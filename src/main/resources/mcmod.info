@@ -1,0 +1,16 @@
+[
+{
+  "modid": "immsersiverailroading",
+  "name": "Immersive Railroading",
+  "description": "Adds Railroading to Minecraft in the style of Immersive Engineering",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["cam72ca,"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
