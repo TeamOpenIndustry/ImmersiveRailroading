@@ -1,0 +1,13 @@
+{
+    "forge_marker": 1,
+    "defaults":
+    {
+        "model": "immersiverailroading:empty"
+    },
+    "variants": {
+    	"normal": [{}],
+    	"inventory": [{
+            "transform": "forge:default-block"
+        }]
+    }
+}

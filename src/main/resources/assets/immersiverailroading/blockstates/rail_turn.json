@@ -1,0 +1,83 @@
+{
+	"forge_marker": 1,
+	"defaults":
+	{
+		"model": "immersiverailroading:empty"
+	},
+	"variants": {
+		"normal": [{}],
+		"inventory": [{
+			"custom": { "flip-v": true },
+			"model": "immersiverailroading:track_curve_very_big.obj",
+			"transform": {
+				"scale": 0.5,
+				"translation": [0, 0, 0],
+				"rotation": {"x": 90}
+			}
+		}],
+		"ttype": {
+			"very_large_right_turn": {
+				"submodel": {
+		                	"rail": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_curve_very_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [1, 0.55, 0.5],
+							"rotation": {"y": 0}
+						}
+	                    		}
+		                }
+			},
+			"very_large_left_turn": {
+				"submodel": {
+		                 	"rail": {
+						"custom": { "flip-v": true },
+		                 		"model": "immersiverailroading:track_curve_very_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [19.58, 0.55, -18.56],
+							"rotation": {"y": 90}
+						}
+	                 		}
+		                }
+			}
+		},
+		"facing": {
+			"north": {
+				"transform": {
+					"rotation": {"y": 180}
+				}
+			},
+			"south": {
+				"transform": {
+					"rotation": {"y": 0}
+				}
+			},
+			"west": {
+				"transform": {
+					"rotation": {"y": 90}
+				}
+			},
+			"east": {
+				"transform": {
+					"rotation": {"y": 270}
+				}
+			}
+		}
+		"medium_turn": {
+			"transform": {
+			"scale": [2, 2, 2],
+			"translation": [-5, 0.55, 2.5]
+			},
+			"model": "immersiverailroading:track_curve_medium.obj"
+		},
+		"large_turn": {
+			"transform": {
+			"scale": [2, 2, 2],
+			"translation": [-9, 0.55, 2.5]
+			},
+			"model": "immersiverailroading:track_curve_big.obj"
+		},
+	}
+}

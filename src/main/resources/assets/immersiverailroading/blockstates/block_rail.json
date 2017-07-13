@@ -1,0 +1,200 @@
+{
+	"forge_marker": 1,
+	"defaults":
+	{
+		"model": "immersiverailroading:empty"
+	},
+	"variants": {
+		"normal": [{}],
+		"inventory": [{
+			"custom": { "flip-v": true },
+			"model": "immersiverailroading:track_normal.obj",
+			"transform": {
+				"translation": [0.5, -0.5, 0],
+			 	"rotation": {"x": 90}
+			}
+		}],
+		
+		
+		"track_type": {
+			"turn_large_left": {
+				"submodel": {
+		                	"rail": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_curve_very_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 1.5],
+							"rotation": {"y": 0}
+						}
+	                    		}
+		                }
+			},
+			"turn_large_right": {
+				"submodel": {
+		                 	"rail": {
+						"custom": { "flip-v": true },
+		                 		"model": "immersiverailroading:track_curve_very_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [19.58, 0.55, -18.56],
+							"rotation": {"y": 90}
+						}
+	                 		}
+		                }
+			},
+			"straight_small": {
+				"submodel": {
+		                	"rail": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 0.5],
+							"rotation": {"y": 0}
+						}
+	                    		}
+		                }
+			},
+			"straight_medium": {
+				"submodel": {
+		                	"rail0": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 0.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail1": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -1.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail2": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -3.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail3": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -5.5],
+							"rotation": {"y": 0}
+						}
+	                    		}
+		                }
+			},
+			"straight_long": {
+				"submodel": {
+		                	"rail0": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 0.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail1": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -1.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail2": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -3.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail3": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -5.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail4": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -7.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail5": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -9.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+		                	"rail6": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -11.5],
+							"rotation": {"y": 0}
+						}
+	                    		},
+	                    		"rail7": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_normal.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, -13.5],
+							"rotation": {"y": 0}
+						}
+	                    		}
+		                }
+			}
+		},
+		
+		"facing": {
+			"north": {
+				"transform": {
+					"rotation": {"y": 180}
+				}
+			},
+			"south": {
+				"transform": {
+					"rotation": {"y": 0}
+				}
+			},
+			"west": {
+				"transform": {
+					"rotation": {"y": 270}
+				}
+			},
+			"east": {
+				"transform": {
+					"rotation": {"y": 90}
+				}
+			}
+		}
+	}
+}

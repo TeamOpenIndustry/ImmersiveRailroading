@@ -1,0 +1,47 @@
+{
+	"forge_marker": 1,
+	"defaults":
+	{
+		"custom": { "flip-v": true },
+		"model": "immersiverailroading:track_normal.obj"
+	},
+	"variants": {
+		"normal": [{}],
+		"inventory": [{
+			"transform": {
+				"translation": [0.5, -0.5, 0],
+			 	"rotation": {"x": 90}
+			}
+		}],
+		"facing": {
+			"north": {
+				"transform": {
+					"scale": [2, 2, 2],
+					"translation": [-1, 0.55, -0.5],
+					"rotation": {"y": 180}
+				}
+			},
+			"south": {
+				"transform": {
+					"scale": [2, 2, 2],
+					"translation": [1, 0.55, 0.5],
+					"rotation": {"y": 0}
+				}
+			},
+			"west": {
+				"transform": {
+					"scale": [2, 2, 2],
+					"translation": [1.5, 0.55, -1],
+					"rotation": {"y": 90}
+				}
+			},
+			"east": {
+				"transform": {
+					"scale": [2, 2, 2],
+					"translation": [-1.5, 0.55, 1],
+					"rotation": {"y": 270}
+				}
+			}
+		}
+	}
+}
