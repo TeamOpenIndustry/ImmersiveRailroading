@@ -42,12 +42,17 @@ public class BlockRail extends BlockRailBase {
         // Do we need this?
 		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRACK_TYPE, TrackType.STRAIGHT_SMALL).withProperty(IS_VISIBLE, true));
 	}
+
+	@Override
+	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+		drops.add(new ItemStack(this, 1, state.getValue(TRACK_TYPE).getMeta()));
+	}
 	
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items)
     {
 		for (TrackItems i : TrackItems.values()) {
-			items.add(new ItemStack(this, 0, i.getMeta()));
+			items.add(new ItemStack(this, 1, i.getMeta()));
 		}
     }
 

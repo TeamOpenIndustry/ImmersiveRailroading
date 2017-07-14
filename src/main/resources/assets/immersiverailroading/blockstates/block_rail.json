@@ -2,7 +2,10 @@
 	"forge_marker": 1,
 	"defaults":
 	{
-		"model": "immersiverailroading:empty"
+		"model": "immersiverailroading:empty",
+		"textures": {
+			"particle": "immersiverailroading:blocks/track_normal"
+		}
 	},
 	"variants": {
 		"normal": [{}],

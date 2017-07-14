@@ -20,7 +20,7 @@ public abstract class BlockRailBase extends Block {
 		setSoundType(SoundType.METAL);
         
 		//setCreativeTab(ImmersiveRailroading.TrackTab);
-        setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+        setCreativeTab(CreativeTabs.TRANSPORTATION);
 	}
 	
 	@Override
