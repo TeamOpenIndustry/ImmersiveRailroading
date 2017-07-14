@@ -79,4 +79,8 @@ public enum TrackType implements IStringSerializable {
 	public int getMeta() {
 		return this.type.getMeta();
 	}
+
+	public TrackDirection getDirection() {
+		return this.direction;
+	}
 }

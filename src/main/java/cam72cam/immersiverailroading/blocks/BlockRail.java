@@ -2,10 +2,9 @@ package cam72cam.immersiverailroading.blocks;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -18,7 +17,6 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
@@ -29,30 +27,21 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackType;
 import cam72cam.immersiverailroading.tile.TileRail;
 
-public class BlockRail extends Block {
+public class BlockRail extends BlockRailBase {
 	public static final String NAME = "block_rail";
+	public static final PropertyBool IS_VISIBLE = PropertyBool.create("is_visible");
 	public static final PropertyEnum<TrackType> TRACK_TYPE = PropertyEnum.create("track_type", TrackType.class);
 	public static final PropertyEnum<EnumFacing> FACING = PropertyEnum.create("facing", EnumFacing.class, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST);
 
 	public BlockRail() {
 		super(Material.IRON);
-		setHardness(1.0F);
-		setSoundType(SoundType.METAL);
 		
         setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        
-		//setCreativeTab(ImmersiveRailroading.TrackTab);
-        setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 		
-		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRACK_TYPE, TRACK_TYPE.getAllowedValues().iterator().next()));
+        // Do we need this?
+		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRACK_TYPE, TrackType.STRAIGHT_SMALL).withProperty(IS_VISIBLE, true));
 	}
-
-	@Override
-    public BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[]{FACING, TRACK_TYPE});
-    }
 	
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items)
@@ -61,34 +50,26 @@ public class BlockRail extends Block {
 			items.add(new ItemStack(this, 0, i.getMeta()));
 		}
     }
+
+	@Override
+    public BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[]{FACING, TRACK_TYPE, IS_VISIBLE});
+    }
 	
 	@Override
     public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite()).withProperty(TRACK_TYPE, TrackType.fromMeta(meta, TrackDirection.LEFT));
+        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing()).withProperty(TRACK_TYPE, TrackType.fromMeta(meta, TrackDirection.LEFT));
     }
 	
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+    	//TODO safe block access
     	TileRail tr = (TileRail)world.getTileEntity(pos);
-		return state.withProperty(BlockRail.FACING, tr.getFacing()).withProperty(BlockRail.TRACK_TYPE, tr.getType());
+		ImmersiveRailroading.logger.info(String.format("GET STATE !!!!! %s", state.getValue(IS_VISIBLE)));
+		return state.withProperty(BlockRail.FACING, tr.getFacing()).withProperty(BlockRail.TRACK_TYPE, tr.getType()).withProperty(IS_VISIBLE, tr.isVisible());
     }
-
-    @Override
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return this.getDefaultState();
-    }
-    
-    @Override
-    public int getMetaFromState(IBlockState state)
-    {
-        return 0;
-    }
-	
-	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
-	}
 
 	@Override
 	public boolean canPlaceBlockAt(World world, BlockPos pos) {
@@ -97,41 +78,18 @@ public class BlockRail extends Block {
 
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-		TileRail tileEntity = (TileRail) world.getTileEntity(pos);
-		if (tileEntity != null && tileEntity.idDrop != null) {
-			return new ItemStack(tileEntity.idDrop);
-		}
-		return null;
+		return new ItemStack(this, 0, state.getValue(TRACK_TYPE).getMeta());
 	}
 
 	@Override
 	public int quantityDropped(Random random) {
-		return 0;
-	}
-	
-	@Override
-	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
-		TileRail tileEntity = (TileRail) world.getTileEntity(pos);
-		boolean isOriginAir = world.isAirBlock(new BlockPos(tileEntity.linkedX, tileEntity.linkedY, tileEntity.linkedZ));
-		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
-		if (isOriginAir || !isOnRealBlock) {
-			this.breakBlock(tileEntity.getWorld(), pos, null);
-		}
+		return 1;
 	}
 	
 	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {
-		return EnumBlockRenderType.MODEL;
-	}
-
-	@Override
-	public boolean isOpaqueCube(IBlockState state) {
-		return false;
-	}
-	
-	@Override
-	public boolean isFullCube(IBlockState state) {
-		return false;
+		ImmersiveRailroading.logger.info(String.format("GET RENDER TYPE !!!!! %s", state.getValue(IS_VISIBLE)));
+		return state.getValue(IS_VISIBLE) ? EnumBlockRenderType.MODEL : EnumBlockRenderType.INVISIBLE;
 	}
 
 	@Override
@@ -145,6 +103,7 @@ public class BlockRail extends Block {
 		TileRail t = new TileRail();
 		t.setType(state.getValue(BlockRail.TRACK_TYPE));
         t.setFacing(state.getValue(BlockRail.FACING));
+        t.setVisible(state.getValue(BlockRail.IS_VISIBLE));
 		return t;
 	}
 }

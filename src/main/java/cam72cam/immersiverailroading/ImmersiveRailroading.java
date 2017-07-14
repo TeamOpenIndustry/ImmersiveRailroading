@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.tile.TileRailGag;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
@@ -29,7 +28,7 @@ public class ImmersiveRailroading
     public static final String MODID = "immersiverailroading";
     public static final String VERSION = "0.1";
     
-	@ObjectHolder(BlockRailGag.name)
+	@ObjectHolder(BlockRailGag.NAME)
 	public static final BlockRailGag BLOCK_RAIL_GAG = new BlockRailGag();
 	@ObjectHolder(BlockRail.NAME)
 	public static BlockRail BLOCK_RAIL = new BlockRail();
@@ -55,14 +54,13 @@ public class ImmersiveRailroading
         {
     		event.getRegistry().register(BLOCK_RAIL_GAG);
     		event.getRegistry().register(BLOCK_RAIL);
-        	GameRegistry.registerTileEntity(TileRailGag.class, BlockRailGag.name);
+        	GameRegistry.registerTileEntity(TileRailGag.class, BlockRailGag.NAME);
         	GameRegistry.registerTileEntity(TileRail.class, BlockRail.NAME);
         }
 
         @SubscribeEvent
         public static void registerItems(RegistryEvent.Register<Item> event)
         {
-        	event.getRegistry().register(new ItemBlock(BLOCK_RAIL_GAG).setRegistryName(BLOCK_RAIL_GAG.getRegistryName()));
         	event.getRegistry().register(new ItemBlockMeta(BLOCK_RAIL).setRegistryName(BLOCK_RAIL.getRegistryName()));
         }
 

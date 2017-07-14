@@ -1,49 +1,40 @@
 package cam72cam.immersiverailroading.tile;
 
-import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import net.minecraft.util.math.BlockPos;
 import cam72cam.immersiverailroading.library.TrackType;
 
-public class TileRail extends TileEntity {
-
-	public double r;
-	public double cx;
-	public double cy;
-	public double cz;
-	public double slopeHeight;
-	public double slopeLength;
-	public double slopeAngle;
+public class TileRail extends TileRailBase {
 	private EnumFacing facing;
-	public boolean isLinkedToRail = false;
-	public int linkedX;
-	public int linkedY;
-	public int linkedZ;
-	public boolean hasModel = true;
-	private boolean switchActive = false;
-	/** stores the latest redstone state */
-	public boolean canTypeBeModifiedBySwitch = false;
-	private boolean manualOverride = false;
-	public Item idDrop;
-	public boolean hasRotated = false;
-	public float turnDegrees;
+	private TrackType type;
+	
+	private BlockPos center;
 
-	private TrackType type;//TODO @cam72cam remove default
+	private double curveRadius;
+	
+	private double slopeHeight;
+	private double slopeLength;
+	private double slopeAngle;
+	
+	private boolean isVisible = true;
+	private boolean switchActive = false;
 
 	public EnumFacing getFacing() {
+		if (facing == EnumFacing.DOWN) {
+			return EnumFacing.NORTH;
+		}
 		return facing;
 	}
 	public TrackType getType() {
 		return this.type;
 	}
-
+	
 	public boolean getSwitchState() {
-
 		return switchActive;
+	}
+	public boolean isVisible() {
+		return isVisible;
 	}
 	
 	public void setType(TrackType value) {
@@ -54,90 +45,56 @@ public class TileRail extends TileEntity {
 		this.facing = value;
 		this.markDirty();
 	}
+	public void setVisible(Boolean value) {
+		this.isVisible = value;
+		this.markDirty();
+	}
+	public void setCenter(BlockPos center, float radius) {
+		this.center = center;
+		this.curveRadius = radius;
+		this.markDirty();
+	}
+	public void setSlope(float slopeAngle, int slopeHeight, int slopeLength) {
+		this.slopeAngle = slopeAngle;
+		this.slopeHeight = slopeHeight;
+		this.slopeLength = slopeLength;
+		this.markDirty();
+	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		facing = EnumFacing.getFront(nbt.getByte("Orientation"));
+		facing = EnumFacing.getFront(nbt.getByte("facing"));
 		type = TrackType.valueOf(nbt.getString("type"));
 		
-		r = nbt.getDouble("r");
-		cx = nbt.getDouble("cx");
-		cy = nbt.getDouble("cy");
-		cz = nbt.getDouble("cz");
-		cy = nbt.getDouble("cy");
+		center = getNBTBlockPos(nbt, "center");
+		curveRadius = nbt.getDouble("r");
+		
 		slopeHeight = nbt.getDouble("slopeHeight");
 		slopeLength = nbt.getDouble("slopeLength");
 		slopeAngle = nbt.getDouble("slopeAngle");
-		linkedX = nbt.getInteger("linkedX");
-		linkedY = nbt.getInteger("linkedY");
-		linkedZ = nbt.getInteger("linkedZ");
-		isLinkedToRail = nbt.getBoolean("isLinkedToRail");
-		hasModel = nbt.getBoolean("hasModel");
+		
+		isVisible = nbt.getBoolean("isVisible");
 		switchActive = nbt.getBoolean("switchActive");
-		canTypeBeModifiedBySwitch = nbt.getBoolean("canTypeBeModifiedBySwitch");
-		manualOverride = nbt.getBoolean("manualOverride");
-		idDrop = Item.getItemById(nbt.getInteger("idDrop"));
-		hasRotated = nbt.getBoolean("hasRotated");
 		
 		super.readFromNBT(nbt);
 	}
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt.setByte("Orientation", (byte) facing.getIndex());
+		nbt.setByte("facing", (byte) facing.getIndex());
 		nbt.setString("type", type.name());
 		
-		nbt.setDouble("r", r);
-		nbt.setDouble("cx", cx);
-		nbt.setDouble("cy", cy);
-		nbt.setDouble("cz", cz);
+		setNBTBlockPos(nbt, "center", center);
+		nbt.setDouble("r", curveRadius);
+		
 		nbt.setDouble("slopeHeight", slopeHeight);
 		nbt.setDouble("slopeLength", slopeLength);
 		nbt.setDouble("slopeAngle", slopeAngle);
-		nbt.setInteger("linkedX", linkedX);
-		nbt.setInteger("linkedY", linkedY);
-		nbt.setInteger("linkedZ", linkedZ);
-		nbt.setBoolean("isLinkedToRail", isLinkedToRail);
-		nbt.setBoolean("hasModel", hasModel);
+		
+		nbt.setBoolean("isVisible", isVisible);
 		nbt.setBoolean("switchActive", switchActive);
-		nbt.setBoolean("canTypeBeModifiedBySwitch", canTypeBeModifiedBySwitch);
-		nbt.setBoolean("manualOverride", manualOverride);
-		nbt.setBoolean("hasRotated", hasRotated);
-		nbt.setInteger("idDrop", Item.getIdFromItem(idDrop));
 		
 		return super.writeToNBT(nbt);
-	}
-
-	@Override
-	public SPacketUpdateTileEntity getUpdatePacket() {
-		ImmersiveRailroading.logger.info("SENDING UPDATE");
-
-		NBTTagCompound nbt = new NBTTagCompound();
-		this.writeToNBT(nbt);
-
-		return new SPacketUpdateTileEntity(this.getPos(), 1, nbt);
-	}
-
-	@Override
-	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-		ImmersiveRailroading.logger.info("GOT UPDATE");
-		this.readFromNBT(pkt.getNbtCompound());
-		super.onDataPacket(net, pkt);
-	}
-	
-	@Override
-	public NBTTagCompound getUpdateTag() {
-		ImmersiveRailroading.logger.info("SENDING INIT DATA");
-		NBTTagCompound tag = super.getUpdateTag();
-		this.writeToNBT(tag);
-		return tag;
-	}
-	
-	@Override 
-	public void handleUpdateTag(NBTTagCompound tag) {
-		ImmersiveRailroading.logger.info("GOT INIT DATA");
-		this.readFromNBT(tag);
-		super.handleUpdateTag(tag);
 	}
 
 	/*
@@ -169,11 +126,8 @@ public class TileRail extends TileEntity {
     	System.out.println("TILE NOT FOUND");
     	return this.getDefaultState();
     }
-	 */
 
 	public void setSwitchState(boolean state) {
-		
-		/*
 		if (!this.isSwitch()) {
 			return;
 		}
@@ -243,10 +197,10 @@ public class TileRail extends TileEntity {
 			default:
 				break;
 			}
-		}*/
+		}
 	}
 
-	/*public boolean isTurnTrack() {
+	public boolean isTurnTrack() {
 		return type.getType() == TrackItems.TURN || type.getType() == TrackItems.SWITCH && getSwitchState();
 	}
 
