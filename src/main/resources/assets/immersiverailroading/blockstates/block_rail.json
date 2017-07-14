@@ -22,19 +22,6 @@
 		
 		
 		"track_type": {
-			"turn_large_left": {
-				"submodel": {
-		                	"rail": {
-						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_curve_very_big.obj",
-						"transform": {
-							"scale": [2, 2, 2],
-							"translation": [0.5, 0.55, 1.5],
-							"rotation": {"y": 0}
-						}
-	                    		}
-		                }
-			},
 			"turn_large_right": {
 				"submodel": {
 		                 	"rail": {
@@ -172,6 +159,32 @@
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -13.5],
+							"rotation": {"y": 0}
+						}
+	                    		}
+		                }
+			},
+			"crossing": {
+				"submodel": {
+		                	"rail": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_x.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 0.5],
+							"rotation": {"y": 0}
+						}
+	                    		}
+		                }
+			},
+			"turn_large_left": {
+				"submodel": {
+		                	"rail": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_curve_very_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 1.5],
 							"rotation": {"y": 0}
 						}
 	                    		}

@@ -6,22 +6,13 @@ import net.minecraft.world.World;
 
 public class BuilderCrossing extends BuilderBase {
 
-	public BuilderCrossing(World world, int x, int y, int z, EnumFacing rotation, TrackType type) {
+	public BuilderCrossing(World world, int x, int y, int z, EnumFacing rotation) {
 		super(world, x, y, z, rotation);
-		/*
-		switch(type) {
-		case SMALL_ROAD_CROSSING:
-			tracks.add(new TrackRail(this, 0, 0, 0, 0, type));
-			break;
-		case TWO_WAYS_CROSSING:
-			tracks.add(new TrackRail(this, 0, 0, 0, 0, TrackType.STRAIGHT_SMALL));
-			tracks.add(new TrackRail(this, 0, 0, 1, 0, type));
-			tracks.add(new TrackRail(this, 0, 0, 2, 0, TrackType.STRAIGHT_SMALL));
-			tracks.add(new TrackRail(this, 0, 0, 1, 1, TrackType.STRAIGHT_SMALL));
-			tracks.add(new TrackRail(this, 2, 0, 1, 1, TrackType.STRAIGHT_SMALL));
-		default:
-			break;
-		}*/
+		
+		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackType.CROSSING));
+		tracks.add(new TrackGag(this, 0, 0, 1));
+		tracks.add(new TrackGag(this, 1, 0, 0));
+		tracks.add(new TrackGag(this, 1, 0, 1));
 	}
 
 }

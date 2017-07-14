@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.library.TrackType;
 import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderCrossing;
 import cam72cam.immersiverailroading.track.BuilderStraight;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -45,6 +46,9 @@ public class ItemBlockMeta extends ItemBlock {
 			break;
 		case STRAIGHT_LARGE:
 			builder = new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, 16);
+			break;
+		case CROSSING:
+			builder = new BuilderCrossing(world, pos.getX(), pos.getY(), pos.getZ(), facing);
 			break;
 		default:
 			return false;
