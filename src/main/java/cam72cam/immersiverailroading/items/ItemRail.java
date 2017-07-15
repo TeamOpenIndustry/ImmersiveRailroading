@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading;
+package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.library.TrackType;
@@ -16,9 +16,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ItemBlockMeta extends ItemBlock {
+public class ItemRail extends ItemBlock {
 
-	public ItemBlockMeta(Block block) {
+	public ItemRail(Block block) {
 		super(block);
 		this.setMaxDamage(0);
 		this.setHasSubtypes(true);

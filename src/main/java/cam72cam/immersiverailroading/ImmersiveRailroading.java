@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Logger;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
+import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
@@ -62,7 +63,7 @@ public class ImmersiveRailroading
         @SubscribeEvent
         public static void registerItems(RegistryEvent.Register<Item> event)
         {
-        	event.getRegistry().register(new ItemBlockMeta(BLOCK_RAIL).setRegistryName(BLOCK_RAIL.getRegistryName()));
+        	event.getRegistry().register(new ItemRail(BLOCK_RAIL).setRegistryName(BLOCK_RAIL.getRegistryName()));
         }
 
         @SubscribeEvent
