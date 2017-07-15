@@ -25,4 +25,9 @@ public enum TrackItems {
 	public static TrackItems fromMeta(int meta) {
 		return TrackItems.values()[meta];
 	}
+
+	public boolean isTurn() {
+		// TODO Auto-generated method stub
+		return this == TURN_MEDIUM || this == TURN_LARGE;
+	}
 }

@@ -78,4 +78,8 @@ public enum TrackType implements IStringSerializable {
 	public TrackDirection getDirection() {
 		return this.direction;
 	}
+
+	public boolean isTurn() {
+		return type.isTurn();
+	}
 }

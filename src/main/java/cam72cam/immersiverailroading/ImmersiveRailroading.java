@@ -37,10 +37,12 @@ public class ImmersiveRailroading
 	public static BlockRail BLOCK_RAIL = new BlockRail();
 	
 	public static Logger logger;
+	public static ImmersiveRailroading instance;
 	
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
+        instance = this;
     }
     
     @EventHandler

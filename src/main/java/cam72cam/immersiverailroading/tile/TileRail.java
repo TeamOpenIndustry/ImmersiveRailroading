@@ -4,6 +4,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -55,6 +56,15 @@ public class TileRail extends TileRailBase {
 	}
 	public boolean isVisible() {
 		return isVisible;
+	}
+
+	public Vec3i getCenter() {
+		return center;
+	}
+
+	public double getRadius() {
+		// TODO Auto-generated method stub
+		return curveRadius;
 	}
 	
 	public void setType(TrackType value) {
