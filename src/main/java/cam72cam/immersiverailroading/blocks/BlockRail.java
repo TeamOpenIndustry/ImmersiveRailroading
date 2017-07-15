@@ -36,9 +36,6 @@ public class BlockRail extends BlockRailBase {
 		
         setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-		
-        // Do we need this?
-		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRACK_TYPE, TrackType.STRAIGHT_SMALL));
 	}
 
 	@Override
@@ -73,6 +70,16 @@ public class BlockRail extends BlockRailBase {
     	TileRail tr = (TileRail)world.getTileEntity(pos);
 		//ImmersiveRailroading.logger.info(String.format("GET STATE !!!!! %s", state.getValue(IS_VISIBLE)));
 		return state.withProperty(BlockRail.FACING, tr.getFacing()).withProperty(BlockRail.TRACK_TYPE, tr.getType());
+    }
+
+    // Required for block drop state, stupid forge
+    @Override
+    public int getMetaFromState(IBlockState state) {
+		return state.getValue(TRACK_TYPE).getMeta();
+    }
+    @Override
+    public IBlockState getStateFromMeta(int meta) {
+    	return this.getDefaultState().withProperty(TRACK_TYPE, TrackType.fromMeta(meta, TrackDirection.LEFT));
     }
 
 	@Override
