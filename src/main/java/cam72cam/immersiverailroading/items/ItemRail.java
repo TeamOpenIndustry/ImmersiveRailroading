@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackType;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderCrossing;
@@ -30,7 +31,7 @@ public class ItemRail extends ItemBlock {
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName(stack) + "." + stack.getItemDamage();
+		return super.getUnlocalizedName(stack) + "." + TrackItems.fromMeta(stack.getMetadata());
 	}
 	
 	@Override
