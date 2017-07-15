@@ -8,6 +8,15 @@ import net.minecraft.util.math.BlockPos;
 
 public class TileRailBase extends TileEntity {
 	private BlockPos parent;
+	private float height = 0.125F;
+
+	public void setHeight(float height) {
+		this.height = height;
+		this.markDirty();
+	}
+	public float getHeight() {
+		return this.height;
+	}
 
 	public BlockPos getParent() {
 		return parent;
@@ -20,11 +29,13 @@ public class TileRailBase extends TileEntity {
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		parent = getNBTBlockPos(nbt, "parent");
+		height = nbt.getFloat("height");
 		super.readFromNBT(nbt);
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		setNBTBlockPos(nbt, "parent", parent);
+		nbt.setFloat("height", height);
 		return super.writeToNBT(nbt);
 	}
 

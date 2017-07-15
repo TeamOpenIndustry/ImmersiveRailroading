@@ -12,15 +12,17 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockRailBase extends Block {
 	public BlockRailBase(Material materialIn) {
 		super(materialIn);
 		setHardness(1.0F);
 		setSoundType(SoundType.METAL);
-        
+		
 		//setCreativeTab(ImmersiveRailroading.TrackTab);
-        setCreativeTab(CreativeTabs.TRANSPORTATION);
+		setCreativeTab(CreativeTabs.TRANSPORTATION);
 	}
 	
 	@Override
@@ -56,8 +58,20 @@ public abstract class BlockRailBase extends Block {
 	}
 	
 	@Override
-	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
+	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		TileRailBase tileEntity = (TileRailBase) source.getTileEntity(pos);
+		float height = 0.125F;
+		if (tileEntity != null) {
+			height = tileEntity.getHeight();
+		}
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height+0.1, 1.0F);
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
+	{
+		return  getCollisionBoundingBox(state, worldIn, pos).expand(0, 0.1, 0).offset(pos);
 	}
 	
 	@Override

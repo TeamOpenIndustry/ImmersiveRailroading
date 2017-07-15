@@ -17,7 +17,7 @@ public class TrackGag extends TrackBase {
 		TileRailGag tileGag = (TileRailGag) super.placeTrack();
 		
 		tileGag.setParent(builder.getPos());
-		//TODO set meta or tile hight
+		tileGag.setHeight(height);
 		
 		return tileGag;
 	}
