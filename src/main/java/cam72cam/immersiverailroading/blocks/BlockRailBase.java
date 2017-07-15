@@ -35,11 +35,11 @@ public abstract class BlockRailBase extends Block {
 
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
-		ImmersiveRailroading.logger.info("BLOCK BROKEN");
 		TileRailBase tileEntity = (TileRailBase) world.getTileEntity(pos);
 		boolean isOriginAir = tileEntity.getParent() != null && world.isAirBlock(tileEntity.getParent());
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
 		if (isOriginAir || !isOnRealBlock) {
+			ImmersiveRailroading.logger.info("BLOCK BROKEN");
 			//stupid IBlockAccess
 			tileEntity.getWorld().destroyBlock(pos, true);
 		}
