@@ -3,6 +3,9 @@ package cam72cam.immersiverailroading.tile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import cam72cam.immersiverailroading.library.TrackType;
 
 public class TileRail extends TileRailBase {
@@ -19,6 +22,20 @@ public class TileRail extends TileRailBase {
 	
 	private boolean isVisible = true;
 	private boolean switchActive = false;
+
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
+		return INFINITE_EXTENT_AABB;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public double getMaxRenderDistanceSquared()
+	{
+		return Double.MAX_VALUE;
+	}
 
 	public EnumFacing getFacing() {
 		if (facing == EnumFacing.DOWN) {

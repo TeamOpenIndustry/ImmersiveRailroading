@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.tile.TileRailTESR;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -14,6 +15,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -48,7 +50,6 @@ public class ImmersiveRailroading
     @Mod.EventBusSubscriber(modid = MODID)
     public static class Registration
     {
-    	
         @SubscribeEvent
         public static void registerBlocks(RegistryEvent.Register<Block> event)
         {
@@ -71,6 +72,7 @@ public class ImmersiveRailroading
             
             ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(BLOCK_RAIL_GAG), 0, new ModelResourceLocation(BLOCK_RAIL_GAG.getRegistryName(), "inventory"));
             
+            ClientRegistry.bindTileEntitySpecialRenderer(TileRail.class, new TileRailTESR());
             for (TrackItems item : TrackItems.values()) {
 	            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(BLOCK_RAIL), item.getMeta(), new ModelResourceLocation(BLOCK_RAIL.getRegistryName(), "inventory"));
             }

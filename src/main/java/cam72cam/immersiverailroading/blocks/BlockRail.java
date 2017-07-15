@@ -72,7 +72,7 @@ public class BlockRail extends BlockRailBase {
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
     	//TODO safe block access
     	TileRail tr = (TileRail)world.getTileEntity(pos);
-		ImmersiveRailroading.logger.info(String.format("GET STATE !!!!! %s", state.getValue(IS_VISIBLE)));
+		//ImmersiveRailroading.logger.info(String.format("GET STATE !!!!! %s", state.getValue(IS_VISIBLE)));
 		return state.withProperty(BlockRail.FACING, tr.getFacing()).withProperty(BlockRail.TRACK_TYPE, tr.getType()).withProperty(IS_VISIBLE, tr.isVisible());
     }
 
@@ -93,8 +93,8 @@ public class BlockRail extends BlockRailBase {
 	
 	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {
-		ImmersiveRailroading.logger.info(String.format("GET RENDER TYPE !!!!! %s", state.getValue(IS_VISIBLE)));
-		return state.getValue(IS_VISIBLE) ? EnumBlockRenderType.MODEL : EnumBlockRenderType.INVISIBLE;
+		// TESR Renderer
+		return EnumBlockRenderType.INVISIBLE;
 	}
 
 	@Override
