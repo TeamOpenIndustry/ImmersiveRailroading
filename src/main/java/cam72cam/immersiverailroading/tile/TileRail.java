@@ -26,6 +26,7 @@ public class TileRail extends TileRailBase {
 		}
 		return facing;
 	}
+	
 	public TrackType getType() {
 		return this.type;
 	}

@@ -177,6 +177,32 @@
 	                    		}
 		                }
 			},
+			"slope_medium": {
+				"submodel": {
+		                	"rail": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_slope_long.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 0.5],
+							"rotation": {"x": -2.4}
+						}
+	                    		}
+		                }
+			},
+			"slope_large": {
+				"submodel": {
+		                	"rail": {
+						"custom": { "flip-v": true },
+		                		"model": "immersiverailroading:track_slope_verylong.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [0.5, 0.55, 0.5],
+							"rotation": {"y": -2.4}
+						}
+	                    		}
+		                }
+			},
 			"turn_large_left": {
 				"submodel": {
 		                	"rail": {

@@ -13,17 +13,13 @@ public enum TrackType implements IStringSerializable {
 	
 	
 	CROSSING(TrackItems.CROSSING),
-	/*
-	LARGE_SLOPE_WOOD(TrackItems.SLOPE_MEDIUM),
-	LARGE_SLOPE_GRAVEL(TrackItems.SLOPE_MEDIUM),
-	LARGE_SLOPE_BALLAST(TrackItems.SLOPE_MEDIUM),
-	VERY_LARGE_SLOPE_WOOD(TrackItems.SLOPE_LARGE),
-	VERY_LARGE_SLOPE_GRAVEL(TrackItems.SLOPE_LARGE),
-	VERY_LARGE_SLOPE_BALLAST(TrackItems.SLOPE_LARGE),
 	
-	MEDIUM_RIGHT_TURN(TrackItems.TURN_MEDIUM, TrackDirection.RIGHT),
-	MEDIUM_LEFT_TURN(TrackItems.TURN_MEDIUM, TrackDirection.LEFT),
-	*/
+	SLOPE_MEDIUM(TrackItems.SLOPE_MEDIUM),
+	SLOPE_LARGE(TrackItems.SLOPE_LARGE),
+	
+	//MEDIUM_RIGHT_TURN(TrackItems.TURN_MEDIUM, TrackDirection.RIGHT),
+	//MEDIUM_LEFT_TURN(TrackItems.TURN_MEDIUM, TrackDirection.LEFT),
+	
 	TURN_LARGE_RIGHT(TrackItems.TURN_LARGE, TrackDirection.RIGHT),
 	TURN_LARGE_LEFT(TrackItems.TURN_LARGE, TrackDirection.LEFT),
 	/*
