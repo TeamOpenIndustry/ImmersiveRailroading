@@ -8,9 +8,6 @@
 	}
     },
     "variants": {
-    	"normal": [{}],
-    	"inventory": [{
-            "transform": "forge:default-block"
-        }]
+        "normal": [{}]
     }
 }

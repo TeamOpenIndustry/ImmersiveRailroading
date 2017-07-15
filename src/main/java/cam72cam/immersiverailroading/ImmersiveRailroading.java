@@ -70,8 +70,6 @@ public class ImmersiveRailroading
         {
             OBJLoader.INSTANCE.addDomain(MODID.toLowerCase());
             
-            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(BLOCK_RAIL_GAG), 0, new ModelResourceLocation(BLOCK_RAIL_GAG.getRegistryName(), "inventory"));
-            
             ClientRegistry.bindTileEntitySpecialRenderer(TileRail.class, new TileRailTESR());
             for (TrackItems item : TrackItems.values()) {
 	            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(BLOCK_RAIL), item.getMeta(), new ModelResourceLocation(BLOCK_RAIL.getRegistryName(), "inventory"));
