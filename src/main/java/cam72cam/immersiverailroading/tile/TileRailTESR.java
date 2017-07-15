@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.tile;
 
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -31,7 +30,7 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 		BlockPos blockPos = te.getPos();
 		IBlockState state = getWorld().getBlockState(blockPos);
-		state = ImmersiveRailroading.BLOCK_RAIL.getActualState(state, getWorld(), blockPos);
+		state = te.getBlockState();
 		IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
 
 		// Bind block textures to current context

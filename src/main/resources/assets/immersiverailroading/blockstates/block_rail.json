@@ -14,7 +14,7 @@
 			"model": "immersiverailroading:track_normal.obj",
 			"transform": {
 				"translation": [0.5, -0.5, 0],
-			 	"rotation": {"x": 90}
+				"rotation": {"x": 90}
 			}
 		}],
 		
@@ -24,197 +24,236 @@
 		"track_type": {
 			"turn_large_right": {
 				"submodel": {
-		                 	"rail": {
+					"rail": {
 						"custom": { "flip-v": true },
-		                 		"model": "immersiverailroading:track_curve_very_big.obj",
+						"model": "immersiverailroading:track_curve_very_big.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [19.58, 0.55, -18.56],
 							"rotation": {"y": 90}
 						}
-	                 		}
-		                }
+					}
+				}
 			},
 			"straight_small": {
 				"submodel": {
-		                	"rail": {
+					"rail": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, 0.5],
 							"rotation": {"y": 0}
 						}
-	                    		}
-		                }
+					}
+				}
 			},
 			"straight_medium": {
 				"submodel": {
-		                	"rail0": {
+					"rail0": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, 0.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail1": {
+					},
+					"rail1": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -1.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail2": {
+					},
+					"rail2": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -3.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail3": {
+					},
+					"rail3": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -5.5],
 							"rotation": {"y": 0}
 						}
-	                    		}
-		                }
+					}
+				}
 			},
 			"straight_long": {
 				"submodel": {
-		                	"rail0": {
+					"rail0": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, 0.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail1": {
+					},
+					"rail1": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -1.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail2": {
+					},
+					"rail2": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -3.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail3": {
+					},
+					"rail3": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -5.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail4": {
+					},
+					"rail4": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -7.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail5": {
+					},
+					"rail5": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -9.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-		                	"rail6": {
+					},
+					"rail6": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -11.5],
 							"rotation": {"y": 0}
 						}
-	                    		},
-	                    		"rail7": {
+					},
+					"rail7": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_normal.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, -13.5],
 							"rotation": {"y": 0}
 						}
-	                    		}
-		                }
+					}
+				}
 			},
 			"crossing": {
 				"submodel": {
-		                	"rail": {
+					"rail": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_x.obj",
+						"model": "immersiverailroading:track_x.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, 0.5],
 							"rotation": {"y": 0}
 						}
-	                    		}
-		                }
+					}
+				}
 			},
 			"slope_medium": {
 				"submodel": {
-		                	"rail": {
+					"rail": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_slope_long.obj",
+						"model": "immersiverailroading:track_slope_long.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, 0.5],
 							"rotation": {"x": -2.4}
 						}
-	                    		}
-		                }
+					}
+				}
 			},
 			"slope_large": {
 				"submodel": {
-		                	"rail": {
+					"rail": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_slope_verylong.obj",
+						"model": "immersiverailroading:track_slope_verylong.obj",
 						"transform": {
 							"scale": [2, 2, 2],
 							"translation": [0.5, 0.55, 0.5],
 							"rotation": {"x": -1.6}
 						}
-	                    		}
-		                }
+					}
+				}
+			},
+			"turn_medium_left": {
+				"submodel": {
+					"rail": {
+						"custom": { "flip-v": true },
+						"model": "immersiverailroading:track_curve_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [-8.5, 0.55, 2.5],
+							"rotation": {"y": 0}
+						}
+					}
+				}
+			},
+			"turn_medium_right": {
+				"submodel": {
+					"rail": {
+						"custom": { "flip-v": true },
+						"model": "immersiverailroading:track_curve_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [10.5, 0.55, 0.5],
+							"rotation": {"y": 90}
+						}
+					}
+				}
 			},
 			"turn_large_left": {
 				"submodel": {
-		                	"rail": {
+					"rail": {
 						"custom": { "flip-v": true },
-		                		"model": "immersiverailroading:track_curve_very_big.obj",
+						"model": "immersiverailroading:track_curve_very_big.obj",
 						"transform": {
 							"scale": [2, 2, 2],
-							"translation": [0.5, 0.55, 1.5],
+							"translation": [0.5, 0.55, 1.57],
 							"rotation": {"y": 0}
 						}
-	                    		}
-		                }
+					}
+				}
+			},
+			"turn_large_right": {
+				"submodel": {
+					"rail": {
+						"custom": { "flip-v": true },
+						"model": "immersiverailroading:track_curve_very_big.obj",
+						"transform": {
+							"scale": [2, 2, 2],
+							"translation": [19.58, 0.55, -18.5],
+							"rotation": {"y": 90}
+						}
+					}
+				}
 			}
 		},
 		

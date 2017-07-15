@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderCrossing;
 import cam72cam.immersiverailroading.track.BuilderSlope;
 import cam72cam.immersiverailroading.track.BuilderStraight;
+import cam72cam.immersiverailroading.track.BuilderTurn;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -52,10 +53,12 @@ public class ItemBlockMeta extends ItemBlock {
 			builder = new BuilderCrossing(world, pos.getX(), pos.getY(), pos.getZ(), facing);
 			break;
 		case SLOPE_MEDIUM:
-			builder = new BuilderSlope(world, pos.getX(), pos.getY(), pos.getZ(), facing, tt);
-			break;
 		case SLOPE_LARGE:
 			builder = new BuilderSlope(world, pos.getX(), pos.getY(), pos.getZ(), facing, tt);
+			break;
+		case TURN_MEDIUM:
+		case TURN_LARGE:
+			builder = new BuilderTurn(world, pos.getX(), pos.getY(), pos.getZ(), facing, tt);
 			break;
 		default:
 			return false;

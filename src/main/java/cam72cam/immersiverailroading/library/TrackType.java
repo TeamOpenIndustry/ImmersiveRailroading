@@ -17,8 +17,8 @@ public enum TrackType implements IStringSerializable {
 	SLOPE_MEDIUM(TrackItems.SLOPE_MEDIUM),
 	SLOPE_LARGE(TrackItems.SLOPE_LARGE),
 	
-	//MEDIUM_RIGHT_TURN(TrackItems.TURN_MEDIUM, TrackDirection.RIGHT),
-	//MEDIUM_LEFT_TURN(TrackItems.TURN_MEDIUM, TrackDirection.LEFT),
+	TURN_MEDIUM_RIGHT(TrackItems.TURN_MEDIUM, TrackDirection.RIGHT),
+	TURN_MEDIUM_LEFT(TrackItems.TURN_MEDIUM, TrackDirection.LEFT),
 	
 	TURN_LARGE_RIGHT(TrackItems.TURN_LARGE, TrackDirection.RIGHT),
 	TURN_LARGE_LEFT(TrackItems.TURN_LARGE, TrackDirection.LEFT),

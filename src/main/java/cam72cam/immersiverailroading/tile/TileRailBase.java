@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.tile;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -21,13 +20,11 @@ public class TileRailBase extends TileEntity {
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		parent = getNBTBlockPos(nbt, "parent");
-		ImmersiveRailroading.logger.info(String.format("READ PARENT %s", parent));
 		super.readFromNBT(nbt);
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		setNBTBlockPos(nbt, "parent", parent);
-		ImmersiveRailroading.logger.info(String.format("WRITE PARENT %s", parent));
 		return super.writeToNBT(nbt);
 	}
 
