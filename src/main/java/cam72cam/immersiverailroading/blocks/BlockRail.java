@@ -4,7 +4,6 @@ import java.util.Random;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -29,7 +28,6 @@ import cam72cam.immersiverailroading.tile.TileRail;
 
 public class BlockRail extends BlockRailBase {
 	public static final String NAME = "block_rail";
-	public static final PropertyBool IS_VISIBLE = PropertyBool.create("is_visible");
 	public static final PropertyEnum<TrackType> TRACK_TYPE = PropertyEnum.create("track_type", TrackType.class);
 	public static final PropertyEnum<EnumFacing> FACING = PropertyEnum.create("facing", EnumFacing.class, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST);
 
@@ -40,7 +38,7 @@ public class BlockRail extends BlockRailBase {
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
 		
         // Do we need this?
-		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRACK_TYPE, TrackType.STRAIGHT_SMALL).withProperty(IS_VISIBLE, true));
+		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRACK_TYPE, TrackType.STRAIGHT_SMALL));
 	}
 
 	@Override
@@ -59,7 +57,7 @@ public class BlockRail extends BlockRailBase {
 	@Override
     public BlockStateContainer createBlockState()
     {
-        return new BlockStateContainer(this, new IProperty[]{FACING, TRACK_TYPE, IS_VISIBLE});
+        return new BlockStateContainer(this, new IProperty[]{FACING, TRACK_TYPE});
     }
 	
 	@Override
@@ -74,7 +72,7 @@ public class BlockRail extends BlockRailBase {
     	//TODO safe block access
     	TileRail tr = (TileRail)world.getTileEntity(pos);
 		//ImmersiveRailroading.logger.info(String.format("GET STATE !!!!! %s", state.getValue(IS_VISIBLE)));
-		return state.withProperty(BlockRail.FACING, tr.getFacing()).withProperty(BlockRail.TRACK_TYPE, tr.getType()).withProperty(IS_VISIBLE, tr.isVisible());
+		return state.withProperty(BlockRail.FACING, tr.getFacing()).withProperty(BlockRail.TRACK_TYPE, tr.getType());
     }
 
 	@Override
@@ -109,7 +107,6 @@ public class BlockRail extends BlockRailBase {
 		TileRail t = new TileRail();
 		t.setType(state.getValue(BlockRail.TRACK_TYPE));
         t.setFacing(state.getValue(BlockRail.FACING));
-        t.setVisible(state.getValue(BlockRail.IS_VISIBLE));
 		return t;
 	}
 }

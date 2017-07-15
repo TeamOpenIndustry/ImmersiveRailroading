@@ -16,6 +16,9 @@ public class TileRailTESR extends FastTESR<TileRail> {
 
 	@Override
 	public void renderTileEntityFast(TileRail te, double x, double y, double z, float partialTicks, int destroyStage, float alpha, BufferBuilder buffer) {
+		if (!te.isVisible()) {
+			return;
+		}
 
 		// Get model for current state
 		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();

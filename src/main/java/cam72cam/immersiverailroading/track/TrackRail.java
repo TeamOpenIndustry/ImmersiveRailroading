@@ -41,7 +41,7 @@ public class TrackRail extends TrackBase {
 
 	@Override
 	public IBlockState getBlockState() {
-		return block.getDefaultState().withProperty(BlockRail.FACING, super.getFacing()).withProperty(BlockRail.TRACK_TYPE, type).withProperty(BlockRail.IS_VISIBLE, hasModel);
+		return block.getDefaultState().withProperty(BlockRail.FACING, super.getFacing()).withProperty(BlockRail.TRACK_TYPE, type);
 	}
 	
 	@Override
