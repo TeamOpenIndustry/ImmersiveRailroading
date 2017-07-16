@@ -7,9 +7,9 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public abstract class SteamTrain extends Locomotive implements IFluidHandler {
+public abstract class SteamLocomotive extends Locomotive implements IFluidHandler {
 
-	public SteamTrain(World world) {
+	public SteamLocomotive(World world) {
 		super(world, new Fluid[] { FluidRegistry.WATER });
 		runSound.setDynamicRate();
 	}

@@ -4,9 +4,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public abstract class DieselTrain extends Locomotive implements IFluidHandler {
+public abstract class DieselLocomotive extends Locomotive implements IFluidHandler {
 
-	public DieselTrain(World world) {
+	public DieselLocomotive(World world) {
 		super(world, new Fluid[] { FluidRegistry.getFluid("oil"), FluidRegistry.getFluid("biofuel") });
 		runSound.setDynamicPitch();
 	}

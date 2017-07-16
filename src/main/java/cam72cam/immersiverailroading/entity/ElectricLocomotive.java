@@ -5,9 +5,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public abstract class ElectricTrain extends Locomotive {
+public abstract class ElectricLocomotive extends Locomotive {
 
-	public ElectricTrain(World world) {
+	public ElectricLocomotive(World world) {
 		super(world, null);
 	}
 	
