@@ -33,6 +33,12 @@ public class BuilderTurn extends BuilderBase {
 		for (int angle = 0; angle < 90; angle++) {
 			int gagX = MathHelper.floor(Math.sin(Math.toRadians(angle)) * radius);
 			int gagZ = MathHelper.floor(Math.cos(Math.toRadians(angle)) * radius);
+
+			if (angle > 10 && angle < 80) {
+				positions.add(Pair.of(gagX, gagZ));
+				positions.add(Pair.of(gagX+1, gagZ-1));
+			}
+
 			positions.add(Pair.of(gagX+1, gagZ));
 			positions.add(Pair.of(gagX+1, gagZ+1));
 			positions.add(Pair.of(gagX+2, gagZ));
