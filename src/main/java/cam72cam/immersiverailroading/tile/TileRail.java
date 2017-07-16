@@ -1,12 +1,20 @@
 package cam72cam.immersiverailroading.tile;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import org.lwjgl.opengl.GL11;
+
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.library.TrackType;
@@ -25,6 +33,7 @@ public class TileRail extends TileRailBase {
 	
 	private boolean isVisible = true;
 	private boolean switchActive = false;
+	private BufferBuilder worldRenderer;
 
 
 	@Override
@@ -130,6 +139,42 @@ public class TileRail extends TileRailBase {
 	public IBlockState getBlockState() {
 		// Functions without a block position
 		return ImmersiveRailroading.BLOCK_RAIL.getDefaultState().withProperty(BlockRail.FACING, facing).withProperty(BlockRail.TRACK_TYPE, type);
+	}
+
+	/*
+	 * This returns a cached buffer as rails don't change their model often
+	 * This drastically reduces the overhead of rendering these complex models
+	 */
+	protected BufferBuilder getModelBuffer() {
+		if (worldRenderer != null) {
+			return worldRenderer;
+		}
+		
+		// Get model for current state
+		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+		BlockPos blockPos = this.getPos();
+		IBlockState state = getWorld().getBlockState(blockPos);
+		state = this.getBlockState();
+		IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
+		
+		// Create render targets
+		worldRenderer = new BufferBuilder(2097152);
+
+		// Reverse position which will be done render model
+		worldRenderer.setTranslation(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ());
+
+		// Start drawing
+		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+
+		// From IE
+		worldRenderer.color(255, 255, 255, 255);
+
+		// Render block at position
+		blockRenderer.getBlockModelRenderer().renderModel(getWorld(), model, state, blockPos, worldRenderer, true);
+		
+		worldRenderer.finishDrawing();
+		
+		return worldRenderer;
 	}
 
 	/*

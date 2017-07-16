@@ -1,19 +1,16 @@
 package cam72cam.immersiverailroading.tile;
 
-import org.lwjgl.opengl.GL11;
+import java.nio.ByteBuffer;
+import java.util.List;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
 
 public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 	@Override
@@ -28,43 +25,57 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 		}
 		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();
-
-		// Get model for current state
-		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
-		BlockPos blockPos = te.getPos();
-		IBlockState state = getWorld().getBlockState(blockPos);
-		state = te.getBlockState();
-		IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
-
+		
 		// Bind block textures to current context
 		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-		// Create render targets
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder worldRenderer = tessellator.getBuffer();
+		// From IE
+		RenderHelper.disableStandardItemLighting();
 
 		// Move to specified position
 		GlStateManager.translate(x, y, z);
-
-		// Reverse position which will be done render model
-		GlStateManager.translate(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ());
-
-		// From TE
-		RenderHelper.disableStandardItemLighting();
-
-		// Start drawing
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-
-		// From TE
-		worldRenderer.color(255, 255, 255, 255);
-
-		// Render block at position
-		blockRenderer.getBlockModelRenderer().renderModel(te.getWorld(), model, state, blockPos, worldRenderer, true);
-
+		
 		// Finish Drawing
-		tessellator.draw();
+		draw(te.getModelBuffer());
 
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
+	}
+	
+	/*
+	 *  From WorldVertexBufferUploader.draw
+	 *  
+	 *  Excludes the reset buffer at the end
+	 */
+	private void draw(BufferBuilder vertexBufferIn) {
+        VertexFormat vertexformat = vertexBufferIn.getVertexFormat();
+        int i = vertexformat.getNextOffset();
+        ByteBuffer bytebuffer = vertexBufferIn.getByteBuffer();
+        List<VertexFormatElement> list = vertexformat.getElements();
+
+        for (int j = 0; j < list.size(); ++j)
+        {
+            VertexFormatElement vertexformatelement = list.get(j);
+            VertexFormatElement.EnumUsage vertexformatelement$enumusage = vertexformatelement.getUsage();
+            int k = vertexformatelement.getType().getGlConstant();
+            int l = vertexformatelement.getIndex();
+            bytebuffer.position(vertexformat.getOffset(j));
+
+            // moved to VertexFormatElement.preDraw
+            vertexformatelement.getUsage().preDraw(vertexformat, j, i, bytebuffer);
+        }
+
+        GlStateManager.glDrawArrays(vertexBufferIn.getDrawMode(), 0, vertexBufferIn.getVertexCount());
+        int i1 = 0;
+
+        for (int j1 = list.size(); i1 < j1; ++i1)
+        {
+            VertexFormatElement vertexformatelement1 = list.get(i1);
+            VertexFormatElement.EnumUsage vertexformatelement$enumusage1 = vertexformatelement1.getUsage();
+            int k1 = vertexformatelement1.getIndex();
+
+            // moved to VertexFormatElement.postDraw
+            vertexformatelement1.getUsage().postDraw(vertexformat, i1, i, bytebuffer);
+        }
 	}
 }
