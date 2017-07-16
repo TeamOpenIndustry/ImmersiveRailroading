@@ -37,7 +37,7 @@ public class TileRail extends TileRailBase {
 	@SideOnly(Side.CLIENT)
 	public double getMaxRenderDistanceSquared()
 	{
-		return super.getMaxRenderDistanceSquared() * 4;
+		return Double.MAX_VALUE;
 	}
 
 	public EnumFacing getFacing() {
