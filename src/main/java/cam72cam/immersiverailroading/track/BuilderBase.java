@@ -141,6 +141,10 @@ public abstract class BuilderBase {
 			track.placeTrack();
 		}
 	}
+	
+	public ArrayList<TrackBase> getTracks() {
+		return this.tracks;
+	}
 
 	public BlockPos getPos() {
 		return new BlockPos(x, y, z);

@@ -1,6 +1,14 @@
 package cam72cam.immersiverailroading.library;
 
+import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderCrossing;
+import cam72cam.immersiverailroading.track.BuilderSlope;
+import cam72cam.immersiverailroading.track.BuilderStraight;
+import cam72cam.immersiverailroading.track.BuilderTurn;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /*
  * TrackType maps to block state model+render combinations
@@ -81,5 +89,26 @@ public enum TrackType implements IStringSerializable {
 
 	public boolean isTurn() {
 		return type.isTurn();
+	}
+	
+	public BuilderBase getBuilder(World world, BlockPos pos, EnumFacing facing) {
+		switch (getType()) {
+		case STRAIGHT_SMALL:
+			return new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, 2);
+		case STRAIGHT_MEDIUM:
+			return new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, 8);
+		case STRAIGHT_LARGE:
+			return new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, 16);
+		case CROSSING:
+			return new BuilderCrossing(world, pos.getX(), pos.getY(), pos.getZ(), facing);
+		case SLOPE_MEDIUM:
+		case SLOPE_LARGE:
+			return new BuilderSlope(world, pos.getX(), pos.getY(), pos.getZ(), facing, this);
+		case TURN_MEDIUM:
+		case TURN_LARGE:
+			return new BuilderTurn(world, pos.getX(), pos.getY(), pos.getZ(), facing, this);
+		default:
+			return null;
+		}
 	}
 }

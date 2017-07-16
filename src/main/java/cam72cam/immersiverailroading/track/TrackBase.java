@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 public abstract class TrackBase {
 	public BuilderBase builder;
@@ -16,6 +17,7 @@ public abstract class TrackBase {
 	private int rel_y;
 	private int rel_z;
 	private EnumFacing rel_rotation;
+	private float height;
 
 	protected Block block;
 
@@ -67,4 +69,15 @@ public abstract class TrackBase {
 		rel_z = trackBase.rel_z;
 	}
 
+	
+	public BlockPos getPos() {
+		return builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
+	}
+	
+	public void setHeight(float height) {
+		this.height = height;
+	}
+	public float getHeight() {
+		return height;
+	}
 }

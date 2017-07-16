@@ -4,8 +4,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -13,11 +18,17 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.TrackBase;
 
 public class TileRail extends TileRailBase {
 	private EnumFacing facing;
@@ -140,10 +151,57 @@ public class TileRail extends TileRailBase {
 		// Functions without a block position
 		return ImmersiveRailroading.BLOCK_RAIL.getDefaultState().withProperty(BlockRail.FACING, facing).withProperty(BlockRail.TRACK_TYPE, type);
 	}
+	
+	private class ScaledModel implements IBakedModel {
+		// I know this is evil and I love it :D
+		
+		private IBakedModel source;
+		private float height;
+		
+		public ScaledModel(IBakedModel source, float height) {
+			this.source = source;
+			this.height = height + 0.02f;
+		}
+
+		@Override
+		public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
+			List<BakedQuad> quads = source.getQuads(state, side, rand);
+			List<BakedQuad> newQuads = new ArrayList<BakedQuad>();
+			for (BakedQuad quad : quads) {
+				int[] newData = Arrays.copyOf(quad.getVertexData(), quad.getVertexData().length);
+
+	            VertexFormat format = quad.getFormat();
+				
+				for (int i = 0; i < 4; ++i)
+		        {
+					int j = format.getIntegerSize() * i;
+		            newData[j + 1] = Float.floatToRawIntBits(Float.intBitsToFloat(newData[j + 1]) * height);
+		        }
+				
+				newQuads.add(new BakedQuad(newData, quad.getTintIndex(), quad.getFace(), quad.getSprite(), quad.shouldApplyDiffuseLighting(), quad.getFormat()));
+			}
+			
+			return newQuads;
+		}
+
+		@Override
+		public boolean isAmbientOcclusion() { return source.isAmbientOcclusion(); }
+		@Override
+		public boolean isGui3d() { return source.isGui3d(); }
+		@Override
+		public boolean isBuiltInRenderer() { return source.isBuiltInRenderer(); }
+		@Override
+		public TextureAtlasSprite getParticleTexture() { return source.getParticleTexture(); }
+		@Override
+		public ItemOverrideList getOverrides() { return source.getOverrides(); }
+		
+	}
 
 	/*
 	 * This returns a cached buffer as rails don't change their model often
 	 * This drastically reduces the overhead of rendering these complex models
+	 * 
+	 * We also draw the railbed here since drawing a model for each gag eats FPS 
 	 */
 	protected BufferBuilder getModelBuffer() {
 		if (worldRenderer != null) {
@@ -156,6 +214,9 @@ public class TileRail extends TileRailBase {
 		IBlockState state = getWorld().getBlockState(blockPos);
 		state = this.getBlockState();
 		IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
+		
+		IBlockState gravelState = Blocks.GRAVEL.getDefaultState();
+		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
 		
 		// Create render targets
 		worldRenderer = new BufferBuilder(2097152);
@@ -170,7 +231,13 @@ public class TileRail extends TileRailBase {
 		worldRenderer.color(255, 255, 255, 255);
 
 		// Render block at position
-		blockRenderer.getBlockModelRenderer().renderModel(getWorld(), model, state, blockPos, worldRenderer, true);
+		blockRenderer.getBlockModelRenderer().renderModel(getWorld(), model, state, blockPos, worldRenderer, false);
+		
+		// This is evil but really fast :D
+		BuilderBase builder = type.getBuilder(world, new BlockPos(0,0,0), facing.getOpposite());
+		for (TrackBase base : builder.getTracks()) {
+			blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, base.getHeight()), gravelState, blockPos.add(base.getPos()), worldRenderer, false);
+		}
 		
 		worldRenderer.finishDrawing();
 		

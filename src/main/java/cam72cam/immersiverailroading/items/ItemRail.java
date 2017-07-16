@@ -4,10 +4,6 @@ import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackType;
 import cam72cam.immersiverailroading.track.BuilderBase;
-import cam72cam.immersiverailroading.track.BuilderCrossing;
-import cam72cam.immersiverailroading.track.BuilderSlope;
-import cam72cam.immersiverailroading.track.BuilderStraight;
-import cam72cam.immersiverailroading.track.BuilderTurn;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,32 +35,8 @@ public class ItemRail extends ItemBlock {
     {
 		EnumFacing facing = newState.getValue(BlockRail.FACING);
 		TrackType tt = newState.getValue(BlockRail.TRACK_TYPE);
-		BuilderBase builder;
-		switch (tt.getType()) {
-		case STRAIGHT_SMALL:
-			builder = new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, 2);
-			break;
-		case STRAIGHT_MEDIUM:
-			builder = new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, 8);
-			break;
-		case STRAIGHT_LARGE:
-			builder = new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, 16);
-			break;
-		case CROSSING:
-			builder = new BuilderCrossing(world, pos.getX(), pos.getY(), pos.getZ(), facing);
-			break;
-		case SLOPE_MEDIUM:
-		case SLOPE_LARGE:
-			builder = new BuilderSlope(world, pos.getX(), pos.getY(), pos.getZ(), facing, tt);
-			break;
-		case TURN_MEDIUM:
-		case TURN_LARGE:
-			builder = new BuilderTurn(world, pos.getX(), pos.getY(), pos.getZ(), facing, tt);
-			break;
-		default:
-			return false;
-		}
 		
+		BuilderBase builder = tt.getBuilder(world, pos, facing);
 		if (builder.canBuild()) {
 			builder.build();
 		}
