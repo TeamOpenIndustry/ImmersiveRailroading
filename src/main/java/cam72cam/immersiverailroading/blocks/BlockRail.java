@@ -60,7 +60,9 @@ public class BlockRail extends BlockRailBase {
 	@Override
     public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-		TrackDirection dir = (placer.getRotationYawHead() % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
+		// For some stupid reason yaw can go negative
+		float yawHead = placer.getRotationYawHead() % 360 + 360;
+		TrackDirection dir = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing()).withProperty(TRACK_TYPE, TrackType.fromMeta(meta, dir));
     }
 	
