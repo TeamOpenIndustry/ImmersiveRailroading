@@ -56,9 +56,6 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
         for (int j = 0; j < list.size(); ++j)
         {
             VertexFormatElement vertexformatelement = list.get(j);
-            VertexFormatElement.EnumUsage vertexformatelement$enumusage = vertexformatelement.getUsage();
-            int k = vertexformatelement.getType().getGlConstant();
-            int l = vertexformatelement.getIndex();
             bytebuffer.position(vertexformat.getOffset(j));
 
             // moved to VertexFormatElement.preDraw
@@ -71,9 +68,6 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
         for (int j1 = list.size(); i1 < j1; ++i1)
         {
             VertexFormatElement vertexformatelement1 = list.get(i1);
-            VertexFormatElement.EnumUsage vertexformatelement$enumusage1 = vertexformatelement1.getUsage();
-            int k1 = vertexformatelement1.getIndex();
-
             // moved to VertexFormatElement.postDraw
             vertexformatelement1.getUsage().postDraw(vertexformat, i1, i, bytebuffer);
         }
