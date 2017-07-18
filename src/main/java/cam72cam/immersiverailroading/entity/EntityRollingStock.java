@@ -69,8 +69,6 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	public boolean isRideable() {
 		return true;
 	}
-	@Override
-	public abstract double getMountedYOffset();
 
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
@@ -111,6 +109,12 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		}
 		return false;
 	}
+	@Override
+	public void onUpdate()
+    {
+		System.out.println("WE DEAD");
+    }
+
 
 	@Override
 	public boolean canBePushed() {

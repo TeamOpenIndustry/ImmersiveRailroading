@@ -11,11 +11,11 @@ public abstract class SteamLocomotive extends Locomotive implements IFluidHandle
 
 	public SteamLocomotive(World world) {
 		super(world, new Fluid[] { FluidRegistry.WATER });
-		runSound.setDynamicRate();
+		//runSound.setDynamicRate();
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getInventorySize() {
 		return 3 + 3 + 3 + 1 + 1;
 	}
 
@@ -74,7 +74,7 @@ public abstract class SteamLocomotive extends Locomotive implements IFluidHandle
 			int burnTime = ForgeEventFactory.getItemBurnTime(cargoItems.getStackInSlot(0));
 			if (getFuel() + burnTime <= getMaxFuel()) {
 				addFuel(burnTime);
-				decrStackSize(0, 1);
+				cargoItems.extractItem(0, 1, false);
 			}
 		}
 

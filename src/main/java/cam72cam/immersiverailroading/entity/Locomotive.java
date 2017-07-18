@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -18,7 +17,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
-public abstract class Locomotive extends FreightTank implements IInventory {
+public abstract class Locomotive extends FreightTank {
 	private MovingSoundRollingStock hornSound;
 	private MovingSoundRollingStock idleSound;
 	protected MovingSoundRollingStock runSound;
@@ -41,7 +40,6 @@ public abstract class Locomotive extends FreightTank implements IInventory {
 	public Locomotive(World world, Fluid[] fluids) {
 		super(world, fluids);
 
-		this.getDataManager().register(CARGO_MASS, 0);
 		this.getDataManager().register(currentMaxSpeedMC, 0f);
 		this.getDataManager().register(currentDestination, "");
 		this.getDataManager().register(currentFuelTrain, 0);

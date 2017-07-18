@@ -34,7 +34,7 @@ public abstract class DieselLocomotive extends Locomotive implements IFluidHandl
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getInventorySize() {
 		return 3 + 3 + 3 + 1;
 	}
 }

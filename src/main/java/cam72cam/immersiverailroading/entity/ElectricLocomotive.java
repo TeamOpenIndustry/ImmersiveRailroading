@@ -12,7 +12,7 @@ public abstract class ElectricLocomotive extends Locomotive {
 	}
 	
 	@Override
-	public int getSizeInventory() {
+	public int getInventorySize() {
 		return 5 + 5 + 5 + 1;
 	}
 
