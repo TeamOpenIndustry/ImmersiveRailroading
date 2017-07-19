@@ -56,6 +56,7 @@ public abstract class Locomotive extends FreightTank {
 		// runSound = EnumSounds.get(this.getClass()).getRun(this);
 
 		this.entityCollisionReduction = 0.99F;
+		this.noClip = true;
 	}
 
 	/*
@@ -174,7 +175,6 @@ public abstract class Locomotive extends FreightTank {
 
 		// double speed = throttle.get() * 0.02;
 		
-		if (!world.isRemote ) {
 		double speed = 0.06;
 		
 		if (rotationFrontYaw == null) {
@@ -207,13 +207,6 @@ public abstract class Locomotive extends FreightTank {
 		this.rotationYaw = (float) Math.toDegrees(Math.atan2(bogeySkew.x, bogeySkew.z));
 
 		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
-		System.out.println(rotationYaw);
-
-		if (world.isRemote) {
-			// System.out.println(bogeySkew);
-			// System.out.println(String.format("%s - %s - %s",
-			// rotationFrontYaw, rotationYaw, rotationRearYaw));
-		}
 
 		this.motionX = deltaCenter.x;
 		this.motionZ = deltaCenter.z;
@@ -228,11 +221,13 @@ public abstract class Locomotive extends FreightTank {
 			this.motionY = 0;
 		}
 
+		this.prevPosX = posX;
+		this.prevPosY = posY;
+		this.prevPosZ = posZ;
 		this.posX += this.motionX;
 		this.posY += this.motionY;
 		this.posZ += this.motionZ;
-		}
-	}
+	}	
 
 	private Vec3d between(Vec3d front, Vec3d rear) {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
@@ -267,7 +262,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	private Vec3d nextMovement(float yaw, double d) {
-		double x = -Math.sin(Math.toRadians(yaw));
+		double x = Math.sin(Math.toRadians(yaw));
 		double z = Math.cos(Math.toRadians(yaw));
 		return new Vec3d(x * d, 0, z * d);
 	}
