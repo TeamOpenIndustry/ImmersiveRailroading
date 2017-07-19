@@ -4,8 +4,11 @@ import org.apache.logging.log4j.Logger;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
-import cam72cam.immersiverailroading.entity.locomotives.Shay;
-import cam72cam.immersiverailroading.entity.locomotives.ShayRenderFactory;
+import cam72cam.immersiverailroading.entity.DieselLocomotive;
+import cam72cam.immersiverailroading.entity.ElectricLocomotive;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.SteamLocomotive;
+import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -13,10 +16,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailTESR;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.EntityList.EntityEggInfo;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -83,10 +83,18 @@ public class ImmersiveRailroading
         	event.getRegistry().register(ITEM_ROLLING_STOCK);
         }
         
+        private static int lastEntityID = 0;
+        private static void registerRollingStock(Class<? extends EntityRollingStock> type) {
+        	lastEntityID ++;
+        	EntityRegistry.registerModEntity(new ResourceLocation(MODID, type.getSimpleName()), SteamLocomotive.class, type.getSimpleName(), lastEntityID, instance, 64, 5, true);
+            RenderingRegistry.registerEntityRenderingHandler(SteamLocomotive.class, DefinitionManager.RENDER_INSTANCE);
+        }
+        
         @SubscribeEvent
         public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
-        	EntityRegistry.registerModEntity(new ResourceLocation(MODID, "Shay"), Shay.class, "Shay", 1, instance, 64, 1, true);
-            RenderingRegistry.registerEntityRenderingHandler(Shay.class, ShayRenderFactory.INSTANCE);
+        	registerRollingStock(SteamLocomotive.class);
+        	registerRollingStock(DieselLocomotive.class);
+        	registerRollingStock(ElectricLocomotive.class);
         }
 
         @SubscribeEvent
@@ -102,7 +110,12 @@ public class ImmersiveRailroading
         
         @SubscribeEvent
         public static void onTextureStitchedPre(TextureStitchEvent.Pre event) {
-        	TextureAtlasSprite sprite = event.getMap().registerSprite(new ResourceLocation(ImmersiveRailroading.MODID, "rolling_stock/locoshay"));
+        	// This is the first event after the model loaders have managers
+        	DefinitionManager.initDefinitions();
+        	
+        	for(ResourceLocation texture : DefinitionManager.getTextures()) {
+        		event.getMap().registerSprite(texture);
+        	}
         }
     }
 }

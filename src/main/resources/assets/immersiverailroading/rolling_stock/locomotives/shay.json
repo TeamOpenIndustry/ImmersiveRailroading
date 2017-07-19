@@ -1,0 +1,32 @@
+{
+	"era": "steam",
+	"name": "Shay",
+	"works": "Lima Locomotive Works",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/modellocosteamshay.obj",
+	"properties": {
+		"water_consumption": 100,
+		"fuel_consumption": 100,
+		"water_capacity": 100,
+		"fuel_capacity": 10,
+		"passenger_offset_x": 1,
+		"passenger_offset_y": 1,
+		"horsepower": 500,
+		"tractive_effort": 300,
+		"acceleration": 100,
+		"deceleration": 100,
+		"max_speed": 20 
+	},
+	"particles": {
+		"smoke_stack": {
+			"type": "SMOKE_LARGE",
+			"position": [1.87, 1.78, 0.0]
+		}
+	},
+	"sounds": {
+		"TODO": "TODO"
+	},
+	"trucks": {
+		"front": 3, 
+		"rear": -1
+	}
+}

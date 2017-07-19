@@ -1,6 +1,10 @@
 package cam72cam.immersiverailroading.entity;
 
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+
+import java.nio.charset.StandardCharsets;
+
+import cam72cam.immersiverailroading.entity.registry.IDefinitionRollingStock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,6 +15,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
+	protected String defID;
 
 	public EntityRollingStock(World world) {
 		super(world);
@@ -31,20 +36,25 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
+		byte[] defBytes = new byte[additionalData.readInt()];
+		additionalData.readBytes(defBytes);
+		defID = new String(defBytes, StandardCharsets.UTF_8);
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
+		buffer.writeInt(defID.getBytes(StandardCharsets.UTF_8).length);
+		buffer.writeBytes(defID.getBytes(StandardCharsets.UTF_8));
 	}
 	
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		
+		nbttagcompound.setString("defID", defID);
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		
+		defID = nbttagcompound.getString("defID");
 	}
 	
 	@Override
@@ -112,7 +122,9 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public void onUpdate()
     {
-		System.out.println("WE DEAD");
+		if (this.isDead) {
+			System.out.println("WE DEAD");
+		}
     }
 
 
@@ -131,5 +143,5 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		//TODO @cam72cam
 	}
 
-	
+	public abstract void render(double x, double y, double z, float entityYaw, float partialTicks);
 }

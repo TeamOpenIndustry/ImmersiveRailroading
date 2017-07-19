@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.entity.locomotives;
+package cam72cam.immersiverailroading.entity.registry;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -29,20 +30,20 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
 
-public class ShayRender extends Render<Shay> {
+public class EntityRender extends Render<EntityRollingStock> {
 
 	private BufferBuilder buffer;
 
-	protected ShayRender(RenderManager renderManager) {
+	protected EntityRender(RenderManager renderManager) {
 		super(renderManager);
 	}
 	
-	public boolean shouldRender(Shay livingEntity, ICamera camera, double camX, double camY, double camZ) {
+	public boolean shouldRender(EntityRollingStock livingEntity, ICamera camera, double camX, double camY, double camZ) {
 		return true;
 	}
 
 	@Override
-	public void doRender(Shay entity, double x, double y, double z, float entityYaw, float partialTicks) {
+	public void doRender(EntityRollingStock entity, double x, double y, double z, float entityYaw, float partialTicks) {
 		if (buffer == null)
 		{
 			System.out.println("WOOOO");
@@ -53,6 +54,8 @@ public class ShayRender extends Render<Shay> {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+
+			//Minecraft.getMinecraft().getResourceManager().getResource(modelLoc).getInputStream();
 			
 			OBJModel m = (OBJModel)model;
 			Builder<String, String> q = ImmutableMap.builder();
@@ -111,7 +114,7 @@ public class ShayRender extends Render<Shay> {
         }
 	}
 	
-	protected BufferBuilder getModelBuffer(Shay e, IBakedModel model) {
+	protected BufferBuilder getModelBuffer(EntityRollingStock e, IBakedModel model) {
 		
 		// Create render targets
 		BufferBuilder worldRenderer = new BufferBuilder(2097152);
@@ -135,7 +138,7 @@ public class ShayRender extends Render<Shay> {
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Shay entity) {
+	protected ResourceLocation getEntityTexture(EntityRollingStock entity) {
 		return null;
 	}
 }

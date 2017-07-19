@@ -148,17 +148,6 @@ public abstract class Locomotive extends FreightTank {
 		Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
 	}
 
-	/*
-	 * @Override public void keyHandlerFromPacket(int i) { if (i ==
-	 * KeyMapping.horn.getValue()) { soundHorn(); } if (i ==
-	 * KeyMapping.inventory.getValue()) { ((EntityPlayer)
-	 * riddenByEntity).openGui(Traincraft.instance, GuiIDs.LOCO, world, (int)
-	 * this.posX, (int) this.posY, (int) this.posZ); } if (i ==
-	 * KeyMapping.up.getValue()) { throttle.set(throttle.get() + 1);
-	 * System.out.println("Faster!"); } if (i == KeyMapping.down.getValue()) {
-	 * throttle.set(throttle.get() - 1); System.out.println("Slower!"); } }
-	 */
-
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -184,7 +173,13 @@ public abstract class Locomotive extends FreightTank {
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
 
 		// double speed = throttle.get() * 0.02;
+		
+		if (!world.isRemote ) {
 		double speed = 0.06;
+		
+		if (rotationFrontYaw == null) {
+			rotationYaw = 90;
+		}
 
 		if (rotationFrontYaw == null) {
 			rotationFrontYaw = rotationYaw;
@@ -212,6 +207,7 @@ public abstract class Locomotive extends FreightTank {
 		this.rotationYaw = (float) Math.toDegrees(Math.atan2(bogeySkew.x, bogeySkew.z));
 
 		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+		System.out.println(rotationYaw);
 
 		if (world.isRemote) {
 			// System.out.println(bogeySkew);
@@ -235,23 +231,27 @@ public abstract class Locomotive extends FreightTank {
 		this.posX += this.motionX;
 		this.posY += this.motionY;
 		this.posZ += this.motionZ;
+		}
 	}
 
 	private Vec3d between(Vec3d front, Vec3d rear) {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
 	}
+	
+	protected abstract float frontBogeyOffset();
+	protected abstract float rearBogeyOffset();
 
 	private Vec3d frontBogeyPosition() {
-		// TODO bogey distance
-		Vec3d front = new Vec3d(0, 0, 3);
-		front = front.rotateYaw((float) Math.toRadians(this.rotationYaw));
+		//Vec3d front = new Vec3d(0, 0, frontBogeyOffset());
+		//front = front.rotateYaw((float) Math.toRadians(this.rotationYaw));
+		Vec3d front = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * frontBogeyOffset(), 0, Math.cos(Math.toRadians(this.rotationYaw)) * frontBogeyOffset());
 		return front.addVector(posX, posY, posZ);
 	}
 
 	private Vec3d rearBogeyPosition() {
-		// TODO bogey distance
-		Vec3d rear = new Vec3d(0, 0, -1);
-		rear = rear.rotateYaw((float) Math.toRadians(this.rotationYaw));
+		//Vec3d rear = new Vec3d(0, 0, rearBogeyOffset());
+		//rear = rear.rotateYaw((float) Math.toRadians(this.rotationYaw));
+		Vec3d rear = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * rearBogeyOffset(), 0, Math.cos(Math.toRadians(this.rotationYaw)) * rearBogeyOffset());
 		return rear.addVector(posX, posY, posZ);
 	}
 
@@ -277,10 +277,11 @@ public abstract class Locomotive extends FreightTank {
 
 		if (rail == null) {
 			System.out.println("WARNING OFF TRACK!!!");
-			System.out.println(position);
-			if (this.ticksExisted > 100) { // HACK
+			System.out.println(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+			System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
+			//if (this.ticksExisted > 100) { // HACK
 				this.setDead();
-			}
+			//}
 			return position;
 		}
 
@@ -314,11 +315,13 @@ public abstract class Locomotive extends FreightTank {
 				return newneg;
 			}
 		} else {
+			return position.add(delta);
+			/*
 			if (Math.abs(delta.x) > Math.abs(delta.z)) {
 				return new Vec3d(position.x + Math.copySign(distance, delta.x), position.y, Math.floor(position.z) + 0.5);
 			} else {
 				return new Vec3d(Math.floor(position.x) + 0.5, position.y, position.z + Math.copySign(distance, delta.z));
-			}
+			}*/
 		}
 	}
 

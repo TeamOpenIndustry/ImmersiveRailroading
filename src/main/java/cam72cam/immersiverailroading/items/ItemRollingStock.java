@@ -1,7 +1,8 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.locomotives.Shay;
+import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
+import cam72cam.immersiverailroading.entity.registry.IDefinitionRollingStock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.EnumActionResult;
@@ -22,9 +23,8 @@ public class ItemRollingStock extends Item {
 	
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		if (!worldIn.isRemote) {
-			Shay s = new Shay(worldIn);
-			s.setPosition(pos.getX(), pos.getY()+2, pos.getZ());
-			worldIn.spawnEntity(s);
+			IDefinitionRollingStock def = DefinitionManager.getDefinition("rolling_stock/locomotives/shay.json");
+			def.spawn(worldIn, pos.add(0, 0.6, 0), facing);
 			System.out.println("SPAWNED SHAY");
 		}
 		return super.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);

@@ -2,16 +2,34 @@ package cam72cam.immersiverailroading.entity;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
+import cam72cam.immersiverailroading.entity.registry.RegisteredSteamLocomotive;
+import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public abstract class SteamLocomotive extends Locomotive implements IFluidHandler {
-
+public class SteamLocomotive extends Locomotive implements IFluidHandler {
 	public SteamLocomotive(World world) {
 		super(world, new Fluid[] { FluidRegistry.WATER });
-		//runSound.setDynamicRate();
+		
+		//Identifier from NBT
+	}
+
+
+	public SteamLocomotive(World world, String defID) {
+		this(world);
+		this.defID = defID;
+	}
+	
+	
+	private RegisteredSteamLocomotive getDefinition() {
+		return (RegisteredSteamLocomotive) DefinitionManager.getDefinition(defID);
+	}
+
+	public double getMaxFuel() {
+		return 2000.0;
 	}
 
 	@Override
@@ -21,10 +39,6 @@ public abstract class SteamLocomotive extends Locomotive implements IFluidHandle
 
 	public int[] getLocomotiveInventorySizes() {
 		return new int[] { 3, 3, 3 };
-	}
-
-	public double getMaxFuel() {
-		return 2000.0;
 	}
 
 	@Override
@@ -130,5 +144,78 @@ public abstract class SteamLocomotive extends Locomotive implements IFluidHandle
 		return (int) ((this.getFuel() * i) / getMaxFuel());
 	}
 
-	public abstract int getWaterConsumption();
+
+	@Override
+	public void render(double x, double y, double z, float entityYaw, float partialTicks) {
+		if (this.getDefinition() != null) {
+			this.getDefinition().render(this, x, y, z, entityYaw, partialTicks);
+		} else {
+			this.getEntityWorld().removeEntity(this);
+		}
+	}
+	
+	public int getWaterConsumption() {
+		//return this.getDefinition().getWaterConsumption();
+		return 0;
+	}
+
+	@Override
+	public void updatePassenger(Entity passenger) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getDefaultFuelConsumption() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int getDefaultPower() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public double getDefaultAccel() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public double getDefaultBrake() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public Speed getMaxSpeed() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	protected float frontBogeyOffset() {
+		return 3;
+	}
+
+
+	@Override
+	protected float rearBogeyOffset() {
+		return -1;
+	}
+
+
+	@Override
+	public int getTankCapacity() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
