@@ -49,7 +49,7 @@ public class BuilderTurn extends BuilderBase {
 		
 		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, type);
 		
-		turnTrack.setRotationCenter(xMult * radius, 0, 0, radius - 1f);
+		turnTrack.setRotationCenter(-xMult * radius, 0, 0, radius - 1f);
 		
 		tracks.add(turnTrack);
 		for (Pair<Integer, Integer> pair : positions) {
