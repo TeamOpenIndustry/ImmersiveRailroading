@@ -150,6 +150,8 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 		
 		GlStateManager.scale(2, 2, 2);
 		
+		GlStateManager.rotate(180 - entityYaw+90, 0, 1, 0);
+		
 		// Finish Drawing
 		draw(getBuffer());
 		GlStateManager.popMatrix();

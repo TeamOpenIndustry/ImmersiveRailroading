@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.List;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
@@ -194,22 +195,47 @@ public abstract class Locomotive extends FreightTank {
 		Vec3d nextRear = nextPosition(rear, this.rotationRearYaw, nextMovement(this.rotationRearYaw, speed));
 		Vec3d frontDelta = front.subtract(nextFront);
 		Vec3d rearDelta = rear.subtract(nextRear);
-		rotationFrontYaw = (float) Math.toDegrees(Math.atan2(-frontDelta.x, frontDelta.z));
-		rotationRearYaw = (float) Math.toDegrees(Math.atan2(-rearDelta.x, rearDelta.z));
+		rotationFrontYaw = (float) Math.toDegrees(Math.atan2(frontDelta.x, frontDelta.z));
+		rotationRearYaw = (float) Math.toDegrees(Math.atan2(rearDelta.x, rearDelta.z));
 		rotationFrontYaw = (rotationFrontYaw + 360f) % 360f;
 		rotationRearYaw = (rotationRearYaw + 360f) % 360f;
+		
+		if (!world.isRemote) {
+			System.out.println(rearDelta);
+			System.out.println(rotationRearYaw);
+		}
 
 		Vec3d currCenter = between(front, rear);
 		Vec3d nextCenter = between(nextFront, nextRear);
 		Vec3d deltaCenter = currCenter.subtract(nextCenter);
 
 		Vec3d bogeySkew = nextRear.subtract(nextFront);
-		this.rotationYaw = (float) Math.toDegrees(Math.atan2(bogeySkew.x, bogeySkew.z));
+		
+		this.prevRotationYaw = rotationYaw;
+		
+		this.rotationYaw = (float) Math.toDegrees(Math.atan2(bogeySkew.x, -bogeySkew.z));
 
 		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+		
+		
+		
+		/*
+		Vec3d currCenter = this.getPositionVector();
+		Vec3d nextCenter = nextPosition(currCenter, this.rotationYaw, nextMovement(this.rotationYaw, speed));
+		Vec3d deltaCenter = currCenter.subtract(nextCenter);
+
+		Vec3d bogeySkew = deltaCenter;//nextRear.subtract(nextFront);
+		
+		this.prevRotationYaw = rotationYaw;
+		
+		this.rotationYaw = (float) Math.toDegrees(Math.atan2(bogeySkew.x, -bogeySkew.z));
+
+		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+*/
+		
 
 		this.motionX = deltaCenter.x;
-		this.motionZ = deltaCenter.z;
+		this.motionZ = -deltaCenter.z;
 
 		// Can this run client side in 1.12?
 		if (!this.world.isRemote && world.isAirBlock(new BlockPos((int) posX, (int) (this.posY - 0.6), (int) posZ))) {
@@ -262,7 +288,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	private Vec3d nextMovement(float yaw, double d) {
-		double x = Math.sin(Math.toRadians(yaw));
+		double x = -Math.sin(Math.toRadians(yaw));
 		double z = Math.cos(Math.toRadians(yaw));
 		return new Vec3d(x * d, 0, z * d);
 	}
@@ -286,9 +312,9 @@ public abstract class Locomotive extends FreightTank {
 			// Relative position to the curve center
 			Vec3d posDelta = new Vec3d(rail.getCenter()).subtract(position);
 			// Calculate the angle (rad) for the current position is
-			double posRelYaw = Math.atan2(posDelta.x, posDelta.z);
+			double posRelYaw = Math.atan2(posDelta.x, posDelta.z) + Math.toRadians(180);
 			// Hack the radius
-			double radius = rail.getRadius() + 1.5; // TODO bake this into
+			double radius = rail.getRadius() + 2; // TODO bake this into
 													// BuilderTurn
 			// Calculate the angle delta in rad (radians are awesome)
 			double yawDelt = distance / radius;
@@ -302,13 +328,24 @@ public abstract class Locomotive extends FreightTank {
 			Vec3d newpos = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw + yawDelt) * radius, 0, Math.cos(posRelYaw + yawDelt) * radius);
 			Vec3d newneg = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw - yawDelt) * radius, 0, Math.cos(posRelYaw - yawDelt) * radius);
 
+			Vec3d ret;
 			// Return whichever position is closest to the estimated next
 			// position
 			if (newpos.subtract(nextPos).lengthVector() < newneg.subtract(nextPos).lengthVector()) {
-				return newpos;
+				ret = newpos;
 			} else {
-				return newneg;
+				ret = newneg;
 			}
+			
+			Vec3d check = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw) * radius, 0, Math.cos(posRelYaw) * radius);
+			if (!world.isRemote) {
+				ImmersiveRailroading.logger.info(Math.toDegrees(posRelYaw));
+				ImmersiveRailroading.logger.info(position);
+				ImmersiveRailroading.logger.info(check);
+				ImmersiveRailroading.logger.info(nextPos);
+				ImmersiveRailroading.logger.info(ret);
+			}
+			return ret;
 		} else {
 			return position.add(delta);
 			/*
