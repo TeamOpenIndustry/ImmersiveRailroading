@@ -65,6 +65,8 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 		SteamLocomotive loco = new SteamLocomotive(world, defID);
 		
 		loco.setPosition(pos.getX(), pos.getY(), pos.getZ());
+		loco.prevRotationYaw =facing.getHorizontalAngle(); 
+		loco.rotationYaw = facing.getHorizontalAngle();
 		world.spawnEntity(loco);
 		
 		return loco;

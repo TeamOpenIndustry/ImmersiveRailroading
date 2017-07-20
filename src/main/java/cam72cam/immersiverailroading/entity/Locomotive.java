@@ -177,10 +177,6 @@ public abstract class Locomotive extends FreightTank {
 		// double speed = throttle.get() * 0.02;
 		
 		double speed = 0.06;
-		
-		if (rotationFrontYaw == null) {
-			rotationYaw = 90;
-		}
 
 		if (rotationFrontYaw == null) {
 			rotationFrontYaw = rotationYaw;
