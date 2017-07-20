@@ -239,9 +239,9 @@ public class TileRail extends TileRailBase {
 			blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, base.getHeight()), gravelState, blockPos.add(base.getPos()), worldRenderer, false);
 		}
 		//Debug center location
-		//if (center != null) {
-		//	blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, this.getHeight()), gravelState, center, worldRenderer, false);
-		//}
+		if (center != null) {
+			blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, this.getHeight()), gravelState, center, worldRenderer, false);
+		}
 		
 		worldRenderer.finishDrawing();
 		

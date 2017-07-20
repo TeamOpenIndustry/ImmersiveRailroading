@@ -13,8 +13,10 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
@@ -176,7 +178,7 @@ public abstract class Locomotive extends FreightTank {
 
 		// double speed = throttle.get() * 0.02;
 		
-		double speed = 0.06;
+		double speed = 0.2;
 
 		if (rotationFrontYaw == null) {
 			rotationFrontYaw = rotationYaw;
@@ -184,54 +186,49 @@ public abstract class Locomotive extends FreightTank {
 		if (rotationRearYaw == null) {
 			rotationRearYaw = rotationYaw;
 		}
+		
 
 		Vec3d front = frontBogeyPosition();
 		Vec3d rear = rearBogeyPosition();
 		Vec3d nextFront = nextPosition(front, this.rotationFrontYaw, nextMovement(this.rotationFrontYaw, speed));
 		Vec3d nextRear = nextPosition(rear, this.rotationRearYaw, nextMovement(this.rotationRearYaw, speed));
-		Vec3d frontDelta = front.subtract(nextFront);
-		Vec3d rearDelta = rear.subtract(nextRear);
-		rotationFrontYaw = (float) Math.toDegrees(Math.atan2(frontDelta.x, frontDelta.z));
-		rotationRearYaw = (float) Math.toDegrees(Math.atan2(rearDelta.x, rearDelta.z));
+		Vec3d frontDelta = front.subtractReverse(nextFront);
+		Vec3d rearDelta = rear.subtractReverse(nextRear);
+		rotationFrontYaw = (float) Math.toDegrees(Math.atan2(-frontDelta.x, frontDelta.z));
+		rotationRearYaw = (float) Math.toDegrees(Math.atan2(-rearDelta.x, rearDelta.z));
 		rotationFrontYaw = (rotationFrontYaw + 360f) % 360f;
 		rotationRearYaw = (rotationRearYaw + 360f) % 360f;
-		
-		if (!world.isRemote) {
-			System.out.println(rearDelta);
-			System.out.println(rotationRearYaw);
-		}
 
 		Vec3d currCenter = between(front, rear);
 		Vec3d nextCenter = between(nextFront, nextRear);
-		Vec3d deltaCenter = currCenter.subtract(nextCenter);
+		Vec3d deltaCenter = currCenter.subtractReverse(nextCenter);
 
-		Vec3d bogeySkew = nextRear.subtract(nextFront);
+		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
 		
 		this.prevRotationYaw = rotationYaw;
 		
-		this.rotationYaw = (float) Math.toDegrees(Math.atan2(bogeySkew.x, -bogeySkew.z));
+		this.rotationYaw = (float) Math.toDegrees(Math.atan2(-bogeySkew.x, bogeySkew.z));
 
 		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
-		
 		
 		
 		/*
 		Vec3d currCenter = this.getPositionVector();
 		Vec3d nextCenter = nextPosition(currCenter, this.rotationYaw, nextMovement(this.rotationYaw, speed));
-		Vec3d deltaCenter = currCenter.subtract(nextCenter);
+		Vec3d deltaCenter = currCenter.subtractReverse(nextCenter);
 
 		Vec3d bogeySkew = deltaCenter;//nextRear.subtract(nextFront);
 		
 		this.prevRotationYaw = rotationYaw;
-		
-		this.rotationYaw = (float) Math.toDegrees(Math.atan2(bogeySkew.x, -bogeySkew.z));
+		this.rotationYaw = (float) Math.toDegrees(Math.atan2(-bogeySkew.x, bogeySkew.z));
 
 		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
-*/
+		*/
+
 		
 
 		this.motionX = deltaCenter.x;
-		this.motionZ = -deltaCenter.z;
+		this.motionZ = deltaCenter.z;
 
 		// Can this run client side in 1.12?
 		if (!this.world.isRemote && world.isAirBlock(new BlockPos((int) posX, (int) (this.posY - 0.6), (int) posZ))) {
@@ -306,50 +303,60 @@ public abstract class Locomotive extends FreightTank {
 
 		if (rail.getType().isTurn()) {
 			// Relative position to the curve center
-			Vec3d posDelta = new Vec3d(rail.getCenter()).subtract(position);
+			Vec3d posDelta = new Vec3d(rail.getCenter()).subtractReverse(position);
 			// Calculate the angle (rad) for the current position is
-			double posRelYaw = Math.atan2(posDelta.x, posDelta.z) + Math.toRadians(180);
+			double posRelYaw = Math.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
-			double radius = rail.getRadius() + 2; // TODO bake this into
+			double radius = rail.getRadius() + 1; // TODO bake this into
 													// BuilderTurn
 			// Calculate the angle delta in rad (radians are awesome)
 			double yawDelt = distance / radius;
 
 			// Calculate the original next position (won't be accurate, but we
 			// use it as an estimate)
-			Vec3d nextPos = position.addVector(delta.x, delta.y, delta.z);
+			Vec3d nextPos = position.add(delta);
+			
+			/*for (int i = 0; i < 90; i++) {
+				Vec3d check = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw + Math.toRadians(i)) * radius, 0, -Math.cos(posRelYaw + Math.toRadians(i)) * radius);
+				world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, check.x, check.y, check.z, 0, 0, 0);
+			}*/
 
 			// Calculate the two possible next positions (forward on the curve
 			// or backward on the curve)
-			Vec3d newpos = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw + yawDelt) * radius, 0, Math.cos(posRelYaw + yawDelt) * radius);
-			Vec3d newneg = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw - yawDelt) * radius, 0, Math.cos(posRelYaw - yawDelt) * radius);
+			Vec3d newpos = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw + yawDelt) * radius, 0, -Math.cos(posRelYaw + yawDelt) * radius);
+			Vec3d newneg = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw - yawDelt) * radius, 0, -Math.cos(posRelYaw - yawDelt) * radius);
 
-			Vec3d ret;
 			// Return whichever position is closest to the estimated next
 			// position
 			if (newpos.subtract(nextPos).lengthVector() < newneg.subtract(nextPos).lengthVector()) {
-				ret = newpos;
+				return newpos;
 			} else {
-				ret = newneg;
+				return newneg;
 			}
-			
-			Vec3d check = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw) * radius, 0, Math.cos(posRelYaw) * radius);
-			if (!world.isRemote) {
-				ImmersiveRailroading.logger.info(Math.toDegrees(posRelYaw));
-				ImmersiveRailroading.logger.info(position);
-				ImmersiveRailroading.logger.info(check);
-				ImmersiveRailroading.logger.info(nextPos);
-				ImmersiveRailroading.logger.info(ret);
-			}
-			return ret;
 		} else {
+			// Good enough for now
 			return position.add(delta);
+			// Look on either side of the rail for a sibling rail
 			/*
-			if (Math.abs(delta.x) > Math.abs(delta.z)) {
-				return new Vec3d(position.x + Math.copySign(distance, delta.x), position.y, Math.floor(position.z) + 0.5);
+			Vec3d side1Pos = position.add(delta.rotateYaw(90));
+			Vec3d side2Pos = position.add(delta.rotateYaw(-90));
+			TileRail side1Rail = railFromPosition(side1Pos);
+			TileRail side2Rail = railFromPosition(side2Pos);
+			Vec3d betweenLoc;
+			if (side1Rail != null && side1Rail.getParent() == rail.getParent()) {
+				betweenLoc = between(new Vec3d(side1Rail.getPos()), new Vec3d(rail.getPos()));
+			} else if (side2Rail != null && side2Rail.getParent() == rail.getParent()) {
+				betweenLoc = between(new Vec3d(side2Rail.getPos()), new Vec3d(rail.getPos()));
 			} else {
-				return new Vec3d(Math.floor(position.x) + 0.5, position.y, position.z + Math.copySign(distance, delta.z));
-			}*/
+				ImmersiveRailroading.logger.error("INVALID RAIL");
+				return position.add(delta);
+			}
+			if (Math.abs(delta.x) > Math.abs(delta.z)) {
+				return new Vec3d(position.x + Math.copySign(distance, delta.x), position.y, Math.floor(position.z) + betweenLoc.z);
+			} else {
+				return new Vec3d(betweenLoc.x, position.y, position.z + Math.copySign(distance, delta.z));
+			}
+			*/
 		}
 	}
 

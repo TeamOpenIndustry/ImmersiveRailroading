@@ -46,7 +46,7 @@ public abstract class BuilderBase {
 	}
 	
 	public PosRot convertRelativeCenterPositions(int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation) {
-		if (rel_x < 1) {
+		if (rel_x >= 1) {
 			switch(rotation) {
 			case SOUTH:
 				rel_x += 0;

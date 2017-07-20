@@ -86,7 +86,7 @@ public class ImmersiveRailroading
         private static int lastEntityID = 0;
         private static void registerRollingStock(Class<? extends EntityRollingStock> type) {
         	lastEntityID ++;
-        	EntityRegistry.registerModEntity(new ResourceLocation(MODID, type.getSimpleName()), SteamLocomotive.class, type.getSimpleName(), lastEntityID, instance, 64, 5, true);
+        	EntityRegistry.registerModEntity(new ResourceLocation(MODID, type.getSimpleName()), SteamLocomotive.class, type.getSimpleName(), lastEntityID, instance, 64, 10, true);
             RenderingRegistry.registerEntityRenderingHandler(SteamLocomotive.class, DefinitionManager.RENDER_INSTANCE);
         }
         
