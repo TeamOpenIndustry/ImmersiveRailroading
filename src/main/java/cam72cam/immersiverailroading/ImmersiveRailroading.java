@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading;
 
+import java.util.List;
+
 import org.apache.logging.log4j.Logger;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
@@ -9,6 +11,7 @@ import cam72cam.immersiverailroading.entity.ElectricLocomotive;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.SteamLocomotive;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
+import cam72cam.immersiverailroading.entity.registry.IDefinitionRollingStock;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -16,9 +19,18 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailTESR;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -106,7 +118,21 @@ public class ImmersiveRailroading
             for (TrackItems item : TrackItems.values()) {
 	            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(BLOCK_RAIL), item.getMeta(), new ModelResourceLocation(BLOCK_RAIL.getRegistryName(), "inventory"));
             }
+            
+            ModelLoader.setCustomMeshDefinition(ITEM_ROLLING_STOCK, new ItemMeshDefinition() {
+				@Override
+				public ModelResourceLocation getModelLocation(ItemStack stack) {
+					// TODO NBT or Damage
+					return new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), ItemRollingStock.defID);
+				}
+            });
         }
+        
+        @SubscribeEvent
+    	public static void onModelBakeEvent(ModelBakeEvent event)
+    	{
+        	event.getModelRegistry().putObject(new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), ItemRollingStock.defID), DefinitionManager.getDefinition(ItemRollingStock.defID).getInventoryModel());
+    	}
         
         @SubscribeEvent
         public static void onTextureStitchedPre(TextureStitchEvent.Pre event) {

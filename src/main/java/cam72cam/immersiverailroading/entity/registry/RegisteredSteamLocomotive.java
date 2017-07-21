@@ -6,6 +6,10 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 
+import javax.vecmath.AxisAngle4f;
+import javax.vecmath.Matrix4f;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.ImmutableMap;
@@ -23,6 +27,9 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -31,9 +38,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
+import util.Matrix4;
 
 public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 	private String name;
@@ -71,18 +80,23 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 		
 		return loco;
 	}
+	
+	private IBakedModel getBakedModel()  {
+		Builder<String, String> q = ImmutableMap.builder();
+		q.put("flip-v", "true");
+		q.put("ambient", "true");
+		ImmutableMap<String, String> customData = q.build();
+		model = (OBJModel) model.process(customData);
+		IBakedModel baked = model.bake(model.getDefaultState(), DefaultVertexFormats.ITEM, ModelLoader.defaultTextureGetter());
+		return baked;
+	}
 
 	private BufferBuilder getBuffer() {
 		// TODO rewrite this so we can have animations
 
 		if (buffer == null) {
-			Builder<String, String> q = ImmutableMap.builder();
-			q.put("flip-v", "true");
-			q.put("ambient", "true");
-			ImmutableMap<String, String> customData = q.build();
-			model = (OBJModel) model.process(customData);
-			IBakedModel baked = model.bake(model.getDefaultState(), DefaultVertexFormats.ITEM, ModelLoader.defaultTextureGetter());
-			buffer = buildBuffer(baked);
+			
+			buffer = buildBuffer(getBakedModel());
 		}
 		return buffer;
 	}
@@ -168,5 +182,65 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 	@Override
 	public Collection<ResourceLocation> getTextures() {
 		return model.getTextures();
+	}
+
+	@Override
+	public IBakedModel getInventoryModel() {
+		IBakedModel m = getBakedModel();
+		return new IBakedModel() {
+			@Override
+			public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
+				// TODO Auto-generated method stub
+				return m.getQuads(state, side, rand);
+			}
+
+			@Override
+			public boolean isAmbientOcclusion() {
+				return m.isAmbientOcclusion();
+			}
+
+			@Override
+			public boolean isGui3d() {
+				return m.isGui3d();
+			}
+
+			@Override
+			public boolean isBuiltInRenderer() {
+				return m.isBuiltInRenderer();
+			}
+
+			@Override
+			public TextureAtlasSprite getParticleTexture() {
+				return m.getParticleTexture();
+			}
+
+			@Override
+			public ItemOverrideList getOverrides() {
+				return m.getOverrides();
+			}
+			
+			@Override
+			public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
+				Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
+				switch(cameraTransformType) {
+				case THIRD_PERSON_LEFT_HAND:
+				case THIRD_PERSON_RIGHT_HAND:
+					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.4, 0, -0.5).scale(0.4, 0.4, 0.4).rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(60), 0, 0, 1).toMatrix4f());
+				case FIRST_PERSON_LEFT_HAND:
+				case FIRST_PERSON_RIGHT_HAND:
+					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(10), 0, 0, 1).toMatrix4f());
+				case GROUND:
+				case FIXED:
+					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, 0.4, 0).scale(2,2,2).toMatrix4f());
+				case GUI:
+					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.4, 0.4, 0.4).rotate(Math.toRadians(-60), 0, 1, 0).rotate(Math.toRadians(-20), 0, 0, 1).toMatrix4f());
+				case HEAD:
+					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(1, 0, 0).scale(2,2,2).rotate(Math.toRadians(90), 0, 1, 0).toMatrix4f());
+				case NONE:
+					return defaultVal;
+				}
+				return defaultVal;
+			}
+		};
 	}
 }

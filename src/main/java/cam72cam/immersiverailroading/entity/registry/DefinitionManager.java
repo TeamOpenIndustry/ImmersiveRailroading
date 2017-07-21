@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.registry;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,5 +60,9 @@ public class DefinitionManager {
 
 	public static IDefinitionRollingStock getDefinition(String defID) {
 		return definitions.get(defID);
+	}
+
+	public static Collection<IDefinitionRollingStock> getDefinitions() {
+		return definitions.values();
 	}
 }
