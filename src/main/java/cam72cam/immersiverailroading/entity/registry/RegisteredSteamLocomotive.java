@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity.registry;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,10 +11,12 @@ import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Matrix4f;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -52,6 +55,7 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 	private float bogeyRear;
 	private BufferBuilder buffer;
 	private String defID;
+	private Matrix4 defaultTransform = new Matrix4();
 
 	public RegisteredSteamLocomotive(String defID) throws Exception {
 		this.defID = defID;
@@ -67,6 +71,17 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 		model = (OBJModel) OBJLoader.INSTANCE.loadModel(new ResourceLocation(result.get("model").getAsString()));
 		bogeyFront = result.get("trucks").getAsJsonObject().get("front").getAsFloat();
 		bogeyRear = result.get("trucks").getAsJsonObject().get("rear").getAsFloat();
+		
+		JsonObject rotations = result.get("rotate").getAsJsonObject();
+		if (rotations.has("x")) {
+			defaultTransform.rotate(Math.toRadians(rotations.get("x").getAsFloat()), 1, 0, 0);
+		}
+		if (rotations.has("y")) {
+			defaultTransform.rotate(Math.toRadians(rotations.get("y").getAsFloat()), 0, 1, 0);
+		}
+		if (rotations.has("z")) {
+			defaultTransform.rotate(Math.toRadians(rotations.get("z").getAsFloat()), 0, 0, 1);
+		}
 	}
 
 	@Override
@@ -166,17 +181,33 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 		
 		GlStateManager.scale(2, 2, 2);
 		
-		GlStateManager.rotate(180 - entityYaw+90, 0, 1, 0);
+		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
+		FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
+		Matrix4 transform = defaultTransform.copy().rotate(Math.toRadians(180), 0, 1, 0);
+		matrix.put((float) transform.m00);
+		matrix.put((float) transform.m01);
+		matrix.put((float) transform.m02);
+		matrix.put((float) transform.m03);
+		matrix.put((float) transform.m10);
+		matrix.put((float) transform.m11);
+		matrix.put((float) transform.m12);
+		matrix.put((float) transform.m13);
+		matrix.put((float) transform.m20);
+		matrix.put((float) transform.m21);
+		matrix.put((float) transform.m22);
+		matrix.put((float) transform.m23);
+		matrix.put((float) transform.m30);
+		matrix.put((float) transform.m31);
+		matrix.put((float) transform.m32);
+		matrix.put((float) transform.m33);
+		matrix.flip();
+		
+		GlStateManager.multMatrix(matrix);
 		
 		// Finish Drawing
 		draw(getBuffer());
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
-	}
-
-	@Override
-	public void renderItem() {
-		//TODO
 	}
 
 	@Override
@@ -225,17 +256,17 @@ public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
 				switch(cameraTransformType) {
 				case THIRD_PERSON_LEFT_HAND:
 				case THIRD_PERSON_RIGHT_HAND:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.4, 0, -0.5).scale(0.4, 0.4, 0.4).rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(60), 0, 0, 1).toMatrix4f());
+					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(60), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
 				case FIRST_PERSON_LEFT_HAND:
 				case FIRST_PERSON_RIGHT_HAND:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(10), 0, 0, 1).toMatrix4f());
+					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(10), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
 				case GROUND:
 				case FIXED:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, 0.4, 0).scale(2,2,2).toMatrix4f());
+					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(2,2,2).toMatrix4f());
 				case GUI:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.4, 0.4, 0.4).rotate(Math.toRadians(-60), 0, 1, 0).rotate(Math.toRadians(-20), 0, 0, 1).toMatrix4f());
+					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.3, 0.3, 0.3).rotate(Math.toRadians(200), 0, 1, 0).rotate(Math.toRadians(-15), 1, 0, 0).multiply(defaultTransform.copy()).toMatrix4f());
 				case HEAD:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(1, 0, 0).scale(2,2,2).rotate(Math.toRadians(90), 0, 1, 0).toMatrix4f());
+					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(2,2,2).translate(0, 0, 0.5).leftMultiply(defaultTransform).toMatrix4f());
 				case NONE:
 					return defaultVal;
 				}

@@ -123,7 +123,7 @@ public class ImmersiveRailroading
 				@Override
 				public ModelResourceLocation getModelLocation(ItemStack stack) {
 					// TODO NBT or Damage
-					return new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), ItemRollingStock.defID);
+					return new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), ItemRollingStock.defFromStack(stack));
 				}
             });
         }
@@ -131,7 +131,11 @@ public class ImmersiveRailroading
         @SubscribeEvent
     	public static void onModelBakeEvent(ModelBakeEvent event)
     	{
-        	event.getModelRegistry().putObject(new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), ItemRollingStock.defID), DefinitionManager.getDefinition(ItemRollingStock.defID).getInventoryModel());
+        	for (String defID : DefinitionManager.getDefinitionNames()) {
+        		ModelResourceLocation loc = new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), defID);
+        		IBakedModel model = DefinitionManager.getDefinition(defID).getInventoryModel();
+        		event.getModelRegistry().putObject(loc, model);
+        	}
     	}
         
         @SubscribeEvent

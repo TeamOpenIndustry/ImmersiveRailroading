@@ -12,7 +12,6 @@ import net.minecraft.world.World;
 public interface IDefinitionRollingStock {
 	public EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing);
 	void render(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks);
-	public void renderItem();
 	public Collection<ResourceLocation> getTextures();
 	public IBakedModel getInventoryModel();
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
@@ -64,5 +65,9 @@ public class DefinitionManager {
 
 	public static Collection<IDefinitionRollingStock> getDefinitions() {
 		return definitions.values();
+	}
+
+	public static Set<String> getDefinitionNames() {
+		return definitions.keySet();
 	}
 }

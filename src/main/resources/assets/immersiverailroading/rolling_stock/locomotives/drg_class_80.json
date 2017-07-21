@@ -1,8 +1,8 @@
 {
 	"era": "steam",
-	"name": "Shay",
-	"works": "Lima Locomotive Works",
-	"model": "immersiverailroading:models/rolling_stock/locomotives/shay.obj",
+	"name": "Class 01",
+	"works": "Jung, Union Gießerei, Wolf, Hohenzollern",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/drg_class_80.obj",
 	"properties": {
 		"water_consumption": 100,
 		"fuel_consumption": 100,
@@ -14,7 +14,7 @@
 		"tractive_effort": 300,
 		"acceleration": 100,
 		"deceleration": 100,
-		"max_speed": 32
+		"max_speed": 45 
 	},
 	"particles": {
 		"smoke_stack": {
@@ -30,6 +30,6 @@
 		"rear": -1
 	},
 	"rotate": {
-		"y": 90
+		"y": -90
 	}
 }
