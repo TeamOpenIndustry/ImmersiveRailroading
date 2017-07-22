@@ -32,6 +32,10 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 	}
 
 	public void moveRollingStock(double moveDistance) {
+		if (world.isRemote) {
+			//TODO fix sync
+			return;
+		}
 		if (frontYaw == null) {
 			frontYaw = rotationYaw;
 		}
