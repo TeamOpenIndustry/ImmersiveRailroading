@@ -86,10 +86,14 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
 	}
 
-	protected abstract float frontBogeyOffset();
+	protected float frontBogeyOffset() {
+		return this.getDefinition().getBogeyFront();
+	}
 
-	protected abstract float rearBogeyOffset();
-
+	protected float rearBogeyOffset() {
+		return this.getDefinition().getBogeyRear();
+	}
+	
 	private Vec3d frontBogeyPosition() {
 		// Vec3d front = new Vec3d(0, 0, frontBogeyOffset());
 		// front = front.rotateYaw((float) Math.toRadians(this.rotationYaw));

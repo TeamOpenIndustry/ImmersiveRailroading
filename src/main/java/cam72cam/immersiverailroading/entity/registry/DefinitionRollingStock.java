@@ -1,8 +1,5 @@
 package cam72cam.immersiverailroading.entity.registry;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -18,9 +15,6 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -62,22 +56,9 @@ public abstract class DefinitionRollingStock {
 
 	private BufferBuilder buffer;
 	
-	protected static JsonObject getJsonData(String defID) throws IOException {
-		ResourceLocation resource = new ResourceLocation(ImmersiveRailroading.MODID, defID);
-		InputStream input = Minecraft.getMinecraft().getResourceManager().getResource(resource).getInputStream();
-
-		JsonParser parser = new JsonParser();
-		JsonObject result = parser.parse(new InputStreamReader(input)).getAsJsonObject();
-		return result;
-	}
-	protected JsonObject getJsonData() throws IOException {
-		return getJsonData(defID);
-	}
 	
-	public DefinitionRollingStock(String defID) throws Exception {
+	public DefinitionRollingStock(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
-
-		JsonObject data = this.getJsonData();
 
 		name = data.get("name").getAsString();
 		works = data.get("works").getAsString();

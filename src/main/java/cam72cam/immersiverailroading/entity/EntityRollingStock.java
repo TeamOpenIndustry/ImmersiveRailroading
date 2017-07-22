@@ -4,6 +4,8 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
 import java.nio.charset.StandardCharsets;
 
+import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
+import cam72cam.immersiverailroading.entity.registry.DefinitionRollingStock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,6 +30,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.isImmuneToFire = true;
 		super.entityCollisionReduction = 0.8F;
 		super.ignoreFrustumCheck = true;
+	}
+	
+	protected DefinitionRollingStock getDefinition() {
+		return DefinitionManager.getDefinition(defID);
 	}
 
 	/*
@@ -130,6 +136,13 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		// TODO @cam72cam
 	}
 
-	public abstract void render(double x, double y, double z, float entityYaw, float partialTicks);
+
+	public void render(double x, double y, double z, float entityYaw, float partialTicks) {
+		if (this.getDefinition() != null) {
+			this.getDefinition().render(this, x, y, z, entityYaw, partialTicks);
+		} else {
+			this.getEntityWorld().removeEntity(this);
+		}
+	}
 
 }

@@ -1,0 +1,25 @@
+{
+	"era": "diesel",
+	"name": "SD70",
+	"works": "Electro-Motive Division",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/sd70.obj",
+	"properties": {
+		"fuel_consumption": 100,
+		"fuel_capacity": 100,
+		"passenger_offset_x": 1,
+		"passenger_offset_y": 1,
+		"passenger_offset_z": 1,
+		"horsepower": 4600,
+		"tractive_effort": 4400,
+		"acceleration": 100,
+		"deceleration": 100,
+		"max_speed": 70
+	},
+	"trucks": {
+		"front": 3, 
+		"rear": -3
+	},
+	"rotate": {
+		"y": 180
+	}
+}

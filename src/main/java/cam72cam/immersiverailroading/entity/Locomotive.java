@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.List;
 
+import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
+import cam72cam.immersiverailroading.entity.registry.RegisteredLocomotive;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -9,6 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
@@ -59,13 +62,42 @@ public abstract class Locomotive extends FreightTank {
 
 	public abstract int[] getLocomotiveInventorySizes();
 	public abstract int getFuelDiv(int i);
-	public abstract void updatePassenger(Entity passenger);
 	public abstract double getMaxFuel();
-	public abstract int getDefaultFuelConsumption();
-	public abstract int getDefaultPower();
-	public abstract double getDefaultAccel();
-	public abstract double getDefaultBrake();
-	public abstract Speed getMaxSpeed();
+	
+	/*
+	 * 
+	 * Stock Definitions
+	 * 
+	 */
+	
+	protected RegisteredLocomotive getDefinition() {
+		return (RegisteredLocomotive) DefinitionManager.getDefinition(defID);
+	}
+
+
+
+	public int getDefaultFuelConsumption() {
+		return this.getDefinition().getFuelConsumption();
+	}
+
+
+	public int getDefaultPower() {
+		return this.getDefinition().getPower();
+	}
+
+	public double getDefaultAccel() {
+		return this.getDefinition().getAccel();
+	}
+
+
+	public double getDefaultBrake() {
+		return this.getDefinition().getBrake();
+	}
+
+
+	public Speed getMaxSpeed() {
+		return this.getDefinition().getMaxSpeed();
+	}
 
 	/*
 	 * 
@@ -140,6 +172,13 @@ public abstract class Locomotive extends FreightTank {
 		System.out.println("Stopping audio");
 		Minecraft.getMinecraft().getSoundHandler().stopSound(idleSound);
 		Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
+	}
+
+	@Override
+	public void updatePassenger(Entity passenger) {
+		Vec3d offset = this.getDefinition().getPlayerOffset();
+		offset = offset.add(new Vec3d(this.getPosition()));
+		passenger.setPosition(offset.x, offset.y, offset.z);
 	}
 
 	@Override

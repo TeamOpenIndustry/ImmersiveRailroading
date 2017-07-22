@@ -4,8 +4,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.RegisteredSteamLocomotive;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.*;
@@ -15,16 +13,13 @@ public class SteamLocomotive extends Locomotive implements IFluidHandler {
 	public SteamLocomotive(World world) {
 		this(world, null);
 	}
+
 	public SteamLocomotive(World world, String defID) {
 		super(world, defID, FluidRegistry.WATER);
 	}
-	
-	private RegisteredSteamLocomotive getDefinition() {
-		return (RegisteredSteamLocomotive) DefinitionManager.getDefinition(defID);
-	}
 
-	public double getMaxFuel() {
-		return 2000.0;
+	protected RegisteredSteamLocomotive getDefinition() {
+		return (RegisteredSteamLocomotive) DefinitionManager.getDefinition(defID);
 	}
 
 	@Override
@@ -59,21 +54,18 @@ public class SteamLocomotive extends Locomotive implements IFluidHandler {
 		return ArrayUtils.removeElement(super.getContainertOutputSlots(), 0);
 	}
 
-	/* TODO
-	@Override
-	protected Integer customHeatHandler(Integer overheatLevel) {
-		int waterLevel = this.getLiquidAmount();
-		int maxWaterLevel = getCartTankCapacity();
-
-		if (waterLevel < 1 && getFuel() > 10) {
-			overheatLevel += 5;
-		}
-		if (waterLevel > maxWaterLevel / 2 && overheatLevel > 50 && !getState().equals("broken")) {
-			overheatLevel -= 1;
-		}
-		return overheatLevel;
-	}
-	*/
+	/*
+	 * TODO
+	 * 
+	 * @Override protected Integer customHeatHandler(Integer overheatLevel) {
+	 * int waterLevel = this.getLiquidAmount(); int maxWaterLevel =
+	 * getCartTankCapacity();
+	 * 
+	 * if (waterLevel < 1 && getFuel() > 10) { overheatLevel += 5; } if
+	 * (waterLevel > maxWaterLevel / 2 && overheatLevel > 50 &&
+	 * !getState().equals("broken")) { overheatLevel -= 1; } return
+	 * overheatLevel; }
+	 */
 
 	@Override
 	protected void checkInvent() {
@@ -112,25 +104,20 @@ public class SteamLocomotive extends Locomotive implements IFluidHandler {
 			FluidUtil.tryFluidTransfer(this, tender, desiredDrain, true);
 		}
 
-		/* TODO
-		for (int tenderID = 0; tenderID < tender.getInventorySize(); tenderID++) {
-			ItemStack tenderItem = tender.cargoItems[tenderID];
-			ItemStack locoItem = cargoItems[0];
-			if (TraincraftUtil.steamFuelBurnTime(tenderItem) > 0) {
-				if (locoItem == null) {
-					tender.decrStackSize(tenderID, 1);
-
-					cargoItems[0] = tenderItem.copy();
-					cargoItems[0].stackSize = 1;
-					break;
-				} else if (locoItem.isItemEqual(tenderItem) && locoItem.getMaxStackSize() > locoItem.stackSize) {
-					tender.decrStackSize(tenderID, 1);
-
-					cargoItems[0].stackSize++;
-					break;
-				}
-			}
-		}*/
+		/*
+		 * TODO for (int tenderID = 0; tenderID < tender.getInventorySize();
+		 * tenderID++) { ItemStack tenderItem = tender.cargoItems[tenderID];
+		 * ItemStack locoItem = cargoItems[0]; if
+		 * (TraincraftUtil.steamFuelBurnTime(tenderItem) > 0) { if (locoItem ==
+		 * null) { tender.decrStackSize(tenderID, 1);
+		 * 
+		 * cargoItems[0] = tenderItem.copy(); cargoItems[0].stackSize = 1;
+		 * break; } else if (locoItem.isItemEqual(tenderItem) &&
+		 * locoItem.getMaxStackSize() > locoItem.stackSize) {
+		 * tender.decrStackSize(tenderID, 1);
+		 * 
+		 * cargoItems[0].stackSize++; break; } } }
+		 */
 	}
 
 	/** Used for the gui */
@@ -139,72 +126,17 @@ public class SteamLocomotive extends Locomotive implements IFluidHandler {
 		return (int) ((this.getFuel() * i) / getMaxFuel());
 	}
 
-
-	@Override
-	public void render(double x, double y, double z, float entityYaw, float partialTicks) {
-		if (this.getDefinition() != null) {
-			this.getDefinition().render(this, x, y, z, entityYaw, partialTicks);
-		} else {
-			this.getEntityWorld().removeEntity(this);
-		}
-	}
-	
 	public int getWaterConsumption() {
 		return this.getDefinition().getWaterConsumption();
 	}
 
 	@Override
-	public void updatePassenger(Entity passenger) {
-		Vec3d offset = this.getDefinition().getPlayerOffset();
-		offset = offset.add(new Vec3d(this.getPosition()));
-		passenger.setPosition(offset.x, offset.y, offset.z);
-	}
-
-
-	@Override
-	public int getDefaultFuelConsumption() {
-		return this.getDefinition().getFuelConsumption();
-	}
-
-
-	@Override
-	public int getDefaultPower() {
-		return this.getDefinition().getPower();
-	}
-
-
-	@Override
-	public double getDefaultAccel() {
-		return this.getDefinition().getAccel();
-	}
-
-
-	@Override
-	public double getDefaultBrake() {
-		return this.getDefinition().getBrake();
-	}
-
-
-	@Override
-	public Speed getMaxSpeed() {
-		return this.getDefinition().getMaxSpeed();
-	}
-
-
-	@Override
-	protected float frontBogeyOffset() {
-		return this.getDefinition().getBogeyFront();
-	}
-
-
-	@Override
-	protected float rearBogeyOffset() {
-		return this.getDefinition().getBogeyRear();
-	}
-
-
-	@Override
 	public int getTankCapacity() {
 		return this.getDefinition().getTankCapacity();
+	}
+
+	@Override
+	public double getMaxFuel() {
+		return this.getDefinition().getFuelCapacity();
 	}
 }
