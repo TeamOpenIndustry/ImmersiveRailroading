@@ -1,0 +1,25 @@
+{
+	"era": "diesel",
+	"name": "DB Class V60",
+	"works": "Krupp, Krauss-Maffei, Mak and Hensche",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/v60.obj",
+	"properties": {
+		"fuel_consumption": 100,
+		"fuel_capacity": 100,
+		"passenger_offset_x": 1,
+		"passenger_offset_y": 1,
+		"passenger_offset_z": 1,
+		"horsepower": 640,
+		"tractive_effort": 640,
+		"acceleration": 100,
+		"deceleration": 100,
+		"max_speed": 60
+	},
+	"trucks": {
+		"front": 2, 
+		"rear": -2
+	},
+	"rotate": {
+		"y": -90
+	}
+}
