@@ -1,0 +1,25 @@
+{
+	"era": "electric",
+	"name": "DR E69",
+	"works": "Krupp, Krauss-Maffei, Mak and Hensche",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/e69.obj",
+	"properties": {
+		"fuel_consumption": 100,
+		"fuel_capacity": 100,
+		"passenger_offset_x": 1,
+		"passenger_offset_y": 1,
+		"passenger_offset_z": 1,
+		"horsepower": 600,
+		"tractive_effort": 600,
+		"acceleration": 100,
+		"deceleration": 100,
+		"max_speed": 50
+	},
+	"trucks": {
+		"front": 2, 
+		"rear": -2
+	},
+	"rotate": {
+		"y": -90
+	}
+}
