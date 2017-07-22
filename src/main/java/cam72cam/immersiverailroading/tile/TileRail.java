@@ -215,7 +215,7 @@ public class TileRail extends TileRailBase {
 		state = this.getBlockState();
 		IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
 		
-		IBlockState gravelState = Blocks.GRAVEL.getDefaultState();
+		IBlockState gravelState = Blocks.GRASS.getDefaultState();
 		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
 		
 		// Create render targets

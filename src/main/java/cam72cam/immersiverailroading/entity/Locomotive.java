@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.List;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
@@ -13,10 +12,8 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
@@ -40,8 +37,8 @@ public abstract class Locomotive extends FreightTank {
 	private Float rotationFrontYaw;
 	private Float rotationRearYaw;
 
-	public Locomotive(World world, Fluid[] fluids) {
-		super(world, fluids);
+	public Locomotive(World world, String defID, Fluid... fluids) {
+		super(world, defID, fluids);
 
 		this.getDataManager().register(currentMaxSpeedMC, 0f);
 		this.getDataManager().register(currentDestination, "");

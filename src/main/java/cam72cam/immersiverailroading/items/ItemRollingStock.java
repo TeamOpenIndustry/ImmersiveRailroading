@@ -1,9 +1,14 @@
 package cam72cam.immersiverailroading.items;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.IDefinitionRollingStock;
+import cam72cam.immersiverailroading.entity.registry.DefinitionRollingStock;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,6 +23,8 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemRollingStock extends Item {
 	public static final String NAME = "item_rolling_stock";
@@ -45,11 +52,18 @@ public class ItemRollingStock extends Item {
 		return super.getUnlocalizedName(stack) + "." + defFromStack(stack);
 	}
 	
+	@SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
+    {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        tooltip.addAll(DefinitionManager.getDefinition(defFromStack(stack)).getTooltip());
+    }
+	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		if (!worldIn.isRemote) {
 			ItemStack stack = player.getHeldItem(hand);
-			IDefinitionRollingStock def = DefinitionManager.getDefinition(defFromStack(stack));
+			DefinitionRollingStock def = DefinitionManager.getDefinition(defFromStack(stack));
 			def.spawn(worldIn, pos.add(0, 0.6, 0), EnumFacing.fromAngle(player.rotationYawHead));
 			System.out.println("SPAWNED SHAY");
 		}
@@ -62,7 +76,7 @@ public class ItemRollingStock extends Item {
 	}
 	
 	public static String defFromStack(ItemStack stack) {
-		if (stack.getTagCompound() != null) {
+		if (stack.getTagCompound() != null){
 			return stack.getTagCompound().getString("defID");
 		}
 		stack.setCount(0);

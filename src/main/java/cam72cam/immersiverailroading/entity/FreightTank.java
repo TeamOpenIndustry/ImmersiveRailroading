@@ -21,12 +21,12 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	private FluidTank theTank;
 	private List<Fluid> filter;
 
-	public FreightTank(World world, Fluid... fluids) {
-		super(world);
+	public FreightTank(World world, String defID, Fluid... fluids) {
+		super(world, defID);
 
 		filter = Arrays.asList(fluids);
 
-		theTank = new FluidTank(null, getTankCapacity()) {
+		theTank = new FluidTank(null, 0) {
 			@Override
 			public boolean canFillFluidType(FluidStack fluid)
 		    {
@@ -103,7 +103,12 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
+
+		//AFTER defID load!
+		theTank.setCapacity(this.getTankCapacity());
+		
 		this.theTank.readFromNBT(nbttagcompound.getCompoundTag("tank"));
+		
 	}
 	
 	protected void onInventoryChanged() {

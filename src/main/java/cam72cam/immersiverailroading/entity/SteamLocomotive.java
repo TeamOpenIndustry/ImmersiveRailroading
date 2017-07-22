@@ -5,6 +5,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.RegisteredSteamLocomotive;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.*;
@@ -12,17 +13,11 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class SteamLocomotive extends Locomotive implements IFluidHandler {
 	public SteamLocomotive(World world) {
-		super(world, new Fluid[] { FluidRegistry.WATER });
-		
-		//Identifier from NBT
+		this(world, null);
 	}
-
-
 	public SteamLocomotive(World world, String defID) {
-		this(world);
-		this.defID = defID;
+		super(world, defID, FluidRegistry.WATER);
 	}
-	
 	
 	private RegisteredSteamLocomotive getDefinition() {
 		return (RegisteredSteamLocomotive) DefinitionManager.getDefinition(defID);
@@ -155,67 +150,61 @@ public class SteamLocomotive extends Locomotive implements IFluidHandler {
 	}
 	
 	public int getWaterConsumption() {
-		//return this.getDefinition().getWaterConsumption();
-		return 0;
+		return this.getDefinition().getWaterConsumption();
 	}
 
 	@Override
 	public void updatePassenger(Entity passenger) {
-		// TODO Auto-generated method stub
-		
+		Vec3d offset = this.getDefinition().getPlayerOffset();
+		offset = offset.add(new Vec3d(this.getPosition()));
+		passenger.setPosition(offset.x, offset.y, offset.z);
 	}
 
 
 	@Override
 	public int getDefaultFuelConsumption() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.getDefinition().getFuelConsumption();
 	}
 
 
 	@Override
 	public int getDefaultPower() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.getDefinition().getPower();
 	}
 
 
 	@Override
 	public double getDefaultAccel() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.getDefinition().getAccel();
 	}
 
 
 	@Override
 	public double getDefaultBrake() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.getDefinition().getBrake();
 	}
 
 
 	@Override
 	public Speed getMaxSpeed() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.getDefinition().getMaxSpeed();
 	}
 
 
 	@Override
 	protected float frontBogeyOffset() {
-		return 3;
+		return this.getDefinition().getBogeyFront();
 	}
 
 
 	@Override
 	protected float rearBogeyOffset() {
-		return -1;
+		return this.getDefinition().getBogeyRear();
 	}
 
 
 	@Override
 	public int getTankCapacity() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.getDefinition().getTankCapacity();
 	}
 }

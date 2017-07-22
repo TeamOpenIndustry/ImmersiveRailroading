@@ -16,7 +16,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 public abstract class Freight extends EntityLinkableRollingStock {
-	protected ItemStackHandler cargoItems = new ItemStackHandler(this.getInventorySize()) {
+	protected ItemStackHandler cargoItems = new ItemStackHandler(0) {
         @Override
         protected void onContentsChanged(int slot) {
             // We need to tell the tile entity that something has changed so
@@ -27,8 +27,8 @@ public abstract class Freight extends EntityLinkableRollingStock {
     
 	protected DataParameter<Integer> CARGO_MASS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 
-	public Freight(World world) {
-		super(world);
+	public Freight(World world, String defID) {
+		super(world, defID);
 		
 		this.getDataManager().register(CARGO_MASS, 0);
 	}
@@ -80,7 +80,13 @@ public abstract class Freight extends EntityLinkableRollingStock {
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
+
+		//After defID load
+		cargoItems.setSize(this.getInventorySize());
+		
 		cargoItems.deserializeNBT((NBTTagCompound) nbttagcompound.getTag("items"));
+		
+		
 		// Is this needed?
 		handleMass();
 	}

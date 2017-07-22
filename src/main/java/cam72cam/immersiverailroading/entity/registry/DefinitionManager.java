@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
@@ -38,7 +39,7 @@ public class DefinitionManager {
 		}
 	};
 	
-	private static Map<String, IDefinitionRollingStock> definitions = new HashMap<String, IDefinitionRollingStock>();
+	private static Map<String, DefinitionRollingStock> definitions = new HashMap<String, DefinitionRollingStock>();
 	
 	public static void initDefinitions() {
 		for(String locomotive : Config.locomotives) {
@@ -53,17 +54,21 @@ public class DefinitionManager {
 
 	public static List<ResourceLocation> getTextures() {
 		List<ResourceLocation> result = new ArrayList<ResourceLocation>();
-		for(IDefinitionRollingStock stock : definitions.values()) {
+		for(DefinitionRollingStock stock : definitions.values()) {
 			result.addAll(stock.getTextures());
 		}
 		return result;
 	}
 
-	public static IDefinitionRollingStock getDefinition(String defID) {
-		return definitions.get(defID);
+	public static DefinitionRollingStock getDefinition(String defID) {
+		DefinitionRollingStock val = definitions.get(defID);
+		if (val == null) {
+			ImmersiveRailroading.logger.warn("Invalid stock ID: "  + defID);
+		}
+		return val;
 	}
 
-	public static Collection<IDefinitionRollingStock> getDefinitions() {
+	public static Collection<DefinitionRollingStock> getDefinitions() {
 		return definitions.values();
 	}
 

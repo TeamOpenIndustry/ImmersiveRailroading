@@ -4,7 +4,6 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
 import java.nio.charset.StandardCharsets;
 
-import cam72cam.immersiverailroading.entity.registry.IDefinitionRollingStock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,8 +16,10 @@ import net.minecraft.world.World;
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	protected String defID;
 
-	public EntityRollingStock(World world) {
+	public EntityRollingStock(World world, String defID) {
 		super(world);
+		
+		this.defID = defID;
 
 		//TODO
 		setSize((float) 10, (float) 10);

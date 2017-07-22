@@ -1,277 +1,97 @@
 package cam72cam.immersiverailroading.entity.registry;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.util.Collection;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4f;
-import javax.vecmath.Matrix4f;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Speed;
 import cam72cam.immersiverailroading.entity.SteamLocomotive;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemOverrideList;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.obj.OBJLoader;
-import net.minecraftforge.client.model.obj.OBJModel;
-import util.Matrix4;
 
-public class RegisteredSteamLocomotive implements IDefinitionRollingStock {
-	private String name;
-	private String works;
-	private OBJModel model;
-	private float bogeyFront;
-	private float bogeyRear;
-	private BufferBuilder buffer;
-	private String defID;
-	private Matrix4 defaultTransform = new Matrix4();
+public class RegisteredSteamLocomotive extends DefinitionRollingStock {
+	private int waterConsumption;
+	private int fuelConsumption;
+	private int tankCapacity;
+	private int fuelCapacity;
+	private int power;
+	private int traction;
+	private double accel;
+	private double brake;
+	private Speed maxSpeed;
 
 	public RegisteredSteamLocomotive(String defID) throws Exception {
-		this.defID = defID;
-
-		ResourceLocation resource = new ResourceLocation(ImmersiveRailroading.MODID, defID);
-		InputStream input = Minecraft.getMinecraft().getResourceManager().getResource(resource).getInputStream();
-
-		JsonParser parser = new JsonParser();
-		JsonObject result = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+		super(defID);
+		JsonObject properties = super.getJsonData().get("properties").getAsJsonObject();
 		
-		name = result.get("name").getAsString();
-		works = result.get("works").getAsString();
-		model = (OBJModel) OBJLoader.INSTANCE.loadModel(new ResourceLocation(result.get("model").getAsString()));
-		bogeyFront = result.get("trucks").getAsJsonObject().get("front").getAsFloat();
-		bogeyRear = result.get("trucks").getAsJsonObject().get("rear").getAsFloat();
+		waterConsumption = properties.get("fuel_consumption").getAsInt();
+		fuelConsumption = properties.get("fuel_consumption").getAsInt();
 		
-		JsonObject rotations = result.get("rotate").getAsJsonObject();
-		if (rotations.has("x")) {
-			defaultTransform.rotate(Math.toRadians(rotations.get("x").getAsFloat()), 1, 0, 0);
-		}
-		if (rotations.has("y")) {
-			defaultTransform.rotate(Math.toRadians(rotations.get("y").getAsFloat()), 0, 1, 0);
-		}
-		if (rotations.has("z")) {
-			defaultTransform.rotate(Math.toRadians(rotations.get("z").getAsFloat()), 0, 0, 1);
-		}
+		tankCapacity = properties.get("water_capacity").getAsInt();
+		fuelCapacity = properties.get("fuel_capacity").getAsInt();
+		
+		power = properties.get("horsepower").getAsInt();
+		traction = properties.get("tractive_effort").getAsInt();
+		accel = properties.get("deceleration").getAsDouble();
+		brake = properties.get("deceleration").getAsDouble();
+		maxSpeed = Speed.fromMetric(properties.get("max_speed").getAsDouble());
 	}
 
 	@Override
 	public EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing) {
 		SteamLocomotive loco = new SteamLocomotive(world, defID);
-		
+
 		loco.setPosition(pos.getX(), pos.getY(), pos.getZ());
-		loco.prevRotationYaw =facing.getHorizontalAngle(); 
+		loco.prevRotationYaw = facing.getHorizontalAngle();
 		loco.rotationYaw = facing.getHorizontalAngle();
 		world.spawnEntity(loco);
-		
+
 		return loco;
 	}
 	
-	private IBakedModel getBakedModel()  {
-		Builder<String, String> q = ImmutableMap.builder();
-		q.put("flip-v", "true");
-		q.put("ambient", "true");
-		ImmutableMap<String, String> customData = q.build();
-		model = (OBJModel) model.process(customData);
-		IBakedModel baked = model.bake(model.getDefaultState(), DefaultVertexFormats.ITEM, ModelLoader.defaultTextureGetter());
-		return baked;
-	}
-
-	private BufferBuilder getBuffer() {
-		// TODO rewrite this so we can have animations
-
-		if (buffer == null) {
-			
-			buffer = buildBuffer(getBakedModel());
-		}
-		return buffer;
-	}
-	private BufferBuilder buildBuffer(IBakedModel model) {
-		
-		// Create render targets
-		BufferBuilder worldRenderer = new BufferBuilder(2097152);
-
-		// Start drawing
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
-		
-		// From IE
-		worldRenderer.color(255, 255, 255, 255);
-		
-		List<BakedQuad> quads = model.getQuads((IBlockState)null, (EnumFacing)null, 0L);
-		int i = 0;
-		for (int j = quads.size(); i < j; ++i)
-        {
-            net.minecraftforge.client.model.pipeline.LightUtil.renderQuadColor(worldRenderer, quads.get(i), 0xFFFFFFFF);
-        }
-
-		worldRenderer.finishDrawing();
-		
-		return worldRenderer;
-	}
-	private void draw(BufferBuilder vertexBufferIn) {
-        VertexFormat vertexformat = vertexBufferIn.getVertexFormat();
-        int i = vertexformat.getNextOffset();
-        ByteBuffer bytebuffer = vertexBufferIn.getByteBuffer();
-        List<VertexFormatElement> list = vertexformat.getElements();
-
-        for (int j = 0; j < list.size(); ++j)
-        {
-            VertexFormatElement vertexformatelement = list.get(j);
-            bytebuffer.position(vertexformat.getOffset(j));
-
-            // moved to VertexFormatElement.preDraw
-            vertexformatelement.getUsage().preDraw(vertexformat, j, i, bytebuffer);
-        }
-
-        GlStateManager.glDrawArrays(vertexBufferIn.getDrawMode(), 0, vertexBufferIn.getVertexCount());
-        int i1 = 0;
-
-        for (int j1 = list.size(); i1 < j1; ++i1)
-        {
-            VertexFormatElement vertexformatelement1 = list.get(i1);
-            // moved to VertexFormatElement.postDraw
-            vertexformatelement1.getUsage().postDraw(vertexformat, i1, i, bytebuffer);
-        }
-	}
-
 	@Override
-	public void render(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
-		GlStateManager.pushAttrib();
-		GlStateManager.pushMatrix();
-		
-		// Bind block textures to current context
-		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
-		// From IE
-		RenderHelper.disableStandardItemLighting();
-		
-		GlStateManager.color(1, 1, 1);
-
-		// Move to specified position
-		GlStateManager.translate(x, y, z);
-		
-		GlStateManager.scale(2, 2, 2);
-		
-		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
-		FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
-		Matrix4 transform = defaultTransform.copy().rotate(Math.toRadians(180), 0, 1, 0);
-		matrix.put((float) transform.m00);
-		matrix.put((float) transform.m01);
-		matrix.put((float) transform.m02);
-		matrix.put((float) transform.m03);
-		matrix.put((float) transform.m10);
-		matrix.put((float) transform.m11);
-		matrix.put((float) transform.m12);
-		matrix.put((float) transform.m13);
-		matrix.put((float) transform.m20);
-		matrix.put((float) transform.m21);
-		matrix.put((float) transform.m22);
-		matrix.put((float) transform.m23);
-		matrix.put((float) transform.m30);
-		matrix.put((float) transform.m31);
-		matrix.put((float) transform.m32);
-		matrix.put((float) transform.m33);
-		matrix.flip();
-		
-		GlStateManager.multMatrix(matrix);
-		
-		// Finish Drawing
-		draw(getBuffer());
-		GlStateManager.popMatrix();
-		GlStateManager.popAttrib();
+	public List<String> getTooltip() {
+		List<String> tips = super.getTooltip();
+		tips.add("Horse Power: " + this.getPower());
+		tips.add("Max Speed: " + this.getMaxSpeed().metricString());
+		return tips;
 	}
 
-	@Override
-	public Collection<ResourceLocation> getTextures() {
-		return model.getTextures();
+	public int getWaterConsumption() {
+		return this.waterConsumption;
 	}
 
-	@Override
-	public IBakedModel getInventoryModel() {
-		IBakedModel m = getBakedModel();
-		return new IBakedModel() {
-			@Override
-			public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-				// TODO Auto-generated method stub
-				return m.getQuads(state, side, rand);
-			}
+	public int getFuelConsumption() {
+		return this.fuelConsumption;
+	}
 
-			@Override
-			public boolean isAmbientOcclusion() {
-				return m.isAmbientOcclusion();
-			}
+	public int getTankCapacity() {
+		return this.tankCapacity;
+	}
+	
+	public int getFuelCapacity() {
+		return this.fuelCapacity;
+	}
+	
+	public int getPower() {
+		return this.power;
+	}
+	
+	public int getTraction() {
+		return this.traction;
+	}
 
-			@Override
-			public boolean isGui3d() {
-				return m.isGui3d();
-			}
+	public double getAccel() {
+		return this.accel;
+	}
 
-			@Override
-			public boolean isBuiltInRenderer() {
-				return m.isBuiltInRenderer();
-			}
+	public double getBrake() {
+		return this.brake;
+	}
 
-			@Override
-			public TextureAtlasSprite getParticleTexture() {
-				return m.getParticleTexture();
-			}
-
-			@Override
-			public ItemOverrideList getOverrides() {
-				return m.getOverrides();
-			}
-			
-			@Override
-			public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
-				Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
-				switch(cameraTransformType) {
-				case THIRD_PERSON_LEFT_HAND:
-				case THIRD_PERSON_RIGHT_HAND:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(60), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
-				case FIRST_PERSON_LEFT_HAND:
-				case FIRST_PERSON_RIGHT_HAND:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(10), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
-				case GROUND:
-				case FIXED:
-					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(2,2,2).toMatrix4f());
-				case GUI:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.3, 0.3, 0.3).rotate(Math.toRadians(200), 0, 1, 0).rotate(Math.toRadians(-15), 1, 0, 0).multiply(defaultTransform.copy()).toMatrix4f());
-				case HEAD:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().scale(2,2,2).translate(0, 0, 0.5).leftMultiply(defaultTransform).toMatrix4f());
-				case NONE:
-					return defaultVal;
-				}
-				return defaultVal;
-			}
-		};
+	public Speed getMaxSpeed() {
+		return this.maxSpeed;
 	}
 }

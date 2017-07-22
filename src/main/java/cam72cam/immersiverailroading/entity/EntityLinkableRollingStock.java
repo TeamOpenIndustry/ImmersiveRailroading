@@ -16,8 +16,8 @@ public abstract class EntityLinkableRollingStock extends EntityRollingStock {
 	private EntityLinkableRollingStock cartLinkedFront;
 	private EntityLinkableRollingStock cartLinkedBack;
 
-	public EntityLinkableRollingStock(World world) {
-		super(world);
+	public EntityLinkableRollingStock(World world, String defID) {
+		super(world, defID);
 	}
 
 	@Override

@@ -10,6 +10,7 @@
 		"fuel_capacity": 10,
 		"passenger_offset_x": 1,
 		"passenger_offset_y": 1,
+		"passenger_offset_z": 1,
 		"horsepower": 500,
 		"tractive_effort": 300,
 		"acceleration": 100,

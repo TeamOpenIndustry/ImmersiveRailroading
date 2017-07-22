@@ -6,9 +6,13 @@ import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public abstract class Tender extends FreightTank implements IFluidHandler {
-
+	
 	public Tender(World world) {
-		super(world, new Fluid[]{FluidRegistry.WATER});
+		this(world, null);
+	}
+
+	public Tender(World world, String defID) {
+		super(world, defID, FluidRegistry.WATER);
 	}
 	
 	@Override

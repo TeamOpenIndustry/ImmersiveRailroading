@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.entity.ElectricLocomotive;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.SteamLocomotive;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.IDefinitionRollingStock;
+import cam72cam.immersiverailroading.entity.registry.DefinitionRollingStock;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.TrackItems;

@@ -6,9 +6,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public abstract class ElectricLocomotive extends Locomotive {
-
+	
 	public ElectricLocomotive(World world) {
-		super(world, null);
+		this(world, null);
+	}
+	
+	public ElectricLocomotive(World world, String defID) {
+		super(world, defID);
 	}
 	
 	@Override
