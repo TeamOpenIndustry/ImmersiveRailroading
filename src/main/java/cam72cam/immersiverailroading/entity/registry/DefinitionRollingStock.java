@@ -17,10 +17,12 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.MoveableRollingStock;
+import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -58,8 +60,8 @@ public abstract class DefinitionRollingStock {
 	private Matrix4 defaultTransform = new Matrix4();
 
 	private BufferBuilder buffer;
-	private double frontBoundsOffset;
-	private double rearBoundsOffset;
+	private double frontBounds;
+	private double rearBounds;
 	private double heightBounds;
 	private double widthBounds;
 	
@@ -87,8 +89,8 @@ public abstract class DefinitionRollingStock {
 		}
 
 		JsonObject boundsData = data.get("bounds").getAsJsonObject();
-		frontBoundsOffset = boundsData.get("front").getAsDouble();
-		rearBoundsOffset = boundsData.get("rear").getAsDouble();
+		frontBounds = boundsData.get("front").getAsDouble();
+		rearBounds = boundsData.get("rear").getAsDouble();
 		widthBounds = boundsData.get("width").getAsDouble();
 		heightBounds = boundsData.get("height").getAsDouble();
 	}
@@ -205,8 +207,8 @@ public abstract class DefinitionRollingStock {
 		GlStateManager.popAttrib();
 		
 
-		//Render.renderOffsetAABB(getBounds(), stock.posX, stock.posY, stock.posZ);
-		Render.renderOffsetAABB(stock.getCollisionBoundingBox().offset(new BlockPos(-stock.posX, -stock.posY, -stock.posZ)), x, y, z);
+		// No idea why I need the +1 here
+		//Render.renderOffsetAABB(stock.getCollisionBoundingBox(), x, y, z);
 	}
 
 	public Collection<ResourceLocation> getTextures() {
@@ -289,25 +291,7 @@ public abstract class DefinitionRollingStock {
 	}
 	
 	public AxisAlignedBB getBounds(MoveableRollingStock stock) {
-		this.widthBounds = 2;
-		this.frontBoundsOffset = 3;
-		this.rearBoundsOffset = 3;
-		
-		Vec3d frontPos = new Vec3d(0,0,0);//stock.frontBogeyPosition();
-		Vec3d rearPos = new Vec3d(0,0,0);//stock.rearBogeyPosition();
-
-		// height
-		rearPos = rearPos.addVector(0, this.heightBounds, 0);
-		
-		// length
-		frontPos = frontPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw)) * this.frontBoundsOffset, 0, Math.cos(Math.toRadians(stock.rotationYaw)) * this.frontBoundsOffset);
-		rearPos = rearPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw + 180)) * this.rearBoundsOffset, 0, Math.cos(Math.toRadians(stock.rotationYaw + 180)) * this.rearBoundsOffset);
-		
-		// width
-		Vec3d frontPosa = frontPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds, 0, Math.cos(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds);
-		Vec3d rearPosa = rearPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds, 0, Math.cos(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds);
-		
-		return new AxisAlignedBB(frontPosa, rearPosa).union(new AxisAlignedBB(frontPos, rearPos)).offset(stock.getPosition());
+		return new RealBB(frontBounds, rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPosition());
 	}
 
 	public List<String> getTooltip() {

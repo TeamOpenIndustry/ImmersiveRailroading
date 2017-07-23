@@ -36,6 +36,10 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 	public AxisAlignedBB getCollisionBoundingBox() {
 		return this.getDefinition().getBounds(this);
 	}
+	@Override
+	public AxisAlignedBB getEntityBoundingBox() {
+		return this.getDefinition().getBounds(this);
+	}
 
 	public void moveRollingStock(double moveDistance) {
 		if (world.isRemote) {

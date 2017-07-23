@@ -12,7 +12,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -25,7 +24,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		this.defID = defID;
 
 		// TODO
-		setSize((float) 10, (float) 10);
+		setSize((float) 0, (float) 0);
 
 		super.preventEntitySpawning = true;
 		super.isImmuneToFire = true;
