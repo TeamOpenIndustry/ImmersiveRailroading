@@ -31,7 +31,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 
 		super.preventEntitySpawning = true;
 		super.isImmuneToFire = true;
-		super.entityCollisionReduction = 0.8F;
+		super.entityCollisionReduction = 1F;
 		super.ignoreFrustumCheck = true;
 	}
 	
@@ -80,20 +80,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 */
 	@Override
 	public boolean canBeCollidedWith() {
-		return true;
-	}
-	public void onCollideWithPlayer(EntityPlayer entityIn) {
-		//TODO
-		super.onCollideWithPlayer(entityIn);
-	}
-	
-
-	@Override
-	public boolean canRiderInteract() {
-		return true;
-	}
-
-	public boolean isRideable() {
+		// Needed for right click, probably a forge or MC bug
 		return true;
 	}
 
@@ -110,6 +97,11 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 
 			return true;
 		}
+	}
+	
+	@Override
+	public boolean canRiderInteract() {
+		return false;
 	}
 
 	@Override
@@ -142,20 +134,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	}
 
 	@Override
-	public void onUpdate() {
-		if (this.isDead) {
-			System.out.println("WE DEAD");
-		}
-	}
-
-	@Override
 	public boolean canBePushed() {
 		return false;
-	}
-
-	@Override
-	public void applyEntityCollision(Entity par1Entity) {
-		// TODO @cam72cam
 	}
 
 

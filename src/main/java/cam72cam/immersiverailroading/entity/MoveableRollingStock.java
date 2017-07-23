@@ -1,11 +1,16 @@
 package cam72cam.immersiverailroading.entity;
 
+import java.util.List;
+
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -108,6 +113,29 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		
 		if (!this.world.isRemote && this.ticksExisted % 20 == 0) {
 			ImmersiveRailroading.net.sendToAllAround(new MRSSyncPacket(this), new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+		}
+		
+		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
+		for (Entity entity : entitiesWithin) {
+			if (entity instanceof MoveableRollingStock) {
+				//TODO rolling stock collisions, gets tricky with trains
+				continue;
+			}
+			
+			if (entity.getRidingEntity() instanceof MoveableRollingStock) {
+				// Don't apply bb to passengers
+				continue;
+			}
+			
+			// Move entity
+			entity.setVelocity(this.motionX * 2, 0, this.motionZ * 2);
+			// Force update
+			entity.onUpdate();
+			
+			double speedDamage = this.getCurrentSpeed().metric() / Config.entitySpeedDamage;
+			if (speedDamage > 1) {
+				entity.attackEntityFrom((new DamageSource("hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
+			}
 		}
 	}
 
