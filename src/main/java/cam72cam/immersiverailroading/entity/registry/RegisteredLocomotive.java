@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 
-import cam72cam.immersiverailroading.entity.Speed;
+import cam72cam.immersiverailroading.util.Speed;
 
 public abstract class RegisteredLocomotive extends DefinitionRollingStock  {
 	private int fuelConsumption;

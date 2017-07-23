@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.entity;
+package cam72cam.immersiverailroading.util;
 
 public class Speed {
 	private static double speedRatio = 2;

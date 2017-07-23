@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.DefinitionRollingStock;
+import cam72cam.immersiverailroading.util.Speed;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;

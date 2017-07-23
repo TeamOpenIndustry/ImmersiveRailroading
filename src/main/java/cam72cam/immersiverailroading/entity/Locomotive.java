@@ -5,6 +5,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.RegisteredLocomotive;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
