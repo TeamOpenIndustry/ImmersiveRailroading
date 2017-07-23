@@ -64,7 +64,7 @@ public class ItemRollingStock extends Item {
 		if (!worldIn.isRemote) {
 			ItemStack stack = player.getHeldItem(hand);
 			DefinitionRollingStock def = DefinitionManager.getDefinition(defFromStack(stack));
-			def.spawn(worldIn, pos.add(0, 0.6, 0), EnumFacing.fromAngle(player.rotationYawHead));
+			def.spawn(worldIn, pos.add(0, 0.7, 0), EnumFacing.fromAngle(player.rotationYawHead));
 			System.out.println("SPAWNED SHAY");
 		}
 		return super.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);

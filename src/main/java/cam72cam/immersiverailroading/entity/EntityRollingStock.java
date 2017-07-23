@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.DefinitionRollingStock;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -118,10 +119,12 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 
 	@Override
 	public void updatePassenger(Entity passenger) {
-		Vec3d offset = this.getDefinition().getPlayerOffset();
-		offset = offset.add(new Vec3d(this.getPosition()));
-		passenger.setPosition(offset.x, offset.y, offset.z);
-		passenger.setVelocity(this.motionX, this.motionY, this.motionZ);
+		if (this.isPassenger(passenger)) {
+			Vec3d pos = this.getDefinition().getPlayerOffset();
+			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+			pos = pos.add(this.getPositionVector());
+			passenger.setPosition(pos.x, pos.y, pos.z);
+		}
 	}
 
 	@Override
