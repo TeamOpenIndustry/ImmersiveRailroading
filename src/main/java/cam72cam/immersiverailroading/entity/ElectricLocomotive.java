@@ -5,7 +5,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public abstract class ElectricLocomotive extends Locomotive {
+public class ElectricLocomotive extends Locomotive {
 	
 	public ElectricLocomotive(World world) {
 		this(world, null);
@@ -53,5 +53,10 @@ public abstract class ElectricLocomotive extends Locomotive {
 	@Override
 	public int getFuelDiv(int i) {
 		return (int) ((this.getFuel() * (i)) / getMaxFuel());
+	}
+
+	@Override
+	public int getTankCapacity() {
+		return 0;
 	}
 }

@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.entity.registry;
 
 import com.google.gson.JsonObject;
 
-import cam72cam.immersiverailroading.entity.DieselLocomotive;
+import cam72cam.immersiverailroading.entity.ElectricLocomotive;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -19,7 +19,7 @@ public class RegisteredElectricLocomotive extends RegisteredLocomotive {
 
 	@Override
 	public EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing) {
-		DieselLocomotive loco = new DieselLocomotive(world, defID);
+		ElectricLocomotive loco = new ElectricLocomotive(world, defID);
 
 		loco.setPosition(pos.getX(), pos.getY(), pos.getZ());
 		loco.prevRotationYaw = facing.getHorizontalAngle();
