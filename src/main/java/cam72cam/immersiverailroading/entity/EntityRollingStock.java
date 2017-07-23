@@ -76,6 +76,15 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	/*
 	 * Player Interactions
 	 */
+	@Override
+	public boolean canBeCollidedWith() {
+		return true;
+	}
+	public void onCollideWithPlayer(EntityPlayer entityIn) {
+		//TODO
+		super.onCollideWithPlayer(entityIn);
+	}
+	
 
 	@Override
 	public boolean canRiderInteract() {

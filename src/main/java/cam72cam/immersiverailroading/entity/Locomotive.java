@@ -53,7 +53,6 @@ public abstract class Locomotive extends FreightTank {
 		// runSound = EnumSounds.get(this.getClass()).getRun(this);
 
 		this.entityCollisionReduction = 0.99F;
-		this.noClip = true;
 	}
 
 	/*
