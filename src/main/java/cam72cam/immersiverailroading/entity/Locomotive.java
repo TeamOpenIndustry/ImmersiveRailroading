@@ -129,11 +129,11 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	public String getDestinationGUI() {
-		return dataManager.get(this.currentDestination);
+		return dataManager.get(currentDestination);
 	}
 
 	public int getFuel() {
-		return dataManager.get(this.currentFuelTrain);
+		return dataManager.get(currentFuelTrain);
 	}
 
 	public boolean isFuelled() {
