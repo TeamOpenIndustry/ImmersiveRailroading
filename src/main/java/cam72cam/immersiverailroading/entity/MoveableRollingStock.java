@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -29,6 +30,11 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		super.readEntityFromNBT(nbttagcompound);
 		frontYaw = nbttagcompound.getFloat("frontYaw");
 		rearYaw = nbttagcompound.getFloat("rearYaw");
+	}
+	
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox() {
+		return this.getDefinition().getBounds(this);
 	}
 
 	public void moveRollingStock(double moveDistance) {
@@ -98,7 +104,7 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		return this.getDefinition().getBogeyRear();
 	}
 	
-	private Vec3d frontBogeyPosition() {
+	public Vec3d frontBogeyPosition() {
 		// Vec3d front = new Vec3d(0, 0, frontBogeyOffset());
 		// front = front.rotateYaw((float) Math.toRadians(this.rotationYaw));
 		Vec3d front = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * frontBogeyOffset(), 0,
@@ -106,7 +112,7 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		return front.addVector(posX, posY, posZ);
 	}
 
-	private Vec3d rearBogeyPosition() {
+	public Vec3d rearBogeyPosition() {
 		// Vec3d rear = new Vec3d(0, 0, rearBogeyOffset());
 		// rear = rear.rotateYaw((float) Math.toRadians(this.rotationYaw));
 		Vec3d rear = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * rearBogeyOffset(), 0,

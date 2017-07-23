@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.MoveableRollingStock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -25,6 +26,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -32,6 +34,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -55,7 +58,10 @@ public abstract class DefinitionRollingStock {
 	private Matrix4 defaultTransform = new Matrix4();
 
 	private BufferBuilder buffer;
-	
+	private double frontBoundsOffset;
+	private double rearBoundsOffset;
+	private double heightBounds;
+	private double widthBounds;
 	
 	public DefinitionRollingStock(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
@@ -64,7 +70,8 @@ public abstract class DefinitionRollingStock {
 		works = data.get("works").getAsString();
 		model = (OBJModel) OBJLoader.INSTANCE.loadModel(new ResourceLocation(data.get("model").getAsString()));
 		JsonObject properties = data.get("properties").getAsJsonObject();
-		playerOffset = new Vec3d(properties.get("passenger_offset_x").getAsDouble(), properties.get("passenger_offset_y").getAsDouble(), properties.get("passenger_offset_z").getAsDouble());
+		playerOffset = new Vec3d(properties.get("passenger_offset_x").getAsDouble(), properties.get("passenger_offset_y").getAsDouble(),
+				properties.get("passenger_offset_z").getAsDouble());
 		bogeyFront = data.get("trucks").getAsJsonObject().get("front").getAsFloat();
 		bogeyRear = data.get("trucks").getAsJsonObject().get("rear").getAsFloat();
 
@@ -78,8 +85,14 @@ public abstract class DefinitionRollingStock {
 		if (rotations.has("z")) {
 			defaultTransform.rotate(Math.toRadians(rotations.get("z").getAsFloat()), 0, 0, 1);
 		}
+
+		JsonObject boundsData = data.get("bounds").getAsJsonObject();
+		frontBoundsOffset = boundsData.get("front").getAsDouble();
+		rearBoundsOffset = boundsData.get("rear").getAsDouble();
+		widthBounds = boundsData.get("width").getAsDouble();
+		heightBounds = boundsData.get("height").getAsDouble();
 	}
-	
+
 	private IBakedModel getBakedModel() {
 		Builder<String, String> q = ImmutableMap.builder();
 		q.put("flip-v", "true");
@@ -190,6 +203,10 @@ public abstract class DefinitionRollingStock {
 		draw(getBuffer());
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
+		
+
+		//Render.renderOffsetAABB(getBounds(), stock.posX, stock.posY, stock.posZ);
+		Render.renderOffsetAABB(stock.getCollisionBoundingBox().offset(new BlockPos(-stock.posX, -stock.posY, -stock.posZ)), x, y, z);
 	}
 
 	public Collection<ResourceLocation> getTextures() {
@@ -259,11 +276,10 @@ public abstract class DefinitionRollingStock {
 		};
 	}
 
-	
 	public Vec3d getPlayerOffset() {
 		return this.playerOffset;
 	}
-	
+
 	public float getBogeyFront() {
 		return this.bogeyFront;
 	}
@@ -272,6 +288,28 @@ public abstract class DefinitionRollingStock {
 		return this.bogeyRear;
 	}
 	
+	public AxisAlignedBB getBounds(MoveableRollingStock stock) {
+		this.widthBounds = 2;
+		this.frontBoundsOffset = 3;
+		this.rearBoundsOffset = 3;
+		
+		Vec3d frontPos = new Vec3d(0,0,0);//stock.frontBogeyPosition();
+		Vec3d rearPos = new Vec3d(0,0,0);//stock.rearBogeyPosition();
+
+		// height
+		rearPos = rearPos.addVector(0, this.heightBounds, 0);
+		
+		// length
+		frontPos = frontPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw)) * this.frontBoundsOffset, 0, Math.cos(Math.toRadians(stock.rotationYaw)) * this.frontBoundsOffset);
+		rearPos = rearPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw + 180)) * this.rearBoundsOffset, 0, Math.cos(Math.toRadians(stock.rotationYaw + 180)) * this.rearBoundsOffset);
+		
+		// width
+		Vec3d frontPosa = frontPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds, 0, Math.cos(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds);
+		Vec3d rearPosa = rearPos.addVector(-Math.sin(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds, 0, Math.cos(Math.toRadians(stock.rotationYaw-90)) * this.widthBounds);
+		
+		return new AxisAlignedBB(frontPosa, rearPosa).union(new AxisAlignedBB(frontPos, rearPos)).offset(stock.getPosition());
+	}
+
 	public List<String> getTooltip() {
 		List<String> tips = new ArrayList<String>();
 		tips.add("Works: " + this.works);

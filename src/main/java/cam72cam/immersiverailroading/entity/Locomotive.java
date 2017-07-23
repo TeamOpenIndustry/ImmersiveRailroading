@@ -20,17 +20,17 @@ public abstract class Locomotive extends FreightTank {
 	private MovingSoundRollingStock idleSound;
 	protected MovingSoundRollingStock runSound;
 
-	private DataParameter<Float> currentMaxSpeedMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private DataParameter<String> currentDestination = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
-	private DataParameter<String> currentState = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
-	private DataParameter<Integer> currentFuelTrain = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	private DataParameter<Integer> currentCartsPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	private DataParameter<Float> currentMassPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private DataParameter<Float> currentSpeedReductionMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private DataParameter<Float> currentAccelReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private DataParameter<Float> currentBrakeReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private DataParameter<Float> currentFuelRate = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private DataParameter<Float> throttle = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	private static DataParameter<Float> currentMaxSpeedMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	private static DataParameter<String> currentDestination = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
+	private static DataParameter<String> currentState = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
+	private static DataParameter<Integer> currentFuelTrain = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
+	private static DataParameter<Integer> currentCartsPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
+	private static DataParameter<Float> currentMassPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	private static DataParameter<Float> currentSpeedReductionMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	private static DataParameter<Float> currentAccelReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	private static DataParameter<Float> currentBrakeReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	private static DataParameter<Float> currentFuelRate = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	private static DataParameter<Float> throttle = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 
 
 	public Locomotive(World world, String defID, Fluid... fluids) {

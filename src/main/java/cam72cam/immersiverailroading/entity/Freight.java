@@ -25,7 +25,7 @@ public abstract class Freight extends EntityLinkableRollingStock {
         }
     };
     
-	protected DataParameter<Integer> CARGO_MASS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
+	protected static DataParameter<Integer> CARGO_MASS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 
 	public Freight(World world, String defID) {
 		super(world, defID);

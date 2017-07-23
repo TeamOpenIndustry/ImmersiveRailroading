@@ -19,6 +19,12 @@
 		"front": 3, 
 		"rear": -3
 	},
+	"bounds": {
+		"front": 4,
+		"rear": 2,
+		"height": 4,
+		"width": 2
+	},
 	"rotate": {
 		"y": 180
 	}
