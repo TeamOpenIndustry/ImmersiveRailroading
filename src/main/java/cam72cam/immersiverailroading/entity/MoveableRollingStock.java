@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import net.minecraft.nbt.NBTTagCompound;
@@ -8,11 +10,14 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class MoveableRollingStock extends EntityRollingStock {
 
-	private Float frontYaw;
-	private Float rearYaw;
+	public Float frontYaw;
+	public Float rearYaw;
 
 	public MoveableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -41,11 +46,17 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		return this.getDefinition().getBounds(this);
 	}
 
+	@Override
+	@SideOnly(Side.CLIENT)
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport){
+		// We need our own custom sync packets, see MRSSyncPacket
+    }
+	@Override
+	public void setVelocity(double x, double y, double z) {
+		// We need our own custom sync packets, see MRSSyncPacket
+	}
+	
 	public void moveRollingStock(double moveDistance) {
-		if (world.isRemote) {
-			//TODO fix sync
-			return;
-		}
 		if (frontYaw == null) {
 			frontYaw = rotationYaw;
 		}
@@ -94,6 +105,10 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		this.posX += this.motionX;
 		this.posY += this.motionY;
 		this.posZ += this.motionZ;
+		
+		if (!this.world.isRemote && this.ticksExisted % 20 == 0) {
+			ImmersiveRailroading.net.sendToAllAround(new MRSSyncPacket(this), new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+		}
 	}
 
 	private Vec3d between(Vec3d front, Vec3d rear) {
@@ -145,13 +160,15 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		TileRail rail = railFromPosition(position);
 
 		if (rail == null) {
-			System.out.println("WARNING OFF TRACK!!!");
-			System.out.println(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
-			System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
-			// if (this.ticksExisted > 100) { // HACK
-			this.setDead();
-			// }
-			return position;
+			if (!world.isRemote ) {
+				System.out.println("WARNING OFF TRACK!!!");
+				System.out.println(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+				System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
+				this.setDead();
+				return position;
+			} else {
+				return position.add(delta);
+			}
 		}
 
 		double distance = delta.lengthVector();

@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailTESR;
@@ -35,16 +36,20 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
+import net.minecraftforge.fml.relauncher.Side;
 
 @Mod(modid = ImmersiveRailroading.MODID, name="ImmersiveRailroading", version = ImmersiveRailroading.VERSION)
 public class ImmersiveRailroading
 {
     public static final String MODID = "immersiverailroading";
     public static final String VERSION = "0.1";
+	public static final int ENTITY_SYNC_DISTANCE = 128;
     
 	@ObjectHolder(BlockRailGag.NAME)
 	public static final BlockRailGag BLOCK_RAIL_GAG = new BlockRailGag();
@@ -57,6 +62,8 @@ public class ImmersiveRailroading
 	public static Logger logger;
 	public static ImmersiveRailroading instance;
 	
+	public static final SimpleNetworkWrapper net = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
+	
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
@@ -66,6 +73,7 @@ public class ImmersiveRailroading
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
+    	net.registerMessage(MRSSyncPacket.Handler.class, MRSSyncPacket.class, 0, Side.CLIENT);
     }
     
     @Mod.EventBusSubscriber(modid = MODID)
@@ -90,7 +98,7 @@ public class ImmersiveRailroading
         private static int lastEntityID = 0;
         private static void registerRollingStock(Class<? extends EntityRollingStock> type) {
         	lastEntityID ++;
-        	EntityRegistry.registerModEntity(new ResourceLocation(MODID, type.getSimpleName()), type, type.getSimpleName(), lastEntityID, instance, 64, 1, true);
+        	EntityRegistry.registerModEntity(new ResourceLocation(MODID, type.getSimpleName()), type, type.getSimpleName(), lastEntityID, instance, ENTITY_SYNC_DISTANCE, 20, false);
             RenderingRegistry.registerEntityRenderingHandler(type, DefinitionManager.RENDER_INSTANCE);
         }
         

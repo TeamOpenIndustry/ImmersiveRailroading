@@ -175,13 +175,6 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	@Override
-	public void updatePassenger(Entity passenger) {
-		Vec3d offset = this.getDefinition().getPlayerOffset();
-		offset = offset.add(new Vec3d(this.getPosition()));
-		passenger.setPosition(offset.x, offset.y, offset.z);
-	}
-
-	@Override
 	public void onUpdate() {
 		super.onUpdate();
 

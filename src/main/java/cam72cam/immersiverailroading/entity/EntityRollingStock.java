@@ -14,6 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
@@ -113,6 +114,14 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public boolean shouldRiderSit() {
 		return false;
+	}
+
+	@Override
+	public void updatePassenger(Entity passenger) {
+		Vec3d offset = this.getDefinition().getPlayerOffset();
+		offset = offset.add(new Vec3d(this.getPosition()));
+		passenger.setPosition(offset.x, offset.y, offset.z);
+		passenger.setVelocity(this.motionX, this.motionY, this.motionZ);
 	}
 
 	@Override
