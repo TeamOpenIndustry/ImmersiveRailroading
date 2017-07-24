@@ -1,5 +1,8 @@
 package cam72cam.immersiverailroading.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.LocomotiveDieselDefinition;
 import net.minecraft.world.World;
@@ -13,7 +16,7 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 	}
 
 	public LocomotiveDiesel(World world, String defID) {
-		super(world, defID, FluidRegistry.getFluid("oil"), FluidRegistry.getFluid("biofuel"));
+		super(world, defID);
 		//runSound.setDynamicPitch();
 	}
 
@@ -37,6 +40,14 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 
 	public int[] getLocomotiveInventorySizes() {
 		return new int[] { 3, 3, 3 };
+	}
+
+	@Override
+	public List<Fluid> getFluidFilter() {
+		ArrayList<Fluid> filter = new ArrayList<Fluid>();
+		filter.add(FluidRegistry.getFluid("oil"));
+		filter.add(FluidRegistry.getFluid("biofuel"));
+		return filter;
 	}
 
 	@Override

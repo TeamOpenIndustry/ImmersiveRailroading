@@ -14,7 +14,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.Fluid;
 
 public abstract class Locomotive extends FreightTank {
 	private MovingSoundRollingStock hornSound;
@@ -34,8 +33,8 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> throttle = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 
 
-	public Locomotive(World world, String defID, Fluid... fluids) {
-		super(world, defID, fluids);
+	public Locomotive(World world, String defID) {
+		super(world, defID);
 
 		this.getDataManager().register(currentMaxSpeedMC, 0f);
 		this.getDataManager().register(currentDestination, "");

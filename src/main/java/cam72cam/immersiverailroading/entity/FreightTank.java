@@ -1,7 +1,8 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -19,20 +20,9 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public abstract class FreightTank extends Freight implements IFluidHandler {
 	private FluidTank theTank;
-	private List<Fluid> filter;
 
-	public FreightTank(World world, String defID, Fluid... fluids) {
+	public FreightTank(World world, String defID) {
 		super(world, defID);
-
-		filter = Arrays.asList(fluids);
-
-		theTank = new FluidTank(null, 0) {
-			@Override
-			public boolean canFillFluidType(FluidStack fluid)
-		    {
-				return canFill() && (filter.size() == 0 || filter.contains(fluid.getFluid()));
-		    }
-		};
 	}
 
 	/*
@@ -40,6 +30,13 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 * Specifications
 	 */
 	public abstract int getTankCapacity();
+
+	/**
+	 * null == all
+	 * [] == none
+	 */
+	@Nullable
+	public abstract List<Fluid> getFluidFilter();
 
 	protected int[] getContainerInputSlots() {
 		return new int[] { 0 };
@@ -104,13 +101,21 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
 
-		//AFTER defID load!
+		// AFTER defID load!
+
+		theTank = new FluidTank(null, 0) {
+			@Override
+			public boolean canFillFluidType(FluidStack fluid) {
+				return canFill() && (getFluidFilter() == null || getFluidFilter().contains(fluid.getFluid()));
+			}
+		};
+
 		theTank.setCapacity(this.getTankCapacity());
-		
+
 		this.theTank.readFromNBT(nbttagcompound.getCompoundTag("tank"));
-		
+
 	}
-	
+
 	protected void onInventoryChanged() {
 		super.onInventoryChanged();
 		if (!world.isRemote) {
@@ -139,33 +144,34 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 			if (input == null) {
 				continue;
 			}
-			
+
 			ItemStack inputCopy = ItemHandlerHelper.copyStackWithSize(input, 1);
 			IFluidHandlerItem containerFluidHandler = FluidUtil.getFluidHandler(inputCopy);
-			
+
 			if (containerFluidHandler == null) {
 				continue;
 			}
-			
+
 			// This is kind of funky but it works
 			while (input.getCount() > 0) {
-				// First try to drain the container, if we can't do that we try to fill it
-				
+				// First try to drain the container, if we can't do that we try
+				// to fill it
+
 				boolean didAction = false;
-				
-				for (Boolean doFill : new Boolean[] {false, true}) {
+
+				for (Boolean doFill : new Boolean[] { false, true }) {
 
 					FluidActionResult inputAttempt;
-					
+
 					if (doFill) {
 						inputAttempt = FluidUtil.tryFillContainer(inputCopy, theTank, Integer.MAX_VALUE, null, false);
 					} else {
 						inputAttempt = FluidUtil.tryEmptyContainer(inputCopy, theTank, Integer.MAX_VALUE, null, false);
 					}
-					
+
 					if (inputAttempt.isSuccess()) {
 						// We were able to drain into the container
-						
+
 						// Can we move it to an output slot?
 						ItemStack out = inputAttempt.getResult();
 						for (Integer slot : this.getContainertOutputSlots()) {
@@ -174,12 +180,12 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 								break;
 							}
 						}
-						
+
 						// We moved it to the output
 						if (out.getCount() == 1) {
 							input.setCount(input.getCount() - 1);
 							cargoItems.setStackInSlot(inputSlot, input);
-							
+
 							if (doFill) {
 								FluidUtil.tryFillContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
 							} else {
@@ -188,9 +194,9 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 							didAction = true;
 							break;
 						}
-					}	
+					}
 				}
-				
+
 				if (!didAction) {
 					// Unable to move any stuff around
 					break;
@@ -203,19 +209,17 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 		handleMass();
 	}
 
-
 	/*
 	 * 
 	 * IFluidHandler Overrides
 	 * 
 	 */
 
-
 	@Override
 	public IFluidTankProperties[] getTankProperties() {
 		return theTank.getTankProperties();
 	}
-	
+
 	@Override
 	public int fill(FluidStack resource, boolean doFill) {
 		return theTank.fill(resource, doFill);

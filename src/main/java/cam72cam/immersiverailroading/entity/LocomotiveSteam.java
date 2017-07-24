@@ -1,5 +1,8 @@
 package cam72cam.immersiverailroading.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
@@ -15,7 +18,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	}
 
 	public LocomotiveSteam(World world, String defID) {
-		super(world, defID, FluidRegistry.WATER);
+		super(world, defID);
 	}
 
 	protected LocomotiveSteamDefinition getDefinition() {
@@ -138,5 +141,12 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	@Override
 	public double getMaxFuel() {
 		return this.getDefinition().getFuelCapacity();
+	}
+
+	@Override
+	public List<Fluid> getFluidFilter() {
+		List<Fluid> filter = new ArrayList<Fluid>();
+		filter.add(FluidRegistry.WATER);
+		return filter;
 	}
 }

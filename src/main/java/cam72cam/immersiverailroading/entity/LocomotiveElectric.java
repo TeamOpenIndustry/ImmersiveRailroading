@@ -1,9 +1,13 @@
 package cam72cam.immersiverailroading.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.item.Item;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.Fluid;
 
 public class LocomotiveElectric extends Locomotive {
 	
@@ -58,5 +62,10 @@ public class LocomotiveElectric extends Locomotive {
 	@Override
 	public int getTankCapacity() {
 		return 0;
+	}
+
+	@Override
+	public List<Fluid> getFluidFilter() {
+		return new ArrayList<Fluid>();
 	}
 }
