@@ -32,7 +32,7 @@ public class DefinitionManager {
 				public boolean shouldRender(EntityRollingStock livingEntity, ICamera camera, double camX, double camY, double camZ) {
 					return true;
 				}
-				
+
 				@Override
 				public void doRender(EntityRollingStock entity, double x, double y, double z, float entityYaw, float partialTicks) {
 					entity.render(x, y, z, entityYaw, partialTicks);
@@ -45,17 +45,17 @@ public class DefinitionManager {
 			};
 		}
 	};
-	
+
 	private static Map<String, EntityRollingStockDefinition> definitions = new HashMap<String, EntityRollingStockDefinition>();
-	
+
 	public static void initDefinitions() {
-		for(String locomotive : Config.locomotives) {
+		for (String locomotive : Config.locomotives) {
 			try {
 				String defID = "rolling_stock/locomotives/" + locomotive + ".json";
 				JsonObject data = getJsonData(defID);
 				String era = data.get("era").getAsString();
 				LocomotiveDefinition loco = null;
-				switch(era) {
+				switch (era) {
 				case "steam":
 					loco = new LocomotiveSteamDefinition(defID, data);
 					break;
@@ -74,8 +74,17 @@ public class DefinitionManager {
 				ex.printStackTrace();
 			}
 		}
+		for (String passenger_cart : Config.passenger_carts) {
+			try {
+				String defID = "rolling_stock/passenger/" + passenger_cart + ".json";
+				JsonObject data = getJsonData(defID);
+				definitions.put(defID, new CartPassengerDefinition(defID, data));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
-	
+
 	private static JsonObject getJsonData(String defID) throws IOException {
 		ResourceLocation resource = new ResourceLocation(ImmersiveRailroading.MODID, defID);
 		InputStream input = Minecraft.getMinecraft().getResourceManager().getResource(resource).getInputStream();
@@ -87,7 +96,7 @@ public class DefinitionManager {
 
 	public static List<ResourceLocation> getTextures() {
 		List<ResourceLocation> result = new ArrayList<ResourceLocation>();
-		for(EntityRollingStockDefinition stock : definitions.values()) {
+		for (EntityRollingStockDefinition stock : definitions.values()) {
 			result.addAll(stock.getTextures());
 		}
 		return result;
@@ -96,7 +105,7 @@ public class DefinitionManager {
 	public static EntityRollingStockDefinition getDefinition(String defID) {
 		EntityRollingStockDefinition val = definitions.get(defID);
 		if (val == null) {
-			ImmersiveRailroading.logger.warn("Invalid stock ID: "  + defID);
+			ImmersiveRailroading.logger.warn("Invalid stock ID: " + defID);
 		}
 		return val;
 	}

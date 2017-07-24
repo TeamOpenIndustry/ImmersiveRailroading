@@ -49,7 +49,6 @@ public abstract class EntityRollingStockDefinition {
 
 	protected String defID;
 	private String name;
-	private String works;
 	private OBJModel model;
 	private Vec3d playerOffset;
 	private float bogeyFront;
@@ -67,7 +66,6 @@ public abstract class EntityRollingStockDefinition {
 		this.defID = defID;
 
 		name = data.get("name").getAsString();
-		works = data.get("works").getAsString();
 		model = (OBJModel) OBJLoader.INSTANCE.loadModel(new ResourceLocation(data.get("model").getAsString()));
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		playerOffset = new Vec3d(properties.get("passenger_offset_x").getAsDouble(), properties.get("passenger_offset_y").getAsDouble(),
@@ -294,7 +292,6 @@ public abstract class EntityRollingStockDefinition {
 
 	public List<String> getTooltip() {
 		List<String> tips = new ArrayList<String>();
-		tips.add("Works: " + this.works);
 		return tips;
 	}
 }
