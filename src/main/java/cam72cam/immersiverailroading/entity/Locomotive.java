@@ -5,6 +5,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.KeyBindings;
 import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -12,7 +13,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
@@ -173,6 +173,24 @@ public abstract class Locomotive extends FreightTank {
 		Minecraft.getMinecraft().getSoundHandler().stopSound(idleSound);
 		Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
 	}
+	
+	@Override
+	public void handleKeyPress(Entity source, KeyBindings key) {
+		switch(key) {
+		case THROTTLE_UP:
+			this.dataManager.set(throttle, this.dataManager.get(throttle) + 0.1f);
+			break;
+		case THROTTLE_DOWN:
+			this.dataManager.set(throttle, this.dataManager.get(throttle) - 0.1f);
+			break;
+		case THROTTLE_ZERO:
+			this.dataManager.set(throttle, 0f);
+			break;
+		default:
+			super.handleKeyPress(source, key);
+			break;
+		}
+	}
 
 	@Override
 	public void onUpdate() {
@@ -199,7 +217,7 @@ public abstract class Locomotive extends FreightTank {
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
 
 		// double speed = throttle.get() * 0.02;
-		moveRollingStock(0.2);
+		moveRollingStock(this.dataManager.get(throttle));
 	}
 	
 	private void PullPhysic() {

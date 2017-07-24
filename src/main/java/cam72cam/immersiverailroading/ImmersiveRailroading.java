@@ -11,12 +11,16 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
+import cam72cam.immersiverailroading.library.KeyBindings;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailTESR;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -36,6 +40,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.EntityEntry;
@@ -74,6 +79,10 @@ public class ImmersiveRailroading
     public void init(FMLInitializationEvent event)
     {
     	net.registerMessage(MRSSyncPacket.Handler.class, MRSSyncPacket.class, 0, Side.CLIENT);
+    	net.registerMessage(KeyPressPacket.Handler.class, KeyPressPacket.class, 1, Side.SERVER);
+    	if (event.getSide() == Side.CLIENT) {
+    		KeyBindings.registerKeyBindings();
+    	}
     }
     
     @Mod.EventBusSubscriber(modid = MODID)
@@ -146,6 +155,19 @@ public class ImmersiveRailroading
         	for(ResourceLocation texture : DefinitionManager.getTextures()) {
         		event.getMap().registerSprite(texture);
         	}
+        }
+        
+        @SubscribeEvent
+        public static void onKeyInput(InputEvent.KeyInputEvent event) {
+			EntityPlayerSP player = Minecraft.getMinecraft().player;
+    		for (KeyBindings binding : KeyBindings.values()) {
+    			if (binding.isPressed()) {
+    				EntityRollingStock riding = (EntityRollingStock)player.getRidingEntity();
+    				if (riding != null) {
+    					ImmersiveRailroading.net.sendToServer(new KeyPressPacket(binding, player.getEntityId(), riding.getEntityId()));
+    				}
+    			}
+    		}
         }
     }
 }

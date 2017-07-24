@@ -62,6 +62,9 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 	}
 	
 	public void moveRollingStock(double moveDistance) {
+		if (moveDistance == 0) {
+			return;
+		}
 		if (frontYaw == null) {
 			frontYaw = rotationYaw;
 		}

@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.library.KeyBindings;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
@@ -145,6 +146,9 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		} else {
 			this.getEntityWorld().removeEntity(this);
 		}
+	}
+
+	public void handleKeyPress(Entity source, KeyBindings key) {
 	}
 
 }
