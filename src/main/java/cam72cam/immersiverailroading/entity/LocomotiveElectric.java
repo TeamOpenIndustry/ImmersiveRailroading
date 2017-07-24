@@ -5,13 +5,13 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public class ElectricLocomotive extends Locomotive {
+public class LocomotiveElectric extends Locomotive {
 	
-	public ElectricLocomotive(World world) {
+	public LocomotiveElectric(World world) {
 		this(world, null);
 	}
 	
-	public ElectricLocomotive(World world, String defID) {
+	public LocomotiveElectric(World world, String defID) {
 		super(world, defID);
 	}
 	

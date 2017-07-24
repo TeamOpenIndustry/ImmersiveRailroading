@@ -4,10 +4,10 @@ import org.apache.logging.log4j.Logger;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
-import cam72cam.immersiverailroading.entity.DieselLocomotive;
-import cam72cam.immersiverailroading.entity.ElectricLocomotive;
+import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
+import cam72cam.immersiverailroading.entity.LocomotiveElectric;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.SteamLocomotive;
+import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
@@ -104,9 +104,9 @@ public class ImmersiveRailroading
         
         @SubscribeEvent
         public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
-        	registerRollingStock(SteamLocomotive.class);
-        	registerRollingStock(DieselLocomotive.class);
-        	registerRollingStock(ElectricLocomotive.class);
+        	registerRollingStock(LocomotiveSteam.class);
+        	registerRollingStock(LocomotiveDiesel.class);
+        	registerRollingStock(LocomotiveElectric.class);
         }
 
         @SubscribeEvent

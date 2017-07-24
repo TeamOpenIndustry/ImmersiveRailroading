@@ -30,11 +30,11 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
 
-public class EntityRender extends Render<EntityRollingStock> {
+public class EntityRollingStockRender extends Render<EntityRollingStock> {
 
 	private BufferBuilder buffer;
 
-	protected EntityRender(RenderManager renderManager) {
+	protected EntityRollingStockRender(RenderManager renderManager) {
 		super(renderManager);
 	}
 	

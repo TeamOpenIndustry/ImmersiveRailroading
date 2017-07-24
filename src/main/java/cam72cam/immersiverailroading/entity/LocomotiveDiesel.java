@@ -1,18 +1,18 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.RegisteredDieselLocomotive;
+import cam72cam.immersiverailroading.entity.registry.LocomotiveDieselDefinition;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class DieselLocomotive extends Locomotive implements IFluidHandler {
+public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 
-	public DieselLocomotive(World world) {
+	public LocomotiveDiesel(World world) {
 		this(world, null);
 	}
 
-	public DieselLocomotive(World world, String defID) {
+	public LocomotiveDiesel(World world, String defID) {
 		super(world, defID, FluidRegistry.getFluid("oil"), FluidRegistry.getFluid("biofuel"));
 		//runSound.setDynamicPitch();
 	}
@@ -27,8 +27,8 @@ public class DieselLocomotive extends Locomotive implements IFluidHandler {
 		}
 	}
 
-	protected RegisteredDieselLocomotive getDefinition() {
-		return (RegisteredDieselLocomotive) DefinitionManager.getDefinition(defID);
+	protected LocomotiveDieselDefinition getDefinition() {
+		return (LocomotiveDieselDefinition) DefinitionManager.getDefinition(defID);
 	}
 
 	public int getFuelDiv(int i) {

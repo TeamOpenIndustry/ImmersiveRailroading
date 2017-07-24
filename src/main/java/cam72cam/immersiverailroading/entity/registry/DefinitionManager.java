@@ -46,7 +46,7 @@ public class DefinitionManager {
 		}
 	};
 	
-	private static Map<String, DefinitionRollingStock> definitions = new HashMap<String, DefinitionRollingStock>();
+	private static Map<String, EntityRollingStockDefinition> definitions = new HashMap<String, EntityRollingStockDefinition>();
 	
 	public static void initDefinitions() {
 		for(String locomotive : Config.locomotives) {
@@ -54,16 +54,16 @@ public class DefinitionManager {
 				String defID = "rolling_stock/locomotives/" + locomotive + ".json";
 				JsonObject data = getJsonData(defID);
 				String era = data.get("era").getAsString();
-				RegisteredLocomotive loco = null;
+				LocomotiveDefinition loco = null;
 				switch(era) {
 				case "steam":
-					loco = new RegisteredSteamLocomotive(defID, data);
+					loco = new LocomotiveSteamDefinition(defID, data);
 					break;
 				case "diesel":
-					loco = new RegisteredDieselLocomotive(defID, data);
+					loco = new LocomotiveDieselDefinition(defID, data);
 					break;
 				case "electric":
-					loco = new RegisteredElectricLocomotive(defID, data);
+					loco = new LocomotiveElectricDefinition(defID, data);
 					break;
 				default:
 					ImmersiveRailroading.logger.warn(String.format("Invalid era %s in %s", era, defID));
@@ -87,21 +87,21 @@ public class DefinitionManager {
 
 	public static List<ResourceLocation> getTextures() {
 		List<ResourceLocation> result = new ArrayList<ResourceLocation>();
-		for(DefinitionRollingStock stock : definitions.values()) {
+		for(EntityRollingStockDefinition stock : definitions.values()) {
 			result.addAll(stock.getTextures());
 		}
 		return result;
 	}
 
-	public static DefinitionRollingStock getDefinition(String defID) {
-		DefinitionRollingStock val = definitions.get(defID);
+	public static EntityRollingStockDefinition getDefinition(String defID) {
+		EntityRollingStockDefinition val = definitions.get(defID);
 		if (val == null) {
 			ImmersiveRailroading.logger.warn("Invalid stock ID: "  + defID);
 		}
 		return val;
 	}
 
-	public static Collection<DefinitionRollingStock> getDefinitions() {
+	public static Collection<EntityRollingStockDefinition> getDefinitions() {
 		return definitions.values();
 	}
 

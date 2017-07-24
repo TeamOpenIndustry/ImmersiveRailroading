@@ -7,7 +7,7 @@ import java.util.UUID;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
-public abstract class EntityLinkableRollingStock extends MoveableRollingStock {
+public abstract class EntityLinkableRollingStock extends EntityMoveableRollingStock {
 	
 	public boolean isAttaching = false;
 

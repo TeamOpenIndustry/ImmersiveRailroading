@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.net;
 
-import cam72cam.immersiverailroading.entity.MoveableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -27,7 +27,7 @@ public class MRSSyncPacket implements IMessage {
 		// Reflect constructor
 	}
 
-	public MRSSyncPacket(MoveableRollingStock mrs) {
+	public MRSSyncPacket(EntityMoveableRollingStock mrs) {
 		// Should we sync dimension ID as well?
 		this.entityID = mrs.getEntityId();
 		this.rotationYaw = mrs.rotationYaw;
@@ -41,7 +41,7 @@ public class MRSSyncPacket implements IMessage {
 		this.motionZ = mrs.motionZ;
 	}
 
-	public void applyTo(MoveableRollingStock mrs) {
+	public void applyTo(EntityMoveableRollingStock mrs) {
 		mrs.rotationYaw = this.rotationYaw;
 		mrs.frontYaw = this.frontYaw;
 		mrs.rearYaw = this.rearYaw;
@@ -89,7 +89,7 @@ public class MRSSyncPacket implements IMessage {
 		}
 
 		private void handle(MRSSyncPacket message, MessageContext ctx) {
-			MoveableRollingStock entity = (MoveableRollingStock) Minecraft.getMinecraft().world.getEntityByID(message.entityID);
+			EntityMoveableRollingStock entity = (EntityMoveableRollingStock) Minecraft.getMinecraft().world.getEntityByID(message.entityID);
 			if (entity == null) {
 				return;
 			}

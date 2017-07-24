@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.RegisteredLocomotive;
+import cam72cam.immersiverailroading.entity.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.client.Minecraft;
@@ -70,8 +70,8 @@ public abstract class Locomotive extends FreightTank {
 	 * 
 	 */
 	
-	protected RegisteredLocomotive getDefinition() {
-		return (RegisteredLocomotive) DefinitionManager.getDefinition(defID);
+	protected LocomotiveDefinition getDefinition() {
+		return (LocomotiveDefinition) DefinitionManager.getDefinition(defID);
 	}
 
 

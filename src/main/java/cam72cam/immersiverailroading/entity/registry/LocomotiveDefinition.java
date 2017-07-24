@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.util.Speed;
 
-public abstract class RegisteredLocomotive extends DefinitionRollingStock  {
+public abstract class LocomotiveDefinition extends EntityRollingStockDefinition  {
 	private int fuelConsumption;
 	private int power;
 	private int traction;
@@ -14,7 +14,7 @@ public abstract class RegisteredLocomotive extends DefinitionRollingStock  {
 	private double brake;
 	private Speed maxSpeed;
 	
-	public RegisteredLocomotive(String defID, JsonObject data) throws Exception {
+	public LocomotiveDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		

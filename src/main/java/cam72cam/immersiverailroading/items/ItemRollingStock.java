@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.DefinitionRollingStock;
+import cam72cam.immersiverailroading.entity.registry.EntityRollingStockDefinition;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -63,7 +63,7 @@ public class ItemRollingStock extends Item {
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		if (!worldIn.isRemote) {
 			ItemStack stack = player.getHeldItem(hand);
-			DefinitionRollingStock def = DefinitionManager.getDefinition(defFromStack(stack));
+			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defFromStack(stack));
 			def.spawn(worldIn, pos.add(0, 0.7, 0), EnumFacing.fromAngle(player.rotationYawHead));
 			System.out.println("SPAWNED SHAY");
 		}

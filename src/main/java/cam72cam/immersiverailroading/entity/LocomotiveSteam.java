@@ -3,23 +3,23 @@ package cam72cam.immersiverailroading.entity;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.RegisteredSteamLocomotive;
+import cam72cam.immersiverailroading.entity.registry.LocomotiveSteamDefinition;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class SteamLocomotive extends Locomotive implements IFluidHandler {
-	public SteamLocomotive(World world) {
+public class LocomotiveSteam extends Locomotive implements IFluidHandler {
+	public LocomotiveSteam(World world) {
 		this(world, null);
 	}
 
-	public SteamLocomotive(World world, String defID) {
+	public LocomotiveSteam(World world, String defID) {
 		super(world, defID, FluidRegistry.WATER);
 	}
 
-	protected RegisteredSteamLocomotive getDefinition() {
-		return (RegisteredSteamLocomotive) DefinitionManager.getDefinition(defID);
+	protected LocomotiveSteamDefinition getDefinition() {
+		return (LocomotiveSteamDefinition) DefinitionManager.getDefinition(defID);
 	}
 
 	@Override

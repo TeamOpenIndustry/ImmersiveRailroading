@@ -19,12 +19,12 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public abstract class MoveableRollingStock extends EntityRollingStock {
+public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 
 	public Float frontYaw;
 	public Float rearYaw;
 
-	public MoveableRollingStock(World world, String defID) {
+	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
 	}
 
@@ -117,12 +117,12 @@ public abstract class MoveableRollingStock extends EntityRollingStock {
 		
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
 		for (Entity entity : entitiesWithin) {
-			if (entity instanceof MoveableRollingStock) {
+			if (entity instanceof EntityMoveableRollingStock) {
 				//TODO rolling stock collisions, gets tricky with trains
 				continue;
 			}
 			
-			if (entity.getRidingEntity() instanceof MoveableRollingStock) {
+			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
 				// Don't apply bb to passengers
 				continue;
 			}

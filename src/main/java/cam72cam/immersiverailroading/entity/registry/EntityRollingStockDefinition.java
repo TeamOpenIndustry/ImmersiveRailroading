@@ -16,7 +16,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.MoveableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -44,7 +44,7 @@ import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
 import util.Matrix4;
 
-public abstract class DefinitionRollingStock {
+public abstract class EntityRollingStockDefinition {
 	public abstract EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing);
 
 	protected String defID;
@@ -63,7 +63,7 @@ public abstract class DefinitionRollingStock {
 	private double heightBounds;
 	private double widthBounds;
 	
-	public DefinitionRollingStock(String defID, JsonObject data) throws Exception {
+	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
 
 		name = data.get("name").getAsString();
@@ -288,7 +288,7 @@ public abstract class DefinitionRollingStock {
 		return this.bogeyRear;
 	}
 	
-	public AxisAlignedBB getBounds(MoveableRollingStock stock) {
+	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock) {
 		return new RealBB(frontBounds, rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
 	}
 

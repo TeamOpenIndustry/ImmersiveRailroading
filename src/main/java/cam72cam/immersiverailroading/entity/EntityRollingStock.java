@@ -5,7 +5,7 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import java.nio.charset.StandardCharsets;
 
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.DefinitionRollingStock;
+import cam72cam.immersiverailroading.entity.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
@@ -35,7 +35,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.ignoreFrustumCheck = true;
 	}
 	
-	protected DefinitionRollingStock getDefinition() {
+	protected EntityRollingStockDefinition getDefinition() {
 		return DefinitionManager.getDefinition(defID);
 	}
 
