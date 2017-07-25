@@ -79,6 +79,20 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 		if (rearYaw == null) {
 			rearYaw = rotationYaw;
 		}
+		
+		this.prevRotationYaw = rotationYaw;
+		
+		boolean isReverse = moveDistance < 0;
+		
+		if (isReverse) {
+			moveDistance = -moveDistance;
+			frontYaw += 180;
+			rearYaw += 180;
+			rotationYaw += 180;
+			this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+			frontYaw = (frontYaw + 360f) % 360f;
+			rearYaw = (rearYaw + 360f) % 360f;
+		}
 
 		Vec3d front = frontBogeyPosition();
 		Vec3d rear = rearBogeyPosition();
@@ -97,10 +111,19 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 
 		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
 
-		this.prevRotationYaw = rotationYaw;
 
 		this.rotationYaw = (float) Math.toDegrees(Math.atan2(-bogeySkew.x, bogeySkew.z));
 		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+		
+		
+		if (isReverse) {
+			frontYaw += 180;
+			rearYaw += 180;
+			rotationYaw += 180;
+			this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+			frontYaw = (frontYaw + 360f) % 360f;
+			rearYaw = (rearYaw + 360f) % 360f;
+		}
 
 		this.motionX = deltaCenter.x;
 		this.motionZ = deltaCenter.z;
