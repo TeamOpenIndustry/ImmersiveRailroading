@@ -173,7 +173,13 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		}
 		if (source.getRidingEntity() == this) {
 			movement = VecUtil.rotateYaw(movement, source.getRotationYawHead());
-			passengerOffsets.put(source.getPersistentID(), passengerOffsets.get(source.getPersistentID()).add(movement));
+			movement = VecUtil.rotateYaw(movement, 180-this.rotationYaw);
+			
+			Vec3d pos = passengerOffsets.get(source.getPersistentID()).add(movement);
+
+			pos = this.getDefinition().correctPassengerBounds(pos);
+			
+			passengerOffsets.put(source.getPersistentID(), pos);
 			syncPassengerOffsets();
 		}
 	}

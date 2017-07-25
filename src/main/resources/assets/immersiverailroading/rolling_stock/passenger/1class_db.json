@@ -1,10 +1,13 @@
 {
 	"name": "First Class DB",
 	"model": "immersiverailroading:models/rolling_stock/passenger/1class_db.obj",
-	"properties": {
-		"passenger_offset_x": 1,
-		"passenger_offset_y": 1,
-		"passenger_offset_z": 1
+	"passenger": {
+		"default_x": 0,
+		"default_y": 1.25,
+		"default_z": 0,
+		"front": 2,
+		"rear": -2,
+		"width": 2
 	},
 	"trucks": {
 		"front": 2, 

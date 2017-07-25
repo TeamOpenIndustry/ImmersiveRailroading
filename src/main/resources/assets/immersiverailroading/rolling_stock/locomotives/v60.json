@@ -6,14 +6,19 @@
 	"properties": {
 		"fuel_consumption": 100,
 		"fuel_capacity": 100,
-		"passenger_offset_x": -0.5,
-		"passenger_offset_y": 2,
-		"passenger_offset_z": 0.7,
 		"horsepower": 640,
 		"tractive_effort": 640,
 		"acceleration": 100,
 		"deceleration": 100,
 		"max_speed": 60
+	},
+	"passenger": {
+		"default_x": -0.5,
+		"default_y": 2,
+		"default_z": 0.7,
+		"front": 0.5,
+		"rear": -1,
+		"width": 2
 	},
 	"trucks": {
 		"front": 2, 
