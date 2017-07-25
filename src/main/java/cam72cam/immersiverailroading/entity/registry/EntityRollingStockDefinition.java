@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.render.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.block.state.IBlockState;
@@ -40,8 +41,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.obj.OBJLoader;
-import net.minecraftforge.client.model.obj.OBJModel;
 import util.Matrix4;
 
 public abstract class EntityRollingStockDefinition {
@@ -66,7 +65,8 @@ public abstract class EntityRollingStockDefinition {
 		this.defID = defID;
 
 		name = data.get("name").getAsString();
-		model = (OBJModel) OBJLoader.INSTANCE.loadModel(new ResourceLocation(data.get("model").getAsString()));
+		//model = (OBJModel) OBJLoader.INSTANCE.loadModel(new ResourceLocation(data.get("model").getAsString()));
+		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()));
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		playerOffset = new Vec3d(properties.get("passenger_offset_x").getAsDouble(), properties.get("passenger_offset_y").getAsDouble(),
 				properties.get("passenger_offset_z").getAsDouble());
@@ -96,9 +96,10 @@ public abstract class EntityRollingStockDefinition {
 		q.put("flip-v", "true");
 		q.put("ambient", "true");
 		ImmutableMap<String, String> customData = q.build();
-		model = (OBJModel) model.process(customData);
-		IBakedModel baked = model.bake(model.getDefaultState(), DefaultVertexFormats.ITEM, ModelLoader.defaultTextureGetter());
-		return baked;
+		//model = (OBJModel) model.process(customData);
+		//IBakedModel baked = model.bake(model.getDefaultState(), DefaultVertexFormats.ITEM, ModelLoader.defaultTextureGetter());
+		//return baked;
+		return null;
 	}
 
 	private BufferBuilder getBuffer() {
@@ -162,7 +163,9 @@ public abstract class EntityRollingStockDefinition {
 		GlStateManager.pushMatrix();
 
 		// Bind block textures to current context
-		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+		if (model.texLoc != null) {
+			Minecraft.getMinecraft().getTextureManager().bindTexture(model.texLoc);
+		}
 
 		// From IE
 		RenderHelper.disableStandardItemLighting();
@@ -196,9 +199,11 @@ public abstract class EntityRollingStockDefinition {
 		matrix.flip();
 
 		GlStateManager.multMatrix(matrix);
+		
+		model.draw();
 
 		// Finish Drawing
-		draw(getBuffer());
+		//draw(getBuffer());
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
 		
@@ -208,7 +213,8 @@ public abstract class EntityRollingStockDefinition {
 	}
 
 	public Collection<ResourceLocation> getTextures() {
-		return model.getTextures();
+		//return model.getTextures();
+		return new ArrayList<ResourceLocation>();
 	}
 
 	public IBakedModel getInventoryModel() {

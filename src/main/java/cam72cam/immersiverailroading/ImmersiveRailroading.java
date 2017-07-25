@@ -150,8 +150,8 @@ public class ImmersiveRailroading
     	{
         	for (String defID : DefinitionManager.getDefinitionNames()) {
         		ModelResourceLocation loc = new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), defID);
-        		IBakedModel model = DefinitionManager.getDefinition(defID).getInventoryModel();
-        		event.getModelRegistry().putObject(loc, model);
+        		//IBakedModel model = DefinitionManager.getDefinition(defID).getInventoryModel();
+        		//event.getModelRegistry().putObject(loc, model);
         	}
     	}
         
