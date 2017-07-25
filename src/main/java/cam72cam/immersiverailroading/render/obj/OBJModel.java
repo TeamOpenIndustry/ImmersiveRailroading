@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import cam72cam.immersiverailroading.util.RelativeResource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
@@ -37,10 +38,10 @@ public class OBJModel {
 			if (line.startsWith("#")) {
 				continue;
 			}
-			String[] parts = line.split(" ");
-			if (parts.length == 0) {
+			if (line.length() == 0) {
 				continue;
 			}
+			String[] parts = line.split(" ");
 			String cmd = parts[0];
 			String[] args = Arrays.copyOfRange(parts, 1, parts.length);
 			switch(cmd) {
@@ -78,21 +79,21 @@ public class OBJModel {
 			return;
 		}
 
-		String[] sp = modelLoc.toString().split("/");
-		input = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(modelLoc.toString().replaceAll(sp[sp.length-1], materialPath))).getInputStream();
+		input = Minecraft.getMinecraft().getResourceManager().getResource(RelativeResource.getRelative(modelLoc, materialPath)).getInputStream();
 		reader = new Scanner(input);
 		while(reader.hasNextLine()) {
 			String line = reader.nextLine();
 			if (line.startsWith("#")) {
 				continue;
 			}
-			String[] parts = line.split(" ");
-			if (parts.length == 0) {
+			if (line.length() == 0) {
 				continue;
 			}
+			String[] parts = line.split(" ");
 			switch(parts[0]) {
-			case "map_Ka":
-				texLoc = new ResourceLocation(parts[1]);
+			case "map_Kd":
+				texLoc = RelativeResource.getRelative(modelLoc, parts[1]);
+				System.out.println(texLoc);
 				break;
 			default:
 				System.out.println("MTL: ignored line '" + line + "'");
