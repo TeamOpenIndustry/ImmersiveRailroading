@@ -196,8 +196,10 @@ public abstract class EntityRollingStockDefinition {
 					return Pair.of(defaultVal.getLeft(),
 							new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(10), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
 				case GROUND:
-				case FIXED:
 					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(2, 2, 2).toMatrix4f());
+				case FIXED:
+					//Item Frame
+					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(4, 4, 4).toMatrix4f());
 				case GUI:
 					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.3, 0.3, 0.3).rotate(Math.toRadians(200), 0, 1, 0)
 							.rotate(Math.toRadians(-15), 1, 0, 0).multiply(defaultTransform.copy()).toMatrix4f());
