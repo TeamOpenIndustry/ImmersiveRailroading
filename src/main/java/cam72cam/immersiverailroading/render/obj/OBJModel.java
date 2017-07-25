@@ -102,35 +102,43 @@ public class OBJModel {
 		}
 	}
 	
+	private Integer displayList = null;
 	public void draw() {
-		GL11.glBegin(GL11.GL_QUADS);
-		{
-			for (List<Face> faces : groups.values()) {
-				for (Face face : faces) {
-					
-					for(int[] point : face.points) {
-						Vector3f v;
-						Vector2f vt;
-						Vector3f vn;
+		if (displayList == null) {
+			displayList = GL11.glGenLists(1);
+			GL11.glNewList(displayList, GL11.GL_COMPILE);
+			
+			GL11.glBegin(GL11.GL_QUADS);
+			{
+				for (List<Face> faces : groups.values()) {
+					for (Face face : faces) {
 						
-						switch(point.length) {
-						case 3:;
-							vn = vertexNormals.get(point[2]);
-							GL11.glNormal3f(vn.x, vn.y, vn.z);
-						case 2:
-							vt = vertexTextures.get(point[1]);
-							GL11.glTexCoord2f(vt.x, 1-vt.y);
-						case 1:
-							v = vertices.get(point[0]);
-							GL11.glVertex3f(v.x, v.y, v.z);
-							break;
-						default:
-							System.out.println("WATWATWAT");
+						for(int[] point : face.points) {
+							Vector3f v;
+							Vector2f vt;
+							Vector3f vn;
+							
+							switch(point.length) {
+							case 3:;
+								vn = vertexNormals.get(point[2]);
+								GL11.glNormal3f(vn.x, vn.y, vn.z);
+							case 2:
+								vt = vertexTextures.get(point[1]);
+								GL11.glTexCoord2f(vt.x, 1-vt.y);
+							case 1:
+								v = vertices.get(point[0]);
+								GL11.glVertex3f(v.x, v.y, v.z);
+								break;
+							default:
+								System.out.println("WATWATWAT");
+							}
 						}
 					}
 				}
 			}
+			GL11.glEnd();
+			GL11.glEndList();
 		}
-		GL11.glEnd();
+		GL11.glCallList(displayList);
 	}
 }
