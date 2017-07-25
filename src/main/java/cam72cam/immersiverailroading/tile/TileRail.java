@@ -20,7 +20,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
@@ -44,7 +46,6 @@ public class TileRail extends TileRailBase {
 	
 	private boolean isVisible = true;
 	private boolean switchActive = false;
-	private BufferBuilder worldRenderer;
 
 
 	@Override
@@ -197,6 +198,12 @@ public class TileRail extends TileRailBase {
 		
 	}
 
+	private Map<String, BufferBuilder> buffers = new HashMap<String, BufferBuilder>();
+	private String renderID() {
+		//TODO more attributes like railbed
+		return String.format("%s%s", this.facing, this.type);
+	}
+	
 	/*
 	 * This returns a cached buffer as rails don't change their model often
 	 * This drastically reduces the overhead of rendering these complex models
@@ -204,48 +211,49 @@ public class TileRail extends TileRailBase {
 	 * We also draw the railbed here since drawing a model for each gag eats FPS 
 	 */
 	protected BufferBuilder getModelBuffer() {
-		if (worldRenderer != null) {
-			return worldRenderer;
+		
+		if (!buffers.containsKey(renderID())) {
+			// Get model for current state
+			final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+			BlockPos blockPos = this.getPos();
+			IBlockState state = getWorld().getBlockState(blockPos);
+			state = this.getBlockState();
+			IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
+			
+			IBlockState gravelState = Blocks.GRASS.getDefaultState();
+			IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
+			
+			// Create render targets
+			BufferBuilder worldRenderer = new BufferBuilder(2048);
+	
+			// Reverse position which will be done render model
+			worldRenderer.setTranslation(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ());
+	
+			// Start drawing
+			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+	
+			// From IE
+			worldRenderer.color(255, 255, 255, 255);
+	
+			// Render block at position
+			blockRenderer.getBlockModelRenderer().renderModel(getWorld(), model, state, blockPos, worldRenderer, false);
+			
+			// This is evil but really fast :D
+			BuilderBase builder = type.getBuilder(world, new BlockPos(0,0,0), facing.getOpposite());
+			for (TrackBase base : builder.getTracks()) {
+				blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, base.getHeight()), gravelState, blockPos.add(base.getPos()), worldRenderer, false);
+			}
+			//Debug center location
+			if (center != null) {
+				blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, this.getHeight()), gravelState, center, worldRenderer, false);
+			}
+			
+			worldRenderer.finishDrawing();
+			
+			buffers.put(renderID(), worldRenderer);
 		}
 		
-		// Get model for current state
-		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
-		BlockPos blockPos = this.getPos();
-		IBlockState state = getWorld().getBlockState(blockPos);
-		state = this.getBlockState();
-		IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
-		
-		IBlockState gravelState = Blocks.GRASS.getDefaultState();
-		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
-		
-		// Create render targets
-		worldRenderer = new BufferBuilder(2097152);
-
-		// Reverse position which will be done render model
-		worldRenderer.setTranslation(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ());
-
-		// Start drawing
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-
-		// From IE
-		worldRenderer.color(255, 255, 255, 255);
-
-		// Render block at position
-		blockRenderer.getBlockModelRenderer().renderModel(getWorld(), model, state, blockPos, worldRenderer, false);
-		
-		// This is evil but really fast :D
-		BuilderBase builder = type.getBuilder(world, new BlockPos(0,0,0), facing.getOpposite());
-		for (TrackBase base : builder.getTracks()) {
-			blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, base.getHeight()), gravelState, blockPos.add(base.getPos()), worldRenderer, false);
-		}
-		//Debug center location
-		if (center != null) {
-			blockRenderer.getBlockModelRenderer().renderModel(getWorld(), new ScaledModel(gravelModel, this.getHeight()), gravelState, center, worldRenderer, false);
-		}
-		
-		worldRenderer.finishDrawing();
-		
-		return worldRenderer;
+		return buffers.get(renderID());
 	}
 
 	/*
