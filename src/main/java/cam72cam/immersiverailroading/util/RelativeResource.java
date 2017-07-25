@@ -9,6 +9,6 @@ public class RelativeResource {
 		
 	}
 	public static ResourceLocation getRelative(ResourceLocation originalLoc, String path) {
-		return new ResourceLocation(originalLoc.getResourceDomain(), FilenameUtils.concat(FilenameUtils.getPath(originalLoc.getResourcePath()), path));
+		return new ResourceLocation(originalLoc.getResourceDomain(), FilenameUtils.concat(FilenameUtils.getPath(originalLoc.getResourcePath()), path).replace('\\', '/'));
 	}
 }
