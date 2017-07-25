@@ -94,17 +94,19 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		if (theTank != null) {
-			this.theTank.writeToNBT(nbttagcompound.getCompoundTag("tank"));
-		}
+		System.out.println(this.theTank);
+		this.theTank.writeToNBT(nbttagcompound.getCompoundTag("tank"));
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-
-		// AFTER defID load!
-
+		this.theTank.readFromNBT(nbttagcompound.getCompoundTag("tank"));
+	}
+	
+	@Override
+	protected void rollingStockInit() {
+		super.rollingStockInit();
 		theTank = new FluidTank(null, 0) {
 			@Override
 			public boolean canFillFluidType(FluidStack fluid) {
@@ -113,9 +115,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 		};
 
 		theTank.setCapacity(this.getTankCapacity());
-
-		this.theTank.readFromNBT(nbttagcompound.getCompoundTag("tank"));
-
 	}
 
 	protected void onInventoryChanged() {

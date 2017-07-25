@@ -80,11 +80,13 @@ public abstract class Freight extends EntityLinkableRollingStock {
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-
-		//After defID load
-		cargoItems.setSize(this.getInventorySize());
-		
 		cargoItems.deserializeNBT((NBTTagCompound) nbttagcompound.getTag("items"));
+	}
+	
+	@Override
+	protected void rollingStockInit() {
+		super.rollingStockInit();
+		cargoItems.setSize(this.getInventorySize());
 	}
 	
 	@Override
