@@ -1,3 +1,2 @@
 newmtl model
-
-map_Ka immersiverailroading:rolling_stock/locomotives/e69_black
+map_Kd ../../../textures/rolling_stock/locomotives/e69_black.png
