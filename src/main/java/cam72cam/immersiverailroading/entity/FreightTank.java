@@ -94,7 +94,9 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		this.theTank.writeToNBT(nbttagcompound.getCompoundTag("tank"));
+		if (theTank != null) {
+			this.theTank.writeToNBT(nbttagcompound.getCompoundTag("tank"));
+		}
 	}
 
 	@Override

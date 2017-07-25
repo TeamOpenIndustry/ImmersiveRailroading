@@ -85,10 +85,6 @@ public abstract class Freight extends EntityLinkableRollingStock {
 		cargoItems.setSize(this.getInventorySize());
 		
 		cargoItems.deserializeNBT((NBTTagCompound) nbttagcompound.getTag("items"));
-		
-		
-		// Is this needed?
-		handleMass();
 	}
 	
 	@Override

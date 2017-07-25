@@ -31,15 +31,23 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setFloat("frontYaw", frontYaw);
-		nbttagcompound.setFloat("rearYaw", rearYaw);
+		if (frontYaw != null) {
+			nbttagcompound.setFloat("frontYaw", frontYaw);
+		}
+		if (rearYaw != null) {
+			nbttagcompound.setFloat("rearYaw", rearYaw);
+		}
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-		frontYaw = nbttagcompound.getFloat("frontYaw");
-		rearYaw = nbttagcompound.getFloat("rearYaw");
+		if (nbttagcompound.hasKey("frontYaw")) {
+			frontYaw = nbttagcompound.getFloat("frontYaw");
+		}
+		if (nbttagcompound.hasKey("rearYaw")) {
+			rearYaw = nbttagcompound.getFloat("rearYaw");
+		}
 	}
 	
 	@Override
