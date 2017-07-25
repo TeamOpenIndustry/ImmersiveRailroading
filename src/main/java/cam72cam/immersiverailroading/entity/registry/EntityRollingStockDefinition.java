@@ -1,19 +1,13 @@
 package cam72cam.immersiverailroading.entity.registry;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
@@ -21,7 +15,6 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -30,9 +23,6 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -40,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.ModelLoader;
 import util.Matrix4;
 
 public abstract class EntityRollingStockDefinition {
@@ -55,17 +44,17 @@ public abstract class EntityRollingStockDefinition {
 
 	private Matrix4 defaultTransform = new Matrix4();
 
-	private BufferBuilder buffer;
 	private double frontBounds;
 	private double rearBounds;
 	private double heightBounds;
 	private double widthBounds;
-	
+
 	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
 
 		name = data.get("name").getAsString();
-		//model = (OBJModel) OBJLoader.INSTANCE.loadModel(new ResourceLocation(data.get("model").getAsString()));
+		// model = (OBJModel) OBJLoader.INSTANCE.loadModel(new
+		// ResourceLocation(data.get("model").getAsString()));
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()));
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		playerOffset = new Vec3d(properties.get("passenger_offset_x").getAsDouble(), properties.get("passenger_offset_y").getAsDouble(),
@@ -89,73 +78,6 @@ public abstract class EntityRollingStockDefinition {
 		rearBounds = boundsData.get("rear").getAsDouble();
 		widthBounds = boundsData.get("width").getAsDouble();
 		heightBounds = boundsData.get("height").getAsDouble();
-	}
-
-	private IBakedModel getBakedModel() {
-		Builder<String, String> q = ImmutableMap.builder();
-		q.put("flip-v", "true");
-		q.put("ambient", "true");
-		ImmutableMap<String, String> customData = q.build();
-		//model = (OBJModel) model.process(customData);
-		//IBakedModel baked = model.bake(model.getDefaultState(), DefaultVertexFormats.ITEM, ModelLoader.defaultTextureGetter());
-		//return baked;
-		return null;
-	}
-
-	private BufferBuilder getBuffer() {
-		// TODO rewrite this so we can have animations
-
-		if (buffer == null) {
-
-			buffer = buildBuffer(getBakedModel());
-		}
-		return buffer;
-	}
-
-	private BufferBuilder buildBuffer(IBakedModel model) {
-
-		// Create render targets
-		BufferBuilder worldRenderer = new BufferBuilder(2097152);
-
-		// Start drawing
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
-
-		// From IE
-		worldRenderer.color(255, 255, 255, 255);
-
-		List<BakedQuad> quads = model.getQuads((IBlockState) null, (EnumFacing) null, 0L);
-		int i = 0;
-		for (int j = quads.size(); i < j; ++i) {
-			net.minecraftforge.client.model.pipeline.LightUtil.renderQuadColor(worldRenderer, quads.get(i), 0xFFFFFFFF);
-		}
-
-		worldRenderer.finishDrawing();
-
-		return worldRenderer;
-	}
-
-	private void draw(BufferBuilder vertexBufferIn) {
-		VertexFormat vertexformat = vertexBufferIn.getVertexFormat();
-		int i = vertexformat.getNextOffset();
-		ByteBuffer bytebuffer = vertexBufferIn.getByteBuffer();
-		List<VertexFormatElement> list = vertexformat.getElements();
-
-		for (int j = 0; j < list.size(); ++j) {
-			VertexFormatElement vertexformatelement = list.get(j);
-			bytebuffer.position(vertexformat.getOffset(j));
-
-			// moved to VertexFormatElement.preDraw
-			vertexformatelement.getUsage().preDraw(vertexformat, j, i, bytebuffer);
-		}
-
-		GlStateManager.glDrawArrays(vertexBufferIn.getDrawMode(), 0, vertexBufferIn.getVertexCount());
-		int i1 = 0;
-
-		for (int j1 = list.size(); i1 < j1; ++i1) {
-			VertexFormatElement vertexformatelement1 = list.get(i1);
-			// moved to VertexFormatElement.postDraw
-			vertexformatelement1.getUsage().postDraw(vertexformat, i1, i, bytebuffer);
-		}
 	}
 
 	public void render(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
@@ -199,56 +121,66 @@ public abstract class EntityRollingStockDefinition {
 		matrix.flip();
 
 		GlStateManager.multMatrix(matrix);
-		
+
 		model.draw();
 
 		// Finish Drawing
-		//draw(getBuffer());
+		// draw(getBuffer());
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
-		
 
 		// No idea why I need the +1 here
-		//Render.renderOffsetAABB(stock.getCollisionBoundingBox(), x, y, z);
-	}
-
-	public Collection<ResourceLocation> getTextures() {
-		//return model.getTextures();
-		return new ArrayList<ResourceLocation>();
+		// Render.renderOffsetAABB(stock.getCollisionBoundingBox(), x, y, z);
 	}
 
 	public IBakedModel getInventoryModel() {
-		IBakedModel m = getBakedModel();
 		return new IBakedModel() {
 			@Override
 			public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-				// TODO Auto-generated method stub
-				return m.getQuads(state, side, rand);
+				/*
+				 * I am an evil wizard!
+				 * 
+				 * So it turns out that I can stick a draw call in here to
+				 * render my own stuff. This subverts forge's entire baked model
+				 * system with a single line of code and injects my own OpenGL
+				 * payload.  Fuck you modeling restrictions.
+				 * 
+				 * This is probably really fragile if someone calls getQuads
+				 * before actually setting up the correct GL context.
+				 */
+				if (model.texLoc != null) {
+					Minecraft.getMinecraft().getTextureManager().bindTexture(model.texLoc);
+				} else {
+					Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
+				}
+				model.draw();
+				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+				return new ArrayList<BakedQuad>();
 			}
 
 			@Override
 			public boolean isAmbientOcclusion() {
-				return m.isAmbientOcclusion();
+				return true;
 			}
 
 			@Override
 			public boolean isGui3d() {
-				return m.isGui3d();
+				return true;
 			}
 
 			@Override
 			public boolean isBuiltInRenderer() {
-				return m.isBuiltInRenderer();
+				return false;
 			}
 
 			@Override
 			public TextureAtlasSprite getParticleTexture() {
-				return m.getParticleTexture();
+				return null;
 			}
 
 			@Override
 			public ItemOverrideList getOverrides() {
-				return m.getOverrides();
+				return ItemOverrideList.NONE;
 			}
 
 			@Override
@@ -291,7 +223,7 @@ public abstract class EntityRollingStockDefinition {
 	public float getBogeyRear() {
 		return this.bogeyRear;
 	}
-	
+
 	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock) {
 		return new RealBB(frontBounds, rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
 	}

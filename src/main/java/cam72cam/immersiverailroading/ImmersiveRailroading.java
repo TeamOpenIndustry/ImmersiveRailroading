@@ -33,7 +33,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
@@ -77,6 +76,8 @@ public class ImmersiveRailroading
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         instance = this;
+        
+    	DefinitionManager.initDefinitions();
     }
     
     @EventHandler
@@ -150,20 +151,10 @@ public class ImmersiveRailroading
     	{
         	for (String defID : DefinitionManager.getDefinitionNames()) {
         		ModelResourceLocation loc = new ModelResourceLocation(ITEM_ROLLING_STOCK.getRegistryName(), defID);
-        		//IBakedModel model = DefinitionManager.getDefinition(defID).getInventoryModel();
-        		//event.getModelRegistry().putObject(loc, model);
+        		IBakedModel model = DefinitionManager.getDefinition(defID).getInventoryModel();
+        		event.getModelRegistry().putObject(loc, model);
         	}
     	}
-        
-        @SubscribeEvent
-        public static void onTextureStitchedPre(TextureStitchEvent.Pre event) {
-        	// This is the first event after the model loaders have managers
-        	DefinitionManager.initDefinitions();
-        	
-        	for(ResourceLocation texture : DefinitionManager.getTextures()) {
-        		event.getMap().registerSprite(texture);
-        	}
-        }
         
         @SubscribeEvent
         public static void onKeyInput(InputEvent.KeyInputEvent event) {
