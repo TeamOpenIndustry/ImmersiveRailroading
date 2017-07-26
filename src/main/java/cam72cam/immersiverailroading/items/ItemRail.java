@@ -39,8 +39,8 @@ public class ItemRail extends ItemBlock {
 		BuilderBase builder = tt.getBuilder(world, pos, facing);
 		if (builder.canBuild()) {
 			builder.build();
+			return true;
 		}
-
-        return true;
+		return false;
     }
 }
