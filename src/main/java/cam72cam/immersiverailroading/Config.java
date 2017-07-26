@@ -4,6 +4,9 @@ import net.minecraftforge.common.config.Config.Comment;
 
 @net.minecraftforge.common.config.Config(modid=ImmersiveRailroading.MODID)
 public class Config {
+	@Comment({"Range between couplers to try linking"})
+	public static double couplerRange = 0.6;
+
 	@Comment({"A list of locomotives to load"})
 	public static String[] locomotives = new String[] {"drg_class_01", "drg_class_80", "shay", "sd40", "sd70", "v60", "e69"};
 	

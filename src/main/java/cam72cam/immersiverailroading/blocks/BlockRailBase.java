@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.blocks;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -41,7 +40,6 @@ public abstract class BlockRailBase extends Block {
 		boolean isOriginAir = tileEntity.getParent() != null && world.isAirBlock(tileEntity.getParent());
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
 		if (isOriginAir || !isOnRealBlock) {
-			ImmersiveRailroading.logger.info("BLOCK BROKEN");
 			//stupid IBlockAccess
 			tileEntity.getWorld().destroyBlock(pos, true);
 		}

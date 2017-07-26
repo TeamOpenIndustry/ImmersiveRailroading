@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -100,27 +101,22 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 		Vec3d nextRear = nextPosition(rear, this.rearYaw, nextMovement(this.rearYaw, moveDistance));
 		Vec3d frontDelta = front.subtractReverse(nextFront);
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
-		frontYaw = (float) Math.toDegrees(Math.atan2(-frontDelta.x, frontDelta.z));
-		rearYaw = (float) Math.toDegrees(Math.atan2(-rearDelta.x, rearDelta.z));
-		frontYaw = (frontYaw + 360f) % 360f;
-		rearYaw = (rearYaw + 360f) % 360f;
+		frontYaw = VecUtil.toYaw(frontDelta);
+		rearYaw = VecUtil.toYaw(rearDelta);
 
 		Vec3d currCenter = between(front, rear);
 		Vec3d nextCenter = between(nextFront, nextRear);
 		Vec3d deltaCenter = currCenter.subtractReverse(nextCenter);
 
 		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
-
-
-		this.rotationYaw = (float) Math.toDegrees(Math.atan2(-bogeySkew.x, bogeySkew.z));
-		this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+		rotationYaw = VecUtil.toYaw(bogeySkew);
 		
 		
 		if (isReverse) {
 			frontYaw += 180;
 			rearYaw += 180;
 			rotationYaw += 180;
-			this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+			rotationYaw = (rotationYaw + 360f) % 360f;
 			frontYaw = (frontYaw + 360f) % 360f;
 			rearYaw = (rearYaw + 360f) % 360f;
 		}
@@ -152,7 +148,7 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
 		for (Entity entity : entitiesWithin) {
 			if (entity instanceof EntityMoveableRollingStock) {
-				//TODO rolling stock collisions, gets tricky with trains
+				// rolling stock collisions handled by looking at the front and rear coupler offsets
 				continue;
 			}
 			
@@ -172,6 +168,7 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 			}
 		}
 		
+		// Riding on top of carts
 		AxisAlignedBB bb = this.getCollisionBoundingBox();
 		bb = bb.offset(0, bb.maxY - bb.minY, 0);
 		bb = bb.setMaxY(bb.minY + 1);
@@ -189,29 +186,13 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 	private Vec3d between(Vec3d front, Vec3d rear) {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
 	}
-
-	protected float frontBogeyOffset() {
-		return this.getDefinition().getBogeyFront();
-	}
-
-	protected float rearBogeyOffset() {
-		return this.getDefinition().getBogeyRear();
-	}
 	
 	public Vec3d frontBogeyPosition() {
-		// Vec3d front = new Vec3d(0, 0, frontBogeyOffset());
-		// front = front.rotateYaw((float) Math.toRadians(this.rotationYaw));
-		Vec3d front = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * frontBogeyOffset(), 0,
-				Math.cos(Math.toRadians(this.rotationYaw)) * frontBogeyOffset());
-		return front.addVector(posX, posY, posZ);
+		return VecUtil.fromYaw(this.getDefinition().getBogeyFront(), rotationYaw).add(getPositionVector());
 	}
 
 	public Vec3d rearBogeyPosition() {
-		// Vec3d rear = new Vec3d(0, 0, rearBogeyOffset());
-		// rear = rear.rotateYaw((float) Math.toRadians(this.rotationYaw));
-		Vec3d rear = new Vec3d(-Math.sin(Math.toRadians(this.rotationYaw)) * rearBogeyOffset(), 0,
-				Math.cos(Math.toRadians(this.rotationYaw)) * rearBogeyOffset());
-		return rear.addVector(posX, posY, posZ);
+		return VecUtil.fromYaw(this.getDefinition().getBogeyRear(), rotationYaw).add(getPositionVector());
 	}
 
 	private TileRail railFromPosition(Vec3d position) {
@@ -226,9 +207,7 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 	}
 
 	private Vec3d nextMovement(float yaw, double d) {
-		double x = -Math.sin(Math.toRadians(yaw));
-		double z = Math.cos(Math.toRadians(yaw));
-		return new Vec3d(x * d, 0, z * d);
+		return VecUtil.fromYaw(d, yaw);
 	}
 
 	private Vec3d nextPosition(Vec3d position, float yaw, Vec3d delta) {

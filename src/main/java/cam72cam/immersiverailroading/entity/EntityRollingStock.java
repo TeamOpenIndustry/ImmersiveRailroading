@@ -69,16 +69,18 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		nbttagcompound.setString("defID", defID);
 		
-		NBTTagCompound offsetTag = nbttagcompound.getCompoundTag("passengerOffsets");
-		List<String> passengers = new ArrayList<String>();
-		for (UUID passenger : passengerOffsets.keySet()) {
-			passengers.add(passenger.toString());
-			offsetTag.setDouble(passenger.toString() + ".x", passengerOffsets.get(passenger).x);
-			offsetTag.setDouble(passenger.toString() + ".y", passengerOffsets.get(passenger).y);
-			offsetTag.setDouble(passenger.toString() + ".z", passengerOffsets.get(passenger).z);
+		if (passengerOffsets.size() > 0) {
+			NBTTagCompound offsetTag = nbttagcompound.getCompoundTag("passengerOffsets");
+			List<String> passengers = new ArrayList<String>();
+			for (UUID passenger : passengerOffsets.keySet()) {
+				passengers.add(passenger.toString());
+				offsetTag.setDouble(passenger.toString() + ".x", passengerOffsets.get(passenger).x);
+				offsetTag.setDouble(passenger.toString() + ".y", passengerOffsets.get(passenger).y);
+				offsetTag.setDouble(passenger.toString() + ".z", passengerOffsets.get(passenger).z);
+			}
+			offsetTag.setString("passengers", String.join("|", passengers));
+			nbttagcompound.setTag("passengerOffsets", offsetTag);
 		}
-		offsetTag.setString("passengers", String.join("|", passengers));
-		nbttagcompound.setTag("passengerOffsets", offsetTag);
 	}
 
 	@Override
@@ -217,11 +219,13 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	public boolean attackEntityFrom(DamageSource damagesource, float amount) {
 		if (damagesource.isCreativePlayer()) {
 			this.setDead();
+			world.removeEntity(this);
 			return false;
 		}
 
 		if (damagesource.getTrueSource() instanceof EntityPlayer && !damagesource.isProjectile()) {
 			this.setDead();
+			world.removeEntity(this);
 			return false;
 		}
 		return false;

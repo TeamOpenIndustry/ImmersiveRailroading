@@ -112,7 +112,6 @@ public class BlockRail extends BlockRailBase {
 	
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
-		ImmersiveRailroading.logger.info("SUPER TILE");
 		TileRail t = new TileRail();
 		t.setType(state.getValue(BlockRail.TRACK_TYPE));
         t.setFacing(state.getValue(BlockRail.FACING));
