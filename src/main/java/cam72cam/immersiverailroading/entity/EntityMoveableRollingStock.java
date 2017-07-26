@@ -171,6 +171,19 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 				entity.attackEntityFrom((new DamageSource("hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
 			}
 		}
+		
+		AxisAlignedBB bb = this.getCollisionBoundingBox();
+		bb = bb.offset(0, bb.maxY - bb.minY, 0);
+		bb = bb.setMaxY(bb.minY + 1);
+		List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
+		for (Entity entity : entitiesAbove) {
+			if (entity instanceof EntityMoveableRollingStock) {
+				continue;
+			}
+			Vec3d pos = entity.getPositionVector();
+			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
+			entity.setPosition(pos.x, pos.y, pos.z);
+		}
 	}
 
 	private Vec3d between(Vec3d front, Vec3d rear) {
