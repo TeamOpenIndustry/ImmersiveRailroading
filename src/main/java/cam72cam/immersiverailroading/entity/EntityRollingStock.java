@@ -217,6 +217,9 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 
 	@Override
 	public boolean attackEntityFrom(DamageSource damagesource, float amount) {
+		if (world.isRemote) {
+			return false;
+		}
 		if (damagesource.isCreativePlayer()) {
 			this.setDead();
 			world.removeEntity(this);

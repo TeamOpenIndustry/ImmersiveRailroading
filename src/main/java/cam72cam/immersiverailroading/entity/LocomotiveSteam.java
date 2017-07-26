@@ -90,11 +90,11 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		Tender tender = null;
 
 		// BUG: locomotives can drain from tenders in front of the locomotive
-		if (this.getLinkedCartFront() instanceof Tender) {
-			tender = (Tender) getLinkedCartFront();
+		if (this.getLinkedCart(CouplerType.FRONT) instanceof Tender) {
+			tender = (Tender) getLinkedCart(CouplerType.FRONT);
 		}
-		if (this.getLinkedCartBack() instanceof Tender) {
-			tender = (Tender) getLinkedCartBack();
+		if (this.getLinkedCart(CouplerType.BACK) instanceof Tender) {
+			tender = (Tender) getLinkedCart(CouplerType.BACK);
 		}
 
 		if (tender == null) {

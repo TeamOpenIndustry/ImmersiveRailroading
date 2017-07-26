@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.entity.EntityLinkableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.block.state.IBlockState;
@@ -249,12 +250,15 @@ public abstract class EntityRollingStockDefinition {
 		return this.bogeyRear;
 	}
 	
-	public double getCouplerFront() {
-		return this.frontBounds + Config.couplerRange;
-	}
-	
-	public double getCouplerRear() {
-		return this.rearBounds + Config.couplerRange;
+	public double getCouplerPosition(CouplerType coupler) {
+		switch(coupler) {
+		case FRONT:
+			return this.frontBounds + Config.couplerRange;
+		case BACK:
+			return this.rearBounds + Config.couplerRange;
+		default:
+			return 0;
+		}
 	}
 
 	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock) {

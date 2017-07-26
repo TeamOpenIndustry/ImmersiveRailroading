@@ -6,15 +6,24 @@ import java.util.UUID;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class EntityLinkableRollingStock extends EntityMoveableRollingStock {
+	
+	public enum CouplerType {
+		FRONT(0),
+		BACK(180);
+		
+		public final float yaw;
+
+		CouplerType(float yaw) {
+			this.yaw = yaw;
+		}
+	}
 	
 	public boolean isAttaching = false;
 
@@ -56,60 +65,43 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 	public void onUpdate() {
 		super.onUpdate();
 		
-		if (!this.isLinkedFront()) {
-			for (EntityLinkableRollingStock potentialLink : this.potentialFrontLinks()) {
-				if (!potentialLink.isLinkedFront() && potentialLink.potentialFrontLinks().contains(this)) {
-					ImmersiveRailroading.logger.info(String.format("COUPLING %s %s", this.getPersistentID(), potentialLink.getPersistentID()));
-					this.LinkFront = potentialLink.getPersistentID();
-					potentialLink.LinkFront = this.getPersistentID();
-					break;
-				} 
-				if (!potentialLink.isLinkedRear() && potentialLink.potentialRearLinks().contains(this)) {
-					ImmersiveRailroading.logger.info(String.format("COUPLING %s %s", this.getPersistentID(), potentialLink.getPersistentID()));
-					this.LinkFront = potentialLink.getPersistentID();
-					potentialLink.LinkBack = this.getPersistentID();
-					break;
+		for (CouplerType coupler : CouplerType.values()) {
+			if (!this.isLinked(coupler)) {
+				for (EntityLinkableRollingStock potentialLink : this.potentialLinks(coupler)) {
+					for (CouplerType potentialCoupler : CouplerType.values()) {
+						// Is the coupler free?
+						if (!potentialLink.isLinked(potentialCoupler)) {
+							// Is the other coupler within linking distance?
+							if (potentialLink.potentialLinks(potentialCoupler).contains(this)) {
+								System.out.println(String.format("Linking %s to %s", this.getPersistentID(), potentialLink.getPersistentID()));
+								this.setCoupledUUID(coupler, potentialLink.getPersistentID());
+								this.setCoupledCart(coupler, potentialLink);
+								potentialLink.setCoupledUUID(potentialCoupler, this.getPersistentID());
+								potentialLink.setCoupledCart(potentialCoupler, this);
+							}
+						}
+					}
+					
+					if (this.isLinked(coupler)) {
+						// Got link
+						break;
+					}
+					
+					// False Match
+					ImmersiveRailroading.logger.info(String.format("MISS %s %s %s", coupler, this.getPersistentID(), potentialLink.getPersistentID()));
 				}
-				ImmersiveRailroading.logger.info(String.format("MISS FRONT %s %s", this.getPersistentID(), potentialLink.getPersistentID()));
-			}
-		}
-		if (!this.isLinkedRear()) {
-			for (EntityLinkableRollingStock potentialLink : this.potentialRearLinks()) {
-				if (!potentialLink.isLinkedFront() && potentialLink.potentialFrontLinks().contains(this)) {
-					ImmersiveRailroading.logger.info(String.format("COUPLING %s %s", this.getPersistentID(), potentialLink.getPersistentID()));
-					this.LinkBack = potentialLink.getPersistentID();
-					potentialLink.LinkFront = this.getPersistentID();
-					break;
-				} 
-				if (!potentialLink.isLinkedRear() && potentialLink.potentialRearLinks().contains(this)) {
-					ImmersiveRailroading.logger.info(String.format("COUPLING %s %s", this.getPersistentID(), potentialLink.getPersistentID()));
-					this.LinkBack = potentialLink.getPersistentID();
-					potentialLink.LinkBack = this.getPersistentID();
-					break;
-				}
-				ImmersiveRailroading.logger.info(String.format("MISS REAR %s %s", this.getPersistentID(), potentialLink.getPersistentID()));
 			}
 		}
 	}
 	
-	public Vec3d frontCouplerPosition() {
-		return VecUtil.fromYaw(getDefinition().getCouplerFront(), rotationYaw).add(getPositionVector());
+	public Vec3d getCouplerPosition(CouplerType coupler) {
+		return VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler), rotationYaw + coupler.yaw).add(getPositionVector());
 	}
 	
-	public Vec3d rearCouplerPosition() {
-		return VecUtil.fromYaw(getDefinition().getCouplerRear(), rotationYaw + 180).add(getPositionVector());
+	public List<EntityLinkableRollingStock> potentialLinks(CouplerType coupler) {
+		return getInCouplerRange(VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler) + Config.couplerRange, rotationYaw + coupler.yaw).add(getPositionVector()));
 	}
 	
-	public List<EntityLinkableRollingStock> potentialFrontLinks() {
-		ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_LARGE, VecUtil.fromYaw(getDefinition().getCouplerFront() + Config.couplerRange, rotationYaw).add(getPositionVector()));
-		return getInCouplerRange(VecUtil.fromYaw(getDefinition().getCouplerFront() + Config.couplerRange, rotationYaw).add(getPositionVector()));
-	}
-	public List<EntityLinkableRollingStock> potentialRearLinks() {
-		ParticleUtil.spawnParticle(world, EnumParticleTypes.REDSTONE, VecUtil.fromYaw(getDefinition().getCouplerRear() + Config.couplerRange, rotationYaw + 180).add(getPositionVector()));
-		ParticleUtil.spawnParticle(world, EnumParticleTypes.REDSTONE, VecUtil.fromYaw(getDefinition().getCouplerRear() + Config.couplerRange, rotationYaw + 180).add(getPositionVector()));
-		ParticleUtil.spawnParticle(world, EnumParticleTypes.REDSTONE, VecUtil.fromYaw(getDefinition().getCouplerRear() + Config.couplerRange, rotationYaw + 180).add(getPositionVector()));
-		return getInCouplerRange(VecUtil.fromYaw(getDefinition().getCouplerRear() + Config.couplerRange, rotationYaw + 180).add(getPositionVector()));
-	}
 	private List<EntityLinkableRollingStock> getInCouplerRange(Vec3d pos) {
 		AxisAlignedBB bb  = new AxisAlignedBB(-Config.couplerRange, -Config.couplerRange, -Config.couplerRange, Config.couplerRange, Config.couplerRange, Config.couplerRange);
 		List<EntityLinkableRollingStock> inRange = world.getEntitiesWithinAABB(EntityLinkableRollingStock.class, bb.offset(pos).offset(0, 1, 0));
@@ -117,73 +109,100 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 		return inRange;
 	}
 
-	public final boolean isLinked() {
-		return isLinkedFront() && isLinkedRear();
-	}
-	
-	public final boolean isLinkedFront() {
-		return LinkFront != null;
-	}
-	
-	public final boolean isLinkedRear() {
-		return LinkBack != null;
-	}
 
+	public boolean isLinked(EntityLinkableRollingStock cart) {
+		return this.getLinkedCart(CouplerType.FRONT) == cart || this.getLinkedCart(CouplerType.BACK) == cart;
+	}
+	
+	public final boolean isLinked() {
+		return isLinked(CouplerType.FRONT) && isLinked(CouplerType.BACK);
+	}
+	
+	public final boolean isLinked(CouplerType coupler) {
+		return getCoupledUUID(coupler) != null;
+	}
+	
+	public final UUID getCoupledUUID(CouplerType coupler) {
+		switch(coupler) {
+		case FRONT:
+			return LinkFront;
+		case BACK:
+			return LinkBack;
+		default:
+			return null;
+		}
+	}
+	public final void setCoupledUUID(CouplerType coupler, UUID id) {
+		switch(coupler) {
+		case FRONT:
+			LinkFront = id;
+			break;
+		case BACK:
+			LinkBack = id;
+			break;
+		}
+	}
+	
 	public void unlink() {
-		unlinkFront();
-		unlinkBack();
+		unlink(CouplerType.FRONT);
+		unlink(CouplerType.BACK);
 	}
 
 	public void unlink(EntityLinkableRollingStock train) {
-		if (train.getPersistentID() == this.LinkFront) {
-			unlinkFront();
-		} else if (train.getPersistentID() == this.LinkBack) {
-			unlinkBack();
+		if (train.getPersistentID() == this.getCoupledUUID(CouplerType.FRONT)) {
+			unlink(CouplerType.FRONT);
+		} else if (train.getPersistentID() == this.getCoupledUUID(CouplerType.BACK)) {
+			unlink(CouplerType.BACK);
 		}
 	}
 
-	public void unlinkFront() {
-		EntityLinkableRollingStock cartLinkedFront = getLinkedCartFront();
+	public void unlink(CouplerType coupler) {
+		EntityLinkableRollingStock cartLinked = getLinkedCart(coupler);
 
 		// Break the link
-		this.LinkFront = null;
-		this.cartLinkedFront = null;
+		this.setCoupledUUID(coupler, null);
+		this.setCoupledCart(coupler, null);
 
 		// Ask the connected car to do the same
-		if (cartLinkedFront != null) {
-			cartLinkedFront.unlink(this);
+		if (cartLinked != null) {
+			cartLinked.unlink(this);
 		}
 	}
 
-	public void unlinkBack() {
-		EntityLinkableRollingStock cartLinkedBack = getLinkedCartBack();
-
-		// Break the link
-		this.LinkBack = null;
-		this.cartLinkedBack = null;
-
-		// Ask the connected car to do the same
-		if (cartLinkedBack != null) {
-			cartLinkedBack.unlink(this);
+	public void setCoupledCart(CouplerType coupler, EntityLinkableRollingStock cart) {
+		switch (coupler) {
+		case FRONT:
+			this.cartLinkedFront = cart;
+			break;
+		case BACK:
+			this.cartLinkedBack = cart;
+			break;
 		}
 	}
+	
+	public EntityLinkableRollingStock getLinkedCart(CouplerType coupler) {
+		EntityLinkableRollingStock cart = null;
 
-	public boolean isLinked(EntityLinkableRollingStock cart) {
-		return this.getLinkedCartFront() == cart || this.getLinkedCartBack() == cart;
-	}
-
-	public EntityLinkableRollingStock getLinkedCartFront() {
-		if (this.cartLinkedFront == null && this.LinkFront != null) {
-			this.cartLinkedFront = findByUUID(this.world, this.LinkFront);
+		switch (coupler) {
+		case FRONT:
+			cart = this.cartLinkedFront;
+			break;
+		case BACK:
+			cart = this.cartLinkedBack;
+			break;
 		}
-		return this.cartLinkedFront;
-	}
-
-	public EntityLinkableRollingStock getLinkedCartBack() {
-		if (this.cartLinkedBack == null && this.LinkBack != null) {
-			this.cartLinkedBack = findByUUID(this.world, this.LinkBack);
+		
+		if (cart == null && this.getCoupledUUID(coupler) != null) {
+			switch (coupler) {
+			case FRONT:
+				this.cartLinkedFront = findByUUID(this.world, this.getCoupledUUID(coupler));
+				return this.cartLinkedFront;
+			case BACK:
+				this.cartLinkedBack = findByUUID(this.world, this.getCoupledUUID(coupler));
+				return this.cartLinkedBack;
+			}
 		}
-		return this.cartLinkedBack;
+		return cart;
 	}
 
 	public static EntityLinkableRollingStock findByUUID(World world, UUID uuid) {
@@ -205,11 +224,11 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 	private final List<EntityLinkableRollingStock> buildTrain(List<EntityLinkableRollingStock> train) {
 		if (!train.contains(this)) {
 			train.add(this);
-			if (this.getLinkedCartFront() != null) {
-				train = this.getLinkedCartFront().buildTrain(train);
+			if (this.getLinkedCart(CouplerType.FRONT) != null) {
+				train = this.getLinkedCart(CouplerType.FRONT).buildTrain(train);
 			}
-			if (this.getLinkedCartBack() != null) {
-				train = this.getLinkedCartBack().buildTrain(train);
+			if (this.getLinkedCart(CouplerType.BACK) != null) {
+				train = this.getLinkedCart(CouplerType.BACK).buildTrain(train);
 			}
 		}
 		return train;
@@ -227,41 +246,47 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 	// This breaks with looped rolling stock
 	// TODO prevent looped trains
 	private void recursiveMove(EntityLinkableRollingStock prev) {
-		EntityLinkableRollingStock next = this.getLinkedCartBack();
-		Vec3d myOffset = this.rearCouplerPosition();
-		if (next == prev) {
-			next = this.getLinkedCartFront();
-			myOffset = this.frontCouplerPosition();
+		for (CouplerType coupler : CouplerType.values()) {
+			EntityLinkableRollingStock coupled = this.getLinkedCart(coupler);
+			Vec3d myOffset = this.getCouplerPosition(coupler);
+			
+			if (coupled == null || coupled == prev) {
+				// Either end of train or wrong iteration direction
+				return;
+			}
+			
+			Vec3d otherOffset = null;
+			for(CouplerType otherCoupler : CouplerType.values()) {
+				if (coupled.getLinkedCart(otherCoupler) == this) {
+					// Matching coupler pair
+					otherOffset = coupled.getCouplerPosition(otherCoupler);
+				}
+			}
+			if (otherOffset == null) {
+				ImmersiveRailroading.logger.warn("Broken Linkage %s => %s", this.getPersistentID(), coupled.getPersistentID());
+				return;
+			}
+			
+			double distance = myOffset.distanceTo(otherOffset);
+			
+			//TEMP
+			if (distance > 1) {
+				ImmersiveRailroading.logger.warn(String.format("%s too far from %s", this.getPersistentID(), coupled.getPersistentID()));
+				ImmersiveRailroading.logger.warn(String.format("%s --> %s", myOffset, otherOffset));
+				return;
+			}
+		
+			// Figure out which direction to move the next stock
+			Vec3d nextPosForward = otherOffset.add(VecUtil.fromYaw(distance, coupled.rotationYaw));
+			Vec3d nextPosReverse = otherOffset.add(VecUtil.fromYaw(-distance, coupled.rotationYaw));
+			
+			if (myOffset.distanceTo(nextPosForward) > myOffset.distanceTo(nextPosReverse)) {
+				// Moving in reverse
+				distance = -distance;
+			}
+			
+			coupled.moveRollingStock(distance);
+			coupled.recursiveMove(this);
 		}
-		
-		if (next == null) {
-			// end of train
-			// base case
-			return;
-		}
-		
-		Vec3d otherOffset = null;
-		if (next.getLinkedCartBack() == this) {
-			otherOffset = next.rearCouplerPosition();
-		} else if (next.getLinkedCartFront() == this) {
-			otherOffset = next.frontCouplerPosition();
-		} else {
-			ImmersiveRailroading.logger.warn("Broken Linkage %s => %s", this.getPersistentID(), next.getPersistentID());
-			return;
-		}
-		
-		double distance = myOffset.subtract(otherOffset).lengthVector();
-		
-		// Figure out which direction to move the next stock
-		Vec3d nextPosForward = otherOffset.add(VecUtil.fromYaw(distance, next.rotationYaw));
-		Vec3d nextPosReverse = otherOffset.add(VecUtil.fromYaw(-distance, next.rotationYaw));
-		
-		if (myOffset.distanceTo(nextPosForward) > myOffset.distanceTo(nextPosReverse)) {
-			// Moving in reverse
-			distance = -distance;
-		}
-		
-		next.moveRollingStock(distance);
-		next.recursiveMove(this);
 	}
 }
