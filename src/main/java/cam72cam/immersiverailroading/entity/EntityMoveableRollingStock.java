@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public abstract class EntityMoveableRollingStock extends EntityRollingStock {
+public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock {
 
 	public Float frontYaw;
 	public Float rearYaw;

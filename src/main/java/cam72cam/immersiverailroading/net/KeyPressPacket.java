@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.net;
 
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.library.KeyBindings;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -50,7 +50,7 @@ public class KeyPressPacket implements IMessage {
 
 		private void handle(KeyPressPacket message, MessageContext ctx) {
 			Entity source = ctx.getServerHandler().player.getServerWorld().getEntityByID(message.sourceEntityID);
-			EntityRollingStock target = (EntityRollingStock) ctx.getServerHandler().player.getServerWorld().getEntityByID(message.targetEntityID);
+			EntityRidableRollingStock target = (EntityRidableRollingStock) ctx.getServerHandler().player.getServerWorld().getEntityByID(message.targetEntityID);
 			if (target == null) {
 				return;
 			}

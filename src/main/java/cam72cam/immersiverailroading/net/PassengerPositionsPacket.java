@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -26,9 +26,9 @@ public class PassengerPositionsPacket implements IMessage {
 	public PassengerPositionsPacket() {
 		//Reflection
 	}
-	public PassengerPositionsPacket(EntityRollingStock stock) {
+	public PassengerPositionsPacket(EntityRidableRollingStock stock) {
 		this.stockID = stock.getPersistentID();
-		this.passengerPositions = stock.passengerOffsets;
+		this.passengerPositions = stock.passengerPositions;
 	}
 
 	@Override
@@ -51,9 +51,9 @@ public class PassengerPositionsPacket implements IMessage {
 		}
 
 		private void handle(PassengerPositionsPacket message, MessageContext ctx) {
-			List<EntityRollingStock> matches = Minecraft.getMinecraft().world.getEntities(EntityRollingStock.class, new Predicate<EntityRollingStock>()
+			List<EntityRidableRollingStock> matches = Minecraft.getMinecraft().world.getEntities(EntityRidableRollingStock.class, new Predicate<EntityRidableRollingStock>()
 		    {
-		        public boolean apply(@Nullable EntityRollingStock entity)
+		        public boolean apply(@Nullable EntityRidableRollingStock entity)
 		        {
 		            return entity != null && entity.getPersistentID().equals(message.stockID);
 		        }
@@ -64,9 +64,9 @@ public class PassengerPositionsPacket implements IMessage {
 				return;
 			}
 			
-			EntityRollingStock entity = (EntityRollingStock) matches.get(0);
+			EntityRidableRollingStock entity = matches.get(0);
 			
-			entity.passengerOffsets = message.passengerPositions;
+			entity.passengerPositions = message.passengerPositions;
 		}
 	}
 }

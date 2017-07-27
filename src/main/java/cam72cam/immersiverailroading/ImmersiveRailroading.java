@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveElectric;
 import cam72cam.immersiverailroading.entity.CartFreight;
 import cam72cam.immersiverailroading.entity.CartPassenger;
 import cam72cam.immersiverailroading.entity.CartTank;
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -165,7 +166,7 @@ public class ImmersiveRailroading
 			EntityPlayerSP player = Minecraft.getMinecraft().player;
     		for (KeyBindings binding : KeyBindings.values()) {
     			if (binding.isPressed()) {
-    				EntityRollingStock riding = (EntityRollingStock)player.getRidingEntity();
+    				EntityRidableRollingStock riding = (EntityRidableRollingStock)player.getRidingEntity();
     				if (riding != null) {
     					ImmersiveRailroading.net.sendToServer(new KeyPressPacket(binding, player.getEntityId(), riding.getEntityId()));
     				}
