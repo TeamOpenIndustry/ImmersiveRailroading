@@ -52,12 +52,12 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 		super.readEntityFromNBT(nbttagcompound);
 		if (nbttagcompound.hasKey("LinkFront")) {
 			LinkFront = UUID.fromString(nbttagcompound.getString("LinkFront"));
-			System.out.println("LINK FRONT");
+			System.out.println(String.format("LOADED LINK FRONT %s => %s", this.getPersistentID(), LinkFront));
 		}
 		
 		if (nbttagcompound.hasKey("LinkBack")) {
 			LinkBack = UUID.fromString(nbttagcompound.getString("LinkBack"));
-			System.out.println("LINK BACK");
+			System.out.println(String.format("LOADED LINK REAR %s => %s", this.getPersistentID(), LinkBack));
 		}
 	}
 	
@@ -78,6 +78,7 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 								this.setCoupledCart(coupler, potentialLink);
 								potentialLink.setCoupledUUID(potentialCoupler, this.getPersistentID());
 								potentialLink.setCoupledCart(potentialCoupler, this);
+								break;
 							}
 						}
 					}
@@ -149,9 +150,9 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 	}
 
 	public void unlink(EntityLinkableRollingStock train) {
-		if (train.getPersistentID() == this.getCoupledUUID(CouplerType.FRONT)) {
+		if (train.getPersistentID().equals(this.getCoupledUUID(CouplerType.FRONT))) {
 			unlink(CouplerType.FRONT);
-		} else if (train.getPersistentID() == this.getCoupledUUID(CouplerType.BACK)) {
+		} else if (train.getPersistentID().equals(this.getCoupledUUID(CouplerType.BACK))) {
 			unlink(CouplerType.BACK);
 		}
 	}
@@ -210,7 +211,7 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 		for (Object e : world.getLoadedEntityList()) {
 			if (e instanceof EntityLinkableRollingStock) {
 				EntityLinkableRollingStock train = (EntityLinkableRollingStock) e;
-				if (train.getPersistentID() == uuid) {
+				if (train.getPersistentID().equals(uuid)) {
 					return train;
 				}
 			}
@@ -252,7 +253,7 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 			
 			if (coupled == null || coupled == prev) {
 				// Either end of train or wrong iteration direction
-				return;
+				continue;
 			}
 			
 			Vec3d otherOffset = null;
@@ -264,16 +265,16 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 			}
 			if (otherOffset == null) {
 				ImmersiveRailroading.logger.warn("Broken Linkage %s => %s", this.getPersistentID(), coupled.getPersistentID());
-				return;
+				continue;
 			}
 			
 			double distance = myOffset.distanceTo(otherOffset);
 			
 			//TEMP
 			if (distance > 1) {
-				ImmersiveRailroading.logger.warn(String.format("%s too far from %s", this.getPersistentID(), coupled.getPersistentID()));
-				ImmersiveRailroading.logger.warn(String.format("%s --> %s", myOffset, otherOffset));
-				return;
+				//ImmersiveRailroading.logger.warn(String.format("%s too far from %s", this.getPersistentID(), coupled.getPersistentID()));
+				//ImmersiveRailroading.logger.warn(String.format("%s --> %s", myOffset, otherOffset));
+				//return;
 			}
 		
 			// Figure out which direction to move the next stock
