@@ -57,12 +57,14 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		defID = BufferUtil.readString(additionalData);
+		passengerOffsets = BufferUtil.readPlayerPositions(additionalData);
 		rollingStockInit();
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		BufferUtil.writeString(buffer, defID);
+		BufferUtil.writePlayerPositions(buffer, passengerOffsets);
 		rollingStockInit();
 	}
 
@@ -195,14 +197,9 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		ImmersiveRailroading.net.sendToAllAround(packet, new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
 	}
 	
-	//nasty hack
-	private int ticksToSyncOffset = 0;
 	@Override
 	protected void addPassenger(Entity passenger) {
 		super.addPassenger(passenger);
-		if (!world.isRemote) {
-			ticksToSyncOffset = 5;
-		}
 	}
 	
 	@Override
@@ -242,23 +239,6 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public boolean canBePushed() {
 		return false;
-	}
-	
-	@Override
-	public void onUpdate() {
-		if (this.ticksExisted % 50 == 0 && !world.isRemote) {
-			this.syncPassengerOffsets();
-		}
-		// Delayed sync after a user logs in.  We sync the entity they are riding N ticks after they have loaded
-		// Otherwise the packet gets there before the entity is fully instantiated.
-		if (!world.isRemote) {
-			if (ticksToSyncOffset > 0) {
-				ticksToSyncOffset--;
-			} else if (ticksToSyncOffset == 0) {
-				this.syncPassengerOffsets();
-				ticksToSyncOffset = -1;
-			}
-		}
 	}
 
 

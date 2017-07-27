@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.net;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,38 +21,26 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PassengerPositionsPacket implements IMessage {
 	private UUID stockID;
-	private Map<UUID, Vec3d> passengerOffsets;
+	private Map<UUID, Vec3d> passengerPositions;
 	
 	public PassengerPositionsPacket() {
 		//Reflection
 	}
 	public PassengerPositionsPacket(EntityRollingStock stock) {
 		this.stockID = stock.getPersistentID();
-		this.passengerOffsets = stock.passengerOffsets;
+		this.passengerPositions = stock.passengerOffsets;
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		stockID = BufferUtil.readUUID(buf);
-		
-		passengerOffsets = new HashMap<UUID, Vec3d>();
-		
-		for (int itemCount = buf.readInt(); itemCount > 0; itemCount--) {
-			UUID id = BufferUtil.readUUID(buf);
-			Vec3d pos = BufferUtil.readVec3d(buf);
-			passengerOffsets.put(id, pos);
-		}
+		passengerPositions = BufferUtil.readPlayerPositions(buf);
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
 		BufferUtil.writeUUID(buf, stockID);
-		
-		buf.writeInt(passengerOffsets.size());
-		for(UUID entry : passengerOffsets.keySet()) {
-			BufferUtil.writeUUID(buf, entry);
-			BufferUtil.writeVec3d(buf, passengerOffsets.get(entry));
-		}
+		BufferUtil.writePlayerPositions(buf, passengerPositions);
 	}
 	
 	public static class Handler implements IMessageHandler<PassengerPositionsPacket, IMessage> {
@@ -79,7 +66,7 @@ public class PassengerPositionsPacket implements IMessage {
 			
 			EntityRollingStock entity = (EntityRollingStock) matches.get(0);
 			
-			entity.passengerOffsets = message.passengerOffsets;
+			entity.passengerOffsets = message.passengerPositions;
 		}
 	}
 }

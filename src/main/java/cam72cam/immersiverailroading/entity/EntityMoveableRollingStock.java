@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.VecUtil;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -25,6 +26,20 @@ public abstract class EntityMoveableRollingStock extends EntityRollingStock {
 
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
+	}
+	
+	@Override
+	public void readSpawnData(ByteBuf additionalData) {
+		super.readSpawnData(additionalData);
+		frontYaw = additionalData.readFloat();
+		rearYaw = additionalData.readFloat();
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		super.writeSpawnData(buffer);
+		buffer.writeFloat(frontYaw);
+		buffer.writeFloat(rearYaw);
 	}
 
 	@Override
