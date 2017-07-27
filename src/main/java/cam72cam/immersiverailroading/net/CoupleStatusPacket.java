@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityLinkableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityLinkableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -18,15 +18,15 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class LinkStatusPacket implements IMessage {
+public class CoupleStatusPacket implements IMessage {
 	private UUID stockID;
 	private UUID stockFrontID;
 	private UUID stockBackID;
 	
-	public LinkStatusPacket() {
+	public CoupleStatusPacket() {
 		//Reflection
 	}
-	public LinkStatusPacket(EntityLinkableRollingStock stock) {
+	public CoupleStatusPacket(EntityCoupleableRollingStock stock) {
 		stockID = stock.getPersistentID(); 
 		stockFrontID = stock.getCoupledUUID(CouplerType.FRONT);
 		stockBackID = stock.getCoupledUUID(CouplerType.BACK);
@@ -46,17 +46,17 @@ public class LinkStatusPacket implements IMessage {
 		BufferUtil.writeUUID(buf, stockBackID);
 	}
 	
-	public static class Handler implements IMessageHandler<LinkStatusPacket, IMessage> {
+	public static class Handler implements IMessageHandler<CoupleStatusPacket, IMessage> {
 		@Override
-		public IMessage onMessage(LinkStatusPacket message, MessageContext ctx) {
+		public IMessage onMessage(CoupleStatusPacket message, MessageContext ctx) {
 			FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
 			return null;
 		}
 
-		private void handle(LinkStatusPacket message, MessageContext ctx) {
-			List<EntityLinkableRollingStock> matches = Minecraft.getMinecraft().world.getEntities(EntityLinkableRollingStock.class, new Predicate<EntityLinkableRollingStock>()
+		private void handle(CoupleStatusPacket message, MessageContext ctx) {
+			List<EntityCoupleableRollingStock> matches = Minecraft.getMinecraft().world.getEntities(EntityCoupleableRollingStock.class, new Predicate<EntityCoupleableRollingStock>()
 		    {
-		        public boolean apply(@Nullable EntityLinkableRollingStock entity)
+		        public boolean apply(@Nullable EntityCoupleableRollingStock entity)
 		        {
 		            return entity != null && entity.getPersistentID().equals(message.stockID);
 		        }
@@ -67,7 +67,7 @@ public class LinkStatusPacket implements IMessage {
 				return;
 			}
 			
-			EntityLinkableRollingStock stock = matches.get(0);
+			EntityCoupleableRollingStock stock = matches.get(0);
 			ImmersiveRailroading.logger.info("GOT LINK PACKET");
 			stock.setCoupledUUID(CouplerType.FRONT, message.stockFrontID);
 			stock.setCoupledUUID(CouplerType.BACK, message.stockBackID);

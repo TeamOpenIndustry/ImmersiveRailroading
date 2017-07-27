@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import net.minecraft.world.World;
 
-public class CartPassenger extends EntityLinkableRollingStock {
+public class CartPassenger extends EntityCoupleableRollingStock {
 	public CartPassenger(World world) {
 		this(world, null);
 	}

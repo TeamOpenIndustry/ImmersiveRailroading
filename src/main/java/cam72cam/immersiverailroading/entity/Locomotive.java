@@ -215,7 +215,7 @@ public abstract class Locomotive extends FreightTank {
 		// runSound.setVolume(getSpeed().minecraft() > 0 ? 1 : 0);
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
 
-		moveLinkedRollingStock(this.dataManager.get(throttle));
+		moveCoupledRollingStock(this.dataManager.get(throttle));
 	}
 	
 	private void PullPhysic() {
@@ -227,7 +227,7 @@ public abstract class Locomotive extends FreightTank {
 		double brakeReduction = 0;
 		double currentFuelConsumptionChange = 0;
 
-		List<EntityLinkableRollingStock> train = this.getTrain();
+		List<EntityCoupleableRollingStock> train = this.getTrain();
 		dataManager.set(currentCartsPulled, train.size() - 1);
 
 		/*

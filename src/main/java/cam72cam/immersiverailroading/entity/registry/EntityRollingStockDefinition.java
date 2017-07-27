@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.entity.EntityLinkableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.block.state.IBlockState;

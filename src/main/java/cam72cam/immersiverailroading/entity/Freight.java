@@ -15,7 +15,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public abstract class Freight extends EntityLinkableRollingStock {
+public abstract class Freight extends EntityCoupleableRollingStock {
 	protected ItemStackHandler cargoItems = new ItemStackHandler(0) {
         @Override
         protected void onContentsChanged(int slot) {
