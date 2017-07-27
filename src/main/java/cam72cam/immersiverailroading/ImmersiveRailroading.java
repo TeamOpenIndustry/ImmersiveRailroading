@@ -18,6 +18,7 @@ import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.KeyBindings;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
+import cam72cam.immersiverailroading.net.LinkStatusPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -87,6 +88,7 @@ public class ImmersiveRailroading
     	net.registerMessage(MRSSyncPacket.Handler.class, MRSSyncPacket.class, 0, Side.CLIENT);
     	net.registerMessage(KeyPressPacket.Handler.class, KeyPressPacket.class, 1, Side.SERVER);
     	net.registerMessage(PassengerPositionsPacket.Handler.class, PassengerPositionsPacket.class, 2, Side.CLIENT);
+    	net.registerMessage(LinkStatusPacket.Handler.class, LinkStatusPacket.class, 3, Side.CLIENT);
     	if (event.getSide() == Side.CLIENT) {
     		KeyBindings.registerKeyBindings();
     	}

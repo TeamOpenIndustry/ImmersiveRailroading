@@ -6,11 +6,15 @@ import java.util.UUID;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.net.LinkStatusPacket;
+import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public abstract class EntityLinkableRollingStock extends EntityMoveableRollingStock {
 	
@@ -35,6 +39,20 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 	public EntityLinkableRollingStock(World world, String defID) {
 		super(world, defID);
 	}
+	
+	@Override
+	public void readSpawnData(ByteBuf additionalData) {
+		super.readSpawnData(additionalData);
+		LinkFront = BufferUtil.readUUID(additionalData);
+		LinkBack = BufferUtil.readUUID(additionalData);
+	}
+	
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		super.writeSpawnData(buffer);
+		BufferUtil.writeUUID(buffer, LinkFront);
+		BufferUtil.writeUUID(buffer, LinkBack);
+	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
@@ -52,18 +70,21 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 		super.readEntityFromNBT(nbttagcompound);
 		if (nbttagcompound.hasKey("LinkFront")) {
 			LinkFront = UUID.fromString(nbttagcompound.getString("LinkFront"));
-			System.out.println(String.format("LOADED LINK FRONT %s => %s", this.getPersistentID(), LinkFront));
 		}
 		
 		if (nbttagcompound.hasKey("LinkBack")) {
 			LinkBack = UUID.fromString(nbttagcompound.getString("LinkBack"));
-			System.out.println(String.format("LOADED LINK REAR %s => %s", this.getPersistentID(), LinkBack));
 		}
 	}
 	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		
+		if (world.isRemote) {
+			// Only link server side
+			return;
+		}
 		
 		for (CouplerType coupler : CouplerType.values()) {
 			if (!this.isLinked(coupler)) {
@@ -78,6 +99,8 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 								this.setCoupledCart(coupler, potentialLink);
 								potentialLink.setCoupledUUID(potentialCoupler, this.getPersistentID());
 								potentialLink.setCoupledCart(potentialCoupler, this);
+								ImmersiveRailroading.net.sendToAllAround(new LinkStatusPacket(this), new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+								ImmersiveRailroading.net.sendToAllAround(new LinkStatusPacket(potentialLink), new TargetPoint(potentialLink.dimension, potentialLink.posX, potentialLink.posY, potentialLink.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
 								break;
 							}
 						}
@@ -134,12 +157,17 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 		}
 	}
 	public final void setCoupledUUID(CouplerType coupler, UUID id) {
+		if (this.getCoupledUUID(coupler) != null && this.getCoupledUUID(coupler).equals(id)) {
+			return;
+		}
 		switch(coupler) {
 		case FRONT:
 			LinkFront = id;
+			cartLinkedFront = null;
 			break;
 		case BACK:
 			LinkBack = id;
+			cartLinkedBack = null;
 			break;
 		}
 	}
@@ -149,10 +177,10 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 		unlink(CouplerType.BACK);
 	}
 
-	public void unlink(EntityLinkableRollingStock train) {
-		if (train.getPersistentID().equals(this.getCoupledUUID(CouplerType.FRONT))) {
+	public void unlink(EntityLinkableRollingStock stock) {
+		if (stock.getPersistentID().equals(this.getCoupledUUID(CouplerType.FRONT))) {
 			unlink(CouplerType.FRONT);
-		} else if (train.getPersistentID().equals(this.getCoupledUUID(CouplerType.BACK))) {
+		} else if (stock.getPersistentID().equals(this.getCoupledUUID(CouplerType.BACK))) {
 			unlink(CouplerType.BACK);
 		}
 	}
@@ -289,5 +317,21 @@ public abstract class EntityLinkableRollingStock extends EntityMoveableRollingSt
 			coupled.moveRollingStock(distance);
 			coupled.recursiveMove(this);
 		}
+	}
+
+	public CouplerType getCouplerFor(EntityLinkableRollingStock stock) {
+		for (CouplerType coupler : CouplerType.values()) {
+			if (this.getLinkedCart(coupler) == stock) {
+				return coupler;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public void setDead() {
+		System.out.println("DEAD");
+		this.unlink();
+		super.setDead();
 	}
 }
