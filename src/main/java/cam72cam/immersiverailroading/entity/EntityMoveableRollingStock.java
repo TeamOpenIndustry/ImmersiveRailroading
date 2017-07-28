@@ -290,6 +290,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				return newneg;
 			}
 		} else {
+			// delta should be in the direction of rotationYaw instead of front or rear
+			// since large changes can occur if the train is way off center
+			delta = nextMovement(this.rotationYaw, distance);
 			// Look on either side of the rail for a sibling rail
 			Vec3d side1Pos = rail.getCenterOfRail().add(delta.normalize().rotateYaw(90));
 			Vec3d side2Pos = rail.getCenterOfRail().add(delta.normalize().rotateYaw(-90));
@@ -301,7 +304,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			} else if (side2Rail != null && side2Rail.getParent().equals(rail.getParent())) {
 				betweenLoc = between(side2Rail.getCenterOfRail(), rail.getCenterOfRail());
 			} else {
-				ImmersiveRailroading.logger.error("INVALID RAIL");
 				return position.add(delta);
 			}
 			if (Math.abs(delta.x) > Math.abs(delta.z)) {
