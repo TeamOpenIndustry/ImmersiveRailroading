@@ -157,4 +157,11 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 			passenger.setPosition(pos.x, pos.y, pos.z);
 		}
 	}
+	
+	@Override
+	public void removePassenger(Entity passenger) {
+		super.removePassenger(passenger);
+		Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth()/2 + 1.3, this.rotationYaw - 90);
+		passenger.setPositionAndUpdate(passenger.posX += delta.x, passenger.posY, passenger.posZ += delta.z);
+	}
 }

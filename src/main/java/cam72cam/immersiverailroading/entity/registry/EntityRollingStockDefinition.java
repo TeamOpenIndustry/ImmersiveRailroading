@@ -270,4 +270,8 @@ public abstract class EntityRollingStockDefinition {
 		List<String> tips = new ArrayList<String>();
 		return tips;
 	}
+
+	public double getPassengerCompartmentWidth() {
+		return this.passengerCompartmentWidth;
+	}
 }
