@@ -150,7 +150,7 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 				passengerPositions.put(passenger.getPersistentID(), new Vec3d(0, 0, 0));
 			}
 			
-			Vec3d pos = this.getDefinition().getPlayerOffset();
+			Vec3d pos = this.getDefinition().getPassengerCenter();
 			pos = pos.add(passengerPositions.get(passenger.getPersistentID()));
 			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 			pos = pos.add(this.getPositionVector());

@@ -45,7 +45,7 @@ public abstract class EntityRollingStockDefinition {
 	protected String defID;
 	private String name;
 	private OBJModel model;
-	private Vec3d passengerDefault;
+	private Vec3d passengerCenter;
 	private float bogeyFront;
 	private float bogeyRear;
 
@@ -55,9 +55,8 @@ public abstract class EntityRollingStockDefinition {
 	private double rearBounds;
 	private double heightBounds;
 	private double widthBounds;
-	private double passengerMaxFront;
-	private double passengerMaxRear;
-	private double passengerMaxWidth;
+	private double passengerCompartmentLength;
+	private double passengerCompartmentWidth;
 
 	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
@@ -67,11 +66,9 @@ public abstract class EntityRollingStockDefinition {
 		// ResourceLocation(data.get("model").getAsString()));
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()));
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
-		passengerDefault = new Vec3d(passenger.get("default_x").getAsDouble(), passenger.get("default_y").getAsDouble(),
-				passenger.get("default_z").getAsDouble());
-		passengerMaxFront = passenger.get("front").getAsDouble();
-		passengerMaxRear = passenger.get("rear").getAsDouble();
-		passengerMaxWidth = passenger.get("width").getAsDouble();
+		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0);
+		passengerCompartmentLength = passenger.get("length").getAsDouble();
+		passengerCompartmentWidth = passenger.get("width").getAsDouble();
 
 		bogeyFront = data.get("trucks").getAsJsonObject().get("front").getAsFloat();
 		bogeyRear = data.get("trucks").getAsJsonObject().get("rear").getAsFloat();
@@ -227,20 +224,20 @@ public abstract class EntityRollingStockDefinition {
 		};
 	}
 
-	public Vec3d getPlayerOffset() {
-		return this.passengerDefault;
+	public Vec3d getPassengerCenter() {
+		return this.passengerCenter;
 	}
 	public Vec3d correctPassengerBounds(Vec3d pos) {
-		if (pos.x > this.passengerMaxFront) {
-			pos = new Vec3d(this.passengerMaxFront, pos.y, pos.z);
+		if (pos.x > this.passengerCompartmentLength) {
+			pos = new Vec3d(this.passengerCompartmentLength, pos.y, pos.z);
 		}
 		
-		if (pos.x < this.passengerMaxRear) {
-			pos = new Vec3d(this.passengerMaxRear, pos.y, pos.z);
+		if (pos.x < -this.passengerCompartmentLength) {
+			pos = new Vec3d(-this.passengerCompartmentLength, pos.y, pos.z);
 		}
 		
-		if (Math.abs(pos.z+0.75) > this.passengerMaxWidth/2) {
-			pos = new Vec3d(pos.x, pos.y, Math.copySign(this.passengerMaxWidth/2, pos.z)-0.75);
+		if (Math.abs(pos.z) > this.passengerCompartmentWidth/2) {
+			pos = new Vec3d(pos.x, pos.y, Math.copySign(this.passengerCompartmentWidth/2, pos.z));
 		}
 		
 		return pos;

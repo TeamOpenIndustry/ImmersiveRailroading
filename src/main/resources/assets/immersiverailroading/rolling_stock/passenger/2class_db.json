@@ -2,21 +2,19 @@
 	"name": "Second Class DB",
 	"model": "immersiverailroading:models/rolling_stock/passenger/1class_db.obj",
 	"passenger": {
-		"default_x": 0,
-		"default_y": 1.25,
-		"default_z": 0,
-		"front": 2,
-		"rear": -2,
+		"center_x": 0,
+		"center_y": 1.4,
+		"length": 2,
 		"width": 2
 	},
 	"trucks": {
 		"front": 2, 
-		"rear": 2
+		"rear": -2
 	},
 	"bounds": {
-		"front": 3,
-		"rear": 3,
-		"height": 4,
+		"front": 3.5,
+		"rear": 3.5,
+		"height": 4.24,
 		"width": 2
 	},
 	"rotate": {

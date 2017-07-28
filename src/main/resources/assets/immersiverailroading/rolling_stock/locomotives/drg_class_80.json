@@ -15,11 +15,9 @@
 		"max_speed": 45 
 	},
 	"passenger": {
-		"default_x": 0,
-		"default_y": 2,
-		"default_z": 0,
-		"front": 2,
-		"rear": -2,
+		"center_x": -1.5,
+		"center_y": 2,
+		"length": 0.4,
 		"width": 2
 	},
 	"particles": {
@@ -32,14 +30,14 @@
 		"TODO": "TODO"
 	},
 	"trucks": {
-		"front": 3, 
-		"rear": -1
+		"front": 1.5, 
+		"rear": -1.5
 	},
 	"bounds": {
-		"front": 4,
-		"rear": 2,
-		"height": 4,
-		"width": 2
+		"front": 3,
+		"rear": 3.5,
+		"height": 4.25,
+		"width": 3
 	},
 	"rotate": {
 		"y": -90
