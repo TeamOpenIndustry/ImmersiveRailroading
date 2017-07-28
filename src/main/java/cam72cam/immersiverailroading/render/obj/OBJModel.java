@@ -107,7 +107,9 @@ public class OBJModel {
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			
+			double defaultBrightness = 0.7;
+			GL11.glColor4d(defaultBrightness, defaultBrightness, defaultBrightness, 1);
+
 			GL11.glBegin(GL11.GL_QUADS);
 			{
 				for (List<Face> faces : groups.values()) {
@@ -119,7 +121,7 @@ public class OBJModel {
 							Vector3f vn;
 							
 							switch(point.length) {
-							case 3:;
+							case 3:
 								vn = vertexNormals.get(point[2]);
 								GL11.glNormal3f(vn.x, vn.y, vn.z);
 							case 2:

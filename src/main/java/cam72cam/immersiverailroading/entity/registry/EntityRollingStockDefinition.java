@@ -8,6 +8,8 @@ import javax.vecmath.Matrix4f;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
@@ -18,6 +20,7 @@ import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -32,6 +35,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import util.Matrix4;
 
 public abstract class EntityRollingStockDefinition {
@@ -98,11 +103,8 @@ public abstract class EntityRollingStockDefinition {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(model.texLoc);
 		}
 
-		// From IE
-		RenderHelper.disableStandardItemLighting();
-
-		GlStateManager.color(1, 1, 1);
-
+		GL11.glDisable(GL11.GL_LIGHTING);
+        
 		// Move to specified position
 		GlStateManager.translate(x, y + 0.2, z);
 
@@ -133,16 +135,15 @@ public abstract class EntityRollingStockDefinition {
 		GlStateManager.multMatrix(matrix);
 
 		model.draw();
+		
+		GL11.glEnable(GL11.GL_LIGHTING);
 
-		// Finish Drawing
-		// draw(getBuffer());
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
 
 		// No idea why I need the +1 here
 		// Render.renderOffsetAABB(stock.getCollisionBoundingBox(), x, y, z);
 	}
-
 	public IBakedModel getInventoryModel() {
 		return new IBakedModel() {
 			@Override
@@ -163,7 +164,9 @@ public abstract class EntityRollingStockDefinition {
 				} else {
 					Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
 				}
+				GL11.glDisable(GL11.GL_LIGHTING);
 				model.draw();
+				GL11.glEnable(GL11.GL_LIGHTING);
 				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 				return new ArrayList<BakedQuad>();
 			}
