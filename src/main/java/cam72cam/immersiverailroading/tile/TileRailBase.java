@@ -81,4 +81,11 @@ public class TileRailBase extends TileEntity {
 	public Vec3d getCenterOfRail() {
 		return new Vec3d(this.getPos()).addVector(0.5, 0, 0.5);
 	}
+	public TileRail getParentTile() {
+		TileEntity te = world.getTileEntity(this.getParent());
+		if (te instanceof TileRail) {
+			return (TileRail)te ;
+		}
+		return null;
+	}
 }

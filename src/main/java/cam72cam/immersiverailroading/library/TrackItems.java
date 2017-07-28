@@ -27,7 +27,6 @@ public enum TrackItems {
 	}
 
 	public boolean isTurn() {
-		// TODO Auto-generated method stub
 		return this == TURN_MEDIUM || this == TURN_LARGE;
 	}
 }

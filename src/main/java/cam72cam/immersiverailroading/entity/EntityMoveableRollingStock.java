@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -224,7 +223,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private TileRail railFromPosition(Vec3d position) {
 		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 		if (te instanceof TileRailGag) {
-			return (TileRail) world.getTileEntity(((TileRailGag) te).getParent());
+			return ((TileRailGag) te).getParentTile();
 		} else if (te instanceof TileRail) {
 			return (TileRail) te;
 		} else {
