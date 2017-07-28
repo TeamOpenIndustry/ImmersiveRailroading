@@ -68,7 +68,7 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 	}
 	
 	@Override
-	protected void rollingStockInit() {
+	public void rollingStockInit() {
 		if (!world.isRemote) {
 			this.syncPassengerOffsets();
 		}

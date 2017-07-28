@@ -3,9 +3,12 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -27,19 +30,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
 	}
-	
+
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		super.readSpawnData(additionalData);
-		frontYaw = additionalData.readFloat();
-		rearYaw = additionalData.readFloat();
+		frontYaw = BufferUtil.readFloat(additionalData);
+		rearYaw = BufferUtil.readFloat(additionalData);
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		super.writeSpawnData(buffer);
-		buffer.writeFloat(frontYaw);
-		buffer.writeFloat(rearYaw);
+		BufferUtil.writeFloat(buffer, frontYaw);
+		BufferUtil.writeFloat(buffer, rearYaw);
 	}
 
 	@Override
@@ -63,11 +66,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			rearYaw = nbttagcompound.getFloat("rearYaw");
 		}
 	}
-	
+
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox() {
 		return this.getDefinition().getBounds(this);
 	}
+
 	@Override
 	public AxisAlignedBB getEntityBoundingBox() {
 		return this.getDefinition().getBounds(this);
@@ -75,14 +79,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	@Override
 	@SideOnly(Side.CLIENT)
-    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport){
+	public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
 		// We need our own custom sync packets, see MRSSyncPacket
-    }
+	}
+
 	@Override
 	public void setVelocity(double x, double y, double z) {
 		// We need our own custom sync packets, see MRSSyncPacket
 	}
-	
+
 	public void moveRollingStock(double moveDistance) {
 		if (moveDistance == 0) {
 			return;
@@ -93,11 +98,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (rearYaw == null) {
 			rearYaw = rotationYaw;
 		}
-		
+
 		this.prevRotationYaw = rotationYaw;
-		
+
 		boolean isReverse = moveDistance < 0;
-		
+
 		if (isReverse) {
 			moveDistance = -moveDistance;
 			frontYaw += 180;
@@ -123,8 +128,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
 		rotationYaw = VecUtil.toYaw(bogeySkew);
-		
-		
+
 		if (isReverse) {
 			frontYaw += 180;
 			rearYaw += 180;
@@ -153,34 +157,35 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		this.posX += this.motionX;
 		this.posY += this.motionY;
 		this.posZ += this.motionZ;
-		
+
 		if (!this.world.isRemote && this.ticksExisted % 20 == 0) {
 			this.sendToObserving(new MRSSyncPacket(this));
 		}
-		
+
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
 		for (Entity entity : entitiesWithin) {
 			if (entity instanceof EntityMoveableRollingStock) {
-				// rolling stock collisions handled by looking at the front and rear coupler offsets
+				// rolling stock collisions handled by looking at the front and
+				// rear coupler offsets
 				continue;
 			}
-			
+
 			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
 				// Don't apply bb to passengers
 				continue;
 			}
-			
+
 			// Move entity
 			entity.setVelocity(this.motionX * 2, 0, this.motionZ * 2);
 			// Force update
 			entity.onUpdate();
-			
+
 			double speedDamage = this.getCurrentSpeed().metric() / Config.entitySpeedDamage;
 			if (speedDamage > 1) {
 				entity.attackEntityFrom((new DamageSource("hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
 			}
 		}
-		
+
 		// Riding on top of carts
 		AxisAlignedBB bb = this.getCollisionBoundingBox();
 		bb = bb.offset(0, bb.maxY - bb.minY, 0);
@@ -199,7 +204,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private Vec3d between(Vec3d front, Vec3d rear) {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
 	}
-	
+
 	public Vec3d frontBogeyPosition() {
 		return VecUtil.fromYaw(this.getDefinition().getBogeyFront(), rotationYaw).add(getPositionVector());
 	}
@@ -208,6 +213,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return VecUtil.fromYaw(this.getDefinition().getBogeyRear(), rotationYaw).add(getPositionVector());
 	}
 
+	private TileRailBase directRailFromPosition(Vec3d position) {
+		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+		if (te instanceof TileRailBase) {
+			return (TileRailBase)te;
+		}
+		return null;
+	}
+	
 	private TileRail railFromPosition(Vec3d position) {
 		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 		if (te instanceof TileRailGag) {
@@ -227,7 +240,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		TileRail rail = railFromPosition(position);
 
 		if (rail == null) {
-			if (!world.isRemote ) {
+			if (!world.isRemote) {
 				System.out.println("WARNING OFF TRACK!!!");
 				System.out.println(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 				System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
@@ -277,26 +290,25 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				return newneg;
 			}
 		} else {
-			// Good enough for now
-			return position.add(delta);
 			// Look on either side of the rail for a sibling rail
-			/*
-			 * Vec3d side1Pos = position.add(delta.rotateYaw(90)); Vec3d
-			 * side2Pos = position.add(delta.rotateYaw(-90)); TileRail side1Rail
-			 * = railFromPosition(side1Pos); TileRail side2Rail =
-			 * railFromPosition(side2Pos); Vec3d betweenLoc; if (side1Rail !=
-			 * null && side1Rail.getParent() == rail.getParent()) { betweenLoc =
-			 * between(new Vec3d(side1Rail.getPos()), new Vec3d(rail.getPos()));
-			 * } else if (side2Rail != null && side2Rail.getParent() ==
-			 * rail.getParent()) { betweenLoc = between(new
-			 * Vec3d(side2Rail.getPos()), new Vec3d(rail.getPos())); } else {
-			 * ImmersiveRailroading.logger.error("INVALID RAIL"); return
-			 * position.add(delta); } if (Math.abs(delta.x) > Math.abs(delta.z))
-			 * { return new Vec3d(position.x + Math.copySign(distance, delta.x),
-			 * position.y, Math.floor(position.z) + betweenLoc.z); } else {
-			 * return new Vec3d(betweenLoc.x, position.y, position.z +
-			 * Math.copySign(distance, delta.z)); }
-			 */
+			Vec3d side1Pos = rail.getCenterOfRail().add(delta.normalize().rotateYaw(90));
+			Vec3d side2Pos = rail.getCenterOfRail().add(delta.normalize().rotateYaw(-90));
+			TileRailBase side1Rail = directRailFromPosition(side1Pos);
+			TileRailBase side2Rail = directRailFromPosition(side2Pos);
+			Vec3d betweenLoc;
+			if (side1Rail != null && side1Rail.getParent().equals(rail.getParent())) {
+				betweenLoc = between(side1Rail.getCenterOfRail(), rail.getCenterOfRail());
+			} else if (side2Rail != null && side2Rail.getParent().equals(rail.getParent())) {
+				betweenLoc = between(side2Rail.getCenterOfRail(), rail.getCenterOfRail());
+			} else {
+				ImmersiveRailroading.logger.error("INVALID RAIL");
+				return position.add(delta);
+			}
+			if (Math.abs(delta.x) > Math.abs(delta.z)) {
+				return new Vec3d(position.x + delta.x, position.y, betweenLoc.z);
+			} else {
+				return new Vec3d(betweenLoc.x, position.y, position.z + delta.z);
+			}
 		}
 	}
 }

@@ -19,6 +19,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
+	
 	protected String defID;
 
 	public EntityRollingStock(World world, String defID) {
@@ -50,11 +51,12 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		BufferUtil.writeString(buffer, defID);
+		rollingStockInit();
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		nbttagcompound.setString("defID", defID);
+		nbttagcompound.setString("defID", defID);		
 	}
 
 	@Override
@@ -67,7 +69,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 * Fired after we have a definitionID. Here is where you construct objects
 	 * based on the rolling stock definition
 	 */
-	protected void rollingStockInit() {
+	public void rollingStockInit() {
+		System.out.println("INIT " + world.isRemote);
 	}
 
 	@Override

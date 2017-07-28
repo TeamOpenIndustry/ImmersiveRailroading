@@ -39,6 +39,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -172,6 +173,14 @@ public class ImmersiveRailroading
     				}
     			}
     		}
+        }
+        
+        @SubscribeEvent
+        public static void onEntitySpawnHack(EntityJoinWorldEvent event) {
+        	if (event.getEntity() instanceof EntityRollingStock) {
+	        	EntityRollingStock entity = (EntityRollingStock)event.getEntity();
+	        	entity.rollingStockInit();
+        	}
         }
     }
 }

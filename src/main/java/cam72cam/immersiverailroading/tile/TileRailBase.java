@@ -5,6 +5,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class TileRailBase extends TileEntity {
 	private BlockPos parent;
@@ -75,5 +76,9 @@ public class TileRailBase extends TileEntity {
 	
 	protected final static BlockPos getNBTBlockPos(NBTTagCompound nbt, String key) {
 		 return nbt.hasKey(key) ? BlockPos.fromLong(nbt.getLong(key)) : null;
+	}
+	
+	public Vec3d getCenterOfRail() {
+		return new Vec3d(this.getPos()).addVector(0.5, 0, 0.5);
 	}
 }

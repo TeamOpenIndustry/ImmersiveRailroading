@@ -84,7 +84,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 	
 	@Override
-	protected void rollingStockInit() {
+	public void rollingStockInit() {
 		super.rollingStockInit();
 		cargoItems.setSize(this.getInventorySize());
 	}

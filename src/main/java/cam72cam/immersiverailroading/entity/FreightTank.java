@@ -105,7 +105,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	}
 	
 	@Override
-	protected void rollingStockInit() {
+	public void rollingStockInit() {
 		super.rollingStockInit();
 		theTank = new FluidTank(null, 0) {
 			@Override

@@ -23,6 +23,23 @@ public class BufferUtil {
 		return new String(defBytes, StandardCharsets.UTF_8);
 	}
 
+	public static void writeFloat(ByteBuf buf, @Nullable Float frontYaw) {
+		if (frontYaw != null) {
+			writeString(buf, frontYaw.toString());
+		} else {
+			writeString(buf, "NULLFLOAT");
+		}
+	}
+
+	public static @Nullable Float readFloat(ByteBuf buf) {
+		String val = readString(buf);
+		if (!val.equals("NULLFLOAT")) {
+			return Float.parseFloat(val);
+		} else {
+			return null;
+		}
+	}
+
 	public static void writeUUID(ByteBuf buf, @Nullable UUID val) {
 		if (val != null) {
 			writeString(buf, val.toString());
