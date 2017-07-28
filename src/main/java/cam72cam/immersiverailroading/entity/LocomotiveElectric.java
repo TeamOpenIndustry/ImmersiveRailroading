@@ -38,7 +38,7 @@ public class LocomotiveElectric extends Locomotive {
 		if (world.isRemote) {
 			return;
 		}
-		this.setState("hot");
+		//this.setState("hot");
 		
 		/* if the loco has fuel */
 		if (getFuel() < getMaxFuel() && cargoItems.getStackInSlot(0) != null)
