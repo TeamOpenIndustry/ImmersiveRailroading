@@ -267,8 +267,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		// Update y position
 		TileRailBase directRail = directRailFromPosition(position);
-		// todo fix slope max height
-		position = new Vec3d(position.x, Math.floor(position.y) + Math.min(0.90, directRail.getHeight()), position.z);
+		position = new Vec3d(position.x, Math.floor(position.y) + directRail.getHeight(), position.z);
 
 		double distance = delta.lengthVector();
 

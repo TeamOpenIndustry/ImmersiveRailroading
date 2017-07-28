@@ -27,8 +27,8 @@ public class BuilderSlope extends BuilderBase {
 			TrackGag gag = new TrackGag(this, 0, 0, tracks.size()/2);
 			TrackGag gag2 = new TrackGag(this, 1, 0, tracks.size()/2);
 			
-			gag.setHeight(slope * (i + 1));
-			gag2.setHeight(slope * (i + 1));
+			gag.setHeight(slope * i);
+			gag2.setHeight(slope * i);
 			
 			tracks.add(gag);
 			tracks.add(gag2);
