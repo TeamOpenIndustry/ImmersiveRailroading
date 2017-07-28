@@ -8,10 +8,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class TileRailBase extends TileEntity {
-	public static final float MIN_HEIGHT = 0.125F;
-	
 	private BlockPos parent;
-	private float height = MIN_HEIGHT;
+	private float height = 0;
 
 	public void setHeight(float height) {
 		this.height = height;
