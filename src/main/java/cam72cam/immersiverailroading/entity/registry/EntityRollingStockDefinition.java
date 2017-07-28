@@ -109,6 +109,7 @@ public abstract class EntityRollingStockDefinition {
 		GlStateManager.scale(2, 2, 2);
 
 		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
+		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
 		FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
 		Matrix4 transform = defaultTransform.copy().rotate(Math.toRadians(180), 0, 1, 0);
 		matrix.put((float) transform.m00);

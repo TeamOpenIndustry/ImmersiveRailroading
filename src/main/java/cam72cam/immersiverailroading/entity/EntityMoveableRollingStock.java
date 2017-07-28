@@ -107,7 +107,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			frontYaw += 180;
 			rearYaw += 180;
 			rotationYaw += 180;
-			this.rotationYaw = (this.rotationYaw + 360f) % 360f;
+			rotationPitch = -rotationPitch;
+			rotationYaw = (rotationYaw + 360f) % 360f;
 			frontYaw = (frontYaw + 360f) % 360f;
 			rearYaw = (rearYaw + 360f) % 360f;
 		}
@@ -127,27 +128,28 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
 		rotationYaw = VecUtil.toYaw(bogeySkew);
+		rotationPitch = (float) Math.toDegrees(Math.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
 
 		if (isReverse) {
 			frontYaw += 180;
 			rearYaw += 180;
 			rotationYaw += 180;
+			rotationPitch = -rotationPitch;
 			rotationYaw = (rotationYaw + 360f) % 360f;
 			frontYaw = (frontYaw + 360f) % 360f;
 			rearYaw = (rearYaw + 360f) % 360f;
 		}
 
 		this.motionX = deltaCenter.x;
+		this.motionY = deltaCenter.y;
 		this.motionZ = deltaCenter.z;
 
 		// Can this run client side in 1.12?
-		if (!this.world.isRemote && world.isAirBlock(new BlockPos((int) posX, (int) (this.posY - 0.6), (int) posZ))) {
+		if (!this.world.isRemote && world.isAirBlock(new BlockPos(this))) {
 			// Fall
 			if (this.motionY < 1) {
 				this.motionY += -0.1;
 			}
-		} else {
-			this.motionY = 0;
 		}
 
 		this.prevPosX = posX;
@@ -205,11 +207,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 
 	public Vec3d frontBogeyPosition() {
-		return VecUtil.fromYaw(this.getDefinition().getBogeyFront(), rotationYaw).add(getPositionVector());
+		return VecUtil.fromYawPitch(this.getDefinition().getBogeyFront(), rotationYaw, rotationPitch).add(getPositionVector());
 	}
 
 	public Vec3d rearBogeyPosition() {
-		return VecUtil.fromYaw(this.getDefinition().getBogeyRear(), rotationYaw).add(getPositionVector());
+		return VecUtil.fromYawPitch(this.getDefinition().getBogeyRear(), rotationYaw, rotationPitch).add(getPositionVector());
 	}
 
 	private TileRailBase directRailFromPosition(Vec3d position) {
@@ -237,11 +239,24 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	private Vec3d nextPosition(Vec3d position, float yaw, Vec3d delta) {
 		TileRail rail = railFromPosition(position);
+		if (rail == null) {
+			// Try a smidge higher
+			// We get some wobble on the top of slopes, this corrects for imperfect precision
+			rail = railFromPosition(position.addVector(0, 0.2, 0));
+			if (rail != null) {
+				position = position.addVector(0, 0.2, 0);
+			} else {
+				rail = railFromPosition(position.addVector(0, -0.2, 0));
+				if (rail != null) {
+					position = position.addVector(0, -0.2, 0);
+				}
+			}
+		}
 
 		if (rail == null) {
 			if (!world.isRemote) {
 				System.out.println("WARNING OFF TRACK!!!");
-				System.out.println(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+				System.out.println(position);
 				System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
 				this.setDead();
 				return position;
@@ -249,6 +264,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				return position.add(delta);
 			}
 		}
+
+		// Update y position
+		TileRailBase directRail = directRailFromPosition(position);
+		// todo fix slope max height
+		position = new Vec3d(position.x, Math.floor(position.y) + Math.min(0.90, directRail.getHeight()), position.z);
 
 		double distance = delta.lengthVector();
 
@@ -293,15 +313,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// since large changes can occur if the train is way off center
 			delta = nextMovement(this.rotationYaw, distance);
 			// Look on either side of the rail for a sibling rail
-			Vec3d side1Pos = rail.getCenterOfRail().add(delta.normalize().rotateYaw(90));
-			Vec3d side2Pos = rail.getCenterOfRail().add(delta.normalize().rotateYaw(-90));
+			Vec3d side1Pos = directRail.getCenterOfRail().add(delta.normalize().rotateYaw(90));
+			Vec3d side2Pos = directRail.getCenterOfRail().add(delta.normalize().rotateYaw(-90));
 			TileRailBase side1Rail = directRailFromPosition(side1Pos);
 			TileRailBase side2Rail = directRailFromPosition(side2Pos);
 			Vec3d betweenLoc;
-			if (side1Rail != null && side1Rail.getParent().equals(rail.getParent())) {
-				betweenLoc = between(side1Rail.getCenterOfRail(), rail.getCenterOfRail());
-			} else if (side2Rail != null && side2Rail.getParent().equals(rail.getParent())) {
-				betweenLoc = between(side2Rail.getCenterOfRail(), rail.getCenterOfRail());
+			if (side1Rail != null && side1Rail.getParent().equals(directRail.getParent())) {
+				betweenLoc = between(side1Rail.getCenterOfRail(), directRail.getCenterOfRail());
+			} else if (side2Rail != null && side2Rail.getParent().equals(directRail.getParent())) {
+				betweenLoc = between(side2Rail.getCenterOfRail(), directRail.getCenterOfRail());
 			} else {
 				return position.add(delta);
 			}

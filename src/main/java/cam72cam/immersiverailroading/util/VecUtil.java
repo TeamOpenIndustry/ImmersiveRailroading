@@ -19,4 +19,8 @@ public class VecUtil {
 	public static Vec3d rotateYaw(Vec3d pos, float rotationYaw) {
 		return fromYaw(pos.x, rotationYaw).add(fromYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
 	}
+
+	public static Vec3d fromYawPitch(float distance, float rotationYaw, float rotationPitch) {
+		return fromYaw(distance, rotationYaw).addVector(0, Math.tan(Math.toRadians(rotationPitch)) * distance, 0);
+	}
 }
