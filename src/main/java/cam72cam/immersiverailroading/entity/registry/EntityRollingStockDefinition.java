@@ -104,7 +104,7 @@ public abstract class EntityRollingStockDefinition {
 		GlStateManager.color(1, 1, 1);
 
 		// Move to specified position
-		GlStateManager.translate(x, y, z);
+		GlStateManager.translate(x, y + 0.2, z);
 
 		GlStateManager.scale(2, 2, 2);
 
