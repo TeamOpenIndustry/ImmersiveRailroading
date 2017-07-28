@@ -24,7 +24,7 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<String> currentDestination = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
 	private static DataParameter<String> currentState = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
 	private static DataParameter<Integer> currentFuelTrain = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	private static DataParameter<Integer> currentCartsPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
+	private static DataParameter<Integer> currentCarsPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
 	private static DataParameter<Float> currentMassPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> currentSpeedReductionMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> currentAccelReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
@@ -39,7 +39,7 @@ public abstract class Locomotive extends FreightTank {
 		this.getDataManager().register(currentMaxSpeedMC, 0f);
 		this.getDataManager().register(currentDestination, "");
 		this.getDataManager().register(currentFuelTrain, 0);
-		this.getDataManager().register(currentCartsPulled, 0);
+		this.getDataManager().register(currentCarsPulled, 0);
 		this.getDataManager().register(currentMassPulled, 0.0f);
 		this.getDataManager().register(currentSpeedReductionMC, 0f);
 		this.getDataManager().register(currentAccelReduction, 0.0f);
@@ -103,8 +103,8 @@ public abstract class Locomotive extends FreightTank {
 	 * All this is used in GUI only
 	 */
 
-	public Integer getCurrentNumCartsPulled() {
-		return dataManager.get(currentCartsPulled);
+	public Integer getCurrentNumCarsPulled() {
+		return dataManager.get(currentCarsPulled);
 	}
 
 	public double getCurrentMassPulled() {
@@ -228,7 +228,7 @@ public abstract class Locomotive extends FreightTank {
 		double currentFuelConsumptionChange = 0;
 
 		List<EntityCoupleableRollingStock> train = this.getTrain();
-		dataManager.set(currentCartsPulled, train.size() - 1);
+		dataManager.set(currentCarsPulled, train.size() - 1);
 
 		/*
 		 * TODO MASS for (EntityRollingStock entity : train) { totalMass +=

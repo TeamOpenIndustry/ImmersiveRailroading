@@ -228,18 +228,18 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public EntityCoupleableRollingStock getCoupled(CouplerType coupler) {
-		EntityCoupleableRollingStock cart = null;
+		EntityCoupleableRollingStock stock = null;
 
 		switch (coupler) {
 		case FRONT:
-			cart = this.coupledStockFront;
+			stock = this.coupledStockFront;
 			break;
 		case BACK:
-			cart = this.coupledStockBack;
+			stock = this.coupledStockBack;
 			break;
 		}
 
-		if (cart == null && this.getCoupledUUID(coupler) != null) {
+		if (stock == null && this.getCoupledUUID(coupler) != null) {
 			switch (coupler) {
 			case FRONT:
 				this.coupledStockFront = findByUUID(this.world, this.getCoupledUUID(coupler));
@@ -249,7 +249,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				return this.coupledStockBack;
 			}
 		}
-		return cart;
+		return stock;
 	}
 
 	public CouplerType getCouplerFor(EntityCoupleableRollingStock stock) {
@@ -270,8 +270,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		return isCoupled(CouplerType.FRONT) && isCoupled(CouplerType.BACK);
 	}
 	
-	public boolean isCoupled(EntityCoupleableRollingStock cart) {
-		return this.getCoupled(CouplerType.FRONT) == cart || this.getCoupled(CouplerType.BACK) == cart;
+	public boolean isCoupled(EntityCoupleableRollingStock stock) {
+		return this.getCoupled(CouplerType.FRONT) == stock || this.getCoupled(CouplerType.BACK) == stock;
 	}
 
 	public final boolean isCoupled(CouplerType coupler) {
@@ -309,7 +309,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	/*
-	 * Get carts by coupled bounding boxes
+	 * Get cars by coupled bounding boxes
 	 */
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {

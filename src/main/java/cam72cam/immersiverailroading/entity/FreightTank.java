@@ -77,7 +77,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	}
 
 	@SideOnly(Side.CLIENT)
-	public int getCartTankCapacity() {
+	public int getCarTankCapacity() {
 		return theTank.getCapacity();
 	}
 

@@ -189,7 +189,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 		}
 
-		// Riding on top of carts
+		// Riding on top of cars
 		AxisAlignedBB bb = this.getCollisionBoundingBox();
 		bb = bb.offset(0, bb.maxY - bb.minY, 0);
 		bb = bb.setMaxY(bb.minY + 1);

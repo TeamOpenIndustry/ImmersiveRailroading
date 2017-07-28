@@ -62,7 +62,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	 * 
 	 * @Override protected Integer customHeatHandler(Integer overheatLevel) {
 	 * int waterLevel = this.getLiquidAmount(); int maxWaterLevel =
-	 * getCartTankCapacity();
+	 * getCarTankCapacity();
 	 * 
 	 * if (waterLevel < 1 && getFuel() > 10) { overheatLevel += 5; } if
 	 * (waterLevel > maxWaterLevel / 2 && overheatLevel > 50 &&
