@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.TrackType;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -14,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -311,6 +313,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// delta should be in the direction of rotationYaw instead of front or rear
 			// since large changes can occur if the train is way off center
 			delta = nextMovement(this.rotationYaw, distance);
+			
+			// Check that we are not moving in the wrong axis along a track
+			if (EnumFacing.fromAngle(rotationYaw).getAxis() != rail.getFacing().getAxis() && rail.getType() != TrackType.CROSSING) {
+				if (!world.isRemote) {
+					System.out.println("Wrong track direction");
+					this.setDead();
+					return position;
+				}
+			}
+			
 			// Look on either side of the rail for a sibling rail
 			Vec3d side1Pos = directRail.getCenterOfRail().add(delta.normalize().rotateYaw(90));
 			Vec3d side2Pos = directRail.getCenterOfRail().add(delta.normalize().rotateYaw(-90));
