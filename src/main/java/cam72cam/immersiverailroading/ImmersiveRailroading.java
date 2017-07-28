@@ -6,9 +6,9 @@ import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveElectric;
-import cam72cam.immersiverailroading.entity.CartFreight;
-import cam72cam.immersiverailroading.entity.CartPassenger;
-import cam72cam.immersiverailroading.entity.CartTank;
+import cam72cam.immersiverailroading.entity.CarFreight;
+import cam72cam.immersiverailroading.entity.CarPassenger;
+import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
@@ -127,9 +127,9 @@ public class ImmersiveRailroading
         	registerRollingStock(LocomotiveSteam.class);
         	registerRollingStock(LocomotiveDiesel.class);
         	registerRollingStock(LocomotiveElectric.class);
-        	registerRollingStock(CartPassenger.class);
-        	registerRollingStock(CartFreight.class);
-        	registerRollingStock(CartTank.class);
+        	registerRollingStock(CarPassenger.class);
+        	registerRollingStock(CarFreight.class);
+        	registerRollingStock(CarTank.class);
         	registerRollingStock(Tender.class);
         }
 

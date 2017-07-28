@@ -2,12 +2,12 @@ package cam72cam.immersiverailroading.entity;
 
 import net.minecraft.world.World;
 
-public class CartFreight extends Freight {
-	public CartFreight(World world) {
+public class CarFreight extends Freight {
+	public CarFreight(World world) {
 		this(world, null);
 	}
 	
-	public CartFreight(World world, String defID) {
+	public CarFreight(World world, String defID) {
 		super(world, defID);
 	}
 

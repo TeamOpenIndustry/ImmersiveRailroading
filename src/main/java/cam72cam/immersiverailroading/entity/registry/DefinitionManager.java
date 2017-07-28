@@ -72,11 +72,20 @@ public class DefinitionManager {
 				ex.printStackTrace();
 			}
 		}
-		for (String passenger_cart : Config.passenger_carts) {
+		for (String passenger_car : Config.passenger_cars) {
 			try {
-				String defID = "rolling_stock/passenger/" + passenger_cart + ".json";
+				String defID = "rolling_stock/passenger/" + passenger_car + ".json";
 				JsonObject data = getJsonData(defID);
-				definitions.put(defID, new CartPassengerDefinition(defID, data));
+				definitions.put(defID, new CarPassengerDefinition(defID, data));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+		for (String freight_car : Config.freight_cars) {
+			try {
+				String defID = "rolling_stock/freight/" + freight_car + ".json";
+				JsonObject data = getJsonData(defID);
+				definitions.put(defID, new CarFreightDefinition(defID, data));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

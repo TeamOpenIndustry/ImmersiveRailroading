@@ -3,20 +3,20 @@ package cam72cam.immersiverailroading.entity.registry;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.CartTank;
+import cam72cam.immersiverailroading.entity.CarTank;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class CartFreightDefinition extends EntityRollingStockDefinition {
+public class CarTankDefinition extends EntityRollingStockDefinition {
 
-	public CartFreightDefinition(String defID, JsonObject data) throws Exception {
+	public CarTankDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 	}
 	
 	@Override
 	public EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing) {
-		CartTank loco = new CartTank(world, defID);
+		CarTank loco = new CarTank(world, defID);
 
 		loco.setPosition(pos.getX(), pos.getY(), pos.getZ());
 		loco.prevRotationYaw = facing.getHorizontalAngle();

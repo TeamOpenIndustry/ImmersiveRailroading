@@ -5,12 +5,12 @@ import java.util.List;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
-public class CartTank extends FreightTank {
-	public CartTank(World world) {
+public class CarTank extends FreightTank {
+	public CarTank(World world) {
 		this(world, null);
 	}
 	
-	public CartTank(World world, String defID) {
+	public CarTank(World world, String defID) {
 		super(world, defID);
 	}
 
