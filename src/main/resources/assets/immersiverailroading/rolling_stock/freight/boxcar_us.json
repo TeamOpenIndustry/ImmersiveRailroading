@@ -7,6 +7,10 @@
 		"length": 2,
 		"width": 2
 	},
+	"freight": {
+		"slots": 54,
+		"cargo": ["all"]
+	},
 	"trucks": {
 		"front": 2, 
 		"rear": -2

@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
+import cam72cam.immersiverailroading.gui.GuiProxy;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.KeyBindings;
@@ -94,6 +95,8 @@ public class ImmersiveRailroading
     	if (event.getSide() == Side.CLIENT) {
     		KeyBindings.registerKeyBindings();
     	}
+    	
+    	NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiProxy());
     }
     
     @Mod.EventBusSubscriber(modid = MODID)
@@ -179,7 +182,7 @@ public class ImmersiveRailroading
         public static void onEntitySpawnHack(EntityJoinWorldEvent event) {
         	if (event.getEntity() instanceof EntityRollingStock) {
 	        	EntityRollingStock entity = (EntityRollingStock)event.getEntity();
-	        	entity.rollingStockInit();
+	        	entity.tryRollingStockInit();
         	}
         }
     }
