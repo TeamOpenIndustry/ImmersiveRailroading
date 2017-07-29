@@ -15,12 +15,14 @@ import net.minecraft.world.World;
 public class CarFreightDefinition extends EntityRollingStockDefinition {
 
 	private int numSlots;
+	private int width;
 	private List<String> validCargo;
 
 	public CarFreightDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 		JsonObject freight = data.get("freight").getAsJsonObject();
 		this.numSlots = freight.get("slots").getAsInt();
+		this.width = freight.get("width").getAsInt();
 		this.validCargo = new ArrayList<String>();
 		for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
 			validCargo.add(el.getAsString());
@@ -41,5 +43,9 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 	
 	public int getInventorySize() {
 		return numSlots;
+	}
+
+	public int getInventoryWidth() {
+		return width;
 	}
 }

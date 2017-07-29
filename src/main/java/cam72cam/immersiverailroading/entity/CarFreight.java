@@ -22,5 +22,9 @@ public class CarFreight extends Freight {
 		return this.getDefinition().getInventorySize();
 	}
 	
+	public int getInventoryWidth() {
+		return this.getDefinition().getInventoryWidth();
+	}
+	
 	//TODO filter inventory
 }
