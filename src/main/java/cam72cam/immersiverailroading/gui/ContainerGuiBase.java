@@ -1,9 +1,19 @@
 package cam72cam.immersiverailroading.gui;
 
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.inventory.Container;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.Fluid;
 
 public abstract class ContainerGuiBase extends GuiContainer {
+    public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
 
 	public ContainerGuiBase(Container inventorySlotsIn) {
 		super(inventorySlotsIn);
@@ -91,5 +101,50 @@ public abstract class ContainerGuiBase extends GuiContainer {
     	} else {
     		return drawPlayerMidBar((aboveWidth - playerXSize) / 2, y);
     	}
+	}
+    
+    public void drawFluid(Fluid fluid, int x, int y, int width, int height, int scale) {
+    	this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+		TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite(fluid.getStill().toString());
+		if(sprite != null)
+		{
+			int col = fluid.getColor();
+			GlStateManager.color((col>>16&255)/255.0f,(col>>8&255)/255.0f,(col&255)/255.0f, 1);
+			int iW = sprite.getIconWidth()*scale;
+			int iH = sprite.getIconHeight()*scale;
+			
+	        float minU = sprite.getMinU();
+	        float minV = sprite.getMinV();
+	        
+	        Tessellator tessellator = Tessellator.getInstance();
+	        BufferBuilder buffer = tessellator.getBuffer();
+	        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);	        
+	        for (int offY = 0; offY < height; offY += iH) {
+	        	int curHeight = Math.min(iH, height - offY);
+	        	float maxVScaled = sprite.getInterpolatedV(16.0 * curHeight / iH);
+		        for (int offX = 0; offX < width; offX += iW) {
+		        	int curWidth = Math.min(iW, width - offX);
+		        	float maxUScaled = sprite.getInterpolatedU(16.0 * curWidth / iW);  
+			        buffer.pos(x+offX, y+offY, this.zLevel).tex(minU, maxVScaled).endVertex();
+			        buffer.pos(x+offX, y+offY+curHeight, this.zLevel).tex(minU, minV).endVertex();
+			        buffer.pos(x+offX+curWidth, y+offY+curHeight, this.zLevel).tex(maxUScaled, minV).endVertex();
+			        buffer.pos(x+offX+curWidth, y+offY, this.zLevel).tex(maxUScaled, maxVScaled).endVertex();
+		        }
+	        }
+	        tessellator.draw();
+		}
+		this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+    }
+
+	public void drawTankBlock(int x, int y, int horizSlots, int inventoryRows, Fluid fluid, float percentFull) {
+		int width = horizSlots * slotSize;
+		int height = inventoryRows * slotSize;
+		Gui.drawRect(x, y, x+width, y+height, 0xFF000000);
+		
+    	if (percentFull > 0 && fluid != null) {
+    		int fullHeight = Math.max(1, (int) (height * percentFull));
+    		drawFluid(fluid, x, y + height - fullHeight, width, fullHeight, 2);
+    	}
+    	GlStateManager.color(1, 1, 1, 1);
 	}
 }

@@ -14,10 +14,10 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
     public static final int topOffset = 18;
     public static final int bottomOffset = 7;
     public static final int textureHeight = 222;
-    public static final int paddingRight = 8;
-    public static final int paddingLeft = 7;
+    public static final int paddingRight = 7;
+    public static final int paddingLeft = 8;
     public static final int stdUiHorizSlots = 9;
-    public static final int playerXSize = paddingRight + stdUiHorizSlots * slotSize + paddingLeft;
+    public static final int playerXSize = paddingLeft + stdUiHorizSlots * slotSize + paddingRight;
 	private static final int midBarHeight = 4;
 	
     public int offsetTopBar(int x, int y, int slots) {
@@ -65,7 +65,7 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
 		for (int slotID = 0; slotID < slots; slotID++) {
 			int row = slotID / horizSlots;
 			int col = slotID % horizSlots;
-            this.addSlotToContainer(new SlotItemHandler(handler, slotID, paddingRight + col * slotSize, y + row * slotSize));
+            this.addSlotToContainer(new SlotItemHandler(handler, slotID, paddingLeft + col * slotSize, y + row * slotSize));
 		}
 		return y + slotSize * (int) Math.ceil((double)slots / horizSlots);
 	}
@@ -73,7 +73,7 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
 	public int addPlayerInventory(IInventory playerInventory, int currY, int horizSlots) {
     	currY += 9;
 
-		int normInvOffset = (horizSlots - stdUiHorizSlots) * slotSize / 2 + paddingRight;
+		int normInvOffset = (horizSlots - stdUiHorizSlots) * slotSize / 2 + paddingLeft;
 		
         for (int l = 0; l < 3; ++l)
         {
