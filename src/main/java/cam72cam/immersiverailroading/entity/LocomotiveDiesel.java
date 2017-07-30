@@ -26,7 +26,9 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 		if (getFuel() < getMaxFuel()) {
 			int amount = (int) Math.min(10, getMaxFuel() - getFuel());
 			FluidStack ableToDrain = drain(amount, true);
-			addFuel(ableToDrain.amount);
+			if (ableToDrain != null) {
+				addFuel(ableToDrain.amount);
+			}
 		}
 	}
 

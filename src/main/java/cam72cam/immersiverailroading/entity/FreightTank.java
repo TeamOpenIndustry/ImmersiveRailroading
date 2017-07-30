@@ -142,6 +142,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
 		this.theTank.readFromNBT(nbttagcompound.getCompoundTag("tank"));
+		onTankContentsChanged();
 	}
 	
 	@Override
@@ -164,14 +165,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 		theTank.setCapacity(this.getTankCapacity());
 	}
 
-	@Override
-	protected void onInventoryChanged() {
-		super.onInventoryChanged();
-		if (!world.isRemote) {
-			checkInvent();
-		}
-	}
-
 	/**
 	 * Handle mass depending on liquid amount
 	 */
@@ -184,8 +177,18 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 		}
 		this.getDataManager().set(CARGO_MASS, mass);
 	}
+	
+	@Override
+	public void onUpdate() {
+		super.onUpdate();
+		checkInvent();
+	}
 
 	protected void checkInvent() {
+
+		if (world.isRemote) {
+			return;
+		}
 
 		for (int inputSlot : getContainerInputSlots()) {
 			ItemStack input = cargoItems.getStackInSlot(inputSlot);
@@ -235,7 +238,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 								cargoItems.extractItem(inputSlot, 1, false);
 								
 								// Increase output
-								out.setCount(this.cargoItems.getStackInSlot(slot).getCount() + out.getCount());
 								this.cargoItems.insertItem(slot, out, false);
 								break;
 							}
