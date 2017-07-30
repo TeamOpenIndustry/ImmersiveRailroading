@@ -105,7 +105,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 		if (theTank.getFluid() == null) {
 			this.dataManager.set(FLUID_TYPE, "EMPTY");
 		} else {
-			this.dataManager.set(FLUID_TYPE, theTank.getFluid().toString());
+			this.dataManager.set(FLUID_TYPE, FluidRegistry.getFluidName(theTank.getFluid()));
 		}
 	}
 	
