@@ -135,7 +135,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		this.theTank.writeToNBT(nbttagcompound.getCompoundTag("tank"));
+		nbttagcompound.setTag("tank", this.theTank.writeToNBT(new NBTTagCompound()));
 	}
 
 	@Override
@@ -167,7 +167,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	@Override
 	protected void onInventoryChanged() {
 		super.onInventoryChanged();
-		System.out.println("ERHER");
 		if (!world.isRemote) {
 			checkInvent();
 		}
