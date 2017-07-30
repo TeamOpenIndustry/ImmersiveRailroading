@@ -1,0 +1,26 @@
+{
+	"name": "Tank US",
+	"model": "immersiverailroading:models/rolling_stock/tank/tank_us.obj",
+	"passenger": {
+		"center_x": 0,
+		"center_y": 4,
+		"length": 2,
+		"width": 1.5
+	},
+	"tank": {
+		"capacity": 80000 
+	},
+	"trucks": {
+		"front": 2, 
+		"rear": -2
+	},
+	"bounds": {
+		"front": 3.5,
+		"rear": 3.5,
+		"height": 4.25,
+		"width": 2
+	},
+	"rotate": {
+		"y": 90
+	}
+}

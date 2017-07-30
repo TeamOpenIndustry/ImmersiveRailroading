@@ -90,6 +90,15 @@ public class DefinitionManager {
 				ex.printStackTrace();
 			}
 		}
+		for (String tank_car : Config.tank_cars) {
+			try {
+				String defID = "rolling_stock/tank/" + tank_car + ".json";
+				JsonObject data = getJsonData(defID);
+				definitions.put(defID, new CarTankDefinition(defID, data));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	private static JsonObject getJsonData(String defID) throws IOException {

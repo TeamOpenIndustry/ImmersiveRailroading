@@ -103,7 +103,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 
 		// Only drain 10mb at a time from the tender
 		int desiredDrain = 10;
-		if (getTankCapacity() - getLiquidAmount() >= 10) {
+		if (getTankCapacity() - getServerLiquidAmount() >= 10) {
 			FluidUtil.tryFluidTransfer(this, tender, desiredDrain, true);
 		}
 

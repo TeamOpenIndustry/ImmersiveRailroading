@@ -13,8 +13,11 @@ public class Config {
 	@Comment({"A list of passenger cars to load"})
 	public static String[] passenger_cars = new String[] { "1class_db", "2class_db" };
 	
-	@Comment({"A list of passenger cars to load"})
+	@Comment({"A list of freight cars to load"})
 	public static String[] freight_cars = new String[] { "boxcar_us" };
+	
+	@Comment({"A list of tank cars to load"})
+	public static String[] tank_cars = new String[] { "tank_us" };
 
 	@Comment({"km/h to damage 1 heart on collision"})
 	public static double entitySpeedDamage = 10;

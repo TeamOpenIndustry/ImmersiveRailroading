@@ -10,8 +10,13 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -19,10 +24,15 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public abstract class FreightTank extends Freight implements IFluidHandler {
+	private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.createKey(FreightTank.class, DataSerializers.VARINT);
+	private static final DataParameter<String> FLUID_TYPE = EntityDataManager.createKey(FreightTank.class, DataSerializers.STRING);
 	private FluidTank theTank;
 
 	public FreightTank(World world, String defID) {
 		super(world, defID);
+		
+		dataManager.register(FLUID_AMOUNT, 0);
+		dataManager.register(FLUID_TYPE, "EMPTY");
 	}
 
 	/*
@@ -68,17 +78,39 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 * 
 	 * Functions for Models and GUI
 	 */
-	public int getLiquidAmount() {
-		return theTank.getFluidAmount();
-	}
-
-	public FluidStack getLiquid() {
-		return theTank.getFluid();
-	}
-
+	
 	@SideOnly(Side.CLIENT)
-	public int getCarTankCapacity() {
-		return theTank.getCapacity();
+	public int getClientLiquidAmount() {
+		return this.dataManager.get(FLUID_AMOUNT);
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public Fluid getClientLiquid() {
+		String type = this.dataManager.get(FLUID_TYPE);
+		if (type.equals("EMPTY")) {
+			return null;
+		}
+		return FluidRegistry.getFluid(type);
+	}
+	
+	
+	/*
+	 * 
+	 * Server functions
+	 * 
+	 */
+
+	protected void onTankContentsChanged() {
+		this.dataManager.set(FLUID_AMOUNT, theTank.getFluidAmount());
+		if (theTank.getFluid() == null) {
+			this.dataManager.set(FLUID_TYPE, "EMPTY");
+		} else {
+			this.dataManager.set(FLUID_TYPE, theTank.getFluid().toString());
+		}
+	}
+	
+	public int getServerLiquidAmount() {
+		return theTank.getFluidAmount();
 	}
 
 	/*
@@ -90,11 +122,19 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	protected GuiTypes guiType() {
 		return GuiTypes.TANK;
 	}
+	
+	@Override
+	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		// TODO right click with tanks/buckets
+		if(!world.isRemote) {
+			System.out.println(theTank.getFluidAmount());
+		}
+		return super.processInitialInteract(player, hand);
+	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		System.out.println(this.theTank);
 		this.theTank.writeToNBT(nbttagcompound.getCompoundTag("tank"));
 	}
 
@@ -112,13 +152,22 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 			public boolean canFillFluidType(FluidStack fluid) {
 				return canFill() && (getFluidFilter() == null || getFluidFilter().contains(fluid.getFluid()));
 			}
+			
+			@Override
+			public void onContentsChanged() {
+				if (!world.isRemote) {
+					FreightTank.this.onTankContentsChanged();
+				}
+			}
 		};
 
 		theTank.setCapacity(this.getTankCapacity());
 	}
 
+	@Override
 	protected void onInventoryChanged() {
 		super.onInventoryChanged();
+		System.out.println("ERHER");
 		if (!world.isRemote) {
 			checkInvent();
 		}
@@ -154,11 +203,10 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 			}
 
 			// This is kind of funky but it works
-			while (input.getCount() > 0) {
+			// WILL BE CALLED RECUSIVELY from onInventoryChanged
+			if (input.getCount() > 0) {
 				// First try to drain the container, if we can't do that we try
 				// to fill it
-
-				boolean didAction = false;
 
 				for (Boolean doFill : new Boolean[] { false, true }) {
 
@@ -176,31 +224,24 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 						// Can we move it to an output slot?
 						ItemStack out = inputAttempt.getResult();
 						for (Integer slot : this.getContainertOutputSlots()) {
-							if (this.cargoItems.insertItem(slot, out, false).getCount() == 1) {
-								out.setCount(0);
+							if (this.cargoItems.insertItem(slot, out, true).getCount() == 0) {
+								// Move Liquid
+								if (doFill) {
+									FluidUtil.tryFillContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
+								} else {
+									FluidUtil.tryEmptyContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
+								}
+								
+								// Decrease input
+								cargoItems.extractItem(inputSlot, 1, false);
+								
+								// Increase output
+								out.setCount(this.cargoItems.getStackInSlot(slot).getCount() + out.getCount());
+								this.cargoItems.insertItem(slot, out, false);
 								break;
 							}
 						}
-
-						// We moved it to the output
-						if (out.getCount() == 1) {
-							input.setCount(input.getCount() - 1);
-							cargoItems.setStackInSlot(inputSlot, input);
-
-							if (doFill) {
-								FluidUtil.tryFillContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
-							} else {
-								FluidUtil.tryEmptyContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
-							}
-							didAction = true;
-							break;
-						}
 					}
-				}
-
-				if (!didAction) {
-					// Unable to move any stuff around
-					break;
 				}
 			}
 		}
