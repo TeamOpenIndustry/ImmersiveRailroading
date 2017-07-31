@@ -142,6 +142,8 @@ public class ClientProxy extends CommonProxy {
 					// Bind block textures to current context
 					if (model.texLoc != null) {
 						Minecraft.getMinecraft().getTextureManager().bindTexture(model.texLoc);
+					} else {
+						Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
 					}
 
 					GL11.glDisable(GL11.GL_LIGHTING);

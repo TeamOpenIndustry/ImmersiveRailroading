@@ -29,7 +29,8 @@ public class OBJModel {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		Scanner reader = new Scanner(input);
 		
-		ArrayList<Face> currentGroup = null;
+		ArrayList<Face> currentGroup = new ArrayList<Face>();
+		groups.put("defaultName", currentGroup);
 		String materialPath = null;
 		String material = null;
 		
@@ -110,30 +111,47 @@ public class OBJModel {
 			double defaultBrightness = 0.7;
 			GL11.glColor4d(defaultBrightness, defaultBrightness, defaultBrightness, 1);
 
-			GL11.glBegin(GL11.GL_QUADS);
-			{
-				for (List<Face> faces : groups.values()) {
-					for (Face face : faces) {
+			int mode = GL11.GL_QUADS;
+			int verts = 4;
+			
+			GL11.glBegin(mode);
+			for (List<Face> faces : groups.values()) {
+				for (Face face : faces) {
+					switch (face.points.length) {
+					case 3:
+						GL11.glEnd();
+						GL11.glBegin(GL11.GL_TRIANGLES);
+						break;
+					case 4:
+						GL11.glEnd();
+						GL11.glBegin(GL11.GL_QUADS);
+						break;
+					default:
+						GL11.glEnd();
+						GL11.glBegin(GL11.GL_POLYGON);
+						break;
+					}
+					
+					for(int[] point : face.points) {
+						Vector3f v;
+						Vector2f vt;
+						Vector3f vn;
 						
-						for(int[] point : face.points) {
-							Vector3f v;
-							Vector2f vt;
-							Vector3f vn;
-							
-							switch(point.length) {
-							case 3:
-								vn = vertexNormals.get(point[2]);
-								GL11.glNormal3f(vn.x, vn.y, vn.z);
-							case 2:
+						switch(point.length) {
+						case 3:
+							vn = vertexNormals.get(point[2]);
+							GL11.glNormal3f(vn.x, vn.y, vn.z);
+						case 2:
+							if (point[1] != -1) {
 								vt = vertexTextures.get(point[1]);
 								GL11.glTexCoord2f(vt.x, 1-vt.y);
-							case 1:
-								v = vertices.get(point[0]);
-								GL11.glVertex3f(v.x, v.y, v.z);
-								break;
-							default:
-								System.out.println("WATWATWAT");
 							}
+						case 1:
+							v = vertices.get(point[0]);
+							GL11.glVertex3f(v.x, v.y, v.z);
+							break;
+						default:
+							System.out.println("WATWATWAT");
 						}
 					}
 				}

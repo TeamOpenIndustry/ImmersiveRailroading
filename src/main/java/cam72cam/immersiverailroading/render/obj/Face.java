@@ -14,7 +14,11 @@ public class Face {
 		String[] sp = point.split("/");
 		int[] ret = new int[sp.length];
 		for (int i = 0; i < sp.length; i++) {
-			ret[i] = Integer.parseInt(sp[i])-1;
+			if (!sp[i].equals("")) {
+				ret[i] = Integer.parseInt(sp[i])-1;
+			} else {
+				ret[i] = -1;
+			}
 		}
 		return ret;
 	}
