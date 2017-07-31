@@ -12,7 +12,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -20,6 +19,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PassengerPositionsPacket implements IMessage {
+	private int dimension;
 	private UUID stockID;
 	private Map<UUID, Vec3d> passengerPositions;
 	
@@ -27,18 +27,21 @@ public class PassengerPositionsPacket implements IMessage {
 		//Reflection
 	}
 	public PassengerPositionsPacket(EntityRidableRollingStock stock) {
+		this.dimension = stock.getEntityWorld().provider.getDimension();
 		this.stockID = stock.getPersistentID();
 		this.passengerPositions = stock.passengerPositions;
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		dimension = buf.readInt();
 		stockID = BufferUtil.readUUID(buf);
 		passengerPositions = BufferUtil.readPlayerPositions(buf);
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
+		buf.writeInt(dimension);
 		BufferUtil.writeUUID(buf, stockID);
 		BufferUtil.writePlayerPositions(buf, passengerPositions);
 	}
@@ -51,7 +54,7 @@ public class PassengerPositionsPacket implements IMessage {
 		}
 
 		private void handle(PassengerPositionsPacket message, MessageContext ctx) {
-			List<EntityRidableRollingStock> matches = Minecraft.getMinecraft().world.getEntities(EntityRidableRollingStock.class, new Predicate<EntityRidableRollingStock>()
+			List<EntityRidableRollingStock> matches = ImmersiveRailroading.proxy.getWorld(message.dimension).getEntities(EntityRidableRollingStock.class, new Predicate<EntityRidableRollingStock>()
 		    {
 		        public boolean apply(@Nullable EntityRidableRollingStock entity)
 		        {

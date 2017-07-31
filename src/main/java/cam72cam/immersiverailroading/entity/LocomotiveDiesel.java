@@ -32,7 +32,7 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 		}
 	}
 
-	protected LocomotiveDieselDefinition getDefinition() {
+	public LocomotiveDieselDefinition getDefinition() {
 		return (LocomotiveDieselDefinition) DefinitionManager.getDefinition(defID);
 	}
 

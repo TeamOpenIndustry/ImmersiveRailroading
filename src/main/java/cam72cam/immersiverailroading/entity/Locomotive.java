@@ -5,9 +5,8 @@ import java.util.List;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.KeyBindings;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.util.Speed;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -16,9 +15,9 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.world.World;
 
 public abstract class Locomotive extends FreightTank {
-	private MovingSoundRollingStock hornSound;
-	private MovingSoundRollingStock idleSound;
-	protected MovingSoundRollingStock runSound;
+	//private MovingSoundRollingStock hornSound;
+	//private MovingSoundRollingStock idleSound;
+	//protected MovingSoundRollingStock runSound;
 
 	private static DataParameter<Float> currentMaxSpeedMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<String> currentDestination = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
@@ -69,7 +68,7 @@ public abstract class Locomotive extends FreightTank {
 	 * 
 	 */
 	
-	protected LocomotiveDefinition getDefinition() {
+	public LocomotiveDefinition getDefinition() {
 		return (LocomotiveDefinition) DefinitionManager.getDefinition(defID);
 	}
 
@@ -169,12 +168,12 @@ public abstract class Locomotive extends FreightTank {
 	public void setDead() {
 		super.setDead();
 		System.out.println("Stopping audio");
-		Minecraft.getMinecraft().getSoundHandler().stopSound(idleSound);
-		Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
+		//Minecraft.getMinecraft().getSoundHandler().stopSound(idleSound);
+		//Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
 	}
 	
 	@Override
-	public void handleKeyPress(Entity source, KeyBindings key) {
+	public void handleKeyPress(Entity source, KeyTypes key) {
 		switch(key) {
 		case THROTTLE_UP:
 			this.dataManager.set(throttle, this.dataManager.get(throttle) + 0.1f);
@@ -265,9 +264,9 @@ public abstract class Locomotive extends FreightTank {
 	 */
 
 	public void soundHorn() {
-		if (!Minecraft.getMinecraft().getSoundHandler().isSoundPlaying(hornSound)) {
-			Minecraft.getMinecraft().getSoundHandler().playSound(hornSound);
-		}
+		//if (!Minecraft.getMinecraft().getSoundHandler().isSoundPlaying(hornSound)) {
+		//	Minecraft.getMinecraft().getSoundHandler().playSound(hornSound);
+		//}
 	}
 
 	protected void setState(String state) {

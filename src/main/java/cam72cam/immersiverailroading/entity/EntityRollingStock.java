@@ -33,7 +33,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.ignoreFrustumCheck = true;
 	}
 
-	protected EntityRollingStockDefinition getDefinition() {
+	public EntityRollingStockDefinition getDefinition() {
 		return DefinitionManager.getDefinition(defID);
 	}
 
@@ -133,13 +133,5 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	public void sendToObserving(IMessage packet) {
 		ImmersiveRailroading.net.sendToAllAround(packet,
 				new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
-	}
-
-	public void render(double x, double y, double z, float entityYaw, float partialTicks) {
-		if (this.getDefinition() != null) {
-			this.getDefinition().render(this, x, y, z, entityYaw, partialTicks);
-		} else {
-			this.getEntityWorld().removeEntity(this);
-		}
 	}
 }

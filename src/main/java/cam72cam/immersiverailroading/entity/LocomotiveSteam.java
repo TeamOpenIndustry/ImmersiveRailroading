@@ -21,7 +21,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		super(world, defID);
 	}
 
-	protected LocomotiveSteamDefinition getDefinition() {
+	public LocomotiveSteamDefinition getDefinition() {
 		return (LocomotiveSteamDefinition) DefinitionManager.getDefinition(defID);
 	}
 

@@ -1,7 +1,8 @@
 package cam72cam.immersiverailroading.net;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
-import cam72cam.immersiverailroading.library.KeyBindings;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -12,6 +13,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class KeyPressPacket implements IMessage {
+	private int dimension;
 	private int keyBindingOrdinal;
 	private int sourceEntityID;
 	private int targetEntityID;
@@ -21,7 +23,8 @@ public class KeyPressPacket implements IMessage {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public KeyPressPacket(KeyBindings binding, int sourceEntityID, int targetEntityID) {
+	public KeyPressPacket(KeyTypes binding, int dimension, int sourceEntityID, int targetEntityID) {
+		this.dimension = dimension;
 		this.keyBindingOrdinal = binding.ordinal();
 		this.sourceEntityID = sourceEntityID;
 		this.targetEntityID = targetEntityID;
@@ -29,6 +32,7 @@ public class KeyPressPacket implements IMessage {
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		this.dimension = buf.readInt();
 		this.keyBindingOrdinal = buf.readInt();
 		this.sourceEntityID = buf.readInt();
 		this.targetEntityID = buf.readInt();
@@ -36,6 +40,7 @@ public class KeyPressPacket implements IMessage {
 
 	@Override
 	public void toBytes(ByteBuf buf) {
+		buf.writeInt(dimension);
 		buf.writeInt(keyBindingOrdinal);
 		buf.writeInt(sourceEntityID);
 		buf.writeInt(targetEntityID);
@@ -50,12 +55,12 @@ public class KeyPressPacket implements IMessage {
 
 		private void handle(KeyPressPacket message, MessageContext ctx) {
 			Entity source = ctx.getServerHandler().player.getServerWorld().getEntityByID(message.sourceEntityID);
-			EntityRidableRollingStock target = (EntityRidableRollingStock) ctx.getServerHandler().player.getServerWorld().getEntityByID(message.targetEntityID);
+			EntityRidableRollingStock target = (EntityRidableRollingStock) ImmersiveRailroading.proxy.getWorld(message.dimension).getEntityByID(message.targetEntityID);
 			if (target == null) {
 				return;
 			}
 			
-			target.handleKeyPress(source, KeyBindings.values()[message.keyBindingOrdinal]);
+			target.handleKeyPress(source, KeyTypes.values()[message.keyBindingOrdinal]);
 		}
 	}
 }

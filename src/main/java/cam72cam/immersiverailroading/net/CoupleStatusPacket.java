@@ -12,13 +12,13 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class CoupleStatusPacket implements IMessage {
+	private int dimension;
 	private UUID stockID;
 	private UUID stockFrontID;
 	private UUID stockBackID;
@@ -27,6 +27,7 @@ public class CoupleStatusPacket implements IMessage {
 		//Reflection
 	}
 	public CoupleStatusPacket(EntityCoupleableRollingStock stock) {
+		dimension = stock.getEntityWorld().provider.getDimension();
 		stockID = stock.getPersistentID(); 
 		stockFrontID = stock.getCoupledUUID(CouplerType.FRONT);
 		stockBackID = stock.getCoupledUUID(CouplerType.BACK);
@@ -34,6 +35,7 @@ public class CoupleStatusPacket implements IMessage {
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		dimension = buf.readInt();
 		stockID = BufferUtil.readUUID(buf);
 		stockFrontID = BufferUtil.readUUID(buf);
 		stockBackID = BufferUtil.readUUID(buf);
@@ -41,6 +43,7 @@ public class CoupleStatusPacket implements IMessage {
 
 	@Override
 	public void toBytes(ByteBuf buf) {
+		buf.writeInt(dimension);
 		BufferUtil.writeUUID(buf, stockID);
 		BufferUtil.writeUUID(buf, stockFrontID);
 		BufferUtil.writeUUID(buf, stockBackID);
@@ -54,7 +57,7 @@ public class CoupleStatusPacket implements IMessage {
 		}
 
 		private void handle(CoupleStatusPacket message, MessageContext ctx) {
-			List<EntityCoupleableRollingStock> matches = Minecraft.getMinecraft().world.getEntities(EntityCoupleableRollingStock.class, new Predicate<EntityCoupleableRollingStock>()
+			List<EntityCoupleableRollingStock> matches = ImmersiveRailroading.proxy.getWorld(message.dimension).getEntities(EntityCoupleableRollingStock.class, new Predicate<EntityCoupleableRollingStock>()
 		    {
 		        public boolean apply(@Nullable EntityCoupleableRollingStock entity)
 		        {

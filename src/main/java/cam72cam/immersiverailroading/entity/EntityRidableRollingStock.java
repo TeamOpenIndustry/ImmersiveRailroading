@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import cam72cam.immersiverailroading.library.KeyBindings;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -103,7 +103,7 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 	}
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();
-	public void handleKeyPress(Entity source, KeyBindings key) {
+	public void handleKeyPress(Entity source, KeyTypes key) {
 		Vec3d movement = null;
 		switch (key) {
 		case PLAYER_FORWARD:

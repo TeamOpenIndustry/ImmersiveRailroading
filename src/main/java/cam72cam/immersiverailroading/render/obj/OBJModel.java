@@ -12,8 +12,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.RelativeResource;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
 public class OBJModel {
@@ -26,7 +26,7 @@ public class OBJModel {
 	public ResourceLocation texLoc;
 	
 	public OBJModel(ResourceLocation modelLoc) throws Exception {
-		InputStream input = Minecraft.getMinecraft().getResourceManager().getResource(modelLoc).getInputStream();
+		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		Scanner reader = new Scanner(input);
 		
 		ArrayList<Face> currentGroup = null;
@@ -79,7 +79,7 @@ public class OBJModel {
 			return;
 		}
 
-		input = Minecraft.getMinecraft().getResourceManager().getResource(RelativeResource.getRelative(modelLoc, materialPath)).getInputStream();
+		input = ImmersiveRailroading.proxy.getResourceStream(RelativeResource.getRelative(modelLoc, materialPath));
 		reader = new Scanner(input);
 		while(reader.hasNextLine()) {
 			String line = reader.nextLine();

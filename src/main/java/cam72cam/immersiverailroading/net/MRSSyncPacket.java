@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.net;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
  * Movable rolling stock sync packet
  */
 public class MRSSyncPacket implements IMessage {
+	private int dimension;
 	private int entityID;
 	private float rotationYaw;
 	private float frontYaw;
@@ -28,7 +29,7 @@ public class MRSSyncPacket implements IMessage {
 	}
 
 	public MRSSyncPacket(EntityMoveableRollingStock mrs) {
-		// Should we sync dimension ID as well?
+		this.dimension = mrs.getEntityWorld().provider.getDimension();
 		this.entityID = mrs.getEntityId();
 		this.rotationYaw = mrs.rotationYaw;
 		this.frontYaw = mrs.frontYaw;
@@ -55,6 +56,7 @@ public class MRSSyncPacket implements IMessage {
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		dimension = buf.readInt();
 		entityID = buf.readInt();
 		rotationYaw = buf.readFloat();
 		frontYaw = buf.readFloat();
@@ -69,6 +71,7 @@ public class MRSSyncPacket implements IMessage {
 
 	@Override
 	public void toBytes(ByteBuf buf) {
+		buf.writeInt(dimension);
 		buf.writeInt(entityID);
 		buf.writeFloat(rotationYaw);
 		buf.writeFloat(frontYaw);
@@ -89,7 +92,7 @@ public class MRSSyncPacket implements IMessage {
 		}
 
 		private void handle(MRSSyncPacket message, MessageContext ctx) {
-			EntityMoveableRollingStock entity = (EntityMoveableRollingStock) Minecraft.getMinecraft().world.getEntityByID(message.entityID);
+			EntityMoveableRollingStock entity = (EntityMoveableRollingStock) ImmersiveRailroading.proxy.getWorld(message.dimension).getEntityByID(message.entityID);
 			if (entity == null) {
 				return;
 			}

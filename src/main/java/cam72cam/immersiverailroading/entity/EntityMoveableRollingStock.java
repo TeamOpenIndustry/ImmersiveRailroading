@@ -179,7 +179,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 
 			// Move entity
-			entity.setVelocity(this.motionX * 2, 0, this.motionZ * 2);
+			
+			entity.motionX = this.motionX * 2;
+			entity.motionY = 0;
+			entity.motionZ = this.motionZ * 2;
 			// Force update
 			entity.onUpdate();
 

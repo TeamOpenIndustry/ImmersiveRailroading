@@ -242,10 +242,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (stock == null && this.getCoupledUUID(coupler) != null) {
 			switch (coupler) {
 			case FRONT:
-				this.coupledStockFront = findByUUID(this.world, this.getCoupledUUID(coupler));
+				this.coupledStockFront = findByUUID(this.getCoupledUUID(coupler));
 				return this.coupledStockFront;
 			case BACK:
-				this.coupledStockBack = findByUUID(this.world, this.getCoupledUUID(coupler));
+				this.coupledStockBack = findByUUID(this.getCoupledUUID(coupler));
 				return this.coupledStockBack;
 			}
 		}
@@ -350,9 +350,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		return train;
 	}
 
-	public static EntityCoupleableRollingStock findByUUID(World world, UUID uuid) {
+	public EntityCoupleableRollingStock findByUUID(UUID uuid) {
 		// May want to cache this if it happens a lot
-		for (Object e : world.getLoadedEntityList()) {
+		List<EntityCoupleableRollingStock> elist = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().grow(ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+		for (Object e : elist) {
 			if (e instanceof EntityCoupleableRollingStock) {
 				EntityCoupleableRollingStock train = (EntityCoupleableRollingStock) e;
 				if (train.getPersistentID().equals(uuid)) {

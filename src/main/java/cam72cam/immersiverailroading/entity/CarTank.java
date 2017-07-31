@@ -20,7 +20,7 @@ public class CarTank extends FreightTank {
 		super(world, defID);
 	}
 	
-	protected CarTankDefinition getDefinition() {
+	public CarTankDefinition getDefinition() {
 		return (CarTankDefinition) DefinitionManager.getDefinition(defID);
 	}
 

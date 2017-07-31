@@ -13,7 +13,7 @@ public class CarFreight extends Freight {
 		super(world, defID);
 	}
 	
-	protected CarFreightDefinition getDefinition() {
+	public CarFreightDefinition getDefinition() {
 		return (CarFreightDefinition) DefinitionManager.getDefinition(defID);
 	}
 
