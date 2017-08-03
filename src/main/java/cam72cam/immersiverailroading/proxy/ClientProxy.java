@@ -139,19 +139,10 @@ public class ClientProxy extends CommonProxy {
 					GlStateManager.pushAttrib();
 					GlStateManager.pushMatrix();
 
-					// Bind block textures to current context
-					if (model.texLoc != null) {
-						Minecraft.getMinecraft().getTextureManager().bindTexture(model.texLoc);
-					} else {
-						Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
-					}
-
-					GL11.glDisable(GL11.GL_LIGHTING);
+					GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 					// Move to specified position
 					GlStateManager.translate(x, y + 0.2, z);
-
-					GlStateManager.scale(2, 2, 2);
 
 					GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
 					GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
@@ -178,14 +169,11 @@ public class ClientProxy extends CommonProxy {
 					GlStateManager.multMatrix(matrix);
 
 					model.draw();
-
-					GL11.glEnable(GL11.GL_LIGHTING);
+					
+					GL11.glEnable(GL11.GL_TEXTURE_2D);
 
 					GlStateManager.popMatrix();
 					GlStateManager.popAttrib();
-
-					// Render.renderOffsetAABB(stock.getCollisionBoundingBox(),
-					// x, y, z);
 				}
 
 				@Override
@@ -262,15 +250,9 @@ public class ClientProxy extends CommonProxy {
 				 * This is probably really fragile if someone calls getQuads
 				 * before actually setting up the correct GL context.
 				 */
-				if (model.texLoc != null) {
-					Minecraft.getMinecraft().getTextureManager().bindTexture(model.texLoc);
-				} else {
-					Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
-				}
-				GL11.glDisable(GL11.GL_LIGHTING);
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
 				model.draw();
-				GL11.glEnable(GL11.GL_LIGHTING);
-				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
 				return new ArrayList<BakedQuad>();
 			}
 
@@ -306,22 +288,22 @@ public class ClientProxy extends CommonProxy {
 				case THIRD_PERSON_LEFT_HAND:
 				case THIRD_PERSON_RIGHT_HAND:
 					return Pair.of(defaultVal.getLeft(),
-							new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(60), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
+							new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(60), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
 				case FIRST_PERSON_LEFT_HAND:
 				case FIRST_PERSON_RIGHT_HAND:
 					return Pair.of(defaultVal.getLeft(),
-							new Matrix4().scale(0.4, 0.4, 0.4).rotate(Math.toRadians(10), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
+							new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(10), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
 				case GROUND:
-					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(2, 2, 2).toMatrix4f());
+					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().toMatrix4f());
 				case FIXED:
 					// Item Frame
-					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(4, 4, 4).toMatrix4f());
+					return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(2, 2, 2).toMatrix4f());
 				case GUI:
-					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.3, 0.3, 0.3).rotate(Math.toRadians(200), 0, 1, 0)
+					return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.15, 0.15, 0.15).rotate(Math.toRadians(200), 0, 1, 0)
 							.rotate(Math.toRadians(-15), 1, 0, 0).multiply(defaultTransform.copy()).toMatrix4f());
 				case HEAD:
 					return Pair.of(defaultVal.getLeft(),
-							new Matrix4().scale(2, 2, 2).translate(0, 0, 0.5).leftMultiply(defaultTransform).toMatrix4f());
+							new Matrix4().translate(0, 0, 0.5).leftMultiply(defaultTransform).toMatrix4f());
 				case NONE:
 					return defaultVal;
 				}

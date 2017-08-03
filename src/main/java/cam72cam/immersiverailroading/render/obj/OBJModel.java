@@ -3,11 +3,13 @@ package cam72cam.immersiverailroading.render.obj;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -23,16 +25,19 @@ public class OBJModel {
 	List<Vector3f> vertices = new ArrayList<Vector3f>();
 	List<Vector3f> vertexNormals = new ArrayList<Vector3f>();
 	List<Vector2f> vertexTextures = new ArrayList<Vector2f>();
-	public ResourceLocation texLoc;
+	
+	Map<String, String> groupMtlMap = new HashMap<String, String>();
+	Map<String, Material> materials = new HashMap<String, Material>();
 	
 	public OBJModel(ResourceLocation modelLoc) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		Scanner reader = new Scanner(input);
 		
-		ArrayList<Face> currentGroup = new ArrayList<Face>();
-		groups.put("defaultName", currentGroup);
-		String materialPath = null;
-		String material = null;
+		String currentGroupName = "defaultName";
+		List<Face> currentGroup = new ArrayList<Face>();
+		groups.put(currentGroupName, currentGroup);
+		List<String> materialPaths = new ArrayList<String>();
+		String currentMaterial = null;
 		
 		while(reader.hasNextLine()) {
 			String line = reader.nextLine();
@@ -47,15 +52,18 @@ public class OBJModel {
 			String[] args = Arrays.copyOfRange(parts, 1, parts.length);
 			switch(cmd) {
 			case "mtllib":
-				materialPath = args[0];
+				materialPaths.add(args[0]);
 				break;
 			case "usemtl":
-				material = args[0];
+				currentMaterial = args[0];
+				groupMtlMap.put(currentGroupName,  currentMaterial);
 				break;
+			case "o":
 			case "g":
-				String groupName = args[0];
+				currentGroupName = args[0];
 				currentGroup = new ArrayList<Face>();
-				groups.put(groupName, currentGroup);
+				groups.put(currentGroupName, currentGroup);
+				groupMtlMap.put(currentGroupName,  currentMaterial);
 				break;
 			case "v":
 				vertices.add(new Vector3f(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
@@ -76,46 +84,120 @@ public class OBJModel {
 		}
 		reader.close();
 		
-		if (materialPath == null) {
+		if (materialPaths.size() == 0) {
 			return;
 		}
 
-		input = ImmersiveRailroading.proxy.getResourceStream(RelativeResource.getRelative(modelLoc, materialPath));
-		reader = new Scanner(input);
-		while(reader.hasNextLine()) {
-			String line = reader.nextLine();
-			if (line.startsWith("#")) {
-				continue;
+		for (String materialPath : materialPaths) {
+			
+			Material currentMTL = null;
+			
+			input = ImmersiveRailroading.proxy.getResourceStream(RelativeResource.getRelative(modelLoc, materialPath));
+			reader = new Scanner(input);
+			while(reader.hasNextLine()) {
+				String line = reader.nextLine();
+				if (line.startsWith("#")) {
+					continue;
+				}
+				if (line.length() == 0) {
+					continue;
+				}
+				String[] parts = line.split(" ");
+				switch(parts[0]) {
+				case "newmtl":
+					if (currentMTL != null) {
+						materials.put(currentMTL.name, currentMTL);
+					}
+					currentMTL = new Material();
+					currentMTL.name = parts[1];
+					break;
+				case "Ka":
+					currentMTL.Ka = BufferUtils.createFloatBuffer(4);
+					currentMTL.Ka.put(Float.parseFloat(parts[1]));
+					currentMTL.Ka.put(Float.parseFloat(parts[2]));
+					currentMTL.Ka.put(Float.parseFloat(parts[3]));
+					if (parts.length > 4) {
+						currentMTL.Ka.put(Float.parseFloat(parts[4]));
+					} else {
+						currentMTL.Ka.put(1.0f);
+					}
+					currentMTL.Ka.position(0);
+					break;
+				case "Kd":
+					currentMTL.Kd = BufferUtils.createFloatBuffer(4);
+					currentMTL.Kd.put(Float.parseFloat(parts[1]));
+					currentMTL.Kd.put(Float.parseFloat(parts[2]));
+					currentMTL.Kd.put(Float.parseFloat(parts[3]));
+					if (parts.length > 4) {
+						currentMTL.Kd.put(Float.parseFloat(parts[4]));
+					} else {
+						currentMTL.Kd.put(1.0f);
+					}
+					currentMTL.Kd.position(0);
+					break;
+				case "Ks":
+					currentMTL.Ks = BufferUtils.createFloatBuffer(4);
+					currentMTL.Ks.put(Float.parseFloat(parts[1]));
+					currentMTL.Ks.put(Float.parseFloat(parts[2]));
+					currentMTL.Ks.put(Float.parseFloat(parts[3]));
+					if (parts.length > 4) {
+						currentMTL.Ks.put(Float.parseFloat(parts[4]));
+					} else {
+						currentMTL.Ks.put(1.0f);
+					}
+					currentMTL.Ks.position(0);
+					break;
+				case "map_Kd":
+					currentMTL.texKd = RelativeResource.getRelative(modelLoc, parts[1]);
+					break;
+				default:
+					System.out.println("MTL: ignored line '" + line + "'");
+					break;
+				}
 			}
-			if (line.length() == 0) {
-				continue;
-			}
-			String[] parts = line.split(" ");
-			switch(parts[0]) {
-			case "map_Kd":
-				texLoc = RelativeResource.getRelative(modelLoc, parts[1]);
-				System.out.println(texLoc);
-				break;
-			default:
-				System.out.println("MTL: ignored line '" + line + "'");
-				break;
+
+			if (currentMTL != null) {
+				materials.put(currentMTL.name, currentMTL);
 			}
 		}
 	}
 	
 	private Integer displayList = null;
 	public void draw() {
+		// TODO texture binding
+		/*
+		 * Idea:
+		 * break model by texture groups
+		 * render each in it's own display list
+		 * iterate through map <material, display_list>
+		 * might be more performant than baking the texture binding into the display list?
+		 */
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			double defaultBrightness = 0.7;
-			GL11.glColor4d(defaultBrightness, defaultBrightness, defaultBrightness, 1);
-
-			int mode = GL11.GL_QUADS;
-			int verts = 4;
 			
-			GL11.glBegin(mode);
-			for (List<Face> faces : groups.values()) {
+			ImmersiveRailroading.logger.warn(materials.keySet().toString());
+			
+			GL11.glBegin(GL11.GL_QUADS);
+			for (String group : groups.keySet()) {
+				Material currentMTL = materials.get(groupMtlMap.get(group));
+				List<Face> faces = groups.get(group);
+				
+				if (currentMTL == null) {
+					ImmersiveRailroading.logger.warn(String.format("Missing mtl %s %s", group, groupMtlMap.get(group)));
+				} else {
+					if(currentMTL.Ka != null) {
+						GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, currentMTL.Ka);
+					}
+					if(currentMTL.Kd != null) {
+						GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_DIFFUSE, currentMTL.Kd);
+						GL11.glColor4f(currentMTL.Kd.get(0), currentMTL.Kd.get(1), currentMTL.Kd.get(2), currentMTL.Kd.get(3));
+					}
+					if(currentMTL.Ks != null) {
+						GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, currentMTL.Ks);
+					}
+				}
+				
 				for (Face face : faces) {
 					switch (face.points.length) {
 					case 3:
