@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.TrackType;
-import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
@@ -21,8 +20,14 @@ public class BuilderCrossing extends BuilderBase {
 
 	@Override
 	public List<VecYawPitch> getRenderData() {
-		// TODO Auto-generated method stub
-		return new ArrayList<VecYawPitch>();
+		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
+		
+		data.add(new VecYawPitch(0, 0, 0, 0));
+		data.add(new VecYawPitch(0, 0, 1, 0));
+		data.add(new VecYawPitch(1, 0, 0, -90));
+		data.add(new VecYawPitch(2, 0, 0, -90));
+		
+		return data;
 	}
 
 }
