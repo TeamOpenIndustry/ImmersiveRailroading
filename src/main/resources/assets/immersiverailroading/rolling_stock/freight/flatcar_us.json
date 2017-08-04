@@ -13,14 +13,14 @@
 		"cargo": ["all"]
 	},
 	"trucks": {
-		"front": 2, 
-		"rear": -2
+		"front": 9.55, 
+		"rear": -9.55
 	},
 	"bounds": {
-		"front": 3.5,
-		"rear": 3.5,
-		"height": 3,
-		"width": 2
+		"front": 13.8,
+		"rear": 13.8,
+		"height": 1.5,
+		"width": 3
 	},
 	"rotate": {
 		"y": 90
