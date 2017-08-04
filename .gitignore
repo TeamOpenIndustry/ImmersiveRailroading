@@ -20,3 +20,6 @@ build
 # other
 eclipse
 run
+
+# sketchup
+*.skb

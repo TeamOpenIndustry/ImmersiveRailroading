@@ -14,7 +14,7 @@ public class Config {
 	public static String[] passenger_cars = new String[] { "1class_db", "2class_db" };
 	
 	@Comment({"A list of freight cars to load"})
-	public static String[] freight_cars = new String[] { "boxcar_us" };
+	public static String[] freight_cars = new String[] { "boxcar_us", "flatcar_us" };
 	
 	@Comment({"A list of tank cars to load"})
 	public static String[] tank_cars = new String[] { "tank_us" };
