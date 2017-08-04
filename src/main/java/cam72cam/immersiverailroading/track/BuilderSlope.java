@@ -4,30 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.TrackType;
-import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class BuilderSlope extends BuilderBase {
 
+	private int length;
+
 	@SuppressWarnings("incomplete-switch")
 	public BuilderSlope(World world, int x, int y, int z, EnumFacing rotation, TrackType type) {
 		super(world, x, y, z, rotation);
 		
-		int gags = 0;
+		length = 0;
 		switch(type) {
 		case SLOPE_MEDIUM:
-			gags = 23;
+			length = 23;
 			break;
 		case SLOPE_LARGE:
-			gags = 35;
+			length = 35;
 			break;
 		}
 		
-		float slope = (1.0F/(gags + 1));
+		float slope = (1.0F/(length + 1));
 		tracks.add(new TrackRail(this, 0, 0, tracks.size()/2, EnumFacing.NORTH, type));
 		tracks.add(new TrackGag(this, 1, 0, tracks.size()/2));
-		for(int i = 1; i <= gags; i ++) {
+		for(int i = 1; i <= length; i ++) {
 			TrackGag gag = new TrackGag(this, 0, 0, tracks.size()/2);
 			TrackGag gag2 = new TrackGag(this, 1, 0, tracks.size()/2);
 			
@@ -41,7 +42,13 @@ public class BuilderSlope extends BuilderBase {
 
 	@Override
 	public List<VecYawPitch> getRenderData() {
-		// TODO Auto-generated method stub
-		return new ArrayList<VecYawPitch>();
+		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
+		
+		float slope = (1.0F/(length + 1));
+		
+		for (int i = 0; i <= length; i++) {
+			data.add(new VecYawPitch(0, slope * i, i, 0, (float) -Math.toDegrees(Math.atan2(1, length))));
+		}
+		return data;
 	}
 }

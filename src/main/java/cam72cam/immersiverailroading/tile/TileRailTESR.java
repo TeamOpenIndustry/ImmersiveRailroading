@@ -26,7 +26,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
@@ -101,6 +100,7 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 				GlStateManager.pushMatrix();
 				GlStateManager.rotate(180-te.getFacing().getHorizontalAngle(), 0, 1, 0);
 				GlStateManager.translate(piece.x, piece.y, piece.z);
+				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
 				GlStateManager.rotate(-90, 0, 1, 0);
 				baseRailModel.drawDirect();
