@@ -7,9 +7,12 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.render.ScaledModel;
+import cam72cam.immersiverailroading.render.obj.OBJModel;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.TrackBase;
+import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -23,9 +26,23 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
+	
+	private static OBJModel baseRailModel;
+	
+	static {
+		try {
+			baseRailModel = new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"));
+		} catch (Exception e) {
+			ImmersiveRailroading.logger.catching(e);
+		}
+	}
+	
 	@Override
 	public boolean isGlobalRenderer(TileRail te) {
 		return true;
@@ -49,7 +66,42 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 		GlStateManager.translate(x, y, z);
 		
 		// Finish Drawing
-		draw(getModelBuffer(te));
+		draw(getBaseBuffer(te));
+		
+		RenderHelper.enableStandardItemLighting();
+		
+		
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
+		switch (te.getFacing().getOpposite()) {
+		case EAST:
+			GlStateManager.translate(0, 0, 1);
+			break;
+		case NORTH:
+			GlStateManager.translate(1, 0, 1);
+			break;
+		case SOUTH:
+			// No Change
+			break;
+		case WEST:
+			GlStateManager.translate(1, 0, 0);
+			break;
+		default:
+			break;
+		}
+		BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
+		for (TrackBase base : builder.getTracks()) {
+			if (!base.doRender()) {
+				continue;
+			}
+			GlStateManager.pushMatrix();
+			BlockPos pos = base.getPos();
+			GlStateManager.translate(pos.getX(), pos.getY(), pos.getZ());
+			GlStateManager.rotate(90-te.getFacing().getHorizontalAngle(), 0, 1, 0);
+			baseRailModel.draw();
+			GlStateManager.popMatrix();
+		}
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
 
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
@@ -101,7 +153,7 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 	 * 
 	 * We also draw the railbed here since drawing a model for each gag eats FPS 
 	 */
-	protected static BufferBuilder getModelBuffer(TileRail te) {
+	protected static BufferBuilder getBaseBuffer(TileRail te) {
 		
 		if (!buffers.containsKey(renderID(te))) {
 			// Get model for current state
@@ -111,7 +163,7 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 			state = te.getBlockState();
 			IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
 			
-			IBlockState gravelState = Blocks.GRASS.getDefaultState();
+			IBlockState gravelState = Blocks.GRAVEL.getDefaultState();
 			IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
 			
 			// Create render targets
@@ -127,7 +179,7 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 			worldRenderer.color(255, 255, 255, 255);
 	
 			// Render block at position
-			blockRenderer.getBlockModelRenderer().renderModel(te.getWorld(), model, state, blockPos, worldRenderer, false);
+			//blockRenderer.getBlockModelRenderer().renderModel(te.getWorld(), model, state, blockPos, worldRenderer, false);
 			
 			// This is evil but really fast :D
 			BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());

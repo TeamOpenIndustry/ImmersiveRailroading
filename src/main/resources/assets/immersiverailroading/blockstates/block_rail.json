@@ -11,10 +11,10 @@
 		"normal": [{}],
 		"inventory": [{
 			"custom": { "flip-v": true },
-			"model": "immersiverailroading:track_normal.obj",
+			"model": "immersiverailroading:track_1m.obj",
 			"transform": {
 				"translation": [0.5, -0.5, 0],
-				"rotation": {"x": 90}
+				"rotation": {"x": 45}
 			}
 		}],
 		
@@ -37,11 +37,9 @@
 				"submodel": {
 					"rail": {
 						"custom": { "flip-v": true },
-						"model": "immersiverailroading:track_normal.obj",
+						"model": "immersiverailroading:track_1m.obj",
 						"transform": {
-							"scale": [2, 2, 2],
-							"translation": [0.5, 0.55, 0.5],
-							"rotation": {"y": 0}
+							"translation": [0, 0, 1]
 						}
 					}
 				}

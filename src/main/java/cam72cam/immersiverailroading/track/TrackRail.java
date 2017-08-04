@@ -20,7 +20,7 @@ public class TrackRail extends TrackBase {
 	private float slopeAngle = 0;
 
 	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackType type) {
-		super(builder, rel_x, rel_y, rel_z, ImmersiveRailroading.BLOCK_RAIL, rel_rotation);
+		super(builder, rel_x, rel_y, rel_z, ImmersiveRailroading.BLOCK_RAIL, rel_rotation, true);
 		this.type = type;
 	}
 	
