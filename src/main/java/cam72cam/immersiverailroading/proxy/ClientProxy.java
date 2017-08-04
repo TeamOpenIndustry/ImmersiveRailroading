@@ -114,6 +114,11 @@ public class ClientProxy extends CommonProxy {
 		keys.put(KeyTypes.PLAYER_LEFT, Minecraft.getMinecraft().gameSettings.keyBindLeft);
 		keys.put(KeyTypes.PLAYER_RIGHT, Minecraft.getMinecraft().gameSettings.keyBindRight);
 		
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_UP));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_DOWN));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_ZERO));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.HORN));
+		
 	}
 	
 	public World getWorld(int dimension)  {
