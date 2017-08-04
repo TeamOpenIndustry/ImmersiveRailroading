@@ -20,7 +20,7 @@ public class ScaledModel implements IBakedModel {
 	
 	public ScaledModel(IBakedModel source, float height) {
 		this.source = source;
-		this.height = height + 0.02f;
+		this.height = height + 0.1f;
 	}
 
 	@Override

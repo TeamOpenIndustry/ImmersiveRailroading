@@ -27,8 +27,8 @@ public class BuilderStraight extends BuilderBase {
 		tracks.add(new TrackRail(this, 0, 0, tracks.size()/2, EnumFacing.NORTH, type));
 		tracks.add(new TrackGag(this, 1, 0, tracks.size()/2));
 		for(int i = 1; i < length; i ++) {
-			tracks.add(new TrackGag(this, 0, 0, tracks.size()/2));
-			tracks.add(new TrackGag(this, 1, 0, tracks.size()/2));
+			tracks.add(new TrackGag(this, 0, 0, tracks.size()/2, true));
+			tracks.add(new TrackGag(this, 1, 0, tracks.size()/2, false));
 		}
 	}
 }
