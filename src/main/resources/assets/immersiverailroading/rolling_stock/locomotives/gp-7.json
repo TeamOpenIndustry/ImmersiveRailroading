@@ -1,0 +1,34 @@
+{
+	"era": "diesel",
+	"name": "GP-7",
+	"works": "Electro-Motive Division",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/gp-7.obj",
+	"properties": {
+		"fuel_consumption": 100,
+		"fuel_capacity": 100,
+		"horsepower": 1500,
+		"tractive_effort": 274,
+		"acceleration": 100,
+		"deceleration": 100,
+		"max_speed": 65
+	},
+	"passenger": {
+		"center_x": 3,
+		"center_y": 2,
+		"length": 0.22,
+		"width": 2
+	},
+	"trucks": {
+		"front": 4.7, 
+		"rear": -4.7
+	},
+	"bounds": {
+		"front": 7.8,
+		"rear": 7.8,
+		"height": 4.4,
+		"width": 3
+	},
+	"rotate": {
+		"y": -90
+	}
+}

@@ -170,6 +170,8 @@ public class ClientProxy extends CommonProxy {
 
 					model.draw();
 					
+					
+					
 					GL11.glEnable(GL11.GL_TEXTURE_2D);
 
 					GlStateManager.popMatrix();
