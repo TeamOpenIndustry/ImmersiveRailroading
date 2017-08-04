@@ -20,26 +20,26 @@ import net.minecraft.util.ResourceLocation;
 
 public class OBJModel {
 	List<String> materialPaths = new ArrayList<String>();
-	//LinkedHashMap is ordered
+	// LinkedHashMap is ordered
 	Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
 	List<Vector3f> vertices = new ArrayList<Vector3f>();
 	List<Vector3f> vertexNormals = new ArrayList<Vector3f>();
 	List<Vector2f> vertexTextures = new ArrayList<Vector2f>();
-	
+
 	Map<String, String> groupMtlMap = new HashMap<String, String>();
 	Map<String, Material> materials = new HashMap<String, Material>();
-	
+
 	public OBJModel(ResourceLocation modelLoc) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		Scanner reader = new Scanner(input);
-		
+
 		String currentGroupName = "defaultName";
 		List<Face> currentGroup = new ArrayList<Face>();
 		groups.put(currentGroupName, currentGroup);
 		List<String> materialPaths = new ArrayList<String>();
 		String currentMaterial = null;
-		
-		while(reader.hasNextLine()) {
+
+		while (reader.hasNextLine()) {
 			String line = reader.nextLine();
 			if (line.startsWith("#")) {
 				continue;
@@ -50,20 +50,20 @@ public class OBJModel {
 			String[] parts = line.split(" ");
 			String cmd = parts[0];
 			String[] args = Arrays.copyOfRange(parts, 1, parts.length);
-			switch(cmd) {
+			switch (cmd) {
 			case "mtllib":
 				materialPaths.add(args[0]);
 				break;
 			case "usemtl":
 				currentMaterial = args[0];
-				groupMtlMap.put(currentGroupName,  currentMaterial);
+				groupMtlMap.put(currentGroupName, currentMaterial);
 				break;
 			case "o":
 			case "g":
 				currentGroupName = args[0];
 				currentGroup = new ArrayList<Face>();
 				groups.put(currentGroupName, currentGroup);
-				groupMtlMap.put(currentGroupName,  currentMaterial);
+				groupMtlMap.put(currentGroupName, currentMaterial);
 				break;
 			case "v":
 				vertices.add(new Vector3f(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
@@ -83,18 +83,18 @@ public class OBJModel {
 			}
 		}
 		reader.close();
-		
+
 		if (materialPaths.size() == 0) {
 			return;
 		}
 
 		for (String materialPath : materialPaths) {
-			
+
 			Material currentMTL = null;
-			
+
 			input = ImmersiveRailroading.proxy.getResourceStream(RelativeResource.getRelative(modelLoc, materialPath));
 			reader = new Scanner(input);
-			while(reader.hasNextLine()) {
+			while (reader.hasNextLine()) {
 				String line = reader.nextLine();
 				if (line.startsWith("#")) {
 					continue;
@@ -103,7 +103,7 @@ public class OBJModel {
 					continue;
 				}
 				String[] parts = line.split(" ");
-				switch(parts[0]) {
+				switch (parts[0]) {
 				case "newmtl":
 					if (currentMTL != null) {
 						materials.put(currentMTL.name, currentMTL);
@@ -161,86 +161,91 @@ public class OBJModel {
 			}
 		}
 	}
-	
+
 	private Integer displayList = null;
+
 	public void draw() {
 		// TODO texture binding
 		/*
-		 * Idea:
-		 * break model by texture groups
-		 * render each in it's own display list
-		 * iterate through map <material, display_list>
-		 * might be more performant than baking the texture binding into the display list?
+		 * Idea: break model by texture groups render each in it's own display
+		 * list iterate through map <material, display_list> might be more
+		 * performant than baking the texture binding into the display list?
 		 */
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			
-			ImmersiveRailroading.logger.warn(materials.keySet().toString());
-			
-			GL11.glBegin(GL11.GL_QUADS);
-			for (String group : groups.keySet()) {
-				Material currentMTL = materials.get(groupMtlMap.get(group));
-				List<Face> faces = groups.get(group);
-				
-				if (currentMTL == null) {
-					ImmersiveRailroading.logger.warn(String.format("Missing mtl %s %s", group, groupMtlMap.get(group)));
-				} else {
-					if(currentMTL.Ka != null) {
-						GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, currentMTL.Ka);
-					}
-					if(currentMTL.Kd != null) {
-						GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_DIFFUSE, currentMTL.Kd);
-						GL11.glColor4f(currentMTL.Kd.get(0), currentMTL.Kd.get(1), currentMTL.Kd.get(2), currentMTL.Kd.get(3));
-					}
-					if(currentMTL.Ks != null) {
-						GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, currentMTL.Ks);
-					}
-				}
-				
-				for (Face face : faces) {
-					switch (face.points.length) {
-					case 3:
-						GL11.glEnd();
-						GL11.glBegin(GL11.GL_TRIANGLES);
-						break;
-					case 4:
-						GL11.glEnd();
-						GL11.glBegin(GL11.GL_QUADS);
-						break;
-					default:
-						GL11.glEnd();
-						GL11.glBegin(GL11.GL_POLYGON);
-						break;
-					}
-					
-					for(int[] point : face.points) {
-						Vector3f v;
-						Vector2f vt;
-						Vector3f vn;
-						
-						switch(point.length) {
-						case 3:
-							vn = vertexNormals.get(point[2]);
-							GL11.glNormal3f(vn.x, vn.y, vn.z);
-						case 2:
-							if (point[1] != -1) {
-								vt = vertexTextures.get(point[1]);
-								GL11.glTexCoord2f(vt.x, 1-vt.y);
-							}
-						case 1:
-							v = vertices.get(point[0]);
-							GL11.glVertex3f(v.x, v.y, v.z);
-							break;
-						default:
-							System.out.println("WATWATWAT");
-						}
-					}
-				}
-			}
-			GL11.glEnd();
+			drawDirect();
 			GL11.glEndList();
 		}
 		GL11.glCallList(displayList);
+	}
+
+	public void drawDirect() {
+
+		GL11.glBegin(GL11.GL_QUADS);
+		for (String group : groups.keySet()) {
+			Material currentMTL = materials.get(groupMtlMap.get(group));
+			List<Face> faces = groups.get(group);
+
+			if (currentMTL == null) {
+				ImmersiveRailroading.logger.warn(String.format("Missing mtl %s %s", group, groupMtlMap.get(group)));
+			} else {
+				if (currentMTL.Ka != null) {
+					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, currentMTL.Ka);
+				}
+				if (currentMTL.Kd != null) {
+					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_DIFFUSE, currentMTL.Kd);
+					float darken = 0.06f;
+					float r = Math.max(0, currentMTL.Kd.get(0)-darken);
+					float g = Math.max(0, currentMTL.Kd.get(1)-darken);
+					float b = Math.max(0, currentMTL.Kd.get(2)-darken);
+					GL11.glColor4f(r, g, b, currentMTL.Kd.get(3));
+				}
+				if (currentMTL.Ks != null) {
+					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, currentMTL.Ks);
+				}
+			}
+
+			for (Face face : faces) {
+				switch (face.points.length) {
+				case 3:
+					GL11.glEnd();
+					GL11.glBegin(GL11.GL_TRIANGLES);
+					break;
+				case 4:
+					GL11.glEnd();
+					GL11.glBegin(GL11.GL_QUADS);
+					break;
+				default:
+					GL11.glEnd();
+					GL11.glBegin(GL11.GL_POLYGON);
+					break;
+				}
+
+				for (int[] point : face.points) {
+					Vector3f v;
+					Vector2f vt;
+					Vector3f vn;
+
+					switch (point.length) {
+					case 3:
+						vn = vertexNormals.get(point[2]);
+						GL11.glNormal3f(vn.x, vn.y, vn.z);
+					case 2:
+						if (point[1] != -1) {
+							vt = vertexTextures.get(point[1]);
+							GL11.glTexCoord2f(vt.x, 1 - vt.y);
+						}
+					case 1:
+						v = vertices.get(point[0]);
+						GL11.glVertex3f(v.x, v.y, v.z);
+						break;
+					default:
+						System.out.println("WATWATWAT");
+					}
+				}
+			}
+		}
+		GL11.glEnd();
 	}
 }

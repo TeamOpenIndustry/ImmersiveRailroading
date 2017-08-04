@@ -47,6 +47,8 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 	public boolean isGlobalRenderer(TileRail te) {
 		return true;
 	}
+	
+	private static Map<String, Integer> displayLists = new HashMap<String, Integer>();
 
 	@Override
 	public void render(TileRail te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -69,40 +71,54 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 		draw(getBaseBuffer(te));
 		
 		RenderHelper.enableStandardItemLighting();
+
 		
 		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
-		switch (te.getFacing().getOpposite()) {
-		case EAST:
-			GlStateManager.translate(0, 0, 1);
-			break;
-		case NORTH:
-			GlStateManager.translate(1, 0, 1);
-			break;
-		case SOUTH:
-			// No Change
-			break;
-		case WEST:
-			GlStateManager.translate(1, 0, 0);
-			break;
-		default:
-			break;
-		}
-		BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
-		for (TrackBase base : builder.getTracks()) {
-			if (!base.doRender()) {
-				continue;
-			}
-			GlStateManager.pushMatrix();
-			BlockPos pos = base.getPos();
-			GlStateManager.translate(pos.getX(), pos.getY(), pos.getZ());
-			GlStateManager.rotate(90-te.getFacing().getHorizontalAngle(), 0, 1, 0);
-			baseRailModel.draw();
-			GlStateManager.popMatrix();
-		}
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
 
+		if (!displayLists.containsKey(renderID(te))) {
+			int displayList = GL11.glGenLists(1);
+			GL11.glNewList(displayList, GL11.GL_COMPILE);
+			
+			switch (te.getFacing().getOpposite()) {
+			case EAST:
+				GlStateManager.translate(0, 0, 1);
+				break;
+			case NORTH:
+				GlStateManager.translate(1, 0, 1);
+				break;
+			case SOUTH:
+				// No Change
+				break;
+			case WEST:
+				GlStateManager.translate(1, 0, 0);
+				break;
+			default:
+				break;
+			}
+			BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
+			for (TrackBase base : builder.getTracks()) {
+				if (!base.doRender()) {
+					continue;
+				}
+				GlStateManager.pushMatrix();
+				BlockPos pos = base.getPos();
+				GlStateManager.translate(pos.getX(), pos.getY(), pos.getZ());
+				GlStateManager.rotate(90-te.getFacing().getHorizontalAngle(), 0, 1, 0);
+				baseRailModel.drawDirect();
+				GlStateManager.popMatrix();
+			}
+
+			GL11.glEndList();
+			
+			displayLists.put(renderID(te), displayList);
+		}
+		
+		GL11.glCallList(displayLists.get(renderID(te)));
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
 	}
