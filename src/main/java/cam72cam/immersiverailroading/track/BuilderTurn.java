@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.track;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -11,6 +13,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class BuilderTurn extends BuilderBase {
+
+	private int radius;
+	private TrackDirection direction;
 
 	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, TrackType type) {
 		super(world, x, y, z, rotation);
@@ -26,6 +31,9 @@ public class BuilderTurn extends BuilderBase {
 		default:
 			return;
 		}
+		
+		this.radius = radius;
+		this.direction = type.getDirection();
 
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
@@ -65,5 +73,24 @@ public class BuilderTurn extends BuilderBase {
 			}
 			tracks.add(new TrackGag(this, gagX, 0, gagZ));
 		}
+	}
+
+	@Override
+	public List<VecYawPitch> getRenderData() {
+		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
+		
+		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
+		int xOff = direction == TrackDirection.LEFT ? 0 : 1;
+		
+		float angleDelta = (float) (90 / (Math.PI * (radius+1)/2));
+		
+		for (float angle = 0; angle < 90; angle+=angleDelta) {
+			double gagX = Math.sin(Math.toRadians(angle)) * (radius+1)+xOff;
+			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+1);
+			
+			data.add(new VecYawPitch(gagX * xMult - xMult * radius, 0, gagZ, (angle + angleDelta/2)*xMult+90));
+		}
+		
+		return data;
 	}
 }

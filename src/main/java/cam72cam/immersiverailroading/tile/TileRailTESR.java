@@ -11,8 +11,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.render.ScaledModel;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
 import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.track.TrackBase;
-import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -26,10 +26,9 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 	
@@ -98,14 +97,12 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 				break;
 			}
 			BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
-			for (TrackBase base : builder.getTracks()) {
-				if (!base.doRender()) {
-					continue;
-				}
+			for (VecYawPitch piece : builder.getRenderData()) {
 				GlStateManager.pushMatrix();
-				BlockPos pos = base.getPos();
-				GlStateManager.translate(pos.getX(), pos.getY(), pos.getZ());
-				GlStateManager.rotate(90-te.getFacing().getHorizontalAngle(), 0, 1, 0);
+				GlStateManager.rotate(180-te.getFacing().getHorizontalAngle(), 0, 1, 0);
+				GlStateManager.translate(piece.x, piece.y, piece.z);
+				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
+				GlStateManager.rotate(-90, 0, 1, 0);
 				baseRailModel.drawDirect();
 				GlStateManager.popMatrix();
 			}
