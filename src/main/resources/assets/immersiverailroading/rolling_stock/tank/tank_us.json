@@ -11,14 +11,14 @@
 		"capacity": 80000 
 	},
 	"trucks": {
-		"front": 2, 
-		"rear": -2
+		"front": 7.15, 
+		"rear": -7.15
 	},
 	"bounds": {
-		"front": 3.5,
-		"rear": 3.5,
-		"height": 4.25,
-		"width": 2
+		"front": 9.15,
+		"rear": 9.15,
+		"height": 3.4,
+		"width": 3
 	},
 	"rotate": {
 		"y": 90
