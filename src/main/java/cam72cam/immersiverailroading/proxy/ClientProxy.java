@@ -142,7 +142,7 @@ public class ClientProxy extends CommonProxy {
 					GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 					// Move to specified position
-					GlStateManager.translate(x, y + 0.2, z);
+					GlStateManager.translate(x, y + 0.3, z);
 
 					GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
 					GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);

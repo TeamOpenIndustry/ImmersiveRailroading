@@ -1,6 +1,6 @@
 {
 	"name": "Box Car",
-	"model": "immersiverailroading:models/rolling_stock/freight/box_car.obj",
+	"model": "immersiverailroading:models/rolling_stock/freight/flat_car.obj",
 	"passenger": {
 		"center_x": 0,
 		"center_y": 1.4,
@@ -19,7 +19,7 @@
 	"bounds": {
 		"front": 3.5,
 		"rear": 3.5,
-		"height": 4.25,
+		"height": 3,
 		"width": 2
 	},
 	"rotate": {

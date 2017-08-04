@@ -1,6 +1,6 @@
 {
 	"name": "Tank US",
-	"model": "immersiverailroading:models/rolling_stock/tank/tank_us.obj",
+	"model": "immersiverailroading:models/rolling_stock/tank/tank_car.obj",
 	"passenger": {
 		"center_x": 0,
 		"center_y": 4,
