@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
+import java.util.List;
+
 import cam72cam.immersiverailroading.library.TrackType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -51,6 +53,12 @@ public class BuilderParallel extends BuilderBase {
 		for (int i = 1; i < xArray2.length; i++) {
 			tracks.add(new TrackGag(this, xArray2[i] * xMult, 0, zArray2[i] * zMult, 0, subTypeOther));
 		}*/
+	}
+
+	@Override
+	public List<VecYawPitch> getRenderData() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

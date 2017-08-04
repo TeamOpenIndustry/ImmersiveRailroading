@@ -21,15 +21,12 @@ public abstract class TrackBase {
 
 	protected Block block;
 
-	private boolean doRender;
-
-	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block, EnumFacing rel_rotation, boolean doRender) {
+	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block, EnumFacing rel_rotation) {
 		this.builder = builder;
 		this.rel_x = rel_x;
 		this.rel_y = rel_y;
 		this.rel_z = rel_z;
 		this.rel_rotation = rel_rotation;
-		this.doRender = doRender;
 		this.block = block;
 	}
 
@@ -82,8 +79,5 @@ public abstract class TrackBase {
 	}
 	public float getHeight() {
 		return height;
-	}
-	public boolean doRender() {
-		return this.doRender;
 	}
 }
