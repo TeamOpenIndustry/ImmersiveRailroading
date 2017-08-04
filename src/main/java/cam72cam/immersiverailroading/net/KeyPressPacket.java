@@ -1,6 +1,11 @@
 package cam72cam.immersiverailroading.net;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import com.google.common.base.Predicate;
+
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import io.netty.buffer.ByteBuf;
@@ -54,13 +59,22 @@ public class KeyPressPacket implements IMessage {
 		}
 
 		private void handle(KeyPressPacket message, MessageContext ctx) {
+			
 			Entity source = ctx.getServerHandler().player.getServerWorld().getEntityByID(message.sourceEntityID);
-			EntityRidableRollingStock target = (EntityRidableRollingStock) ImmersiveRailroading.proxy.getWorld(message.dimension).getEntityByID(message.targetEntityID);
-			if (target == null) {
+			
+			List<EntityRidableRollingStock> matches = ctx.getServerHandler().player.getServerWorld().getEntities(EntityRidableRollingStock.class, new Predicate<EntityRidableRollingStock>()
+		    {
+		        public boolean apply(@Nullable EntityRidableRollingStock entity)
+		        {
+		            return entity != null && entity.getEntityId() == message.targetEntityID;
+		        }
+		    });
+
+			if (matches.isEmpty()) {
 				return;
 			}
 			
-			target.handleKeyPress(source, KeyTypes.values()[message.keyBindingOrdinal]);
+			matches.get(0).handleKeyPress(source, KeyTypes.values()[message.keyBindingOrdinal]);
 		}
 	}
 }
