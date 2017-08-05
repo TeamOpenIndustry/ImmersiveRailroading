@@ -18,6 +18,7 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
@@ -172,8 +173,38 @@ public class ClientProxy extends CommonProxy {
 					matrix.flip();
 
 					GlStateManager.multMatrix(matrix);
+					
+					List<String> main = new ArrayList<String>();
+					List<String> front = new ArrayList<String>();
+					List<String> rear = new ArrayList<String>();
+					
+					for (String group : model.groups()) {
+						if (group.contains("BOGEY_FRONT")) {
+							front.add(group);
+						} else if (group.contains("BOGEY_REAR")) {
+							rear.add(group);
+						} else {
+							main.add(group);
+						}
+					}
 
-					model.draw();
+					model.drawGroups(main);
+					
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(-def.getBogeyFront(), 0, 0);
+					GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).frontYaw, 0, 1, 0);
+					GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
+					GlStateManager.translate(def.getBogeyFront(), 0, 0);
+					model.drawGroups(front);
+					GlStateManager.popMatrix();
+					
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(-def.getBogeyRear(), 0, 0);
+					GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).rearYaw, 0, 1, 0);
+					GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
+					GlStateManager.translate(def.getBogeyRear(), 0, 0);
+					model.drawGroups(rear);
+					GlStateManager.popMatrix();
 					
 					
 					
