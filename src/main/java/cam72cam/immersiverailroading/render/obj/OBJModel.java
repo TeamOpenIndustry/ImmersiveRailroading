@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -181,14 +182,30 @@ public class OBJModel {
 	}
 
 	public void drawDirect() {
-
+		drawDirectGroups(groups.keySet());
+	}
+	
+	public Map<Iterable<String>, Integer> displayLists = new HashMap<Iterable<String>, Integer>();
+	
+	public void drawGroups(Iterable<String> groupNames) {
+		if (!displayLists.containsKey(groupNames)) {
+			int groupsDisplayList = GL11.glGenLists(1);
+			GL11.glNewList(groupsDisplayList, GL11.GL_COMPILE);
+			drawDirectGroups(groupNames);
+			GL11.glEndList();
+			displayLists.put(groupNames, groupsDisplayList);
+		}
+		GL11.glCallList(displayLists.get(groupNames));
+	}
+	
+	public void drawDirectGroups(Iterable<String> groupNames) {
 		GL11.glBegin(GL11.GL_QUADS);
-		for (String group : groups.keySet()) {
+		for (String group : groupNames) {
 			Material currentMTL = materials.get(groupMtlMap.get(group));
 			List<Face> faces = groups.get(group);
 
 			if (currentMTL == null) {
-				ImmersiveRailroading.logger.warn(String.format("Missing mtl %s %s", group, groupMtlMap.get(group)));
+				//ImmersiveRailroading.logger.warn(String.format("Missing mtl %s %s", group, groupMtlMap.get(group)));
 			} else {
 				if (currentMTL.Ka != null) {
 					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, currentMTL.Ka);
@@ -247,5 +264,9 @@ public class OBJModel {
 			}
 		}
 		GL11.glEnd();
+	}
+	
+	public Set<String> groups() {
+		return groups.keySet();
 	}
 }
