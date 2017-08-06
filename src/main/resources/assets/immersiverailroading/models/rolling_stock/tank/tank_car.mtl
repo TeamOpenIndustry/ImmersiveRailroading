@@ -1,7 +1,7 @@
 # Blender MTL File: 'None'
 # Material Count: 4
 
-newmtl Color_005_.001
+newmtl Color_005_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.447059 0.447059 0.447059
@@ -11,7 +11,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_007_.001
+newmtl Color_007_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.227451 0.227451 0.227451
