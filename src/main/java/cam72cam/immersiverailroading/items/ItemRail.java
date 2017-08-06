@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.items;
 
-import cam72cam.immersiverailroading.blocks.BlockRail;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackType;
 import cam72cam.immersiverailroading.track.BuilderBase;
@@ -33,8 +33,12 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
-		EnumFacing facing = newState.getValue(BlockRail.FACING);
-		TrackType tt = newState.getValue(BlockRail.TRACK_TYPE);
+
+		float yawHead = player.getRotationYawHead() % 360 + 360;
+		TrackDirection dir = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
+		
+		EnumFacing facing = player.getHorizontalFacing();
+		TrackType tt = TrackType.fromMeta(stack.getMetadata(), dir);
 		
 		BuilderBase builder = tt.getBuilder(world, pos, facing);
 		if (builder.canBuild()) {

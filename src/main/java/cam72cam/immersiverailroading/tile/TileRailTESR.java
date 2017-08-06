@@ -172,9 +172,11 @@ public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
 			// Get model for current state
 			final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 			BlockPos blockPos = te.getPos();
+			/*
 			IBlockState state = te.getWorld().getBlockState(blockPos);
 			state = te.getBlockState();
 			IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
+			*/
 			
 			IBlockState gravelState = Blocks.GRAVEL.getDefaultState();
 			IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
