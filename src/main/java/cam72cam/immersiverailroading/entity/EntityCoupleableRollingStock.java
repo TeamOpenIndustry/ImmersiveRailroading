@@ -150,18 +150,19 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private void recursiveMove(EntityCoupleableRollingStock prev) {
 		for (CouplerType coupler : CouplerType.values()) {
 			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
-			Vec3d myOffset = this.getCouplerPosition(coupler);
 
 			if (coupled == null || coupled == prev) {
 				// Either end of train or wrong iteration direction
 				continue;
 			}
+			
+			Vec3d myOffset = this.getCouplerPositionTo(coupler, coupled);
 
 			Vec3d otherOffset = null;
 			for (CouplerType otherCoupler : CouplerType.values()) {
 				if (coupled.getCoupled(otherCoupler) == this) {
 					// Matching coupler pair
-					otherOffset = coupled.getCouplerPosition(otherCoupler);
+					otherOffset = coupled.getCouplerPositionTo(otherCoupler, this);
 				}
 			}
 			if (otherOffset == null) {
@@ -170,6 +171,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 
 			double distance = myOffset.distanceTo(otherOffset);
+			
+			//distance = Math.max(0, distance-0.1);
 
 			// TEMP
 			if (distance > 1) {
@@ -311,6 +314,17 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	/*
 	 * Get cars by coupled bounding boxes
 	 */
+
+	private Vec3d getCouplerPositionTo(CouplerType coupler, EntityCoupleableRollingStock coupled) {
+		//	Take the current position
+		//	Add
+		//		The Vector between the two couplers
+		//		which has been normalized
+		//  	then scaled to the distance between the stock position and the coupler
+		//
+		//	This works remarkably well even around corners
+		return this.getPositionVector().add(this.getPositionVector().subtractReverse(coupled.getPositionVector()).normalize().scale(getDefinition().getCouplerPosition(coupler)));
+	}
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {
 		return VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler), rotationYaw + coupler.yaw).add(getPositionVector());
