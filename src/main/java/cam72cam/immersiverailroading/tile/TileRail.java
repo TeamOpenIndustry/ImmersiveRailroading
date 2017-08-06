@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.tile;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -8,8 +7,6 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.library.TrackType;
 
 public class TileRail extends TileRailBase {
@@ -126,11 +123,6 @@ public class TileRail extends TileRailBase {
 		nbt.setBoolean("switchActive", switchActive);
 		
 		return super.writeToNBT(nbt);
-	}
-
-	public IBlockState getBlockState() {
-		// Functions without a block position
-		return ImmersiveRailroading.BLOCK_RAIL.getDefaultState().withProperty(BlockRail.FACING, facing).withProperty(BlockRail.TRACK_TYPE, type);
 	}
 
 	/*

@@ -1,11 +1,9 @@
 package cam72cam.immersiverailroading.track;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.library.TrackType;
 import cam72cam.immersiverailroading.tile.TileRail;
 
@@ -37,11 +35,6 @@ public class TrackRail extends TrackBase {
 		slopeHeight = height;
 		slopeLength = length;
 		slopeAngle = angle;
-	}
-
-	@Override
-	public IBlockState getBlockState() {
-		return block.getDefaultState().withProperty(BlockRail.FACING, super.getFacing()).withProperty(BlockRail.TRACK_TYPE, type);
 	}
 	
 	@Override
