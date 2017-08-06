@@ -88,7 +88,7 @@ public class BuilderTurn extends BuilderBase {
 			double gagX = Math.sin(Math.toRadians(angle)) * (radius+1)+xOff;
 			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+1);
 			
-			data.add(new VecYawPitch(gagX * xMult - xMult * radius, 0, gagZ, (angle + angleDelta/2)*xMult+90));
+			data.add(new VecYawPitch(gagX * xMult - xMult * radius, 0, gagZ, (angle)*xMult+90 + angleDelta/2));
 		}
 		
 		return data;
