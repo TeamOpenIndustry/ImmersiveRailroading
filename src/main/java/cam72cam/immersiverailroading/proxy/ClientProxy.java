@@ -174,37 +174,49 @@ public class ClientProxy extends CommonProxy {
 
 					GlStateManager.multMatrix(matrix);
 					
-					List<String> main = new ArrayList<String>();
-					List<String> front = new ArrayList<String>();
-					List<String> rear = new ArrayList<String>();
-					
-					for (String group : model.groups()) {
-						if (group.contains("BOGEY_FRONT")) {
-							front.add(group);
-						} else if (group.contains("BOGEY_REAR")) {
-							rear.add(group);
-						} else {
-							main.add(group);
+					if (stock instanceof EntityMoveableRollingStock && ((EntityMoveableRollingStock)stock).frontYaw != null && ((EntityMoveableRollingStock)stock).rearYaw != null) {
+						List<String> main = new ArrayList<String>();
+						List<String> front = new ArrayList<String>();
+						List<String> rear = new ArrayList<String>();
+						
+						for (String group : model.groups()) {
+							if (group.contains("BOGEY_FRONT")) {
+								front.add(group);
+							} else if (group.contains("BOGEY_REAR")) {
+								rear.add(group);
+							} else {
+								main.add(group);
+							}
 						}
+	
+						model.drawGroups(main);
+						
+						GlStateManager.pushMatrix();
+						GlStateManager.translate(-def.getBogeyFront(), 0, 0);
+						if (!((EntityMoveableRollingStock)stock).isReverse) {
+							GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).frontYaw, 0, 1, 0);							
+						} else {
+							GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).rearYaw, 0, 1, 0);
+						}
+						GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
+						GlStateManager.translate(def.getBogeyFront(), 0, 0);
+						model.drawGroups(front);
+						GlStateManager.popMatrix();
+						
+						GlStateManager.pushMatrix();
+						GlStateManager.translate(-def.getBogeyRear(), 0, 0);
+						if (!((EntityMoveableRollingStock)stock).isReverse) {
+							GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).rearYaw, 0, 1, 0);							
+						} else {
+							GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).frontYaw, 0, 1, 0);
+						}
+						GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
+						GlStateManager.translate(def.getBogeyRear(), 0, 0);
+						model.drawGroups(rear);
+						GlStateManager.popMatrix();
+					} else {
+						model.draw();
 					}
-
-					model.drawGroups(main);
-					
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(-def.getBogeyFront(), 0, 0);
-					GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).frontYaw, 0, 1, 0);
-					GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
-					GlStateManager.translate(def.getBogeyFront(), 0, 0);
-					model.drawGroups(front);
-					GlStateManager.popMatrix();
-					
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(-def.getBogeyRear(), 0, 0);
-					GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).rearYaw, 0, 1, 0);
-					GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
-					GlStateManager.translate(def.getBogeyRear(), 0, 0);
-					model.drawGroups(rear);
-					GlStateManager.popMatrix();
 					
 					
 					

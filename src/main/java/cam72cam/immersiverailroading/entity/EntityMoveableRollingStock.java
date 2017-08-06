@@ -27,6 +27,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	public Float frontYaw;
 	public Float rearYaw;
+	public boolean isReverse = false;
 
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -102,7 +103,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		this.prevRotationYaw = rotationYaw;
 
-		boolean isReverse = moveDistance < 0;
+		isReverse  = moveDistance < 0;
 
 		if (isReverse) {
 			moveDistance = -moveDistance;
