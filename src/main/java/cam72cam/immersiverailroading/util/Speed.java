@@ -1,7 +1,8 @@
 package cam72cam.immersiverailroading.util;
 
 public class Speed {
-	private static double speedRatio = 2;
+	// 20 tps * 3.6km/h
+	private static double speedRatio = 20 * 3.6;
 	
 	private double internalSpeed;
 	
@@ -10,7 +11,7 @@ public class Speed {
 	}
 	
 	public static Speed fromMetric(double speed) {
-		return new Speed(speed / speedRatio / 10 / 3.6);
+		return new Speed(speed / speedRatio);
 	}
 	
 	private Speed(double speed) {
@@ -22,7 +23,7 @@ public class Speed {
 	}
 	
 	public double metric() {
-		return internalSpeed * speedRatio * 10 * 3.6;
+		return internalSpeed * speedRatio;
 	}
 
 	public String metricString() {

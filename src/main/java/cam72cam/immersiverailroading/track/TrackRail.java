@@ -15,7 +15,6 @@ public class TrackRail extends TrackBase {
 	private boolean hasModel = true;
 	private int slopeHeight = 0;
 	private int slopeLength = 0;
-	private float slopeAngle = 0;
 
 	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackType type) {
 		super(builder, rel_x, rel_y, rel_z, ImmersiveRailroading.BLOCK_RAIL, rel_rotation);
@@ -31,10 +30,9 @@ public class TrackRail extends TrackBase {
 		this.hasModel = hasModel;
 	}
 	
-	public void setSlope(int height, int length, float angle) {
+	public void setSlope(int height, int length) {
 		slopeHeight = height;
 		slopeLength = length;
-		slopeAngle = angle;
 	}
 	
 	@Override
@@ -46,7 +44,7 @@ public class TrackRail extends TrackBase {
 		tileRail.setCenter(center, radius);
 		tileRail.setVisible(hasModel); //REMOVEME?
 		tileRail.setType(type); //REMOVEME?
-		tileRail.setSlope(slopeAngle, slopeHeight, slopeLength);
+		tileRail.setSlope(slopeHeight, slopeLength);
 		
 		return tileRail;
 	}

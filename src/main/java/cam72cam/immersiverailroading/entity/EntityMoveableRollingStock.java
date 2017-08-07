@@ -228,7 +228,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return null;
 	}
 	
-	private TileRail railFromPosition(Vec3d position) {
+	protected TileRail railFromPosition(Vec3d position) {
 		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 		if (te instanceof TileRailGag) {
 			return ((TileRailGag) te).getParentTile();

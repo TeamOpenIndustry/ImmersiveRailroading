@@ -17,9 +17,8 @@ public class TileRail extends TileRailBase {
 
 	private double curveRadius;
 	
-	private double slopeHeight;
-	private double slopeLength;
-	private double slopeAngle;
+	private double slopeHeight = 0;
+	private double slopeLength = 0;
 	
 	private boolean isVisible = true;
 	private boolean switchActive = false;
@@ -81,8 +80,7 @@ public class TileRail extends TileRailBase {
 		this.curveRadius = radius;
 		this.markDirty();
 	}
-	public void setSlope(float slopeAngle, int slopeHeight, int slopeLength) {
-		this.slopeAngle = slopeAngle;
+	public void setSlope(int slopeHeight, int slopeLength) {
 		this.slopeHeight = slopeHeight;
 		this.slopeLength = slopeLength;
 		this.markDirty();
@@ -98,7 +96,6 @@ public class TileRail extends TileRailBase {
 		
 		slopeHeight = nbt.getDouble("slopeHeight");
 		slopeLength = nbt.getDouble("slopeLength");
-		slopeAngle = nbt.getDouble("slopeAngle");
 		
 		isVisible = nbt.getBoolean("isVisible");
 		switchActive = nbt.getBoolean("switchActive");
@@ -116,12 +113,19 @@ public class TileRail extends TileRailBase {
 		
 		nbt.setDouble("slopeHeight", slopeHeight);
 		nbt.setDouble("slopeLength", slopeLength);
-		nbt.setDouble("slopeAngle", slopeAngle);
 		
 		nbt.setBoolean("isVisible", isVisible);
 		nbt.setBoolean("switchActive", switchActive);
 		
 		return super.writeToNBT(nbt);
+	}
+
+	public double getSlope() {
+		if (this.slopeLength != 0) {
+			return this.slopeHeight / this.slopeLength;
+		} else {
+			return 0;
+		}
 	}
 
 	/*

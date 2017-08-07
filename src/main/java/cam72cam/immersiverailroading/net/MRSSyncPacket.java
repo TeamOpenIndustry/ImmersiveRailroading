@@ -20,6 +20,9 @@ public class MRSSyncPacket implements IMessage {
 	private double posX;
 	private double posY;
 	private double posZ;
+	private double prevPosX;
+	private double prevPosY;
+	private double prevPosZ;
 	private double motionX;
 	private double motionY;
 	private double motionZ;
@@ -37,6 +40,9 @@ public class MRSSyncPacket implements IMessage {
 		this.posX = mrs.posX;
 		this.posY = mrs.posY;
 		this.posZ = mrs.posZ;
+		this.prevPosX = mrs.prevPosX;
+		this.prevPosY = mrs.prevPosY;
+		this.prevPosZ = mrs.prevPosZ;
 		this.motionX = mrs.motionX;
 		this.motionY = mrs.motionY;
 		this.motionZ = mrs.motionZ;
@@ -49,6 +55,9 @@ public class MRSSyncPacket implements IMessage {
 		mrs.posX = this.posX;
 		mrs.posY = this.posY;
 		mrs.posZ = this.posZ;
+		mrs.prevPosX = this.prevPosX;
+		mrs.prevPosY = this.prevPosY;
+		mrs.prevPosZ = this.prevPosZ;
 		mrs.motionX = this.motionX;
 		mrs.motionY = this.motionY;
 		mrs.motionZ = this.motionZ;
@@ -64,6 +73,9 @@ public class MRSSyncPacket implements IMessage {
 		posX = buf.readDouble();
 		posY = buf.readDouble();
 		posZ = buf.readDouble();
+		prevPosX = buf.readDouble();
+		prevPosY = buf.readDouble();
+		prevPosZ = buf.readDouble();
 		motionX = buf.readDouble();
 		motionY = buf.readDouble();
 		motionZ = buf.readDouble();
@@ -79,6 +91,9 @@ public class MRSSyncPacket implements IMessage {
 		buf.writeDouble(posX);
 		buf.writeDouble(posY);
 		buf.writeDouble(posZ);
+		buf.writeDouble(prevPosX);
+		buf.writeDouble(prevPosY);
+		buf.writeDouble(prevPosZ);
 		buf.writeDouble(motionX);
 		buf.writeDouble(motionY);
 		buf.writeDouble(motionZ);

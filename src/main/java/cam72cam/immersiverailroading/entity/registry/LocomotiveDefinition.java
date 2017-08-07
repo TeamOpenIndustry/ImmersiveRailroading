@@ -11,7 +11,6 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 	private int fuelConsumption;
 	private int power;
 	private int traction;
-	private double accel;
 	private double brake;
 	private Speed maxSpeed;
 	
@@ -24,7 +23,6 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 		fuelConsumption = properties.get("fuel_consumption").getAsInt();
 		power = properties.get("horsepower").getAsInt();
 		traction = properties.get("tractive_effort").getAsInt();
-		accel = properties.get("deceleration").getAsDouble();
 		brake = properties.get("deceleration").getAsDouble();
 		maxSpeed = Speed.fromMetric(properties.get("max_speed").getAsDouble());
 	}
@@ -33,7 +31,7 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 	public List<String> getTooltip() {
 		List<String> tips = super.getTooltip();
 		tips.add("Works: " + this.works);
-		tips.add("Horse Power: " + this.getPower());
+		tips.add("Horse Power: " + this.getHorsePower());
 		tips.add("Max Speed: " + this.getMaxSpeed().metricString());
 		return tips;
 	}
@@ -42,19 +40,18 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 		return this.fuelConsumption;
 	}
 	
-	public int getPower() {
+	public int getHorsePower() {
 		return this.power;
 	}
 	
-	public int getTraction() {
+	/**
+	 * @return tractive effort in pounds
+	 */
+	public int getStartingTraction() {
 		return this.traction;
 	}
 
-	public double getAccel() {
-		return this.accel;
-	}
-
-	public double getBrake() {
+	public double getBrakePower() {
 		return this.brake;
 	}
 
