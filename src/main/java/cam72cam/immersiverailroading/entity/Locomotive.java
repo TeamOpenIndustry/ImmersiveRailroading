@@ -250,7 +250,7 @@ public abstract class Locomotive extends FreightTank {
 		
 		// a = f (to newtons) * m (to newtons)
 		double tractiveAccell = tractiveEffortNewtons / massToMove;
-		double resistanceAccell = rollingResistanceNewtons / massToMove * 10;
+		double resistanceAccell = rollingResistanceNewtons / massToMove;
 		double gradeAccell = gradeForceNewtons / massToMove;
 		
 		
@@ -280,7 +280,7 @@ public abstract class Locomotive extends FreightTank {
 			System.out.println("DECELL " + deltaAccellGradeMCVelocity);
 			System.out.println("NEW SPEED M/s " + newMCVelocity);
 			System.out.println();
-		}
+		} 
 		
 		if (Math.abs(newMCVelocity) < 0.001) {
 			return 0;
