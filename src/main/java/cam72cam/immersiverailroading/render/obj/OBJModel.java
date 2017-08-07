@@ -78,6 +78,13 @@ public class OBJModel {
 			case "f":
 				currentGroup.add(new Face(args));
 				break;
+			case "s":
+				//Ignore
+				break;
+			case "l":
+				// Ignore
+				// TODO might be able to use this for details
+				break;
 			default:
 				System.out.println("OBJ: ignored line '" + line + "'");
 				break;
@@ -150,6 +157,21 @@ public class OBJModel {
 					break;
 				case "map_Kd":
 					currentMTL.texKd = RelativeResource.getRelative(modelLoc, parts[1]);
+					break;
+				case "Ns":
+					//Ignore
+					break;
+				case "Ke":
+					//Ignore
+					break;
+				case "Ni":
+					//Ignore
+					break;
+				case "d":
+					//ignore
+					break;
+				case "illum":
+					//ignore
 					break;
 				default:
 					System.out.println("MTL: ignored line '" + line + "'");
