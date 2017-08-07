@@ -134,7 +134,11 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 */
 
 	public Speed getCurrentSpeed() {
-		return Speed.fromMinecraft(MathHelper.sqrt(motionX * motionX + motionZ * motionZ));
+		float speed = MathHelper.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
+		if (Float.isNaN(speed)) {
+			speed = 0;
+		}
+		return Speed.fromMinecraft(speed);
 	}
 
 	public void sendToObserving(IMessage packet) {

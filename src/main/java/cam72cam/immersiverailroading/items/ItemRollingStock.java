@@ -76,6 +76,9 @@ public class ItemRollingStock extends Item {
 				if (stock instanceof EntityMoveableRollingStock) {
 					// snap to track
 					((EntityMoveableRollingStock)stock).moveRollingStock(0.01);
+					stock.motionX = 0;
+					stock.motionY = 0;
+					stock.motionZ = 0;
 				}
 			}
 			return EnumActionResult.PASS;
