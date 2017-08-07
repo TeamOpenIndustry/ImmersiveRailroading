@@ -4,7 +4,7 @@
     {
         "model": "immersiverailroading:empty",
 	"textures": {
-		"particle": "immersiverailroading:blocks/track_normal"
+		"particle": "minecraft:blocks/iron_block"
 	}
     },
     "variants": {
