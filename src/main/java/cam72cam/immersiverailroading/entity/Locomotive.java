@@ -215,7 +215,10 @@ public abstract class Locomotive extends FreightTank {
 		double outputHorsepower = Math.abs(dataManager.get(throttle) * this.getDefinition().getHorsePower());
 		double locoEfficiency = 0.7f; //TODO config
 		
-		double tractiveEffortNewtons = (float) (2650.0f * ((locoEfficiency * outputHorsepower) / this.getCurrentSpeed().metric()));
+		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / this.getCurrentSpeed().metric()));
+		if (Double.isNaN(tractiveEffortNewtons)) {
+			tractiveEffortNewtons = 0;
+		}
 		
 		tractiveEffortNewtons = Math.min(tractiveEffortNewtons, this.getDefinition().getStartingTraction() * 4.44822);
 		
@@ -230,7 +233,11 @@ public abstract class Locomotive extends FreightTank {
 			rollingResistanceNewtons += 0.0015 * e.getWeight() * 4.44822f;
 			
 			//Grade forces
-			double grade = -this.motionY / Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ); 
+			// TODO force while not moving
+			double grade = -this.motionY / Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+			if (Double.isNaN(grade)) {
+				grade = 0;
+			}
 			
 			// lbs * 1%gradeResistance * grade multiplier
 			gradeForceNewtons += (e.getWeight() / 100) * (grade * 100)  * 4.44822f;
@@ -243,7 +250,7 @@ public abstract class Locomotive extends FreightTank {
 		
 		// a = f (to newtons) * m (to newtons)
 		double tractiveAccell = tractiveEffortNewtons / massToMove;
-		double resistanceAccell = rollingResistanceNewtons / massToMove;
+		double resistanceAccell = rollingResistanceNewtons / massToMove * 10;
 		double gradeAccell = gradeForceNewtons / massToMove;
 		
 		
@@ -257,7 +264,7 @@ public abstract class Locomotive extends FreightTank {
 		
 		double deltaAccellGradeMCVelocity = Speed.fromMetric(gradeAccell).minecraft();
 		
-		double newMCVelocity = currentMCVelocity + deltaAccellTractiveMCVelocity + deltaAccellRollingResistanceMCVelocity * deltaAccellGradeMCVelocity;
+		double newMCVelocity = currentMCVelocity + deltaAccellTractiveMCVelocity + deltaAccellRollingResistanceMCVelocity + deltaAccellGradeMCVelocity;
 
 
 		if(this.ticksExisted % 20 == 0 && !world.isRemote) {
@@ -270,10 +277,12 @@ public abstract class Locomotive extends FreightTank {
 			System.out.println("SPEED M/s " + currentMCVelocity);
 			System.out.println("ACCELL " + deltaAccellTractiveMCVelocity);
 			System.out.println("DECELL " + deltaAccellRollingResistanceMCVelocity);
+			System.out.println("DECELL " + deltaAccellGradeMCVelocity);
+			System.out.println("NEW SPEED M/s " + newMCVelocity);
 			System.out.println();
 		}
 		
-		if (Math.abs(newMCVelocity) < 0.01) {
+		if (Math.abs(newMCVelocity) < 0.001) {
 			return 0;
 		}
 		
