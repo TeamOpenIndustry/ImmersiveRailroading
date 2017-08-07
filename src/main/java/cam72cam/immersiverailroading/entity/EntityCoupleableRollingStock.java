@@ -95,6 +95,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			// Only couple server side
 			return;
 		}
+		
+		if (this.ticksExisted % 20 == 0) {
+			this.sendToObserving(new CoupleStatusPacket(this));
+		}
 
 		for (CouplerType coupler : CouplerType.values()) {
 			if (!this.isCoupled(coupler)) {

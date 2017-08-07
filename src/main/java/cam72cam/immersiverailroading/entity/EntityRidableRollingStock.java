@@ -70,9 +70,6 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 	@Override
 	public void rollingStockInit() {
 		super.rollingStockInit();
-		if (!world.isRemote) {
-			this.syncPassengerOffsets();
-		}
 	}
 	
 
@@ -131,12 +128,8 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 			pos = this.getDefinition().correctPassengerBounds(pos);
 			
 			passengerPositions.put(source.getPersistentID(), pos);
-			syncPassengerOffsets();
+			sendToObserving(new PassengerPositionsPacket(this));
 		}
-	}
-	
-	public void syncPassengerOffsets() {
-		sendToObserving(new PassengerPositionsPacket(this));
 	}
 	
 	@Override
