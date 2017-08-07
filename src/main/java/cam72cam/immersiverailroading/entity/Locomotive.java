@@ -1,11 +1,10 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.List;
-
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -80,16 +79,12 @@ public abstract class Locomotive extends FreightTank {
 
 
 	public int getDefaultPower() {
-		return this.getDefinition().getPower();
-	}
-
-	public double getDefaultAccel() {
-		return this.getDefinition().getAccel();
+		return this.getDefinition().getHorsePower();
 	}
 
 
 	public double getDefaultBrake() {
-		return this.getDefinition().getBrake();
+		return this.getDefinition().getBrakePower();
 	}
 
 
@@ -195,10 +190,6 @@ public abstract class Locomotive extends FreightTank {
 		super.onUpdate();
 
 		if (!world.isRemote) {
-
-			if (ticksExisted % 20 == 0) {
-				PullPhysic();
-			}
 			if (ticksExisted % 100 == 0) {
 
 				int fuelTrain = getFuel();
@@ -214,48 +205,79 @@ public abstract class Locomotive extends FreightTank {
 		// runSound.setVolume(getSpeed().minecraft() > 0 ? 1 : 0);
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
 
-		moveCoupledRollingStock(this.dataManager.get(throttle));
+		moveCoupledRollingStock(getMovement());
 	}
 	
-	private void PullPhysic() {
-		double totalMass = 0;
-		double power = 0;
-		double maxRealSpeed = 0;
-		double maxSpeedReduction = 0;
-		double accelReduction = 0;
-		double brakeReduction = 0;
-		double currentFuelConsumptionChange = 0;
+	protected float getMovement() {
+		//http://evilgeniustech.com/idiotsGuideToRailroadPhysics/HorsepowerAndTractiveEffort/
+		//http://www.republiclocomotive.com/locomotive-power-calculations.html
+		
+		double outputHorsepower = Math.abs(dataManager.get(throttle) * this.getDefinition().getHorsePower());
+		double locoEfficiency = 0.7f; //TODO config
+		
+		double tractiveEffortNewtons = (float) (2650.0f * ((locoEfficiency * outputHorsepower) / this.getCurrentSpeed().metric()));
+		
+		tractiveEffortNewtons = Math.min(tractiveEffortNewtons, this.getDefinition().getStartingTraction() * 4.44822);
+		
+		//lbs
+		double rollingResistanceNewtons = 0;
+		double gradeForceNewtons = 0;
+		//TODO starting effort
+		double massToMove = 0;
+		for (EntityCoupleableRollingStock e : this.getTrain()) {
+			massToMove += e.getWeight();
+			
+			rollingResistanceNewtons += 0.0015 * e.getWeight() * 4.44822f;
+			
+			//Grade forces
+			double grade = -this.motionY / Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ); 
+			
+			// lbs * 1%gradeResistance * grade multiplier
+			gradeForceNewtons += (e.getWeight() / 100) * (grade * 100)  * 4.44822f;
+		}
+		
+		// TO KG
+		massToMove *=  0.453592f;
 
-		List<EntityCoupleableRollingStock> train = this.getTrain();
-		dataManager.set(currentCarsPulled, train.size() - 1);
+		double reverseMultiplier = (this.isReverse ? -1 : 1);
+		
+		// a = f (to newtons) * m (to newtons)
+		double tractiveAccell = tractiveEffortNewtons / massToMove;
+		double resistanceAccell = rollingResistanceNewtons / massToMove;
+		double gradeAccell = gradeForceNewtons / massToMove;
+		
+		
+		
+		double currentMCVelocity = this.getCurrentSpeed().minecraft() * reverseMultiplier;
+		double deltaAccellTractiveMCVelocity = Math.copySign(Speed.fromMetric(tractiveAccell).minecraft(), dataManager.get(throttle));
+		
+		// Limit decell to current speed to trains stop
+		// Apply in the reverse direction of current travel
+		double deltaAccellRollingResistanceMCVelocity = Math.min(Speed.fromMetric(resistanceAccell).minecraft(), this.getCurrentSpeed().minecraft()) * -reverseMultiplier;
+		
+		double deltaAccellGradeMCVelocity = Speed.fromMetric(gradeAccell).minecraft();
+		
+		double newMCVelocity = currentMCVelocity + deltaAccellTractiveMCVelocity + deltaAccellRollingResistanceMCVelocity * deltaAccellGradeMCVelocity;
 
-		/*
-		 * TODO MASS for (EntityRollingStock entity : train) { totalMass +=
-		 * entity.mass; if (entity instanceof Locomotive) { Locomotive
-		 * locomotive = ((Locomotive) entity); // TODO check if the locomotive
-		 * is actually ready to be used power += locomotive.getDefaultPower();
-		 * maxRealSpeed = Math.min(maxRealSpeed,
-		 * locomotive.getDefaultMaxSpeed().metric()); } }
-		 */
 
-		maxSpeedReduction = Math.min(maxRealSpeed, totalMass / (power / 400));
-
-		dataManager.set(currentMaxSpeedMC, (float) (maxRealSpeed - maxSpeedReduction));
-
-		double scaledPower = (totalMass / (power / 200)) / 1000 * 0.8;
-
-		accelReduction = Math.min(getDefaultAccel(), scaledPower * totalMass * 1.13);
-		double currentAccel = getDefaultAccel() - accelReduction;
-
-		brakeReduction = Math.min(getDefaultBrake(), scaledPower * totalMass);
-		double brake = getDefaultBrake() - brakeReduction;
-
-		currentFuelConsumptionChange = Math.min(getDefaultFuelConsumption(), scaledPower * totalMass * 100);
-		dataManager.set(currentFuelRate, (float) (getDefaultFuelConsumption() - currentFuelConsumptionChange));
-		dataManager.set(currentMassPulled, (float) totalMass);
-		dataManager.set(currentSpeedReductionMC, (float) maxSpeedReduction);
-		dataManager.set(currentAccelReduction, (float) accelReduction);
-		dataManager.set(currentBrakeReduction, (float) brakeReduction);
+		if(this.ticksExisted % 20 == 0 && !world.isRemote) {
+			System.out.println("Output HP :" + outputHorsepower);
+			System.out.println("Tractive Effort N: " + tractiveEffortNewtons);
+			System.out.println("Rolling Resistance N: " + rollingResistanceNewtons);
+			System.out.println("Slope Resistance N: " + gradeForceNewtons);
+			System.out.println("Mass to move kg: " + massToMove);
+			System.out.println("Accell: " + tractiveAccell);
+			System.out.println("SPEED M/s " + currentMCVelocity);
+			System.out.println("ACCELL " + deltaAccellTractiveMCVelocity);
+			System.out.println("DECELL " + deltaAccellRollingResistanceMCVelocity);
+			System.out.println();
+		}
+		
+		if (Math.abs(newMCVelocity) < 0.01) {
+			return 0;
+		}
+		
+		return (float)newMCVelocity;
 	}
 
 	/*

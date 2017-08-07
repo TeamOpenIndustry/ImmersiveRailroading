@@ -122,6 +122,13 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		return false;
 	}
 
+	/**
+	 * @return Stock Weight in KG
+	 */
+	public int getWeight() {
+		return this.getDefinition().getWeight();
+	}
+
 	/*
 	 * Helpers
 	 */

@@ -26,7 +26,9 @@ public class BuilderSlope extends BuilderBase {
 		}
 		
 		float slope = (1.0F/(length + 1));
-		tracks.add(new TrackRail(this, 0, 0, tracks.size()/2, EnumFacing.NORTH, type));
+		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/2, EnumFacing.NORTH, type);
+		rootTrack.setSlope(1, length);
+		tracks.add(rootTrack);
 		tracks.add(new TrackGag(this, 1, 0, tracks.size()/2));
 		for(int i = 1; i <= length; i ++) {
 			TrackGag gag = new TrackGag(this, 0, 0, tracks.size()/2);

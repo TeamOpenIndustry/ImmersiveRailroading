@@ -36,6 +36,7 @@ public abstract class EntityRollingStockDefinition {
 	private double widthBounds;
 	private double passengerCompartmentLength;
 	private double passengerCompartmentWidth;
+	private int weight;
 
 	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
@@ -68,6 +69,10 @@ public abstract class EntityRollingStockDefinition {
 		rearBounds = boundsData.get("rear").getAsDouble();
 		widthBounds = boundsData.get("width").getAsDouble();
 		heightBounds = boundsData.get("height").getAsDouble();
+		
+		
+		//TODO
+		weight = 250000; //lbs
 	}
 
 	public Vec3d getPassengerCenter() {
@@ -127,5 +132,12 @@ public abstract class EntityRollingStockDefinition {
 
 	public Matrix4 getDefaultTransformation() {
 		return defaultTransform;
+	}
+
+	/**
+	 * @return Stock Weight in KG
+	 */
+	public int getWeight() {
+		return this.weight;
 	}
 }
