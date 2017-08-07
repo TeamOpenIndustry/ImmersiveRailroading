@@ -61,7 +61,6 @@ public class TileRail extends TileRailBase {
 	}
 
 	public double getRadius() {
-		// TODO Auto-generated method stub
 		return curveRadius;
 	}
 	
