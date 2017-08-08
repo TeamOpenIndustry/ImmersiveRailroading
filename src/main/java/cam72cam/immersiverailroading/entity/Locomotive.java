@@ -285,6 +285,10 @@ public abstract class Locomotive extends FreightTank {
 			return 0;
 		}
 		
+		if (Math.abs(newMCVelocity) > this.getDefinition().getMaxSpeed().minecraft()) {
+			newMCVelocity = Math.copySign(this.getDefinition().getMaxSpeed().minecraft(), newMCVelocity);
+		}
+		
 		return (float)newMCVelocity;
 	}
 
