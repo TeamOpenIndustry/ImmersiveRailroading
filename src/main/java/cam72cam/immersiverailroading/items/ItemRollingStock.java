@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -75,7 +76,7 @@ public class ItemRollingStock extends Item {
 				EntityRollingStock stock = def.spawn(worldIn, pos.add(0, 0.7, 0), EnumFacing.fromAngle(player.rotationYawHead));
 				if (stock instanceof EntityMoveableRollingStock) {
 					// snap to track
-					((EntityMoveableRollingStock)stock).moveRollingStock(0.01);
+					((EntityMoveableRollingStock)stock).moveRollingStock(stock.getDefinition().getCouplerPosition(CouplerType.BACK) - Config.couplerRange);
 					stock.motionX = 0;
 					stock.motionY = 0;
 					stock.motionZ = 0;
