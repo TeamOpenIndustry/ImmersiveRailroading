@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.tile;
+package cam72cam.immersiverailroading.render;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -8,8 +8,8 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.render.ScaledModel;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -29,7 +29,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
-public class TileRailTESR extends TileEntitySpecialRenderer<TileRail> {
+public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 	
 	private static OBJModel baseRailModel;
 	
