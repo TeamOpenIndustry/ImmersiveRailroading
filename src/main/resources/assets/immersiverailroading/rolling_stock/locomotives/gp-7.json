@@ -10,7 +10,7 @@
 		"tractive_effort": 61500,
 		"acceleration": 100,
 		"deceleration": 100,
-		"max_speed": 65
+		"max_speed": 104.607
 	},
 	"passenger": {
 		"center_x": 3,
