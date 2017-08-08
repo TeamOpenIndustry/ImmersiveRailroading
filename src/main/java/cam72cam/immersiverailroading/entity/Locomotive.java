@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
