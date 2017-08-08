@@ -7,10 +7,8 @@
 		"fuel_consumption": 100,
 		"fuel_capacity": 100,
 		"horsepower": 1500,
-		"tractive_effort": 61500,
-		"acceleration": 100,
-		"deceleration": 100,
-		"max_speed": 104.607
+		"tractive_effort_lbf": 61500,
+		"max_speed_kmh": 104.607
 	},
 	"passenger": {
 		"center_x": 3,
