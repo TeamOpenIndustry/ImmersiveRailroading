@@ -91,6 +91,36 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 
 	public void moveRollingStock(double moveDistance) {
+		
+		if (Math.abs(moveDistance) > 0.1) {
+			//Split movement (recursive)
+			
+			// Save current data to apply at the end
+		    double prevPosX = this.posX;
+		    double prevPosY = this.posY;
+		    double prevPosZ = this.posZ;
+		    float prevRotationYaw = this.rotationYaw;
+		    float prevRotationPitch = this.rotationPitch;
+		    double lastTickPosX = this.posX;
+		    double lastTickPosY = this.posY;
+		    double lastTickPosZ = this.posZ;
+		    
+		    moveRollingStock(moveDistance/2);
+		    moveRollingStock(moveDistance/2);
+		    
+		    // Apply prev position info now that we have performed the movement
+		    this.prevPosX = prevPosX;
+		    this.prevPosY = prevPosY;
+		    this.prevPosZ = prevPosZ;
+		    this.prevRotationYaw = prevRotationYaw;
+		    this.prevRotationPitch = prevRotationPitch;
+		    this.lastTickPosX = lastTickPosX;
+		    this.lastTickPosY = lastTickPosY;
+		    this.lastTickPosZ = lastTickPosZ;
+		    
+		    return;
+		}
+		
 		if (moveDistance == 0) {
 			return;
 		}
