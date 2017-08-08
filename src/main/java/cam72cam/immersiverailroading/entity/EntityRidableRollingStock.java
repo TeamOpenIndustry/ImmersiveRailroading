@@ -149,6 +149,8 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 			pos = pos.add(this.getPositionVector());
 			passenger.setPosition(pos.x, pos.y, pos.z);
+			
+			passenger.rotationYaw += (this.rotationYaw - this.prevRotationYaw);
 		}
 	}
 	
