@@ -71,7 +71,6 @@ public class CoupleStatusPacket implements IMessage {
 			}
 			
 			EntityCoupleableRollingStock stock = matches.get(0);
-			ImmersiveRailroading.logger.info("GOT LINK PACKET");
 			stock.setCoupledUUID(CouplerType.FRONT, message.stockFrontID);
 			stock.setCoupledUUID(CouplerType.BACK, message.stockBackID);
 		}

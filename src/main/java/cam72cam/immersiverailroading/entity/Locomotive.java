@@ -1,5 +1,8 @@
 package cam72cam.immersiverailroading.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -11,6 +14,8 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class Locomotive extends FreightTank {
 	//private MovingSoundRollingStock hornSound;
@@ -28,6 +33,9 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> currentBrakeReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> currentFuelRate = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> throttle = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	
+	@SideOnly(Side.CLIENT)
+	private List<String> debugInfo = new ArrayList<String>();
 
 
 	public Locomotive(World world, String defID) {
@@ -269,31 +277,38 @@ public abstract class Locomotive extends FreightTank {
 		
 		double newMCVelocity = currentMCVelocity + deltaAccellTractiveMCVelocity + deltaAccellRollingResistanceMCVelocity + deltaAccellGradeMCVelocity;
 
-
-		if(this.ticksExisted % 20 == 0 && !world.isRemote) {
-			System.out.println("Output HP :" + outputHorsepower);
-			System.out.println("Tractive Effort N: " + tractiveEffortNewtons);
-			System.out.println("Rolling Resistance N: " + rollingResistanceNewtons);
-			System.out.println("Slope Resistance N: " + gradeForceNewtons);
-			System.out.println("Mass to move kg: " + massToMove);
-			System.out.println("Accell: " + tractiveAccell);
-			System.out.println("SPEED M/s " + currentMCVelocity);
-			System.out.println("ACCELL " + deltaAccellTractiveMCVelocity);
-			System.out.println("DECELL " + deltaAccellRollingResistanceMCVelocity);
-			System.out.println("DECELL " + deltaAccellGradeMCVelocity);
-			System.out.println("NEW SPEED M/s " + newMCVelocity);
-			System.out.println();
-		} 
 		
 		if (Math.abs(newMCVelocity) < 0.001) {
-			return 0;
+			newMCVelocity = 0;
 		}
 		
 		if (Math.abs(newMCVelocity) > this.getDefinition().getMaxSpeed().minecraft()) {
 			newMCVelocity = Math.copySign(this.getDefinition().getMaxSpeed().minecraft(), newMCVelocity);
 		}
+
+		if(this.ticksExisted % 20 == 0 && world.isRemote) {
+			debugInfo = new ArrayList<String>();
+			debugInfo.add("Locomotive Output HP: " + outputHorsepower);
+			debugInfo.add("Locomotive Tractive Effort N: " + tractiveEffortNewtons);
+			debugInfo.add("Train Rolling Resistance N: " + rollingResistanceNewtons);
+			debugInfo.add("Train Slope Resistance N: " + gradeForceNewtons);
+			debugInfo.add("Train Mass KG: " + massToMove);
+			debugInfo.add("Locomotive SPEED M/s: " + currentMCVelocity);
+			debugInfo.add("Locomotive Tractive M/s^2: " + deltaAccellTractiveMCVelocity);
+			debugInfo.add("Locomotive Rolling M/s^2: " + deltaAccellRollingResistanceMCVelocity);
+			debugInfo.add("Locomotive Grade M/s^2: " + deltaAccellGradeMCVelocity);
+			debugInfo.add("Locomotive SPEED M/s: " + newMCVelocity);
+		} 
 		
 		return (float)newMCVelocity;
+	}
+	
+	/*
+	 * Client Debug Stuff
+	 */
+	@SideOnly(Side.CLIENT)
+	public List<String> getDebugInfo() {
+		return this.debugInfo;
 	}
 
 	/*
