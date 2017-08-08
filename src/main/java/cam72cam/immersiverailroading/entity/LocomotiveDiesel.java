@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.LocomotiveDieselDefinition;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;

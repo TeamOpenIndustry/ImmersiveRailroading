@@ -3,9 +3,9 @@ package cam72cam.immersiverailroading.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.entity.registry.CarTankDefinition;
-import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.gui.ISyncableSlots;
+import cam72cam.immersiverailroading.registry.CarTankDefinition;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 

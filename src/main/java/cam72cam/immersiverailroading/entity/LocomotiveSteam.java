@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
-import cam72cam.immersiverailroading.entity.registry.LocomotiveSteamDefinition;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.*;

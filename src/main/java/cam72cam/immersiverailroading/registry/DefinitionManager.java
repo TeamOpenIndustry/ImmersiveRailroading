@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.entity.registry;
+package cam72cam.immersiverailroading.registry;
 
 import java.io.IOException;
 import java.io.InputStream;
