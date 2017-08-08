@@ -70,6 +70,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			rearYaw = nbttagcompound.getFloat("rearYaw");
 		}
 	}
+	
+	public void zeroSpeed() {
+		motionX = 0;
+		motionY = 0;
+		motionZ = 0;
+		currentSpeed = null;
+	}
 
 	private Speed currentSpeed;
 	public Speed getCurrentSpeed() {
