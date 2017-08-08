@@ -21,6 +21,7 @@ import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.registry.DefinitionManager;
 import cam72cam.immersiverailroading.entity.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.gui.FreightContainer;
@@ -50,6 +51,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -59,6 +61,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
@@ -363,5 +366,15 @@ public class ClientProxy extends CommonProxy {
 
 	public InputStream getResourceStream(ResourceLocation modelLoc) throws IOException {
 		return Minecraft.getMinecraft().getResourceManager().getResource(modelLoc).getInputStream();
+	}
+	
+	@SubscribeEvent
+	public static void onOverlayEvent(RenderGameOverlayEvent.Text event) {
+		if (Minecraft.getMinecraft().gameSettings.showDebugInfo) {
+			Entity riding = Minecraft.getMinecraft().player.getRidingEntity();
+			if (riding instanceof Locomotive) {
+				event.getLeft().addAll(((Locomotive)riding).getDebugInfo());
+			}
+		}
 	}
 }
