@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.util.Speed;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -32,6 +33,7 @@ public class MRSSyncPacket implements IMessage {
 	private double motionX;
 	private double motionY;
 	private double motionZ;
+	private double speedMetric;
 
 	public MRSSyncPacket() {
 		// Reflect constructor
@@ -58,6 +60,7 @@ public class MRSSyncPacket implements IMessage {
 		this.motionX = mrs.motionX;
 		this.motionY = mrs.motionY;
 		this.motionZ = mrs.motionZ;
+		this.speedMetric = mrs.getCurrentSpeed().metric();
 	}
 
 	public void applyTo(EntityMoveableRollingStock mrs) {
@@ -79,6 +82,7 @@ public class MRSSyncPacket implements IMessage {
 		mrs.motionX = this.motionX;
 		mrs.motionY = this.motionY;
 		mrs.motionZ = this.motionZ;
+		mrs.setCurrentSpeed(Speed.fromMetric(speedMetric));
 	}
 
 	@Override
@@ -103,6 +107,7 @@ public class MRSSyncPacket implements IMessage {
 		motionX = buf.readDouble();
 		motionY = buf.readDouble();
 		motionZ = buf.readDouble();
+		speedMetric = buf.readDouble();
 	}
 
 	@Override
@@ -127,6 +132,7 @@ public class MRSSyncPacket implements IMessage {
 		buf.writeDouble(motionX);
 		buf.writeDouble(motionY);
 		buf.writeDouble(motionZ);
+		buf.writeDouble(speedMetric);
 	}
 
 	public static class Handler implements IMessageHandler<MRSSyncPacket, IMessage> {
