@@ -170,10 +170,14 @@ public abstract class Locomotive extends FreightTank {
 	public void handleKeyPress(Entity source, KeyTypes key) {
 		switch(key) {
 		case THROTTLE_UP:
-			this.dataManager.set(throttle, this.dataManager.get(throttle) + 0.1f);
+			if (this.dataManager.get(throttle) < 1) {
+				this.dataManager.set(throttle, this.dataManager.get(throttle) + 0.1f);
+			}
 			break;
 		case THROTTLE_DOWN:
-			this.dataManager.set(throttle, this.dataManager.get(throttle) - 0.1f);
+			if (this.dataManager.get(throttle) > -1) {
+				this.dataManager.set(throttle, this.dataManager.get(throttle) - 0.1f);
+			}
 			break;
 		case THROTTLE_ZERO:
 			this.dataManager.set(throttle, 0f);
