@@ -424,4 +424,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 		}
 	}
+
+	/**
+	 * Should only be called from MRSSync
+	 */
+	public void setCurrentSpeed(Speed newSpeed) {
+		this.currentSpeed = newSpeed;
+	}
 }
