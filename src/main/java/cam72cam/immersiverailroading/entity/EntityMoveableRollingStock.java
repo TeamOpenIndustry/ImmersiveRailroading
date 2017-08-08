@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BufferUtil;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -18,6 +19,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -67,6 +69,20 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (nbttagcompound.hasKey("rearYaw")) {
 			rearYaw = nbttagcompound.getFloat("rearYaw");
 		}
+	}
+
+	private Speed currentSpeed;
+	public Speed getCurrentSpeed() {
+		if (currentSpeed == null) {
+			//Fallback
+			// does not work for curves
+			float speed = MathHelper.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
+			if (Float.isNaN(speed)) {
+				speed = 0;
+			}
+			currentSpeed = Speed.fromMinecraft(speed);
+		}
+		return currentSpeed;
 	}
 
 	@Override
@@ -183,8 +199,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		    this.lastTickPosY = lastTickPosY;
 		    this.lastTickPosZ = lastTickPosZ;
 		    
+		    this.currentSpeed = Speed.fromMinecraft(Math.abs(moveDistance));
+		    
 		    return;
 		}
+	    
+	    this.currentSpeed = Speed.fromMinecraft(Math.abs(moveDistance));
 		
 		if (moveDistance == 0) {
 			return;

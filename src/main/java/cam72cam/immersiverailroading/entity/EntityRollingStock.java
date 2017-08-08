@@ -133,14 +133,6 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 * Helpers
 	 */
 
-	public Speed getCurrentSpeed() {
-		float speed = MathHelper.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
-		if (Float.isNaN(speed)) {
-			speed = 0;
-		}
-		return Speed.fromMinecraft(speed);
-	}
-
 	public void sendToObserving(IMessage packet) {
 		ImmersiveRailroading.net.sendToAllAround(packet,
 				new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
