@@ -109,8 +109,11 @@ public class ClientProxy extends CommonProxy {
 		super.init(event);
 		
 		keys.put(KeyTypes.THROTTLE_UP, new KeyBinding("Increase Throttle", Keyboard.KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.THROTTLE_ZERO, new KeyBinding("Zero Throttle", Keyboard.KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.THROTTLE_DOWN, new KeyBinding("Decrease Throttle", Keyboard.KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.THROTTLE_ZERO, new KeyBinding("Zero Throttle", Keyboard.KEY_ADD, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.AIR_BRAKE_UP, new KeyBinding("Increase Air Brake", Keyboard.KEY_NUMPAD7, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.AIR_BRAKE_ZERO, new KeyBinding("Zero Air Brake", Keyboard.KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.AIR_BRAKE_DOWN, new KeyBinding("Decrease Air Brake", Keyboard.KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.HORN, new KeyBinding("Sound Horn", Keyboard.KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.PLAYER_FORWARD, Minecraft.getMinecraft().gameSettings.keyBindForward);
 		keys.put(KeyTypes.PLAYER_BACKWARD, Minecraft.getMinecraft().gameSettings.keyBindBack);
@@ -120,6 +123,9 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_UP));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_DOWN));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_ZERO));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_UP));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_DOWN));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_ZERO));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.HORN));
 		
 	}
@@ -148,6 +154,7 @@ public class ClientProxy extends CommonProxy {
 					GlStateManager.pushMatrix();
 
 					GL11.glDisable(GL11.GL_TEXTURE_2D);
+					GL11.glDisable(GL11.GL_CULL_FACE);
 
 					// Move to specified position
 					GlStateManager.translate(x, y + 0.3, z);
