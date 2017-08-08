@@ -42,7 +42,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			return;
 		}
 
-		if (rand.nextInt(100) == 0 && getTankCapacity() > 0 && isFuelled()) {
+		if (rand.nextInt(100) == 0 && getTankCapacity() > 0 && getFuel() > 0) {
 			drain(getWaterConsumption() / 5, true);
 		}
 	}

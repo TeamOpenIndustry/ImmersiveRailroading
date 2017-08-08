@@ -22,16 +22,7 @@ public abstract class Locomotive extends FreightTank {
 	//private MovingSoundRollingStock idleSound;
 	//protected MovingSoundRollingStock runSound;
 
-	private static DataParameter<Float> currentMaxSpeedMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private static DataParameter<String> currentDestination = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
-	private static DataParameter<String> currentState = EntityDataManager.createKey(Locomotive.class, DataSerializers.STRING);
 	private static DataParameter<Integer> currentFuelTrain = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	private static DataParameter<Integer> currentCarsPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	private static DataParameter<Float> currentMassPulled = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private static DataParameter<Float> currentSpeedReductionMC = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private static DataParameter<Float> currentAccelReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private static DataParameter<Float> currentBrakeReduction = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private static DataParameter<Float> currentFuelRate = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> throttle = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	
 	@SideOnly(Side.CLIENT)
@@ -41,15 +32,7 @@ public abstract class Locomotive extends FreightTank {
 	public Locomotive(World world, String defID) {
 		super(world, defID);
 
-		this.getDataManager().register(currentMaxSpeedMC, 0f);
-		this.getDataManager().register(currentDestination, "");
 		this.getDataManager().register(currentFuelTrain, 0);
-		this.getDataManager().register(currentCarsPulled, 0);
-		this.getDataManager().register(currentMassPulled, 0.0f);
-		this.getDataManager().register(currentSpeedReductionMC, 0f);
-		this.getDataManager().register(currentAccelReduction, 0.0f);
-		this.getDataManager().register(currentBrakeReduction, 0.0f);
-		this.getDataManager().register(currentFuelRate, 0.0f);
 		this.getDataManager().register(throttle, 0f);
 
 		// hornSound = EnumSounds.get(this.getClass()).getHorn(this);
@@ -78,70 +61,13 @@ public abstract class Locomotive extends FreightTank {
 		return (LocomotiveDefinition) DefinitionManager.getDefinition(defID);
 	}
 
-
-
-	public int getDefaultFuelConsumption() {
-		return this.getDefinition().getFuelConsumption();
-	}
-
-
-	public int getDefaultPower() {
-		return this.getDefinition().getHorsePower();
-	}
-
-
-	public double getDefaultBrake() {
-		return this.getDefinition().getBrakePower();
-	}
-
-
-	public Speed getMaxSpeed() {
-		return this.getDefinition().getMaxSpeed();
-	}
-
 	/*
 	 * 
 	 * All this is used in GUI only
 	 */
 
-	public Integer getCurrentNumCarsPulled() {
-		return dataManager.get(currentCarsPulled);
-	}
-
-	public double getCurrentMassPulled() {
-		return dataManager.get(currentMassPulled);
-	}
-
-	public Speed getCurrentSpeedReduction() {
-		return Speed.fromMinecraft(dataManager.get(currentSpeedReductionMC));
-	}
-
-	public Float getCurrentAccelReduction() {
-		return dataManager.get(currentAccelReduction);
-	}
-
-	public Float getCurrentBrakeReduction() {
-		return dataManager.get(currentBrakeReduction);
-	}
-
-	public String getState() {
-		return dataManager.get(currentState);
-	}
-
-	public String getDestinationGUI() {
-		return dataManager.get(currentDestination);
-	}
-
 	public int getFuel() {
 		return dataManager.get(currentFuelTrain);
-	}
-
-	public boolean isFuelled() {
-		return getFuel() > 0;
-	}
-
-	public double getFuelConsumption() {
-		return dataManager.get(currentFuelRate);
 	}
 
 	/*
@@ -200,6 +126,7 @@ public abstract class Locomotive extends FreightTank {
 	public void onUpdate() {
 		super.onUpdate();
 
+		/*
 		if (!world.isRemote) {
 			if (ticksExisted % 100 == 0) {
 
@@ -210,9 +137,9 @@ public abstract class Locomotive extends FreightTank {
 					motionX *= 0.8;
 					motionZ *= 0.8;
 				}
-				dataManager.set(currentFuelTrain, fuelTrain);
 			}
 		}
+		*/
 		// runSound.setVolume(getSpeed().minecraft() > 0 ? 1 : 0);
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
 
@@ -320,10 +247,6 @@ public abstract class Locomotive extends FreightTank {
 		//if (!Minecraft.getMinecraft().getSoundHandler().isSoundPlaying(hornSound)) {
 		//	Minecraft.getMinecraft().getSoundHandler().playSound(hornSound);
 		//}
-	}
-
-	protected void setState(String state) {
-		dataManager.set(currentState, state);
 	}
 
 	public void addFuel(double fuel) {

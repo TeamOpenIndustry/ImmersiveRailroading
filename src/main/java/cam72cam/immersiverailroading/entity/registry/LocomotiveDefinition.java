@@ -11,7 +11,6 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 	private int fuelConsumption;
 	private int power;
 	private int traction;
-	private double brake;
 	private Speed maxSpeed;
 	
 	public LocomotiveDefinition(String defID, JsonObject data) throws Exception {
@@ -22,9 +21,8 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 		
 		fuelConsumption = properties.get("fuel_consumption").getAsInt();
 		power = properties.get("horsepower").getAsInt();
-		traction = properties.get("tractive_effort").getAsInt();
-		brake = properties.get("deceleration").getAsDouble();
-		maxSpeed = Speed.fromMetric(properties.get("max_speed").getAsDouble());
+		traction = properties.get("tractive_effort_lbf").getAsInt();
+		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble());
 	}
 	
 	@Override
@@ -49,10 +47,6 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 	 */
 	public int getStartingTraction() {
 		return this.traction;
-	}
-
-	public double getBrakePower() {
-		return this.brake;
 	}
 
 	public Speed getMaxSpeed() {
