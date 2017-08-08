@@ -89,9 +89,60 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public void setVelocity(double x, double y, double z) {
 		// We need our own custom sync packets, see MRSSyncPacket
 	}
+	
+	@Override
+	public void onUpdate() {
+		super.onUpdate();
+		
+		// Need to do this here instead of in moveRollingStock
+		// calling this too often can get packets mixed up (eg recursive case)
+		if (!this.world.isRemote && this.ticksExisted % 20 == 0) {
+			this.sendToObserving(new MRSSyncPacket(this));
+		}
+
+		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
+		for (Entity entity : entitiesWithin) {
+			if (entity instanceof EntityMoveableRollingStock) {
+				// rolling stock collisions handled by looking at the front and
+				// rear coupler offsets
+				continue;
+			}
+
+			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
+				// Don't apply bb to passengers
+				continue;
+			}
+
+			// Move entity
+			
+			entity.motionX = this.motionX * 2;
+			entity.motionY = 0;
+			entity.motionZ = this.motionZ * 2;
+			// Force update
+			entity.onUpdate();
+
+			double speedDamage = this.getCurrentSpeed().metric() / Config.entitySpeedDamage;
+			if (speedDamage > 1) {
+				entity.attackEntityFrom((new DamageSource("hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
+			}
+		}
+
+		// Riding on top of cars
+		AxisAlignedBB bb = this.getCollisionBoundingBox();
+		bb = bb.offset(0, bb.maxY - bb.minY, 0);
+		bb = bb.setMaxY(bb.minY + 1);
+		List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
+		for (Entity entity : entitiesAbove) {
+			if (entity instanceof EntityMoveableRollingStock) {
+				continue;
+			}
+			Vec3d pos = entity.getPositionVector();
+			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
+			entity.setPosition(pos.x, pos.y, pos.z);
+		}
+	}
 
 	public void moveRollingStock(double moveDistance) {
-		
 		if (Math.abs(moveDistance) > 0.1) {
 			//Split movement (recursive)
 			
@@ -105,8 +156,22 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		    double lastTickPosY = this.posY;
 		    double lastTickPosZ = this.posZ;
 		    
+		    double motionX = 0;
+		    double motionY = 0;
+		    double motionZ = 0;
+		    
 		    moveRollingStock(moveDistance/2);
+		    motionX += this.motionX;
+		    motionY += this.motionY;
+		    motionZ += this.motionZ;
 		    moveRollingStock(moveDistance/2);
+		    motionX += this.motionX;
+		    motionY += this.motionY;
+		    motionZ += this.motionZ;
+		    
+		    this.motionX = motionX;
+		    this.motionY = motionY;
+		    this.motionZ = motionZ;
 		    
 		    // Apply prev position info now that we have performed the movement
 		    this.prevPosX = prevPosX;
@@ -191,51 +256,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		this.posX += this.motionX;
 		this.posY += this.motionY;
 		this.posZ += this.motionZ;
-
-		if (!this.world.isRemote && this.ticksExisted % 20 == 0) {
-			this.sendToObserving(new MRSSyncPacket(this));
-		}
-
-		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
-		for (Entity entity : entitiesWithin) {
-			if (entity instanceof EntityMoveableRollingStock) {
-				// rolling stock collisions handled by looking at the front and
-				// rear coupler offsets
-				continue;
-			}
-
-			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
-				// Don't apply bb to passengers
-				continue;
-			}
-
-			// Move entity
-			
-			entity.motionX = this.motionX * 2;
-			entity.motionY = 0;
-			entity.motionZ = this.motionZ * 2;
-			// Force update
-			entity.onUpdate();
-
-			double speedDamage = this.getCurrentSpeed().metric() / Config.entitySpeedDamage;
-			if (speedDamage > 1) {
-				entity.attackEntityFrom((new DamageSource("hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
-			}
-		}
-
-		// Riding on top of cars
-		AxisAlignedBB bb = this.getCollisionBoundingBox();
-		bb = bb.offset(0, bb.maxY - bb.minY, 0);
-		bb = bb.setMaxY(bb.minY + 1);
-		List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
-		for (Entity entity : entitiesAbove) {
-			if (entity instanceof EntityMoveableRollingStock) {
-				continue;
-			}
-			Vec3d pos = entity.getPositionVector();
-			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
-			entity.setPosition(pos.x, pos.y, pos.z);
-		}
 	}
 
 	private Vec3d between(Vec3d front, Vec3d rear) {
