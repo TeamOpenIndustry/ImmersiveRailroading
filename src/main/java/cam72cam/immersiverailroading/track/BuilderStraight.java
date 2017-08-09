@@ -43,8 +43,10 @@ public class BuilderStraight extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
+		data.add(new VecYawPitch(0, 0, 0, 0, 0, length, "RAIL_RIGHT", "RAIL_LEFT"));
+		
 		for (int i = 0; i < length; i++) {
-			data.add(new VecYawPitch(0, 0, i, 0));
+			data.add(new VecYawPitch(0, 0, i, 0, "RAIL_BASE"));
 		}
 		return data;
 	}

@@ -7,6 +7,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import scala.actors.threadpool.Arrays;
 
 //TODO @cam72cam use BlockPos and Vec3i
 
@@ -33,22 +34,36 @@ public abstract class BuilderBase {
 	public class VecYawPitch extends Vec3d {
 		private float yaw;
 		private float pitch;
+		private float length;
+		private List<String> groups;
 		
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw) {
+		@SuppressWarnings("unchecked")
+		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, String... groups) {
 			super(xIn, yIn, zIn);
 			this.yaw = yaw;
 			this.pitch = 0;
+			this.length = 1;
+			this.groups = Arrays.asList(groups);
 		}
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch) {
-			super(xIn, yIn, zIn);
-			this.yaw = yaw;
+		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, String... groups) {
+			this(xIn, yIn, zIn, yaw, groups);
 			this.pitch = pitch;
+		}
+		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, float length, String... groups) {
+			this(xIn, yIn, zIn, yaw, pitch, groups);
+			this.length = length;
 		}
 		public float getYaw() {
 			return this.yaw;
 		}
 		public float getPitch() {
 			return this.pitch;
+		}
+		public float getLength() {
+			return this.length;
+		}
+		public List<String> getGroups() {
+			return this.groups;
 		}
 	}
 	
