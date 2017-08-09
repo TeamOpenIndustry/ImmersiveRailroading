@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +104,22 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
 				GlStateManager.rotate(-90, 0, 1, 0);
-				baseRailModel.drawDirect();
+				GlStateManager.scale(piece.getLength(), 1, 1);
+				if (piece.getGroups().size() != 0) {
+					// TODO static
+					ArrayList<String> groups = new ArrayList<String>();
+					for (String baseGroup : piece.getGroups()) {
+						for (String groupName : baseRailModel.groups())  {
+							if (groupName.contains(baseGroup)) {
+								groups.add(groupName);
+							}
+						}
+					}
+					
+					baseRailModel.drawDirectGroups(groups);
+				} else {
+					baseRailModel.drawDirect();
+				}
 				GlStateManager.popMatrix();
 			}
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
@@ -47,9 +48,11 @@ public class BuilderSlope extends BuilderBase {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
 		float slope = (1.0F/(length + 1));
+
+		data.add(new VecYawPitch(0, 0, 0, 0, (float) -Math.toDegrees(Math.atan2(1, length)), length+1, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		for (int i = 0; i <= length; i++) {
-			data.add(new VecYawPitch(0, slope * i, i, 0, (float) -Math.toDegrees(Math.atan2(1, length))));
+			data.add(new VecYawPitch(0, slope * i, i, 0, (float) -Math.toDegrees(Math.atan2(1, length)), "RAIL_BASE"));
 		}
 		return data;
 	}
