@@ -98,6 +98,13 @@ public class StockModel extends OBJModel {
 		List<String> rearBogey = new ArrayList<String>();
 		Map<String, List<String>> rearBogeyWheels = new HashMap<String, List<String>>();
 		Map<String, List<String>> drivingWheels = new HashMap<String, List<String>>();
+		
+		List<String> connectingRodLeft = new ArrayList<String>();
+		List<String> connectingRodRight = new ArrayList<String>();
+		List<String> drivingRodLeft = new ArrayList<String>();
+		List<String> drivingRodRight = new ArrayList<String>();
+		List<String> pistonRodLeft = new ArrayList<String>();
+		List<String> pistonRodRight = new ArrayList<String>();
 
 		for (String group : groups()) {
 			if (group.contains("BOGEY_FRONT")) {
@@ -134,6 +141,27 @@ public class StockModel extends OBJModel {
 					drivingWheels.put(groupName, names);
 				} else {
 					drivingWheels.get(groupName).add(group);
+				}
+			} else if (group.contains("CONNECTING_ROD")) {
+				if (group.contains("LEFT")) {
+					connectingRodLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					connectingRodRight.add(group);
+				}
+			} else if (group.contains("DRIVING_ROD")) {
+				if (group.contains("LEFT")) {
+					drivingRodLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					drivingRodRight.add(group);
+				}
+			} else if (group.contains("PISTON_ROD")) {
+				if (group.contains("LEFT")) {
+					pistonRodLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					pistonRodRight.add(group);
 				}
 			} else {
 				main.add(group);
@@ -202,14 +230,89 @@ public class StockModel extends OBJModel {
 		for (List<String> wheel : drivingWheels.values()) {
 			float circumference = heightOfGroups(wheel) * (float)Math.PI;
 			float relDist = distance % circumference;
+			float wheelAngle = 360 * relDist / circumference;
 			Vector3f wheelPos = centerOfGroups(wheel);
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
-			GlStateManager.rotate(360 * relDist / circumference, 0, 0, 1);
+			GlStateManager.rotate(wheelAngle, 0, 0, 1);
 			GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
 			drawGroups(wheel);
 			GlStateManager.popMatrix();
 		}
+		
+		// left is offset by -90
+		// Assumes rods are in identical positions
+		{
+			List<List<String>> wheels = new ArrayList<List<String>>();
+			wheels.addAll(drivingWheels.values());
+			List<String> wheel = wheels.get(wheels.size()/2);
+			float circumference = heightOfGroups(wheel) * (float)Math.PI;
+			float relDist = distance % circumference;
+			float wheelAngle = 360 * relDist / circumference;
+
+			Vector3f wheelPos = centerOfGroups(wheel);
+			Vector3f connRodPos =  centerOfGroups(connectingRodRight);
+			float connRodOffset = connRodPos.x - wheelPos.x;
+			Vector3f drivingRodMin = minOfGroup(drivingRodRight);
+			Vector3f drivingRodMax = maxOfGroup(drivingRodRight);
+			float drivingRodHeight = drivingRodMax.y - drivingRodMin.y;
+			float drivingRodLength = drivingRodMax.x - drivingRodMin.x;
+			float drivingRodCenterLength = drivingRodLength - drivingRodHeight;  
+			
+			Vec3d rightConnRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngle - 90);
+			double drivingRodHorizRight = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - rightConnRodMovment.z * rightConnRodMovment.z);
+			Vec3d leftConnRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngle);
+			double drivingRodHorizLeft = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - leftConnRodMovment.z * leftConnRodMovment.z);
+			
+			Vector3f pistonMax = maxOfGroup(pistonRodRight);
+			double pistonDeltaRight = -pistonMax.x - drivingRodHorizRight + rightConnRodMovment.x;
+			double pistonDeltaLeft = -pistonMax.x - drivingRodHorizLeft + leftConnRodMovment.x;
+			
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(-connRodOffset, 0, 0);
+				GlStateManager.translate(rightConnRodMovment.x, rightConnRodMovment.z, 0);
+				drawGroups(connectingRodRight);
+				
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(connRodPos.x, connRodPos.y, connRodPos.z);
+				GlStateManager.rotate((float) Math.toDegrees(Math.atan2(rightConnRodMovment.z, drivingRodHorizRight)), 0, 0, 1);
+				GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
+				drawGroups(drivingRodRight);
+				GlStateManager.popMatrix();
+				
+			}
+			GlStateManager.popMatrix();
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(pistonDeltaRight, 0, 0);
+				drawGroups(pistonRodRight);
+			}
+			GlStateManager.popMatrix();
+			
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(-connRodOffset, 0, 0);
+				GlStateManager.translate(leftConnRodMovment.x, leftConnRodMovment.z, 0);
+				drawGroups(connectingRodLeft);
+				
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(connRodPos.x, connRodPos.y, connRodPos.z);
+				GlStateManager.rotate((float) Math.toDegrees(Math.atan2(leftConnRodMovment.z, drivingRodHorizLeft)), 0, 0, 1);
+				GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
+				drawGroups(drivingRodLeft);
+				GlStateManager.popMatrix();
+				
+			}
+			GlStateManager.popMatrix();
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(pistonDeltaLeft, 0, 0);
+				drawGroups(pistonRodLeft);
+			}
+			GlStateManager.popMatrix();
+		}
+		
 	}
 	int lastTick = 0;
 	float distance = 0;
