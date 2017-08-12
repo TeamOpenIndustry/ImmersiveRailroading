@@ -18,6 +18,7 @@ import org.lwjgl.util.vector.Vector3f;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.RelativeResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
 	List<String> materialPaths = new ArrayList<String>();
@@ -290,5 +291,45 @@ public class OBJModel {
 	
 	public Set<String> groups() {
 		return groups.keySet();
+	}
+
+	public Vector3f centerOfGroups(List<String> groupNames) {
+		Vector3f max = null;
+		Vector3f min = null;
+		for (String group : groupNames) {
+			List<Face> faces = groups.get(group);
+			for (Face face : faces) {
+				for (int[] point : face.points) {
+					Vector3f v = vertices.get(point[0]);
+					if (min == null) {
+						min = v;
+					} else {
+						if (min.x > v.x) {
+							min.x = v.x;
+						}
+						if (min.y > v.y) {
+							min.y = v.y;
+						}
+						if (min.z > v.z) {
+							min.z = v.z;
+						}
+					}
+					if (max == null) {
+						max = v;
+					} else {
+						if (min.x < v.x) {
+							min.x = v.x;
+						}
+						if (min.y < v.y) {
+							min.y = v.y;
+						}
+						if (min.z < v.z) {
+							min.z = v.z;
+						}
+					}
+				}
+			}
+		}
+		return new Vector3f((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
 	}
 }
