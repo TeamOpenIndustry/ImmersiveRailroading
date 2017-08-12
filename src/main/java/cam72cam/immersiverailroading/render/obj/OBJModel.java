@@ -291,9 +291,8 @@ public class OBJModel {
 	public Set<String> groups() {
 		return groups.keySet();
 	}
-
-	public Vector3f centerOfGroups(List<String> groupNames) {
-		Vector3f max = null;
+	
+	public Vector3f minOfGroup(List<String> groupNames) {
 		Vector3f min = null;
 		for (String group : groupNames) {
 			List<Face> faces = groups.get(group);
@@ -313,6 +312,22 @@ public class OBJModel {
 							min.z = v.z;
 						}
 					}
+				}
+			}
+		}
+		if (min == null) {
+			System.out.println("EMPTY " + groupNames);
+			return new Vector3f(0, 0, 0);
+		}
+		return min;
+	}
+	public Vector3f maxOfGroup(List<String> groupNames) {
+		Vector3f max = null;
+		for (String group : groupNames) {
+			List<Face> faces = groups.get(group);
+			for (Face face : faces) {
+				for (int[] point : face.points) {
+					Vector3f v = vertices.get(point[0]);
 					if (max == null) {
 						max = new Vector3f(v.x, v.y, v.z);
 					} else {
@@ -329,6 +344,21 @@ public class OBJModel {
 				}
 			}
 		}
+		if (max == null) {
+			System.out.println("EMPTY " + groupNames);
+			return new Vector3f(0, 0, 0);
+		}
+		return max;
+	}
+
+	public Vector3f centerOfGroups(List<String> groupNames) {
+		Vector3f min = minOfGroup(groupNames);
+		Vector3f max = maxOfGroup(groupNames);
 		return new Vector3f((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
+	}
+	public float heightOfGroups(List<String> groupNames) {
+		Vector3f min = minOfGroup(groupNames);
+		Vector3f max = maxOfGroup(groupNames);
+		return max.y - min.y;
 	}
 }
