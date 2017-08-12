@@ -18,7 +18,6 @@ import org.lwjgl.util.vector.Vector3f;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.RelativeResource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
 	List<String> materialPaths = new ArrayList<String>();
@@ -302,7 +301,7 @@ public class OBJModel {
 				for (int[] point : face.points) {
 					Vector3f v = vertices.get(point[0]);
 					if (min == null) {
-						min = v;
+						min = new Vector3f(v.x, v.y, v.z);
 					} else {
 						if (min.x > v.x) {
 							min.x = v.x;
@@ -315,16 +314,16 @@ public class OBJModel {
 						}
 					}
 					if (max == null) {
-						max = v;
+						max = new Vector3f(v.x, v.y, v.z);
 					} else {
-						if (min.x < v.x) {
-							min.x = v.x;
+						if (max.x < v.x) {
+							max.x = v.x;
 						}
-						if (min.y < v.y) {
-							min.y = v.y;
+						if (max.y < v.y) {
+							max.y = v.y;
 						}
-						if (min.z < v.z) {
-							min.z = v.z;
+						if (max.z < v.z) {
+							max.z = v.z;
 						}
 					}
 				}
