@@ -164,6 +164,41 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			entity.setPosition(pos.x, pos.y, pos.z);
 		}
 	}
+	
+	public class PosRot extends Vec3d {
+		private float rotation;
+		public PosRot(double xIn, double yIn, double zIn, float rotation) {
+			super(xIn, yIn, zIn);
+			this.rotation = rotation;
+		}
+		public PosRot(Vec3d nextFront, float yaw) {
+			this(nextFront.x, nextFront.y, nextFront.z, yaw);
+		}
+		public float getRotation() {
+			return rotation;
+		}
+	}
+
+	public PosRot predictFrontBogeyPosition(float offset) {
+		Vec3d front = frontBogeyPosition();
+		Vec3d nextFront = front;
+		while (offset > 0) {
+			nextFront = nextPosition(nextFront, this.rotationYaw, nextMovement(this.frontYaw, Math.min(0.1, offset)));
+			offset -= 0.1;
+		}
+		Vec3d frontDelta = front.subtractReverse(nextFront);
+		return new PosRot(nextFront.subtractReverse(this.getPositionVector()), VecUtil.toYaw(frontDelta));
+	}
+	public PosRot predictRearBogeyPosition(float offset) {
+		Vec3d rear = rearBogeyPosition();
+		Vec3d nextRear = rear;
+		while (offset > 0) {
+			nextRear = nextPosition(nextRear, this.rotationYaw+180, nextMovement(this.rearYaw+180, Math.min(0.1, offset)));
+			offset -= 0.1;
+		}
+		Vec3d rearDelta = rear.subtractReverse(nextRear);
+		return new PosRot(nextRear.subtractReverse(this.getPositionVector()), VecUtil.toYaw(rearDelta));
+	}
 
 	public void moveRollingStock(double moveDistance) {
 		if (Math.abs(moveDistance) > 0.1) {
@@ -240,8 +275,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		Vec3d front = frontBogeyPosition();
 		Vec3d rear = rearBogeyPosition();
-		Vec3d nextFront = nextPosition(front, this.frontYaw, nextMovement(this.frontYaw, moveDistance));
-		Vec3d nextRear = nextPosition(rear, this.rearYaw, nextMovement(this.rearYaw, moveDistance));
+		Vec3d nextFront = nextPosition(front, this.rotationYaw, nextMovement(this.frontYaw, moveDistance));
+		Vec3d nextRear = nextPosition(rear, this.rotationYaw, nextMovement(this.rearYaw, moveDistance));
 		Vec3d frontDelta = front.subtractReverse(nextFront);
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
 		frontYaw = VecUtil.toYaw(frontDelta);
@@ -320,7 +355,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return VecUtil.fromYaw(d, yaw);
 	}
 
-	private Vec3d nextPosition(Vec3d position, float yaw, Vec3d delta) {
+	private Vec3d nextPosition(Vec3d position, float trainYaw, Vec3d delta) {
 		TileRail rail = railFromPosition(position);
 		if (rail == null) {
 			// Try a smidge higher
@@ -393,10 +428,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		} else {
 			// delta should be in the direction of rotationYaw instead of front or rear
 			// since large changes can occur if the train is way off center
-			delta = nextMovement(this.rotationYaw, distance);
+			delta = nextMovement(trainYaw, distance);
 			
 			// Check that we are not moving in the wrong axis along a track
-			if (EnumFacing.fromAngle(rotationYaw).getAxis() != rail.getFacing().getAxis() && rail.getType() != TrackType.CROSSING) {
+			if (EnumFacing.fromAngle(trainYaw).getAxis() != rail.getFacing().getAxis() && rail.getType() != TrackType.CROSSING) {
 				if (!world.isRemote) {
 					System.out.println("Wrong track direction");
 					this.setDead();
