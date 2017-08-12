@@ -93,15 +93,39 @@ public class StockModel extends OBJModel {
 		EntityRollingStockDefinition def = stock.getDefinition();
 
 		List<String> main = new ArrayList<String>();
-		List<String> front = new ArrayList<String>();
-		List<String> rear = new ArrayList<String>();
+		List<String> frontBogey = new ArrayList<String>();
+		Map<String, List<String>> frontBogeyWheels = new HashMap<String, List<String>>();
+		List<String> rearBogey = new ArrayList<String>();
+		Map<String, List<String>> rearBogeyWheels = new HashMap<String, List<String>>();
 		Map<String, List<String>> drivingWheels = new HashMap<String, List<String>>();
 
 		for (String group : groups()) {
 			if (group.contains("BOGEY_FRONT")) {
-				front.add(group);
+				if (group.contains("WHEEL")) {
+					String groupName = group.split("[_" + Pattern.quote(".") + "]")[3];
+					if (!frontBogeyWheels.containsKey(groupName)) {
+						List<String> names = new ArrayList<String>();
+						names.add(group);
+						frontBogeyWheels.put(groupName, names);
+					} else {
+						frontBogeyWheels.get(groupName).add(group);
+					}
+				} else {
+					frontBogey.add(group);
+				}
 			} else if (group.contains("BOGEY_REAR")) {
-				rear.add(group);
+				if (group.contains("WHEEL")) {
+					String groupName = group.split("[_" + Pattern.quote(".") + "]")[3];
+					if (!rearBogeyWheels.containsKey(groupName)) {
+						List<String> names = new ArrayList<String>();
+						names.add(group);
+						rearBogeyWheels.put(groupName, names);
+					} else {
+						rearBogeyWheels.get(groupName).add(group);
+					}
+				} else {
+					rearBogey.add(group);
+				}
 			} else if (group.contains("WHEEL_DRIVER")) {
 				String groupName = group.split("[_" + Pattern.quote(".") + "]")[2];
 				if (!drivingWheels.containsKey(groupName)) {
@@ -119,10 +143,10 @@ public class StockModel extends OBJModel {
 		drawGroups(main);
 
 		
-		if (front.size() != 0 && rear.size() != 0) {
+		if (frontBogey.size() != 0 && rearBogey.size() != 0) {
 
-			Vector3f frontVec = centerOfGroups(front);
-			Vector3f rearVec = centerOfGroups(rear);
+			Vector3f frontVec = centerOfGroups(frontBogey);
+			Vector3f rearVec = centerOfGroups(rearBogey);
 			
 			PosRot frontPos = stock.predictFrontBogeyPosition(-frontVec.x - def.getBogeyFront());
 			PosRot rearPos = stock.predictRearBogeyPosition(rearVec.x + def.getBogeyRear());
@@ -134,7 +158,18 @@ public class StockModel extends OBJModel {
 			
 			GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()), 0, 1, 0);
 			GlStateManager.translate(-frontVec.x, 0, 0);
-			drawGroups(front);
+			drawGroups(frontBogey);
+			for (List<String> wheel : frontBogeyWheels.values()) {
+				float circumference = heightOfGroups(wheel) * (float)Math.PI;
+				float relDist = distance % circumference;
+				Vector3f wheelPos = centerOfGroups(wheel);
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+				GlStateManager.rotate(-360 * relDist / circumference, 0, 0, 1);
+				GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+				drawGroups(wheel);
+				GlStateManager.popMatrix();
+			}
 			GlStateManager.popMatrix();
 			
 			GlStateManager.pushMatrix();
@@ -144,7 +179,18 @@ public class StockModel extends OBJModel {
 			
 			GlStateManager.rotate(-(180 - stock.rotationYaw + rearPos.getRotation()), 0, 1, 0);
 			GlStateManager.translate(-rearVec.x, 0, 0);
-			drawGroups(rear);
+			drawGroups(rearBogey);
+			for (List<String> wheel : rearBogeyWheels.values()) {
+				float circumference = heightOfGroups(wheel) * (float)Math.PI;
+				float relDist = distance % circumference;
+				Vector3f wheelPos = centerOfGroups(wheel);
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+				GlStateManager.rotate(-360 * relDist / circumference, 0, 0, 1);
+				GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+				drawGroups(wheel);
+				GlStateManager.popMatrix();
+			}
 			GlStateManager.popMatrix();
 		}
 		
