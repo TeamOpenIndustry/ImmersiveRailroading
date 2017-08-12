@@ -1,0 +1,33 @@
+{
+	"era": "steam",
+	"name": "A1 Peppercorn",
+	"works": "A1 Steam Locomotive Trust",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/a1_peppercorn.obj",
+	"properties": {
+		"fuel_consumption": 100,
+		"fuel_capacity": 100,
+		"water_capacity": 27000, 
+		"horsepower": 2700,
+		"tractive_effort_lbf": 37400,
+		"max_speed_kmh": 160
+	},
+	"passenger": {
+		"center_x": -6.5,
+		"center_y": 1.5,
+		"length": 1,
+		"width": 2
+	},
+	"trucks": {
+		"front": 2.3, 
+		"rear": -2.3
+	},
+	"bounds": {
+		"front": 7,
+		"rear": 7.3,
+		"height": 4,
+		"width": 3
+	},
+	"rotate": {
+		"y": -90
+	}
+}

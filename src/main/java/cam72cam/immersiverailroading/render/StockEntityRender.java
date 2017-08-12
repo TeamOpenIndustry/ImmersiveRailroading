@@ -1,16 +1,11 @@
 package cam72cam.immersiverailroading.render;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.obj.OBJModel;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
@@ -33,7 +28,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 	public void doRender(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
 		EntityRollingStockDefinition def = stock.getDefinition();
 
-		OBJModel model = def.getModel();
+		StockModel model = def.getModel();
 		Matrix4 defaultTransform = def.getDefaultTransformation();
 
 		GlStateManager.pushAttrib();
@@ -43,7 +38,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 
 		// Move to specified position
-		GlStateManager.translate(x, y + 0.3, z);
+		GlStateManager.translate(x, y + 0.35, z);
 
 		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
 		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
@@ -69,50 +64,8 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 
 		GlStateManager.multMatrix(matrix);
 		
-		if (stock instanceof EntityMoveableRollingStock && ((EntityMoveableRollingStock)stock).frontYaw != null && ((EntityMoveableRollingStock)stock).rearYaw != null) {
-			List<String> main = new ArrayList<String>();
-			List<String> front = new ArrayList<String>();
-			List<String> rear = new ArrayList<String>();
-			
-			for (String group : model.groups()) {
-				if (group.contains("BOGEY_FRONT")) {
-					front.add(group);
-				} else if (group.contains("BOGEY_REAR")) {
-					rear.add(group);
-				} else {
-					main.add(group);
-				}
-			}
-
-			model.drawGroups(main);
-			
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(-def.getBogeyFront(), 0, 0);
-			if (!((EntityMoveableRollingStock)stock).isReverse) {
-				GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).frontYaw, 0, 1, 0);							
-			} else {
-				GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).rearYaw, 0, 1, 0);
-			}
-			GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
-			GlStateManager.translate(def.getBogeyFront(), 0, 0);
-			model.drawGroups(front);
-			GlStateManager.popMatrix();
-			
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(-def.getBogeyRear(), 0, 0);
-			if (!((EntityMoveableRollingStock)stock).isReverse) {
-				GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).rearYaw, 0, 1, 0);							
-			} else {
-				GlStateManager.rotate(180-((EntityMoveableRollingStock)stock).frontYaw, 0, 1, 0);
-			}
-			GlStateManager.rotate(-(180-stock.rotationYaw), 0, 1, 0);
-			GlStateManager.translate(def.getBogeyRear(), 0, 0);
-			model.drawGroups(rear);
-			GlStateManager.popMatrix();
-		} else {
-			model.draw();
-		}
 		
+		model.draw(stock);
 		
 		
 		GL11.glEnable(GL11.GL_TEXTURE_2D);

@@ -1,7 +1,7 @@
 # Blender MTL File: 'None'
 # Material Count: 16
 
-newmtl BASE_GREEN.009
+newmtl BASE_GREEN
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.262745 0.376471 0.149020
@@ -11,7 +11,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Brass.002
+newmtl Brass
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.600000 0.364706 0.121569
@@ -21,7 +21,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl BufferRed.002
+newmtl BufferRed
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.600000 0.117647 0.117647
@@ -31,7 +31,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_000_.009
+newmtl Color_000_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
@@ -41,7 +41,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_001_.002
+newmtl Color_001_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.886275 0.886275 0.886275
@@ -51,7 +51,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_004_.007
+newmtl Color_004_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.556863 0.556863 0.556863
@@ -61,7 +61,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_005_.009
+newmtl Color_005_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.447059 0.447059 0.447059
@@ -71,7 +71,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_006_.002
+newmtl Color_006_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.337255 0.337255 0.337255
@@ -81,7 +81,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_007_.002
+newmtl Color_007_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.227451 0.227451 0.227451
@@ -91,7 +91,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_008_.009
+newmtl Color_008_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.047059 0.047059 0.047059
@@ -101,7 +101,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_009_.009
+newmtl Color_009_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.000000 0.000000
@@ -111,7 +111,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_D03_.004
+newmtl Color_D03_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 0.847059 0.396078
@@ -121,7 +121,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Translucent_Glass_Blue_.004
+newmtl Translucent_Glass_Blue_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.392157 0.584314 0.929412
@@ -131,7 +131,7 @@ Ni -1.000000
 d 0.678431
 illum 2
 
-newmtl Translucent_Glass_Tinted_.004
+newmtl Translucent_Glass_Tinted_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -140,9 +140,9 @@ Ke 0.000000 0.000000 0.000000
 Ni -1.000000
 d 1.000000
 illum 2
-map_Kd /home/gilligan/workspace/ImmersiveRailroading/models/a1_peppercorn/Translucent_Glass_Tinted_.jpg
+map_Kd /home/gilligan/models/a1_peppercorn/Translucent_Glass_Tinted_.jpg
 
-newmtl __Color_008_1.008
+newmtl __Color_008_1
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.117647 0.117647 0.117647
@@ -152,7 +152,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl material.009
+newmtl material
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
