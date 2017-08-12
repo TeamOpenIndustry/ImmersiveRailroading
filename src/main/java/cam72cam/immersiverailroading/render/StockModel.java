@@ -1,7 +1,10 @@
 package cam72cam.immersiverailroading.render;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -92,12 +95,22 @@ public class StockModel extends OBJModel {
 		List<String> main = new ArrayList<String>();
 		List<String> front = new ArrayList<String>();
 		List<String> rear = new ArrayList<String>();
+		Map<String, List<String>> drivingWheels = new HashMap<String, List<String>>();
 
 		for (String group : groups()) {
 			if (group.contains("BOGEY_FRONT")) {
 				front.add(group);
 			} else if (group.contains("BOGEY_REAR")) {
 				rear.add(group);
+			} else if (group.contains("WHEEL_DRIVER")) {
+				String groupName = group.split("[_" + Pattern.quote(".") + "]")[2];
+				if (!drivingWheels.containsKey(groupName)) {
+					List<String> names = new ArrayList<String>();
+					names.add(group);
+					drivingWheels.put(groupName, names);
+				} else {
+					drivingWheels.get(groupName).add(group);
+				}
 			} else {
 				main.add(group);
 			}
@@ -105,21 +118,14 @@ public class StockModel extends OBJModel {
 
 		drawGroups(main);
 
-		Vector3f frontVec = centerOfGroups(front);
-		Vector3f rearVec = centerOfGroups(rear);
 		
-		PosRot frontPos;
-		PosRot rearPos;
-		
-		frontPos = stock.predictFrontBogeyPosition(-frontVec.x - def.getBogeyFront());
-		rearPos = stock.predictRearBogeyPosition(rearVec.x + def.getBogeyRear());
-		
-		if (stock.ticksExisted % 20 == 0) {
-			System.out.println(rearVec.x + def.getBogeyRear());
-			System.out.println(rearPos.lengthVector());
-		}
-		
-		if (front.size() != 0) {
+		if (front.size() != 0 && rear.size() != 0) {
+
+			Vector3f frontVec = centerOfGroups(front);
+			Vector3f rearVec = centerOfGroups(rear);
+			
+			PosRot frontPos = stock.predictFrontBogeyPosition(-frontVec.x - def.getBogeyFront());
+			PosRot rearPos = stock.predictRearBogeyPosition(rearVec.x + def.getBogeyRear());
 	
 			GlStateManager.pushMatrix();
 			
@@ -130,9 +136,7 @@ public class StockModel extends OBJModel {
 			GlStateManager.translate(-frontVec.x, 0, 0);
 			drawGroups(front);
 			GlStateManager.popMatrix();
-		}
-
-		if (rear.size() != 0) {
+			
 			GlStateManager.pushMatrix();
 			
 			Vec3d rearPosActual = VecUtil.rotateYaw(rearPos, 180 - stock.rotationYaw);
@@ -143,5 +147,24 @@ public class StockModel extends OBJModel {
 			drawGroups(rear);
 			GlStateManager.popMatrix();
 		}
+		
+		if (lastTick != stock.ticksExisted) {
+			lastTick = stock.ticksExisted;
+			distance += stock.getCurrentSpeed().minecraft()  * (stock.isReverse ? -1 : 1);
+		}
+		
+		for (List<String> wheel : drivingWheels.values()) {
+			float circumference = heightOfGroups(wheel) * (float)Math.PI;
+			float relDist = distance % circumference;
+			Vector3f wheelPos = centerOfGroups(wheel);
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+			GlStateManager.rotate(360 * relDist / circumference, 0, 0, 1);
+			GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+			drawGroups(wheel);
+			GlStateManager.popMatrix();
+		}
 	}
+	int lastTick = 0;
+	float distance = 0;
 }
