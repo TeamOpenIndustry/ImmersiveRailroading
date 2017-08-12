@@ -8,7 +8,7 @@ public class Config {
 	public static double couplerRange = 0.3;
 
 	@Comment({"A list of locomotives to load"})
-	public static String[] locomotives = new String[] {"gp-7"};
+	public static String[] locomotives = new String[] {"gp-7", "a1_peppercorn"};
 	
 	@Comment({"A list of passenger cars to load"})
 	public static String[] passenger_cars = new String[] { };
