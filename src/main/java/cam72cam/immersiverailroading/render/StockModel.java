@@ -105,6 +105,16 @@ public class StockModel extends OBJModel {
 		List<String> drivingRodRight = new ArrayList<String>();
 		List<String> pistonRodLeft = new ArrayList<String>();
 		List<String> pistonRodRight = new ArrayList<String>();
+		List<String> crossHeadLeft = new ArrayList<String>();
+		List<String> crossHeadRight = new ArrayList<String>();
+		List<String> combinationLeverLeft = new ArrayList<String>();
+		List<String> combinationLeverRight = new ArrayList<String>();
+		List<String> returnCrankRodLeft = new ArrayList<String>();
+		List<String> returnCrankRodRight = new ArrayList<String>();
+		List<String> returnCrankLeft = new ArrayList<String>();
+		List<String> returnCrankRight = new ArrayList<String>();
+		List<String> slottedLinkLeft = new ArrayList<String>();
+		List<String> slottedLinkRight = new ArrayList<String>();
 
 		for (String group : groups()) {
 			if (group.contains("BOGEY_FRONT")) {
@@ -162,6 +172,41 @@ public class StockModel extends OBJModel {
 				}
 				if (group.contains("RIGHT")) {
 					pistonRodRight.add(group);
+				}
+			} else if (group.contains("CROSS_HEAD")) {
+				if (group.contains("LEFT")) {
+					crossHeadLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					crossHeadRight.add(group);
+				}
+			} else if (group.contains("COMBINATION_LEVER")) {
+				if (group.contains("LEFT")) {
+					combinationLeverLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					combinationLeverRight.add(group);
+				}
+			} else if (group.contains("RETURN_CRANK_ROD")) {
+				if (group.contains("LEFT")) {
+					returnCrankRodLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					returnCrankRodRight.add(group);
+				}
+			} else if (group.contains("RETURN_CRANK")) {
+				if (group.contains("LEFT")) {
+					returnCrankLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					returnCrankRight.add(group);
+				}
+			} else if (group.contains("SLOTTED_LINK")) {
+				if (group.contains("LEFT")) {
+					slottedLinkLeft.add(group);
+				}
+				if (group.contains("RIGHT")) {
+					slottedLinkRight.add(group);
 				}
 			} else {
 				main.add(group);
@@ -248,7 +293,8 @@ public class StockModel extends OBJModel {
 			List<String> wheel = wheels.get(wheels.size()/2);
 			float circumference = heightOfGroups(wheel) * (float)Math.PI;
 			float relDist = distance % circumference;
-			float wheelAngle = 360 * relDist / circumference;
+			float wheelAngleLeft = 360 * relDist / circumference;
+			float wheelAngleRight = wheelAngleLeft - 90;
 
 			Vector3f wheelPos = centerOfGroups(wheel);
 			Vector3f connRodPos =  centerOfGroups(connectingRodRight);
@@ -259,15 +305,56 @@ public class StockModel extends OBJModel {
 			float drivingRodLength = drivingRodMax.x - drivingRodMin.x;
 			float drivingRodCenterLength = drivingRodLength - drivingRodHeight;  
 			
-			Vec3d rightConnRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngle - 90);
+			Vec3d rightConnRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngleRight);
 			double drivingRodHorizRight = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - rightConnRodMovment.z * rightConnRodMovment.z);
-			Vec3d leftConnRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngle);
+			Vec3d leftConnRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngleLeft);
 			double drivingRodHorizLeft = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - leftConnRodMovment.z * leftConnRodMovment.z);
 			
 			Vector3f pistonMax = maxOfGroup(pistonRodRight);
 			double pistonDeltaRight = -pistonMax.x - drivingRodHorizRight + rightConnRodMovment.x;
 			double pistonDeltaLeft = -pistonMax.x - drivingRodHorizLeft + leftConnRodMovment.x;
 			
+			double returnCrankHeight = heightOfGroups(returnCrankRight);
+			double returnCrankLength = lengthOfGroups(returnCrankRight);
+			Vector3f returnCrankRightPos = centerOfGroups(returnCrankRight);
+			Vector3f returnCrankLeftPos = centerOfGroups(returnCrankLeft);
+			float returnCrankAngle = 180 - 60;
+			
+			double returnCrankRodHeight = heightOfGroups(returnCrankRodRight);
+			double returnCrankRodLength = lengthOfGroups(returnCrankRodRight);
+			Vector3f returnCrankRodRightCenter = centerOfGroups(returnCrankRodRight);
+			Vector3f returnCrankRodLeftCenter = centerOfGroups(returnCrankRodLeft);
+			Vec3d crankOffsetRight = VecUtil.fromYaw(returnCrankLength - returnCrankHeight, 90+wheelAngleRight + returnCrankAngle);
+			Vec3d crankOffsetLeft = VecUtil.fromYaw(returnCrankLength - returnCrankHeight, 90+wheelAngleLeft + returnCrankAngle);
+			
+			Vector3f slottedLinkMin = minOfGroup(slottedLinkRight);
+			float slottedLinkWidth = lengthOfGroups(slottedLinkRight);
+			Vector3f slottedLinkCenter = centerOfGroups(slottedLinkRight);
+			Vector3f slottedLinkRightCenter = centerOfGroups(slottedLinkRight);
+			Vector3f slottedLinkLeftCenter = centerOfGroups(slottedLinkLeft);
+			
+			Vec3d returnCrankRodRightPos = new Vec3d(rightConnRodMovment.x, rightConnRodMovment.z, 0);
+			returnCrankRodRightPos = returnCrankRodRightPos.addVector(wheelPos.x, wheelPos.y, returnCrankRodRightCenter.z);
+			returnCrankRodRightPos = returnCrankRodRightPos.addVector(crankOffsetRight.x, crankOffsetRight.z, 0);
+			// This line is not taking into account the fact that it is attached to a swing arm.  Therefore this and the following lines are "close enough", but not quite right
+			Vec3d returnCrankRodRightOffset = new Vec3d(returnCrankRodRightPos.x - slottedLinkMin.x, returnCrankRodRightPos.y - slottedLinkMin.y - slottedLinkWidth/2, 0);
+			float returnCrankRodRightAngle = (float)Math.toDegrees(Math.atan2(returnCrankRodRightOffset.y, returnCrankRodRightOffset.x));
+			Vec3d returnCrankRodRightActual = VecUtil.fromYaw(returnCrankRodLength - returnCrankHeight, returnCrankRodRightAngle);
+			returnCrankRodRightActual = new Vec3d(returnCrankRodRightPos.x-returnCrankRodRightActual.z, returnCrankRodRightPos.y+returnCrankRodRightActual.x, 0);
+			float slottedLinkRightAngle = (float)Math.toDegrees(Math.atan2(-slottedLinkCenter.x + returnCrankRodRightActual.x, slottedLinkCenter.y - returnCrankRodRightActual.y));
+			
+			Vec3d returnCrankRodLeftPos = new Vec3d(leftConnRodMovment.x, leftConnRodMovment.z, 0);
+			returnCrankRodLeftPos = returnCrankRodLeftPos.addVector(wheelPos.x, wheelPos.y, returnCrankRodLeftCenter.z);
+			returnCrankRodLeftPos = returnCrankRodLeftPos.addVector(crankOffsetLeft.x, crankOffsetLeft.z, 0);
+			// This line is not taking into account the fact that it is attached to a swing arm.  Therefore this and the following lines are "close enough", but not quite left
+			Vec3d returnCrankRodLeftOffset = new Vec3d(returnCrankRodLeftPos.x - slottedLinkMin.x, returnCrankRodLeftPos.y - slottedLinkMin.y - slottedLinkWidth/2, 0);
+			float returnCrankRodLeftAngle = (float)Math.toDegrees(Math.atan2(returnCrankRodLeftOffset.y, returnCrankRodLeftOffset.x));
+			Vec3d returnCrankRodLeftActual = VecUtil.fromYaw(returnCrankRodLength - returnCrankHeight, returnCrankRodLeftAngle);
+			returnCrankRodLeftActual = new Vec3d(returnCrankRodLeftPos.x-returnCrankRodLeftActual.z, returnCrankRodLeftPos.y+returnCrankRodLeftActual.x, 0);
+			float slottedLinkLeftAngle = (float)Math.toDegrees(Math.atan2(-slottedLinkCenter.x + returnCrankRodLeftActual.x, slottedLinkCenter.y - returnCrankRodLeftActual.y));
+			
+			// CONNECTING_ROD_RIGHT
+			// DRIVING_ROD_RIGHT
 			GlStateManager.pushMatrix();
 			{
 				GlStateManager.translate(-connRodOffset, 0, 0);
@@ -280,16 +367,52 @@ public class StockModel extends OBJModel {
 				GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
 				drawGroups(drivingRodRight);
 				GlStateManager.popMatrix();
-				
 			}
 			GlStateManager.popMatrix();
+			// RETURN_CRANK_RIGHT
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(rightConnRodMovment.x, rightConnRodMovment.z, 0);
+				GlStateManager.translate(wheelPos.x, wheelPos.y, returnCrankRightPos.z);
+				GlStateManager.rotate(wheelAngleRight + returnCrankAngle, 0, 0, 1);
+				GlStateManager.translate(-returnCrankLength/2 + returnCrankHeight/2, 0, 0);
+				GlStateManager.translate(-returnCrankRightPos.x, -returnCrankRightPos.y, -returnCrankRightPos.z);
+				drawGroups(returnCrankRight);
+			}
+			GlStateManager.popMatrix();
+			// RETURN_CRANK_ROD_RIGHT
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(returnCrankRodRightPos.x, returnCrankRodRightPos.y, returnCrankRodRightPos.z);
+				GlStateManager.rotate(returnCrankRodRightAngle, 0, 0, 1);
+				GlStateManager.translate(-returnCrankRodLength/2 + returnCrankRodHeight/2, 0, 0);
+				GlStateManager.translate(-returnCrankRodRightCenter.x, -returnCrankRodRightCenter.y, -returnCrankRodRightCenter.z);
+				drawGroups(returnCrankRodRight);
+			}
+			GlStateManager.popMatrix();
+			// SLOTTED_LINK_RIGHT
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(slottedLinkRightCenter.x, slottedLinkRightCenter.y, slottedLinkRightCenter.z);
+				GlStateManager.rotate(slottedLinkRightAngle, 0, 0, 1);
+				GlStateManager.translate(-slottedLinkRightCenter.x, -slottedLinkRightCenter.y, -slottedLinkRightCenter.z);
+				drawGroups(slottedLinkRight);
+			}
+			GlStateManager.popMatrix();
+			// PISTON RIGHT
 			GlStateManager.pushMatrix();
 			{
 				GlStateManager.translate(pistonDeltaRight, 0, 0);
 				drawGroups(pistonRodRight);
+				drawGroups(crossHeadRight);
+				//TODO rotate combination lever
+				drawGroups(combinationLeverRight);
 			}
 			GlStateManager.popMatrix();
 			
+			
+			// CONNECTING_ROD_LEFT
+			// DRIVING_ROD_LEFT
 			GlStateManager.pushMatrix();
 			{
 				GlStateManager.translate(-connRodOffset, 0, 0);
@@ -302,13 +425,46 @@ public class StockModel extends OBJModel {
 				GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
 				drawGroups(drivingRodLeft);
 				GlStateManager.popMatrix();
-				
 			}
 			GlStateManager.popMatrix();
+			// RETURN_CRANK_LEFT
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(leftConnRodMovment.x, leftConnRodMovment.z, 0);
+				GlStateManager.translate(wheelPos.x, wheelPos.y, returnCrankLeftPos.z);
+				GlStateManager.rotate(wheelAngleLeft + returnCrankAngle, 0, 0, 1);
+				GlStateManager.translate(-returnCrankLength/2 + returnCrankHeight/2, 0, 0);
+				GlStateManager.translate(-returnCrankLeftPos.x, -returnCrankLeftPos.y, -returnCrankLeftPos.z);
+				drawGroups(returnCrankLeft);
+			}
+			GlStateManager.popMatrix();
+			// RETURN_CRANK_ROD_LEFT
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(returnCrankRodLeftPos.x, returnCrankRodLeftPos.y, returnCrankRodLeftPos.z);
+				GlStateManager.rotate(returnCrankRodLeftAngle, 0, 0, 1);
+				GlStateManager.translate(-returnCrankRodLength/2 + returnCrankRodHeight/2, 0, 0);
+				GlStateManager.translate(-returnCrankRodLeftCenter.x, -returnCrankRodLeftCenter.y, -returnCrankRodLeftCenter.z);
+				drawGroups(returnCrankRodLeft);
+			}
+			GlStateManager.popMatrix();
+			// SLOTTED_LINK_LEFT
+			GlStateManager.pushMatrix();
+			{
+				GlStateManager.translate(slottedLinkLeftCenter.x, slottedLinkLeftCenter.y, slottedLinkLeftCenter.z);
+				GlStateManager.rotate(slottedLinkLeftAngle, 0, 0, 1);
+				GlStateManager.translate(-slottedLinkLeftCenter.x, -slottedLinkLeftCenter.y, -slottedLinkLeftCenter.z);
+				drawGroups(slottedLinkLeft);
+			}
+			GlStateManager.popMatrix();
+			// PISTON_LEFT
 			GlStateManager.pushMatrix();
 			{
 				GlStateManager.translate(pistonDeltaLeft, 0, 0);
 				drawGroups(pistonRodLeft);
+				drawGroups(crossHeadLeft);
+				//TODO rotate combination lever
+				drawGroups(combinationLeverLeft);
 			}
 			GlStateManager.popMatrix();
 		}
