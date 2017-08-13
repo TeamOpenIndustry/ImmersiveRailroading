@@ -361,4 +361,9 @@ public class OBJModel {
 		Vector3f max = maxOfGroup(groupNames);
 		return max.y - min.y;
 	}
+	public float lengthOfGroups(List<String> groupNames) {
+		Vector3f min = minOfGroup(groupNames);
+		Vector3f max = maxOfGroup(groupNames);
+		return max.x - min.x;
+	}
 }
