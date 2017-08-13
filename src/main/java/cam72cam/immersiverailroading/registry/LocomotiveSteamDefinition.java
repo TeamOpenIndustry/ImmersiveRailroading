@@ -12,6 +12,14 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int waterConsumption;
 	private int tankCapacity;
 	private int fuelCapacity;
+	private ValveGearType valveGear;
+	
+	public enum ValveGearType {
+		WALSCHAERTS,
+		MALLET_WALSCHAERTS,
+		SHAY,
+		CLIMAX,
+	}
 
 	public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -19,6 +27,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		waterConsumption = properties.get("fuel_consumption").getAsInt();
 		tankCapacity = properties.get("water_capacity").getAsInt();
 		fuelCapacity = properties.get("fuel_capacity").getAsInt();
+		valveGear = ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase());
 	}
 
 	@Override
@@ -43,5 +52,8 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	
 	public int getFuelCapacity() {
 		return this.fuelCapacity;
+	}
+	public ValveGearType getValveGear() {
+		return valveGear;
 	}
 }

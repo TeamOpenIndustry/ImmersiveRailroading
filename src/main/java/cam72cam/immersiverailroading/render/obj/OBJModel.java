@@ -292,7 +292,7 @@ public class OBJModel {
 		return groups.keySet();
 	}
 	
-	public Vector3f minOfGroup(List<String> groupNames) {
+	public Vector3f minOfGroup(Iterable<String> groupNames) {
 		Vector3f min = null;
 		for (String group : groupNames) {
 			List<Face> faces = groups.get(group);
@@ -321,7 +321,7 @@ public class OBJModel {
 		}
 		return min;
 	}
-	public Vector3f maxOfGroup(List<String> groupNames) {
+	public Vector3f maxOfGroup(Iterable<String> groupNames) {
 		Vector3f max = null;
 		for (String group : groupNames) {
 			List<Face> faces = groups.get(group);
@@ -351,17 +351,17 @@ public class OBJModel {
 		return max;
 	}
 
-	public Vector3f centerOfGroups(List<String> groupNames) {
+	public Vector3f centerOfGroups(Iterable<String> groupNames) {
 		Vector3f min = minOfGroup(groupNames);
 		Vector3f max = maxOfGroup(groupNames);
 		return new Vector3f((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
 	}
-	public float heightOfGroups(List<String> groupNames) {
+	public float heightOfGroups(Iterable<String> groupNames) {
 		Vector3f min = minOfGroup(groupNames);
 		Vector3f max = maxOfGroup(groupNames);
 		return max.y - min.y;
 	}
-	public float lengthOfGroups(List<String> groupNames) {
+	public float lengthOfGroups(Iterable<String> groupNames) {
 		Vector3f min = minOfGroup(groupNames);
 		Vector3f max = maxOfGroup(groupNames);
 		return max.x - min.x;
