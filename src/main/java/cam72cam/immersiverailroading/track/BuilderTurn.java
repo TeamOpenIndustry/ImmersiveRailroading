@@ -79,16 +79,23 @@ public class BuilderTurn extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
-		int xOff = direction == TrackDirection.LEFT ? 0 : 1;
-		
 		float angleDelta = (float) (90 / (Math.PI * (radius+1)/2));
 		
-		for (float angle = 0; angle < 90; angle+=angleDelta) {
-			double gagX = Math.sin(Math.toRadians(angle)) * (radius+1)+xOff;
-			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+1);
+		if (direction == TrackDirection.RIGHT) {
 			
-			data.add(new VecYawPitch(gagX * xMult - xMult * radius, 0, gagZ, (angle)*xMult+90 + angleDelta/2));
+			for (float angle = 0; angle < 90; angle+=angleDelta) {
+				double gagX = Math.sin(Math.toRadians(angle)) * (radius+1);
+				double gagZ = Math.cos(Math.toRadians(angle)) * (radius+1);
+				
+				data.add(new VecYawPitch(gagX - radius+1, 0, gagZ, angle+90 + angleDelta/2));
+			}
+		} else {
+			for (float angle = 0; angle < 90; angle+=angleDelta) {
+				double gagX = Math.sin(Math.toRadians(angle)) * (radius-1);
+				double gagZ = Math.cos(Math.toRadians(angle)) * (radius-1);
+				
+				data.add(new VecYawPitch(gagX * -1 - -1 * radius, 0, gagZ, 180-angle + 90 - angleDelta/2));
+			}
 		}
 		
 		return data;
