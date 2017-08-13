@@ -140,10 +140,9 @@ public class StockModel extends OBJModel {
 		drawGroups(allGroups);
 	}
 
-	Map<String, List<String>> drivingWheels;
+	Map<String, List<String>> drivingWheels = new HashMap<String, List<String>>();
 
 	private Set<String> parseDrivingWheels(Set<String> allGroups) {
-		drivingWheels = new HashMap<String, List<String>>();
 		Set<String> main = new HashSet<String>();
 
 		for (String group : allGroups) {
@@ -178,17 +177,13 @@ public class StockModel extends OBJModel {
 		}
 	}
 
-	List<String> frontBogey;
-	Map<String, List<String>> frontBogeyWheels;
-	List<String> rearBogey;
-	Map<String, List<String>> rearBogeyWheels;
+	List<String> frontBogey = new ArrayList<String>();
+	Map<String, List<String>> frontBogeyWheels = new HashMap<String, List<String>>();
+	List<String> rearBogey = new ArrayList<String>();
+	Map<String, List<String>> rearBogeyWheels = new HashMap<String, List<String>>();
 
 	private Set<String> parseBogies(Set<String> allGroups) {
 		Set<String> main = new HashSet<String>();
-		frontBogey = new ArrayList<String>();
-		frontBogeyWheels = new HashMap<String, List<String>>();
-		rearBogey = new ArrayList<String>();
-		rearBogeyWheels = new HashMap<String, List<String>>();
 
 		for (String group : allGroups) {
 			if (group.contains("BOGEY_FRONT")) {
@@ -281,27 +276,17 @@ public class StockModel extends OBJModel {
 		}
 	}
 
-	Map<String, List<String>> connectingRods;
-	Map<String, List<String>> drivingRods;
-	Map<String, List<String>> pistonRods;
-	Map<String, List<String>> crossHeads;
-	Map<String, List<String>> combinationLevers;
-	Map<String, List<String>> returnCrankRods;
-	Map<String, List<String>> returnCranks;
-	Map<String, List<String>> slottedLinks;
+	Map<String, List<String>> connectingRods = new HashMap<String, List<String>>();
+	Map<String, List<String>> drivingRods = new HashMap<String, List<String>>();
+	Map<String, List<String>> pistonRods = new HashMap<String, List<String>>();
+	Map<String, List<String>> crossHeads = new HashMap<String, List<String>>();
+	Map<String, List<String>> combinationLevers = new HashMap<String, List<String>>();
+	Map<String, List<String>> returnCrankRods = new HashMap<String, List<String>>();
+	Map<String, List<String>> returnCranks = new HashMap<String, List<String>>();
+	Map<String, List<String>> slottedLinks = new HashMap<String, List<String>>();
 
 	private Set<String> parseWalschaerts(Set<String> allGroups, String section) {
 		Set<String> main = new HashSet<String>();
-		if (connectingRods == null) {
-			connectingRods = new HashMap<String, List<String>>();
-			drivingRods = new HashMap<String, List<String>>();
-			pistonRods = new HashMap<String, List<String>>();
-			crossHeads = new HashMap<String, List<String>>();
-			combinationLevers = new HashMap<String, List<String>>();
-			returnCrankRods = new HashMap<String, List<String>>();
-			returnCranks = new HashMap<String, List<String>>();
-			slottedLinks = new HashMap<String, List<String>>();
-		}
 
 		connectingRods.put(section, new ArrayList<String>());
 		drivingRods.put(section, new ArrayList<String>());
