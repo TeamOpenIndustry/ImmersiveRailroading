@@ -15,14 +15,5 @@
 	"trucks": {
 		"front": 9.55, 
 		"rear": -9.55
-	},
-	"bounds": {
-		"front": 13.8,
-		"rear": 13.8,
-		"height": 1.5,
-		"width": 3
-	},
-	"rotate": {
-		"y": -90
 	}
 }

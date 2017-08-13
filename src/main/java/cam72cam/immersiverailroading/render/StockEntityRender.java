@@ -1,7 +1,5 @@
 package cam72cam.immersiverailroading.render;
 
-import java.nio.FloatBuffer;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
@@ -11,7 +9,6 @@ import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
-import util.Matrix4;
 
 public class StockEntityRender extends Render<EntityRollingStock> {
 
@@ -29,7 +26,6 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		EntityRollingStockDefinition def = stock.getDefinition();
 
 		StockModel model = def.getModel();
-		Matrix4 defaultTransform = def.getDefaultTransformation();
 
 		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();
@@ -42,28 +38,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 
 		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
 		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
-		FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
-		Matrix4 transform = defaultTransform.copy().rotate(Math.toRadians(180), 0, 1, 0);
-		matrix.put((float) transform.m00);
-		matrix.put((float) transform.m01);
-		matrix.put((float) transform.m02);
-		matrix.put((float) transform.m03);
-		matrix.put((float) transform.m10);
-		matrix.put((float) transform.m11);
-		matrix.put((float) transform.m12);
-		matrix.put((float) transform.m13);
-		matrix.put((float) transform.m20);
-		matrix.put((float) transform.m21);
-		matrix.put((float) transform.m22);
-		matrix.put((float) transform.m23);
-		matrix.put((float) transform.m30);
-		matrix.put((float) transform.m31);
-		matrix.put((float) transform.m32);
-		matrix.put((float) transform.m33);
-		matrix.flip();
-
-		GlStateManager.multMatrix(matrix);
-		
+		GlStateManager.rotate(-90, 0, 1, 0);
 		
 		model.draw(stock);
 		
