@@ -125,8 +125,11 @@ public class StockModel extends OBJModel {
 
 		switch (def.getValveGear()) {
 		case WALSCHAERTS:
-			drawWalschaerts(stock, "LEFT", 0);
-			drawWalschaerts(stock, "RIGHT", -90);
+			List<List<String>> wheels = new ArrayList<List<String>>();
+			wheels.addAll(drivingWheels.values());
+			List<String> wheel = wheels.get(wheels.size() / 2);
+			drawWalschaerts(stock, "LEFT", 0, wheel);
+			drawWalschaerts(stock, "RIGHT", -90, wheel);
 			break;
 		case MALLET_WALSCHAERTS:
 			break;
@@ -344,11 +347,8 @@ public class StockModel extends OBJModel {
 		return main;
 	}
 
-	private void drawWalschaerts(LocomotiveSteam stock, String section, int wheelAngleOffset) {
+	private void drawWalschaerts(LocomotiveSteam stock, String section, int wheelAngleOffset, List<String> wheel) {
 		// TODO wheel index param
-		List<List<String>> wheels = new ArrayList<List<String>>();
-		wheels.addAll(drivingWheels.values());
-		List<String> wheel = wheels.get(wheels.size() / 2);
 		float circumference = heightOfGroups(wheel) * (float) Math.PI;
 		float relDist = stock.distanceTraveled % circumference;
 		float wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
