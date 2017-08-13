@@ -30,6 +30,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public Float frontYaw;
 	public Float rearYaw;
 	public boolean isReverse = false;
+	public float distanceTraveled = 0;
 
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -58,6 +59,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (rearYaw != null) {
 			nbttagcompound.setFloat("rearYaw", rearYaw);
 		}
+		nbttagcompound.setFloat("distanceTraveled", distanceTraveled);
 	}
 
 	@Override
@@ -69,6 +71,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (nbttagcompound.hasKey("rearYaw")) {
 			rearYaw = nbttagcompound.getFloat("rearYaw");
 		}
+		distanceTraveled = nbttagcompound.getFloat("distanceTraveled");
 	}
 	
 	public void zeroSpeed() {
@@ -247,6 +250,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		}
 	    
 	    this.currentSpeed = Speed.fromMinecraft(Math.abs(moveDistance));
+	    distanceTraveled += moveDistance;
 		
 		if (moveDistance == 0) {
 			return;

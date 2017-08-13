@@ -23,9 +23,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class StockModel extends OBJModel {
-	// might need to be stored on entity
-	int lastTick = 0;
-	float distance = 0;
 	boolean hasParsedModel = false;
 
 	public StockModel(ResourceLocation modelLoc) throws Exception {
@@ -101,11 +98,6 @@ public class StockModel extends OBJModel {
 
 		LocomotiveSteamDefinition def = stock.getDefinition();
 
-		if (lastTick != stock.ticksExisted) {
-			lastTick = stock.ticksExisted;
-			distance += stock.getCurrentSpeed().minecraft() * (stock.isReverse ? -1 : 1);
-		}
-
 		if (!hasParsedModel) {
 			hasParsedModel = true;
 			allGroups = groups();
@@ -172,7 +164,7 @@ public class StockModel extends OBJModel {
 	private void drawDrivingWheels(LocomotiveSteam stock) {
 		for (List<String> wheel : drivingWheels.values()) {
 			float circumference = heightOfGroups(wheel) * (float) Math.PI;
-			float relDist = distance % circumference;
+			float relDist = stock.distanceTraveled % circumference;
 			float wheelAngle = 360 * relDist / circumference;
 			Vector3f wheelPos = centerOfGroups(wheel);
 			GlStateManager.pushMatrix();
@@ -253,7 +245,7 @@ public class StockModel extends OBJModel {
 			drawGroups(frontBogey);
 			for (List<String> wheel : frontBogeyWheels.values()) {
 				float circumference = heightOfGroups(wheel) * (float) Math.PI;
-				float relDist = distance % circumference;
+				float relDist = stock.distanceTraveled % circumference;
 				Vector3f wheelPos = centerOfGroups(wheel);
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -274,7 +266,7 @@ public class StockModel extends OBJModel {
 			drawGroups(rearBogey);
 			for (List<String> wheel : rearBogeyWheels.values()) {
 				float circumference = heightOfGroups(wheel) * (float) Math.PI;
-				float relDist = distance % circumference;
+				float relDist = stock.distanceTraveled % circumference;
 				Vector3f wheelPos = centerOfGroups(wheel);
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -395,7 +387,7 @@ public class StockModel extends OBJModel {
 			wheels.addAll(drivingWheels.values());
 			List<String> wheel = wheels.get(wheels.size() / 2);
 			float circumference = heightOfGroups(wheel) * (float) Math.PI;
-			float relDist = distance % circumference;
+			float relDist = stock.distanceTraveled % circumference;
 			float wheelAngleLeft = 360 * relDist / circumference;
 			float wheelAngleRight = wheelAngleLeft - 90;
 
