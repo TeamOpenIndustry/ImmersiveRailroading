@@ -366,4 +366,10 @@ public class OBJModel {
 		Vector3f max = maxOfGroup(groupNames);
 		return max.x - min.x;
 	}
+
+	public double widthOfGroups(Set<String> groupNames) {
+		Vector3f min = minOfGroup(groupNames);
+		Vector3f max = maxOfGroup(groupNames);
+		return max.z - min.z;
+	}
 }

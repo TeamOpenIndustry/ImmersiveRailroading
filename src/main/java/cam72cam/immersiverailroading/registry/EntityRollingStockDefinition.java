@@ -16,7 +16,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import util.Matrix4;
 
 public abstract class EntityRollingStockDefinition {
 	public abstract EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing);
@@ -27,8 +26,6 @@ public abstract class EntityRollingStockDefinition {
 	private Vec3d passengerCenter;
 	private float bogeyFront;
 	private float bogeyRear;
-
-	private Matrix4 defaultTransform = new Matrix4();
 
 	private double frontBounds;
 	private double rearBounds;
@@ -52,23 +49,11 @@ public abstract class EntityRollingStockDefinition {
 
 		bogeyFront = data.get("trucks").getAsJsonObject().get("front").getAsFloat();
 		bogeyRear = data.get("trucks").getAsJsonObject().get("rear").getAsFloat();
-
-		JsonObject rotations = data.get("rotate").getAsJsonObject();
-		if (rotations.has("x")) {
-			defaultTransform.rotate(Math.toRadians(rotations.get("x").getAsFloat()), 1, 0, 0);
-		}
-		if (rotations.has("y")) {
-			defaultTransform.rotate(Math.toRadians(rotations.get("y").getAsFloat()), 0, 1, 0);
-		}
-		if (rotations.has("z")) {
-			defaultTransform.rotate(Math.toRadians(rotations.get("z").getAsFloat()), 0, 0, 1);
-		}
-
-		JsonObject boundsData = data.get("bounds").getAsJsonObject();
-		frontBounds = boundsData.get("front").getAsDouble();
-		rearBounds = boundsData.get("rear").getAsDouble();
-		widthBounds = boundsData.get("width").getAsDouble();
-		heightBounds = boundsData.get("height").getAsDouble();
+		
+		frontBounds = -model.minOfGroup(model.groups()).x;
+		rearBounds = model.maxOfGroup(model.groups()).x;
+		widthBounds = model.widthOfGroups(model.groups());
+		heightBounds = model.heightOfGroups(model.groups());
 		
 		
 		//TODO
@@ -128,10 +113,6 @@ public abstract class EntityRollingStockDefinition {
 
 	public StockModel getModel() {
 		return model;
-	}
-
-	public Matrix4 getDefaultTransformation() {
-		return defaultTransform;
 	}
 
 	/**

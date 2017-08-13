@@ -23,11 +23,9 @@ import util.Matrix4;
 public class StockItemModel implements IBakedModel {
 
 	private OBJModel model;
-	private Matrix4 defaultTransform;
 
 	public StockItemModel(EntityRollingStockDefinition def) {
 		this.model = def.getModel();
-		defaultTransform = def.getDefaultTransformation();
 	}
 	
 	@Override
@@ -81,22 +79,22 @@ public class StockItemModel implements IBakedModel {
 		case THIRD_PERSON_LEFT_HAND:
 		case THIRD_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(60), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
+					new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(60), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case FIRST_PERSON_LEFT_HAND:
 		case FIRST_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(10), 1, 0, 0).multiply(defaultTransform).toMatrix4f());
+					new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(10), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case GROUND:
-			return Pair.of(defaultVal.getLeft(), defaultTransform.copy().toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case FIXED:
 			// Item Frame
-			return Pair.of(defaultVal.getLeft(), defaultTransform.copy().scale(2, 2, 2).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).scale(2, 2, 2).toMatrix4f());
 		case GUI:
 			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.15, 0.15, 0.15).rotate(Math.toRadians(200), 0, 1, 0)
-					.rotate(Math.toRadians(-15), 1, 0, 0).multiply(defaultTransform.copy()).toMatrix4f());
+					.rotate(Math.toRadians(-15), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case HEAD:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().translate(0, 0, 0.5).leftMultiply(defaultTransform).toMatrix4f());
+					new Matrix4().translate(0, 0, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case NONE:
 			return defaultVal;
 		}
