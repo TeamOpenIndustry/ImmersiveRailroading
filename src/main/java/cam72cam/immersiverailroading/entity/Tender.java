@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class Tender extends FreightTank implements IFluidHandler {
+public class Tender extends CarTank implements IFluidHandler {
 	
 	public Tender(World world) {
 		this(world, null);
@@ -26,12 +26,6 @@ public class Tender extends FreightTank implements IFluidHandler {
 	@Override
 	public GuiTypes guiType() {
 		return GuiTypes.TENDER;
-	}
-
-	@Override
-	public int getTankCapacity() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override

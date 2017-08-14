@@ -10,6 +10,9 @@ public class Config {
 	@Comment({"A list of locomotives to load"})
 	public static String[] locomotives = new String[] {"gp-7", "a1_peppercorn"};
 	
+	@Comment({"A list of tenders to load"})
+	public static String[] tenders = new String[] { "a1_peppercorn_tender" };
+	
 	@Comment({"A list of passenger cars to load"})
 	public static String[] passenger_cars = new String[] { };
 	

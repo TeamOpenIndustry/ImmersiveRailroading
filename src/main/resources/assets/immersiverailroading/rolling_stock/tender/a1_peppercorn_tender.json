@@ -1,0 +1,17 @@
+{
+	"name": "A1 Peppercorn Tender",
+	"model": "immersiverailroading:models/rolling_stock/tender/a1_peppercorn_tender.obj",
+	"passenger": {
+		"center_x": 0,
+		"center_y": 4,
+		"length": 2,
+		"width": 1.5
+	},
+	"tank": {
+		"capacity": 80000 
+	},
+	"trucks": {
+		"front": 2.14, 
+		"rear": -2.14
+	}
+}
