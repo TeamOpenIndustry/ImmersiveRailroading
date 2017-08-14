@@ -45,6 +45,15 @@ public class DefinitionManager {
 				ex.printStackTrace();
 			}
 		}
+		for (String tender : Config.tenders) {
+			try {
+				String defID = "rolling_stock/tender/" + tender + ".json";
+				JsonObject data = getJsonData(defID);
+				definitions.put(defID, new TenderDefinition(defID, data));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 		for (String passenger_car : Config.passenger_cars) {
 			try {
 				String defID = "rolling_stock/passenger/" + passenger_car + ".json";
