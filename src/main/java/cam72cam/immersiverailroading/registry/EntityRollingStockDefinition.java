@@ -21,7 +21,7 @@ public abstract class EntityRollingStockDefinition {
 	public abstract EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing);
 
 	protected String defID;
-	private String name;
+	public String name;
 	private StockModel model;
 	private Vec3d passengerCenter;
 	private float bogeyFront;
