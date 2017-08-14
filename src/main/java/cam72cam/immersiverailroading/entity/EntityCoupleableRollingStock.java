@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -90,6 +90,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		
 
 		if (world.isRemote) {
 			// Only couple server side
@@ -107,11 +108,17 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 						// Is the coupler free?
 						if (!potentialCoupling.isCoupled(potentialCoupler)) {
 							// Is the other coupler within coupling distance?
-							if (potentialCoupling.potentialCouplings(potentialCoupler).contains(this)) {
-								this.setCoupledUUID(coupler, potentialCoupling.getPersistentID());
-								potentialCoupling.setCoupledUUID(potentialCoupler, this.getPersistentID());
-								this.sendToObserving(new CoupleStatusPacket(this));
-								potentialCoupling.sendToObserving(new CoupleStatusPacket(potentialCoupling));
+							for (EntityCoupleableRollingStock possiblyMe : potentialCoupling.potentialCouplings(potentialCoupler)) {
+								if (possiblyMe.getPersistentID().equals(this.getPersistentID())) {
+									this.setCoupledUUID(coupler, potentialCoupling.getPersistentID());
+									potentialCoupling.setCoupledUUID(potentialCoupler, this.getPersistentID());
+									this.sendToObserving(new CoupleStatusPacket(this));
+									potentialCoupling.sendToObserving(new CoupleStatusPacket(potentialCoupling));
+									break;
+								}
+							}
+							if (this.isCoupled(coupler)) {
+								// coupled
 								break;
 							}
 						}
@@ -124,7 +131,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 					// False Match
 					ImmersiveRailroading.logger
-							.info(String.format("MISS %s %s %s", coupler, this.getPersistentID(), potentialCoupling.getPersistentID()));
+							.info(String.format("MISS %s %s %s", coupler, this.getDefinition().name, potentialCoupling.getDefinition().name));
 				}
 			}
 		}
@@ -335,15 +342,21 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public List<EntityCoupleableRollingStock> potentialCouplings(CouplerType coupler) {
-		return getInCouplerRange(VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler) + Config.couplerRange, rotationYaw + coupler.yaw)
-				.add(getPositionVector()));
-	}
-
-	private List<EntityCoupleableRollingStock> getInCouplerRange(Vec3d pos) {
+		Vec3d pos = VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler) + Config.couplerRange, rotationYaw + coupler.yaw).add(getPositionVector());
+		
 		double range = Config.couplerRange;
-		AxisAlignedBB bb = new AxisAlignedBB(-range, -range, -range, range, range, range);
-		List<EntityCoupleableRollingStock> inRange = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, bb.offset(pos).offset(0, 1, 0));
-		inRange.remove(this); // just to be safe
+		
+		List<EntityCoupleableRollingStock> nearBy = world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.withinRange(pos.x, pos.y, pos.z, 32));;
+		nearBy.remove(this); // just to be safe
+		
+		List<EntityCoupleableRollingStock> inRange = new ArrayList<EntityCoupleableRollingStock>();
+		for (EntityCoupleableRollingStock stock : nearBy) {
+			for (CouplerType otherCoupler : CouplerType.values()) {
+				if (this.getCouplerPosition(coupler).subtract(stock.getCouplerPosition(otherCoupler)).lengthVector() < range) {
+					inRange.add(stock);
+				}
+			}
+		}
 		return inRange;
 	}
 
