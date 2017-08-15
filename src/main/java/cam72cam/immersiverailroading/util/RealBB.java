@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.util;
 
 import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Rectangle2D.Double;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -67,13 +66,51 @@ public class RealBB extends AxisAlignedBB {
 		return this.clone();
 	}
 	public AxisAlignedBB contract(double x, double y, double z) {
-		return this.clone();
+		RealBB expanded = this.clone();
+		
+		if (x > 0) {
+			expanded.front -= x;
+		} else {
+			expanded.rear -= x;
+		}
+		
+		if (y > 0) {
+			expanded.height -= y;
+		} else {
+			expanded.centerY -= y;
+		}
+		
+		expanded.width -= z;
+		
+		return expanded;
 	}
 	public AxisAlignedBB expand(double x, double y, double z) {
-		return this.clone();
+		RealBB expanded = this.clone();
+		
+		if (x > 0) {
+			expanded.front += x;
+		} else {
+			expanded.rear += x;
+		}
+		
+		if (y > 0) {
+			expanded.height += y;
+		} else {
+			expanded.centerY += y;
+		}
+		
+		expanded.width += z;
+		
+		return expanded;
 	}
 	public AxisAlignedBB grow(double x, double y, double z) {
-		return this.clone();
+		RealBB growed = this.clone();
+		growed.front += x;
+		growed.rear += x;
+		growed.height += y;
+		growed.centerY += y;
+		growed.width += z + z;
+		return growed;
 	}
 	public AxisAlignedBB intersect(AxisAlignedBB p_191500_1_) {
 		return this.clone();
@@ -118,15 +155,21 @@ public class RealBB extends AxisAlignedBB {
 		int[] zp = new int[] { (int) (100 * origin.z), (int) (100 * point1.z), (int) (100 * opposite.z), (int) (100 * point2.z)};
 		
 		Polygon rect = new Polygon(xp, zp, 4);
-		doesIntersect = doesIntersect && rect.contains(x1*100, z1*100) && rect.contains(x2*100, z2*100);
-		if (doesIntersect) {
-			System.out.println("INTERSECTS");
+		
+		if (x1 == x2 && y1 == y2 && z1 == z2) {
+			// Single point
+			doesIntersect = doesIntersect && rect.contains(x1*100, z1*100);	
+		} else {
+			// AABB
+			Rectangle2D r = new Rectangle2D.Double(x1*100, z1*100, 0, 0);
+			r.add(x2*100, z2*100);
+			doesIntersect = doesIntersect && rect.intersects(r );
 		}
 		
 		return doesIntersect;
 	}
 	public boolean contains(Vec3d vec) {
-		return super.contains(vec);
+		return this.intersects(vec.x, vec.y, vec.z, vec.x, vec.y, vec.z);
 	}
 	public RayTraceResult calculateIntercept(Vec3d vecA, Vec3d vecB) {
 		return super.calculateIntercept(vecA, vecB);
