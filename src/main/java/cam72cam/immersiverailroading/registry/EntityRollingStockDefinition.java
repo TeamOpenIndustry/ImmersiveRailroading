@@ -99,7 +99,7 @@ public abstract class EntityRollingStockDefinition {
 	}
 
 	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock) {
-		return new RealBB(frontBounds, rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
+		return new RealBB(frontBounds, -rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
 	}
 
 	public List<String> getTooltip() {
