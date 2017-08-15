@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.util;
 import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
 
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -172,6 +173,20 @@ public class RealBB extends AxisAlignedBB {
 		return this.intersects(vec.x, vec.y, vec.z, vec.x, vec.y, vec.z);
 	}
 	public RayTraceResult calculateIntercept(Vec3d vecA, Vec3d vecB) {
-		return super.calculateIntercept(vecA, vecB);
+		// This does NOT set enumfacing.  The places where this code (entity) is used don't use that value as of 1.12.
+		int steps = 10;
+		double xDist = vecB.x - vecA.x;
+		double yDist = vecB.y - vecA.y;
+		double zDist = vecB.z - vecA.z;
+		double xDelta = xDist / steps;
+		double yDelta = yDist / steps;
+		double zDelta = zDist / steps;
+		for (int step = 0; step < steps; step ++) {
+			Vec3d stepPos = new Vec3d(vecA.x + xDelta * step, vecA.y + yDelta * step, vecA.z + zDelta * step);
+			if (this.contains(stepPos)) {
+				return new RayTraceResult(stepPos, EnumFacing.UP); 
+			}
+		}
+		return null;
 	}
 }
