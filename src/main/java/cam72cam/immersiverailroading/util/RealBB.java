@@ -25,32 +25,32 @@ public class RealBB extends AxisAlignedBB {
 	private double centerZ;
 	
 	public RealBB(double front, double rear, double width, double height, float yaw) {
+		this(front, rear, width, height, yaw, 0, 0, 0);
+		
+	}
+	
+	private RealBB(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
 		// I hate java sometimes
 		// super constructors must be the first call in a constructor, what sort
 		// of shit is that
-		super(c(front, rear, width, height, yaw)[0], c(front, rear, width, height, yaw)[1], c(front, rear, width, height, yaw)[2],
-				c(front, rear, width, height, yaw)[3], c(front, rear, width, height, yaw)[4], c(front, rear, width, height, yaw)[5]);
+		super(c(front, rear, width, height, yaw, centerX, centerY, centerZ)[0], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[1], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[2],
+				c(front, rear, width, height, yaw, centerX, centerY, centerZ)[3], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[4], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[5]);
 		this.front = front;
 		this.rear = rear;
 		this.width = width;
 		this.height = height;
 		this.yaw = yaw;
+		this.centerX = centerX;
+		this.centerY = centerY;
+		this.centerZ = centerZ;
 	}
 	
 	private static AxisAlignedBB newBB(Vec3d min, Vec3d max) {
 		//Why the fuck is this ClientOnly?
 		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
 	}
-	
-	public RealBB clone() {
-		RealBB clone = new RealBB(front, rear, width, height, yaw);
-		clone.centerX = centerX;
-		clone.centerY = centerY;
-		clone.centerZ = centerZ;
-		return clone;
-	}
 
-	private static double[] c(double front, double rear, double width, double height, float yaw) {
+	private static double[] c(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
 		Vec3d frontPos = VecUtil.fromYaw(front, yaw);
 		Vec3d rearPos = VecUtil.fromYaw(rear, yaw);
 
@@ -60,8 +60,12 @@ public class RealBB extends AxisAlignedBB {
 		AxisAlignedBB rightBox = newBB(frontPos.add(offsetRight), rearPos.add(offsetRight));
 		AxisAlignedBB leftBox = newBB(frontPos.add(offsetLeft), rearPos.add(offsetLeft));
 
-		AxisAlignedBB newthis = rightBox.union(leftBox);
+		AxisAlignedBB newthis = rightBox.union(leftBox).offset(centerX, centerY, centerZ);
 		return new double[] { newthis.maxX, height, newthis.maxZ, newthis.minX, newthis.minY, newthis.minZ };
+	}
+	
+	public RealBB clone() {
+		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ);
 	}
 	public AxisAlignedBB setMaxY(double y2) {
 		return this.clone();
@@ -83,7 +87,7 @@ public class RealBB extends AxisAlignedBB {
 		
 		expanded.width -= z;
 		
-		return expanded;
+		return expanded.clone();
 	}
 	public AxisAlignedBB expand(double x, double y, double z) {
 		RealBB expanded = this.clone();
@@ -102,7 +106,7 @@ public class RealBB extends AxisAlignedBB {
 		
 		expanded.width += z;
 		
-		return expanded;
+		return expanded.clone();
 	}
 	public AxisAlignedBB grow(double x, double y, double z) {
 		RealBB growed = this.clone();
@@ -124,19 +128,19 @@ public class RealBB extends AxisAlignedBB {
 		offsetted.centerX += x;
 		offsetted.centerY += y;
 		offsetted.centerZ += z;
-		return offsetted;
+		return offsetted.clone();
 	}
 	public AxisAlignedBB offset(BlockPos pos) {
 		return this.offset(pos.getX(), pos.getY(), pos.getZ());
 	}
 	public double calculateXOffset(AxisAlignedBB other, double offsetX) {
-		return super.calculateXOffset(other, offsetX);
+		return 0;
 	}
 	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
-		return super.calculateYOffset(other, offsetY);
+		return 0;
 	}
 	public double calculateZOffset(AxisAlignedBB other, double offsetZ) {
-		return super.calculateZOffset(other, offsetZ);
+		return 0;
 	}
 	public boolean intersects(double x1, double y1, double z1, double x2, double y2, double z2) {
 		boolean doesIntersect = true;

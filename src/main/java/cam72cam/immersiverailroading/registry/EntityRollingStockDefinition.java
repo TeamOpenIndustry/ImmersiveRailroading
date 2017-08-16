@@ -121,4 +121,8 @@ public abstract class EntityRollingStockDefinition {
 	public int getWeight() {
 		return this.weight;
 	}
+
+	public double getHeight() {
+		return this.heightBounds;
+	}
 }
