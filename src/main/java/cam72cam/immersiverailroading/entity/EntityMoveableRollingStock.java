@@ -155,11 +155,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		// Riding on top of cars
 		AxisAlignedBB bb = this.getCollisionBoundingBox();
-		bb = bb.offset(0, bb.maxY - bb.minY, 0);
-		bb = bb.setMaxY(bb.minY + 1);
+		bb = bb.offset(0, this.getDefinition().getHeight()+1, 0);
 		List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
 		for (Entity entity : entitiesAbove) {
 			if (entity instanceof EntityMoveableRollingStock) {
+				continue;
+			}
+			if (this.isPassenger(entity)) {
 				continue;
 			}
 			Vec3d pos = entity.getPositionVector();
