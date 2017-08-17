@@ -11,9 +11,11 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.track.TrackBase;
+import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -27,6 +29,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
@@ -68,6 +71,10 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 		
 		// Finish Drawing
 		draw(getBaseBuffer(te));
+		BufferBuilder snow = getSnowBuffer(te);
+		if (snow != null) {
+			draw(snow);
+		}
 		
 		RenderHelper.enableStandardItemLighting();
 
@@ -228,5 +235,71 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 		}
 		
 		return buffers.get(renderID(te));
+	}
+
+	private static Map<String, BufferBuilder> snowBuffers = new HashMap<String, BufferBuilder>();
+	
+	private static String snowRenderID(TileRail te) {
+		return String.format("%s", te.getPos());
+	}
+	
+	private static BufferBuilder getSnowBuffer(TileRail te) {
+		if (te.snowRenderFlagDirty) {
+			if (snowBuffers.containsKey(snowRenderID(te))) {
+				snowBuffers.remove(snowRenderID(te));
+			}
+		}
+		
+		if (!snowBuffers.containsKey(snowRenderID(te))) {
+			final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+			BlockPos blockPos = te.getPos();
+			
+			IBlockState snowState = Blocks.SNOW_LAYER.getDefaultState();
+			
+			// Create render targets
+			BufferBuilder worldRenderer = new BufferBuilder(2048);
+	
+			// Reverse position which will be done render model
+			worldRenderer.setTranslation(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ());
+	
+			// Start drawing
+			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+	
+			// From IE
+			worldRenderer.color(255, 255, 255, 255);
+			
+			boolean hasSnow = false;
+			
+			// This is evil but really fast :D
+			BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
+			for (TrackBase base : builder.getTracks()) {
+				TileEntity snowTe = te.getWorld().getTileEntity(blockPos.add(base.getPos()));
+				if (snowTe == null) {
+					continue;
+				}
+				if (!(snowTe instanceof TileRailBase)) {
+					continue;
+				}
+				int snowLevel = ((TileRailBase)snowTe).getSnowLayers();
+				if (snowLevel == 0) {
+					continue;
+				}
+				snowState = snowState.withProperty(BlockSnow.LAYERS, snowLevel);
+				IBakedModel snowModel = blockRenderer.getBlockModelShapes().getModelForState(snowState);
+				blockRenderer.getBlockModelRenderer().renderModel(te.getWorld(), new TranslatedModel(snowModel, base.getHeight()), snowState, blockPos.add(base.getPos()), worldRenderer, false);
+				hasSnow = true;
+			}
+			
+			worldRenderer.finishDrawing();
+			
+			if (!hasSnow) {
+				snowBuffers.put(snowRenderID(te), null);
+			} else {
+				snowBuffers.put(snowRenderID(te), worldRenderer);
+			}
+			te.snowRenderFlagDirty = false;
+		}
+		
+		return snowBuffers.get(snowRenderID(te));
 	}
 }
