@@ -6,6 +6,7 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -33,6 +34,11 @@ public abstract class BlockRailBase extends Block {
 			world.destroyBlock(parent, true);
 		}
 	}
+	
+	@Override
+	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+		this.onNeighborChange(worldIn, pos, fromPos);
+	}
 
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
@@ -42,6 +48,12 @@ public abstract class BlockRailBase extends Block {
 		if (isOriginAir || !isOnRealBlock) {
 			//stupid IBlockAccess
 			tileEntity.getWorld().destroyBlock(pos, true);
+		}
+		
+		IBlockState up = world.getBlockState(pos.up());
+		if (up.getBlock() == Blocks.SNOW_LAYER) {
+			tileEntity.getWorld().setBlockToAir(pos.up());
+			tileEntity.handleSnowTick();
 		}
 	}
 
@@ -60,7 +72,7 @@ public abstract class BlockRailBase extends Block {
 		TileRailBase tileEntity = (TileRailBase) source.getTileEntity(pos);
 		float height = 0.125F;
 		if (tileEntity != null) {
-			height = tileEntity.getHeight();
+			height = tileEntity.getFullHeight();
 		}
 		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height+0.1, 1.0F);
 	}

@@ -25,6 +25,9 @@ public class Config {
 	@Comment({"km/h to damage 1 heart on collision"})
 	public static double entitySpeedDamage = 10;
 	
+	@Comment({"Deep Snow on tracks"})
+	public static boolean deepSnow = false;
+	
 	@Comment({"Self explanitory"})
 	public static boolean trainsOnTheBrain = true;
 }

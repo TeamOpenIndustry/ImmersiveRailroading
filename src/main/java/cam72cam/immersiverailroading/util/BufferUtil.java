@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 
 public class BufferUtil {
 
@@ -85,5 +86,15 @@ public class BufferUtil {
 		}
 
 		return passengerPositions;
+	}
+
+	public static void writeVec3i(ByteBuf buf, Vec3i pos) {
+		buf.writeInt(pos.getX());
+		buf.writeInt(pos.getY());
+		buf.writeInt(pos.getZ());
+	}
+	
+	public static Vec3i readVec3i(ByteBuf buf) {
+		return new Vec3i(buf.readInt(), buf.readInt(), buf.readInt());
 	}
 }

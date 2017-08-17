@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.TrackType;
-import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
