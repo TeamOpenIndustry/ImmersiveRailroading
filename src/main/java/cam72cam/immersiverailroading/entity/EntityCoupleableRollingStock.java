@@ -157,7 +157,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	// This breaks with looped rolling stock
-	// TODO prevent looped trains
 	private void recursiveMove(EntityCoupleableRollingStock prev) {
 		for (CouplerType coupler : CouplerType.values()) {
 			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
@@ -182,18 +181,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 
 			double distance = myOffset.distanceTo(otherOffset);
-			
-			//distance = Math.max(0, distance-0.1);
-
-			// TEMP
-			if (distance > 1) {
-				// ImmersiveRailroading.logger.warn(String.format("%s too far
-				// from %s", this.getPersistentID(),
-				// coupled.getPersistentID()));
-				// ImmersiveRailroading.logger.warn(String.format("%s --> %s",
-				// myOffset, otherOffset));
-				// return;
-			}
 
 			// Figure out which direction to move the next stock
 			Vec3d nextPosForward = otherOffset.add(VecUtil.fromYaw(distance, coupled.rotationYaw));
@@ -357,6 +344,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				}
 			}
 		}
+		
+		for (EntityCoupleableRollingStock stock : this.getTrain()) {
+			// Prevent infinite loops
+			inRange.remove(stock);
+		}
+		
 		return inRange;
 	}
 
