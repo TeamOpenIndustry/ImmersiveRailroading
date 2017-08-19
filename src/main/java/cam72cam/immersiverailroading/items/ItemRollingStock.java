@@ -78,6 +78,7 @@ public class ItemRollingStock extends Item {
 					// snap to track
 					((EntityMoveableRollingStock)stock).moveRollingStock(stock.getDefinition().getCouplerPosition(CouplerType.BACK) - Config.couplerRange);
 					((EntityMoveableRollingStock)stock).zeroSpeed();
+					((EntityMoveableRollingStock)stock).syncMRS();
 				}
 			}
 			return EnumActionResult.PASS;
