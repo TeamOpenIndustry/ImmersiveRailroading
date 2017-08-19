@@ -116,6 +116,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		// We need our own custom sync packets, see MRSSyncPacket
 	}
 	
+	public void syncMRS() {
+		this.sendToObserving(new MRSSyncPacket(this));
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -123,7 +127,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		// Need to do this here instead of in moveRollingStock
 		// calling this too often can get packets mixed up (eg recursive case)
 		if (!this.world.isRemote && this.ticksExisted % 20 == 0) {
-			this.sendToObserving(new MRSSyncPacket(this));
+			this.syncMRS();
 		}
 
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
