@@ -14,7 +14,7 @@ public class Config {
 	public static String[] tenders = new String[] { "a1_peppercorn_tender" };
 	
 	@Comment({"A list of passenger cars to load"})
-	public static String[] passenger_cars = new String[] { };
+	public static String[] passenger_cars = new String[] { "br_coach_mk1" };
 	
 	@Comment({"A list of freight cars to load"})
 	public static String[] freight_cars = new String[] { "boxcar_us", "flatcar_us" };
