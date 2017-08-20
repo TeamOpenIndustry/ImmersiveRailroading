@@ -405,7 +405,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// Calculate the angle (rad) for the current position is
 			double posRelYaw = Math.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
-			double radius = rail.getRadius() + 1; // TODO bake this into
+			double radius = rail.getRadius() + 0.5; // TODO bake this into
 													// BuilderTurn
 			// Calculate the angle delta in rad (radians are awesome)
 			double yawDelt = distance / radius;
@@ -449,23 +449,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				}
 			}
 			
-			// Look on either side of the rail for a sibling rail
-			Vec3d side1Pos = directRail.getCenterOfRail().add(delta.normalize().rotateYaw(90));
-			Vec3d side2Pos = directRail.getCenterOfRail().add(delta.normalize().rotateYaw(-90));
-			TileRailBase side1Rail = directRailFromPosition(side1Pos);
-			TileRailBase side2Rail = directRailFromPosition(side2Pos);
-			Vec3d betweenLoc;
-			if (side1Rail != null && side1Rail.getParent().equals(directRail.getParent())) {
-				betweenLoc = between(side1Rail.getCenterOfRail(), directRail.getCenterOfRail());
-			} else if (side2Rail != null && side2Rail.getParent().equals(directRail.getParent())) {
-				betweenLoc = between(side2Rail.getCenterOfRail(), directRail.getCenterOfRail());
-			} else {
-				return position.add(delta);
-			}
 			if (Math.abs(delta.x) > Math.abs(delta.z)) {
-				return new Vec3d(position.x + delta.x, position.y, betweenLoc.z);
+				return new Vec3d(position.x + delta.x, position.y, rail.getCenterOfRail().z);
 			} else {
-				return new Vec3d(betweenLoc.x, position.y, position.z + delta.z);
+				return new Vec3d(rail.getCenterOfRail().x, position.y, position.z + delta.z);
 			}
 		}
 	}

@@ -31,11 +31,13 @@ public class BuilderStraight extends BuilderBase {
 	}
 	
 	private void addTracks(TrackType type, int length) {
-		tracks.add(new TrackRail(this, 0, 0, tracks.size()/2, EnumFacing.NORTH, type));
-		tracks.add(new TrackGag(this, 1, 0, tracks.size()/2));
+		tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));
+		tracks.add(new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, type));
+		tracks.add(new TrackGag(this, 1, 0, tracks.size()/3));
 		for(int i = 1; i < length; i ++) {
-			tracks.add(new TrackGag(this, 0, 0, tracks.size()/2));
-			tracks.add(new TrackGag(this, 1, 0, tracks.size()/2));
+			tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));
+			tracks.add(new TrackGag(this, 0, 0, tracks.size()/3));
+			tracks.add(new TrackGag(this, 1, 0, tracks.size()/3));
 		}
 	}
 
@@ -43,10 +45,10 @@ public class BuilderStraight extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		data.add(new VecYawPitch(0, 0, 0, 0, 0, length, "RAIL_RIGHT", "RAIL_LEFT"));
+		data.add(new VecYawPitch(-0.5, 0, 0, 0, 0, length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		for (int i = 0; i < length; i++) {
-			data.add(new VecYawPitch(0, 0, i, 0, "RAIL_BASE"));
+			data.add(new VecYawPitch(-0.5, 0, i, 0, "RAIL_BASE"));
 		}
 		return data;
 	}
