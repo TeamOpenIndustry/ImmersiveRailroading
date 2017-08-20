@@ -26,19 +26,23 @@ public class BuilderSlope extends BuilderBase {
 		}
 		
 		float slope = (1.0F/(length + 1));
-		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/2, EnumFacing.NORTH, type);
+		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, type);
 		rootTrack.setSlope(1, length);
+		tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));
 		tracks.add(rootTrack);
-		tracks.add(new TrackGag(this, 1, 0, tracks.size()/2));
+		tracks.add(new TrackGag(this, 1, 0, tracks.size()/3));
 		for(int i = 1; i <= length; i ++) {
-			TrackGag gag = new TrackGag(this, 0, 0, tracks.size()/2);
-			TrackGag gag2 = new TrackGag(this, 1, 0, tracks.size()/2);
+			TrackGag gag = new TrackGag(this, -1, 0, tracks.size()/3);
+			TrackGag gag2 = new TrackGag(this, 0, 0, tracks.size()/3);
+			TrackGag gag3 = new TrackGag(this, 1, 0, tracks.size()/3);
 			
 			gag.setHeight(slope * i);
 			gag2.setHeight(slope * i);
+			gag3.setHeight(slope * i);
 			
 			tracks.add(gag);
 			tracks.add(gag2);
+			tracks.add(gag3);
 		}
 	}
 
@@ -48,10 +52,10 @@ public class BuilderSlope extends BuilderBase {
 		
 		float slope = (1.0F/(length + 1));
 
-		data.add(new VecYawPitch(0, 0, 0, 0, (float) -Math.toDegrees(Math.atan2(1, length)), length+1, "RAIL_RIGHT", "RAIL_LEFT"));
+		data.add(new VecYawPitch(-0.5, 0, 0, 0, (float) -Math.toDegrees(Math.atan2(1, length)), length+1, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		for (int i = 0; i <= length; i++) {
-			data.add(new VecYawPitch(0, slope * i, i, 0, (float) -Math.toDegrees(Math.atan2(1, length)), "RAIL_BASE"));
+			data.add(new VecYawPitch(-0.5, slope * i, i, 0, (float) -Math.toDegrees(Math.atan2(1, length)), "RAIL_BASE"));
 		}
 		return data;
 	}

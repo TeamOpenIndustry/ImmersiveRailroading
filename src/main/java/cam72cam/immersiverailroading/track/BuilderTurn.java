@@ -9,7 +9,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class BuilderTurn extends BuilderBase {
@@ -23,10 +22,10 @@ public class BuilderTurn extends BuilderBase {
 		int radius = 0;
 		switch(type.getType()) {
 		case TURN_MEDIUM:
-			radius = 9;
+			radius = 20;
 			break;
 		case TURN_LARGE:
-			radius = 19;
+			radius = 40;
 			break;
 		default:
 			return;
@@ -37,19 +36,30 @@ public class BuilderTurn extends BuilderBase {
 
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
+		double hack = -1;
+		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
-		for (int angle = 0; angle < 90; angle++) {
-			int gagX = MathHelper.floor(Math.sin(Math.toRadians(angle)) * radius);
-			int gagZ = MathHelper.floor(Math.cos(Math.toRadians(angle)) * radius);
-
-			if (angle > 10 && angle < 80) {
-				positions.add(Pair.of(gagX, gagZ));
-				positions.add(Pair.of(gagX+1, gagZ-1));
-			}
-
+		for (float angle = 0; angle < 90; angle+=angleDelta) {
+			int gagX;
+			int gagZ;
+			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack-0.51));
+			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack-0.51));
 			positions.add(Pair.of(gagX+1, gagZ));
-			positions.add(Pair.of(gagX+1, gagZ+1));
-			positions.add(Pair.of(gagX+2, gagZ));
+			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack));
+			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack));
+			positions.add(Pair.of(gagX+1, gagZ));
+			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+0.5));
+			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+0.5));
+			positions.add(Pair.of(gagX+1, gagZ));
+			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1));
+			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1));
+			positions.add(Pair.of(gagX+1, gagZ));
+			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.5));
+			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.5));
+			positions.add(Pair.of(gagX+1, gagZ));
+			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.99));
+			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.99));
+			positions.add(Pair.of(gagX+1, gagZ));
 		}
 
 		int xMult = type.getDirection() == TrackDirection.LEFT ? -1 : 1;
@@ -67,10 +77,10 @@ public class BuilderTurn extends BuilderBase {
 				// Skip parent block
 				continue;
 			}
-			if (gagX > radius || gagZ > radius) {
+			/*if (gagX > radius || gagZ > radius) {
 				// Skip out of bounds
 				continue;
-			}
+			}*/
 			tracks.add(new TrackGag(this, gagX, 0, gagZ));
 		}
 	}
@@ -79,22 +89,22 @@ public class BuilderTurn extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		float angleDelta = (float) (90 / (Math.PI * (radius+1)/2));
+		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
 		if (direction == TrackDirection.RIGHT) {
 			
-			for (float angle = 0; angle < 90; angle+=angleDelta) {
-				double gagX = Math.sin(Math.toRadians(angle)) * (radius+1);
-				double gagZ = Math.cos(Math.toRadians(angle)) * (radius+1);
+			for (float angle = -angleDelta/2; angle < 90+angleDelta/2; angle+=angleDelta) {
+				double gagX = Math.sin(Math.toRadians(angle)) * (radius);
+				double gagZ = Math.cos(Math.toRadians(angle)) * (radius);
 				
-				data.add(new VecYawPitch(gagX - radius+1, 0, gagZ, angle+90 + angleDelta/2));
+				data.add(new VecYawPitch(gagX - radius+1+0.5, 0, gagZ+0.5, Math.min(180, angle+90 + angleDelta/2)));
 			}
 		} else {
 			for (float angle = 0; angle < 90; angle+=angleDelta) {
 				double gagX = Math.sin(Math.toRadians(angle)) * (radius-1);
 				double gagZ = Math.cos(Math.toRadians(angle)) * (radius-1);
 				
-				data.add(new VecYawPitch(gagX * -1 - -1 * radius, 0, gagZ, 180-angle + 90 - angleDelta/2));
+				data.add(new VecYawPitch(gagX * -1 - -1 * radius+0.5, 0, gagZ-0.5, 180-angle + 90 - angleDelta/2));
 			}
 		}
 		
