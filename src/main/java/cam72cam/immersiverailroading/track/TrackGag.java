@@ -14,8 +14,6 @@ public class TrackGag extends TrackBase {
 	public TileEntity placeTrack() {
 		TileRailGag tileGag = (TileRailGag) super.placeTrack();
 		
-		tileGag.setParent(builder.getPos());
-		tileGag.setHeight(getHeight());
 		tileGag.setFlexible(isFlexible());
 		
 		return tileGag;

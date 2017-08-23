@@ -39,11 +39,10 @@ public class TrackRail extends TrackBase {
 	public TileEntity placeTrack() {
 		TileRail tileRail = (TileRail) super.placeTrack();
 		
-		tileRail.setFacing(super.getFacing()); //REMOVEME?
-		tileRail.setParent(builder.getPos());
+		tileRail.setFacing(super.getFacing());
 		tileRail.setCenter(center, radius);
 		tileRail.setVisible(hasModel); //REMOVEME?
-		tileRail.setType(type); //REMOVEME?
+		tileRail.setType(type);
 		tileRail.setSlope(slopeHeight, slopeLength);
 		
 		return tileRail;

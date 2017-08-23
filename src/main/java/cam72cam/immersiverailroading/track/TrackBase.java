@@ -8,6 +8,7 @@ import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockMushroom;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -64,13 +65,24 @@ public abstract class TrackBase {
 	public TileEntity placeTrack() {
 		PosRot pos = builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
 		
+		NBTTagCompound replaced = null;
+		
 		IBlockState state = builder.world.getBlockState(pos);
 		Block removed = state.getBlock();
 		if (removed != null) {
-			removed.dropBlockAsItem(builder.world, pos, state, 0);
+			if (removed instanceof BlockRailBase) {
+				TileRailBase te = (TileRailBase) builder.world.getTileEntity(pos);
+				replaced = te.serializeNBT();
+			} else {				
+				removed.dropBlockAsItem(builder.world, pos, state, 0);
+			}
 		}
 		builder.world.setBlockState(pos, getBlockState(), 3);
-		return builder.world.getTileEntity(pos);
+		TileRailBase tr = (TileRailBase)builder.world.getTileEntity(pos);
+		tr.setReplaced(replaced);
+		tr.setParent(builder.getPos());
+		tr.setHeight(getHeight());
+		return tr;
 	}
 	public IBlockState getBlockState() {
 		return block.getDefaultState();

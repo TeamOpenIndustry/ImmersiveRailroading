@@ -3,12 +3,14 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.SnowRenderUpdatePacket;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
 public class TileRailBase extends TileEntity {
 	private BlockPos parent;
@@ -16,6 +18,8 @@ public class TileRailBase extends TileEntity {
 	private int snowLayers = 0;
 	public boolean snowRenderFlagDirty = true;
 	protected boolean flexible = false;
+	private NBTTagCompound replaced;
+	private boolean skipNextRefresh = false;
 
 	public void setHeight(float height) {
 		this.height = height;
@@ -62,7 +66,10 @@ public class TileRailBase extends TileEntity {
 		parent = getNBTBlockPos(nbt, "parent");
 		height = nbt.getFloat("height");
 		snowLayers = nbt.getInteger("snowLayers");
-		flexible = nbt.getBoolean("flexible"); 
+		flexible = nbt.getBoolean("flexible");
+		if (nbt.hasKey("replaced")) {
+			replaced = nbt.getCompoundTag("replaced");
+		}
 		super.readFromNBT(nbt);
 	}
 	@Override
@@ -71,6 +78,9 @@ public class TileRailBase extends TileEntity {
 		nbt.setFloat("height", height);
 		nbt.setInteger("snowLayers", snowLayers);
 		nbt.setBoolean("flexible", flexible);
+		if (replaced != null) {
+			nbt.setTag("replaced", replaced);
+		}
 		return super.writeToNBT(nbt);
 	}
 
@@ -124,5 +134,26 @@ public class TileRailBase extends TileEntity {
 			return (TileRail)te ;
 		}
 		return null;
+	}
+	public void setReplaced(NBTTagCompound replaced) {
+		this.replaced = replaced;
+		this.markDirty();
+	}
+	public NBTTagCompound getReplaced() {
+		return replaced;
+	}
+	
+	public void setSkipNextRefresh() {
+		this.skipNextRefresh = true;
+	}
+	
+	@Override
+	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+		// This works around a hack where Chunk does a removeTileEntity directly after calling breakBlock
+		// We have already removed the original TE and are replacing it with one which goes with a new block 
+		if (this.skipNextRefresh ) {
+			return false;
+		}
+		return super.shouldRefresh(world, pos, oldState, newState);
 	}
 }

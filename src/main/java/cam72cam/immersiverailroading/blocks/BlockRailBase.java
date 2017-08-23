@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.blocks;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -30,6 +31,16 @@ public abstract class BlockRailBase extends Block {
 		TileRailBase te = (TileRailBase) world.getTileEntity(pos);
 		BlockPos parent = te.getParent();
 		super.breakBlock(world, pos, state);
+		
+		if (te.getReplaced() != null) {
+			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_GAG.getDefaultState());
+			TileRailBase newte = (TileRailBase) world.getTileEntity(pos);
+			newte.readFromNBT(te.getReplaced());
+			newte.markDirty();
+			// This works around a hack where Chunk does a removeTileEntity directly after calling breakBlock
+			// We have already removed the TE above and are replacing it with one which goes with a new block
+			newte.setSkipNextRefresh();
+		}
 
 		if (parent != null && !te.isFlexible()) {
 			world.destroyBlock(parent, true);
@@ -44,7 +55,7 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
 		TileRailBase tileEntity = (TileRailBase) world.getTileEntity(pos);
-		boolean isOriginAir = tileEntity.getParent() != null && world.isAirBlock(tileEntity.getParent());
+		boolean isOriginAir = tileEntity.getParent() == null || world.isAirBlock(tileEntity.getParent());
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
 		if (isOriginAir || !isOnRealBlock) {
 			//stupid IBlockAccess
