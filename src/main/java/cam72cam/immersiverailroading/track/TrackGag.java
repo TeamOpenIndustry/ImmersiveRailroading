@@ -16,6 +16,7 @@ public class TrackGag extends TrackBase {
 		
 		tileGag.setParent(builder.getPos());
 		tileGag.setHeight(getHeight());
+		tileGag.setFlexible(isFlexible());
 		
 		return tileGag;
 	}
