@@ -34,44 +34,65 @@ public class BuilderTurn extends BuilderBase {
 		this.radius = radius;
 		this.direction = type.getDirection();
 
+		int xMult = type.getDirection() == TrackDirection.LEFT ? -1 : 1;
+		int zMult = 1;
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
 		double hack = -1;
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
-		for (float angle = 0; angle < 90; angle+=angleDelta) {
+		float fourth = 0;
+		float fourths = 4;
+		
+		float startAngle = 90 - fourth/4 * 90;
+		float endAngle = startAngle - fourths/4 * 90;
+		
+		if (type.getDirection() == TrackDirection.LEFT) {
+			startAngle = 180 + 90 + fourth/4 * 90;
+			endAngle = startAngle + fourths/4 * 90;
+		}
+
+		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
+		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
+		
+		if (type.getDirection() == TrackDirection.LEFT) {
+			float tmp = startAngle;
+			startAngle = endAngle;
+			endAngle = tmp;
+		}
+		
+		for (float angle = startAngle; angle > endAngle; angle-=angleDelta) {
 			int gagX;
 			int gagZ;
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack-0.51));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack-0.51));
-			positions.add(Pair.of(gagX+1, gagZ));
+			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack));
-			positions.add(Pair.of(gagX+1, gagZ));
+			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+0.5));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+0.5));
-			positions.add(Pair.of(gagX+1, gagZ));
+			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1));
-			positions.add(Pair.of(gagX+1, gagZ));
+			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.5));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.5));
-			positions.add(Pair.of(gagX+1, gagZ));
+			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.99));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.99));
-			positions.add(Pair.of(gagX+1, gagZ));
+			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 		}
 
-		int xMult = type.getDirection() == TrackDirection.LEFT ? -1 : 1;
-		int zMult = 1;
 		
 		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, type);
 		
 		turnTrack.setRotationCenter(-xMult * radius, 0, 0, radius - 1f);
 		
+		xMult = 1;
 		tracks.add(turnTrack);
 		for (Pair<Integer, Integer> pair : positions) {
-			int gagX = pair.getLeft() * xMult - xMult * radius; 
+			int gagX = pair.getLeft() * xMult; 
 			int gagZ = pair.getRight() * zMult;
 			if (gagX == 0 && gagZ == 0) {
 				// Skip parent block
