@@ -27,10 +27,11 @@ public abstract class BlockRailBase extends Block {
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		BlockPos parent = ((TileRailBase) world.getTileEntity(pos)).getParent();
+		TileRailBase te = (TileRailBase) world.getTileEntity(pos);
+		BlockPos parent = te.getParent();
 		super.breakBlock(world, pos, state);
 
-		if (parent != null) {
+		if (parent != null && !te.isFlexible()) {
 			world.destroyBlock(parent, true);
 		}
 	}

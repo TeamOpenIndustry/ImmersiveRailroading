@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase.PosRot;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFlower;
@@ -21,6 +23,8 @@ public abstract class TrackBase {
 
 	protected Block block;
 
+	private boolean flexible = false;
+
 	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block, EnumFacing rel_rotation) {
 		this.builder = builder;
 		this.rel_x = rel_x;
@@ -34,7 +38,20 @@ public abstract class TrackBase {
 		PosRot pos = builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
 		Block block = builder.world.getBlockState(pos).getBlock();
 		
-		return block == null || block.isReplaceable(builder.world, pos) || block instanceof BlockFlower || block == Blocks.DOUBLE_PLANT || block instanceof BlockMushroom;
+		if (block == null) {
+			return true;
+		}
+		if (block.isReplaceable(builder.world, pos)) {
+			return true;
+		}
+		if (block instanceof BlockFlower || block == Blocks.DOUBLE_PLANT || block instanceof BlockMushroom) {
+			return true;
+		}
+		if (block instanceof BlockRailBase) {
+			TileRailBase te = (TileRailBase) builder.world.getTileEntity(pos);
+			return te.isFlexible();
+		}
+		return false;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -79,5 +96,13 @@ public abstract class TrackBase {
 	}
 	public float getHeight() {
 		return height;
+	}
+
+	public void setFlexible() {
+		this.flexible  = true;
+	}
+
+	public boolean isFlexible() {
+		return this.flexible;
 	}
 }

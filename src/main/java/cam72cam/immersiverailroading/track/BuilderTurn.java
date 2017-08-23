@@ -38,11 +38,12 @@ public class BuilderTurn extends BuilderBase {
 		int zMult = 1;
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
+		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		double hack = -1;
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
 		float fourth = 0;
-		float fourths = 4;
+		float fourths = 2;
 		
 		float startAngle = 90 - fourth/4 * 90;
 		float endAngle = startAngle - fourths/4 * 90;
@@ -54,6 +55,7 @@ public class BuilderTurn extends BuilderBase {
 
 		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
 		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
+		float flexAngle = endAngle;
 		
 		if (type.getDirection() == TrackDirection.LEFT) {
 			float tmp = startAngle;
@@ -64,25 +66,40 @@ public class BuilderTurn extends BuilderBase {
 		for (float angle = startAngle; angle > endAngle; angle-=angleDelta) {
 			int gagX;
 			int gagZ;
+			boolean isFlex = flexAngle + angleDelta > angle && flexAngle - angleDelta < angle;
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack-0.51));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack-0.51));
 			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			if (isFlex)
+				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack));
 			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			if (isFlex)
+				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+0.5));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+0.5));
 			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			if (isFlex)
+				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1));
 			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			if (isFlex)
+				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.5));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.5));
 			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			if (isFlex)
+				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.99));
 			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.99));
 			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			if (isFlex)
+				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 		}
+		
+		System.out.println(flexPositions.size());
 
 		
 		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, type);
@@ -102,7 +119,11 @@ public class BuilderTurn extends BuilderBase {
 				// Skip out of bounds
 				continue;
 			}*/
-			tracks.add(new TrackGag(this, gagX, 0, gagZ));
+			TrackBase tg = new TrackGag(this, gagX, 0, gagZ);
+			if (flexPositions.contains(pair)) {
+				tg.setFlexible();
+			}
+			tracks.add(tg);
 		}
 	}
 
@@ -114,14 +135,14 @@ public class BuilderTurn extends BuilderBase {
 		
 		if (direction == TrackDirection.RIGHT) {
 			
-			for (float angle = -angleDelta/2; angle < 90+angleDelta/2; angle+=angleDelta) {
+			for (float angle = 45+-angleDelta/2; angle < 90+angleDelta/2; angle+=angleDelta) {
 				double gagX = Math.sin(Math.toRadians(angle)) * (radius);
 				double gagZ = Math.cos(Math.toRadians(angle)) * (radius);
 				
 				data.add(new VecYawPitch(gagX - radius+1+0.5, 0, gagZ+0.5, Math.min(180, angle+90 + angleDelta/2)));
 			}
 		} else {
-			for (float angle = 0; angle < 90; angle+=angleDelta) {
+			for (float angle = 45; angle < 90; angle+=angleDelta) {
 				double gagX = Math.sin(Math.toRadians(angle)) * (radius-1);
 				double gagZ = Math.cos(Math.toRadians(angle)) * (radius-1);
 				

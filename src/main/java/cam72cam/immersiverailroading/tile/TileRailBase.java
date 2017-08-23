@@ -15,6 +15,7 @@ public class TileRailBase extends TileEntity {
 	private float height = 0;
 	private int snowLayers = 0;
 	public boolean snowRenderFlagDirty = true;
+	protected boolean flexible = false;
 
 	public void setHeight(float height) {
 		this.height = height;
@@ -52,11 +53,16 @@ public class TileRailBase extends TileEntity {
 		this.markDirty();
 	}
 	
+	public boolean isFlexible() {
+		return this.flexible;
+	}
+	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		parent = getNBTBlockPos(nbt, "parent");
 		height = nbt.getFloat("height");
 		snowLayers = nbt.getInteger("snowLayers");
+		flexible = nbt.getBoolean("flexible"); 
 		super.readFromNBT(nbt);
 	}
 	@Override
@@ -64,6 +70,7 @@ public class TileRailBase extends TileEntity {
 		setNBTBlockPos(nbt, "parent", parent);
 		nbt.setFloat("height", height);
 		nbt.setInteger("snowLayers", snowLayers);
+		nbt.setBoolean("flexible", flexible);
 		return super.writeToNBT(nbt);
 	}
 
