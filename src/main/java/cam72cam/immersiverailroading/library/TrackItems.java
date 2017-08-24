@@ -1,21 +1,23 @@
 package cam72cam.immersiverailroading.library;
 
-public enum TrackItems {
-	STRAIGHT_SMALL,
-	STRAIGHT_MEDIUM,
-	STRAIGHT_LARGE,
+import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderCrossing;
+import cam72cam.immersiverailroading.track.BuilderSlope;
+import cam72cam.immersiverailroading.track.BuilderStraight;
+import cam72cam.immersiverailroading.track.BuilderTurn;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
+public enum TrackItems implements IStringSerializable {
+	STRAIGHT,
 	CROSSING,
-	SLOPE_MEDIUM,
-	SLOPE_LARGE,
-	TURN_MEDIUM,
-	TURN_LARGE,
-	SWITCH_MEDIUM,
-	SWITCH_LARGE,
-	PARALEL_SWITCH_MEDIUM,
-	TURN_MEDIUM_45,
-	TURN_LARGE_45,
-	SWITCH_MEDIUM_45,
-	SWITCH_LARGE_45,
+	SLOPE,
+	TURN,
+	SWITCH,
+	PARALEL_SWITCH,
 	;
 	
 	public int getMeta() {
@@ -25,8 +27,39 @@ public enum TrackItems {
 	public static TrackItems fromMeta(int meta) {
 		return TrackItems.values()[meta];
 	}
+	@Override
+	public String getName() {
+		return this.name().toLowerCase(); 
+	}
+	
+	@Override
+	public String toString() {
+	    return getName();
+	}
 
 	public boolean isTurn() {
-		return this == TURN_MEDIUM || this == TURN_LARGE;
+		return this == TURN;
+	}
+	
+	public BuilderBase getBuilder(World world, BlockPos pos, EnumFacing facing, int length, int quarter, int quarters, TrackDirection direction) {
+		switch (this) {
+		case STRAIGHT:
+			return new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter);
+		case CROSSING:
+			return new BuilderCrossing(world, pos.getX(), pos.getY(), pos.getZ(), facing, quarter);
+		case SLOPE:
+			return new BuilderSlope(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter);
+		case TURN:
+			return new BuilderTurn(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter, quarters, direction);
+		default:
+			return null;
+		}
+	}
+	public BuilderBase getBuilder(TileRail te) {
+		return getBuilder(te, te.getPos());
+	}
+
+	public BuilderBase getBuilder(TileRail te, BlockPos blockPos) {
+		return te.getType().getBuilder(te.getWorld(), blockPos, te.getFacing().getOpposite(), te.getLength(), te.getRotationQuarter(), te.getTurnQuarters(), te.getDirection());
 	}
 }

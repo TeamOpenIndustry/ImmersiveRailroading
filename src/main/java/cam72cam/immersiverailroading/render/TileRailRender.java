@@ -103,7 +103,7 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 			default:
 				break;
 			}
-			BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
+			BuilderBase builder = te.getType().getBuilder(te, new BlockPos(0,0,0));
 			for (VecYawPitch piece : builder.getRenderData()) {
 				GlStateManager.pushMatrix();
 				GlStateManager.rotate(180-te.getFacing().getHorizontalAngle(), 0, 1, 0);
@@ -180,7 +180,7 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 	private static Map<String, BufferBuilder> buffers = new HashMap<String, BufferBuilder>();
 	private static String renderID(TileRail te) {
 		//TODO more attributes like railbed
-		return String.format("%s%s", te.getFacing(), te.getType());
+		return String.format("%s%s%s%s", te.getFacing(), te.getType(), te.getDirection(), te.getLength(), te.getTurnQuarters());
 	}
 	
 	/*
@@ -220,7 +220,7 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 			//blockRenderer.getBlockModelRenderer().renderModel(te.getWorld(), model, state, blockPos, worldRenderer, false);
 			
 			// This is evil but really fast :D
-			BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
+			BuilderBase builder = te.getType().getBuilder(te, new BlockPos(0,0,0));
 			for (TrackBase base : builder.getTracks()) {
 				blockRenderer.getBlockModelRenderer().renderModel(te.getWorld(), new ScaledModel(gravelModel, base.getHeight()), gravelState, blockPos.add(base.getPos()), worldRenderer, false);
 			}
@@ -271,7 +271,7 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 			boolean hasSnow = false;
 			
 			// This is evil but really fast :D
-			BuilderBase builder = te.getType().getBuilder(te.getWorld(), new BlockPos(0,0,0), te.getFacing().getOpposite());
+			BuilderBase builder = te.getType().getBuilder(te, new BlockPos(0,0,0));
 			for (TrackBase base : builder.getTracks()) {
 				TileEntity snowTe = te.getWorld().getTileEntity(blockPos.add(base.getPos()));
 				if (snowTe == null) {

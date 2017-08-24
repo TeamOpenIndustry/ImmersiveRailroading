@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.library.TrackItems;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
@@ -11,23 +11,12 @@ public class BuilderSlope extends BuilderBase {
 
 	private int length;
 
-	@SuppressWarnings("incomplete-switch")
-	public BuilderSlope(World world, int x, int y, int z, EnumFacing rotation, TrackType type) {
+	public BuilderSlope(World world, int x, int y, int z, EnumFacing rotation,  int length, int quarter) {
 		super(world, x, y, z, rotation);
-		
-		length = 0;
-		switch(type) {
-		case SLOPE_MEDIUM:
-			length = 23;
-			break;
-		case SLOPE_LARGE:
-			length = 35;
-			break;
-		}
+		this.length = length;
 		
 		float slope = (1.0F/(length + 1));
-		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, type);
-		rootTrack.setSlope(1, length);
+		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, TrackItems.SLOPE, length, quarter);
 		tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));
 		tracks.add(rootTrack);
 		tracks.add(new TrackGag(this, 1, 0, tracks.size()/3));

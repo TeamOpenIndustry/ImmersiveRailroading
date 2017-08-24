@@ -4,35 +4,33 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 
 public class TrackRail extends TrackBase {
 
-	private TrackType type;
+	private TrackItems type;
 	private BlockPos center;
-	private float radius;
 	private boolean hasModel = true;
-	private int slopeHeight = 0;
-	private int slopeLength = 0;
+	private int length;
+	private int quarter;
+	private int turnQuarters;
+	private TrackDirection direction = TrackDirection.NONE;
 
-	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackType type) {
+	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackItems type, int length, int quarter) {
 		super(builder, rel_x, rel_y, rel_z, ImmersiveRailroading.BLOCK_RAIL, rel_rotation);
 		this.type = type;
+		this.quarter = quarter;
+		this.length = length;
 	}
 	
-	public void setRotationCenter(int rel_cx, int rel_cy, int rel_cz, float d) {
+	public void setRotationCenter(int rel_cx, int rel_cy, int rel_cz) {
 		center = builder.convertRelativeCenterPositions(rel_cx, rel_cy, rel_cz, EnumFacing.NORTH);
-		this.radius = d;
 	}
 	
 	public void setHasModel(boolean hasModel) {
 		this.hasModel = hasModel;
-	}
-	
-	public void setSlope(int height, int length) {
-		slopeHeight = height;
-		slopeLength = length;
 	}
 	
 	@Override
@@ -40,11 +38,22 @@ public class TrackRail extends TrackBase {
 		TileRail tileRail = (TileRail) super.placeTrack();
 		
 		tileRail.setFacing(super.getFacing());
-		tileRail.setCenter(center, radius);
+		tileRail.setCenter(center);
 		tileRail.setVisible(hasModel); //REMOVEME?
 		tileRail.setType(type);
-		tileRail.setSlope(slopeHeight, slopeLength);
+		tileRail.setLength(this.length);
+		tileRail.setDirection(direction);
+		tileRail.setRotationQuarter(quarter);
+		tileRail.setTurnQuarters(turnQuarters);
 		
 		return tileRail;
+	}
+
+	public void setDirection(TrackDirection direction) {
+		this.direction = direction;
+	}
+
+	public void setTurnQuarters(int quarters) {
+		this.turnQuarters = quarters;
 	}
 }
