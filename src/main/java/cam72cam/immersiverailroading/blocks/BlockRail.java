@@ -16,6 +16,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 
@@ -33,7 +34,11 @@ public class BlockRail extends BlockRailBase {
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
 		TileRail tileEntity = (TileRail) world.getTileEntity(pos);
 		if (tileEntity != null) {
-			drops.add(new ItemStack(this, 1, tileEntity.getType().getMeta()));
+			ItemStack stack = new ItemStack(this, 1, tileEntity.getType().getMeta());
+			ItemRail.setLength(stack, tileEntity.getLength());
+			drops.add(stack);
+			// todo drop components
+			// todo drop snow?
 		}
 	}
 	

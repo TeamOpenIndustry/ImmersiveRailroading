@@ -2,13 +2,13 @@ package cam72cam.immersiverailroading.track;
 
 import java.util.List;
 
-import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.library.TrackItems;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class BuilderParallel extends BuilderBase {
 
-	public BuilderParallel(World world, int x, int y, int z, EnumFacing rotation, TrackType type, boolean isRight) {
+	public BuilderParallel(World world, int x, int y, int z, EnumFacing rotation, TrackItems type, boolean isRight) {
 		super(world, x, y, z, rotation);
 		/*
 		TrackType subType = isRight ? TrackType.MEDIUM_RIGHT_PARALLEL_SWITCH : TrackType.MEDIUM_LEFT_PARALLEL_SWITCH;

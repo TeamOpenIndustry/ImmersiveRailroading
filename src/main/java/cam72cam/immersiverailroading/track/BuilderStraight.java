@@ -3,14 +3,14 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.library.TrackItems;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class BuilderStraight extends BuilderBase {
 	private int length;
 
-	public BuilderStraight(World world, int x, int y, int z, EnumFacing rotation, int length) {
+	public BuilderStraight(World world, int x, int y, int z, EnumFacing rotation, int length, int quarter) {
 		super(world, x, y, z, rotation);
 		
 		this.length = length;
@@ -20,19 +20,19 @@ public class BuilderStraight extends BuilderBase {
 		int short_tracks = ((length % 16) % 8) / 2;
 		
 		for (;long_tracks > 0; long_tracks --) {
-			addTracks(TrackType.STRAIGHT_LONG, 16);
+			addTracks(16, quarter);
 		}
 		for (;med_tracks > 0; med_tracks --) {
-			addTracks(TrackType.STRAIGHT_MEDIUM, 8);
+			addTracks(8, quarter);
 		}
 		for (;short_tracks > 0; short_tracks --) {
-			addTracks(TrackType.STRAIGHT_SMALL, 2);
+			addTracks(2, quarter);
 		}
 	}
 	
-	private void addTracks(TrackType type, int length) {
+	private void addTracks(int length, int quarter) {
 		tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));
-		tracks.add(new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, type));
+		tracks.add(new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, TrackItems.STRAIGHT, length, quarter));
 		tracks.add(new TrackGag(this, 1, 0, tracks.size()/3));
 		for(int i = 1; i < length; i ++) {
 			tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));

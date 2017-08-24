@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -441,7 +441,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			delta = nextMovement(trainYaw, distance);
 			
 			// Check that we are not moving in the wrong axis along a track
-			if (EnumFacing.fromAngle(trainYaw).getAxis() != rail.getFacing().getAxis() && rail.getType() != TrackType.CROSSING) {
+			if (EnumFacing.fromAngle(trainYaw).getAxis() != rail.getFacing().getAxis() && rail.getType() != TrackItems.CROSSING) {
 				if (!world.isRemote) {
 					System.out.println("Wrong track direction");
 					this.setDead();

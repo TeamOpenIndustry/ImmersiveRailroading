@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackType;
+import cam72cam.immersiverailroading.library.TrackItems;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
@@ -16,25 +16,13 @@ public class BuilderTurn extends BuilderBase {
 	private int radius;
 	private TrackDirection direction;
 
-	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, TrackType type) {
+	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, int radius, int quarter, int quarters, TrackDirection direction) {
 		super(world, x, y, z, rotation);
 		
-		int radius = 0;
-		switch(type.getType()) {
-		case TURN_MEDIUM:
-			radius = 20;
-			break;
-		case TURN_LARGE:
-			radius = 40;
-			break;
-		default:
-			return;
-		}
-		
 		this.radius = radius;
-		this.direction = type.getDirection();
+		this.direction = direction;
 
-		int xMult = type.getDirection() == TrackDirection.LEFT ? -1 : 1;
+		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
@@ -42,22 +30,19 @@ public class BuilderTurn extends BuilderBase {
 		double hack = -1;
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
-		float fourth = 0;
-		float fourths = 2;
+		float startAngle = 90 - quarter/4 * 90;
+		float endAngle = startAngle - quarters/4 * 90;
 		
-		float startAngle = 90 - fourth/4 * 90;
-		float endAngle = startAngle - fourths/4 * 90;
-		
-		if (type.getDirection() == TrackDirection.LEFT) {
-			startAngle = 180 + 90 + fourth/4 * 90;
-			endAngle = startAngle + fourths/4 * 90;
+		if (direction == TrackDirection.LEFT) {
+			startAngle = 180 + 90 + quarter/4 * 90;
+			endAngle = startAngle + quarters/4 * 90;
 		}
 
 		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
 		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
 		float flexAngle = endAngle;
 		
-		if (type.getDirection() == TrackDirection.LEFT) {
+		if (direction == TrackDirection.LEFT) {
 			float tmp = startAngle;
 			startAngle = endAngle;
 			endAngle = tmp;
@@ -98,13 +83,13 @@ public class BuilderTurn extends BuilderBase {
 			if (isFlex)
 				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
 		}
-		
-		System.out.println(flexPositions.size());
 
 		
-		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, type);
+		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.TURN, radius, quarter);
 		
-		turnTrack.setRotationCenter(-xMult * radius, 0, 0, radius - 1f);
+		turnTrack.setRotationCenter(-xMult * radius, 0, 0);
+		turnTrack.setDirection(direction);
+		turnTrack.setTurnQuarters(quarters);
 		
 		xMult = 1;
 		tracks.add(turnTrack);
