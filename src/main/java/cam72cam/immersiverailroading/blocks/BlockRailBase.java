@@ -42,7 +42,7 @@ public abstract class BlockRailBase extends Block {
 			newte.setSkipNextRefresh();
 		}
 
-		if (parent != null && !te.isFlexible()) {
+		if (parent != null && !te.getWillBeReplaced()) {
 			world.destroyBlock(parent, true);
 		}
 	}

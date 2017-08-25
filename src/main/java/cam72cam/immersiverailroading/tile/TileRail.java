@@ -8,6 +8,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.track.BuilderBase;
 
 public class TileRail extends TileRailBase {
 	private EnumFacing facing;
@@ -22,6 +23,7 @@ public class TileRail extends TileRailBase {
 	private int rotationQuarter;
 	private TrackDirection direction = TrackDirection.NONE;
 	private int turnQuarters;
+	private float horizOff;
 
 
 	@Override
@@ -88,6 +90,15 @@ public class TileRail extends TileRailBase {
 	}
 	
 	
+	public float getHorizOff() {
+		return horizOff;
+	}
+	public void setHorizOff(float horizOff) {
+		this.horizOff = horizOff;
+		this.markDirty();
+	}
+	
+	
 	/*
 	 * Either blocks or quarters
 	 */
@@ -129,6 +140,8 @@ public class TileRail extends TileRailBase {
 		isVisible = nbt.getBoolean("isVisible");
 		switchActive = nbt.getBoolean("switchActive");
 		
+		horizOff = nbt.getFloat("horizOff");
+		
 		length = nbt.getInteger("length");
 		rotationQuarter = nbt.getInteger("rotationQuarter");
 		direction = TrackDirection.values()[nbt.getInteger("direction")];
@@ -147,11 +160,21 @@ public class TileRail extends TileRailBase {
 		nbt.setBoolean("isVisible", isVisible);
 		nbt.setBoolean("switchActive", switchActive);
 		
+		nbt.setFloat("horizOff", horizOff);
+		
 		nbt.setInteger("length", length);
 		nbt.setInteger("rotationQuarter", rotationQuarter);
 		nbt.setInteger("direction", direction.ordinal());
 		nbt.setInteger("turnQuarters", turnQuarters);
 		
 		return super.writeToNBT(nbt);
+	}
+
+	private BuilderBase builder;
+	public BuilderBase getBuilder() {
+		if (builder == null) {
+			builder = getType().getBuilder(this, new BlockPos(0,0,0));
+		}
+		return builder;
 	}
 }

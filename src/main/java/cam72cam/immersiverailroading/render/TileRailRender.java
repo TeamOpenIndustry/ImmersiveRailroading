@@ -69,6 +69,10 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 		// Move to specified position
 		GlStateManager.translate(x, y, z);
 		
+		// Move to offset position
+		BuilderBase builder = te.getBuilder();
+		GL11.glTranslated(-builder.getRenderOffset().getX(), 0, -builder.getRenderOffset().getZ());
+		
 		// Finish Drawing
 		draw(getBaseBuffer(te));
 		BufferBuilder snow = getSnowBuffer(te);
@@ -81,7 +85,10 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 		
 		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		
+
+		GlStateManager.rotate(180-te.getFacing().getHorizontalAngle(), 0, 1, 0);
+		GlStateManager.translate(te.getHorizOff()-0.5, 0, 0);
+		GlStateManager.rotate(-(180-te.getFacing().getHorizontalAngle()), 0, 1, 0);
 
 		if (!displayLists.containsKey(renderID(te))) {
 			int displayList = GL11.glGenLists(1);
@@ -102,8 +109,8 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 				break;
 			default:
 				break;
-			}
-			BuilderBase builder = te.getType().getBuilder(te, new BlockPos(0,0,0));
+			}			
+			
 			for (VecYawPitch piece : builder.getRenderData()) {
 				GlStateManager.pushMatrix();
 				GlStateManager.rotate(180-te.getFacing().getHorizontalAngle(), 0, 1, 0);
