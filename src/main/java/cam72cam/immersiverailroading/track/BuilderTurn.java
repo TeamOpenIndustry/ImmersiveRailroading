@@ -19,7 +19,7 @@ public class BuilderTurn extends BuilderBase {
 	private float startAngle;
 	private float endAngle;
 
-	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, int radius, int quarter, int quarters, TrackDirection direction) {
+	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, int radius, int quarter, int quarters, TrackDirection direction, float horizOff) {
 		super(world, x, y, z, rotation);
 		
 		System.out.println("Quarter: " + quarter);
@@ -95,7 +95,7 @@ public class BuilderTurn extends BuilderBase {
 		}
 
 		
-		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.TURN, radius, quarter);
+		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.TURN, radius, quarter, horizOff);
 		
 		turnTrack.setRotationCenter(-xMult * radius, 0, 0);
 		turnTrack.setDirection(direction);

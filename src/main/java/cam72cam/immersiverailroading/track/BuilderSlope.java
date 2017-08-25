@@ -11,12 +11,12 @@ public class BuilderSlope extends BuilderBase {
 
 	private int length;
 
-	public BuilderSlope(World world, int x, int y, int z, EnumFacing rotation,  int length, int quarter) {
+	public BuilderSlope(World world, int x, int y, int z, EnumFacing rotation,  int length, int quarter, float horizOff) {
 		super(world, x, y, z, rotation);
 		this.length = length;
 		
 		float slope = (1.0F/(length + 1));
-		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, TrackItems.SLOPE, length, quarter);
+		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, TrackItems.SLOPE, length, quarter, horizOff);
 		tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));
 		tracks.add(rootTrack);
 		tracks.add(new TrackGag(this, 1, 0, tracks.size()/3));

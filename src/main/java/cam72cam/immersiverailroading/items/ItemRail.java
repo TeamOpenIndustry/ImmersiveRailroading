@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -60,7 +61,6 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
-
 		float yawHead = player.getRotationYawHead() % 360 + 360;
 		TrackDirection dir = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
 		int quarter = MathHelper.floor((yawHead % 90f) /90*4);
@@ -71,7 +71,29 @@ public class ItemRail extends ItemBlock {
 		EnumFacing facing = player.getHorizontalFacing();
 		TrackItems tt = TrackItems.fromMeta(stack.getMetadata());
 		
-		BuilderBase builder = tt.getBuilder(world, pos, facing, getLength(stack), quarter, getQuarters(stack), dir);
+		float horizOff = 0;
+		switch (facing) {
+		case WEST:
+			horizOff = hitZ;
+			break;
+		case EAST:
+			horizOff = 1-hitZ;
+			break;
+		case SOUTH:
+			horizOff = hitX;
+			break;
+		case NORTH:
+			horizOff = 1-hitX;
+			break;
+		default:
+			break;
+		}
+		
+		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+			pos = pos.down();
+		}
+		
+		BuilderBase builder = tt.getBuilder(world, pos, facing, getLength(stack), quarter, getQuarters(stack), dir, horizOff);
 		if (builder.canBuild()) {
 			builder.build();
 			return true;

@@ -41,16 +41,16 @@ public enum TrackItems implements IStringSerializable {
 		return this == TURN;
 	}
 	
-	public BuilderBase getBuilder(World world, BlockPos pos, EnumFacing facing, int length, int quarter, int quarters, TrackDirection direction) {
+	public BuilderBase getBuilder(World world, BlockPos pos, EnumFacing facing, int length, int quarter, int quarters, TrackDirection direction, float horizOff) {
 		switch (this) {
 		case STRAIGHT:
-			return new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter);
+			return new BuilderStraight(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter, horizOff);
 		case CROSSING:
-			return new BuilderCrossing(world, pos.getX(), pos.getY(), pos.getZ(), facing, quarter);
+			return new BuilderCrossing(world, pos.getX(), pos.getY(), pos.getZ(), facing, quarter, horizOff);
 		case SLOPE:
-			return new BuilderSlope(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter);
+			return new BuilderSlope(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter, horizOff);
 		case TURN:
-			return new BuilderTurn(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter, quarters, direction);
+			return new BuilderTurn(world, pos.getX(), pos.getY(), pos.getZ(), facing, length, quarter, quarters, direction, horizOff);
 		default:
 			return null;
 		}
@@ -60,6 +60,6 @@ public enum TrackItems implements IStringSerializable {
 	}
 
 	public BuilderBase getBuilder(TileRail te, BlockPos blockPos) {
-		return te.getType().getBuilder(te.getWorld(), blockPos, te.getFacing().getOpposite(), te.getLength(), te.getRotationQuarter(), te.getTurnQuarters(), te.getDirection());
+		return te.getType().getBuilder(te.getWorld(), blockPos, te.getFacing().getOpposite(), te.getLength(), te.getRotationQuarter(), te.getTurnQuarters(), te.getDirection(), te.getHorizOff());
 	}
 }

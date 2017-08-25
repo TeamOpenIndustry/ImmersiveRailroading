@@ -190,4 +190,8 @@ public abstract class BuilderBase {
 	public BlockPos getPos() {
 		return new BlockPos(x, y, z);
 	}
+
+	public BlockPos getRenderOffset() {
+		return new BlockPos(0,0,0);
+	}
 }

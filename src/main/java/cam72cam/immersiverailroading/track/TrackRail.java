@@ -17,12 +17,14 @@ public class TrackRail extends TrackBase {
 	private int quarter;
 	private int turnQuarters;
 	private TrackDirection direction = TrackDirection.NONE;
+	private float horizOff;
 
-	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackItems type, int length, int quarter) {
+	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackItems type, int length, int quarter, float horizOff) {
 		super(builder, rel_x, rel_y, rel_z, ImmersiveRailroading.BLOCK_RAIL, rel_rotation);
 		this.type = type;
 		this.quarter = quarter;
 		this.length = length;
+		this.horizOff = horizOff;
 	}
 	
 	public void setRotationCenter(int rel_cx, int rel_cy, int rel_cz) {
@@ -45,6 +47,7 @@ public class TrackRail extends TrackBase {
 		tileRail.setDirection(direction);
 		tileRail.setRotationQuarter(quarter);
 		tileRail.setTurnQuarters(turnQuarters);
+		tileRail.setHorizOff(horizOff);
 		
 		return tileRail;
 	}

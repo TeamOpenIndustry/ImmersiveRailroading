@@ -405,8 +405,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// Calculate the angle (rad) for the current position is
 			double posRelYaw = Math.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
-			double radius = rail.getRadius() + 0.5; // TODO bake this into
-													// BuilderTurn
+			double radius = rail.getRadius() - 0.5;
 			// Calculate the angle delta in rad (radians are awesome)
 			double yawDelt = distance / radius;
 
