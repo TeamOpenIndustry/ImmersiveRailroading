@@ -180,7 +180,7 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 	private static Map<String, BufferBuilder> buffers = new HashMap<String, BufferBuilder>();
 	private static String renderID(TileRail te) {
 		//TODO more attributes like railbed
-		return String.format("%s%s%s%s", te.getFacing(), te.getType(), te.getDirection(), te.getLength(), te.getTurnQuarters());
+		return String.format("%s%s%s%s%s%s", te.getFacing(), te.getType(), te.getDirection(), te.getLength(), te.getRotationQuarter(), te.getTurnQuarters());
 	}
 	
 	/*

@@ -45,7 +45,10 @@ public class ItemRail extends ItemBlock {
 	// called both server and client side,
 	// kind of a hack for onItemLeftClick
 	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-		// TODO set quarter
+		int quarter = getQuarters(stack);
+		if (entityLiving.isSneaking()) {
+			setQuarters(stack, (quarter) % 4+1);
+		}
 		return false;
 	}
 
@@ -61,11 +64,14 @@ public class ItemRail extends ItemBlock {
 		float yawHead = player.getRotationYawHead() % 360 + 360;
 		TrackDirection dir = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
 		int quarter = MathHelper.floor((yawHead % 90f) /90*4);
+		if (dir == TrackDirection.LEFT) {
+			quarter = (3-quarter+4) % 4;
+		}
 		
 		EnumFacing facing = player.getHorizontalFacing();
 		TrackItems tt = TrackItems.fromMeta(stack.getMetadata());
 		
-		BuilderBase builder = tt.getBuilder(world, pos, facing, getLength(stack), quarter, 4, dir);
+		BuilderBase builder = tt.getBuilder(world, pos, facing, getLength(stack), quarter, getQuarters(stack), dir);
 		if (builder.canBuild()) {
 			builder.build();
 			return true;
@@ -76,7 +82,8 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(""+getLength(stack));
+        tooltip.add("Length: " + getLength(stack));
+        tooltip.add("Quarters: " + getQuarters(stack));
 	}
 	
 	public static void setLength(ItemStack stack, int length) {
@@ -91,5 +98,19 @@ public class ItemRail extends ItemBlock {
 			return stack.getTagCompound().getInteger("length");
 		}
 		return 10;
+	}
+	
+	public static void setQuarters(ItemStack stack, int quarters) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setInteger("quarters", quarters);
+	}
+	
+	public static int getQuarters(ItemStack stack) {
+		if (stack.getTagCompound() != null){
+			return stack.getTagCompound().getInteger("quarters");
+		}
+		return 3;
 	}
 }

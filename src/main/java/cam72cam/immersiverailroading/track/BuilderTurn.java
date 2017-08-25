@@ -15,9 +15,15 @@ public class BuilderTurn extends BuilderBase {
 
 	private int radius;
 	private TrackDirection direction;
+	private float realStartAngle;
+	private float startAngle;
+	private float endAngle;
 
 	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, int radius, int quarter, int quarters, TrackDirection direction) {
 		super(world, x, y, z, rotation);
+		
+		System.out.println("Quarter: " + quarter);
+		System.out.println("Quarters: " + quarters);
 		
 		this.radius = radius;
 		this.direction = direction;
@@ -30,16 +36,20 @@ public class BuilderTurn extends BuilderBase {
 		double hack = -1;
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
-		float startAngle = 90 - quarter/4 * 90;
-		float endAngle = startAngle - quarters/4 * 90;
+		
+		startAngle = 90 - quarter/4f * 90;
+		endAngle = startAngle - quarters/4f * 90;
+		//endAngle = startAngle - 90;
 		
 		if (direction == TrackDirection.LEFT) {
-			startAngle = 180 + 90 + quarter/4 * 90;
-			endAngle = startAngle + quarters/4 * 90;
+			startAngle = 180 + 90 + quarter/4f * 90;
+			endAngle = startAngle + quarters/4f * 90;
+			//endAngle = startAngle + 360;
 		}
 
 		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
 		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
+		realStartAngle = startAngle;
 		float flexAngle = endAngle;
 		
 		if (direction == TrackDirection.LEFT) {
@@ -116,22 +126,38 @@ public class BuilderTurn extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
+		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
+		
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
+		
+		float xPos = (int)(Math.sin(Math.toRadians(realStartAngle)) * (radius-2));
+		float zPos = (int)(Math.cos(Math.toRadians(realStartAngle)) * (radius-2));
+		
+		if (realStartAngle % 90 == 0) {
+			xPos += 0.5;
+			zPos -= 0.5;
+		} else {
+			//Magical bs
+			//xPos += 0.7;
+
+			xPos += 0.5;
+			zPos -= 0.5;
+		}
 		
 		if (direction == TrackDirection.RIGHT) {
 			
-			for (float angle = 45+-angleDelta/2; angle < 90+angleDelta/2; angle+=angleDelta) {
-				double gagX = Math.sin(Math.toRadians(angle)) * (radius);
-				double gagZ = Math.cos(Math.toRadians(angle)) * (radius);
-				
-				data.add(new VecYawPitch(gagX - radius+1+0.5, 0, gagZ+0.5, Math.min(180, angle+90 + angleDelta/2)));
+			for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
+				double gagX = Math.sin(Math.toRadians(angle)) * (radius)-xPos;
+				double gagZ = Math.cos(Math.toRadians(angle)) * (radius)-zPos;
+				data.add(new VecYawPitch(gagX, 0, gagZ, Math.min(180, angle+90 + angleDelta/2)));
 			}
 		} else {
-			for (float angle = 45; angle < 90; angle+=angleDelta) {
-				double gagX = Math.sin(Math.toRadians(angle)) * (radius-1);
-				double gagZ = Math.cos(Math.toRadians(angle)) * (radius-1);
+			xPos -=2;
+			for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
+				double gagX = Math.sin(Math.toRadians(angle)) * (radius)-xPos;
+				double gagZ = Math.cos(Math.toRadians(angle)) * (radius)-zPos;
 				
-				data.add(new VecYawPitch(gagX * -1 - -1 * radius+0.5, 0, gagZ-0.5, 180-angle + 90 - angleDelta/2));
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle + 90 + angleDelta/2));
 			}
 		}
 		
