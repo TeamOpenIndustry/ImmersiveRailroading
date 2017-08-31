@@ -1,0 +1,25 @@
+{
+	"era": "steam",
+	"name": "Big Boy (4000 class)",
+	"works": "American Locomotive Company",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/big_boy.obj",
+	"properties": {
+		"fuel_consumption": 100,
+		"fuel_capacity": 100,
+		"water_capacity": 27000, 
+		"horsepower": 6290,
+		"tractive_effort_lbf": 135375,
+		"max_speed_kmh": 130,
+		"valve_gear": "mallet_walschaerts"
+	},
+	"passenger": {
+		"center_x": -6.5,
+		"center_y": 1.5,
+		"length": 1,
+		"width": 2
+	},
+	"trucks": {
+		"front": -2.29, 
+		"rear": -7.62
+	}
+}
