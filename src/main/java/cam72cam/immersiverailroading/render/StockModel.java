@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -23,6 +24,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class StockModel extends OBJModel {
+	private static final int MALLET_ANGLE_REAR = -45;
 	boolean hasParsedModel = false;
 
 	public StockModel(ResourceLocation modelLoc) throws Exception {
@@ -102,14 +104,19 @@ public class StockModel extends OBJModel {
 			hasParsedModel = true;
 			allGroups = groups();
 
-			allGroups = parseDrivingWheels(allGroups);
-
 			switch (def.getValveGear()) {
 			case WALSCHAERTS:
 				allGroups = parseWalschaerts(allGroups, "LEFT");
 				allGroups = parseWalschaerts(allGroups, "RIGHT");
+				allGroups = parseDrivingWheels(allGroups, false);
 				break;
 			case MALLET_WALSCHAERTS:
+				allGroups = parseWalschaerts(allGroups, "LEFT_FRONT");
+				allGroups = parseWalschaerts(allGroups, "RIGHT_FRONT");
+				allGroups = parseWalschaerts(allGroups, "LEFT_REAR");
+				allGroups = parseWalschaerts(allGroups, "RIGHT_REAR");
+				allGroups = parseFrontLocomotive(allGroups);
+				allGroups = parseDrivingWheels(allGroups, true);
 				break;
 			case CLIMAX:
 				break;
@@ -121,17 +128,66 @@ public class StockModel extends OBJModel {
 		}
 
 		drawBogies(stock);
-		drawDrivingWheels(stock);
 
 		switch (def.getValveGear()) {
 		case WALSCHAERTS:
-			List<List<String>> wheels = new ArrayList<List<String>>();
-			wheels.addAll(drivingWheels.values());
-			List<String> wheel = wheels.get(wheels.size() / 2);
-			drawWalschaerts(stock, "LEFT", 0, wheel);
-			drawWalschaerts(stock, "RIGHT", -90, wheel);
+			{
+				List<List<String>> wheels = new ArrayList<List<String>>();
+				wheels.addAll(drivingWheels.values());
+				drawDrivingWheels(stock, wheels);
+				List<String> wheel = wheels.get(wheels.size() / 2);
+				drawWalschaerts(stock, "LEFT", 0, heightOfGroups(wheel), centerOfGroups(wheel), centerOfGroups(wheel));
+				drawWalschaerts(stock, "RIGHT", -90, heightOfGroups(wheel), centerOfGroups(wheel), centerOfGroups(wheel));
+			}
 			break;
 		case MALLET_WALSCHAERTS:
+			{
+				GL11.glPushMatrix();
+				
+
+				Vector3f frontVec = centerOfGroups(frontLocomotive);
+
+				PosRot frontPos = stock.predictFrontBogeyPosition(-frontVec.x - def.getBogeyFront());
+
+				Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
+				
+				GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
+				GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()) + 180, 0, 1, 0);
+				GlStateManager.translate(-frontVec.x, 0, 0);
+				
+				
+				List<List<String>> wheels = new ArrayList<List<String>>();
+				List<String> center = new ArrayList<String>();
+				for (String wheel : drivingWheels.keySet()) {
+					if (wheel.contains("FRONT")) {
+						wheels.add(drivingWheels.get(wheel));
+						center.addAll(drivingWheels.get(wheel));
+					}
+				}
+				drawFrontLocomotive();
+				drawDrivingWheels(stock, wheels);
+				List<String> wheel = wheels.get(wheels.size() / 2-1);
+				drawWalschaerts(stock, "LEFT_FRONT", 0, heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
+				drawWalschaerts(stock, "RIGHT_FRONT", -90,  heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
+				GL11.glPopMatrix();
+			}
+			{
+				GL11.glPushMatrix();
+				//GL11.glRotated(10, 0, 1, 0);
+				List<List<String>> wheels = new ArrayList<List<String>>();
+				List<String> center = new ArrayList<String>();
+				for (String wheel : drivingWheels.keySet()) {
+					if (wheel.contains("REAR")) {
+						wheels.add(drivingWheels.get(wheel));
+						center.addAll(drivingWheels.get(wheel));
+					}
+				}
+				drawDrivingWheels(stock, wheels);
+				List<String> wheel = wheels.get(wheels.size() / 2-1);
+				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
+				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
+				GL11.glPopMatrix();
+			}
 			break;
 		case CLIMAX:
 			break;
@@ -142,15 +198,39 @@ public class StockModel extends OBJModel {
 		// Draw remaining groups
 		drawGroups(allGroups);
 	}
+	
+	List<String> frontLocomotive = new ArrayList<String>();
+	private Set<String> parseFrontLocomotive(Set<String> allGroups) {
+		Set<String> main = new HashSet<String>();
+
+		for (String group : allGroups) {
+			if (group.contains("FRONT_LOCOMOTIVE")) {
+				frontLocomotive.add(group);
+			} else {
+				main.add(group);
+			}
+		}
+		return main;
+	}
+	
+	private void drawFrontLocomotive() {
+		drawGroups(frontLocomotive);
+	}
 
 	Map<String, List<String>> drivingWheels = new HashMap<String, List<String>>();
 
-	private Set<String> parseDrivingWheels(Set<String> allGroups) {
+	private Set<String> parseDrivingWheels(Set<String> allGroups, boolean isWalschaerts) {
 		Set<String> main = new HashSet<String>();
 
 		for (String group : allGroups) {
 			if (group.contains("WHEEL_DRIVER")) {
-				String groupName = group.split("[_" + Pattern.quote(".") + "]")[2];
+				String[] split = group.split("[_" + Pattern.quote(".") + "]");
+				String groupName;
+				if (isWalschaerts) {
+					groupName = split[2] + split[3];
+				} else {
+					groupName = split[2];
+				}
 				if (!drivingWheels.containsKey(groupName)) {
 					List<String> names = new ArrayList<String>();
 					names.add(group);
@@ -165,11 +245,15 @@ public class StockModel extends OBJModel {
 		return main;
 	}
 
-	private void drawDrivingWheels(LocomotiveSteam stock) {
-		for (List<String> wheel : drivingWheels.values()) {
+	private void drawDrivingWheels(LocomotiveSteam stock, List<List<String>> wheels) {
+		for (List<String> wheel : wheels) {
 			float circumference = heightOfGroups(wheel) * (float) Math.PI;
 			float relDist = stock.distanceTraveled % circumference;
 			float wheelAngle = 360 * relDist / circumference;
+			if (wheel.get(0).contains("REAR")) {
+				//MALLET HACK
+				wheelAngle += MALLET_ANGLE_REAR;
+			}
 			Vector3f wheelPos = centerOfGroups(wheel);
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -347,15 +431,14 @@ public class StockModel extends OBJModel {
 		return main;
 	}
 
-	private void drawWalschaerts(LocomotiveSteam stock, String section, int wheelAngleOffset, List<String> wheel) {
-		// TODO wheel index param
-		float circumference = heightOfGroups(wheel) * (float) Math.PI;
+	private void drawWalschaerts(LocomotiveSteam stock, String section, int wheelAngleOffset, float diameter, Vector3f wheelCenter, Vector3f wheelPos) {
+		float circumference = diameter * (float) Math.PI;
 		float relDist = stock.distanceTraveled % circumference;
 		float wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 
-		Vector3f wheelPos = centerOfGroups(wheel);
+		//Vector3f wheelPos = centerOfGroups(wheel);
 		Vector3f connRodPos = centerOfGroups(connectingRods.get(section));
-		float connRodOffset = connRodPos.x - wheelPos.x;
+		float connRodOffset = connRodPos.x - wheelCenter.x;
 		Vector3f drivingRodMin = minOfGroup(drivingRods.get(section));
 		Vector3f drivingRodMax = maxOfGroup(drivingRods.get(section));
 		float drivingRodHeight = drivingRodMax.y - drivingRodMin.y;
@@ -366,7 +449,7 @@ public class StockModel extends OBJModel {
 		double drivingRodHorizLeft = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - connRodMovment.z * connRodMovment.z);
 
 		Vector3f pistonMax = maxOfGroup(pistonRods.get(section));
-		double pistonDeltaLeft = -pistonMax.x - drivingRodHorizLeft + connRodMovment.x;
+		double pistonDeltaLeft = connRodMovment.x - 0.3;
 
 		double returnCrankHeight = heightOfGroups(returnCranks.get(section));
 		double returnCrankLength = lengthOfGroups(returnCranks.get(section));
