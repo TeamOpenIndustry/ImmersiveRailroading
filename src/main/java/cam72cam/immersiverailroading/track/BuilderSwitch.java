@@ -3,16 +3,15 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.library.TrackItems;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
+import cam72cam.immersiverailroading.util.RailInfo;
+import net.minecraft.util.math.BlockPos;
 
 public class BuilderSwitch extends BuilderBase {
 
 	private BuilderTurn turnBuilder;
 
-	public BuilderSwitch(World world, int x, int y, int z, EnumFacing rotation, TrackItems type, boolean isRight) {
-		super(world, x, y, z, rotation);
+	public BuilderSwitch(RailInfo info, BlockPos pos) {
+		super(info, pos);
 		/*
 		TrackType subType = null;
 

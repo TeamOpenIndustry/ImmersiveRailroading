@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -23,14 +24,17 @@ public abstract class BuilderBase {
 	
 	private int[] translation;
 
-	public BuilderBase(World world, int x, int y, int z, EnumFacing rotation) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.rotation = rotation;
-		this.world = world;
-	}
+	public RailInfo info;
 	
+	public BuilderBase(RailInfo info, BlockPos pos) {
+		this.info = info;
+		rotation = info.facing;
+		world = info.world;
+		this.x = pos.getX();
+		this.y = pos.getY();
+		this.z = pos.getZ();
+	}
+
 	public class VecYawPitch extends Vec3d {
 		private float yaw;
 		private float pitch;
