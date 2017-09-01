@@ -56,9 +56,15 @@ public class RailInfo {
 		
 		facing = player.getHorizontalFacing();
 		type = TrackItems.fromMeta(stack.getMetadata());
+
 		
-		hitX = ((int)(hitX * 10)) / 10f;
-		hitZ = ((int)(hitZ * 10)) / 10f;
+		if (type == TrackItems.STRAIGHT && quarter != 0) {
+			hitX = ((int)(hitX * 10)) / 10f;
+			hitZ = ((int)(hitZ * 10)) / 10f;
+		} else {
+			hitX = 0.5f;
+			hitZ = 0.5f;
+		}
 		
 		horizOff = 0;
 		switch (facing) {
