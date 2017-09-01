@@ -43,6 +43,8 @@ public class BuilderStraight extends BuilderBase {
 			}
 		}
 		
+		this.setParentPos(new BlockPos(mainX, 0, mainZ));
+		
 		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.STRAIGHT, info.length, info.quarter, info.horizOff);
 		tracks.add(main);
 		
