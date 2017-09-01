@@ -19,7 +19,7 @@ public abstract class BuilderBase {
 	int x;
 	int y;
 	int z;
-	EnumFacing rotation;
+	public EnumFacing rotation;
 	
 	private int[] translation;
 

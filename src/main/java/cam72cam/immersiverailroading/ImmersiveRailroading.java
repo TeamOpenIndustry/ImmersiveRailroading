@@ -4,8 +4,10 @@ import org.apache.logging.log4j.Logger;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
+import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
+import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -29,6 +31,8 @@ public class ImmersiveRailroading
 	
 	@ObjectHolder(ItemRollingStock.NAME)
 	public static ItemRollingStock ITEM_ROLLING_STOCK = new ItemRollingStock();
+	
+	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL).setRegistryName(ImmersiveRailroading.BLOCK_RAIL.getRegistryName());
 	
 	public static Logger logger;
 	public static ImmersiveRailroading instance;
