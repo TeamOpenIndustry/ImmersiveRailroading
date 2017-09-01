@@ -200,10 +200,10 @@ public abstract class BuilderBase {
 
 	
 	public void setParentPos(BlockPos pos) {
-		parent_pos = pos;
+		parent_pos = convertRelativePositions(pos.getX(), pos.getY(), pos.getZ(), this.rotation);
 	}
 	public BlockPos getParentPos() {
-		return convertRelativePositions(parent_pos.getX(), parent_pos.getY(), parent_pos.getZ(), this.rotation);
+		return parent_pos;
 	}
 
 	public BlockPos getRenderOffset() {
