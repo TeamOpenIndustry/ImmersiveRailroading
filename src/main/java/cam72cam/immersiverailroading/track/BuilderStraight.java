@@ -7,46 +7,43 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
 public class BuilderStraight extends BuilderBase {
-	private int length;
 	private float angle;
 	private int mainX;
 	private int mainZ;
 
-	public BuilderStraight(World world, int x, int y, int z, EnumFacing rotation, int length, int quarter, float horizOff) {
-		super(world, x, y, z, rotation);
-		
-		this.length = length;
+	public BuilderStraight(RailInfo info, BlockPos pos) {
+		super(info, pos);
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
-		angle = quarter/4f * 90;
+		angle = info.quarter/4f * 90;
 		
-		for (float dist = 0; dist < length; dist += 0.25) {
-			Vec3d pos = VecUtil.fromYaw(dist, angle);
+		for (float dist = 0; dist < info.length; dist += 0.25) {
+			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
 			for (double q = -1.5; q <= 1.5; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90);
-				int posX = (int)(pos.x+nextUp.x);
-				int posZ = (int)(pos.z+nextUp.z);
+				int posX = (int)(gagPos.x+nextUp.x);
+				int posZ = (int)(gagPos.z+nextUp.z);
 				positions.add(Pair.of(posX, posZ));
-				if (dist < 3 || dist > length - 3) {
+				if (dist < 3 || dist > info.length - 3) {
 					flexPositions.add(Pair.of(posX, posZ));
 				}
 			}
-			if (Math.ceil(dist) == Math.ceil(length/2)) {
-				mainX = (int) pos.x;
-				mainZ = (int) pos.z;
+			if (Math.ceil(dist) == Math.ceil(info.length/2)) {
+				mainX = (int) gagPos.x;
+				mainZ = (int) gagPos.z;
 			}
 		}
 		
-		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.STRAIGHT, length, quarter, horizOff);
+		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.STRAIGHT, info.length, info.quarter, info.horizOff);
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
@@ -71,9 +68,9 @@ public class BuilderStraight extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		data.add(new VecYawPitch(-0.5, 0, 0, -angle, 0, length, "RAIL_RIGHT", "RAIL_LEFT"));
+		data.add(new VecYawPitch(-0.5, 0, 0, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < info.length; i++) {
 			Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}

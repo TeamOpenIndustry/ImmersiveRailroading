@@ -4,6 +4,10 @@ import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderCrossing;
+import cam72cam.immersiverailroading.track.BuilderSlope;
+import cam72cam.immersiverailroading.track.BuilderStraight;
+import cam72cam.immersiverailroading.track.BuilderTurn;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -80,7 +84,18 @@ public class RailInfo {
 	}
 	
 	public BuilderBase getBuilder(BlockPos pos) {
-		return type.getBuilder(world, pos, facing, length, quarter, quarters, direction, horizOff);
+		switch (type) {
+		case STRAIGHT:
+			return new BuilderStraight(this, pos);
+		case CROSSING:
+			return new BuilderCrossing(this, pos);
+		case SLOPE:
+			return new BuilderSlope(this, pos);
+		case TURN:
+			return new BuilderTurn(this, pos);
+		default:
+			return null;
+		}
 	}
 	
 	private BuilderBase builder;

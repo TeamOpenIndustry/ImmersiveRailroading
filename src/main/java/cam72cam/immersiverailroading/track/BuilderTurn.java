@@ -8,27 +8,22 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
+import net.minecraft.util.math.BlockPos;
 
 public class BuilderTurn extends BuilderBase {
 
-	private int radius;
-	private TrackDirection direction;
 	private float realStartAngle;
 	private float startAngle;
 	private float endAngle;
 
-	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, int radius, int quarter, int quarters, TrackDirection direction, float horizOff) {
-		super(world, x, y, z, rotation);
+	public BuilderTurn(RailInfo info, BlockPos pos) {
+		super(info, pos);
 		
-		System.out.println("Quarter: " + quarter);
-		System.out.println("Quarters: " + quarters);
-		
-		this.radius = radius;
-		this.direction = direction;
+		int radius = info.length;
 
-		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
+		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
@@ -37,13 +32,13 @@ public class BuilderTurn extends BuilderBase {
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
 		
-		startAngle = 90 - quarter/4f * 90;
-		endAngle = startAngle - quarters/4f * 90;
+		startAngle = 90 - info.quarter/4f * 90;
+		endAngle = startAngle - info.quarters/4f * 90;
 		//endAngle = startAngle - 90;
 		
-		if (direction == TrackDirection.LEFT) {
-			startAngle = 180 + 90 + quarter/4f * 90;
-			endAngle = startAngle + quarters/4f * 90;
+		if (info.direction == TrackDirection.LEFT) {
+			startAngle = 180 + 90 + info.quarter/4f * 90;
+			endAngle = startAngle + info.quarters/4f * 90;
 			//endAngle = startAngle + 360;
 		}
 
@@ -52,7 +47,7 @@ public class BuilderTurn extends BuilderBase {
 		realStartAngle = startAngle;
 		float flexAngle = endAngle;
 		
-		if (direction == TrackDirection.LEFT) {
+		if (info.direction == TrackDirection.LEFT) {
 			float tmp = startAngle;
 			startAngle = endAngle;
 			endAngle = tmp;
@@ -95,11 +90,11 @@ public class BuilderTurn extends BuilderBase {
 		}
 
 		
-		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.TURN, radius, quarter, horizOff);
+		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.horizOff);
 		
 		turnTrack.setRotationCenter(-xMult * radius, 0, 0);
-		turnTrack.setDirection(direction);
-		turnTrack.setTurnQuarters(quarters);
+		turnTrack.setDirection(info.direction);
+		turnTrack.setTurnQuarters(info.quarters);
 		
 		xMult = 1;
 		tracks.add(turnTrack);
@@ -126,7 +121,9 @@ public class BuilderTurn extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
+		int radius = info.length;
+		
+		//int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
@@ -144,7 +141,7 @@ public class BuilderTurn extends BuilderBase {
 			zPos -= 0.5;
 		}
 		
-		if (direction == TrackDirection.RIGHT) {
+		if (info.direction == TrackDirection.RIGHT) {
 			
 			for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
 				double gagX = Math.sin(Math.toRadians(angle)) * (radius)-xPos;
