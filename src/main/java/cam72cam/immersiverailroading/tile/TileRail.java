@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.util.RailInfo;
 
 public class TileRail extends TileRailBase {
 	private EnumFacing facing;
@@ -170,11 +170,12 @@ public class TileRail extends TileRailBase {
 		return super.writeToNBT(nbt);
 	}
 
-	private BuilderBase builder;
-	public BuilderBase getBuilder() {
-		if (builder == null) {
-			builder = getType().getBuilder(this, new BlockPos(0,0,0));
+	private RailInfo info;
+	public RailInfo getRailRenderInfo() {
+		if (info == null) {
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getHorizOff());
 		}
-		return builder;
+		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
+		return info;
 	}
 }

@@ -16,7 +16,6 @@ import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveElectric;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.net.CoupleStatusPacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
@@ -83,7 +82,7 @@ public abstract class CommonProxy implements IGuiHandler {
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event)
     {
-    	event.getRegistry().register(new ItemRail(ImmersiveRailroading.BLOCK_RAIL).setRegistryName(ImmersiveRailroading.BLOCK_RAIL.getRegistryName()));
+    	event.getRegistry().register(ImmersiveRailroading.ITEM_RAIL_BLOCK);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_ROLLING_STOCK);
     }
     

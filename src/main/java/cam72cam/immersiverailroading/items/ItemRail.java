@@ -4,10 +4,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.BuilderBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -20,7 +19,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class ItemRail extends ItemBlock {
@@ -61,39 +59,9 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
-		float yawHead = player.getRotationYawHead() % 360 + 360;
-		TrackDirection dir = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
-		int quarter = MathHelper.floor((yawHead % 90f) /90*4);
-		if (dir == TrackDirection.LEFT) {
-			quarter = (3-quarter+4) % 4;
-		}
+		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ);
 		
-		EnumFacing facing = player.getHorizontalFacing();
-		TrackItems tt = TrackItems.fromMeta(stack.getMetadata());
-		
-		float horizOff = 0;
-		switch (facing) {
-		case WEST:
-			horizOff = hitZ;
-			break;
-		case EAST:
-			horizOff = 1-hitZ;
-			break;
-		case SOUTH:
-			horizOff = hitX;
-			break;
-		case NORTH:
-			horizOff = 1-hitX;
-			break;
-		default:
-			break;
-		}
-		
-		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			pos = pos.down();
-		}
-		
-		BuilderBase builder = tt.getBuilder(world, pos, facing, getLength(stack), quarter, getQuarters(stack), dir, horizOff);
+		BuilderBase builder = info.getBuilder(pos);
 		if (builder.canBuild()) {
 			builder.build();
 			return true;
