@@ -58,7 +58,7 @@ public abstract class TrackBase {
 		builder.world.setBlockState(pos, getBlockState(), 3);
 		TileRailBase tr = (TileRailBase)builder.world.getTileEntity(pos);
 		tr.setReplaced(replaced);
-		tr.setParent(builder.getPos());
+		tr.setParent(builder.getParentPos());
 		tr.setHeight(getHeight());
 		return tr;
 	}

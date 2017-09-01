@@ -25,11 +25,14 @@ public abstract class BuilderBase {
 	private int[] translation;
 
 	public RailInfo info;
+
+	private BlockPos parent_pos;
 	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;
 		rotation = info.facing;
 		world = info.world;
+		parent_pos = pos;
 		this.x = pos.getX();
 		this.y = pos.getY();
 		this.z = pos.getZ();
@@ -193,6 +196,14 @@ public abstract class BuilderBase {
 
 	public BlockPos getPos() {
 		return new BlockPos(x, y, z);
+	}
+
+	
+	public void setParentPos(BlockPos pos) {
+		parent_pos = pos;
+	}
+	public BlockPos getParentPos() {
+		return convertRelativePositions(parent_pos.getX(), parent_pos.getY(), parent_pos.getZ(), this.rotation);
 	}
 
 	public BlockPos getRenderOffset() {
