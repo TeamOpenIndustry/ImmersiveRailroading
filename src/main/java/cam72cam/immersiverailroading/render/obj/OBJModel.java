@@ -222,6 +222,7 @@ public class OBJModel {
 	
 	public void drawDirectGroups(Iterable<String> groupNames) {
 		GL11.glBegin(GL11.GL_QUADS);
+		int last = 4;
 		for (String group : groupNames) {
 			Material currentMTL = materials.get(groupMtlMap.get(group));
 			List<Face> faces = groups.get(group);
@@ -248,18 +249,23 @@ public class OBJModel {
 			for (Face face : faces) {
 				switch (face.points.length) {
 				case 3:
-					GL11.glEnd();
-					GL11.glBegin(GL11.GL_TRIANGLES);
+					if (face.points.length != last) {
+						GL11.glEnd();
+						GL11.glBegin(GL11.GL_TRIANGLES);
+					}
 					break;
 				case 4:
-					GL11.glEnd();
-					GL11.glBegin(GL11.GL_QUADS);
+					if (face.points.length != last) {
+						GL11.glEnd();
+						GL11.glBegin(GL11.GL_QUADS);
+					}
 					break;
 				default:
 					GL11.glEnd();
 					GL11.glBegin(GL11.GL_POLYGON);
 					break;
 				}
+				last = face.points.length; 
 
 				for (int[] point : face.points) {
 					Vector3f v;
@@ -292,63 +298,71 @@ public class OBJModel {
 		return groups.keySet();
 	}
 	
+	private Map<Iterable<String>, Vector3f> mins = new HashMap<Iterable<String>, Vector3f>();
 	public Vector3f minOfGroup(Iterable<String> groupNames) {
-		Vector3f min = null;
-		for (String group : groupNames) {
-			List<Face> faces = groups.get(group);
-			for (Face face : faces) {
-				for (int[] point : face.points) {
-					Vector3f v = vertices.get(point[0]);
-					if (min == null) {
-						min = new Vector3f(v.x, v.y, v.z);
-					} else {
-						if (min.x > v.x) {
-							min.x = v.x;
-						}
-						if (min.y > v.y) {
-							min.y = v.y;
-						}
-						if (min.z > v.z) {
-							min.z = v.z;
+		if (!mins.containsKey(groupNames)) {
+			Vector3f min = null;
+			for (String group : groupNames) {
+				List<Face> faces = groups.get(group);
+				for (Face face : faces) {
+					for (int[] point : face.points) {
+						Vector3f v = vertices.get(point[0]);
+						if (min == null) {
+							min = new Vector3f(v.x, v.y, v.z);
+						} else {
+							if (min.x > v.x) {
+								min.x = v.x;
+							}
+							if (min.y > v.y) {
+								min.y = v.y;
+							}
+							if (min.z > v.z) {
+								min.z = v.z;
+							}
 						}
 					}
 				}
 			}
+			if (min == null) {
+				System.out.println("EMPTY " + groupNames);
+				min = new Vector3f(0, 0, 0);
+			}
+			mins.put(groupNames, min);
 		}
-		if (min == null) {
-			System.out.println("EMPTY " + groupNames);
-			return new Vector3f(0, 0, 0);
-		}
-		return min;
+		return mins.get(groupNames);
 	}
+	private Map<Iterable<String>, Vector3f> maxs = new HashMap<Iterable<String>, Vector3f>();
 	public Vector3f maxOfGroup(Iterable<String> groupNames) {
-		Vector3f max = null;
-		for (String group : groupNames) {
-			List<Face> faces = groups.get(group);
-			for (Face face : faces) {
-				for (int[] point : face.points) {
-					Vector3f v = vertices.get(point[0]);
-					if (max == null) {
-						max = new Vector3f(v.x, v.y, v.z);
-					} else {
-						if (max.x < v.x) {
-							max.x = v.x;
-						}
-						if (max.y < v.y) {
-							max.y = v.y;
-						}
-						if (max.z < v.z) {
-							max.z = v.z;
+		if (!maxs.containsKey(groupNames)) {
+			Vector3f max = null;
+			for (String group : groupNames) {
+				List<Face> faces = groups.get(group);
+				for (Face face : faces) {
+					for (int[] point : face.points) {
+						Vector3f v = vertices.get(point[0]);
+						if (max == null) {
+							max = new Vector3f(v.x, v.y, v.z);
+						} else {
+							if (max.x < v.x) {
+								max.x = v.x;
+							}
+							if (max.y < v.y) {
+								max.y = v.y;
+							}
+							if (max.z < v.z) {
+								max.z = v.z;
+							}
 						}
 					}
 				}
 			}
+			if (max == null) {
+				System.out.println("EMPTY " + groupNames);
+				max = new Vector3f(0, 0, 0);
+			}
+			maxs.put(groupNames, max);
 		}
-		if (max == null) {
-			System.out.println("EMPTY " + groupNames);
-			return new Vector3f(0, 0, 0);
-		}
-		return max;
+		return maxs.get(groupNames);
 	}
 
 	public Vector3f centerOfGroups(Iterable<String> groupNames) {
