@@ -1,8 +1,5 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.track.TrackBase;
