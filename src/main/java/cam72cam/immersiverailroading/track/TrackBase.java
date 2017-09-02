@@ -13,9 +13,9 @@ import net.minecraft.util.EnumFacing;
 public abstract class TrackBase {
 	public BuilderBase builder;
 
-	private int rel_x;
-	private int rel_y;
-	private int rel_z;
+	protected int rel_x;
+	protected int rel_y;
+	protected int rel_z;
 	private EnumFacing rel_rotation;
 	private float height;
 
