@@ -17,6 +17,9 @@ public class BuilderTurn extends BuilderBase {
 	private float realStartAngle;
 	private float startAngle;
 	private float endAngle;
+	
+	private int mainX;
+	private int mainZ;
 
 	public BuilderTurn(RailInfo info, BlockPos pos) {
 		super(info, pos);
@@ -28,7 +31,7 @@ public class BuilderTurn extends BuilderBase {
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
-		double hack = -1;
+		double hack = -0.5;
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
 		
@@ -45,7 +48,6 @@ public class BuilderTurn extends BuilderBase {
 		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
 		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
 		realStartAngle = startAngle;
-		float flexAngle = endAngle;
 		
 		if (info.direction == TrackDirection.LEFT) {
 			float tmp = startAngle;
@@ -53,44 +55,26 @@ public class BuilderTurn extends BuilderBase {
 			endAngle = tmp;
 		}
 		
+		float flexAngle = 6;
+		
 		for (float angle = startAngle; angle > endAngle; angle-=angleDelta) {
-			int gagX;
-			int gagZ;
-			boolean isFlex = flexAngle + angleDelta > angle && flexAngle - angleDelta < angle;
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack-0.51));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack-0.51));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+0.5));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+0.5));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.5));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.5));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.99));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.99));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			
+			for (double q = -1.4; q <= 1.4; q+=0.1) {
+				int gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+q))+1-xPos;
+				int gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+q))-zPos;
+				positions.add(Pair.of(gagX, gagZ));
+				if (angle > startAngle-flexAngle || angle < endAngle+flexAngle)
+					flexPositions.add(Pair.of(gagX, gagZ));
+			}
+			if (Math.ceil(angle) == Math.ceil((startAngle + endAngle)/2)) {
+				mainX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack))+1-xPos;
+				mainZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack))-zPos;
+			}
 		}
 
+		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
-		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.horizOff);
+		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.horizOff);
 		
 		turnTrack.setRotationCenter(-xMult * radius, 0, 0);
 		turnTrack.setDirection(info.direction);
@@ -101,20 +85,21 @@ public class BuilderTurn extends BuilderBase {
 		for (Pair<Integer, Integer> pair : positions) {
 			int gagX = pair.getLeft() * xMult; 
 			int gagZ = pair.getRight() * zMult;
-			if (gagX == 0 && gagZ == 0) {
+			if (gagX == mainX && gagZ == mainZ) {
 				// Skip parent block
 				continue;
 			}
-			/*if (gagX > radius || gagZ > radius) {
-				// Skip out of bounds
-				continue;
-			}*/
 			TrackBase tg = new TrackGag(this, gagX, 0, gagZ);
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
 			}
 			tracks.add(tg);
 		}
+	}
+	
+	@Override
+	public BlockPos getRenderOffset() {
+		return convertRelativePositions(mainX, 0, mainZ, EnumFacing.NORTH);
 	}
 
 	@Override
