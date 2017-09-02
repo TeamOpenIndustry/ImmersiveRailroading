@@ -225,7 +225,7 @@ public class ClientProxy extends CommonProxy {
 	                GL11.glTranslated(info.getBuilder().getRenderOffset().getX(), info.getBuilder().getRenderOffset().getY(), info.getBuilder().getRenderOffset().getZ());
 	                
 	                GlStateManager.disableBlend();
-	                RailRenderUtil.render(info);
+	                RailRenderUtil.render(info, true);
 	                GlStateManager.enableBlend();
 				}
 				GL11.glPopMatrix();

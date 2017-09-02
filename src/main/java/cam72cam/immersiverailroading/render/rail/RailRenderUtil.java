@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 
 public class RailRenderUtil {
-	public static void render(RailInfo info) {
+	public static void render(RailInfo info, boolean renderOverlay) {
 		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();
 		
@@ -30,9 +30,9 @@ public class RailRenderUtil {
 		
 		// Finish Drawing
 		RailRenderUtil.draw(RailBaseRender.getBaseBuffer(info));
-		BufferBuilder snow = RailSnowRender.getSnowBuffer(info);
-		if (snow != null) {
-			RailRenderUtil.draw(snow);
+		RailRenderUtil.draw(RailSnowRender.getSnowBuffer(info));
+		if (renderOverlay) {
+			RailRenderUtil.draw(RailBaseOverlayRender.getOverlayBuffer(info));
 		}
 		
 		RenderHelper.enableStandardItemLighting();
@@ -49,6 +49,9 @@ public class RailRenderUtil {
 	 *  Excludes the reset buffer at the end
 	 */
 	public static void draw(BufferBuilder vertexBufferIn) {
+		if (vertexBufferIn == null) {
+			return;
+		}
         VertexFormat vertexformat = vertexBufferIn.getVertexFormat();
         int i = vertexformat.getNextOffset();
         ByteBuffer bytebuffer = vertexBufferIn.getByteBuffer();

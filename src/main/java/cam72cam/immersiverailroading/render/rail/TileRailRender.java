@@ -26,7 +26,7 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 			// Move to specified position
 			GlStateManager.translate(x, y, z);
 			
-			RailRenderUtil.render(info);
+			RailRenderUtil.render(info, false);
 		}
 		GL11.glPopMatrix();
 	}
