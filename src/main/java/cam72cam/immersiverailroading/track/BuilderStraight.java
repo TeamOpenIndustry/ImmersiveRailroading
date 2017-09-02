@@ -15,8 +15,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class BuilderStraight extends BuilderBase {
 	protected float angle;
-	private int mainX;
-	private int mainZ;
+	protected int mainX;
+	protected int mainZ;
 
 	public BuilderStraight(RailInfo info, BlockPos pos) {
 		super(info, pos);

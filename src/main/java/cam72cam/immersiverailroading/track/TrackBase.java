@@ -9,6 +9,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 public abstract class TrackBase {
 	public BuilderBase builder;
@@ -22,6 +23,8 @@ public abstract class TrackBase {
 	protected Block block;
 
 	private boolean flexible = false;
+
+	private BlockPos parent;
 
 	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block, EnumFacing rel_rotation) {
 		this.builder = builder;
@@ -58,7 +61,11 @@ public abstract class TrackBase {
 		builder.world.setBlockState(pos, getBlockState(), 3);
 		TileRailBase tr = (TileRailBase)builder.world.getTileEntity(pos);
 		tr.setReplaced(replaced);
-		tr.setParent(builder.getParentPos());
+		if (parent != null) {
+			tr.setParent(parent);
+		} else {
+			tr.setParent(builder.getParentPos());
+		}
 		tr.setHeight(getHeight());
 		return tr;
 	}
@@ -93,5 +100,9 @@ public abstract class TrackBase {
 
 	public boolean isFlexible() {
 		return this.flexible;
+	}
+
+	public void overrideParent(BlockPos blockPos) {
+		this.parent = builder.convertRelativePositions(blockPos.getX(), blockPos.getY(), blockPos.getZ(), rel_rotation);
 	}
 }
