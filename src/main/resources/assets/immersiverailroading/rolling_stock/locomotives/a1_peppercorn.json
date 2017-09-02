@@ -10,7 +10,8 @@
 		"horsepower": 2700,
 		"tractive_effort_lbf": 37400,
 		"max_speed_kmh": 160,
-		"valve_gear": "walschaerts"
+		"valve_gear": "walschaerts",
+		"weight": 106
 	},
 	"passenger": {
 		"center_x": -6.5,

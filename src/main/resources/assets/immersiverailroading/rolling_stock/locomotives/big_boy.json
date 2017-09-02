@@ -10,7 +10,8 @@
 		"horsepower": 6290,
 		"tractive_effort_lbf": 135375,
 		"max_speed_kmh": 130,
-		"valve_gear": "mallet_walschaerts"
+		"valve_gear": "mallet_walschaerts",
+		"weight": 567
 	},
 	"passenger": {
 		"center_x": -6.5,
