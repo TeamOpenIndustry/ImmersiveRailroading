@@ -49,9 +49,17 @@ public class RailInfo {
 		
 		float yawHead = player.getRotationYawHead() % 360 + 360;
 		direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
-		quarter = MathHelper.floor((yawHead % 90f) /90*4);
+		//quarter = MathHelper.floor((yawHead % 90f) /(90)*4);
+		float yawPartial = (yawHead+3600) % 90f;
 		if (direction == TrackDirection.LEFT) {
-			quarter = (3-quarter+4) % 4;
+			yawPartial = 90-yawPartial;
+		}
+		if (yawPartial < 15) {
+			quarter = 0;
+		} else if (yawPartial < 30) {
+			quarter = 1;
+		} else {
+			quarter = 2;
 		}
 		
 		facing = player.getHorizontalFacing();

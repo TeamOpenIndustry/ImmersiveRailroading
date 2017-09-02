@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -20,6 +21,10 @@ public class BuilderStraight extends BuilderBase {
 
 	public BuilderStraight(RailInfo info, BlockPos pos) {
 		super(info, pos);
+		
+		if (info.direction == TrackDirection.LEFT) {
+			info.quarter = -info.quarter; 
+		}
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
