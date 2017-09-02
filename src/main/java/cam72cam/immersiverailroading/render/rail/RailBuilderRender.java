@@ -59,8 +59,8 @@ public class RailBuilderRender {
 				GlStateManager.pushMatrix();
 				GlStateManager.rotate(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GlStateManager.translate(piece.x, piece.y, piece.z);
-				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
+				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(-90, 0, 1, 0);
 				GlStateManager.scale(piece.getLength(), 1, 1);
 				if (piece.getGroups().size() != 0) {

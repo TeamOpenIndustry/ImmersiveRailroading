@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
@@ -15,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class BuilderStraight extends BuilderBase {
-	private float angle;
+	protected float angle;
 	private int mainX;
 	private int mainZ;
 
@@ -50,7 +49,7 @@ public class BuilderStraight extends BuilderBase {
 		
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
-		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.STRAIGHT, info.length, info.quarter, info.horizOff);
+		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, info.type, info.length, info.quarter, info.horizOff);
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
@@ -75,10 +74,11 @@ public class BuilderStraight extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		data.add(new VecYawPitch(-0.5, 0, 0, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
+		Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
+		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		for (int i = 0; i < info.length; i++) {
-			Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
+			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}
 		return data;

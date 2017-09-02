@@ -12,7 +12,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class RailInfo {
@@ -66,7 +65,7 @@ public class RailInfo {
 		type = TrackItems.fromMeta(stack.getMetadata());
 
 		
-		if (type == TrackItems.STRAIGHT && quarter != 0) {
+		if ((type == TrackItems.STRAIGHT || type == TrackItems.SLOPE) && quarter != 0) {
 			hitX = ((int)(hitX * 10)) / 10f;
 			hitZ = ((int)(hitZ * 10)) / 10f;
 		} else {
