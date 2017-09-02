@@ -55,9 +55,7 @@ public abstract class EntityRollingStockDefinition {
 		widthBounds = model.widthOfGroups(model.groups());
 		heightBounds = model.heightOfGroups(model.groups());
 		
-		
-		//TODO
-		weight = 250000; //lbs
+		weight = data.get("properties").getAsJsonObject().get("weight").getAsInt(); //tonnes
 	}
 
 	public Vec3d getPassengerCenter() {
@@ -116,7 +114,7 @@ public abstract class EntityRollingStockDefinition {
 	}
 
 	/**
-	 * @return Stock Weight in KG
+	 * @return Stock Weight in tonnes
 	 */
 	public int getWeight() {
 		return this.weight;
