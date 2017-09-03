@@ -352,13 +352,30 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 	protected TileRail railFromPosition(Vec3d position) {
 		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+		TileRail parent;
 		if (te instanceof TileRailGag) {
-			return ((TileRailGag) te).getParentTile();
+			parent = ((TileRailGag) te).getParentTile();
 		} else if (te instanceof TileRail) {
-			return (TileRail) te;
+			parent = (TileRail) te;
 		} else {
 			return null;
 		}
+		
+		TileRail super_parent = parent.getParentTile();
+		
+		if (super_parent.getType() == TrackItems.SWITCH) {
+			boolean isRedstone = false;
+			for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+				isRedstone = isRedstone || world.isBlockIndirectlyGettingPowered(parent.getPos().offset(facing)) != 0;
+				System.out.println(world.isBlockIndirectlyGettingPowered(parent.getPos().offset(facing)));
+			}
+			
+			if (!isRedstone) {
+				parent = super_parent;
+			}
+		}
+		
+		return parent;
 	}
 
 	private Vec3d nextMovement(float yaw, double d) {
