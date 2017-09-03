@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -121,11 +122,35 @@ public class BuilderTurn extends BuilderBase {
 		if (info.direction == TrackDirection.LEFT) {
 			xPos +=1;
 		}
+		
+		int counter = 0;
 			
 		for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
 			double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack+xMult)+1-xPos;
 			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack+zMult)-zPos;
-			data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2));
+			float switchAngle = 0;
+			float switchOffset = 0;
+			if (info.switchState == SwitchState.STRAIGHT) {
+				if (info.direction == TrackDirection.RIGHT ) {
+					if (angle > startAngle - 4*angleDelta) {
+						counter++;
+						switchOffset = (4-counter) / 30f * -1;
+						switchAngle = angleDelta * info.length / 30;
+					}
+				} else {
+					if (angle < endAngle + 4*angleDelta) {
+						counter++;
+						switchOffset = (counter) / 30f * 1;
+						switchAngle = -angleDelta * info.length / 30;
+					}
+				}
+			}
+			if (switchAngle == 0) {
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2 + switchAngle));
+			} else {
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2, "RAIL_BASE", "RAIL_RIGHT"));
+				data.add(new VecYawPitch(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
+			}
 		}
 
 		return super.offsetRenderData(mainX, mainZ, data);

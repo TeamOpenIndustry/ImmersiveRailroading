@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.SwitchUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -60,6 +61,7 @@ public abstract class BlockRailBase extends Block {
 		if (isOriginAir || !isOnRealBlock) {
 			//stupid IBlockAccess
 			tileEntity.getWorld().destroyBlock(pos, true);
+			return;
 		}
 		
 		IBlockState up = world.getBlockState(pos.up());
@@ -67,6 +69,7 @@ public abstract class BlockRailBase extends Block {
 			tileEntity.getWorld().setBlockToAir(pos.up());
 			tileEntity.handleSnowTick();
 		}
+		tileEntity.getParentTile().setSwitchState(SwitchUtil.getSwitchState(tileEntity.getParentTile()));
 	}
 
 	@Override

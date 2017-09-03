@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.BuilderBase;
@@ -27,7 +28,9 @@ public class RailInfo {
 	public float horizOff;
 	public boolean relativePosition;
 
+	// Used for tile rendering only
 	public boolean snowRenderFlagDirty = false;
+	public SwitchState switchState = SwitchState.NONE;
 	
 	
 	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, float horizOff) {
