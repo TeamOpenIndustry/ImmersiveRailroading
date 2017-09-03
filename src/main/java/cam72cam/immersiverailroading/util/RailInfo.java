@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderCrossing;
-import cam72cam.immersiverailroading.track.BuilderParallel;
 import cam72cam.immersiverailroading.track.BuilderSlope;
 import cam72cam.immersiverailroading.track.BuilderStraight;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
@@ -118,8 +117,6 @@ public class RailInfo {
 			return new BuilderTurn(this, pos);
 		case SWITCH:
 			return new BuilderSwitch(this, pos);
-		case PARALEL_SWITCH:
-			return new BuilderParallel(this, pos);
 		default:
 			return null;
 		}

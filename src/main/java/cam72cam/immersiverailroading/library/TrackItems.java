@@ -8,7 +8,6 @@ public enum TrackItems implements IStringSerializable {
 	SLOPE,
 	TURN,
 	SWITCH,
-	PARALEL_SWITCH,
 	;
 	
 	public int getMeta() {
