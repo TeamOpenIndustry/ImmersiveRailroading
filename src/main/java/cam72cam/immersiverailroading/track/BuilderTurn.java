@@ -98,8 +98,8 @@ public class BuilderTurn extends BuilderBase {
 	}
 	
 	@Override
-	public BlockPos getRenderOffset() {
-		return convertRelativePositions(mainX, 0, mainZ, EnumFacing.NORTH);
+	public List<TrackBase> getTracksForRender() {
+		return super.offsetTracksForRender(mainX, mainZ, this.tracks);
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class BuilderTurn extends BuilderBase {
 				data.add(new VecYawPitch(gagX, 0, gagZ, angle + 90 + angleDelta/2));
 			}
 		}
-		
-		return data;
+
+		return super.offsetRenderData(mainX, mainZ, data);
 	}
 }

@@ -66,8 +66,8 @@ public class BuilderStraight extends BuilderBase {
 	}
 	
 	@Override
-	public BlockPos getRenderOffset() {
-		return convertRelativePositions(mainX, 0, mainZ, EnumFacing.NORTH);
+	public List<TrackBase> getTracksForRender() {
+		return super.offsetTracksForRender(mainX, mainZ, this.tracks);
 	}
 
 	@Override
@@ -81,6 +81,6 @@ public class BuilderStraight extends BuilderBase {
 			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}
-		return data;
+		return super.offsetRenderData(mainX, mainZ, data);
 	}
 }

@@ -26,6 +26,7 @@ public class RailInfo {
 	public int quarter;
 	public int quarters;
 	public float horizOff;
+	public boolean relativePosition;
 
 	public boolean snowRenderFlagDirty = false;
 	
@@ -42,11 +43,12 @@ public class RailInfo {
 		this.horizOff = horizOff;
 	}
 	
-	public RailInfo(ItemStack stack, EntityPlayer player, BlockPos pos, float hitX, float hitY, float hitZ) {
+	public RailInfo(ItemStack stack, EntityPlayer player, BlockPos pos, float hitX, float hitY, float hitZ, boolean relativePosition) {
 		position = pos;
 		world = player.getEntityWorld();
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
+		this.relativePosition = relativePosition;
 		
 		float yawHead = player.getRotationYawHead() % 360 + 360;
 		direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
@@ -99,7 +101,9 @@ public class RailInfo {
 	}
 	
 	public RailInfo clone() {
-		return new RailInfo(position, world, facing, type, direction, length, quarter, quarters, horizOff);
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, horizOff);
+		c.relativePosition = relativePosition;
+		return c;
 	}
 	
 	public BuilderBase getBuilder(BlockPos pos) {
