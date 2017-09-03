@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -10,6 +11,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.immersiverailroading.util.SwitchUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -362,17 +364,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		}
 		
 		TileRail super_parent = parent.getParentTile();
-		
-		if (super_parent.getType() == TrackItems.SWITCH) {
-			boolean isRedstone = false;
-			for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-				isRedstone = isRedstone || world.isBlockIndirectlyGettingPowered(parent.getPos().offset(facing)) != 0;
-				System.out.println(world.isBlockIndirectlyGettingPowered(parent.getPos().offset(facing)));
-			}
-			
-			if (!isRedstone) {
-				parent = super_parent;
-			}
+		if (SwitchUtil.getSwitchState(parent) == SwitchState.STRAIGHT) {
+			parent = super_parent;
 		}
 		
 		return parent;

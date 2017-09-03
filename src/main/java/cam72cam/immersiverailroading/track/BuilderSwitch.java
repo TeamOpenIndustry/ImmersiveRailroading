@@ -47,14 +47,18 @@ public class BuilderSwitch extends BuilderBase {
 	@Override
 	public List<TrackBase> getTracksForRender() {
 		List<TrackBase> data = straightBuilder.getTracksForRender();
-		data.addAll(turnBuilder.getTracksForRender());
+		if (info.relativePosition) {
+			data.addAll(turnBuilder.getTracksForRender());
+		}
 		return data;
 	}
 	
 	@Override
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = straightBuilder.getRenderData();
-		data.addAll(turnBuilder.getRenderData());
+		if (info.relativePosition) {
+			data.addAll(turnBuilder.getRenderData());
+		}
 		return data;
 	}
 }
