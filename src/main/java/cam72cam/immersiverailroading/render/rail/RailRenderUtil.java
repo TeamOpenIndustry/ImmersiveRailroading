@@ -3,8 +3,6 @@ package cam72cam.immersiverailroading.render.rail;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -26,7 +24,7 @@ public class RailRenderUtil {
 		RenderHelper.disableStandardItemLighting();
 		
 		// Move to offset position
-		GL11.glTranslated(-info.getBuilder().getRenderOffset().getX(), 0, -info.getBuilder().getRenderOffset().getZ());
+		//GL11.glTranslated(-info.getBuilder().getRenderOffset().getX(), 0, -info.getBuilder().getRenderOffset().getZ());
 		
 		// Finish Drawing
 		RailRenderUtil.draw(RailBaseRender.getBaseBuffer(info));

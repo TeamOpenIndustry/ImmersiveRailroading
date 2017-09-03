@@ -59,7 +59,7 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
-		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ);
+		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ, false);
 		
 		BuilderBase builder = info.getBuilder(pos);
 		if (builder.canBuild()) {

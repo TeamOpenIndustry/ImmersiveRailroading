@@ -42,9 +42,6 @@ public class RailSnowRender {
 			// Create render targets
 			BufferBuilder worldRenderer = new BufferBuilder(2048);
 	
-			// Reverse position which will be done render model
-			worldRenderer.setTranslation(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ());
-	
 			// Start drawing
 			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 	
@@ -54,7 +51,7 @@ public class RailSnowRender {
 			boolean hasSnow = false;
 			
 			// This is evil but really fast :D
-			for (TrackBase base : info.getBuilder().getTracks()) {
+			for (TrackBase base : info.getBuilder().getTracksForRender()) {
 				TileEntity snowTe = info.world.getTileEntity(blockPos.add(base.getPos()));
 				if (snowTe == null) {
 					continue;
@@ -68,7 +65,7 @@ public class RailSnowRender {
 				}
 				snowState = snowState.withProperty(BlockSnow.LAYERS, snowLevel);
 				IBakedModel snowModel = blockRenderer.getBlockModelShapes().getModelForState(snowState);
-				blockRenderer.getBlockModelRenderer().renderModel(info.world, new TranslatedModel(snowModel, base.getHeight()), snowState, blockPos.add(base.getPos()), worldRenderer, false);
+				blockRenderer.getBlockModelRenderer().renderModel(info.world, new TranslatedModel(snowModel, base.getHeight()), snowState, base.getPos(), worldRenderer, false);
 				hasSnow = true;
 			}
 			

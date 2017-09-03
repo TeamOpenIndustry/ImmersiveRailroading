@@ -6,9 +6,10 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.math.BlockPos;
 
-public class BuilderSwitch extends BuilderStraight {
+public class BuilderSwitch extends BuilderBase {
 
 	private BuilderTurn turnBuilder;
+	private BuilderStraight straightBuilder;
 
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
@@ -16,14 +17,16 @@ public class BuilderSwitch extends BuilderStraight {
 		RailInfo turnInfo = info.clone();
 		turnInfo.type = TrackItems.TURN;
 
+		straightBuilder = new BuilderStraight(info, pos);
 		turnBuilder = new BuilderTurn(turnInfo, pos);
-		for(TrackBase track : turnBuilder.tracks) {
-			if (track instanceof TrackRail) {
-				track.overrideParent(new BlockPos(mainX, 0, mainZ));
+		
+		for(TrackBase turn : turnBuilder.tracks) {
+			if (turn instanceof TrackRail) {
+				turn.overrideParent(new BlockPos(straightBuilder.mainX, 0, straightBuilder.mainZ));
 			}
-			for (TrackBase base : tracks) {
-				if (base.rel_x == track.rel_x && base.rel_z == track.rel_z) {
-					base.setFlexible();
+			for (TrackBase straight : straightBuilder.tracks) {
+				if (straight.rel_x == turn.rel_x && straight.rel_z == turn.rel_z) {
+					straight.setFlexible();
 				}
 			}
 		}
@@ -32,18 +35,25 @@ public class BuilderSwitch extends BuilderStraight {
 
 	@Override
 	public boolean canBuild() {
-		return super.canBuild() && turnBuilder.canBuild();
+		return straightBuilder.canBuild() && turnBuilder.canBuild();
 	}
 	
 	@Override
 	public void build() {
-		super.build();
+		straightBuilder.build();
 		turnBuilder.build();
 	}
 	
 	@Override
+	public List<TrackBase> getTracksForRender() {
+		List<TrackBase> data = straightBuilder.getTracksForRender();
+		data.addAll(turnBuilder.getTracksForRender());
+		return data;
+	}
+	
+	@Override
 	public List<VecYawPitch> getRenderData() {
-		List<VecYawPitch> data = super.getRenderData();
+		List<VecYawPitch> data = straightBuilder.getRenderData();
 		data.addAll(turnBuilder.getRenderData());
 		return data;
 	}

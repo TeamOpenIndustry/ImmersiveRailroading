@@ -212,7 +212,7 @@ public class ClientProxy extends CommonProxy {
 		        }
 		        
 		        pos = pos.up();
-		        RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ);
+		        RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ, true);
 		        
 		        GL11.glPushMatrix();
 				{
@@ -222,7 +222,6 @@ public class ClientProxy extends CommonProxy {
 	                GL11.glTranslated(-d0, -d1, -d2);
 	                
 	                GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
-	                GL11.glTranslated(info.getBuilder().getRenderOffset().getX(), info.getBuilder().getRenderOffset().getY(), info.getBuilder().getRenderOffset().getZ());
 	                
 	                GlStateManager.disableBlend();
 	                RailRenderUtil.render(info, true);
