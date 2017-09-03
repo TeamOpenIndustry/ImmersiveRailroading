@@ -108,39 +108,24 @@ public class BuilderTurn extends BuilderBase {
 		
 		int radius = info.length;
 		
-		//int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
+		float angleDelta = (90 / ((float)Math.PI * (radius+1)/2));
 		
-		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
+		int xMult = 1;
+		int zMult = 1;
+		float hack = -0.5f;
 		
-		float xPos = (int)(Math.sin(Math.toRadians(realStartAngle)) * (radius-2));
-		float zPos = (int)(Math.cos(Math.toRadians(realStartAngle)) * (radius-2));
 		
-		if (realStartAngle % 90 == 0) {
-			xPos += 0.5;
-			zPos -= 0.5;
-		} else {
-			//Magical bs
-			//xPos += 0.7;
-
-			xPos += 0.5;
-			zPos -= 0.5;
+		float xPos = (int)(Math.sin(Math.toRadians(realStartAngle)) * (radius+hack+xMult));
+		float zPos = (int)(Math.cos(Math.toRadians(realStartAngle)) * (radius+hack+zMult));
+		
+		if (info.direction == TrackDirection.LEFT) {
+			xPos +=1;
 		}
-		
-		if (info.direction == TrackDirection.RIGHT) {
 			
-			for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
-				double gagX = Math.sin(Math.toRadians(angle)) * (radius)-xPos;
-				double gagZ = Math.cos(Math.toRadians(angle)) * (radius)-zPos;
-				data.add(new VecYawPitch(gagX, 0, gagZ, Math.min(180, angle+90 + angleDelta/2)));
-			}
-		} else {
-			xPos -=2;
-			for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
-				double gagX = Math.sin(Math.toRadians(angle)) * (radius)-xPos;
-				double gagZ = Math.cos(Math.toRadians(angle)) * (radius)-zPos;
-				
-				data.add(new VecYawPitch(gagX, 0, gagZ, angle + 90 + angleDelta/2));
-			}
+		for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
+			double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack+xMult)+1-xPos;
+			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack+zMult)-zPos;
+			data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2));
 		}
 
 		return super.offsetRenderData(mainX, mainZ, data);
