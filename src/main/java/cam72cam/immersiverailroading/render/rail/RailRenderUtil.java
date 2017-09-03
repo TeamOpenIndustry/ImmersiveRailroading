@@ -77,6 +77,6 @@ public class RailRenderUtil {
 
 	public static String renderID(RailInfo info) {
 		//TODO more attributes like railbed
-		return String.format("%s%s%s%s%s%s", info.facing, info.type, info.direction, info.length, info.quarter, info.quarters);
+		return String.format("%s%s%s%s%s%s%s", info.facing, info.type, info.direction, info.length, info.quarter, info.quarters, info.relativePosition);
 	}
 }
