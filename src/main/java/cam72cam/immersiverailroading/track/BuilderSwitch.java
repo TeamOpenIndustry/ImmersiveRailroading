@@ -24,10 +24,10 @@ public class BuilderSwitch extends BuilderBase {
 			if (turn instanceof TrackRail) {
 				turn.overrideParent(new BlockPos(straightBuilder.mainX, 0, straightBuilder.mainZ));
 			}
-			for (TrackBase straight : straightBuilder.tracks) {
-				if (straight.rel_x == turn.rel_x && straight.rel_z == turn.rel_z) {
-					straight.setFlexible();
-				}
+		}
+		for (TrackBase straight : straightBuilder.tracks) {
+			if (straight instanceof TrackGag) {
+				straight.setFlexible();
 			}
 		}
 	}
