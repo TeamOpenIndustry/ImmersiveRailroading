@@ -56,7 +56,7 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
 		TileRailBase tileEntity = (TileRailBase) world.getTileEntity(pos);
-		boolean isOriginAir = tileEntity.getParent() == null || world.isAirBlock(tileEntity.getParent());
+		boolean isOriginAir = tileEntity.getParentTile() == null || tileEntity.getParentTile().getParentTile() == null;
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
 		if (isOriginAir || !isOnRealBlock) {
 			//stupid IBlockAccess
@@ -69,7 +69,9 @@ public abstract class BlockRailBase extends Block {
 			tileEntity.getWorld().setBlockToAir(pos.up());
 			tileEntity.handleSnowTick();
 		}
-		tileEntity.getParentTile().setSwitchState(SwitchUtil.getSwitchState(tileEntity.getParentTile()));
+		if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
+			tileEntity.getParentTile().setSwitchState(SwitchUtil.getSwitchState(tileEntity.getParentTile()));
+		}
 	}
 
 	@Override
