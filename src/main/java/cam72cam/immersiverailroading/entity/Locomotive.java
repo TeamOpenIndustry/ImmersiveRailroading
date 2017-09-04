@@ -184,11 +184,12 @@ public abstract class Locomotive extends FreightTank {
 		double rollingResistanceNewtons = 0;
 		double gradeForceNewtons = 0;
 		//TODO starting effort
-		double massToMove = 0;
+		double massToMoveKg = 0;
 		for (EntityCoupleableRollingStock e : this.getTrain()) {
-			massToMove += e.getWeight();
+			massToMoveKg += e.getWeight();
 			
-			rollingResistanceNewtons += 0.0015 * e.getWeight() * 4.44822f;
+			double stockMassLb = 2.20462 * e.getWeight();
+			rollingResistanceNewtons += 0.0015 * stockMassLb * 4.44822f;
 			
 			//Grade forces
 			// TODO force while not moving
@@ -198,23 +199,20 @@ public abstract class Locomotive extends FreightTank {
 			}
 			
 			// lbs * 1%gradeResistance * grade multiplier
-			gradeForceNewtons += (e.getWeight() / 100) * (grade * 100)  * 4.44822f;
+			gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		}
 
 		// 0.25 = steel wheel on steel rail
-		double brakeAdhesion =  massToMove * 0.25;
-		double airBrakeNewtons = brakeAdhesion * dataManager.get(AIR_BRAKE) * 4.44822f;		
-		
-		// TO KG
-		massToMove *=  0.453592f;
+		double brakeAdhesion =  massToMoveKg * 0.25;
+		double airBrakeNewtons = brakeAdhesion * dataManager.get(AIR_BRAKE) * 4.44822f;
 		
 		double reverseMultiplier = (this.isReverse ? -1 : 1);
 		
 		// a = f (to newtons) * m (to newtons)
-		double tractiveAccell = tractiveEffortNewtons / massToMove;
-		double resistanceAccell = rollingResistanceNewtons / massToMove;
-		double gradeAccell = gradeForceNewtons / massToMove;
-		double brakeAccell = airBrakeNewtons / massToMove;
+		double tractiveAccell = tractiveEffortNewtons / massToMoveKg;
+		double resistanceAccell = rollingResistanceNewtons / massToMoveKg;
+		double gradeAccell = gradeForceNewtons / massToMoveKg;
+		double brakeAccell = airBrakeNewtons / massToMoveKg;
 		
 		
 		
@@ -248,7 +246,7 @@ public abstract class Locomotive extends FreightTank {
 			debugInfo.add("Locomotive Tractive Effort N: " + tractiveEffortNewtons);
 			debugInfo.add("Train Rolling Resistance N: " + rollingResistanceNewtons);
 			debugInfo.add("Train Slope Resistance N: " + gradeForceNewtons);
-			debugInfo.add("Train Mass KG: " + massToMove);
+			debugInfo.add("Train Mass KG: " + massToMoveKg);
 			debugInfo.add("Locomotive SPEED M/s: " + currentMCVelocity);
 			debugInfo.add("Locomotive Tractive M/s^2: " + deltaAccellTractiveMCVelocity);
 			debugInfo.add("Locomotive Rolling M/s^2: " + deltaAccellRollingResistanceMCVelocity);

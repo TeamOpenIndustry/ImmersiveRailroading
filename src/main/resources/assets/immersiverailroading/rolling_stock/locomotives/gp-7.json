@@ -9,7 +9,7 @@
 		"horsepower": 1500,
 		"tractive_effort_lbf": 61500,
 		"max_speed_kmh": 104.607,
-		"weight": 112
+		"weight_kg": 112000
 	},
 	"passenger": {
 		"center_x": 3,

@@ -2,7 +2,7 @@
 	"name": "BR Coach MK1",
 	"model": "immersiverailroading:models/rolling_stock/passenger/br_coach_mk1.obj",
 	"properties": {
-		"weight": 54
+		"weight_kg": 27433
 	},
 	"passenger": {
 		"center_x": 0,

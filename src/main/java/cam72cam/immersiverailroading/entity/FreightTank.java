@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -164,19 +165,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 
 		theTank.setCapacity(this.getTankCapacity());
 	}
-
-	/**
-	 * Handle mass depending on liquid amount
-	 */
-	@Override
-	protected void handleMass() {
-		int mass = 0;
-		if (theTank.getFluid() != null) {
-			// 1 bucket = 1 kilo
-			mass += theTank.getFluid().amount / 10000;
-		}
-		this.getDataManager().set(CARGO_MASS, mass);
-	}
 	
 	@Override
 	public void onUpdate() {
@@ -258,6 +246,27 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 * 
 	 */
 
+
+	/**
+	 * Handle mass depending on liquid amount
+	 */
+	@Override
+	protected void handleMass() {
+		int mass = 0;
+		if (theTank.getFluid() != null) {
+			mass += theTank.getFluid().amount / 1000;
+		}
+		this.getDataManager().set(CARGO_ITEMS, mass);
+	}
+	
+	@Override
+	public double getWeight() {
+		// LiquidWeight 
+		double fLoad = Config.liquidWeight * (this.getDataManager().get(FLUID_AMOUNT) / 1000f);
+		fLoad = fLoad + super.getWeight();
+		return fLoad;
+	}
+	
 	@Override
 	public IFluidTankProperties[] getTankProperties() {
 		return theTank.getTankProperties();

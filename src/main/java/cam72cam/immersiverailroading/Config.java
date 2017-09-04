@@ -30,4 +30,10 @@ public class Config {
 	
 	@Comment({"Self explanitory"})
 	public static boolean trainsOnTheBrain = true;
+	
+	@Comment({"How heavy is a single block in Kg"})
+	public static int blockWeight = 100;
+	
+	@Comment({"How heavy is a single bucket of liquid in Kg"})
+	public static int liquidWeight = 100;
 }
