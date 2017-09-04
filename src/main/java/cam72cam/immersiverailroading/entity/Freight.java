@@ -25,12 +25,12 @@ public abstract class Freight extends EntityCoupleableRollingStock {
         }
     };
     
-	protected static DataParameter<Integer> CARGO_MASS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
+	protected static DataParameter<Integer> CARGO_ITEMS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 
 	public Freight(World world, String defID) {
 		super(world, defID);
 		
-		this.getDataManager().register(CARGO_MASS, 0);
+		this.getDataManager().register(CARGO_ITEMS, 0);
 	}
 	
 	protected void onInventoryChanged() {
@@ -68,7 +68,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 			itemInsideCount += cargoItems.getStackInSlot(slot).getCount();
 		}
-		this.getDataManager().set(CARGO_MASS, itemInsideCount);
+		this.getDataManager().set(CARGO_ITEMS, itemInsideCount);
 	}
 
 	@Override
@@ -103,10 +103,10 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 	
 	@Override
-	public int getWeight() {
-		float fLoad = 1000 * Config.blockWeight * this.getDataManager().get(CARGO_MASS);
+	public double getWeight() {
+		double fLoad = Config.blockWeight * this.getDataManager().get(CARGO_ITEMS);
 		fLoad = fLoad + super.getWeight();
-		return Math.round(fLoad);
+		return fLoad;
 	}
 
     @Override

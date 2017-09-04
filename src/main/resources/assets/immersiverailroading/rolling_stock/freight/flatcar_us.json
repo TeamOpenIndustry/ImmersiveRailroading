@@ -2,7 +2,7 @@
 	"name": "Box Car",
 	"model": "immersiverailroading:models/rolling_stock/freight/flat_car.obj",
 	"properties": {
-		"weight": 80
+		"weight_kg": 72574
 	},
 	"passenger": {
 		"center_x": 0,
