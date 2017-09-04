@@ -165,18 +165,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 
 		theTank.setCapacity(this.getTankCapacity());
 	}
-
-	/**
-	 * Handle mass depending on liquid amount
-	 */
-	@Override
-	protected void handleMass() {
-		int mass = 0;
-		if (theTank.getFluid() != null) {
-			mass += theTank.getFluid().amount / 1000;
-		}
-		this.getDataManager().set(CARGO_MASS, mass);
-	}
 	
 	@Override
 	public void onUpdate() {
@@ -258,11 +246,25 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 * 
 	 */
 
+
+	/**
+	 * Handle mass depending on liquid amount
+	 */
 	@Override
-	public int getWeight() {
-		float fLoad = 1000 * Config.liquidWeight * this.getDataManager().get(CARGO_MASS);
+	protected void handleMass() {
+		int mass = 0;
+		if (theTank.getFluid() != null) {
+			mass += theTank.getFluid().amount / 1000;
+		}
+		this.getDataManager().set(CARGO_ITEMS, mass);
+	}
+	
+	@Override
+	public double getWeight() {
+		// LiquidWeight 
+		double fLoad = Config.liquidWeight * (this.getDataManager().get(FLUID_AMOUNT) / 1000f);
 		fLoad = fLoad + super.getWeight();
-		return Math.round(fLoad);
+		return fLoad;
 	}
 	
 	@Override
