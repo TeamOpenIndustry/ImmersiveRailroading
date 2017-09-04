@@ -1,5 +1,5 @@
 package cam72cam.immersiverailroading.entity;
-
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -102,7 +102,12 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 	}
 	
-
+	@Override
+	public int getWeight() {
+		float fLoad = 1000 * Config.blockWeight * this.getDataManager().get(CARGO_MASS);
+		fLoad = fLoad + super.getWeight();
+		return Math.round(fLoad);
+	}
 
     @Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing) {

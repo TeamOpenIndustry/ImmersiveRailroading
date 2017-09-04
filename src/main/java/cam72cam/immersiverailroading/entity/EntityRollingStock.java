@@ -124,7 +124,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 * @return Stock Weight in Kg
 	 */
 	public int getWeight() {
-		return (1000 * this.getDefinition().getWeight());
+		float fWeight = this.getDefinition().getWeight();
+		return (1000 * Math.round(fWeight));
 	}
 
 	/*
