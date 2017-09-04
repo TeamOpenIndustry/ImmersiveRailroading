@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -59,6 +60,10 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
+		if (player.getEntityWorld().getBlockState(pos.down()).getBlock() instanceof BlockRailBase) {
+			pos = pos.down();
+		}
+		
 		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ, false);
 		
 		BuilderBase builder = info.getBuilder(pos);
