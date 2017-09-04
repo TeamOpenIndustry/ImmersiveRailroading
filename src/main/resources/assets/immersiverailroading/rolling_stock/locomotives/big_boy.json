@@ -11,7 +11,7 @@
 		"tractive_effort_lbf": 135375,
 		"max_speed_kmh": 130,
 		"valve_gear": "mallet_walschaerts",
-		"weight": 567
+		"weight_kg": 345600
 	},
 	"passenger": {
 		"center_x": -12,

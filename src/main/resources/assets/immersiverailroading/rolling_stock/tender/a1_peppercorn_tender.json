@@ -2,7 +2,7 @@
 	"name": "A1 Peppercorn Tender",
 	"model": "immersiverailroading:models/rolling_stock/tender/a1_peppercorn_tender.obj",
 	"properties": {
-		"weight": 61
+		"weight_kg": 61877
 	},
 	"passenger": {
 		"center_x": 0,

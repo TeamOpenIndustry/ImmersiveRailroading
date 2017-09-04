@@ -1,5 +1,5 @@
 package cam72cam.immersiverailroading.entity;
-
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,12 +25,12 @@ public abstract class Freight extends EntityCoupleableRollingStock {
         }
     };
     
-	protected static DataParameter<Integer> CARGO_MASS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
+	protected static DataParameter<Integer> CARGO_ITEMS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 
 	public Freight(World world, String defID) {
 		super(world, defID);
 		
-		this.getDataManager().register(CARGO_MASS, 0);
+		this.getDataManager().register(CARGO_ITEMS, 0);
 	}
 	
 	protected void onInventoryChanged() {
@@ -68,7 +68,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 			itemInsideCount += cargoItems.getStackInSlot(slot).getCount();
 		}
-		this.getDataManager().set(CARGO_MASS, itemInsideCount);
+		this.getDataManager().set(CARGO_ITEMS, itemInsideCount);
 	}
 
 	@Override
@@ -102,7 +102,12 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 	}
 	
-
+	@Override
+	public double getWeight() {
+		double fLoad = Config.blockWeight * this.getDataManager().get(CARGO_ITEMS);
+		fLoad = fLoad + super.getWeight();
+		return fLoad;
+	}
 
     @Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing) {

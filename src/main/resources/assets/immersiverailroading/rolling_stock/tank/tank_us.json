@@ -2,7 +2,7 @@
 	"name": "Tank US",
 	"model": "immersiverailroading:models/rolling_stock/tank/tank_car.obj",
 	"properties": {
-		"weight": 36
+		"weight_kg": 36060
 	},
 	"passenger": {
 		"center_x": 0,
