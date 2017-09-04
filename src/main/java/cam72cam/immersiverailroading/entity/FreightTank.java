@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -172,8 +173,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	protected void handleMass() {
 		int mass = 0;
 		if (theTank.getFluid() != null) {
-			// 1 bucket = 1 kilo
-			mass += theTank.getFluid().amount / 10000;
+			mass += theTank.getFluid().amount / 1000;
 		}
 		this.getDataManager().set(CARGO_MASS, mass);
 	}
@@ -258,6 +258,13 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 * 
 	 */
 
+	@Override
+	public int getWeight() {
+		float fLoad = 1000 * Config.liquidWeight * this.getDataManager().get(CARGO_MASS);
+		fLoad = fLoad + super.getWeight();
+		return Math.round(fLoad);
+	}
+	
 	@Override
 	public IFluidTankProperties[] getTankProperties() {
 		return theTank.getTankProperties();
