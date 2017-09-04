@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.SwitchUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -42,7 +43,7 @@ public abstract class BlockRailBase extends Block {
 			newte.setSkipNextRefresh();
 		}
 
-		if (parent != null && !te.isFlexible()) {
+		if (parent != null && !te.getWillBeReplaced()) {
 			world.destroyBlock(parent, true);
 		}
 	}
@@ -55,17 +56,21 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
 		TileRailBase tileEntity = (TileRailBase) world.getTileEntity(pos);
-		boolean isOriginAir = tileEntity.getParent() == null || world.isAirBlock(tileEntity.getParent());
+		boolean isOriginAir = tileEntity.getParentTile() == null || tileEntity.getParentTile().getParentTile() == null;
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
 		if (isOriginAir || !isOnRealBlock) {
 			//stupid IBlockAccess
 			tileEntity.getWorld().destroyBlock(pos, true);
+			return;
 		}
 		
 		IBlockState up = world.getBlockState(pos.up());
 		if (up.getBlock() == Blocks.SNOW_LAYER) {
 			tileEntity.getWorld().setBlockToAir(pos.up());
 			tileEntity.handleSnowTick();
+		}
+		if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
+			tileEntity.getParentTile().setSwitchState(SwitchUtil.getSwitchState(tileEntity.getParentTile()));
 		}
 	}
 

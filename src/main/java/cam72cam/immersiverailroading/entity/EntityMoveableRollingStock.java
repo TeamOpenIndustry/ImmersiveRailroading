@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -10,6 +11,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.immersiverailroading.util.SwitchUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -352,13 +354,21 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 	protected TileRail railFromPosition(Vec3d position) {
 		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+		TileRail parent;
 		if (te instanceof TileRailGag) {
-			return ((TileRailGag) te).getParentTile();
+			parent = ((TileRailGag) te).getParentTile();
 		} else if (te instanceof TileRail) {
-			return (TileRail) te;
+			parent = (TileRail) te;
 		} else {
 			return null;
 		}
+		
+		TileRail super_parent = parent.getParentTile();
+		if (SwitchUtil.getSwitchState(parent) == SwitchState.STRAIGHT) {
+			parent = super_parent;
+		}
+		
+		return parent;
 	}
 
 	private Vec3d nextMovement(float yaw, double d) {
@@ -405,8 +415,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// Calculate the angle (rad) for the current position is
 			double posRelYaw = Math.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
-			double radius = rail.getRadius() + 0.5; // TODO bake this into
-													// BuilderTurn
+			double radius = rail.getRadius() - 0.5;
 			// Calculate the angle delta in rad (radians are awesome)
 			double yawDelt = distance / radius;
 

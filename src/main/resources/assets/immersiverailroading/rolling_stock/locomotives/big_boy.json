@@ -14,8 +14,8 @@
 		"weight_kg": 345600
 	},
 	"passenger": {
-		"center_x": -6.5,
-		"center_y": 1.5,
+		"center_x": -12,
+		"center_y": 2.4,
 		"length": 1,
 		"width": 2
 	},

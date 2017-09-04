@@ -6,114 +6,90 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
+import net.minecraft.util.math.BlockPos;
 
 public class BuilderTurn extends BuilderBase {
 
-	private int radius;
-	private TrackDirection direction;
 	private float realStartAngle;
 	private float startAngle;
 	private float endAngle;
+	
+	private int mainX;
+	private int mainZ;
 
-	public BuilderTurn(World world, int x, int y, int z, EnumFacing rotation, int radius, int quarter, int quarters, TrackDirection direction) {
-		super(world, x, y, z, rotation);
+	public BuilderTurn(RailInfo info, BlockPos pos) {
+		super(info, pos);
 		
-		System.out.println("Quarter: " + quarter);
-		System.out.println("Quarters: " + quarters);
-		
-		this.radius = radius;
-		this.direction = direction;
+		int radius = info.length;
 
-		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
+		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;
 		
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
-		double hack = -1;
+		double hack = -0.5;
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
 		
 		
-		startAngle = 90 - quarter/4f * 90;
-		endAngle = startAngle - quarters/4f * 90;
+		startAngle = 90 - info.quarter/4f * 90;
+		endAngle = startAngle - info.quarters/4f * 90;
 		//endAngle = startAngle - 90;
 		
-		if (direction == TrackDirection.LEFT) {
-			startAngle = 180 + 90 + quarter/4f * 90;
-			endAngle = startAngle + quarters/4f * 90;
+		if (info.direction == TrackDirection.LEFT) {
+			startAngle = 180 + 90 + info.quarter/4f * 90;
+			endAngle = startAngle + info.quarters/4f * 90;
 			//endAngle = startAngle + 360;
 		}
 
 		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
 		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
 		realStartAngle = startAngle;
-		float flexAngle = endAngle;
 		
-		if (direction == TrackDirection.LEFT) {
+		if (info.direction == TrackDirection.LEFT) {
 			float tmp = startAngle;
 			startAngle = endAngle;
 			endAngle = tmp;
 		}
 		
+		float flexAngle = 6;
+		
 		for (float angle = startAngle; angle > endAngle; angle-=angleDelta) {
-			int gagX;
-			int gagZ;
-			boolean isFlex = flexAngle + angleDelta > angle && flexAngle - angleDelta < angle;
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack-0.51));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack-0.51));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+0.5));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+0.5));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.5));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.5));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+1.99));
-			gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+1.99));
-			positions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
-			if (isFlex)
-				flexPositions.add(Pair.of(gagX+1-xPos, gagZ-zPos));
+			
+			for (double q = -1.4; q <= 1.4; q+=0.1) {
+				int gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+q))+1-xPos;
+				int gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+q))-zPos;
+				positions.add(Pair.of(gagX, gagZ));
+				if (angle > startAngle-flexAngle || angle < endAngle+flexAngle)
+					flexPositions.add(Pair.of(gagX, gagZ));
+			}
+			if (Math.ceil(angle) == Math.ceil((startAngle + endAngle)/2)) {
+				mainX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack))+1-xPos;
+				mainZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack))-zPos;
+			}
 		}
 
+		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
-		TrackRail turnTrack = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.TURN, radius, quarter);
+		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.horizOff);
 		
 		turnTrack.setRotationCenter(-xMult * radius, 0, 0);
-		turnTrack.setDirection(direction);
-		turnTrack.setTurnQuarters(quarters);
+		turnTrack.setDirection(info.direction);
+		turnTrack.setTurnQuarters(info.quarters);
 		
 		xMult = 1;
 		tracks.add(turnTrack);
 		for (Pair<Integer, Integer> pair : positions) {
 			int gagX = pair.getLeft() * xMult; 
 			int gagZ = pair.getRight() * zMult;
-			if (gagX == 0 && gagZ == 0) {
+			if (gagX == mainX && gagZ == mainZ) {
 				// Skip parent block
 				continue;
 			}
-			/*if (gagX > radius || gagZ > radius) {
-				// Skip out of bounds
-				continue;
-			}*/
 			TrackBase tg = new TrackGag(this, gagX, 0, gagZ);
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
@@ -121,46 +97,62 @@ public class BuilderTurn extends BuilderBase {
 			tracks.add(tg);
 		}
 	}
+	
+	@Override
+	public List<TrackBase> getTracksForRender() {
+		return super.offsetTracksForRender(mainX, mainZ, this.tracks);
+	}
 
 	@Override
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		int xMult = direction == TrackDirection.LEFT ? -1 : 1;
+		int radius = info.length;
 		
-		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
+		float angleDelta = (90 / ((float)Math.PI * (radius+1)/2));
 		
-		float xPos = (int)(Math.sin(Math.toRadians(realStartAngle)) * (radius-2));
-		float zPos = (int)(Math.cos(Math.toRadians(realStartAngle)) * (radius-2));
+		int xMult = 1;
+		int zMult = 1;
+		float hack = -0.5f;
 		
-		if (realStartAngle % 90 == 0) {
-			xPos += 0.5;
-			zPos -= 0.5;
-		} else {
-			//Magical bs
-			//xPos += 0.7;
-
-			xPos += 0.5;
-			zPos -= 0.5;
+		
+		float xPos = (int)(Math.sin(Math.toRadians(realStartAngle)) * (radius+hack+xMult));
+		float zPos = (int)(Math.cos(Math.toRadians(realStartAngle)) * (radius+hack+zMult));
+		
+		if (info.direction == TrackDirection.LEFT) {
+			xPos +=1;
 		}
 		
-		if (direction == TrackDirection.RIGHT) {
+		int counter = 0;
 			
-			for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
-				double gagX = Math.sin(Math.toRadians(angle)) * (radius)-xPos;
-				double gagZ = Math.cos(Math.toRadians(angle)) * (radius)-zPos;
-				data.add(new VecYawPitch(gagX, 0, gagZ, Math.min(180, angle+90 + angleDelta/2)));
+		for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
+			double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack+xMult)+1-xPos;
+			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack+zMult)-zPos;
+			float switchAngle = 0;
+			float switchOffset = 0;
+			if (info.switchState == SwitchState.STRAIGHT) {
+				if (info.direction == TrackDirection.RIGHT ) {
+					if (angle > startAngle - 4*angleDelta) {
+						counter++;
+						switchOffset = (4-counter) / 30f * -1;
+						switchAngle = angleDelta * info.length / 30;
+					}
+				} else {
+					if (angle < endAngle + 4*angleDelta) {
+						counter++;
+						switchOffset = (counter) / 30f * 1;
+						switchAngle = -angleDelta * info.length / 30;
+					}
+				}
 			}
-		} else {
-			xPos -=2;
-			for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
-				double gagX = Math.sin(Math.toRadians(angle)) * (radius)-xPos;
-				double gagZ = Math.cos(Math.toRadians(angle)) * (radius)-zPos;
-				
-				data.add(new VecYawPitch(gagX, 0, gagZ, angle + 90 + angleDelta/2));
+			if (switchAngle == 0) {
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2 + switchAngle));
+			} else {
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2, "RAIL_BASE", "RAIL_RIGHT"));
+				data.add(new VecYawPitch(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
 			}
 		}
-		
-		return data;
+
+		return super.offsetRenderData(mainX, mainZ, data);
 	}
 }

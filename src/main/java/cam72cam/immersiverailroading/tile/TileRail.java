@@ -6,8 +6,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.net.SwitchStatePacket;
+import cam72cam.immersiverailroading.util.RailInfo;
 
 public class TileRail extends TileRailBase {
 	private EnumFacing facing;
@@ -16,12 +20,13 @@ public class TileRail extends TileRailBase {
 	private BlockPos center;
 	
 	private boolean isVisible = true;
-	private boolean switchActive = false;
+	private SwitchState switchState = SwitchState.NONE;
 	
 	private int length;
 	private int rotationQuarter;
 	private TrackDirection direction = TrackDirection.NONE;
 	private int turnQuarters;
+	private float horizOff;
 
 
 	@Override
@@ -56,8 +61,14 @@ public class TileRail extends TileRailBase {
 		this.markDirty();
 	}
 	
-	public boolean getSwitchState() {
-		return switchActive;
+	public SwitchState getSwitchState() {
+		return switchState;
+	}
+	public void setSwitchState(SwitchState state) {
+		this.switchState = state;
+		if (!world.isRemote) {
+			ImmersiveRailroading.net.sendToDimension(new SwitchStatePacket(this.getWorld().provider.getDimension(), this.pos, state), this.getWorld().provider.getDimension());
+		}
 	}
 	
 	public boolean isVisible() {
@@ -84,6 +95,15 @@ public class TileRail extends TileRailBase {
 	}
 	public void setDirection(TrackDirection dir) {
 		this.direction = dir;
+		this.markDirty();
+	}
+	
+	
+	public float getHorizOff() {
+		return horizOff;
+	}
+	public void setHorizOff(float horizOff) {
+		this.horizOff = horizOff;
 		this.markDirty();
 	}
 	
@@ -127,7 +147,9 @@ public class TileRail extends TileRailBase {
 		center = getNBTBlockPos(nbt, "center");
 		
 		isVisible = nbt.getBoolean("isVisible");
-		switchActive = nbt.getBoolean("switchActive");
+		switchState = SwitchState.values()[nbt.getInteger("switchState")];
+		
+		horizOff = nbt.getFloat("horizOff");
 		
 		length = nbt.getInteger("length");
 		rotationQuarter = nbt.getInteger("rotationQuarter");
@@ -145,7 +167,9 @@ public class TileRail extends TileRailBase {
 		setNBTBlockPos(nbt, "center", center);
 		
 		nbt.setBoolean("isVisible", isVisible);
-		nbt.setBoolean("switchActive", switchActive);
+		nbt.setInteger("switchState", switchState.ordinal());
+		
+		nbt.setFloat("horizOff", horizOff);
 		
 		nbt.setInteger("length", length);
 		nbt.setInteger("rotationQuarter", rotationQuarter);
@@ -153,5 +177,15 @@ public class TileRail extends TileRailBase {
 		nbt.setInteger("turnQuarters", turnQuarters);
 		
 		return super.writeToNBT(nbt);
+	}
+
+	private RailInfo info;
+	public RailInfo getRailRenderInfo() {
+		if (info == null) {
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getHorizOff());
+		}
+		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
+		info.switchState = this.switchState;
+		return info;
 	}
 }

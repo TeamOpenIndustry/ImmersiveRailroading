@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -19,18 +20,24 @@ public abstract class BuilderBase {
 	int x;
 	int y;
 	int z;
-	EnumFacing rotation;
+	public EnumFacing rotation;
 	
 	private int[] translation;
 
-	public BuilderBase(World world, int x, int y, int z, EnumFacing rotation) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.rotation = rotation;
-		this.world = world;
-	}
+	public RailInfo info;
+
+	private BlockPos parent_pos;
 	
+	public BuilderBase(RailInfo info, BlockPos pos) {
+		this.info = info;
+		rotation = info.facing;
+		world = info.world;
+		parent_pos = pos;
+		this.x = pos.getX();
+		this.y = pos.getY();
+		this.z = pos.getZ();
+	}
+
 	public class VecYawPitch extends Vec3d {
 		private float yaw;
 		private float pitch;
@@ -183,11 +190,48 @@ public abstract class BuilderBase {
 		}
 	}
 	
-	public ArrayList<TrackBase> getTracks() {
+	public List<TrackBase> getTracksForRender() {
 		return this.tracks;
 	}
 
 	public BlockPos getPos() {
 		return new BlockPos(x, y, z);
+	}
+
+	
+	public void setParentPos(BlockPos pos) {
+		parent_pos = convertRelativePositions(pos.getX(), pos.getY(), pos.getZ(), this.rotation);
+	}
+	public BlockPos getParentPos() {
+		return parent_pos;
+	}
+
+	public List<VecYawPitch> offsetRenderData(int mainX, int mainZ, List<VecYawPitch> data) {
+		if (info.relativePosition) {
+			return data;
+		}
+		List<VecYawPitch> dataOffset = new ArrayList<VecYawPitch>();
+		
+		for (VecYawPitch piece : data) {
+			Vec3d off = piece.subtract(mainX, 0, mainZ);
+			dataOffset.add(new VecYawPitch(off.x, off.y, off.z, piece.getYaw(), piece.getPitch(), piece.getLength(), (String[]) piece.getGroups().toArray()));
+		}
+		
+		return dataOffset;
+	}
+
+	public List<TrackBase> offsetTracksForRender(int mainX, int mainZ, List<TrackBase> tracksParam) {
+		if (info.relativePosition) {
+			return tracksParam;
+		}
+		List<TrackBase> data = new ArrayList<TrackBase>();
+		for (TrackBase base : tracksParam) {
+			//TODO might need to clone base
+			base.rel_x -= mainX;
+			base.rel_z -= mainZ;
+			
+			data.add(base);
+		}
+		return data;
 	}
 }

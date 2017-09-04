@@ -3,35 +3,19 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.library.TrackItems;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
+import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
-public class BuilderSlope extends BuilderBase {
-
-	private int length;
-
-	public BuilderSlope(World world, int x, int y, int z, EnumFacing rotation,  int length, int quarter) {
-		super(world, x, y, z, rotation);
-		this.length = length;
+public class BuilderSlope extends BuilderStraight {
+	public BuilderSlope(RailInfo info, BlockPos pos) {
+		super(info, pos);
 		
-		float slope = (1.0F/(length + 1));
-		TrackRail rootTrack = new TrackRail(this, 0, 0, tracks.size()/3, EnumFacing.NORTH, TrackItems.SLOPE, length, quarter);
-		tracks.add(new TrackGag(this, -1, 0, tracks.size()/3));
-		tracks.add(rootTrack);
-		tracks.add(new TrackGag(this, 1, 0, tracks.size()/3));
-		for(int i = 1; i <= length; i ++) {
-			TrackGag gag = new TrackGag(this, -1, 0, tracks.size()/3);
-			TrackGag gag2 = new TrackGag(this, 0, 0, tracks.size()/3);
-			TrackGag gag3 = new TrackGag(this, 1, 0, tracks.size()/3);
-			
-			gag.setHeight(slope * i);
-			gag2.setHeight(slope * i);
-			gag3.setHeight(slope * i);
-			
-			tracks.add(gag);
-			tracks.add(gag2);
-			tracks.add(gag3);
+		float slope = (1.0F/(info.length + 1));
+		
+		for (TrackBase base : tracks) {
+			base.setHeight((float) Math.min((new Vec3d(base.rel_x, 0, base.rel_z)).lengthVector() * slope, 0.9));
 		}
 	}
 
@@ -39,12 +23,14 @@ public class BuilderSlope extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		float slope = (1.0F/(length + 1));
-
-		data.add(new VecYawPitch(-0.5, 0, 0, 0, (float) -Math.toDegrees(Math.atan2(1, length)), length+1, "RAIL_RIGHT", "RAIL_LEFT"));
+		float slope = (1.0F/(info.length + 1));
 		
-		for (int i = 0; i <= length; i++) {
-			data.add(new VecYawPitch(-0.5, slope * i, i, 0, (float) -Math.toDegrees(Math.atan2(1, length)), "RAIL_BASE"));
+		Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
+		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, (float) -Math.toDegrees(Math.atan2(1, info.length)), info.length, "RAIL_RIGHT", "RAIL_LEFT"));
+		
+		for (int i = 0; i < info.length; i++) {
+			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
+			data.add(new VecYawPitch(pos.x, pos.y + slope * i, pos.z, -angle, (float) -Math.toDegrees(Math.atan2(1, info.length)), "RAIL_BASE"));
 		}
 		return data;
 	}

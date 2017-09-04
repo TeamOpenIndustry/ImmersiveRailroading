@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
@@ -24,10 +27,13 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemModel;
-import cam72cam.immersiverailroading.render.TileRailRender;
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.render.rail.TileRailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -39,7 +45,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -180,6 +190,44 @@ public class ClientProxy extends CommonProxy {
 			Entity riding = Minecraft.getMinecraft().player.getRidingEntity();
 			if (riding instanceof Locomotive) {
 				event.getLeft().addAll(((Locomotive)riding).getDebugInfo());
+			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void onRenderMouseover(DrawBlockHighlightEvent event) {
+		if (event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
+			if (event.getPlayer().getHeldItemMainhand().getItem() == ImmersiveRailroading.ITEM_RAIL_BLOCK) {
+				EntityPlayer player = event.getPlayer();
+				ItemStack stack = event.getPlayer().getHeldItemMainhand();
+				BlockPos pos = event.getTarget().getBlockPos();
+				
+				Vec3d vec = event.getTarget().hitVec;
+		        float hitX = (float)(vec.x - (double)pos.getX());
+		        float hitY = (float)(vec.y - (double)pos.getY());
+		        float hitZ = (float)(vec.z - (double)pos.getZ());
+		        
+		        if (player.getEntityWorld().getBlockState(pos).getBlock() instanceof BlockRailBase) {
+		        	pos = pos.down();
+		        }
+		        
+		        pos = pos.up();
+		        RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ, true);
+		        
+		        GL11.glPushMatrix();
+				{
+	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)event.getPartialTicks();
+	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)event.getPartialTicks();
+	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)event.getPartialTicks();
+	                GL11.glTranslated(-d0, -d1, -d2);
+	                
+	                GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
+	                
+	                GlStateManager.disableBlend();
+	                RailRenderUtil.render(info, true);
+	                GlStateManager.enableBlend();
+				}
+				GL11.glPopMatrix();
 			}
 		}
 	}
