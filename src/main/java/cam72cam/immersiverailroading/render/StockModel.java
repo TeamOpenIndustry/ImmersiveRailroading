@@ -446,10 +446,9 @@ public class StockModel extends OBJModel {
 		float drivingRodCenterLength = drivingRodLength - drivingRodHeight;
 
 		Vec3d connRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngle);
-		double drivingRodHorizLeft = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - connRodMovment.z * connRodMovment.z);
+		double drivingRodHoriz = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - connRodMovment.z * connRodMovment.z);
 
-		Vector3f pistonMax = maxOfGroup(pistonRods.get(section));
-		double pistonDeltaLeft = connRodMovment.x - 0.3;
+		double pistonDelta = connRodMovment.x - 0.3;
 
 		double returnCrankHeight = heightOfGroups(returnCranks.get(section));
 		double returnCrankLength = lengthOfGroups(returnCranks.get(section));
@@ -490,7 +489,7 @@ public class StockModel extends OBJModel {
 
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(connRodPos.x, connRodPos.y, connRodPos.z);
-			GlStateManager.rotate((float) Math.toDegrees(Math.atan2(connRodMovment.z, drivingRodHorizLeft)), 0, 0, 1);
+			GlStateManager.rotate((float) Math.toDegrees(Math.atan2(connRodMovment.z, drivingRodHoriz)), 0, 0, 1);
 			GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
 			drawGroups(drivingRods.get(section));
 			GlStateManager.popMatrix();
@@ -529,7 +528,7 @@ public class StockModel extends OBJModel {
 		// PISTON_LEFT
 		GlStateManager.pushMatrix();
 		{
-			GlStateManager.translate(pistonDeltaLeft, 0, 0);
+			GlStateManager.translate(pistonDelta, 0, 0);
 			drawGroups(pistonRods.get(section));
 			drawGroups(crossHeads.get(section));
 			// TODO rotate combination lever

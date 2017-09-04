@@ -3,11 +3,9 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase.PosRot;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFlower;
-import net.minecraft.block.BlockMushroom;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -16,15 +14,17 @@ import net.minecraft.util.math.BlockPos;
 public abstract class TrackBase {
 	public BuilderBase builder;
 
-	private int rel_x;
-	private int rel_y;
-	private int rel_z;
+	protected int rel_x;
+	protected int rel_y;
+	protected int rel_z;
 	private EnumFacing rel_rotation;
 	private float height;
 
 	protected Block block;
 
 	private boolean flexible = false;
+
+	private BlockPos parent;
 
 	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block, EnumFacing rel_rotation) {
 		this.builder = builder;
@@ -35,35 +35,15 @@ public abstract class TrackBase {
 		this.block = block;
 	}
 
-	private boolean canBeReplaced() {
-		PosRot pos = builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
-		Block block = builder.world.getBlockState(pos).getBlock();
-		
-		if (block == null) {
-			return true;
-		}
-		if (block.isReplaceable(builder.world, pos)) {
-			return true;
-		}
-		if (block instanceof BlockFlower || block == Blocks.DOUBLE_PLANT || block instanceof BlockMushroom) {
-			return true;
-		}
-		if (block instanceof BlockRailBase) {
-			TileRailBase te = (TileRailBase) builder.world.getTileEntity(pos);
-			return te.isFlexible();
-		}
-		return false;
-	}
-
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
-		PosRot pos = builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
+		PosRot pos = getPos();
 		
-		return canBeReplaced() && builder.world.getBlockState(pos.down()).isTopSolid();
+		return BlockUtil.canBeReplaced(builder.world, pos, true) && builder.world.getBlockState(pos.down()).isTopSolid();
 	}
 
 	public TileEntity placeTrack() {
-		PosRot pos = builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
+		PosRot pos = getPos();
 		
 		NBTTagCompound replaced = null;
 		
@@ -73,6 +53,7 @@ public abstract class TrackBase {
 			if (removed instanceof BlockRailBase) {
 				TileRailBase te = (TileRailBase) builder.world.getTileEntity(pos);
 				replaced = te.serializeNBT();
+				te.setWillBeReplaced();
 			} else {				
 				removed.dropBlockAsItem(builder.world, pos, state, 0);
 			}
@@ -80,7 +61,11 @@ public abstract class TrackBase {
 		builder.world.setBlockState(pos, getBlockState(), 3);
 		TileRailBase tr = (TileRailBase)builder.world.getTileEntity(pos);
 		tr.setReplaced(replaced);
-		tr.setParent(builder.getPos());
+		if (parent != null) {
+			tr.setParent(parent);
+		} else {
+			tr.setParent(builder.getParentPos());
+		}
 		tr.setHeight(getHeight());
 		return tr;
 	}
@@ -88,8 +73,7 @@ public abstract class TrackBase {
 		return block.getDefaultState();
 	}
 	public EnumFacing getFacing() {
-		PosRot coords = builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
-		return coords.getRotation();
+		return getPos().getRotation();
 	}
 
 	public void moveTo(TrackBase trackBase) {
@@ -99,7 +83,7 @@ public abstract class TrackBase {
 	}
 
 	
-	public BlockPos getPos() {
+	public PosRot getPos() {
 		return builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
 	}
 	
@@ -116,5 +100,9 @@ public abstract class TrackBase {
 
 	public boolean isFlexible() {
 		return this.flexible;
+	}
+
+	public void overrideParent(BlockPos blockPos) {
+		this.parent = builder.convertRelativePositions(blockPos.getX(), blockPos.getY(), blockPos.getZ(), rel_rotation);
 	}
 }

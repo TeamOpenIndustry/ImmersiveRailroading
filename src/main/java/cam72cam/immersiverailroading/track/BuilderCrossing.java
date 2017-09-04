@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
+import net.minecraft.util.math.BlockPos;
 
 public class BuilderCrossing extends BuilderBase {
 
-	public BuilderCrossing(World world, int x, int y, int z, EnumFacing rotation, int quarter) {
-		super(world, x, y, z, rotation);
+	public BuilderCrossing(RailInfo info, BlockPos pos) {
+		super(info, pos);
 		
 		tracks.add(new TrackGag(this, -1, 0, 0));
-		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, quarter));
+		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, info.quarter, info.horizOff));
 		tracks.add(new TrackGag(this, 1, 0, 0));
 		
 		tracks.add(new TrackGag(this, -1, 0, 1));

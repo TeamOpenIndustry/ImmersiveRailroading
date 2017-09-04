@@ -18,6 +18,7 @@ public class TileRailBase extends TileEntity {
 	private int snowLayers = 0;
 	public boolean snowRenderFlagDirty = true;
 	protected boolean flexible = false;
+	private boolean willBeReplaced = false; 
 	private NBTTagCompound replaced;
 	private boolean skipNextRefresh = false;
 
@@ -155,5 +156,14 @@ public class TileRailBase extends TileEntity {
 			return false;
 		}
 		return super.shouldRefresh(world, pos, oldState, newState);
+	}
+	
+	// Called before flex track replacement
+	public void setWillBeReplaced() {
+		this.willBeReplaced = true;
+	}
+	// Called duing flex track replacement
+	public boolean getWillBeReplaced() {
+		return this.willBeReplaced;
 	}
 }
