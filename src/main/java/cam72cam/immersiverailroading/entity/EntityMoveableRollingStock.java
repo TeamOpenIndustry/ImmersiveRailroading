@@ -460,11 +460,36 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 					return position;
 				}
 			}
+			float angle = rail.getRotationQuarter()/4f * 90 + rail.getFacing().getHorizontalAngle();
 			
-			if (Math.abs(delta.x) > Math.abs(delta.z)) {
-				return new Vec3d(position.x + delta.x, position.y, rail.getCenterOfRail().z);
+			// |>----O-----|
+			// |--->-O-----|
+			// |-----O->---|
+			// |-----O---->|
+			// |<----O-----|
+			// |---<-O-----|
+			// |-----O-<---|
+			// |-----O----<|
+			
+			double toCenter = rail.getCenterOfRail().distanceTo(position);
+			
+			Vec3d possiblePositive = rail.getCenterOfRail().add(VecUtil.fromYaw(toCenter, angle));
+			Vec3d possibleNegative = rail.getCenterOfRail().add(VecUtil.fromYaw(-toCenter, angle));
+			
+			double angularDistance = 0; 
+			if (possiblePositive.distanceTo(position) < possibleNegative.distanceTo(position)) {
+				angularDistance = toCenter;
 			} else {
-				return new Vec3d(rail.getCenterOfRail().x, position.y, position.z + delta.z);
+				angularDistance = -toCenter;
+			}
+			
+			possiblePositive = rail.getCenterOfRail().add(VecUtil.fromYaw(angularDistance + distance, angle));
+			possibleNegative = rail.getCenterOfRail().add(VecUtil.fromYaw(angularDistance - distance, angle));
+			
+			if (possiblePositive.distanceTo(position.add(delta)) < possibleNegative.distanceTo(position.add(delta))) {
+				return possiblePositive;
+			} else {
+				return possibleNegative;
 			}
 		}
 	}
