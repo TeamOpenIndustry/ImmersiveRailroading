@@ -4,7 +4,6 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -18,7 +17,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -451,7 +449,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// delta should be in the direction of rotationYaw instead of front or rear
 			// since large changes can occur if the train is way off center
 			delta = nextMovement(trainYaw, distance);
-			
+			/*
 			// Check that we are not moving in the wrong axis along a track
 			if (EnumFacing.fromAngle(trainYaw).getAxis() != rail.getFacing().getAxis() && rail.getType() != TrackItems.CROSSING) {
 				if (!world.isRemote) {
@@ -459,7 +457,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 					this.setDead();
 					return position;
 				}
-			}
+			}*/
 			float angle = rail.getRotationQuarter()/4f * 90 + rail.getFacing().getHorizontalAngle();
 			
 			// |>----O-----|
@@ -471,10 +469,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// |-----O-<---|
 			// |-----O----<|
 			
-			double toCenter = rail.getCenterOfRail().distanceTo(position);
 			
-			Vec3d possiblePositive = rail.getCenterOfRail().add(VecUtil.fromYaw(toCenter, angle));
-			Vec3d possibleNegative = rail.getCenterOfRail().add(VecUtil.fromYaw(-toCenter, angle));
+			Vec3d center = rail.getPlacementPosition();
+			
+			double toCenter = center.distanceTo(position);
+			
+			Vec3d possiblePositive = center.add(VecUtil.fromYaw(toCenter, angle));
+			Vec3d possibleNegative = center.add(VecUtil.fromYaw(-toCenter, angle));
 			
 			double angularDistance = 0; 
 			if (possiblePositive.distanceTo(position) < possibleNegative.distanceTo(position)) {
@@ -483,8 +484,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				angularDistance = -toCenter;
 			}
 			
-			possiblePositive = rail.getCenterOfRail().add(VecUtil.fromYaw(angularDistance + distance, angle));
-			possibleNegative = rail.getCenterOfRail().add(VecUtil.fromYaw(angularDistance - distance, angle));
+			possiblePositive = center.add(VecUtil.fromYaw(angularDistance + distance, angle));
+			possibleNegative = center.add(VecUtil.fromYaw(angularDistance - distance, angle));
 			
 			if (possiblePositive.distanceTo(position.add(delta)) < possibleNegative.distanceTo(position.add(delta))) {
 				return possiblePositive;

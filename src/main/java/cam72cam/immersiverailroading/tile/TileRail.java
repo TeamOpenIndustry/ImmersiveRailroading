@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -25,7 +26,8 @@ public class TileRail extends TileRailBase {
 	private int rotationQuarter;
 	private TrackDirection direction = TrackDirection.NONE;
 	private int turnQuarters;
-	private float horizOff;
+	
+	private Vec3d placementPosition;
 
 
 	@Override
@@ -90,11 +92,11 @@ public class TileRail extends TileRailBase {
 	}
 	
 	
-	public float getHorizOff() {
-		return horizOff;
+	public Vec3d getPlacementPosition() {
+		return placementPosition;
 	}
-	public void setHorizOff(float horizOff) {
-		this.horizOff = horizOff;
+	public void setPlacementPosition(Vec3d placementPosition) {
+		this.placementPosition = placementPosition;
 		this.markDirty();
 	}
 	
@@ -139,7 +141,7 @@ public class TileRail extends TileRailBase {
 		
 		switchState = SwitchState.values()[nbt.getInteger("switchState")];
 		
-		horizOff = nbt.getFloat("horizOff");
+		placementPosition = getNBTVec3d(nbt, "placementPosition");
 		
 		length = nbt.getInteger("length");
 		rotationQuarter = nbt.getInteger("rotationQuarter");
@@ -158,7 +160,7 @@ public class TileRail extends TileRailBase {
 		
 		nbt.setInteger("switchState", switchState.ordinal());
 		
-		nbt.setFloat("horizOff", horizOff);
+		setNBTVec3d(nbt, "placementPosition", placementPosition);
 		
 		nbt.setInteger("length", length);
 		nbt.setInteger("rotationQuarter", rotationQuarter);
@@ -171,7 +173,7 @@ public class TileRail extends TileRailBase {
 	private RailInfo info;
 	public RailInfo getRailRenderInfo() {
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getHorizOff());
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition());
 		}
 		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
 		info.switchState = this.switchState;

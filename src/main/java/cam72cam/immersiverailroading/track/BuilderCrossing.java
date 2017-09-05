@@ -14,7 +14,7 @@ public class BuilderCrossing extends BuilderBase {
 		super(info, pos);
 		
 		tracks.add(new TrackGag(this, -1, 0, 0));
-		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, info.quarter, info.horizOff));
+		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, info.quarter, info.placementPosition));
 		tracks.add(new TrackGag(this, 1, 0, 0));
 		
 		tracks.add(new TrackGag(this, -1, 0, 1));

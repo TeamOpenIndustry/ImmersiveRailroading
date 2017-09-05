@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.render.rail;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -25,6 +27,10 @@ public class RailRenderUtil {
 		
 		// Move to offset position
 		//GL11.glTranslated(-info.getBuilder().getRenderOffset().getX(), 0, -info.getBuilder().getRenderOffset().getZ());
+		GL11.glPushMatrix();
+
+		GlStateManager.translate(-info.position.getX(), -info.position.getY(), -info.position.getZ());
+		GlStateManager.translate(Math.floor(info.placementPosition.x), Math.floor(info.placementPosition.y), Math.floor(info.placementPosition.z));
 		
 		// Finish Drawing
 		RailRenderUtil.draw(RailBaseRender.getBaseBuffer(info));
@@ -32,6 +38,8 @@ public class RailRenderUtil {
 		if (renderOverlay) {
 			RailRenderUtil.draw(RailBaseOverlayRender.getOverlayBuffer(info));
 		}
+		
+		GL11.glPopMatrix();
 		
 		RenderHelper.enableStandardItemLighting();
 
@@ -77,6 +85,6 @@ public class RailRenderUtil {
 
 	public static String renderID(RailInfo info) {
 		//TODO more attributes like railbed
-		return String.format("%s%s%s%s%s%s%s%s", info.facing, info.type, info.direction, info.length, info.quarter, info.quarters, info.relativePosition, info.switchState);
+		return String.format("%s%s%s%s%s%s%s", info.facing, info.type, info.direction, info.length, info.quarter, info.quarters, info.switchState);
 	}
 }
