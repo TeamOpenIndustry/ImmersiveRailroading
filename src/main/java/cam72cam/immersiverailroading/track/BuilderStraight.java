@@ -15,8 +15,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class BuilderStraight extends BuilderBase {
 	protected float angle;
-	protected int mainX;
-	protected int mainZ;
+	public int mainX;
+	public int mainZ;
 
 	public BuilderStraight(RailInfo info, BlockPos pos) {
 		super(info, pos);
@@ -49,7 +49,7 @@ public class BuilderStraight extends BuilderBase {
 		
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
-		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, info.type, info.length, info.quarter, info.horizOff);
+		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
@@ -67,7 +67,7 @@ public class BuilderStraight extends BuilderBase {
 	
 	@Override
 	public List<TrackBase> getTracksForRender() {
-		return super.offsetTracksForRender(mainX, mainZ, this.tracks);
+		return this.tracks;
 	}
 
 	@Override
@@ -81,6 +81,6 @@ public class BuilderStraight extends BuilderBase {
 			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}
-		return super.offsetRenderData(mainX, mainZ, data);
+		return data;
 	}
 }

@@ -205,33 +205,4 @@ public abstract class BuilderBase {
 	public BlockPos getParentPos() {
 		return parent_pos;
 	}
-
-	public List<VecYawPitch> offsetRenderData(int mainX, int mainZ, List<VecYawPitch> data) {
-		if (info.relativePosition) {
-			return data;
-		}
-		List<VecYawPitch> dataOffset = new ArrayList<VecYawPitch>();
-		
-		for (VecYawPitch piece : data) {
-			Vec3d off = piece.subtract(mainX, 0, mainZ);
-			dataOffset.add(new VecYawPitch(off.x, off.y, off.z, piece.getYaw(), piece.getPitch(), piece.getLength(), (String[]) piece.getGroups().toArray()));
-		}
-		
-		return dataOffset;
-	}
-
-	public List<TrackBase> offsetTracksForRender(int mainX, int mainZ, List<TrackBase> tracksParam) {
-		if (info.relativePosition) {
-			return tracksParam;
-		}
-		List<TrackBase> data = new ArrayList<TrackBase>();
-		for (TrackBase base : tracksParam) {
-			//TODO might need to clone base
-			base.rel_x -= mainX;
-			base.rel_z -= mainZ;
-			
-			data.add(base);
-		}
-		return data;
-	}
 }

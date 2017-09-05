@@ -75,7 +75,7 @@ public class BuilderTurn extends BuilderBase {
 
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
-		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.horizOff);
+		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.placementPosition);
 		
 		turnTrack.setRotationCenter(-xMult * radius, 0, 0);
 		turnTrack.setDirection(info.direction);
@@ -100,7 +100,7 @@ public class BuilderTurn extends BuilderBase {
 	
 	@Override
 	public List<TrackBase> getTracksForRender() {
-		return super.offsetTracksForRender(mainX, mainZ, this.tracks);
+		return this.tracks;
 	}
 
 	@Override
@@ -153,6 +153,6 @@ public class BuilderTurn extends BuilderBase {
 			}
 		}
 
-		return super.offsetRenderData(mainX, mainZ, data);
+		return data;
 	}
 }

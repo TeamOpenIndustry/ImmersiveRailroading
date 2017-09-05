@@ -121,15 +121,31 @@ public class TileRailBase extends TileEntity {
 			nbt.setLong(key, value.toLong());
 		}
 	}
+	protected final static void setNBTVec3d(NBTTagCompound nbt, String key, Vec3d value) {
+		if (value != null) {
+			nbt.setDouble(key + "X", value.x);
+			nbt.setDouble(key + "Y", value.y);
+			nbt.setDouble(key + "Z", value.z);
+		}
+	}
 	
 	protected final static BlockPos getNBTBlockPos(NBTTagCompound nbt, String key) {
-		 return nbt.hasKey(key) ? BlockPos.fromLong(nbt.getLong(key)) : null;
+		return nbt.hasKey(key) ? BlockPos.fromLong(nbt.getLong(key)) : null;
+	}
+	protected final static Vec3d getNBTVec3d(NBTTagCompound nbt, String key) {
+		if (!nbt.hasKey(key + "X") || !nbt.hasKey(key + "Y") || !nbt.hasKey(key + "Z")) {
+			return null;
+		}
+		return new Vec3d(nbt.getDouble(key + "X"),nbt.getDouble(key + "Y"),nbt.getDouble(key + "Z"));
 	}
 	
 	public Vec3d getCenterOfRail() {
 		return new Vec3d(this.getPos()).addVector(0.5, 0, 0.5);
 	}
 	public TileRail getParentTile() {
+		if (this.getParent() == null) {
+			return null;
+		}
 		TileEntity te = world.getTileEntity(this.getParent());
 		if (te instanceof TileRail) {
 			return (TileRail)te ;

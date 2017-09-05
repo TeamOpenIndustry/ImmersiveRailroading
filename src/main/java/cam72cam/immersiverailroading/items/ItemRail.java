@@ -64,7 +64,7 @@ public class ItemRail extends ItemBlock {
 			pos = pos.down();
 		}
 		
-		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ, false);
+		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ);
 		
 		BuilderBase builder = info.getBuilder(pos);
 		if (builder.canBuild()) {

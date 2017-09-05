@@ -14,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class RailInfo {
@@ -25,15 +26,14 @@ public class RailInfo {
 	public int length;
 	public int quarter;
 	public int quarters;
-	public float horizOff;
-	public boolean relativePosition;
+	public Vec3d placementPosition;
 
 	// Used for tile rendering only
 	public boolean snowRenderFlagDirty = false;
 	public SwitchState switchState = SwitchState.NONE;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, float horizOff) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -42,15 +42,14 @@ public class RailInfo {
 		this.length = length;
 		this.quarter = quarter;
 		this.quarters = quarters;
-		this.horizOff = horizOff;
+		this.placementPosition = placementPosition;
 	}
 	
-	public RailInfo(ItemStack stack, EntityPlayer player, BlockPos pos, float hitX, float hitY, float hitZ, boolean relativePosition) {
+	public RailInfo(ItemStack stack, EntityPlayer player, BlockPos pos, float hitX, float hitY, float hitZ) {
 		position = pos;
 		world = player.getEntityWorld();
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
-		this.relativePosition = relativePosition;
 		
 		float yawHead = player.getRotationYawHead() % 360 + 360;
 		direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
@@ -79,23 +78,7 @@ public class RailInfo {
 			hitZ = 0.5f;
 		}
 		
-		horizOff = 0;
-		switch (facing) {
-		case WEST:
-			horizOff = hitZ;
-			break;
-		case EAST:
-			horizOff = 1-hitZ;
-			break;
-		case SOUTH:
-			horizOff = hitX;
-			break;
-		case NORTH:
-			horizOff = 1-hitX;
-			break;
-		default:
-			break;
-		}
+		placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		
 		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
 			pos = pos.down();
@@ -103,8 +86,7 @@ public class RailInfo {
 	}
 	
 	public RailInfo clone() {
-		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, horizOff);
-		c.relativePosition = relativePosition;
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, placementPosition);
 		return c;
 	}
 	
