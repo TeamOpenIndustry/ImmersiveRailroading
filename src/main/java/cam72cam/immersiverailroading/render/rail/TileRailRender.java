@@ -17,9 +17,6 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 
 	@Override
 	public void render(TileRail te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		if (!te.isVisible()) {
-			return;
-		}
 		RailInfo info = te.getRailRenderInfo();
 		GL11.glPushMatrix();
 		{
