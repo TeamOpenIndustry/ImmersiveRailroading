@@ -12,7 +12,6 @@ public class TrackRail extends TrackBase {
 
 	private TrackItems type;
 	private BlockPos center;
-	private boolean hasModel = true;
 	private int length;
 	private int quarter;
 	private int turnQuarters;
@@ -31,17 +30,12 @@ public class TrackRail extends TrackBase {
 		center = builder.convertRelativeCenterPositions(rel_cx, rel_cy, rel_cz, EnumFacing.NORTH);
 	}
 	
-	public void setHasModel(boolean hasModel) {
-		this.hasModel = hasModel;
-	}
-	
 	@Override
 	public TileEntity placeTrack() {
 		TileRail tileRail = (TileRail) super.placeTrack();
 		
 		tileRail.setFacing(super.getFacing());
 		tileRail.setCenter(center);
-		tileRail.setVisible(hasModel); //REMOVEME?
 		tileRail.setType(type);
 		tileRail.setLength(this.length);
 		tileRail.setDirection(direction);

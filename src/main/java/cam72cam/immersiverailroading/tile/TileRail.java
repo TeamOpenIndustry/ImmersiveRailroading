@@ -19,7 +19,6 @@ public class TileRail extends TileRailBase {
 	
 	private BlockPos center;
 	
-	private boolean isVisible = true;
 	private SwitchState switchState = SwitchState.NONE;
 	
 	private int length;
@@ -69,14 +68,6 @@ public class TileRail extends TileRailBase {
 		if (!world.isRemote) {
 			ImmersiveRailroading.net.sendToDimension(new SwitchStatePacket(this.getWorld().provider.getDimension(), this.pos, state), this.getWorld().provider.getDimension());
 		}
-	}
-	
-	public boolean isVisible() {
-		return isVisible;
-	}
-	public void setVisible(Boolean value) {
-		this.isVisible = value;
-		this.markDirty();
 	}
 
 	public Vec3i getCenter() {
@@ -146,7 +137,6 @@ public class TileRail extends TileRailBase {
 		
 		center = getNBTBlockPos(nbt, "center");
 		
-		isVisible = nbt.getBoolean("isVisible");
 		switchState = SwitchState.values()[nbt.getInteger("switchState")];
 		
 		horizOff = nbt.getFloat("horizOff");
@@ -166,7 +156,6 @@ public class TileRail extends TileRailBase {
 		
 		setNBTBlockPos(nbt, "center", center);
 		
-		nbt.setBoolean("isVisible", isVisible);
 		nbt.setInteger("switchState", switchState.ordinal());
 		
 		nbt.setFloat("horizOff", horizOff);
