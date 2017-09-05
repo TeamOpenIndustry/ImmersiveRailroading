@@ -41,6 +41,9 @@ public class StockModel extends OBJModel {
 		}
 	}
 
+	List<String> standardMain;
+	List<String> standardFront = new ArrayList<String>();
+	List<String> standardRear = new ArrayList<String>();
 	private void drawStandardStock(EntityMoveableRollingStock stock) {
 		if (stock.frontYaw == null || stock.rearYaw == null) {
 			draw();
@@ -49,21 +52,22 @@ public class StockModel extends OBJModel {
 
 		EntityRollingStockDefinition def = stock.getDefinition();
 
-		List<String> main = new ArrayList<String>();
-		List<String> front = new ArrayList<String>();
-		List<String> rear = new ArrayList<String>();
-
-		for (String group : groups()) {
-			if (group.contains("BOGEY_FRONT")) {
-				front.add(group);
-			} else if (group.contains("BOGEY_REAR")) {
-				rear.add(group);
-			} else {
-				main.add(group);
+		if (standardMain == null) {
+			standardMain = new ArrayList<String>();
+			standardFront = new ArrayList<String>();
+			standardRear = new ArrayList<String>();
+			for (String group : groups()) {
+				if (group.contains("BOGEY_FRONT")) {
+					standardFront.add(group);
+				} else if (group.contains("BOGEY_REAR")) {
+					standardRear.add(group);
+				} else {
+					standardMain.add(group);
+				}
 			}
 		}
 
-		drawGroups(main);
+		drawGroups(standardMain);
 
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(-def.getBogeyFront(), 0, 0);
@@ -74,7 +78,7 @@ public class StockModel extends OBJModel {
 		}
 		GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 		GlStateManager.translate(def.getBogeyFront(), 0, 0);
-		drawGroups(front);
+		drawGroups(standardFront);
 		GlStateManager.popMatrix();
 
 		GlStateManager.pushMatrix();
@@ -86,7 +90,7 @@ public class StockModel extends OBJModel {
 		}
 		GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 		GlStateManager.translate(def.getBogeyRear(), 0, 0);
-		drawGroups(rear);
+		drawGroups(standardRear);
 		GlStateManager.popMatrix();
 	}
 
