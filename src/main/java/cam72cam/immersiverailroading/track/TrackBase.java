@@ -39,7 +39,7 @@ public abstract class TrackBase {
 	public boolean canPlaceTrack() {
 		PosRot pos = getPos();
 		
-		return BlockUtil.canBeReplaced(builder.world, pos, true) && builder.world.getBlockState(pos.down()).isTopSolid();
+		return BlockUtil.canBeReplaced(builder.world, pos, flexible) && builder.world.getBlockState(pos.down()).isTopSolid();
 	}
 
 	public TileEntity placeTrack() {
@@ -49,16 +49,24 @@ public abstract class TrackBase {
 		
 		IBlockState state = builder.world.getBlockState(pos);
 		Block removed = state.getBlock();
+		TileRailBase te = null;
 		if (removed != null) {
 			if (removed instanceof BlockRailBase) {
-				TileRailBase te = (TileRailBase) builder.world.getTileEntity(pos);
+				te = (TileRailBase) builder.world.getTileEntity(pos);
 				replaced = te.serializeNBT();
-				te.setWillBeReplaced();
 			} else {				
 				removed.dropBlockAsItem(builder.world, pos, state, 0);
 			}
 		}
+		
+		if (te != null) {
+			te.setWillBeReplaced(true);
+		}
 		builder.world.setBlockState(pos, getBlockState(), 3);
+		if (te != null) {
+			te.setWillBeReplaced(false);
+		}
+		
 		TileRailBase tr = (TileRailBase)builder.world.getTileEntity(pos);
 		tr.setReplaced(replaced);
 		if (parent != null) {
