@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 public class SwitchUtil {
 	public static SwitchState getSwitchState(TileRail rail) {
@@ -17,7 +18,7 @@ public class SwitchUtil {
 		}
 		
 		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-			if (rail.getWorld().isBlockIndirectlyGettingPowered(rail.getPos().offset(facing)) > 0) {
+			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(rail.getPlacementPosition()).offset(facing)) > 0) {
 				return SwitchState.TURN;
 			}
 		}
