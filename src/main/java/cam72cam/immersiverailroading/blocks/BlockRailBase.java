@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.blocks;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.SwitchUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -9,6 +9,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -30,27 +31,46 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		TileRailBase te = (TileRailBase) world.getTileEntity(pos);
-		BlockPos parent = te.getParent();
 		super.breakBlock(world, pos, state);
-		
-		if (te.getReplaced() != null) {
-			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_GAG.getDefaultState());
-			TileRailBase newte = (TileRailBase) world.getTileEntity(pos);
-			newte.readFromNBT(te.getReplaced());
-			newte.markDirty();
-			// This works around a hack where Chunk does a removeTileEntity directly after calling breakBlock
-			// We have already removed the TE above and are replacing it with one which goes with a new block
-			newte.setSkipNextRefresh();
-		}
-
+		breakParentIfExists(te);
+	}
+	
+	public static void breakParentIfExists(TileRailBase te) {
+		BlockPos parent = te.getParent();
 		if (parent != null && !te.getWillBeReplaced()) {
-			world.destroyBlock(parent, true);
+			System.out.println(te.getWorld().getBlockState(parent).getBlock().getClass());
+			if (te.getWorld().getBlockState(parent).getBlock() instanceof BlockRail) {
+				if (tryBreakRail(te.getWorld(), parent)) {
+					te.getWorld().setBlockToAir(parent);
+				}
+			}
 		}
 	}
 	
 	@Override
 	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
 		this.onNeighborChange(worldIn, pos, fromPos);
+	}
+	
+	public static boolean tryBreakRail(IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileRailBase) {
+			TileRailBase rail = (TileRailBase)te;
+			if (rail.getReplaced() != null) {
+				// new object here is important
+				TileRailGag newGag = new TileRailGag();
+				newGag.readFromNBT(rail.getReplaced());
+				
+				// Only do replacement if parent still exists
+				if (rail.getWorld().getTileEntity(newGag.getParent()) != null) {
+					rail.getWorld().setTileEntity(pos, newGag);
+					newGag.markDirty();
+					breakParentIfExists(rail);
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -59,8 +79,9 @@ public abstract class BlockRailBase extends Block {
 		boolean isOriginAir = tileEntity.getParentTile() == null || tileEntity.getParentTile().getParentTile() == null;
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
 		if (isOriginAir || !isOnRealBlock) {
-			//stupid IBlockAccess
-			tileEntity.getWorld().destroyBlock(pos, true);
+			if (tryBreakRail(world, pos)) { 
+				tileEntity.getWorld().destroyBlock(pos, true);
+			}
 			return;
 		}
 		

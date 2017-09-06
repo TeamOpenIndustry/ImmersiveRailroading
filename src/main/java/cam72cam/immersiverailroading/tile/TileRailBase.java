@@ -175,8 +175,8 @@ public class TileRailBase extends TileEntity {
 	}
 	
 	// Called before flex track replacement
-	public void setWillBeReplaced() {
-		this.willBeReplaced = true;
+	public void setWillBeReplaced(boolean value) {
+		this.willBeReplaced = value;
 	}
 	// Called duing flex track replacement
 	public boolean getWillBeReplaced() {

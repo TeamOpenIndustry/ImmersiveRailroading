@@ -7,6 +7,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRail;
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarPassenger;
@@ -31,6 +32,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -104,6 +106,13 @@ public abstract class CommonProxy implements IGuiHandler {
         	entity.tryRollingStockInit();
     	}
     }
+	
+	@SubscribeEvent
+	public static void onBlockBreakEvent(BreakEvent event) {
+		if (!BlockRailBase.tryBreakRail(event.getWorld(), event.getPos())) {
+			event.setCanceled(true);
+		}
+	}
 
 	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
 }
