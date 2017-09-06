@@ -17,6 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -412,7 +413,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		if (rail.getType().isTurn()) {
 			// Relative position to the curve center
-			Vec3d posDelta = new Vec3d(rail.getCenter()).subtractReverse(position);
+			Vec3d posDelta = rail.getCenter().subtractReverse(position);
 			// Calculate the angle (rad) for the current position is
 			double posRelYaw = Math.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
@@ -424,19 +425,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// use it as an estimate)
 			Vec3d nextPos = position.add(delta);
 
-			/*
-			 * for (int i = 0; i < 90; i++) { Vec3d check = new
-			 * Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw +
-			 * Math.toRadians(i)) * radius, 0, -Math.cos(posRelYaw +
-			 * Math.toRadians(i)) * radius);
-			 * world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, check.x,
-			 * check.y, check.z, 0, 0, 0); }
-			 */
+			
+			 for (int i = 0; i < 90; i++) { Vec3d check = 
+			 rail.getCenter().addVector(Math.sin(posRelYaw +
+			 Math.toRadians(i)) * radius, 0, -Math.cos(posRelYaw +
+			 Math.toRadians(i)) * radius);
+			 world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, check.x,
+			 check.y, check.z, 0, 0, 0); }
+			 
 
 			// Calculate the two possible next positions (forward on the curve
 			// or backward on the curve)
-			Vec3d newpos = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw + yawDelt) * radius, 0, -Math.cos(posRelYaw + yawDelt) * radius);
-			Vec3d newneg = new Vec3d(rail.getCenter()).addVector(Math.sin(posRelYaw - yawDelt) * radius, 0, -Math.cos(posRelYaw - yawDelt) * radius);
+			Vec3d newpos = rail.getCenter().addVector(Math.sin(posRelYaw + yawDelt) * radius, 0, -Math.cos(posRelYaw + yawDelt) * radius);
+			Vec3d newneg = rail.getCenter().addVector(Math.sin(posRelYaw - yawDelt) * radius, 0, -Math.cos(posRelYaw - yawDelt) * radius);
 
 			// Return whichever position is closest to the estimated next
 			// position

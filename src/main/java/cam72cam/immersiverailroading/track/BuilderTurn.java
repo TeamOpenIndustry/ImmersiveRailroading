@@ -9,9 +9,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class BuilderTurn extends BuilderBase {
 
@@ -48,6 +52,8 @@ public class BuilderTurn extends BuilderBase {
 
 		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
 		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
+		double xAbsPos = (Math.sin(Math.toRadians(startAngle)) * (radius+hack));
+		double zAbsPos = (Math.cos(Math.toRadians(startAngle)) * (radius+hack));
 		realStartAngle = startAngle;
 		
 		if (info.direction == TrackDirection.LEFT) {
@@ -77,7 +83,13 @@ public class BuilderTurn extends BuilderBase {
 		
 		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.placementPosition);
 		
-		turnTrack.setRotationCenter(-xMult * radius, 0, 0);
+		Vec3d center = new Vec3d(-xAbsPos, 0, -zAbsPos-0.5); 
+		center = VecUtil.rotateYaw(center, info.facing.getHorizontalAngle() - 90);
+		center = info.placementPosition.add(center);
+		
+		ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, center);
+		
+		turnTrack.setRotationCenter(center);
 		turnTrack.setDirection(info.direction);
 		turnTrack.setTurnQuarters(info.quarters);
 		
