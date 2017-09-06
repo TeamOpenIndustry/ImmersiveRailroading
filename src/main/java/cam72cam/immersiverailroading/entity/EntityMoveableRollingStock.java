@@ -17,7 +17,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -425,14 +424,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// use it as an estimate)
 			Vec3d nextPos = position.add(delta);
 
-			
-			 for (int i = 0; i < 90; i++) { Vec3d check = 
-			 rail.getCenter().addVector(Math.sin(posRelYaw +
-			 Math.toRadians(i)) * radius, 0, -Math.cos(posRelYaw +
-			 Math.toRadians(i)) * radius);
-			 world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, check.x,
-			 check.y, check.z, 0, 0, 0); }
-			 
+//			for (int i = 0; i < 90; i++) {
+//				Vec3d check = rail.getCenter().addVector(Math.sin(posRelYaw + Math.toRadians(i)) * radius, 0,
+//						-Math.cos(posRelYaw + Math.toRadians(i)) * radius);
+//				world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, check.x, check.y, check.z, 0, 0, 0);
+//			}
 
 			// Calculate the two possible next positions (forward on the curve
 			// or backward on the curve)
