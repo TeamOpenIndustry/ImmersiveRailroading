@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.track;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackDirection;
@@ -12,7 +11,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 public class TrackRail extends TrackBase {
 
 	private TrackItems type;
-	private BlockPos center;
+	private Vec3d center;
 	private int length;
 	private int quarter;
 	private int turnQuarters;
@@ -27,8 +26,9 @@ public class TrackRail extends TrackBase {
 		this.placementPosition = placementPosition;
 	}
 	
-	public void setRotationCenter(int rel_cx, int rel_cy, int rel_cz) {
-		center = builder.convertRelativeCenterPositions(rel_cx, rel_cy, rel_cz, EnumFacing.NORTH);
+	public void setRotationCenter(Vec3d center) {
+		//center = builder.convertRelativeCenterPositions(rel_cx, rel_cy, rel_cz, EnumFacing.NORTH);
+		this.center = center;
 	}
 	
 	@Override

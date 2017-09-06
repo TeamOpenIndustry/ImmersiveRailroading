@@ -2,9 +2,7 @@ package cam72cam.immersiverailroading.tile;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -18,7 +16,7 @@ public class TileRail extends TileRailBase {
 	private EnumFacing facing;
 	private TrackItems type;
 	
-	private BlockPos center;
+	private Vec3d center;
 	
 	private SwitchState switchState = SwitchState.NONE;
 	
@@ -72,13 +70,13 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
-	public Vec3i getCenter() {
+	public Vec3d getCenter() {
 		return center;
 	}
 	public double getRadius() {
 		return length;
 	}
-	public void setCenter(BlockPos center) {
+	public void setCenter(Vec3d center) {
 		this.center = center;
 		this.markDirty();
 	}
@@ -137,7 +135,7 @@ public class TileRail extends TileRailBase {
 		facing = EnumFacing.getFront(nbt.getByte("facing"));
 		type = TrackItems.valueOf(nbt.getString("type"));
 		
-		center = getNBTBlockPos(nbt, "center");
+		center = getNBTVec3d(nbt, "center");
 		
 		switchState = SwitchState.values()[nbt.getInteger("switchState")];
 		
@@ -156,7 +154,7 @@ public class TileRail extends TileRailBase {
 		nbt.setByte("facing", (byte) facing.getIndex());
 		nbt.setString("type", type.name());
 		
-		setNBTBlockPos(nbt, "center", center);
+		setNBTVec3d(nbt, "center", center);
 		
 		nbt.setInteger("switchState", switchState.ordinal());
 		
