@@ -13,6 +13,10 @@
 	"tank": {
 		"capacity": 80000 
 	},
+	"tender": {
+		"slots": 54,
+		"width": 20
+	},
 	"trucks": {
 		"front": 2.14, 
 		"rear": -2.14

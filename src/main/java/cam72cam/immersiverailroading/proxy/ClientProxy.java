@@ -15,10 +15,13 @@ import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
 import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TankContainerGui;
+import cam72cam.immersiverailroading.gui.TenderContainer;
+import cam72cam.immersiverailroading.gui.TenderContainerGui;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -73,6 +76,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
+		System.out.println(GuiTypes.values()[ID]);
 		switch (GuiTypes.values()[ID]) {
 		case FREIGHT:
 			return new FreightContainerGui((CarFreight) world.getEntityByID(entityID),
@@ -81,6 +85,11 @@ public class ClientProxy extends CommonProxy {
 			return new TankContainerGui((CarTank) world.getEntityByID(entityID),
 					new TankContainer(player.inventory, (CarTank) world.getEntityByID(entityID)));
 		case TENDER:
+			return new TenderContainerGui((Tender) world.getEntityByID(entityID),
+					new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityID)));
+		case STEAM_LOCOMOTIVE:
+			return null;
+		case DIESEL_LOCOMOTIVE:
 			return null;
 		default:
 			return null;

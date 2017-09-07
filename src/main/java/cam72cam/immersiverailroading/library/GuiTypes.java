@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.library;
 
 public enum GuiTypes {
-	FREIGHT, TANK, TENDER
+	FREIGHT, TANK, TENDER, STEAM_LOCOMOTIVE, DIESEL_LOCOMOTIVE
 
 }
