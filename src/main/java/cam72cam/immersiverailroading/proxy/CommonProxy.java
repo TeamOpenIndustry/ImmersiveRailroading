@@ -15,7 +15,6 @@ import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
-import cam72cam.immersiverailroading.entity.LocomotiveElectric;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.gui.FreightContainer;
@@ -57,7 +56,6 @@ public abstract class CommonProxy implements IGuiHandler {
     static {
     	entityClasses.add(LocomotiveSteam.class);
     	entityClasses.add(LocomotiveDiesel.class);
-    	entityClasses.add(LocomotiveElectric.class);
     	entityClasses.add(CarPassenger.class);
     	entityClasses.add(CarFreight.class);
     	entityClasses.add(CarTank.class);

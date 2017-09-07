@@ -38,7 +38,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		}
 
 		if (rand.nextInt(100) == 0 && getTankCapacity() > 0 && getFuel() > 0) {
-			drain(getWaterConsumption() / 5, true);
+			drain(this.getDefinition().getWaterConsumption(), true);
 		}
 	}
 
@@ -79,15 +79,11 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 
 		if (cargoItems.getStackInSlot(0) != null) {
 			int burnTime = ForgeEventFactory.getItemBurnTime(cargoItems.getStackInSlot(0));
-			if (getFuel() + burnTime <= getMaxFuel()) {
+			if (burnTime > 0 && getFuel() + burnTime <= this.getDefinition().getFuelCapacity()) {
 				addFuel(burnTime);
+				// TODO shadow item which fades as it is used based on burn time
 				cargoItems.extractItem(0, 1, false);
 			}
-		}
-
-		if (getFuel() <= 0) {
-			motionX *= 0.88;
-			motionZ *= 0.88;
 		}
 
 		Tender tender = null;
@@ -126,24 +122,9 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		 */
 	}
 
-	/** Used for the gui */
-	@Override
-	public int getFuelDiv(int i) {
-		return (int) ((this.getFuel() * i) / getMaxFuel());
-	}
-
-	public int getWaterConsumption() {
-		return this.getDefinition().getWaterConsumption();
-	}
-
 	@Override
 	public int getTankCapacity() {
 		return this.getDefinition().getTankCapacity();
-	}
-
-	@Override
-	public double getMaxFuel() {
-		return this.getDefinition().getFuelCapacity();
 	}
 
 	@Override

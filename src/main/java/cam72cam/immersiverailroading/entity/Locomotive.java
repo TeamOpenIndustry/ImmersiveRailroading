@@ -43,14 +43,6 @@ public abstract class Locomotive extends FreightTank {
 
 		this.entityCollisionReduction = 0.99F;
 	}
-
-	/*
-	 * 
-	 * Things to be overridden
-	 */
-
-	public abstract int getFuelDiv(int i);
-	public abstract double getMaxFuel();
 	
 	/*
 	 * 
@@ -298,7 +290,7 @@ public abstract class Locomotive extends FreightTank {
 		//}
 	}
 
-	public void addFuel(double fuel) {
-		dataManager.set(FUEL, (int) Math.min(getMaxFuel(), dataManager.get(FUEL) + fuel));
+	public void addFuel(int fuel) {
+		dataManager.set(FUEL, dataManager.get(FUEL) + fuel);
 	}
 }
