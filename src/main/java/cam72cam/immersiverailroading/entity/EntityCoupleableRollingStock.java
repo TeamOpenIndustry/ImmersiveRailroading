@@ -170,13 +170,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 			Vec3d otherOffset = null;
 			for (CouplerType otherCoupler : CouplerType.values()) {
-				if (coupled.getCoupled(otherCoupler) == this) {
+				EntityCoupleableRollingStock otherStock = coupled.getCoupled(otherCoupler);
+				if (otherStock != null && otherStock.getPersistentID().equals(this.getPersistentID())) {
 					// Matching coupler pair
 					otherOffset = coupled.getCouplerPositionTo(otherCoupler, this);
 				}
 			}
 			if (otherOffset == null) {
-				ImmersiveRailroading.logger.warn("Broken Coupling %s => %s", this.getPersistentID(), coupled.getPersistentID());
+				ImmersiveRailroading.logger.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), coupled.getPersistentID()));
 				continue;
 			}
 
@@ -376,8 +377,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	public EntityCoupleableRollingStock findByUUID(UUID uuid) {
 		// May want to cache this if it happens a lot
-		List<EntityCoupleableRollingStock> elist = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().grow(ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
-		for (Object e : elist) {
+		//List<EntityCoupleableRollingStock> elist = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().grow(ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+		//for (Object e : elist) {
+		for (Object e : world.getLoadedEntityList()) {
 			if (e instanceof EntityCoupleableRollingStock) {
 				EntityCoupleableRollingStock train = (EntityCoupleableRollingStock) e;
 				if (train.getPersistentID().equals(uuid)) {
