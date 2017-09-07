@@ -13,6 +13,10 @@
 		"valve_gear": "walschaerts",
 		"weight_kg": 106888
 	},
+	"firebox": {
+		"slots": 9,
+		"width": 3
+	},
 	"passenger": {
 		"center_x": -6.5,
 		"center_y": 1.5,

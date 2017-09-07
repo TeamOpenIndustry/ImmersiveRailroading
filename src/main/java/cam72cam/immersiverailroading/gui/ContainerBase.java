@@ -65,7 +65,7 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
 		for (int slotID = 0; slotID < slots; slotID++) {
 			int row = slotID / horizSlots;
 			int col = slotID % horizSlots;
-            this.addSlotToContainer(new SlotItemHandler(handler, slotID, paddingLeft + col * slotSize, y + row * slotSize));
+            this.addSlotToContainer(new SlotItemHandler(handler, slotID, x + paddingLeft + col * slotSize, y + row * slotSize));
 		}
 		return y + slotSize * (int) Math.ceil((double)slots / horizSlots);
 	}

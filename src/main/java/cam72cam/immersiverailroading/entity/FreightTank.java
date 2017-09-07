@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -7,6 +8,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -268,5 +270,19 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	@Override
 	public FluidStack drain(int maxDrain, boolean doDrain) {
 		return theTank.drain(maxDrain, doDrain);
+	}
+
+	private List<ISyncableSlots> listners = new ArrayList<ISyncableSlots>();
+	@Override
+	protected void onInventoryChanged() {
+		super.onInventoryChanged();
+		if (!world.isRemote) {
+			for(ISyncableSlots container : listners) {
+				container.syncSlots();;
+			}
+		}
+	}
+	public void addListener(ISyncableSlots tankContainer) {
+		this.listners.add(tankContainer);
 	}
 }

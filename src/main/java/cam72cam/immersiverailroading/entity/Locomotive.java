@@ -49,7 +49,6 @@ public abstract class Locomotive extends FreightTank {
 	 * Things to be overridden
 	 */
 
-	public abstract int[] getLocomotiveInventorySizes();
 	public abstract int getFuelDiv(int i);
 	public abstract double getMaxFuel();
 	

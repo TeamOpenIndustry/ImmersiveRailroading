@@ -13,6 +13,8 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int tankCapacity;
 	private int fuelCapacity;
 	private ValveGearType valveGear;
+	private int numSlots;
+	private int width;
 	
 	public enum ValveGearType {
 		WALSCHAERTS,
@@ -28,6 +30,9 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		tankCapacity = properties.get("water_capacity").getAsInt();
 		fuelCapacity = properties.get("fuel_capacity").getAsInt();
 		valveGear = ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase());
+		JsonObject tender = data.get("firebox").getAsJsonObject();
+		this.numSlots = tender.get("slots").getAsInt();
+		this.width = tender.get("width").getAsInt();
 	}
 
 	@Override
@@ -55,5 +60,13 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	}
 	public ValveGearType getValveGear() {
 		return valveGear;
+	}
+	
+	public int getInventorySize() {
+		return numSlots;
+	}
+
+	public int getInventoryWidth() {
+		return width;
 	}
 }

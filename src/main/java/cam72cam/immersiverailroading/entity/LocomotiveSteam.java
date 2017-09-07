@@ -3,8 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
-
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import net.minecraft.world.World;
@@ -26,14 +25,10 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	}
 
 	@Override
-	public int getInventorySize() {
-		return 3 + 3 + 3 + 1 + 1;
+	public GuiTypes guiType() {
+		return GuiTypes.STEAM_LOCOMOTIVE;
 	}
-
-	public int[] getLocomotiveInventorySizes() {
-		return new int[] { 3, 3, 3 };
-	}
-
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -48,13 +43,21 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	}
 
 	@Override
-	public int[] getContainerInputSlots() {
-		return new int[] { 1 };
+	public int getInventorySize() {
+		return this.getDefinition().getInventorySize() + 2;
 	}
-
+	
+	public int getInventoryWidth() {
+		return this.getDefinition().getInventoryWidth();
+	}
+	
 	@Override
-	public int[] getContainertOutputSlots() {
-		return ArrayUtils.removeElement(super.getContainertOutputSlots(), 0);
+	protected int[] getContainerInputSlots() {
+		return new int[] { getInventorySize()-2 };
+	}
+	@Override
+	protected int[] getContainertOutputSlots() {
+		return new int[] { getInventorySize()-1 };
 	}
 
 	/*
