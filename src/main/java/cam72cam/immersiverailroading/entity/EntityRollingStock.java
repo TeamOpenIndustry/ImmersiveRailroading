@@ -3,7 +3,8 @@ package cam72cam.immersiverailroading.entity;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -135,4 +136,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		ImmersiveRailroading.net.sendToAllAround(packet,
 				new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
 	}
+	
+	@SideOnly(Side.CLIENT)
+	public boolean isInRangeToRenderDist(double distance)
+    {
+        return true;
+    }
 }
