@@ -1,15 +1,15 @@
 package cam72cam.immersiverailroading.gui;
 
-import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.entity.FreightTank;
 import net.minecraft.client.renderer.GlStateManager;
 
 public class TankContainerGui extends ContainerGuiBase {
 	
 	private int inventoryRows;
 	private int horizSlots;
-	private CarTank stock;
+	private FreightTank stock;
 
-    public TankContainerGui(CarTank stock, TankContainer container) {
+    public TankContainerGui(FreightTank stock, TankContainer container) {
         super(container);
         this.stock = stock;
         this.inventoryRows = container.numRows;
