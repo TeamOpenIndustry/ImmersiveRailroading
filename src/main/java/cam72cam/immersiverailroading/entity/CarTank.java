@@ -1,16 +1,13 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.registry.CarTankDefinition;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
 public class CarTank extends FreightTank {
-	private List<ISyncableSlots> listners = new ArrayList<ISyncableSlots>();
 
 	public CarTank(World world) {
 		this(world, null);
@@ -32,19 +29,5 @@ public class CarTank extends FreightTank {
 	@Override
 	public List<Fluid> getFluidFilter() {
 		return this.getDefinition().getFluidFilter();
-	}
-	
-	@Override
-	protected void onInventoryChanged() {
-		super.onInventoryChanged();
-		if (!world.isRemote) {
-			for(ISyncableSlots container : listners) {
-				container.syncSlots();;
-			}
-		}
-	}
-
-	public void addListener(ISyncableSlots tankContainer) {
-		this.listners.add(tankContainer);
 	}
 }

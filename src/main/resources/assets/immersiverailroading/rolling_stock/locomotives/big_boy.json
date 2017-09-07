@@ -13,6 +13,10 @@
 		"valve_gear": "mallet_walschaerts",
 		"weight_kg": 345600
 	},
+	"firebox": {
+		"slots": 18,
+		"width": 6
+	},
 	"passenger": {
 		"center_x": -12,
 		"center_y": 2.4,
