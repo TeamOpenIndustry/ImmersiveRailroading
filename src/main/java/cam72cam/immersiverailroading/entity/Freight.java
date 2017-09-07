@@ -81,6 +81,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
 		cargoItems.deserializeNBT((NBTTagCompound) nbttagcompound.getTag("items"));
+		handleMass();
 	}
 	
 	@Override
