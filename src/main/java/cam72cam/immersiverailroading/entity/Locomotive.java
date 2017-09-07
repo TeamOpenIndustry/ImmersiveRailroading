@@ -160,15 +160,14 @@ public abstract class Locomotive extends FreightTank {
 		*/
 		// runSound.setVolume(getSpeed().minecraft() > 0 ? 1 : 0);
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
-
-		moveCoupledRollingStock(getMovement());
+		
+		float movement = getMovement();
+		if (movement != 0) {
+			moveCoupledRollingStock(movement);
+		}
 	}
 	
-	protected float getMovement() {
-		//http://evilgeniustech.com/idiotsGuideToRailroadPhysics/HorsepowerAndTractiveEffort/
-		//http://www.republiclocomotive.com/locomotive-power-calculations.html
-		//http://www.wplives.org/forms_and_documents/Air_Brake_Principles.pdf
-		
+	private double getTractiveEffortNewtons() {		
 		double outputHorsepower = Math.abs(dataManager.get(THROTTLE) * this.getDefinition().getHorsePower());
 		double locoEfficiency = 0.7f; //TODO config
 		
@@ -178,6 +177,23 @@ public abstract class Locomotive extends FreightTank {
 		}
 		
 		tractiveEffortNewtons = Math.min(tractiveEffortNewtons, this.getDefinition().getStartingTraction() * 4.44822);
+		return Math.copySign(tractiveEffortNewtons, dataManager.get(THROTTLE));
+	}
+	
+	private int lastMoveTick = -1;
+	protected float getMovement() {
+		// Run once per train per tick
+		if (this.lastMoveTick == this.ticksExisted) {
+			return 0;
+		}
+		
+		
+		//http://evilgeniustech.com/idiotsGuideToRailroadPhysics/HorsepowerAndTractiveEffort/
+		//http://www.republiclocomotive.com/locomotive-power-calculations.html
+		//http://www.wplives.org/forms_and_documents/Air_Brake_Principles.pdf
+		
+		double tractiveEffortNewtons = 0;
+		double airBrake = 0;
 		
 		//lbs
 		double rollingResistanceNewtons = 0;
@@ -199,11 +215,18 @@ public abstract class Locomotive extends FreightTank {
 			
 			// lbs * 1%gradeResistance * grade multiplier
 			gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
+			
+			if (e instanceof Locomotive) {
+				Locomotive loco = (Locomotive) e;
+				tractiveEffortNewtons += loco.getTractiveEffortNewtons();
+				airBrake += loco.dataManager.get(AIR_BRAKE);
+				loco.lastMoveTick = loco.ticksExisted + (loco.getPersistentID() == this.getPersistentID() ? 0 : 1);
+			}
 		}
 
 		// 0.25 = steel wheel on steel rail
 		double brakeAdhesion =  massToMoveKg * 0.25;
-		double airBrakeNewtons = brakeAdhesion * dataManager.get(AIR_BRAKE) * 4.44822f;
+		double airBrakeNewtons = brakeAdhesion * Math.min(airBrake, 1) * 4.44822f;
 		
 		double reverseMultiplier = (this.isReverse ? -1 : 1);
 		
@@ -216,7 +239,7 @@ public abstract class Locomotive extends FreightTank {
 		
 		
 		double currentMCVelocity = this.getCurrentSpeed().minecraft() * reverseMultiplier;
-		double deltaAccellTractiveMCVelocity = Math.copySign(Speed.fromMetric(tractiveAccell).minecraft(), dataManager.get(THROTTLE));
+		double deltaAccellTractiveMCVelocity = Speed.fromMetric(tractiveAccell).minecraft();
 		
 		// Limit decell to current speed to trains stop
 		// Apply in the reverse direction of current travel
@@ -241,7 +264,6 @@ public abstract class Locomotive extends FreightTank {
 
 		if(this.ticksExisted % 20 == 0 && world.isRemote) {
 			debugInfo = new ArrayList<String>();
-			debugInfo.add("Locomotive Output HP: " + outputHorsepower);
 			debugInfo.add("Locomotive Tractive Effort N: " + tractiveEffortNewtons);
 			debugInfo.add("Train Rolling Resistance N: " + rollingResistanceNewtons);
 			debugInfo.add("Train Slope Resistance N: " + gradeForceNewtons);
