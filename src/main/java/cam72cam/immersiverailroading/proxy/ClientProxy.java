@@ -72,11 +72,6 @@ public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
 
 	@Override
-	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
-		return null;
-	}
-
-	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
 		switch (GuiTypes.values()[ID]) {
 		case FREIGHT:

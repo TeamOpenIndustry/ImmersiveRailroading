@@ -17,6 +17,9 @@ import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveElectric;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.gui.FreightContainer;
+import cam72cam.immersiverailroading.gui.TankContainer;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.net.CoupleStatusPacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
@@ -27,6 +30,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -115,4 +119,20 @@ public abstract class CommonProxy implements IGuiHandler {
 	}
 
 	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
+	
+
+
+    @Override
+    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
+    	switch(GuiTypes.values()[ID]) {
+		case FREIGHT:
+	    	return new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityID));
+		case TANK:
+	    	return new TankContainer(player.inventory, (CarTank) world.getEntityByID(entityID));
+		case TENDER:
+			return null;
+		default:
+			return null;
+    	}
+    }
 }
