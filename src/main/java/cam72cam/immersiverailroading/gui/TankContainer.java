@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
-import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.entity.FreightTank;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -11,10 +11,10 @@ import net.minecraftforge.items.SlotItemHandler;
 
 public class TankContainer extends ContainerBase {
 	
-	private CarTank Tank;
+	private FreightTank Tank;
 	protected int numRows;
 
-	public TankContainer(IInventory playerInventory, CarTank stock) {
+	public TankContainer(IInventory playerInventory, FreightTank stock) {
 		this.Tank = stock;
         int horizSlots = 10;
 		this.numRows = 4;

@@ -122,7 +122,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 */
 
 	@Override
-	protected GuiTypes guiType() {
+	public GuiTypes guiType() {
 		return GuiTypes.TANK;
 	}
 	
