@@ -24,8 +24,8 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 	@Override
 	protected void checkInvent() {
 		super.checkInvent();
-		if (getFuel() < getMaxFuel()) {
-			int amount = (int) Math.min(10, getMaxFuel() - getFuel());
+		if (getFuel() < this.getDefinition().getFuelCapacity()) {
+			int amount = (int) Math.min(10, this.getDefinition().getFuelCapacity() - getFuel());
 			FluidStack ableToDrain = drain(amount, true);
 			if (ableToDrain != null) {
 				addFuel(ableToDrain.amount);
@@ -56,11 +56,6 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 
 	@Override
 	public int getTankCapacity() {
-		return this.getDefinition().getFuelCapacity();
-	}
-
-	@Override
-	public double getMaxFuel() {
 		return this.getDefinition().getFuelCapacity();
 	}
 }

@@ -33,9 +33,6 @@ public class DefinitionManager {
 				case "diesel":
 					loco = new LocomotiveDieselDefinition(defID, data);
 					break;
-				case "electric":
-					loco = new LocomotiveElectricDefinition(defID, data);
-					break;
 				default:
 					ImmersiveRailroading.logger.warn(String.format("Invalid era %s in %s", era, defID));
 					continue;
