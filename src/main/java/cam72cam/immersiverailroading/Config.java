@@ -34,9 +34,6 @@ public class Config {
 	@Comment({"How heavy is a single block in Kg"})
 	public static int blockWeight = 100;
 	
-	@Comment({"How heavy is a single bucket of liquid in Kg"})
-	public static int liquidWeight = 100;
-	
 	@Comment({"MilliBuckets per Liter"})
 	public static int MB_PER_LITER = 1;
 }

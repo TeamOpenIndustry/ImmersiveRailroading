@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -238,9 +237,10 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	
 	@Override
 	public double getWeight() {
-		// LiquidWeight 
-		double fLoad = Config.liquidWeight * (this.getDataManager().get(FLUID_AMOUNT) / 1000f);
-		fLoad = fLoad + super.getWeight();
+		double fLoad = super.getWeight();
+		if (this.getLiquidAmount() > 0) {
+			fLoad += this.getLiquidAmount() * this.getLiquid().getDensity() / Fluid.BUCKET_VOLUME;
+		}
 		return fLoad;
 	}
 	
