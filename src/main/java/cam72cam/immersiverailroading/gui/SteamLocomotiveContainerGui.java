@@ -5,8 +5,6 @@ import java.util.Map;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.init.Blocks;
-import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 
 public class SteamLocomotiveContainerGui extends ContainerGuiBase {
 	
@@ -20,7 +18,7 @@ public class SteamLocomotiveContainerGui extends ContainerGuiBase {
         this.inventoryRows = container.numRows;
         this.horizSlots = stock.getInventoryWidth();
         this.xSize = paddingRight + horizSlots*2 * slotSize + paddingLeft;
-        this.ySize = 114 + this.inventoryRows * slotSize;
+        this.ySize = 114 + this.inventoryRows * slotSize*2;
     }
 
 	@Override
