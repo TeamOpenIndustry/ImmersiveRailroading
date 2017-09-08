@@ -5,9 +5,11 @@ import java.util.List;
 
 import blusunrize.immersiveengineering.api.energy.DieselHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -30,6 +32,31 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 	@Override
 	public GuiTypes guiType() {
 		return GuiTypes.DIESEL_LOCOMOTIVE;
+	}
+	
+	
+	/*
+	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
+	 */
+	@Override
+	public void handleKeyPress(Entity source, KeyTypes key) {
+		float prevThrottle = getThrottle();
+		float prevAirBrake = getAirBrake();
+		
+		super.handleKeyPress(source, key);
+		
+		float newThrottle = getThrottle();
+		float newAirBrake = getAirBrake();
+		
+		if (prevThrottle != newThrottle || prevAirBrake != newAirBrake) {
+			for (EntityCoupleableRollingStock stock : this.getTrain()) {
+				if (stock instanceof LocomotiveDiesel) {
+					LocomotiveDiesel loco = (LocomotiveDiesel) stock;
+					loco.setThrottle(newThrottle);
+					loco.setAirBrake(newAirBrake);
+				}
+			}
+		}
 	}
 	
 	@Override

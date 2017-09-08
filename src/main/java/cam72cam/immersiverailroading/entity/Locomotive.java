@@ -66,15 +66,15 @@ public abstract class Locomotive extends FreightTank {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setFloat("throttle", dataManager.get(THROTTLE));
-		nbttagcompound.setFloat("brake", dataManager.get(AIR_BRAKE));
+		nbttagcompound.setFloat("throttle", getThrottle());
+		nbttagcompound.setFloat("brake", getAirBrake());
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-		dataManager.set(THROTTLE, nbttagcompound.getFloat("throttle"));
-		dataManager.set(AIR_BRAKE, nbttagcompound.getFloat("brake"));
+		setThrottle(nbttagcompound.getFloat("throttle"));
+		setAirBrake(nbttagcompound.getFloat("brake"));
 	}
 
 	@Override
@@ -89,29 +89,29 @@ public abstract class Locomotive extends FreightTank {
 	public void handleKeyPress(Entity source, KeyTypes key) {
 		switch(key) {
 		case THROTTLE_UP:
-			if (this.dataManager.get(THROTTLE) < 1) {
-				this.dataManager.set(THROTTLE, this.dataManager.get(THROTTLE) + 0.1f);
+			if (getThrottle() < 1) {
+				setThrottle(getThrottle() + 0.1f);
 			}
 			break;
 		case THROTTLE_ZERO:
-			this.dataManager.set(THROTTLE, 0f);
+			setThrottle(0f);
 			break;
 		case THROTTLE_DOWN:
-			if (this.dataManager.get(THROTTLE) > -1) {
-				this.dataManager.set(THROTTLE, this.dataManager.get(THROTTLE) - 0.1f);
+			if (getThrottle() > -1) {
+				setThrottle(getThrottle() - 0.1f);
 			}
 			break;
 		case AIR_BRAKE_UP:
-			if (this.dataManager.get(AIR_BRAKE) < 1) {
-				this.dataManager.set(AIR_BRAKE, this.dataManager.get(AIR_BRAKE) + 0.1f);
+			if (getAirBrake() < 1) {
+				setAirBrake(getAirBrake() + 0.1f);
 			}
 			break;
 		case AIR_BRAKE_ZERO:
-			this.dataManager.set(AIR_BRAKE, 0f);
+			setAirBrake(0f);
 			break;
 		case AIR_BRAKE_DOWN:
-			if (this.dataManager.get(AIR_BRAKE) > 0) {
-				this.dataManager.set(AIR_BRAKE, this.dataManager.get(AIR_BRAKE) - 0.1f);
+			if (getAirBrake() > 0) {
+				setAirBrake(getAirBrake() - 0.1f);
 			}
 			break;
 		default:
@@ -150,7 +150,7 @@ public abstract class Locomotive extends FreightTank {
 	protected abstract int getAvailableHP();
 	
 	private double getTractiveEffortNewtons() {		
-		double outputHorsepower = Math.abs(dataManager.get(THROTTLE) * getAvailableHP());
+		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
 		double locoEfficiency = 0.7f; //TODO config
 		
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / this.getCurrentSpeed().metric()));
@@ -159,7 +159,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 		
 		tractiveEffortNewtons = Math.min(tractiveEffortNewtons, this.getDefinition().getStartingTraction() * 4.44822);
-		return Math.copySign(tractiveEffortNewtons, dataManager.get(THROTTLE));
+		return Math.copySign(tractiveEffortNewtons, getThrottle());
 	}
 	
 	private int lastMoveTick = -1;
@@ -201,7 +201,7 @@ public abstract class Locomotive extends FreightTank {
 			if (e instanceof Locomotive) {
 				Locomotive loco = (Locomotive) e;
 				tractiveEffortNewtons += loco.getTractiveEffortNewtons();
-				airBrake += loco.dataManager.get(AIR_BRAKE);
+				airBrake += loco.getAirBrake();
 				loco.lastMoveTick = loco.ticksExisted + (loco.getPersistentID() == this.getPersistentID() ? 0 : 1);
 			}
 		}
@@ -282,5 +282,15 @@ public abstract class Locomotive extends FreightTank {
 	
 	public float getThrottle() {
 		return dataManager.get(THROTTLE);
+	}
+	public void setThrottle(float newThrottle) {
+		dataManager.set(THROTTLE, newThrottle);
+	}
+	
+	public float getAirBrake() {
+		return dataManager.get(AIR_BRAKE);
+	}
+	public void setAirBrake(float newAirBrake) {
+		dataManager.set(AIR_BRAKE, newAirBrake);
 	}
 }
