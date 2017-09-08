@@ -30,6 +30,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
+import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemModel;
@@ -58,6 +59,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
@@ -207,6 +209,21 @@ public class ClientProxy extends CommonProxy {
 		}
 		if (player.movementInput.backKeyDown) {
 			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_BACKWARD, riding.getEntityWorld().provider.getDimension(), player.getEntityId(), riding.getEntityId()));
+		}
+	}
+	
+	@SubscribeEvent
+	public static void onClick(MouseEvent event) {
+		// So it turns out that the client sends mouse click packets to the server regardless of 
+		// if the entity being clicked is within the requisite distance.
+		// We need to override that distance because train centers are further away
+		// than 36m.
+		if ((event.getButton() == 0 || event.getButton() == 1) && event.isButtonstate()) {
+			Entity entity = Minecraft.getMinecraft().objectMouseOver.entityHit;
+			if (entity != null && entity instanceof EntityRidableRollingStock) {
+				ImmersiveRailroading.net.sendToServer(new MousePressPacket(event.getButton(), entity.world.provider.getDimension(), entity.getEntityId()));
+				event.setCanceled(true);
+			}
 		}
 	}
 
