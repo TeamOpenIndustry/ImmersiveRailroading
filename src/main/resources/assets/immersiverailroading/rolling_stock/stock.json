@@ -1,0 +1,7 @@
+{
+	"freight": [ "boxcar_us", "flatcar_us" ],
+	"locomotives": [ "a1_peppercorn", "big_boy", "gp-7" ],
+	"passenger": [ "br_coach_mk1" ],
+	"tank": [ "tank_us" ],
+	"tender": [ "a1_peppercorn_tender" ]
+}

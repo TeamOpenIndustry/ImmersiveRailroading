@@ -62,7 +62,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	entityClasses.add(Tender.class);
     }
 	
-    public void preInit(FMLPreInitializationEvent event) {
+    public void preInit(FMLPreInitializationEvent event) throws IOException {
     	DefinitionManager.initDefinitions();
     }
     

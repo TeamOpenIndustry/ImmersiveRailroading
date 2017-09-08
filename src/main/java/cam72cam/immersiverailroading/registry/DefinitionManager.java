@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.util.ResourceLocation;
 
@@ -19,10 +19,12 @@ public class DefinitionManager {
 
 	private static Map<String, EntityRollingStockDefinition> definitions = new HashMap<String, EntityRollingStockDefinition>();
 
-	public static void initDefinitions() {
-		for (String locomotive : Config.locomotives) {
+	public static void initDefinitions() throws IOException {
+		JsonObject stock = getJsonData("rolling_stock/stock.json");
+		
+		for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
 			try {
-				String defID = "rolling_stock/locomotives/" + locomotive + ".json";
+				String defID = "rolling_stock/locomotives/" + locomotive .getAsString()+ ".json";
 				JsonObject data = getJsonData(defID);
 				String era = data.get("era").getAsString();
 				LocomotiveDefinition loco = null;
@@ -42,36 +44,36 @@ public class DefinitionManager {
 				ex.printStackTrace();
 			}
 		}
-		for (String tender : Config.tenders) {
+		for (JsonElement tender : stock.get("tender").getAsJsonArray()) {
 			try {
-				String defID = "rolling_stock/tender/" + tender + ".json";
+				String defID = "rolling_stock/tender/" + tender.getAsString() + ".json";
 				JsonObject data = getJsonData(defID);
 				definitions.put(defID, new TenderDefinition(defID, data));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-		for (String passenger_car : Config.passenger_cars) {
+		for (JsonElement passenger_car : stock.get("passenger").getAsJsonArray()) {
 			try {
-				String defID = "rolling_stock/passenger/" + passenger_car + ".json";
+				String defID = "rolling_stock/passenger/" + passenger_car.getAsString() + ".json";
 				JsonObject data = getJsonData(defID);
 				definitions.put(defID, new CarPassengerDefinition(defID, data));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-		for (String freight_car : Config.freight_cars) {
+		for (JsonElement freight_car : stock.get("freight").getAsJsonArray()) {
 			try {
-				String defID = "rolling_stock/freight/" + freight_car + ".json";
+				String defID = "rolling_stock/freight/" + freight_car.getAsString() + ".json";
 				JsonObject data = getJsonData(defID);
 				definitions.put(defID, new CarFreightDefinition(defID, data));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-		for (String tank_car : Config.tank_cars) {
+		for (JsonElement tank_car : stock.get("tank").getAsJsonArray()) {
 			try {
-				String defID = "rolling_stock/tank/" + tank_car + ".json";
+				String defID = "rolling_stock/tank/" + tank_car.getAsString() + ".json";
 				JsonObject data = getJsonData(defID);
 				definitions.put(defID, new CarTankDefinition(defID, data));
 			} catch (Exception ex) {

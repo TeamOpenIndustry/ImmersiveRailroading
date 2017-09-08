@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading;
 
+import java.io.IOException;
+
 import org.apache.logging.log4j.Logger;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
@@ -43,7 +45,7 @@ public class ImmersiveRailroading
 	public static CommonProxy proxy;
 	
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
+    public void preInit(FMLPreInitializationEvent event) throws IOException {
         logger = event.getModLog();
         instance = this;
         
