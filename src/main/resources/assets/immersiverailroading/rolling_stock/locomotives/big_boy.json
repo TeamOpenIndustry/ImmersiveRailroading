@@ -6,7 +6,7 @@
 	"properties": {
 		"fuel_consumption": 100,
 		"fuel_capacity": 100,
-		"water_capacity": 27000, 
+		"water_capacity_l": 27000, 
 		"horsepower": 6290,
 		"tractive_effort_lbf": 135375,
 		"max_speed_kmh": 130,

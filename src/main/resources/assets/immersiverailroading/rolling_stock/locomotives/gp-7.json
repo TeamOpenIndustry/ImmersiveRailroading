@@ -4,8 +4,8 @@
 	"works": "Electro-Motive Division",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/gp-7.obj",
 	"properties": {
-		"fuel_consumption": 100,
-		"fuel_capacity": 100,
+		"fuel_efficiency_%": 100,
+		"fuel_capacity_l": 6000,
 		"horsepower": 1500,
 		"tractive_effort_lbf": 61500,
 		"max_speed_kmh": 104.607,
