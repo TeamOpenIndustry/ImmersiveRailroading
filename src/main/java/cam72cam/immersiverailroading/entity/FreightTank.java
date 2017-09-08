@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -214,13 +215,14 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 								} else {
 									FluidUtil.tryEmptyContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
 								}
-								
-								// Decrease input
-								cargoItems.extractItem(inputSlot, 1, false);
-								
-								// Increase output
-								this.cargoItems.insertItem(slot, out, false);
-								break;
+								if (!Config.debugInfiniteLiquids) {
+									// Decrease input
+									cargoItems.extractItem(inputSlot, 1, false);
+									
+									// Increase output
+									this.cargoItems.insertItem(slot, out, false);
+									break;
+								}
 							}
 						}
 					}

@@ -104,36 +104,41 @@ public abstract class ContainerGuiBase extends GuiContainer {
 	}
     
     public void drawFluid(Fluid fluid, int x, int y, int width, int height, int scale) {
-    	this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 		TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite(fluid.getStill().toString());
 		if(sprite != null)
 		{
-			int col = fluid.getColor();
-			GlStateManager.color((col>>16&255)/255.0f,(col>>8&255)/255.0f,(col&255)/255.0f, 1);
-			int iW = sprite.getIconWidth()*scale;
-			int iH = sprite.getIconHeight()*scale;
-			
-	        float minU = sprite.getMinU();
-	        float minV = sprite.getMinV();
-	        
-	        Tessellator tessellator = Tessellator.getInstance();
-	        BufferBuilder buffer = tessellator.getBuffer();
-	        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);	        
-	        for (int offY = 0; offY < height; offY += iH) {
-	        	int curHeight = Math.min(iH, height - offY);
-	        	float maxVScaled = sprite.getInterpolatedV(16.0 * curHeight / iH);
-		        for (int offX = 0; offX < width; offX += iW) {
-		        	int curWidth = Math.min(iW, width - offX);
-		        	float maxUScaled = sprite.getInterpolatedU(16.0 * curWidth / iW);  
-			        buffer.pos(x+offX, y+offY, this.zLevel).tex(minU, maxVScaled).endVertex();
-			        buffer.pos(x+offX, y+offY+curHeight, this.zLevel).tex(minU, minV).endVertex();
-			        buffer.pos(x+offX+curWidth, y+offY+curHeight, this.zLevel).tex(maxUScaled, minV).endVertex();
-			        buffer.pos(x+offX+curWidth, y+offY, this.zLevel).tex(maxUScaled, maxVScaled).endVertex();
-		        }
-	        }
-	        tessellator.draw();
+			drawSprite(sprite, fluid.getColor(), x, y, width, height, scale);
 		}
-		this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+    }
+    
+    public void drawSprite(TextureAtlasSprite sprite, int col, int x, int y, int width, int height, int scale) {
+    	this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+
+		GlStateManager.color((col>>16&255)/255.0f,(col>>8&255)/255.0f,(col&255)/255.0f, 1);
+		int iW = sprite.getIconWidth()*scale;
+		int iH = sprite.getIconHeight()*scale;
+		
+        float minU = sprite.getMinU();
+        float minV = sprite.getMinV();
+        
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);	        
+        for (int offY = 0; offY < height; offY += iH) {
+        	int curHeight = Math.min(iH, height - offY);
+        	float maxVScaled = sprite.getInterpolatedV(16.0 * curHeight / iH);
+	        for (int offX = 0; offX < width; offX += iW) {
+	        	int curWidth = Math.min(iW, width - offX);
+	        	float maxUScaled = sprite.getInterpolatedU(16.0 * curWidth / iW);  
+		        buffer.pos(x+offX, y+offY, this.zLevel).tex(minU, minV).endVertex();
+		        buffer.pos(x+offX, y+offY+curHeight, this.zLevel).tex(minU, maxVScaled).endVertex();
+		        buffer.pos(x+offX+curWidth, y+offY+curHeight, this.zLevel).tex(maxUScaled, maxVScaled).endVertex();
+		        buffer.pos(x+offX+curWidth, y+offY, this.zLevel).tex(maxUScaled, minV).endVertex();
+	        }
+        }
+        tessellator.draw();
+        
+		this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);	
     }
 
 	public void drawTankBlock(int x, int y, int horizSlots, int inventoryRows, Fluid fluid, float percentFull) {
