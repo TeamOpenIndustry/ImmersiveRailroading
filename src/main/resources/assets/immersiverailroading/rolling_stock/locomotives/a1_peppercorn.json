@@ -4,8 +4,7 @@
 	"works": "A1 Steam Locomotive Trust",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/a1_peppercorn.obj",
 	"properties": {
-		"fuel_consumption": 100,
-		"fuel_capacity": 100,
+		"max_psi": 250,
 		"water_capacity_l": 27000, 
 		"horsepower": 2700,
 		"tractive_effort_lbf": 37400,

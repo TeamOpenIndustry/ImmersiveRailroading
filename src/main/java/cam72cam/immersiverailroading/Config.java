@@ -21,4 +21,6 @@ public class Config {
 	
 	@Comment({"MilliBuckets per Liter"})
 	public static int MB_PER_LITER = 1;
+
+	public static boolean debugInfiniteLiquids = true;
 }

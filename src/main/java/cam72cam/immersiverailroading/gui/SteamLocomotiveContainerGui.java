@@ -1,7 +1,12 @@
 package cam72cam.immersiverailroading.gui;
 
+import java.util.Map;
+
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.init.Blocks;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 
 public class SteamLocomotiveContainerGui extends ContainerGuiBase {
 	
@@ -37,7 +42,34 @@ public class SteamLocomotiveContainerGui extends ContainerGuiBase {
     	
     	currY = drawBottomBar(i, currY, horizSlots*2);
 
+    	int prevY = currY;
     	currY = drawSlotBlock(i + horizSlots * slotSize/2, currY, horizSlots, inventoryRows);
+    	try {
+    		Map<Integer, Integer> burnTime = stock.getBurnTime();
+    		Map<Integer, Integer> burnMax = stock.getBurnMax();
+	    	for (int slot : burnTime.keySet()) {
+	    		int time = stock.getBurnTime().get(slot);
+	    		if (time != 0) {
+	    			float perc = Math.min(1f, (float)time / burnMax.get(slot));
+	    			
+	    			int xSlot = slot % this.horizSlots+1;
+	    			int ySlot = slot / this.horizSlots;
+	    			
+	    			int xPos = i + horizSlots * slotSize/2 + (paddingLeft + (xSlot-1) * slotSize);
+	    			int yPos = (prevY) + ySlot * slotSize;
+	    			
+	    			int offset = 1;
+	    			int zOff = (int) ((slotSize-offset*2-1)*(1-perc));
+	    			
+	    			drawRect(xPos+offset, yPos+offset + zOff, xPos + slotSize-offset, yPos + slotSize-offset, 0x77c64306);
+	    			TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite("minecraft:blocks/fire_layer_1");
+	    			drawSprite(sprite, 0xFFFFFFFF, xPos + offset, yPos + offset + zOff, slotSize-offset*2, slotSize-offset*2 - zOff, 1);
+	    		}
+	    	}
+    	} catch (Exception ex) {
+    		ex.printStackTrace();
+    	}
+    	GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     	
     	currY = drawPlayerInventoryConnector(i, currY, width, horizSlots);
     	currY = drawPlayerInventory((width - playerXSize) / 2, currY);

@@ -4,9 +4,8 @@
 	"works": "American Locomotive Company",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/big_boy.obj",
 	"properties": {
-		"fuel_consumption": 100,
-		"fuel_capacity": 100,
-		"water_capacity_l": 27000, 
+		"max_psi": 300,
+		"water_capacity_l": 95000, 
 		"horsepower": 6290,
 		"tractive_effort_lbf": 135375,
 		"max_speed_kmh": 130,
