@@ -100,20 +100,21 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 	}
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();
+	private final double pressDist = 0.05;
 	public void handleKeyPress(Entity source, KeyTypes key) {
 		Vec3d movement = null;
 		switch (key) {
 		case PLAYER_FORWARD:
-			movement = new Vec3d(0.1, 0, 0);
+			movement = new Vec3d(pressDist, 0, 0);
 			break;
 		case PLAYER_BACKWARD:
-			movement = new Vec3d(-0.1, 0, 0);
+			movement = new Vec3d(-pressDist, 0, 0);
 			break;
 		case PLAYER_LEFT:
-			movement = new Vec3d(0, 0, -0.1);
+			movement = new Vec3d(0, 0, -pressDist);
 			break;
 		case PLAYER_RIGHT:
-			movement = new Vec3d(0, 0, 0.1);
+			movement = new Vec3d(0, 0, pressDist);
 			break;
 		default:
 			//ignore key
