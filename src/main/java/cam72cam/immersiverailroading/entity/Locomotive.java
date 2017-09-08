@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,6 @@ public abstract class Locomotive extends FreightTank {
 	//private MovingSoundRollingStock idleSound;
 	//protected MovingSoundRollingStock runSound;
 
-	private static DataParameter<Integer> FUEL = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
 	private static DataParameter<Float> THROTTLE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	
@@ -33,7 +33,6 @@ public abstract class Locomotive extends FreightTank {
 	public Locomotive(World world, String defID) {
 		super(world, defID);
 
-		this.getDataManager().register(FUEL, 0);
 		this.getDataManager().register(THROTTLE, 0f);
 		this.getDataManager().register(AIR_BRAKE, 0f);
 
@@ -56,15 +55,6 @@ public abstract class Locomotive extends FreightTank {
 
 	/*
 	 * 
-	 * All this is used in GUI only
-	 */
-
-	public int getFuel() {
-		return dataManager.get(FUEL);
-	}
-
-	/*
-	 * 
 	 * EntityRollingStock Overrides
 	 */
 
@@ -76,7 +66,6 @@ public abstract class Locomotive extends FreightTank {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setInteger("fuelTrain", getFuel());
 		nbttagcompound.setFloat("throttle", dataManager.get(THROTTLE));
 		nbttagcompound.setFloat("brake", dataManager.get(AIR_BRAKE));
 	}
@@ -84,7 +73,6 @@ public abstract class Locomotive extends FreightTank {
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-		dataManager.set(FUEL, nbttagcompound.getInteger("fuelTrain"));
 		dataManager.set(THROTTLE, nbttagcompound.getFloat("throttle"));
 		dataManager.set(AIR_BRAKE, nbttagcompound.getFloat("brake"));
 	}
@@ -159,8 +147,10 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 	
+	protected abstract int getAvailableHP();
+	
 	private double getTractiveEffortNewtons() {		
-		double outputHorsepower = Math.abs(dataManager.get(THROTTLE) * this.getDefinition().getHorsePower());
+		double outputHorsepower = Math.abs(dataManager.get(THROTTLE) * getAvailableHP());
 		double locoEfficiency = 0.7f; //TODO config
 		
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / this.getCurrentSpeed().metric()));
@@ -289,8 +279,8 @@ public abstract class Locomotive extends FreightTank {
 		//	Minecraft.getMinecraft().getSoundHandler().playSound(hornSound);
 		//}
 	}
-
-	public void addFuel(int fuel) {
-		dataManager.set(FUEL, dataManager.get(FUEL) + fuel);
+	
+	public float getThrottle() {
+		return dataManager.get(THROTTLE);
 	}
 }

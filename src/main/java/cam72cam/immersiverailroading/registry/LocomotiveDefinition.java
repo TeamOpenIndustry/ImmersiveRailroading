@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.util.Speed;
 
 public abstract class LocomotiveDefinition extends EntityRollingStockDefinition  {
 	private String works;
-	private int fuelConsumption;
 	private int power;
 	private int traction;
 	private Speed maxSpeed;
@@ -19,7 +18,6 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 		
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		
-		fuelConsumption = properties.get("fuel_consumption").getAsInt();
 		power = properties.get("horsepower").getAsInt();
 		traction = properties.get("tractive_effort_lbf").getAsInt();
 		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble());
@@ -32,10 +30,6 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 		tips.add("Horse Power: " + this.getHorsePower());
 		tips.add("Max Speed: " + this.getMaxSpeed().metricString());
 		return tips;
-	}
-
-	public int getFuelConsumption() {
-		return this.fuelConsumption;
 	}
 	
 	public int getHorsePower() {

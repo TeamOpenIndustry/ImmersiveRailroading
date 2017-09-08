@@ -3,18 +3,21 @@ package cam72cam.immersiverailroading.registry;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
+import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
-	private int fuelCapacity;
+	private FluidQuantity fuelCapacity;
+	private int fuelEfficiency;
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 		JsonObject properties = data.get("properties").getAsJsonObject();
-		fuelCapacity = properties.get("fuel_capacity").getAsInt();
+		fuelCapacity = FluidQuantity.FromLiters(properties.get("fuel_capacity_l").getAsInt());
+		fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
 	}
 
 	@Override
@@ -29,7 +32,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		return loco;
 	}
 	
-	public int getFuelCapacity() {
+	public FluidQuantity getFuelCapacity() {
 		return this.fuelCapacity;
+	}
+
+	public int getFuelEfficiency() {
+		return this.fuelEfficiency;
 	}
 }

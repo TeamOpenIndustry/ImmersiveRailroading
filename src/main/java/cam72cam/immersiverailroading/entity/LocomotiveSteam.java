@@ -6,8 +6,8 @@ import java.util.List;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
+import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
@@ -30,14 +30,35 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	}
 	
 	@Override
+	protected int getAvailableHP() {
+		return this.getDefinition().getHorsePower();
+	}
+	
+	@Override
 	public void onUpdate() {
 		super.onUpdate();
 
 		if (world.isRemote) {
 			return;
 		}
+		
+		Tender tender = null;
+		if (this.getCoupled(CouplerType.BACK) instanceof Tender) {
+			tender = (Tender) getCoupled(CouplerType.BACK);
+		}
 
-		if (rand.nextInt(100) == 0 && getTankCapacity() > 0 && getFuel() > 0) {
+		if (tender == null) {
+			return;
+		}
+
+		// Only drain 10mb at a time from the tender
+		int desiredDrain = 10;
+		if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
+			FluidUtil.tryFluidTransfer(this, tender, desiredDrain, true);
+		}
+
+		if (rand.nextInt(100) == 0 && getTankCapacity().MilliBuckets() > 0) {
+			//TODO heat check
 			drain(this.getDefinition().getWaterConsumption(), true);
 		}
 	}
@@ -60,70 +81,8 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		return new int[] { getInventorySize()-1 };
 	}
 
-	/*
-	 * TODO
-	 * 
-	 * @Override protected Integer customHeatHandler(Integer overheatLevel) {
-	 * int waterLevel = this.getLiquidAmount(); int maxWaterLevel =
-	 * getCarTankCapacity();
-	 * 
-	 * if (waterLevel < 1 && getFuel() > 10) { overheatLevel += 5; } if
-	 * (waterLevel > maxWaterLevel / 2 && overheatLevel > 50 &&
-	 * !getState().equals("broken")) { overheatLevel -= 1; } return
-	 * overheatLevel; }
-	 */
-
 	@Override
-	protected void checkInvent() {
-		super.checkInvent();
-
-		if (cargoItems.getStackInSlot(0) != null) {
-			int burnTime = ForgeEventFactory.getItemBurnTime(cargoItems.getStackInSlot(0));
-			if (burnTime > 0 && getFuel() + burnTime <= this.getDefinition().getFuelCapacity()) {
-				addFuel(burnTime);
-				// TODO shadow item which fades as it is used based on burn time
-				cargoItems.extractItem(0, 1, false);
-			}
-		}
-
-		Tender tender = null;
-
-		// BUG: locomotives can drain from tenders in front of the locomotive
-		if (this.getCoupled(CouplerType.FRONT) instanceof Tender) {
-			tender = (Tender) getCoupled(CouplerType.FRONT);
-		}
-		if (this.getCoupled(CouplerType.BACK) instanceof Tender) {
-			tender = (Tender) getCoupled(CouplerType.BACK);
-		}
-
-		if (tender == null) {
-			return;
-		}
-
-		// Only drain 10mb at a time from the tender
-		int desiredDrain = 10;
-		if (getTankCapacity() - getServerLiquidAmount() >= 10) {
-			FluidUtil.tryFluidTransfer(this, tender, desiredDrain, true);
-		}
-
-		/*
-		 * TODO for (int tenderID = 0; tenderID < tender.getInventorySize();
-		 * tenderID++) { ItemStack tenderItem = tender.cargoItems[tenderID];
-		 * ItemStack locoItem = cargoItems[0]; if
-		 * (TraincraftUtil.steamFuelBurnTime(tenderItem) > 0) { if (locoItem ==
-		 * null) { tender.decrStackSize(tenderID, 1);
-		 * 
-		 * cargoItems[0] = tenderItem.copy(); cargoItems[0].stackSize = 1;
-		 * break; } else if (locoItem.isItemEqual(tenderItem) &&
-		 * locoItem.getMaxStackSize() > locoItem.stackSize) {
-		 * tender.decrStackSize(tenderID, 1);
-		 * 
-		 * cargoItems[0].stackSize++; break; } } }
-		 */
-	}
-
-	@Override
-	public int getTankCapacity() {
+	public FluidQuantity getTankCapacity() {
 		return this.getDefinition().getTankCapacity();
 	}
 

@@ -10,8 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -42,7 +41,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 * 
 	 * Specifications
 	 */
-	public abstract int getTankCapacity();
+	public abstract FluidQuantity getTankCapacity();
 
 	/**
 	 * null == all
@@ -76,19 +75,12 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	public int getInventorySize() {
 		return 2;
 	}
-
-	/*
-	 * 
-	 * Functions for Models and GUI
-	 */
 	
-	@SideOnly(Side.CLIENT)
-	public int getClientLiquidAmount() {
+	public int getLiquidAmount() {
 		return this.dataManager.get(FLUID_AMOUNT);
 	}
 	
-	@SideOnly(Side.CLIENT)
-	public Fluid getClientLiquid() {
+	public Fluid getLiquid() {
 		String type = this.dataManager.get(FLUID_TYPE);
 		if (type.equals("EMPTY")) {
 			return null;
@@ -165,7 +157,7 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 			}
 		};
 
-		theTank.setCapacity(this.getTankCapacity());
+		theTank.setCapacity(this.getTankCapacity().MilliBuckets());
 	}
 	
 	@Override

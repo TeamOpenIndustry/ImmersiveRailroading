@@ -4,13 +4,14 @@ import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int waterConsumption;
-	private int tankCapacity;
+	private FluidQuantity tankCapacity;
 	private int fuelCapacity;
 	private ValveGearType valveGear;
 	private int numSlots;
@@ -27,7 +28,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		super(defID, data);
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		waterConsumption = properties.get("fuel_consumption").getAsInt();
-		tankCapacity = properties.get("water_capacity").getAsInt();
+		tankCapacity = FluidQuantity.FromLiters(properties.get("water_capacity_l").getAsInt());
 		fuelCapacity = properties.get("fuel_capacity").getAsInt();
 		valveGear = ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase());
 		JsonObject tender = data.get("firebox").getAsJsonObject();
@@ -51,7 +52,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		return this.waterConsumption;
 	}
 
-	public int getTankCapacity() {
+	public FluidQuantity getTankCapacity() {
 		return this.tankCapacity;
 	}
 	

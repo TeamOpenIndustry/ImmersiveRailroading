@@ -4,6 +4,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.registry.CarTankDefinition;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 
@@ -22,7 +23,7 @@ public class CarTank extends FreightTank {
 	}
 
 	@Override
-	public int getTankCapacity() {
+	public FluidQuantity getTankCapacity() {
 		return this.getDefinition().getTankCapaity();
 	}
 

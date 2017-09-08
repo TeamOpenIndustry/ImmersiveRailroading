@@ -30,7 +30,7 @@ public class TenderContainerGui extends ContainerGuiBase {
         currY = drawTopBar(i, currY, horizSlots);
     	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows);
     	
-    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, stock.getClientLiquid(), stock.getClientLiquidAmount() / (float)stock.getTankCapacity());
+    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, stock.getLiquid(), stock.getLiquidAmount() / (float)stock.getTankCapacity().MilliBuckets());
     	
     	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
     	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));

@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
 import net.minecraft.util.EnumFacing;
@@ -18,12 +19,12 @@ import net.minecraftforge.fluids.FluidRegistry;
 public class CarTankDefinition extends EntityRollingStockDefinition {
 
 	private List<Fluid> fluidFilter = null; // null == no filter
-	private int capacity;
+	private FluidQuantity capacity;
 
 	public CarTankDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 		JsonObject tank = data.get("tank").getAsJsonObject();
-		capacity = tank.get("capacity").getAsInt();
+		capacity = FluidQuantity.FromLiters(tank.get("capacity_l").getAsInt());
 		if (tank.has("whitelist")) {
 			fluidFilter = new ArrayList<Fluid>();
 			for(JsonElement allowed : tank.get("whitelist").getAsJsonArray()) {
@@ -49,7 +50,7 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 		return loco;
 	}
 
-	public int getTankCapaity() {
+	public FluidQuantity getTankCapaity() {
 		return this.capacity;
 	}
 
