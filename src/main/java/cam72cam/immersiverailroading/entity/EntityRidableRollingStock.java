@@ -78,9 +78,10 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 		if (player.isSneaking()) {
 			return false;
 		} else if (this.isBeingRidden()) {
-			return true;
+			return false;
 		} else {
 			if (!this.world.isRemote) {
+				System.out.println("HERE2");
 				passengerPositions.put(player.getPersistentID(), new Vec3d(0, 0, 0));
 				player.startRiding(this);
 			}
