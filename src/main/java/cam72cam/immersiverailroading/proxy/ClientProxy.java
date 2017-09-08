@@ -69,7 +69,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -174,8 +174,11 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public static void onKeyInput(InputEvent.KeyInputEvent event) {
+	public static void onKeyInput(ClientTickEvent event) {
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
+		if (player == null) {
+			return;
+		}
 		if (!player.isRiding()) {
 			return;
 		}
