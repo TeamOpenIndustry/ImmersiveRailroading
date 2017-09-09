@@ -185,7 +185,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		}
 		
 		if (!changedBurnTime) {
-			if (boilerPressure <= 0) {
+			if (boilerPressure <= 0 || boilerTemperature > 100) {
 				//cooling firebox
 				boilerTemperature = (float) Math.max(0, boilerTemperature-0.05);
 			} else {

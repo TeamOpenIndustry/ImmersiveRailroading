@@ -4,6 +4,12 @@ import net.minecraftforge.common.config.Config.Comment;
 
 @net.minecraftforge.common.config.Config(modid=ImmersiveRailroading.MODID)
 public class Config {
+	@Comment({"Place to draw the Train GUI as a % from the left of the screen"})
+	public static int GUIPositionHorizontal = 2;
+	
+	@Comment({"Place to draw the Train GUI as a % from the top of the screen"})
+	public static int GUIPositionVertical = 95;
+
 	@Comment({"Range between couplers to try coupling"})
 	public static double couplerRange = 0.3;
 
