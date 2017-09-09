@@ -25,6 +25,7 @@ import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TankContainerGui;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.gui.TenderContainerGui;
+import cam72cam.immersiverailroading.gui.TrackGui;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
@@ -98,6 +99,8 @@ public class ClientProxy extends CommonProxy {
 		case STEAM_LOCOMOTIVE:
 			return new SteamLocomotiveContainerGui((LocomotiveSteam) world.getEntityByID(entityID),
 					new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityID)));
+		case RAIL:
+			return new TrackGui();
 		default:
 			return null;
 		}
