@@ -63,7 +63,7 @@ public class TrackGui extends GuiScreen {
 	
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == typeButton) {
-			type = TrackItems.fromMeta((type.ordinal() + 1)%(TrackItems.values().length-1));
+			type = TrackItems.fromMeta((type.ordinal() + 1)%(TrackItems.values().length));
 			typeButton.displayString = "Type: " + type.getName();
 			quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		}

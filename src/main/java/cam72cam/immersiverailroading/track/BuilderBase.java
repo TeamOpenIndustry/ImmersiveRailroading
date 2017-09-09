@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -8,7 +9,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import scala.actors.threadpool.Arrays;
 
 //TODO @cam72cam use BlockPos and Vec3i
 
@@ -46,7 +46,6 @@ public abstract class BuilderBase {
 		private float length;
 		private List<String> groups;
 		
-		@SuppressWarnings("unchecked")
 		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, String... groups) {
 			super(xIn, yIn, zIn);
 			this.yaw = yaw;

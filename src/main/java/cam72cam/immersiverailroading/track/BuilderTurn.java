@@ -9,7 +9,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
@@ -86,8 +85,6 @@ public class BuilderTurn extends BuilderBase {
 		Vec3d center = new Vec3d(-xAbsPos, 0, -zAbsPos-0.5); 
 		center = VecUtil.rotateYaw(center, info.facing.getHorizontalAngle() - 90);
 		center = info.placementPosition.add(center);
-		
-		ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, center);
 		
 		turnTrack.setRotationCenter(center);
 		turnTrack.setDirection(info.direction);
