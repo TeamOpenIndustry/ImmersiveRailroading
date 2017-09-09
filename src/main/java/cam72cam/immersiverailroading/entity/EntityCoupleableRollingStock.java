@@ -434,7 +434,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		// May want to cache this if it happens a lot
 		//List<EntityCoupleableRollingStock> elist = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().grow(ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
 		//for (Object e : elist) {
-		for (Object e : world.getLoadedEntityList()) {
+		for (Object e : world.loadedEntityList) {
 			if (e instanceof EntityCoupleableRollingStock) {
 				EntityCoupleableRollingStock train = (EntityCoupleableRollingStock) e;
 				if (train.getPersistentID().equals(uuid)) {
