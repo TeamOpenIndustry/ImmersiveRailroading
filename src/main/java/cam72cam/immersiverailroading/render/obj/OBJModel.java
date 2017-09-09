@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render.obj;
 
 import java.io.InputStream;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,22 +11,18 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.RelativeResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
 	List<String> materialPaths = new ArrayList<String>();
 	// LinkedHashMap is ordered
 	Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
-	List<Vector3f> vertices = new ArrayList<Vector3f>();
-	List<Vector3f> vertexNormals = new ArrayList<Vector3f>();
-	List<Vector2f> vertexTextures = new ArrayList<Vector2f>();
+	List<Vec3d> vertices = new ArrayList<Vec3d>();
+	List<Vec3d> vertexNormals = new ArrayList<Vec3d>();
+	List<Vec2f> vertexTextures = new ArrayList<Vec2f>();
 
 	Map<String, String> groupMtlMap = new HashMap<String, String>();
 	Map<String, Material> materials = new HashMap<String, Material>();
@@ -67,13 +64,13 @@ public class OBJModel {
 				groupMtlMap.put(currentGroupName, currentMaterial);
 				break;
 			case "v":
-				vertices.add(new Vector3f(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
+				vertices.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
 				break;
 			case "vn":
-				vertexNormals.add(new Vector3f(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
+				vertexNormals.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
 				break;
 			case "vt":
-				vertexTextures.add(new Vector2f(Float.parseFloat(args[0]), Float.parseFloat(args[1])));
+				vertexTextures.add(new Vec2f(Float.parseFloat(args[0]), Float.parseFloat(args[1])));
 				break;
 			case "f":
 				currentGroup.add(new Face(args));
@@ -120,7 +117,7 @@ public class OBJModel {
 					currentMTL.name = parts[1];
 					break;
 				case "Ka":
-					currentMTL.Ka = BufferUtils.createFloatBuffer(4);
+					currentMTL.Ka = FloatBuffer.allocate(4);
 					currentMTL.Ka.put(Float.parseFloat(parts[1]));
 					currentMTL.Ka.put(Float.parseFloat(parts[2]));
 					currentMTL.Ka.put(Float.parseFloat(parts[3]));
@@ -132,7 +129,7 @@ public class OBJModel {
 					currentMTL.Ka.position(0);
 					break;
 				case "Kd":
-					currentMTL.Kd = BufferUtils.createFloatBuffer(4);
+					currentMTL.Kd = FloatBuffer.allocate(4);
 					currentMTL.Kd.put(Float.parseFloat(parts[1]));
 					currentMTL.Kd.put(Float.parseFloat(parts[2]));
 					currentMTL.Kd.put(Float.parseFloat(parts[3]));
@@ -144,7 +141,7 @@ public class OBJModel {
 					currentMTL.Kd.position(0);
 					break;
 				case "Ks":
-					currentMTL.Ks = BufferUtils.createFloatBuffer(4);
+					currentMTL.Ks = FloatBuffer.allocate(4);
 					currentMTL.Ks.put(Float.parseFloat(parts[1]));
 					currentMTL.Ks.put(Float.parseFloat(parts[2]));
 					currentMTL.Ks.put(Float.parseFloat(parts[3]));
@@ -184,140 +181,31 @@ public class OBJModel {
 			}
 		}
 	}
-
-	private Integer displayList = null;
-
-	public void draw() {
-		// TODO texture binding
-		/*
-		 * Idea: break model by texture groups render each in it's own display
-		 * list iterate through map <material, display_list> might be more
-		 * performant than baking the texture binding into the display list?
-		 */
-		if (displayList == null) {
-			displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			drawDirect();
-			GL11.glEndList();
-		}
-		GL11.glCallList(displayList);
-	}
-
-	public void drawDirect() {
-		drawDirectGroups(groups.keySet());
-	}
-	
-	public Map<Iterable<String>, Integer> displayLists = new HashMap<Iterable<String>, Integer>();
-	
-	public void drawGroups(Iterable<String> groupNames) {
-		if (!displayLists.containsKey(groupNames)) {
-			int groupsDisplayList = GL11.glGenLists(1);
-			GL11.glNewList(groupsDisplayList, GL11.GL_COMPILE);
-			drawDirectGroups(groupNames);
-			GL11.glEndList();
-			displayLists.put(groupNames, groupsDisplayList);
-		}
-		GL11.glCallList(displayLists.get(groupNames));
-	}
-	
-	public void drawDirectGroups(Iterable<String> groupNames) {
-		GL11.glBegin(GL11.GL_QUADS);
-		int last = 4;
-		for (String group : groupNames) {
-			Material currentMTL = materials.get(groupMtlMap.get(group));
-			List<Face> faces = groups.get(group);
-
-			if (currentMTL == null) {
-				//ImmersiveRailroading.logger.warn(String.format("Missing mtl %s %s", group, groupMtlMap.get(group)));
-			} else {
-				if (currentMTL.Ka != null) {
-					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, currentMTL.Ka);
-				}
-				if (currentMTL.Kd != null) {
-					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_DIFFUSE, currentMTL.Kd);
-					float darken = 0.06f;
-					float r = Math.max(0, currentMTL.Kd.get(0)-darken);
-					float g = Math.max(0, currentMTL.Kd.get(1)-darken);
-					float b = Math.max(0, currentMTL.Kd.get(2)-darken);
-					GL11.glColor4f(r, g, b, currentMTL.Kd.get(3));
-				}
-				if (currentMTL.Ks != null) {
-					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, currentMTL.Ks);
-				}
-			}
-
-			for (Face face : faces) {
-				switch (face.points.length) {
-				case 3:
-					if (face.points.length != last) {
-						GL11.glEnd();
-						GL11.glBegin(GL11.GL_TRIANGLES);
-					}
-					break;
-				case 4:
-					if (face.points.length != last) {
-						GL11.glEnd();
-						GL11.glBegin(GL11.GL_QUADS);
-					}
-					break;
-				default:
-					GL11.glEnd();
-					GL11.glBegin(GL11.GL_POLYGON);
-					break;
-				}
-				last = face.points.length; 
-
-				for (int[] point : face.points) {
-					Vector3f v;
-					Vector2f vt;
-					Vector3f vn;
-
-					switch (point.length) {
-					case 3:
-						vn = vertexNormals.get(point[2]);
-						GL11.glNormal3f(vn.x, vn.y, vn.z);
-					case 2:
-						if (point[1] != -1) {
-							vt = vertexTextures.get(point[1]);
-							GL11.glTexCoord2f(vt.x, 1 - vt.y);
-						}
-					case 1:
-						v = vertices.get(point[0]);
-						GL11.glVertex3f(v.x, v.y, v.z);
-						break;
-					default:
-						System.out.println("WATWATWAT");
-					}
-				}
-			}
-		}
-		GL11.glEnd();
-	}
 	
 	public Set<String> groups() {
 		return groups.keySet();
 	}
 	
-	private Map<Iterable<String>, Vector3f> mins = new HashMap<Iterable<String>, Vector3f>();
-	public Vector3f minOfGroup(Iterable<String> groupNames) {
+	private Map<Iterable<String>, Vec3d> mins = new HashMap<Iterable<String>, Vec3d>();
+	public Vec3d minOfGroup(Iterable<String> groupNames) {
 		if (!mins.containsKey(groupNames)) {
-			Vector3f min = null;
+			Vec3d min = null;
 			for (String group : groupNames) {
 				List<Face> faces = groups.get(group);
 				for (Face face : faces) {
 					for (int[] point : face.points) {
-						Vector3f v = vertices.get(point[0]);
+						Vec3d v = vertices.get(point[0]);
 						if (min == null) {
-							min = new Vector3f(v.x, v.y, v.z);
+							min = new Vec3d(v.x, v.y, v.z);
 						} else {
 							if (min.x > v.x) {
-								min.x = v.x;
+								min = new Vec3d(v.x, min.y, min.z);
 							}
 							if (min.y > v.y) {
-								min.y = v.y;
+								min = new Vec3d(min.x, v.y, min.z);
 							}
 							if (min.z > v.z) {
-								min.z = v.z;
+								min = new Vec3d(min.x, min.y, v.z);
 							}
 						}
 					}
@@ -325,32 +213,32 @@ public class OBJModel {
 			}
 			if (min == null) {
 				System.out.println("EMPTY " + groupNames);
-				min = new Vector3f(0, 0, 0);
+				min = new Vec3d(0, 0, 0);
 			}
 			mins.put(groupNames, min);
 		}
 		return mins.get(groupNames);
 	}
-	private Map<Iterable<String>, Vector3f> maxs = new HashMap<Iterable<String>, Vector3f>();
-	public Vector3f maxOfGroup(Iterable<String> groupNames) {
+	private Map<Iterable<String>, Vec3d> maxs = new HashMap<Iterable<String>, Vec3d>();
+	public Vec3d maxOfGroup(Iterable<String> groupNames) {
 		if (!maxs.containsKey(groupNames)) {
-			Vector3f max = null;
+			Vec3d max = null;
 			for (String group : groupNames) {
 				List<Face> faces = groups.get(group);
 				for (Face face : faces) {
 					for (int[] point : face.points) {
-						Vector3f v = vertices.get(point[0]);
+						Vec3d v = vertices.get(point[0]);
 						if (max == null) {
-							max = new Vector3f(v.x, v.y, v.z);
+							max = new Vec3d(v.x, v.y, v.z);
 						} else {
 							if (max.x < v.x) {
-								max.x = v.x;
+								max = new Vec3d(v.x, max.y, max.z);
 							}
 							if (max.y < v.y) {
-								max.y = v.y;
+								max = new Vec3d(max.x, v.y, max.z);
 							}
 							if (max.z < v.z) {
-								max.z = v.z;
+								max = new Vec3d(max.x, max.y, v.z);
 							}
 						}
 					}
@@ -358,32 +246,32 @@ public class OBJModel {
 			}
 			if (max == null) {
 				System.out.println("EMPTY " + groupNames);
-				max = new Vector3f(0, 0, 0);
+				max = new Vec3d(0, 0, 0);
 			}
 			maxs.put(groupNames, max);
 		}
 		return maxs.get(groupNames);
 	}
 
-	public Vector3f centerOfGroups(Iterable<String> groupNames) {
-		Vector3f min = minOfGroup(groupNames);
-		Vector3f max = maxOfGroup(groupNames);
-		return new Vector3f((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
+	public Vec3d centerOfGroups(Iterable<String> groupNames) {
+		Vec3d min = minOfGroup(groupNames);
+		Vec3d max = maxOfGroup(groupNames);
+		return new Vec3d((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
 	}
-	public float heightOfGroups(Iterable<String> groupNames) {
-		Vector3f min = minOfGroup(groupNames);
-		Vector3f max = maxOfGroup(groupNames);
+	public double heightOfGroups(Iterable<String> groupNames) {
+		Vec3d min = minOfGroup(groupNames);
+		Vec3d max = maxOfGroup(groupNames);
 		return max.y - min.y;
 	}
-	public float lengthOfGroups(Iterable<String> groupNames) {
-		Vector3f min = minOfGroup(groupNames);
-		Vector3f max = maxOfGroup(groupNames);
+	public double lengthOfGroups(Iterable<String> groupNames) {
+		Vec3d min = minOfGroup(groupNames);
+		Vec3d max = maxOfGroup(groupNames);
 		return max.x - min.x;
 	}
 
 	public double widthOfGroups(Set<String> groupNames) {
-		Vector3f min = minOfGroup(groupNames);
-		Vector3f max = maxOfGroup(groupNames);
+		Vec3d min = minOfGroup(groupNames);
+		Vec3d max = maxOfGroup(groupNames);
 		return max.z - min.z;
 	}
 }

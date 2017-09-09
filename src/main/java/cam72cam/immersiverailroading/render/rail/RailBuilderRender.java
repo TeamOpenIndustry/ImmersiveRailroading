@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
+import cam72cam.immersiverailroading.render.obj.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -18,11 +19,11 @@ import net.minecraft.util.math.Vec3d;
 
 public class RailBuilderRender {
 	
-	private static OBJModel baseRailModel;
+	private static OBJRender baseRailModel;
 	
 	static {
 		try {
-			baseRailModel = new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"));
+			baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj")));
 		} catch (Exception e) {
 			ImmersiveRailroading.logger.catching(e);
 		}
@@ -74,7 +75,7 @@ public class RailBuilderRender {
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
 					for (String baseGroup : piece.getGroups()) {
-						for (String groupName : baseRailModel.groups())  {
+						for (String groupName : baseRailModel.model.groups())  {
 							if (groupName.contains(baseGroup)) {
 								groups.add(groupName);
 							}

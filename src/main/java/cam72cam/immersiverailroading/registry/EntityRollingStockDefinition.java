@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.render.StockModel;
+import cam72cam.immersiverailroading.render.obj.OBJModel;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -22,7 +22,7 @@ public abstract class EntityRollingStockDefinition {
 
 	protected String defID;
 	public String name;
-	private StockModel model;
+	private OBJModel model;
 	private Vec3d passengerCenter;
 	private float bogeyFront;
 	private float bogeyRear;
@@ -41,7 +41,7 @@ public abstract class EntityRollingStockDefinition {
 		name = data.get("name").getAsString();
 		// model = (OBJModel) OBJLoader.INSTANCE.loadModel(new
 		// ResourceLocation(data.get("model").getAsString()));
-		model = new StockModel(new ResourceLocation(data.get("model").getAsString()));
+		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()));
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
 		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0);
 		passengerCompartmentLength = passenger.get("length").getAsDouble();
@@ -109,7 +109,7 @@ public abstract class EntityRollingStockDefinition {
 		return this.passengerCompartmentWidth;
 	}
 
-	public StockModel getModel() {
+	public OBJModel getModel() {
 		return model;
 	}
 
