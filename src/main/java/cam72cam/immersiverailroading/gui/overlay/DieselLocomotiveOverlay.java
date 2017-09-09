@@ -15,5 +15,8 @@ public class DieselLocomotiveOverlay extends LocomotiveOverlay {
 		}
 		LocomotiveDiesel loco = (LocomotiveDiesel) riding;
 		drawGauge(0xAA79650c, ((float)loco.getLiquidAmount())/Fluid.BUCKET_VOLUME, loco.getTankCapacity().Buckets(), "B");
+		
+		drawScalar("Brake", loco.getAirBrake()*10, 0, 10);
+		drawScalar("Throttle", loco.getThrottle()*10, -10, 10);
 	}
 }
