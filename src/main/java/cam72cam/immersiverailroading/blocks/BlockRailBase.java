@@ -76,6 +76,10 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
 		TileRailBase tileEntity = (TileRailBase) world.getTileEntity(pos);
+		if (tileEntity.getWorld().isRemote) {
+			System.out.println("SKIP NEIGHBOR");
+			return;
+		}
 		boolean isOriginAir = tileEntity.getParentTile() == null || tileEntity.getParentTile().getParentTile() == null;
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
 		if (isOriginAir || !isOnRealBlock) {

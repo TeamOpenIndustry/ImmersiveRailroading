@@ -30,7 +30,6 @@ public abstract class Locomotive extends FreightTank {
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
 	
-	@SideOnly(Side.CLIENT)
 	private List<String> debugInfo = new ArrayList<String>();
 
 

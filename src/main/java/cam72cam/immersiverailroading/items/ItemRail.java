@@ -54,11 +54,13 @@ public class ItemRail extends ItemBlock {
 			pos = pos.down();
 		}
 		
-		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ);
+		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ); 
 		
 		BuilderBase builder = info.getBuilder(pos);
 		if (builder.canBuild()) {
-			builder.build();
+			if (!world.isRemote) {
+				builder.build();
+			}
 			return true;
 		}
 		return false;
