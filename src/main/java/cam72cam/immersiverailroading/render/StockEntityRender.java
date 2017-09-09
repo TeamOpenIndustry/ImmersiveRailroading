@@ -25,7 +25,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 	public void doRender(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
 		EntityRollingStockDefinition def = stock.getDefinition();
 
-		StockModel model = def.getModel();
+		StockModel model = StockModel.get(def.getModel());
 
 		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();

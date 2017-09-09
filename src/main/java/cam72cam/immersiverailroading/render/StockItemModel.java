@@ -9,7 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.obj.OBJModel;
+import cam72cam.immersiverailroading.render.obj.OBJRender;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -22,10 +22,10 @@ import util.Matrix4;
 
 public class StockItemModel implements IBakedModel {
 
-	private OBJModel model;
+	private OBJRender model;
 
 	public StockItemModel(EntityRollingStockDefinition def) {
-		this.model = def.getModel();
+		this.model = new OBJRender(def.getModel());
 	}
 	
 	@Override

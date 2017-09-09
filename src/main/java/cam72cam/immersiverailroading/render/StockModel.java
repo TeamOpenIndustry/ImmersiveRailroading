@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
@@ -18,17 +17,27 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.obj.OBJModel;
+import cam72cam.immersiverailroading.render.obj.OBJRender;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
-public class StockModel extends OBJModel {
+public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
 	boolean hasParsedModel = false;
 
-	public StockModel(ResourceLocation modelLoc) throws Exception {
-		super(modelLoc);
+	private static Map<OBJModel, StockModel> cache = new HashMap<OBJModel, StockModel>();
+	
+	public static StockModel get(OBJModel model) {
+		if (!cache.containsKey(model)) {
+			cache.put(model, new StockModel(model));
+		}
+		return cache.get(model);
+	}
+
+	private StockModel(OBJModel objModel) {
+		super(objModel);
+		System.out.println("ERHJEHKAHSJKDHKAS");
 	}
 
 	public void draw(EntityRollingStock stock) {
@@ -56,7 +65,7 @@ public class StockModel extends OBJModel {
 			standardMain = new ArrayList<String>();
 			standardFront = new ArrayList<String>();
 			standardRear = new ArrayList<String>();
-			for (String group : groups()) {
+			for (String group : model.groups()) {
 				if (group.contains("BOGEY_FRONT")) {
 					standardFront.add(group);
 				} else if (group.contains("BOGEY_REAR")) {
@@ -98,7 +107,7 @@ public class StockModel extends OBJModel {
 
 		if (!hasParsedModel) {
 			hasParsedModel = true;
-			allGroups = groups();
+			allGroups = model.groups();
 
 			switch (def.getValveGear()) {
 			case WALSCHAERTS:
@@ -132,8 +141,8 @@ public class StockModel extends OBJModel {
 				wheels.addAll(drivingWheels.values());
 				drawDrivingWheels(stock, wheels);
 				List<String> wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT", 0, heightOfGroups(wheel), centerOfGroups(wheel), centerOfGroups(wheel));
-				drawWalschaerts(stock, "RIGHT", -90, heightOfGroups(wheel), centerOfGroups(wheel), centerOfGroups(wheel));
+				drawWalschaerts(stock, "LEFT", 0, model.heightOfGroups(wheel), model.centerOfGroups(wheel), model.centerOfGroups(wheel));
+				drawWalschaerts(stock, "RIGHT", -90, model.heightOfGroups(wheel), model.centerOfGroups(wheel), model.centerOfGroups(wheel));
 			}
 			break;
 		case MALLET_WALSCHAERTS:
@@ -141,9 +150,9 @@ public class StockModel extends OBJModel {
 				GL11.glPushMatrix();
 				
 
-				Vector3f frontVec = centerOfGroups(frontLocomotive);
+				Vec3d frontVec = model.centerOfGroups(frontLocomotive);
 
-				PosRot frontPos = stock.predictFrontBogeyPosition(-frontVec.x - def.getBogeyFront());
+				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
 
 				Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
 				
@@ -163,8 +172,8 @@ public class StockModel extends OBJModel {
 				drawFrontLocomotive();
 				drawDrivingWheels(stock, wheels);
 				List<String> wheel = wheels.get(wheels.size() / 2-1);
-				drawWalschaerts(stock, "LEFT_FRONT", 0, heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
-				drawWalschaerts(stock, "RIGHT_FRONT", -90,  heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
+				drawWalschaerts(stock, "LEFT_FRONT", 0, model.heightOfGroups(center), model.centerOfGroups(center), model.centerOfGroups(wheel));
+				drawWalschaerts(stock, "RIGHT_FRONT", -90,  model.heightOfGroups(center), model.centerOfGroups(center), model.centerOfGroups(wheel));
 				GL11.glPopMatrix();
 			}
 			{
@@ -180,8 +189,8 @@ public class StockModel extends OBJModel {
 				}
 				drawDrivingWheels(stock, wheels);
 				List<String> wheel = wheels.get(wheels.size() / 2-1);
-				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
-				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  heightOfGroups(center), centerOfGroups(center), centerOfGroups(wheel));
+				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, model.heightOfGroups(center), model.centerOfGroups(center), model.centerOfGroups(wheel));
+				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  model.heightOfGroups(center), model.centerOfGroups(center), model.centerOfGroups(wheel));
 				GL11.glPopMatrix();
 			}
 			break;
@@ -243,17 +252,17 @@ public class StockModel extends OBJModel {
 
 	private void drawDrivingWheels(LocomotiveSteam stock, List<List<String>> wheels) {
 		for (List<String> wheel : wheels) {
-			float circumference = heightOfGroups(wheel) * (float) Math.PI;
-			float relDist = stock.distanceTraveled % circumference;
-			float wheelAngle = 360 * relDist / circumference;
+			double circumference = model.heightOfGroups(wheel) * (float) Math.PI;
+			double relDist = stock.distanceTraveled % circumference;
+			double wheelAngle = 360 * relDist / circumference;
 			if (wheel.get(0).contains("REAR")) {
 				//MALLET HACK
 				wheelAngle += MALLET_ANGLE_REAR;
 			}
-			Vector3f wheelPos = centerOfGroups(wheel);
+			Vec3d wheelPos = model.centerOfGroups(wheel);
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
-			GlStateManager.rotate(wheelAngle, 0, 0, 1);
+			GlStateManager.rotate((float) wheelAngle, 0, 0, 1);
 			GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
 			drawGroups(wheel);
 			GlStateManager.popMatrix();
@@ -309,11 +318,11 @@ public class StockModel extends OBJModel {
 
 		if (frontBogey.size() != 0 && rearBogey.size() != 0) {
 
-			Vector3f frontVec = centerOfGroups(frontBogey);
-			Vector3f rearVec = centerOfGroups(rearBogey);
+			Vec3d frontVec = model.centerOfGroups(frontBogey);
+			Vec3d rearVec = model.centerOfGroups(rearBogey);
 
-			PosRot frontPos = stock.predictFrontBogeyPosition(-frontVec.x - def.getBogeyFront());
-			PosRot rearPos = stock.predictRearBogeyPosition(rearVec.x + def.getBogeyRear());
+			PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
+			PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear()));
 
 			GlStateManager.pushMatrix();
 
@@ -324,12 +333,12 @@ public class StockModel extends OBJModel {
 			GlStateManager.translate(-frontVec.x, 0, 0);
 			drawGroups(frontBogey);
 			for (List<String> wheel : frontBogeyWheels.values()) {
-				float circumference = heightOfGroups(wheel) * (float) Math.PI;
-				float relDist = stock.distanceTraveled % circumference;
-				Vector3f wheelPos = centerOfGroups(wheel);
+				double circumference = model.heightOfGroups(wheel) * (float) Math.PI;
+				double relDist = stock.distanceTraveled % circumference;
+				Vec3d wheelPos = model.centerOfGroups(wheel);
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
-				GlStateManager.rotate(-360 * relDist / circumference, 0, 0, 1);
+				GlStateManager.rotate((float) (-360 * relDist / circumference), 0, 0, 1);
 				GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
 				drawGroups(wheel);
 				GlStateManager.popMatrix();
@@ -345,12 +354,12 @@ public class StockModel extends OBJModel {
 			GlStateManager.translate(-rearVec.x, 0, 0);
 			drawGroups(rearBogey);
 			for (List<String> wheel : rearBogeyWheels.values()) {
-				float circumference = heightOfGroups(wheel) * (float) Math.PI;
-				float relDist = stock.distanceTraveled % circumference;
-				Vector3f wheelPos = centerOfGroups(wheel);
+				double circumference = model.heightOfGroups(wheel) * (float) Math.PI;
+				double relDist = stock.distanceTraveled % circumference;
+				Vec3d wheelPos = model.centerOfGroups(wheel);
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
-				GlStateManager.rotate(-360 * relDist / circumference, 0, 0, 1);
+				GlStateManager.rotate((float) (-360 * relDist / circumference), 0, 0, 1);
 				GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
 				drawGroups(wheel);
 				GlStateManager.popMatrix();
@@ -427,38 +436,38 @@ public class StockModel extends OBJModel {
 		return main;
 	}
 
-	private void drawWalschaerts(LocomotiveSteam stock, String section, int wheelAngleOffset, float diameter, Vector3f wheelCenter, Vector3f wheelPos) {
-		float circumference = diameter * (float) Math.PI;
-		float relDist = stock.distanceTraveled % circumference;
-		float wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
+	private void drawWalschaerts(LocomotiveSteam stock, String section, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
+		double circumference = diameter * (float) Math.PI;
+		double relDist = stock.distanceTraveled % circumference;
+		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 
-		//Vector3f wheelPos = centerOfGroups(wheel);
-		Vector3f connRodPos = centerOfGroups(connectingRods.get(section));
-		float connRodOffset = connRodPos.x - wheelCenter.x;
-		Vector3f drivingRodMin = minOfGroup(drivingRods.get(section));
-		Vector3f drivingRodMax = maxOfGroup(drivingRods.get(section));
-		float drivingRodHeight = drivingRodMax.y - drivingRodMin.y;
-		float drivingRodLength = drivingRodMax.x - drivingRodMin.x;
-		float drivingRodCenterLength = drivingRodLength - drivingRodHeight;
+		//Vec3d wheelPos = model.centerOfGroups(wheel);
+		Vec3d connRodPos = model.centerOfGroups(connectingRods.get(section));
+		double connRodOffset = connRodPos.x - wheelCenter.x;
+		Vec3d drivingRodMin = model.minOfGroup(drivingRods.get(section));
+		Vec3d drivingRodMax = model.maxOfGroup(drivingRods.get(section));
+		double drivingRodHeight = drivingRodMax.y - drivingRodMin.y;
+		double drivingRodLength = drivingRodMax.x - drivingRodMin.x;
+		double drivingRodCenterLength = drivingRodLength - drivingRodHeight;
 
-		Vec3d connRodMovment = VecUtil.fromYaw(connRodOffset, wheelAngle);
+		Vec3d connRodMovment = VecUtil.fromYaw(connRodOffset, (float) wheelAngle);
 		double drivingRodHoriz = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - connRodMovment.z * connRodMovment.z);
 
 		double pistonDelta = connRodMovment.x - 0.3;
 
-		double returnCrankHeight = heightOfGroups(returnCranks.get(section));
-		double returnCrankLength = lengthOfGroups(returnCranks.get(section));
-		Vector3f returnCrankPos = centerOfGroups(returnCranks.get(section));
+		double returnCrankHeight = model.heightOfGroups(returnCranks.get(section));
+		double returnCrankLength = model.lengthOfGroups(returnCranks.get(section));
+		Vec3d returnCrankPos = model.centerOfGroups(returnCranks.get(section));
 		float returnCrankAngle = 180 - 60;
 
-		double returnCrankRodHeight = heightOfGroups(returnCrankRods.get(section));
-		double returnCrankRodLength = lengthOfGroups(returnCrankRods.get(section));
-		Vector3f returnCrankRodCenter = centerOfGroups(returnCrankRods.get(section));
-		Vec3d crankOffset = VecUtil.fromYaw(returnCrankLength - returnCrankHeight, 90 + wheelAngle + returnCrankAngle);
+		double returnCrankRodHeight = model.heightOfGroups(returnCrankRods.get(section));
+		double returnCrankRodLength = model.lengthOfGroups(returnCrankRods.get(section));
+		Vec3d returnCrankRodCenter = model.centerOfGroups(returnCrankRods.get(section));
+		Vec3d crankOffset = VecUtil.fromYaw(returnCrankLength - returnCrankHeight, (float) (90 + wheelAngle + returnCrankAngle));
 
-		Vector3f slottedLinkMin = minOfGroup(slottedLinks.get(section));
-		float slottedLinkWidth = lengthOfGroups(slottedLinks.get(section));
-		Vector3f slottedLinkCenter = centerOfGroups(slottedLinks.get(section));
+		Vec3d slottedLinkMin = model.minOfGroup(slottedLinks.get(section));
+		double slottedLinkWidth = model.lengthOfGroups(slottedLinks.get(section));
+		Vec3d slottedLinkCenter = model.centerOfGroups(slottedLinks.get(section));
 		
 		Vec3d returnCrankRodPos = new Vec3d(connRodMovment.x, connRodMovment.z, 0);
 		returnCrankRodPos = returnCrankRodPos.addVector(wheelPos.x, wheelPos.y, returnCrankRodCenter.z);
@@ -496,7 +505,7 @@ public class StockModel extends OBJModel {
 		{
 			GlStateManager.translate(connRodMovment.x, connRodMovment.z, 0);
 			GlStateManager.translate(wheelPos.x, wheelPos.y, returnCrankPos.z);
-			GlStateManager.rotate(wheelAngle + returnCrankAngle, 0, 0, 1);
+			GlStateManager.rotate((float) (wheelAngle + returnCrankAngle), 0, 0, 1);
 			GlStateManager.translate(-returnCrankLength / 2 + returnCrankHeight / 2, 0, 0);
 			GlStateManager.translate(-returnCrankPos.x, -returnCrankPos.y, -returnCrankPos.z);
 			drawGroups(returnCranks.get(section));
