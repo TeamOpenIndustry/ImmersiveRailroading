@@ -48,7 +48,6 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 	public void ticketsLoaded(List<Ticket> tickets, World world) {
 		int dim = world.provider.getDimension();
 		if (TICKETS.containsKey(dim)) {
-			ForgeChunkManager.releaseTicket(TICKETS.get(dim));
 			TICKETS.remove(dim);
 		}
 		
