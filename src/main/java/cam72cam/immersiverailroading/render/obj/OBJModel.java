@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.render.obj;
 
 import java.io.InputStream;
-import java.nio.FloatBuffer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -117,7 +117,7 @@ public class OBJModel {
 					currentMTL.name = parts[1];
 					break;
 				case "Ka":
-					currentMTL.Ka = FloatBuffer.allocate(4);
+					currentMTL.Ka = ByteBuffer.allocateDirect(4*4).asFloatBuffer();
 					currentMTL.Ka.put(Float.parseFloat(parts[1]));
 					currentMTL.Ka.put(Float.parseFloat(parts[2]));
 					currentMTL.Ka.put(Float.parseFloat(parts[3]));
@@ -129,7 +129,7 @@ public class OBJModel {
 					currentMTL.Ka.position(0);
 					break;
 				case "Kd":
-					currentMTL.Kd = FloatBuffer.allocate(4);
+					currentMTL.Kd = ByteBuffer.allocateDirect(4*4).asFloatBuffer();
 					currentMTL.Kd.put(Float.parseFloat(parts[1]));
 					currentMTL.Kd.put(Float.parseFloat(parts[2]));
 					currentMTL.Kd.put(Float.parseFloat(parts[3]));
@@ -141,7 +141,7 @@ public class OBJModel {
 					currentMTL.Kd.position(0);
 					break;
 				case "Ks":
-					currentMTL.Ks = FloatBuffer.allocate(4);
+					currentMTL.Ks = ByteBuffer.allocateDirect(4*4).asFloatBuffer();
 					currentMTL.Ks.put(Float.parseFloat(parts[1]));
 					currentMTL.Ks.put(Float.parseFloat(parts[2]));
 					currentMTL.Ks.put(Float.parseFloat(parts[3]));
