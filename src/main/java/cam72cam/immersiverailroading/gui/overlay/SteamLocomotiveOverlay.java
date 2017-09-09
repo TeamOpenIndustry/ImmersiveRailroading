@@ -26,5 +26,8 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		}
 		
 		drawGauge(boilerColor, (int) loco.getBoilerTemperature(), 150, "C");
+		
+		drawScalar("Brake", loco.getAirBrake()*10, 0, 10);
+		drawScalar("Throttle", loco.getThrottle()*10, -10, 10);
 	}
 }
