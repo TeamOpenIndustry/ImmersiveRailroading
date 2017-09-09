@@ -363,6 +363,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		} else {
 			return null;
 		}
+		if (parent == null) {
+			return null;
+		}
 		
 		TileRail super_parent = parent.getParentTile();
 		if (SwitchUtil.getSwitchState(parent) == SwitchState.STRAIGHT) {

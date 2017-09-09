@@ -27,6 +27,8 @@ public abstract class BuilderBase {
 	public RailInfo info;
 
 	private BlockPos parent_pos;
+
+	public boolean overrideFlexible = false;
 	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;

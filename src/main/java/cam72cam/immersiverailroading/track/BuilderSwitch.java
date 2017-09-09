@@ -17,8 +17,9 @@ public class BuilderSwitch extends BuilderBase {
 		RailInfo turnInfo = info.clone();
 		turnInfo.type = TrackItems.TURN;
 
-		straightBuilder = new BuilderStraight(info, pos);
+		straightBuilder = new BuilderStraight(info, pos, true);
 		turnBuilder = new BuilderTurn(turnInfo, pos);
+		turnBuilder.overrideFlexible = true;
 		
 		for(TrackBase turn : turnBuilder.tracks) {
 			if (turn instanceof TrackRail) {

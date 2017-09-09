@@ -17,8 +17,12 @@ public class BuilderStraight extends BuilderBase {
 	protected float angle;
 	public int mainX;
 	public int mainZ;
-
+	
 	public BuilderStraight(RailInfo info, BlockPos pos) {
+		this(info, pos, false);
+	}
+
+	public BuilderStraight(RailInfo info, BlockPos pos, boolean endOfTrack) {
 		super(info, pos);
 		
 		if (info.direction == TrackDirection.LEFT) {
@@ -41,9 +45,16 @@ public class BuilderStraight extends BuilderBase {
 					flexPositions.add(Pair.of(posX, posZ));
 				}
 			}
-			if (Math.ceil(dist) == Math.ceil(info.length/2)) {
-				mainX = (int) gagPos.x;
-				mainZ = (int) gagPos.z;
+			if (endOfTrack) {
+				if (Math.ceil(dist) == Math.ceil(info.length)) {
+					mainX = (int) gagPos.x;
+					mainZ = (int) gagPos.z;
+				}
+			} else {
+				if (Math.ceil(dist) == Math.ceil(info.length/2)) {
+					mainX = (int) gagPos.x;
+					mainZ = (int) gagPos.z;
+				}
 			}
 		}
 		

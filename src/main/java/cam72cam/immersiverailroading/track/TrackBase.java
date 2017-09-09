@@ -39,7 +39,7 @@ public abstract class TrackBase {
 	public boolean canPlaceTrack() {
 		PosRot pos = getPos();
 		
-		return BlockUtil.canBeReplaced(builder.world, pos, flexible) && builder.world.getBlockState(pos.down()).isTopSolid();
+		return BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) && builder.world.getBlockState(pos.down()).isTopSolid();
 	}
 
 	public TileEntity placeTrack() {

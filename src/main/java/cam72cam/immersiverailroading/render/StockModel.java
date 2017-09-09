@@ -71,11 +71,7 @@ public class StockModel extends OBJModel {
 
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(-def.getBogeyFront(), 0, 0);
-		if (!stock.isReverse) {
-			GlStateManager.rotate(180 - stock.frontYaw, 0, 1, 0);
-		} else {
-			GlStateManager.rotate(180 - stock.rearYaw, 0, 1, 0);
-		}
+		GlStateManager.rotate(180 - stock.frontYaw, 0, 1, 0);		
 		GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 		GlStateManager.translate(def.getBogeyFront(), 0, 0);
 		drawGroups(standardFront);
@@ -83,11 +79,7 @@ public class StockModel extends OBJModel {
 
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(-def.getBogeyRear(), 0, 0);
-		if (!stock.isReverse) {
-			GlStateManager.rotate(180 - stock.rearYaw, 0, 1, 0);
-		} else {
-			GlStateManager.rotate(180 - stock.frontYaw, 0, 1, 0);
-		}
+		GlStateManager.rotate(180 - stock.rearYaw, 0, 1, 0);
 		GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 		GlStateManager.translate(def.getBogeyRear(), 0, 0);
 		drawGroups(standardRear);
