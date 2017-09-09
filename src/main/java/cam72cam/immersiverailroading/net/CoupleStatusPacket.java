@@ -66,7 +66,7 @@ public class CoupleStatusPacket implements IMessage {
 		    });
 			
 			if (matches.size() != 1) {
-				ImmersiveRailroading.logger.error("Bad packet for entityID " + message.stockID + " " + matches.size());
+				// Might get packets outside of load distance
 				return;
 			}
 			

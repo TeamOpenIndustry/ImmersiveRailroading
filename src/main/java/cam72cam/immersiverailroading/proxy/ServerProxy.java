@@ -9,11 +9,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.server.FMLServerHandler;
 
 @EventBusSubscriber(Side.SERVER)
 public class ServerProxy extends CommonProxy {
+
+	public void init(FMLInitializationEvent event) {
+		super.init(event);
+	}
 
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {

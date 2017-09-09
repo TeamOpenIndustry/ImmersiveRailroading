@@ -28,5 +28,9 @@ public class Config {
 	@Comment({"MilliBuckets per Liter"})
 	public static int MB_PER_LITER = 1;
 
+	@Comment({"DEBUG: Buckets infinite fill/empty tanks"})
 	public static boolean debugInfiniteLiquids = true;
+	
+	@Comment({"Print extra chunk loading info"})
+	public static boolean debugChunkLoading = true;
 }

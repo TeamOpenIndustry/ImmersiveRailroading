@@ -8,12 +8,14 @@ import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
+import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -44,6 +46,8 @@ public class ImmersiveRailroading
 	@SidedProxy(clientSide="cam72cam.immersiverailroading.proxy.ClientProxy", serverSide="cam72cam.immersiverailroading.proxy.ServerProxy")
 	public static CommonProxy proxy;
 	
+	private ChunkManager chunker;
+	
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) throws IOException {
         logger = event.getModLog();
@@ -56,5 +60,11 @@ public class ImmersiveRailroading
     public void init(FMLInitializationEvent event)
     {
     	proxy.init(event);
+    }
+    
+    @EventHandler
+    public void postInit(FMLPostInitializationEvent event) throws IOException {
+		chunker = new ChunkManager();
+		chunker.init();
     }
 }
