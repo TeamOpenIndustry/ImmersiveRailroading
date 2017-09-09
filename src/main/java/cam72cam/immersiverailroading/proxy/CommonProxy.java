@@ -44,6 +44,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
@@ -119,6 +120,12 @@ public abstract class CommonProxy implements IGuiHandler {
 		if (!BlockRailBase.tryBreakRail(event.getWorld(), event.getPos())) {
 			event.setCanceled(true);
 		}
+	}
+	
+	@SubscribeEvent
+	public static void onWorldTick(WorldTickEvent event) {
+		// Only fired server side
+		ChunkManager.handleWorldTick(event.world);
 	}
 
 	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
