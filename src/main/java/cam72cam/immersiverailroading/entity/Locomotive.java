@@ -26,6 +26,10 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> THROTTLE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	
+
+	private static final float throttleNotch = 0.04f;
+	private static final float airBrakeNotch = 0.04f;
+	
 	@SideOnly(Side.CLIENT)
 	private List<String> debugInfo = new ArrayList<String>();
 
@@ -90,7 +94,7 @@ public abstract class Locomotive extends FreightTank {
 		switch(key) {
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {
-				setThrottle(getThrottle() + 0.1f);
+				setThrottle(getThrottle() + throttleNotch);
 			}
 			break;
 		case THROTTLE_ZERO:
@@ -98,12 +102,12 @@ public abstract class Locomotive extends FreightTank {
 			break;
 		case THROTTLE_DOWN:
 			if (getThrottle() > -1) {
-				setThrottle(getThrottle() - 0.1f);
+				setThrottle(getThrottle() - throttleNotch);
 			}
 			break;
 		case AIR_BRAKE_UP:
 			if (getAirBrake() < 1) {
-				setAirBrake(getAirBrake() + 0.1f);
+				setAirBrake(getAirBrake() + airBrakeNotch);
 			}
 			break;
 		case AIR_BRAKE_ZERO:
@@ -111,7 +115,7 @@ public abstract class Locomotive extends FreightTank {
 			break;
 		case AIR_BRAKE_DOWN:
 			if (getAirBrake() > 0) {
-				setAirBrake(getAirBrake() - 0.1f);
+				setAirBrake(getAirBrake() - airBrakeNotch);
 			}
 			break;
 		default:
