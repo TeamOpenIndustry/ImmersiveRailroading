@@ -25,6 +25,8 @@ import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TankContainerGui;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.gui.TenderContainerGui;
+import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
+import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -61,6 +63,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
@@ -239,6 +242,12 @@ public class ClientProxy extends CommonProxy {
 				event.getLeft().addAll(((Locomotive)riding).getDebugInfo());
 			}
 		}
+	}
+	
+	@SubscribeEvent
+	public static void onOverlayEvent(RenderGameOverlayEvent.Post event) {
+		new SteamLocomotiveOverlay().draw();
+		new DieselLocomotiveOverlay().draw();
 	}
 	
 	@SubscribeEvent
