@@ -4,14 +4,15 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -35,21 +36,10 @@ public class ItemRail extends ItemBlock {
 	}
 	
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		ItemStack stack = playerIn.getHeldItem(handIn);
-		int length = getLength(stack);
-		setLength(stack, length+ (playerIn.isSneaking() ? -1 : 1));
-		playerIn.setHeldItem(handIn, stack);
-		return super.onItemRightClick(worldIn, playerIn, handIn);
-	}
-	
-	// called both server and client side,
-	// kind of a hack for onItemLeftClick
-	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-		int quarter = getQuarters(stack);
-		if (entityLiving.isSneaking()) {
-			setQuarters(stack, (quarter) % 4+1);
-		}
-		return false;
+		if (worldIn.isRemote) {
+            playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
+        }
+        return super.onItemRightClick(worldIn, playerIn, handIn);
 	}
 
 	@Override
