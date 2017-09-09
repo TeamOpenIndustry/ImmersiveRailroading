@@ -70,13 +70,11 @@ public class RailInfo {
 		type = TrackItems.fromMeta(stack.getMetadata());
 
 		
-		if ((type == TrackItems.STRAIGHT || type == TrackItems.SLOPE) && quarter != 0) {
-			hitX = ((int)(hitX * 10)) / 10f;
-			hitZ = ((int)(hitZ * 10)) / 10f;
-		} else {
-			hitX = 0.5f;
-			hitZ = 0.5f;
-		}
+		hitX = ((int)(hitX * 10)) / 10f;
+		hitZ = ((int)(hitZ * 10)) / 10f;
+		
+		//hitX = 0.5f;
+		//hitZ = 0.5f;
 		
 		placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		
