@@ -143,7 +143,11 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 			if (Config.debugChunkLoading) {
 				System.out.println(String.format("LOADED CHUNK %s %s", pos.chunkX, pos.chunkZ));
 			}
-			ForgeChunkManager.forceChunk(ticket, new net.minecraft.util.math.ChunkPos(pos.chunkX, pos.chunkZ));
+			try {
+				ForgeChunkManager.forceChunk(ticket, new net.minecraft.util.math.ChunkPos(pos.chunkX, pos.chunkZ));
+			} catch (Exception ex) {
+				ImmersiveRailroading.logger.catching(ex);
+			}
 		}
 	}
 }
