@@ -182,13 +182,18 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public void moveCoupledRollingStock(Float moveDistance) {
 		this.moveRollingStock(moveDistance);
 		if (Math.abs(moveDistance) > 0.01) {
-			recursiveMove(null);
+			recursiveMove(null, 0);
 		}
 	}
 
 	// This breaks with looped rolling stock
-	private void recursiveMove(EntityCoupleableRollingStock prev) {
+	private void recursiveMove(EntityCoupleableRollingStock prev, int depth) {
 		ChunkManager.flagEntityPos(this);
+		
+		if (depth > Config.maxTrainLength) {
+			ImmersiveRailroading.logger.warn("TRAIN TOO LONG!");
+			return;
+		}
 		
 		for (CouplerType coupler : CouplerType.values()) {
 			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
@@ -196,6 +201,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			if (coupled == null || coupled == prev) {
 				// Either end of train or wrong iteration direction
 				continue;
+			}
+			
+			if (coupled == this) {
+				this.decouple(coupler);
 			}
 			
 			// THIS UPDATES LAST KNOWN POS
@@ -263,7 +272,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 
 			coupled.moveRollingStock(distance);
-			coupled.recursiveMove(this);
+			coupled.recursiveMove(this, depth+1);
 		}
 	}
 
