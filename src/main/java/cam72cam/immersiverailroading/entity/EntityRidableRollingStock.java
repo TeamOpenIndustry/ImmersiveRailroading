@@ -77,7 +77,7 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if (player.isSneaking()) {
 			return false;
-		} else if (this.isBeingRidden()) {
+		} else if (player.isRidingOrBeingRiddenBy(this)) {
 			return false;
 		} else {
 			if (!this.world.isRemote) {
