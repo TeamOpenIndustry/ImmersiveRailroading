@@ -33,7 +33,7 @@ public class BlockRail extends BlockRailBase {
 	@Override
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
 		TileRail tileEntity = (TileRail) world.getTileEntity(pos);
-		if (tileEntity != null) {
+		if (tileEntity != null && tileEntity.getType() != null) {
 			ItemStack stack = new ItemStack(this, 1, tileEntity.getType().getMeta());
 			ItemRail.setLength(stack, tileEntity.getLength());
 			drops.add(stack);
