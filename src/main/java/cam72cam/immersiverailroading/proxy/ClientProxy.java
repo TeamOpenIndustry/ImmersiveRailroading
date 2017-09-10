@@ -228,6 +228,13 @@ public class ClientProxy extends CommonProxy {
 			if (entity != null && entity instanceof EntityRidableRollingStock) {
 				ImmersiveRailroading.net.sendToServer(new MousePressPacket(event.getButton(), entity.world.provider.getDimension(), entity.getEntityId()));
 				event.setCanceled(true);
+				return;
+			}
+			Entity riding = Minecraft.getMinecraft().player.getRidingEntity();
+			if (riding != null && riding instanceof EntityRidableRollingStock) {
+				ImmersiveRailroading.net.sendToServer(new MousePressPacket(event.getButton(), riding.world.provider.getDimension(), riding.getEntityId()));
+				event.setCanceled(true);
+				return;
 			}
 		}
 	}
