@@ -22,6 +22,10 @@ public class TileRailBase extends TileEntity {
 	private NBTTagCompound replaced;
 	private boolean skipNextRefresh = false;
 	protected boolean hasTileData = false;
+	
+	public boolean isLoaded() {
+		return !world.isRemote || hasTileData;
+	}
 
 	public void setHeight(float height) {
 		this.height = height;

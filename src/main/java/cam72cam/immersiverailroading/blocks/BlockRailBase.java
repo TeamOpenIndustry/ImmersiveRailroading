@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.blocks;
 
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.SwitchUtil;
@@ -95,7 +96,10 @@ public abstract class BlockRailBase extends Block {
 			tileEntity.handleSnowTick();
 		}
 		if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
-			tileEntity.getParentTile().setSwitchState(SwitchUtil.getSwitchState(tileEntity.getParentTile()));
+			SwitchState state = SwitchUtil.getSwitchState(tileEntity.getParentTile());
+			if (state != SwitchState.NONE) {
+				tileEntity.getParentTile().setSwitchState(state);
+			}
 		}
 	}
 

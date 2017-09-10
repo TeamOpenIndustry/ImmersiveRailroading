@@ -8,7 +8,16 @@ import net.minecraft.util.math.BlockPos;
 
 public class SwitchUtil {
 	public static SwitchState getSwitchState(TileRail rail) {
+		if (rail == null) {
+			return SwitchState.NONE;
+		}
+		if (!rail.isLoaded()) {
+			return SwitchState.NONE;
+		}
 		TileRail parent = rail.getParentTile();
+		if (parent == null || !parent.isLoaded()) {
+			return SwitchState.NONE;
+		}
 		
 		if (rail.getType() != TrackItems.TURN) {
 			return SwitchState.NONE;
