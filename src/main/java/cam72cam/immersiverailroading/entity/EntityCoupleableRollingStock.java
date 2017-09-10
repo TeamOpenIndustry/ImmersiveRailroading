@@ -191,6 +191,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		ChunkManager.flagEntityPos(this);
 		
 		if (depth > Config.maxTrainLength) {
+			this.decouple(prev);
 			ImmersiveRailroading.logger.warn("TRAIN TOO LONG!");
 			return;
 		}
