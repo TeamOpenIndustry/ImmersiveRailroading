@@ -5,6 +5,7 @@ import java.io.IOException;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -22,6 +23,8 @@ public class TrackGui extends GuiScreen {
 	private int length;
 	private int quarters;
 	private TrackItems type;
+	private TrackPositionType posType;
+	private GuiButton posTypeButton;
 	
 	public TrackGui() {
 		slot = Minecraft.getMinecraft().player.inventory.currentItem;
@@ -29,6 +32,7 @@ public class TrackGui extends GuiScreen {
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
 		type = TrackItems.fromMeta(stack.getMetadata());
+		posType = ItemRail.getPosType(stack);
 	}
 	
 	@Override
@@ -56,6 +60,9 @@ public class TrackGui extends GuiScreen {
 	    this.buttonList.add(quartersSlider);
 
 		quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
+		
+		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 2 - 24 + buttonID*30, "Position: " + posType.name());
+		this.buttonList.add(posTypeButton);
 	    
 	    doneButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 2 - 24 + buttonID*30, "Done");
 	    this.buttonList.add(doneButton);
@@ -67,8 +74,12 @@ public class TrackGui extends GuiScreen {
 			typeButton.displayString = "Type: " + type.getName();
 			quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		}
+		if (button == posTypeButton) {
+			posType = TrackPositionType.values()[((posType.ordinal() + 1)%(TrackPositionType.values().length))];
+			posTypeButton.displayString = "Position: " + posType.name();
+		}
 		if (button == doneButton) {
-			ImmersiveRailroading.net.sendToServer(new ItemRailUpdatePacket(slot, lengthSlider.getValueInt(), quartersSlider.getValueInt(), type));
+			ImmersiveRailroading.net.sendToServer(new ItemRailUpdatePacket(slot, lengthSlider.getValueInt(), quartersSlider.getValueInt(), type, posType));
 			this.mc.displayGuiScreen(null);
 	        if (this.mc.currentScreen == null)
 	            this.mc.setIngameFocus();

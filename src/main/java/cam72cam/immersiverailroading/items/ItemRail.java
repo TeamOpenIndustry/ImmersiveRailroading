@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.Block;
@@ -99,5 +100,19 @@ public class ItemRail extends ItemBlock {
 			return stack.getTagCompound().getInteger("quarters");
 		}
 		return 3;
+	}
+	
+	public static void setPosType(ItemStack stack, TrackPositionType posType) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setInteger("pos_type", posType.ordinal());
+	}
+	
+	public static TrackPositionType getPosType(ItemStack stack) {
+		if (stack.getTagCompound() != null){
+			return TrackPositionType.values()[stack.getTagCompound().getInteger("pos_type")];
+		}
+		return TrackPositionType.FIXED;
 	}
 }
