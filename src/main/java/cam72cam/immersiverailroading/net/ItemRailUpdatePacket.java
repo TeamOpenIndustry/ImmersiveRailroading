@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackPositionType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -16,17 +17,19 @@ public class ItemRailUpdatePacket implements IMessage {
 	private int length;
 	private int quarters;
 	private TrackItems type;
+	private TrackPositionType posType;
 	
 	public ItemRailUpdatePacket() {
 		// For Reflection
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
 		this.type = type;
+		this.posType = posType;
 	}
 
 	@Override
@@ -35,6 +38,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.slot = buf.readInt();
 		this.quarters = buf.readInt();
 		this.type = TrackItems.fromMeta(buf.readInt());
+		this.posType = TrackPositionType.values()[buf.readInt()];
 	}
 
 	@Override
@@ -43,6 +47,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		buf.writeInt(slot);
 		buf.writeInt(quarters);
 		buf.writeInt(type.getMeta());
+		buf.writeInt(posType.ordinal());
 	}
 	
 	public static class Handler implements IMessageHandler<ItemRailUpdatePacket, IMessage> {
@@ -56,6 +61,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemStack stack = ctx.getServerHandler().player.inventory.getStackInSlot(message.slot);
 			ItemRail.setLength(stack, message.length);
 			ItemRail.setQuarters(stack, message.quarters);
+			ItemRail.setPosType(stack, message.posType);
 			stack.setItemDamage(message.type.getMeta());
 			ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 		}

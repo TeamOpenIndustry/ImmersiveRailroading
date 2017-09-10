@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderCrossing;
 import cam72cam.immersiverailroading.track.BuilderSlope;
@@ -50,6 +51,7 @@ public class RailInfo {
 		world = player.getEntityWorld();
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
+		TrackPositionType posType = ItemRail.getPosType(stack);
 		
 		float yawHead = player.getRotationYawHead() % 360 + 360;
 		direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
@@ -70,11 +72,19 @@ public class RailInfo {
 		type = TrackItems.fromMeta(stack.getMetadata());
 
 		
-		hitX = ((int)(hitX * 10)) / 10f;
-		hitZ = ((int)(hitZ * 10)) / 10f;
-		
-		//hitX = 0.5f;
-		//hitZ = 0.5f;
+		switch(posType) {
+		case FIXED:
+			hitX = 0.5f;
+			hitZ = 0.5f;
+			break;
+		case PIXELS:
+			hitX = ((int)(hitX * 16)) / 16f;
+			hitZ = ((int)(hitZ * 16)) / 16f;
+			break;
+		case SMOOTH:
+			// NOP
+			break;
+		}
 		
 		placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		
