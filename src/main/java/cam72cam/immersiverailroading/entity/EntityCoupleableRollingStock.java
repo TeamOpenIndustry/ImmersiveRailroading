@@ -34,10 +34,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	private UUID coupledFront = null;
 	private BlockPos lastKnownFront = null;
+	private int coupledFrontMissingTick = -1;
 	private EntityCoupleableRollingStock coupledStockFront;
 	
 	private UUID coupledBack = null;
 	private BlockPos lastKnownRear= null;
+	private int coupledBackMissingTick = -1;
 	private EntityCoupleableRollingStock coupledStockBack;
 
 	public EntityCoupleableRollingStock(World world, String defID) {
@@ -204,7 +206,43 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			if (otherOffset == null) {
 				ImmersiveRailroading.logger.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), coupled.getPersistentID()));
+				
+				switch(coupler) {
+				case FRONT:
+					if (coupledFrontMissingTick == -1) {
+						coupledFrontMissingTick = this.ticksExisted;
+					} else if (coupledFrontMissingTick + 60 < this.ticksExisted) {
+						// If we still have not seen the stock within 3 seconds, disconnect.
+						this.decouple(coupler);
+					}
+					break;
+				case BACK:
+					if (coupledBackMissingTick == -1) {
+						coupledBackMissingTick = this.ticksExisted;
+					} else if (coupledBackMissingTick + 60 < this.ticksExisted) {
+						// If we still have not seen the stock within 3 seconds, disconnect.
+						this.decouple(coupler);
+					}
+					break;
+				}
+				
+				if (!world.isRemote) {
+					// Some more debug because this randomly fails
+					System.out.println(coupled == findByUUID(coupled.getPersistentID()));
+					System.out.println(coupled.getCoupled(CouplerType.FRONT));
+					System.out.println(coupled.getCoupledUUID(CouplerType.FRONT));
+					System.out.println(coupled.getCoupled(CouplerType.BACK));
+					System.out.println(coupled.getCoupledUUID(CouplerType.BACK));
+				}
 				continue;
+			} else {
+				switch(coupler) {
+				case FRONT:
+					coupledFrontMissingTick = -1;
+				case BACK:
+					coupledBackMissingTick = -1;
+					break;
+				}
 			}
 
 			double distance = myOffset.distanceTo(otherOffset);
@@ -358,6 +396,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	public void decouple(CouplerType coupler) {
 		EntityCoupleableRollingStock coupled = getCoupled(coupler);
+		
+		System.out.println(this.getPersistentID() + " decouple " + coupler);
 
 		// Break the coupling
 		this.setCoupledUUID(coupler, null);
