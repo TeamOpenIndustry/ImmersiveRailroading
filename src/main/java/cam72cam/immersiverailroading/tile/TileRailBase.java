@@ -21,6 +21,7 @@ public class TileRailBase extends TileEntity {
 	private boolean willBeReplaced = false; 
 	private NBTTagCompound replaced;
 	private boolean skipNextRefresh = false;
+	protected boolean hasTileData = false;
 
 	public void setHeight(float height) {
 		this.height = height;
@@ -99,6 +100,7 @@ public class TileRailBase extends TileEntity {
 		super.onDataPacket(net, pkt);
 		world.markBlockRangeForRenderUpdate(getPos(), getPos());
 		snowRenderFlagDirty = true;
+		hasTileData = true;
 	}
 	
 	@Override
@@ -114,6 +116,7 @@ public class TileRailBase extends TileEntity {
 		super.handleUpdateTag(tag);
 		world.markBlockRangeForRenderUpdate(getPos(), getPos());
 		snowRenderFlagDirty = true;
+		hasTileData = true;
 	}
 	
 	protected final static void setNBTBlockPos(NBTTagCompound nbt, String key, BlockPos value) {

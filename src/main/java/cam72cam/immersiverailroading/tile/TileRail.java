@@ -170,6 +170,9 @@ public class TileRail extends TileRailBase {
 
 	private RailInfo info;
 	public RailInfo getRailRenderInfo() {
+		if (!hasTileData) {
+			return null;
+		}
 		if (info == null) {
 			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition());
 		}
