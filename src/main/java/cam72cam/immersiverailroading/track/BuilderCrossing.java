@@ -13,8 +13,10 @@ public class BuilderCrossing extends BuilderBase {
 	public BuilderCrossing(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		tracks.add(new TrackGag(this, -1, 0, 0));
+		this.setParentPos(new BlockPos(0, 0, 0));
+		
 		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, info.quarter, info.placementPosition));
+		tracks.add(new TrackGag(this, -1, 0, 0));
 		tracks.add(new TrackGag(this, 1, 0, 0));
 		
 		tracks.add(new TrackGag(this, -1, 0, 1));
