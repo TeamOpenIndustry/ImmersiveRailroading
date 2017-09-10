@@ -94,6 +94,10 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	public void setDead() {
 		super.setDead();
 		
+		if (world.isRemote) {
+			return;
+		}
+		
 		for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 			ItemStack itemstack = cargoItems.getStackInSlot(slot);
 			if (itemstack.getCount() != 0) {
