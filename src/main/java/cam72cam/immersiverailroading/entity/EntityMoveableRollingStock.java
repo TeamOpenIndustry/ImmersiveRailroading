@@ -104,6 +104,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public AxisAlignedBB getEntityBoundingBox() {
 		return this.getDefinition().getBounds(this);
 	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+    public AxisAlignedBB getRenderBoundingBox()
+    {
+        return this.getEntityBoundingBox().grow(20);
+    }
 
 	@Override
 	@SideOnly(Side.CLIENT)
