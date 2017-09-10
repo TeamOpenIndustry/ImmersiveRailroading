@@ -162,7 +162,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	@Override
 	public void setDead() {
-		this.decouple();
+		if (!world.isRemote) {
+			try {
+				throw new Exception("DECOUPLE");
+			} catch (Exception e) {
+				ImmersiveRailroading.logger.catching(e);
+			}
+			this.decouple();
+		}
 		super.setDead();
 	}
 
@@ -205,28 +212,27 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				}
 			}
 			if (otherOffset == null) {
-				ImmersiveRailroading.logger.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), coupled.getPersistentID()));
-				
-				switch(coupler) {
-				case FRONT:
-					if (coupledFrontMissingTick == -1) {
-						coupledFrontMissingTick = this.ticksExisted;
-					} else if (coupledFrontMissingTick + 60 < this.ticksExisted) {
-						// If we still have not seen the stock within 3 seconds, disconnect.
-						this.decouple(coupler);
-					}
-					break;
-				case BACK:
-					if (coupledBackMissingTick == -1) {
-						coupledBackMissingTick = this.ticksExisted;
-					} else if (coupledBackMissingTick + 60 < this.ticksExisted) {
-						// If we still have not seen the stock within 3 seconds, disconnect.
-						this.decouple(coupler);
-					}
-					break;
-				}
-				
 				if (!world.isRemote) {
+					ImmersiveRailroading.logger.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), coupled.getPersistentID()));
+					
+					switch(coupler) {
+					case FRONT:
+						if (coupledFrontMissingTick == -1) {
+							coupledFrontMissingTick = this.ticksExisted;
+						} else if (coupledFrontMissingTick + 60 < this.ticksExisted) {
+							// If we still have not seen the stock within 3 seconds, disconnect.
+							this.decouple(coupler);
+						}
+						break;
+					case BACK:
+						if (coupledBackMissingTick == -1) {
+							coupledBackMissingTick = this.ticksExisted;
+						} else if (coupledBackMissingTick + 60 < this.ticksExisted) {
+							// If we still have not seen the stock within 3 seconds, disconnect.
+							this.decouple(coupler);
+						}
+						break;
+					}
 					// Some more debug because this randomly fails
 					System.out.println(coupled == findByUUID(coupled.getPersistentID()));
 					System.out.println(coupled.getCoupled(CouplerType.FRONT));
