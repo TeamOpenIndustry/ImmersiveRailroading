@@ -303,6 +303,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				return this.coupledStockFront;
 			case BACK:
 				this.coupledStockBack = findByUUID(this.getCoupledUUID(coupler));
+				if (this.coupledStockBack == null) {
+					ChunkManager.flagEntityPos(this.world, this.lastKnownRear);
+				}
 				return this.coupledStockBack;
 			}
 		}
