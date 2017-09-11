@@ -37,10 +37,10 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 	}
 	
 	/**
-	 * @return tractive effort in pounds
+	 * @return tractive effort in newtons
 	 */
-	public int getStartingTraction() {
-		return this.traction;
+	public int getStartingTractionNewtons() {
+		return (int) (this.traction * 4.44822);
 	}
 
 	public Speed getMaxSpeed() {
