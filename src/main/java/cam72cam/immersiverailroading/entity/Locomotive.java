@@ -152,16 +152,21 @@ public abstract class Locomotive extends FreightTank {
 	
 	protected abstract int getAvailableHP();
 	
+	
 	private double getTractiveEffortNewtons() {		
-		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
 		double locoEfficiency = 0.7f; //TODO config
+		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
 		
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / this.getCurrentSpeed().metric()));
 		if (Double.isNaN(tractiveEffortNewtons)) {
 			tractiveEffortNewtons = 0;
 		}
 		
-		tractiveEffortNewtons = Math.min(tractiveEffortNewtons, this.getDefinition().getStartingTraction() * 4.44822);
+		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons()) {
+			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons();
+			this.distanceTraveled += Math.copySign(0.05, getThrottle()); //Whell Slip
+		}
+		
 		return Math.copySign(tractiveEffortNewtons, getThrottle());
 	}
 	
