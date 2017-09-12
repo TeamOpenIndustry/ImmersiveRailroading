@@ -16,8 +16,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
 
 public class RailBaseRender {
-	private static Map<String, BufferBuilder> buffers = new HashMap<String, BufferBuilder>();
-	
 	/*
 	 * This returns a cached buffer as rails don't change their model often
 	 * This drastically reduces the overhead of rendering these complex models
@@ -25,33 +23,39 @@ public class RailBaseRender {
 	 * We also draw the railbed here since drawing a model for each gag eats FPS 
 	 */
 	protected static BufferBuilder getBaseBuffer(RailInfo info) {
+		// Get model for current state
+		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 		
-		if (!buffers.containsKey(RailRenderUtil.renderID(info))) {
-			// Get model for current state
-			final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
-			
-			IBlockState gravelState = Blocks.GRAVEL.getDefaultState();
-			IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
-			
-			// Create render targets
-			BufferBuilder worldRenderer = new BufferBuilder(2048);
-	
-			// Start drawing
-			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-	
-			// From IE
-			worldRenderer.color(255, 255, 255, 255);
-			
-			// This is evil but really fast :D
-			for (TrackBase base : info.getBuilder().getTracksForRender()) {
-				blockRenderer.getBlockModelRenderer().renderModel(info.world, new ScaledModel(gravelModel, base.getHeight()), gravelState, base.getPos(), worldRenderer, false);
-			}
-			
-			worldRenderer.finishDrawing();
-			
-			buffers.put(RailRenderUtil.renderID(info), worldRenderer);
+		IBlockState gravelState = Blocks.GRAVEL.getDefaultState();
+		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
+		
+		// Create render targets
+		BufferBuilder worldRenderer = new BufferBuilder(2048);
+
+		// Start drawing
+		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+
+		// From IE
+		worldRenderer.color(255, 255, 255, 255);
+		
+		// This is evil but really fast :D
+		for (TrackBase base : info.getBuilder().getTracksForRender()) {
+			blockRenderer.getBlockModelRenderer().renderModel(info.world, new ScaledModel(gravelModel, base.getHeight()), gravelState, base.getPos(), worldRenderer, false);
 		}
 		
-		return buffers.get(RailRenderUtil.renderID(info));
+		worldRenderer.finishDrawing();
+		return worldRenderer;
+	}
+
+	private static Map<String, Integer> displayLists = new HashMap<String, Integer>();
+	public static void draw(RailInfo info) {
+		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
+			int displayList = GL11.glGenLists(1);
+			GL11.glNewList(displayList, GL11.GL_COMPILE);
+			RailRenderUtil.draw(getBaseBuffer(info));
+			GL11.glEndList();
+			displayLists.put(RailRenderUtil.renderID(info), displayList);
+		}
+		GL11.glCallList(displayLists.get(RailRenderUtil.renderID(info)));
 	}
 }

@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.RailInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
@@ -22,6 +23,7 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 			// Still loading...
 			return;
 		}
+		Minecraft.getMinecraft().mcProfiler.startSection("tile_rail");
 		GL11.glPushMatrix();
 		{
 			// Move to specified position
@@ -30,5 +32,6 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 			RailRenderUtil.render(info, false);
 		}
 		GL11.glPopMatrix();
+		Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 }
