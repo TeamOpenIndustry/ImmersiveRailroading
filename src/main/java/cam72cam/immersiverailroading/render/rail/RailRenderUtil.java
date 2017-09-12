@@ -33,17 +33,26 @@ public class RailRenderUtil {
 		GlStateManager.translate(Math.floor(info.placementPosition.x), Math.floor(info.placementPosition.y), Math.floor(info.placementPosition.z));
 		
 		// Finish Drawing
-		RailRenderUtil.draw(RailBaseRender.getBaseBuffer(info));
+		Minecraft.getMinecraft().mcProfiler.startSection("base");
+		RailBaseRender.draw(info);
+		//RailRenderUtil.draw(RailBaseRender.getBaseBuffer(info));
 		RailRenderUtil.draw(RailSnowRender.getSnowBuffer(info));
 		if (renderOverlay) {
 			RailRenderUtil.draw(RailBaseOverlayRender.getOverlayBuffer(info));
 		}
+		Minecraft.getMinecraft().mcProfiler.endSection();
+		Minecraft.getMinecraft().mcProfiler.startSection("rail");
 		
 		GL11.glPopMatrix();
+		GL11.glPushMatrix();
 		
 		RenderHelper.enableStandardItemLighting();
-
 		RailBuilderRender.renderRailBuilder(info);
+		
+		Minecraft.getMinecraft().mcProfiler.endSection();
+		
+		
+		GL11.glPopMatrix();
 
 		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
