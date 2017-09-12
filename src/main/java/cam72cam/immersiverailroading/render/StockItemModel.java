@@ -23,6 +23,7 @@ import util.Matrix4;
 public class StockItemModel implements IBakedModel {
 
 	private OBJRender model;
+	private int displayList = -1;
 
 	public StockItemModel(EntityRollingStockDefinition def) {
 		this.model = new OBJRender(def.getModel());
@@ -42,7 +43,22 @@ public class StockItemModel implements IBakedModel {
 		 * before actually setting up the correct GL context.
 		 */
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		model.draw();
+		GL11.glDisable(GL11.GL_CULL_FACE);
+		
+		if (displayList == -1) {
+			displayList = GL11.glGenLists(1);
+			GL11.glNewList(displayList, GL11.GL_COMPILE);
+			{
+				GL11.glPushMatrix();
+				
+				model.drawDirectGroups(model.model.groups(), 0.2);
+				GL11.glPopMatrix();
+			}
+			GL11.glEndList();
+		}
+		
+		GL11.glCallList(displayList);
+		
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		return new ArrayList<BakedQuad>();
 	}
@@ -79,18 +95,18 @@ public class StockItemModel implements IBakedModel {
 		case THIRD_PERSON_LEFT_HAND:
 		case THIRD_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(60), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
+					new Matrix4().rotate(Math.toRadians(60), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case FIRST_PERSON_LEFT_HAND:
 		case FIRST_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().scale(0.2, 0.2, 0.2).rotate(Math.toRadians(10), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
+					new Matrix4().rotate(Math.toRadians(10), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case GROUND:
 			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case FIXED:
 			// Item Frame
-			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).scale(2, 2, 2).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case GUI:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).scale(0.15, 0.15, 0.15).rotate(Math.toRadians(200), 0, 1, 0)
+			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, -0.1, 0).rotate(Math.toRadians(200), 0, 1, 0)
 					.rotate(Math.toRadians(-15), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case HEAD:
 			return Pair.of(defaultVal.getLeft(),
