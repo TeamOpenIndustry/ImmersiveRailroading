@@ -248,7 +248,7 @@ public class ClientProxy extends CommonProxy {
 		if (Minecraft.getMinecraft().gameSettings.showDebugInfo) {
 			Entity riding = Minecraft.getMinecraft().player.getRidingEntity();
 			if (riding instanceof Locomotive) {
-				event.getLeft().addAll(((Locomotive)riding).getDebugInfo());
+				//event.getLeft().addAll(((Locomotive)riding).getDebugInfo());
 			}
 		}
 	}

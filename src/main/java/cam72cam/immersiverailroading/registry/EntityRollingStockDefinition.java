@@ -13,12 +13,11 @@ import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStockDefinition {
-	public abstract EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing);
+	public abstract EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing);
 
 	protected String defID;
 	public String name;

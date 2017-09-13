@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -39,10 +39,10 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 	}
 	
 	@Override
-	public EntityRollingStock spawn(World world, BlockPos pos, EnumFacing facing) {
+	public EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing) {
 		CarTank loco = new CarTank(world, defID);
 
-		loco.setPosition(pos.getX(), pos.getY(), pos.getZ());
+		loco.setPosition(pos.x, pos.y, pos.z);
 		loco.prevRotationYaw = facing.getHorizontalAngle();
 		loco.rotationYaw = facing.getHorizontalAngle();
 		world.spawnEntity(loco);
