@@ -22,7 +22,6 @@ import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.net.CoupleStatusPacket;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
@@ -73,7 +72,6 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(MRSSyncPacket.Handler.class, MRSSyncPacket.class, 0, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(KeyPressPacket.Handler.class, KeyPressPacket.class, 1, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(PassengerPositionsPacket.Handler.class, PassengerPositionsPacket.class, 2, Side.CLIENT);
-    	ImmersiveRailroading.net.registerMessage(CoupleStatusPacket.Handler.class, CoupleStatusPacket.class, 3, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(SnowRenderUpdatePacket.Handler.class, SnowRenderUpdatePacket.class, 4, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(SwitchStatePacket.Handler.class, SwitchStatePacket.class, 5, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(MousePressPacket.Handler.class, MousePressPacket.class, 6, Side.SERVER);

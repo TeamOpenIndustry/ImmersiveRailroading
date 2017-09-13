@@ -33,7 +33,4 @@ public class Config {
 	
 	@Comment({"Print extra chunk loading info"})
 	public static boolean debugChunkLoading = true;
-
-	@Comment({"Max length of a train"})
-	public static int maxTrainLength = 100;
 }

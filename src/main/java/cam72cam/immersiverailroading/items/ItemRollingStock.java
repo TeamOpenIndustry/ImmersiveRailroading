@@ -6,12 +6,15 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.entity.MovementSimulator;
+import cam72cam.immersiverailroading.entity.TickPos;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -27,6 +30,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -69,16 +73,21 @@ public class ItemRollingStock extends Item {
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		ItemStack stack = player.getHeldItem(hand);
 		
-		TileEntity te = worldIn.getTileEntity(pos);
+		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defFromStack(stack));
+		
+		double offset = def.getCouplerPosition(CouplerType.BACK) - Config.couplerRange;
+		float yaw = EnumFacing.fromAngle(player.rotationYawHead).getHorizontalAngle();
+		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.fromMinecraft(0), new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
+		
+		
+		TileEntity te = worldIn.getTileEntity(new BlockPos(tp.position));
 		if (te instanceof TileRailBase && !((TileRailBase)te).getParentTile().getType().isTurn()) {
 			if (!worldIn.isRemote) {
-				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defFromStack(stack));
-				EntityRollingStock stock = def.spawn(worldIn, pos.add(0, 0.7, 0), EnumFacing.fromAngle(player.rotationYawHead));
+				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead));
 				if (stock instanceof EntityMoveableRollingStock) {
 					// snap to track
-					((EntityMoveableRollingStock)stock).moveRollingStock(stock.getDefinition().getCouplerPosition(CouplerType.BACK) - Config.couplerRange);
-					((EntityMoveableRollingStock)stock).zeroSpeed();
-					((EntityMoveableRollingStock)stock).syncMRS();
+					EntityMoveableRollingStock mrs = (EntityMoveableRollingStock)stock;
+					mrs.initPositions();
 				}
 			}
 			return EnumActionResult.PASS;

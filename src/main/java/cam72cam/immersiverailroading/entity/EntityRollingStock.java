@@ -142,4 +142,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
     {
         return true;
     }
+
+	public void triggerResimulate() {
+	}
 }

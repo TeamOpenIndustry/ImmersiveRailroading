@@ -23,4 +23,8 @@ public class VecUtil {
 	public static Vec3d fromYawPitch(float distance, float rotationYaw, float rotationPitch) {
 		return fromYaw(distance, rotationYaw).addVector(0, Math.tan(Math.toRadians(rotationPitch)) * distance, 0);
 	}
+	
+	public static Vec3d between(Vec3d front, Vec3d rear) {
+		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
+	}
 }
