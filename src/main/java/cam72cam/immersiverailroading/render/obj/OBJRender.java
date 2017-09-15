@@ -59,13 +59,12 @@ public class OBJRender {
 	}
 
 	public void drawDirectGroups(Iterable<String> groupNames, double scale) {
-		Map<Integer, Map<Material, List<Face>>> stuff = new HashMap<Integer, Map<Material, List<Face>>>();
+		Map<Integer, List<Face>> stuff = new HashMap<Integer, List<Face>>();
 
 		int triFaceCount = 0;
 		int quadFaceCount = 0;
 
 		for (String group : groupNames) {
-			Material currentMTL = model.materials.get(model.groupMtlMap.get(group));
 			List<Face> faces = model.groups.get(group);
 
 			for (Face face : faces) {
@@ -85,14 +84,10 @@ public class OBJRender {
 				}
 
 				if (!stuff.containsKey(type)) {
-					stuff.put(type, new HashMap<Material, List<Face>>());
+					stuff.put(type, new ArrayList<Face>());
 				}
 
-				if (!stuff.get(type).containsKey(currentMTL)) {
-					stuff.get(type).put(currentMTL, new ArrayList<Face>());
-				}
-
-				stuff.get(type).get(currentMTL).add(face);
+				stuff.get(type).add(face);
 			}
 		}
 
@@ -104,9 +99,8 @@ public class OBJRender {
 		FloatBuffer quadColorBuffer = BufferUtils.createFloatBuffer(quadFaceCount * 4 * 4);
 
 		for (Integer type : stuff.keySet()) {
-			Map<Material, List<Face>> stuffType = stuff.get(type);
-			for (Material currentMTL : stuffType.keySet()) {
-				List<Face> faces = stuffType.get(currentMTL);
+			for (Face face : stuff.get(type)) {
+				Material currentMTL = model.materials.get(face.mtl);
 				if (currentMTL.Ka != null) {
 					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, currentMTL.Ka);
 				}
@@ -116,72 +110,70 @@ public class OBJRender {
 				float a = 0;
 				if (currentMTL.Kd != null) {
 					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_DIFFUSE, currentMTL.Kd);
-					float darken = 0.06f;
-					r = Math.max(0, currentMTL.Kd.get(0) - darken);
-					g = Math.max(0, currentMTL.Kd.get(1) - darken);
-					b = Math.max(0, currentMTL.Kd.get(2) - darken);
+					r = Math.max(0, currentMTL.Kd.get(0) - model.darken);
+					g = Math.max(0, currentMTL.Kd.get(1) - model.darken);
+					b = Math.max(0, currentMTL.Kd.get(2) - model.darken);
 					a = currentMTL.Kd.get(3);
 					GL11.glColor4f(r, g, b, currentMTL.Kd.get(3));
 				}
 				if (currentMTL.Ks != null) {
 					GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, currentMTL.Ks);
 				}
-				for (Face face : faces) {
-					if (type == GL11.GL_POLYGON) {
-						GL11.glBegin(type);
-						GL11.glColor4f(r, g, b, currentMTL.Kd.get(3));
-						for (int[] point : face.points) {
-							Vec3d v;
-							Vec2f vt;
-							Vec3d vn;
+				if (type == GL11.GL_POLYGON) {
+					GL11.glBegin(type);
+					//GL11.glColor4f(r, g, b, currentMTL.Kd.get(3));
+					for (int[] point : face.points) {
+						Vec3d v;
+						//Vec2f vt;
+						//Vec3d vn;
 
-							switch (point.length) {
-							case 3:
-								vn = model.vertexNormals.get(point[2]);
-								GL11.glNormal3d(vn.x, vn.y, vn.z);
-							case 2:
-								if (point[1] != -1) {
-									vt = model.vertexTextures.get(point[1]);
-									GL11.glTexCoord2f(vt.x, 1 - vt.y);
-								}
-							case 1:
-								v = model.vertices.get(point[0]);
-								GL11.glVertex3d(v.x * scale, v.y * scale, v.z * scale);
-								break;
-							default:
-								break;
+						switch (point.length) {
+						case 3:
+							//vn = model.vertexNormals.get(point[2]);
+							//GL11.glNormal3d(vn.x, vn.y, vn.z);
+							//System.out.println(String.format("%s %s %s", vn.x, vn.y, vn.z));
+						case 2:
+							if (point[1] != -1) {
+								//vt = model.vertexTextures.get(point[1]);
+								//GL11.glTexCoord2f(vt.x, 1 - vt.y);
 							}
+						case 1:
+							v = model.vertices.get(point[0]);
+							GL11.glVertex3d(v.x * scale, v.y * scale, v.z * scale);
+							break;
+						default:
+							break;
 						}
-						GL11.glEnd();
-					} else {
-						for (int[] point : face.points) {
-							if (type == GL11.GL_QUADS) {
-								Vec3d v = model.vertices.get(point[0]);
-								Vec3d vn = model.vertexNormals.get(point[2]);
-								quadBuffer.put((float) (v.x * scale));
-								quadBuffer.put((float) (v.y * scale));
-								quadBuffer.put((float) (v.z * scale));
-								quadNormalBuffer.put((float) (vn.x));
-								quadNormalBuffer.put((float) (vn.y));
-								quadNormalBuffer.put((float) (vn.z));
-								quadColorBuffer.put(r);
-								quadColorBuffer.put(g);
-								quadColorBuffer.put(b);
-								quadColorBuffer.put(a);
-							} else {
-								Vec3d v = model.vertices.get(point[0]);
-								Vec3d vn = model.vertexNormals.get(point[2]);
-								triBuffer.put((float) (v.x * scale));
-								triBuffer.put((float) (v.y * scale));
-								triBuffer.put((float) (v.z * scale));
-								triNormalBuffer.put((float) (vn.x));
-								triNormalBuffer.put((float) (vn.y));
-								triNormalBuffer.put((float) (vn.z));
-								triColorBuffer.put(r);
-								triColorBuffer.put(g);
-								triColorBuffer.put(b);
-								triColorBuffer.put(a);
-							}
+					}
+					GL11.glEnd();
+				} else {
+					for (int[] point : face.points) {
+						if (type == GL11.GL_QUADS) {
+							Vec3d v = model.vertices.get(point[0]);
+							Vec3d vn = model.vertexNormals.get(point[2]);
+							quadBuffer.put((float) (v.x * scale));
+							quadBuffer.put((float) (v.y * scale));
+							quadBuffer.put((float) (v.z * scale));
+							quadNormalBuffer.put((float) (vn.x));
+							quadNormalBuffer.put((float) (vn.y));
+							quadNormalBuffer.put((float) (vn.z));
+							quadColorBuffer.put(r);
+							quadColorBuffer.put(g);
+							quadColorBuffer.put(b);
+							quadColorBuffer.put(a);
+						} else {
+							Vec3d v = model.vertices.get(point[0]);
+							Vec3d vn = model.vertexNormals.get(point[2]);
+							triBuffer.put((float) (v.x * scale));
+							triBuffer.put((float) (v.y * scale));
+							triBuffer.put((float) (v.z * scale));
+							triNormalBuffer.put((float) (vn.x));
+							triNormalBuffer.put((float) (vn.y));
+							triNormalBuffer.put((float) (vn.z));
+							triColorBuffer.put(r);
+							triColorBuffer.put(g);
+							triColorBuffer.put(b);
+							triColorBuffer.put(a);
 						}
 					}
 				}

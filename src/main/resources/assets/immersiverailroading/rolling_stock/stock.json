@@ -1,7 +1,7 @@
 {
 	"freight": [ "boxcar_us", "flatcar_us" ],
-	"locomotives": [ "a1_peppercorn", "big_boy", "gp-7" ],
+	"locomotives": [ "a1_peppercorn", "big_boy", "gp-7", "k4_pacific" ],
 	"passenger": [ "br_coach_mk1" ],
 	"tank": [ "tank_us" ],
-	"tender": [ "a1_peppercorn_tender" ]
+	"tender": [ "a1_peppercorn_tender", "k4_tender" ]
 }

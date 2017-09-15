@@ -2,8 +2,10 @@ package cam72cam.immersiverailroading.render.obj;
 
 public class Face {
 	public int[][] points; 
+	public String mtl;
 
-	public Face(String[] args) {
+	public Face(String[] args, String mtl) {
+		this.mtl = mtl;
 		points = new int[args.length][];
 		for(int i = 0; i < args.length; i++) {
 			points[i] = parsePoint(args[i]);
