@@ -204,6 +204,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		for (TickPos parentPos : prev.positions) {
 			CouplerType coupler = this.getCouplerFor(prev);
+			
+			if (coupler == null) {
+				prev.decouple(this);
+				this.decouple(prev);
+				return;
+			}
+			
 			Vec3d myOffset = this.getCouplerPositionTo(coupler, lastPos, parentPos);
 			
 			CouplerType otherCoupler = prev.getCouplerFor(this);
