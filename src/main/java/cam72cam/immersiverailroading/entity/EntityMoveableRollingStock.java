@@ -222,7 +222,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    this.motionY = this.posY - this.prevPosY;
 	    this.motionZ = this.posZ - this.prevPosZ;
 	    
-	    distanceTraveled += this.currentSpeed.minecraft();
+	    distanceTraveled += (this.isReverse ? -1 : 1) * this.currentSpeed.minecraft();
 
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
 		for (Entity entity : entitiesWithin) {
