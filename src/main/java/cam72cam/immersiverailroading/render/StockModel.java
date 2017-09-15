@@ -98,7 +98,7 @@ public class StockModel extends OBJRender {
 	Set<String> allGroups;
 
 	private void drawSteamLocomotive(LocomotiveSteam stock) {
-		if (stock.frontYaw == null || stock.rearYaw == null) {
+		if (stock.frontYaw == null || stock.rearYaw == null || stock.positions.isEmpty()) {
 			draw();
 			return;
 		}
