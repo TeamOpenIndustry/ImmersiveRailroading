@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.util.SwitchUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -122,6 +123,15 @@ public abstract class BlockRailBase extends Block {
 		}
 		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height+0.1, 1.0F);
 	}
+
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		TileRailBase tileEntity = (TileRailBase) source.getTileEntity(pos);
+		float height = 0.125F;
+		if (tileEntity != null) {
+			height = tileEntity.getFullHeight();
+		}
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height, 1.0F);
+	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -134,4 +144,18 @@ public abstract class BlockRailBase extends Block {
 	public int getMetaFromState(IBlockState state) {
 		return 0;
 	}
+	
+	/*
+	 * Fence, glass override
+	 */
+	@Override
+    public boolean canBeConnectedTo(IBlockAccess world, BlockPos pos, EnumFacing facing) {
+		return false;
+	}
+	@Deprecated
+	@Override
+    public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
+    }
 }
