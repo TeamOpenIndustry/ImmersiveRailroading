@@ -254,7 +254,7 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@SubscribeEvent
-	public static void onOverlayEvent(RenderGameOverlayEvent.Post event) {
+	public static void onOverlayEvent(RenderGameOverlayEvent.Pre event) {
 		new SteamLocomotiveOverlay().draw();
 		new DieselLocomotiveOverlay().draw();
 	}
