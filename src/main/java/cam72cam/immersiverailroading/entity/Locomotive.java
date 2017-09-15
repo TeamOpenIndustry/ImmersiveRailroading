@@ -132,6 +132,8 @@ public abstract class Locomotive extends FreightTank {
 		// runSound.setVolume(getSpeed().minecraft() > 0 ? 1 : 0);
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
 		
+		simulateWheelSlip();
+		
 		if (world.isRemote) {
 			return;
 		}
@@ -165,6 +167,11 @@ public abstract class Locomotive extends FreightTank {
 	
 	protected abstract int getAvailableHP();
 	
+	private void simulateWheelSlip() {
+		if (Math.abs(getTractiveEffortNewtons(this.getCurrentSpeed())) == this.getDefinition().getStartingTractionNewtons()) {
+			this.distanceTraveled += Math.copySign(0.05, getThrottle()); //Wheel Slip
+		}
+	}
 	
 	private double getTractiveEffortNewtons(Speed speed) {		
 		double locoEfficiency = 0.7f; //TODO config
@@ -174,7 +181,6 @@ public abstract class Locomotive extends FreightTank {
 		
 		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons()) {
 			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons();
-			this.distanceTraveled += Math.copySign(0.05, getThrottle()); //Whell Slip
 		}
 		
 		return Math.copySign(tractiveEffortNewtons, getThrottle());
