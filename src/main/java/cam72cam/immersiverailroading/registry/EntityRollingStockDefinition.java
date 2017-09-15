@@ -40,7 +40,12 @@ public abstract class EntityRollingStockDefinition {
 		name = data.get("name").getAsString();
 		// model = (OBJModel) OBJLoader.INSTANCE.loadModel(new
 		// ResourceLocation(data.get("model").getAsString()));
-		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()));
+		float darken = 0;
+		if (data.has("darken_model")) {
+			darken = data.get("darken_model").getAsFloat();
+			System.out.println("DARKEN!!!!!" + darken);
+		}
+		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
 		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0);
 		passengerCompartmentLength = passenger.get("length").getAsDouble();

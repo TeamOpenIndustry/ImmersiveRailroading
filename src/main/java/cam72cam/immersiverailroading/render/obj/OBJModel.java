@@ -24,12 +24,13 @@ public class OBJModel {
 	List<Vec3d> vertexNormals = new ArrayList<Vec3d>();
 	List<Vec2f> vertexTextures = new ArrayList<Vec2f>();
 
-	Map<String, String> groupMtlMap = new HashMap<String, String>();
 	Map<String, Material> materials = new HashMap<String, Material>();
+	public float darken;
 
-	public OBJModel(ResourceLocation modelLoc) throws Exception {
+	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		Scanner reader = new Scanner(input);
+		this.darken = darken;
 
 		String currentGroupName = "defaultName";
 		List<Face> currentGroup = new ArrayList<Face>();
@@ -54,14 +55,12 @@ public class OBJModel {
 				break;
 			case "usemtl":
 				currentMaterial = args[0];
-				groupMtlMap.put(currentGroupName, currentMaterial);
 				break;
 			case "o":
 			case "g":
 				currentGroupName = args[0];
 				currentGroup = new ArrayList<Face>();
 				groups.put(currentGroupName, currentGroup);
-				groupMtlMap.put(currentGroupName, currentMaterial);
 				break;
 			case "v":
 				vertices.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
@@ -73,7 +72,7 @@ public class OBJModel {
 				vertexTextures.add(new Vec2f(Float.parseFloat(args[0]), Float.parseFloat(args[1])));
 				break;
 			case "f":
-				currentGroup.add(new Face(args));
+				currentGroup.add(new Face(args, currentMaterial));
 				break;
 			case "s":
 				//Ignore

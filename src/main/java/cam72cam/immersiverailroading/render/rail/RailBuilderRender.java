@@ -23,7 +23,7 @@ public class RailBuilderRender {
 	
 	static {
 		try {
-			baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj")));
+			baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"), 0.05f));
 		} catch (Exception e) {
 			ImmersiveRailroading.logger.catching(e);
 		}
