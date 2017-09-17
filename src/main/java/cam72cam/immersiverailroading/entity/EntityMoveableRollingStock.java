@@ -230,10 +230,18 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				// rolling stock collisions handled by looking at the front and
 				// rear coupler offsets
 				continue;
-			}
+			} 
 
 			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
 				// Don't apply bb to passengers
+				continue;
+			}
+
+			
+			// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
+			// We need to do a forward lookup
+			if (!this.getCollisionBoundingBox().intersects(entity.getEntityBoundingBox())) {
+				// miss
 				continue;
 			}
 
@@ -262,6 +270,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			if (this.isPassenger(entity)) {
 				continue;
 			}
+
+			// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
+			// We need to do a forward lookup
+			if (!bb.intersects(entity.getEntityBoundingBox())) {
+				// miss
+				continue;
+			}
+			
 			Vec3d pos = entity.getPositionVector();
 			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
 			entity.setPosition(pos.x, pos.y, pos.z);
