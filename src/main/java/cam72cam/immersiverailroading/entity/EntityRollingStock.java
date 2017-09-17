@@ -102,16 +102,14 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		if (world.isRemote) {
 			return false;
 		}
-		if (damagesource.isCreativePlayer()) {
-			this.setDead();
-			world.removeEntity(this);
-			return false;
-		}
-
+		
 		if (damagesource.getTrueSource() instanceof EntityPlayer && !damagesource.isProjectile()) {
-			this.setDead();
-			world.removeEntity(this);
-			return false;
+			EntityPlayer player = (EntityPlayer) damagesource.getTrueSource();
+			if (player.isSneaking()) {
+				this.setDead();
+				world.removeEntity(this);
+				return false;
+			}
 		}
 		return false;
 	}
