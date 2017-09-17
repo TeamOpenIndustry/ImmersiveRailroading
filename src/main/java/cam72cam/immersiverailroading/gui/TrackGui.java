@@ -15,6 +15,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.init.Items;
+import net.minecraftforge.fml.client.config.GuiCheckBox;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.item.ItemStack;
@@ -25,10 +26,12 @@ public class TrackGui extends GuiScreen {
 	private GuiButton typeButton;
 	private GuiTextField lengthInput;
 	private GuiSlider quartersSlider;
+	private GuiCheckBox railBedFillCB;
 
 	private int slot;
 	private int length;
 	private int quarters;
+	private boolean railBedFill;
 	private TrackItems type;
 	private TrackPositionType posType;
 	private GuiButton posTypeButton;
@@ -57,6 +60,7 @@ public class TrackGui extends GuiScreen {
 		quarters = ItemRail.getQuarters(stack);
 		type = TrackItems.fromMeta(stack.getMetadata());
 		posType = ItemRail.getPosType(stack);
+		railBedFill = ItemRail.getBedFill(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
 		oreDict.add(new ItemStack(Items.AIR));
@@ -126,11 +130,11 @@ public class TrackGui extends GuiScreen {
 		this.quartersSlider = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Quarters: ", 1, 4, quarters,
 				null);
 		quartersSlider.showDecimal = false;
-
-		// this.buttonList.add(lengthSlider);
-		this.buttonList.add(quartersSlider);
-
 		quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
+		this.buttonList.add(quartersSlider);
+		
+		this.railBedFillCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Fill Rail Bed", railBedFill);
+		this.buttonList.add(railBedFillCB);
 		
 		bedTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "RailBed: " + getBedstackName());
 		this.buttonList.add(bedTypeButton);
@@ -154,6 +158,9 @@ public class TrackGui extends GuiScreen {
 		if (button == bedTypeButton) {
 			bedSelector.isActive = true;
 		}
+		if (button == railBedFillCB) {
+			railBedFill = railBedFillCB.isChecked();
+		}
 	}
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
         this.lengthInput.textboxKeyTyped(typedChar, keyCode);
@@ -165,7 +172,7 @@ public class TrackGui extends GuiScreen {
         	}
         	if (!this.lengthInput.getText().isEmpty()) {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, railBedFill));
         	}
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)

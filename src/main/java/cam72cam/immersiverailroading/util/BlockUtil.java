@@ -4,8 +4,11 @@ import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFlower;
+import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockMushroom;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -27,5 +30,15 @@ public class BlockUtil {
 			return te.isFlexible();
 		}
 		return false;
+	}
+	
+	public static IBlockState itemToBlockState(ItemStack stack) {
+		Block block = Block.getBlockFromItem(stack.getItem());
+		@SuppressWarnings("deprecation")
+		IBlockState gravelState = block.getStateFromMeta(stack.getMetadata());
+		if (block instanceof BlockLog ) {
+			gravelState = gravelState.withProperty(BlockLog.LOG_AXIS, BlockLog.EnumAxis.Z);
+		}
+		return gravelState;
 	}
 }

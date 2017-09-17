@@ -128,4 +128,15 @@ public class ItemRail extends ItemBlock {
 	public static void setBed(ItemStack stack, ItemStack base) {
 		stack.getTagCompound().setTag("bedItem", base.serializeNBT());
 	}
+
+	public static boolean getBedFill(ItemStack stack) {
+		if (stack.getTagCompound().hasKey("bedFill")) { 
+			return stack.getTagCompound().getBoolean("bedFill");
+		} else {
+			return false;
+		}
+	}
+	public static void setBedFill(ItemStack stack, boolean value) {
+		stack.getTagCompound().setBoolean("bedFill", value);
+	}
 }
