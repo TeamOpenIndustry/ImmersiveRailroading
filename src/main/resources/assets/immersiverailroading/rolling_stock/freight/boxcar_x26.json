@@ -1,0 +1,23 @@
+{
+	"name": "Box Car X26",
+	"model": "immersiverailroading:models/rolling_stock/freight/boxcar_x26.obj",
+	"darken_model": "0",
+	"properties": {
+		"weight_kg": 21318
+	},
+	"passenger": {
+		"center_x": 0,s
+		"center_y": 1.2,
+		"length": 2,
+		"width": 2
+	},
+	"freight": {
+		"slots": 40
+		"width": 25,
+		"cargo": ["all"]
+	},
+	"trucks": {
+		"front": 4.3, 
+		"rear": -4.3
+	}
+}
