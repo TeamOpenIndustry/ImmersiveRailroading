@@ -91,6 +91,11 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 	}
 	
 	@Override
+	protected boolean canFitPassenger(Entity passenger) {
+		return this.getPassengers().size() < this.getDefinition().getMaxPassengers();
+	}
+	
+	@Override
 	public boolean canRiderInteract() {
 		return false;
 	}
