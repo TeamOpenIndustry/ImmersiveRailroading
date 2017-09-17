@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.Block;
@@ -52,11 +53,17 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
+		if (ItemRail.isPreview(stack)) {
+			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_PREVIEW.getDefaultState());
+			TileRailPreview te = (TileRailPreview) world.getTileEntity(pos);
+			te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
+			return true;
+		}
 		if (player.getEntityWorld().getBlockState(pos.down()).getBlock() instanceof BlockRailBase) {
 			pos = pos.down();
 		}
 		
-		RailInfo info = new RailInfo(stack, player, pos, hitX, hitY, hitZ); 
+		RailInfo info = new RailInfo(stack, player.world, player.getRotationYawHead(), pos, hitX, hitY, hitZ); 
 		
 		BuilderBase builder = info.getBuilder(pos);
 		if (builder.canBuild()) {
@@ -138,5 +145,16 @@ public class ItemRail extends ItemBlock {
 	}
 	public static void setBedFill(ItemStack stack, boolean value) {
 		stack.getTagCompound().setBoolean("bedFill", value);
+	}
+
+	public static boolean isPreview(ItemStack stack) {
+		if (stack.getTagCompound().hasKey("isPreview")) { 
+			return stack.getTagCompound().getBoolean("isPreview");
+		} else {
+			return false;
+		}
+	}
+	public static void setPreview(ItemStack stack, boolean value) {
+		stack.getTagCompound().setBoolean("isPreview", value);
 	}
 }
