@@ -6,13 +6,13 @@
 		"weight_kg": 21318
 	},
 	"passenger": {
-		"center_x": 0,s
+		"center_x": 0,
 		"center_y": 1.2,
 		"length": 2,
 		"width": 2
 	},
 	"freight": {
-		"slots": 40
+		"slots": 40,
 		"width": 25,
 		"cargo": ["all"]
 	},
