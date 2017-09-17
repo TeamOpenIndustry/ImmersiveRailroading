@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
@@ -8,6 +9,7 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.SwitchUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -193,6 +195,9 @@ public class MovementSimulator {
 			} else {
 				return newneg;
 			}
+		} else if (rail.getType() == TrackItems.CROSSING) {
+			delta = VecUtil.fromYaw(distance, EnumFacing.fromAngle(trainYaw).getHorizontalAngle());
+			return position.add(delta);
 		} else {
 			// delta should be in the direction of rotationYaw instead of front or rear
 			// since large changes can occur if the train is way off center
