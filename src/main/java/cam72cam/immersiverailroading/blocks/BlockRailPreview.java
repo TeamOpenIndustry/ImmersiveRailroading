@@ -51,7 +51,6 @@ public class BlockRailPreview extends Block {
 			if (!worldIn.isRemote) {
 				TileRailPreview te = (TileRailPreview) worldIn.getTileEntity(pos);
 				te.setHit(hitX, hitY, hitZ);
-				System.out.println(hitX + " : " + hitZ);
 			}
 			return false;
 		} else {
