@@ -201,7 +201,7 @@ public class TileRail extends TileRailBase {
 
 	private RailInfo info;
 	public RailInfo getRailRenderInfo() {
-		if (!hasTileData) {
+		if (!hasTileData && world.isRemote) {
 			return null;
 		}
 		if (info == null) {
