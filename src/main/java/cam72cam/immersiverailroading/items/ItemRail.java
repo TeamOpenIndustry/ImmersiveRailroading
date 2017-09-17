@@ -31,11 +31,6 @@ public class ItemRail extends ItemBlock {
 	public ItemRail(Block block) {
 		super(block);
 		this.setMaxDamage(0);
-		this.setHasSubtypes(true);
-	}
-
-	public int getMetadata(int damage) {
-		return damage;
 	}
 	
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
@@ -47,7 +42,7 @@ public class ItemRail extends ItemBlock {
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName(stack) + "." + TrackItems.fromMeta(stack.getMetadata());
+		return super.getUnlocalizedName(stack);
 	}
 	
 	@Override
@@ -78,8 +73,26 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add("Length: " + getLength(stack));
+        tooltip.add("Type:     " + getType(stack));
+        tooltip.add("Length:   " + getLength(stack));
         tooltip.add("Quarters: " + getQuarters(stack));
+        tooltip.add("Position: " + getPosType(stack));
+        tooltip.add("Rail Bed: " + getBed(stack).getDisplayName());
+        tooltip.add("Preview:  " + isPreview(stack));
+	}
+
+	public static void setType(ItemStack stack, TrackItems type) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setInteger("type", type.ordinal());
+	}
+	
+	public static TrackItems getType(ItemStack stack) {
+		if (stack.getTagCompound() != null){
+			return TrackItems.values()[stack.getTagCompound().getInteger("type")];
+		}
+		return TrackItems.STRAIGHT;
 	}
 	
 	public static void setLength(ItemStack stack, int length) {

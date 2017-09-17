@@ -10,13 +10,6 @@ public enum TrackItems implements IStringSerializable {
 	SWITCH,
 	;
 	
-	public int getMeta() {
-		return this.ordinal();
-	}
-	
-	public static TrackItems fromMeta(int meta) {
-		return TrackItems.values()[meta];
-	}
 	@Override
 	public String getName() {
 		return this.name().toLowerCase(); 

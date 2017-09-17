@@ -63,7 +63,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			this.tilePreviewPos = new BlockPos(BufferUtil.readVec3i(buf));
 		}
 		this.quarters = buf.readInt();
-		this.type = TrackItems.fromMeta(buf.readInt());
+		this.type = TrackItems.values()[buf.readInt()];
 		this.posType = TrackPositionType.values()[buf.readInt()];
 		this.bedStack = ByteBufUtils.readItemStack(buf);
 		this.railBedFill = buf.readBoolean();
@@ -80,7 +80,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			BufferUtil.writeVec3i(buf, tilePreviewPos);
 		}
 		buf.writeInt(quarters);
-		buf.writeInt(type.getMeta());
+		buf.writeInt(type.ordinal());
 		buf.writeInt(posType.ordinal());
 		ByteBufUtils.writeItemStack(buf, bedStack);
 		buf.writeBoolean(railBedFill);
@@ -101,13 +101,13 @@ public class ItemRailUpdatePacket implements IMessage {
 			} else {
 				stack = ((TileRailPreview)ctx.getServerHandler().player.world.getTileEntity(message.tilePreviewPos)).getItem();
 			}
+			ItemRail.setType(stack, message.type);
 			ItemRail.setLength(stack, message.length);
 			ItemRail.setQuarters(stack, message.quarters);
 			ItemRail.setPosType(stack, message.posType);
 			ItemRail.setBed(stack, message.bedStack);
 			ItemRail.setBedFill(stack, message.railBedFill);
 			ItemRail.setPreview(stack, message.isPreview);
-			stack.setItemDamage(message.type.getMeta());
 			if (message.tilePreviewPos == null) {
 				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 			} else {
