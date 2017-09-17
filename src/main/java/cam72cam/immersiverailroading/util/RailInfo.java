@@ -29,13 +29,14 @@ public class RailInfo {
 	public int quarters;
 	public Vec3d placementPosition;
 	public ItemStack railBed;
+	public boolean railBedFill;
 
 	// Used for tile rendering only
 	public boolean snowRenderFlagDirty = false;
 	public SwitchState switchState = SwitchState.NONE;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition, ItemStack railBed) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition, ItemStack railBed, boolean railBedFill) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -54,6 +55,7 @@ public class RailInfo {
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
 		railBed = ItemRail.getBed(stack);
+		railBedFill = ItemRail.getBedFill(stack);
 		TrackPositionType posType = ItemRail.getPosType(stack);
 		
 		float yawHead = player.getRotationYawHead() % 360 + 360;
@@ -97,7 +99,7 @@ public class RailInfo {
 	}
 	
 	public RailInfo clone() {
-		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, placementPosition, railBed);
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, placementPosition, railBed, railBedFill);
 		return c;
 	}
 	

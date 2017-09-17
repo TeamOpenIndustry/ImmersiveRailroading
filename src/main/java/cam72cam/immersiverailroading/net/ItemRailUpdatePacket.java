@@ -20,19 +20,21 @@ public class ItemRailUpdatePacket implements IMessage {
 	private TrackItems type;
 	private TrackPositionType posType;
 	private ItemStack bedStack;
+	private boolean railBedFill;
 	
 	public ItemRailUpdatePacket() {
 		// For Reflection
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, boolean railBedFill) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
 		this.type = type;
 		this.posType = posType;
 		this.bedStack = bedStack;
+		this.railBedFill = railBedFill;
 	}
 
 	@Override
@@ -43,6 +45,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.type = TrackItems.fromMeta(buf.readInt());
 		this.posType = TrackPositionType.values()[buf.readInt()];
 		this.bedStack = ByteBufUtils.readItemStack(buf);
+		this.railBedFill = buf.readBoolean();
 	}
 
 	@Override
@@ -53,6 +56,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		buf.writeInt(type.getMeta());
 		buf.writeInt(posType.ordinal());
 		ByteBufUtils.writeItemStack(buf, bedStack);
+		buf.writeBoolean(railBedFill);
 	}
 	
 	public static class Handler implements IMessageHandler<ItemRailUpdatePacket, IMessage> {
@@ -68,6 +72,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemRail.setQuarters(stack, message.quarters);
 			ItemRail.setPosType(stack, message.posType);
 			ItemRail.setBed(stack, message.bedStack);
+			ItemRail.setBedFill(stack, message.railBedFill);
 			stack.setItemDamage(message.type.getMeta());
 			ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 		}

@@ -205,7 +205,7 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition(), getRailBed());
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition(), getRailBed(), false);
 		}
 		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
 		info.switchState = this.switchState;

@@ -43,6 +43,7 @@ public class TrackRail extends TrackBase {
 		tileRail.setRotationQuarter(quarter);
 		tileRail.setTurnQuarters(turnQuarters);
 		tileRail.setPlacementPosition(placementPosition);
+		tileRail.setRailBed(builder.info.railBed);
 		
 		return tileRail;
 	}
