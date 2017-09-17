@@ -139,8 +139,6 @@ public abstract class Locomotive extends FreightTank {
 		}
 		
 		if (this.getRemainingPositions() < 20 || resimulate) {
-			resimulate = false;
-			
 			TickPos lastPos = this.getCurrentTickPos();
 			if (lastPos == null) {
 				triggerResimulate();
@@ -159,6 +157,13 @@ public abstract class Locomotive extends FreightTank {
 					ChunkManager.flagEntityPos(this.world, new BlockPos(pos.position));
 				}
 				positions.add(pos);
+			}
+			
+			for (EntityCoupleableRollingStock stock : this.getTrain()) {
+				if (stock instanceof Locomotive) {
+					Locomotive loco = (Locomotive) stock;
+					loco.resimulate = false;
+				}
 			}
 			
 			simulateCoupledRollingStock();
@@ -296,7 +301,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public void setThrottle(float newThrottle) {
 		dataManager.set(THROTTLE, newThrottle);
-		resimulate = true;
+		triggerResimulate();
 	}
 	
 	public float getAirBrake() {
@@ -304,6 +309,6 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public void setAirBrake(float newAirBrake) {
 		dataManager.set(AIR_BRAKE, newAirBrake);
-		resimulate = true;
+		triggerResimulate();
 	}
 }
