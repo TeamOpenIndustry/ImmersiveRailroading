@@ -203,5 +203,8 @@ public class OBJRender {
 		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
 		GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
 		GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
+		
+		// Reset draw color (IMPORTANT)
+		GL11.glColor4f(1, 1, 1, 1);
 	}
 }
