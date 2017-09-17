@@ -150,7 +150,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		// TODO: Speed up or slow down entity ticking instead of
 		// skipping or re-doing ticks
 		this.positions = newPositions;
-		this.tickPosID = newPositions.get(0).tickID;
+		if (newPositions.size() > 0) {
+			// might happen if stock stops suddenly
+			this.tickPosID = newPositions.get(0).tickID;
+		}
 	}
 	
 	public TickPos getTickPos(int tickID) {
