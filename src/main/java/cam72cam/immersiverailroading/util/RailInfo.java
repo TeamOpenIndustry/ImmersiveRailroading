@@ -50,6 +50,7 @@ public class RailInfo {
 	
 	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
 		position = pos;
+		type = ItemRail.getType(stack);
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
 		railBed = ItemRail.getBed(stack);
@@ -73,7 +74,6 @@ public class RailInfo {
 		}
 		
 		facing = EnumFacing.fromAngle(yawHead);
-		type = TrackItems.fromMeta(stack.getMetadata());
 
 		
 		switch(posType) {

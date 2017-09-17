@@ -75,7 +75,7 @@ public class TrackGui extends GuiScreen {
 		stack = stack.copy();
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
-		type = TrackItems.fromMeta(stack.getMetadata());
+		type = ItemRail.getType(stack);
 		posType = ItemRail.getPosType(stack);
 		railBedFill = ItemRail.getBedFill(stack);
 		isPreview = ItemRail.isPreview(stack);
@@ -168,7 +168,7 @@ public class TrackGui extends GuiScreen {
 
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == typeButton) {
-			type = TrackItems.fromMeta((type.ordinal() + 1) % (TrackItems.values().length));
+			type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
 			typeButton.displayString = "Type: " + type.getName();
 			quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		}

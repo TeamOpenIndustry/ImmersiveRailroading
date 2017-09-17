@@ -4,7 +4,6 @@ import java.util.Random;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -17,7 +16,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRail;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 
 public class BlockRail extends BlockRailBase {
@@ -34,21 +32,12 @@ public class BlockRail extends BlockRailBase {
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
 		TileRail tileEntity = (TileRail) world.getTileEntity(pos);
 		if (tileEntity != null && tileEntity.getType() != null) {
-			ItemStack stack = new ItemStack(this, 1, tileEntity.getType().getMeta());
-			ItemRail.setLength(stack, tileEntity.getLength());
+			ItemStack stack = new ItemStack(this, 1);
 			drops.add(stack);
 			// todo drop components
 			// todo drop snow?
 		}
 	}
-	
-	@Override
-	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items)
-    {
-		for (TrackItems i : TrackItems.values()) {
-			items.add(new ItemStack(this, 1, i.getMeta()));
-		}
-    }
 
 	@Override
 	public boolean canPlaceBlockAt(World world, BlockPos pos) {
@@ -61,7 +50,15 @@ public class BlockRail extends BlockRailBase {
 		if (tileEntity == null) {
 			return ItemStack.EMPTY;
 		}
-		return new ItemStack(this, 1, tileEntity.getType().getMeta());
+		ItemStack stack = new ItemStack(this, 1);
+		ItemRail.setType(stack, tileEntity.getType());
+		ItemRail.setLength(stack, tileEntity.getLength());
+		ItemRail.setQuarters(stack, tileEntity.getTurnQuarters());
+		//ItemRail.setPosType(stack, )
+		ItemRail.setBed(stack, tileEntity.getRailBed());
+		//ItemRail.setPreview(stack, )
+		
+		return stack;
 	}
 
 	@Override

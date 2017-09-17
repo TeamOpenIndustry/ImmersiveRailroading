@@ -33,7 +33,6 @@ import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -55,7 +54,6 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -165,10 +163,8 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRail.class, new TileRailRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		
-		for (TrackItems item : TrackItems.values()) {
-			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ImmersiveRailroading.BLOCK_RAIL), item.getMeta(),
-					new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL.getRegistryName(), "inventory"));
-		}
+		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK, 0,
+				new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL.getRegistryName(), "inventory"));
 
 		ModelLoader.setCustomMeshDefinition(ImmersiveRailroading.ITEM_ROLLING_STOCK, new ItemMeshDefinition() {
 			@Override
