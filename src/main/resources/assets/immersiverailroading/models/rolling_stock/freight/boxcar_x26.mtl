@@ -11,7 +11,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 
-newmtl Black_Trucks.png
+newmtl Material.08
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.026482 0.018972 0.018109
@@ -101,7 +101,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 
-newmtl Material.029_Trucks.png
+newmtl Material.12
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.083053 0.083053 0.083053
@@ -121,7 +121,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 
-newmtl Material.030_Trucks.png
+newmtl Material.210
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.043727 0.043727 0.043727
