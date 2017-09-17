@@ -1,7 +1,7 @@
 {
 	"name": "Box Car X26",
 	"model": "immersiverailroading:models/rolling_stock/freight/boxcar_x26.obj",
-	"darken_model": "0",
+	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 21318
 	},
