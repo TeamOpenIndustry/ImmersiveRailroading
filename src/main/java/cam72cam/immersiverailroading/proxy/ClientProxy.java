@@ -67,6 +67,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
@@ -262,8 +263,10 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onOverlayEvent(RenderGameOverlayEvent.Pre event) {
-		new SteamLocomotiveOverlay().draw();
-		new DieselLocomotiveOverlay().draw();
+		if (event.getType() == ElementType.CHAT) {
+			new SteamLocomotiveOverlay().draw();
+			new DieselLocomotiveOverlay().draw();
+		}
 	}
 	
 	@SubscribeEvent
