@@ -27,11 +27,13 @@ public class TrackGui extends GuiScreen {
 	private GuiTextField lengthInput;
 	private GuiSlider quartersSlider;
 	private GuiCheckBox railBedFillCB;
+	private GuiCheckBox isPreviewCB;
 
 	private int slot;
 	private int length;
 	private int quarters;
 	private boolean railBedFill;
+	private boolean isPreview;
 	private TrackItems type;
 	private TrackPositionType posType;
 	private GuiButton posTypeButton;
@@ -61,6 +63,7 @@ public class TrackGui extends GuiScreen {
 		type = TrackItems.fromMeta(stack.getMetadata());
 		posType = ItemRail.getPosType(stack);
 		railBedFill = ItemRail.getBedFill(stack);
+		isPreview = ItemRail.isPreview(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
 		oreDict.add(new ItemStack(Items.AIR));
@@ -142,6 +145,9 @@ public class TrackGui extends GuiScreen {
 		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "Position: " + posType.name());
 		this.buttonList.add(posTypeButton);
 		
+		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Blueprint Preview", railBedFill);
+		this.buttonList.add(isPreviewCB);
+		
 		bedSelector.initGui();
 	}
 
@@ -161,6 +167,9 @@ public class TrackGui extends GuiScreen {
 		if (button == railBedFillCB) {
 			railBedFill = railBedFillCB.isChecked();
 		}
+		if (button == isPreviewCB) {
+			isPreview = isPreviewCB.isChecked();
+		}
 	}
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
         this.lengthInput.textboxKeyTyped(typedChar, keyCode);
@@ -172,7 +181,7 @@ public class TrackGui extends GuiScreen {
         	}
         	if (!this.lengthInput.getText().isEmpty()) {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, railBedFill));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, railBedFill, isPreview));
         	}
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)

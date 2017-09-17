@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
+import cam72cam.immersiverailroading.blocks.BlockRailPreview;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
@@ -32,7 +33,9 @@ public class ImmersiveRailroading
 	@ObjectHolder(BlockRailGag.NAME)
 	public static final BlockRailGag BLOCK_RAIL_GAG = new BlockRailGag();
 	@ObjectHolder(BlockRail.NAME)
-	public static BlockRail BLOCK_RAIL = new BlockRail();
+	public static final BlockRail BLOCK_RAIL = new BlockRail();
+	@ObjectHolder(BlockRailPreview.NAME)
+	public static final BlockRailPreview BLOCK_RAIL_PREVIEW = new BlockRailPreview();
 	
 	@ObjectHolder(ItemRollingStock.NAME)
 	public static ItemRollingStock ITEM_ROLLING_STOCK = new ItemRollingStock();

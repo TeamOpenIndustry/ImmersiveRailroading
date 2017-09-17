@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.track.BuilderSlope;
 import cam72cam.immersiverailroading.track.BuilderStraight;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.BuilderTurn;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -49,16 +48,16 @@ public class RailInfo {
 		this.railBed = railBed;
 	}
 	
-	public RailInfo(ItemStack stack, EntityPlayer player, BlockPos pos, float hitX, float hitY, float hitZ) {
+	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
 		position = pos;
-		world = player.getEntityWorld();
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
 		railBed = ItemRail.getBed(stack);
 		railBedFill = ItemRail.getBedFill(stack);
+		world = worldIn;
 		TrackPositionType posType = ItemRail.getPosType(stack);
 		
-		float yawHead = player.getRotationYawHead() % 360 + 360;
+		yawHead = yawHead % 360 + 360;
 		direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
 		//quarter = MathHelper.floor((yawHead % 90f) /(90)*4);
 		float yawPartial = (yawHead+3600) % 90f;
@@ -73,7 +72,7 @@ public class RailInfo {
 			quarter = 2;
 		}
 		
-		facing = player.getHorizontalFacing();
+		facing = EnumFacing.fromAngle(yawHead);
 		type = TrackItems.fromMeta(stack.getMetadata());
 
 		
