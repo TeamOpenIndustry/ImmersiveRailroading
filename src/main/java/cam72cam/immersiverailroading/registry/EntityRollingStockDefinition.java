@@ -33,6 +33,7 @@ public abstract class EntityRollingStockDefinition {
 	private double passengerCompartmentLength;
 	private double passengerCompartmentWidth;
 	private int weight;
+	private int maxPassengers;
 
 	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
@@ -43,13 +44,13 @@ public abstract class EntityRollingStockDefinition {
 		float darken = 0;
 		if (data.has("darken_model")) {
 			darken = data.get("darken_model").getAsFloat();
-			System.out.println("DARKEN!!!!!" + darken);
 		}
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
 		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0);
 		passengerCompartmentLength = passenger.get("length").getAsDouble();
 		passengerCompartmentWidth = passenger.get("width").getAsDouble();
+		maxPassengers = passenger.get("slots").getAsInt();
 
 		bogeyFront = data.get("trucks").getAsJsonObject().get("front").getAsFloat();
 		bogeyRear = data.get("trucks").getAsJsonObject().get("rear").getAsFloat();
@@ -126,5 +127,9 @@ public abstract class EntityRollingStockDefinition {
 
 	public double getHeight() {
 		return this.heightBounds;
+	}
+
+	public int getMaxPassengers() {
+		return this.maxPassengers;
 	}
 }
