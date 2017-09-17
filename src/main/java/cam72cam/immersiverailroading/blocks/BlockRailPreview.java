@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.blocks;
 import java.util.Random;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -13,11 +14,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockRailPreview extends Block {
 	public static final String NAME = "block_rail_preview";
@@ -28,6 +33,33 @@ public class BlockRailPreview extends Block {
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
 	}
 
+	public static boolean tryBreakPreview(World world, BlockPos pos, boolean sneaking) {
+		TileEntity te = world.getTileEntity(pos);
+		if (sneaking && te instanceof TileRailPreview) {
+			TileRailPreview tr = (TileRailPreview)te;
+			world.setBlockToAir(pos);
+			if (tr.getRailRenderInfo().getBuilder(pos).canBuild()) {
+				tr.getRailRenderInfo().getBuilder(pos).build();
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		if (playerIn.isSneaking()) {
+			if (!worldIn.isRemote) {
+				TileRailPreview te = (TileRailPreview) worldIn.getTileEntity(pos);
+				te.setHit(hitX, hitY, hitZ);
+				System.out.println(hitX + " : " + hitZ);
+			}
+			return false;
+		} else {
+			playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL_PREVIEW.ordinal(), worldIn, pos.getX(), pos.getY(), pos.getZ());
+		}
+		return true;
+	}
+
 	@Override
 	public boolean isOpaqueCube(IBlockState state) {
 		return false;
@@ -35,7 +67,7 @@ public class BlockRailPreview extends Block {
 	
 	@Override
 	public boolean isFullCube(IBlockState state) {
-		return true;
+		return false;
 	}
 	
 	@Override
@@ -67,6 +99,24 @@ public class BlockRailPreview extends Block {
 	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {
 		return EnumBlockRenderType.INVISIBLE;
+	}
+	
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		float height = 0.125F;
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height+0.1, 1.0F);
+	}
+
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		float height = 0.125F;
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height, 1.0F);
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
+	{
+		return  getCollisionBoundingBox(state, worldIn, pos).expand(0, 0.1, 0).offset(pos);
 	}
 	
 	

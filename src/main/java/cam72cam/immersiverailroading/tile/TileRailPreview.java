@@ -15,9 +15,29 @@ public class TileRailPreview extends TileEntity {
 	float hitY;
 	float hitZ;
 	public boolean hasTileData;
+	
+	@Override
+	public void markDirty() {
+		super.markDirty();
+		
+		world.markBlockRangeForRenderUpdate(getPos(), getPos());
+		world.notifyBlockUpdate(getPos(), world.getBlockState(getPos()), world.getBlockState(getPos()), 3);
+	}
 
 	public ItemStack getItem() {
 		return this.item;
+	}
+
+	public void setItem(ItemStack stack) {
+		this.item = stack;
+		this.markDirty();
+	}
+
+	public void setHit(float hitX, float hitY, float hitZ) {
+		this.hitX = hitX;
+		this.hitY = hitY;
+		this.hitZ = hitZ;
+		this.markDirty();
 	}
 	
 	public void init(ItemStack item, float yawHead, float hitX, float hitY, float hitZ) {
@@ -36,8 +56,8 @@ public class TileRailPreview extends TileEntity {
 		item = new ItemStack(nbt.getCompoundTag("item"));
 		yawHead = nbt.getFloat("yawHead");
 		hitX = nbt.getFloat("hitX");
-		hitX = nbt.getFloat("hitY");
-		hitX = nbt.getFloat("hitZ");
+		hitY = nbt.getFloat("hitY");
+		hitZ = nbt.getFloat("hitZ");
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -51,7 +71,7 @@ public class TileRailPreview extends TileEntity {
 	}
 	
 	public RailInfo getRailRenderInfo() {
-		if (hasTileData) {
+		if (hasTileData || !world.isRemote) {
 			return new RailInfo(item, world, yawHead, pos, hitX, hitY, hitZ);
 		}
 		return null;

@@ -86,24 +86,26 @@ public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
 
 	@Override
-	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
+	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
 		System.out.println(GuiTypes.values()[ID]);
 		switch (GuiTypes.values()[ID]) {
 		case FREIGHT:
-			return new FreightContainerGui((CarFreight) world.getEntityByID(entityID),
-					new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityID)));
+			return new FreightContainerGui((CarFreight) world.getEntityByID(entityIDorPosX),
+					new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorPosX)));
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
-			return new TankContainerGui((FreightTank) world.getEntityByID(entityID),
-					new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityID)));
+			return new TankContainerGui((FreightTank) world.getEntityByID(entityIDorPosX),
+					new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorPosX)));
 		case TENDER:
-			return new TenderContainerGui((Tender) world.getEntityByID(entityID),
-					new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityID)));
+			return new TenderContainerGui((Tender) world.getEntityByID(entityIDorPosX),
+					new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityIDorPosX)));
 		case STEAM_LOCOMOTIVE:
-			return new SteamLocomotiveContainerGui((LocomotiveSteam) world.getEntityByID(entityID),
-					new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityID)));
+			return new SteamLocomotiveContainerGui((LocomotiveSteam) world.getEntityByID(entityIDorPosX),
+					new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityIDorPosX)));
 		case RAIL:
 			return new TrackGui();
+		case RAIL_PREVIEW:
+			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		default:
 			return null;
 		}
