@@ -5,6 +5,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class BuilderSwitch extends BuilderBase {
 
@@ -65,5 +66,16 @@ public class BuilderSwitch extends BuilderBase {
 			data.addAll(turnBuilder.getRenderData());
 		//}
 		return data;
+	}
+
+
+	public boolean isOnStraight(Vec3d position) {
+		System.out.println(info.placementPosition);
+		for(TrackBase gag : straightBuilder.tracks) {
+			if (gag.getPos().add(new BlockPos(info.placementPosition)).equals(new BlockPos(position))) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

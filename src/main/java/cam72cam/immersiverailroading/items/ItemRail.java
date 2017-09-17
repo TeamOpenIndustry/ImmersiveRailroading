@@ -125,7 +125,7 @@ public class ItemRail extends ItemBlock {
 	}
 
 	public static ItemStack getBed(ItemStack stack) {
-		if (stack.getTagCompound().hasKey("bedItem")) { 
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("bedItem")) { 
 			return new ItemStack(stack.getTagCompound().getCompoundTag("bedItem"));
 		} else {
 			return new ItemStack(Items.AIR);
@@ -137,7 +137,7 @@ public class ItemRail extends ItemBlock {
 	}
 
 	public static boolean getBedFill(ItemStack stack) {
-		if (stack.getTagCompound().hasKey("bedFill")) { 
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("bedFill")) { 
 			return stack.getTagCompound().getBoolean("bedFill");
 		} else {
 			return false;
@@ -148,7 +148,7 @@ public class ItemRail extends ItemBlock {
 	}
 
 	public static boolean isPreview(ItemStack stack) {
-		if (stack.getTagCompound().hasKey("isPreview")) { 
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("isPreview")) { 
 			return stack.getTagCompound().getBoolean("isPreview");
 		} else {
 			return false;

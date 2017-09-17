@@ -122,7 +122,7 @@ public class MovementSimulator {
 		}
 		
 		TileRail super_parent = parent.getParentTile();
-		if (SwitchUtil.getSwitchState(parent) == SwitchState.STRAIGHT) {
+		if (SwitchUtil.getSwitchState(parent, position) == SwitchState.STRAIGHT) {
 			parent = super_parent;
 		}
 		
