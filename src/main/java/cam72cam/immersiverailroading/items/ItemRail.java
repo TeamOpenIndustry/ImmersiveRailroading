@@ -15,6 +15,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -114,5 +115,17 @@ public class ItemRail extends ItemBlock {
 			return TrackPositionType.values()[stack.getTagCompound().getInteger("pos_type")];
 		}
 		return TrackPositionType.FIXED;
+	}
+
+	public static ItemStack getBed(ItemStack stack) {
+		if (stack.getTagCompound().hasKey("bedItem")) { 
+			return new ItemStack(stack.getTagCompound().getCompoundTag("bedItem"));
+		} else {
+			return new ItemStack(Items.AIR);
+		}
+	}
+	
+	public static void setBed(ItemStack stack, ItemStack base) {
+		stack.getTagCompound().setTag("bedItem", base.serializeNBT());
 	}
 }

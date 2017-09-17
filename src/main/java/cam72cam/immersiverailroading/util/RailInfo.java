@@ -28,13 +28,14 @@ public class RailInfo {
 	public int quarter;
 	public int quarters;
 	public Vec3d placementPosition;
+	public ItemStack railBed;
 
 	// Used for tile rendering only
 	public boolean snowRenderFlagDirty = false;
 	public SwitchState switchState = SwitchState.NONE;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition, ItemStack railBed) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -44,6 +45,7 @@ public class RailInfo {
 		this.quarter = quarter;
 		this.quarters = quarters;
 		this.placementPosition = placementPosition;
+		this.railBed = railBed;
 	}
 	
 	public RailInfo(ItemStack stack, EntityPlayer player, BlockPos pos, float hitX, float hitY, float hitZ) {
@@ -51,6 +53,7 @@ public class RailInfo {
 		world = player.getEntityWorld();
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
+		railBed = ItemRail.getBed(stack);
 		TrackPositionType posType = ItemRail.getPosType(stack);
 		
 		float yawHead = player.getRotationYawHead() % 360 + 360;
@@ -94,7 +97,7 @@ public class RailInfo {
 	}
 	
 	public RailInfo clone() {
-		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, placementPosition);
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, placementPosition, railBed);
 		return c;
 	}
 	

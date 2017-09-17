@@ -7,13 +7,15 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLog;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 
 public class RailBaseRender {
 	/*
@@ -26,7 +28,16 @@ public class RailBaseRender {
 		// Get model for current state
 		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 		
-		IBlockState gravelState = Blocks.GRAVEL.getDefaultState();
+		if (info.railBed.getItem() == Items.AIR) {
+			return null;
+		}
+		
+		Block block = Block.getBlockFromItem(info.railBed.getItem());
+		@SuppressWarnings("deprecation")
+		IBlockState gravelState = block.getStateFromMeta(info.railBed.getMetadata());
+		if (block instanceof BlockLog ) {
+			gravelState = gravelState.withProperty(BlockLog.LOG_AXIS, BlockLog.EnumAxis.Z);
+		}
 		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
 		
 		// Create render targets

@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.tile;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
@@ -15,6 +17,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 public class TileRail extends TileRailBase {
 	private EnumFacing facing;
 	private TrackItems type;
+	private ItemStack railBed;
 	
 	private Vec3d center;
 	
@@ -57,6 +60,13 @@ public class TileRail extends TileRailBase {
 	}
 	public void setType(TrackItems value) {
 		this.type = value;
+		this.markDirty();
+	}
+	public ItemStack getRailBed() {
+		return this.railBed;
+	}
+	public void setRailBed(ItemStack railBed) {
+		this.railBed = railBed;
 		this.markDirty();
 	}
 	
@@ -132,6 +142,12 @@ public class TileRail extends TileRailBase {
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
+		int version = 0;
+		
+		if (nbt.hasKey("version")) {
+			version = nbt.getInteger("version");
+		}
+		
 		facing = EnumFacing.getFront(nbt.getByte("facing"));
 		type = TrackItems.valueOf(nbt.getString("type"));
 		
@@ -145,6 +161,12 @@ public class TileRail extends TileRailBase {
 		rotationQuarter = nbt.getInteger("rotationQuarter");
 		direction = TrackDirection.values()[nbt.getInteger("direction")];
 		turnQuarters = nbt.getInteger("turnQuarters");
+		
+		if (version == 0) {
+			railBed = new ItemStack(Blocks.GRAVEL);
+		} else {
+			railBed = new ItemStack(nbt.getCompoundTag("railBed"));
+		}
 		
 		super.readFromNBT(nbt);
 	}
@@ -170,6 +192,10 @@ public class TileRail extends TileRailBase {
 		nbt.setInteger("direction", direction.ordinal());
 		nbt.setInteger("turnQuarters", turnQuarters);
 		
+		nbt.setInteger("version", 1);
+		
+		nbt.setTag("railBed", railBed.serializeNBT());
+		
 		return super.writeToNBT(nbt);
 	}
 
@@ -179,7 +205,7 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition());
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition(), getRailBed());
 		}
 		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
 		info.switchState = this.switchState;

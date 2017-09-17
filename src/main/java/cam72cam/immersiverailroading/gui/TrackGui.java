@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
 import java.io.IOException;
-
 import javax.annotation.Nullable;
 
 import com.google.common.base.Predicate;
@@ -15,8 +14,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.init.Items;
 import net.minecraftforge.fml.client.config.GuiSlider;
+import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.StringUtils;
 
 public class TrackGui extends GuiScreen {
@@ -30,6 +32,8 @@ public class TrackGui extends GuiScreen {
 	private TrackItems type;
 	private TrackPositionType posType;
 	private GuiButton posTypeButton;
+	private GuiButton bedTypeButton;
+	private ItemPickerGUI bedSelector;
 
 	private final Predicate<String> integerFilter = new Predicate<String>() {
 		public boolean apply(@Nullable String inputString) {
@@ -53,13 +57,30 @@ public class TrackGui extends GuiScreen {
 		quarters = ItemRail.getQuarters(stack);
 		type = TrackItems.fromMeta(stack.getMetadata());
 		posType = ItemRail.getPosType(stack);
+		NonNullList<ItemStack> oreDict = NonNullList.create();
+		
+		oreDict.add(new ItemStack(Items.AIR));
+		
+		for (ItemStack ore : OreDictionary.getOres(ImmersiveRailroading.ORE_RAIL_BED)) {
+			if (ore.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
+				ore.getItem().getSubItems(ore.getItem().getCreativeTab(), oreDict);
+			} else {
+				oreDict.add(ore);
+			}
+		}
+		bedSelector = new ItemPickerGUI(oreDict);
+		bedSelector.choosenItem = ItemRail.getBed(stack);
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		this.drawDefaultBackground();
-        this.lengthInput.drawTextBox();
-		super.drawScreen(mouseX, mouseY, partialTicks);
+		if (bedSelector.isActive) {
+			bedSelector.drawScreen(mouseX, mouseY, partialTicks);
+		} else {
+			this.drawDefaultBackground();
+	        this.lengthInput.drawTextBox();
+			super.drawScreen(mouseX, mouseY, partialTicks);
+		}
 	}
 	
 	@Override
@@ -71,6 +92,23 @@ public class TrackGui extends GuiScreen {
 	@Override
 	public boolean doesGuiPauseGame() {
 		return false;
+	}
+	
+	public void setWorldAndResolution(Minecraft mc, int width, int height) {
+		super.setWorldAndResolution(mc, width, height);
+		bedSelector.setWorldAndResolution(mc, width, height);
+	}
+	
+	public void setGuiSize(int w, int h) {
+		this.setGuiSize(w, h);
+		bedSelector.setGuiSize(w, h);
+	}
+	
+	public String getBedstackName() {
+		if (bedSelector.choosenItem.getItem() != Items.AIR) {
+			return bedSelector.choosenItem.getDisplayName();
+		}
+		return "None";
 	}
 
 	public void initGui() {
@@ -93,9 +131,14 @@ public class TrackGui extends GuiScreen {
 		this.buttonList.add(quartersSlider);
 
 		quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
+		
+		bedTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "RailBed: " + getBedstackName());
+		this.buttonList.add(bedTypeButton);
 
 		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "Position: " + posType.name());
 		this.buttonList.add(posTypeButton);
+		
+		bedSelector.initGui();
 	}
 
 	protected void actionPerformed(GuiButton button) throws IOException {
@@ -108,14 +151,21 @@ public class TrackGui extends GuiScreen {
 			posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
 			posTypeButton.displayString = "Position: " + posType.name();
 		}
+		if (button == bedTypeButton) {
+			bedSelector.isActive = true;
+		}
 	}
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
         this.lengthInput.textboxKeyTyped(typedChar, keyCode);
         // Enter or ESC
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
+        	if (bedSelector.isActive) {
+        		bedSelector.isActive = false;
+        		return;
+        	}
         	if (!this.lengthInput.getText().isEmpty()) {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem));
         	}
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)
@@ -124,6 +174,15 @@ public class TrackGui extends GuiScreen {
 	}
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
     {
+        if (bedSelector.isActive) {
+        	bedSelector.mouseClicked(mouseX, mouseY, mouseButton);
+
+			if (!bedSelector.isActive) {
+				bedTypeButton.displayString = "RailBed: " + getBedstackName();
+			}
+        	
+        	return;
+        }
         super.mouseClicked(mouseX, mouseY, mouseButton);
         this.lengthInput.mouseClicked(mouseX, mouseY, mouseButton);
     }
