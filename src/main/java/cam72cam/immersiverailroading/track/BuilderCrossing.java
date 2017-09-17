@@ -16,17 +16,14 @@ public class BuilderCrossing extends BuilderBase {
 		this.setParentPos(new BlockPos(0, 0, 0));
 		
 		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, info.quarter, info.placementPosition));
-		tracks.add(new TrackGag(this, -1, 0, 0));
-		tracks.add(new TrackGag(this, 1, 0, 0));
-		
-		tracks.add(new TrackGag(this, -1, 0, 1));
-		tracks.add(new TrackGag(this, 0, 0, 1));
-		tracks.add(new TrackGag(this, 1, 0, 1));
-		
-		tracks.add(new TrackGag(this, -1, 0, 2));
-		tracks.add(new TrackGag(this, 0, 0, 2));
-		tracks.add(new TrackGag(this, 1, 0, 2));
-		
+		for (int i = -1; i <=1; i ++) {
+			for (int j = -1; j <=1; j ++) {
+				if (i == 0 && j == 0) {
+					continue;
+				}
+				tracks.add(new TrackGag(this, i, 0, j));
+			}
+		}
 	}
 
 	@Override
@@ -34,13 +31,13 @@ public class BuilderCrossing extends BuilderBase {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
 		
+		data.add(new VecYawPitch(-0.5, 0, -1, 0));
 		data.add(new VecYawPitch(-0.5, 0, 0, 0));
 		data.add(new VecYawPitch(-0.5, 0, 1, 0));
-		data.add(new VecYawPitch(-0.5, 0, 2, 0));
 		
-		data.add(new VecYawPitch(0, 0, 0.5, -90));
-		data.add(new VecYawPitch(1, 0, 0.5, -90));
-		data.add(new VecYawPitch(2, 0, 0.5, -90));
+		data.add(new VecYawPitch(0, 0, -0.5, -90));
+		data.add(new VecYawPitch(1, 0, -0.5, -90));
+		data.add(new VecYawPitch(2, 0, -0.5, -90));
 		
 		return data;
 	}
