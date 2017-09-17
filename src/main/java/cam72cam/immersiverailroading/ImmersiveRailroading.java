@@ -27,6 +27,7 @@ public class ImmersiveRailroading
     public static final String MODID = "immersiverailroading";
     public static final String VERSION = "0.1.6";
 	public static final int ENTITY_SYNC_DISTANCE = 512;
+    public static final String ORE_RAIL_BED = "railBed";
     
 	@ObjectHolder(BlockRailGag.NAME)
 	public static final BlockRailGag BLOCK_RAIL_GAG = new BlockRailGag();

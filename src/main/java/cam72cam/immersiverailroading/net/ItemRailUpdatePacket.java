@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.TrackPositionType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -18,18 +19,20 @@ public class ItemRailUpdatePacket implements IMessage {
 	private int quarters;
 	private TrackItems type;
 	private TrackPositionType posType;
+	private ItemStack bedStack;
 	
 	public ItemRailUpdatePacket() {
 		// For Reflection
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
 		this.type = type;
 		this.posType = posType;
+		this.bedStack = bedStack;
 	}
 
 	@Override
@@ -39,6 +42,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.quarters = buf.readInt();
 		this.type = TrackItems.fromMeta(buf.readInt());
 		this.posType = TrackPositionType.values()[buf.readInt()];
+		this.bedStack = ByteBufUtils.readItemStack(buf);
 	}
 
 	@Override
@@ -48,6 +52,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		buf.writeInt(quarters);
 		buf.writeInt(type.getMeta());
 		buf.writeInt(posType.ordinal());
+		ByteBufUtils.writeItemStack(buf, bedStack);
 	}
 	
 	public static class Handler implements IMessageHandler<ItemRailUpdatePacket, IMessage> {
@@ -62,6 +67,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemRail.setLength(stack, message.length);
 			ItemRail.setQuarters(stack, message.quarters);
 			ItemRail.setPosType(stack, message.posType);
+			ItemRail.setBed(stack, message.bedStack);
 			stack.setItemDamage(message.type.getMeta());
 			ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 		}

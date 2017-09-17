@@ -34,7 +34,9 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
@@ -51,10 +53,11 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.oredict.OreDictionary;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
-    protected static List<Class<? extends EntityRollingStock>> entityClasses = new ArrayList<Class<? extends EntityRollingStock>>();
+	protected static List<Class<? extends EntityRollingStock>> entityClasses = new ArrayList<Class<? extends EntityRollingStock>>();
     static {
     	entityClasses.add(LocomotiveSteam.class);
     	entityClasses.add(LocomotiveDiesel.class);
@@ -66,6 +69,16 @@ public abstract class CommonProxy implements IGuiHandler {
 	
     public void preInit(FMLPreInitializationEvent event) throws IOException {
     	DefinitionManager.initDefinitions();
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.BRICK_BLOCK);
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.COBBLESTONE);
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.DIRT);
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.GRAVEL);
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.LOG, 1, OreDictionary.WILDCARD_VALUE));
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.NETHER_BRICK);
+    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
     }
     
     public void init(FMLInitializationEvent event) {
