@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -21,6 +22,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class TrackGui extends GuiScreen {
 	private GuiButton typeButton;
@@ -54,10 +57,21 @@ public class TrackGui extends GuiScreen {
 			return val > 0 && val <= 100;
 		}
 	};
+	private BlockPos tilePreviewPos;
 
 	public TrackGui() {
 		slot = Minecraft.getMinecraft().player.inventory.currentItem;
 		ItemStack stack = Minecraft.getMinecraft().player.getHeldItemMainhand();
+		init(stack);
+	}
+
+	public TrackGui(World world, int posX, int posY, int posZ) {
+		this.tilePreviewPos = new BlockPos(posX, posY, posZ);
+		TileRailPreview te = (TileRailPreview) world.getTileEntity(tilePreviewPos);
+		init(te.getItem());
+	}
+
+	private void init(ItemStack stack) {
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
 		type = TrackItems.fromMeta(stack.getMetadata());
@@ -180,8 +194,13 @@ public class TrackGui extends GuiScreen {
         		return;
         	}
         	if (!this.lengthInput.getText().isEmpty()) {
+        		if (this.tilePreviewPos != null) {
+    				ImmersiveRailroading.net.sendToServer(
+    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, railBedFill, isPreview));
+        		} else {
 				ImmersiveRailroading.net.sendToServer(
 						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, railBedFill, isPreview));
+        		}
         	}
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)

@@ -136,6 +136,8 @@ public abstract class CommonProxy implements IGuiHandler {
 	public static void onBlockBreakEvent(BreakEvent event) {
 		if (!BlockRailBase.tryBreakRail(event.getWorld(), event.getPos())) {
 			event.setCanceled(true);
+		} else if (BlockRailPreview.tryBreakPreview(event.getWorld(), event.getPos(), event.getPlayer().isSneaking())) {
+			event.setCanceled(true);
 		}
 	}
 	

@@ -3,8 +3,11 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -22,6 +25,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	private ItemStack bedStack;
 	private boolean railBedFill;
 	private boolean isPreview;
+	private BlockPos tilePreviewPos;
 	
 	public ItemRailUpdatePacket() {
 		// For Reflection
@@ -39,10 +43,25 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.isPreview = isPreview;
 	}
 
+	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, boolean railBedFill, boolean isPreview) {
+		this.tilePreviewPos = tilePreviewPos;
+		this.length = length;
+		this.quarters = quarters;
+		this.type = type;
+		this.posType = posType;
+		this.bedStack = bedStack;
+		this.railBedFill = railBedFill;
+		this.isPreview = isPreview;
+	}
+
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		this.length = buf.readInt();
-		this.slot = buf.readInt();
+		if (buf.readBoolean()) {
+			this.slot = buf.readInt();
+		} else {
+			this.tilePreviewPos = new BlockPos(BufferUtil.readVec3i(buf));
+		}
 		this.quarters = buf.readInt();
 		this.type = TrackItems.fromMeta(buf.readInt());
 		this.posType = TrackPositionType.values()[buf.readInt()];
@@ -54,7 +73,12 @@ public class ItemRailUpdatePacket implements IMessage {
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(length);
-		buf.writeInt(slot);
+		buf.writeBoolean(tilePreviewPos == null);
+		if (tilePreviewPos == null) {
+			buf.writeInt(slot);
+		} else {
+			BufferUtil.writeVec3i(buf, tilePreviewPos);
+		}
 		buf.writeInt(quarters);
 		buf.writeInt(type.getMeta());
 		buf.writeInt(posType.ordinal());
@@ -71,7 +95,12 @@ public class ItemRailUpdatePacket implements IMessage {
 		}
 
 		private void handle(ItemRailUpdatePacket message, MessageContext ctx) {
-			ItemStack stack = ctx.getServerHandler().player.inventory.getStackInSlot(message.slot);
+			ItemStack stack;
+			if (message.tilePreviewPos == null) {
+				stack = ctx.getServerHandler().player.inventory.getStackInSlot(message.slot);
+			} else {
+				stack = ((TileRailPreview)ctx.getServerHandler().player.world.getTileEntity(message.tilePreviewPos)).getItem();
+			}
 			ItemRail.setLength(stack, message.length);
 			ItemRail.setQuarters(stack, message.quarters);
 			ItemRail.setPosType(stack, message.posType);
@@ -79,7 +108,11 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemRail.setBedFill(stack, message.railBedFill);
 			ItemRail.setPreview(stack, message.isPreview);
 			stack.setItemDamage(message.type.getMeta());
-			ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
+			if (message.tilePreviewPos == null) {
+				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
+			} else {
+				((TileRailPreview)ctx.getServerHandler().player.world.getTileEntity(message.tilePreviewPos)).setItem(stack);
+			}
 		}
 	}
 }
