@@ -72,6 +72,7 @@ public class TrackGui extends GuiScreen {
 	}
 
 	private void init(ItemStack stack) {
+		stack = stack.copy();
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
 		type = TrackItems.fromMeta(stack.getMetadata());
@@ -159,7 +160,7 @@ public class TrackGui extends GuiScreen {
 		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "Position: " + posType.name());
 		this.buttonList.add(posTypeButton);
 		
-		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Blueprint Preview", railBedFill);
+		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Place Blueprint", isPreview);
 		this.buttonList.add(isPreviewCB);
 		
 		bedSelector.initGui();

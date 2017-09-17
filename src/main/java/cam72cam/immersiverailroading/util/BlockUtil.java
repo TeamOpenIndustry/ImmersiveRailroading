@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
@@ -23,6 +24,9 @@ public class BlockUtil {
 			return true;
 		}
 		if (block instanceof BlockFlower || block == Blocks.DOUBLE_PLANT || block instanceof BlockMushroom) {
+			return true;
+		}
+		if (block == ImmersiveRailroading.BLOCK_RAIL_PREVIEW) {
 			return true;
 		}
 		if (allowFlex && block instanceof BlockRailBase) {
