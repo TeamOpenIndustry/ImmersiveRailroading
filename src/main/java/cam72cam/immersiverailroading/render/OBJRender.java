@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render.obj;
+package cam72cam.immersiverailroading.render;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -9,6 +9,9 @@ import java.util.Map;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.model.obj.Face;
+import cam72cam.immersiverailroading.model.obj.Material;
+import cam72cam.immersiverailroading.model.obj.OBJModel;
 import net.minecraft.util.math.Vec3d;
 
 public class OBJRender {

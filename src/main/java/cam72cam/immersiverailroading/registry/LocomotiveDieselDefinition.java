@@ -15,6 +15,12 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+	}
+	
+	@Override
+	public void parseJson(JsonObject data) throws Exception {
+		super.parseJson(data);
+		
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		fuelCapacity = FluidQuantity.FromLiters(properties.get("fuel_capacity_l").getAsInt());
 		fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();

@@ -23,6 +23,11 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 
 	public CarTankDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+	}
+	
+	@Override
+	public void parseJson(JsonObject data) throws Exception {
+		super.parseJson(data);
 		JsonObject tank = data.get("tank").getAsJsonObject();
 		capacity = FluidQuantity.FromLiters(tank.get("capacity_l").getAsInt());
 		if (tank.has("whitelist")) {

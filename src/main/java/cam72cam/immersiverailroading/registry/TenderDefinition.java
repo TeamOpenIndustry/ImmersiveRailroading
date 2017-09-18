@@ -14,6 +14,12 @@ public class TenderDefinition extends CarTankDefinition {
 
 	public TenderDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+	}
+	
+	@Override
+	public void parseJson(JsonObject data) throws Exception {
+		super.parseJson(data);
+		
 		JsonObject tender = data.get("tender").getAsJsonObject();
 		this.numSlots = tender.get("slots").getAsInt();
 		this.width = tender.get("width").getAsInt();

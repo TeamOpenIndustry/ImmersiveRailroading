@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render.obj;
+package cam72cam.immersiverailroading.model.obj;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -17,14 +17,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
-	List<String> materialPaths = new ArrayList<String>();
+	public List<String> materialPaths = new ArrayList<String>();
 	// LinkedHashMap is ordered
-	Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
-	List<Vec3d> vertices = new ArrayList<Vec3d>();
-	List<Vec3d> vertexNormals = new ArrayList<Vec3d>();
-	List<Vec2f> vertexTextures = new ArrayList<Vec2f>();
+	public Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
+	public List<Vec3d> vertices = new ArrayList<Vec3d>();
+	public List<Vec3d> vertexNormals = new ArrayList<Vec3d>();
+	public List<Vec2f> vertexTextures = new ArrayList<Vec2f>();
 
-	Map<String, Material> materials = new HashMap<String, Material>();
+	public Map<String, Material> materials = new HashMap<String, Material>();
 	public float darken;
 
 	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {

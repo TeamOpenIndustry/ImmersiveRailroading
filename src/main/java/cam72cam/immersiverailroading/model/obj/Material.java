@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render.obj;
+package cam72cam.immersiverailroading.model.obj;
 
 import java.nio.FloatBuffer;
 
