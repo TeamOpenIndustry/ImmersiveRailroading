@@ -14,6 +14,12 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 	
 	public LocomotiveDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+	}
+	
+	@Override
+	public void parseJson(JsonObject data) throws Exception {
+		super.parseJson(data);
+		
 		works = data.get("works").getAsString();
 		
 		JsonObject properties = data.get("properties").getAsJsonObject();

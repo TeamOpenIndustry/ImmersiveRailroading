@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render.obj;
+package cam72cam.immersiverailroading.model.obj;
 
 public class Face {
 	public int[][] points; 

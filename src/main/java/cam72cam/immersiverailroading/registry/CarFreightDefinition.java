@@ -20,6 +20,11 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 
 	public CarFreightDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+	}
+	
+	@Override
+	public void parseJson(JsonObject data) throws Exception {
+		super.parseJson(data);
 		JsonObject freight = data.get("freight").getAsJsonObject();
 		this.numSlots = freight.get("slots").getAsInt();
 		this.width = freight.get("width").getAsInt();

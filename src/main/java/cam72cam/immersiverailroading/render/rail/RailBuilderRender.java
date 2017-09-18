@@ -8,8 +8,8 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.render.obj.OBJModel;
-import cam72cam.immersiverailroading.render.obj.OBJRender;
+import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
