@@ -36,6 +36,7 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.render.RailItemModel;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemModel;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
@@ -164,7 +165,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK, 0,
-				new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL.getRegistryName(), "inventory"));
+				new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""));
 
 		ModelLoader.setCustomMeshDefinition(ImmersiveRailroading.ITEM_ROLLING_STOCK, new ItemMeshDefinition() {
 			@Override
@@ -182,6 +183,10 @@ public class ClientProxy extends CommonProxy {
 			IBakedModel model = new StockItemModel(DefinitionManager.getDefinition(defID));
 			event.getModelRegistry().putObject(loc, model);
 		}
+
+		ModelResourceLocation loc = new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), "");
+		IBakedModel model = new RailItemModel();
+		event.getModelRegistry().putObject(loc, model);
 	}
 
 	@SubscribeEvent
