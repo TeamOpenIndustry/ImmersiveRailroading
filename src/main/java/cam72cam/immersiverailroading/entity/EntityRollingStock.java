@@ -30,7 +30,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.isImmuneToFire = true;
 		super.entityCollisionReduction = 1F;
 		super.ignoreFrustumCheck = true;
-	}
+	} 
 
 	public EntityRollingStockDefinition getDefinition() {
 		return DefinitionManager.getDefinition(defID);

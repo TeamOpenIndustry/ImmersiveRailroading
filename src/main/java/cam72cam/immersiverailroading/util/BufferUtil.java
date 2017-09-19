@@ -1,12 +1,15 @@
 package cam72cam.immersiverailroading.util;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.library.ItemComponentType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -96,5 +99,23 @@ public class BufferUtil {
 	
 	public static Vec3i readVec3i(ByteBuf buf) {
 		return new Vec3i(buf.readInt(), buf.readInt(), buf.readInt());
+	}
+	
+	public static void writeItemComponentTypes(ByteBuf buf, List<ItemComponentType> items) {
+		buf.writeInt(items.size());
+		for (ItemComponentType item : items) {
+			buf.writeInt(item.ordinal());
+		}
+	}
+	
+	public static List<ItemComponentType> readItemComponentTypes(ByteBuf buf) {
+		List<ItemComponentType> items = new ArrayList<ItemComponentType>();
+		
+		int count = buf.readInt();
+		for (int i = 0; i < count; i ++) {
+			items.add(ItemComponentType.values()[buf.readInt()]);
+		}
+		
+		return items;
 	}
 }

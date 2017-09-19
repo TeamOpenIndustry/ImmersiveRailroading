@@ -1,11 +1,15 @@
 package cam72cam.immersiverailroading.library;
 
-public enum ComponentName {
+public enum RenderComponentType {
 	// STANDARD
 	BOGEY_FRONT_WHEEL_X(".*BOGEY_FRONT_WHEEL_#WHEEL#.*"),
 	BOGEY_FRONT(".*BOGEY_FRONT.*"),
 	BOGEY_REAR_WHEEL_X(".*BOGEY_REAR_WHEEL_#WHEEL#.*"),
 	BOGEY_REAR(".*BOGEY_REAR.*"),
+	//FRAME
+	
+	//STEAM
+	//BOILER
 	
 	// WALCHERTS
 	WHEEL_DRIVER_X(".*WHEEL_DRIVER_#WHEEL#.*"),
@@ -35,7 +39,7 @@ public enum ComponentName {
 	
 	public final String regex;
 	
-	ComponentName(String regex) {
+	RenderComponentType(String regex) {
 		this.regex = regex;
 	}
 }
