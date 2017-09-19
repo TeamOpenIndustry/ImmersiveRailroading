@@ -7,8 +7,10 @@ import org.apache.logging.log4j.Logger;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.blocks.BlockRailPreview;
+import cam72cam.immersiverailroading.items.ItemLargeWrench;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import net.minecraft.item.Item;
@@ -39,6 +41,12 @@ public class ImmersiveRailroading
 	
 	@ObjectHolder(ItemRollingStock.NAME)
 	public static ItemRollingStock ITEM_ROLLING_STOCK = new ItemRollingStock();
+	
+	@ObjectHolder(ItemRollingStockComponent.NAME)
+	public static ItemRollingStockComponent ITEM_ROLLING_STOCK_COMPONENT = new ItemRollingStockComponent();
+	
+	@ObjectHolder(ItemLargeWrench.NAME)
+	public static ItemLargeWrench ITEM_LARGE_WRENCH = new ItemLargeWrench();
 	
 	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL).setRegistryName(ImmersiveRailroading.BLOCK_RAIL.getRegistryName());
 	

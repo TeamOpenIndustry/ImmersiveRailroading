@@ -268,7 +268,7 @@ public class OBJModel {
 		return max.x - min.x;
 	}
 
-	public double widthOfGroups(Set<String> groupNames) {
+	public double widthOfGroups(Iterable<String> groupNames) {
 		Vec3d min = minOfGroup(groupNames);
 		Vec3d max = maxOfGroup(groupNames);
 		return max.z - min.z;

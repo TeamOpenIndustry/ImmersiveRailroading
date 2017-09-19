@@ -18,7 +18,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public abstract class EntityRidableRollingStock extends EntityRollingStock {
+public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock {
 	public EntityRidableRollingStock(World world, String defID) {
 		super(world, defID);
 	}
@@ -75,6 +75,10 @@ public abstract class EntityRidableRollingStock extends EntityRollingStock {
 
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		if (super.processInitialInteract(player, hand)) {
+			return true;
+		}
+		
 		if (player.isSneaking()) {
 			return false;
 		} else if (player.isRiding() && player.getRidingEntity().getPersistentID() == this.getPersistentID()) {

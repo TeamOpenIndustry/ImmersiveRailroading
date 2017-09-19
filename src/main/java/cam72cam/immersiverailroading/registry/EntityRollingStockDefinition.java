@@ -9,10 +9,12 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.library.ComponentName;
+import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.model.Component;
+import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
@@ -23,7 +25,24 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStockDefinition {
-	public abstract EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing);
+	public abstract EntityRollingStock instance(World world);
+	
+	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing) {
+		EntityRollingStock stock = instance(world);
+		
+		if (stock instanceof EntityBuildableRollingStock) {
+			List<ItemComponentType> items = new ArrayList<ItemComponentType>();
+			items.add(ItemComponentType.FRAME);
+			((EntityBuildableRollingStock)stock).setComponents(false, items );
+		}
+
+		stock.setPosition(pos.x, pos.y, pos.z);
+		stock.prevRotationYaw = facing.getHorizontalAngle();
+		stock.rotationYaw = facing.getHorizontalAngle();
+		world.spawnEntity(stock);
+
+		return stock;
+	}
 
 	protected String defID;
 	public String name;
@@ -41,14 +60,15 @@ public abstract class EntityRollingStockDefinition {
 	private int weight;
 	private int maxPassengers;
 	
-	private Map<ComponentName, List<Component>> components;
+	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
+	ArrayList<ItemComponentType> itemComponents;
 
 	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
 		
 		parseJson(data);
 		
-		addComponentIfExists(Component.parse(ComponentName.REMAINING, this, parseComponents()));
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
 	}
 
 	public void parseJson(JsonObject data) throws Exception  {
@@ -75,41 +95,58 @@ public abstract class EntityRollingStockDefinition {
 		weight = data.get("properties").getAsJsonObject().get("weight_kg").getAsInt();
 	}
 	
-	protected void addComponentIfExists(Component component) {
-		if (component != null) {
-			if (!components.containsKey(component.name)) {
-				components.put(component.name, new ArrayList<Component>());
+	protected void addComponentIfExists(RenderComponent renderComponent, boolean itemComponent) {
+		if (renderComponent != null) {
+			if (!renderComponents.containsKey(renderComponent.type)) {
+				renderComponents.put(renderComponent.type, new ArrayList<RenderComponent>());
 			}
-			components.get(component.name).add(component);
+			renderComponents.get(renderComponent.type).add(renderComponent);
+			
+			if (itemComponent) {
+				itemComponents.add(ItemComponentType.from(renderComponent.type));
+			}
 		}
 	}
 	
 	protected Set<String> parseComponents() {
-		components = new HashMap<ComponentName, List<Component>>();
+		renderComponents = new HashMap<RenderComponentType, List<RenderComponent>>();
+		itemComponents = new ArrayList<ItemComponentType>();
 		
 		Set<String> groups = new HashSet<String>();
 		groups.addAll(model.groups());
 		
 		for (int i = 0; i < 10; i++) {
-			addComponentIfExists(Component.parseWheel(ComponentName.BOGEY_FRONT_WHEEL_X, this, groups, i));
-			addComponentIfExists(Component.parseWheel(ComponentName.BOGEY_REAR_WHEEL_X, this, groups, i));
+			addComponentIfExists(RenderComponent.parseWheel(RenderComponentType.BOGEY_FRONT_WHEEL_X, this, groups, i), true);
+			addComponentIfExists(RenderComponent.parseWheel(RenderComponentType.BOGEY_REAR_WHEEL_X, this, groups, i), true);
 		}
 		
-		addComponentIfExists(Component.parse(ComponentName.BOGEY_FRONT, this, groups));
-		addComponentIfExists(Component.parse(ComponentName.BOGEY_REAR, this, groups));
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_FRONT, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_REAR, this, groups), true);
 		
 		return groups;
 	}
 	
-	public Component getComponent(ComponentName name) {
-		if (!components.containsKey(name)) {
+	public RenderComponent getComponent(RenderComponentType name) {
+		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
-		return components.get(name).get(0);
+		return renderComponents.get(name).get(0);
+	}
+
+	public RenderComponent getComponent(RenderComponent comp) {
+		if (!renderComponents.containsKey(comp.type)) {
+			return null;
+		}
+		for (RenderComponent c : getComponents(comp.type)) {
+			if (c.equals(comp)) {
+				return c;
+			}
+		}
+		return null;
 	}
 	
-	public List<Component> getComponents(ComponentName name) {
-		return components.get(name);
+	public List<RenderComponent> getComponents(RenderComponentType name) {
+		return renderComponents.get(name);
 	}
 
 	public Vec3d getPassengerCenter() {
@@ -129,6 +166,10 @@ public abstract class EntityRollingStockDefinition {
 		}
 		
 		return pos;
+	}
+
+	public List<ItemComponentType> getItemComponents() {
+		return itemComponents;
 	}
 
 	public float getBogeyFront() {

@@ -4,31 +4,31 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import cam72cam.immersiverailroading.library.ComponentName;
+import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import net.minecraft.util.math.Vec3d;
 
-public class Component {
-	public final ComponentName name;
+public class RenderComponent {
+	public final RenderComponentType type;
 	public final EntityRollingStockDefinition def;
 	public final int wheel;
 	public final String side;
 	public final Set<String> modelIDs;
 	
-	public static Component parse(ComponentName name, EntityRollingStockDefinition def, Set<String> groups) {
+	public static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups) {
 		return parse(name, def, groups, -1, "");
 	}
 	
-	public static Component parseWheel(ComponentName name, EntityRollingStockDefinition def, Set<String> groups, int i) {
+	public static RenderComponent parseWheel(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int i) {
 		return parse(name, def, groups, i, "");
 	}
 	
-	public static Component parseSide(ComponentName name, EntityRollingStockDefinition def, Set<String> groups, String side) {
+	public static RenderComponent parseSide(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, String side) {
 		return parse(name, def, groups, -1, side);
 	}
 	
-	private static Component parse(ComponentName name, EntityRollingStockDefinition def, Set<String> groups, int wheel, String side) {
-		Component comp = new Component(name, def, wheel, side);
+	private static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int wheel, String side) {
+		RenderComponent comp = new RenderComponent(name, def, wheel, side);
 		
 		String wheelStr = wheel != -1 ? "" + wheel : "";
 		
@@ -43,17 +43,17 @@ public class Component {
 		groups.removeAll(comp.modelIDs);
 		
 		return comp;
-	}
+	} 
 
-	private Component(ComponentName name, EntityRollingStockDefinition def, int wheel, String side) {
+	private RenderComponent(RenderComponentType name, EntityRollingStockDefinition def, int wheel, String side) {
 		this.modelIDs = new HashSet<String>();
-		this.name = name;
+		this.type = name;
 		this.def = def;
 		this.wheel = wheel;
 		this.side = side;
 	}
 	
-	protected Component(EntityRollingStockDefinition def) {
+	protected RenderComponent(EntityRollingStockDefinition def) {
 		this(null, def, 0, null);
 	}
 

@@ -8,8 +8,6 @@ import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.CarFreight;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class CarFreightDefinition extends EntityRollingStockDefinition {
@@ -34,16 +32,8 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 		}
 	}
 	
-	@Override
-	public EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing) {
-		CarFreight loco = new CarFreight(world, defID);
-
-		loco.setPosition(pos.x, pos.y, pos.z);
-		loco.prevRotationYaw = facing.getHorizontalAngle();
-		loco.rotationYaw = facing.getHorizontalAngle();
-		world.spawnEntity(loco);
-
-		return loco;
+	public EntityRollingStock instance(World world) {
+		return new CarFreight(world, defID);
 	}
 	
 	public int getInventorySize() {
