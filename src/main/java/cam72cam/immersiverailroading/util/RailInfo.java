@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.track.BuilderStraight;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.BuilderTurn;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
@@ -149,6 +150,7 @@ public class RailInfo {
 				
 				int ties = 0;
 				int rails = 0;
+				int bed = 0;
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
 					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
@@ -156,6 +158,9 @@ public class RailInfo {
 					}
 					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("plankTreatedWood"), playerStack)) {
 						ties += playerStack.getCount();
+					}
+					if (railBed.getItem() != Items.AIR && railBed.getItem() == playerStack.getItem() && railBed.getMetadata() == playerStack.getMetadata()) {
+						bed += playerStack.getCount();
 					}
 				}
 				
@@ -165,12 +170,18 @@ public class RailInfo {
 				}
 				
 				if (rails < builder.costRails()) {
-					player.sendMessage(new TextComponentString("Missing " + (builder.costRails() - rails) + " ties"));
+					player.sendMessage(new TextComponentString("Missing " + (builder.costRails() - rails) + " rails"));
+					return false;
+				}
+				
+				if (railBed.getItem() != Items.AIR && bed < builder.costBed()) {
+					player.sendMessage(new TextComponentString("Missing " + (builder.costBed() - bed) + " rail bed"));
 					return false;
 				}
 
 				ties = builder.costTies();
 				rails = builder.costRails();
+				bed = builder.costBed();
 				List<ItemStack> drops = new ArrayList<ItemStack>();
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
@@ -202,6 +213,21 @@ public class RailInfo {
 							drops.add(copy); 
 							playerStack.setCount(playerStack.getCount() - ties);
 							ties = 0;
+						}
+					}
+					if (railBed.getItem() != Items.AIR && railBed.getItem() == playerStack.getItem() && railBed.getMetadata() == playerStack.getMetadata()) {
+						if (bed > playerStack.getCount()) {
+							bed -= playerStack.getCount();
+							ItemStack copy = playerStack.copy();
+							copy.setCount(playerStack.getCount());
+							drops.add(copy);  
+							playerStack.setCount(0);
+						} else if (bed != 0) {
+							ItemStack copy = playerStack.copy();
+							copy.setCount(bed);
+							drops.add(copy); 
+							playerStack.setCount(playerStack.getCount() - bed);
+							bed = 0;
 						}
 					}
 				}
