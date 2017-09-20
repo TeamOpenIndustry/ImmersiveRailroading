@@ -218,6 +218,18 @@ public abstract class BuilderBase {
 		return this.tracks.size()*2/3;
 	}
 
+	public int costBed() {
+		int fillCount = 0;
+		for (TrackBase track : tracks) {
+			if (world.isAirBlock(track.getPos().down())) {
+				fillCount += 1;
+			}
+		}
+		
+		//TODO more accurate
+		return (int) (this.tracks.size() * 0.1) + (this.info.railBedFill ? fillCount : 0);
+	}
+
 	public void setDrops(List<ItemStack> drops) {
 		this.drops = drops;
 	}
