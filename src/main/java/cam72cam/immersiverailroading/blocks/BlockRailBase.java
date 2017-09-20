@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.SwitchUtil;
@@ -43,6 +44,11 @@ public abstract class BlockRailBase extends Block {
 			System.out.println(te.getWorld().getBlockState(parent).getBlock().getClass());
 			if (te.getWorld().getBlockState(parent).getBlock() instanceof BlockRail) {
 				if (tryBreakRail(te.getWorld(), parent)) {
+					
+					TileRail parentTE = te.getParentTile();
+					
+					parentTE.spawnDrops();
+					
 					te.getWorld().setBlockToAir(parent);
 				}
 			}
