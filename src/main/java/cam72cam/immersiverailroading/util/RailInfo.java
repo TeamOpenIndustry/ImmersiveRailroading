@@ -1,5 +1,8 @@
 package cam72cam.immersiverailroading.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
@@ -11,11 +14,15 @@ import cam72cam.immersiverailroading.track.BuilderSlope;
 import cam72cam.immersiverailroading.track.BuilderStraight;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.BuilderTurn;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.OreDictionary;
 
 public class RailInfo {
 	public BlockPos position;
@@ -125,5 +132,96 @@ public class RailInfo {
 			builder = getBuilder(new BlockPos(0,0,0));
 		}
 		return builder;
+	}
+	
+	public boolean build(EntityPlayer player, BlockPos pos) {
+		BuilderBase builder = getBuilder(pos);
+		
+
+		if (builder.canBuild()) {
+			if (!world.isRemote) {
+				if (player.isCreative()) {
+					builder.build();
+					return true;
+				}
+				
+				// Survival check
+				
+				int ties = 0;
+				int rails = 0;
+				
+				for (ItemStack playerStack : player.inventory.mainInventory) {
+					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
+						rails += playerStack.getCount();
+					}
+					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("plankTreatedWood"), playerStack)) {
+						ties += playerStack.getCount();
+					}
+				}
+				
+				if (ties < builder.costTies()) {
+					player.sendMessage(new TextComponentString("Missing " + (builder.costTies() - ties) + " ties"));
+					return false;
+				}
+				
+				if (rails < builder.costRails()) {
+					player.sendMessage(new TextComponentString("Missing " + (builder.costRails() - rails) + " ties"));
+					return false;
+				}
+
+				ties = builder.costTies();
+				rails = builder.costRails();
+				List<ItemStack> drops = new ArrayList<ItemStack>();
+				
+				for (ItemStack playerStack : player.inventory.mainInventory) {
+					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
+						if (rails > playerStack.getCount()) {
+							rails -= playerStack.getCount();
+							ItemStack copy = playerStack.copy();
+							copy.setCount(playerStack.getCount());
+							drops.add(copy); 
+							playerStack.setCount(0);
+						} else if (rails != 0) {
+							ItemStack copy = playerStack.copy();
+							copy.setCount(rails);
+							drops.add(copy); 
+							playerStack.setCount(playerStack.getCount() - rails);
+							rails = 0;
+						}
+					}
+					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("plankTreatedWood"), playerStack)) {
+						if (ties > playerStack.getCount()) {
+							ties -= playerStack.getCount();
+							ItemStack copy = playerStack.copy();
+							copy.setCount(playerStack.getCount());
+							drops.add(copy);  
+							playerStack.setCount(0);
+						} else if (ties != 0) {
+							ItemStack copy = playerStack.copy();
+							copy.setCount(ties);
+							drops.add(copy); 
+							playerStack.setCount(playerStack.getCount() - ties);
+							ties = 0;
+						}
+					}
+				}
+				builder.setDrops(drops);
+				builder.build();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
+	private boolean OreDictionaryContainsMatch(boolean strict, NonNullList<ItemStack> ores, ItemStack playerStack) {
+        for (ItemStack target : ores)
+        {
+            if (OreDictionary.itemMatches(target, playerStack, strict))
+            {
+                return true;
+            }
+        }
+        return false;
 	}
 }
