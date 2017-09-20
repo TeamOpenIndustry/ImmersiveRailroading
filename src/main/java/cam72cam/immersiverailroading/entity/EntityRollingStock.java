@@ -86,7 +86,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	/*
 	 * Player Interactions
 	 */
-	@Override
+	
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		return false;
 	}

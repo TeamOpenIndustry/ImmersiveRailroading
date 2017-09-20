@@ -31,6 +31,7 @@ public class ItemRail extends ItemBlock {
 	public ItemRail(Block block) {
 		super(block);
 		this.setMaxDamage(0);
+        this.setMaxStackSize(1);
 	}
 	
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {

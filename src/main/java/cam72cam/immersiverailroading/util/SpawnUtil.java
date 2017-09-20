@@ -13,16 +13,18 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class SpawnUtil {
-	public static EnumActionResult placeStock(EntityPlayer player, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
+	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
 		double offset = def.getCouplerPosition(CouplerType.BACK) - Config.couplerRange;
 		float yaw = EnumFacing.fromAngle(player.rotationYawHead).getHorizontalAngle();
 		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.fromMinecraft(0), new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
@@ -42,6 +44,11 @@ public class SpawnUtil {
 					EntityMoveableRollingStock mrs = (EntityMoveableRollingStock)stock;
 					mrs.initPositions();
 				}
+			}
+			if (!player.isCreative()) {
+				ItemStack stack = player.getHeldItem(hand);
+				stack.setCount(stack.getCount()-1);
+				player.setHeldItem(hand, stack);
 			}
 			return EnumActionResult.PASS;
 		}

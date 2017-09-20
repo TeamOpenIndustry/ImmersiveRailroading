@@ -12,13 +12,11 @@ import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -116,15 +114,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	@Override
 	public GuiTypes guiType() {
 		return GuiTypes.TANK;
-	}
-	
-	@Override
-	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-		// TODO right click with tanks/buckets
-		if(!world.isRemote) {
-			System.out.println(theTank.getFluidAmount());
-		}
-		return super.processInitialInteract(player, hand);
 	}
 
 	@Override
