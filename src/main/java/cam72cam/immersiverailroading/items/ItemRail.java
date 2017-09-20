@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.items;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -11,7 +10,6 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -24,11 +22,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.OreDictionary;
 
 public class ItemRail extends ItemBlock {
 
@@ -57,99 +52,18 @@ public class ItemRail extends ItemBlock {
 			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_PREVIEW.getDefaultState());
 			TileRailPreview te = (TileRailPreview) world.getTileEntity(pos);
 			te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
-			return true;
+			// don't decrement stack regardless
+			return false;
 		}
 		if (player.getEntityWorld().getBlockState(pos.down()).getBlock() instanceof BlockRailBase) {
 			pos = pos.down();
 		}
 		
 		RailInfo info = new RailInfo(stack, player.world, player.getRotationYawHead(), pos, hitX, hitY, hitZ); 
-		
-		BuilderBase builder = info.getBuilder(pos);
-		
-		if (builder.canBuild()) {
-			if (!world.isRemote) {
-				if (player.isCreative()) {
-					builder.build();
-					return false;
-				}
-				
-				// Survival check
-				
-				int ties = 0;
-				int rails = 0;
-				
-				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
-						rails += playerStack.getCount();
-					}
-					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("plankTreatedWood"), playerStack)) {
-						ties += playerStack.getCount();
-					}
-				}
-				
-				if (ties < builder.costTies()) {
-					player.sendMessage(new TextComponentString("Missing " + (builder.costTies() - ties) + " ties"));
-					return false;
-				}
-				
-				if (rails < builder.costRails()) {
-					player.sendMessage(new TextComponentString("Missing " + (builder.costRails() - rails) + " ties"));
-					return false;
-				}
-
-				ties = builder.costTies();
-				rails = builder.costRails();
-				List<ItemStack> drops = new ArrayList<ItemStack>();
-				
-				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
-						if (rails > playerStack.getCount()) {
-							rails -= playerStack.getCount();
-							ItemStack copy = playerStack.copy();
-							copy.setCount(playerStack.getCount());
-							drops.add(copy); 
-							playerStack.setCount(0);
-						} else {
-							ItemStack copy = playerStack.copy();
-							copy.setCount(rails);
-							drops.add(copy); 
-							playerStack.setCount(playerStack.getCount() - rails);
-						}
-					}
-					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("plankTreatedWood"), playerStack)) {
-						if (ties > playerStack.getCount()) {
-							ties -= playerStack.getCount();
-							ItemStack copy = playerStack.copy();
-							copy.setCount(playerStack.getCount());
-							drops.add(copy);  
-							playerStack.setCount(0);
-						} else {
-							ItemStack copy = playerStack.copy();
-							copy.setCount(ties);
-							drops.add(copy); 
-							playerStack.setCount(playerStack.getCount() - ties);
-						}
-					}
-				}
-				builder.setDrops(drops);
-				builder.build();
-			}
-		}
+		info.build(player, pos);
 		// don't decrement stack regardless
 		return false;
     }
-	
-	private boolean OreDictionaryContainsMatch(boolean strict, NonNullList<ItemStack> ores, ItemStack playerStack) {
-        for (ItemStack target : ores)
-        {
-            if (OreDictionary.itemMatches(target, playerStack, strict))
-            {
-                return true;
-            }
-        }
-        return false;
-	}
 
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {

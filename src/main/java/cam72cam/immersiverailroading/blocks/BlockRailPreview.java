@@ -33,14 +33,12 @@ public class BlockRailPreview extends Block {
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
 	}
 
-	public static boolean tryBreakPreview(World world, BlockPos pos, boolean sneaking) {
+	public static boolean tryBreakPreview(World world, BlockPos pos, EntityPlayer entityPlayer) {
 		TileEntity te = world.getTileEntity(pos);
-		if (sneaking && te instanceof TileRailPreview) {
+		if (entityPlayer.isSneaking() && te instanceof TileRailPreview) {
 			TileRailPreview tr = (TileRailPreview)te;
 			world.setBlockToAir(pos);
-			if (tr.getRailRenderInfo().getBuilder(pos).canBuild()) {
-				tr.getRailRenderInfo().getBuilder(pos).build();
-			}
+			tr.getRailRenderInfo().build(entityPlayer, pos);
 			return true;
 		}
 		return false;
