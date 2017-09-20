@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.ItemComponentType;
@@ -120,6 +121,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	
 	public void addNextComponent(EntityPlayer player) {
 		if (this.isBuilt()) {
+			player.sendMessage(new TextComponentString(this.getDefinition().name + " is complete!"));
 			return;
 		}
 		
@@ -139,13 +141,15 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		boolean addedComponents = false;
 		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
 			ItemStack found = player.inventory.getStackInSlot(i);
-			if (ItemRollingStockComponent.defFromStack(found).equals(this.defID)) {
-				ItemComponentType type = ItemRollingStockComponent.typeFromStack(found);
-				if (toAdd.contains(type)) {
-					addComponent(type);
-					player.inventory.decrStackSize(i, 1);
-					addedComponents = true;
-					break;
+			if (found.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+				if (ItemRollingStockComponent.defFromStack(found).equals(this.defID)) {
+					ItemComponentType type = ItemRollingStockComponent.typeFromStack(found);
+					if (toAdd.contains(type)) {
+						addComponent(type);
+						player.inventory.decrStackSize(i, 1);
+						addedComponents = true;
+						break;
+					}
 				}
 			}
 		}
@@ -162,6 +166,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	public ItemComponentType removeNextComponent(EntityPlayer player) {
 		this.isBuilt = false;
 		if (this.builtItems.size() <= 1) {
+			player.sendMessage(new TextComponentString(this.getDefinition().name + " is disassembled!"));
 			return null;
 		}
 		
@@ -196,20 +201,44 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		if (super.processInitialInteract(player, hand)) {
+			return true;
+		}
+		
 		if (world.isRemote) {
 			return false;
 		}
-		if (player.getHeldItemMainhand().getItem() == ImmersiveRailroading.ITEM_LARGE_WRENCH || player.getHeldItemMainhand().getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+		if (player.getHeldItem(hand).getItem() == ImmersiveRailroading.ITEM_LARGE_WRENCH || player.getHeldItem(hand).getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
 			if (!player.isSneaking()) {
-				if (!this.isBuilt()) {
-					//TEMP ASSEMBLE
-					addNextComponent(player);
-				}
+				addNextComponent(player);
 			} else {
 				this.removeNextComponent(player);
 			}
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public void setDead() {
+		super.setDead();
+		
+		if (world.isRemote) {
+			return;
+		}
+		
+		if (this.isBuilt) {
+			ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK, 1, 0);
+			item.setTagCompound(ItemRollingStock.nbtFromDef(this.defID));
+			world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
+		} else {
+			for (ItemComponentType component : this.builtItems) {
+				ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
+				item.setTagCompound(ItemRollingStockComponent.nbtFromDef(this.defID, component));
+				world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
+			}
+		}
+		this.isBuilt = false;
+		this.builtItems = new ArrayList<ItemComponentType>();
 	}
 }

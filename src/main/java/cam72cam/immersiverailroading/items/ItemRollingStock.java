@@ -35,6 +35,7 @@ public class ItemRollingStock extends Item {
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(CreativeTabs.TRANSPORTATION);
+        this.setMaxStackSize(1);
 	}
 	
 	@Override
@@ -66,7 +67,7 @@ public class ItemRollingStock extends Item {
 		
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defFromStack(stack));
 		
-		return SpawnUtil.placeStock(player, worldIn, pos, def, def.getItemComponents());
+		return SpawnUtil.placeStock(player, hand, worldIn, pos, def, def.getItemComponents());
 	}
 	
 	@Override

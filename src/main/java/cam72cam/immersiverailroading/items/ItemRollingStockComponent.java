@@ -75,7 +75,7 @@ public class ItemRollingStockComponent extends Item {
 		
 		List<ItemComponentType> frame = new ArrayList<ItemComponentType>();
 		frame.add(ItemComponentType.FRAME);
-		return SpawnUtil.placeStock(player, worldIn, pos, def, frame);
+		return SpawnUtil.placeStock(player, hand, worldIn, pos, def, frame);
 	}
 	
 	public static String defFromStack(ItemStack stack) {
