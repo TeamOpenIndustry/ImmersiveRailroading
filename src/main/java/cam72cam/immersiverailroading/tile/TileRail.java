@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -7,6 +8,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
@@ -29,6 +34,8 @@ public class TileRail extends TileRailBase {
 	private int turnQuarters;
 	
 	private Vec3d placementPosition;
+	
+	private List<ItemStack> drops;
 
 
 	@Override
@@ -162,6 +169,15 @@ public class TileRail extends TileRailBase {
 		direction = TrackDirection.values()[nbt.getInteger("direction")];
 		turnQuarters = nbt.getInteger("turnQuarters");
 		
+		this.drops = new ArrayList<ItemStack>();
+		if (nbt.hasKey("drops")) {
+			NBTTagCompound dropNBT = nbt.getCompoundTag("drops");
+			int count = dropNBT.getInteger("count");
+			for (int i = 0; i < count; i++) {
+				drops.add(new ItemStack(dropNBT.getCompoundTag("drop_" + i)));
+			}
+		}
+		
 		if (version == 0) {
 			railBed = new ItemStack(Blocks.GRAVEL);
 		} else {
@@ -192,6 +208,15 @@ public class TileRail extends TileRailBase {
 		nbt.setInteger("direction", direction.ordinal());
 		nbt.setInteger("turnQuarters", turnQuarters);
 		
+		if (drops != null && drops.size() != 0) {
+			NBTTagCompound dropNBT = new NBTTagCompound();
+			dropNBT.setInteger("count", drops.size());
+			for (int i = 0; i < drops.size(); i++) {
+				dropNBT.setTag("drop_" + i, drops.get(i).serializeNBT());
+			}
+			nbt.setTag("drops", dropNBT);
+		}
+		
 		nbt.setInteger("version", 1);
 		
 		nbt.setTag("railBed", railBed.serializeNBT());
@@ -210,5 +235,20 @@ public class TileRail extends TileRailBase {
 		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
 		info.switchState = this.switchState;
 		return info;
+	}
+
+
+	public void setDrops(List<ItemStack> drops) {
+		this.drops = drops;
+		this.markDirty();
+	}
+	public void spawnDrops() {
+		if (!world.isRemote) {
+			if (drops != null && drops.size() != 0) {
+				for(ItemStack drop : drops) {
+					world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), drop));
+				}
+			}
+		}
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import cam72cam.immersiverailroading.util.RailInfo;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -29,6 +30,8 @@ public abstract class BuilderBase {
 	private BlockPos parent_pos;
 
 	public boolean overrideFlexible = false;
+
+	public List<ItemStack> drops;
 	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;
@@ -205,5 +208,17 @@ public abstract class BuilderBase {
 	}
 	public BlockPos getParentPos() {
 		return parent_pos;
+	}
+	
+	public int costTies() {
+		return this.tracks.size()/3;
+	}
+	
+	public int costRails() {
+		return this.tracks.size()*2/3;
+	}
+
+	public void setDrops(List<ItemStack> drops) {
+		this.drops = drops;
 	}
 }
