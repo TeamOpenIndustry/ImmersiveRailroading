@@ -22,8 +22,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock {
 
-	public Float frontYaw;
-	public Float rearYaw;
+	private Float frontYaw;
+	private Float rearYaw;
 	public boolean isReverse = false;
 	public float distanceTraveled = 0;
 	public int tickPosID = 0;
@@ -310,25 +310,48 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		}
 	}
 
-	public PosRot predictFrontBogeyPosition(float offset) {
-		MovementSimulator sim = new MovementSimulator(world, getCurrentTickPos(), this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
+	
+	public float getFrontYaw() {
+		if (this.frontYaw != null) {
+			return this.frontYaw;
+		}
+		return this.rotationYaw;
+	}
+	
+	public float getRearYaw() {
+		if (this.rearYaw != null) {
+			return this.rearYaw;
+		}
+		return this.rotationYaw;
+	}
+
+	private TickPos getCurrentTickPosOrFake() {
+		if (this.getCurrentTickPos() != null) {
+			return this.getCurrentTickPos();
+		}
+		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false, false);
+	}
+	
+	public PosRot predictFrontBogeyPosition(float offset) {		
+		MovementSimulator sim = new MovementSimulator(world, getCurrentTickPosOrFake(), this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
 		
 		Vec3d front = sim.frontBogeyPosition();
 		Vec3d nextFront = front;
 		while (offset > 0) {
-			nextFront = sim.nextPosition(nextFront, this.rotationYaw, VecUtil.fromYaw(Math.min(0.1, offset), this.frontYaw));
+			nextFront = sim.nextPosition(nextFront, this.rotationYaw, VecUtil.fromYaw(Math.min(0.1, offset), this.getFrontYaw()));
 			offset -= 0.1;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
 		return new PosRot(nextFront.subtractReverse(this.getPositionVector()), VecUtil.toYaw(frontDelta));
 	}
+
 	public PosRot predictRearBogeyPosition(float offset) {
-		MovementSimulator sim = new MovementSimulator(world, getCurrentTickPos(), this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
+		MovementSimulator sim = new MovementSimulator(world, getCurrentTickPosOrFake(), this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
 		
 		Vec3d rear = sim.rearBogeyPosition();
 		Vec3d nextRear = rear;
 		while (offset > 0) {
-			nextRear = sim.nextPosition(nextRear, this.rotationYaw+180, VecUtil.fromYaw(Math.min(0.1, offset), this.rearYaw+180));
+			nextRear = sim.nextPosition(nextRear, this.rotationYaw+180, VecUtil.fromYaw(Math.min(0.1, offset), this.getRearYaw()+180));
 			offset -= 0.1;
 		}
 		Vec3d rearDelta = rear.subtractReverse(nextRear);

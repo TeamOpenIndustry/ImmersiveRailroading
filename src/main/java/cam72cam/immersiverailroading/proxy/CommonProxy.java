@@ -43,7 +43,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -126,14 +125,6 @@ public abstract class CommonProxy implements IGuiHandler {
     	for (Class<? extends EntityRollingStock> type : entityClasses) {
         	lastEntityID ++;
         	EntityRegistry.registerModEntity(new ResourceLocation(ImmersiveRailroading.MODID, type.getSimpleName()), type, type.getSimpleName(), lastEntityID, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE, 20, false);	
-    	}
-    }
-    
-    @SubscribeEvent
-    public static void onEntitySpawnHack(EntityJoinWorldEvent event) {
-    	if (event.getEntity() instanceof EntityRollingStock) {
-        	EntityRollingStock entity = (EntityRollingStock)event.getEntity();
-        	entity.tryRollingStockInit();
     	}
     }
 	

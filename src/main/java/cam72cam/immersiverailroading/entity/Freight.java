@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.util.VecUtil;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,6 +12,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -34,7 +37,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 	
 	protected void onInventoryChanged() {
-		if (!world.isRemote ) {
+		if (!world.isRemote) {
 			handleMass();
 		}
 	}
@@ -45,12 +48,41 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	 * 
 	 * EntityRollingStock Overrides
 	 */
+	
+	@Override
+	public void onAssemble() {
+		super.onAssemble();
+		this.cargoItems.setSize(this.getInventorySize());
+	}
+	
+	@Override
+	public void onDissassemble() {
+		super.onDissassemble();
+		
+		if (!world.isRemote) {		
+			for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
+				ItemStack itemstack = cargoItems.getStackInSlot(slot);
+				if (itemstack.getCount() != 0) {
+					Vec3d pos = this.getPositionVector().add(VecUtil.fromYaw(4, this.rotationYaw+90));
+					world.spawnEntity(new EntityItem(this.world, pos.x, pos.y, pos.z, itemstack.copy()));
+					itemstack.setCount(0);
+				}
+			}
+		}
+		
+		this.cargoItems.setSize(0);
+	}
 
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if ((super.processInitialInteract(player, hand))) {
 			return true;
 		}
+		
+		if (!this.isBuilt()) {
+			return false;
+		}
+		
 		// I don't believe the positions are used
 		player.openGui(ImmersiveRailroading.instance, guiType().ordinal(), world, this.getEntityId(), 0, 0);
 		return true;
@@ -85,12 +117,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 	
 	@Override
-	public void rollingStockInit() {
-		super.rollingStockInit();
-		cargoItems.setSize(this.getInventorySize());
-	}
-	
-	@Override
 	public void setDead() {
 		super.setDead();
 		
@@ -101,7 +127,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 			ItemStack itemstack = cargoItems.getStackInSlot(slot);
 			if (itemstack.getCount() != 0) {
-				this.dropItem(itemstack.getItem(), itemstack.getCount());
+				world.spawnEntity(new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack.copy()));
 				itemstack.setCount(0);
 			}
 		}

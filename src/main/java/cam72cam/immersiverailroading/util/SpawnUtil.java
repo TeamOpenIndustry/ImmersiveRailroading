@@ -29,7 +29,6 @@ public class SpawnUtil {
 		float yaw = EnumFacing.fromAngle(player.rotationYawHead).getHorizontalAngle();
 		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.fromMinecraft(0), new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
 		
-		
 		TileEntity te = worldIn.getTileEntity(new BlockPos(tp.position));
 		if (te instanceof TileRailBase && !((TileRailBase)te).getParentTile().getType().isTurn()) {
 			if (!worldIn.isRemote) {

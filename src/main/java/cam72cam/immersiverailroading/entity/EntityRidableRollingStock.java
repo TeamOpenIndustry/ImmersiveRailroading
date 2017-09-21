@@ -67,11 +67,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 	}
 	
-	@Override
-	public void rollingStockInit() {
-		super.rollingStockInit();
-	}
-	
 
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
