@@ -44,13 +44,11 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		defID = BufferUtil.readString(additionalData);
-		tryRollingStockInit();
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		BufferUtil.writeString(buffer, defID);
-		tryRollingStockInit();
 	}
 
 	@Override
@@ -61,22 +59,6 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		defID = nbttagcompound.getString("defID");
-		tryRollingStockInit();
-	}
-
-	private boolean hasInited = false;
-	public void tryRollingStockInit() {
-		if (!hasInited) {
-			hasInited = true;
-			rollingStockInit();
-		}
-	}
-	
-	/**
-	 * Fired after we have a definitionID. Here is where you construct objects
-	 * based on the rolling stock definition
-	 */
-	public void rollingStockInit() {
 	}
 
 	@Override

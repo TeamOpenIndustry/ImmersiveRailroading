@@ -12,7 +12,6 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -29,13 +28,6 @@ public abstract class EntityRollingStockDefinition {
 	
 	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing) {
 		EntityRollingStock stock = instance(world);
-		
-		if (stock instanceof EntityBuildableRollingStock) {
-			List<ItemComponentType> items = new ArrayList<ItemComponentType>();
-			items.add(ItemComponentType.FRAME);
-			((EntityBuildableRollingStock)stock).setComponents(false, items );
-		}
-
 		stock.setPosition(pos.x, pos.y, pos.z);
 		stock.prevRotationYaw = facing.getHorizontalAngle();
 		stock.rotationYaw = facing.getHorizontalAngle();

@@ -115,11 +115,29 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		return (int) (this.getDefinition().getHorsePower() * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(), 3));
 	}
 	
+	
+	@Override
+	public void onDissassemble() {
+		super.onDissassemble();
+		this.setBoilerTemperature(0);
+		this.setBoilerPressure(0);
+		
+		Map<Integer, Integer> burnTime = getBurnTime();
+		for (Integer slot : burnTime.keySet()) {
+			burnTime.put(slot, 0);
+		}
+		setBurnTime(burnTime);
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
 
 		if (world.isRemote) {
+			return;
+		}
+		
+		if (!this.isBuilt()) {
 			return;
 		}
 		

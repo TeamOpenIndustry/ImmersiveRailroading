@@ -79,11 +79,6 @@ public class StockModel extends OBJRender {
 	}
 
 	private void drawStandardStock(EntityMoveableRollingStock stock) {
-		if (stock.frontYaw == null || stock.rearYaw == null) {
-			draw();
-			return;
-		}
-
 		EntityRollingStockDefinition def = stock.getDefinition();
 		
 		initComponents(stock);
@@ -93,7 +88,7 @@ public class StockModel extends OBJRender {
 		if (def.getComponent(RenderComponentType.BOGEY_FRONT) != null) {
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(-def.getBogeyFront(), 0, 0);
-			GlStateManager.rotate(180 - stock.frontYaw, 0, 1, 0);		
+			GlStateManager.rotate(180 - stock.getFrontYaw(), 0, 1, 0);		
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyFront(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_FRONT));
@@ -103,7 +98,7 @@ public class StockModel extends OBJRender {
 		if (def.getComponent(RenderComponentType.BOGEY_REAR) != null) {
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(-def.getBogeyRear(), 0, 0);
-			GlStateManager.rotate(180 - stock.rearYaw, 0, 1, 0);
+			GlStateManager.rotate(180 - stock.getRearYaw(), 0, 1, 0);
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyRear(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_REAR));
@@ -112,11 +107,6 @@ public class StockModel extends OBJRender {
 	}
 
 	private void drawSteamLocomotive(LocomotiveSteam stock) {
-		if (stock.frontYaw == null || stock.rearYaw == null || stock.positions.isEmpty()) {
-			draw();
-			return;
-		}
-
 		LocomotiveSteamDefinition def = stock.getDefinition();
 		
 		initComponents(stock);

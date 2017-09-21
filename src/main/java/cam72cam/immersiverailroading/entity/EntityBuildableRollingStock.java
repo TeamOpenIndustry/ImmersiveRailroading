@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 
 public class EntityBuildableRollingStock extends EntityRollingStock {
 	private boolean isBuilt = false;
-	private List<ItemComponentType> builtItems;
+	private List<ItemComponentType> builtItems = new ArrayList<ItemComponentType>();
 	public EntityBuildableRollingStock(World world, String defID) {
 		super(world, defID);
 	}
@@ -29,14 +29,12 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		super.readSpawnData(additionalData);
-		isBuilt = additionalData.readBoolean();
-		builtItems = BufferUtil.readItemComponentTypes(additionalData);
+		setComponents(BufferUtil.readItemComponentTypes(additionalData));
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		super.writeSpawnData(buffer);
-		buffer.writeBoolean(isBuilt);
 		BufferUtil.writeItemComponentTypes(buffer, builtItems);
 	}
 	
@@ -56,27 +54,42 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbt) {
 		super.readEntityFromNBT(nbt);
+		
 		isBuilt = nbt.getBoolean("isBuilt");
-		builtItems = new ArrayList<ItemComponentType>();
 		
-		int[] items = nbt.getIntArray("builtItems");
-		
-		for (int i = 0; i < items.length; i++) {
-			builtItems.add(ItemComponentType.values()[items[i]]);
+		if (isBuilt) {
+			// Grandfathered in
+			this.setComponents(this.getDefinition().getItemComponents());
+		} else {
+			// Partially built
+			List<ItemComponentType> newItems = new ArrayList<ItemComponentType>();
+			
+			int[] items = nbt.getIntArray("builtItems");
+			
+			for (int i = 0; i < items.length; i++) {
+				newItems.add(ItemComponentType.values()[items[i]]);
+			}
+			
+			this.setComponents(newItems);
 		}
 	}
 	
 	public void setComponents(List<ItemComponentType> items) {
 		this.builtItems = new ArrayList<ItemComponentType>(items);
+		this.isBuilt = false;
 		this.isBuilt = getMissingItemComponents().isEmpty();
+		
+		System.out.println(this.world.isRemote + " : " + this.isBuilt);
+		
 		if (!world.isRemote) {
 			this.sendToObserving(new BuildableStockSyncPacket(this));
 		}
-	}
-	
-	public void setComponents(boolean isBuilt, List<ItemComponentType> items) {
-		this.builtItems = new ArrayList<ItemComponentType>(items);
-		this.isBuilt = isBuilt;
+
+		if (this.isBuilt()) {
+			this.onAssemble();
+		} else {
+			this.onDissassemble();
+		}
 	}
 	
 	public List<ItemComponentType> getItemComponents() {
@@ -85,6 +98,21 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	
 	public boolean isBuilt() {
 		return this.isBuilt;
+	}
+	
+
+	public boolean areWheelsBuilt() {
+		if (this.isBuilt) {
+			return this.isBuilt;
+		}
+		
+		for (ItemComponentType item : this.getMissingItemComponents()) {
+			if (item.isWheelPart()) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public List<ItemComponentType> getMissingItemComponents() {
@@ -116,6 +144,9 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		System.out.println("Added: " + item);
 		this.builtItems.add(item);
 		this.isBuilt = getMissingItemComponents().isEmpty();
+		if (isBuilt) {
+			onAssemble();
+		}
 		this.sendToObserving(new BuildableStockSyncPacket(this));
 	}
 	
@@ -164,6 +195,10 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	}
 	
 	public ItemComponentType removeNextComponent(EntityPlayer player) {
+		if (this.isBuilt) {
+			this.onDissassemble();
+		}
+		
 		this.isBuilt = false;
 		if (this.builtItems.size() <= 1) {
 			player.sendMessage(new TextComponentString(this.getDefinition().name + " is disassembled!"));
@@ -240,5 +275,12 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		}
 		this.isBuilt = false;
 		this.builtItems = new ArrayList<ItemComponentType>();
+	}
+
+	public void onAssemble() {
+		// NOP
+	}
+	public void onDissassemble() {
+		// NOP
 	}
 }

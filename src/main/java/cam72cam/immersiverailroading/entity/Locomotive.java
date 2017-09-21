@@ -144,14 +144,27 @@ public abstract class Locomotive extends FreightTank {
 				triggerResimulate();
 				return;
 			}
+			
+			boolean isStuck = false;
+			for (EntityBuildableRollingStock stock : this.getTrain()) {
+				if (!stock.areWheelsBuilt()) {
+					isStuck = true;
+				}
+			}
+			
 			Speed simSpeed = this.getCurrentSpeed();
+			if (isStuck) {
+				simSpeed = Speed.fromMinecraft(0);
+			}
 			
 			// Clear out the list and re-simulate
 			this.positions = new ArrayList<TickPos>();
 			positions.add(lastPos);
 
 			for (int i = 0; i < 30; i ++) {
-				simSpeed = getMovement(simSpeed);
+				if (!isStuck) {
+					simSpeed = getMovement(simSpeed);
+				}
 				TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + i);
 				if (pos.speed.metric() != 0) {
 					ChunkManager.flagEntityPos(this.world, new BlockPos(pos.position));
@@ -178,7 +191,11 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 	
-	private double getTractiveEffortNewtons(Speed speed) {		
+	private double getTractiveEffortNewtons(Speed speed) {	
+		if (!this.isBuilt()) {
+			return 0;
+		}
+		
 		double locoEfficiency = 0.7f; //TODO config
 		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
 		

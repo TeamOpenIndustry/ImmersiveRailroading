@@ -19,7 +19,6 @@ public class BuildableStockSyncPacket implements IMessage {
 	
 	private int dimension;
 	private int entityID;
-	private boolean isBuilt;
 	private List<ItemComponentType> items;
 
 	public BuildableStockSyncPacket() {
@@ -30,14 +29,12 @@ public class BuildableStockSyncPacket implements IMessage {
 		this.dimension = stock.dimension;
 		this.entityID = stock.getEntityId();
 		this.items = stock.getItemComponents();
-		this.isBuilt = stock.isBuilt();
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(dimension);
 		buf.writeInt(entityID);
-		buf.writeBoolean(isBuilt);
 		BufferUtil.writeItemComponentTypes(buf, items);
 	}
 
@@ -46,7 +43,6 @@ public class BuildableStockSyncPacket implements IMessage {
 	public void fromBytes(ByteBuf buf) {
 		dimension = buf.readInt();
 		entityID = buf.readInt();
-		isBuilt = buf.readBoolean();
 		items = BufferUtil.readItemComponentTypes(buf);
 	}
 	public static class Handler implements IMessageHandler<BuildableStockSyncPacket, IMessage> {
@@ -62,7 +58,7 @@ public class BuildableStockSyncPacket implements IMessage {
 				return;
 			}
 
-			entity.setComponents(message.isBuilt, message.items);
+			entity.setComponents(message.items);
 		}
 	}
 }

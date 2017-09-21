@@ -26,7 +26,19 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 public abstract class FreightTank extends Freight implements IFluidHandler {
 	private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.createKey(FreightTank.class, DataSerializers.VARINT);
 	private static final DataParameter<String> FLUID_TYPE = EntityDataManager.createKey(FreightTank.class, DataSerializers.STRING);
-	private FluidTank theTank;
+	private FluidTank theTank = new FluidTank(null, 0) {
+		@Override
+		public boolean canFillFluidType(FluidStack fluid) {
+			return canFill() && (getFluidFilter() == null || getFluidFilter().contains(fluid.getFluid()));
+		}
+		
+		@Override
+		public void onContentsChanged() {
+			if (!world.isRemote) {
+				FreightTank.this.onTankContentsChanged();
+			}
+		}
+	};;
 
 	public FreightTank(World world, String defID) {
 		super(world, defID);
@@ -92,8 +104,27 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	 * Server functions
 	 * 
 	 */
+	
+	@Override
+	public void onAssemble() {
+		super.onAssemble();
+		this.theTank.setCapacity(this.getTankCapacity().MilliBuckets());
+		onTankContentsChanged();
+	}
+	
+	@Override
+	public void onDissassemble() {
+		super.onDissassemble();
+		this.theTank.drain(this.theTank.getFluidAmount(), true);
+		this.theTank.setCapacity(0);
+		onTankContentsChanged();
+	}
 
 	protected void onTankContentsChanged() {
+		if (world.isRemote) {
+			return;
+		}
+		
 		this.dataManager.set(FLUID_AMOUNT, theTank.getFluidAmount());
 		if (theTank.getFluid() == null) {
 			this.dataManager.set(FLUID_TYPE, "EMPTY");
@@ -130,26 +161,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	}
 	
 	@Override
-	public void rollingStockInit() {
-		super.rollingStockInit();
-		theTank = new FluidTank(null, 0) {
-			@Override
-			public boolean canFillFluidType(FluidStack fluid) {
-				return canFill() && (getFluidFilter() == null || getFluidFilter().contains(fluid.getFluid()));
-			}
-			
-			@Override
-			public void onContentsChanged() {
-				if (!world.isRemote) {
-					FreightTank.this.onTankContentsChanged();
-				}
-			}
-		};
-
-		theTank.setCapacity(this.getTankCapacity().MilliBuckets());
-	}
-	
-	@Override
 	public void onUpdate() {
 		super.onUpdate();
 		checkInvent();
@@ -158,6 +169,14 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	protected void checkInvent() {
 
 		if (world.isRemote) {
+			return;
+		}
+		
+		if (!this.isBuilt()) {
+			return;
+		}
+		
+		if (cargoItems.getSlots() == 0) {
 			return;
 		}
 
