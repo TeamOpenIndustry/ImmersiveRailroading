@@ -106,6 +106,7 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyFront(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_FRONT));
+			drawComponents(def.getComponents(RenderComponentType.BOGEY_FRONT_WHEEL_X));
 			GlStateManager.popMatrix();
 		}
 		
@@ -116,6 +117,7 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyRear(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_REAR));
+			drawComponents(def.getComponents(RenderComponentType.BOGEY_REAR_WHEEL_X));
 			GlStateManager.popMatrix();
 		}
 
