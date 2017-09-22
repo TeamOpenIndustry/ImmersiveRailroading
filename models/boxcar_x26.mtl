@@ -1,18 +1,7 @@
 # Blender MTL File: "50' Boxcar.blend"
-# Material Count: 13
+# Material Count: 10
 
 newmtl Black
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.026482 0.018972 0.018109
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\Users\train\Documents\Rails Of War Models\Rolling Stock\50' Boxcar\Textures\Trucks.png
-
-newmtl Black_NONE
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.026482 0.018972 0.018109
@@ -26,16 +15,6 @@ newmtl Material
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.060056 0.041573 0.038156
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl Material.001
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
@@ -111,20 +90,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\Rails Of War Models\Rolling Stock\50' Boxcar\Textures\Trucks.png
 
 newmtl Material.030
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.043727 0.043727 0.043727
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\Users\train\Documents\Rails Of War Models\Rolling Stock\50' Boxcar\Textures\Trucks.png
-
-newmtl Material.030_NONE
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.043727 0.043727 0.043727
