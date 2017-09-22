@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum ItemComponentType {
-	FRAME(AssemblyStep.FRAME, RenderComponentType.REMAINING), //TODO
+	FRAME(AssemblyStep.FRAME, RenderComponentType.FRAME), //TODO
 	
 	// MALLET
 	FRONT_FRAME(AssemblyStep.FRAME, RenderComponentType.FRONT_LOCOMOTIVE),
@@ -14,12 +14,34 @@ public enum ItemComponentType {
 	BOGEY_FRONT(AssemblyStep.WHEELS, RenderComponentType.BOGEY_FRONT),
 	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, RenderComponentType.BOGEY_REAR_WHEEL_X),
 	BOGEY_REAR(AssemblyStep.WHEELS, RenderComponentType.BOGEY_REAR),
+	FRAME_WHEEL(AssemblyStep.WHEELS, RenderComponentType.FRAME_WHEEL_X),
+	
+	SHELL(AssemblyStep.SHELL, RenderComponentType.SHELL),
+	
+	// LOCOMOTIVE
+	CAB(AssemblyStep.SHELL, RenderComponentType.CAB),
+	BELL(AssemblyStep.SHELL, RenderComponentType.BELL),
+	WHISTLE(AssemblyStep.SHELL, RenderComponentType.WHISTLE),
+	HORN(AssemblyStep.SHELL, RenderComponentType.HORN),
+	
+	// DIESEL
+	FUEL_TANK(AssemblyStep.SHELL, RenderComponentType.FUEL_TANK),
+	ALTERNATOR(AssemblyStep.SHELL, RenderComponentType.ALTERNATOR),
+	ENGINE_BLOCK(AssemblyStep.SHELL, RenderComponentType.ENGINE_BLOCK),
+	PISTON(AssemblyStep.SHELL, RenderComponentType.PISTON_X),
+	
+	//STEAM
+	FIREBOX(AssemblyStep.BOILER, RenderComponentType.FIREBOX),
+	STEAM_CHEST(AssemblyStep.FRAME, RenderComponentType.STEAM_CHEST),
+	BOILER_SEGMENT(AssemblyStep.BOILER, RenderComponentType.BOILER_SEGMENT_X),
+	PIPING(AssemblyStep.BOILER, RenderComponentType.PIPING),
 	
 	// WALCHERTS
 	WHEEL_DRIVER(AssemblyStep.WHEELS, RenderComponentType.WHEEL_DRIVER_X),
 	WHEEL_DRIVER_FRONT(AssemblyStep.WHEELS, RenderComponentType.WHEEL_DRIVER_FRONT_X), // MALLET
 	WHEEL_DRIVER_REAR(AssemblyStep.WHEELS, RenderComponentType.WHEEL_DRIVER_REAR_X), // MALLET
 	
+	CYLINDER(AssemblyStep.FRAME, RenderComponentType.CYLINDER_SIDE),
 	SIDE_ROD(AssemblyStep.VALVE_GEAR, RenderComponentType.SIDE_ROD_SIDE),
 	MAIN_ROD(AssemblyStep.VALVE_GEAR, RenderComponentType.MAIN_ROD_SIDE),
 	PISTON_ROD(AssemblyStep.VALVE_GEAR, RenderComponentType.PISTON_ROD_SIDE),
@@ -70,6 +92,7 @@ public enum ItemComponentType {
 		case WHEEL_DRIVER:
 		case WHEEL_DRIVER_FRONT:
 		case WHEEL_DRIVER_REAR:
+		case FRAME_WHEEL:
 			return true;
 		default:
 			return false;
