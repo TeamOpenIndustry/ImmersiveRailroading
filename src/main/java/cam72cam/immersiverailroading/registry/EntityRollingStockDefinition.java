@@ -94,7 +94,7 @@ public abstract class EntityRollingStockDefinition {
 			}
 			renderComponents.get(renderComponent.type).add(renderComponent);
 			
-			if (itemComponent) {
+			if (itemComponent && renderComponent.type != RenderComponentType.REMAINING) {
 				itemComponents.add(ItemComponentType.from(renderComponent.type));
 			}
 		}
@@ -108,12 +108,16 @@ public abstract class EntityRollingStockDefinition {
 		groups.addAll(model.groups());
 		
 		for (int i = 0; i < 10; i++) {
-			addComponentIfExists(RenderComponent.parseWheel(RenderComponentType.BOGEY_FRONT_WHEEL_X, this, groups, i), true);
-			addComponentIfExists(RenderComponent.parseWheel(RenderComponentType.BOGEY_REAR_WHEEL_X, this, groups, i), true);
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_FRONT_WHEEL_X, this, groups, i), true);
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_REAR_WHEEL_X, this, groups, i), true);
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.FRAME_WHEEL_X, this, groups, i), true);
 		}
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_FRONT, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_REAR, this, groups), true);
+		
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
 		
 		return groups;
 	}

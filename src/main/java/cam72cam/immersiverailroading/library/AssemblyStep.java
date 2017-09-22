@@ -5,7 +5,7 @@ public enum AssemblyStep {
 	WHEELS,
 	VALVE_GEAR,
 	BOILER,
-	CAB,
+	SHELL,
 	REMAINING,
 	;
 

@@ -11,7 +11,7 @@ import net.minecraft.util.math.Vec3d;
 public class RenderComponent {
 	public final RenderComponentType type;
 	public final EntityRollingStockDefinition def;
-	public final int wheel;
+	public final int id;
 	public final String side;
 	public final Set<String> modelIDs;
 	
@@ -19,21 +19,21 @@ public class RenderComponent {
 		return parse(name, def, groups, -1, "");
 	}
 	
-	public static RenderComponent parseWheel(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int i) {
-		return parse(name, def, groups, i, "");
+	public static RenderComponent parseID(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int id) {
+		return parse(name, def, groups, id, "");
 	}
 	
 	public static RenderComponent parseSide(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, String side) {
 		return parse(name, def, groups, -1, side);
 	}
 	
-	private static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int wheel, String side) {
-		RenderComponent comp = new RenderComponent(name, def, wheel, side);
+	private static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int id, String side) {
+		RenderComponent comp = new RenderComponent(name, def, id, side);
 		
-		String wheelStr = wheel != -1 ? "" + wheel : "";
+		String idStr = id != -1 ? "" + id : "";
 		
 		for (String group : groups) {
-			if (Pattern.matches(name.regex.replace("#SIDE#", side).replaceAll("#WHEEL#", wheelStr), group)) {
+			if (Pattern.matches(name.regex.replace("#SIDE#", side).replaceAll("#ID#", idStr), group)) {
 				comp.modelIDs.add(group);
 			}
 		}
@@ -49,7 +49,7 @@ public class RenderComponent {
 		this.modelIDs = new HashSet<String>();
 		this.type = name;
 		this.def = def;
-		this.wheel = wheel;
+		this.id = wheel;
 		this.side = side;
 	}
 	
