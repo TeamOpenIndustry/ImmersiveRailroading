@@ -214,6 +214,10 @@ public abstract class EntityRollingStockDefinition {
 	public double getHeight() {
 		return this.heightBounds;
 	}
+	
+	public double getLength() {
+		return this.frontBounds + this.rearBounds;
+	}
 
 	public int getMaxPassengers() {
 		return this.maxPassengers;
