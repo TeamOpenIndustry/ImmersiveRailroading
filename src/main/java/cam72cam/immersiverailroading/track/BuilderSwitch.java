@@ -70,7 +70,6 @@ public class BuilderSwitch extends BuilderBase {
 
 
 	public boolean isOnStraight(Vec3d position) {
-		System.out.println(info.placementPosition);
 		for(TrackBase gag : straightBuilder.tracks) {
 			if (gag.getPos().add(new BlockPos(info.placementPosition)).equals(new BlockPos(position))) {
 				return true;

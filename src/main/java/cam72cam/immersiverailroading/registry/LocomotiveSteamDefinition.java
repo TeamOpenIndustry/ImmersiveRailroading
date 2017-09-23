@@ -56,13 +56,13 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		switch (this.valveGear) {
 		case WALSCHAERTS:
 			for (int i = 0; i < 10; i++) {
-				addComponentIfExists(RenderComponent.parseWheel(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
+				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
 			}
 			break;
 		case MALLET_WALSCHAERTS:
 			for (int i = 0; i < 10; i++) {
-				addComponentIfExists(RenderComponent.parseWheel(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
-				addComponentIfExists(RenderComponent.parseWheel(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
+				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
+				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
 			};
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
 			break;
@@ -71,6 +71,16 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		case SHAY:
 			break;
 		}
+		
+
+		for (int i = 0; i < 20; i++) {
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOILER_SEGMENT_X, this, groups, i), true);
+		}
+		
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.FIREBOX, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.PIPING, this, groups), true);
+		
 		
 		List<String> sides = new ArrayList<String>();
 		
@@ -92,6 +102,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				RenderComponentType.SIDE_ROD_SIDE,
 				RenderComponentType.MAIN_ROD_SIDE,
 				RenderComponentType.PISTON_ROD_SIDE,
+				RenderComponentType.CYLINDER_SIDE,
 			};
 			
 			for (String side : sides) {

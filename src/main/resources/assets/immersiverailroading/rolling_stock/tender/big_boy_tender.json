@@ -1,0 +1,26 @@
+{
+	"name": "Big Boy (4000 class) Tender",
+	"model": "immersiverailroading:models/rolling_stock/tender/centipede_tender.obj",
+	"darken_model": "0.05",
+	"properties": {
+		"weight_kg": 74389
+	},
+	"passenger": {
+		"slots": 1,
+		"center_x": 4,
+		"center_y": 2.5,
+		"length": 1,
+		"width": 1.5
+	},
+	"tank": {
+		"capacity_l":  100000
+	},
+	"tender": {
+		"slots": 80,
+		"width": 20
+	},
+	"trucks": {
+		"front": 5, 
+		"rear": -0.5
+	}
+}
