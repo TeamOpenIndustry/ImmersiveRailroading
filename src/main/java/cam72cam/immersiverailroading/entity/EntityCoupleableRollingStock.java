@@ -12,10 +12,12 @@ import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.NBTUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EntitySelectors;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
@@ -27,6 +29,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		CouplerType(float yaw) {
 			this.yaw = yaw;
+		}
+
+		public CouplerType opposite() {
+			return this == FRONT ? BACK : FRONT;
+		}
+		
+		public String toString() {
+			return this == FRONT ? "Front" : "Rear";
 		}
 	}
 
@@ -102,6 +112,27 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 * Overrides
 	 * 
 	 */
+	
+	@Override
+	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		if (player.getHeldItem(hand).getItem() == ImmersiveRailroading.ITEM_HOOK) {
+			CouplerType coupler = CouplerType.FRONT;
+			if (this.getCouplerPosition(CouplerType.FRONT).distanceTo(player.getPositionVector()) > this.getCouplerPosition(CouplerType.BACK).distanceTo(player.getPositionVector())) {
+				coupler = CouplerType.BACK;
+			}
+			if (player.isSneaking()) {
+				player.sendMessage(new TextComponentString("UNCOUPLE " + coupler));
+			} else {
+				if (this.isCoupled(coupler)) {
+					player.sendMessage(new TextComponentString(String.format("%s Coupler is coupled to %s", coupler, this.getCoupled(coupler).getDefinition().name)));
+				} else {
+					player.sendMessage(new TextComponentString(String.format("%s Coupler is uncoupled", coupler)));
+				}
+			}
+			return true;
+		}
+		return super.processInitialInteract(player, hand);
+	}
 
 	@Override
 	public void onUpdate() {
@@ -331,6 +362,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public final boolean isCoupled(CouplerType coupler) {
 		return getCoupledUUID(coupler) != null;
 	}
+	
+	public final boolean isCoupled(EntityCoupleableRollingStock stock) { 
+		return getCouplerFor(stock) != null;
+	}
 
 	/*
 	 * Decouple
@@ -380,21 +415,28 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {
-		return VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler), rotationYaw + coupler.yaw+180).add(getPositionVector());
+		return VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler), rotationYaw + coupler.yaw).add(getPositionVector());
 	}
 
 	public List<EntityCoupleableRollingStock> potentialCouplings(CouplerType coupler) {
-		Vec3d pos = getCouplerPosition(coupler);
 		
 		double range = Config.couplerRange;
 		
-		List<EntityCoupleableRollingStock> nearBy = world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.withinRange(pos.x, pos.y, pos.z, 32));;
+		List<EntityCoupleableRollingStock> nearBy = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().expand(range * 4, 0, 0));
 		
 		List<EntityCoupleableRollingStock> inRange = new ArrayList<EntityCoupleableRollingStock>();
 		for (EntityCoupleableRollingStock stock : nearBy) {
 			for (CouplerType otherCoupler : CouplerType.values()) {
-				if (this.getCouplerPosition(coupler).subtract(stock.getCouplerPosition(otherCoupler)).lengthVector() < range) {
-					inRange.add(stock);
+				if (stock.isCoupled(otherCoupler)) {
+					continue;
+				}
+				
+				if (stock.getPersistentID().equals(this.getPersistentID())) {
+					continue;
+				}
+				
+				if (this.getCouplerPosition(coupler).distanceTo(stock.getCouplerPosition(otherCoupler)) < this.getCouplerPosition(coupler.opposite()).distanceTo(stock.getCouplerPosition(otherCoupler)) ) {
+						inRange.add(stock);
 				}
 			}
 		}

@@ -117,6 +117,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(ImmersiveRailroading.ITEM_ROLLING_STOCK);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_LARGE_WRENCH);
+    	event.getRegistry().register(ImmersiveRailroading.ITEM_HOOK);
     }
     
     @SubscribeEvent

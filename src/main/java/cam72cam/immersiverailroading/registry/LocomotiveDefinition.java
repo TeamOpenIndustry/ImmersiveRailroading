@@ -1,9 +1,12 @@
 package cam72cam.immersiverailroading.registry;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.gson.JsonObject;
 
+import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.Speed;
 
 public abstract class LocomotiveDefinition extends EntityRollingStockDefinition  {
@@ -27,6 +30,18 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 		power = properties.get("horsepower").getAsInt();
 		traction = properties.get("tractive_effort_lbf").getAsInt();
 		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble());
+	}
+	
+	@Override
+	protected Set<String> parseComponents() {
+		Set<String> groups = super.parseComponents();
+
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CAB, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.BELL, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.WHISTLE, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.HORN, this, groups), true);
+		
+		return groups;
 	}
 	
 	@Override

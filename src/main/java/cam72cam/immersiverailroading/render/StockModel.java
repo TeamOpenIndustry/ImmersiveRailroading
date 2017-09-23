@@ -16,6 +16,7 @@ import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.MultiRenderComponent;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
@@ -67,10 +68,21 @@ public class StockModel extends OBJRender {
 			drawGroups(component.modelIDs);
 		}
 	}
+	
+	private void drawComponents(List<RenderComponent> components) {
+		if (components == null) {
+			return;
+		}
+		for (RenderComponent component : components) {
+			this.drawComponent(component);
+		}
+	}
 
 	public void draw(EntityRollingStock stock) {
 		if (stock instanceof LocomotiveSteam) {
 			drawSteamLocomotive((LocomotiveSteam) stock);
+		} else if (stock instanceof LocomotiveDiesel) {
+			drawDieselLocomotive((LocomotiveDiesel)stock);
 		} else if (stock instanceof EntityMoveableRollingStock) {
 			drawStandardStock((EntityMoveableRollingStock) stock);
 		} else {
@@ -82,8 +94,10 @@ public class StockModel extends OBJRender {
 		EntityRollingStockDefinition def = stock.getDefinition();
 		
 		initComponents(stock);
-
-		drawComponent(def.getComponent(RenderComponentType.REMAINING));
+		
+		drawComponent(def.getComponent(RenderComponentType.FRAME));
+		drawComponent(def.getComponent(RenderComponentType.SHELL));
+		drawComponents(def.getComponents(RenderComponentType.FRAME_WHEEL_X));		
 
 		if (def.getComponent(RenderComponentType.BOGEY_FRONT) != null) {
 			GlStateManager.pushMatrix();
@@ -92,6 +106,7 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyFront(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_FRONT));
+			drawComponents(def.getComponents(RenderComponentType.BOGEY_FRONT_WHEEL_X));
 			GlStateManager.popMatrix();
 		}
 		
@@ -102,9 +117,30 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyRear(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_REAR));
+			drawComponents(def.getComponents(RenderComponentType.BOGEY_REAR_WHEEL_X));
 			GlStateManager.popMatrix();
 		}
+
+		if (this.isBuilt) {
+			drawComponent(def.getComponent(RenderComponentType.REMAINING));
+		}
 	}
+
+	private void drawDieselLocomotive(EntityMoveableRollingStock stock) {
+		EntityRollingStockDefinition def = stock.getDefinition();
+		
+		drawStandardStock(stock);
+
+		drawComponent(def.getComponent(RenderComponentType.FUEL_TANK));
+		drawComponent(def.getComponent(RenderComponentType.ALTERNATOR));
+		drawComponent(def.getComponent(RenderComponentType.ENGINE_BLOCK));
+		
+		drawComponents(def.getComponents(RenderComponentType.CAB));
+		drawComponents(def.getComponents(RenderComponentType.WHISTLE));
+		drawComponents(def.getComponents(RenderComponentType.BELL));
+		drawComponents(def.getComponents(RenderComponentType.HORN));
+	}
+
 
 	private void drawSteamLocomotive(LocomotiveSteam stock) {
 		LocomotiveSteamDefinition def = stock.getDefinition();
@@ -159,9 +195,26 @@ public class StockModel extends OBJRender {
 		case SHAY:
 			break;
 		}
-
+		
 		// Draw remaining groups
-		drawComponent(def.getComponent(RenderComponentType.REMAINING));
+
+		drawComponent(def.getComponent(RenderComponentType.FRAME));
+		drawComponent(def.getComponent(RenderComponentType.SHELL));
+		
+		drawComponents(def.getComponents(RenderComponentType.BOILER_SEGMENT_X));
+		drawComponent(def.getComponent(RenderComponentType.FIREBOX));
+		drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST));
+		drawComponent(def.getComponent(RenderComponentType.PIPING));
+		drawComponents(def.getComponents(RenderComponentType.CYLINDER_SIDE));
+		
+		drawComponents(def.getComponents(RenderComponentType.CAB));
+		drawComponents(def.getComponents(RenderComponentType.WHISTLE));
+		drawComponents(def.getComponents(RenderComponentType.BELL));
+		drawComponents(def.getComponents(RenderComponentType.HORN));
+		
+		if (stock.isBuilt()) {
+			drawComponent(def.getComponent(RenderComponentType.REMAINING));
+		}
 	}
 
 

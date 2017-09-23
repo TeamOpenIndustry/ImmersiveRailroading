@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.blocks.BlockRailPreview;
+import cam72cam.immersiverailroading.items.ItemHook;
 import cam72cam.immersiverailroading.items.ItemLargeWrench;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
@@ -14,6 +15,7 @@ import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import net.minecraft.item.Item;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -48,6 +50,9 @@ public class ImmersiveRailroading
 	@ObjectHolder(ItemLargeWrench.NAME)
 	public static ItemLargeWrench ITEM_LARGE_WRENCH = new ItemLargeWrench();
 	
+	@ObjectHolder(ItemHook.NAME)
+	public static ItemHook ITEM_HOOK = new ItemHook();
+	
 	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL).setRegistryName(ImmersiveRailroading.BLOCK_RAIL.getRegistryName());
 	
 	public static Logger logger;
@@ -64,6 +69,8 @@ public class ImmersiveRailroading
     public void preInit(FMLPreInitializationEvent event) throws IOException {
         logger = event.getModLog();
         instance = this;
+        
+        World.MAX_ENTITY_RADIUS = 32;
         
     	proxy.preInit(event);
     }
