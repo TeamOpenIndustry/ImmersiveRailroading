@@ -175,6 +175,11 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		// TODO actual gas and fluid temp calculations
 		
 		for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
+			if (waterLevelMB == 0) {
+				// Don't burn if completely out of water
+				// Prevents beginner mistakes
+				continue;
+			}
 			int time = burnTime.containsKey(slot) ? burnTime.get(slot) : 0;
 			if (time <= 0) {
 				ItemStack stack = this.cargoItems.getStackInSlot(slot);
