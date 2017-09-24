@@ -167,6 +167,9 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH.getRegistryName(), ""));
+
+		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_HOOK, 0,
+				new ModelResourceLocation(ImmersiveRailroading.ITEM_HOOK.getRegistryName(), ""));
 		
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""));
