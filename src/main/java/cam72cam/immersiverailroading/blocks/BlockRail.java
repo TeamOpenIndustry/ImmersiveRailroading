@@ -1,7 +1,5 @@
 package cam72cam.immersiverailroading.blocks;
 
-import java.util.Random;
-
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,13 +28,6 @@ public class BlockRail extends BlockRailBase {
 
 	@Override
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
-		TileRail tileEntity = (TileRail) world.getTileEntity(pos);
-		if (tileEntity != null && tileEntity.getType() != null) {
-			ItemStack stack = new ItemStack(this, 1);
-			drops.add(stack);
-			// todo drop components
-			// todo drop snow?
-		}
 	}
 
 	@Override
@@ -59,11 +50,6 @@ public class BlockRail extends BlockRailBase {
 		//ItemRail.setPreview(stack, )
 		
 		return stack;
-	}
-
-	@Override
-	public int quantityDropped(Random random) {
-		return 1;
 	}
 	
 	@Override

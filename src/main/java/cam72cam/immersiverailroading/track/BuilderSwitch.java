@@ -4,6 +4,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -34,6 +35,21 @@ public class BuilderSwitch extends BuilderBase {
 				straight.setFlexible();
 			}
 		}
+	}
+	
+	public int costTies() {
+		return straightBuilder.costTies() + turnBuilder.costTies();
+	}
+	
+	public int costRails() {
+		return straightBuilder.costRails() + turnBuilder.costRails();
+	}
+
+	public int costBed() {
+		return straightBuilder.costBed() + turnBuilder.costBed();
+	}
+	public void setDrops(List<ItemStack> drops) {
+		straightBuilder.setDrops(drops);
 	}
 	
 
