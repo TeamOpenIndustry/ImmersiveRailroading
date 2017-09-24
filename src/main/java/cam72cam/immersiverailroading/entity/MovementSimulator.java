@@ -47,7 +47,7 @@ public class MovementSimulator {
 			position.frontYaw += 180;
 			position.rearYaw += 180;
 			position.rotationYaw += 180;
-			position.rotationPitch = -position.rotationPitch;
+			//position.rotationPitch = -position.rotationPitch;
 			position.rotationYaw = (position.rotationYaw + 360f) % 360f;
 			position.frontYaw = (position.frontYaw + 360f) % 360f;
 			position.rearYaw = (position.rearYaw + 360f) % 360f;
@@ -74,7 +74,7 @@ public class MovementSimulator {
 			position.frontYaw += 180;
 			position.rearYaw += 180;
 			//rotationYaw += 180;
-			position.rotationPitch = -position.rotationPitch;
+			//position.rotationPitch = -position.rotationPitch;
 			position.rotationYaw = (position.rotationYaw + 360f) % 360f;
 			position.frontYaw = (position.frontYaw + 360f) % 360f;
 			position.rearYaw = (position.rearYaw + 360f) % 360f;
@@ -134,13 +134,13 @@ public class MovementSimulator {
 		if (rail == null) {
 			// Try a smidge higher
 			// We get some wobble on the top of slopes, this corrects for imperfect precision
-			rail = railFromPosition(position.addVector(0, 0.2, 0));
+			rail = railFromPosition(position.addVector(0, 0.4, 0));
 			if (rail != null) {
-				position = position.addVector(0, 0.2, 0);
+				position = position.addVector(0, 0.4, 0);
 			} else {
-				rail = railFromPosition(position.addVector(0, -0.2, 0));
+				rail = railFromPosition(position.addVector(0, -0.4, 0));
 				if (rail != null) {
-					position = position.addVector(0, -0.2, 0);
+					position = position.addVector(0, -0.4, 0);
 				}
 			}
 		}
@@ -156,10 +156,6 @@ public class MovementSimulator {
 				return position.add(delta);
 			}
 		}
-
-		// Update y position
-		TileRailBase directRail = directRailFromPosition(position);
-		position = new Vec3d(position.x, Math.floor(position.y) + directRail.getHeight(), position.z);
 
 		double distance = delta.lengthVector();
 
@@ -240,11 +236,22 @@ public class MovementSimulator {
 			possiblePositive = center.add(VecUtil.fromYaw(angularDistance + distance, angle));
 			possibleNegative = center.add(VecUtil.fromYaw(angularDistance - distance, angle));
 			
+			Vec3d outPosition;
 			if (possiblePositive.distanceTo(position.add(delta)) < possibleNegative.distanceTo(position.add(delta))) {
-				return possiblePositive;
+				outPosition = possiblePositive;
 			} else {
-				return possibleNegative;
+				outPosition = possibleNegative;
 			}
+
+			// Update y position
+			TileRailBase directRail = directRailFromPosition(outPosition);
+			if (directRail != null) {
+				outPosition = new Vec3d(outPosition.x, directRail.getPos().getY() + directRail.getHeight(), outPosition.z);
+			} else {
+				outPosition = new Vec3d(outPosition.x, position.y, outPosition.z);
+			}
+			
+			return outPosition;
 		}
 	}
 }
