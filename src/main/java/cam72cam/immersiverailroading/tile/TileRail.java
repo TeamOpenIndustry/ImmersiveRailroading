@@ -88,13 +88,16 @@ public class TileRail extends TileRailBase {
 	}
 
 	public Vec3d getCenter() {
-		return center;
+		if (center == null) {
+			return null;
+		}
+		return center.addVector(pos.getX(), pos.getY(), pos.getZ());
 	}
 	public double getRadius() {
 		return length;
 	}
 	public void setCenter(Vec3d center) {
-		this.center = center;
+		this.center = center.subtract(pos.getX(), pos.getY(), pos.getZ());
 		this.markDirty();
 	}
 
@@ -108,10 +111,10 @@ public class TileRail extends TileRailBase {
 	
 	
 	public Vec3d getPlacementPosition() {
-		return placementPosition;
+		return placementPosition.addVector(pos.getX(), pos.getY(), pos.getZ());
 	}
 	public void setPlacementPosition(Vec3d placementPosition) {
-		this.placementPosition = placementPosition;
+		this.placementPosition = placementPosition.subtract(pos.getX(), pos.getY(), pos.getZ());
 		this.markDirty();
 	}
 	
@@ -149,8 +152,9 @@ public class TileRail extends TileRailBase {
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		int version = 0;
+		super.readFromNBT(nbt);
 		
+		int version = 0;
 		if (nbt.hasKey("version")) {
 			version = nbt.getInteger("version");
 		}
@@ -158,11 +162,7 @@ public class TileRail extends TileRailBase {
 		facing = EnumFacing.getFront(nbt.getByte("facing"));
 		type = TrackItems.valueOf(nbt.getString("type"));
 		
-		center = getNBTVec3d(nbt, "center");
-		
 		switchState = SwitchState.values()[nbt.getInteger("switchState")];
-		
-		placementPosition = getNBTVec3d(nbt, "placementPosition");
 		
 		length = nbt.getInteger("length");
 		rotationQuarter = nbt.getInteger("rotationQuarter");
@@ -177,14 +177,23 @@ public class TileRail extends TileRailBase {
 				drops.add(new ItemStack(dropNBT.getCompoundTag("drop_" + i)));
 			}
 		}
-		
-		if (version == 0) {
-			railBed = new ItemStack(Blocks.GRAVEL);
-		} else {
-			railBed = new ItemStack(nbt.getCompoundTag("railBed"));
+		switch(version) {
+		case 0:
+			// Add missing railbed setting
+			nbt.setTag("railBed", new ItemStack(Blocks.GRAVEL).serializeNBT());
+		case 1:
+			// Convert positions to relative
+			if (getNBTVec3d(nbt, "center") != null) {
+				setNBTVec3d(nbt, "center", getNBTVec3d(nbt, "center").subtract(pos.getX(), pos.getY(), pos.getZ()));
+			}
+			setNBTVec3d(nbt, "placementPosition", getNBTVec3d(nbt, "placementPosition").subtract(pos.getX(), pos.getY(), pos.getZ()));
+		case 2:
+			// nothing yet...
 		}
 		
-		super.readFromNBT(nbt);
+		railBed = new ItemStack(nbt.getCompoundTag("railBed"));
+		center = getNBTVec3d(nbt, "center");
+		placementPosition = getNBTVec3d(nbt, "placementPosition");
 	}
 
 	@Override
@@ -197,11 +206,8 @@ public class TileRail extends TileRailBase {
 		nbt.setByte("facing", (byte) facing.getIndex());
 		nbt.setString("type", type.name());
 		
-		setNBTVec3d(nbt, "center", center);
 		
 		nbt.setInteger("switchState", switchState.ordinal());
-		
-		setNBTVec3d(nbt, "placementPosition", placementPosition);
 		
 		nbt.setInteger("length", length);
 		nbt.setInteger("rotationQuarter", rotationQuarter);
@@ -217,9 +223,9 @@ public class TileRail extends TileRailBase {
 			nbt.setTag("drops", dropNBT);
 		}
 		
-		nbt.setInteger("version", 1);
-		
 		nbt.setTag("railBed", railBed.serializeNBT());
+		setNBTVec3d(nbt, "center", center);
+		setNBTVec3d(nbt, "placementPosition", placementPosition);
 		
 		return super.writeToNBT(nbt);
 	}
