@@ -61,7 +61,7 @@ public class RealBB extends AxisAlignedBB {
 		AxisAlignedBB leftBox = newBB(frontPos.add(offsetLeft), rearPos.add(offsetLeft));
 
 		AxisAlignedBB newthis = rightBox.union(leftBox).offset(centerX, centerY, centerZ);
-		return new double[] { newthis.maxX, newthis.maxY, newthis.maxZ, newthis.minX, newthis.minY, newthis.minZ };
+		return new double[] { newthis.maxX, newthis.maxY + height, newthis.maxZ, newthis.minX, newthis.minY, newthis.minZ };
 	}
 	
 	public RealBB clone() {
