@@ -49,7 +49,7 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 		float newAirBrake = getAirBrake();
 		
 		if (prevThrottle != newThrottle || prevAirBrake != newAirBrake) {
-			for (EntityCoupleableRollingStock stock : this.getTrain()) {
+			for (EntityCoupleableRollingStock stock : this.getTrain(false)) {
 				if (stock instanceof LocomotiveDiesel) {
 					LocomotiveDiesel loco = (LocomotiveDiesel) stock;
 					loco.setThrottle(newThrottle);
