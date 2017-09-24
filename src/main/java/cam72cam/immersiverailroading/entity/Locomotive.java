@@ -232,10 +232,8 @@ public abstract class Locomotive extends FreightTank {
 			
 			//Grade forces
 			// TODO force while not moving
-			double grade = -e.motionY / Math.sqrt(e.motionX * e.motionX + e.motionZ * e.motionZ);
-			if (Double.isNaN(grade)) {
-				grade = 0;
-			}
+			
+			double grade = -Math.tan(Math.toRadians(e.rotationPitch % 90));
 			
 			// lbs * 1%gradeResistance * grade multiplier
 			gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
