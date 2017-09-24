@@ -56,10 +56,10 @@ public class TileRailBase extends TileEntity {
 	}
 
 	public BlockPos getParent() {
-		return parent;
+		return parent.add(pos);
 	}
 	public void setParent(BlockPos pos) {
-		this.parent = pos;
+		this.parent = pos.subtract(this.pos);
 		this.markDirty();
 	}
 	
@@ -69,14 +69,31 @@ public class TileRailBase extends TileEntity {
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		parent = getNBTBlockPos(nbt, "parent");
+		super.readFromNBT(nbt);
+		
+		int version = 0;
+		if (nbt.hasKey("version")) {
+			version = nbt.getInteger("version");
+		}
+		
+		
 		height = nbt.getFloat("height");
 		snowLayers = nbt.getInteger("snowLayers");
 		flexible = nbt.getBoolean("flexible");
 		if (nbt.hasKey("replaced")) {
 			replaced = nbt.getCompoundTag("replaced");
 		}
-		super.readFromNBT(nbt);
+		
+		switch(version) {
+		case 0:
+			//NOP
+		case 1:
+			setNBTBlockPos(nbt, "parent", getNBTBlockPos(nbt, "parent").subtract(pos));
+		case 2:
+			// Nothing yet ...
+		}
+		
+		parent = getNBTBlockPos(nbt, "parent");
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -87,6 +104,8 @@ public class TileRailBase extends TileEntity {
 		if (replaced != null) {
 			nbt.setTag("replaced", replaced);
 		}
+		nbt.setInteger("version", 2);
+		
 		return super.writeToNBT(nbt);
 	}
 
