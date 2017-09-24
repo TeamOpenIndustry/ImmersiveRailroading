@@ -181,6 +181,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				if (!this.isCouplerEngaged(coupler)) {
 					EntityCoupleableRollingStock otherStock = this.getCoupled(coupler);
 					CouplerType otherCoupler = otherStock.getCouplerFor(this);
+					if (otherCoupler == null) {
+						System.out.println("MISSING COUPLER TOP");
+						continue;
+					}
 					if (this.getCouplerPosition(coupler).distanceTo(otherStock.getCouplerPosition(otherCoupler)) > Config.couplerRange*4) {
 						this.decouple(otherStock);
 					}
@@ -262,8 +266,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			double prevDist = lastPos.position.distanceTo(prev.positions.get(0).position);
 			double dist = lastPos.position.distanceTo(prev.positions.get(1).position);
 			if (prevDist <= dist) {
+				System.out.println("DETACHED");
 				return;
 			}
+			System.out.println("ATTACHED");
 		}
 		
 		for (TickPos parentPos : prev.positions) {
@@ -511,19 +517,31 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 	}
 
-
 	public final List<EntityCoupleableRollingStock> getTrain() {
-		return this.buildTrain(new ArrayList<EntityCoupleableRollingStock>());
+		return getTrain(true);
 	}
 
-	private final List<EntityCoupleableRollingStock> buildTrain(List<EntityCoupleableRollingStock> train) {
+	public final List<EntityCoupleableRollingStock> getTrain(boolean followDisengaged) {
+		return this.buildTrain(new ArrayList<EntityCoupleableRollingStock>(), followDisengaged);
+	}
+
+	private final List<EntityCoupleableRollingStock> buildTrain(List<EntityCoupleableRollingStock> train, boolean followDisengaged) {
 		if (!train.contains(this)) {
 			train.add(this);
-			if (this.getCoupled(CouplerType.FRONT) != null) {
-				train = this.getCoupled(CouplerType.FRONT).buildTrain(train);
-			}
-			if (this.getCoupled(CouplerType.BACK) != null) {
-				train = this.getCoupled(CouplerType.BACK).buildTrain(train);
+			for (CouplerType coupler : CouplerType.values()) {
+				if (this.getCoupled(coupler) != null) {
+					boolean iAmCoupled = this.isCouplerEngaged(coupler);
+					EntityCoupleableRollingStock other = this.getCoupled(coupler);
+					CouplerType otherCoupler = other.getCouplerFor(this);
+					if (otherCoupler == null) {
+						System.out.println("MISSING COUPLER");
+						continue;
+					}
+					boolean otherIsCoupled = other.isCouplerEngaged(otherCoupler); 
+					if ((iAmCoupled && otherIsCoupled) || followDisengaged) {
+						train = this.getCoupled(coupler).buildTrain(train, followDisengaged);
+					}
+				}
 			}
 		}
 		return train;

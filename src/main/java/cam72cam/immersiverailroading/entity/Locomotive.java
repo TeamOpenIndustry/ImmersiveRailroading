@@ -239,7 +239,9 @@ public abstract class Locomotive extends FreightTank {
 			
 			// lbs * 1%gradeResistance * grade multiplier
 			gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
-			
+		}
+		
+		for (EntityCoupleableRollingStock e : this.getTrain(false)) {
 			if (e instanceof Locomotive) {
 				Locomotive loco = (Locomotive) e;
 				tractiveEffortNewtons += loco.getTractiveEffortNewtons(speed);
