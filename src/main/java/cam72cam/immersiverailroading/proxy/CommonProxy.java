@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.blocks.BlockRailPreview;
+import cam72cam.immersiverailroading.blocks.BlockSteamHammer;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.entity.CarTank;
@@ -35,6 +36,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.tile.TileSteamHammer;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -105,9 +107,11 @@ public abstract class CommonProxy implements IGuiHandler {
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL_GAG);
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL);
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL_PREVIEW);
+		event.getRegistry().register(ImmersiveRailroading.BLOCK_STEAM_HAMMER);
     	GameRegistry.registerTileEntity(TileRailGag.class, BlockRailGag.NAME);
     	GameRegistry.registerTileEntity(TileRail.class, BlockRail.NAME);
     	GameRegistry.registerTileEntity(TileRailPreview.class, BlockRailPreview.NAME);
+    	GameRegistry.registerTileEntity(TileSteamHammer.class, BlockSteamHammer.NAME);
     }
     
     @SubscribeEvent
@@ -118,6 +122,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_LARGE_WRENCH);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_HOOK);
+    	event.getRegistry().register(ImmersiveRailroading.ITEM_STEAM_HAMMER);
     }
     
     @SubscribeEvent
