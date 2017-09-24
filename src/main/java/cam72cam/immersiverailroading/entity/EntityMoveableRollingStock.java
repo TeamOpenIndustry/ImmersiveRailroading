@@ -10,10 +10,13 @@ import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -284,6 +287,22 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			Vec3d pos = entity.getPositionVector();
 			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
 			entity.setPosition(pos.x, pos.y, pos.z);
+		}
+		if (this.ticksExisted % 20 == 0 && !world.isRemote) {
+			bb = this.getCollisionBoundingBox();
+			for (int x = (int) bb.minX; x < bb.maxX; x++) {
+				for (int y = (int) bb.minY; y < bb.maxY; y++) {
+					for (int z = (int) bb.minZ; z < bb.maxZ; z++) {
+						BlockPos bp = new BlockPos(x, y, z);
+						if (bb.contains(new Vec3d(bp))) {
+							IBlockState state = world.getBlockState(bp);
+							if (state.getBlock() != Blocks.AIR && state.getBlock() != ImmersiveRailroading.BLOCK_RAIL && state.getBlock() != ImmersiveRailroading.BLOCK_RAIL_GAG) {
+								world.destroyBlock(bp, true);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
