@@ -61,7 +61,7 @@ public class RealBB extends AxisAlignedBB {
 		AxisAlignedBB leftBox = newBB(frontPos.add(offsetLeft), rearPos.add(offsetLeft));
 
 		AxisAlignedBB newthis = rightBox.union(leftBox).offset(centerX, centerY, centerZ);
-		return new double[] { newthis.maxX, height, newthis.maxZ, newthis.minX, newthis.minY, newthis.minZ };
+		return new double[] { newthis.maxX, newthis.maxY, newthis.maxZ, newthis.minX, newthis.minY, newthis.minZ };
 	}
 	
 	public RealBB clone() {
@@ -123,6 +123,16 @@ public class RealBB extends AxisAlignedBB {
 	public AxisAlignedBB union(AxisAlignedBB other) {
 		return this.clone();
 	}
+	
+	@Override
+	public AxisAlignedBB offset(BlockPos pos) {
+		return this.offset(pos.getX(), pos.getY(), pos.getZ());
+	}
+	@Override
+	public AxisAlignedBB offset(Vec3d vec) {
+		return this.offset(vec.x, vec.y, vec.z);
+	}
+	@Override
 	public AxisAlignedBB offset(double x, double y, double z) {
 		RealBB offsetted = this.clone();
 		offsetted.centerX += x;
@@ -130,9 +140,7 @@ public class RealBB extends AxisAlignedBB {
 		offsetted.centerZ += z;
 		return offsetted.clone();
 	}
-	public AxisAlignedBB offset(BlockPos pos) {
-		return this.offset(pos.getX(), pos.getY(), pos.getZ());
-	}
+	
 	public double calculateXOffset(AxisAlignedBB other, double offsetX) {
 		return 0;
 	}
