@@ -36,8 +36,12 @@ public class RailRenderUtil {
 		Minecraft.getMinecraft().mcProfiler.startSection("base");
 		RailBaseRender.draw(info);
 		//RailRenderUtil.draw(RailBaseRender.getBaseBuffer(info));
+		Minecraft.getMinecraft().mcProfiler.endSection();
+		Minecraft.getMinecraft().mcProfiler.startSection("snow");
 		RailRenderUtil.draw(RailSnowRender.getSnowBuffer(info));
 		if (renderOverlay) {
+			Minecraft.getMinecraft().mcProfiler.endSection();
+			Minecraft.getMinecraft().mcProfiler.startSection("overlay");
 			RailRenderUtil.draw(RailBaseOverlayRender.getOverlayBuffer(info));
 		}
 		Minecraft.getMinecraft().mcProfiler.endSection();

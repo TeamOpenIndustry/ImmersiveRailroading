@@ -29,6 +29,7 @@ public class RailSnowRender {
 	public static BufferBuilder getSnowBuffer(RailInfo info) {
 		if (info.snowRenderFlagDirty) {
 			if (snowBuffers.containsKey(snowRenderID(info))) {
+				System.out.println("Dirty Snow");
 				snowBuffers.remove(snowRenderID(info));
 			}
 		}
@@ -76,7 +77,6 @@ public class RailSnowRender {
 			} else {
 				snowBuffers.put(snowRenderID(info), worldRenderer);
 			}
-			info.snowRenderFlagDirty = false;
 		}
 		
 		return snowBuffers.get(snowRenderID(info));
