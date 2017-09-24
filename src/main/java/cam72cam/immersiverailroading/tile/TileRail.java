@@ -248,6 +248,7 @@ public class TileRail extends TileRailBase {
 				for(ItemStack drop : drops) {
 					world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), drop));
 				}
+				drops = new ArrayList<ItemStack>();
 			}
 		}
 	}

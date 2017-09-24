@@ -34,23 +34,23 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		TileRailBase te = (TileRailBase) world.getTileEntity(pos);
-		super.breakBlock(world, pos, state);
+		
+		if (te instanceof TileRail) {
+			((TileRail) te).spawnDrops();
+		}
+		
 		breakParentIfExists(te);
+		super.breakBlock(world, pos, state);
 	}
 	
 	public static void breakParentIfExists(TileRailBase te) {
 		BlockPos parent = te.getParent();
 		if (parent != null && !te.getWillBeReplaced()) {
-			System.out.println(te.getWorld().getBlockState(parent).getBlock().getClass());
 			if (te.getWorld().getBlockState(parent).getBlock() instanceof BlockRail) {
-				if (tryBreakRail(te.getWorld(), parent)) {
-					
-					TileRail parentTE = te.getParentTile();
-					
-					parentTE.spawnDrops();
-					
-					te.getWorld().setBlockToAir(parent);
+				if (te.getParentTile() != null) {
+					te.getParentTile().spawnDrops();
 				}
+				te.getWorld().setBlockToAir(parent);
 			}
 		}
 	}
@@ -85,7 +85,6 @@ public abstract class BlockRailBase extends Block {
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
 		TileRailBase tileEntity = (TileRailBase) world.getTileEntity(pos);
 		if (tileEntity.getWorld().isRemote) {
-			System.out.println("SKIP NEIGHBOR");
 			return;
 		}
 		boolean isOriginAir = tileEntity.getParentTile() == null || tileEntity.getParentTile().getParentTile() == null;
