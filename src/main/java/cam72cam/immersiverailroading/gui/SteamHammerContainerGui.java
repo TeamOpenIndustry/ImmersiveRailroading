@@ -32,8 +32,6 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         NonNullList<ItemStack> items = NonNullList.create(); 
         
         ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(CreativeTabs.TRANSPORTATION, items);
-        
-        System.out.println(tile.getChoosenItem());
 
 		itemSelector = new ItemPickerGUI(items);
 		itemSelector.choosenItem = tile.getChoosenItem();
@@ -50,12 +48,13 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         	return;
         }
     	
-    	//if (mouseX > )
+    	int i = (this.width - this.xSize) / 2;
+        int j = (this.height - this.ySize) / 2;
     	
-    	//i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows
-    	
-    	if (mouseButton == 1) {
-    		itemSelector.isActive = true;
+    	if (mouseX > i + paddingLeft + 2*slotSize && mouseX < i + paddingLeft  + horizSlots * slotSize - 2*slotSize) {
+    		if (mouseY > j + topOffset && mouseY < j + topOffset + inventoryRows * slotSize ) {
+    			itemSelector.isActive = true;
+    		}
     	}
     	
     	super.mouseClicked(mouseX, mouseY, mouseButton);
