@@ -1,7 +1,7 @@
-# Blender MTL File: 'None'
+# Blender MTL File: 'K4 Beta.blend'
 # Material Count: 8
 
-newmtl BASE_GREEN.008
+newmtl BASE_GREEN
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.262745 0.376471 0.149020
@@ -11,7 +11,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl BufferRed.008
+newmtl BufferRed
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.600000 0.117647 0.117647
@@ -21,7 +21,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_001_.008
+newmtl Color_001_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.886275 0.886275 0.886275
@@ -31,7 +31,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_005_.008
+newmtl Color_005_.006
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.447059 0.447059 0.447059
@@ -41,7 +41,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_006_.008
+newmtl Color_006_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.337255 0.337255 0.337255
@@ -51,7 +51,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_008_.008
+newmtl Color_008_.003
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.117647 0.117647 0.117647
@@ -61,7 +61,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl __LightGray_.002
+newmtl __LightGray_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.662745 0.662745 0.662745
@@ -71,7 +71,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl material.008
+newmtl material.001
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
