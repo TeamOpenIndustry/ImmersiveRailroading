@@ -18,6 +18,12 @@ public abstract class ContainerGuiBase extends GuiContainer {
 	public ContainerGuiBase(Container inventorySlotsIn) {
 		super(inventorySlotsIn);
 	}
+	
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
+        this.renderHoveredToolTip(mouseX, mouseY);
+	}
 
 	public static final int slotSize = 18;
     public static final int topOffset = 17;
