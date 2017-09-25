@@ -21,6 +21,8 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
+import cam72cam.immersiverailroading.gui.SteamHammerContainer;
+import cam72cam.immersiverailroading.gui.SteamHammerContainerGui;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainerGui;
 import cam72cam.immersiverailroading.gui.TankContainer;
@@ -37,6 +39,8 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.RailItemModel;
+import cam72cam.immersiverailroading.render.SteamHammerItemRender;
+import cam72cam.immersiverailroading.render.TileSteamHammerRender;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.StockItemModel;
@@ -45,6 +49,7 @@ import cam72cam.immersiverailroading.render.rail.TileRailPreviewRender;
 import cam72cam.immersiverailroading.render.rail.TileRailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.tile.TileSteamHammer;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -107,6 +112,8 @@ public class ClientProxy extends CommonProxy {
 			return new TrackGui();
 		case RAIL_PREVIEW:
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
+		case BLOCK_STEAM_HAMMER:
+			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, (TileSteamHammer) world.getTileEntity(new BlockPos(entityIDorPosX, posY, posZ))));
 		default:
 			return null;
 		}
@@ -164,6 +171,7 @@ public class ClientProxy extends CommonProxy {
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRail.class, new TileRailRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileSteamHammer.class, new TileSteamHammerRender());
 		
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH.getRegistryName(), ""));
@@ -177,6 +185,9 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""));
+		
+		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_STEAM_HAMMER, 0,
+				new ModelResourceLocation(ImmersiveRailroading.ITEM_STEAM_HAMMER.getRegistryName(), ""));
 
 		ModelLoader.setCustomMeshDefinition(ImmersiveRailroading.ITEM_ROLLING_STOCK, new ItemMeshDefinition() {
 			@Override
@@ -197,6 +208,7 @@ public class ClientProxy extends CommonProxy {
 
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""), new RailItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""), new StockItemComponentModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_STEAM_HAMMER.getRegistryName(), ""), new SteamHammerItemRender());
 	}
 
 	@SubscribeEvent
