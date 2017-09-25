@@ -161,70 +161,80 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		for (CouplerType coupler : CouplerType.values()) {
-			if (this.ticksExisted > 20 && this.isCoupled(coupler) && this.getCoupled(coupler) == null) {
-				System.out.println("Removing missing");
-				this.decouple(coupler);
-			}
-			if (this.getCoupled(coupler) != null) {
-				if (this.getCoupled(coupler).isDead) {
-					System.out.println("Removing Dead Stock");
+		try {
+			for (CouplerType coupler : CouplerType.values()) {
+				if (this.ticksExisted > 20 && this.isCoupled(coupler) && this.getCoupled(coupler) == null) {
+					System.out.println("Removing missing");
 					this.decouple(coupler);
-				} else {
-					if (coupler == CouplerType.FRONT) {
-						lastKnownFront = this.getCoupled(coupler).getPosition();
-					} else {
-						lastKnownRear = this.getCoupled(coupler).getPosition();
-					}
 				}
-				
-				if (!this.isCouplerEngaged(coupler)) {
-					EntityCoupleableRollingStock otherStock = this.getCoupled(coupler);
-					CouplerType otherCoupler = otherStock.getCouplerFor(this);
-					if (otherCoupler == null) {
-						System.out.println("MISSING COUPLER TOP");
-						continue;
+				if (this.getCoupled(coupler) != null) {
+					if (this.getCoupled(coupler).isDead) {
+						System.out.println("Removing Dead Stock");
+						this.decouple(coupler);
+					} else {
+						if (coupler == CouplerType.FRONT) {
+							lastKnownFront = this.getCoupled(coupler).getPosition();
+						} else {
+							lastKnownRear = this.getCoupled(coupler).getPosition();
+						}
 					}
-					if (this.getCouplerPosition(coupler).distanceTo(otherStock.getCouplerPosition(otherCoupler)) > Config.couplerRange*4) {
-						this.decouple(otherStock);
+					
+					if (!this.isCouplerEngaged(coupler)) {
+						EntityCoupleableRollingStock otherStock = this.getCoupled(coupler);
+						CouplerType otherCoupler = otherStock.getCouplerFor(this);
+						if (otherCoupler == null) {
+							System.out.println("MISSING COUPLER TOP");
+							continue;
+						}
+						if (this.getCouplerPosition(coupler).distanceTo(otherStock.getCouplerPosition(otherCoupler)) > Config.couplerRange*4) {
+							this.decouple(otherStock);
+						}
 					}
 				}
 			}
+		} catch (Exception ex){
+			ex.printStackTrace();
+			ImmersiveRailroading.logger.error("Something broke in the decoupling code");
 		}
 
-		for (CouplerType coupler : CouplerType.values()) {
-			if (!this.isCoupled(coupler)) {
-				for (EntityCoupleableRollingStock potentialCoupling : this.potentialCouplings(coupler)) {
-					for (CouplerType potentialCoupler : CouplerType.values()) {
-						// Is the coupler free?
-						if (!potentialCoupling.isCoupled(potentialCoupler)) {
-							// Is the other coupler within coupling distance?
-							
-							for (EntityCoupleableRollingStock possiblyMe : potentialCoupling.potentialCouplings(potentialCoupler)) {
-								if (possiblyMe.getPersistentID().equals(this.getPersistentID())) {
-									this.setCoupledUUID(coupler, potentialCoupling.getPersistentID());
-									potentialCoupling.setCoupledUUID(potentialCoupler, this.getPersistentID());
-									
+		try {
+			for (CouplerType coupler : CouplerType.values()) {
+				if (!this.isCoupled(coupler)) {
+					for (EntityCoupleableRollingStock potentialCoupling : this.potentialCouplings(coupler)) {
+						for (CouplerType potentialCoupler : CouplerType.values()) {
+							// Is the coupler free?
+							if (!potentialCoupling.isCoupled(potentialCoupler)) {
+								// Is the other coupler within coupling distance?
+								
+								for (EntityCoupleableRollingStock possiblyMe : potentialCoupling.potentialCouplings(potentialCoupler)) {
+									if (possiblyMe.getPersistentID().equals(this.getPersistentID())) {
+										this.setCoupledUUID(coupler, potentialCoupling.getPersistentID());
+										potentialCoupling.setCoupledUUID(potentialCoupler, this.getPersistentID());
+										
+										break;
+									}
+								}
+								if (this.isCoupled(coupler)) {
+									// coupled
 									break;
 								}
 							}
-							if (this.isCoupled(coupler)) {
-								// coupled
-								break;
-							}
 						}
+	
+						if (this.isCoupled(coupler)) {
+							// coupled
+							break;
+						}
+	
+						// False Match
+						ImmersiveRailroading.logger
+								.info(String.format("MISS %s %s %s", coupler, this.getDefinition().name, potentialCoupling.getDefinition().name));
 					}
-
-					if (this.isCoupled(coupler)) {
-						// coupled
-						break;
-					}
-
-					// False Match
-					ImmersiveRailroading.logger
-							.info(String.format("MISS %s %s %s", coupler, this.getDefinition().name, potentialCoupling.getDefinition().name));
 				}
 			}
+		} catch (Exception ex){
+			ImmersiveRailroading.logger.error("Something broke in the coupling code");
+			ex.printStackTrace();
 		}
 	}
 
