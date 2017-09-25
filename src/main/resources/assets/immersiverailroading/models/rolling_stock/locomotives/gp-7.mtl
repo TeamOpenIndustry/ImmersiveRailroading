@@ -1,4 +1,4 @@
-# Blender MTL File: 'None'
+# Blender MTL File: 'K4 Beta.blend'
 # Material Count: 8
 
 newmtl Color_000_
@@ -21,7 +21,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_005_.001
+newmtl Color_005_.005
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.447059 0.447059 0.447059
@@ -31,7 +31,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_007_
+newmtl Color_007_.005
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.227451 0.227451 0.227451
@@ -41,7 +41,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_008_
+newmtl Color_008_.002
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.117647 0.117647 0.117647
@@ -51,7 +51,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_009_
+newmtl Color_009_.002
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.000000 0.000000
