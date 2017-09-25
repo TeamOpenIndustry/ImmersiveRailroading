@@ -35,7 +35,6 @@ public class TileSteamHammer extends TileEntity implements ITickable {
         }
         this.craftProgress = compound.getInteger("craftProgress");
         this.chosenItem = new ItemStack(compound.getCompoundTag("chosenItem"));
-        System.out.println("SYNC" + this.chosenItem);
     }
 
     @Override
@@ -157,7 +156,6 @@ public class TileSteamHammer extends TileEntity implements ITickable {
 	}
 
 	public void setChoosenItem(ItemStack selected) {
-		System.out.println("CHOOSEN: " + selected);
 		selected.setCount(1);
 		this.chosenItem = selected.copy();
 		this.markDirty();
