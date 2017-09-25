@@ -45,7 +45,7 @@ public class TileSteamHammerRender extends TileEntitySpecialRenderer<TileSteamHa
 		GL11.glTranslated(x, y, z);
 		GL11.glScaled(2, 2, 2);
 		renderer.drawGroups(rest);
-		GL11.glTranslated(0, -(Math.abs(te.getWorld().getWorldTime() % 30 - 15)) / 14f, 0);
+		GL11.glTranslated(0, -(Math.abs(te.getTicks() % 30 - 15)) / 14f, 0);
 		renderer.drawGroups(hammer);
 		GL11.glPopMatrix();
 		
