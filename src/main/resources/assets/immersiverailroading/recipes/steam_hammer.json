@@ -1,0 +1,20 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:block_steam_hammer"
+  },
+  "pattern": [
+    "dpd",
+    "d d",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "item": "immersiveengineering:storage",
+      "data": 8
+    },
+    "p": {
+      "item": "minecraft:piston"
+    }
+  }
+}
