@@ -163,7 +163,6 @@ public class StockModel extends OBJRender {
 			{
 				GL11.glPushMatrix();
 				
-				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT));
 				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE);
 				Vec3d frontVec = frontLocomotive.center();
 				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
@@ -175,6 +174,7 @@ public class StockModel extends OBJRender {
 				
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X);
 				RenderComponent center = new MultiRenderComponent(wheels);
+				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT));
 				drawComponent(frontLocomotive);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
