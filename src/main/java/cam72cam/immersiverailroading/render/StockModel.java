@@ -163,6 +163,7 @@ public class StockModel extends OBJRender {
 			{
 				GL11.glPushMatrix();
 				
+				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT));
 				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE);
 				Vec3d frontVec = frontLocomotive.center();
 				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
@@ -204,6 +205,7 @@ public class StockModel extends OBJRender {
 		drawComponents(def.getComponents(RenderComponentType.BOILER_SEGMENT_X));
 		drawComponent(def.getComponent(RenderComponentType.FIREBOX));
 		drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST));
+		drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_REAR));
 		drawComponent(def.getComponent(RenderComponentType.PIPING));
 		drawComponents(def.getComponents(RenderComponentType.CYLINDER_SIDE));
 		
