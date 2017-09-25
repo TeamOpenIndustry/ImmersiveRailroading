@@ -255,6 +255,9 @@ public class ClientProxy extends CommonProxy {
 		// We need to override that distance because train centers are further away
 		// than 36m.
 		if ((event.getButton() == 0 || event.getButton() == 1) && event.isButtonstate()) {
+			if (Minecraft.getMinecraft().objectMouseOver == null) {
+				return;
+			}
 			Entity entity = Minecraft.getMinecraft().objectMouseOver.entityHit;
 			if (entity != null && entity instanceof EntityRidableRollingStock) {
 				ImmersiveRailroading.net.sendToServer(new MousePressPacket(event.getButton(), entity.world.provider.getDimension(), entity.getEntityId()));
