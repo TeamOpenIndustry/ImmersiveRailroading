@@ -84,14 +84,14 @@ public class StockItemComponentModel implements IBakedModel {
 		
 		GL11.glPushMatrix();
 		
-		GL11.glRotated(-90, 0, 1, 0);
-		GL11.glRotated(90, 1, 0, 0);
+		//GL11.glRotated(-90, 0, 1, 0);
+		//GL11.glRotated(90, 1, 0, 0);
 		
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_CULL_FACE);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
-		GL11.glTranslated(-center.x, -center.y, center.z - width/2);
+		GL11.glTranslated(-center.x, -center.y, -center.z);
 
 		RenderHelper.disableStandardItemLighting();
 
@@ -165,7 +165,8 @@ public class StockItemComponentModel implements IBakedModel {
 			// Item Frame
 			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case GUI:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().scale(scale, scale, scale).translate(0.5, -0.3, 0).rotate(Math.toRadians(+5+90), 0, 1, 0).toMatrix4f());
+			//.rotate(Math.toRadians(+5+90), 0, 1, 0)
+			return Pair.of(defaultVal.getLeft(), new Matrix4().scale(scale, scale, scale).translate(0.5, 0.5, 0).toMatrix4f());
 		case HEAD:
 			return Pair.of(defaultVal.getLeft(),
 					new Matrix4().translate(0, 0, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
