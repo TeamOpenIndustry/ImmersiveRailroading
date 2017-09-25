@@ -97,7 +97,11 @@ public class TileRail extends TileRailBase {
 		return length;
 	}
 	public void setCenter(Vec3d center) {
-		this.center = center.subtract(pos.getX(), pos.getY(), pos.getZ());
+		if (center != null) {
+			this.center = center.subtract(pos.getX(), pos.getY(), pos.getZ());
+		} else {
+			this.center = center;
+		}
 		this.markDirty();
 	}
 
