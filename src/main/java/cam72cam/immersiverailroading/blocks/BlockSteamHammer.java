@@ -29,6 +29,15 @@ public class BlockSteamHammer extends Block {
         setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
 	}
+	
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te != null && te instanceof TileSteamHammer) {
+			((TileSteamHammer)te).dropItems();
+		}
+		super.breakBlock(world, pos, state);
+	}
+	
 	@Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		if (worldIn.isRemote) {
