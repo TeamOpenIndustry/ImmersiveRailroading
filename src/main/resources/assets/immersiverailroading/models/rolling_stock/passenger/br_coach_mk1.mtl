@@ -1,4 +1,4 @@
-# Blender MTL File: 'None'
+# Blender MTL File: 'K4 Beta.blend'
 # Material Count: 8
 
 newmtl BaseBrown.001
@@ -41,7 +41,7 @@ Ni -1.000000
 d 1.000000
 illum 2
 
-newmtl Color_B22_
+newmtl Color_B22_.001
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.200000 0.078431 0.039216
