@@ -160,4 +160,17 @@ public class TileSteamHammer extends TileEntity implements ITickable {
 		this.chosenItem = selected.copy();
 		this.markDirty();
 	}
+
+	public void dropItems() {
+		if (world.isRemote) {
+			return;
+		}
+		for (int slot = 0; slot < itemStackHandler.getSlots(); slot++) {
+			ItemStack itemstack = itemStackHandler.getStackInSlot(slot);
+			if (itemstack.getCount() != 0) {
+				world.spawnEntity(new EntityItem(this.world, pos.getX(), pos.getY(), pos.getZ(), itemstack.copy()));
+				itemstack.setCount(0);
+			}
+		}
+	}
 }
