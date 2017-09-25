@@ -1,0 +1,21 @@
+{
+	"forge_marker": 1,
+	"defaults":
+	{
+		"model": "immersiverailroading:empty",
+		"textures": {
+			"particle": "minecraft:blocks/iron_block"
+		}
+	},
+	"variants": {
+		"normal": [{}],
+		"inventory": [{
+			"custom": { "flip-v": true },
+			"model": "immersiverailroading:track_1m.obj",
+			"transform": {
+				"translation": [0.5, -0.5, 0],
+				"rotation": {"x": 45}
+			}
+		}]
+	}
+}
