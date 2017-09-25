@@ -20,6 +20,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.gui.FreightContainer;
+import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
@@ -31,6 +32,7 @@ import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.net.SnowRenderUpdatePacket;
+import cam72cam.immersiverailroading.net.SteamHammerSelectPacket;
 import cam72cam.immersiverailroading.net.SwitchStatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -43,6 +45,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -94,6 +97,8 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(MousePressPacket.Handler.class, MousePressPacket.class, 6, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(ItemRailUpdatePacket.Handler.class, ItemRailUpdatePacket.class, 7, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(BuildableStockSyncPacket.Handler.class, BuildableStockSyncPacket.class, 8, Side.CLIENT);
+    	ImmersiveRailroading.net.registerMessage(SteamHammerSelectPacket.Handler.class, SteamHammerSelectPacket.class, 9, Side.SERVER);
+    	
     	
     	
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
@@ -154,17 +159,19 @@ public abstract class CommonProxy implements IGuiHandler {
 
 
     @Override
-    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
+    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int entityIDorX, int y, int z) {
     	switch(GuiTypes.values()[ID]) {
 		case FREIGHT:
-	    	return new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityID));
+	    	return new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorX));
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
-	    	return new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityID));
+	    	return new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorX));
 		case TENDER:
-			return new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityID));
+			return new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityIDorX));
 		case STEAM_LOCOMOTIVE:
-			return new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityID));
+			return new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityIDorX));
+		case BLOCK_STEAM_HAMMER:
+			return new SteamHammerContainer(player.inventory, (TileSteamHammer) world.getTileEntity(new BlockPos(entityIDorX, y, z)));
 		default:
 			return null;
     	}
