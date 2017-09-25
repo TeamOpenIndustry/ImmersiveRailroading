@@ -26,6 +26,7 @@ public class TileSteamHammer extends TileEntity implements ITickable {
         	TileSteamHammer.this.markDirty();
         }
     };
+	private int ticks;
     
     @Override
     public void readFromNBT(NBTTagCompound compound) {
@@ -77,6 +78,8 @@ public class TileSteamHammer extends TileEntity implements ITickable {
 
 	@Override
 	public void update() {
+		ticks+=1;
+		
 		if (world.isRemote) {
 			return;
 		}
@@ -172,5 +175,9 @@ public class TileSteamHammer extends TileEntity implements ITickable {
 				itemstack.setCount(0);
 			}
 		}
+	}
+
+	public int getTicks() {
+		return this.ticks;
 	}
 }
