@@ -25,6 +25,9 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import net.minecraftforge.fml.common.Optional;
+
+@Optional.Interface(iface = "mezz.jei.api.ingredients.ISlowRenderItem", modid = "jei")
 public class ItemRail extends ItemBlock {
 
 	public ItemRail(Block block) {
