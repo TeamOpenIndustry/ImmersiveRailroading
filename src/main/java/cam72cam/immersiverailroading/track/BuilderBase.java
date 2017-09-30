@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -211,11 +212,11 @@ public abstract class BuilderBase {
 	}
 	
 	public int costTies() {
-		return this.tracks.size()/3;
+		return (int) (this.tracks.size()/3 * Config.TieCostMultiplier);
 	}
 	
 	public int costRails() {
-		return this.tracks.size()*2/3;
+		return (int) (this.tracks.size()*2/3 * Config.RailCostMultiplier);
 	}
 
 	public int costBed() {
@@ -227,7 +228,7 @@ public abstract class BuilderBase {
 		}
 		
 		//TODO more accurate
-		return (int) (this.tracks.size() * 0.1) + (this.info.railBedFill ? fillCount : 0);
+		return (int) ((int) (this.tracks.size() * 0.1) + (this.info.railBedFill ? fillCount : 0)  * Config.BedCostMultiplier);
 	}
 
 	public void setDrops(List<ItemStack> drops) {
