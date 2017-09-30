@@ -33,4 +33,13 @@ public class Config {
 	
 	@Comment({"Print extra chunk loading info"})
 	public static boolean debugChunkLoading = true;
+
+	@Comment("Cost to place down a tie")
+	public static double TieCostMultiplier = 0.25;
+
+	@Comment("Cost to place down a rail")
+	public static double RailCostMultiplier = 0.25;
+
+	@Comment("Cost to place down rail bed")
+	public static double BedCostMultiplier = 0.25;
 }
