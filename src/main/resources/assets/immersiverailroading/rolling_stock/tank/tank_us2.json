@@ -1,0 +1,22 @@
+{
+	"name": "Tank US 2",
+	"model": "immersiverailroading:models/rolling_stock/tank/tank_us2.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 38060
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": 0,
+		"center_y": 3.5,
+		"length": 2,
+		"width": 1.5
+	},
+	"tank": {
+		"capacity_l": 85000 
+	},
+	"trucks": {
+		"front": 6.65, 
+		"rear": -6.65
+	}
+}
