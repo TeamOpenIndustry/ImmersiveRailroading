@@ -1,0 +1,26 @@
+{
+	"name": "K4 Pacific Tender",
+	"model": "immersiverailroading:models/rolling_stock/tender/e6_tender.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 62000
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": 3.4,
+		"center_y": 1.5,
+		"length": 1,
+		"width": 2.5
+	},
+	"tank": {
+		"capacity_l":  26000
+	},
+	"tender": {
+		"slots": 48,
+		"width": 14
+	},
+	"trucks": {
+		"front": 2.35, 
+		"rear": -2.35
+	}
+}
