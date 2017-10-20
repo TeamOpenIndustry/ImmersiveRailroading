@@ -62,6 +62,9 @@ public class RailItemModel implements IBakedModel {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 			
 		double scale = 0.95/info.length;
+		if (info.type == TrackItems.CROSSING) {
+			scale = 0.95 / 3;
+		}
 		GL11.glScaled(scale, -scale*2, scale);
 
 		RenderHelper.disableStandardItemLighting();
