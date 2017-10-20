@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,7 +27,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 			return;
 		}
 		Minecraft.getMinecraft().mcProfiler.startSection("tile_rail");
-		GL11.glEnable (GL11.GL_BLEND);
+		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
 		GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
 		if (GLContext.getCapabilities().OpenGL14) {
 			GL14.glBlendColor(1, 1, 1, 0.7f);
@@ -39,7 +40,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 			RailRenderUtil.render(info, true);
 		}
 		GL11.glPopMatrix();
-		GL11.glDisable(GL11.GL_BLEND);
+		blend.restore();
 		Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 }

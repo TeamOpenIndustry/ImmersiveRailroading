@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -41,8 +42,8 @@ public class StockItemModel implements IBakedModel {
 		 * This is probably really fragile if someone calls getQuads
 		 * before actually setting up the correct GL context.
 		 */
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_CULL_FACE);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 		
 		if (displayList == -1) {
 			displayList = GL11.glGenLists(1);
@@ -58,7 +59,8 @@ public class StockItemModel implements IBakedModel {
 		
 		GL11.glCallList(displayList);
 		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		tex.restore();
+		cull.restore();
 		return new ArrayList<BakedQuad>();
 	}
 
