@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -222,7 +223,7 @@ public abstract class BuilderBase {
 	public int costBed() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
-			if (world.isAirBlock(track.getPos().down())) {
+			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
 				fillCount += 1;
 			}
 		}

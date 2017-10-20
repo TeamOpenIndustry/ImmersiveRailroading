@@ -15,11 +15,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 
 public class RailBaseOverlayRender {
-	
-	/*
-	 * This returns a cached buffer as rails don't change their model often
-	 * This drastically reduces the overhead of rendering these complex models 
-	 */
 	protected static BufferBuilder getOverlayBuffer(RailInfo info) {
 		
 		// Get model for current state
