@@ -50,6 +50,7 @@ import cam72cam.immersiverailroading.render.rail.TileRailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.tile.TileSteamHammer;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -317,7 +318,8 @@ public class ClientProxy extends CommonProxy {
 		        
 		        GL11.glPushMatrix();
 				{
-					GL11.glEnable(GL11.GL_BLEND);
+					GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
+					
 					GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
 					if (GLContext.getCapabilities().OpenGL14) {
 						GL14.glBlendColor(1, 1, 1, 0.5f);
@@ -331,9 +333,8 @@ public class ClientProxy extends CommonProxy {
 	                GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
 	                
 	                RailRenderUtil.render(info, true);
-	                
 
-					GL11.glDisable(GL11.GL_BLEND);
+					blend.restore();
 				}
 				GL11.glPopMatrix();
 			}

@@ -5,25 +5,23 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 
 public class RailRenderUtil {
 	public static void render(RailInfo info, boolean renderOverlay) {
-		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();
 		
 		// Bind block textures to current context
 		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-		// From IE
-		RenderHelper.disableStandardItemLighting();
+		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
 		
 		// Move to offset position
 		//GL11.glTranslated(-info.getBuilder().getRenderOffset().getX(), 0, -info.getBuilder().getRenderOffset().getZ());
@@ -50,8 +48,9 @@ public class RailRenderUtil {
 		GL11.glPopMatrix();
 		GL11.glPushMatrix();
 		
-		RenderHelper.enableStandardItemLighting();
 		RailBuilderRender.renderRailBuilder(info);
+		
+		light.restore();
 		
 		Minecraft.getMinecraft().mcProfiler.endSection();
 		
@@ -59,7 +58,6 @@ public class RailRenderUtil {
 		GL11.glPopMatrix();
 
 		GlStateManager.popMatrix();
-		GlStateManager.popAttrib();
 	}
 	
 	/*

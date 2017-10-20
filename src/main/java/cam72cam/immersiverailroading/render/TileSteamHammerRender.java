@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.tile.TileSteamHammer;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.ResourceLocation;
 
@@ -39,7 +40,7 @@ public class TileSteamHammerRender extends TileEntitySpecialRenderer<TileSteamHa
 	
 	@Override
 	public void render(TileSteamHammer te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 		
 		GL11.glPushMatrix();
 		GL11.glTranslated(x, y, z);
@@ -49,6 +50,6 @@ public class TileSteamHammerRender extends TileEntitySpecialRenderer<TileSteamHa
 		renderer.drawGroups(hammer);
 		GL11.glPopMatrix();
 		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		tex.restore();
 	}
 }
