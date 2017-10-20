@@ -56,6 +56,11 @@ public class TileRailBase extends TileEntity {
 	}
 
 	public BlockPos getParent() {
+		if (parent == null) {
+			ImmersiveRailroading.logger.warn("Invalid block without parent");
+			world.setBlockToAir(pos);
+			return null;
+		}
 		return parent.add(pos);
 	}
 	public void setParent(BlockPos pos) {

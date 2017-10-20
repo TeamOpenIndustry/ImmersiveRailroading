@@ -54,6 +54,7 @@ public class RailInfo {
 		this.quarters = quarters;
 		this.placementPosition = placementPosition;
 		this.railBed = railBed;
+		this.railBedFill = railBedFill;
 	}
 	
 	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
