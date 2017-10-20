@@ -201,7 +201,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			return;
 		}
 		if (currentPos.isOffTrack) {
-			world.removeEntity(this);
 			return;
 		}
 		

@@ -29,6 +29,7 @@ public class MovementSimulator {
 	
 	public TickPos nextPosition(double moveDistance) {
 		position.tickID += 1;
+		TickPos origPosition = position.clone();
 
 		if (Math.abs(moveDistance) < 0.001) {
 			position.speed = Speed.fromMinecraft(Math.abs(0));
@@ -57,6 +58,9 @@ public class MovementSimulator {
 		
 		Vec3d nextFront = nextPosition(front, position.rotationYaw, VecUtil.fromYaw(moveDistance, position.frontYaw));
 		Vec3d nextRear = nextPosition(rear, position.rotationYaw, VecUtil.fromYaw(moveDistance, position.rearYaw));
+		if (nextFront.equals(front) || nextRear == rear) {
+			return origPosition;
+		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
 		position.frontYaw = VecUtil.toYaw(frontDelta);
@@ -128,23 +132,45 @@ public class MovementSimulator {
 		
 		return parent;
 	}
+	
+	private TileRail fuzzyRailPosition(Vec3d position) {
+		TileRail rail = railFromPosition(position);
+		if (rail != null) {
+			return rail;
+		}
+		
+		// Try a smidge higher
+		// We get some wobble on the top of slopes, this corrects for imperfect precision
+		rail = railFromPosition(position.addVector(0, 0.4, 0));
+		if (rail != null) {
+			return rail;
+		}
+		rail = railFromPosition(position.addVector(0, -0.4, 0));
+		if (rail != null) {
+			return rail;
+		}
+		return null;
+	}
+	
+	private TileRail closeEnoughRailPosition(Vec3d position, float trainYaw) {
+		TileRail rail = fuzzyRailPosition(position);
+		if (rail != null) {
+			return rail;
+		}
+		rail = fuzzyRailPosition(position.add(VecUtil.fromYaw(1, trainYaw)));
+		if (rail != null) {
+			return rail;
+		}
+		rail = fuzzyRailPosition(position.add(VecUtil.fromYaw(-1, trainYaw)));
+		if (rail != null) {
+			return rail;
+		}
+		return null;
+	}
 
 	public Vec3d nextPosition(Vec3d position, float trainYaw, Vec3d delta) {
-		TileRail rail = railFromPosition(position);
-		if (rail == null) {
-			// Try a smidge higher
-			// We get some wobble on the top of slopes, this corrects for imperfect precision
-			rail = railFromPosition(position.addVector(0, 0.4, 0));
-			if (rail != null) {
-				position = position.addVector(0, 0.4, 0);
-			} else {
-				rail = railFromPosition(position.addVector(0, -0.4, 0));
-				if (rail != null) {
-					position = position.addVector(0, -0.4, 0);
-				}
-			}
-		}
-
+		TileRail rail = closeEnoughRailPosition(position, trainYaw);
+		
 		if (rail == null) {
 			if (!world.isRemote) {
 				System.out.println("WARNING OFF TRACK!!!");
