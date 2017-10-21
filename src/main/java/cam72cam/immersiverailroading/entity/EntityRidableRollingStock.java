@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -131,6 +132,18 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			
 			Vec3d pos = passengerPositions.get(source.getPersistentID()).add(movement);
 
+			
+			if (this instanceof EntityCoupleableRollingStock) {
+				if (this.getDefinition().isAtFront(pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
+					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT));
+					return;
+				}
+				if (this.getDefinition().isAtRear(pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
+					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK));
+					return;
+				}
+			}
+			
 			pos = this.getDefinition().correctPassengerBounds(pos);
 			
 			passengerPositions.put(source.getPersistentID(), pos);

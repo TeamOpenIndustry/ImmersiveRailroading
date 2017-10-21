@@ -164,6 +164,13 @@ public abstract class EntityRollingStockDefinition {
 		return pos;
 	}
 
+	public boolean isAtFront(Vec3d pos) {
+		return pos.x >= this.passengerCompartmentLength;
+	}
+	public boolean isAtRear(Vec3d pos) {
+		return pos.x <= -this.passengerCompartmentLength;
+	}
+
 	public List<ItemComponentType> getItemComponents() {
 		return itemComponents;
 	}
