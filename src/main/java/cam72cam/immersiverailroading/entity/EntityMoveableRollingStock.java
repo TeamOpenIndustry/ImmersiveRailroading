@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -242,6 +243,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				continue;
 			}
 
+			if (! (entity instanceof EntityLivingBase)) {
+				continue;
+			}
+
 			
 			// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
 			// We need to do a forward lookup
@@ -273,6 +278,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				continue;
 			}
 			if (this.isPassenger(entity)) {
+				continue;
+			}
+			
+			if (! (entity instanceof EntityLivingBase)) {
 				continue;
 			}
 
