@@ -6,9 +6,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
@@ -17,7 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class TileSteamHammer extends TileEntity implements ITickable {
+public class TileSteamHammer extends SyncdTileEntity implements ITickable {
 	private int craftProgress = 0;
 	private ItemStack chosenItem = new ItemStack(Items.AIR);
 	private ItemStackHandler itemStackHandler = new ItemStackHandler(2) {
@@ -47,35 +44,6 @@ public class TileSteamHammer extends TileEntity implements ITickable {
         return compound;
     }
     
-    @Override
-	public SPacketUpdateTileEntity getUpdatePacket() {
-		NBTTagCompound nbt = new NBTTagCompound();
-		this.writeToNBT(nbt);
-		
-		return new SPacketUpdateTileEntity(this.getPos(), 1, nbt);
-	}
-
-	@Override
-	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-		this.readFromNBT(pkt.getNbtCompound());
-		super.onDataPacket(net, pkt);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-	}
-	
-	@Override
-	public NBTTagCompound getUpdateTag() {
-		NBTTagCompound tag = super.getUpdateTag();
-		this.writeToNBT(tag);
-		return tag;
-	}
-	
-	@Override 
-	public void handleUpdateTag(NBTTagCompound tag) {
-		this.readFromNBT(tag);
-		super.handleUpdateTag(tag);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-	}
-
 	@Override
 	public void update() {
 		ticks+=1;

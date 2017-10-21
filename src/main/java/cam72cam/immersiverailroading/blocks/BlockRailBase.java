@@ -161,6 +161,10 @@ public abstract class BlockRailBase extends Block {
 	@Override
     public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
+		if (p_193383_4_ == EnumFacing.UP) {
+			// SNOW ONLY?
+			return BlockFaceShape.SOLID;
+		}
         return BlockFaceShape.UNDEFINED;
     }
 }

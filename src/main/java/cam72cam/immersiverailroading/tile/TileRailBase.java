@@ -2,26 +2,21 @@ package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.net.SnowRenderUpdatePacket;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class TileRailBase extends TileEntity {
+public class TileRailBase extends SyncdTileEntity {
 	private BlockPos parent;
 	private float height = 0;
 	private int snowLayers = 0;
-	public boolean snowRenderFlagDirty = true;
 	protected boolean flexible = false;
 	private boolean willBeReplaced = false; 
 	private NBTTagCompound replaced;
 	private boolean skipNextRefresh = false;
-	protected boolean hasTileData = false;
 	
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -39,9 +34,6 @@ public class TileRailBase extends TileEntity {
 	}
 	public void setSnowLayers(int snowLayers) {
 		this.snowLayers = snowLayers;
-		if (this.getParentTile() != null) {
-			this.getParentTile().snowRenderFlagDirty = true;
-		}
 	}
 	public float getFullHeight() {
 		return this.height + this.snowLayers / 8.0f;
@@ -51,7 +43,6 @@ public class TileRailBase extends TileEntity {
 		if (this.snowLayers < (Config.deepSnow ? 8 : 1)) {
 			this.snowLayers += 1;
 			this.markDirty();
-			ImmersiveRailroading.net.sendToDimension(new SnowRenderUpdatePacket(this.getWorld().provider.getDimension(), this.pos, snowLayers), this.getWorld().provider.getDimension());
 		}
 	}
 
@@ -99,6 +90,9 @@ public class TileRailBase extends TileEntity {
 		}
 		
 		parent = getNBTBlockPos(nbt, "parent");
+		if (world != null && this.getParentTile() != null) {
+			this.getParentTile().snowRenderFlagDirty = true;
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -112,39 +106,6 @@ public class TileRailBase extends TileEntity {
 		nbt.setInteger("version", 2);
 		
 		return super.writeToNBT(nbt);
-	}
-
-	@Override
-	public SPacketUpdateTileEntity getUpdatePacket() {
-		NBTTagCompound nbt = new NBTTagCompound();
-		this.writeToNBT(nbt);
-		
-		return new SPacketUpdateTileEntity(this.getPos(), 1, nbt);
-	}
-
-	@Override
-	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-		this.readFromNBT(pkt.getNbtCompound());
-		super.onDataPacket(net, pkt);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-		snowRenderFlagDirty = true;
-		hasTileData = true;
-	}
-	
-	@Override
-	public NBTTagCompound getUpdateTag() {
-		NBTTagCompound tag = super.getUpdateTag();
-		this.writeToNBT(tag);
-		return tag;
-	}
-	
-	@Override 
-	public void handleUpdateTag(NBTTagCompound tag) {
-		this.readFromNBT(tag);
-		super.handleUpdateTag(tag);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-		snowRenderFlagDirty = true;
-		hasTileData = true;
 	}
 	
 	protected final static void setNBTBlockPos(NBTTagCompound nbt, String key, BlockPos value) {
