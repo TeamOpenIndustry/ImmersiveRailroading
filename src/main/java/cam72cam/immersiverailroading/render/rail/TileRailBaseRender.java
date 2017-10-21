@@ -92,6 +92,9 @@ public class TileRailBaseRender<F extends TileRailBase> extends TileEntitySpecia
 			TileRail parent = te.getParentTile();
 			if (parent != null) {
 				RailInfo info = parent.getRailRenderInfo();
+				if (info == null) {
+					return;
+				}
 				if (info.railBed.getItem() == Items.AIR) {
 					return;
 				}

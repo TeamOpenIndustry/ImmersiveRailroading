@@ -48,6 +48,11 @@ public class BuilderSwitch extends BuilderBase {
 	public int costBed() {
 		return straightBuilder.costBed() + turnBuilder.costBed();
 	}
+	
+	public int costFill() {
+		return straightBuilder.costFill() + turnBuilder.costFill();
+	}
+	
 	public void setDrops(List<ItemStack> drops) {
 		straightBuilder.setDrops(drops);
 	}

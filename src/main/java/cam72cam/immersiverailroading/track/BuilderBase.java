@@ -7,9 +7,11 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -213,23 +215,26 @@ public abstract class BuilderBase {
 	}
 	
 	public int costTies() {
-		return (int) (this.tracks.size()/3 * Config.TieCostMultiplier);
+		return MathHelper.ceil(this.tracks.size()/3 * Config.TieCostMultiplier);
 	}
 	
 	public int costRails() {
-		return (int) (this.tracks.size()*2/3 * Config.RailCostMultiplier);
+		return MathHelper.ceil(this.tracks.size()*2/3 * Config.RailCostMultiplier);
+	}
+	
+	public int costBed() {
+		//TODO more accurate
+		return MathHelper.ceil(this.tracks.size() * 0.1 * Config.BedCostMultiplier);
 	}
 
-	public int costBed() {
+	public int costFill() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
 			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
 				fillCount += 1;
 			}
 		}
-		
-		//TODO more accurate
-		return (int) ((int) (this.tracks.size() * 0.1) + (this.info.railBedFill ? fillCount : 0)  * Config.BedCostMultiplier);
+		return MathHelper.ceil(this.info.railBedFill.getItem() != Items.AIR ? fillCount : 0);
 	}
 
 	public void setDrops(List<ItemStack> drops) {
