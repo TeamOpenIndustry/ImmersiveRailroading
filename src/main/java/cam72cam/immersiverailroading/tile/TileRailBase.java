@@ -5,12 +5,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -83,7 +85,13 @@ public class TileRailBase extends SyncdTileEntity {
 		
 		
 		height = nbt.getFloat("height");
+		int oldSnowLayers = snowLayers;
 		snowLayers = nbt.getInteger("snowLayers");
+		if (oldSnowLayers > snowLayers && world != null && world.isRemote) {
+			for (int i = 0; i < 30 * (oldSnowLayers); i ++) {
+				ParticleUtil.spawnParticle(world, EnumParticleTypes.SNOWBALL, this.getCenterOfRail().addVector(Math.random() * 4-2, 1, Math.random() * 4-2));
+			}
+		}
 		flexible = nbt.getBoolean("flexible");
 		if (nbt.hasKey("replaced")) {
 			replaced = nbt.getCompoundTag("replaced");
@@ -199,7 +207,6 @@ public class TileRailBase extends SyncdTileEntity {
 					for (int j = 0; j < 3; j ++) {
 						IBlockState state = world.getBlockState(ph);
 						if (world.isAirBlock(ph) && !BlockUtil.isRail(world.getBlockState(ph.down()))) {
-							System.out.println(ph);
 							world.setBlockState(ph, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snowDown));
 							return;
 						}
