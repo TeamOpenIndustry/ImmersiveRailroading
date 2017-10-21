@@ -45,9 +45,11 @@ import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.StockItemModel;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.render.rail.TileRailBaseRender;
 import cam72cam.immersiverailroading.render.rail.TileRailPreviewRender;
 import cam72cam.immersiverailroading.render.rail.TileRailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.tile.TileSteamHammer;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -171,6 +173,7 @@ public class ClientProxy extends CommonProxy {
 		OBJLoader.INSTANCE.addDomain(ImmersiveRailroading.MODID.toLowerCase());
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRail.class, new TileRailRender());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileRailGag.class, new TileRailBaseRender<TileRailGag>());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileSteamHammer.class, new TileSteamHammerRender());
 		

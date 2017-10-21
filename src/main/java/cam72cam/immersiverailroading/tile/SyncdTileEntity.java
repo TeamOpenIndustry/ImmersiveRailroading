@@ -11,9 +11,8 @@ public class SyncdTileEntity extends TileEntity {
 	@Override
 	public void markDirty() {
 		super.markDirty();
-		
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-		world.notifyBlockUpdate(getPos(), world.getBlockState(getPos()), world.getBlockState(getPos()), 3);
+		world.notifyBlockUpdate(getPos(), world.getBlockState(getPos()), world.getBlockState(getPos()), 3 + 8);
+		world.notifyNeighborsOfStateChange(pos, this.getBlockType(), true);
 	}
 	
 	

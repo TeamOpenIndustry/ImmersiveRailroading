@@ -52,4 +52,8 @@ public class BlockUtil {
 		}
 		return gravelState;
 	}
+	
+	public static boolean isRail(IBlockState state) {
+		return state.getBlock() == ImmersiveRailroading.BLOCK_RAIL || state.getBlock() == ImmersiveRailroading.BLOCK_RAIL_GAG;
+	}
 }
