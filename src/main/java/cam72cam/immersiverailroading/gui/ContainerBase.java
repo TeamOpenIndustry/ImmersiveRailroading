@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.gui;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
@@ -113,4 +115,14 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
             }
         }
     }
+	
+	@Override 
+	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
+		try {
+			return super.slotClick(slotId, dragType, clickTypeIn, player);
+		} catch (Exception ex) {
+			// This is a crappy hack
+			return ItemStack.EMPTY; 
+		}
+	}
 }
