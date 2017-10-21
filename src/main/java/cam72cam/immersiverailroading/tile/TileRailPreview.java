@@ -32,7 +32,7 @@ public class TileRailPreview extends SyncdTileEntity {
 	}
 
 	public void setItem(ItemStack stack) {
-		this.item = stack;
+		this.item = stack.copy();
 		this.markDirty();
 	}
 
@@ -44,7 +44,7 @@ public class TileRailPreview extends SyncdTileEntity {
 	}
 	
 	public void init(ItemStack item, float yawHead, float hitX, float hitY, float hitZ) {
-		this.item = item;
+		this.item = item.copy();
 		this.yawHead = yawHead;
 		this.hitX = hitX;
 		this.hitY = hitY;
