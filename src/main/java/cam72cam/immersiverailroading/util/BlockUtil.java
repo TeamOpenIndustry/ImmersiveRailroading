@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockSnow;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -27,6 +28,9 @@ public class BlockUtil {
 			return true;
 		}
 		if (block instanceof BlockLiquid) {
+			return true;
+		}
+		if (block instanceof BlockSnow) {
 			return true;
 		}
 		if (block == ImmersiveRailroading.BLOCK_RAIL_PREVIEW) {
