@@ -289,11 +289,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		}
 		if (this.ticksExisted % 20 == 0 && !world.isRemote) {
 			bb = this.getCollisionBoundingBox();
-			for (int x = (int) bb.minX; x < bb.maxX; x++) {
-				for (int y = (int) bb.minY; y < bb.maxY; y++) {
-					for (int z = (int) bb.minZ; z < bb.maxZ; z++) {
+			for (int x = MathHelper.floor(bb.minX); x <= MathHelper.ceil(bb.maxX); x++) {
+				for (int y = MathHelper.floor(bb.minY); y <= MathHelper.ceil(bb.maxY); y++) {
+					for (int z = MathHelper.floor(bb.minZ); z <= MathHelper.ceil(bb.maxZ); z++) {
 						BlockPos bp = new BlockPos(x, y, z);
-						if (bb.contains(new Vec3d(bp))) {
+						if (bb.contains(new Vec3d(bp).addVector(0.5, 0.5, 0.5))) {
 							IBlockState state = world.getBlockState(bp);
 							if (state.getBlock() != Blocks.AIR && state.getBlock() != ImmersiveRailroading.BLOCK_RAIL && state.getBlock() != ImmersiveRailroading.BLOCK_RAIL_GAG) {
 								world.destroyBlock(bp, true);
