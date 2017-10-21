@@ -6,6 +6,8 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -15,6 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -299,13 +302,24 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (this.ticksExisted % 20 == 0 && !world.isRemote) {
 			bb = this.getCollisionBoundingBox();
 			for (int x = MathHelper.floor(bb.minX); x <= MathHelper.ceil(bb.maxX); x++) {
-				for (int y = MathHelper.floor(bb.minY); y <= MathHelper.ceil(bb.maxY); y++) {
+				for (int y = MathHelper.floor(bb.minY)-1; y <= MathHelper.ceil(bb.maxY); y++) {
 					for (int z = MathHelper.floor(bb.minZ); z <= MathHelper.ceil(bb.maxZ); z++) {
 						BlockPos bp = new BlockPos(x, y, z);
 						if (bb.contains(new Vec3d(bp).addVector(0.5, 0.5, 0.5))) {
 							IBlockState state = world.getBlockState(bp);
-							if (state.getBlock() != Blocks.AIR && state.getBlock() != ImmersiveRailroading.BLOCK_RAIL && state.getBlock() != ImmersiveRailroading.BLOCK_RAIL_GAG) {
-								world.destroyBlock(bp, true);
+							if (state.getBlock() != Blocks.AIR) {
+								if (!BlockUtil.isRail(state)) {
+									IBlockState up = world.getBlockState(bp.up());
+									if (!BlockUtil.isRail(up)) {
+										world.destroyBlock(bp, true);										
+									}
+								} else {
+									TileEntity te = world.getTileEntity(bp);
+									if (te instanceof TileRailBase) {
+										((TileRailBase) te).cleanSnow();
+										continue;
+									}
+								}
 							}
 						}
 					}

@@ -1,10 +1,16 @@
 package cam72cam.immersiverailroading.tile;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -34,16 +40,19 @@ public class TileRailBase extends SyncdTileEntity {
 	}
 	public void setSnowLayers(int snowLayers) {
 		this.snowLayers = snowLayers;
+		this.markDirty();
 	}
 	public float getFullHeight() {
 		return this.height + this.snowLayers / 8.0f;
 	}
 	
-	public void handleSnowTick() {
+	public boolean handleSnowTick() {
 		if (this.snowLayers < (Config.deepSnow ? 8 : 1)) {
 			this.snowLayers += 1;
 			this.markDirty();
+			return true;
 		}
+		return false;
 	}
 
 	public BlockPos getParent() {
@@ -88,7 +97,6 @@ public class TileRailBase extends SyncdTileEntity {
 		case 2:
 			// Nothing yet ...
 		}
-		
 		parent = getNBTBlockPos(nbt, "parent");
 		if (world != null && this.getParentTile() != null) {
 			this.getParentTile().snowRenderFlagDirty = true;
@@ -173,5 +181,55 @@ public class TileRailBase extends SyncdTileEntity {
 	// Called duing flex track replacement
 	public boolean getWillBeReplaced() {
 		return this.willBeReplaced;
+	}
+
+	public void cleanSnow() {
+		int snow = this.getSnowLayers();
+		if (snow > 1) {
+			this.setSnowLayers(1);
+			int snowDown = snow -1;
+			for (int i = 1; i <= 3; i ++) {
+				EnumFacing[] horiz = EnumFacing.HORIZONTALS;
+				if (Math.random() > 0.5) {
+					// Split between sides of the track
+					ArrayUtils.reverse(horiz);
+				}
+				for (EnumFacing facing : horiz) {
+					BlockPos ph = world.getPrecipitationHeight(pos.offset(facing, i));
+					for (int j = 0; j < 3; j ++) {
+						IBlockState state = world.getBlockState(ph);
+						if (world.isAirBlock(ph) && !BlockUtil.isRail(world.getBlockState(ph.down()))) {
+							System.out.println("PLACING SNOW IN AIR");
+							System.out.println(ph);
+							world.setBlockState(ph, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snowDown));
+							return;
+						}
+						if (world.getBlockState(ph).getBlock() == Blocks.SNOW) {
+							System.out.println("ITER UP");
+							ph = ph.up();
+							continue;
+						}
+						if (world.getBlockState(ph).getBlock() == Blocks.SNOW_LAYER) {
+							Integer currSnow = state.getValue(BlockSnow.LAYERS);
+							if (currSnow == 8) {
+								System.out.println("ITER UP");
+								ph = ph.up();
+								continue;
+							}
+							System.out.println("DEEPER SNOW");
+							int toAdd = Math.min(8 - currSnow, snowDown);
+							world.setBlockState(ph, state.withProperty(BlockSnow.LAYERS, currSnow + toAdd));
+							snowDown -= toAdd;
+							if (snowDown <= 0) {
+								return;
+							}
+						}
+						ph = ph.down();
+					}
+				}
+			}
+
+			System.out.println("BAD SNOW");
+		}
 	}
 }

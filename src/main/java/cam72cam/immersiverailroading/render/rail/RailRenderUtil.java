@@ -30,19 +30,10 @@ public class RailRenderUtil {
 		GlStateManager.translate(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 		GlStateManager.translate(Math.floor(info.placementPosition.x), Math.floor(info.placementPosition.y), Math.floor(info.placementPosition.z));
 		
-		// Finish Drawing
-		Minecraft.getMinecraft().mcProfiler.startSection("base");
-		RailBaseRender.draw(info);
-		//RailRenderUtil.draw(RailBaseRender.getBaseBuffer(info));
-		Minecraft.getMinecraft().mcProfiler.endSection();
-		Minecraft.getMinecraft().mcProfiler.startSection("snow");
-		RailRenderUtil.draw(RailSnowRender.getSnowBuffer(info));
 		if (renderOverlay) {
-			Minecraft.getMinecraft().mcProfiler.endSection();
-			Minecraft.getMinecraft().mcProfiler.startSection("overlay");
+			RailBaseRender.draw(info);
 			RailRenderUtil.draw(RailBaseOverlayRender.getOverlayBuffer(info));
 		}
-		Minecraft.getMinecraft().mcProfiler.endSection();
 		Minecraft.getMinecraft().mcProfiler.startSection("rail");
 		
 		GL11.glPopMatrix();
