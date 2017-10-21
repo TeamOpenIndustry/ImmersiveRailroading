@@ -199,24 +199,20 @@ public class TileRailBase extends SyncdTileEntity {
 					for (int j = 0; j < 3; j ++) {
 						IBlockState state = world.getBlockState(ph);
 						if (world.isAirBlock(ph) && !BlockUtil.isRail(world.getBlockState(ph.down()))) {
-							System.out.println("PLACING SNOW IN AIR");
 							System.out.println(ph);
 							world.setBlockState(ph, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snowDown));
 							return;
 						}
 						if (world.getBlockState(ph).getBlock() == Blocks.SNOW) {
-							System.out.println("ITER UP");
 							ph = ph.up();
 							continue;
 						}
 						if (world.getBlockState(ph).getBlock() == Blocks.SNOW_LAYER) {
 							Integer currSnow = state.getValue(BlockSnow.LAYERS);
 							if (currSnow == 8) {
-								System.out.println("ITER UP");
 								ph = ph.up();
 								continue;
 							}
-							System.out.println("DEEPER SNOW");
 							int toAdd = Math.min(8 - currSnow, snowDown);
 							world.setBlockState(ph, state.withProperty(BlockSnow.LAYERS, currSnow + toAdd));
 							snowDown -= toAdd;
@@ -228,8 +224,6 @@ public class TileRailBase extends SyncdTileEntity {
 					}
 				}
 			}
-
-			System.out.println("BAD SNOW");
 		}
 	}
 }
