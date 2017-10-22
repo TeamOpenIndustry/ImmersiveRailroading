@@ -154,9 +154,10 @@ public class StockModel extends OBJRender {
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X);
 				drawDrivingWheels(stock, wheels);
+				RenderComponent center = new MultiRenderComponent(wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT", 0, wheel.height(), wheel.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), wheel.center(), wheel.center());
+				drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
+				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
 			}
 			break;
 		case MALLET_WALSCHAERTS:
