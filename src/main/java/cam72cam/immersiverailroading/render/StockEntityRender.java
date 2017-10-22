@@ -29,7 +29,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		StockModel model = StockModel.get(def.getModel());
 
 		GlStateManager.pushMatrix();
-
+		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 
@@ -44,6 +44,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		
 		tex.restore();
 		cull.restore();
+		light.restore();
 
 		GlStateManager.popMatrix();
 	}
