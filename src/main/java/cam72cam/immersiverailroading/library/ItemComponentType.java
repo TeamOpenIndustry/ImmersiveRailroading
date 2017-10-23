@@ -10,6 +10,8 @@ public enum ItemComponentType {
 	FRONT_FRAME(AssemblyStep.FRAME, RenderComponentType.FRONT_LOCOMOTIVE),
 	
 	// STANDARD
+	BOGEY_WHEEL(AssemblyStep.WHEELS, RenderComponentType.BOGEY_POS_WHEEL_X),
+	BOGEY(AssemblyStep.WHEELS, RenderComponentType.BOGEY_POS),
 	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, RenderComponentType.BOGEY_FRONT_WHEEL_X),
 	BOGEY_FRONT(AssemblyStep.WHEELS, RenderComponentType.BOGEY_FRONT),
 	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, RenderComponentType.BOGEY_REAR_WHEEL_X),

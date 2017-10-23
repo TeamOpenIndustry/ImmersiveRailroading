@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.library;
 
 public enum RenderComponentType {
 	// STANDARD
+	BOGEY_POS_WHEEL_X(".*BOGEY_#POS#_WHEEL_#ID#.*"),
+	BOGEY_POS(".*BOGEY_#POS#.*"),
 	BOGEY_FRONT_WHEEL_X(".*BOGEY_FRONT_WHEEL_#ID#.*"),
 	BOGEY_FRONT(".*BOGEY_FRONT.*"),
 	BOGEY_REAR_WHEEL_X(".*BOGEY_REAR_WHEEL_#ID#.*"),

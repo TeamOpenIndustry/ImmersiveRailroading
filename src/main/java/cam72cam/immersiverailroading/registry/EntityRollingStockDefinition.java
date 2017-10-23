@@ -100,6 +100,10 @@ public abstract class EntityRollingStockDefinition {
 		}
 	}
 	
+	protected boolean unifiedBogies() {
+		return true;
+	}
+	
 	protected Set<String> parseComponents() {
 		renderComponents = new HashMap<RenderComponentType, List<RenderComponent>>();
 		itemComponents = new ArrayList<ItemComponentType>();
@@ -108,13 +112,22 @@ public abstract class EntityRollingStockDefinition {
 		groups.addAll(model.groups());
 		
 		for (int i = 0; i < 10; i++) {
-			addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_FRONT_WHEEL_X, this, groups, i), true);
-			addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_REAR_WHEEL_X, this, groups, i), true);
+			if (unifiedBogies()) {
+				addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "FRONT", i), true);
+				addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "REAR", i), true);
+			} else {
+				addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_FRONT_WHEEL_X, this, groups, i), true);
+				addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_REAR_WHEEL_X, this, groups, i), true);
+			}
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.FRAME_WHEEL_X, this, groups, i), true);
 		}
-		
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_FRONT, this, groups), true);
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_REAR, this, groups), true);
+		if (unifiedBogies()) {
+			addComponentIfExists(RenderComponent.parsePos(RenderComponentType.BOGEY_POS, this, groups, "FRONT"), true);
+			addComponentIfExists(RenderComponent.parsePos(RenderComponentType.BOGEY_POS, this, groups, "REAR"), true);
+		} else {
+			addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_FRONT, this, groups), true);
+			addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_REAR, this, groups), true);
+		}
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
@@ -127,6 +140,18 @@ public abstract class EntityRollingStockDefinition {
 			return null;
 		}
 		return renderComponents.get(name).get(0);
+	}
+	
+	public RenderComponent getComponent(RenderComponentType name, String pos) {
+		if (!renderComponents.containsKey(name)) {
+			return null;
+		}
+		for (RenderComponent c : renderComponents.get(name)) {
+			if (c.pos.equals(pos)) {
+				return c;
+			}
+		}
+		return null;
 	}
 
 	public RenderComponent getComponent(RenderComponent comp) {
@@ -143,6 +168,19 @@ public abstract class EntityRollingStockDefinition {
 	
 	public List<RenderComponent> getComponents(RenderComponentType name) {
 		return renderComponents.get(name);
+	}
+	
+	public List<RenderComponent> getComponents(RenderComponentType name, String pos) {
+		if (!renderComponents.containsKey(name)) {
+			return null;
+		}
+		List<RenderComponent> components = new ArrayList<RenderComponent>();
+		for (RenderComponent c : renderComponents.get(name)) {
+			if (c.pos.equals(pos)) {
+				components.add(c);
+			}
+		}
+		return components;
 	}
 
 	public Vec3d getPassengerCenter() {
