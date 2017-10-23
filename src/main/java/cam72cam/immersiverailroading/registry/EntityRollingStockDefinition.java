@@ -23,8 +23,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public abstract class EntityRollingStockDefinition {
-	public abstract EntityRollingStock instance(World world);
+public class EntityRollingStockDefinition {
+	
+	public EntityRollingStock instance(World world) {
+		return null;
+	}
 	
 	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing) {
 		EntityRollingStock stock = instance(world);
@@ -37,9 +40,9 @@ public abstract class EntityRollingStockDefinition {
 	}
 
 	protected String defID;
-	public String name;
+	public String name = "Unknown";
 	private OBJModel model;
-	private Vec3d passengerCenter;
+	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
 	private float bogeyRear;
 
@@ -57,6 +60,14 @@ public abstract class EntityRollingStockDefinition {
 
 	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
+		if (data == null) {
+			// USED ONLY RIGHT BEFORE REMOVING UNKNOWN STOCK
+
+			renderComponents = new HashMap<RenderComponentType, List<RenderComponent>>();
+			itemComponents = new ArrayList<ItemComponentType>();
+			
+			return;
+		}
 		
 		parseJson(data);
 		
@@ -238,6 +249,7 @@ public abstract class EntityRollingStockDefinition {
 
 	public List<String> getTooltip() {
 		List<String> tips = new ArrayList<String>();
+		tips.add(name);
 		return tips;
 	}
 

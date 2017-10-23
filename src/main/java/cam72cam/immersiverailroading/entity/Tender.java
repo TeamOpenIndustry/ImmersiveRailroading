@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
@@ -21,7 +20,7 @@ public class Tender extends CarTank implements IFluidHandler {
 	}
 	
 	public TenderDefinition getDefinition() {
-		return (TenderDefinition) DefinitionManager.getDefinition(defID);
+		return super.getDefinition(TenderDefinition.class);
 	}
 	
 	@Override

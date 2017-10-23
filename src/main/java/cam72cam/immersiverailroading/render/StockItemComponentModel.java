@@ -42,6 +42,10 @@ public class StockItemComponentModel implements IBakedModel {
 	private double length;
 	
 	private static Map<String, OBJRender> render_cache = new HashMap<String, OBJRender>();
+	
+	public static void clearRenderCache() {
+		render_cache = new HashMap<String, OBJRender>(); 
+	}
 
 	public StockItemComponentModel() {
 	}
@@ -53,6 +57,7 @@ public class StockItemComponentModel implements IBakedModel {
 		
 		if (def == null) {
 			ImmersiveRailroading.logger.error("Item missing definition!");
+			stack.setCount(0);
 			return;
 		}
 

@@ -14,8 +14,8 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 
 	private int numSlots;
 	private int width;
-	private List<String> validCargo;
-
+	private List<String> validCargo = new ArrayList<String>();
+	
 	public CarFreightDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 	}

@@ -5,6 +5,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.lang.reflect.InvocationTargetException;
+
+import com.google.gson.JsonObject;
+
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -30,10 +35,33 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.isImmuneToFire = true;
 		super.entityCollisionReduction = 1F;
 		super.ignoreFrustumCheck = true;
-	} 
+	}
 
 	public EntityRollingStockDefinition getDefinition() {
-		return DefinitionManager.getDefinition(defID);
+		return this.getDefinition(EntityRollingStockDefinition.class);
+	}
+	public <T extends EntityRollingStockDefinition> T getDefinition(Class<T> type) {
+		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+		if (def == null) {
+			try {
+				return type.getConstructor(String.class, JsonObject.class).newInstance(defID, (JsonObject)null);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+					| SecurityException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} else {
+			return type.cast(def);
+		}
+	}
+	
+	public void onUpdate() {
+		if (!world.isRemote && this.ticksExisted % 5 == 0) {
+			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+			if (def == null) {
+				world.removeEntity(this);
+			}
+		}
 	}
 
 	/*

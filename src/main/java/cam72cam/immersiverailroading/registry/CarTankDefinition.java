@@ -17,8 +17,8 @@ import net.minecraftforge.fluids.FluidRegistry;
 public class CarTankDefinition extends EntityRollingStockDefinition {
 
 	private List<Fluid> fluidFilter = null; // null == no filter
-	private FluidQuantity capacity;
-
+	private FluidQuantity capacity = FluidQuantity.ZERO;
+	
 	public CarTankDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 	}

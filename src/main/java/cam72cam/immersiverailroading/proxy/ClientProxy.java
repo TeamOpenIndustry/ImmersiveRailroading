@@ -2,7 +2,9 @@ package cam72cam.immersiverailroading.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.lwjgl.input.Keyboard;
@@ -57,6 +59,8 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.resources.IResource;
+import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -118,7 +122,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 	
-	
 
 	@Override
 	public void init(FMLInitializationEvent event) {
@@ -144,6 +147,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_ZERO));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.HORN));
 		
+		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
 	}
 	
 	public World getWorld(int dimension)  {
@@ -265,6 +269,14 @@ public class ClientProxy extends CommonProxy {
 
 	public InputStream getResourceStream(ResourceLocation modelLoc) throws IOException {
 		return Minecraft.getMinecraft().getResourceManager().getResource(modelLoc).getInputStream();
+	}
+	
+	public List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException {
+		List<InputStream> res = new ArrayList<InputStream>();
+		for (IResource resource : Minecraft.getMinecraft().getResourceManager().getAllResources(modelLoc)) {
+			res.add(resource.getInputStream());
+		}
+		return res;
 	}
 	
 	@SubscribeEvent

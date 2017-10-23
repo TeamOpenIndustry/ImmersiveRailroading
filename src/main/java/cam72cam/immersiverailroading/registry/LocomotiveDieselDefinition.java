@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import net.minecraft.world.World;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
-	private FluidQuantity fuelCapacity;
+	private FluidQuantity fuelCapacity = FluidQuantity.ZERO;
 	private int fuelEfficiency;
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
