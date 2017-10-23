@@ -6,7 +6,6 @@ import java.util.List;
 import blusunrize.immersiveengineering.api.energy.DieselHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.entity.Entity;
@@ -26,7 +25,7 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 	}
 
 	public LocomotiveDieselDefinition getDefinition() {
-		return (LocomotiveDieselDefinition) DefinitionManager.getDefinition(defID);
+		return super.getDefinition(LocomotiveDieselDefinition.class);
 	}
 	
 	@Override

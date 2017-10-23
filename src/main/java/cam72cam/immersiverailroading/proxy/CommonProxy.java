@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.proxy;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
@@ -63,6 +65,7 @@ import net.minecraftforge.oredict.OreDictionary;
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
 	protected static List<Class<? extends EntityRollingStock>> entityClasses = new ArrayList<Class<? extends EntityRollingStock>>();
+	protected String configDir;
     static {
     	entityClasses.add(LocomotiveSteam.class);
     	entityClasses.add(LocomotiveDiesel.class);
@@ -71,8 +74,9 @@ public abstract class CommonProxy implements IGuiHandler {
     	entityClasses.add(CarTank.class);
     	entityClasses.add(Tender.class);
     }
-	
+    
     public void preInit(FMLPreInitializationEvent event) throws IOException {
+    	configDir = event.getModConfigurationDirectory().getAbsolutePath() + File.separator + ImmersiveRailroading.MODID;
     	DefinitionManager.initDefinitions();
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.BRICK_BLOCK);
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.COBBLESTONE);
@@ -99,6 +103,9 @@ public abstract class CommonProxy implements IGuiHandler {
     	
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     }
+    
+	public void serverStarting(FMLServerStartingEvent event) {
+	}
     
     public abstract World getWorld(int dimension);
     
@@ -151,6 +158,7 @@ public abstract class CommonProxy implements IGuiHandler {
 	}
 
 	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
+	public abstract List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException;
 	
 
 

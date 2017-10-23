@@ -9,11 +9,11 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.Speed;
 
-public abstract class LocomotiveDefinition extends EntityRollingStockDefinition  {
-	private String works;
+public class LocomotiveDefinition extends EntityRollingStockDefinition  {
+	private String works = "Unknown";
 	private int power;
 	private int traction;
-	private Speed maxSpeed;
+	private Speed maxSpeed = Speed.ZERO;
 	
 	public LocomotiveDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);

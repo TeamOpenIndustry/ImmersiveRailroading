@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.item.ItemStack;
@@ -42,7 +41,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	}
 
 	public LocomotiveSteamDefinition getDefinition() {
-		return (LocomotiveSteamDefinition) DefinitionManager.getDefinition(defID);
+		return super.getDefinition(LocomotiveSteamDefinition.class);
 	}
 
 	@Override

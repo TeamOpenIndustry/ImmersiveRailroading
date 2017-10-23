@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.entity;
 import java.util.List;
 
 import cam72cam.immersiverailroading.registry.CarTankDefinition;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
@@ -19,7 +18,7 @@ public class CarTank extends FreightTank {
 	}
 	
 	public CarTankDefinition getDefinition() {
-		return (CarTankDefinition) DefinitionManager.getDefinition(defID);
+		return super.getDefinition(CarTankDefinition.class);
 	}
 
 	@Override

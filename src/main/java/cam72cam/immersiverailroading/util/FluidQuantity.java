@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.Config;
 import net.minecraftforge.fluids.Fluid;
 
 public class FluidQuantity {
+	public static final FluidQuantity ZERO = FromBuckets(0);
 	private final int mb;
 	
 	private FluidQuantity(int mb) {

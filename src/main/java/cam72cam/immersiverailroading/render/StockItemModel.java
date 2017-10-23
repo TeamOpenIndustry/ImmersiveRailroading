@@ -32,6 +32,10 @@ import util.Matrix4;
 public class StockItemModel implements IBakedModel {
 	private static Map<String, OBJRender> render_cache = new HashMap<String, OBJRender>();
 	private OBJRender model;
+	
+	public static void clearRenderCache() {
+		render_cache = new HashMap<String, OBJRender>(); 
+	}
 
 	public StockItemModel() {
 	}
@@ -42,6 +46,8 @@ public class StockItemModel implements IBakedModel {
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 			if (def != null) {
 				render_cache.put(defID, new OBJRender(def.getModel()));
+			} else {
+				stack.setCount(0);
 			}
 		}
 		model = render_cache.get(defID);
@@ -60,16 +66,18 @@ public class StockItemModel implements IBakedModel {
 		 * This is probably really fragile if someone calls getQuads
 		 * before actually setting up the correct GL context.
 		 */
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
-		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-		
-		GL11.glPushMatrix();
-		GL11.glScaled(0.2, 0.2, 0.2);
-		model.draw();
-		GL11.glPopMatrix();
-		
-		tex.restore();
-		cull.restore();
+		if (model != null) {
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+			
+			GL11.glPushMatrix();
+			GL11.glScaled(0.2, 0.2, 0.2);
+			model.draw();
+			GL11.glPopMatrix();
+			
+			tex.restore();
+			cull.restore();
+		}
 		return new ArrayList<BakedQuad>();
 	}
 

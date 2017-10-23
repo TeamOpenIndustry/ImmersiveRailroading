@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.registry.CarFreightDefinition;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
 import net.minecraft.world.World;
 
 public class CarFreight extends Freight {
@@ -14,7 +13,7 @@ public class CarFreight extends Freight {
 	}
 	
 	public CarFreightDefinition getDefinition() {
-		return (CarFreightDefinition) DefinitionManager.getDefinition(defID);
+		return super.getDefinition(CarFreightDefinition.class);
 	}
 
 	@Override

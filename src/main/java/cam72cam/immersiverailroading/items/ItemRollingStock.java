@@ -23,6 +23,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
@@ -57,7 +58,10 @@ public class ItemRollingStock extends Item {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.addAll(DefinitionManager.getDefinition(defFromStack(stack)).getTooltip());
+        EntityRollingStockDefinition def = DefinitionManager.getDefinition(defFromStack(stack));
+        if (def != null) {
+        	tooltip.addAll(def.getTooltip());
+        }
     }
 	
 	@Override
@@ -65,6 +69,10 @@ public class ItemRollingStock extends Item {
 		ItemStack stack = player.getHeldItem(hand);
 		
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defFromStack(stack));
+		if (def == null) {
+			player.sendMessage(new TextComponentString("Error: Rolling stock does not exist on the server.  Can not place"));
+			return EnumActionResult.FAIL;
+		}
 		
 		return SpawnUtil.placeStock(player, hand, worldIn, pos, def, def.getItemComponents());
 	}
