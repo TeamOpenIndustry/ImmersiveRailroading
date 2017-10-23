@@ -1,32 +1,50 @@
 package cam72cam.immersiverailroading.render;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.items.ItemRollingStock;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import util.Matrix4;
 
 public class StockItemModel implements IBakedModel {
-
+	private static Map<String, OBJRender> render_cache = new HashMap<String, OBJRender>();
 	private OBJRender model;
-	private int displayList = -1;
 
-	public StockItemModel(EntityRollingStockDefinition def) {
-		this.model = new OBJRender(def.getModel());
+	public StockItemModel() {
+	}
+	
+	public StockItemModel(ItemStack stack) {
+		String defID = ItemRollingStock.defFromStack(stack);
+			if (!render_cache.containsKey(defID)) {
+			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+			if (def != null) {
+				render_cache.put(defID, new OBJRender(def.getModel()));
+			}
+		}
+		model = render_cache.get(defID);
 	}
 	
 	@Override
@@ -45,19 +63,10 @@ public class StockItemModel implements IBakedModel {
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 		
-		if (displayList == -1) {
-			displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			{
-				GL11.glPushMatrix();
-				
-				model.drawDirectGroups(model.model.groups(), 0.2);
-				GL11.glPopMatrix();
-			}
-			GL11.glEndList();
-		}
-		
-		GL11.glCallList(displayList);
+		GL11.glPushMatrix();
+		GL11.glScaled(0.2, 0.2, 0.2);
+		model.draw();
+		GL11.glPopMatrix();
 		
 		tex.restore();
 		cull.restore();
@@ -84,9 +93,19 @@ public class StockItemModel implements IBakedModel {
 		return null;
 	}
 
+	public class ItemOverrideListHack extends ItemOverrideList {
+		public ItemOverrideListHack() {
+			super(new ArrayList<ItemOverride>());
+		}
+
+		public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
+			return new StockItemModel(stack);
+		}
+	}
+
 	@Override
 	public ItemOverrideList getOverrides() {
-		return ItemOverrideList.NONE;
+		return new ItemOverrideListHack();
 	}
 
 	@Override

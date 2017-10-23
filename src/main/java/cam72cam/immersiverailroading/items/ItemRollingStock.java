@@ -52,9 +52,6 @@ public class ItemRollingStock extends Item {
         	}
         }
     }
-	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName(stack) + "." + defFromStack(stack);
-	}
 	
 	@SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)

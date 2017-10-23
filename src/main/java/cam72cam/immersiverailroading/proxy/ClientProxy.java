@@ -32,12 +32,10 @@ import cam72cam.immersiverailroading.gui.TenderContainerGui;
 import cam72cam.immersiverailroading.gui.TrackGui;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
-import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.RailItemModel;
 import cam72cam.immersiverailroading.render.SteamHammerItemRender;
 import cam72cam.immersiverailroading.render.TileSteamHammerRender;
@@ -56,8 +54,6 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -193,23 +189,13 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_STEAM_HAMMER, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_STEAM_HAMMER.getRegistryName(), ""));
 
-		ModelLoader.setCustomMeshDefinition(ImmersiveRailroading.ITEM_ROLLING_STOCK, new ItemMeshDefinition() {
-			@Override
-			public ModelResourceLocation getModelLocation(ItemStack stack) {
-				// TODO NBT or Damage
-				return new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), ItemRollingStock.defFromStack(stack));
-			}
-		});
+		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK, 0,
+				new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), ""));
 	}
 
 	@SubscribeEvent
 	public static void onModelBakeEvent(ModelBakeEvent event) {
-		for (String defID : DefinitionManager.getDefinitionNames()) {
-			ModelResourceLocation loc = new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), defID);
-			IBakedModel model = new StockItemModel(DefinitionManager.getDefinition(defID));
-			event.getModelRegistry().putObject(loc, model);
-		}
-
+		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), ""), new StockItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""), new RailItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""), new StockItemComponentModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_STEAM_HAMMER.getRegistryName(), ""), new SteamHammerItemRender());
