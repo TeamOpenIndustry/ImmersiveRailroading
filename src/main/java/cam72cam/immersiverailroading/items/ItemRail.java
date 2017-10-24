@@ -15,7 +15,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -76,6 +75,7 @@ public class ItemRail extends ItemBlock {
         tooltip.add("Quarters: " + getQuarters(stack));
         tooltip.add("Position: " + getPosType(stack));
         tooltip.add("Rail Bed: " + getBed(stack).getDisplayName());
+        tooltip.add("Rail Bed Fill: " + getBedFill(stack).getDisplayName());
         tooltip.add("Preview:  " + isPreview(stack));
 	}
 
@@ -139,7 +139,7 @@ public class ItemRail extends ItemBlock {
 		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("bedItem")) { 
 			return new ItemStack(stack.getTagCompound().getCompoundTag("bedItem"));
 		} else {
-			return new ItemStack(Items.AIR);
+			return ItemStack.EMPTY;
 		}
 	}
 	
@@ -147,15 +147,15 @@ public class ItemRail extends ItemBlock {
 		stack.getTagCompound().setTag("bedItem", base.serializeNBT());
 	}
 
-	public static boolean getBedFill(ItemStack stack) {
+	public static ItemStack getBedFill(ItemStack stack) {
 		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("bedFill")) { 
-			return stack.getTagCompound().getBoolean("bedFill");
+			return new ItemStack(stack.getTagCompound().getCompoundTag("bedFill"));
 		} else {
-			return false;
+			return ItemStack.EMPTY;
 		}
 	}
-	public static void setBedFill(ItemStack stack, boolean value) {
-		stack.getTagCompound().setBoolean("bedFill", value);
+	public static void setBedFill(ItemStack stack, ItemStack base) {
+		stack.getTagCompound().setTag("bedFill", base.serializeNBT());
 	}
 
 	public static boolean isPreview(ItemStack stack) {

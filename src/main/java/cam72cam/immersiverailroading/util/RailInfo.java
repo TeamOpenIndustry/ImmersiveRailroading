@@ -36,14 +36,14 @@ public class RailInfo {
 	public int quarters;
 	public Vec3d placementPosition;
 	public ItemStack railBed;
-	public boolean railBedFill;
+	public ItemStack railBedFill;
 
 	// Used for tile rendering only
 	public boolean snowRenderFlagDirty = false;
 	public SwitchState switchState = SwitchState.NONE;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition, ItemStack railBed, boolean railBedFill) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -54,6 +54,7 @@ public class RailInfo {
 		this.quarters = quarters;
 		this.placementPosition = placementPosition;
 		this.railBed = railBed;
+		this.railBedFill = railBedFill;
 	}
 	
 	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
@@ -151,6 +152,7 @@ public class RailInfo {
 				int ties = 0;
 				int rails = 0;
 				int bed = 0;
+				int fill = 0;
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
 					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
@@ -161,6 +163,9 @@ public class RailInfo {
 					}
 					if (railBed.getItem() != Items.AIR && railBed.getItem() == playerStack.getItem() && railBed.getMetadata() == playerStack.getMetadata()) {
 						bed += playerStack.getCount();
+					}
+					if (railBedFill.getItem() != Items.AIR && railBedFill.getItem() == playerStack.getItem() && railBedFill.getMetadata() == playerStack.getMetadata()) {
+						fill += playerStack.getCount();
 					}
 				}
 				
@@ -178,10 +183,16 @@ public class RailInfo {
 					player.sendMessage(new TextComponentString("Missing " + (builder.costBed() - bed) + " rail bed"));
 					return false;
 				}
+				
+				if (railBedFill.getItem() != Items.AIR && fill < builder.costFill()) {
+					player.sendMessage(new TextComponentString("Missing " + (builder.costFill() - fill) + " rail bed fill"));
+					return false;
+				}
 
 				ties = builder.costTies();
 				rails = builder.costRails();
 				bed = builder.costBed();
+				fill = builder.costFill();
 				List<ItemStack> drops = new ArrayList<ItemStack>();
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
@@ -228,6 +239,21 @@ public class RailInfo {
 							drops.add(copy); 
 							playerStack.setCount(playerStack.getCount() - bed);
 							bed = 0;
+						}
+					}
+					if (railBedFill.getItem() != Items.AIR && railBedFill.getItem() == playerStack.getItem() && railBedFill.getMetadata() == playerStack.getMetadata()) {
+						if (fill > playerStack.getCount()) {
+							fill -= playerStack.getCount();
+							ItemStack copy = playerStack.copy();
+							copy.setCount(playerStack.getCount());
+							//drops.add(copy);  
+							playerStack.setCount(0);
+						} else if (fill != 0) {
+							ItemStack copy = playerStack.copy();
+							copy.setCount(fill);
+							//drops.add(copy); 
+							playerStack.setCount(playerStack.getCount() - fill);
+							fill = 0;
 						}
 					}
 				}

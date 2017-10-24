@@ -475,7 +475,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {
-		return VecUtil.fromYaw(getDefinition().getCouplerPosition(coupler), rotationYaw + coupler.yaw).add(getPositionVector());
+		
+		//Don't ask me why these are reversed...
+		if (coupler == CouplerType.FRONT) {
+			return predictRearBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(this.getPositionVector());
+		} else {
+			return predictFrontBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(this.getPositionVector());
+		}
 	}
 
 	public List<EntityCoupleableRollingStock> potentialCouplings(CouplerType coupler) {

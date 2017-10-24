@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -35,7 +36,7 @@ public class SteamHammerItemRender implements IBakedModel {
 	
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 		
 		GL11.glPushMatrix();
 		double scale = 0.2;
@@ -43,7 +44,7 @@ public class SteamHammerItemRender implements IBakedModel {
 		renderer.draw();
 		GL11.glPopMatrix();
 		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		tex.restore();
 		return new ArrayList<BakedQuad>();
 	}
 

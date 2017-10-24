@@ -12,10 +12,10 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
@@ -58,16 +58,22 @@ public class RailItemModel implements IBakedModel {
 		GL11.glRotated(-90, 0, 1, 0);
 		GL11.glRotated(-90, 1, 0, 0);
 		
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_CULL_FACE);
+		
 			
 		double scale = 0.95/info.length;
+		if (info.type == TrackItems.CROSSING) {
+			scale = 0.95 / 3;
+		}
 		GL11.glScaled(scale, -scale*2, scale);
 
-		RenderHelper.disableStandardItemLighting();
+		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+		GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
+		
 		RailBaseRender.draw(info);
 		RailBuilderRender.renderRailBuilder(info);
-		RenderHelper.enableStandardItemLighting();
+		
+		lighting.restore();
+		cull.restore();
 		
 		GL11.glPopMatrix();
 		

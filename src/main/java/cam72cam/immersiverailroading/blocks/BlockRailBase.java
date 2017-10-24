@@ -11,9 +11,12 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -98,8 +101,9 @@ public abstract class BlockRailBase extends Block {
 		
 		IBlockState up = world.getBlockState(pos.up());
 		if (up.getBlock() == Blocks.SNOW_LAYER) {
-			tileEntity.getWorld().setBlockToAir(pos.up());
-			tileEntity.handleSnowTick();
+			if (tileEntity.handleSnowTick()) {
+				tileEntity.getWorld().setBlockToAir(pos.up());
+			}
 		}
 		if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
 			SwitchState state = SwitchUtil.getSwitchState(tileEntity.getParentTile());
@@ -161,6 +165,42 @@ public abstract class BlockRailBase extends Block {
 	@Override
     public BlockFaceShape getBlockFaceShape(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
+		if (p_193383_4_ == EnumFacing.UP) {
+			// SNOW ONLY?
+			return BlockFaceShape.SOLID;
+		}
         return BlockFaceShape.UNDEFINED;
     }
+	
+	@Override
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		ItemStack stack = playerIn.getHeldItem(hand);
+		Block block = Block.getBlockFromItem(stack.getItem());
+		TileEntity te = worldIn.getTileEntity(pos);
+		if (te instanceof TileRailBase) {
+			if (block == Blocks.SNOW_LAYER) {
+				if (!worldIn.isRemote) {
+					((TileRailBase) te).handleSnowTick();
+				}
+				return true;
+			}
+			if (block == Blocks.SNOW) {
+				if (!worldIn.isRemote) {
+					for (int i = 0; i < 8; i ++) {
+						((TileRailBase) te).handleSnowTick();
+					}
+				}
+				return true;
+			}
+			if (stack.getItem().getToolClasses(stack).contains("shovel")) {
+				if (!worldIn.isRemote) {
+					((TileRailBase) te).cleanSnow();
+					((TileRailBase) te).setSnowLayers(0);
+					stack.damageItem(1, playerIn);
+				}
+			}
+		}
+		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+		
+	}
 }

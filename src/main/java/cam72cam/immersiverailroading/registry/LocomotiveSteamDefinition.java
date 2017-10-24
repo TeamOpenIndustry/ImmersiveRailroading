@@ -46,6 +46,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public EntityRollingStock instance(World world) {
 		return new LocomotiveSteam(world, defID);
 	}
+	
+	@Override
+	protected boolean unifiedBogies() {
+		return false;
+	}
 
 	@Override
 	protected Set<String> parseComponents() {

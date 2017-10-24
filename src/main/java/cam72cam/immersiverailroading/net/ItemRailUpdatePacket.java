@@ -23,7 +23,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	private TrackItems type;
 	private TrackPositionType posType;
 	private ItemStack bedStack;
-	private boolean railBedFill;
+	private ItemStack railBedFill;
 	private boolean isPreview;
 	private BlockPos tilePreviewPos;
 	
@@ -32,7 +32,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, boolean railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
@@ -43,7 +43,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.isPreview = isPreview;
 	}
 
-	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, boolean railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
 		this.tilePreviewPos = tilePreviewPos;
 		this.length = length;
 		this.quarters = quarters;
@@ -66,7 +66,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.type = TrackItems.values()[buf.readInt()];
 		this.posType = TrackPositionType.values()[buf.readInt()];
 		this.bedStack = ByteBufUtils.readItemStack(buf);
-		this.railBedFill = buf.readBoolean();
+		this.railBedFill = ByteBufUtils.readItemStack(buf);
 		this.isPreview = buf.readBoolean();
 	}
 
@@ -83,7 +83,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		buf.writeInt(type.ordinal());
 		buf.writeInt(posType.ordinal());
 		ByteBufUtils.writeItemStack(buf, bedStack);
-		buf.writeBoolean(railBedFill);
+		ByteBufUtils.writeItemStack(buf, railBedFill);
 		buf.writeBoolean(isPreview);
 	}
 	

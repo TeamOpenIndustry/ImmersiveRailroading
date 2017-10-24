@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
@@ -27,11 +28,10 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 
 		StockModel model = StockModel.get(def.getModel());
 
-		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();
-
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_CULL_FACE);
+		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 
 		// Move to specified position
 		GlStateManager.translate(x, y + 0.35, z);
@@ -42,11 +42,11 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		
 		model.draw(stock);
 		
-		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		tex.restore();
+		cull.restore();
+		light.restore();
 
 		GlStateManager.popMatrix();
-		GlStateManager.popAttrib();
 	}
 
 	@Override

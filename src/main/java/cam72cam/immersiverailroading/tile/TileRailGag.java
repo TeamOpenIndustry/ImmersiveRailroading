@@ -5,4 +5,9 @@ public class TileRailGag extends TileRailBase {
 		this.flexible = flexible;
 		this.markDirty();
 	}
+	
+	public boolean hasFastRenderer()
+    {
+        return false;
+    }
 }

@@ -97,27 +97,27 @@ public class StockModel extends OBJRender {
 		
 		drawComponent(def.getComponent(RenderComponentType.FRAME));
 		drawComponent(def.getComponent(RenderComponentType.SHELL));
-		drawComponents(def.getComponents(RenderComponentType.FRAME_WHEEL_X));		
+		drawComponents(def.getComponents(RenderComponentType.FRAME_WHEEL_X));
 
-		if (def.getComponent(RenderComponentType.BOGEY_FRONT) != null) {
+		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT") != null) {
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(-def.getBogeyFront(), 0, 0);
 			GlStateManager.rotate(180 - stock.getFrontYaw(), 0, 1, 0);		
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyFront(), 0, 0);
-			drawComponent(def.getComponent(RenderComponentType.BOGEY_FRONT));
-			drawComponents(def.getComponents(RenderComponentType.BOGEY_FRONT_WHEEL_X));
+			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "FRONT"));
+			drawComponents(def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT"));
 			GlStateManager.popMatrix();
 		}
 		
-		if (def.getComponent(RenderComponentType.BOGEY_REAR) != null) {
+		if (def.getComponent(RenderComponentType.BOGEY_POS) != null) {
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(-def.getBogeyRear(), 0, 0);
 			GlStateManager.rotate(180 - stock.getRearYaw(), 0, 1, 0);
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyRear(), 0, 0);
-			drawComponent(def.getComponent(RenderComponentType.BOGEY_REAR));
-			drawComponents(def.getComponents(RenderComponentType.BOGEY_REAR_WHEEL_X));
+			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "REAR"));
+			drawComponents(def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR"));
 			GlStateManager.popMatrix();
 		}
 
@@ -154,9 +154,10 @@ public class StockModel extends OBJRender {
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X);
 				drawDrivingWheels(stock, wheels);
+				RenderComponent center = new MultiRenderComponent(wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT", 0, wheel.height(), wheel.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), wheel.center(), wheel.center());
+				drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
+				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
 			}
 			break;
 		case MALLET_WALSCHAERTS:

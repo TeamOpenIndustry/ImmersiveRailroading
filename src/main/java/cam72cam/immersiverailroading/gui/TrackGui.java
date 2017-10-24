@@ -29,19 +29,19 @@ public class TrackGui extends GuiScreen {
 	private GuiButton typeButton;
 	private GuiTextField lengthInput;
 	private GuiSlider quartersSlider;
-	private GuiCheckBox railBedFillCB;
 	private GuiCheckBox isPreviewCB;
 
 	private int slot;
 	private int length;
 	private int quarters;
-	private boolean railBedFill;
 	private boolean isPreview;
 	private TrackItems type;
 	private TrackPositionType posType;
 	private GuiButton posTypeButton;
 	private GuiButton bedTypeButton;
 	private ItemPickerGUI bedSelector;
+	private GuiButton bedFillButton;
+	private ItemPickerGUI bedFillSelector;
 
 	private final Predicate<String> integerFilter = new Predicate<String>() {
 		public boolean apply(@Nullable String inputString) {
@@ -77,7 +77,6 @@ public class TrackGui extends GuiScreen {
 		quarters = ItemRail.getQuarters(stack);
 		type = ItemRail.getType(stack);
 		posType = ItemRail.getPosType(stack);
-		railBedFill = ItemRail.getBedFill(stack);
 		isPreview = ItemRail.isPreview(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
@@ -92,12 +91,16 @@ public class TrackGui extends GuiScreen {
 		}
 		bedSelector = new ItemPickerGUI(oreDict);
 		bedSelector.choosenItem = ItemRail.getBed(stack);
+		bedFillSelector = new ItemPickerGUI(oreDict);
+		bedFillSelector.choosenItem = ItemRail.getBedFill(stack);
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		if (bedSelector.isActive) {
 			bedSelector.drawScreen(mouseX, mouseY, partialTicks);
+		} else if (bedFillSelector.isActive) {
+			bedFillSelector.drawScreen(mouseX, mouseY, partialTicks);
 		} else {
 			this.drawDefaultBackground();
 	        this.lengthInput.drawTextBox();
@@ -119,16 +122,24 @@ public class TrackGui extends GuiScreen {
 	public void setWorldAndResolution(Minecraft mc, int width, int height) {
 		super.setWorldAndResolution(mc, width, height);
 		bedSelector.setWorldAndResolution(mc, width, height);
+		bedFillSelector.setWorldAndResolution(mc, width, height);
 	}
 	
 	public void setGuiSize(int w, int h) {
 		this.setGuiSize(w, h);
 		bedSelector.setGuiSize(w, h);
+		bedFillSelector.setGuiSize(w, h);
 	}
 	
 	public String getBedstackName() {
 		if (bedSelector.choosenItem.getItem() != Items.AIR) {
 			return bedSelector.choosenItem.getDisplayName();
+		}
+		return "None";
+	}
+	public String getBedFillName() {
+		if (bedFillSelector.choosenItem.getItem() != Items.AIR) {
+			return bedFillSelector.choosenItem.getDisplayName();
 		}
 		return "None";
 	}
@@ -151,12 +162,12 @@ public class TrackGui extends GuiScreen {
 		quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		this.buttonList.add(quartersSlider);
 		
-		this.railBedFillCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Fill Rail Bed", railBedFill);
-		this.buttonList.add(railBedFillCB);
-		
 		bedTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "RailBed: " + getBedstackName());
 		this.buttonList.add(bedTypeButton);
 
+		bedFillButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "RailBed Fill: " + getBedFillName());
+		this.buttonList.add(bedFillButton);
+		
 		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "Position: " + posType.name());
 		this.buttonList.add(posTypeButton);
 		
@@ -179,8 +190,8 @@ public class TrackGui extends GuiScreen {
 		if (button == bedTypeButton) {
 			bedSelector.isActive = true;
 		}
-		if (button == railBedFillCB) {
-			railBedFill = railBedFillCB.isChecked();
+		if (button == bedFillButton) {
+			bedFillSelector.isActive = true;
 		}
 		if (button == isPreviewCB) {
 			isPreview = isPreviewCB.isChecked();
@@ -194,13 +205,17 @@ public class TrackGui extends GuiScreen {
         		bedSelector.isActive = false;
         		return;
         	}
+        	if (bedFillSelector.isActive) {
+        		bedFillSelector.isActive = false;
+        		return;
+        	}
         	if (!this.lengthInput.getText().isEmpty()) {
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, railBedFill, isPreview));
+    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
         		} else {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, railBedFill, isPreview));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
         		}
         	}
 			this.mc.displayGuiScreen(null);
@@ -215,6 +230,15 @@ public class TrackGui extends GuiScreen {
 
 			if (!bedSelector.isActive) {
 				bedTypeButton.displayString = "RailBed: " + getBedstackName();
+			}
+        	
+        	return;
+        }
+        if (bedFillSelector.isActive) {
+        	bedFillSelector.mouseClicked(mouseX, mouseY, mouseButton);
+
+			if (!bedFillSelector.isActive) {
+				bedFillButton.displayString = "RailBed Fill: " + getBedFillName();
 			}
         	
         	return;

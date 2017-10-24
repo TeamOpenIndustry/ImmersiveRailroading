@@ -3,20 +3,16 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TileRailPreview extends TileEntity {
+public class TileRailPreview extends SyncdTileEntity {
 
 	private ItemStack item;
 	float yawHead;
 	float hitX;
 	float hitY;
 	float hitZ;
-	public boolean hasTileData;
 	
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -30,21 +26,13 @@ public class TileRailPreview extends TileEntity {
 	{
 		return Double.MAX_VALUE;
 	}
-	
-	@Override
-	public void markDirty() {
-		super.markDirty();
-		
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-		world.notifyBlockUpdate(getPos(), world.getBlockState(getPos()), world.getBlockState(getPos()), 3);
-	}
 
 	public ItemStack getItem() {
 		return this.item;
 	}
 
 	public void setItem(ItemStack stack) {
-		this.item = stack;
+		this.item = stack.copy();
 		this.markDirty();
 	}
 
@@ -56,7 +44,7 @@ public class TileRailPreview extends TileEntity {
 	}
 	
 	public void init(ItemStack item, float yawHead, float hitX, float hitY, float hitZ) {
-		this.item = item;
+		this.item = item.copy();
 		this.yawHead = yawHead;
 		this.hitX = hitX;
 		this.hitY = hitY;
@@ -90,36 +78,5 @@ public class TileRailPreview extends TileEntity {
 			return new RailInfo(item, world, yawHead, pos, hitX, hitY, hitZ);
 		}
 		return null;
-	}
-	
-	@Override
-	public SPacketUpdateTileEntity getUpdatePacket() {
-		NBTTagCompound nbt = new NBTTagCompound();
-		this.writeToNBT(nbt);
-		
-		return new SPacketUpdateTileEntity(this.getPos(), 1, nbt);
-	}
-
-	@Override
-	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-		this.readFromNBT(pkt.getNbtCompound());
-		super.onDataPacket(net, pkt);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-		hasTileData = true;
-	}
-	
-	@Override
-	public NBTTagCompound getUpdateTag() {
-		NBTTagCompound tag = super.getUpdateTag();
-		this.writeToNBT(tag);
-		return tag;
-	}
-	
-	@Override 
-	public void handleUpdateTag(NBTTagCompound tag) {
-		this.readFromNBT(tag);
-		super.handleUpdateTag(tag);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
-		hasTileData = true;
 	}
 }

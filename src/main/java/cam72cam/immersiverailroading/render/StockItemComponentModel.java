@@ -18,8 +18,8 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
@@ -86,20 +86,19 @@ public class StockItemComponentModel implements IBakedModel {
 		
 		//GL11.glRotated(-90, 0, 1, 0);
 		//GL11.glRotated(90, 1, 0, 0);
-		
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_CULL_FACE);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		
 		GL11.glTranslated(-center.x, -center.y, -center.z);
-
-		RenderHelper.disableStandardItemLighting();
+		
+		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
+		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
 
 		renderer.drawGroups(groups);
 		
-		RenderHelper.enableStandardItemLighting();
-
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		blend.restore();
+		cull.restore();
+		tex.restore();
+		light.restore();
 		
 		GL11.glPopMatrix();
 		
