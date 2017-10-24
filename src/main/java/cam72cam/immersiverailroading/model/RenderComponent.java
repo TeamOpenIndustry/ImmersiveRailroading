@@ -14,26 +14,35 @@ public class RenderComponent {
 	public final int id;
 	public final String side;
 	public final Set<String> modelIDs;
+	public final String pos;
 	
 	public static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups) {
-		return parse(name, def, groups, -1, "");
+		return parse(name, def, groups, -1, "", "");
 	}
 	
 	public static RenderComponent parseID(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int id) {
-		return parse(name, def, groups, id, "");
+		return parse(name, def, groups, id, "", "");
 	}
 	
 	public static RenderComponent parseSide(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, String side) {
-		return parse(name, def, groups, -1, side);
+		return parse(name, def, groups, -1, side, "");
+	}
+
+	public static RenderComponent parsePos(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, String pos) {
+		return parse(name, def, groups, -1, "", pos);
+	}
+
+	public static RenderComponent parsePosID(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, String pos, int id) {
+		return parse(name, def, groups, id, "", pos);
 	}
 	
-	private static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int id, String side) {
-		RenderComponent comp = new RenderComponent(name, def, id, side);
+	private static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int id, String side, String pos) {
+		RenderComponent comp = new RenderComponent(name, def, id, side, pos);
 		
 		String idStr = id != -1 ? "" + id : "";
 		
 		for (String group : groups) {
-			if (Pattern.matches(name.regex.replace("#SIDE#", side).replaceAll("#ID#", idStr), group)) {
+			if (Pattern.matches(name.regex.replace("#SIDE#", side).replaceAll("#ID#", idStr).replaceAll("#POS#", pos), group)) {
 				comp.modelIDs.add(group);
 			}
 		}
@@ -45,16 +54,17 @@ public class RenderComponent {
 		return comp;
 	} 
 
-	private RenderComponent(RenderComponentType name, EntityRollingStockDefinition def, int wheel, String side) {
+	private RenderComponent(RenderComponentType name, EntityRollingStockDefinition def, int wheel, String side, String pos) {
 		this.modelIDs = new HashSet<String>();
 		this.type = name;
 		this.def = def;
 		this.id = wheel;
 		this.side = side;
+		this.pos = pos;
 	}
 	
 	protected RenderComponent(EntityRollingStockDefinition def) {
-		this(null, def, 0, null);
+		this(null, def, 0, null, null);
 	}
 
 	public Vec3d min() {

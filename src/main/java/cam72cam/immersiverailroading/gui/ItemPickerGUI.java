@@ -15,6 +15,11 @@ public class ItemPickerGUI extends GuiScreen {
 		this.items = items;
 	}
 	
+	public void setItems(NonNullList<ItemStack> items ) {
+		this.items = items;
+		this.initGui();
+	}
+	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.drawDefaultBackground();
@@ -41,6 +46,8 @@ public class ItemPickerGUI extends GuiScreen {
 		int startY = this.height / 4;
 		
 		int stacksX = this.width/2 / 16;
+		
+		this.buttonList.clear();
 		
 		for (int i = 0; i < items.size(); i++) {
 			int col = i % stacksX;

@@ -4,11 +4,12 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFlower;
+import net.minecraft.block.BlockGrass;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockLog;
-import net.minecraft.block.BlockMushroom;
+import net.minecraft.block.BlockSnow;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -23,7 +24,13 @@ public class BlockUtil {
 		if (block.isReplaceable(world, pos)) {
 			return true;
 		}
-		if (block instanceof BlockFlower || block == Blocks.DOUBLE_PLANT || block instanceof BlockMushroom) {
+		if (block instanceof IGrowable && !(block instanceof BlockGrass)) {
+			return true;
+		}
+		if (block instanceof BlockLiquid) {
+			return true;
+		}
+		if (block instanceof BlockSnow) {
 			return true;
 		}
 		if (block == ImmersiveRailroading.BLOCK_RAIL_PREVIEW) {
@@ -44,5 +51,9 @@ public class BlockUtil {
 			gravelState = gravelState.withProperty(BlockLog.LOG_AXIS, BlockLog.EnumAxis.Z);
 		}
 		return gravelState;
+	}
+	
+	public static boolean isRail(IBlockState state) {
+		return state.getBlock() == ImmersiveRailroading.BLOCK_RAIL || state.getBlock() == ImmersiveRailroading.BLOCK_RAIL_GAG;
 	}
 }

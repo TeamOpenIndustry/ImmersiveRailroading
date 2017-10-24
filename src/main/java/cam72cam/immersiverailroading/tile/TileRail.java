@@ -16,7 +16,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.net.SwitchStatePacket;
 import cam72cam.immersiverailroading.util.RailInfo;
 
 public class TileRail extends TileRailBase {
@@ -36,6 +35,8 @@ public class TileRail extends TileRailBase {
 	private Vec3d placementPosition;
 	
 	private List<ItemStack> drops;
+	
+	public boolean snowRenderFlagDirty = true;
 
 
 	@Override
@@ -81,9 +82,9 @@ public class TileRail extends TileRailBase {
 		return switchState;
 	}
 	public void setSwitchState(SwitchState state) {
-		this.switchState = state;
-		if (!world.isRemote) {
-			ImmersiveRailroading.net.sendToDimension(new SwitchStatePacket(this.getWorld().provider.getDimension(), this.pos, state), this.getWorld().provider.getDimension());
+		if (state != switchState) {
+			this.switchState = state;
+			this.markDirty();
 		}
 	}
 
@@ -240,10 +241,10 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition(), getRailBed(), false);
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY);
 		}
 		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
-		this.snowRenderFlagDirty = false; //THIS MIGHT BREAK STUFF
+		this.snowRenderFlagDirty = false;
 		info.switchState = this.switchState;
 		return info;
 	}
