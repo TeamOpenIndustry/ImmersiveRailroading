@@ -3,5 +3,5 @@
 	"locomotives": [ "a1_peppercorn", "big_boy", "gp-7", "ge_b40_8", "k4_pacific", "e6_atlantic" ],
 	"passenger": [ "br_coach_mk1" ],
 	"tank": [ "tank_us", "tank_us2" ],
-	"tender": [ "a1_peppercorn_tender", "k4_tender", "big_boy_tender"]
+	"tender": [ "a1_peppercorn_tender", "k4_tender", "big_boy_tender","e6_tender"]
 }
