@@ -28,6 +28,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	
 	public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+		
+		// Handle null data
+		if (tankCapacity == null) {
+			tankCapacity = FluidQuantity.ZERO;
+		}
 	}
 	
 	@Override

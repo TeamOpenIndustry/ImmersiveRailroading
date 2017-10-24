@@ -14,10 +14,15 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 
 	private int numSlots;
 	private int width;
-	private List<String> validCargo = new ArrayList<String>();
+	private List<String> validCargo;
 	
 	public CarFreightDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+		
+		// Handle null data
+		if (validCargo == null) {
+			validCargo = new ArrayList<String>();
+		}
 	}
 	
 	@Override

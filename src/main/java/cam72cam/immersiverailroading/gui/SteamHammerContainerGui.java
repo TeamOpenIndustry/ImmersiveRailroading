@@ -56,7 +56,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     }
     
     private boolean isPartOf(ItemStack item, ItemStack stock) {
-    	return ItemRollingStockComponent.defFromStack(item).equals(ItemRollingStock.defFromStack(stock));
+    	return ItemRollingStockComponent.getDefinitionID(item).equals(ItemRollingStock.getDefinitionID(stock));
     }
     
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
