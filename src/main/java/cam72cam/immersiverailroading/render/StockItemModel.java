@@ -41,7 +41,7 @@ public class StockItemModel implements IBakedModel {
 	}
 	
 	public StockItemModel(ItemStack stack) {
-		String defID = ItemRollingStock.defFromStack(stack);
+		String defID = ItemRollingStock.getDefinitionID(stack);
 			if (!render_cache.containsKey(defID)) {
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 			if (def != null) {

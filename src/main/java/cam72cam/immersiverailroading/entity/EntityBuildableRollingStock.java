@@ -173,8 +173,8 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
 			ItemStack found = player.inventory.getStackInSlot(i);
 			if (found.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
-				if (ItemRollingStockComponent.defFromStack(found).equals(this.defID)) {
-					ItemComponentType type = ItemRollingStockComponent.typeFromStack(found);
+				if (ItemRollingStockComponent.getDefinitionID(found).equals(this.defID)) {
+					ItemComponentType type = ItemRollingStockComponent.getComponentType(found);
 					if (toAdd.contains(type)) {
 						addComponent(type);
 						player.inventory.decrStackSize(i, 1);
@@ -228,7 +228,8 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		
 		ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
-		item.setTagCompound(ItemRollingStockComponent.nbtFromDef(this.defID, toRemove));
+		ItemRollingStockComponent.setDefinitionID(item, defID);
+		ItemRollingStockComponent.setComponentType(item, toRemove);
 		world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, item));
 		
 		return toRemove;
@@ -264,12 +265,13 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		if (this.isBuilt) {
 			ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK, 1, 0);
-			item.setTagCompound(ItemRollingStock.nbtFromDef(this.defID));
+			ItemRollingStock.setDefinitionID(item, defID);
 			world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
 		} else {
 			for (ItemComponentType component : this.builtItems) {
 				ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
-				item.setTagCompound(ItemRollingStockComponent.nbtFromDef(this.defID, component));
+				ItemRollingStockComponent.setDefinitionID(item, defID);
+				ItemRollingStockComponent.setComponentType(item, component);
 				world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
 			}
 		}

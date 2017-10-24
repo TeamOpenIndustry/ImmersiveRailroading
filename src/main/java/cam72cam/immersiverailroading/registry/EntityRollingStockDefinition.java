@@ -249,7 +249,6 @@ public class EntityRollingStockDefinition {
 
 	public List<String> getTooltip() {
 		List<String> tips = new ArrayList<String>();
-		tips.add(name);
 		return tips;
 	}
 

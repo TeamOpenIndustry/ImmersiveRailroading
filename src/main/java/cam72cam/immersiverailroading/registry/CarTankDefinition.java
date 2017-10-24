@@ -16,11 +16,16 @@ import net.minecraftforge.fluids.FluidRegistry;
 
 public class CarTankDefinition extends EntityRollingStockDefinition {
 
-	private List<Fluid> fluidFilter = null; // null == no filter
-	private FluidQuantity capacity = FluidQuantity.ZERO;
+	private List<Fluid> fluidFilter; // null == no filter
+	private FluidQuantity capacity;
 	
 	public CarTankDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
+		
+		// Handle null data
+		if (capacity == null) {
+			capacity = FluidQuantity.ZERO;
+		}
 	}
 	
 	@Override

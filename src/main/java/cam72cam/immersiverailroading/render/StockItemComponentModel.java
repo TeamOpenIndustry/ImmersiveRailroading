@@ -51,8 +51,8 @@ public class StockItemComponentModel implements IBakedModel {
 	}
 	
 	public StockItemComponentModel(ItemStack stack) {
-		String defID = ItemRollingStockComponent.defFromStack(stack);
-		ItemComponentType item = ItemRollingStockComponent.typeFromStack(stack);
+		String defID = ItemRollingStockComponent.getDefinitionID(stack);
+		ItemComponentType item = ItemRollingStockComponent.getComponentType(stack);
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		
 		if (def == null) {
