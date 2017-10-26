@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
@@ -70,13 +71,13 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add("Type:     " + getType(stack));
-        tooltip.add("Length:   " + getLength(stack));
-        tooltip.add("Quarters: " + getQuarters(stack));
-        tooltip.add("Position: " + getPosType(stack));
-        tooltip.add("Rail Bed: " + getBed(stack).getDisplayName());
-        tooltip.add("Rail Bed Fill: " + getBedFill(stack).getDisplayName());
-        tooltip.add("Preview:  " + isPreview(stack));
+        tooltip.add(GuiText.TRACK_TYPE.toString(getType(stack)));
+        tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
+        tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack)));
+        tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
+        tooltip.add(GuiText.TRACK_RAIL_BED.toString(getBed(stack).getDisplayName()));
+        tooltip.add(GuiText.TRACK_RAIL_BED_FILL.toString(getBedFill(stack).getDisplayName()));
+        tooltip.add((isPreview(stack) ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString());
 	}
 
 	public static void setType(ItemStack stack, TrackItems type) {

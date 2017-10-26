@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -17,7 +18,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
@@ -36,7 +36,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 		
 		public String toString() {
-			return this == FRONT ? "Front" : "Rear";
+			return (this == FRONT ? ChatText.COUPLER_FRONT : ChatText.COUPLER_BACK).toString();
 		}
 	}
 
@@ -128,12 +128,20 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			if (player.isSneaking()) {
 				this.setCouplerEngaged(coupler, !this.isCouplerEngaged(coupler));
-				player.sendMessage(new TextComponentString(String.format("Coupler %s engaged: %s", coupler, this.isCouplerEngaged(coupler))));
+				if (this.isCouplerEngaged(coupler)) {
+					player.sendMessage(ChatText.COUPLER_ENGAGED.getMessage(coupler));
+				} else {
+					player.sendMessage(ChatText.COUPLER_DISENGAGED.getMessage(coupler));
+				}
 			} else {
 				if (this.isCoupled(coupler) && this.isCouplerEngaged(coupler)) {
-					player.sendMessage(new TextComponentString(String.format("%s Coupler is coupled to %s", coupler, this.getCoupled(coupler).getDefinition().name)));
+					player.sendMessage(ChatText.COUPLER_STATUS_COUPLED.getMessage(coupler, this.getCoupled(coupler).getDefinition().name));
 				} else {
-					player.sendMessage(new TextComponentString(String.format("%s Coupler is uncoupled, engaged: %s", coupler, this.isCouplerEngaged(coupler))));
+					if (this.isCouplerEngaged(coupler)) {
+						player.sendMessage(ChatText.COUPLER_STATUS_DECOUPLED_ENGAGED.getMessage(coupler));
+					} else {
+						player.sendMessage(ChatText.COUPLER_STATUS_DECOUPLED_DISENGAGED.getMessage(coupler));
+					}
 				}
 			}
 			return true;

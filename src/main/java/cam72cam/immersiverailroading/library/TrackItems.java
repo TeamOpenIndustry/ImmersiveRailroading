@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.library;
 
-import net.minecraft.util.IStringSerializable;
+import cam72cam.immersiverailroading.util.TextUtil;
 
-public enum TrackItems implements IStringSerializable {
+public enum TrackItems {
 	STRAIGHT,
 	CROSSING,
 	SLOPE,
@@ -11,13 +11,8 @@ public enum TrackItems implements IStringSerializable {
 	;
 	
 	@Override
-	public String getName() {
-		return this.name().toLowerCase(); 
-	}
-	
-	@Override
 	public String toString() {
-	    return getName();
+	    return TextUtil.translate("track.immersiverailroading:class." + super.toString().toLowerCase()); 
 	}
 
 	public boolean isTurn() {

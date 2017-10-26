@@ -5,6 +5,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
@@ -21,7 +22,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -170,22 +170,22 @@ public class RailInfo {
 				}
 				
 				if (ties < builder.costTies()) {
-					player.sendMessage(new TextComponentString("Missing " + (builder.costTies() - ties) + " ties"));
+					player.sendMessage(ChatText.BUILD_MISSING_TIES.getMessage(builder.costTies() - ties));
 					return false;
 				}
 				
 				if (rails < builder.costRails()) {
-					player.sendMessage(new TextComponentString("Missing " + (builder.costRails() - rails) + " rails"));
+					player.sendMessage(ChatText.BUILD_MISSING_RAILS.getMessage(builder.costRails() - rails));
 					return false;
 				}
 				
 				if (railBed.getItem() != Items.AIR && bed < builder.costBed()) {
-					player.sendMessage(new TextComponentString("Missing " + (builder.costBed() - bed) + " rail bed"));
+					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED.getMessage(builder.costBed() - bed));
 					return false;
 				}
 				
 				if (railBedFill.getItem() != Items.AIR && fill < builder.costFill()) {
-					player.sendMessage(new TextComponentString("Missing " + (builder.costFill() - fill) + " rail bed fill"));
+					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED_FILL.getMessage(builder.costFill() - fill));
 					return false;
 				}
 

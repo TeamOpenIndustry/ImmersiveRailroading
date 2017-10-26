@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.Speed;
@@ -55,9 +56,9 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 	@Override
 	public List<String> getTooltip() {
 		List<String> tips = super.getTooltip();
-		tips.add("Works: " + this.works);
-		tips.add("Horse Power: " + this.getHorsePower());
-		tips.add("Max Speed: " + this.getMaxSpeed().metricString());
+		tips.add(GuiText.LOCO_WORKS.toString(this.works));
+		tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower()));
+		tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed().metricString()));
 		return tips;
 	}
 	
