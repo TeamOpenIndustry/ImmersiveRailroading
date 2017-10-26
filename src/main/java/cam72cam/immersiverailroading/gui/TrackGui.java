@@ -7,6 +7,7 @@ import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -135,19 +136,19 @@ public class TrackGui extends GuiScreen {
 		if (bedSelector.choosenItem.getItem() != Items.AIR) {
 			return bedSelector.choosenItem.getDisplayName();
 		}
-		return "None";
+		return GuiText.NONE.toString();
 	}
 	public String getBedFillName() {
 		if (bedFillSelector.choosenItem.getItem() != Items.AIR) {
 			return bedFillSelector.choosenItem.getDisplayName();
 		}
-		return "None";
+		return GuiText.NONE.toString();
 	}
 
 	public void initGui() {
 		int buttonID = 0;
 
-		typeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "Type: " + type.getName());
+		typeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_TYPE.toString(type));
 		this.buttonList.add(typeButton);
 
 		this.lengthInput = new GuiTextField(buttonID++, this.fontRenderer, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, 200, 20);
@@ -156,22 +157,22 @@ public class TrackGui extends GuiScreen {
 		this.lengthInput.setValidator(this.integerFilter);
 		this.lengthInput.setFocused(true);
 
-		this.quartersSlider = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Quarters: ", 1, 4, quarters,
+		this.quartersSlider = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_QUARTERS.toString(), 1, 4, quarters,
 				null);
 		quartersSlider.showDecimal = false;
 		quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		this.buttonList.add(quartersSlider);
 		
-		bedTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "RailBed: " + getBedstackName());
+		bedTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_RAIL_BED.toString(getBedstackName()));
 		this.buttonList.add(bedTypeButton);
 
-		bedFillButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "RailBed Fill: " + getBedFillName());
+		bedFillButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_RAIL_BED_FILL.toString(getBedFillName()));
 		this.buttonList.add(bedFillButton);
 		
-		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, "Position: " + posType.name());
+		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_POSITION.toString(posType));
 		this.buttonList.add(posTypeButton);
 		
-		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, "Place Blueprint", isPreview);
+		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview);
 		this.buttonList.add(isPreviewCB);
 		
 		bedSelector.initGui();
@@ -180,12 +181,12 @@ public class TrackGui extends GuiScreen {
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == typeButton) {
 			type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
-			typeButton.displayString = "Type: " + type.getName();
+			typeButton.displayString = GuiText.SELECTOR_TYPE.toString(type);
 			quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		}
 		if (button == posTypeButton) {
 			posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
-			posTypeButton.displayString = "Position: " + posType.name();
+			posTypeButton.displayString = GuiText.SELECTOR_POSITION.toString(posType);
 		}
 		if (button == bedTypeButton) {
 			bedSelector.isActive = true;
@@ -229,7 +230,7 @@ public class TrackGui extends GuiScreen {
         	bedSelector.mouseClicked(mouseX, mouseY, mouseButton);
 
 			if (!bedSelector.isActive) {
-				bedTypeButton.displayString = "RailBed: " + getBedstackName();
+				bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
 			}
         	
         	return;
@@ -238,7 +239,7 @@ public class TrackGui extends GuiScreen {
         	bedFillSelector.mouseClicked(mouseX, mouseY, mouseButton);
 
 			if (!bedFillSelector.isActive) {
-				bedFillButton.displayString = "RailBed Fill: " + getBedFillName();
+				bedFillButton.displayString = GuiText.SELECTOR_RAIL_BED_FILL.toString(getBedFillName());
 			}
         	
         	return;

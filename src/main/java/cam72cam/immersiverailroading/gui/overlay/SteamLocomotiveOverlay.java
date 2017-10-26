@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.library.GuiText;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fluids.Fluid;
 
@@ -27,7 +28,7 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		
 		drawGauge(boilerColor, (int) loco.getBoilerTemperature(), 150, "C");
 		
-		drawScalar("Brake", loco.getAirBrake()*10, 0, 10);
-		drawScalar("Throttle", loco.getThrottle()*10, -10, 10);
+		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
+		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
 	}
 }

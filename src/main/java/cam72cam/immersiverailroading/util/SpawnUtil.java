@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.MovementSimulator;
 import cam72cam.immersiverailroading.entity.TickPos;
 import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -20,7 +21,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class SpawnUtil {
@@ -52,7 +52,7 @@ public class SpawnUtil {
 			return EnumActionResult.PASS;
 		}
 		if (worldIn.isRemote) {
-			player.sendMessage(new TextComponentTranslation("RollingStock must be placed on straight track"));
+			player.sendMessage(ChatText.STOCK_PLACEMENT.getMessage());
 		}
 		return EnumActionResult.FAIL;
 	}

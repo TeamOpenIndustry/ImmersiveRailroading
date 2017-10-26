@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.library;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.util.TextUtil;
+
 public enum ItemComponentType {
 	FRAME(AssemblyStep.FRAME, RenderComponentType.FRAME), //TODO
 	
@@ -115,14 +117,8 @@ public enum ItemComponentType {
 		return null;
 	}
 
-	public String prettyString() {
-		String result = "";
-		String join = "";
-		String[] parts = this.toString().split("_");
-		for (String part : parts) {
-			result += join + part.substring(0, 1) + part.substring(1, part.length()).toLowerCase(); 
-			join = " ";
-		}
-		return result;
+	@Override
+	public String toString() {
+		return TextUtil.translate("part.immersiverailroading:component." + super.toString().toLowerCase());
 	}
 }

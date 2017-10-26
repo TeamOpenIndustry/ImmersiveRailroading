@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.items;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
@@ -13,7 +14,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -56,7 +56,7 @@ public abstract class BaseItemRollingStock extends Item {
 		
 		EntityRollingStockDefinition def = getDefinition(stack);
 		if (def == null) {
-			player.sendMessage(new TextComponentString("Error: Rolling stock does not exist on the server.  Can not place"));
+			player.sendMessage(ChatText.STOCK_INVALID.getMessage());
 			return EnumActionResult.FAIL;
 		}
 		

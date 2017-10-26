@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
@@ -16,7 +17,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public class EntityBuildableRollingStock extends EntityRollingStock {
@@ -152,7 +152,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	
 	public void addNextComponent(EntityPlayer player) {
 		if (this.isBuilt()) {
-			player.sendMessage(new TextComponentString(this.getDefinition().name + " is complete!"));
+			player.sendMessage(ChatText.STOCK_BUILT.getMessage(this.getDefinition().name));
 			return;
 		}
 		
@@ -188,9 +188,9 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		if (!addedComponents) {
 			String comStr = "";
 			for (ItemComponentType component : toAdd) {
-				comStr += component.prettyString() + ", ";
+				comStr += component.toString() + ", ";
 			}
-			player.sendMessage(new TextComponentString("Missing: " + comStr));
+			player.sendMessage(ChatText.STOCK_MISSING.getMessage(comStr));
 		}
 	}
 	
@@ -201,7 +201,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		this.isBuilt = false;
 		if (this.builtItems.size() <= 1) {
-			player.sendMessage(new TextComponentString(this.getDefinition().name + " is disassembled!"));
+			player.sendMessage(ChatText.STOCK_DISSASEMBLED.getMessage(this.getDefinition().name));
 			return null;
 		}
 		
