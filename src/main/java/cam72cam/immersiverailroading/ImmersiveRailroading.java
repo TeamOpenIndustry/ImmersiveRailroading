@@ -56,7 +56,7 @@ public class ImmersiveRailroading
 	@ObjectHolder(ItemHook.NAME)
 	public static ItemHook ITEM_HOOK = new ItemHook();
 	
-	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL).setRegistryName(ImmersiveRailroading.BLOCK_RAIL.getRegistryName());
+	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL);
 	
 	@ObjectHolder(BlockSteamHammer.NAME)
 	public static BlockSteamHammer BLOCK_STEAM_HAMMER = new BlockSteamHammer();

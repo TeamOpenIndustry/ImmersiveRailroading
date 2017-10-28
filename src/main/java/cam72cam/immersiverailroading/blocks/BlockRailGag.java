@@ -52,6 +52,6 @@ public class BlockRailGag extends BlockRailBase {
 
 	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {
-		return EnumBlockRenderType.INVISIBLE;
+		return EnumBlockRenderType.MODEL;
 	}
 }
