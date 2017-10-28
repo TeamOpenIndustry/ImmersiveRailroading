@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.blocks;
 
+import com.google.common.collect.ImmutableMap;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -8,7 +9,9 @@ import cam72cam.immersiverailroading.util.SwitchUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,6 +28,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockRailBase extends Block {
+	
 	public BlockRailBase(Material materialIn) {
 		super(materialIn);
 		setHardness(1.0F);
@@ -57,6 +61,42 @@ public abstract class BlockRailBase extends Block {
 			}
 		}
 	}
+	
+	public class RailBlockState extends BlockStateContainer.StateImplementation {
+		public ItemStack bed;
+		public float height;
+		public int snow;
+		protected RailBlockState(Block blockIn, ImmutableMap<IProperty<?>, Comparable<?>> propertiesIn) {
+			super(blockIn, propertiesIn);
+		}
+		public void setBed(ItemStack railBed) {
+			this.bed = railBed;
+		}
+		public void setHeight(float height) {
+			this.height = height;
+		}
+		public void setSnow(int snowLayers) {
+			this.snow = snowLayers;
+		}
+	}
+
+    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+    	TileEntity te = world.getTileEntity(pos);
+    	if (te instanceof TileRailBase) {
+    		TileRail parent = ((TileRailBase) te).getParentTile();
+    		if (parent != null) {
+    			if (parent.getRailBed() != null) {
+    				RailBlockState statea = new RailBlockState(state.getBlock(), state.getProperties());
+    				statea.setBed(parent.getRailBed());
+    				statea.setHeight(((TileRailBase) te).getHeight());
+    				statea.setSnow(((TileRailBase) te).getSnowLayers());
+    				return statea;
+    			}
+    		}
+    	}
+        return state;
+    }
 	
 	@Override
 	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {

@@ -55,7 +55,7 @@ public class BlockRail extends BlockRailBase {
 	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {
 		// TESR Renderer
-		return EnumBlockRenderType.INVISIBLE;
+		return EnumBlockRenderType.MODEL;
 	}
 
 	@Override

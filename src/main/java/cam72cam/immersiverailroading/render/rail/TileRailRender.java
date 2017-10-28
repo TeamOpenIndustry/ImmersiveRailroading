@@ -6,8 +6,9 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
-public class TileRailRender extends TileRailBaseRender<TileRail> {
+public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 	
 	@Override
 	public boolean isGlobalRenderer(TileRail te) {
@@ -17,8 +18,6 @@ public class TileRailRender extends TileRailBaseRender<TileRail> {
 
 	@Override
 	public void render(TileRail te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		super.render(te, x, y, z, partialTicks, destroyStage, alpha);
-		
 		RailInfo info = te.getRailRenderInfo();
 		if (info == null) {
 			// Still loading...
