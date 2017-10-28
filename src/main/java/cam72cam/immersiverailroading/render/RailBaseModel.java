@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 
@@ -26,7 +27,7 @@ public class RailBaseModel implements IBakedModel {
 				state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, railState.snow);
 				IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
 				return model.getQuads(state, side, rand);
-			} else {
+			} else if (railState.bed.getItem() != Items.AIR) {
 				ItemStack item = railState.bed;
 				state = BlockUtil.itemToBlockState(item);
 				IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);

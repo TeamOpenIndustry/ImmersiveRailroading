@@ -14,7 +14,9 @@ import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
@@ -33,7 +35,7 @@ public class RailBuilderRender {
 	private static Map<String, Integer> displayLists = new HashMap<String, Integer>();
 	public static void renderRailBuilder(RailInfo info) {
 
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		//GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 
 		Vec3d renderOff = new Vec3d(-0.5, 0, -0.5);
 
@@ -62,7 +64,8 @@ public class RailBuilderRender {
 
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
 			int displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);		
+			GL11.glNewList(displayList, GL11.GL_COMPILE);	
+			Minecraft.getMinecraft().getTextureManager().bindTexture(baseRailModel.model.tex);	
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GlStateManager.pushMatrix();
@@ -89,6 +92,7 @@ public class RailBuilderRender {
 				}
 				GlStateManager.popMatrix();
 			}
+			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 			GL11.glEndList();
 			
@@ -97,6 +101,6 @@ public class RailBuilderRender {
 		
 		GL11.glCallList(displayLists.get(RailRenderUtil.renderID(info)));
 		
-		tex.restore();
+		//tex.restore();
 	}
 }

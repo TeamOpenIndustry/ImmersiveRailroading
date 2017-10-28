@@ -1,10 +1,13 @@
 package cam72cam.immersiverailroading.model.obj;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Face {
 	public int[][] points; 
 	public String mtl;
 
-	public Face(String[] args, String mtl) {
+	public Face(String mtl, String...args) {
 		this.mtl = mtl;
 		points = new int[args.length][];
 		for(int i = 0; i < args.length; i++) {
@@ -23,6 +26,18 @@ public class Face {
 			}
 		}
 		return ret;
+	}
+
+	public static List<Face> parse(String[] args, String currentMaterial) {
+		List<Face> res = new ArrayList<Face>();
+		if (args.length < 5) {
+			res.add(new Face(currentMaterial, args));
+		} else {
+			for (int i = 2; i < args.length; i++) {
+				res.add(new Face(currentMaterial, args[0], args[i-1], args[i]));
+			}
+		}
+		return res;
 	}
 
 }

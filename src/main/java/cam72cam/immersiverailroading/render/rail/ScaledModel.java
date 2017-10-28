@@ -26,7 +26,6 @@ public class ScaledModel implements IBakedModel {
 
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		Minecraft.getMinecraft().mcProfiler.startSection("hack");
 		List<BakedQuad> quads = source.getQuads(state, side, rand);
 		List<BakedQuad> newQuads = new ArrayList<BakedQuad>();
 		for (BakedQuad quad : quads) {
@@ -42,8 +41,6 @@ public class ScaledModel implements IBakedModel {
 			
 			newQuads.add(new BakedQuad(newData, quad.getTintIndex(), quad.getFace(), quad.getSprite(), quad.shouldApplyDiffuseLighting(), quad.getFormat()));
 		}
-
-		Minecraft.getMinecraft().mcProfiler.endSection();;
 		
 		return newQuads;
 	}
