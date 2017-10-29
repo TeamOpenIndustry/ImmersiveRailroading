@@ -164,6 +164,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public TickPos getTickPos(int tickID) {
+		if (positions.size() == 0) {
+			return null;
+		}
 		for (TickPos pos : positions) {
 			if (pos.tickID == tickID) {
 				return pos;
@@ -175,7 +178,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return positions.get(positions.size()-1);
 	}
 	
-	public TickPos getCurrentTickPos() {
+	public TickPos getCurrentTickPosAndPrune() {
 		if (positions.size() == 0) {
 			return null;
 		}
@@ -199,7 +202,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		this.tickPosID++;
 		
 		// Apply position tick
-		TickPos currentPos = getCurrentTickPos();
+		TickPos currentPos = getCurrentTickPosAndPrune();
 		if (currentPos == null) {
 			// Not loaded yet or not moving
 			return;
@@ -367,8 +370,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 
 	private TickPos getCurrentTickPosOrFake() {
-		if (this.getCurrentTickPos() != null) {
-			return this.getCurrentTickPos();
+		if (this.getTickPos(this.tickPosID) != null) {
+			return this.getTickPos(this.tickPosID);
 		}
 		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false, false);
 	}

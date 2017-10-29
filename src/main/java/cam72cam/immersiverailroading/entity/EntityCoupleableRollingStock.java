@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.NBTUtil;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -253,94 +254,114 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 */
 
 	public void simulateCoupledRollingStock() {
-		this.sendToObserving(new MRSSyncPacket(this, this.positions));
-		
-		for (CouplerType coupler : CouplerType.values()) {
-			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
-			if (coupled != null) {
-				coupled.recursiveMove(this);
+		List<TickPos> truncated = new ArrayList<TickPos>();
+		for (int tickOffset = 0; tickOffset < this.positions.size(); tickOffset++) {
+			truncated.add(this.positions.get(tickOffset));
+			boolean onTrack = true;
+			for (CouplerType coupler : CouplerType.values()) {
+				EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
+				if (coupled != null) {
+					onTrack = coupled.recursiveMove(this, tickOffset) && onTrack;
+				}
 			}
+			if (!onTrack) {
+				this.positions = truncated;
+				for (EntityCoupleableRollingStock entity : this.getTrain(true)) {
+					entity.positions.get(entity.positions.size()-1).speed = Speed.ZERO;
+				}
+				break;
+			}
+		}
+		for (EntityCoupleableRollingStock entity : this.getTrain(true)) {
+			entity.sendToObserving(new MRSSyncPacket(entity, entity.positions));			
 		}
 	}
 
 	// This breaks with looped rolling stock
-	private void recursiveMove(EntityCoupleableRollingStock prev) {
-		// Clear out existing movement information
-		TickPos lastPos = this.getCurrentTickPos();
-		this.positions = new ArrayList<TickPos>();
-		this.positions.add(lastPos);
+	private boolean recursiveMove(EntityCoupleableRollingStock parent, int tickOffset) {
+		if (this.positions.size()-1 < tickOffset) {
+			System.out.println("MISSING START POS " + tickOffset);
+			return true;
+		}
 		
-		CouplerType coupler = this.getCouplerFor(prev);
-		CouplerType otherCoupler = prev.getCouplerFor(this);
+		TickPos currentPos = this.positions.get(tickOffset);
+		TickPos parentPos = parent.positions.get(tickOffset);
+		
+		if (tickOffset == 0) {
+			// Clear out existing movement information
+			this.positions = new ArrayList<TickPos>();
+			this.positions.add(currentPos);
+		}
+		
+		CouplerType coupler = this.getCouplerFor(parent);
+		CouplerType otherCoupler = parent.getCouplerFor(this);
 		
 		if (coupler == null) {
-			prev.decouple(this);
-			this.decouple(prev);
-			return;
+			parent.decouple(this);
+			this.decouple(parent);
+			this.triggerResimulate();
+			System.out.println("COUPLER NULL");
+			return true;
 		}
-
-		if (!this.isCouplerEngaged(coupler) || !prev.isCouplerEngaged(otherCoupler)) {
+		
+		if ((!this.isCouplerEngaged(coupler) || !parent.isCouplerEngaged(otherCoupler)) && tickOffset < parent.positions.size()-1) {
 			// Push only, no pull
-			
-			if (prev.positions.size() < 2) {
-				System.out.println("Can't push with less than 2 positions");
-				return;
-			}
-			
-			double prevDist = lastPos.position.distanceTo(prev.positions.get(0).position);
-			double dist = lastPos.position.distanceTo(prev.positions.get(1).position);
+			double prevDist = currentPos.position.distanceTo(parentPos.position);
+			double dist = currentPos.position.distanceTo(parent.positions.get(tickOffset+1).position);
 			if (prevDist <= dist) {
 				System.out.println("DETACHED");
-				return;
+				return true;
 			}
 			System.out.println("ATTACHED");
 		}
 		
-		for (TickPos parentPos : prev.positions) {
-			
-			Vec3d myOffset = this.getCouplerPositionTo(coupler, lastPos, parentPos);
-			Vec3d otherOffset = prev.getCouplerPositionTo(otherCoupler, parentPos, lastPos);
-			
-			if (otherOffset == null) {
-				if (!world.isRemote) {
-					ImmersiveRailroading.logger.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), prev.getPersistentID()));
-				}
-				continue;
+		Vec3d myOffset = this.getCouplerPositionTo(coupler, currentPos, parentPos);
+		Vec3d otherOffset = parent.getCouplerPositionTo(otherCoupler, parentPos, currentPos);
+		
+		if (otherOffset == null) {
+			if (!world.isRemote) {
+				ImmersiveRailroading.logger.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), parent.getPersistentID()));
 			}
-			
-			double distance = myOffset.distanceTo(otherOffset);
+			return true;
+		}
+		
+		double distance = myOffset.distanceTo(otherOffset);
 
-			// Figure out which direction to move the next stock
-			Vec3d nextPosForward = myOffset.add(VecUtil.fromYaw(distance, lastPos.rotationYaw));
-			Vec3d nextPosReverse = myOffset.add(VecUtil.fromYaw(-distance, lastPos.rotationYaw));
+		// Figure out which direction to move the next stock
+		Vec3d nextPosForward = myOffset.add(VecUtil.fromYaw(distance, currentPos.rotationYaw));
+		Vec3d nextPosReverse = myOffset.add(VecUtil.fromYaw(-distance, currentPos.rotationYaw));
 
-			if (otherOffset.distanceTo(nextPosForward) > otherOffset.distanceTo(nextPosReverse)) {
-				// Moving in reverse
-				distance = -distance;
-			}
+		if (otherOffset.distanceTo(nextPosForward) > otherOffset.distanceTo(nextPosReverse)) {
+			// Moving in reverse
+			distance = -distance;
+		}
 
-			lastPos = this.moveRollingStock(distance, lastPos.tickID);
-			this.positions.add(lastPos);
-			
-			if (lastPos.speed.metric() != 0) {
-				ChunkManager.flagEntityPos(this.world, new BlockPos(lastPos.position));
-				for (CouplerType toChunk : CouplerType.values()) {
-					ChunkManager.flagEntityPos(this.world, new BlockPos(this.getCouplerPosition(toChunk)));
-				}
+		TickPos nextPos = this.moveRollingStock(distance, currentPos.tickID);
+		this.positions.add(nextPos);
+		if (nextPos.isOffTrack) {
+			return false;
+		}
+		
+		if (nextPos.speed.metric() != 0) {
+			ChunkManager.flagEntityPos(this.world, new BlockPos(nextPos.position));
+			for (CouplerType toChunk : CouplerType.values()) {
+				ChunkManager.flagEntityPos(this.world, new BlockPos(this.getCouplerPosition(toChunk)));
 			}
 		}
-		this.sendToObserving(new MRSSyncPacket(this, this.positions));
 		
+		boolean onTrack = true;
 		for (CouplerType nextCoupler : CouplerType.values()) {
 			EntityCoupleableRollingStock coupled = this.getCoupled(nextCoupler);
 
-			if (coupled == null || coupled == prev) {
+			if (coupled == null || coupled == parent) {
 				// Either end of train or wrong iteration direction
 				continue;
 			}
 			
-			coupled.recursiveMove(this);
+			onTrack = coupled.recursiveMove(this, tickOffset) ? onTrack : false;
 		}
+
+		return onTrack;
 	}
 
 	/*
