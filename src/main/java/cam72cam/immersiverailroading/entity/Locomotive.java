@@ -140,8 +140,7 @@ public abstract class Locomotive extends FreightTank {
 		if (this.getRemainingPositions() < 20 || resimulate) {
 			TickPos lastPos = this.getCurrentTickPosAndPrune();
 			if (lastPos == null) {
-				initPositions();
-				lastPos = this.getCurrentTickPosAndPrune();
+				this.triggerResimulate();
 			}
 			
 			boolean isStuck = false;

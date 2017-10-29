@@ -254,9 +254,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 */
 
 	public void simulateCoupledRollingStock() {
-		List<TickPos> truncated = new ArrayList<TickPos>();
 		for (int tickOffset = 0; tickOffset < this.positions.size(); tickOffset++) {
-			truncated.add(this.positions.get(tickOffset));
 			boolean onTrack = true;
 			for (CouplerType coupler : CouplerType.values()) {
 				EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
@@ -265,7 +263,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				}
 			}
 			if (!onTrack) {
-				this.positions = truncated;
+				for (int i = tickOffset; i < this.positions.size(); i ++) {
+					this.positions.get(i).speed = Speed.ZERO;
+				}
 				for (EntityCoupleableRollingStock entity : this.getTrain(true)) {
 					entity.positions.get(entity.positions.size()-1).speed = Speed.ZERO;
 				}
@@ -336,10 +336,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			distance = -distance;
 		}
 
+		boolean onTrack = true;
+		
 		TickPos nextPos = this.moveRollingStock(distance, currentPos.tickID);
 		this.positions.add(nextPos);
 		if (nextPos.isOffTrack) {
-			return false;
+			onTrack = false;
 		}
 		
 		if (nextPos.speed.metric() != 0) {
@@ -349,7 +351,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		boolean onTrack = true;
 		for (CouplerType nextCoupler : CouplerType.values()) {
 			EntityCoupleableRollingStock coupled = this.getCoupled(nextCoupler);
 

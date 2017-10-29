@@ -1,10 +1,10 @@
 package cam72cam.immersiverailroading.util;
 
 public class Speed {
-	public static final Speed ZERO = fromMetric(0);
-
 	// 20 tps * 3.6km/h
-	private static double speedRatio = 20 * 3.6;
+	private static final double speedRatio = 20 * 3.6;
+	
+	public static final Speed ZERO = fromMetric(0);
 	
 	private double internalSpeed;
 	
