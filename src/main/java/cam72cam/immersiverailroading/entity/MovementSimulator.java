@@ -29,6 +29,7 @@ public class MovementSimulator {
 	
 	public TickPos nextPosition(double moveDistance) {
 		position.tickID += 1;
+		position.isOffTrack = false;
 		TickPos origPosition = position.clone();
 
 		if (Math.abs(moveDistance) < 0.001) {

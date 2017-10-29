@@ -172,8 +172,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				return pos;
 			}
 		}
-
-		ImmersiveRailroading.logger.warn("Missing TickPos for " + tickID);
 		
 		return positions.get(positions.size()-1);
 	}
@@ -205,9 +203,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		TickPos currentPos = getCurrentTickPosAndPrune();
 		if (currentPos == null) {
 			// Not loaded yet or not moving
-			return;
-		}
-		if (currentPos.isOffTrack) {
 			return;
 		}
 		
