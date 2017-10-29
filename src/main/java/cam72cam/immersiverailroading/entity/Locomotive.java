@@ -184,9 +184,19 @@ public abstract class Locomotive extends FreightTank {
 	
 	protected abstract int getAvailableHP();
 	
+	private double getAppliedTractiveEffort(Speed speed) {
+		double locoEfficiency = 0.7f; //TODO config
+		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
+		
+		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(0.0001, Math.abs(speed.metric()))));
+		return tractiveEffortNewtons;
+	}
+	
 	private void simulateWheelSlip() {
-		if (Math.abs(getTractiveEffortNewtons(this.getCurrentSpeed())) == this.getDefinition().getStartingTractionNewtons()) {
-			this.distanceTraveled += Math.copySign(0.05, getThrottle()); //Wheel Slip
+		double applied = getAppliedTractiveEffort(this.getCurrentSpeed());
+		double actual = this.getDefinition().getStartingTractionNewtons();
+		if (applied > actual) {
+			this.distanceTraveled += Math.copySign((applied / actual - 1)/100, getThrottle()); //Wheel Slip
 		}
 	}
 	
@@ -195,13 +205,14 @@ public abstract class Locomotive extends FreightTank {
 			return 0;
 		}
 		
-		double locoEfficiency = 0.7f; //TODO config
-		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
+		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
 		
-		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(0.0001, Math.abs(speed.metric()))));
 		
 		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons()) {
-			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons();
+			// CRC Handbook of Physical Quantities. Boca Raton, FL: CRC Press, 1997: 145-156.
+			double us = 0.74;
+			double uk = 0.57;
+			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons() * (uk/us);
 		}
 		
 		return Math.copySign(tractiveEffortNewtons, getThrottle());
