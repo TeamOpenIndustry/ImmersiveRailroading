@@ -140,7 +140,6 @@ Ke 0.000000 0.000000 0.000000
 Ni -1.000000
 d 1.000000
 illum 2
-map_Kd /home/gilligan/workspace/ImmersiveRailroading/models/Locomotives/Steam/A1 Pepicorn/a1_peppercorn/Translucent_Glass_Tinted_.jpg
 
 newmtl __Color_008_1
 Ns 96.078431
