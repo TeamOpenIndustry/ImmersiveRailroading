@@ -60,6 +60,9 @@ public class MovementSimulator {
 		Vec3d nextRear = nextPosition(rear, position.rotationYaw, VecUtil.fromYaw(moveDistance, position.rearYaw));
 		if (nextFront.equals(front) || nextRear == rear) {
 			origPosition.speed = Speed.fromMetric(0);
+			if (position.isOffTrack) {
+				origPosition.isOffTrack = true;
+			}
 			return origPosition;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
