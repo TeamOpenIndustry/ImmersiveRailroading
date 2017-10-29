@@ -281,6 +281,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		if (!this.isCouplerEngaged(coupler) || !prev.isCouplerEngaged(otherCoupler)) {
 			// Push only, no pull
+			
+			if (prev.positions.size() < 2) {
+				System.out.println("Can't push with less than 2 positions");
+				return;
+			}
+			
 			double prevDist = lastPos.position.distanceTo(prev.positions.get(0).position);
 			double dist = lastPos.position.distanceTo(prev.positions.get(1).position);
 			if (prevDist <= dist) {
