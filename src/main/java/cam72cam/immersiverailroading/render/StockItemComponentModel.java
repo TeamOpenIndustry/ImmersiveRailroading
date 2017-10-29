@@ -163,13 +163,13 @@ public class StockItemComponentModel implements IBakedModel {
 		case THIRD_PERSON_LEFT_HAND:
 		case THIRD_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-60), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
+					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-60), 0, 0, 1).translate(0.5,0.25,0.5).scale(0.2, 0.2, 0.2).toMatrix4f());
 		case FIRST_PERSON_LEFT_HAND:
 		case FIRST_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-30), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
+					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-30), 0, 0, 1).translate(0.5,0.25,0.5).scale(0.2, 0.2, 0.2).toMatrix4f());
 		case GROUND:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5,0.5,0.5).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5,0.5,0.5).scale(0.2, 0.2, 0.2).toMatrix4f());
 		case FIXED:
 			// Item Frame
 			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
