@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockSnow;
@@ -13,6 +12,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IPlantable;
 
 public class BlockUtil {
 	public static boolean canBeReplaced(World world, BlockPos pos, boolean allowFlex) {
@@ -24,7 +24,10 @@ public class BlockUtil {
 		if (block.isReplaceable(world, pos)) {
 			return true;
 		}
-		if (block instanceof IGrowable && !(block instanceof BlockGrass)) {
+		if (block instanceof IGrowable) {
+			return true;
+		}
+		if (block instanceof IPlantable) {
 			return true;
 		}
 		if (block instanceof BlockLiquid) {
