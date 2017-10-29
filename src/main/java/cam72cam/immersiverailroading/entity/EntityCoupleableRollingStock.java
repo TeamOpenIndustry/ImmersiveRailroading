@@ -264,6 +264,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			if (!onTrack) {
 				for (int i = tickOffset; i < this.positions.size(); i ++) {
+					this.positions.get(i).position = this.positions.get(tickOffset).position;
 					this.positions.get(i).speed = Speed.ZERO;
 				}
 				for (EntityCoupleableRollingStock entity : this.getTrain(true)) {
