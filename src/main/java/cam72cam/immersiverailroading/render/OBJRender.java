@@ -26,12 +26,6 @@ public class OBJRender {
 	private Integer displayList = null;
 
 	public void draw() {
-		// TODO texture binding
-		/*
-		 * Idea: break model by texture groups render each in it's own display
-		 * list iterate through map <material, display_list> might be more
-		 * performant than baking the texture binding into the display list?
-		 */
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
