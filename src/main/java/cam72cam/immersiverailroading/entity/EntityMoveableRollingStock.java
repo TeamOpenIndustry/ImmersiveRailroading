@@ -35,6 +35,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public int tickPosID = 0;
 	private Speed currentSpeed;
 	public List<TickPos> positions = new ArrayList<TickPos>();
+	private AxisAlignedBB boundingBox;
 
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -101,19 +102,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox() {
-		return this.getDefinition().getBounds(this);
+		return this.boundingBox;
 	}
 
 	@Override
 	public AxisAlignedBB getEntityBoundingBox() {
-		return this.getDefinition().getBounds(this);
+		return this.boundingBox;
 	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox()
     {
-        return this.getEntityBoundingBox().grow(20);
+        return this.getEntityBoundingBox().grow(50);
     }
 	
 	/*
@@ -221,6 +222,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    this.rotationPitch = currentPos.rotationPitch;
 	    this.frontYaw = currentPos.frontYaw;
 	    this.rearYaw = currentPos.rearYaw;
+	    
+	    this.boundingBox = this.getDefinition().getBounds(this);
 	    
 	    this.currentSpeed = currentPos.speed;
 	    this.isReverse = currentPos.isReverse; 
