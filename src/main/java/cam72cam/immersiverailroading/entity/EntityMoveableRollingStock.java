@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;

@@ -19,6 +19,9 @@ public class Config {
 	@Comment({"Deep Snow on tracks"})
 	public static boolean deepSnow = false;
 	
+	@Comment({"Enable Boiler Explosions"})
+	public static boolean explosionsEnabled = true;
+	
 	@Comment({"Self explanitory"})
 	public static boolean trainsOnTheBrain = true;
 	
