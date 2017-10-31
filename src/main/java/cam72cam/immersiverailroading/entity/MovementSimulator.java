@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -77,7 +78,7 @@ public class MovementSimulator {
 
 		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
 		position.rotationYaw = VecUtil.toYaw(bogeySkew);
-		position.rotationPitch = (float) Math.toDegrees(Math.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
+		position.rotationPitch = (float) Math.toDegrees(MathHelper.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
 
 		if (position.isReverse) {
 			position.frontYaw += 180;
@@ -194,7 +195,7 @@ public class MovementSimulator {
 			// Relative position to the curve center
 			Vec3d posDelta = rail.getCenter().subtractReverse(position);
 			// Calculate the angle (rad) for the current position is
-			double posRelYaw = Math.atan2(posDelta.x, -posDelta.z);
+			double posRelYaw = MathHelper.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
 			double radius = rail.getRadius() - 0.5;
 			// Calculate the angle delta in rad (radians are awesome)
