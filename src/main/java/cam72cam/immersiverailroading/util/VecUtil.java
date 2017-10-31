@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class VecUtil {
@@ -12,7 +13,7 @@ public class VecUtil {
 	}
 	
 	public static float toYaw(Vec3d delta) {
-		float yaw = (float) Math.toDegrees(Math.atan2(-delta.x, delta.z));
+		float yaw = (float) Math.toDegrees(MathHelper.atan2(-delta.x, delta.z));
 		return (yaw + 360f) % 360f;
 	}
 

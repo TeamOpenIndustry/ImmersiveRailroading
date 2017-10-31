@@ -24,6 +24,7 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class StockModel extends OBJRender {
@@ -369,12 +370,12 @@ public class StockModel extends OBJRender {
 		// enough", but not quite left
 		Vec3d returnCrankRodOffset = new Vec3d(returnCrankRodPos.x - slottedLinkMin.x,
 				returnCrankRodPos.y - slottedLinkMin.y - slottedLinkWidth / 2, 0);
-		float returnCrankRodAngle = (float) Math.toDegrees(Math.atan2(returnCrankRodOffset.y, returnCrankRodOffset.x));
+		float returnCrankRodAngle = (float) Math.toDegrees(MathHelper.atan2(returnCrankRodOffset.y, returnCrankRodOffset.x));
 		Vec3d returnCrankRodActual = VecUtil.fromYaw(returnCrankRodLength - returnCrankHeight, returnCrankRodAngle);
 		returnCrankRodActual = new Vec3d(returnCrankRodPos.x - returnCrankRodActual.z,
 				returnCrankRodPos.y + returnCrankRodActual.x, 0);
 		float slottedLinkAngle = (float) Math
-				.toDegrees(Math.atan2(-slottedLinkCenter.x + returnCrankRodActual.x, slottedLinkCenter.y - returnCrankRodActual.y));
+				.toDegrees(MathHelper.atan2(-slottedLinkCenter.x + returnCrankRodActual.x, slottedLinkCenter.y - returnCrankRodActual.y));
 
 		// CONNECTING_ROD_LEFT
 		// DRIVING_ROD_LEFT
@@ -386,7 +387,7 @@ public class StockModel extends OBJRender {
 
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(connRodPos.x, connRodPos.y, connRodPos.z);
-			GlStateManager.rotate((float) Math.toDegrees(Math.atan2(connRodMovment.z, drivingRodHoriz)), 0, 0, 1);
+			GlStateManager.rotate((float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRodHoriz)), 0, 0, 1);
 			GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
 			drawComponent(drivingRod);
 			GlStateManager.popMatrix();
