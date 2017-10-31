@@ -177,7 +177,6 @@ public class RealBB extends AxisAlignedBB {
 			r.add(x2*100, z2*100);
 			doesIntersect = doesIntersect && rect.intersects(r );
 		}
-		
 		return doesIntersect;
 	}
 	public boolean contains(Vec3d vec) {
