@@ -157,8 +157,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 					if (BurnUtil.getBurnTime(this.cargoItems.getStackInSlot(slot)) != 0) {
 						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlots(); tenderSlot ++) {
 							if (this.cargoItems.getStackInSlot(slot).isItemEqual(tender.cargoItems.getStackInSlot(tenderSlot))) {
-								int toMove = this.cargoItems.getStackInSlot(slot).getMaxStackSize() - this.cargoItems.getStackInSlot(slot).getCount();
-								ItemStack extracted = tender.cargoItems.extractItem(tenderSlot, toMove, false);
+								ItemStack extracted = tender.cargoItems.extractItem(tenderSlot, 1, false);
 								this.cargoItems.insertItem(slot, extracted, false);
 							}
 						}
