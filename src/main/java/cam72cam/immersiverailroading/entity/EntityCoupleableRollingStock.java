@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Predicate;
+
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
@@ -17,6 +23,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -170,80 +177,54 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		try {
-			for (CouplerType coupler : CouplerType.values()) {
-				if (this.ticksExisted > 20 && this.isCoupled(coupler) && this.getCoupled(coupler) == null) {
-					System.out.println("Removing missing");
+		for (CouplerType coupler : CouplerType.values()) {
+			if (!this.isCoupled(coupler)) {
+				continue;
+			}
+			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
+			if (coupled == null) {
+				if (this.ticksExisted > 20) {
+					ImmersiveRailroading.logger.warn("Coupled entity was not loaded after 20 ticks, decoupling");
 					this.decouple(coupler);
 				}
-				if (this.getCoupled(coupler) != null) {
-					if (this.getCoupled(coupler).isDead) {
-						System.out.println("Removing Dead Stock");
-						this.decouple(coupler);
-					} else {
-						if (coupler == CouplerType.FRONT) {
-							lastKnownFront = this.getCoupled(coupler).getPosition();
-						} else {
-							lastKnownRear = this.getCoupled(coupler).getPosition();
-						}
-					}
-					
-					if (!this.isCouplerEngaged(coupler)) {
-						EntityCoupleableRollingStock otherStock = this.getCoupled(coupler);
-						CouplerType otherCoupler = otherStock.getCouplerFor(this);
-						if (otherCoupler == null) {
-							System.out.println("MISSING COUPLER TOP");
-							continue;
-						}
-						if (this.getCouplerPosition(coupler).distanceTo(otherStock.getCouplerPosition(otherCoupler)) > Config.couplerRange*4) {
-							this.decouple(otherStock);
-						}
-					}
+				continue;
+			}
+			if (coupled.isDead) {
+				ImmersiveRailroading.logger.warn("Removing Dead Stock");
+				this.decouple(coupler);
+				continue;
+			}
+			
+			if (coupler == CouplerType.FRONT) {
+				lastKnownFront = coupled.getPosition();
+			} else {
+				lastKnownRear = coupled.getPosition();
+			}
+			
+			if (!this.isCouplerEngaged(coupler)) {
+				CouplerType otherCoupler = coupled.getCouplerFor(this);
+				if (otherCoupler == null) {
+					continue;
+				}
+				if (this.getCouplerPosition(coupler).distanceTo(coupled.getCouplerPosition(otherCoupler)) > Config.couplerRange*4) {
+					this.decouple(coupled);
 				}
 			}
-		} catch (Exception ex){
-			ex.printStackTrace();
-			ImmersiveRailroading.logger.error("Something broke in the decoupling code");
 		}
 
-		try {
-			for (CouplerType coupler : CouplerType.values()) {
-				if (!this.isCoupled(coupler)) {
-					for (EntityCoupleableRollingStock potentialCoupling : this.potentialCouplings(coupler)) {
-						for (CouplerType potentialCoupler : CouplerType.values()) {
-							// Is the coupler free?
-							if (!potentialCoupling.isCoupled(potentialCoupler)) {
-								// Is the other coupler within coupling distance?
-								
-								for (EntityCoupleableRollingStock possiblyMe : potentialCoupling.potentialCouplings(potentialCoupler)) {
-									if (possiblyMe.getPersistentID().equals(this.getPersistentID())) {
-										this.setCoupledUUID(coupler, potentialCoupling.getPersistentID());
-										potentialCoupling.setCoupledUUID(potentialCoupler, this.getPersistentID());
-										
-										break;
-									}
-								}
-								if (this.isCoupled(coupler)) {
-									// coupled
-									break;
-								}
-							}
-						}
-	
-						if (this.isCoupled(coupler)) {
-							// coupled
-							break;
-						}
-	
-						// False Match
-						ImmersiveRailroading.logger
-								.info(String.format("MISS %s %s %s", coupler, this.getDefinition().name, potentialCoupling.getDefinition().name));
-					}
+		for (CouplerType coupler : CouplerType.values()) {
+			if (!this.isCoupled(coupler)) {
+				Pair<EntityCoupleableRollingStock, CouplerType> potential = this.potentialCouplings(coupler);
+				if (potential == null) {
+					continue;
 				}
+				
+				EntityCoupleableRollingStock stock = potential.getLeft();
+				CouplerType otherCoupler = potential.getRight();
+
+				this.setCoupledUUID(coupler, stock.getPersistentID());
+				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
 			}
-		} catch (Exception ex){
-			ImmersiveRailroading.logger.error("Something broke in the coupling code");
-			ex.printStackTrace();
 		}
 	}
 
@@ -521,43 +502,91 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 	}
 
-	public List<EntityCoupleableRollingStock> potentialCouplings(CouplerType coupler) {
+	public Pair<EntityCoupleableRollingStock, CouplerType> potentialCouplings(CouplerType coupler) {
+		List<EntityCoupleableRollingStock> train = this.getTrain();
 		
-		double range = Config.couplerRange;
+		List<EntityCoupleableRollingStock> nearBy = world.getEntities(EntityCoupleableRollingStock.class, new Predicate<EntityCoupleableRollingStock>()
+	    {
+	        public boolean apply(@Nullable EntityCoupleableRollingStock entity)
+	        {
+	        	if (entity == null) {
+	        		return false;
+	        	}
+	        	
+	        	if (entity.isDead) {
+	        		return false;
+	        	}
+	        	
+	        	if (entity.getDistanceToEntity(EntityCoupleableRollingStock.this) > 64) {
+	        		return false;
+	        	}
+	        	
+	        	for (EntityCoupleableRollingStock stock : train) {
+	        		if (stock.getUniqueID().equals(entity.getUniqueID())) {
+	        			return false;
+	        		}
+	        	}
+	        	
+	            return true;
+	        }
+	    });
 		
-		List<EntityCoupleableRollingStock> nearBy = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().expand(range * 4, 0, 0));
+		Pair<EntityCoupleableRollingStock, CouplerType> bestMatch = null;
+		double bestDistance = 100;
 		
-		List<EntityCoupleableRollingStock> inRange = new ArrayList<EntityCoupleableRollingStock>();
+		
+		/*
+		 * 1. |-----+-----| |-----+-----|
+		 * 2. |-----+---|=|----+-----|
+		 * 3. |---|=+====+|-----|  // Check distance from center to coupler
+		 */
+		
 		for (EntityCoupleableRollingStock stock : nearBy) {
-			for (CouplerType otherCoupler : CouplerType.values()) {
-				if (stock.isCoupled(otherCoupler)) {
+			double couplerDistFront = this.getPositionVector().distanceTo(stock.getCouplerPosition(CouplerType.FRONT));
+			double couplerDistRear = this.getPositionVector().distanceTo(stock.getCouplerPosition(CouplerType.BACK));
+			// See above diagram (3).  OtherCoupler closet to my center is the one we want to couple to.
+			CouplerType otherCoupler = couplerDistFront < couplerDistRear ? CouplerType.FRONT : CouplerType.BACK;
+			if (stock.isCoupled(otherCoupler)) {
+				//Best matching coupler is a no-go
+				continue;
+			}
+			
+			double myCouplerToOtherCoupler = this.getCouplerPosition(coupler).distanceTo(stock.getCouplerPosition(otherCoupler));
+			double myCenterToMyCoupler = this.getPositionVector().distanceTo(this.getCouplerPosition(coupler));
+			double myCenterToOtherCoupler = this.getPositionVector().distanceTo(stock.getCouplerPosition(otherCoupler));
+
+			if (myCouplerToOtherCoupler > bestDistance) {
+				// Current best match is closer, should be a small edge case when stock is almost entirely overlapping
+				continue;
+			}
+			
+			if (myCenterToMyCoupler < myCenterToOtherCoupler) {
+				// diagram 1, check that it is not too far away
+				if (myCouplerToOtherCoupler > Config.couplerRange) {
+					// Not close enough to consider
 					continue;
 				}
-				
-				if (stock.getPersistentID().equals(this.getPersistentID())) {
+			} else {
+				// diagram 2 or diagram 3
+				AxisAlignedBB myBB = this.getCollisionBoundingBox().contract(0, 0, 0.25); // Prevent overlap on other rails
+				//TODO movement simulator
+				if (!myBB.contains(stock.getCouplerPosition(otherCoupler).addVector(0, 1, 0))) {
 					continue;
 				}
-				
-				if (this.getCouplerPosition(coupler).distanceTo(stock.getCouplerPosition(otherCoupler)) < this.getCouplerPosition(coupler.opposite()).distanceTo(stock.getCouplerPosition(otherCoupler)) ) {
-						inRange.add(stock);
-				}
 			}
+			
+			// findByUUID seems to work around a memcpy issue where refs are not updated
+			stock = this.findByUUID(stock.getUniqueID());
+			if (stock == null) {
+				//this should not happen...
+				continue;
+			}
+			
+			bestMatch = Pair.of(stock, otherCoupler);
+			bestDistance = myCouplerToOtherCoupler;
 		}
 		
-		List<EntityCoupleableRollingStock> toRemove = new ArrayList<EntityCoupleableRollingStock>();
-		
-		for (EntityCoupleableRollingStock stock : this.getTrain()) {
-			// Prevent infinite loops
-			for (EntityCoupleableRollingStock pot: inRange) {
-				if (pot.getPersistentID().equals(stock.getPersistentID())) {
-					toRemove.add(pot);
-				}
-			}
-		}
-		
-		inRange.removeAll(toRemove);
-		
-		return inRange;
+		return bestMatch;
 	}
 
 	/*
