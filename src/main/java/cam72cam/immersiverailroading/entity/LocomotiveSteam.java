@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
@@ -254,7 +255,9 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
-			world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure, true);
+			if (Config.explosionsEnabled) {
+				world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure, true);
+			}
 			world.removeEntity(this);
 		}
 	}
