@@ -152,7 +152,7 @@ public abstract class Locomotive extends FreightTank {
 			
 			Speed simSpeed = this.getCurrentSpeed();
 			if (isStuck) {
-				simSpeed = Speed.fromMinecraft(0);
+				simSpeed = Speed.ZERO;
 			}
 			
 			// Clear out the list and re-simulate

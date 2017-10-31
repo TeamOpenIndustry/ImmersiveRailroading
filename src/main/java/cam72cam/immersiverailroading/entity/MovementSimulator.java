@@ -33,7 +33,7 @@ public class MovementSimulator {
 		TickPos origPosition = position.clone();
 
 		if (Math.abs(moveDistance) < 0.001) {
-			position.speed = Speed.fromMinecraft(Math.abs(0));
+			position.speed = Speed.ZERO;
 			return position;
 		}
 		

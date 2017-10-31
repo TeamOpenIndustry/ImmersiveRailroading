@@ -31,4 +31,8 @@ public class Speed {
 	public String metricString() {
 		return String.format("%.2f km/h", metric());
 	}
+
+	public boolean isZero() {
+		return internalSpeed == 0;
+	}
 }

@@ -102,11 +102,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox() {
-		return this.boundingBox;
+		return this.getEntityBoundingBox();
 	}
 
 	@Override
 	public AxisAlignedBB getEntityBoundingBox() {
+		if (this.boundingBox == null) {
+			this.boundingBox = this.getDefinition().getBounds(this);
+		}
 		return this.boundingBox;
 	}
 	
@@ -223,7 +226,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    this.frontYaw = currentPos.frontYaw;
 	    this.rearYaw = currentPos.rearYaw;
 	    
-	    this.boundingBox = this.getDefinition().getBounds(this);
+	    if (!currentPos.speed.isZero()) {
+	    	this.boundingBox = null; // Force update
+	    }
 	    
 	    this.currentSpeed = currentPos.speed;
 	    this.isReverse = currentPos.isReverse; 
