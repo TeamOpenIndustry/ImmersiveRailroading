@@ -496,9 +496,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
-			return predictRearBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(this.getPositionVector());
+			return predictRearBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(this.getPositionVector()).addVector(0, 1, 0);
 		} else {
-			return predictFrontBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(this.getPositionVector());
+			return predictFrontBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(this.getPositionVector()).addVector(0, 1, 0);
 		}
 	}
 
@@ -569,8 +569,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			} else {
 				// diagram 2 or diagram 3
 				AxisAlignedBB myBB = this.getCollisionBoundingBox().contract(0, 0, 0.25); // Prevent overlap on other rails
-				//TODO movement simulator
-				if (!myBB.contains(stock.getCouplerPosition(otherCoupler).addVector(0, 1, 0))) {
+				if (!myBB.contains(stock.getCouplerPosition(otherCoupler))) {
 					continue;
 				}
 			}
