@@ -84,16 +84,13 @@ public abstract class BlockRailBase extends Block {
     {
     	TileEntity te = world.getTileEntity(pos);
     	if (te instanceof TileRailBase) {
-    		TileRail parent = ((TileRailBase) te).getParentTile();
-    		if (parent != null) {
-    			if (parent.getRailBed() != null) {
-    				RailBlockState statea = new RailBlockState(state.getBlock(), state.getProperties());
-    				statea.setBed(parent.getRailBed());
-    				statea.setHeight(((TileRailBase) te).getHeight());
-    				statea.setSnow(((TileRailBase) te).getSnowLayers());
-    				return statea;
-    			}
-    		}
+			if (((TileRailBase) te).getRenderRailBed() != null) {
+				RailBlockState statea = new RailBlockState(state.getBlock(), state.getProperties());
+				statea.setBed(((TileRailBase) te).getRenderRailBed());
+				statea.setHeight(((TileRailBase) te).getHeight());
+				statea.setSnow(((TileRailBase) te).getSnowLayers());
+				return statea;
+			}
     	}
         return state;
     }
