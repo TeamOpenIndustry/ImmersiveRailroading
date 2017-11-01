@@ -329,7 +329,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (nextPos.speed.metric() != 0) {
 			ChunkManager.flagEntityPos(this.world, new BlockPos(nextPos.position));
 			for (CouplerType toChunk : CouplerType.values()) {
-				ChunkManager.flagEntityPos(this.world, new BlockPos(this.getCouplerPosition(toChunk)));
+				ChunkManager.flagEntityPos(this.world, new BlockPos(this.getCouplerPosition(toChunk, nextPos)));
 			}
 		}
 		
@@ -493,12 +493,16 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {
+		return getCouplerPosition(coupler, this.getCurrentTickPosOrFake());
+	}
+
+	public Vec3d getCouplerPosition(CouplerType coupler, TickPos pos) {
 		
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
-			return predictRearBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(this.getPositionVector()).addVector(0, 1, 0);
+			return predictRearBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(pos.position).addVector(0, 1, 0);
 		} else {
-			return predictFrontBogeyPosition((float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(this.getPositionVector()).addVector(0, 1, 0);
+			return predictFrontBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(pos.position).addVector(0, 1, 0);
 		}
 	}
 
@@ -540,10 +544,17 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		 * 2. |-----+---|=|----+-----|
 		 * 3. |---|=+====+|-----|
 		 */
+
+		// getCouplerPosition is a somewhat expensive call, minimize if possible
+		Vec3d myCouplerPos = this.getCouplerPosition(coupler);
 		
 		for (EntityCoupleableRollingStock stock : nearBy) {
-			double couplerDistFront = this.getPositionVector().distanceTo(stock.getCouplerPosition(CouplerType.FRONT));
-			double couplerDistRear = this.getPositionVector().distanceTo(stock.getCouplerPosition(CouplerType.BACK));
+			Vec3d stockFrontPos = stock.getCouplerPosition(CouplerType.FRONT);
+			Vec3d stockBackPos = stock.getCouplerPosition(CouplerType.BACK);
+			
+			double couplerDistFront = this.getPositionVector().distanceTo(stockFrontPos);
+			double couplerDistRear = this.getPositionVector().distanceTo(stockBackPos);
+			
 			// See above diagram (3).  OtherCoupler closet to my center is the one we want to couple to.
 			CouplerType otherCoupler = couplerDistFront < couplerDistRear ? CouplerType.FRONT : CouplerType.BACK;
 			if (stock.isCoupled(otherCoupler)) {
@@ -551,9 +562,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				continue;
 			}
 			
-			double myCouplerToOtherCoupler = this.getCouplerPosition(coupler).distanceTo(stock.getCouplerPosition(otherCoupler));
-			double myCenterToMyCoupler = this.getPositionVector().distanceTo(this.getCouplerPosition(coupler));
-			double myCenterToOtherCoupler = this.getPositionVector().distanceTo(stock.getCouplerPosition(otherCoupler));
+			Vec3d stockCouplerPos = otherCoupler == CouplerType.FRONT ? stockFrontPos : stockBackPos;
+			
+			double myCouplerToOtherCoupler = myCouplerPos.distanceTo(stockCouplerPos);
+			double myCenterToMyCoupler = this.getPositionVector().distanceTo(myCouplerPos);
+			double myCenterToOtherCoupler = this.getPositionVector().distanceTo(stockCouplerPos);
 
 			if (myCouplerToOtherCoupler > bestDistance) {
 				// Current best match is closer, should be a small edge case when stock is almost entirely overlapping
@@ -569,7 +582,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			} else {
 				// diagram 2 or diagram 3
 				AxisAlignedBB myBB = this.getCollisionBoundingBox().contract(0, 0, 0.25); // Prevent overlap on other rails
-				if (!myBB.contains(stock.getCouplerPosition(otherCoupler))) {
+				if (!myBB.contains(stockCouplerPos)) {
 					continue;
 				}
 			}

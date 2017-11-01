@@ -179,9 +179,9 @@ public class MovementSimulator {
 		
 		if (rail == null) {
 			if (!world.isRemote) {
-				System.out.println("WARNING OFF TRACK!!!");
-				System.out.println(position);
-				System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
+				//System.out.println("WARNING OFF TRACK!!!");
+				//System.out.println(position);
+				//System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
 				this.position.isOffTrack = true;
 				return position;
 			} else {
