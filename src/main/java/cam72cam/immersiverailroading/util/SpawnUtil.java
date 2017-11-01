@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.MovementSimulator;
 import cam72cam.immersiverailroading.entity.TickPos;
 import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -26,11 +25,11 @@ import net.minecraft.world.World;
 public class SpawnUtil {
 	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
 		double offset = def.getCouplerPosition(CouplerType.BACK) - Config.couplerRange;
-		float yaw = EnumFacing.fromAngle(player.rotationYawHead).getHorizontalAngle();
+		float yaw = player.rotationYawHead;
 		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
 		
 		TileEntity te = worldIn.getTileEntity(new BlockPos(tp.position));
-		if (te instanceof TileRailBase && !((TileRailBase)te).getParentTile().getType().isTurn()) {
+		if (te instanceof TileRailBase) {
 			if (!worldIn.isRemote) {
 				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead));
 				
@@ -41,7 +40,8 @@ public class SpawnUtil {
 				if (stock instanceof EntityMoveableRollingStock) {
 					// snap to track
 					EntityMoveableRollingStock mrs = (EntityMoveableRollingStock)stock;
-					mrs.initPositions();
+					tp.speed = Speed.ZERO;
+					mrs.initPositions(tp);
 				}
 			}
 			if (!player.isCreative()) {
@@ -50,9 +50,6 @@ public class SpawnUtil {
 				player.setHeldItem(hand, stack);
 			}
 			return EnumActionResult.PASS;
-		}
-		if (worldIn.isRemote) {
-			player.sendMessage(ChatText.STOCK_PLACEMENT.getMessage());
 		}
 		return EnumActionResult.FAIL;
 	}
