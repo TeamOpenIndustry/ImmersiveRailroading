@@ -45,7 +45,7 @@ public class DefinitionManager {
 						loco = new LocomotiveDieselDefinition(defID, data);
 						break;
 					default:
-						ImmersiveRailroading.logger.warn(String.format("Invalid era %s in %s", era, defID));
+						ImmersiveRailroading.warn("Invalid era %s in %s", era, defID);
 						continue;
 					}
 					definitions.put(defID, loco);
@@ -93,7 +93,7 @@ public class DefinitionManager {
 	}
 
 	private static JsonObject getJsonData(String defID) throws IOException {
-		ImmersiveRailroading.logger.info("Loading stock " + defID);
+		ImmersiveRailroading.info("Loading stock " + defID);
 		ResourceLocation resource = new ResourceLocation(ImmersiveRailroading.MODID, defID);
 		
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(resource);
@@ -106,7 +106,7 @@ public class DefinitionManager {
 	public static EntityRollingStockDefinition getDefinition(String defID) {
 		EntityRollingStockDefinition val = definitions.get(defID);
 		if (val == null) {
-			ImmersiveRailroading.logger.warn("Invalid stock ID: " + defID);
+			ImmersiveRailroading.warn("Invalid stock ID: " + defID);
 		}
 		return val;
 	}

@@ -205,7 +205,7 @@ public class TileRail extends TileRailBase {
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		if (facing == null) {
 			// Something is wrong...
-			ImmersiveRailroading.logger.error("INVALID TILE SAVE");
+			ImmersiveRailroading.error("INVALID TILE SAVE");
 			return super.writeToNBT(nbt);
 		}
 		nbt.setByte("facing", (byte) facing.getIndex());

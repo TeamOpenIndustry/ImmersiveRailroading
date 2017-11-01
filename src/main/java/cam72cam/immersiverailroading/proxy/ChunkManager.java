@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -76,9 +75,7 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 		if (CHUNK_MAP.containsKey(pos)) {
 			currTicks = CHUNK_MAP.get(pos) + 1;
 		} else {
-			if (Config.debugChunkLoading) {
-				System.out.println(String.format("NEW CHUNK %s %s", pos.chunkX, pos.chunkZ));
-			}
+			ImmersiveRailroading.debug("NEW CHUNK %s %s", pos.chunkX, pos.chunkZ);
 		}
 		// max 5s before unload
 		CHUNK_MAP.put(pos, Math.max(100, Math.min(10, currTicks)));
@@ -132,21 +129,17 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 				// Leave chunk loaded
 				//System.out.println(String.format("NOP CHUNK %s %s", chunk.x, chunk.z));
 			} else {
-				if (Config.debugChunkLoading) {
-					System.out.println(String.format("UNLOADED CHUNK %s %s", chunk.x, chunk.z));
-				}
+				ImmersiveRailroading.debug("UNLOADED CHUNK %s %s", chunk.x, chunk.z);
 				ForgeChunkManager.unforceChunk(ticket, chunk);
 			}
 		}
 		
 		for (ChunkPos pos : loaded) {
-			if (Config.debugChunkLoading) {
-				System.out.println(String.format("LOADED CHUNK %s %s", pos.chunkX, pos.chunkZ));
-			}
+			ImmersiveRailroading.debug("LOADED CHUNK %s %s", pos.chunkX, pos.chunkZ);
 			try {
 				ForgeChunkManager.forceChunk(ticket, new net.minecraft.util.math.ChunkPos(pos.chunkX, pos.chunkZ));
 			} catch (Exception ex) {
-				ImmersiveRailroading.logger.catching(ex);
+				ImmersiveRailroading.catching(ex);
 			}
 		}
 	}

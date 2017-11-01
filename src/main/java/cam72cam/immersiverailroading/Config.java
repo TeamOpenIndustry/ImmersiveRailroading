@@ -35,7 +35,7 @@ public class Config {
 	public static boolean debugInfiniteLiquids = true;
 	
 	@Comment({"Print extra chunk loading info"})
-	public static boolean debugChunkLoading = true;
+	public static boolean debugLog = false;
 
 	@Comment("Cost to place down a tie")
 	public static double TieCostMultiplier = 0.25;
