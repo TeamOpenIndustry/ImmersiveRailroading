@@ -697,7 +697,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					EntityCoupleableRollingStock other = this.getCoupled(coupler);
 					CouplerType otherCoupler = other.getCouplerFor(this);
 					if (otherCoupler == null) {
-						this.decouple(coupler);
+						//this.decouple(coupler);
 						continue;
 					}
 					boolean otherIsCoupled = other.isCouplerEngaged(otherCoupler); 
