@@ -133,7 +133,6 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		} catch (Exception ex) {
 			for (StackTraceElement tl : ex.getStackTrace()) {
 				if (tl.getFileName().contains("PlayerList.java")) {
-					System.out.println("HACK");
 					return new ArrayList<T>();
 				}
 			}

@@ -61,7 +61,7 @@ public class TileRailBase extends SyncdTileEntity {
 
 	public BlockPos getParent() {
 		if (parent == null) {
-			ImmersiveRailroading.logger.warn("Invalid block without parent");
+			ImmersiveRailroading.warn("Invalid block without parent");
 			world.setBlockToAir(pos);
 			return null;
 		}

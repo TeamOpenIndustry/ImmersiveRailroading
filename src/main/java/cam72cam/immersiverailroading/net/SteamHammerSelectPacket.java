@@ -44,7 +44,6 @@ public class SteamHammerSelectPacket implements IMessage {
 		}
 
 		private void handle(SteamHammerSelectPacket message, MessageContext ctx) {
-			System.out.println("HANDLE");
 			TileSteamHammer tile = ((TileSteamHammer)ctx.getServerHandler().player.world.getTileEntity(message.tilePreviewPos));
 			tile.setChoosenItem(message.selected);
 		}

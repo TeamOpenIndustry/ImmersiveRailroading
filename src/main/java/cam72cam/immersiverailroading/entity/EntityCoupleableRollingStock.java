@@ -186,13 +186,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
 			if (coupled == null) {
 				if (this.ticksExisted > 20) {
-					ImmersiveRailroading.logger.warn("Coupled entity was not loaded after 20 ticks, decoupling");
+					ImmersiveRailroading.warn("Coupled entity was not loaded after 20 ticks, decoupling");
 					this.decouple(coupler);
 				}
 				continue;
 			}
 			if (coupled.isDead) {
-				ImmersiveRailroading.logger.warn("Removing Dead Stock");
+				ImmersiveRailroading.warn("Removing Dead Stock");
 				this.decouple(coupler);
 				continue;
 			}
@@ -321,7 +321,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	// This breaks with looped rolling stock
 	private boolean recursiveMove(EntityCoupleableRollingStock parent, int tickOffset) {
 		if (this.positions.size() < tickOffset) {
-			System.out.println("MISSING START POS " + tickOffset);
+			ImmersiveRailroading.warn("MISSING START POS " + tickOffset);
 			return true;
 		}
 		
@@ -341,7 +341,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (coupler == null) {
 			parent.decouple(this);
 			this.decouple(parent);
-			System.out.println("COUPLER NULL");
+			ImmersiveRailroading.warn("COUPLER NULL");
 			return true;
 		}
 		
@@ -366,7 +366,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		if (otherOffset == null) {
 			if (!world.isRemote) {
-				ImmersiveRailroading.logger.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), parent.getPersistentID()));
+				ImmersiveRailroading.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), parent.getPersistentID()));
 			}
 			return true;
 		}
@@ -535,7 +535,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public void decouple(CouplerType coupler) {
 		EntityCoupleableRollingStock coupled = getCoupled(coupler);
 		
-		System.out.println(this.getPersistentID() + " decouple " + coupler);
+		ImmersiveRailroading.info(this.getPersistentID() + " decouple " + coupler);
 
 		// Break the coupling
 		this.setCoupledUUID(coupler, null);

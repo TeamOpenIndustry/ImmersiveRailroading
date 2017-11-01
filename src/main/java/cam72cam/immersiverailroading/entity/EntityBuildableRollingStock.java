@@ -76,10 +76,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	
 	public void setComponents(List<ItemComponentType> items) {
 		this.builtItems = new ArrayList<ItemComponentType>(items);
-		this.isBuilt = false;
 		this.isBuilt = getMissingItemComponents().isEmpty();
-		
-		System.out.println(this.world.isRemote + " : " + this.isBuilt);
 		
 		if (!world.isRemote) {
 			this.sendToObserving(new BuildableStockSyncPacket(this));
@@ -141,7 +138,6 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	}
 	
 	public void addComponent(ItemComponentType item) {
-		System.out.println("Added: " + item);
 		this.builtItems.add(item);
 		this.isBuilt = getMissingItemComponents().isEmpty();
 		if (isBuilt) {
@@ -223,7 +219,6 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		}
 		
 		this.builtItems.remove(toRemove);
-		System.out.println("Removed: " + toRemove);
 		this.sendToObserving(new BuildableStockSyncPacket(this));
 		
 		

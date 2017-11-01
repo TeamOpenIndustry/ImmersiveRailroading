@@ -75,7 +75,7 @@ public abstract class Locomotive extends FreightTank {
 	@Override
 	public void setDead() {
 		super.setDead();
-		System.out.println("Stopping audio");
+		//System.out.println("Stopping audio");
 		//Minecraft.getMinecraft().getSoundHandler().stopSound(idleSound);
 		//Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
 	}
