@@ -7,7 +7,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class TickPos {
 	public int tickID;
-	Speed speed;
+	public Speed speed;
 	boolean isOffTrack;
 	
 	//Vec3d frontPosition;

@@ -96,6 +96,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		this.positions.add(new TickPos(this.tickPosID, this.getCurrentSpeed(), this.getPositionVector(), this.rotationYaw, this.rotationYaw, this.rotationYaw, this.rotationPitch, false, this.isReverse));
 	}
 
+	public void initPositions(TickPos tp) {
+		this.positions = new ArrayList<TickPos>();
+		this.positions.add(tp);
+	}
+
 	/*
 	 * Entity Overrides for BB
 	 */
