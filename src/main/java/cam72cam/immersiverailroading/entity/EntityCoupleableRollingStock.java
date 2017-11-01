@@ -235,7 +235,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 */
 
 	public void simulateCoupledRollingStock() {
-		for (int tickOffset = 0; tickOffset < this.positions.size(); tickOffset++) {
+		for (int tickOffset = 1; tickOffset < this.positions.size(); tickOffset++) {
 			boolean onTrack = true;
 			for (CouplerType coupler : CouplerType.values()) {
 				EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
@@ -261,15 +261,16 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	// This breaks with looped rolling stock
 	private boolean recursiveMove(EntityCoupleableRollingStock parent, int tickOffset) {
-		if (this.positions.size()-1 < tickOffset) {
+		if (this.positions.size() < tickOffset) {
 			System.out.println("MISSING START POS " + tickOffset);
 			return true;
 		}
 		
-		TickPos currentPos = this.positions.get(tickOffset);
+		TickPos currentPos = this.positions.get(tickOffset-1);
 		TickPos parentPos = parent.positions.get(tickOffset);
+		boolean onTrack = !currentPos.isOffTrack;
 		
-		if (tickOffset == 0) {
+		if (tickOffset == 1) {
 			// Clear out existing movement information
 			this.positions = new ArrayList<TickPos>();
 			this.positions.add(currentPos);
@@ -318,7 +319,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			distance = -distance;
 		}
 
-		boolean onTrack = true;
 		
 		TickPos nextPos = this.moveRollingStock(distance, currentPos.tickID);
 		this.positions.add(nextPos);
@@ -538,7 +538,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		/*
 		 * 1. |-----+-----| |-----+-----|
 		 * 2. |-----+---|=|----+-----|
-		 * 3. |---|=+====+|-----|  // Check distance from center to coupler
+		 * 3. |---|=+====+|-----|
 		 */
 		
 		for (EntityCoupleableRollingStock stock : nearBy) {
