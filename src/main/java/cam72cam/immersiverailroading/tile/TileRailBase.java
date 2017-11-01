@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -25,6 +26,7 @@ public class TileRailBase extends SyncdTileEntity {
 	private boolean willBeReplaced = false; 
 	private NBTTagCompound replaced;
 	private boolean skipNextRefresh = false;
+	public ItemStack railBedCache = null;
 	
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -72,6 +74,27 @@ public class TileRailBase extends SyncdTileEntity {
 	
 	public boolean isFlexible() {
 		return this.flexible;
+	}
+	
+	public ItemStack getRenderRailBed() {
+		if (railBedCache == null) {
+			TileRail pt = this.getParentTile();
+			if (pt != null) {
+				railBedCache = pt.getRailBed();
+			}
+		}
+		return railBedCache;
+	}
+	
+	public void writeUpdateNBT(NBTTagCompound nbt) {
+		if (this.getRenderRailBed() != null) {
+			nbt.setTag("renderBed", this.getRenderRailBed().serializeNBT());
+		}
+	}
+	public void readUpdateNBT(NBTTagCompound nbt) {
+		if (nbt.hasKey("renderBed")) {
+			this.railBedCache = new ItemStack(nbt.getCompoundTag("renderBed"));
+		}
 	}
 	
 	@Override

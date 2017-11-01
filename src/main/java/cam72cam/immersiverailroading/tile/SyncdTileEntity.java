@@ -15,11 +15,17 @@ public class SyncdTileEntity extends TileEntity {
 		world.notifyNeighborsOfStateChange(pos, this.getBlockType(), true);
 	}
 	
+	public void writeUpdateNBT(NBTTagCompound nbt) {
+	}
+	public void readUpdateNBT(NBTTagCompound nbt) {
+	}
+	
 	
 	@Override
 	public SPacketUpdateTileEntity getUpdatePacket() {
 		NBTTagCompound nbt = new NBTTagCompound();
 		this.writeToNBT(nbt);
+		this.writeUpdateNBT(nbt);
 		
 		return new SPacketUpdateTileEntity(this.getPos(), 1, nbt);
 	}
@@ -27,6 +33,7 @@ public class SyncdTileEntity extends TileEntity {
 	@Override
 	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
 		this.readFromNBT(pkt.getNbtCompound());
+		this.readUpdateNBT(pkt.getNbtCompound());
 		super.onDataPacket(net, pkt);
 		world.markBlockRangeForRenderUpdate(getPos(), getPos());
 		hasTileData = true;
@@ -36,12 +43,14 @@ public class SyncdTileEntity extends TileEntity {
 	public NBTTagCompound getUpdateTag() {
 		NBTTagCompound tag = super.getUpdateTag();
 		this.writeToNBT(tag);
+		this.writeUpdateNBT(tag);
 		return tag;
 	}
 	
 	@Override 
 	public void handleUpdateTag(NBTTagCompound tag) {
 		this.readFromNBT(tag);
+		this.readUpdateNBT(tag);
 		super.handleUpdateTag(tag);
 		world.markBlockRangeForRenderUpdate(getPos(), getPos());
 		hasTileData = true;
