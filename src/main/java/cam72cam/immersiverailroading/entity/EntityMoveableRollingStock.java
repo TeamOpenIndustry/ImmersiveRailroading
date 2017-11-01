@@ -371,7 +371,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return this.rotationYaw;
 	}
 
-	private TickPos getCurrentTickPosOrFake() {
+	protected TickPos getCurrentTickPosOrFake() {
 		if (this.getTickPos(this.tickPosID) != null) {
 			return this.getTickPos(this.tickPosID);
 		}
@@ -379,28 +379,34 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public PosRot predictFrontBogeyPosition(float offset) {		
-		MovementSimulator sim = new MovementSimulator(world, getCurrentTickPosOrFake(), this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
+		return predictFrontBogeyPosition(getCurrentTickPosOrFake(), offset);
+	}
+	public PosRot predictFrontBogeyPosition(TickPos pos, float offset) {		
+		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
 		
 		Vec3d front = sim.frontBogeyPosition();
 		Vec3d nextFront = front;
 		while (offset > 0) {
-			nextFront = sim.nextPosition(nextFront, this.rotationYaw, VecUtil.fromYaw(Math.min(0.1, offset), this.getFrontYaw()));
+			nextFront = sim.nextPosition(nextFront, pos.rotationYaw, VecUtil.fromYaw(Math.min(0.1, offset), pos.frontYaw));
 			offset -= 0.1;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
-		return new PosRot(nextFront.subtractReverse(this.getPositionVector()), VecUtil.toYaw(frontDelta));
+		return new PosRot(nextFront.subtractReverse(pos.position), VecUtil.toYaw(frontDelta));
 	}
-
-	public PosRot predictRearBogeyPosition(float offset) {
-		MovementSimulator sim = new MovementSimulator(world, getCurrentTickPosOrFake(), this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
+	
+	public PosRot predictRearBogeyPosition(float offset) {		
+		return predictRearBogeyPosition(getCurrentTickPosOrFake(), offset);
+	}
+	public PosRot predictRearBogeyPosition(TickPos pos, float offset) {
+		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(), this.getDefinition().getBogeyRear());
 		
 		Vec3d rear = sim.rearBogeyPosition();
 		Vec3d nextRear = rear;
 		while (offset > 0) {
-			nextRear = sim.nextPosition(nextRear, this.rotationYaw+180, VecUtil.fromYaw(Math.min(0.1, offset), this.getRearYaw()+180));
+			nextRear = sim.nextPosition(nextRear, pos.rotationYaw+180, VecUtil.fromYaw(Math.min(0.1, offset), pos.rearYaw+180));
 			offset -= 0.1;
 		}
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
-		return new PosRot(nextRear.subtractReverse(this.getPositionVector()), VecUtil.toYaw(rearDelta));
+		return new PosRot(nextRear.subtractReverse(pos.position), VecUtil.toYaw(rearDelta));
 	}
 }
