@@ -34,12 +34,13 @@ public class BlockRailPreview extends Block {
 	}
 
 	public static boolean tryBreakPreview(World world, BlockPos pos, EntityPlayer entityPlayer) {
-		TileEntity te = world.getTileEntity(pos);
-		if (entityPlayer.isSneaking() && te instanceof TileRailPreview) {
-			TileRailPreview tr = (TileRailPreview)te;
-			world.setBlockToAir(pos);
-			tr.getRailRenderInfo().build(entityPlayer, pos);
-			return true;
+		if (entityPlayer.isSneaking()) {
+			TileRailPreview tr = TileRailPreview.get(world, pos);
+			if (tr != null) {
+				world.setBlockToAir(pos);
+				tr.getRailRenderInfo().build(entityPlayer, pos);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -47,8 +48,10 @@ public class BlockRailPreview extends Block {
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		if (playerIn.isSneaking()) {
 			if (!worldIn.isRemote) {
-				TileRailPreview te = (TileRailPreview) worldIn.getTileEntity(pos);
-				te.setHit(hitX, hitY, hitZ);
+				TileRailPreview te = TileRailPreview.get(worldIn, pos);
+				if (te != null) {
+					te.setHit(hitX, hitY, hitZ);
+				}
 			}
 			return false;
 		} else {
@@ -79,8 +82,11 @@ public class BlockRailPreview extends Block {
 
 	@Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-		TileRailPreview te = (TileRailPreview) world.getTileEntity(pos);
-		return te.getItem();
+		TileRailPreview te = TileRailPreview.get(world, pos);
+		if (te != null) {
+			return te.getItem();
+		}
+		return ItemStack.EMPTY;
 	}
 
 	@Override

@@ -6,8 +6,11 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -15,6 +18,10 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class TileSteamHammer extends SyncdTileEntity implements ITickable {
+	public static TileSteamHammer get(IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		return te instanceof TileSteamHammer ? (TileSteamHammer) te : null;
+	}
 	private int craftProgress = 0;
 	private ItemStack chosenItem = new ItemStack(Items.AIR);
 	private ItemStackHandler itemStackHandler = new ItemStackHandler(2) {

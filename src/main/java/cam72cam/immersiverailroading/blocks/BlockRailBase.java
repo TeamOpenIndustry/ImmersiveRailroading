@@ -17,7 +17,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -40,13 +39,14 @@ public abstract class BlockRailBase extends Block {
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		TileRailBase te = (TileRailBase) world.getTileEntity(pos);
-		
-		if (te instanceof TileRail) {
-			((TileRail) te).spawnDrops();
+		TileRailBase te = TileRailBase.get(world, pos);
+		if (te != null) {
+			if (te instanceof TileRail) {
+				((TileRail) te).spawnDrops();
+			}
+			
+			breakParentIfExists(te);
 		}
-		
-		breakParentIfExists(te);
 		super.breakBlock(world, pos, state);
 	}
 	
@@ -82,13 +82,13 @@ public abstract class BlockRailBase extends Block {
 
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-    	TileEntity te = world.getTileEntity(pos);
-    	if (te instanceof TileRailBase) {
-			if (((TileRailBase) te).getRenderRailBed() != null) {
+    	TileRailBase te = TileRailBase.get(world, pos);
+    	if (te != null) {
+			if (te.getRenderRailBed() != null) {
 				RailBlockState statea = new RailBlockState(state.getBlock(), state.getProperties());
-				statea.setBed(((TileRailBase) te).getRenderRailBed());
-				statea.setHeight(((TileRailBase) te).getHeight());
-				statea.setSnow(((TileRailBase) te).getSnowLayers());
+				statea.setBed(te.getRenderRailBed());
+				statea.setHeight(te.getHeight());
+				statea.setSnow(te.getSnowLayers());
 				return statea;
 			}
     	}
@@ -101,9 +101,8 @@ public abstract class BlockRailBase extends Block {
 	}
 	
 	public static boolean tryBreakRail(IBlockAccess world, BlockPos pos) {
-		TileEntity te = world.getTileEntity(pos);
-		if (te instanceof TileRailBase) {
-			TileRailBase rail = (TileRailBase)te;
+		TileRailBase rail = TileRailBase.get(world, pos);
+		if (rail != null) {
 			if (rail.getReplaced() != null) {
 				// new object here is important
 				TileRailGag newGag = new TileRailGag();
@@ -123,7 +122,10 @@ public abstract class BlockRailBase extends Block {
 
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
-		TileRailBase tileEntity = (TileRailBase) world.getTileEntity(pos);
+		TileRailBase tileEntity = TileRailBase.get(world, pos);
+		if (tileEntity == null) {
+			return;
+		}
 		if (tileEntity.getWorld().isRemote) {
 			return;
 		}
@@ -162,21 +164,19 @@ public abstract class BlockRailBase extends Block {
 	
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-		TileRailBase tileEntity = (TileRailBase) source.getTileEntity(pos);
-		float height = 0.125F;
-		if (tileEntity != null) {
-			height = tileEntity.getFullHeight();
+		TileRailBase te = TileRailBase.get(source, pos);
+		if (te == null) {
+	        return NULL_AABB;
 		}
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height+0.1, 1.0F);
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, te.getFullHeight()+0.1, 1.0F);
 	}
 
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-		TileRailBase tileEntity = (TileRailBase) source.getTileEntity(pos);
-		float height = 0.125F;
-		if (tileEntity != null) {
-			height = tileEntity.getFullHeight();
+		TileRailBase te = TileRailBase.get(source, pos);
+		if (te == null) {
+	        return NULL_AABB;
 		}
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height, 1.0F);
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, te.getFullHeight(), 1.0F);
 	}
 	
 	@Override
@@ -213,11 +213,11 @@ public abstract class BlockRailBase extends Block {
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		ItemStack stack = playerIn.getHeldItem(hand);
 		Block block = Block.getBlockFromItem(stack.getItem());
-		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof TileRailBase) {
+		TileRailBase te = TileRailBase.get(worldIn, pos);
+		if (te != null) {
 			if (block == Blocks.SNOW_LAYER) {
 				if (!worldIn.isRemote) {
-					((TileRailBase) te).handleSnowTick();
+					te.handleSnowTick();
 				}
 				return true;
 			}
@@ -231,8 +231,8 @@ public abstract class BlockRailBase extends Block {
 			}
 			if (stack.getItem().getToolClasses(stack).contains("shovel")) {
 				if (!worldIn.isRemote) {
-					((TileRailBase) te).cleanSnow();
-					((TileRailBase) te).setSnowLayers(0);
+					te.cleanSnow();
+					te.setSnowLayers(0);
 					stack.damageItem(1, playerIn);
 				}
 			}

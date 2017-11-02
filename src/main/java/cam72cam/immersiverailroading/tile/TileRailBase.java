@@ -16,9 +16,15 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class TileRailBase extends SyncdTileEntity {
+	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		return te instanceof TileRailBase ? (TileRailBase) te : null;
+	}
+	
 	private BlockPos parent;
 	private float height = 0;
 	private int snowLayers = 0;
