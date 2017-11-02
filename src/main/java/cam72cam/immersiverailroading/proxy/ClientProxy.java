@@ -115,7 +115,11 @@ public class ClientProxy extends CommonProxy {
 		case RAIL_PREVIEW:
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		case BLOCK_STEAM_HAMMER:
-			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, (TileSteamHammer) world.getTileEntity(new BlockPos(entityIDorPosX, posY, posZ))));
+			TileSteamHammer te = TileSteamHammer.get(world, new BlockPos(entityIDorPosX, posY, posZ));
+			if (te == null) {
+				return null;
+			}
+			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, te));
 		default:
 			return null;
 		}

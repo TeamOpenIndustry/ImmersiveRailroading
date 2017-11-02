@@ -28,8 +28,8 @@ public class SpawnUtil {
 		float yaw = player.rotationYawHead;
 		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
 		
-		TileEntity te = worldIn.getTileEntity(new BlockPos(tp.position));
-		if (te instanceof TileRailBase) {
+		TileEntity te = TileRailBase.get(worldIn, new BlockPos(tp.position));
+		if (te != null) {
 			if (!worldIn.isRemote) {
 				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead));
 				

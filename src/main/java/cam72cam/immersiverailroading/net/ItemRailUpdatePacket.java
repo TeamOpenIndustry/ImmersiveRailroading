@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.net;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
@@ -96,10 +97,16 @@ public class ItemRailUpdatePacket implements IMessage {
 
 		private void handle(ItemRailUpdatePacket message, MessageContext ctx) {
 			ItemStack stack;
+			TileRailPreview te = null;
 			if (message.tilePreviewPos == null) {
 				stack = ctx.getServerHandler().player.inventory.getStackInSlot(message.slot);
 			} else {
-				stack = ((TileRailPreview)ctx.getServerHandler().player.world.getTileEntity(message.tilePreviewPos)).getItem();
+				te = TileRailPreview.get(ctx.getServerHandler().player.world, message.tilePreviewPos);
+				if (te == null) {
+					ImmersiveRailroading.warn("Got invalid item rail update packet at %s", message.tilePreviewPos);
+					return;
+				}
+				stack = te.getItem();
 			}
 			ItemRail.setType(stack, message.type);
 			ItemRail.setLength(stack, message.length);
@@ -111,7 +118,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			if (message.tilePreviewPos == null) {
 				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 			} else {
-				((TileRailPreview)ctx.getServerHandler().player.world.getTileEntity(message.tilePreviewPos)).setItem(stack);
+				te.setItem(stack);
 			}
 		}
 	}

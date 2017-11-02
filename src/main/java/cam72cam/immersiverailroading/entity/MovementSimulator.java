@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.SwitchUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -110,18 +109,14 @@ public class MovementSimulator {
 	}
 
 	private TileRailBase directRailFromPosition(Vec3d position) {
-		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
-		if (te instanceof TileRailBase) {
-			return (TileRailBase)te;
-		}
-		return null;
+		return TileRailBase.get(world, new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 	}
 	
 	protected TileRail railFromPosition(Vec3d position) {
-		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+		TileRailBase te = TileRailBase.get(world, new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 		TileRail parent;
 		if (te instanceof TileRailGag) {
-			parent = ((TileRailGag) te).getParentTile();
+			parent = te.getParentTile();
 		} else if (te instanceof TileRail) {
 			parent = (TileRail) te;
 		} else {

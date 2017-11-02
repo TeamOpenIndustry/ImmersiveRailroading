@@ -183,11 +183,7 @@ public class TileRailBase extends SyncdTileEntity {
 		if (this.getParent() == null) {
 			return null;
 		}
-		TileEntity te = world.getTileEntity(this.getParent());
-		if (te instanceof TileRail) {
-			return (TileRail)te ;
-		}
-		return null;
+		return TileRail.get(world, this.getParent());
 	}
 	public void setReplaced(NBTTagCompound replaced) {
 		this.replaced = replaced;
