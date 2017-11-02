@@ -230,7 +230,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    this.frontYaw = currentPos.frontYaw;
 	    this.rearYaw = currentPos.rearYaw;
 	    
-	    if (!currentPos.speed.isZero()) {
+	    if (!currentPos.speed.isZero() || this.ticksExisted < 5) {
 	    	this.boundingBox = null; // Force update
 	    }
 	    
