@@ -16,7 +16,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -324,9 +323,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 										world.destroyBlock(bp, true);										
 									}
 								} else {
-									TileEntity te = world.getTileEntity(bp);
-									if (te instanceof TileRailBase) {
-										((TileRailBase) te).cleanSnow();
+									TileRailBase te = TileRailBase.get(world, bp);
+									if (te != null) {
+										te.cleanSnow();
 										continue;
 									}
 								}

@@ -40,8 +40,8 @@ public class BlockUtil {
 			return true;
 		}
 		if (allowFlex && block instanceof BlockRailBase) {
-			TileRailBase te = (TileRailBase) world.getTileEntity(pos);
-			return te.isFlexible();
+			TileRailBase te = TileRailBase.get(world, pos);
+			return te != null && te.isFlexible();
 		}
 		return false;
 	}

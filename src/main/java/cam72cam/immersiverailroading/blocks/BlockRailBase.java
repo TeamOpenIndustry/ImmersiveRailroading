@@ -109,7 +109,7 @@ public abstract class BlockRailBase extends Block {
 				newGag.readFromNBT(rail.getReplaced());
 				
 				// Only do replacement if parent still exists
-				if (rail.getWorld().getTileEntity(newGag.getParent()) != null) {
+				if (TileRailBase.get(world, newGag.getParent()) != null) {
 					rail.getWorld().setTileEntity(pos, newGag);
 					newGag.markDirty();
 					breakParentIfExists(rail);
