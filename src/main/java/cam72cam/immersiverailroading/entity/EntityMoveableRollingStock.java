@@ -31,7 +31,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private Float rearYaw;
 	public boolean isReverse = false;
 	public float distanceTraveled = 0;
-	public int tickPosID = 0;
+	public double tickPosID = 0;
+	private double clientTicksPerServerTick = 1;
 	private Speed currentSpeed;
 	public List<TickPos> positions = new ArrayList<TickPos>();
 	private AxisAlignedBB boundingBox;
@@ -53,7 +54,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		super.writeSpawnData(buffer);
 		BufferUtil.writeFloat(buffer, frontYaw);
 		BufferUtil.writeFloat(buffer, rearYaw);
-		buffer.writeInt(tickPosID);
+		buffer.writeInt((int)tickPosID);
 
 		this.sendToObserving(new MRSSyncPacket(this, this.positions));
 	}
@@ -92,7 +93,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 	public void initPositions() {
 		this.positions = new ArrayList<TickPos>();
-		this.positions.add(new TickPos(this.tickPosID, this.getCurrentSpeed(), this.getPositionVector(), this.rotationYaw, this.rotationYaw, this.rotationYaw, this.rotationPitch, false, this.isReverse));
+		this.positions.add(new TickPos((int)this.tickPosID, this.getCurrentSpeed(), this.getPositionVector(), this.rotationYaw, this.rotationYaw, this.rotationYaw, this.rotationPitch, false, this.isReverse));
 	}
 
 	public void initPositions(TickPos tp) {
@@ -159,10 +160,17 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		this.currentSpeed = newSpeed;
 	}
 	
-
 	public void handleTickPosPacket(List<TickPos> newPositions) {
-		// TODO: Speed up or slow down entity ticking instead of
-		// skipping or re-doing ticks
+		if (this.positions != null && newPositions.size() != 0 && this.ticksExisted > 3) {
+			double tickOffset = tickPosID - newPositions.get(0).tickID;
+			
+			if (tickOffset > 0) {
+				clientTicksPerServerTick *= 1 - (Math.min(10, tickOffset) / 20); // Slow down client ticks
+			}
+			if (tickOffset < 0) {
+				clientTicksPerServerTick *= 1 + (Math.min(10, -tickOffset) / 20); // Speed up client ticks
+			}
+		}
 		this.positions = newPositions;
 		if (newPositions.size() > 0) {
 			// might happen if stock stops suddenly
@@ -187,9 +195,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (positions.size() == 0) {
 			return null;
 		}
-		if (positions.get(0).tickID != this.tickPosID) {
+		if (positions.get(0).tickID != (int)this.tickPosID) {
 			// Prune list
-			while (positions.get(0).tickID != this.tickPosID && positions.size() > 1) {
+			while (positions.get(0).tickID < (int)this.tickPosID && positions.size() > 1) {
 				positions.remove(0);
 			}
 		}
@@ -204,7 +212,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public void onUpdate() {
 		super.onUpdate();
 		
-		this.tickPosID++;
+		this.tickPosID += clientTicksPerServerTick;
 		
 		// Apply position tick
 		TickPos currentPos = getCurrentTickPosAndPrune();
@@ -376,8 +384,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 
 	protected TickPos getCurrentTickPosOrFake() {
-		if (this.getTickPos(this.tickPosID) != null) {
-			return this.getTickPos(this.tickPosID);
+		if (this.getTickPos((int)this.tickPosID) != null) {
+			return this.getTickPos((int)this.tickPosID);
 		}
 		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false, false);
 	}
