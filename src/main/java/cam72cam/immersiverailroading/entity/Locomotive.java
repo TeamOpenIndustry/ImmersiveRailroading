@@ -157,6 +157,10 @@ public abstract class Locomotive extends FreightTank {
 			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons() * (uk/us);
 		}
 		
+		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed().minecraft()) {
+			tractiveEffortNewtons = 0;
+		}
+		
 		return Math.copySign(tractiveEffortNewtons, getThrottle());
 	}
 

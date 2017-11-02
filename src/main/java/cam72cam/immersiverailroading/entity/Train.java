@@ -79,10 +79,6 @@ public class Train extends ArrayList<EntityCoupleableRollingStock> {
 			newMCVelocity = 0;
 		}
 		
-		//TODO NOW if (Math.abs(newMCVelocity) > this.getDefinition().getMaxSpeed().minecraft()) {
-			//newMCVelocity = Math.copySign(this.getDefinition().getMaxSpeed().minecraft(), newMCVelocity);
-		//}
-		
 		return Speed.fromMinecraft(newMCVelocity);
 	}
 
