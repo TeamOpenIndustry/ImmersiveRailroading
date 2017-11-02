@@ -31,9 +31,9 @@ public class BlockSteamHammer extends Block {
 	}
 	
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		TileEntity te = world.getTileEntity(pos);
-		if (te != null && te instanceof TileSteamHammer) {
-			((TileSteamHammer)te).dropItems();
+		TileSteamHammer te = TileSteamHammer.get(world, pos);
+		if (te != null) {
+			te.dropItems();
 		}
 		super.breakBlock(world, pos, state);
 	}
