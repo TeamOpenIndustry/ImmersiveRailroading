@@ -243,10 +243,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				return;
 			}
 			
-			Train train = this.getTrain();
 			// Only simulate on locomotives if we can help it.
 			if (!(this instanceof Locomotive)) {
-				for (EntityCoupleableRollingStock stock : train) {
+				for (EntityCoupleableRollingStock stock : this.getTrain()) {
 					if (stock instanceof Locomotive) {
 						stock.resimulate = true;
 						return;
@@ -283,7 +282,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			
 			simulateCoupledRollingStock();
 			
-			for (EntityCoupleableRollingStock stock : train) {
+			for (EntityCoupleableRollingStock stock : this.getTrain()) {
 				stock.resimulate = false;
 			}
 		}
@@ -452,7 +451,24 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 		
 		if (this.getCoupled(coupler) != null) {
-			this.getTrain().smoothSpeeds();
+			BiConsumer<EntityCoupleableRollingStock, Boolean> fn = new BiConsumer<EntityCoupleableRollingStock, Boolean>() {
+				double speed = 0;
+				double weight = 0;
+				
+				@Override
+				public void accept(EntityCoupleableRollingStock e, Boolean direction) {
+					speed += e.getCurrentSpeed().metric() * e.getWeight() * (direction ? 1 : -1);
+					weight += e.getWeight();
+				}				
+				@Override
+				public int hashCode() {
+					return (int) (speed / weight);
+				}
+			};
+			this.mapTrain(this, true, true, fn);
+			Speed speedPos = Speed.fromMetric(fn.hashCode());
+			Speed speedNeg = Speed.fromMetric(-fn.hashCode());
+			this.mapTrain(this, true, true, (EntityCoupleableRollingStock e, Boolean b) -> e.setCurrentSpeed(b ? speedPos : speedNeg));
 		}
 		
 		triggerTrain();
@@ -699,12 +715,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 	}
 
-	public final Train getTrain() {
+	public final List<EntityCoupleableRollingStock> getTrain() {
 		return getTrain(true);
 	}
 
-	public final Train getTrain(boolean followDisengaged) {
-		Train train = new Train();
+	public final List<EntityCoupleableRollingStock> getTrain(boolean followDisengaged) {
+		List<EntityCoupleableRollingStock> train = new ArrayList<EntityCoupleableRollingStock>();
 		this.mapTrain(this, followDisengaged, train::add);
 		return train;
 	}
