@@ -37,14 +37,14 @@ public class MovementSimulator {
 			return position;
 		}
 		
-		position.speed = Speed.fromMinecraft(Math.abs(moveDistance));
+		position.speed = Speed.fromMinecraft(moveDistance);
 
-		position.isReverse = moveDistance < 0;
+		boolean isReverse = moveDistance < 0;
 
 		Vec3d front = frontBogeyPosition();
 		Vec3d rear = rearBogeyPosition();
 		
-		if (position.isReverse) {
+		if (isReverse) {
 			moveDistance = -moveDistance;
 			position.frontYaw += 180;
 			position.rearYaw += 180;
@@ -60,7 +60,7 @@ public class MovementSimulator {
 		Vec3d nextFront = nextPosition(front, position.rotationYaw, VecUtil.fromYaw(moveDistance, position.frontYaw));
 		Vec3d nextRear = nextPosition(rear, position.rotationYaw, VecUtil.fromYaw(moveDistance, position.rearYaw));
 		if (nextFront.equals(front) || nextRear == rear) {
-			origPosition.speed = Speed.fromMetric(0);
+			origPosition.speed = Speed.ZERO;
 			if (position.isOffTrack) {
 				origPosition.isOffTrack = true;
 			}
@@ -79,7 +79,7 @@ public class MovementSimulator {
 		position.rotationYaw = VecUtil.toYaw(bogeySkew);
 		position.rotationPitch = (float) Math.toDegrees(MathHelper.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
 
-		if (position.isReverse) {
+		if (isReverse) {
 			position.frontYaw += 180;
 			position.rearYaw += 180;
 			//rotationYaw += 180;

@@ -26,7 +26,7 @@ public class SpawnUtil {
 	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
 		double offset = def.getCouplerPosition(CouplerType.BACK) - Config.couplerRange;
 		float yaw = player.rotationYawHead;
-		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
+		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
 		
 		TileEntity te = TileRailBase.get(worldIn, new BlockPos(tp.position));
 		if (te != null) {

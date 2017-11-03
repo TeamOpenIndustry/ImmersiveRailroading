@@ -18,13 +18,12 @@ public class TickPos {
 	float rearYaw;
 	float rotationYaw;
 	float rotationPitch;
-	boolean isReverse;
 
 	
 	public TickPos() {
 	}
 	
-	public TickPos(int tickPosID, Speed speed, Vec3d position, float frontYaw, float rearYaw, float rotationYaw, float rotationPitch, boolean isOffTrack, boolean isReverse) {
+	public TickPos(int tickPosID, Speed speed, Vec3d position, float frontYaw, float rearYaw, float rotationYaw, float rotationPitch, boolean isOffTrack) {
 		this.tickID = tickPosID;
 		this.speed = speed;
 		this.isOffTrack = isOffTrack;
@@ -33,18 +32,16 @@ public class TickPos {
 		this.rearYaw = rearYaw;
 		this.rotationYaw = rotationYaw;
 		this.rotationPitch = rotationPitch;
-		this.isReverse = isReverse;
 	}
 
 	public TickPos clone() {
-		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, rotationPitch, isOffTrack, isReverse);
+		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, rotationPitch, isOffTrack);
 	}
 
 	public void write(ByteBuf buf) {
 		buf.writeInt(tickID);
 		buf.writeFloat((float) speed.metric());
 		buf.writeBoolean(isOffTrack);
-		buf.writeBoolean(isReverse);
 		
 		//BufferUtil.writeVec3d(buf, frontPosition);
 		//BufferUtil.writeVec3d(buf, backPosition);
@@ -60,7 +57,6 @@ public class TickPos {
 		tickID = buf.readInt();
 		speed = Speed.fromMetric(buf.readFloat());
 		isOffTrack = buf.readBoolean();
-		isReverse = buf.readBoolean();
 		
 		//frontPosition = BufferUtil.readVec3d(buf);
 		//backPosition = BufferUtil.readVec3d(buf);
