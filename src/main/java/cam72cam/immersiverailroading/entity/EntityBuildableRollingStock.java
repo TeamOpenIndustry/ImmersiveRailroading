@@ -76,6 +76,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	
 	public void setComponents(List<ItemComponentType> items) {
 		this.builtItems = new ArrayList<ItemComponentType>(items);
+		this.isBuilt = false;
 		this.isBuilt = getMissingItemComponents().isEmpty();
 		
 		if (!world.isRemote) {
