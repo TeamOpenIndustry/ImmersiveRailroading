@@ -108,7 +108,21 @@ public class StockModel extends OBJRender {
 		
 		drawComponent(def.getComponent(RenderComponentType.FRAME));
 		drawComponent(def.getComponent(RenderComponentType.SHELL));
-		drawComponents(def.getComponents(RenderComponentType.FRAME_WHEEL_X));
+		List<RenderComponent> wheels = def.getComponents(RenderComponentType.FRAME_WHEEL_X);
+		if (wheels != null) {
+			for (RenderComponent wheel : wheels) {
+				double circumference = wheel.height() * (float) Math.PI;
+				double relDist = stock.distanceTraveled % circumference;
+				Vec3d wheelPos = wheel.center();
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+				GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
+				GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+				drawComponent(wheel);
+				GlStateManager.popMatrix();
+			}
+		}
+		
 
 		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT") != null) {
 			GlStateManager.pushMatrix();
@@ -117,7 +131,20 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyFront(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "FRONT"));
-			drawComponents(def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT"));
+			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT");
+			if (wheels != null) {
+				for (RenderComponent wheel : wheels) {
+					double circumference = wheel.height() * (float) Math.PI;
+					double relDist = stock.distanceTraveled % circumference;
+					Vec3d wheelPos = wheel.center();
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
+					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+					drawComponent(wheel);
+					GlStateManager.popMatrix();
+				}
+			}
 			GlStateManager.popMatrix();
 		}
 		
@@ -128,7 +155,20 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyRear(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "REAR"));
-			drawComponents(def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR"));
+			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR");
+			if (wheels != null) {
+				for (RenderComponent wheel : wheels) {
+					double circumference = wheel.height() * (float) Math.PI;
+					double relDist = stock.distanceTraveled % circumference;
+					Vec3d wheelPos = wheel.center();
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
+					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+					drawComponent(wheel);
+					GlStateManager.popMatrix();
+				}
+			}
 			GlStateManager.popMatrix();
 		}
 
