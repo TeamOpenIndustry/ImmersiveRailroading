@@ -29,7 +29,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	private Float frontYaw;
 	private Float rearYaw;
-	public boolean isReverse = false;
 	public float distanceTraveled = 0;
 	public double tickPosID = 0;
 	private double clientTicksPerServerTick = 1;
@@ -93,7 +92,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 	public void initPositions() {
 		this.positions = new ArrayList<TickPos>();
-		this.positions.add(new TickPos((int)this.tickPosID, this.getCurrentSpeed(), this.getPositionVector(), this.rotationYaw, this.rotationYaw, this.rotationYaw, this.rotationPitch, false, this.isReverse));
+		this.positions.add(new TickPos((int)this.tickPosID, this.getCurrentSpeed(), this.getPositionVector(), this.rotationYaw, this.rotationYaw, this.rotationYaw, this.rotationPitch, false));
 	}
 
 	public void initPositions(TickPos tp) {
@@ -242,13 +241,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    	this.boundingBox = null; // Force update
 	    }
 	    
-	    this.currentSpeed = currentPos.speed;
-	    this.isReverse = currentPos.isReverse; 
+	    this.currentSpeed = currentPos.speed; 
 	    this.motionX = this.posX - this.prevPosX;
 	    this.motionY = this.posY - this.prevPosY;
 	    this.motionZ = this.posZ - this.prevPosZ;
 	    
-	    distanceTraveled += (this.isReverse ? -1 : 1) * this.currentSpeed.minecraft();
+	    distanceTraveled += this.currentSpeed.minecraft();
 
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
 		for (Entity entity : entitiesWithin) {
@@ -387,7 +385,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (this.getTickPos((int)this.tickPosID) != null) {
 			return this.getTickPos((int)this.tickPosID);
 		}
-		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false, false);
+		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false);
 	}
 	
 	public PosRot predictFrontBogeyPosition(float offset) {		

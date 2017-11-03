@@ -39,22 +39,15 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 	 */
 	@Override
 	public void handleKeyPress(Entity source, KeyTypes key) {
-		float prevThrottle = getThrottle();
-		float prevAirBrake = getAirBrake();
-		
 		super.handleKeyPress(source, key);
 		
-		float newThrottle = getThrottle();
-		float newAirBrake = getAirBrake();
-		
-		if (prevThrottle != newThrottle || prevAirBrake != newAirBrake) {
-			for (EntityCoupleableRollingStock stock : this.getTrain(false)) {
-				if (stock instanceof LocomotiveDiesel) {
-					LocomotiveDiesel loco = (LocomotiveDiesel) stock;
-					loco.setThrottle(newThrottle);
-					loco.setAirBrake(newAirBrake);
-				}
-			}
+		this.mapTrain(this, true, false, this::setThrottleMap);
+	}
+	
+	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
+		if (stock instanceof LocomotiveDiesel) {
+			((LocomotiveDiesel) stock).setThrottle(this.getThrottle() * (direction ? 1 : -1));
+			((LocomotiveDiesel) stock).setAirBrake(this.getAirBrake());
 		}
 	}
 	
