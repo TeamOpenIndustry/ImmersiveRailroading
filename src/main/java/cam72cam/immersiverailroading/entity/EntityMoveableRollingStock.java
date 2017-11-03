@@ -162,12 +162,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public void handleTickPosPacket(List<TickPos> newPositions) {
 		if (this.positions != null && newPositions.size() != 0 && this.ticksExisted > 3) {
 			double tickOffset = tickPosID - newPositions.get(0).tickID;
-			
-			if (tickOffset > 0) {
-				clientTicksPerServerTick *= 1 - (Math.min(10, tickOffset) / 20); // Slow down client ticks
-			}
-			if (tickOffset < 0) {
-				clientTicksPerServerTick *= 1 + (Math.min(10, -tickOffset) / 20); // Speed up client ticks
+			if (Math.abs(tickOffset) > 3) {
+				if (tickOffset > 0) {
+					clientTicksPerServerTick *= 1 - (Math.min(10, tickOffset) / 20); // Slow down client ticks
+				}
+				if (tickOffset < 0) {
+					clientTicksPerServerTick *= 1 + (Math.min(10, -tickOffset) / 20); // Speed up client ticks
+				}
 			}
 		}
 		this.positions = newPositions;
