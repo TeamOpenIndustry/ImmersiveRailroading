@@ -138,7 +138,8 @@ public abstract class Locomotive extends FreightTank {
 		double applied = getAppliedTractiveEffort(this.getCurrentSpeed());
 		double actual = this.getDefinition().getStartingTractionNewtons();
 		if (applied > actual) {
-			this.distanceTraveled += Math.copySign(Math.min((applied / actual - 1)/100, 0.8), getThrottle()); //Wheel Slip
+			double speedMultiplier = 1;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
+			this.distanceTraveled += Math.copySign(Math.min((applied / actual - 1)/100, 0.8), getThrottle()) * speedMultiplier; //Wheel Slip
 		}
 	}
 	

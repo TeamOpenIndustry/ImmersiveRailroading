@@ -46,6 +46,8 @@ public class StockModel extends OBJRender {
 
 	private boolean isBuilt;
 	private List<RenderComponentType> availComponents;
+
+	private double distanceTraveled;
 	private void initComponents(EntityBuildableRollingStock stock) {
 		this.isBuilt = stock.isBuilt();
 		
@@ -81,8 +83,16 @@ public class StockModel extends OBJRender {
 		}
 	}
 
-	public void draw(EntityRollingStock stock) {
+	public void draw(EntityRollingStock stock, float partialTicks) {
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.tex != null);
+		
+		
+		if (stock instanceof EntityMoveableRollingStock) {
+			EntityMoveableRollingStock mstock = (EntityMoveableRollingStock) stock;
+			this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * mstock.clientTicksPerServerTick * partialTicks * 1.1; 
+		} else {
+			this.distanceTraveled = 0;
+		}
 
 		if (model.tex != null) {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(model.tex);
@@ -112,7 +122,7 @@ public class StockModel extends OBJRender {
 		if (wheels != null) {
 			for (RenderComponent wheel : wheels) {
 				double circumference = wheel.height() * (float) Math.PI;
-				double relDist = stock.distanceTraveled % circumference;
+				double relDist = distanceTraveled % circumference;
 				Vec3d wheelPos = wheel.center();
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -135,7 +145,7 @@ public class StockModel extends OBJRender {
 			if (wheels != null) {
 				for (RenderComponent wheel : wheels) {
 					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = stock.distanceTraveled % circumference;
+					double relDist = distanceTraveled % circumference;
 					Vec3d wheelPos = wheel.center();
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -159,7 +169,7 @@ public class StockModel extends OBJRender {
 			if (wheels != null) {
 				for (RenderComponent wheel : wheels) {
 					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = stock.distanceTraveled % circumference;
+					double relDist = distanceTraveled % circumference;
 					Vec3d wheelPos = wheel.center();
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -275,7 +285,7 @@ public class StockModel extends OBJRender {
 	private void drawDrivingWheels(LocomotiveSteam stock, List<RenderComponent> wheels) {
 		for (RenderComponent wheel : wheels) {
 			double circumference = wheel.height() * (float) Math.PI;
-			double relDist = stock.distanceTraveled % circumference;
+			double relDist = distanceTraveled % circumference;
 			double wheelAngle = 360 * relDist / circumference;
 			if (wheel.side.contains("REAR")) {
 				//MALLET HACK
@@ -316,7 +326,7 @@ public class StockModel extends OBJRender {
 			if (frontBogeyWheels != null) {
 				for (RenderComponent wheel : frontBogeyWheels) {
 					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = stock.distanceTraveled % circumference;
+					double relDist = distanceTraveled % circumference;
 					Vec3d wheelPos = wheel.center();
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -344,7 +354,7 @@ public class StockModel extends OBJRender {
 			if (rearBogeyWheels != null) {
 				for (RenderComponent wheel : rearBogeyWheels) {
 					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = stock.distanceTraveled % circumference;
+					double relDist = distanceTraveled % circumference;
 					Vec3d wheelPos = wheel.center();
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -362,7 +372,7 @@ public class StockModel extends OBJRender {
 		LocomotiveSteamDefinition def = stock.getDefinition();
 		
 		double circumference = diameter * (float) Math.PI;
-		double relDist = stock.distanceTraveled % circumference;
+		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 		
 		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side);

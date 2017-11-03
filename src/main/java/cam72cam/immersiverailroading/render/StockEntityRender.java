@@ -40,7 +40,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
 		GlStateManager.rotate(-90, 0, 1, 0);
 		
-		model.draw(stock);
+		model.draw(stock, partialTicks);
 		
 		//tex.restore();
 		cull.restore();

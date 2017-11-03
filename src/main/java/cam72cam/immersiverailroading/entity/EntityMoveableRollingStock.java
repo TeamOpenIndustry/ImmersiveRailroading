@@ -30,8 +30,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private Float frontYaw;
 	private Float rearYaw;
 	public float distanceTraveled = 0;
+	public float renderDistanceTraveled = 0;
 	public double tickPosID = 0;
-	private double clientTicksPerServerTick = 1;
+	public double clientTicksPerServerTick = 1;
 	private Speed currentSpeed;
 	public List<TickPos> positions = new ArrayList<TickPos>();
 	private AxisAlignedBB boundingBox;
