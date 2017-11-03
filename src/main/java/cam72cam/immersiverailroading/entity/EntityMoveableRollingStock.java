@@ -160,9 +160,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void handleTickPosPacket(List<TickPos> newPositions) {
-		if (this.positions != null && newPositions.size() != 0 && this.ticksExisted > 3) {
+		if (this.positions != null && this.positions.size() < 25 && this.ticksExisted > 10) {
 			double tickOffset = tickPosID - newPositions.get(0).tickID;
-			if (Math.abs(tickOffset) > 3) {
+			//System.out.println("SKEW " + clientTicksPerServerTick);
+			if (Math.abs(tickOffset) > 2) {
 				if (tickOffset > 0) {
 					clientTicksPerServerTick *= 1 - (Math.min(10, tickOffset) / 20); // Slow down client ticks
 				}
@@ -208,6 +209,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return positions.size();
 	}
 	
+	private double skewScalar(double curr, double next) {
+		if (world.isRemote) {
+			return curr + (next - curr) * this.clientTicksPerServerTick;
+		}
+		return next;
+	}
+	private float skewScalar(float curr, float next) {
+		if (world.isRemote) {
+			return curr + (next - curr) * (float)this.clientTicksPerServerTick;
+		}
+		return next;
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -221,6 +235,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			return;
 		}
 		
+
 	    this.prevPosX = this.posX;
 	    this.prevPosY = this.posY;
 	    this.prevPosZ = this.posZ;
@@ -229,25 +244,24 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    this.lastTickPosZ = this.posZ;
 	    this.prevRotationYaw = this.rotationYaw;
 	    this.prevRotationPitch = this.rotationPitch;
+		
+
+	    this.posX = skewScalar(this.posX, currentPos.position.x);
+	    this.posY = skewScalar(this.posY, currentPos.position.y);
+	    this.posZ = skewScalar(this.posZ, currentPos.position.z);
+		    
+	    this.rotationYaw = skewScalar(this.rotationYaw, currentPos.rotationYaw);
+	    this.rotationPitch = skewScalar(this.rotationPitch, currentPos.rotationPitch);
+	    this.frontYaw = skewScalar(this.frontYaw == null ? this.rotationYaw : this.frontYaw, currentPos.frontYaw);
+	    this.rearYaw = skewScalar(this.rearYaw == null ? this.rotationYaw : this.rearYaw, currentPos.rearYaw);
 	    
-	    this.posX = currentPos.position.x;
-	    this.posY = currentPos.position.y;
-	    this.posZ = currentPos.position.z;
-	    this.rotationYaw = currentPos.rotationYaw;
-	    this.rotationPitch = currentPos.rotationPitch;
-	    this.frontYaw = currentPos.frontYaw;
-	    this.rearYaw = currentPos.rearYaw;
-	    
-	    if (!currentPos.speed.isZero() || this.ticksExisted < 5) {
-	    	this.boundingBox = null; // Force update
-	    }
-	    
-	    this.currentSpeed = currentPos.speed; 
+	    this.currentSpeed = currentPos.speed;
+		distanceTraveled = skewScalar(distanceTraveled, distanceTraveled + (float)this.currentSpeed.minecraft());
+		this.boundingBox = null;
+		
 	    this.motionX = this.posX - this.prevPosX;
 	    this.motionY = this.posY - this.prevPosY;
 	    this.motionZ = this.posZ - this.prevPosZ;
-	    
-	    distanceTraveled += this.currentSpeed.minecraft();
 
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
 		for (Entity entity : entitiesWithin) {
@@ -383,9 +397,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 
 	protected TickPos getCurrentTickPosOrFake() {
-		if (this.getTickPos((int)this.tickPosID) != null) {
-			return this.getTickPos((int)this.tickPosID);
-		}
 		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false);
 	}
 	
