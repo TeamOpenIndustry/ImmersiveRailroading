@@ -25,16 +25,11 @@ public class RealBB extends AxisAlignedBB {
 	private double centerZ;
 	
 	public RealBB(double front, double rear, double width, double height, float yaw) {
-		this(front, rear, width, height, yaw, 0, 0, 0);
-		
+		this(front, rear, width, height, yaw, 0, 0, 0);		
 	}
 	
 	private RealBB(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
-		// I hate java sometimes
-		// super constructors must be the first call in a constructor, what sort
-		// of shit is that
-		super(c(front, rear, width, height, yaw, centerX, centerY, centerZ)[0], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[1], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[2],
-				c(front, rear, width, height, yaw, centerX, centerY, centerZ)[3], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[4], c(front, rear, width, height, yaw, centerX, centerY, centerZ)[5]);
+		this(constructorParams(front, rear, width, height, yaw, centerX, centerY, centerZ));
 		this.front = front;
 		this.rear = rear;
 		this.width = width;
@@ -45,12 +40,16 @@ public class RealBB extends AxisAlignedBB {
 		this.centerZ = centerZ;
 	}
 	
+	private RealBB(double[] constructorParams) {
+		super(constructorParams[0], constructorParams[1], constructorParams[2], constructorParams[3], constructorParams[4], constructorParams[5]);
+	}
+	
 	private static AxisAlignedBB newBB(Vec3d min, Vec3d max) {
 		//Why the fuck is this ClientOnly?
 		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
 	}
 
-	private static double[] c(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
+	private static double[] constructorParams(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
 		Vec3d frontPos = VecUtil.fromYaw(front, yaw);
 		Vec3d rearPos = VecUtil.fromYaw(rear, yaw);
 
@@ -178,7 +177,6 @@ public class RealBB extends AxisAlignedBB {
 			r.add(x2*100, z2*100);
 			doesIntersect = doesIntersect && rect.intersects(r );
 		}
-		
 		return doesIntersect;
 	}
 	public boolean contains(Vec3d vec) {

@@ -83,7 +83,7 @@ public class OBJModel {
 				// TODO might be able to use this for details
 				break;
 			default:
-				System.out.println("OBJ: ignored line '" + line + "'");
+				ImmersiveRailroading.debug("OBJ: ignored line '" + line + "'");
 				break;
 			}
 		}
@@ -172,7 +172,7 @@ public class OBJModel {
 					//ignore
 					break;
 				default:
-					System.out.println("MTL: ignored line '" + line + "'");
+					ImmersiveRailroading.debug("MTL: ignored line '" + line + "'");
 					break;
 				}
 			}
@@ -213,7 +213,7 @@ public class OBJModel {
 				}
 			}
 			if (min == null) {
-				System.out.println("EMPTY " + groupNames);
+				ImmersiveRailroading.error("EMPTY " + groupNames);
 				min = new Vec3d(0, 0, 0);
 			}
 			mins.put(groupNames, min);
@@ -246,7 +246,7 @@ public class OBJModel {
 				}
 			}
 			if (max == null) {
-				System.out.println("EMPTY " + groupNames);
+				ImmersiveRailroading.error("EMPTY " + groupNames);
 				max = new Vec3d(0, 0, 0);
 			}
 			maxs.put(groupNames, max);

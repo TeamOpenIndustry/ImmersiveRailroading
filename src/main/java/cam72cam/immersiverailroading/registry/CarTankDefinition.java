@@ -38,7 +38,7 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 			for(JsonElement allowed : tank.get("whitelist").getAsJsonArray()) {
 				Fluid allowedFluid = FluidRegistry.getFluid(allowed.getAsString());
 				if (allowedFluid == null) {
-					ImmersiveRailroading.logger.warn("Skipping unknown whitelisted fluid: " + allowed.getAsString());
+					ImmersiveRailroading.warn("Skipping unknown whitelisted fluid: " + allowed.getAsString());
 					continue;
 				}
 				fluidFilter.add(allowedFluid);

@@ -19,6 +19,9 @@ public class Config {
 	@Comment({"Deep Snow on tracks"})
 	public static boolean deepSnow = false;
 	
+	@Comment({"Enable Boiler Explosions"})
+	public static boolean explosionsEnabled = true;
+	
 	@Comment({"Self explanitory"})
 	public static boolean trainsOnTheBrain = true;
 	
@@ -32,7 +35,7 @@ public class Config {
 	public static boolean debugInfiniteLiquids = true;
 	
 	@Comment({"Print extra chunk loading info"})
-	public static boolean debugChunkLoading = true;
+	public static boolean debugLog = false;
 
 	@Comment("Cost to place down a tie")
 	public static double TieCostMultiplier = 0.25;

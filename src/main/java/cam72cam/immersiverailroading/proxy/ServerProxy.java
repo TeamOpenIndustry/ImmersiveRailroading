@@ -74,7 +74,7 @@ public class ServerProxy extends CommonProxy {
 	    			resourcePack.close();
 	    		}
     		} else {
-    			ImmersiveRailroading.logger.error("Expecting " + this.configDir + " to be a directory");
+    			ImmersiveRailroading.error("Expecting " + this.configDir + " to be a directory");
     		}
     	} else {
 			folder.mkdirs();

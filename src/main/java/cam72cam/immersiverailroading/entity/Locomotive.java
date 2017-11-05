@@ -1,10 +1,8 @@
 package cam72cam.immersiverailroading.entity;
 
 
-import java.util.ArrayList;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.entity.Entity;
@@ -12,7 +10,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class Locomotive extends FreightTank {
@@ -26,8 +23,6 @@ public abstract class Locomotive extends FreightTank {
 
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
-	
-	private boolean resimulate = false;
 
 
 	public Locomotive(World world, String defID) {
@@ -80,7 +75,7 @@ public abstract class Locomotive extends FreightTank {
 	@Override
 	public void setDead() {
 		super.setDead();
-		System.out.println("Stopping audio");
+		//System.out.println("Stopping audio");
 		//Minecraft.getMinecraft().getSoundHandler().stopSound(idleSound);
 		//Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
 	}
@@ -119,11 +114,6 @@ public abstract class Locomotive extends FreightTank {
 			break;
 		}
 	}
-	
-	@Override
-	public void triggerResimulate() {
-		resimulate = true;
-	}
 
 	@Override
 	public void onUpdate() {
@@ -132,173 +122,47 @@ public abstract class Locomotive extends FreightTank {
 		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
 		
 		simulateWheelSlip();
-		
-		if (world.isRemote) {
-			return;
-		}
-		
-		if (this.getRemainingPositions() < 20 || resimulate) {
-			TickPos lastPos = this.getCurrentTickPos();
-			if (lastPos == null) {
-				triggerResimulate();
-				return;
-			}
-			
-			boolean isStuck = false;
-			for (EntityBuildableRollingStock stock : this.getTrain()) {
-				if (!stock.areWheelsBuilt()) {
-					isStuck = true;
-				}
-			}
-			
-			Speed simSpeed = this.getCurrentSpeed();
-			if (isStuck) {
-				simSpeed = Speed.fromMinecraft(0);
-			}
-			
-			// Clear out the list and re-simulate
-			this.positions = new ArrayList<TickPos>();
-			positions.add(lastPos);
-
-			for (int i = 0; i < 30; i ++) {
-				if (!isStuck) {
-					simSpeed = getMovement(simSpeed);
-				}
-				TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + i);
-				if (pos.speed.metric() != 0) {
-					ChunkManager.flagEntityPos(this.world, new BlockPos(pos.position));
-				}
-				positions.add(pos);
-			}
-			
-			for (EntityCoupleableRollingStock stock : this.getTrain()) {
-				if (stock instanceof Locomotive) {
-					Locomotive loco = (Locomotive) stock;
-					loco.resimulate = false;
-				}
-			}
-			
-			simulateCoupledRollingStock();
-		}
 	}
 	
 	protected abstract int getAvailableHP();
 	
-	private void simulateWheelSlip() {
-		if (Math.abs(getTractiveEffortNewtons(this.getCurrentSpeed())) == this.getDefinition().getStartingTractionNewtons()) {
-			this.distanceTraveled += Math.copySign(0.05, getThrottle()); //Wheel Slip
-		}
-	}
-	
-	private double getTractiveEffortNewtons(Speed speed) {	
-		if (!this.isBuilt()) {
-			return 0;
-		}
-		
+	private double getAppliedTractiveEffort(Speed speed) {
 		double locoEfficiency = 0.7f; //TODO config
 		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
 		
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(0.0001, Math.abs(speed.metric()))));
+		return tractiveEffortNewtons;
+	}
+	
+	private void simulateWheelSlip() {
+		double applied = getAppliedTractiveEffort(this.getCurrentSpeed());
+		double actual = this.getDefinition().getStartingTractionNewtons();
+		if (applied > actual) {
+			double speedMultiplier = 1;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
+			this.distanceTraveled += Math.copySign(Math.min((applied / actual - 1)/100, 0.8), getThrottle()) * speedMultiplier; //Wheel Slip
+		}
+	}
+	
+	double getTractiveEffortNewtons(Speed speed) {	
+		if (!this.isBuilt()) {
+			return 0;
+		}
+		
+		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
+		
 		
 		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons()) {
-			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons();
+			// CRC Handbook of Physical Quantities. Boca Raton, FL: CRC Press, 1997: 145-156.
+			double us = 0.74;
+			double uk = 0.57;
+			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons() * (uk/us);
+		}
+		
+		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed().minecraft()) {
+			tractiveEffortNewtons = 0;
 		}
 		
 		return Math.copySign(tractiveEffortNewtons, getThrottle());
-	}
-	
-	protected Speed getMovement(Speed speed) {
-		//http://evilgeniustech.com/idiotsGuideToRailroadPhysics/HorsepowerAndTractiveEffort/
-		//http://www.republiclocomotive.com/locomotive-power-calculations.html
-		//http://www.wplives.org/forms_and_documents/Air_Brake_Principles.pdf
-		
-		// ABS
-		speed = Speed.fromMinecraft(Math.abs(speed.minecraft()));
-		
-		double tractiveEffortNewtons = 0;
-		double airBrake = 0;
-		
-		//lbs
-		double rollingResistanceNewtons = 0;
-		double gradeForceNewtons = 0;
-		//TODO starting effort
-		double massToMoveKg = 0;
-		for (EntityCoupleableRollingStock e : this.getTrain()) {
-			massToMoveKg += e.getWeight();
-			
-			double stockMassLb = 2.20462 * e.getWeight();
-			rollingResistanceNewtons += 0.0015 * stockMassLb * 4.44822f;
-			
-			//Grade forces
-			// TODO force while not moving
-			
-			double grade = -Math.tan(Math.toRadians(e.rotationPitch % 90));
-			
-			// lbs * 1%gradeResistance * grade multiplier
-			gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
-		}
-		
-		for (EntityCoupleableRollingStock e : this.getTrain(false)) {
-			if (e instanceof Locomotive) {
-				Locomotive loco = (Locomotive) e;
-				tractiveEffortNewtons += loco.getTractiveEffortNewtons(speed);
-				airBrake += loco.getAirBrake();
-			}
-		}
-
-		// 0.25 = steel wheel on steel rail
-		double brakeAdhesion =  massToMoveKg * 0.25;
-		double airBrakeNewtons = brakeAdhesion * Math.min(airBrake, 1) * 4.44822f;
-		
-		double reverseMultiplier = (this.isReverse ? -1 : 1);
-		
-		// a = f (to newtons) * m (to newtons)
-		double tractiveAccell = tractiveEffortNewtons / massToMoveKg;
-		double resistanceAccell = rollingResistanceNewtons / massToMoveKg;
-		double gradeAccell = gradeForceNewtons / massToMoveKg;
-		double brakeAccell = airBrakeNewtons / massToMoveKg;
-		
-		
-		
-		double currentMCVelocity = speed.minecraft() * reverseMultiplier;
-		double deltaAccellTractiveMCVelocity = Speed.fromMetric(tractiveAccell).minecraft();
-		
-		// Limit decell to current speed to trains stop
-		// Apply in the reverse direction of current travel
-		double deltaAccellRollingResistanceMCVelocity = Math.min(Speed.fromMetric(resistanceAccell).minecraft(), speed.minecraft()) * -reverseMultiplier;
-		
-		double deltaAccellGradeMCVelocity = Speed.fromMetric(gradeAccell).minecraft();
-		
-		double deltaAccellBrakeMCVelocity = Math.min(Speed.fromMetric(brakeAccell).minecraft(), speed.minecraft()) * -reverseMultiplier;
-		
-		// Limit decell to current speed to trains stop
-		// Apply in the reverse direction of current travel
-		double newMCVelocity = currentMCVelocity + deltaAccellTractiveMCVelocity + deltaAccellRollingResistanceMCVelocity + deltaAccellGradeMCVelocity + deltaAccellBrakeMCVelocity;
-
-		if (Math.abs(newMCVelocity) < 0.001) {
-			newMCVelocity = 0;
-		}
-		
-		if (Math.abs(newMCVelocity) > this.getDefinition().getMaxSpeed().minecraft()) {
-			newMCVelocity = Math.copySign(this.getDefinition().getMaxSpeed().minecraft(), newMCVelocity);
-		}
-
-		/*
-		if((int)(Math.random()*20) % 20 == 0) {
-			System.out.println("Locomotive Tractive Effort N: " + tractiveEffortNewtons);
-			System.out.println("Train Rolling Resistance N: " + rollingResistanceNewtons);
-			System.out.println("Train Slope Resistance N: " + gradeForceNewtons);
-			System.out.println("Train Mass KG: " + massToMoveKg);
-			System.out.println("Locomotive SPEED M/s: " + currentMCVelocity);
-			System.out.println("Locomotive Tractive M/s^2: " + deltaAccellTractiveMCVelocity);
-			System.out.println("Locomotive Rolling M/s^2: " + deltaAccellRollingResistanceMCVelocity);
-			System.out.println("Locomotive Grade M/s^2: " + deltaAccellGradeMCVelocity);
-			System.out.println("Locomotive Brake M/s^2: " + deltaAccellBrakeMCVelocity);
-			System.out.println("Locomotive SPEED M/s: " + newMCVelocity);
-		} 
-		*/
-		
-		return Speed.fromMinecraft(newMCVelocity);
 	}
 
 	/*

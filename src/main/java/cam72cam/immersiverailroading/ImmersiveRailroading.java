@@ -33,7 +33,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 public class ImmersiveRailroading
 {
     public static final String MODID = "immersiverailroading";
-    public static final String VERSION = "0.3.4";
+    public static final String VERSION = "0.3.6";
 	public static final int ENTITY_SYNC_DISTANCE = 512;
     public static final String ORE_RAIL_BED = "railBed";
     
@@ -63,7 +63,7 @@ public class ImmersiveRailroading
 	
 	public static Item ITEM_STEAM_HAMMER = new ItemSteamHammer().setRegistryName(ImmersiveRailroading.BLOCK_STEAM_HAMMER.getRegistryName());
 	
-	public static Logger logger;
+	private static Logger logger;
 	public static ImmersiveRailroading instance;
 	
 	public static final SimpleNetworkWrapper net = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
@@ -99,4 +99,22 @@ public class ImmersiveRailroading
     public void serverStarting(FMLServerStartingEvent event) {
     	proxy.serverStarting(event);
     }
+    
+    public static void debug(String msg, Object...params) {
+    	if (Config.debugLog) {
+    		logger.info(String.format(msg, params));
+    	}
+    }
+    public static void info(String msg, Object...params) {
+    	logger.info(String.format(msg, params));
+    }
+    public static void warn(String msg, Object...params) {
+    	logger.warn(String.format(msg, params));
+    }
+    public static void error(String msg, Object...params) {
+    	logger.error(String.format(msg, params));
+    }
+	public static void catching(Throwable ex) {
+		logger.catching(ex);
+	}
 }

@@ -9,15 +9,22 @@ import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class TileRailBase extends SyncdTileEntity {
+	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		return te instanceof TileRailBase ? (TileRailBase) te : null;
+	}
+	
 	private BlockPos parent;
 	private float height = 0;
 	private int snowLayers = 0;
@@ -25,6 +32,7 @@ public class TileRailBase extends SyncdTileEntity {
 	private boolean willBeReplaced = false; 
 	private NBTTagCompound replaced;
 	private boolean skipNextRefresh = false;
+	public ItemStack railBedCache = null;
 	
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -59,7 +67,7 @@ public class TileRailBase extends SyncdTileEntity {
 
 	public BlockPos getParent() {
 		if (parent == null) {
-			ImmersiveRailroading.logger.warn("Invalid block without parent");
+			ImmersiveRailroading.warn("Invalid block without parent");
 			world.setBlockToAir(pos);
 			return null;
 		}
@@ -72,6 +80,27 @@ public class TileRailBase extends SyncdTileEntity {
 	
 	public boolean isFlexible() {
 		return this.flexible;
+	}
+	
+	public ItemStack getRenderRailBed() {
+		if (railBedCache == null) {
+			TileRail pt = this.getParentTile();
+			if (pt != null) {
+				railBedCache = pt.getRailBed();
+			}
+		}
+		return railBedCache;
+	}
+	
+	public void writeUpdateNBT(NBTTagCompound nbt) {
+		if (this.getRenderRailBed() != null) {
+			nbt.setTag("renderBed", this.getRenderRailBed().serializeNBT());
+		}
+	}
+	public void readUpdateNBT(NBTTagCompound nbt) {
+		if (nbt.hasKey("renderBed")) {
+			this.railBedCache = new ItemStack(nbt.getCompoundTag("renderBed"));
+		}
 	}
 	
 	@Override
@@ -154,11 +183,7 @@ public class TileRailBase extends SyncdTileEntity {
 		if (this.getParent() == null) {
 			return null;
 		}
-		TileEntity te = world.getTileEntity(this.getParent());
-		if (te instanceof TileRail) {
-			return (TileRail)te ;
-		}
-		return null;
+		return TileRail.get(world, this.getParent());
 	}
 	public void setReplaced(NBTTagCompound replaced) {
 		this.replaced = replaced;

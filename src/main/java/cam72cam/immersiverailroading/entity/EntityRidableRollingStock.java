@@ -60,7 +60,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		
 		if (nbttagcompound.hasKey("passengerOffsets")) {
 			NBTTagCompound offsetTag = nbttagcompound.getCompoundTag("passengerOffsets");
-			System.out.println(offsetTag.getString("passengers"));
 			for (String passenger : offsetTag.getString("passengers").split("\\|")) {
 				Vec3d pos = new Vec3d(offsetTag.getDouble(passenger + ".x"), offsetTag.getDouble(passenger + ".y"), offsetTag.getDouble(passenger + ".z"));
 				passengerPositions.put(UUID.fromString(passenger), pos);
@@ -81,7 +80,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			return false;
 		} else {
 			if (!this.world.isRemote) {
-				System.out.println("HERE2");
 				passengerPositions.put(player.getPersistentID(), new Vec3d(0, 0, 0));
 				player.startRiding(this);
 			}

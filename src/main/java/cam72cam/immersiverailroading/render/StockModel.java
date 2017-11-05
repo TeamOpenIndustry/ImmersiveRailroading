@@ -20,8 +20,11 @@ import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class StockModel extends OBJRender {
@@ -43,6 +46,8 @@ public class StockModel extends OBJRender {
 
 	private boolean isBuilt;
 	private List<RenderComponentType> availComponents;
+
+	private double distanceTraveled;
 	private void initComponents(EntityBuildableRollingStock stock) {
 		this.isBuilt = stock.isBuilt();
 		
@@ -78,7 +83,21 @@ public class StockModel extends OBJRender {
 		}
 	}
 
-	public void draw(EntityRollingStock stock) {
+	public void draw(EntityRollingStock stock, float partialTicks) {
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.tex != null);
+		
+		
+		if (stock instanceof EntityMoveableRollingStock) {
+			EntityMoveableRollingStock mstock = (EntityMoveableRollingStock) stock;
+			this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * mstock.clientTicksPerServerTick * partialTicks * 1.1; 
+		} else {
+			this.distanceTraveled = 0;
+		}
+
+		if (model.tex != null) {
+			Minecraft.getMinecraft().getTextureManager().bindTexture(model.tex);
+		}
+		
 		if (stock instanceof LocomotiveSteam) {
 			drawSteamLocomotive((LocomotiveSteam) stock);
 		} else if (stock instanceof LocomotiveDiesel) {
@@ -88,6 +107,8 @@ public class StockModel extends OBJRender {
 		} else {
 			draw();
 		}
+		
+		tex.restore();
 	}
 
 	private void drawStandardStock(EntityMoveableRollingStock stock) {
@@ -97,7 +118,21 @@ public class StockModel extends OBJRender {
 		
 		drawComponent(def.getComponent(RenderComponentType.FRAME));
 		drawComponent(def.getComponent(RenderComponentType.SHELL));
-		drawComponents(def.getComponents(RenderComponentType.FRAME_WHEEL_X));
+		List<RenderComponent> wheels = def.getComponents(RenderComponentType.FRAME_WHEEL_X);
+		if (wheels != null) {
+			for (RenderComponent wheel : wheels) {
+				double circumference = wheel.height() * (float) Math.PI;
+				double relDist = distanceTraveled % circumference;
+				Vec3d wheelPos = wheel.center();
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+				GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
+				GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+				drawComponent(wheel);
+				GlStateManager.popMatrix();
+			}
+		}
+		
 
 		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT") != null) {
 			GlStateManager.pushMatrix();
@@ -106,7 +141,20 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyFront(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "FRONT"));
-			drawComponents(def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT"));
+			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT");
+			if (wheels != null) {
+				for (RenderComponent wheel : wheels) {
+					double circumference = wheel.height() * (float) Math.PI;
+					double relDist = distanceTraveled % circumference;
+					Vec3d wheelPos = wheel.center();
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
+					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+					drawComponent(wheel);
+					GlStateManager.popMatrix();
+				}
+			}
 			GlStateManager.popMatrix();
 		}
 		
@@ -117,7 +165,20 @@ public class StockModel extends OBJRender {
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
 			GlStateManager.translate(def.getBogeyRear(), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "REAR"));
-			drawComponents(def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR"));
+			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR");
+			if (wheels != null) {
+				for (RenderComponent wheel : wheels) {
+					double circumference = wheel.height() * (float) Math.PI;
+					double relDist = distanceTraveled % circumference;
+					Vec3d wheelPos = wheel.center();
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
+					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+					drawComponent(wheel);
+					GlStateManager.popMatrix();
+				}
+			}
 			GlStateManager.popMatrix();
 		}
 
@@ -224,7 +285,7 @@ public class StockModel extends OBJRender {
 	private void drawDrivingWheels(LocomotiveSteam stock, List<RenderComponent> wheels) {
 		for (RenderComponent wheel : wheels) {
 			double circumference = wheel.height() * (float) Math.PI;
-			double relDist = stock.distanceTraveled % circumference;
+			double relDist = distanceTraveled % circumference;
 			double wheelAngle = 360 * relDist / circumference;
 			if (wheel.side.contains("REAR")) {
 				//MALLET HACK
@@ -265,7 +326,7 @@ public class StockModel extends OBJRender {
 			if (frontBogeyWheels != null) {
 				for (RenderComponent wheel : frontBogeyWheels) {
 					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = stock.distanceTraveled % circumference;
+					double relDist = distanceTraveled % circumference;
 					Vec3d wheelPos = wheel.center();
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -293,7 +354,7 @@ public class StockModel extends OBJRender {
 			if (rearBogeyWheels != null) {
 				for (RenderComponent wheel : rearBogeyWheels) {
 					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = stock.distanceTraveled % circumference;
+					double relDist = distanceTraveled % circumference;
 					Vec3d wheelPos = wheel.center();
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
@@ -311,7 +372,7 @@ public class StockModel extends OBJRender {
 		LocomotiveSteamDefinition def = stock.getDefinition();
 		
 		double circumference = diameter * (float) Math.PI;
-		double relDist = stock.distanceTraveled % circumference;
+		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 		
 		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side);
@@ -359,12 +420,12 @@ public class StockModel extends OBJRender {
 		// enough", but not quite left
 		Vec3d returnCrankRodOffset = new Vec3d(returnCrankRodPos.x - slottedLinkMin.x,
 				returnCrankRodPos.y - slottedLinkMin.y - slottedLinkWidth / 2, 0);
-		float returnCrankRodAngle = (float) Math.toDegrees(Math.atan2(returnCrankRodOffset.y, returnCrankRodOffset.x));
+		float returnCrankRodAngle = (float) Math.toDegrees(MathHelper.atan2(returnCrankRodOffset.y, returnCrankRodOffset.x));
 		Vec3d returnCrankRodActual = VecUtil.fromYaw(returnCrankRodLength - returnCrankHeight, returnCrankRodAngle);
 		returnCrankRodActual = new Vec3d(returnCrankRodPos.x - returnCrankRodActual.z,
 				returnCrankRodPos.y + returnCrankRodActual.x, 0);
 		float slottedLinkAngle = (float) Math
-				.toDegrees(Math.atan2(-slottedLinkCenter.x + returnCrankRodActual.x, slottedLinkCenter.y - returnCrankRodActual.y));
+				.toDegrees(MathHelper.atan2(-slottedLinkCenter.x + returnCrankRodActual.x, slottedLinkCenter.y - returnCrankRodActual.y));
 
 		// CONNECTING_ROD_LEFT
 		// DRIVING_ROD_LEFT
@@ -376,7 +437,7 @@ public class StockModel extends OBJRender {
 
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(connRodPos.x, connRodPos.y, connRodPos.z);
-			GlStateManager.rotate((float) Math.toDegrees(Math.atan2(connRodMovment.z, drivingRodHoriz)), 0, 0, 1);
+			GlStateManager.rotate((float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRodHoriz)), 0, 0, 1);
 			GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
 			drawComponent(drivingRod);
 			GlStateManager.popMatrix();

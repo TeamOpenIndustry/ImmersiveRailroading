@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.rail;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -28,8 +29,9 @@ public class TileRailRender extends TileEntitySpecialRenderer<TileRail> {
 		{
 			// Move to specified position
 			GlStateManager.translate(x, y, z);
-			
+			GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);			
 			RailRenderUtil.render(info, false);
+			blend.restore();
 		}
 		GL11.glPopMatrix();
 		Minecraft.getMinecraft().mcProfiler.endSection();

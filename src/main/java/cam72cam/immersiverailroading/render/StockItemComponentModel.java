@@ -20,6 +20,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
@@ -56,7 +57,7 @@ public class StockItemComponentModel implements IBakedModel {
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		
 		if (def == null) {
-			ImmersiveRailroading.logger.error("Item missing definition!");
+			ImmersiveRailroading.error("Item missing definition!");
 			stack.setCount(0);
 			return;
 		}
@@ -95,9 +96,13 @@ public class StockItemComponentModel implements IBakedModel {
 		
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, renderer.model.tex != null);
 		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
 
+		if (renderer.model.tex != null) {
+			Minecraft.getMinecraft().getTextureManager().bindTexture(renderer.model.tex);
+		}
+		
 		renderer.drawGroups(groups);
 		
 		blend.restore();
@@ -158,13 +163,13 @@ public class StockItemComponentModel implements IBakedModel {
 		case THIRD_PERSON_LEFT_HAND:
 		case THIRD_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-60), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
+					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-60), 0, 0, 1).translate(0.5,0.25,0.5).scale(0.2, 0.2, 0.2).toMatrix4f());
 		case FIRST_PERSON_LEFT_HAND:
 		case FIRST_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-30), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
+					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-30), 0, 0, 1).translate(0.5,0.25,0.5).scale(0.2, 0.2, 0.2).toMatrix4f());
 		case GROUND:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5,0.5,0.5).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5,0.5,0.5).scale(0.2, 0.2, 0.2).toMatrix4f());
 		case FIXED:
 			// Item Frame
 			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());

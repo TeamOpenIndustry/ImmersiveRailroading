@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
+import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -149,7 +151,19 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 				FluidUtil.tryFluidTransfer(this, tender, desiredDrain, true);
 			}
 			
-			//TODO fuel transfer
+			if (this.ticksExisted % 20 == 0) {
+				// Top off stacks
+				for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
+					if (BurnUtil.getBurnTime(this.cargoItems.getStackInSlot(slot)) != 0) {
+						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlots(); tenderSlot ++) {
+							if (this.cargoItems.getStackInSlot(slot).isItemEqual(tender.cargoItems.getStackInSlot(tenderSlot))) {
+								ItemStack extracted = tender.cargoItems.extractItem(tenderSlot, 1, false);
+								this.cargoItems.insertItem(slot, extracted, false);
+							}
+						}
+					}
+				}
+			}
 		}
 		
 		// Water to steam
@@ -185,7 +199,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 				if (stack.getCount() <= 0 || !TileEntityFurnace.isItemFuel(stack)) {
 					continue;
 				}
-				time = TileEntityFurnace.getItemBurnTime(stack);
+				time = BurnUtil.getBurnTime(stack);
 				burnTime.put(slot, time);
 				burnMax.put(slot, time);
 				stack.setCount(stack.getCount()-1);
@@ -240,7 +254,9 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
-			world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure, true);
+			if (Config.explosionsEnabled) {
+				world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure, true);
+			}
 			world.removeEntity(this);
 		}
 	}

@@ -32,13 +32,13 @@ public class ReloadResourcesCommand extends CommandBase {
 		if (args.length != 1 || !args[0].equals("reload")) {
 			throw new CommandException(getUsage(sender));
 		}
-		ImmersiveRailroading.logger.warn("Reloading Immersive Railroading definitions");
+		ImmersiveRailroading.warn("Reloading Immersive Railroading definitions");
 		try {
 			DefinitionManager.initDefinitions();
 		} catch (IOException e) {
-			ImmersiveRailroading.logger.catching(e);
+			ImmersiveRailroading.catching(e);
 			// Might want to stop the server here...
 		}
-		ImmersiveRailroading.logger.info("Done reloading Immersive Railroading definitions");
+		ImmersiveRailroading.info("Done reloading Immersive Railroading definitions");
 	}
 }

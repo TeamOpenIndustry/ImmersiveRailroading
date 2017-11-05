@@ -3,10 +3,17 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileRailPreview extends SyncdTileEntity {
+	public static TileRailPreview get(IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		return te instanceof TileRailPreview ? (TileRailPreview) te : null;
+	}
 
 	private ItemStack item;
 	float yawHead;

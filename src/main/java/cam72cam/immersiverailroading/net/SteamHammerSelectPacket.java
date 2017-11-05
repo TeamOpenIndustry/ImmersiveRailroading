@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.net;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileSteamHammer;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
@@ -44,8 +45,11 @@ public class SteamHammerSelectPacket implements IMessage {
 		}
 
 		private void handle(SteamHammerSelectPacket message, MessageContext ctx) {
-			System.out.println("HANDLE");
-			TileSteamHammer tile = ((TileSteamHammer)ctx.getServerHandler().player.world.getTileEntity(message.tilePreviewPos));
+			TileSteamHammer tile = TileSteamHammer.get(ctx.getServerHandler().player.world, message.tilePreviewPos);
+			if (tile == null) {
+				ImmersiveRailroading.warn("Got invalid hammer update packet at %s", message.tilePreviewPos);
+				return;
+			}
 			tile.setChoosenItem(message.selected);
 		}
 	}
