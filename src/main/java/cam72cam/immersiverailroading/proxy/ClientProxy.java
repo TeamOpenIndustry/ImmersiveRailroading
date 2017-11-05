@@ -85,6 +85,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -344,4 +345,32 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 	}
+	
+	@SubscribeEvent
+	public static void onClientTick(TickEvent.ClientTickEvent event) {
+		if (offsetCount != 0) {
+			double tickOffset = offsetAggregator / offsetCount;
+			if (tickOffset > 0) {
+				skew *= 1 - (Math.min(10, tickOffset) / 40); // Slow down client ticks
+			}
+			if (tickOffset < 0) {
+				skew *= 1 + (Math.min(10, -tickOffset) / 40); // Speed up client ticks
+			}
+			offsetCount = 0;
+			offsetAggregator = 0;
+		}
+	}
+
+	private static double skew = 1;
+	private static double offsetAggregator = 0.0;
+	private static double offsetCount = 0;
+    
+    public void addTickMetric(double tickPosOffset) {
+    	offsetCount++;
+    	offsetAggregator += tickPosOffset;
+    }
+    
+    public double serverTicksPerClientTick() {
+    	return skew;
+    }
 }

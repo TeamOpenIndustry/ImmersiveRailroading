@@ -184,4 +184,12 @@ public abstract class CommonProxy implements IGuiHandler {
 			return null;
     	}
     }
+    
+    public void addTickMetric(double tickPosOffset) {
+    	// NOP
+    }
+    
+    public double serverTicksPerClientTick() {
+    	return 1;
+    }
 }

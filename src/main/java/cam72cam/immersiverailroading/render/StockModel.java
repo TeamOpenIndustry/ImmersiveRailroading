@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
@@ -89,7 +90,7 @@ public class StockModel extends OBJRender {
 		
 		if (stock instanceof EntityMoveableRollingStock) {
 			EntityMoveableRollingStock mstock = (EntityMoveableRollingStock) stock;
-			this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * mstock.clientTicksPerServerTick * partialTicks * 1.1; 
+			this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * ImmersiveRailroading.proxy.serverTicksPerClientTick() * partialTicks * 1.1; 
 		} else {
 			this.distanceTraveled = 0;
 		}
