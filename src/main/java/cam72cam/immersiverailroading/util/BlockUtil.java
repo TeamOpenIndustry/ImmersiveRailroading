@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockSnow;
@@ -24,7 +25,7 @@ public class BlockUtil {
 		if (block.isReplaceable(world, pos)) {
 			return true;
 		}
-		if (block instanceof IGrowable) {
+		if (block instanceof IGrowable && !(block instanceof BlockGrass)) {
 			return true;
 		}
 		if (block instanceof IPlantable) {
