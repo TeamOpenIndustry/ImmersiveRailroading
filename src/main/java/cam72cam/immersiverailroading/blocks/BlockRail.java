@@ -38,7 +38,7 @@ public class BlockRail extends BlockRailBase {
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
 		TileRail tileEntity = TileRail.get(world, pos);
-		if (tileEntity == null) {
+		if (tileEntity == null || !tileEntity.hasTileData) {
 			return ItemStack.EMPTY;
 		}
 		ItemStack stack = new ItemStack(this, 1);
