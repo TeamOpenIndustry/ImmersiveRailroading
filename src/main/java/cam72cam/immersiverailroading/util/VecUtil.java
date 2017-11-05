@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -19,6 +20,11 @@ public class VecUtil {
 
 	public static Vec3d rotateYaw(Vec3d pos, float rotationYaw) {
 		return fromYaw(pos.x, rotationYaw).add(fromYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
+	}
+
+	public static BlockPos rotateYaw(BlockPos pos, float rotationYaw) {
+		// Might need to do some fancier rounding here
+		return new BlockPos(rotateYaw(new Vec3d(pos), rotationYaw));
 	}
 
 	public static Vec3d fromYawPitch(float distance, float rotationYaw, float rotationPitch) {

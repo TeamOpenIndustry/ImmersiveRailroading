@@ -333,28 +333,27 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
 			entity.setPosition(pos.x, pos.y, pos.z);
 		}
-		if (this.ticksExisted % 20 == 0 && !world.isRemote) {
+		if (!world.isRemote && this.ticksExisted % 10 != 0 && this.getCurrentSpeed().metric() > 0.5) {
 			bb = this.getCollisionBoundingBox();
-			for (int x = MathHelper.floor(bb.minX); x <= MathHelper.ceil(bb.maxX); x++) {
-				for (int y = MathHelper.floor(bb.minY)-1; y <= MathHelper.ceil(bb.maxY); y++) {
-					for (int z = MathHelper.floor(bb.minZ); z <= MathHelper.ceil(bb.maxZ); z++) {
-						BlockPos bp = new BlockPos(x, y, z);
-						if (bb.contains(new Vec3d(bp).addVector(0.5, 0.5, 0.5))) {
-							IBlockState state = world.getBlockState(bp);
-							if (state.getBlock() != Blocks.AIR) {
-								if (!BlockUtil.isRail(state)) {
-									IBlockState up = world.getBlockState(bp.up());
-									if (!BlockUtil.isRail(up)) {
-										world.destroyBlock(bp, true);										
-									}
-								} else {
-									TileRailBase te = TileRailBase.get(world, bp);
-									if (te != null) {
-										te.cleanSnow();
-										continue;
-									}
-								}
+			
+			for (Vec3d pos : this.getDefinition().getBlocksInBounds()) {
+				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+				pos = pos.add(this.getPositionVector());
+				BlockPos bp = new BlockPos(pos);
+				IBlockState state = world.getBlockState(bp);
+				if (state.getBlock() != Blocks.AIR) {
+					if (!BlockUtil.isRail(state)) {
+						if (bb.contains(pos)) { // This is slow, do it as little as possible
+							IBlockState up = world.getBlockState(bp.up());
+							if (!BlockUtil.isRail(up)) {
+								world.destroyBlock(bp, true);										
 							}
+						}
+					} else {
+						TileRailBase te = TileRailBase.get(world, bp);
+						if (te != null) {
+							te.cleanSnow();
+							continue;
 						}
 					}
 				}

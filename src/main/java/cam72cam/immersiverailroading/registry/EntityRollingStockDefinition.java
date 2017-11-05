@@ -20,6 +20,8 @@ import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -46,7 +48,7 @@ public class EntityRollingStockDefinition {
 	private float bogeyFront;
 	private float bogeyRear;
 
-	private double frontBounds;
+	public  double frontBounds;
 	private double rearBounds;
 	private double heightBounds;
 	private double widthBounds;
@@ -245,6 +247,27 @@ public class EntityRollingStockDefinition {
 
 	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock) {
 		return new RealBB(frontBounds, -rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
+	}
+	
+	List<Vec3d> blocksInBounds = null;
+	public List<Vec3d> getBlocksInBounds() {
+		if (blocksInBounds == null) {
+			blocksInBounds = new ArrayList<Vec3d>();
+			double minX = -rearBounds;
+			double maxX = frontBounds;
+			double minY = 0;
+			double maxY = heightBounds;
+			double minZ = -widthBounds / 2;
+			double maxZ = widthBounds / 2;
+			for (double x = minX; x <= maxX; x++) {
+				for (double y = minY; y <= maxY; y++) {
+					for (double z = minZ; z <= maxZ; z++) {
+						blocksInBounds.add(new Vec3d(x,y,z));
+					}
+				}
+			}
+		}
+		return blocksInBounds;
 	}
 
 	public List<String> getTooltip() {
