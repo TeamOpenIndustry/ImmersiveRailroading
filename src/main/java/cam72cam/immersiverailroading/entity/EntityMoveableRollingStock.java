@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -32,7 +33,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public float distanceTraveled = 0;
 	public float renderDistanceTraveled = 0;
 	public double tickPosID = 0;
-	public double clientTicksPerServerTick = 1;
 	private Speed currentSpeed;
 	public List<TickPos> positions = new ArrayList<TickPos>();
 	private AxisAlignedBB boundingBox;
@@ -161,23 +161,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void handleTickPosPacket(List<TickPos> newPositions) {
-		if (this.positions != null && this.positions.size() < 25 && this.ticksExisted > 10) {
-			double tickOffset = tickPosID - newPositions.get(0).tickID;
-			//System.out.println("SKEW " + clientTicksPerServerTick);
-			if (Math.abs(tickOffset) > 2) {
-				if (tickOffset > 0) {
-					clientTicksPerServerTick *= 1 - (Math.min(10, tickOffset) / 20); // Slow down client ticks
-				}
-				if (tickOffset < 0) {
-					clientTicksPerServerTick *= 1 + (Math.min(10, -tickOffset) / 20); // Speed up client ticks
-				}
+		if (newPositions.size() != 0) {
+			if (this.ticksExisted > 5) {
+				ImmersiveRailroading.proxy.addTickMetric(tickPosID - newPositions.get(0).tickID);
 			}
-		}
-		this.positions = newPositions;
-		if (newPositions.size() > 0) {
-			// might happen if stock stops suddenly
 			this.tickPosID = newPositions.get(0).tickID;
 		}
+		this.positions = newPositions;
 	}
 	
 	public TickPos getTickPos(int tickID) {
@@ -212,13 +202,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 	private double skewScalar(double curr, double next) {
 		if (world.isRemote) {
-			return curr + (next - curr) * this.clientTicksPerServerTick;
+			return curr + (next - curr) * ImmersiveRailroading.proxy.serverTicksPerClientTick();
 		}
 		return next;
 	}
 	private float skewScalar(float curr, float next) {
 		if (world.isRemote) {
-			return curr + (next - curr) * (float)this.clientTicksPerServerTick;
+			return curr + (next - curr) * (float)ImmersiveRailroading.proxy.serverTicksPerClientTick();
 		}
 		return next;
 	}
@@ -227,7 +217,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public void onUpdate() {
 		super.onUpdate();
 		
-		this.tickPosID += clientTicksPerServerTick;
+		this.tickPosID += world.isRemote ? ImmersiveRailroading.proxy.serverTicksPerClientTick() : 1;
 		
 		// Apply position tick
 		TickPos currentPos = getCurrentTickPosAndPrune();
