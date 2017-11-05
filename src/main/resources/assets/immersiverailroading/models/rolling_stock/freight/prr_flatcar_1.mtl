@@ -1,0 +1,156 @@
+# Blender MTL File: 'PRR Flatcar 1.blend'
+# Material Count: 14
+
+newmtl Black1
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Black1.png
+
+newmtl Black1.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Black1.png
+
+newmtl Black1.001_NONE
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\Black1.png
+
+newmtl Brake_Shoes
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Brake Shoes.png
+
+newmtl Chrome
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Chrome.png
+
+newmtl Chrome.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Chrome.png
+
+newmtl Chrome.001_NONE
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\Chrome.png
+
+newmtl DarkerOakWood
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Flatcars\DarkerOakWood.png
+
+newmtl Red_Wethered
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Flatcars\\Red Wethered.png
+
+newmtl Red_Wethered_Red_Wethered.png
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Flatcars\Red Wethered.png
+
+newmtl WheelRust
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\WheelRust.png
+
+newmtl WheelRust_NONE
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\WheelRust.png
+
+newmtl oakwood
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Flatcars\oakwood.png
+
+newmtl spring
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\spring.png
