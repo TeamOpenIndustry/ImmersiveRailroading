@@ -58,8 +58,10 @@ public abstract class TrackBase {
 		TileRailBase te = null;
 		if (removed != null) {
 			if (removed instanceof BlockRailBase) {
-				te = (TileRailBase) builder.world.getTileEntity(pos);
-				replaced = te.serializeNBT();
+				te = TileRailBase.get(builder.world, pos);
+				if (te != null) {					
+					replaced = te.serializeNBT();
+				}
 			} else {				
 				removed.dropBlockAsItem(builder.world, pos, state, 0);
 			}
@@ -73,7 +75,7 @@ public abstract class TrackBase {
 			te.setWillBeReplaced(false);
 		}
 		
-		TileRailBase tr = (TileRailBase)builder.world.getTileEntity(pos);
+		TileRailBase tr = TileRailBase.get(builder.world, pos);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);

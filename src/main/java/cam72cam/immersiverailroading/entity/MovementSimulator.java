@@ -8,9 +8,9 @@ import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.SwitchUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -29,21 +29,22 @@ public class MovementSimulator {
 	
 	public TickPos nextPosition(double moveDistance) {
 		position.tickID += 1;
+		position.isOffTrack = false;
 		TickPos origPosition = position.clone();
 
 		if (Math.abs(moveDistance) < 0.001) {
-			position.speed = Speed.fromMinecraft(Math.abs(0));
+			position.speed = Speed.ZERO;
 			return position;
 		}
 		
-		position.speed = Speed.fromMinecraft(Math.abs(moveDistance));
+		position.speed = Speed.fromMinecraft(moveDistance);
 
-		position.isReverse = moveDistance < 0;
+		boolean isReverse = moveDistance < 0;
 
 		Vec3d front = frontBogeyPosition();
 		Vec3d rear = rearBogeyPosition();
 		
-		if (position.isReverse) {
+		if (isReverse) {
 			moveDistance = -moveDistance;
 			position.frontYaw += 180;
 			position.rearYaw += 180;
@@ -59,7 +60,10 @@ public class MovementSimulator {
 		Vec3d nextFront = nextPosition(front, position.rotationYaw, VecUtil.fromYaw(moveDistance, position.frontYaw));
 		Vec3d nextRear = nextPosition(rear, position.rotationYaw, VecUtil.fromYaw(moveDistance, position.rearYaw));
 		if (nextFront.equals(front) || nextRear == rear) {
-			origPosition.speed = Speed.fromMetric(0);
+			origPosition.speed = Speed.ZERO;
+			if (position.isOffTrack) {
+				origPosition.isOffTrack = true;
+			}
 			return origPosition;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
@@ -73,9 +77,9 @@ public class MovementSimulator {
 
 		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
 		position.rotationYaw = VecUtil.toYaw(bogeySkew);
-		position.rotationPitch = (float) Math.toDegrees(Math.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
+		position.rotationPitch = (float) Math.toDegrees(MathHelper.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
 
-		if (position.isReverse) {
+		if (isReverse) {
 			position.frontYaw += 180;
 			position.rearYaw += 180;
 			//rotationYaw += 180;
@@ -105,18 +109,14 @@ public class MovementSimulator {
 	}
 
 	private TileRailBase directRailFromPosition(Vec3d position) {
-		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
-		if (te instanceof TileRailBase) {
-			return (TileRailBase)te;
-		}
-		return null;
+		return TileRailBase.get(world, new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 	}
 	
 	protected TileRail railFromPosition(Vec3d position) {
-		TileEntity te = world.getTileEntity(new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
+		TileRailBase te = TileRailBase.get(world, new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 		TileRail parent;
 		if (te instanceof TileRailGag) {
-			parent = ((TileRailGag) te).getParentTile();
+			parent = te.getParentTile();
 		} else if (te instanceof TileRail) {
 			parent = (TileRail) te;
 		} else {
@@ -174,9 +174,9 @@ public class MovementSimulator {
 		
 		if (rail == null) {
 			if (!world.isRemote) {
-				System.out.println("WARNING OFF TRACK!!!");
-				System.out.println(position);
-				System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
+				//System.out.println("WARNING OFF TRACK!!!");
+				//System.out.println(position);
+				//System.out.println(world.getBlockState(new BlockPos(position)).getBlock().getLocalizedName());
 				this.position.isOffTrack = true;
 				return position;
 			} else {
@@ -190,7 +190,7 @@ public class MovementSimulator {
 			// Relative position to the curve center
 			Vec3d posDelta = rail.getCenter().subtractReverse(position);
 			// Calculate the angle (rad) for the current position is
-			double posRelYaw = Math.atan2(posDelta.x, -posDelta.z);
+			double posRelYaw = MathHelper.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
 			double radius = rail.getRadius() - 0.5;
 			// Calculate the angle delta in rad (radians are awesome)

@@ -30,8 +30,8 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 
 		GlStateManager.pushMatrix();
 		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+		//GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 
 		// Move to specified position
 		GlStateManager.translate(x, y + 0.35, z);
@@ -40,9 +40,9 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
 		GlStateManager.rotate(-90, 0, 1, 0);
 		
-		model.draw(stock);
+		model.draw(stock, partialTicks);
 		
-		tex.restore();
+		//tex.restore();
 		cull.restore();
 		light.restore();
 

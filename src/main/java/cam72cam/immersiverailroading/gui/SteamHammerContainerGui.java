@@ -35,12 +35,12 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         
         NonNullList<ItemStack> items = NonNullList.create(); 
         
-        items.add(new ItemStack(ImmersiveRailroading.ITEM_LARGE_WRENCH, 1));
-        items.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
-        items.add(new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1));
         ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(CreativeTabs.TRANSPORTATION, items);
         
         NonNullList<ItemStack> stock = NonNullList.create();
+        stock.add(new ItemStack(ImmersiveRailroading.ITEM_LARGE_WRENCH, 1));
+        stock.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
+        stock.add(new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1));
         ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(CreativeTabs.TRANSPORTATION, stock);
 
 		stockSelector = new ItemPickerGUI(stock);
@@ -55,7 +55,13 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 		this.items = items;
     }
     
-    private boolean isPartOf(ItemStack item, ItemStack stock) {
+    private boolean isPartOf(ItemStack stock, ItemStack item) {
+    	if (stock.getItem() != ImmersiveRailroading.ITEM_ROLLING_STOCK) {
+    		return false;
+    	}
+    	if (item.getItem() != ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+    		return false;
+    	}
     	return ItemRollingStockComponent.getDefinitionID(item).equals(ItemRollingStock.getDefinitionID(stock));
     }
     
@@ -75,12 +81,17 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     		if (!stockSelector.isActive) {
     			NonNullList<ItemStack> filteredItems = NonNullList.create();
     			for (ItemStack item : items) {
-    				if (isPartOf(item, stockSelector.choosenItem)) {
+    				if (isPartOf(stockSelector.choosenItem, item)) {
     					filteredItems.add(item);
     				}
     			}
-    			itemSelector.setItems(filteredItems);
-    			itemSelector.isActive = true;
+    			if (filteredItems.size() == 0) {
+    				itemSelector.choosenItem = this.stockSelector.choosenItem;
+        			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.stockSelector.choosenItem));
+    			} else {
+	    			itemSelector.setItems(filteredItems);
+	    			itemSelector.isActive = true;
+    			}
     		}
         	
         	return;
@@ -94,12 +105,16 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     			if (stockSelector.choosenItem != null) {
     				NonNullList<ItemStack> filteredItems = NonNullList.create();
         			for (ItemStack item : items) {
-        				if (isPartOf(item, stockSelector.choosenItem)) {
+        				if (isPartOf(stockSelector.choosenItem, item)) {
         					filteredItems.add(item);
         				}
         			}
-        			itemSelector.setItems(filteredItems);
-        			itemSelector.isActive = true;
+        			if (filteredItems.size() == 0) {
+        				stockSelector.isActive = true;
+        			} else {
+	        			itemSelector.setItems(filteredItems);
+	        			itemSelector.isActive = true;
+        			}
     			} else {
     				stockSelector.isActive = true;
     			}

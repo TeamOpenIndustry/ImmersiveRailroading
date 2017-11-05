@@ -57,8 +57,10 @@ public class ItemRail extends ItemBlock {
     {
 		if (ItemRail.isPreview(stack)) {
 			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_PREVIEW.getDefaultState());
-			TileRailPreview te = (TileRailPreview) world.getTileEntity(pos);
-			te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
+			TileRailPreview te = TileRailPreview.get(world, pos);
+			if (te != null) {
+				te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
+			}
 			// don't decrement stack regardless
 			return false;
 		}

@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.client.Minecraft;
@@ -28,14 +27,12 @@ public class RailBuilderRender {
 		try {
 			baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"), 0.05f));
 		} catch (Exception e) {
-			ImmersiveRailroading.logger.catching(e);
+			ImmersiveRailroading.catching(e);
 		}
 	}
 
 	private static Map<String, Integer> displayLists = new HashMap<String, Integer>();
 	public static void renderRailBuilder(RailInfo info) {
-
-		//GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 
 		Vec3d renderOff = new Vec3d(-0.5, 0, -0.5);
 
@@ -100,7 +97,5 @@ public class RailBuilderRender {
 		}
 		
 		GL11.glCallList(displayLists.get(RailRenderUtil.renderID(info)));
-		
-		//tex.restore();
 	}
 }

@@ -13,6 +13,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IPlantable;
 
 public class BlockUtil {
 	public static boolean canBeReplaced(World world, BlockPos pos, boolean allowFlex) {
@@ -27,6 +28,9 @@ public class BlockUtil {
 		if (block instanceof IGrowable && !(block instanceof BlockGrass)) {
 			return true;
 		}
+		if (block instanceof IPlantable) {
+			return true;
+		}
 		if (block instanceof BlockLiquid) {
 			return true;
 		}
@@ -37,8 +41,8 @@ public class BlockUtil {
 			return true;
 		}
 		if (allowFlex && block instanceof BlockRailBase) {
-			TileRailBase te = (TileRailBase) world.getTileEntity(pos);
-			return te.isFlexible();
+			TileRailBase te = TileRailBase.get(world, pos);
+			return te != null && te.isFlexible();
 		}
 		return false;
 	}

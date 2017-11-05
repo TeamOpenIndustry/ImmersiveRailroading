@@ -4,8 +4,11 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -19,6 +22,11 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 
 public class TileRail extends TileRailBase {
+	public static TileRail get(IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		return te instanceof TileRail ? (TileRail) te : null;
+	}
+	
 	private EnumFacing facing;
 	private TrackItems type;
 	private ItemStack railBed;
@@ -37,7 +45,7 @@ public class TileRail extends TileRailBase {
 	private List<ItemStack> drops;
 	
 	public boolean snowRenderFlagDirty = true;
-
+	
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -205,7 +213,7 @@ public class TileRail extends TileRailBase {
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		if (facing == null) {
 			// Something is wrong...
-			ImmersiveRailroading.logger.error("INVALID TILE SAVE");
+			ImmersiveRailroading.error("INVALID TILE SAVE");
 			return super.writeToNBT(nbt);
 		}
 		nbt.setByte("facing", (byte) facing.getIndex());

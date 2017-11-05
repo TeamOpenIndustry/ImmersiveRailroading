@@ -7,6 +7,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import com.google.gson.JsonObject;
 
@@ -122,6 +124,20 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public <T extends Entity> Collection<T> getRecursivePassengersByType(Class<T> entityClass) {
+		try {
+			throw new Exception("Hack the planet");
+		} catch (Exception ex) {
+			for (StackTraceElement tl : ex.getStackTrace()) {
+				if (tl.getFileName().contains("PlayerList.java")) {
+					return new ArrayList<T>();
+				}
+			}
+		}
+		return super.getRecursivePassengersByType(entityClass);
 	}
 
 	@Override
