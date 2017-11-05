@@ -258,11 +258,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    
 	    this.currentSpeed = currentPos.speed;
 		distanceTraveled = skewScalar(distanceTraveled, distanceTraveled + (float)this.currentSpeed.minecraft());
-		this.boundingBox = null;
 		
 	    this.motionX = this.posX - this.prevPosX;
 	    this.motionY = this.posY - this.prevPosY;
 	    this.motionZ = this.posZ - this.prevPosZ;
+
+	    if (Math.abs(this.motionX) + Math.abs(this.motionY) + Math.abs(this.motionZ) > 0.001 ) {
+	    	this.clearPositionCache();
+	    }
 
 		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
 		for (Entity entity : entitiesWithin) {
@@ -357,6 +360,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				}
 			}
 		}
+	}
+
+	protected void clearPositionCache() {
+		this.boundingBox = null;
 	}
 
 	public TickPos moveRollingStock(double moveDistance, int lastTickID) {

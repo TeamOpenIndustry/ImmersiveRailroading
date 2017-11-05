@@ -57,10 +57,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private UUID coupledFront = null;
 	private BlockPos lastKnownFront = null;
 	private boolean frontCouplerEngaged = true;
+	private Vec3d couplerFrontPosition = null;
 	
 	private UUID coupledBack = null;
 	private BlockPos lastKnownRear= null;
 	private boolean backCouplerEngaged = true;
+	private Vec3d couplerRearPosition = null;
 
 	public EntityCoupleableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -595,6 +597,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//	This works remarkably well even around corners
 		return myPos.position.add(myPos.position.subtractReverse(coupledPos.position).normalize().scale(getDefinition().getCouplerPosition(coupler)));
 	}
+	
+	@Override
+	protected void clearPositionCache() {
+		super.clearPositionCache();
+		couplerFrontPosition = null;
+		couplerRearPosition = null;
+	}
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {
 		return getCouplerPosition(coupler, this.getCurrentTickPosOrFake());
@@ -604,9 +613,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
-			return predictRearBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(pos.position).addVector(0, 1, 0);
+			if (couplerFrontPosition == null) {
+				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(pos.position).addVector(0, 1, 0);
+			}
+			return couplerFrontPosition;
 		} else {
-			return predictFrontBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(pos.position).addVector(0, 1, 0);
+			if (couplerRearPosition == null) {
+				couplerRearPosition = predictFrontBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(pos.position).addVector(0, 1, 0);
+			}
+			return couplerRearPosition;
 		}
 	}
 
