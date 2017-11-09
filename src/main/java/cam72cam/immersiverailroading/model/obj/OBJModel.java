@@ -26,7 +26,6 @@ public class OBJModel {
 
 	public Map<String, Material> materials = new HashMap<String, Material>();
 	public float darken;
-	public ResourceLocation tex;
 
 	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
@@ -154,7 +153,6 @@ public class OBJModel {
 					break;
 				case "map_Kd":
 					currentMTL.texKd = RelativeResource.getRelative(modelLoc, parts[1]);
-					this.tex = currentMTL.texKd; 
 					break;
 				case "Ns":
 					//Ignore

@@ -16,7 +16,6 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
@@ -68,15 +67,14 @@ public class StockItemModel implements IBakedModel {
 		 * before actually setting up the correct GL context.
 		 */
 		if (model != null) {
-			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.model.tex != null);
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 			
 			GL11.glPushMatrix();
 			GL11.glScaled(0.2, 0.2, 0.2);
-			if (model.model.tex != null) {
-				Minecraft.getMinecraft().getTextureManager().bindTexture(model.model.tex);
-			}
+			model.bindTexture();
 			model.draw();
+			model.restoreTexture();
 			GL11.glPopMatrix();
 			
 			tex.restore();

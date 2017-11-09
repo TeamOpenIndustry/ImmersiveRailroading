@@ -61,8 +61,7 @@ public class RailBuilderRender {
 
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
 			int displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);	
-			Minecraft.getMinecraft().getTextureManager().bindTexture(baseRailModel.model.tex);	
+			GL11.glNewList(displayList, GL11.GL_COMPILE);		
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GlStateManager.pushMatrix();
@@ -96,6 +95,8 @@ public class RailBuilderRender {
 			displayLists.put(RailRenderUtil.renderID(info), displayList);
 		}
 		
+		baseRailModel.bindTexture();
 		GL11.glCallList(displayLists.get(RailRenderUtil.renderID(info)));
+		baseRailModel.restoreTexture();
 	}
 }

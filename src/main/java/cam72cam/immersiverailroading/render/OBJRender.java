@@ -18,9 +18,33 @@ import net.minecraft.util.math.Vec3d;
 public class OBJRender {
 
 	public OBJModel model;
+	private OBJTextureSheet texture;
+	private int prevTexture = -1;
 
 	public OBJRender(OBJModel model) {
 		this.model = model;
+		this.texture = new OBJTextureSheet(model);
+	}
+
+	public boolean hasTexture() {
+		return texture.mappings.size() != 0;
+	}
+	public void bindTexture() {
+		if (hasTexture()) {
+			int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+			if (currentTexture != this.texture.textureID) {
+				prevTexture  = currentTexture;
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.texture.textureID);
+			}
+		}
+	}
+	public void restoreTexture() {
+		if (hasTexture()) {
+			if (prevTexture != -1) {
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
+				prevTexture = -1;
+			}
+		}
 	}
 
 	private Integer displayList = null;
@@ -58,7 +82,6 @@ public class OBJRender {
 
 	public void drawDirectGroups(Iterable<String> groupNames, double scale) {
 		List<Face> quads = new ArrayList<Face>();
-		boolean has_vt = true;
 		boolean has_vn = true;
 
 		for (String group : groupNames) {
@@ -98,10 +121,11 @@ public class OBJRender {
 					has_vn = false;
 				}
 				if (vt != null) {
-					texBuffer.put(vt.x);
-					texBuffer.put(-vt.y);
+					texBuffer.put(texture.convertU(face.mtl, vt.x));
+					texBuffer.put(texture.convertV(face.mtl, -vt.y));
 				} else {
-					has_vt = false;
+					texBuffer.put(texture.convertU(face.mtl, 0));
+					texBuffer.put(texture.convertV(face.mtl, 0));
 				}
 				colorBuffer.put(r);
 				colorBuffer.put(g);
@@ -111,9 +135,7 @@ public class OBJRender {
 		}
 
 		GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-		if (has_vt) {
-			GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-		}
+		GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
 		GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
 		if (has_vn) {
 			GL11.glEnableClientState(GL11.GL_NORMAL_ARRAY);
@@ -123,9 +145,7 @@ public class OBJRender {
 		colorBuffer.flip();
 		normalBuffer.flip();
 		texBuffer.flip();
-		if (has_vt) {
-			GL11.glTexCoordPointer(2, 2 << 2, texBuffer);
-		}
+		GL11.glTexCoordPointer(2, 2 << 2, texBuffer);
 		GL11.glColorPointer(4, 4 << 2, colorBuffer);
 		if (has_vn) {
 			GL11.glNormalPointer(3 << 2, normalBuffer);
@@ -134,9 +154,7 @@ public class OBJRender {
 		GL11.glDrawArrays(GL11.GL_QUADS, 0, quads.size() * 4);
 
 		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-		if (has_vt) {
-			GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-		}
+		GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
 		GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
 		if (has_vn) {
 			GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
