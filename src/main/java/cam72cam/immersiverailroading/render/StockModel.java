@@ -23,7 +23,6 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -85,7 +84,7 @@ public class StockModel extends OBJRender {
 	}
 
 	public void draw(EntityRollingStock stock, float partialTicks) {
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.tex != null);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, super.hasTexture());
 		
 		
 		if (stock instanceof EntityMoveableRollingStock) {
@@ -95,9 +94,7 @@ public class StockModel extends OBJRender {
 			this.distanceTraveled = 0;
 		}
 
-		if (model.tex != null) {
-			Minecraft.getMinecraft().getTextureManager().bindTexture(model.tex);
-		}
+		this.bindTexture();
 		
 		if (stock instanceof LocomotiveSteam) {
 			drawSteamLocomotive((LocomotiveSteam) stock);
@@ -108,6 +105,8 @@ public class StockModel extends OBJRender {
 		} else {
 			draw();
 		}
+		
+		this.restoreTexture();
 		
 		tex.restore();
 	}

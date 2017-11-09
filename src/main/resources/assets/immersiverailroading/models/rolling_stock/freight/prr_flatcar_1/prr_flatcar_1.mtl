@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Black1.png
+map_Kd black1.png
 
 newmtl Black1.001
 Ns 96.078431
@@ -21,7 +21,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Black1.png
+map_Kd black1.png
 
 newmtl Black1.001_NONE
 Ns 96.078431
@@ -32,7 +32,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\Black1.png
+map_Kd black1.png
 
 newmtl Brake_Shoes
 Ns 96.078431
@@ -43,7 +43,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Brake Shoes.png
+map_Kd brake_shoes.png
 
 newmtl Chrome
 Ns 96.078431
@@ -54,7 +54,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Chrome.png
+map_Kd chrome.png
 
 newmtl Chrome.001
 Ns 96.078431
@@ -65,7 +65,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Chrome.png
+map_Kd chrome.png
 
 newmtl Chrome.001_NONE
 Ns 96.078431
@@ -76,7 +76,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\Chrome.png
+map_Kd chrome.png
 
 newmtl DarkerOakWood
 Ns 96.078431
@@ -87,7 +87,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Flatcars\DarkerOakWood.png
+map_Kd darkeroakwood.png
 
 newmtl Red_Wethered
 Ns 96.078431
@@ -98,7 +98,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Flatcars\\Red Wethered.png
+map_Kd red_weathered.png
 
 newmtl Red_Wethered_Red_Wethered.png
 Ns 96.078431
@@ -109,7 +109,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Flatcars\Red Wethered.png
+map_Kd red_weathered.png
 
 newmtl WheelRust
 Ns 96.078431
@@ -120,7 +120,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\WheelRust.png
+map_Kd wheelrust.png
 
 newmtl WheelRust_NONE
 Ns 96.078431
@@ -131,7 +131,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\WheelRust.png
+map_Kd wheelrust.png
 
 newmtl oakwood
 Ns 96.078431
@@ -142,7 +142,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Flatcars\oakwood.png
+map_Kd oakwood.png
 
 newmtl spring
 Ns 96.078431
@@ -153,4 +153,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\spring.png
+map_Kd spring.png
