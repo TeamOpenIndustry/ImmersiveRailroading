@@ -1,6 +1,6 @@
 {
 	"name": "PRR P70 Coach 1",
-	"model": "immersiverailroading:models/rolling_stock/passenger/p70coach1.obj",
+	"model": "immersiverailroading:models/rolling_stock/passenger/p70coaches/p70coach1.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 28000
