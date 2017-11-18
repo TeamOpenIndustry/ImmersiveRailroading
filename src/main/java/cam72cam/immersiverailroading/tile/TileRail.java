@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
@@ -50,14 +51,13 @@ public class TileRail extends TileRailBase {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
-		return INFINITE_EXTENT_AABB;
+		return new AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos);
 	}
-
+	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public double getMaxRenderDistanceSquared()
-	{
-		return Double.MAX_VALUE;
+	public double getMaxRenderDistanceSquared() {
+		return Math.pow(8*32, 2);
 	}
 
 	public EnumFacing getFacing() {
