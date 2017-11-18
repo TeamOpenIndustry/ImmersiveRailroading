@@ -58,10 +58,6 @@ dependencies {
 	compile files(
 		'ImmersiveEngineering-0.12-71-deobf.jar'
 	)
-
-	compile files(
-		'TrackAPI-1.0.jar'
-	)
 }
 
 processResources {

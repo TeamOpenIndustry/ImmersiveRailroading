@@ -1,10 +1,8 @@
-package cam72cam.immersiverailroading.physics;
+package cam72cam.immersiverailroading.entity;
 
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.util.Speed;
 
-public class PhysicsAccummulator {
+class PhysicsAccummulator {
 	//http://evilgeniustech.com/idiotsGuideToRailroadPhysics/HorsepowerAndTractiveEffort/
 	//http://www.republiclocomotive.com/locomotive-power-calculations.html
 	//http://www.wplives.org/forms_and_documents/Air_Brake_Principles.pdf
@@ -21,7 +19,7 @@ public class PhysicsAccummulator {
 		this.speed = speed;
 	}
 
-	public void accumulate(EntityRollingStock stock, Boolean direction) {
+	void accumulate(EntityRollingStock stock, Boolean direction) {
 		massToMoveKg += stock.getWeight();
 		
 		// SHOULD THIS HAVE DIRECTION MULT?
@@ -40,7 +38,7 @@ public class PhysicsAccummulator {
 		}
 	}
 	
-	public Speed getVelocity() {
+	Speed getVelocity() {
 		// 0.25 = steel wheel on steel rail
 		double brakeAdhesion =  massToMoveKg * 0.25;
 		double airBrakeNewtons = brakeAdhesion * Math.min(airBrake, 1) * 4.44822f;
