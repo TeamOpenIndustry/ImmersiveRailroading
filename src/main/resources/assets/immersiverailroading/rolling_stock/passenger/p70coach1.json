@@ -1,0 +1,24 @@
+{
+	"name": "PRR P70 Coach 1",
+	"model": "immersiverailroading:models/rolling_stock/passenger/p70coach1.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 28000
+	},
+	"passenger": {
+		"slots": 25,
+		"center_x": 0,
+		"center_y": 1.4,
+		"length": 12,
+		"width": 2
+	},
+	"freight": {
+		"slots": 12,
+		"width": 12,
+		"cargo": ["all"]
+	},
+	"trucks": {
+		"front": -8.85, 
+		"rear": 8.85
+	}
+}
