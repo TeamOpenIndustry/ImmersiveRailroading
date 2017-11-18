@@ -213,6 +213,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return next;
 	}
 	
+	private float fixAngleInterp(float curr, float next) {
+		if (curr - next > 180) {
+			curr -= 360;
+    	}
+    	if (next - curr > 180) {
+    		curr += 360;
+    	}
+    	return curr;
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -240,6 +250,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    this.posX = skewScalar(this.posX, currentPos.position.x);
 	    this.posY = skewScalar(this.posY, currentPos.position.y);
 	    this.posZ = skewScalar(this.posZ, currentPos.position.z);
+
+	    if (world.isRemote) {
+	    	this.prevRotationYaw = fixAngleInterp(this.prevRotationYaw, currentPos.rotationYaw);
+	    	this.rotationYaw = fixAngleInterp(this.rotationYaw, currentPos.rotationYaw);
+	    	this.frontYaw = fixAngleInterp(this.frontYaw == null ? this.rotationYaw : this.frontYaw, currentPos.frontYaw);
+	    	this.rearYaw = fixAngleInterp(this.rearYaw == null ? this.rotationYaw : this.rearYaw, currentPos.rearYaw);
+	    }
 		    
 	    this.rotationYaw = skewScalar(this.rotationYaw, currentPos.rotationYaw);
 	    this.rotationPitch = skewScalar(this.rotationPitch, currentPos.rotationPitch);
