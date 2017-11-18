@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.physics;
+package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.Speed;
@@ -8,16 +8,16 @@ import net.minecraft.util.math.Vec3d;
 public class TickPos {
 	public int tickID;
 	public Speed speed;
-	public boolean isOffTrack;
+	boolean isOffTrack;
 	
 	//Vec3d frontPosition;
 	//Vec3d backPosition;
 	public Vec3d position;
 	
-	public float frontYaw;
-	public float rearYaw;
-	public float rotationYaw;
-	public float rotationPitch;
+	float frontYaw;
+	float rearYaw;
+	float rotationYaw;
+	float rotationPitch;
 
 	
 	public TickPos() {

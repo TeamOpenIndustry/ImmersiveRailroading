@@ -4,12 +4,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.SwitchState;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.ParticleUtil;
-import cam72cam.immersiverailroading.util.SwitchUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -22,10 +18,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import trackapi.lib.ITrackTile;
-import trackapi.lib.Util;
 
-public class TileRailBase extends SyncdTileEntity implements ITrackTile {
+public class TileRailBase extends SyncdTileEntity {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileRailBase ? (TileRailBase) te : null;
@@ -263,30 +257,5 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 				}
 			}
 		}
-	}
-	
-	@Override
-	public double getTrackGauge() {
-		return Util.STANDARD_GAUGE;
-	}
-	
-	@Override
-	public double getTrackSlope() {
-		TileRail parent = this.getParentTile();
-		if (parent != null && parent.getType() == TrackItems.SLOPE) {
-			return 1.0 / parent.getLength();
-		}
-		return 0;
-	}
-	
-	@Override
-	public Vec3d getNextPosition(Vec3d currentPosition, float rotationYaw, float bogeyYaw, double distanceMeters) {
-		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
-		
-		if (SwitchUtil.getSwitchState(tile, currentPosition) == SwitchState.STRAIGHT) {
-			tile = tile.getParentTile();
-		}
-		
-		return MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 	}
 }

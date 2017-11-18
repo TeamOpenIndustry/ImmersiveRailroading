@@ -6,8 +6,6 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
-import cam72cam.immersiverailroading.physics.MovementSimulator;
-import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -408,7 +406,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		Vec3d front = sim.frontBogeyPosition();
 		Vec3d nextFront = front;
 		while (offset > 0) {
-			nextFront = sim.nextPosition(nextFront, pos.rotationYaw, pos.frontYaw, Math.min(0.1, offset));
+			nextFront = sim.nextPosition(nextFront, pos.rotationYaw, VecUtil.fromYaw(Math.min(0.1, offset), pos.frontYaw));
 			offset -= 0.1;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
@@ -424,7 +422,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		Vec3d rear = sim.rearBogeyPosition();
 		Vec3d nextRear = rear;
 		while (offset > 0) {
-			nextRear = sim.nextPosition(nextRear, pos.rotationYaw+180, pos.rearYaw+180, Math.min(0.1, offset));
+			nextRear = sim.nextPosition(nextRear, pos.rotationYaw+180, VecUtil.fromYaw(Math.min(0.1, offset), pos.rearYaw+180));
 			offset -= 0.1;
 		}
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
