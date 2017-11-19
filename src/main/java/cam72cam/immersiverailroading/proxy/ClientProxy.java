@@ -55,6 +55,7 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -75,6 +76,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
@@ -294,6 +296,31 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@SubscribeEvent
+	public static void onHackRenderEvent(RenderWorldLastEvent event) {
+		/*
+		 * Minecraft does NOT support rendering entities which overlap with the field of view but don't exist in it
+		 * 
+		 * For large entities this breaks in awesome ways, like walking past the center of a rail car
+		 * 
+		 * To fix this we render the entity the player is riding by hand at the end of the render loop
+		 * This is a bad hack but it works
+		 * 
+		 * BUG: Lighting is not setup correctly
+		 * BUG: Entity is rendered twice (check render pass and is riding???)
+		 */
+		if (Minecraft.getMinecraft().player.isRiding()) {
+			Entity toRender = Minecraft.getMinecraft().player.getLowestRidingEntity();
+			if (toRender instanceof EntityRollingStock) {
+		        GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
+	            RenderHelper.enableStandardItemLighting();
+				Minecraft.getMinecraft().getRenderManager().renderEntityStatic(toRender, event.getPartialTicks(), true);
+	            RenderHelper.disableStandardItemLighting();
+				color.restore();
+			}
+		}
+	}
+	
+	@SubscribeEvent
 	public static void onOverlayEvent(RenderGameOverlayEvent.Pre event) {
 		if (event.getType() == ElementType.CHAT) {
 			new SteamLocomotiveOverlay().draw();
@@ -348,19 +375,23 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
-		if (offsetCount != 0) {
+		tickCount++;
+		
+		if (offsetCount != 0 && tickCount > 40) {
+			tickCount = 0;
 			double tickOffset = offsetAggregator / offsetCount;
 			if (tickOffset > 0) {
-				skew *= 1 - (Math.min(10, tickOffset) / 40); // Slow down client ticks
+				skew *= 1 - (Math.min(10, tickOffset) / 20); // Slow down client ticks
 			}
 			if (tickOffset < 0) {
-				skew *= 1 + (Math.min(10, -tickOffset) / 40); // Speed up client ticks
+				skew *= 1 + (Math.min(10, -tickOffset) / 20); // Speed up client ticks
 			}
 			offsetCount = 0;
 			offsetAggregator = 0;
 		}
 	}
 
+	private static int tickCount = 0;
 	private static double skew = 1;
 	private static double offsetAggregator = 0.0;
 	private static double offsetCount = 0;

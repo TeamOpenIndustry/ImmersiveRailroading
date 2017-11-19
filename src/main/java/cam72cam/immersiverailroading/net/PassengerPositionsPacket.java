@@ -63,7 +63,6 @@ public class PassengerPositionsPacket implements IMessage {
 		    });
 			
 			if (matches.size() != 1) {
-				ImmersiveRailroading.error("Bad packet for entityID " + message.stockID + " " + matches.size());
 				return;
 			}
 			
