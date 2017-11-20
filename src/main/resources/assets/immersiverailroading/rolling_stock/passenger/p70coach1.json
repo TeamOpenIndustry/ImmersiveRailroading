@@ -18,7 +18,7 @@
 		"cargo": ["all"]
 	},
 	"trucks": {
-		"front": -8.85, 
-		"rear": 8.85
+		"front": 8.85, 
+		"rear": -8.85
 	}
 }

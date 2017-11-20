@@ -1,6 +1,6 @@
 {
 	"name": "E6 Atlantic Tender",
-	"model": "immersiverailroading:models/rolling_stock/tender/e6_tender.obj",
+	"model": "immersiverailroading:models/rolling_stock/tender/e6_tender/e6_tender.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 62000
