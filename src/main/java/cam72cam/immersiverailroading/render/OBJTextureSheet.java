@@ -36,13 +36,18 @@ public class OBJTextureSheet {
 		private int maxV = 1;
 
 		private BufferedImage image;
+		private ResourceLocation tex;
 
 		
 		SubTexture(ResourceLocation tex) throws IOException {
 			InputStream input = ImmersiveRailroading.proxy.getResourceStream(tex);
+			this.tex = tex;
 			this.image = TextureUtil.readBufferedImage(input);
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
+			//System.out.println(tex);
+			//System.out.println(realWidth);
+			//System.out.println(realHeight);
 		}
 		public void extendSpace(Vec2f tex) {
 			float u = tex.x;
@@ -61,7 +66,9 @@ public class OBJTextureSheet {
 				for (int cV = 0; cV < copiesV(); cV++) {
 					int offX = originX + this.realWidth * cU;
 					int offY = originY + this.realHeight * cV;
+					System.out.print("ST");
 					TextureUtil.uploadTextureImageSub(textureID, image, offX, offY, false, false);
+					System.out.print("ET");
 				}
 			}
 			image = null;
@@ -132,6 +139,10 @@ public class OBJTextureSheet {
 		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
 		
 		for (SubTexture tex : mappings.values()) {
+			System.out.println(tex.tex);
+			System.out.println(tex.getAbsoluteWidth());
+			System.out.println(currentX);
+			System.out.println(maxSize);
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;

@@ -1,18 +1,7 @@
 # Blender MTL File: 'P70.blend'
-# Material Count: 24
+# Material Count: 19
 
 newmtl black1
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd Black1.png
-
-newmtl black1_NONE
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -43,18 +32,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd Chrome.png
-
-newmtl chrome_Chrome.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd Chrome.png
+map_Kd chrome.png
 
 newmtl cream
 Ns 96.078431
@@ -121,17 +99,6 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd roof.png
-
-newmtl roof_Black1.png.001
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd Black1.png
 
 newmtl roof_NONE
 Ns 96.078431
@@ -233,28 +200,6 @@ illum 2
 map_Kd underframe.png
 
 newmtl wheelrust
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd WheelRust.png
-
-newmtl wheelrust_NONE
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd wheelrust.png
-
-newmtl wheelrust_WheelRust.png
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
