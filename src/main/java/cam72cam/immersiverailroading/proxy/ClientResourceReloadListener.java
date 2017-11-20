@@ -3,8 +3,7 @@ package cam72cam.immersiverailroading.proxy;
 import java.io.IOException;
 
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.render.StockItemComponentModel;
-import cam72cam.immersiverailroading.render.StockItemModel;
+import cam72cam.immersiverailroading.render.StockRenderCache;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 
@@ -18,7 +17,6 @@ public class ClientResourceReloadListener implements IResourceManagerReloadListe
 			e.printStackTrace();
 		}
 		
-		StockItemModel.clearRenderCache();
-		StockItemComponentModel.clearRenderCache();
+		StockRenderCache.clearRenderCache();
 	}
 }

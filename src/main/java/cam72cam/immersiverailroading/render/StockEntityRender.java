@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.render;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -24,9 +23,9 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 
 	@Override
 	public void doRender(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
-		EntityRollingStockDefinition def = stock.getDefinition();
-
-		StockModel model = StockModel.get(def.getModel());
+		String def = stock.getDefinitionID();
+		
+		StockModel model = StockRenderCache.getRender(def);
 
 		GlStateManager.pushMatrix();
 		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
