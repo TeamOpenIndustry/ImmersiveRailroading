@@ -1,5 +1,5 @@
 # Blender MTL File: 'P70.blend'
-# Material Count: 24
+# Material Count: 19
 
 newmtl black1
 Ns 96.078431
@@ -10,18 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Black1.png
-
-newmtl black1_NONE
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\black1.png
+map_Kd black1.png
 
 newmtl black1_black1
 Ns 96.078431
@@ -32,7 +21,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\black1.png
+map_Kd black1.png
 
 newmtl chrome
 Ns 96.078431
@@ -43,18 +32,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Chrome.png
-
-newmtl chrome_Chrome.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Chrome.png
+map_Kd chrome.png
 
 newmtl cream
 Ns 96.078431
@@ -65,7 +43,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\roof.png
+map_Kd roof.png
 
 newmtl cream_NONE
 Ns 96.078431
@@ -76,7 +54,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\cream.png
+map_Kd cream.png
 
 newmtl floor
 Ns 96.078431
@@ -87,7 +65,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\floor.png
+map_Kd floor.png
 
 newmtl glass
 Ns 96.078431
@@ -98,7 +76,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\glass.png
+map_Kd glass.png
 
 newmtl glass_glass.png
 Ns 96.078431
@@ -109,7 +87,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\glass.png
+map_Kd glass.png
 
 newmtl roof
 Ns 96.078431
@@ -120,18 +98,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\roof.png
-
-newmtl roof_Black1.png.001
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\Black1.png
+map_Kd roof.png
 
 newmtl roof_NONE
 Ns 96.078431
@@ -142,7 +109,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\roof.png
+map_Kd roof.png
 
 newmtl roof_underframe.png
 Ns 96.078431
@@ -153,7 +120,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\underframe.png
+map_Kd underframe.png
 
 newmtl stripeyellow
 Ns 96.078431
@@ -164,7 +131,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\stripeyellow.png
+map_Kd stripeyellow.png
 
 newmtl tuscanred
 Ns 96.078431
@@ -175,7 +142,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\tuscanred.png
+map_Kd tuscanred.png
 
 newmtl tuscanred_tuscanred.png
 Ns 96.078431
@@ -186,7 +153,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\tuscanred.png
+map_Kd tuscanred.png
 
 newmtl tuscanred_underframe.png
 Ns 96.078431
@@ -197,7 +164,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\underframe.png
+map_Kd underframe.png
 
 newmtl underframe
 Ns 96.078431
@@ -208,7 +175,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\underframe.png
+map_Kd underframe.png
 
 newmtl underframe_tuscanred.png
 Ns 96.078431
@@ -219,7 +186,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\tuscanred.png
+map_Kd tuscanred.png
 
 newmtl underframe_underframe.png
 Ns 96.078431
@@ -230,7 +197,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\underframe.png
+map_Kd underframe.png
 
 newmtl wheelrust
 Ns 96.078431
@@ -241,26 +208,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\WheelRust.png
-
-newmtl wheelrust_NONE
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\wheelrust.png
-
-newmtl wheelrust_WheelRust.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Trucks\wheelrust.png
+map_Kd wheelrust.png
