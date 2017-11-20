@@ -66,9 +66,7 @@ public class OBJTextureSheet {
 				for (int cV = 0; cV < copiesV(); cV++) {
 					int offX = originX + this.realWidth * cU;
 					int offY = originY + this.realHeight * cV;
-					System.out.print("ST");
 					TextureUtil.uploadTextureImageSub(textureID, image, offX, offY, false, false);
-					System.out.print("ET");
 				}
 			}
 			image = null;
@@ -142,11 +140,14 @@ public class OBJTextureSheet {
 			System.out.println(tex.tex);
 			System.out.println(tex.getAbsoluteWidth());
 			System.out.println(currentX);
-			System.out.println(maxSize);
+			if (tex.getAbsoluteWidth() > maxSize) {
+				System.out.println("ASJDKLAJSKLDJASLDKJASKLJFKLADJFKLSDJAKLFJSDLKJSDKLA");
+			}
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;
 				rowHeight = 0;
+				System.out.println(String.format("NEWLINE %s %s", currentX, currentY));
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
