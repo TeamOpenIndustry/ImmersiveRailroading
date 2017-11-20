@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.render;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -30,17 +27,7 @@ import net.minecraft.util.math.Vec3d;
 public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
 
-	private static Map<OBJModel, StockModel> cache = new HashMap<OBJModel, StockModel>();
-	
-	public static StockModel get(OBJModel model) {
-		if (!cache.containsKey(model)) {
-			cache.put(model, new StockModel(model));
-		}
-		return cache.get(model);
-	}
-
-
-	private StockModel(OBJModel objModel) {
+	public StockModel(OBJModel objModel) {
 		super(objModel);
 	}
 

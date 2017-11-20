@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.render;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 
@@ -40,12 +37,6 @@ public class StockItemComponentModel implements IBakedModel {
 	private Vec3d center;
 	private double width;
 	private double length;
-	
-	private static Map<String, OBJRender> render_cache = new HashMap<String, OBJRender>();
-	
-	public static void clearRenderCache() {
-		render_cache = new HashMap<String, OBJRender>(); 
-	}
 
 	public StockItemComponentModel() {
 	}
@@ -60,12 +51,8 @@ public class StockItemComponentModel implements IBakedModel {
 			stack.setCount(0);
 			return;
 		}
-
-		if (!render_cache.containsKey(defID)) {
-			render_cache.put(defID, new OBJRender(def.getModel()));
-		}
 		
-		renderer = render_cache.get(defID);
+		renderer = StockRenderCache.getRender(defID);
 		groups = new ArrayList<String>();
 
 		for (RenderComponentType r : item.render) {

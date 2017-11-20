@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.render;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 
@@ -12,8 +9,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.items.ItemRollingStock;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -30,27 +25,17 @@ import net.minecraftforge.client.ForgeHooksClient;
 import util.Matrix4;
 
 public class StockItemModel implements IBakedModel {
-	private static Map<String, OBJRender> render_cache = new HashMap<String, OBJRender>();
 	private OBJRender model;
-	
-	public static void clearRenderCache() {
-		render_cache = new HashMap<String, OBJRender>(); 
-	}
 
 	public StockItemModel() {
 	}
 	
 	public StockItemModel(ItemStack stack) {
 		String defID = ItemRollingStock.getDefinitionID(stack);
-			if (!render_cache.containsKey(defID)) {
-			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
-			if (def != null) {
-				render_cache.put(defID, new OBJRender(def.getModel()));
-			} else {
-				stack.setCount(0);
-			}
+		model = StockRenderCache.getRender(defID);
+		if (model == null) {
+			stack.setCount(0);
 		}
-		model = render_cache.get(defID);
 	}
 	
 	@Override

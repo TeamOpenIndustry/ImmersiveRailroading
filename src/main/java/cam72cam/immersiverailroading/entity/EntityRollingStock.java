@@ -56,6 +56,9 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 			return type.cast(def);
 		}
 	}
+	public String getDefinitionID() {
+		return this.defID;
+	}
 	
 	public void onUpdate() {
 		if (!world.isRemote && this.ticksExisted % 5 == 0) {
