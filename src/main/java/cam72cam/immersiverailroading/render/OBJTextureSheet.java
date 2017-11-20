@@ -117,19 +117,37 @@ public class OBJTextureSheet {
 				}
 			}
 		}
+		/*
 		for (SubTexture tex : mappings.values()) {
 			this.sheetWidth += tex.getAbsoluteWidth();
 			this.sheetHeight += tex.getAbsoluteHeight();
-		}
-		
-		textureID = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+		}*/
+		int maxSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
 		
 		int currentX = 0;
 		int currentY = 0;
 		int rowHeight = 0;
 		
-		int maxSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
+		for (SubTexture tex : mappings.values()) {
+			if (currentX + tex.getAbsoluteWidth() > maxSize) {
+				currentX = 0;
+				currentY += rowHeight;
+				rowHeight = 0;
+			}
+			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
+			currentX += tex.getAbsoluteWidth();
+			currentY += tex.getAbsoluteHeight();
+			this.sheetWidth = Math.max(this.sheetWidth, currentX);
+			this.sheetHeight = Math.max(this.sheetHeight, currentY); 
+		}
+		
+		textureID = GL11.glGenTextures();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+		
+		currentX = 0;
+		currentY = 0;
+		rowHeight = 0;
+		
 
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
@@ -137,9 +155,6 @@ public class OBJTextureSheet {
 		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
 		
 		for (SubTexture tex : mappings.values()) {
-			System.out.println(tex.tex);
-			System.out.println(tex.getAbsoluteWidth());
-			System.out.println(currentX);
 			if (tex.getAbsoluteWidth() > maxSize) {
 				System.out.println("ASJDKLAJSKLDJASLDKJASKLJFKLADJFKLSDJAKLFJSDLKJSDKLA");
 			}
