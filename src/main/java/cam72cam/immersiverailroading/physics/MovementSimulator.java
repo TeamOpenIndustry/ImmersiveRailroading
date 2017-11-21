@@ -15,7 +15,7 @@ public class MovementSimulator {
 	private float bogeyFrontOffset;
 	private float bogeyRearOffset;
 
-	public MovementSimulator(World world, TickPos startPos, float bogeyFrontOffset, float bogeyRearOffset) {
+	public MovementSimulator(World world, TickPos startPos, float bogeyFrontOffset, float bogeyRearOffset, double gauge) {
 		this.world = world;
 		this.position = startPos.clone(); //  We may modify it for convenience later on
 		this.bogeyFrontOffset = bogeyFrontOffset;
@@ -118,8 +118,8 @@ public class MovementSimulator {
 			position.isOffTrack = true;
 			return currentPosition;
 		}
-		
-		Vec3d result = rail.getNextPosition(currentPosition, rotationYaw, bogeyYaw, distance);
+		// Not using bogey yaw here, is that OK?
+		Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromYaw(distance, rotationYaw));
 		if (result == null) {
 			position.isOffTrack = true;
 			return currentPosition;

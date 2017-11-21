@@ -5,6 +5,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import trackapi.lib.Util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import net.minecraft.world.World;
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
 	protected String defID;
+	public double gauge;
 
 	public EntityRollingStock(World world, String defID) {
 		super(world);
@@ -77,21 +79,29 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		defID = BufferUtil.readString(additionalData);
+		gauge = additionalData.readDouble();
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		BufferUtil.writeString(buffer, defID);
+		buffer.writeDouble(gauge);
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		nbttagcompound.setString("defID", defID);		
+		nbttagcompound.setString("defID", defID);
+		nbttagcompound.setDouble("gauge", gauge);
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		defID = nbttagcompound.getString("defID");
+		if (nbttagcompound.hasKey("gauge")) {
+			gauge = nbttagcompound.getDouble("gauge");
+		} else {
+			gauge = Util.STANDARD_GAUGE;
+		}
 	}
 
 	@Override

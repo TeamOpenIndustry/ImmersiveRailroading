@@ -22,6 +22,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import trackapi.lib.Util;
 
 public class EntityRollingStockDefinition {
 	
@@ -29,11 +30,12 @@ public class EntityRollingStockDefinition {
 		return null;
 	}
 	
-	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing) {
+	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, double gauge) {
 		EntityRollingStock stock = instance(world);
 		stock.setPosition(pos.x, pos.y, pos.z);
 		stock.prevRotationYaw = facing.getHorizontalAngle();
 		stock.rotationYaw = facing.getHorizontalAngle();
+		stock.gauge = gauge;
 		world.spawnEntity(stock);
 
 		return stock;
@@ -194,69 +196,71 @@ public class EntityRollingStockDefinition {
 		return components;
 	}
 
-	public Vec3d getPassengerCenter() {
-		return this.passengerCenter;
+	public Vec3d getPassengerCenter(double gauge) {
+		return this.passengerCenter.scale(gaugeScale(gauge));
 	}
-	public Vec3d correctPassengerBounds(Vec3d pos) {
-		if (pos.x > this.passengerCompartmentLength) {
-			pos = new Vec3d(this.passengerCompartmentLength, pos.y, pos.z);
+	public Vec3d correctPassengerBounds(double gauge, Vec3d pos) {
+		double gs = gaugeScale(gauge);
+		if (pos.x > this.passengerCompartmentLength * gs) {
+			pos = new Vec3d(this.passengerCompartmentLength * gs, pos.y, pos.z);
 		}
 		
-		if (pos.x < -this.passengerCompartmentLength) {
-			pos = new Vec3d(-this.passengerCompartmentLength, pos.y, pos.z);
+		if (pos.x < -this.passengerCompartmentLength * gs) {
+			pos = new Vec3d(-this.passengerCompartmentLength * gs, pos.y, pos.z);
 		}
 		
-		if (Math.abs(pos.z) > this.passengerCompartmentWidth/2) {
-			pos = new Vec3d(pos.x, pos.y, Math.copySign(this.passengerCompartmentWidth/2, pos.z));
+		if (Math.abs(pos.z) > this.passengerCompartmentWidth/2 * gs) {
+			pos = new Vec3d(pos.x, pos.y, Math.copySign(this.passengerCompartmentWidth/2 * gs, pos.z));
 		}
 		
 		return pos;
 	}
 
-	public boolean isAtFront(Vec3d pos) {
-		return pos.x >= this.passengerCompartmentLength;
+	public boolean isAtFront(double gauge, Vec3d pos) {
+		return pos.x >= this.passengerCompartmentLength * gaugeScale(gauge);
 	}
-	public boolean isAtRear(Vec3d pos) {
-		return pos.x <= -this.passengerCompartmentLength;
+	public boolean isAtRear(double gauge, Vec3d pos) {
+		return pos.x <= -this.passengerCompartmentLength * gaugeScale(gauge);
 	}
 
 	public List<ItemComponentType> getItemComponents() {
 		return itemComponents;
 	}
 
-	public float getBogeyFront() {
-		return this.bogeyFront;
+	public float getBogeyFront(double gauge) {
+		return gaugeScaleF(gauge) * this.bogeyFront;
 	}
 
-	public float getBogeyRear() {
-		return this.bogeyRear;
+	public float getBogeyRear(double gauge) {
+		return gaugeScaleF(gauge) * this.bogeyRear;
 	}
 	
-	public double getCouplerPosition(CouplerType coupler) {
+	public double getCouplerPosition(CouplerType coupler, double gauge) {
 		switch(coupler) {
 		case FRONT:
-			return this.frontBounds + Config.couplerRange;
+			return gaugeScale(gauge) * (this.frontBounds + Config.couplerRange);
 		case BACK:
-			return this.rearBounds + Config.couplerRange;
+			return gaugeScale(gauge) * (this.rearBounds + Config.couplerRange);
 		default:
 			return 0;
 		}
 	}
 
-	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock) {
-		return new RealBB(frontBounds, -rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
+	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock, double gauge) {
+		return new RealBB(gaugeScale(gauge) * frontBounds, gaugeScale(gauge) * -rearBounds, gaugeScale(gauge) * widthBounds,
+				gaugeScale(gauge) * heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
 	}
 	
 	List<Vec3d> blocksInBounds = null;
-	public List<Vec3d> getBlocksInBounds() {
+	public List<Vec3d> getBlocksInBounds(double gauge) {
 		if (blocksInBounds == null) {
 			blocksInBounds = new ArrayList<Vec3d>();
-			double minX = -rearBounds;
-			double maxX = frontBounds;
-			double minY = 0;
-			double maxY = heightBounds;
-			double minZ = -widthBounds / 2;
-			double maxZ = widthBounds / 2;
+			double minX = gaugeScale(gauge) * -rearBounds;
+			double maxX = gaugeScale(gauge) * frontBounds;
+			double minY = gaugeScale(gauge) * 0;
+			double maxY = gaugeScale(gauge) * heightBounds;
+			double minZ = gaugeScale(gauge) * -widthBounds / 2;
+			double maxZ = gaugeScale(gauge) * widthBounds / 2;
 			for (double x = minX; x <= maxX; x++) {
 				for (double y = minY; y <= maxY; y++) {
 					for (double z = minZ; z <= maxZ; z++) {
@@ -288,15 +292,22 @@ public class EntityRollingStockDefinition {
 		return this.weight;
 	}
 
-	public double getHeight() {
-		return this.heightBounds;
+	public double getHeight(double gauge) {
+		return gaugeScale(gauge) * this.heightBounds;
 	}
 	
-	public double getLength() {
-		return this.frontBounds + this.rearBounds;
+	public double getLength(double gauge) {
+		return gaugeScale(gauge) * this.frontBounds + this.rearBounds;
 	}
 
 	public int getMaxPassengers() {
 		return this.maxPassengers;
+	}
+	
+	private static double gaugeScale(double gauge) {
+		return gauge / Util.STANDARD_GAUGE;
+	}
+	private static float gaugeScaleF(double gauge) {
+		return (float) (gauge / Util.STANDARD_GAUGE);
 	}
 }
