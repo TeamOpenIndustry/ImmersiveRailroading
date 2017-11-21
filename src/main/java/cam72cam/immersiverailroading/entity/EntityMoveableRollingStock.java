@@ -162,6 +162,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 	public void handleTickPosPacket(List<TickPos> newPositions) {
 		if (newPositions.size() != 0) {
+	    	this.clearPositionCache();
 			if (this.ticksExisted > 5) {
 				ImmersiveRailroading.proxy.addTickMetric(tickPosID - newPositions.get(0).tickID);
 			}
