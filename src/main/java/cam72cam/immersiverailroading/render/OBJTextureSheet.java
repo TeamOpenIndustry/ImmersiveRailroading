@@ -3,10 +3,12 @@ package cam72cam.immersiverailroading.render;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -36,18 +38,13 @@ public class OBJTextureSheet {
 		private int maxV = 1;
 
 		private BufferedImage image;
-		private ResourceLocation tex;
 
 		
 		SubTexture(ResourceLocation tex) throws IOException {
 			InputStream input = ImmersiveRailroading.proxy.getResourceStream(tex);
-			this.tex = tex;
 			this.image = TextureUtil.readBufferedImage(input);
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
-			//System.out.println(tex);
-			//System.out.println(realWidth);
-			//System.out.println(realHeight);
 		}
 		public void extendSpace(Vec2f tex) {
 			float u = tex.x;
@@ -62,11 +59,28 @@ public class OBJTextureSheet {
 			this.originY = originY;
 			this.sheetWidth = sheetWidth;
 			this.sheetHeight = sheetHeight;
+			
+			int[] pixels = new int[realWidth * realHeight];
+	        image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
+
+	        ByteBuffer buffer = BufferUtils.createByteBuffer(realWidth * realHeight * 4);
+	        for(int y = 0; y < realHeight; y++){
+	            for(int x = 0; x < realWidth; x++){
+	                int pixel = pixels[y * realWidth + x];
+	                buffer.put((byte) ((pixel >> 16) & 0xFF));
+	                buffer.put((byte) ((pixel >> 8) & 0xFF));
+	                buffer.put((byte) ((pixel >> 0)& 0xFF));
+	                buffer.put((byte) ((pixel >> 24) & 0xFF));
+	            }
+	        }
+	        buffer.flip();
+			
+			
 			for (int cU = 0; cU < copiesU(); cU++) {
 				for (int cV = 0; cV < copiesV(); cV++) {
 					int offX = originX + this.realWidth * cU;
 					int offY = originY + this.realHeight * cV;
-					TextureUtil.uploadTextureImageSub(textureID, image, offX, offY, false, false);
+					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 				}
 			}
 			image = null;
@@ -94,6 +108,7 @@ public class OBJTextureSheet {
 	}
 	
 	public OBJTextureSheet(OBJModel model) {
+		
 		mappings = new HashMap<String, SubTexture>();
 		for (String groupName : model.groups.keySet()) {
 			List<Face> quads = model.groups.get(groupName);
@@ -117,11 +132,6 @@ public class OBJTextureSheet {
 				}
 			}
 		}
-		/*
-		for (SubTexture tex : mappings.values()) {
-			this.sheetWidth += tex.getAbsoluteWidth();
-			this.sheetHeight += tex.getAbsoluteHeight();
-		}*/
 		int maxSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
 		
 		int currentX = 0;
@@ -147,22 +157,20 @@ public class OBJTextureSheet {
 		currentX = 0;
 		currentY = 0;
 		rowHeight = 0;
-		
 
+		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
+		
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		
-		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
-		
 		for (SubTexture tex : mappings.values()) {
 			if (tex.getAbsoluteWidth() > maxSize) {
-				System.out.println("ASJDKLAJSKLDJASLDKJASKLJFKLADJFKLSDJAKLFJSDLKJSDKLA");
+				System.out.println("BAD TEXTURE FIXME");
 			}
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;
 				rowHeight = 0;
-				System.out.println(String.format("NEWLINE %s %s", currentX, currentY));
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
