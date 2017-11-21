@@ -1,5 +1,5 @@
 {
-	"name": "Box Car",
+	"name": "Flat Car",
 	"model": "immersiverailroading:models/rolling_stock/freight/flat_car.obj",
 	"darken_model": "0.05",
 	"properties": {
