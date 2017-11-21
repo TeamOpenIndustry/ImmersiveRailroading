@@ -23,6 +23,7 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import trackapi.lib.Util;
 
 public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
@@ -123,10 +124,10 @@ public class StockModel extends OBJRender {
 
 		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT") != null) {
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(-def.getBogeyFront(), 0, 0);
+			GlStateManager.translate(-def.getBogeyFront(Util.STANDARD_GAUGE), 0, 0);
 			GlStateManager.rotate(180 - stock.getFrontYaw(), 0, 1, 0);		
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
-			GlStateManager.translate(def.getBogeyFront(), 0, 0);
+			GlStateManager.translate(def.getBogeyFront(Util.STANDARD_GAUGE), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "FRONT"));
 			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT");
 			if (wheels != null) {
@@ -147,10 +148,10 @@ public class StockModel extends OBJRender {
 		
 		if (def.getComponent(RenderComponentType.BOGEY_POS) != null) {
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(-def.getBogeyRear(), 0, 0);
+			GlStateManager.translate(-def.getBogeyRear(Util.STANDARD_GAUGE), 0, 0);
 			GlStateManager.rotate(180 - stock.getRearYaw(), 0, 1, 0);
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
-			GlStateManager.translate(def.getBogeyRear(), 0, 0);
+			GlStateManager.translate(def.getBogeyRear(Util.STANDARD_GAUGE), 0, 0);
 			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "REAR"));
 			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR");
 			if (wheels != null) {
@@ -214,7 +215,7 @@ public class StockModel extends OBJRender {
 				
 				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE);
 				Vec3d frontVec = frontLocomotive.center();
-				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
+				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(Util.STANDARD_GAUGE)));
 				Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
 				
 				GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
@@ -300,7 +301,7 @@ public class StockModel extends OBJRender {
 		if (frontBogey != null) {
 
 			Vec3d frontVec = frontBogey.center();
-			PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
+			PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(Util.STANDARD_GAUGE)));
 
 			GlStateManager.pushMatrix();
 
@@ -328,7 +329,7 @@ public class StockModel extends OBJRender {
 		if (rearBogey != null)
 		{
 			Vec3d rearVec = rearBogey.center();
-			PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear()));
+			PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear(Util.STANDARD_GAUGE)));
 			
 			GlStateManager.pushMatrix();
 

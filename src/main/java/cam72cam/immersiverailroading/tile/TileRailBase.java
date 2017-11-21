@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.SwitchUtil;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -237,7 +238,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 					BlockPos ph = world.getPrecipitationHeight(pos.offset(facing, i));
 					for (int j = 0; j < 3; j ++) {
 						IBlockState state = world.getBlockState(ph);
-						if (world.isAirBlock(ph) && !BlockUtil.isRail(world.getBlockState(ph.down()))) {
+						if (world.isAirBlock(ph) && !BlockUtil.isRail(world, ph.down())) {
 							world.setBlockState(ph, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snowDown));
 							return;
 						}
@@ -280,12 +281,15 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	}
 	
 	@Override
-	public Vec3d getNextPosition(Vec3d currentPosition, float rotationYaw, float bogeyYaw, double distanceMeters) {
+	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 		
 		if (SwitchUtil.getSwitchState(tile, currentPosition) == SwitchState.STRAIGHT) {
 			tile = tile.getParentTile();
 		}
+		
+		double distanceMeters = motion.lengthVector();
+		float rotationYaw = VecUtil.toYaw(motion);
 		
 		return MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 	}

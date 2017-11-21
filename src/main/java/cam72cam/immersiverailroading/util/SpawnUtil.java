@@ -11,27 +11,31 @@ import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import trackapi.lib.ITrackTile;
+import trackapi.lib.Util;
 
 public class SpawnUtil {
 	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
-		double offset = def.getCouplerPosition(CouplerType.BACK) - Config.couplerRange;
-		float yaw = player.rotationYawHead;
-		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false), def.getBogeyFront(), def.getBogeyRear()).nextPosition(offset);
+		ITrackTile initte = Util.getTileEntity(worldIn, new Vec3d(pos.add(0, 0.7, 0)), true);
+		double gauge = initte.getTrackGauge();
 		
-		TileEntity te = TileRailBase.get(worldIn, new BlockPos(tp.position));
+		double offset = def.getCouplerPosition(CouplerType.BACK, gauge) - Config.couplerRange;
+		float yaw = player.rotationYawHead;
+		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge).nextPosition(offset);
+		
+		ITrackTile te = Util.getTileEntity(worldIn, tp.position, true);
 		if (te != null) {
 			if (!worldIn.isRemote) {
-				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead));
+				System.out.println(tp.position);
+				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead), gauge);
 				
 				if (stock instanceof EntityBuildableRollingStock) {
 					((EntityBuildableRollingStock)stock).setComponents(list);
