@@ -143,7 +143,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 	
-	double getTractiveEffortNewtons(Speed speed) {	
+	public double getTractiveEffortNewtons(Speed speed) {	
 		if (!this.isBuilt()) {
 			return 0;
 		}
