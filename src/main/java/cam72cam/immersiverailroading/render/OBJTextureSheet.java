@@ -36,6 +36,7 @@ public class OBJTextureSheet {
 		private int minV = 0;
 		private int maxU = 1;
 		private int maxV = 1;
+		public ResourceLocation tex;
 
 		private BufferedImage image;
 
@@ -45,6 +46,7 @@ public class OBJTextureSheet {
 			this.image = TextureUtil.readBufferedImage(input);
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
+			this.tex = tex;
 		}
 		public void extendSpace(Vec2f tex) {
 			float u = tex.x;
@@ -163,14 +165,21 @@ public class OBJTextureSheet {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		
+        ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
+        ImmersiveRailroading.debug("Sheet Width: %s", sheetWidth);
+        ImmersiveRailroading.debug("Sheet Height: %s", sheetHeight);
+
 		for (SubTexture tex : mappings.values()) {
+			ImmersiveRailroading.debug("%s copies %s x %s", tex.tex, tex.copiesU(), tex.copiesV());
+			ImmersiveRailroading.debug("%s  actual %s x %s", tex.tex, tex.getAbsoluteWidth(), tex.getAbsoluteHeight());
 			if (tex.getAbsoluteWidth() > maxSize) {
-				System.out.println("BAD TEXTURE FIXME");
+				ImmersiveRailroading.error("BAD TEXTURE FIXME");
 			}
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;
 				rowHeight = 0;
+				ImmersiveRailroading.debug("NEXT_LINE");
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
