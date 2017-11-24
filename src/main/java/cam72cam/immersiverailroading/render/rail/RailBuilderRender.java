@@ -69,13 +69,14 @@ public class RailBuilderRender {
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GlStateManager.pushMatrix();
-				GL11.glScaled(info.gauge / Util.STANDARD_GAUGE, 1, info.gauge / Util.STANDARD_GAUGE);
+				double scale = info.gauge / Util.STANDARD_GAUGE;
+				GL11.glScaled(scale, 1, scale);
 				GlStateManager.rotate(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GlStateManager.translate(piece.x, piece.y, piece.z);
 				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
 				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(-90, 0, 1, 0);
-				GlStateManager.scale(piece.getLength(), info.gauge / Util.STANDARD_GAUGE, 1);
+				GlStateManager.scale(piece.getLength(), scale, 1);
 				if (piece.getGroups().size() != 0) {
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();

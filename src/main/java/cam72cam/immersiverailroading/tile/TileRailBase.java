@@ -53,6 +53,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	public double getGauge() {
 		return this.gauge;
 	}
+	public double getScale() {
+		return this.gauge / Util.STANDARD_GAUGE;
+	}
 
 	public void setHeight(float height) {
 		this.height = height;
