@@ -176,8 +176,9 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		return groups;
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name, String side) {
-		return valveGearComponents.containsKey(side) ? valveGearComponents.get(side).get(name) : null;
+	public RenderComponent getComponent(RenderComponentType name, String side, double gauge) {
+		RenderComponent comp = valveGearComponents.containsKey(side) ? valveGearComponents.get(side).get(name) : null;
+		return comp != null ? comp.scale(gauge) : null;
 	}
 
 	public FluidQuantity getTankCapacity() {

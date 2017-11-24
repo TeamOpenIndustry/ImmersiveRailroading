@@ -39,7 +39,6 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
 		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
 		GlStateManager.rotate(-90, 0, 1, 0);
-		GlStateManager.scale(stock.gauge / Util.STANDARD_GAUGE, stock.gauge / Util.STANDARD_GAUGE, stock.gauge / Util.STANDARD_GAUGE);
 		model.draw(stock, partialTicks);
 		
 		//tex.restore();

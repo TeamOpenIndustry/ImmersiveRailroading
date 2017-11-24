@@ -29,6 +29,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+import trackapi.lib.Util;
 import util.Matrix4;
 
 public class StockItemComponentModel implements IBakedModel {
@@ -56,7 +57,7 @@ public class StockItemComponentModel implements IBakedModel {
 		groups = new ArrayList<String>();
 
 		for (RenderComponentType r : item.render) {
-			RenderComponent comp = def.getComponent(r);
+			RenderComponent comp = def.getComponent(r, Util.STANDARD_GAUGE);
 			if (comp == null) {
 				continue;
 			}
