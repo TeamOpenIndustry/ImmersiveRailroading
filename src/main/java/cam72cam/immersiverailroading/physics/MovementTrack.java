@@ -9,7 +9,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import trackapi.lib.Util;
 
 public class MovementTrack {
 
@@ -36,7 +35,7 @@ public class MovementTrack {
 			// Calculate the angle (rad) for the current position is
 			double posRelYaw = MathHelper.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
-			double radius = rail.getRadius() * (rail.getGauge() / Util.STANDARD_GAUGE) - 0.5;
+			double radius = rail.getRadius() * rail.getScale() - 0.5;
 			// Calculate the angle delta in rad (radians are awesome)
 			double yawDelt = distance / radius;
 

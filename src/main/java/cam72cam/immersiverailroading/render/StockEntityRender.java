@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
-import trackapi.lib.Util;
 
 public class StockEntityRender extends Render<EntityRollingStock> {
 
@@ -34,7 +33,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		//GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 
 		// Move to specified position
-		GlStateManager.translate(x, y + 0.35 * stock.gauge / Util.STANDARD_GAUGE, z);
+		GlStateManager.translate(x, y + 0.35 * stock.getScale(), z);
 
 		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
 		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
