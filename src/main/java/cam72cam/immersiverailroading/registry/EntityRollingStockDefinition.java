@@ -148,30 +148,30 @@ public class EntityRollingStockDefinition {
 		return groups;
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name) {
+	public RenderComponent getComponent(RenderComponentType name, double gauge) {
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
-		return renderComponents.get(name).get(0);
+		return renderComponents.get(name).get(0).scale(gauge);
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name, String pos) {
+	public RenderComponent getComponent(RenderComponentType name, String pos, double gauge) {
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
 		for (RenderComponent c : renderComponents.get(name)) {
 			if (c.pos.equals(pos)) {
-				return c;
+				return c.scale(gauge);
 			}
 		}
 		return null;
 	}
 
-	public RenderComponent getComponent(RenderComponent comp) {
+	public RenderComponent getComponent(RenderComponent comp, double gauge) {
 		if (!renderComponents.containsKey(comp.type)) {
 			return null;
 		}
-		for (RenderComponent c : getComponents(comp.type)) {
+		for (RenderComponent c : getComponents(comp.type, gauge)) {
 			if (c.equals(comp)) {
 				return c;
 			}
@@ -179,18 +179,25 @@ public class EntityRollingStockDefinition {
 		return null;
 	}
 	
-	public List<RenderComponent> getComponents(RenderComponentType name) {
-		return renderComponents.get(name);
+	public List<RenderComponent> getComponents(RenderComponentType name, double gauge) {
+		if (!renderComponents.containsKey(name)) {
+			return null;
+		}
+		List<RenderComponent> components = new ArrayList<RenderComponent>();
+		for (RenderComponent c : renderComponents.get(name)) {
+			components.add(c.scale(gauge));
+		}
+		return components;
 	}
 	
-	public List<RenderComponent> getComponents(RenderComponentType name, String pos) {
+	public List<RenderComponent> getComponents(RenderComponentType name, String pos, double gauge) {
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
 		List<RenderComponent> components = new ArrayList<RenderComponent>();
 		for (RenderComponent c : renderComponents.get(name)) {
 			if (c.pos.equals(pos)) {
-				components.add(c);
+				components.add(c.scale(gauge));
 			}
 		}
 		return components;

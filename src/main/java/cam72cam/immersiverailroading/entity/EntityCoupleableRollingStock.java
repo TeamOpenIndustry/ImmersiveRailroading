@@ -646,6 +646,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	        		return false;
 	        	}
 	        	
+	        	if (entity.gauge != EntityCoupleableRollingStock.this.gauge) {
+	        		return false;
+	        	}
+	        	
 	        	for (EntityCoupleableRollingStock stock : train) {
 	        		if (stock.getUniqueID().equals(entity.getUniqueID())) {
 	        			return false;
