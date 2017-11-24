@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
+import trackapi.lib.Util;
 
 public class RailBuilderRender {
 	
@@ -58,6 +59,9 @@ public class RailBuilderRender {
 		//GlStateManager.translate(info.getOffset().x, 0, info.getOffset().z);
 		GlStateManager.translate(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 		GlStateManager.translate(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
+		
+		renderOff = VecUtil.fromYaw((info.gauge - Util.STANDARD_GAUGE) * 0.34828, 180-info.facing.getOpposite().getHorizontalAngle()-90);
+		GlStateManager.translate(renderOff.x, renderOff.y, renderOff.z);
 
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
 			int displayList = GL11.glGenLists(1);
@@ -65,12 +69,13 @@ public class RailBuilderRender {
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GlStateManager.pushMatrix();
+				GL11.glScaled(info.gauge / Util.STANDARD_GAUGE, 1, info.gauge / Util.STANDARD_GAUGE);
 				GlStateManager.rotate(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GlStateManager.translate(piece.x, piece.y, piece.z);
 				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
 				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(-90, 0, 1, 0);
-				GlStateManager.scale(piece.getLength(), 1, 1);
+				GlStateManager.scale(piece.getLength(), info.gauge / Util.STANDARD_GAUGE, 1);
 				if (piece.getGroups().size() != 0) {
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
@@ -91,7 +96,6 @@ public class RailBuilderRender {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 			GL11.glEndList();
-			
 			displayLists.put(RailRenderUtil.renderID(info), displayList);
 		}
 		

@@ -22,6 +22,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	private int length;
 	private int quarters;
 	private TrackItems type;
+	private double gauge;
 	private TrackPositionType posType;
 	private ItemStack bedStack;
 	private ItemStack railBedFill;
@@ -33,7 +34,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
@@ -42,9 +43,10 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = bedStack;
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
+		this.gauge = gauge;
 	}
 
-	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
 		this.tilePreviewPos = tilePreviewPos;
 		this.length = length;
 		this.quarters = quarters;
@@ -53,6 +55,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = bedStack;
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
+		this.gauge = gauge;
 	}
 
 	@Override
@@ -65,6 +68,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		}
 		this.quarters = buf.readInt();
 		this.type = TrackItems.values()[buf.readInt()];
+		this.gauge = buf.readDouble();
 		this.posType = TrackPositionType.values()[buf.readInt()];
 		this.bedStack = ByteBufUtils.readItemStack(buf);
 		this.railBedFill = ByteBufUtils.readItemStack(buf);
@@ -82,6 +86,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		}
 		buf.writeInt(quarters);
 		buf.writeInt(type.ordinal());
+		buf.writeDouble(gauge);
 		buf.writeInt(posType.ordinal());
 		ByteBufUtils.writeItemStack(buf, bedStack);
 		ByteBufUtils.writeItemStack(buf, railBedFill);
@@ -109,6 +114,7 @@ public class ItemRailUpdatePacket implements IMessage {
 				stack = te.getItem();
 			}
 			ItemRail.setType(stack, message.type);
+			ItemRail.setGauge(stack, message.gauge);
 			ItemRail.setLength(stack, message.length);
 			ItemRail.setQuarters(stack, message.quarters);
 			ItemRail.setPosType(stack, message.posType);

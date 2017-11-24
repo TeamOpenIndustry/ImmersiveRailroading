@@ -36,11 +36,14 @@ public abstract class BuilderBase {
 	public boolean overrideFlexible = false;
 
 	public List<ItemStack> drops;
+
+	public double gauge;
 	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;
 		rotation = info.facing;
 		world = info.world;
+		gauge = info.gauge;
 		parent_pos = pos;
 		this.x = pos.getX();
 		this.y = pos.getY();

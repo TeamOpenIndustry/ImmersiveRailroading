@@ -14,12 +14,14 @@ public class MovementSimulator {
 	private TickPos position;
 	private float bogeyFrontOffset;
 	private float bogeyRearOffset;
+	private double gauge;
 
 	public MovementSimulator(World world, TickPos startPos, float bogeyFrontOffset, float bogeyRearOffset, double gauge) {
 		this.world = world;
 		this.position = startPos.clone(); //  We may modify it for convenience later on
 		this.bogeyFrontOffset = bogeyFrontOffset;
 		this.bogeyRearOffset = bogeyRearOffset;
+		this.gauge = gauge;
 	}
 	
 	public TickPos nextPosition(double moveDistance) {
@@ -97,15 +99,15 @@ public class MovementSimulator {
 	
 	private ITrackTile findTrack(Vec3d currentPosition, float trainYaw) {
 		ITrackTile te = Util.getTileEntity(world, currentPosition, true);
-		if (te != null) {
+		if (te != null && te.getTrackGauge() == gauge) {
 			return te;
 		}
 		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(-1, trainYaw)), true);
-		if (te != null) {
+		if (te != null && te.getTrackGauge() == gauge) {
 			return te;
 		}
 		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(1, trainYaw)), true);
-		if (te != null) {
+		if (te != null && te.getTrackGauge() == gauge) {
 			return te;
 		}
 		return null;

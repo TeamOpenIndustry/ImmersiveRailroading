@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import trackapi.lib.Util;
 
 public class BuilderTurn extends BuilderBase {
 
@@ -27,7 +28,7 @@ public class BuilderTurn extends BuilderBase {
 	public BuilderTurn(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		int radius = info.length;
+		double radius = info.length*(gauge/Util.STANDARD_GAUGE);;
 
 		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;
@@ -35,7 +36,7 @@ public class BuilderTurn extends BuilderBase {
 		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		double hack = -0.5;
-		float angleDelta = (90 / ((float)Math.PI * (radius)/2));
+		float angleDelta = (float) (90 / (Math.PI * radius/2));
 		
 		
 		startAngle = 90 - info.quarter/4f * 90;
@@ -79,7 +80,7 @@ public class BuilderTurn extends BuilderBase {
 
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
-		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, radius, info.quarter, info.placementPosition);
+		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, info.length, info.quarter, info.placementPosition);
 		
 		Vec3d center = new Vec3d(-xAbsPos, 0, -zAbsPos-0.5); 
 		center = VecUtil.rotateYaw(center, info.facing.getHorizontalAngle() - 90);

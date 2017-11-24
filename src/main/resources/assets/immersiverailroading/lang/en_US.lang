@@ -25,6 +25,7 @@ chat.immersiverailroading:build.missing.rail_bed_fill=Missing %s rail bed fill
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
 gui.immersiverailroading:selector.type=Type: %s
+gui.immersiverailroading:selector.gauge=Gauge: %s
 gui.immersiverailroading:selector.quarters=Curve Quarters: 
 gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s

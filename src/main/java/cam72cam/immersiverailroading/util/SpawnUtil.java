@@ -29,12 +29,10 @@ public class SpawnUtil {
 		
 		double offset = def.getCouplerPosition(CouplerType.BACK, gauge) - Config.couplerRange;
 		float yaw = player.rotationYawHead;
-		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)), yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge).nextPosition(offset);
+		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)).addVector(0.5, 0, 0.5), yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge).nextPosition(offset);
 		
-		ITrackTile te = Util.getTileEntity(worldIn, tp.position, true);
-		if (te != null) {
+		if (!tp.isOffTrack) {
 			if (!worldIn.isRemote) {
-				System.out.println(tp.position);
 				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead), gauge);
 				
 				if (stock instanceof EntityBuildableRollingStock) {
