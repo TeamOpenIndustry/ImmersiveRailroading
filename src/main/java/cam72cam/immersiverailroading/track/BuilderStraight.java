@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import trackapi.lib.Util;
 
 public class BuilderStraight extends BuilderBase {
 	protected float angle;
@@ -34,24 +35,26 @@ public class BuilderStraight extends BuilderBase {
 		
 		angle = info.quarter/4f * 90;
 		
-		for (float dist = 0; dist < info.length; dist += 0.25) {
+		double actualLength = info.length*(gauge/Util.STANDARD_GAUGE);
+		
+		for (float dist = 0; dist < actualLength; dist += 0.25) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			for (double q = -1.5; q <= 1.5; q+=0.1) {
+			for (double q = -gauge; q <= gauge; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
 				positions.add(Pair.of(posX, posZ));
-				if (dist < 3 || dist > info.length - 3) {
+				if (dist < 3 || dist > actualLength - 3) {
 					flexPositions.add(Pair.of(posX, posZ));
 				}
 			}
 			if (endOfTrack) {
-				if (Math.ceil(dist) == Math.ceil(info.length)) {
+				if (Math.ceil(dist) == Math.ceil(actualLength)) {
 					mainX = (int) gagPos.x;
 					mainZ = (int) gagPos.z;
 				}
 			} else {
-				if (Math.ceil(dist) == Math.ceil(info.length/2)) {
+				if (Math.ceil(dist) == Math.ceil(actualLength/2)) {
 					mainX = (int) gagPos.x;
 					mainZ = (int) gagPos.z;
 				}

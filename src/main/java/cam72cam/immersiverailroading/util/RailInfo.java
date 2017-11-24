@@ -34,6 +34,7 @@ public class RailInfo {
 	public int length;
 	public int quarter;
 	public int quarters;
+	public double gauge;
 	public Vec3d placementPosition;
 	public ItemStack railBed;
 	public ItemStack railBedFill;
@@ -43,7 +44,7 @@ public class RailInfo {
 	public SwitchState switchState = SwitchState.NONE;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, double gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -52,6 +53,7 @@ public class RailInfo {
 		this.length = length;
 		this.quarter = quarter;
 		this.quarters = quarters;
+		this.gauge = gauge;
 		this.placementPosition = placementPosition;
 		this.railBed = railBed;
 		this.railBedFill = railBedFill;
@@ -62,6 +64,7 @@ public class RailInfo {
 		type = ItemRail.getType(stack);
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
+		gauge = ItemRail.getGauge(stack);
 		railBed = ItemRail.getBed(stack);
 		railBedFill = ItemRail.getBedFill(stack);
 		world = worldIn;
@@ -107,7 +110,7 @@ public class RailInfo {
 	}
 	
 	public RailInfo clone() {
-		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, placementPosition, railBed, railBedFill);
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill);
 		return c;
 	}
 	

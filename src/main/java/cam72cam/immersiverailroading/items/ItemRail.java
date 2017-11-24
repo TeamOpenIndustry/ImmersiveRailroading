@@ -28,6 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import net.minecraftforge.fml.common.Optional;
+import trackapi.lib.Util;
 
 @Optional.Interface(iface = "mezz.jei.api.ingredients.ISlowRenderItem", modid = "jei")
 public class ItemRail extends ItemBlock {
@@ -78,6 +79,7 @@ public class ItemRail extends ItemBlock {
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(GuiText.TRACK_TYPE.toString(getType(stack)));
+        tooltip.add(""+getGauge(stack)+"m");
         tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
         tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack)));
         tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
@@ -126,6 +128,20 @@ public class ItemRail extends ItemBlock {
 			return stack.getTagCompound().getInteger("quarters");
 		}
 		return 3;
+	}
+	
+	public static void setGauge(ItemStack stack, double gauge) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setDouble("gauge", gauge);
+	}
+	
+	public static double getGauge(ItemStack stack) {
+		if (stack.getTagCompound() != null){
+			return stack.getTagCompound().getDouble("gauge");
+		}
+		return Util.STANDARD_GAUGE;
 	}
 	
 	public static void setPosType(ItemStack stack, TrackPositionType posType) {

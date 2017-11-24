@@ -33,6 +33,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	}
 	
 	private BlockPos parent;
+	private double gauge = -1;
 	private float height = 0;
 	private int snowLayers = 0;
 	protected boolean flexible = false;
@@ -43,6 +44,14 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
+	}
+	
+	public void setGauge(double gauge) {
+		this.gauge = gauge;
+		this.markDirty();
+	}
+	public double getGauge() {
+		return this.gauge;
 	}
 
 	public void setHeight(float height) {
@@ -139,12 +148,15 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		case 1:
 			setNBTBlockPos(nbt, "parent", getNBTBlockPos(nbt, "parent").subtract(pos));
 		case 2:
+			nbt.setDouble("gauge", Util.STANDARD_GAUGE);
+		case 3:
 			// Nothing yet ...
 		}
 		parent = getNBTBlockPos(nbt, "parent");
 		if (world != null && this.getParentTile() != null) {
 			this.getParentTile().snowRenderFlagDirty = true;
 		}
+		gauge = nbt.getDouble("gauge");
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -155,7 +167,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		if (replaced != null) {
 			nbt.setTag("replaced", replaced);
 		}
-		nbt.setInteger("version", 2);
+		
+		nbt.setDouble("gauge", gauge);
+		
+		nbt.setInteger("version", 3);
+		
 		
 		return super.writeToNBT(nbt);
 	}
@@ -268,7 +284,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	
 	@Override
 	public double getTrackGauge() {
-		return Util.STANDARD_GAUGE;
+		return gauge;
 	}
 	
 	@Override

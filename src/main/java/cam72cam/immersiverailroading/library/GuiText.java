@@ -11,6 +11,7 @@ public enum GuiText {
 	SELECTOR_RAIL_BED_FILL("selector.rail_bed_fill"),
 	SELECTOR_POSITION("selector.position"),
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),
+	SELECTOR_GAUGE("selector.gauge"),
 
 	TRACK_TYPE("track.type"),
 	TRACK_LENGTH("track.length"),

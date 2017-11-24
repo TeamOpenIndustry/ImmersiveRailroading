@@ -83,6 +83,7 @@ public abstract class TrackBase {
 			tr.setParent(builder.getParentPos());
 		}
 		tr.setHeight(getHeight());
+		tr.setGauge(getGauge());
 		return tr;
 	}
 	public IBlockState getBlockState() {
@@ -108,6 +109,9 @@ public abstract class TrackBase {
 	}
 	public float getHeight() {
 		return height;
+	}
+	public double getGauge() {
+		return builder.gauge;
 	}
 
 	public void setFlexible() {
