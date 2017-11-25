@@ -50,7 +50,7 @@ public class MovingSoundRollingStock extends MovingSound {
         if (train instanceof Locomotive) {
         	Locomotive loco = (Locomotive) train;
 	    	double speed = Math.abs(loco.getCurrentSpeed().minecraft());
-	    	double maxSpeed = Math.abs(loco.getDefinition().getMaxSpeed(Gauge.STANDARD.get()).minecraft());
+	    	double maxSpeed = Math.abs(loco.getDefinition().getMaxSpeed(Gauge.STANDARD.value()).minecraft());
 	        if (this.dyamicRate) {
 	    		// Set repeat delay to speed
 	            this.repeatDelay = (int) (1 - speed/maxSpeed);

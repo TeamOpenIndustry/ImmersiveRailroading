@@ -5,7 +5,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import trackapi.lib.Util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import java.util.Collection;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -100,7 +100,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		if (nbttagcompound.hasKey("gauge")) {
 			gauge = nbttagcompound.getDouble("gauge");
 		} else {
-			gauge = Util.STANDARD_GAUGE;
+			gauge = Gauge.STANDARD.value();
 		}
 	}
 
@@ -166,7 +166,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	}
 	
 	public final double getScale() {
-		return this.gauge / Util.STANDARD_GAUGE;
+		return this.gauge / Gauge.STANDARD.value();
 	}
 
 	/*

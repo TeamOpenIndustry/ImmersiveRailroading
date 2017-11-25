@@ -226,10 +226,10 @@ public class TrackGui extends GuiScreen {
         	if (!this.lengthInput.getText().isEmpty()) {
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.get(), posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
         		} else {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.get(), posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
         		}
         	}
 			this.mc.displayGuiScreen(null);

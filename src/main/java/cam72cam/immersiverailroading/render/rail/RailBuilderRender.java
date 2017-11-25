@@ -7,6 +7,7 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.render.OBJRender;
@@ -18,7 +19,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
-import trackapi.lib.Util;
 
 public class RailBuilderRender {
 	
@@ -60,7 +60,7 @@ public class RailBuilderRender {
 		GlStateManager.translate(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 		GlStateManager.translate(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
 		
-		renderOff = VecUtil.fromYaw((info.gauge - Util.STANDARD_GAUGE) * 0.34828, 180-info.facing.getOpposite().getHorizontalAngle()-90);
+		renderOff = VecUtil.fromYaw((info.gauge - Gauge.STANDARD.value()) * 0.34828, 180-info.facing.getOpposite().getHorizontalAngle()-90);
 		GlStateManager.translate(renderOff.x, renderOff.y, renderOff.z);
 
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
@@ -69,7 +69,7 @@ public class RailBuilderRender {
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GlStateManager.pushMatrix();
-				double scale = info.gauge / Util.STANDARD_GAUGE;
+				double scale = info.gauge / Gauge.STANDARD.value();
 				GL11.glScaled(scale, 1, scale);
 				GlStateManager.rotate(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GlStateManager.translate(piece.x, piece.y, piece.z);

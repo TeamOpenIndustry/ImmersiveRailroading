@@ -17,7 +17,7 @@ public enum Gauge {
 		this.gauge = gauge;
 	}
 	
-	public double get() {
+	public double value() {
 		return gauge;
 	}
 
