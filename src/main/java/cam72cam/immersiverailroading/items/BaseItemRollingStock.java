@@ -16,6 +16,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import trackapi.lib.Util;
 
 public abstract class BaseItemRollingStock extends Item {
 	
@@ -45,6 +46,20 @@ public abstract class BaseItemRollingStock extends Item {
 		}
 		stack.setCount(0);
 		return "BUG";
+	}
+	
+	public static void setGauge(ItemStack stack, double gauge) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setDouble("gauge", gauge);
+	}
+	
+	public static double getGauge(ItemStack stack) {
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge")){
+			return stack.getTagCompound().getDouble("gauge");
+		}
+		return Util.STANDARD_GAUGE;
 	}
 	
 	public static EntityRollingStockDefinition getDefinition(ItemStack stack) {

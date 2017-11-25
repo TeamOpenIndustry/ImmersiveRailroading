@@ -15,6 +15,7 @@ public enum GuiText {
 
 	TRACK_TYPE("track.type"),
 	TRACK_LENGTH("track.length"),
+	TRACK_GAUGE("track.gauge"),
 	TRACK_QUARTERS("track.quarters"),
 	TRACK_RAIL_BED("track.rail_bed"),
 	TRACK_RAIL_BED_FILL("track.rail_bed_fill"),
@@ -25,6 +26,7 @@ public enum GuiText {
 	LOCO_WORKS("loco.works"),
 	LOCO_HORSE_POWER("loco.horse_power"),
 	LOCO_MAX_SPEED("loco.max_speed"),
+	STOCK_GAUGE("stock.gauge"),
 	
 	NONE("none"),
 	;

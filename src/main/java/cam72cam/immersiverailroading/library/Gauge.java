@@ -1,8 +1,9 @@
 package cam72cam.immersiverailroading.library;
 
+import cam72cam.immersiverailroading.util.TextUtil;
 import trackapi.lib.Util;
 
-public enum SupportedTrackGauges {
+public enum Gauge {
 	BRUNEL(2.14),
 	STANDARD(Util.STANDARD_GAUGE),
 	NARROW(0.9144),
@@ -12,7 +13,7 @@ public enum SupportedTrackGauges {
 	
 	private double gauge;
 
-	SupportedTrackGauges(double gauge) {
+	Gauge(double gauge) {
 		this.gauge = gauge;
 	}
 	
@@ -20,12 +21,17 @@ public enum SupportedTrackGauges {
 		return gauge;
 	}
 
-	public static SupportedTrackGauges from(double gauge) {
-		for (SupportedTrackGauges g : values()) {
+	public static Gauge from(double gauge) {
+		for (Gauge g : values()) {
 			if (g.gauge == gauge) {
 				return g;
 			}
 		}
 		return STANDARD;
+	}
+	
+	@Override
+	public String toString() {
+	    return TextUtil.translate("immersiverailroading:gauge." + super.toString().toLowerCase()); 
 	}
 }
