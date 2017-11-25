@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.blocks;
 
 import com.google.common.collect.ImmutableMap;
+
+import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -13,7 +15,6 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -33,8 +34,7 @@ public abstract class BlockRailBase extends Block {
 		setHardness(1.0F);
 		setSoundType(SoundType.METAL);
 		
-		//setCreativeTab(ImmersiveRailroading.TrackTab);
-		setCreativeTab(CreativeTabs.TRANSPORTATION);
+		setCreativeTab(ItemTabs.MAIN_TAB);
 	}
 	
 	@Override

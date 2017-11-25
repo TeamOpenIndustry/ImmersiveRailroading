@@ -9,6 +9,7 @@ public class ItemSteamHammer extends ItemBlock {
 
 	public ItemSteamHammer() {
 		super(ImmersiveRailroading.BLOCK_STEAM_HAMMER);
+        this.setCreativeTab(ItemTabs.MAIN_TAB);
 	}
 
 }
