@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -49,7 +50,7 @@ public class MovingSoundRollingStock extends MovingSound {
         if (train instanceof Locomotive) {
         	Locomotive loco = (Locomotive) train;
 	    	double speed = Math.abs(loco.getCurrentSpeed().minecraft());
-	    	double maxSpeed = Math.abs(loco.getDefinition().getMaxSpeed().minecraft());
+	    	double maxSpeed = Math.abs(loco.getDefinition().getMaxSpeed(Gauge.STANDARD.get()).minecraft());
 	        if (this.dyamicRate) {
 	    		// Set repeat delay to speed
 	            this.repeatDelay = (int) (1 - speed/maxSpeed);

@@ -136,7 +136,7 @@ public abstract class Locomotive extends FreightTank {
 	
 	private void simulateWheelSlip() {
 		double applied = getAppliedTractiveEffort(this.getCurrentSpeed());
-		double actual = this.getDefinition().getStartingTractionNewtons();
+		double actual = this.getDefinition().getStartingTractionNewtons(gauge);
 		if (applied > actual) {
 			double speedMultiplier = 1;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
 			this.distanceTraveled += Math.copySign(Math.min((applied / actual - 1)/100, 0.8), getThrottle()) * speedMultiplier; //Wheel Slip
@@ -151,14 +151,14 @@ public abstract class Locomotive extends FreightTank {
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
 		
 		
-		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons()) {
+		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons(gauge)) {
 			// CRC Handbook of Physical Quantities. Boca Raton, FL: CRC Press, 1997: 145-156.
 			double us = 0.74;
 			double uk = 0.57;
-			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons() * (uk/us);
+			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons(gauge) * (uk/us);
 		}
 		
-		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed().minecraft()) {
+		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
 			tractiveEffortNewtons = 0;
 		}
 		
