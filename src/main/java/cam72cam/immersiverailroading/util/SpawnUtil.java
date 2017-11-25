@@ -5,6 +5,8 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.items.BaseItemRollingStock;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
@@ -26,6 +28,11 @@ public class SpawnUtil {
 	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
 		ITrackTile initte = Util.getTileEntity(worldIn, new Vec3d(pos.add(0, 0.7, 0)), true);
 		double gauge = initte.getTrackGauge();
+		
+		if (!player.isCreative() && gauge != BaseItemRollingStock.getGauge(player.getHeldItem(hand))) {
+			player.sendMessage(ChatText.STOCK_WRONG_GAUGE.getMessage());
+			return EnumActionResult.FAIL;
+		}
 		
 		double offset = def.getCouplerPosition(CouplerType.BACK, gauge) - Config.couplerRange;
 		float yaw = player.rotationYawHead;
