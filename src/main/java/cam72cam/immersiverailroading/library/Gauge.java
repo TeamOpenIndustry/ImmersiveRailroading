@@ -25,14 +25,21 @@ public enum Gauge {
 		return gauge / STANDARD.value();
 	}
 
+	/**
+	 * Returns the closest gauge
+	 */
 	public static Gauge from(double gauge) {
-		// TODO closest value
+		Gauge result = Gauge.BRUNEL;
 		for (Gauge g : values()) {
 			if (g.gauge == gauge) {
 				return g;
 			}
+			
+			if (Math.abs(g.value() - gauge) < Math.abs(result.value() - gauge)) {
+				result = g;
+			}
 		}
-		return STANDARD;
+		return result;
 	}
 	
 	@Override

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -28,7 +27,7 @@ public class BuilderTurn extends BuilderBase {
 	public BuilderTurn(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		double radius = info.length*(gauge/Gauge.STANDARD.value());
+		double radius = info.length*gauge.scale();
 
 		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;

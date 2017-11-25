@@ -4,7 +4,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.physics.MovementTrack;
@@ -33,7 +32,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	}
 	
 	private BlockPos parent;
-	private double gauge = -1;
 	private float height = 0;
 	private int snowLayers = 0;
 	protected boolean flexible = false;
@@ -44,17 +42,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
-	}
-	
-	public void setGauge(double gauge) {
-		this.gauge = gauge;
-		this.markDirty();
-	}
-	public double getGauge() {
-		return this.gauge;
-	}
-	public double getScale() {
-		return this.gauge / Gauge.STANDARD.value();
 	}
 
 	public void setHeight(float height) {
@@ -151,7 +138,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		case 1:
 			setNBTBlockPos(nbt, "parent", getNBTBlockPos(nbt, "parent").subtract(pos));
 		case 2:
-			nbt.setDouble("gauge", Gauge.STANDARD.value());
+			// Nothing in base
 		case 3:
 			// Nothing yet ...
 		}
@@ -159,7 +146,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		if (world != null && this.getParentTile() != null) {
 			this.getParentTile().snowRenderFlagDirty = true;
 		}
-		gauge = nbt.getDouble("gauge");
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -170,8 +156,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		if (replaced != null) {
 			nbt.setTag("replaced", replaced);
 		}
-		
-		nbt.setDouble("gauge", gauge);
 		
 		nbt.setInteger("version", 3);
 		
@@ -287,7 +271,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	
 	@Override
 	public double getTrackGauge() {
-		return gauge;
+		TileRail parent = this.getParentTile();
+		if (parent != null) {
+			return parent.getGauge().value();
+		}
+		return 0;
 	}
 	
 	@Override

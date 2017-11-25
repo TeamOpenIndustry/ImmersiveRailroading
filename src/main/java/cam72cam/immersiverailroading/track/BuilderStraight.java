@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -35,11 +34,11 @@ public class BuilderStraight extends BuilderBase {
 		
 		angle = info.quarter/4f * 90;
 		
-		double actualLength = info.length*(gauge/Gauge.STANDARD.value());
+		double actualLength = info.length*gauge.scale();
 		
 		for (float dist = 0; dist < actualLength; dist += 0.25) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			for (double q = -gauge; q <= gauge; q+=0.1) {
+			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
