@@ -9,6 +9,7 @@ chat.immersiverailroading:stock.built=%s is complete!
 chat.immersiverailroading:stock.dissasembled=%s is disassembled!
 chat.immersiverailroading:stock.missing=Missing: %s
 chat.immersiverailroading:stock.invalid=Error: Rolling stock does not exist on the server.  Can not place
+chat.immersiverailroading:stock.wrong_gauge=Wrong Gauge!
 chat.immersiverailroading:stock.placement=Stock must be placed on straight track
 chat.immersiverailroading:coupler.front=Front
 chat.immersiverailroading:coupler.back=Back
