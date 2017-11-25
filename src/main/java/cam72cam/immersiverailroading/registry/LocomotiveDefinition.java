@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -54,7 +55,7 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 	}
 	
 	@Override
-	public List<String> getTooltip(double gauge) {
+	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = super.getTooltip(gauge);
 		tips.add(GuiText.LOCO_WORKS.toString(this.works));
 		tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower(gauge)));
@@ -62,18 +63,18 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 		return tips;
 	}
 	
-	public int getHorsePower(double gauge) {
-		return (int) (gaugeScale(gauge) * this.power);
+	public int getHorsePower(Gauge gauge) {
+		return (int) (gauge.scale() * this.power);
 	}
 	
 	/**
 	 * @return tractive effort in newtons
 	 */
-	public int getStartingTractionNewtons(double gauge) {
-		return (int) (gaugeScale(gauge) * this.traction * 4.44822);
+	public int getStartingTractionNewtons(Gauge gauge) {
+		return (int) (gauge.scale() * this.traction * 4.44822);
 	}
 
-	public Speed getMaxSpeed(double gauge) {
-		return Speed.fromMinecraft(gaugeScale(gauge) * this.maxSpeed.minecraft());
+	public Speed getMaxSpeed(Gauge gauge) {
+		return Speed.fromMinecraft(gauge.scale() * this.maxSpeed.minecraft());
 	}
 }

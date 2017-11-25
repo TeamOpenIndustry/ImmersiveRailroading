@@ -24,7 +24,7 @@ public class SteamHammerSelectPacket implements IMessage {
 
 	public SteamHammerSelectPacket(BlockPos tilePreviewPos, ItemStack selected, Gauge gauge) {
 		if (selected.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
-			ItemRollingStockComponent.setGauge(selected, gauge.value());
+			ItemRollingStockComponent.setGauge(selected, gauge);
 		}
 		
 		this.tilePreviewPos = tilePreviewPos;

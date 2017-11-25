@@ -108,7 +108,7 @@ public class RenderComponent {
 		return max.z - min.z;
 	}
 
-	public RenderComponent scale(double gauge) {
-		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge / Gauge.STANDARD.value());
+	public RenderComponent scale(Gauge gauge) {
+		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge.scale());
 	}
 }

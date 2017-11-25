@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
@@ -176,7 +177,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		return groups;
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name, String side, double gauge) {
+	public RenderComponent getComponent(RenderComponentType name, String side, Gauge gauge) {
 		RenderComponent comp = valveGearComponents.containsKey(side) ? valveGearComponents.get(side).get(name) : null;
 		return comp != null ? comp.scale(gauge) : null;
 	}

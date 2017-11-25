@@ -48,18 +48,18 @@ public abstract class BaseItemRollingStock extends Item {
 		return "BUG";
 	}
 	
-	public static void setGauge(ItemStack stack, double gauge) {
+	public static void setGauge(ItemStack stack, Gauge gauge) {
 		if (stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
-		stack.getTagCompound().setDouble("gauge", gauge);
+		stack.getTagCompound().setDouble("gauge", gauge.value());
 	}
 	
-	public static double getGauge(ItemStack stack) {
+	public static Gauge getGauge(ItemStack stack) {
 		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge")){
-			return stack.getTagCompound().getDouble("gauge");
+			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
 		}
-		return Gauge.STANDARD.value();
+		return Gauge.STANDARD;
 	}
 	
 	public static EntityRollingStockDefinition getDefinition(ItemStack stack) {

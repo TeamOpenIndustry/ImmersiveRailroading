@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
 	protected String defID;
-	public double gauge;
+	public Gauge gauge;
 
 	public EntityRollingStock(World world, String defID) {
 		super(world);
@@ -79,28 +79,28 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		defID = BufferUtil.readString(additionalData);
-		gauge = additionalData.readDouble();
+		gauge = Gauge.from(additionalData.readDouble());
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		BufferUtil.writeString(buffer, defID);
-		buffer.writeDouble(gauge);
+		buffer.writeDouble(gauge.value());
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		nbttagcompound.setString("defID", defID);
-		nbttagcompound.setDouble("gauge", gauge);
+		nbttagcompound.setDouble("gauge", gauge.value());
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		defID = nbttagcompound.getString("defID");
 		if (nbttagcompound.hasKey("gauge")) {
-			gauge = nbttagcompound.getDouble("gauge");
+			gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
 		} else {
-			gauge = Gauge.STANDARD.value();
+			gauge = Gauge.STANDARD;
 		}
 	}
 
@@ -163,10 +163,6 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 */
 	public double getWeight() {
 		return this.getDefinition().getWeight(gauge);
-	}
-	
-	public final double getScale() {
-		return this.gauge / Gauge.STANDARD.value();
 	}
 
 	/*

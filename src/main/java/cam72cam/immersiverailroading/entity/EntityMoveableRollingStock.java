@@ -376,7 +376,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	public TickPos moveRollingStock(double moveDistance, int lastTickID) {
 		TickPos lastPos = this.getTickPos(lastTickID);
-		return new MovementSimulator(world, lastPos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge).nextPosition(moveDistance);
+		return new MovementSimulator(world, lastPos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value()).nextPosition(moveDistance);
 	}
 	
 	/*
@@ -420,7 +420,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return predictFrontBogeyPosition(getCurrentTickPosOrFake(), offset);
 	}
 	public PosRot predictFrontBogeyPosition(TickPos pos, float offset) {		
-		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge);
+		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
 		
 		Vec3d front = sim.frontBogeyPosition();
 		Vec3d nextFront = front;
@@ -436,7 +436,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return predictRearBogeyPosition(getCurrentTickPosOrFake(), offset);
 	}
 	public PosRot predictRearBogeyPosition(TickPos pos, float offset) {
-		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge);
+		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
 		
 		Vec3d rear = sim.rearBogeyPosition();
 		Vec3d nextRear = rear;
