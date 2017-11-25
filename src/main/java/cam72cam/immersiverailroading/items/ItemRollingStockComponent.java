@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import net.minecraft.client.util.ITooltipFlag;
@@ -71,7 +70,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
     {
 		overrideStackDisplayName(stack);
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(GuiText.STOCK_GAUGE.toString(Gauge.from(getGauge(stack))));
+        tooltip.add(GuiText.STOCK_GAUGE.toString(getGauge(stack)));
     }
 	
 	@Override

@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.items.BaseItemRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
@@ -27,7 +28,9 @@ import trackapi.lib.Util;
 public class SpawnUtil {
 	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
 		ITrackTile initte = Util.getTileEntity(worldIn, new Vec3d(pos.add(0, 0.7, 0)), true);
-		double gauge = initte.getTrackGauge();
+		double trackGauge = initte.getTrackGauge();
+		Gauge gauge = Gauge.from(trackGauge);
+		
 		
 		if (!player.isCreative() && gauge != BaseItemRollingStock.getGauge(player.getHeldItem(hand))) {
 			player.sendMessage(ChatText.STOCK_WRONG_GAUGE.getMessage());
@@ -36,7 +39,7 @@ public class SpawnUtil {
 		
 		double offset = def.getCouplerPosition(CouplerType.BACK, gauge) - Config.couplerRange;
 		float yaw = player.rotationYawHead;
-		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)).addVector(0.5, 0, 0.5), yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge).nextPosition(offset);
+		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)).addVector(0.5, 0, 0.5), yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge.scale()).nextPosition(offset);
 		
 		if (!tp.isOffTrack) {
 			if (!worldIn.isRemote) {

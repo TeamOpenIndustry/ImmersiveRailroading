@@ -59,7 +59,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 		itemSelector.choosenItem = tile.getChoosenItem();
 		this.items = items;
 		
-		this.gauge = Gauge.from(ItemRollingStockComponent.getGauge(itemSelector.choosenItem));
+		this.gauge = ItemRollingStockComponent.getGauge(itemSelector.choosenItem);
     }
     
     public void initGui() {

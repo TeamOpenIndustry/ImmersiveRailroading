@@ -20,8 +20,13 @@ public enum Gauge {
 	public double value() {
 		return gauge;
 	}
+	
+	public double scale() {
+		return gauge / STANDARD.value();
+	}
 
 	public static Gauge from(double gauge) {
+		// TODO closest value
 		for (Gauge g : values()) {
 			if (g.gauge == gauge) {
 				return g;
