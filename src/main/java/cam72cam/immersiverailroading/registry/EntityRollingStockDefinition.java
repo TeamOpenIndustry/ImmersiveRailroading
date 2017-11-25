@@ -279,13 +279,13 @@ public class EntityRollingStockDefinition {
 		return blocksInBounds;
 	}
 
-	public List<String> getTooltip() {
+	public List<String> getTooltip(double gauge) {
 		List<String> tips = new ArrayList<String>();
 		return tips;
 	}
 
-	public double getPassengerCompartmentWidth() {
-		return this.passengerCompartmentWidth;
+	public double getPassengerCompartmentWidth(double gauge) {
+		return gaugeScale(gauge) * this.passengerCompartmentWidth;
 	}
 
 	public OBJModel getModel() {
@@ -295,8 +295,8 @@ public class EntityRollingStockDefinition {
 	/**
 	 * @return Stock Weight in Kg
 	 */
-	public int getWeight() {
-		return this.weight;
+	public int getWeight(double gauge) {
+		return (int) (gaugeScale(gauge) * this.weight);
 	}
 
 	public double getHeight(double gauge) {
@@ -311,7 +311,7 @@ public class EntityRollingStockDefinition {
 		return this.maxPassengers;
 	}
 	
-	private static double gaugeScale(double gauge) {
+	protected static double gaugeScale(double gauge) {
 		return gauge / Util.STANDARD_GAUGE;
 	}
 	private static float gaugeScaleF(double gauge) {

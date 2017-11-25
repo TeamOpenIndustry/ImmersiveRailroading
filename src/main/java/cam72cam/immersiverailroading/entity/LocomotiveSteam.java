@@ -113,7 +113,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	
 	@Override
 	protected int getAvailableHP() {
-		return (int) (this.getDefinition().getHorsePower() * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(), 3));
+		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(), 3));
 	}
 	
 	
@@ -173,7 +173,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			if (getTankCapacity().MilliBuckets() > 0) {
 				if (rand.nextInt(100) == 0) {
 					int outputHorsepower = (int) Math.abs(getThrottle() * getAvailableHP());
-					drain(outputHorsepower * 10 / this.getDefinition().getHorsePower(), true);
+					drain(outputHorsepower * 10 / this.getDefinition().getHorsePower(gauge), true);
 				}
 			}
 		}

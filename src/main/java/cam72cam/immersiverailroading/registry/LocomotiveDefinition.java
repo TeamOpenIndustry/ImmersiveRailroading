@@ -54,26 +54,26 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 	}
 	
 	@Override
-	public List<String> getTooltip() {
-		List<String> tips = super.getTooltip();
+	public List<String> getTooltip(double gauge) {
+		List<String> tips = super.getTooltip(gauge);
 		tips.add(GuiText.LOCO_WORKS.toString(this.works));
-		tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower()));
-		tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed().metricString()));
+		tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower(gauge)));
+		tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed(gauge).metricString()));
 		return tips;
 	}
 	
-	public int getHorsePower() {
-		return this.power;
+	public int getHorsePower(double gauge) {
+		return (int) (gaugeScale(gauge) * this.power);
 	}
 	
 	/**
 	 * @return tractive effort in newtons
 	 */
-	public int getStartingTractionNewtons() {
-		return (int) (this.traction * 4.44822);
+	public int getStartingTractionNewtons(double gauge) {
+		return (int) (gaugeScale(gauge) * this.traction * 4.44822);
 	}
 
-	public Speed getMaxSpeed() {
-		return this.maxSpeed;
+	public Speed getMaxSpeed(double gauge) {
+		return Speed.fromMinecraft(gaugeScale(gauge) * this.maxSpeed.minecraft());
 	}
 }

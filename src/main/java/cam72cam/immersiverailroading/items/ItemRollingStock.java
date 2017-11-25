@@ -58,12 +58,14 @@ public class ItemRollingStock extends BaseItemRollingStock {
     {
 		overrideStackDisplayName(stack);
 		
+		double gauge = getGauge(stack);
+		
         super.addInformation(stack, worldIn, tooltip, flagIn);
         EntityRollingStockDefinition def = getDefinition(stack);
         if (def != null) {
-        	tooltip.addAll(def.getTooltip());
+        	tooltip.addAll(def.getTooltip(gauge));
         }
-        tooltip.add(GuiText.STOCK_GAUGE.toString(Gauge.from(getGauge(stack))));
+        tooltip.add(GuiText.STOCK_GAUGE.toString(Gauge.from(gauge)));
     }
 	
 	@Override

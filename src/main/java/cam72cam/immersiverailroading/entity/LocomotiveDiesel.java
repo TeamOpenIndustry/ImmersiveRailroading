@@ -53,7 +53,7 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 	
 	@Override
 	protected int getAvailableHP() {
-		return this.getLiquidAmount() > 0 ? this.getDefinition().getHorsePower() : 0;
+		return this.getLiquidAmount() > 0 ? this.getDefinition().getHorsePower(gauge) : 0;
 	}
 
 	@Override
