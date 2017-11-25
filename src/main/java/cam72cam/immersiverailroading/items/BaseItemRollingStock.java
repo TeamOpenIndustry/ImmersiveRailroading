@@ -4,6 +4,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
@@ -16,7 +17,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import trackapi.lib.Util;
 
 public abstract class BaseItemRollingStock extends Item {
 	
@@ -59,7 +59,7 @@ public abstract class BaseItemRollingStock extends Item {
 		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge")){
 			return stack.getTagCompound().getDouble("gauge");
 		}
-		return Util.STANDARD_GAUGE;
+		return Gauge.STANDARD.value();
 	}
 	
 	public static EntityRollingStockDefinition getDefinition(ItemStack stack) {

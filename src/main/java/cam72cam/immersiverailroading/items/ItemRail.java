@@ -28,7 +28,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import net.minecraftforge.fml.common.Optional;
-import trackapi.lib.Util;
 
 @Optional.Interface(iface = "mezz.jei.api.ingredients.ISlowRenderItem", modid = "jei")
 public class ItemRail extends ItemBlock {
@@ -136,7 +135,7 @@ public class ItemRail extends ItemBlock {
 		if (stack.getTagCompound() != null){
 			return stack.getTagCompound().getDouble("gauge");
 		}
-		return Util.STANDARD_GAUGE;
+		return Gauge.STANDARD.value();
 	}
 	
 	public static void setPosType(ItemStack stack, TrackPositionType posType) {

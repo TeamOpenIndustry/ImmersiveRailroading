@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -29,7 +30,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
-import trackapi.lib.Util;
 import util.Matrix4;
 
 public class StockItemComponentModel implements IBakedModel {
@@ -57,7 +57,7 @@ public class StockItemComponentModel implements IBakedModel {
 		groups = new ArrayList<String>();
 
 		for (RenderComponentType r : item.render) {
-			RenderComponent comp = def.getComponent(r, Util.STANDARD_GAUGE);
+			RenderComponent comp = def.getComponent(r, Gauge.STANDARD.value());
 			if (comp == null) {
 				continue;
 			}

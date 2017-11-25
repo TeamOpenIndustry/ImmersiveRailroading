@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import trackapi.lib.Util;
 
 public class BuilderStraight extends BuilderBase {
 	protected float angle;
@@ -35,7 +35,7 @@ public class BuilderStraight extends BuilderBase {
 		
 		angle = info.quarter/4f * 90;
 		
-		double actualLength = info.length*(gauge/Util.STANDARD_GAUGE);
+		double actualLength = info.length*(gauge/Gauge.STANDARD.value());
 		
 		for (float dist = 0; dist < actualLength; dist += 0.25) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);

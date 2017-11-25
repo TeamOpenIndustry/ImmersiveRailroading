@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -14,7 +15,6 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import trackapi.lib.Util;
 
 public class BuilderTurn extends BuilderBase {
 
@@ -28,7 +28,7 @@ public class BuilderTurn extends BuilderBase {
 	public BuilderTurn(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		double radius = info.length*(gauge/Util.STANDARD_GAUGE);;
+		double radius = info.length*(gauge/Gauge.STANDARD.value());
 
 		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.Config;
@@ -22,7 +23,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import trackapi.lib.Util;
 
 public class EntityRollingStockDefinition {
 	
@@ -312,9 +312,9 @@ public class EntityRollingStockDefinition {
 	}
 	
 	protected static double gaugeScale(double gauge) {
-		return gauge / Util.STANDARD_GAUGE;
+		return gauge / Gauge.STANDARD.value();
 	}
 	private static float gaugeScaleF(double gauge) {
-		return (float) (gauge / Util.STANDARD_GAUGE);
+		return (float) (gauge / Gauge.STANDARD.value());
 	}
 }

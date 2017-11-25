@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.physics.MovementTrack;
@@ -24,7 +25,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import trackapi.lib.ITrackTile;
-import trackapi.lib.Util;
 
 public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
@@ -54,7 +54,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		return this.gauge;
 	}
 	public double getScale() {
-		return this.gauge / Util.STANDARD_GAUGE;
+		return this.gauge / Gauge.STANDARD.value();
 	}
 
 	public void setHeight(float height) {
@@ -151,7 +151,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		case 1:
 			setNBTBlockPos(nbt, "parent", getNBTBlockPos(nbt, "parent").subtract(pos));
 		case 2:
-			nbt.setDouble("gauge", Util.STANDARD_GAUGE);
+			nbt.setDouble("gauge", Gauge.STANDARD.value());
 		case 3:
 			// Nothing yet ...
 		}

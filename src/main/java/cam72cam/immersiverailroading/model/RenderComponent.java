@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import net.minecraft.util.math.Vec3d;
-import trackapi.lib.Util;
 
 public class RenderComponent {
 	public final RenderComponentType type;
@@ -109,6 +109,6 @@ public class RenderComponent {
 	}
 
 	public RenderComponent scale(double gauge) {
-		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge / Util.STANDARD_GAUGE);
+		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge / Gauge.STANDARD.value());
 	}
 }
