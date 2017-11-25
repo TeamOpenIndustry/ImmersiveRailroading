@@ -82,7 +82,7 @@ public class TrackGui extends GuiScreen {
 		length = ItemRail.getLength(stack);
 		quarters = ItemRail.getQuarters(stack);
 		type = ItemRail.getType(stack);
-		gauge = Gauge.from(ItemRail.getGauge(stack));
+		gauge = ItemRail.getGauge(stack);
 		posType = ItemRail.getPosType(stack);
 		isPreview = ItemRail.isPreview(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();

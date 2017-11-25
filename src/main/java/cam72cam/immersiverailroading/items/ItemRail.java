@@ -73,7 +73,7 @@ public class ItemRail extends ItemBlock {
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(GuiText.TRACK_TYPE.toString(getType(stack)));
-        tooltip.add(GuiText.TRACK_GAUGE.toString(Gauge.from(getGauge(stack))));
+        tooltip.add(GuiText.TRACK_GAUGE.toString(getGauge(stack)));
         tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
         tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack)));
         tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
@@ -124,18 +124,18 @@ public class ItemRail extends ItemBlock {
 		return 3;
 	}
 	
-	public static void setGauge(ItemStack stack, double gauge) {
+	public static void setGauge(ItemStack stack, Gauge gauge) {
 		if (stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
-		stack.getTagCompound().setDouble("gauge", gauge);
+		stack.getTagCompound().setDouble("gauge", gauge.value());
 	}
 	
-	public static double getGauge(ItemStack stack) {
+	public static Gauge getGauge(ItemStack stack) {
 		if (stack.getTagCompound() != null){
-			return stack.getTagCompound().getDouble("gauge");
+			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
 		}
-		return Gauge.STANDARD.value();
+		return Gauge.STANDARD;
 	}
 	
 	public static void setPosType(ItemStack stack, TrackPositionType posType) {

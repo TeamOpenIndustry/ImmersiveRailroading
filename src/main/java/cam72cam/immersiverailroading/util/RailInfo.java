@@ -6,6 +6,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
@@ -34,7 +35,7 @@ public class RailInfo {
 	public int length;
 	public int quarter;
 	public int quarters;
-	public double gauge;
+	public Gauge gauge;
 	public Vec3d placementPosition;
 	public ItemStack railBed;
 	public ItemStack railBedFill;
@@ -44,7 +45,7 @@ public class RailInfo {
 	public SwitchState switchState = SwitchState.NONE;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, double gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
