@@ -171,12 +171,14 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			ItemStack found = player.inventory.getStackInSlot(i);
 			if (found.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
 				if (ItemRollingStockComponent.getDefinitionID(found).equals(this.defID)) {
-					ItemComponentType type = ItemRollingStockComponent.getComponentType(found);
-					if (toAdd.contains(type)) {
-						addComponent(type);
-						player.inventory.decrStackSize(i, 1);
-						addedComponents = true;
-						break;
+					if (player.isCreative() || ItemRollingStockComponent.getGauge(found) == this.gauge) {
+						ItemComponentType type = ItemRollingStockComponent.getComponentType(found);
+						if (toAdd.contains(type)) {
+							addComponent(type);
+							player.inventory.decrStackSize(i, 1);
+							addedComponents = true;
+							break;
+						}
 					}
 				}
 			}
@@ -225,6 +227,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
 		ItemRollingStockComponent.setDefinitionID(item, defID);
+		ItemRollingStockComponent.setGauge(item, gauge);
 		ItemRollingStockComponent.setComponentType(item, toRemove);
 		world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, item));
 		
@@ -262,11 +265,13 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		if (this.isBuilt) {
 			ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK, 1, 0);
 			ItemRollingStock.setDefinitionID(item, defID);
+			ItemRollingStock.setGauge(item, gauge);
 			world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
 		} else {
 			for (ItemComponentType component : this.builtItems) {
 				ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
 				ItemRollingStockComponent.setDefinitionID(item, defID);
+				ItemRollingStockComponent.setGauge(item, gauge);
 				ItemRollingStockComponent.setComponentType(item, component);
 				world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
 			}
