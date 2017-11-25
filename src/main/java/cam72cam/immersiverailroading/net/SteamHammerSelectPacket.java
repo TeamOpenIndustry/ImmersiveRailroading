@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.tile.TileSteamHammer;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
@@ -20,7 +22,11 @@ public class SteamHammerSelectPacket implements IMessage {
 		// For Reflection
 	}
 
-	public SteamHammerSelectPacket(BlockPos tilePreviewPos, ItemStack selected) {
+	public SteamHammerSelectPacket(BlockPos tilePreviewPos, ItemStack selected, Gauge gauge) {
+		if (selected.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+			ItemRollingStockComponent.setGauge(selected, gauge.get());
+		}
+		
 		this.tilePreviewPos = tilePreviewPos;
 		this.selected = selected;
 	}
