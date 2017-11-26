@@ -38,4 +38,11 @@ public class FluidQuantity {
 	public FluidQuantity scale(double scale) {
 		return new FluidQuantity((int)(mb * scale));
 	}
+
+	public FluidQuantity min(FluidQuantity min) {
+		if (min.mb > mb) {
+			return min;
+		}
+		return this;
+	}
 }

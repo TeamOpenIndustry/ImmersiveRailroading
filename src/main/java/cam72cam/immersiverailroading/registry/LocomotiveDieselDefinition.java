@@ -55,7 +55,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	}
 	
 	public FluidQuantity getFuelCapacity(Gauge gauge) {
-		return this.fuelCapacity.scale(gauge.scale());
+		return this.fuelCapacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1));
 	}
 
 	public int getFuelEfficiency() {

@@ -53,7 +53,7 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 	}
 
 	public FluidQuantity getTankCapaity(Gauge gauge) {
-		return this.capacity.scale(gauge.scale());
+		return this.capacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1));
 	}
 
 	public List<Fluid> getFluidFilter() {

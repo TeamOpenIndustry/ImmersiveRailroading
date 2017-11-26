@@ -18,11 +18,11 @@ public class CarFreight extends Freight {
 
 	@Override
 	public int getInventorySize() {
-		return this.getDefinition().getInventorySize();
+		return this.getDefinition().getInventorySize(gauge);
 	}
 	
 	public int getInventoryWidth() {
-		return this.getDefinition().getInventoryWidth();
+		return this.getDefinition().getInventoryWidth(gauge);
 	}
 	
 	//TODO filter inventory

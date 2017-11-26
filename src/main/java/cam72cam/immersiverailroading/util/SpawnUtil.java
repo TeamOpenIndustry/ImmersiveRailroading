@@ -28,6 +28,9 @@ import trackapi.lib.Util;
 public class SpawnUtil {
 	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
 		ITrackTile initte = Util.getTileEntity(worldIn, new Vec3d(pos.add(0, 0.7, 0)), true);
+		if (initte == null) {
+			return EnumActionResult.FAIL;
+		}
 		double trackGauge = initte.getTrackGauge();
 		Gauge gauge = Gauge.from(trackGauge);
 		
