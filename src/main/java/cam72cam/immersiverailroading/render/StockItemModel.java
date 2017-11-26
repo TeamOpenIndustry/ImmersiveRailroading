@@ -26,11 +26,13 @@ import util.Matrix4;
 
 public class StockItemModel implements IBakedModel {
 	private OBJRender model;
+	private double scale;
 
 	public StockItemModel() {
 	}
 	
 	public StockItemModel(ItemStack stack) {
+		scale = ItemRollingStock.getGauge(stack).scale();
 		String defID = ItemRollingStock.getDefinitionID(stack);
 		model = StockRenderCache.getRender(defID);
 		if (model == null) {
@@ -56,7 +58,8 @@ public class StockItemModel implements IBakedModel {
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 			
 			GL11.glPushMatrix();
-			GL11.glScaled(0.2, 0.2, 0.2);
+			double scale = 0.2 * Math.sqrt(this.scale);
+			GL11.glScaled(scale, scale, scale);
 			model.bindTexture();
 			model.draw();
 			model.restoreTexture();
