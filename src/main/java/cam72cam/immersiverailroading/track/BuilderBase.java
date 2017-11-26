@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.init.Items;
@@ -36,11 +37,14 @@ public abstract class BuilderBase {
 	public boolean overrideFlexible = false;
 
 	public List<ItemStack> drops;
+
+	public Gauge gauge;
 	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;
 		rotation = info.facing;
 		world = info.world;
+		gauge = info.gauge;
 		parent_pos = pos;
 		this.x = pos.getX();
 		this.y = pos.getY();

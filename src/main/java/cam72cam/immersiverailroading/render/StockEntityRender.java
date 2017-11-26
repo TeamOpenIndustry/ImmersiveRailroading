@@ -33,12 +33,11 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 		//GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 
 		// Move to specified position
-		GlStateManager.translate(x, y + 0.35, z);
+		GlStateManager.translate(x, y + 0.35 * stock.gauge.scale(), z);
 
 		GlStateManager.rotate(180 - entityYaw, 0, 1, 0);
 		GlStateManager.rotate(stock.rotationPitch, 1, 0, 0);
 		GlStateManager.rotate(-90, 0, 1, 0);
-		
 		model.draw(stock, partialTicks);
 		
 		//tex.restore();

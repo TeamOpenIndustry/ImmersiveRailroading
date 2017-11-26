@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -15,7 +16,6 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -37,7 +37,7 @@ public class ItemRail extends ItemBlock {
 		super(block);
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(CreativeTabs.TOOLS);
+        this.setCreativeTab(ItemTabs.MAIN_TAB);
 	}
 	
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
@@ -45,11 +45,6 @@ public class ItemRail extends ItemBlock {
             playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
         }
         return super.onItemRightClick(worldIn, playerIn, handIn);
-	}
-
-	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName(stack);
 	}
 	
 	@Override
@@ -78,6 +73,7 @@ public class ItemRail extends ItemBlock {
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(GuiText.TRACK_TYPE.toString(getType(stack)));
+        tooltip.add(GuiText.TRACK_GAUGE.toString(getGauge(stack)));
         tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
         tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack)));
         tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
@@ -126,6 +122,20 @@ public class ItemRail extends ItemBlock {
 			return stack.getTagCompound().getInteger("quarters");
 		}
 		return 3;
+	}
+	
+	public static void setGauge(ItemStack stack, Gauge gauge) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setDouble("gauge", gauge.value());
+	}
+	
+	public static Gauge getGauge(ItemStack stack) {
+		if (stack.getTagCompound() != null){
+			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
+		}
+		return Gauge.STANDARD;
 	}
 	
 	public static void setPosType(ItemStack stack, TrackPositionType posType) {

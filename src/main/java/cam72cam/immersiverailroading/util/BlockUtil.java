@@ -12,8 +12,10 @@ import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
+import trackapi.lib.Util;
 
 public class BlockUtil {
 	public static boolean canBeReplaced(World world, BlockPos pos, boolean allowFlex) {
@@ -57,7 +59,7 @@ public class BlockUtil {
 		return gravelState;
 	}
 	
-	public static boolean isRail(IBlockState state) {
-		return state.getBlock() == ImmersiveRailroading.BLOCK_RAIL || state.getBlock() == ImmersiveRailroading.BLOCK_RAIL_GAG;
+	public static boolean isRail(World world, BlockPos pos) {
+		return Util.getTileEntity(world, new Vec3d(pos), true) != null;
 	}
 }

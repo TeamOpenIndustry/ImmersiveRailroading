@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -31,6 +32,8 @@ public class TileRail extends TileRailBase {
 	private EnumFacing facing;
 	private TrackItems type;
 	private ItemStack railBed;
+	
+	private Gauge gauge;
 	
 	private Vec3d center;
 	
@@ -84,6 +87,14 @@ public class TileRail extends TileRailBase {
 	public void setRailBed(ItemStack railBed) {
 		this.railBed = railBed;
 		this.markDirty();
+	}
+	
+	public void setGauge(Gauge gauge) {
+		this.gauge = gauge;
+		this.markDirty();
+	}
+	public Gauge getGauge() {
+		return this.gauge;
 	}
 	
 	public SwitchState getSwitchState() {
@@ -201,12 +212,15 @@ public class TileRail extends TileRailBase {
 			}
 			setNBTVec3d(nbt, "placementPosition", getNBTVec3d(nbt, "placementPosition").subtract(pos.getX(), pos.getY(), pos.getZ()));
 		case 2:
+			nbt.setDouble("gauge", Gauge.STANDARD.value());
+		case 3:
 			// nothing yet...
 		}
 		
 		railBed = new ItemStack(nbt.getCompoundTag("railBed"));
 		center = getNBTVec3d(nbt, "center");
 		placementPosition = getNBTVec3d(nbt, "placementPosition");
+		gauge = Gauge.from(nbt.getDouble("gauge"));
 	}
 
 	@Override
@@ -239,6 +253,7 @@ public class TileRail extends TileRailBase {
 		nbt.setTag("railBed", railBed.serializeNBT());
 		setNBTVec3d(nbt, "center", center);
 		setNBTVec3d(nbt, "placementPosition", placementPosition);
+		nbt.setDouble("gauge", gauge.value());
 		
 		return super.writeToNBT(nbt);
 	}
@@ -249,7 +264,7 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY);
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY);
 		}
 		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
 		this.snowRenderFlagDirty = false;

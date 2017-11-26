@@ -29,7 +29,7 @@ public class BuilderSlope extends BuilderStraight {
 		Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
 		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, (float) -Math.toDegrees(MathHelper.atan2(1, info.length)), info.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
-		for (int i = 0; i < info.length; i++) {
+		for (double i = 0; i < info.length-gauge.scale()/2; i+=gauge.scale()) {
 			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y + slope * i, pos.z, -angle, (float) -Math.toDegrees(MathHelper.atan2(1, info.length)), "RAIL_BASE"));
 		}

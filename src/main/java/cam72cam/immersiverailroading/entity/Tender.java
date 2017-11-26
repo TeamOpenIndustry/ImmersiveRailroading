@@ -37,11 +37,11 @@ public class Tender extends CarTank implements IFluidHandler {
 
 	@Override
 	public int getInventorySize() {
-		return this.getDefinition().getInventorySize() + 2;
+		return this.getDefinition().getInventorySize(gauge) + 2;
 	}
 	
 	public int getInventoryWidth() {
-		return this.getDefinition().getInventoryWidth();
+		return this.getDefinition().getInventoryWidth(gauge);
 	}
 	
 	@Override

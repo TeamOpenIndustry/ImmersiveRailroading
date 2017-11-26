@@ -16,6 +16,8 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
+import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
+import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.NBTUtil;
@@ -595,7 +597,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//  	then scaled to the distance between the stock position and the coupler
 		//
 		//	This works remarkably well even around corners
-		return myPos.position.add(myPos.position.subtractReverse(coupledPos.position).normalize().scale(getDefinition().getCouplerPosition(coupler)));
+		return myPos.position.add(myPos.position.subtractReverse(coupledPos.position).normalize().scale(getDefinition().getCouplerPosition(coupler, gauge)));
 	}
 	
 	@Override
@@ -614,12 +616,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
 			if (couplerFrontPosition == null) {
-				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange + this.getDefinition().getBogeyRear())).add(pos.position).addVector(0, 1, 0);
+				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getLength(gauge)/2 + Config.couplerRange + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerFrontPosition;
 		} else {
 			if (couplerRearPosition == null) {
-				couplerRearPosition = predictFrontBogeyPosition(pos, (float) (this.getDefinition().getLength()/2 + Config.couplerRange - this.getDefinition().getBogeyFront())).add(pos.position).addVector(0, 1, 0);
+				couplerRearPosition = predictFrontBogeyPosition(pos, (float) (this.getDefinition().getLength(gauge)/2 + Config.couplerRange - this.getDefinition().getBogeyFront(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerRearPosition;
 		}
@@ -641,6 +643,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	        	}
 	        	
 	        	if (entity.getDistanceToEntity(EntityCoupleableRollingStock.this) > 64) {
+	        		return false;
+	        	}
+	        	
+	        	if (entity.gauge != EntityCoupleableRollingStock.this.gauge) {
 	        		return false;
 	        	}
 	        	

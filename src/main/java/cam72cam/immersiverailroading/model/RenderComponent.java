@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import net.minecraft.util.math.Vec3d;
@@ -15,6 +16,7 @@ public class RenderComponent {
 	public final String side;
 	public final Set<String> modelIDs;
 	public final String pos;
+	public final double scale;
 	
 	public static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups) {
 		return parse(name, def, groups, -1, "", "");
@@ -61,17 +63,28 @@ public class RenderComponent {
 		this.id = wheel;
 		this.side = side;
 		this.pos = pos;
+		this.scale = 1;
 	}
 	
 	protected RenderComponent(EntityRollingStockDefinition def) {
 		this(null, def, 0, null, null);
 	}
 
+	private RenderComponent(Set<String> modelIDs, RenderComponentType type, EntityRollingStockDefinition def, int id, String side, String pos, double scale) {
+		this.modelIDs = modelIDs;
+		this.type = type;
+		this.def = def;
+		this.id = id;
+		this.side = side;
+		this.pos = pos;
+		this.scale = scale;
+	}
+
 	public Vec3d min() {
-		return def.getModel().minOfGroup(modelIDs);
+		return def.getModel().minOfGroup(modelIDs).scale(scale);
 	}
 	public Vec3d max() {
-		return def.getModel().maxOfGroup(modelIDs);
+		return def.getModel().maxOfGroup(modelIDs).scale(scale);
 	}
 	public Vec3d center() {
 		Vec3d min = min();
@@ -93,5 +106,9 @@ public class RenderComponent {
 		Vec3d min = min();
 		Vec3d max = max();
 		return max.z - min.z;
+	}
+
+	public RenderComponent scale(Gauge gauge) {
+		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge.scale());
 	}
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.Config;
@@ -29,11 +30,12 @@ public class EntityRollingStockDefinition {
 		return null;
 	}
 	
-	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing) {
+	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge) {
 		EntityRollingStock stock = instance(world);
 		stock.setPosition(pos.x, pos.y, pos.z);
 		stock.prevRotationYaw = facing.getHorizontalAngle();
 		stock.rotationYaw = facing.getHorizontalAngle();
+		stock.gauge = gauge;
 		world.spawnEntity(stock);
 
 		return stock;
@@ -146,30 +148,30 @@ public class EntityRollingStockDefinition {
 		return groups;
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name) {
+	public RenderComponent getComponent(RenderComponentType name, Gauge gauge) {
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
-		return renderComponents.get(name).get(0);
+		return renderComponents.get(name).get(0).scale(gauge);
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name, String pos) {
+	public RenderComponent getComponent(RenderComponentType name, String pos, Gauge gauge) {
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
 		for (RenderComponent c : renderComponents.get(name)) {
 			if (c.pos.equals(pos)) {
-				return c;
+				return c.scale(gauge);
 			}
 		}
 		return null;
 	}
 
-	public RenderComponent getComponent(RenderComponent comp) {
+	public RenderComponent getComponent(RenderComponent comp, Gauge gauge) {
 		if (!renderComponents.containsKey(comp.type)) {
 			return null;
 		}
-		for (RenderComponent c : getComponents(comp.type)) {
+		for (RenderComponent c : getComponents(comp.type, gauge)) {
 			if (c.equals(comp)) {
 				return c;
 			}
@@ -177,86 +179,95 @@ public class EntityRollingStockDefinition {
 		return null;
 	}
 	
-	public List<RenderComponent> getComponents(RenderComponentType name) {
-		return renderComponents.get(name);
+	public List<RenderComponent> getComponents(RenderComponentType name, Gauge gauge) {
+		if (!renderComponents.containsKey(name)) {
+			return null;
+		}
+		List<RenderComponent> components = new ArrayList<RenderComponent>();
+		for (RenderComponent c : renderComponents.get(name)) {
+			components.add(c.scale(gauge));
+		}
+		return components;
 	}
 	
-	public List<RenderComponent> getComponents(RenderComponentType name, String pos) {
+	public List<RenderComponent> getComponents(RenderComponentType name, String pos, Gauge gauge) {
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
 		List<RenderComponent> components = new ArrayList<RenderComponent>();
 		for (RenderComponent c : renderComponents.get(name)) {
 			if (c.pos.equals(pos)) {
-				components.add(c);
+				components.add(c.scale(gauge));
 			}
 		}
 		return components;
 	}
 
-	public Vec3d getPassengerCenter() {
-		return this.passengerCenter;
+	public Vec3d getPassengerCenter(Gauge gauge) {
+		return this.passengerCenter.scale(gauge.scale());
 	}
-	public Vec3d correctPassengerBounds(Vec3d pos) {
-		if (pos.x > this.passengerCompartmentLength) {
-			pos = new Vec3d(this.passengerCompartmentLength, pos.y, pos.z);
+	public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos) {
+		double gs = gauge.scale();
+		if (pos.x > this.passengerCompartmentLength * gs) {
+			pos = new Vec3d(this.passengerCompartmentLength * gs, pos.y, pos.z);
 		}
 		
-		if (pos.x < -this.passengerCompartmentLength) {
-			pos = new Vec3d(-this.passengerCompartmentLength, pos.y, pos.z);
+		if (pos.x < -this.passengerCompartmentLength * gs) {
+			pos = new Vec3d(-this.passengerCompartmentLength * gs, pos.y, pos.z);
 		}
 		
-		if (Math.abs(pos.z) > this.passengerCompartmentWidth/2) {
-			pos = new Vec3d(pos.x, pos.y, Math.copySign(this.passengerCompartmentWidth/2, pos.z));
+		if (Math.abs(pos.z) > this.passengerCompartmentWidth/2 * gs) {
+			pos = new Vec3d(pos.x, pos.y, Math.copySign(this.passengerCompartmentWidth/2 * gs, pos.z));
 		}
 		
 		return pos;
 	}
 
-	public boolean isAtFront(Vec3d pos) {
-		return pos.x >= this.passengerCompartmentLength;
+	public boolean isAtFront(Gauge gauge, Vec3d pos) {
+		return pos.x >= this.passengerCompartmentLength * gauge.scale();
 	}
-	public boolean isAtRear(Vec3d pos) {
-		return pos.x <= -this.passengerCompartmentLength;
+	public boolean isAtRear(Gauge gauge, Vec3d pos) {
+		return pos.x <= -this.passengerCompartmentLength * gauge.scale();
 	}
 
 	public List<ItemComponentType> getItemComponents() {
 		return itemComponents;
 	}
 
-	public float getBogeyFront() {
-		return this.bogeyFront;
+	public float getBogeyFront(Gauge gauge) {
+		return (float)gauge.scale() * this.bogeyFront;
 	}
 
-	public float getBogeyRear() {
-		return this.bogeyRear;
+	public float getBogeyRear(Gauge gauge) {
+		return (float)gauge.scale() * this.bogeyRear;
 	}
 	
-	public double getCouplerPosition(CouplerType coupler) {
+	public double getCouplerPosition(CouplerType coupler, Gauge gauge) {
 		switch(coupler) {
 		case FRONT:
-			return this.frontBounds + Config.couplerRange;
+			return gauge.scale() * (this.frontBounds + Config.couplerRange);
 		case BACK:
-			return this.rearBounds + Config.couplerRange;
+			return gauge.scale() * (this.rearBounds + Config.couplerRange);
 		default:
 			return 0;
 		}
 	}
 
-	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock) {
-		return new RealBB(frontBounds, -rearBounds, widthBounds, heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
+	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {
+		return new RealBB(gauge.scale() * frontBounds, gauge.scale() * -rearBounds, gauge.scale() * widthBounds,
+				gauge.scale() * heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
 	}
 	
 	List<Vec3d> blocksInBounds = null;
-	public List<Vec3d> getBlocksInBounds() {
+	public List<Vec3d> getBlocksInBounds(Gauge gauge) {
 		if (blocksInBounds == null) {
 			blocksInBounds = new ArrayList<Vec3d>();
-			double minX = -rearBounds;
-			double maxX = frontBounds;
-			double minY = 0;
-			double maxY = heightBounds;
-			double minZ = -widthBounds / 2;
-			double maxZ = widthBounds / 2;
+			double minX = gauge.scale() * -rearBounds;
+			double maxX = gauge.scale() * frontBounds;
+			double minY = gauge.scale() * 0;
+			double maxY = gauge.scale() * heightBounds;
+			double minZ = gauge.scale() * -widthBounds / 2;
+			double maxZ = gauge.scale() * widthBounds / 2;
 			for (double x = minX; x <= maxX; x++) {
 				for (double y = minY; y <= maxY; y++) {
 					for (double z = minZ; z <= maxZ; z++) {
@@ -268,13 +279,13 @@ public class EntityRollingStockDefinition {
 		return blocksInBounds;
 	}
 
-	public List<String> getTooltip() {
+	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = new ArrayList<String>();
 		return tips;
 	}
 
-	public double getPassengerCompartmentWidth() {
-		return this.passengerCompartmentWidth;
+	public double getPassengerCompartmentWidth(Gauge gauge) {
+		return gauge.scale() * this.passengerCompartmentWidth;
 	}
 
 	public OBJModel getModel() {
@@ -284,16 +295,16 @@ public class EntityRollingStockDefinition {
 	/**
 	 * @return Stock Weight in Kg
 	 */
-	public int getWeight() {
-		return this.weight;
+	public int getWeight(Gauge gauge) {
+		return (int) (gauge.scale() * this.weight);
 	}
 
-	public double getHeight() {
-		return this.heightBounds;
+	public double getHeight(Gauge gauge) {
+		return gauge.scale() * this.heightBounds;
 	}
 	
-	public double getLength() {
-		return this.frontBounds + this.rearBounds;
+	public double getLength(Gauge gauge) {
+		return gauge.scale() * this.frontBounds + this.rearBounds;
 	}
 
 	public int getMaxPassengers() {

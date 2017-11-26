@@ -112,7 +112,16 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-		cargoItems.deserializeNBT((NBTTagCompound) nbttagcompound.getTag("items"));
+		ItemStackHandler temp = new ItemStackHandler();
+		temp.deserializeNBT((NBTTagCompound) nbttagcompound.getTag("items"));
+		cargoItems.setSize(this.getInventorySize());
+		for (int slot = 0; slot < temp.getSlots(); slot ++) {
+			if (slot < cargoItems.getSlots()) {
+				cargoItems.setStackInSlot(slot, temp.getStackInSlot(slot));
+			} else {
+				world.spawnEntity(new EntityItem(this.world, this.posX, this.posY, this.posZ, temp.getStackInSlot(slot)));
+			}
+		}
 		handleMass();
 	}
 	

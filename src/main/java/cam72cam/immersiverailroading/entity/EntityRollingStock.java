@@ -13,6 +13,7 @@ import java.util.Collection;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -27,6 +28,7 @@ import net.minecraft.world.World;
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
 	protected String defID;
+	public Gauge gauge;
 
 	public EntityRollingStock(World world, String defID) {
 		super(world);
@@ -77,21 +79,29 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		defID = BufferUtil.readString(additionalData);
+		gauge = Gauge.from(additionalData.readDouble());
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		BufferUtil.writeString(buffer, defID);
+		buffer.writeDouble(gauge.value());
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		nbttagcompound.setString("defID", defID);		
+		nbttagcompound.setString("defID", defID);
+		nbttagcompound.setDouble("gauge", gauge.value());
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		defID = nbttagcompound.getString("defID");
+		if (nbttagcompound.hasKey("gauge")) {
+			gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
+		} else {
+			gauge = Gauge.STANDARD;
+		}
 	}
 
 	@Override
@@ -152,7 +162,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 * @return Stock Weight in Kg
 	 */
 	public double getWeight() {
-		return this.getDefinition().getWeight();
+		return this.getDefinition().getWeight(gauge);
 	}
 
 	/*

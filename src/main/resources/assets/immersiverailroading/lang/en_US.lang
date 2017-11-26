@@ -9,6 +9,7 @@ chat.immersiverailroading:stock.built=%s is complete!
 chat.immersiverailroading:stock.dissasembled=%s is disassembled!
 chat.immersiverailroading:stock.missing=Missing: %s
 chat.immersiverailroading:stock.invalid=Error: Rolling stock does not exist on the server.  Can not place
+chat.immersiverailroading:stock.wrong_gauge=Wrong Gauge!
 chat.immersiverailroading:stock.placement=Stock must be placed on straight track
 chat.immersiverailroading:coupler.front=Front
 chat.immersiverailroading:coupler.back=Back
@@ -25,6 +26,7 @@ chat.immersiverailroading:build.missing.rail_bed_fill=Missing %s rail bed fill
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
 gui.immersiverailroading:selector.type=Type: %s
+gui.immersiverailroading:selector.gauge=Gauge: %s
 gui.immersiverailroading:selector.quarters=Curve Quarters: 
 gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
@@ -34,6 +36,7 @@ gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
 gui.immersiverailroading:track.length=Length:    %s
+gui.immersiverailroading:track.gauge=Gauge:     %s
 gui.immersiverailroading:track.quarters=Quarters: %s
 gui.immersiverailroading:track.position=Position:   %s
 gui.immersiverailroading:track.rail_bed=Bed:        %s
@@ -44,6 +47,13 @@ gui.immersiverailroading:track.place_blueprint_false=Place:      Track
 gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.horse_power=Horse Power: %s
 gui.immersiverailroading:loco.max_speed=Max Speed:    %s
+gui.immersiverailroading:stock.gauge=Gauge: %s
+
+immersiverailroading:gauge.brunel=Brunel
+immersiverailroading:gauge.standard=Standard
+immersiverailroading:gauge.narrow=Narrow
+immersiverailroading:gauge.minecraft=Minecraft
+immersiverailroading:gauge.model=Model
 
 track.immersiverailroading:class.straight=Straight
 track.immersiverailroading:class.crossing=Crossing
@@ -97,3 +107,7 @@ part.immersiverailroading:component.reversing_arm=Reversing Arm
 part.immersiverailroading:component.lifting_link=Lifting Link
 part.immersiverailroading:component.reach_rod=Reach Rod
 part.immersiverailroading:component.walcherts_linkage=Walcherts Linkage
+
+itemGroup.immersiverailroading=Immersive Railroading
+itemGroup.immersiverailroading.stock=Immersive Railroading Stock
+itemGroup.immersiverailroading.components=Immersive Railroading Components
