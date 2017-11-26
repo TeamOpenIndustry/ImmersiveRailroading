@@ -34,4 +34,8 @@ public class FluidQuantity {
 	public int MilliBuckets() {
 		return mb;
 	}
+
+	public FluidQuantity scale(double scale) {
+		return new FluidQuantity((int)(mb * scale));
+	}
 }

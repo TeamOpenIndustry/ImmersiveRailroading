@@ -182,12 +182,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		return comp != null ? comp.scale(gauge) : null;
 	}
 
-	public FluidQuantity getTankCapacity() {
-		return this.tankCapacity;
+	public FluidQuantity getTankCapacity(Gauge gauge) {
+		return this.tankCapacity.scale(gauge.scale());
 	}
 	
-	public int getMaxPSI() {
-		return this.maxPSI;
+	public int getMaxPSI(Gauge gauge) {
+		return (int) (this.maxPSI * gauge.scale());
 	}
 	public ValveGearType getValveGear() {
 		return valveGear;
