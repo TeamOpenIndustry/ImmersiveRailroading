@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +21,7 @@ public class DefinitionManager {
 	private static Map<String, EntityRollingStockDefinition> definitions;
 
 	public static void initDefinitions() throws IOException {
-		definitions = new HashMap<String, EntityRollingStockDefinition>();
+		definitions = new LinkedHashMap<String, EntityRollingStockDefinition>();
 
 		ResourceLocation resource = new ResourceLocation(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
 		

@@ -5,6 +5,7 @@ import java.util.Set;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -53,8 +54,8 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		return new LocomotiveDiesel(world, defID);
 	}
 	
-	public FluidQuantity getFuelCapacity() {
-		return this.fuelCapacity;
+	public FluidQuantity getFuelCapacity(Gauge gauge) {
+		return this.fuelCapacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1));
 	}
 
 	public int getFuelEfficiency() {

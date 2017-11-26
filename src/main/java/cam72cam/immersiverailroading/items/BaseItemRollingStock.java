@@ -4,6 +4,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
@@ -45,6 +46,20 @@ public abstract class BaseItemRollingStock extends Item {
 		}
 		stack.setCount(0);
 		return "BUG";
+	}
+	
+	public static void setGauge(ItemStack stack, Gauge gauge) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setDouble("gauge", gauge.value());
+	}
+	
+	public static Gauge getGauge(ItemStack stack) {
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge")){
+			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
+		}
+		return Gauge.STANDARD;
 	}
 	
 	public static EntityRollingStockDefinition getDefinition(ItemStack stack) {

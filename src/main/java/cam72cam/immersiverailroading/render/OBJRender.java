@@ -63,17 +63,24 @@ public class OBJRender {
 		drawDirectGroups(model.groups.keySet());
 	}
 
-	public Map<Iterable<String>, Integer> displayLists = new HashMap<Iterable<String>, Integer>();
+	public Map<Double, Map<Iterable<String>, Integer>> displayLists = new HashMap<Double, Map<Iterable<String>, Integer>>();
 
-	public void drawGroups(Iterable<String> groupNames) {
-		if (!displayLists.containsKey(groupNames)) {
+	public void drawGroups(Iterable<String> groupNames, double scale) {
+		if (!displayLists.containsKey(scale)) {
+			displayLists.put(scale, new HashMap<Iterable<String>, Integer>());
+		}
+		
+		if (!displayLists.get(scale).containsKey(groupNames)) {
 			int groupsDisplayList = GL11.glGenLists(1);
 			GL11.glNewList(groupsDisplayList, GL11.GL_COMPILE);
-			drawDirectGroups(groupNames);
+			drawDirectGroups(groupNames, scale);
 			GL11.glEndList();
-			displayLists.put(groupNames, groupsDisplayList);
+			displayLists.get(scale).put(groupNames, groupsDisplayList);
 		}
-		GL11.glCallList(displayLists.get(groupNames));
+		GL11.glCallList(displayLists.get(scale).get(groupNames));
+	}
+	public void drawGroups(Iterable<String> groupNames) {
+		drawGroups(groupNames, 1);
 	}
 
 	public void drawDirectGroups(Iterable<String> groupNames) {

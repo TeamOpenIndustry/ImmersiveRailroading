@@ -4,8 +4,12 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.ParticleUtil;
+import cam72cam.immersiverailroading.util.SwitchUtil;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -18,8 +22,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import trackapi.lib.ITrackTile;
 
-public class TileRailBase extends SyncdTileEntity {
+public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileRailBase ? (TileRailBase) te : null;
@@ -132,6 +137,8 @@ public class TileRailBase extends SyncdTileEntity {
 		case 1:
 			setNBTBlockPos(nbt, "parent", getNBTBlockPos(nbt, "parent").subtract(pos));
 		case 2:
+			// Nothing in base
+		case 3:
 			// Nothing yet ...
 		}
 		parent = getNBTBlockPos(nbt, "parent");
@@ -148,7 +155,9 @@ public class TileRailBase extends SyncdTileEntity {
 		if (replaced != null) {
 			nbt.setTag("replaced", replaced);
 		}
-		nbt.setInteger("version", 2);
+		
+		nbt.setInteger("version", 3);
+		
 		
 		return super.writeToNBT(nbt);
 	}
@@ -231,7 +240,7 @@ public class TileRailBase extends SyncdTileEntity {
 					BlockPos ph = world.getPrecipitationHeight(pos.offset(facing, i));
 					for (int j = 0; j < 3; j ++) {
 						IBlockState state = world.getBlockState(ph);
-						if (world.isAirBlock(ph) && !BlockUtil.isRail(world.getBlockState(ph.down()))) {
+						if (world.isAirBlock(ph) && !BlockUtil.isRail(world, ph.down())) {
 							world.setBlockState(ph, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snowDown));
 							return;
 						}
@@ -257,5 +266,28 @@ public class TileRailBase extends SyncdTileEntity {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public double getTrackGauge() {
+		TileRail parent = this.getParentTile();
+		if (parent != null) {
+			return parent.getGauge().value();
+		}
+		return 0;
+	}
+	
+	@Override
+	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
+		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
+		
+		if (SwitchUtil.getSwitchState(tile, currentPosition) == SwitchState.STRAIGHT) {
+			tile = tile.getParentTile();
+		}
+		
+		double distanceMeters = motion.lengthVector();
+		float rotationYaw = VecUtil.toYaw(motion);
+		
+		return MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 	}
 }

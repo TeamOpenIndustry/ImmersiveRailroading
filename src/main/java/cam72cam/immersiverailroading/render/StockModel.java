@@ -57,7 +57,7 @@ public class StockModel extends OBJRender {
 				availComponents.remove(component.type);
 			}
 			
-			drawGroups(component.modelIDs);
+			drawGroups(component.modelIDs, component.scale);
 		}
 	}
 	
@@ -103,9 +103,9 @@ public class StockModel extends OBJRender {
 		
 		initComponents(stock);
 		
-		drawComponent(def.getComponent(RenderComponentType.FRAME));
-		drawComponent(def.getComponent(RenderComponentType.SHELL));
-		List<RenderComponent> wheels = def.getComponents(RenderComponentType.FRAME_WHEEL_X);
+		drawComponent(def.getComponent(RenderComponentType.FRAME, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.SHELL, stock.gauge));
+		List<RenderComponent> wheels = def.getComponents(RenderComponentType.FRAME_WHEEL_X, stock.gauge);
 		if (wheels != null) {
 			for (RenderComponent wheel : wheels) {
 				double circumference = wheel.height() * (float) Math.PI;
@@ -121,14 +121,14 @@ public class StockModel extends OBJRender {
 		}
 		
 
-		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT") != null) {
+		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT", stock.gauge) != null) {
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(-def.getBogeyFront(), 0, 0);
+			GlStateManager.translate(-def.getBogeyFront(stock.gauge), 0, 0);
 			GlStateManager.rotate(180 - stock.getFrontYaw(), 0, 1, 0);		
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
-			GlStateManager.translate(def.getBogeyFront(), 0, 0);
-			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "FRONT"));
-			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT");
+			GlStateManager.translate(def.getBogeyFront(stock.gauge), 0, 0);
+			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "FRONT", stock.gauge));
+			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT", stock.gauge);
 			if (wheels != null) {
 				for (RenderComponent wheel : wheels) {
 					double circumference = wheel.height() * (float) Math.PI;
@@ -145,14 +145,14 @@ public class StockModel extends OBJRender {
 			GlStateManager.popMatrix();
 		}
 		
-		if (def.getComponent(RenderComponentType.BOGEY_POS) != null) {
+		if (def.getComponent(RenderComponentType.BOGEY_POS, stock.gauge) != null) {
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(-def.getBogeyRear(), 0, 0);
+			GlStateManager.translate(-def.getBogeyRear(stock.gauge), 0, 0);
 			GlStateManager.rotate(180 - stock.getRearYaw(), 0, 1, 0);
 			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
-			GlStateManager.translate(def.getBogeyRear(), 0, 0);
-			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "REAR"));
-			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR");
+			GlStateManager.translate(def.getBogeyRear(stock.gauge), 0, 0);
+			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "REAR", stock.gauge));
+			wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "REAR", stock.gauge);
 			if (wheels != null) {
 				for (RenderComponent wheel : wheels) {
 					double circumference = wheel.height() * (float) Math.PI;
@@ -170,7 +170,7 @@ public class StockModel extends OBJRender {
 		}
 
 		if (this.isBuilt) {
-			drawComponent(def.getComponent(RenderComponentType.REMAINING));
+			drawComponent(def.getComponent(RenderComponentType.REMAINING, stock.gauge));
 		}
 	}
 
@@ -179,14 +179,14 @@ public class StockModel extends OBJRender {
 		
 		drawStandardStock(stock);
 
-		drawComponent(def.getComponent(RenderComponentType.FUEL_TANK));
-		drawComponent(def.getComponent(RenderComponentType.ALTERNATOR));
-		drawComponent(def.getComponent(RenderComponentType.ENGINE_BLOCK));
+		drawComponent(def.getComponent(RenderComponentType.FUEL_TANK, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.ALTERNATOR, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.ENGINE_BLOCK, stock.gauge));
 		
-		drawComponents(def.getComponents(RenderComponentType.CAB));
-		drawComponents(def.getComponents(RenderComponentType.WHISTLE));
-		drawComponents(def.getComponents(RenderComponentType.BELL));
-		drawComponents(def.getComponents(RenderComponentType.HORN));
+		drawComponents(def.getComponents(RenderComponentType.CAB, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.WHISTLE, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.BELL, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.HORN, stock.gauge));
 	}
 
 
@@ -200,9 +200,9 @@ public class StockModel extends OBJRender {
 		switch (def.getValveGear()) {
 		case WALSCHAERTS:
 			{
-				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X);
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
 				drawDrivingWheels(stock, wheels);
-				RenderComponent center = new MultiRenderComponent(wheels);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
 				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
@@ -212,18 +212,18 @@ public class StockModel extends OBJRender {
 			{
 				GL11.glPushMatrix();
 				
-				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE);
+				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE, stock.gauge);
 				Vec3d frontVec = frontLocomotive.center();
-				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
+				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
 				Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
 				
 				GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
 				GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()) + 180, 0, 1, 0);
 				GlStateManager.translate(-frontVec.x, 0, 0);
 				
-				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X);
-				RenderComponent center = new MultiRenderComponent(wheels);
-				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT));
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT, stock.gauge));
 				drawComponent(frontLocomotive);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
@@ -232,8 +232,8 @@ public class StockModel extends OBJRender {
 				GL11.glPopMatrix();
 			}
 			{
-				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X);
-				RenderComponent center = new MultiRenderComponent(wheels);
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, stock.gauge);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center());
@@ -248,23 +248,23 @@ public class StockModel extends OBJRender {
 		
 		// Draw remaining groups
 
-		drawComponent(def.getComponent(RenderComponentType.FRAME));
-		drawComponent(def.getComponent(RenderComponentType.SHELL));
+		drawComponent(def.getComponent(RenderComponentType.FRAME, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.SHELL, stock.gauge));
 		
-		drawComponents(def.getComponents(RenderComponentType.BOILER_SEGMENT_X));
-		drawComponent(def.getComponent(RenderComponentType.FIREBOX));
-		drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST));
-		drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_REAR));
-		drawComponent(def.getComponent(RenderComponentType.PIPING));
-		drawComponents(def.getComponents(RenderComponentType.CYLINDER_SIDE));
+		drawComponents(def.getComponents(RenderComponentType.BOILER_SEGMENT_X, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.FIREBOX, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_REAR, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.PIPING, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.CYLINDER_SIDE, stock.gauge));
 		
-		drawComponents(def.getComponents(RenderComponentType.CAB));
-		drawComponents(def.getComponents(RenderComponentType.WHISTLE));
-		drawComponents(def.getComponents(RenderComponentType.BELL));
-		drawComponents(def.getComponents(RenderComponentType.HORN));
+		drawComponents(def.getComponents(RenderComponentType.CAB, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.WHISTLE, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.BELL, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.HORN, stock.gauge));
 		
 		if (stock.isBuilt()) {
-			drawComponent(def.getComponent(RenderComponentType.REMAINING));
+			drawComponent(def.getComponent(RenderComponentType.REMAINING, stock.gauge));
 		}
 	}
 
@@ -292,15 +292,15 @@ public class StockModel extends OBJRender {
 	private void drawBogies(EntityMoveableRollingStock stock) {
 		EntityRollingStockDefinition def = stock.getDefinition();
 		
-		RenderComponent frontBogey = def.getComponent(RenderComponentType.BOGEY_FRONT);
-		List<RenderComponent> frontBogeyWheels = def.getComponents(RenderComponentType.BOGEY_FRONT_WHEEL_X);
-		RenderComponent rearBogey = def.getComponent(RenderComponentType.BOGEY_REAR);
-		List<RenderComponent> rearBogeyWheels = def.getComponents(RenderComponentType.BOGEY_REAR_WHEEL_X);
+		RenderComponent frontBogey = def.getComponent(RenderComponentType.BOGEY_FRONT, stock.gauge);
+		List<RenderComponent> frontBogeyWheels = def.getComponents(RenderComponentType.BOGEY_FRONT_WHEEL_X, stock.gauge);
+		RenderComponent rearBogey = def.getComponent(RenderComponentType.BOGEY_REAR, stock.gauge);
+		List<RenderComponent> rearBogeyWheels = def.getComponents(RenderComponentType.BOGEY_REAR_WHEEL_X, stock.gauge);
 
 		if (frontBogey != null) {
 
 			Vec3d frontVec = frontBogey.center();
-			PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront()));
+			PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
 
 			GlStateManager.pushMatrix();
 
@@ -328,7 +328,7 @@ public class StockModel extends OBJRender {
 		if (rearBogey != null)
 		{
 			Vec3d rearVec = rearBogey.center();
-			PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear()));
+			PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear(stock.gauge)));
 			
 			GlStateManager.pushMatrix();
 
@@ -362,9 +362,9 @@ public class StockModel extends OBJRender {
 		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 		
-		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side);
-		RenderComponent drivingRod = def.getComponent(RenderComponentType.MAIN_ROD_SIDE, side);
-		RenderComponent pistonRod = def.getComponent(RenderComponentType.PISTON_ROD_SIDE, side);
+		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
+		RenderComponent drivingRod = def.getComponent(RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
+		RenderComponent pistonRod = def.getComponent(RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
 
 		Vec3d connRodPos = connectingRod.center();
 		double connRodOffset = connRodPos.x - wheelCenter.x;
@@ -379,11 +379,11 @@ public class StockModel extends OBJRender {
 
 		double pistonDelta = connRodMovment.x - 0.3;
 
-		RenderComponent crossHead = def.getComponent(RenderComponentType.UNION_LINK_SIDE, side);
-		RenderComponent combinationLever = def.getComponent(RenderComponentType.COMBINATION_LEVER_SIDE, side);
-		RenderComponent returnCrank = def.getComponent(RenderComponentType.ECCENTRIC_CRANK_SIDE, side);
-		RenderComponent returnCrankRod = def.getComponent(RenderComponentType.ECCENTRIC_ROD_SIDE, side);
-		RenderComponent slottedLink = def.getComponent(RenderComponentType.EXPANSION_LINK_SIDE, side);
+		RenderComponent crossHead = def.getComponent(RenderComponentType.UNION_LINK_SIDE, side, stock.gauge);
+		RenderComponent combinationLever = def.getComponent(RenderComponentType.COMBINATION_LEVER_SIDE, side, stock.gauge);
+		RenderComponent returnCrank = def.getComponent(RenderComponentType.ECCENTRIC_CRANK_SIDE, side, stock.gauge);
+		RenderComponent returnCrankRod = def.getComponent(RenderComponentType.ECCENTRIC_ROD_SIDE, side, stock.gauge);
+		RenderComponent slottedLink = def.getComponent(RenderComponentType.EXPANSION_LINK_SIDE, side, stock.gauge);
 		
 		double returnCrankHeight = returnCrank.height();
 		double returnCrankLength = returnCrank.length();

@@ -132,17 +132,17 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 			
 			if (this instanceof EntityCoupleableRollingStock) {
-				if (this.getDefinition().isAtFront(pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
+				if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
 					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT));
 					return;
 				}
-				if (this.getDefinition().isAtRear(pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
+				if (this.getDefinition().isAtRear(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
 					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK));
 					return;
 				}
 			}
 			
-			pos = this.getDefinition().correctPassengerBounds(pos);
+			pos = this.getDefinition().correctPassengerBounds(gauge, pos);
 			
 			passengerPositions.put(source.getPersistentID(), pos);
 			sendToObserving(new PassengerPositionsPacket(this));
@@ -161,7 +161,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				passengerPositions.put(passenger.getPersistentID(), new Vec3d(0, 0, 0));
 			}
 			
-			Vec3d pos = this.getDefinition().getPassengerCenter();
+			Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
 			pos = pos.add(passengerPositions.get(passenger.getPersistentID()));
 			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 			pos = pos.add(this.getPositionVector());
@@ -174,7 +174,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	@Override
 	public void removePassenger(Entity passenger) {
 		super.removePassenger(passenger);
-		Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth()/2 + 1.3, this.rotationYaw - 90);
+		Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3, this.rotationYaw - 90);
 		passenger.setPositionAndUpdate(passenger.posX += delta.x, passenger.posY, passenger.posZ += delta.z);
 	}
 }

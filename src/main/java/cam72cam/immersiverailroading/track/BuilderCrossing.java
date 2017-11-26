@@ -5,19 +5,27 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class BuilderCrossing extends BuilderBase {
+	/*
+	 * This is terrible
+	 */
 
 	public BuilderCrossing(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
+		info.length = 3;
+		
 		this.setParentPos(new BlockPos(0, 0, 0));
 		
 		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, info.quarter, info.placementPosition));
-		for (int i = -1; i <=1; i ++) {
-			for (int j = -1; j <=1; j ++) {
+		int blocks = 1;
+		for (int i = -blocks; i <=blocks; i ++) {
+			for (int j = -blocks; j <=blocks; j ++) {
 				if (i == 0 && j == 0) {
 					continue;
 				}
@@ -28,16 +36,26 @@ public class BuilderCrossing extends BuilderBase {
 
 	@Override
 	public List<VecYawPitch> getRenderData() {
+		
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
+		float angle = 0;
+		info.length = 3;
 		
+		Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
+		data.add(new VecYawPitch(pos.x, pos.y, pos.z-1, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
-		data.add(new VecYawPitch(-0.5, 0, -1, 0));
-		data.add(new VecYawPitch(-0.5, 0, 0, 0));
-		data.add(new VecYawPitch(-0.5, 0, 1, 0));
+		for (double i = 0; i < info.length-gauge.scale()/2; i+=gauge.scale()) {
+			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
+			data.add(new VecYawPitch(pos.x, pos.y, pos.z-1, -angle, "RAIL_BASE"));
+		}
+		angle -= 90;
 		
-		data.add(new VecYawPitch(0, 0, -0.5, -90));
-		data.add(new VecYawPitch(1, 0, -0.5, -90));
-		data.add(new VecYawPitch(2, 0, -0.5, -90));
+		pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
+		data.add(new VecYawPitch(pos.x-(2-gauge.scale()), pos.y, pos.z+gauge.scale(), -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
+		for (double i = 0; i < info.length-gauge.scale()/2; i+=gauge.scale()) {
+			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
+			data.add(new VecYawPitch(pos.x-(2-gauge.scale()), pos.y, pos.z+gauge.scale(), -angle, "RAIL_BASE"));
+		}
 		
 		return data;
 	}

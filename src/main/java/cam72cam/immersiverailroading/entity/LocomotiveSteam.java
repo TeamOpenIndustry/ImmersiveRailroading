@@ -113,7 +113,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 	
 	@Override
 	protected int getAvailableHP() {
-		return (int) (this.getDefinition().getHorsePower() * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(), 3));
+		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
 	}
 	
 	
@@ -173,7 +173,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			if (getTankCapacity().MilliBuckets() > 0) {
 				if (rand.nextInt(100) == 0) {
 					int outputHorsepower = (int) Math.abs(getThrottle() * getAvailableHP());
-					drain(outputHorsepower * 10 / this.getDefinition().getHorsePower(), true);
+					drain(outputHorsepower * 10 / this.getDefinition().getHorsePower(gauge), true);
 				}
 			}
 		}
@@ -201,7 +201,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 				if (stack.getCount() <= 0 || !TileEntityFurnace.isItemFuel(stack)) {
 					continue;
 				}
-				time = BurnUtil.getBurnTime(stack);
+				time = (int) (BurnUtil.getBurnTime(stack) * 1/gauge.scale());
 				burnTime.put(slot, time);
 				burnMax.put(slot, time);
 				stack.setCount(stack.getCount()-1);
@@ -212,10 +212,10 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			}
 			changedBurnTime = true;
 			if (boilerTemperature < 100 || waterLevelMB < this.getTankCapacity().MilliBuckets() * 0.75) {
-				boilerTemperature += 100/waterLevelMB;
+				boilerTemperature += 100/waterLevelMB * gauge.scale();
 			}
 			if (boilerTemperature >= 100) {
-				boilerPressure += 100/waterLevelMB;
+				boilerPressure += 100/waterLevelMB * gauge.scale();
 				if (rand.nextInt(10) == 0) {
 					waterLevelMB -= 1;
 				}
@@ -237,9 +237,9 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			boilerPressure = Math.max(0, boilerPressure - throttle * (this.cargoItems.getSlots()-2) * 100/waterLevelMB);
 		}
 		
-		if (boilerPressure > this.getDefinition().getMaxPSI()) {
+		if (boilerPressure > this.getDefinition().getMaxPSI(gauge)) {
 			// TODO hissing and steam of pressure relief valve
-			boilerPressure = this.getDefinition().getMaxPSI();
+			boilerPressure = this.getDefinition().getMaxPSI(gauge);
 		}
 		
 		if (changedBurnTime) {
@@ -252,7 +252,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		setBoilerTemperature(boilerTemperature);
 		setBoilerPressure(boilerPressure);
 		
-		if (boilerPressure > this.getDefinition().getMaxPSI() * 1.1 || (boilerPressure > this.getDefinition().getMaxPSI() * 0.5 && boilerTemperature > 150)) {
+		if (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 1.1 || (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 0.5 && boilerTemperature > 150)) {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
@@ -265,11 +265,11 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 
 	@Override
 	public int getInventorySize() {
-		return this.getDefinition().getInventorySize() + 2;
+		return this.getDefinition().getInventorySize(gauge) + 2;
 	}
 	
 	public int getInventoryWidth() {
-		return this.getDefinition().getInventoryWidth();
+		return this.getDefinition().getInventoryWidth(gauge);
 	}
 	
 	@Override
@@ -283,7 +283,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 
 	@Override
 	public FluidQuantity getTankCapacity() {
-		return this.getDefinition().getTankCapacity();
+		return this.getDefinition().getTankCapacity(gauge);
 	}
 
 	@Override

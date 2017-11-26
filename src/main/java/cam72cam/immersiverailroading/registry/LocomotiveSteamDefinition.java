@@ -10,11 +10,13 @@ import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
@@ -176,26 +178,27 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		return groups;
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name, String side) {
-		return valveGearComponents.containsKey(side) ? valveGearComponents.get(side).get(name) : null;
+	public RenderComponent getComponent(RenderComponentType name, String side, Gauge gauge) {
+		RenderComponent comp = valveGearComponents.containsKey(side) ? valveGearComponents.get(side).get(name) : null;
+		return comp != null ? comp.scale(gauge) : null;
 	}
 
-	public FluidQuantity getTankCapacity() {
-		return this.tankCapacity;
+	public FluidQuantity getTankCapacity(Gauge gauge) {
+		return this.tankCapacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1));
 	}
 	
-	public int getMaxPSI() {
-		return this.maxPSI;
+	public int getMaxPSI(Gauge gauge) {
+		return (int) (this.maxPSI * gauge.scale());
 	}
 	public ValveGearType getValveGear() {
 		return valveGear;
 	}
 	
-	public int getInventorySize() {
-		return numSlots;
+	public int getInventorySize(Gauge gauge) {
+		return MathHelper.ceil(numSlots * gauge.scale());
 	}
 
-	public int getInventoryWidth() {
-		return width;
+	public int getInventoryWidth(Gauge gauge) {
+		return Math.max(3, MathHelper.ceil(width * gauge.scale()));
 	}
 }

@@ -45,6 +45,7 @@ public class TrackRail extends TrackBase {
 		tileRail.setPlacementPosition(placementPosition);
 		tileRail.setRailBed(builder.info.railBed);
 		tileRail.setDrops(builder.drops);
+		tileRail.setGauge(builder.gauge);
 		
 		return tileRail;
 	}

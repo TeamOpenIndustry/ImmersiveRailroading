@@ -41,6 +41,7 @@ public class RailItemModel implements IBakedModel {
 			world = Minecraft.getMinecraft().world;
 		}
 		info = new RailInfo(stack, world, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f);
+		info.length = 10;
 	}
 
 	@Override

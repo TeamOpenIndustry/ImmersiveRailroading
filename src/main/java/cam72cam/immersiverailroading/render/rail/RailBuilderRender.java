@@ -7,6 +7,7 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.render.OBJRender;
@@ -58,6 +59,9 @@ public class RailBuilderRender {
 		//GlStateManager.translate(info.getOffset().x, 0, info.getOffset().z);
 		GlStateManager.translate(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 		GlStateManager.translate(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
+		
+		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90);
+		GlStateManager.translate(renderOff.x, renderOff.y, renderOff.z);
 
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
 			int displayList = GL11.glGenLists(1);
@@ -70,7 +74,11 @@ public class RailBuilderRender {
 				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
 				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(-90, 0, 1, 0);
-				GlStateManager.scale(piece.getLength(), 1, 1);
+				float length = piece.getLength();
+				if (length == 1) {
+					length = (float) info.gauge.scale();
+				}
+				GlStateManager.scale(length, info.gauge.scale(), info.gauge.scale());
 				if (piece.getGroups().size() != 0) {
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
@@ -91,7 +99,6 @@ public class RailBuilderRender {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 			GL11.glEndList();
-			
 			displayLists.put(RailRenderUtil.renderID(info), displayList);
 		}
 		

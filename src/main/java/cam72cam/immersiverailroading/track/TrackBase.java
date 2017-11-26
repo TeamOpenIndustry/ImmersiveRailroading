@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase.PosRot;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -108,6 +109,9 @@ public abstract class TrackBase {
 	}
 	public float getHeight() {
 		return height;
+	}
+	public Gauge getGauge() {
+		return builder.gauge;
 	}
 
 	public void setFlexible() {

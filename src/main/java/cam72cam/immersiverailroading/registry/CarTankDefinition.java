@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
@@ -51,8 +52,8 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 		return new CarTank(world, defID);
 	}
 
-	public FluidQuantity getTankCapaity() {
-		return this.capacity;
+	public FluidQuantity getTankCapaity(Gauge gauge) {
+		return this.capacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1));
 	}
 
 	public List<Fluid> getFluidFilter() {

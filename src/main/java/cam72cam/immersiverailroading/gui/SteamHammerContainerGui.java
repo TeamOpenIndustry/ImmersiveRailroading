@@ -7,11 +7,14 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.items.ItemTabs;
+import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.net.SteamHammerSelectPacket;
 import cam72cam.immersiverailroading.tile.TileSteamHammer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -20,9 +23,11 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 	
 	private int inventoryRows;
 	private int horizSlots;
+	private Gauge gauge;
 	private TileSteamHammer tile;
 	private ItemPickerGUI stockSelector;
 	private ItemPickerGUI itemSelector;
+	private GuiButton gaugeButton;
 	private NonNullList<ItemStack> items;
 
     public SteamHammerContainerGui(SteamHammerContainer container) {
@@ -31,17 +36,17 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         this.tile = container.tile;
         this.horizSlots = 10;
         this.xSize = paddingRight + horizSlots * slotSize + paddingLeft;
-        this.ySize = 114 + this.inventoryRows * slotSize;
+        this.ySize = 114 + this.inventoryRows * slotSize; 
         
         NonNullList<ItemStack> items = NonNullList.create(); 
         
-        ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(CreativeTabs.TRANSPORTATION, items);
+        ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(ItemTabs.COMPONENT_TAB, items);
         
         NonNullList<ItemStack> stock = NonNullList.create();
         stock.add(new ItemStack(ImmersiveRailroading.ITEM_LARGE_WRENCH, 1));
         stock.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
         stock.add(new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1));
-        ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(CreativeTabs.TRANSPORTATION, stock);
+        ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
 
 		stockSelector = new ItemPickerGUI(stock);
 		for (ItemStack itemStock : stock) {
@@ -53,6 +58,14 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 		itemSelector = new ItemPickerGUI(NonNullList.create());
 		itemSelector.choosenItem = tile.getChoosenItem();
 		this.items = items;
+		
+		this.gauge = ItemRollingStockComponent.getGauge(itemSelector.choosenItem);
+    }
+    
+    public void initGui() {
+    	super.initGui();
+    	gaugeButton = new GuiButton(1, this.width / 2 - 100 + 3, (this.height - this.ySize) / 2, 194, 20, GuiText.SELECTOR_GAUGE.toString(gauge));
+		this.buttonList.add(gaugeButton);
     }
     
     private boolean isPartOf(ItemStack stock, ItemStack item) {
@@ -70,7 +83,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     		itemSelector.mouseClicked(mouseX, mouseY, mouseButton);
     		
     		if (!itemSelector.isActive) {
-    			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.itemSelector.choosenItem));
+    			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
     		}
         	
         	return;
@@ -87,7 +100,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     			}
     			if (filteredItems.size() == 0) {
     				itemSelector.choosenItem = this.stockSelector.choosenItem;
-        			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.stockSelector.choosenItem));
+        			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.stockSelector.choosenItem, this.gauge));
     			} else {
 	    			itemSelector.setItems(filteredItems);
 	    			itemSelector.isActive = true;
@@ -96,6 +109,13 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         	
         	return;
         }
+    	
+		if (gaugeButton.mousePressed(mc, mouseX, mouseY)) {
+			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
+			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
+			return;
+		}
     	
     	int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;

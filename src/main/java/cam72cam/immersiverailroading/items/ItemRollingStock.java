@@ -6,6 +6,8 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import net.minecraft.client.util.ITooltipFlag;
@@ -33,7 +35,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
 		super();
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(CreativeTabs.TRANSPORTATION);
+        this.setCreativeTab(ItemTabs.STOCK_TAB);
         this.setMaxStackSize(1);
 	}
 	
@@ -56,11 +58,14 @@ public class ItemRollingStock extends BaseItemRollingStock {
     {
 		overrideStackDisplayName(stack);
 		
+		Gauge gauge = getGauge(stack);
+		
         super.addInformation(stack, worldIn, tooltip, flagIn);
         EntityRollingStockDefinition def = getDefinition(stack);
         if (def != null) {
-        	tooltip.addAll(def.getTooltip());
+        	tooltip.addAll(def.getTooltip(gauge));
         }
+        tooltip.add(GuiText.STOCK_GAUGE.toString(gauge));
     }
 	
 	@Override

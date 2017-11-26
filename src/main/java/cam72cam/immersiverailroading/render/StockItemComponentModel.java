@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -37,11 +38,13 @@ public class StockItemComponentModel implements IBakedModel {
 	private Vec3d center;
 	private double width;
 	private double length;
+	private double scale;
 
 	public StockItemComponentModel() {
 	}
 	
 	public StockItemComponentModel(ItemStack stack) {
+		scale = ItemRollingStockComponent.getGauge(stack).scale();
 		String defID = ItemRollingStockComponent.getDefinitionID(stack);
 		ItemComponentType item = ItemRollingStockComponent.getComponentType(stack);
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
@@ -56,7 +59,7 @@ public class StockItemComponentModel implements IBakedModel {
 		groups = new ArrayList<String>();
 
 		for (RenderComponentType r : item.render) {
-			RenderComponent comp = def.getComponent(r);
+			RenderComponent comp = def.getComponent(r, Gauge.STANDARD);
 			if (comp == null) {
 				continue;
 			}
@@ -140,6 +143,7 @@ public class StockItemComponentModel implements IBakedModel {
 		if (width != 0 || length != 0) {
 			scale = 0.95/Math.max(width, length);
 		}
+		scale *= Math.sqrt(this.scale);
 		
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		switch (cameraTransformType) {
