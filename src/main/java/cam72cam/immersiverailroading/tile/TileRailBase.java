@@ -5,7 +5,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.SwitchState;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.ParticleUtil;
@@ -274,15 +273,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		TileRail parent = this.getParentTile();
 		if (parent != null) {
 			return parent.getGauge().value();
-		}
-		return 0;
-	}
-	
-	@Override
-	public double getTrackSlope() {
-		TileRail parent = this.getParentTile();
-		if (parent != null && parent.getType() == TrackItems.SLOPE) {
-			return 1.0 / parent.getLength();
 		}
 		return 0;
 	}
