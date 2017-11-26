@@ -34,7 +34,7 @@ public class BuilderStraight extends BuilderBase {
 		
 		angle = info.quarter/4f * 90;
 		
-		double actualLength = info.length*gauge.scale();
+		double actualLength = info.length;
 		
 		for (float dist = 0; dist < actualLength; dist += 0.25) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
@@ -90,7 +90,7 @@ public class BuilderStraight extends BuilderBase {
 		Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
 		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
-		for (int i = 0; i < info.length; i++) {
+		for (double i = 0; i < info.length-gauge.scale()/2; i+=gauge.scale()) {
 			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}

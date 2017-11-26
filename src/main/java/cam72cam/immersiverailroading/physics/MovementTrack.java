@@ -35,7 +35,7 @@ public class MovementTrack {
 			// Calculate the angle (rad) for the current position is
 			double posRelYaw = MathHelper.atan2(posDelta.x, -posDelta.z);
 			// Hack the radius
-			double radius = rail.getRadius() * rail.getGauge().scale() - 0.5;
+			double radius = rail.getRadius() - 0.5;
 			// Calculate the angle delta in rad (radians are awesome)
 			double yawDelt = distance / radius;
 
