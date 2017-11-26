@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -27,7 +28,7 @@ public class BuilderTurn extends BuilderBase {
 	public BuilderTurn(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		double radius = info.length*gauge.scale();
+		double radius = info.length;
 
 		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;
@@ -64,7 +65,7 @@ public class BuilderTurn extends BuilderBase {
 		
 		for (float angle = startAngle; angle > endAngle; angle-=angleDelta) {
 			
-			for (double q = -1.4; q <= 1.4; q+=0.1) {
+			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
 				int gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+q))+1-xPos;
 				int gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+q))-zPos;
 				positions.add(Pair.of(gagX, gagZ));
@@ -113,42 +114,47 @@ public class BuilderTurn extends BuilderBase {
 
 	@Override
 	public List<VecYawPitch> getRenderData() {
+		// This is NOT perfect.  It is good enough for now.  
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		int radius = info.length;
+		float radius = info.length;
 		
-		float angleDelta = (90 / ((float)Math.PI * (radius+1)/2));
+		float angleDelta = (90 / ((float)Math.PI * (radius+1)/2)) * (float)gauge.scale();
 		
-		int xMult = 1;
-		int zMult = 1;
-		float hack = -0.5f;
+		double hack = 0.05;
 		
+		double xPos = Math.floor(Math.sin(Math.toRadians(realStartAngle)) * (radius+hack));
+		double zPos = Math.floor(Math.cos(Math.toRadians(realStartAngle)) * (radius+hack));
 		
-		float xPos = (int)(Math.sin(Math.toRadians(realStartAngle)) * (radius+hack+xMult));
-		float zPos = (int)(Math.cos(Math.toRadians(realStartAngle)) * (radius+hack+zMult));
+		// Magic numbers
+		hack = 0.7 * (gauge.value() - Gauge.STANDARD.value()/2);
 		
 		if (info.direction == TrackDirection.LEFT) {
-			xPos +=1;
+			xPos += 1;
+			zPos += 1;
+		} else {
+			xPos -= 1;
 		}
+		xPos += 1-gauge.scale();
 		
 		int counter = 0;
 			
 		for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
-			double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack+xMult)+1-xPos;
-			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack+zMult)-zPos;
+			double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack)-xPos;
+			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack)-zPos;
 			float switchAngle = 0;
 			float switchOffset = 0;
 			if (info.switchState == SwitchState.STRAIGHT) {
 				if (info.direction == TrackDirection.RIGHT ) {
 					if (angle > startAngle - 4*angleDelta) {
 						counter++;
-						switchOffset = (4-counter) / 30f * -1;
+						switchOffset = (4-counter) / 30f * -(float)gauge.scale();
 						switchAngle = angleDelta * info.length / 30;
 					}
 				} else {
 					if (angle < endAngle + 4*angleDelta) {
 						counter++;
-						switchOffset = (counter) / 30f * 1;
+						switchOffset = (counter) / 30f * (float)gauge.scale();
 						switchAngle = -angleDelta * info.length / 30;
 					}
 				}

@@ -60,7 +60,7 @@ public class RailBuilderRender {
 		GlStateManager.translate(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 		GlStateManager.translate(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
 		
-		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828, 180-info.facing.getOpposite().getHorizontalAngle()-90);
+		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90);
 		GlStateManager.translate(renderOff.x, renderOff.y, renderOff.z);
 
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
@@ -69,13 +69,16 @@ public class RailBuilderRender {
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GlStateManager.pushMatrix();
-				GL11.glScaled(info.gauge.scale(), 1, info.gauge.scale());
 				GlStateManager.rotate(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GlStateManager.translate(piece.x, piece.y, piece.z);
 				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
 				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
 				GlStateManager.rotate(-90, 0, 1, 0);
-				GlStateManager.scale(piece.getLength(), info.gauge.scale(), 1);
+				float length = piece.getLength();
+				if (length == 1) {
+					length = (float) info.gauge.scale();
+				}
+				GlStateManager.scale(length, info.gauge.scale(), info.gauge.scale());
 				if (piece.getGroups().size() != 0) {
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
