@@ -67,6 +67,7 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 			}
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime /= Math.abs(getThrottle())*10;
+			burnTime *= 1/gauge.scale();
 			if (this.ticksExisted % burnTime == 0) {
 				drain(1, true);
 			}
@@ -87,6 +88,6 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 
 	@Override
 	public FluidQuantity getTankCapacity() {
-		return this.getDefinition().getFuelCapacity();
+		return this.getDefinition().getFuelCapacity(gauge);
 	}
 }
