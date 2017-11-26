@@ -1,13 +1,13 @@
 package cam72cam.immersiverailroading.library;
 
 import cam72cam.immersiverailroading.util.TextUtil;
-import trackapi.lib.Util;
+import trackapi.lib.Gauges;
 
 public enum Gauge {
 	BRUNEL(2.14),
-	STANDARD(Util.STANDARD_GAUGE),
+	STANDARD(Gauges.STANDARD),
 	NARROW(0.9144),
-	MINECRAFT(Util.MINECRAFT_GAUGE),
+	MINECRAFT(Gauges.MINECRAFT),
 	MODEL(0.2),
 	;
 	
