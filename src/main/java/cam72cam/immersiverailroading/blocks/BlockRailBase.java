@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.blocks;
 
-import com.google.common.collect.ImmutableMap;
+import javax.annotation.Nonnull;
 
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -24,10 +24,19 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.common.property.PropertyFloat;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BlockRailBase extends Block {
+	
+	public static final PropertyItemStack RAIL_BED = new PropertyItemStack("RAIL_BED");
+	public static final PropertyFloat HEIGHT = new PropertyFloat("HEIGHT");
+	public static final PropertyFloat SNOW = new PropertyFloat("SNOW");
+	public static final PropertyFloat GAUGE = new PropertyFloat("GAUGE");
 	
 	public BlockRailBase(Material materialIn) {
 		super(materialIn);
@@ -62,34 +71,29 @@ public abstract class BlockRailBase extends Block {
 		}
 	}
 	
-	public class RailBlockState extends BlockStateContainer.StateImplementation {
-		public ItemStack bed;
-		public float height;
-		public int snow;
-		protected RailBlockState(Block blockIn, ImmutableMap<IProperty<?>, Comparable<?>> propertiesIn) {
-			super(blockIn, propertiesIn);
-		}
-		public void setBed(ItemStack railBed) {
-			this.bed = railBed;
-		}
-		public void setHeight(float height) {
-			this.height = height;
-		}
-		public void setSnow(int snowLayers) {
-			this.snow = snowLayers;
-		}
-	}
-
-    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
+	@Override
+    @Nonnull
+    protected BlockStateContainer createBlockState()
     {
+        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty<?>[] {
+        	RAIL_BED,
+        	HEIGHT,
+        	SNOW,
+        	GAUGE
+        });
+    }
+
+	@Override
+    public IBlockState getExtendedState(IBlockState origState, IBlockAccess world, BlockPos pos)
+    {
+    	IExtendedBlockState state = (IExtendedBlockState)origState;
     	TileRailBase te = TileRailBase.get(world, pos);
     	if (te != null) {
 			if (te.getRenderRailBed() != null) {
-				RailBlockState statea = new RailBlockState(state.getBlock(), state.getProperties());
-				statea.setBed(te.getRenderRailBed());
-				statea.setHeight(te.getHeight());
-				statea.setSnow(te.getSnowLayers());
-				return statea;
+				state = state.withProperty(RAIL_BED, te.getRenderRailBed());
+				state = state.withProperty(HEIGHT, te.getHeight());
+				state = state.withProperty(SNOW, (float)te.getSnowLayers());
+				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
 			}
     	}
         return state;
