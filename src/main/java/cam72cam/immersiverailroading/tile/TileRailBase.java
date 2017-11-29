@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -32,6 +33,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	
 	private BlockPos parent;
 	private float height = 0;
+	private Augment augment; 
 	private int snowLayers = 0;
 	protected boolean flexible = false;
 	private boolean willBeReplaced = false; 
@@ -49,6 +51,13 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	}
 	public float getHeight() {
 		return this.height;
+	}
+	public void setAugment(Augment augment) {
+		this.augment = augment;
+		this.markDirty();
+	}
+	public Augment getAugment() {
+		return this.augment;
 	}
 	public int getSnowLayers() {
 		return this.snowLayers;
@@ -131,6 +140,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 			replaced = nbt.getCompoundTag("replaced");
 		}
 		
+		if (nbt.hasKey("augment")) {
+			augment = Augment.values()[nbt.getInteger("augment")];
+		}
+		
 		switch(version) {
 		case 0:
 			//NOP
@@ -154,6 +167,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		nbt.setBoolean("flexible", flexible);
 		if (replaced != null) {
 			nbt.setTag("replaced", replaced);
+		}
+		
+		if (augment != null) {
+			nbt.setInteger("augment", this.augment.ordinal());
 		}
 		
 		nbt.setInteger("version", 3);

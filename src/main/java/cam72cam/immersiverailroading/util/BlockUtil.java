@@ -59,6 +59,10 @@ public class BlockUtil {
 		return gravelState;
 	}
 	
+	public static boolean isIRRail(World world, BlockPos pos) {
+		return world.getBlockState(pos).getBlock() instanceof BlockRailBase;
+	}
+	
 	public static boolean isRail(World world, BlockPos pos) {
 		return Util.getTileEntity(world, new Vec3d(pos), true) != null;
 	}
