@@ -8,4 +8,5 @@ public enum Augment {
 	ITEM_UNLOADER,
 	FLUID_LOADER,
 	FLUID_UNLOADER,
+	DETECTOR,
 }

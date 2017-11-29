@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.render.rail.ScaledModel;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.BlockSnow;
@@ -28,7 +29,14 @@ public class RailBaseModel implements IBakedModel {
 			if (bed != null) { // wait for tile to be initialized
 				float height = railState.getValue(BlockRailBase.HEIGHT).floatValue();
 				int snow = railState.getValue(BlockRailBase.SNOW).intValue();
+				Augment augment = railState.getValue(BlockRailBase.AUGMENT);
 				//double gauge = railState.getValue(BlockRailBase.GAUGE).doubleValue();
+				
+				if (augment != null) {
+					state = Blocks.IRON_BLOCK.getDefaultState();
+					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
+					return model.getQuads(state, side, rand);
+				}
 				
 				if (snow != 0) {
 					state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snow);

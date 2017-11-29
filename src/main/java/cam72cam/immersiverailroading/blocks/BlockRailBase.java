@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.blocks;
 import javax.annotation.Nonnull;
 
 import cam72cam.immersiverailroading.items.ItemTabs;
+import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -37,6 +38,7 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyFloat HEIGHT = new PropertyFloat("HEIGHT");
 	public static final PropertyFloat SNOW = new PropertyFloat("SNOW");
 	public static final PropertyFloat GAUGE = new PropertyFloat("GAUGE");
+	public static final PropertyEnum<Augment> AUGMENT = new PropertyEnum<Augment>("AUGMENT", Augment.class);
 	
 	public BlockRailBase(Material materialIn) {
 		super(materialIn);
@@ -79,7 +81,8 @@ public abstract class BlockRailBase extends Block {
         	RAIL_BED,
         	HEIGHT,
         	SNOW,
-        	GAUGE
+        	GAUGE,
+        	AUGMENT,
         });
     }
 
@@ -94,6 +97,7 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(HEIGHT, te.getHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
+				state = state.withProperty(AUGMENT, te.getAugment());
 			}
     	}
         return state;

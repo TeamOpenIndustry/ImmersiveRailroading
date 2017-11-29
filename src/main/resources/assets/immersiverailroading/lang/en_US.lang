@@ -7,6 +7,8 @@ item.immersiverailroading:item_augment.ITEM_LOADER.name=Item Loader
 item.immersiverailroading:item_augment.ITEM_UNLOADER.name=Item Unloader
 item.immersiverailroading:item_augment.FLUID_LOADER.name=Fluid Loader
 item.immersiverailroading:item_augment.FLUID_UNLOADER.name=Fluid Unloader
+item.immersiverailroading:item_augment.DETECTOR.name=Fluid Unloader
+
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
 tile.immersiverailroading:block_rail_preview.name=Rail Preview
