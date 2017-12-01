@@ -2,7 +2,7 @@
 	"era": "steam",
 	"name": "E6 Atlantic",
 	"works": "PRR Juniata Shops",
-	"model": "immersiverailroading:models/rolling_stock/locomotives/e6_atlantic.obj",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/e6_atlantic/e6_atlantic.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"max_psi": 205,
