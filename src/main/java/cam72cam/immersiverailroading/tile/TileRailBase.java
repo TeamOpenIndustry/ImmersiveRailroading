@@ -1,9 +1,13 @@
 package cam72cam.immersiverailroading.tile;
 
+import java.util.List;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.physics.MovementTrack;
@@ -19,13 +23,23 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import trackapi.lib.ITrackTile;
 
-public class TileRailBase extends SyncdTileEntity implements ITrackTile {
+public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickable {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileRailBase ? (TileRailBase) te : null;
@@ -40,6 +54,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 	private NBTTagCompound replaced;
 	private boolean skipNextRefresh = false;
 	public ItemStack railBedCache = null;
+	private FluidTank augmentTank = null;
 	
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -158,6 +173,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		if (world != null && this.getParentTile() != null) {
 			this.getParentTile().snowRenderFlagDirty = true;
 		}
+		
+		if (nbt.hasKey("augmentTank")) {
+			createAugmentTank();
+			augmentTank.readFromNBT(nbt.getCompoundTag("augmentTank"));			
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -171,6 +191,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		
 		if (augment != null) {
 			nbt.setInteger("augment", this.augment.ordinal());
+			if (augmentTank != null) {
+				nbt.setTag("augmentTank", augmentTank.writeToNBT(new NBTTagCompound()));
+			}
 		}
 		
 		nbt.setInteger("version", 3);
@@ -306,5 +329,156 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile {
 		float rotationYaw = VecUtil.toYaw(motion);
 		
 		return MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+	}
+	
+	/*
+	 * Capabilities tie ins
+	 */
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		if (this.getAugment() != null) {
+			switch(this.getAugment()) {
+			case FLUID_LOADER:
+			case FLUID_UNLOADER:
+			case WATER_TROUGH:
+				return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
+			case ITEM_LOADER:
+			case ITEM_UNLOADER:
+				return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+			case DETECTOR:
+			case LOCO_CONTROL:
+			case SPEED_RETARDER:
+				break;
+			}
+		}
+		return super.hasCapability(capability, facing);
+	}
+	
+	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type, Capability<?> capability){
+		AxisAlignedBB bb = new AxisAlignedBB(this.pos.south().west(), this.pos.up(3).east().north());
+		List<T> stocks = this.world.getEntitiesWithinAABB(type, bb);
+		for (T stock : stocks) {
+			if (capability == null || stock.hasCapability(capability, null)) {
+				return stock;
+			}
+		}
+		return null;
+	}
+	
+	public EntityRollingStock getStockNearBy(Capability<?> capability){
+		return getStockNearBy(EntityRollingStock.class, capability);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		if (this.getAugment() != null) {
+			switch(this.getAugment()) {
+			case FLUID_LOADER:
+			case FLUID_UNLOADER:
+			case WATER_TROUGH:
+				if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+					if (this.augmentTank == null) {
+						this.createAugmentTank();
+					}
+					return (T) this.augmentTank;
+				}
+			case ITEM_LOADER:
+			case ITEM_UNLOADER:
+				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+					EntityRollingStock stock = getStockNearBy(capability);
+					if (stock != null) {
+						return stock.getCapability(capability, null);
+					}
+					return (T) new ItemStackHandler(0);
+				}
+			case DETECTOR:
+			case LOCO_CONTROL:
+			case SPEED_RETARDER:
+				break;
+			}
+		}
+		return super.getCapability(capability, facing);
+	}
+	
+	private void createAugmentTank() {
+		switch(this.augment) {
+		case FLUID_LOADER:
+		case FLUID_UNLOADER:
+			this.augmentTank = new FluidTank(1000);
+			break;
+		case WATER_TROUGH:
+			this.augmentTank = new FluidTank(FluidRegistry.WATER, 0, 1000) {
+				@Override
+				protected void onContentsChanged() {
+					TileRailBase.this.markDirty();
+				}
+			};
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void transferAll(IFluidHandler source, IFluidHandler dest, int maxQuantity) {
+		FluidStack possibleDrain = source.drain(maxQuantity, false);
+		if (possibleDrain == null || possibleDrain.amount == 0) {
+			return;
+		}
+		int filled = dest.fill(possibleDrain, true);
+		source.drain(filled, true);
+	}
+
+	@Override
+	public void update() {
+		if (this.world.isRemote) {
+			return;
+		}
+		
+		if (this.augment == null) {
+			return;
+		}
+		
+		if (!this.augment.isFluidHandler()) {
+			return;
+		}
+		
+		if (this.augmentTank == null) {
+			this.createAugmentTank();
+		}
+		
+		Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
+		EntityRollingStock stock;
+		switch (this.augment) {
+		case FLUID_LOADER:
+			stock = this.getStockNearBy(capability);
+			if (stock != null) {
+				transferAll(this.augmentTank, stock.getCapability(capability, null), 10);
+			}
+			break;
+		case FLUID_UNLOADER:
+			stock = this.getStockNearBy(capability);
+			if (stock != null) {
+				transferAll(stock.getCapability(capability, null), this.augmentTank, 10);
+			}
+			break;
+		case WATER_TROUGH:
+			Tender tender = this.getStockNearBy(Tender.class, capability);
+			if (tender != null) {
+				transferAll(this.augmentTank, tender.getCapability(capability, null), waterPressureFromSpeed(tender.getCurrentSpeed().metric()));
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public double getTankLevel() {
+		return this.augmentTank == null ? 0 : (double)this.augmentTank.getFluidAmount() / this.augmentTank.getCapacity(); 
+	}
+	
+	private static int waterPressureFromSpeed(double speed) {
+		speed = Math.abs(speed);
+		return (int) ((speed * speed) / 200);
 	}
 }

@@ -17,16 +17,17 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.*;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
-public abstract class FreightTank extends Freight implements IFluidHandler {
+public abstract class FreightTank extends Freight {
 	private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.createKey(FreightTank.class, DataSerializers.VARINT);
 	private static final DataParameter<String> FLUID_TYPE = EntityDataManager.createKey(FreightTank.class, DataSerializers.STRING);
-	private FluidTank theTank = new FluidTank(null, 0) {
+	protected final FluidTank theTank = new FluidTank(null, 0) {
 		@Override
 		public boolean canFillFluidType(FluidStack fluid) {
 			return canFill() && (getFluidFilter() == null || getFluidFilter().contains(fluid.getFluid()));
@@ -253,26 +254,6 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 		}
 		return fLoad;
 	}
-	
-	@Override
-	public IFluidTankProperties[] getTankProperties() {
-		return theTank.getTankProperties();
-	}
-
-	@Override
-	public int fill(FluidStack resource, boolean doFill) {
-		return theTank.fill(resource, doFill);
-	}
-
-	@Override
-	public FluidStack drain(FluidStack resource, boolean doDrain) {
-		return theTank.drain(resource, doDrain);
-	}
-
-	@Override
-	public FluidStack drain(int maxDrain, boolean doDrain) {
-		return theTank.drain(maxDrain, doDrain);
-	}
 
 	private List<ISyncableSlots> listners = new ArrayList<ISyncableSlots>();
 	@Override
@@ -287,4 +268,21 @@ public abstract class FreightTank extends Freight implements IFluidHandler {
 	public void addListener(ISyncableSlots tankContainer) {
 		this.listners.add(tankContainer);
 	}
+	
+	@Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            return true;
+        }
+        return super.hasCapability(capability, facing);
+    }
+
+    @SuppressWarnings("unchecked")
+	@Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            return (T) theTank;
+        }
+        return super.getCapability(capability, facing);
+    }
 }

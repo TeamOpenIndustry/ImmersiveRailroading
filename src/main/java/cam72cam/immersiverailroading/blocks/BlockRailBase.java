@@ -39,6 +39,7 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyFloat SNOW = new PropertyFloat("SNOW");
 	public static final PropertyFloat GAUGE = new PropertyFloat("GAUGE");
 	public static final PropertyEnum<Augment> AUGMENT = new PropertyEnum<Augment>("AUGMENT", Augment.class);
+	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
 	
 	public BlockRailBase(Material materialIn) {
 		super(materialIn);
@@ -83,6 +84,7 @@ public abstract class BlockRailBase extends Block {
         	SNOW,
         	GAUGE,
         	AUGMENT,
+        	LIQUID,
         });
     }
 
@@ -98,6 +100,7 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
+				state = state.withProperty(LIQUID, (float)te.getTankLevel());
 			}
     	}
         return state;
@@ -178,13 +181,14 @@ public abstract class BlockRailBase extends Block {
 		}
 		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, te.getFullHeight()+0.1, 1.0F);
 	}
-
+	
+	
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
 		TileRailBase te = TileRailBase.get(source, pos);
 		if (te == null) {
 	        return NULL_AABB;
 		}
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, te.getFullHeight(), 1.0F);
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Math.max(te.getFullHeight(),0.25), 1.0F);
 	}
 	
 	@Override
