@@ -109,7 +109,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox() {
-		return this.getEntityBoundingBox();
+		return this.getEntityBoundingBox().contract(0, 0.5, 0).offset(0, 0.5, 0);
 	}
 
 	@Override

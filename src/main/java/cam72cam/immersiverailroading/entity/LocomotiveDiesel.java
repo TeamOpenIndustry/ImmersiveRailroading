@@ -11,9 +11,8 @@ import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
+public class LocomotiveDiesel extends Locomotive {
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -69,7 +68,7 @@ public class LocomotiveDiesel extends Locomotive implements IFluidHandler {
 			burnTime /= Math.abs(getThrottle())*10;
 			burnTime *= 1/gauge.scale();
 			if (this.ticksExisted % burnTime == 0) {
-				drain(1, true);
+				theTank.drain(1, true);
 			}
 		}
 	}

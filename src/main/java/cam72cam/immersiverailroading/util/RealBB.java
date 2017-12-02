@@ -144,7 +144,11 @@ public class RealBB extends AxisAlignedBB {
 		return 0;
 	}
 	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
-		return 0;
+		if (other.minY < this.maxY) {
+			return 0.1;
+		} else {
+			return 0;
+		}
 	}
 	public double calculateZOffset(AxisAlignedBB other, double offsetZ) {
 		return 0;

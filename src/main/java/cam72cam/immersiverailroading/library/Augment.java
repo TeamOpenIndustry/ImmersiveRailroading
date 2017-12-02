@@ -8,5 +8,17 @@ public enum Augment {
 	ITEM_UNLOADER,
 	FLUID_LOADER,
 	FLUID_UNLOADER,
-	DETECTOR,
+	DETECTOR
+	;
+	
+	public boolean isFluidHandler() {
+		switch (this) {
+		case FLUID_LOADER:
+		case FLUID_UNLOADER:
+		case WATER_TROUGH:
+			return true;
+		default:
+			return false;
+		}
+	}
 }

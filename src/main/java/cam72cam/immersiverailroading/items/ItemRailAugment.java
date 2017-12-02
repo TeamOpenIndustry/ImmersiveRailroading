@@ -44,7 +44,7 @@ public class ItemRailAugment extends Item {
 				TileRailBase te = TileRailBase.get(world, pos);
 				if (te != null) {
 					ItemStack stack = player.getHeldItem(hand);
-					if (te.getAugment() == null && Gauge.from(te.getTrackGauge()) == getGauge(stack)) {
+					if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == getGauge(stack))) {
 						te.setAugment(getAugment(stack));
 						if (!player.isCreative()) {
 							stack.setCount(0);

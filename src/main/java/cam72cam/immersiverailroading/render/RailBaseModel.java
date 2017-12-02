@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.render.rail.ScaledModel;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.property.IExtendedBlockState;
@@ -27,15 +29,23 @@ public class RailBaseModel implements IBakedModel {
 			IExtendedBlockState railState = (IExtendedBlockState)state;
 			ItemStack bed = railState.getValue(BlockRailBase.RAIL_BED);
 			if (bed != null) { // wait for tile to be initialized
-				float height = railState.getValue(BlockRailBase.HEIGHT).floatValue();
+				float height = railState.getValue(BlockRailBase.HEIGHT).floatValue() + 0.1f;
 				int snow = railState.getValue(BlockRailBase.SNOW).intValue();
 				Augment augment = railState.getValue(BlockRailBase.AUGMENT);
 				//double gauge = railState.getValue(BlockRailBase.GAUGE).doubleValue();
+				double liquid = railState.getValue(BlockRailBase.LIQUID);
 				
 				if (augment != null) {
-					state = Blocks.IRON_BLOCK.getDefaultState();
-					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-					return model.getQuads(state, side, rand);
+					if (augment == Augment.WATER_TROUGH) {
+						state = Blocks.CONCRETE.getDefaultState();
+						state = state.withProperty(BlockColored.COLOR, EnumDyeColor.BLUE);
+						IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
+						return new ScaledModel(model, (float) (height * liquid)).getQuads(state, side, rand);
+					} else {
+						state = Blocks.IRON_BLOCK.getDefaultState();
+						IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
+						return new ScaledModel(model, height).getQuads(state, side, rand);
+					}
 				}
 				
 				if (snow != 0) {
