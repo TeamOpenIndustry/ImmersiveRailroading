@@ -180,15 +180,19 @@ public abstract class Locomotive extends FreightTank {
 		return dataManager.get(THROTTLE);
 	}
 	public void setThrottle(float newThrottle) {
-		dataManager.set(THROTTLE, newThrottle);
-		triggerResimulate();
+		if (this.getThrottle() != this.getThrottle()) {
+			dataManager.set(THROTTLE, newThrottle);
+			triggerResimulate();
+		}
 	}
 	
 	public float getAirBrake() {
 		return dataManager.get(AIR_BRAKE);
 	}
 	public void setAirBrake(float newAirBrake) {
-		dataManager.set(AIR_BRAKE, newAirBrake);
-		triggerResimulate();
+		if (this.getAirBrake() != newAirBrake) {
+			dataManager.set(AIR_BRAKE, newAirBrake);
+			triggerResimulate();
+		}
 	}
 }

@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.ParticleUtil;
+import cam72cam.immersiverailroading.util.RedstoneUtil;
 import cam72cam.immersiverailroading.util.SwitchUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.block.BlockSnow;
@@ -515,10 +516,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		case LOCO_CONTROL:
 			Locomotive loco = this.getStockNearBy(Locomotive.class, null);
 			if (loco != null) {
-				int power = 0;
-				for (EnumFacing facing : EnumFacing.VALUES) {
-					power = Math.max(power, world.getRedstonePower(pos.offset(facing), facing));
-				}
+				int power = RedstoneUtil.getPower(world, pos);
 				loco.setThrottle(power/15f);
 				if (power == 0) {
 					loco.setAirBrake(1);
