@@ -268,4 +268,26 @@ public abstract class BlockRailBase extends Block {
 		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
 		
 	}
+
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    {
+    	TileRailBase te = TileRailBase.get(blockAccess, pos);
+    	if (te != null && te.getAugment() == Augment.DETECTOR) {
+    		return te.getRedstoneLevel();
+    	}
+    	return 0;
+    }
+
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    {
+        return this.getWeakPower(blockState, blockAccess, pos, side);
+    }
+
+    public boolean canProvidePower(IBlockState state)
+    {
+    	if (state instanceof IExtendedBlockState) {
+    		return ((IExtendedBlockState) state).getValue(AUGMENT) == Augment.DETECTOR;
+    	}
+        return false;
+    }
 }

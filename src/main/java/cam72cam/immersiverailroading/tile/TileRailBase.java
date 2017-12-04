@@ -58,6 +58,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	private boolean skipNextRefresh = false;
 	public ItemStack railBedCache = null;
 	private FluidTank augmentTank = null;
+	private int redstoneLevel = 0;
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
@@ -430,10 +431,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			if (neighbor != null && neighbor.augmentTank != null) {
 				if (neighbor.augmentTank.getFluidAmount() + 1 < augmentTank.getFluidAmount()) {
 					transferAll(augmentTank, neighbor.augmentTank, (augmentTank.getFluidAmount() - neighbor.augmentTank.getFluidAmount())/2);
+					this.markDirty();
 				}
 			}
 		}
-		this.markDirty();
 	}
 	
 	private void createAugmentTank() {
@@ -447,6 +448,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 				@Override
 				protected void onContentsChanged() {
 					balanceTanks();
+					markDirty();
 				}
 			};
 			break;
@@ -526,10 +528,20 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			}
 			break;
 		case DETECTOR:
+			boolean provideRedstone = this.getStockNearBy(null) != null;
+			boolean currentRedstone = redstoneLevel != 0;
+			if (provideRedstone != currentRedstone) {
+				this.redstoneLevel = provideRedstone ? 15 : 0;
+				this.markDirty(); //TODO overkill
+			}
 			break;
 		default:
 			break;
 		}
+	}
+	
+	public int getRedstoneLevel() {
+		return this.redstoneLevel;
 	}
 	
 	public double getTankLevel() {
