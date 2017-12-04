@@ -8,6 +8,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.client.util.ITooltipFlag;
@@ -45,7 +47,25 @@ public class ItemRailAugment extends Item {
 				if (te != null) {
 					ItemStack stack = player.getHeldItem(hand);
 					if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == getGauge(stack))) {
-						te.setAugment(getAugment(stack));
+						Augment augment = getAugment(stack);
+						switch(augment) {
+						case SPEED_RETARDER:
+						case WATER_TROUGH:
+							TileRail parent = te.getParentTile();
+							if (parent == null) {
+								return EnumActionResult.FAIL;
+							}
+							if (parent.getRotationQuarter() != 0) {
+								return EnumActionResult.FAIL;
+							}
+							if (parent.getType() != TrackItems.STRAIGHT) {
+								return EnumActionResult.FAIL; 
+							}
+							break;
+						default:
+							break;
+						}
+						te.setAugment(augment);
 						if (!player.isCreative()) {
 							stack.setCount(0);
 						}
