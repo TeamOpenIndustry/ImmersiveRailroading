@@ -20,6 +20,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -40,6 +41,7 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyFloat GAUGE = new PropertyFloat("GAUGE");
 	public static final PropertyEnum<Augment> AUGMENT = new PropertyEnum<Augment>("AUGMENT", Augment.class);
 	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
+	public static final PropertyEnum<EnumFacing> FACING = new PropertyEnum<EnumFacing>("FACING", EnumFacing.class);
 	
 	public BlockRailBase(Material materialIn) {
 		super(materialIn);
@@ -85,6 +87,7 @@ public abstract class BlockRailBase extends Block {
         	GAUGE,
         	AUGMENT,
         	LIQUID,
+        	FACING,
         });
     }
 
@@ -101,6 +104,19 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
+				TileRail parent = te.getParentTile();
+				if (parent != null) {
+					if (parent.getFacing().getAxis() == Axis.X) {
+						if (parent.getPos().getZ() == te.getPos().getZ()) {
+							state = state.withProperty(FACING, te.getParentTile().getFacing());
+						}
+					}
+					if (parent.getFacing().getAxis() == Axis.Z) {
+						if (parent.getPos().getX() == te.getPos().getX()) {
+							state = state.withProperty(FACING, te.getParentTile().getFacing());
+						}
+					}
+				}
 			}
     	}
         return state;

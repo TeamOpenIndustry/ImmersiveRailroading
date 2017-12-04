@@ -18,12 +18,14 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -55,6 +57,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	private boolean skipNextRefresh = false;
 	public ItemStack railBedCache = null;
 	private FluidTank augmentTank = null;
+	private int clientLastTankAmount = 0;
+	private long clientSoundTimeout = 0;
+	private int ticksExisted;
 	
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -129,6 +134,23 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	public void readUpdateNBT(NBTTagCompound nbt) {
 		if (nbt.hasKey("renderBed")) {
 			this.railBedCache = new ItemStack(nbt.getCompoundTag("renderBed"));
+		}
+		if (this.augmentTank != null && this.augment == Augment.WATER_TROUGH) {
+			int delta = clientLastTankAmount - this.augmentTank.getFluidAmount();
+			if (delta > 0) {
+				// We lost water, do spray
+				// TODO, this fires during rebalance which is not correct
+				for (int i = 0; i < delta/10; i ++) {
+					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+						ParticleUtil.spawnParticle(world, EnumParticleTypes.WATER_SPLASH, new Vec3d(pos.offset(facing)).addVector(0.5, 0.5, 0.5));
+					}
+				}
+				if (clientSoundTimeout < world.getWorldTime()) {
+					world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_BUCKET_FILL, SoundCategory.BLOCKS, 1, 1, false);
+					clientSoundTimeout = world.getWorldTime() + 10;
+				}
+			}
+			clientLastTankAmount = this.augmentTank.getFluidAmount();
 		}
 	}
 	
@@ -401,6 +423,18 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		return super.getCapability(capability, facing);
 	}
 	
+	private void balanceTanks() {
+		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+			TileRailBase neighbor = TileRailBase.get(world, pos.offset(facing));
+			if (neighbor != null && neighbor.augmentTank != null) {
+				if (neighbor.augmentTank.getFluidAmount() + 1 < augmentTank.getFluidAmount()) {
+					transferAll(augmentTank, neighbor.augmentTank, (augmentTank.getFluidAmount() - neighbor.augmentTank.getFluidAmount())/2);
+				}
+			}
+		}
+		this.markDirty();
+	}
+	
 	private void createAugmentTank() {
 		switch(this.augment) {
 		case FLUID_LOADER:
@@ -411,7 +445,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			this.augmentTank = new FluidTank(FluidRegistry.WATER, 0, 1000) {
 				@Override
 				protected void onContentsChanged() {
-					TileRailBase.this.markDirty();
+					balanceTanks();
 				}
 			};
 			break;
@@ -447,6 +481,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			this.createAugmentTank();
 		}
 		
+		ticksExisted += 1;
+		
 		Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
 		EntityRollingStock stock;
 		switch (this.augment) {
@@ -466,6 +502,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			Tender tender = this.getStockNearBy(Tender.class, capability);
 			if (tender != null) {
 				transferAll(this.augmentTank, tender.getCapability(capability, null), waterPressureFromSpeed(tender.getCurrentSpeed().metric()));
+			} else if (this.ticksExisted % 20 == 0) {
+				balanceTanks();
 			}
 			break;
 		default:
