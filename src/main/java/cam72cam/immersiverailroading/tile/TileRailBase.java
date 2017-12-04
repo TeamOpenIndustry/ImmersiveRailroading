@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -473,13 +474,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			return;
 		}
 		
-		if (!this.augment.isFluidHandler()) {
-			return;
-		}
 		
-		if (this.augmentTank == null) {
-			this.createAugmentTank();
-		}
 		
 		ticksExisted += 1;
 		
@@ -487,24 +482,50 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		EntityRollingStock stock;
 		switch (this.augment) {
 		case FLUID_LOADER:
+			if (this.augmentTank == null) {
+				this.createAugmentTank();
+			}
 			stock = this.getStockNearBy(capability);
 			if (stock != null) {
 				transferAll(this.augmentTank, stock.getCapability(capability, null), 10);
 			}
 			break;
 		case FLUID_UNLOADER:
+			if (this.augmentTank == null) {
+				this.createAugmentTank();
+			}
 			stock = this.getStockNearBy(capability);
 			if (stock != null) {
 				transferAll(stock.getCapability(capability, null), this.augmentTank, 10);
 			}
 			break;
 		case WATER_TROUGH:
+			if (this.augmentTank == null) {
+				this.createAugmentTank();
+			}
 			Tender tender = this.getStockNearBy(Tender.class, capability);
 			if (tender != null) {
 				transferAll(this.augmentTank, tender.getCapability(capability, null), waterPressureFromSpeed(tender.getCurrentSpeed().metric()));
 			} else if (this.ticksExisted % 20 == 0) {
 				balanceTanks();
 			}
+			break;
+		case LOCO_CONTROL:
+			Locomotive loco = this.getStockNearBy(Locomotive.class, null);
+			if (loco != null) {
+				int power = 0;
+				for (EnumFacing facing : EnumFacing.VALUES) {
+					power = Math.max(power, world.getRedstonePower(pos.offset(facing), facing));
+				}
+				loco.setThrottle(power/15f);
+				if (power == 0) {
+					loco.setAirBrake(1);
+				} else {
+					loco.setAirBrake(0);
+				}
+			}
+			break;
+		case DETECTOR:
 			break;
 		default:
 			break;
@@ -516,7 +537,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	}
 	
 	private static int waterPressureFromSpeed(double speed) {
-		speed = Math.abs(speed);
+		if (speed < 0) {
+			return 0;
+		}
 		return (int) ((speed * speed) / 200);
 	}
 }

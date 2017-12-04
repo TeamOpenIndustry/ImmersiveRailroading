@@ -13,17 +13,6 @@ public enum Augment {
 	DETECTOR
 	;
 	
-	public boolean isFluidHandler() {
-		switch (this) {
-		case FLUID_LOADER:
-		case FLUID_UNLOADER:
-		case WATER_TROUGH:
-			return true;
-		default:
-			return false;
-		}
-	}
-	
 	public EnumDyeColor tempColor() {
 		switch (this) {
 		case DETECTOR:
