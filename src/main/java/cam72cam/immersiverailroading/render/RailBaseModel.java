@@ -5,7 +5,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.render.rail.ScaledModel;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockSnow;
@@ -20,6 +20,8 @@ import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class RailBaseModel implements IBakedModel {
@@ -29,24 +31,48 @@ public class RailBaseModel implements IBakedModel {
 			IExtendedBlockState railState = (IExtendedBlockState)state;
 			ItemStack bed = railState.getValue(BlockRailBase.RAIL_BED);
 			if (bed != null) { // wait for tile to be initialized
-				float height = railState.getValue(BlockRailBase.HEIGHT).floatValue() + 0.1f;
+				float height = railState.getValue(BlockRailBase.HEIGHT).floatValue();
 				int snow = railState.getValue(BlockRailBase.SNOW).intValue();
 				Augment augment = railState.getValue(BlockRailBase.AUGMENT);
-				//double gauge = railState.getValue(BlockRailBase.GAUGE).doubleValue();
+				double gauged = railState.getValue(BlockRailBase.GAUGE).doubleValue();
 				double liquid = railState.getValue(BlockRailBase.LIQUID);
+				EnumFacing facing = railState.getValue(BlockRailBase.FACING);
+				Gauge gauge = Gauge.from(gauged);
 				
 				if (augment != null) {
-					if (augment == Augment.WATER_TROUGH) {
-						state = Blocks.CONCRETE.getDefaultState();
-						state = state.withProperty(BlockColored.COLOR, EnumDyeColor.BLUE);
-						IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-						return new ScaledModel(model, (float) (height * liquid)).getQuads(state, side, rand);
-					} else {
-						state = Blocks.IRON_BLOCK.getDefaultState();
-						IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-						return new ScaledModel(model, height).getQuads(state, side, rand);
+					height = height + 0.1f * (float)gauge.scale() * 1.25f;
+
+					state = Blocks.CONCRETE.getDefaultState();
+					state = state.withProperty(BlockColored.COLOR, augment.tempColor());
+					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
+					List<BakedQuad> quads = new ArrayList<BakedQuad>();
+					quads.addAll(new BakedScaledModel(model, height).getQuads(state, side, rand));
+					
+					if (augment == Augment.WATER_TROUGH && facing != null) {
+						Vec3d scale = new Vec3d(1, height, 0.5 * gauge.scale());
+						Vec3d pos = new Vec3d(0,height,0.5-0.25 * gauge.scale());
+						if (facing.getAxis() == Axis.Z) {
+							scale = new Vec3d(0.5 * gauge.scale(), height, 1);
+							pos = new Vec3d(0.5-0.25 * gauge.scale(),height,0);
+						}
+						
+						if (side != EnumFacing.DOWN && side != EnumFacing.UP) {
+							state = state.withProperty(BlockColored.COLOR, EnumDyeColor.GRAY);
+							BakedScaledModel container = new BakedScaledModel(model, scale, pos);
+							quads.addAll(container.getQuads(state, side, rand));
+						} else if (liquid > 0) {
+							state = state.withProperty(BlockColored.COLOR, EnumDyeColor.BLUE);
+							scale = new Vec3d(scale.x, scale.y * liquid, scale.z);
+							IBakedModel water = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
+							IBakedModel waterScaled = new BakedScaledModel(water, scale, pos);
+							quads.addAll(waterScaled.getQuads(state, side, rand));
+						}
 					}
+					
+					return quads;
 				}
+				
+				height = height + 0.1f * (float)gauge.scale();
 				
 				if (snow != 0) {
 					state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snow);
@@ -56,7 +82,7 @@ public class RailBaseModel implements IBakedModel {
 					ItemStack item = bed;
 					state = BlockUtil.itemToBlockState(item);
 					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-					return new ScaledModel(model, height).getQuads(state, side, rand);
+					return new BakedScaledModel(model, height).getQuads(state, side, rand);
 				}
 			}
 		}
