@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.util.Speed;
@@ -37,6 +38,11 @@ public class PhysicsAccummulator {
 			Locomotive loco = (Locomotive) stock;
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(speed) * (direction ? 1 : -1);
 			airBrake += loco.getAirBrake();
+		}
+		
+		if (stock instanceof EntityMoveableRollingStock) {
+			int slowdown = ((EntityMoveableRollingStock)stock).getSpeedRetarderSlowdown();
+			rollingResistanceNewtons += slowdown * stockMassLb / 300;
 		}
 	}
 	

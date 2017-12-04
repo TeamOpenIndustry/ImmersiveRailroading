@@ -180,7 +180,7 @@ public abstract class Locomotive extends FreightTank {
 		return dataManager.get(THROTTLE);
 	}
 	public void setThrottle(float newThrottle) {
-		if (this.getThrottle() != this.getThrottle()) {
+		if (this.getThrottle() != newThrottle) {
 			dataManager.set(THROTTLE, newThrottle);
 			triggerResimulate();
 		}
