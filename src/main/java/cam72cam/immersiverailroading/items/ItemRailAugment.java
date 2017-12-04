@@ -48,13 +48,12 @@ public class ItemRailAugment extends Item {
 					ItemStack stack = player.getHeldItem(hand);
 					if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == getGauge(stack))) {
 						Augment augment = getAugment(stack);
+						TileRail parent = te.getParentTile();
+						if (parent == null) {
+							return EnumActionResult.FAIL;
+						}
 						switch(augment) {
-						case SPEED_RETARDER:
 						case WATER_TROUGH:
-							TileRail parent = te.getParentTile();
-							if (parent == null) {
-								return EnumActionResult.FAIL;
-							}
 							if (parent.getRotationQuarter() != 0) {
 								return EnumActionResult.FAIL;
 							}
@@ -62,6 +61,14 @@ public class ItemRailAugment extends Item {
 								return EnumActionResult.FAIL; 
 							}
 							break;
+						case SPEED_RETARDER:
+							switch(parent.getType()) {
+							case SWITCH:
+							case TURN:
+								return EnumActionResult.FAIL; 
+							default:
+								break;
+							}
 						default:
 							break;
 						}

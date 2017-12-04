@@ -285,9 +285,6 @@ public abstract class BlockRailBase extends Block {
 
     public boolean canProvidePower(IBlockState state)
     {
-    	if (state instanceof IExtendedBlockState) {
-    		return ((IExtendedBlockState) state).getValue(AUGMENT) == Augment.DETECTOR;
-    	}
-        return false;
+        return true;
     }
 }
