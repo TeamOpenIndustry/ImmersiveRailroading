@@ -451,12 +451,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return new PosRot(nextRear.subtractReverse(pos.position), VecUtil.toYaw(rearDelta));
 	}
 
-	public int getSpeedRetarderSlowdown() {
+	public int getSpeedRetarderSlowdown(TickPos latest) {
 		int over = 0;
 		
 		for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
-			pos = pos.add(this.getPositionVector());
+			pos = pos.add(latest.position);
 			BlockPos bp = new BlockPos(pos);
 			bp = bp.down();
 			IBlockState state = world.getBlockState(bp);
