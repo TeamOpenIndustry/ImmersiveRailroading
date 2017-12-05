@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render.rail;
+package cam72cam.immersiverailroading.render;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,16 +11,25 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.Vec3d;
 
-public class ScaledModel implements IBakedModel {
+public class BakedScaledModel implements IBakedModel {
 	// I know this is evil and I love it :D
 	
 	private IBakedModel source;
-	private float height;
+	private final Vec3d scale;
+	private final Vec3d transform;
 	
-	public ScaledModel(IBakedModel source, float height) {
+	public BakedScaledModel(IBakedModel source, Vec3d scale, Vec3d transform) {
 		this.source = source;
-		this.height = height + 0.1f;
+		this.scale = scale;
+		this.transform = transform;
+	}
+	
+	public BakedScaledModel(IBakedModel source, float height) {
+		this.source = source;
+		this.scale = new Vec3d(1, height, 1);
+		transform = new Vec3d(0,0,0);
 	}
 
 	@Override
@@ -35,7 +44,9 @@ public class ScaledModel implements IBakedModel {
 			for (int i = 0; i < 4; ++i)
 	        {
 				int j = format.getIntegerSize() * i;
-	            newData[j + 1] = Float.floatToRawIntBits(Float.intBitsToFloat(newData[j + 1]) * height);
+	            newData[j + 0] = Float.floatToRawIntBits(Float.intBitsToFloat(newData[j + 0]) * (float)scale.x + (float)transform.x);
+	            newData[j + 1] = Float.floatToRawIntBits(Float.intBitsToFloat(newData[j + 1]) * (float)scale.y + (float)transform.y);
+	            newData[j + 2] = Float.floatToRawIntBits(Float.intBitsToFloat(newData[j + 2]) * (float)scale.z + (float)transform.z);
 	        }
 			
 			newQuads.add(new BakedQuad(newData, quad.getTintIndex(), quad.getFace(), quad.getSprite(), quad.shouldApplyDiffuseLighting(), quad.getFormat()));

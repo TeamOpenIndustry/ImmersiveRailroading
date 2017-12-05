@@ -46,6 +46,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         stock.add(new ItemStack(ImmersiveRailroading.ITEM_LARGE_WRENCH, 1));
         stock.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
         stock.add(new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1));
+        ImmersiveRailroading.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
         ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
 
 		stockSelector = new ItemPickerGUI(stock);

@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.blocks;
 import javax.annotation.Nonnull;
 
 import cam72cam.immersiverailroading.items.ItemTabs;
+import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -19,6 +20,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -37,6 +39,9 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyFloat HEIGHT = new PropertyFloat("HEIGHT");
 	public static final PropertyFloat SNOW = new PropertyFloat("SNOW");
 	public static final PropertyFloat GAUGE = new PropertyFloat("GAUGE");
+	public static final PropertyEnum<Augment> AUGMENT = new PropertyEnum<Augment>("AUGMENT", Augment.class);
+	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
+	public static final PropertyEnum<EnumFacing> FACING = new PropertyEnum<EnumFacing>("FACING", EnumFacing.class);
 	
 	public BlockRailBase(Material materialIn) {
 		super(materialIn);
@@ -79,7 +84,10 @@ public abstract class BlockRailBase extends Block {
         	RAIL_BED,
         	HEIGHT,
         	SNOW,
-        	GAUGE
+        	GAUGE,
+        	AUGMENT,
+        	LIQUID,
+        	FACING,
         });
     }
 
@@ -94,6 +102,21 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(HEIGHT, te.getHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
+				state = state.withProperty(AUGMENT, te.getAugment());
+				state = state.withProperty(LIQUID, (float)te.getTankLevel());
+				TileRail parent = te.getParentTile();
+				if (parent != null) {
+					if (parent.getFacing().getAxis() == Axis.X) {
+						if (parent.getPos().getZ() == te.getPos().getZ()) {
+							state = state.withProperty(FACING, te.getParentTile().getFacing());
+						}
+					}
+					if (parent.getFacing().getAxis() == Axis.Z) {
+						if (parent.getPos().getX() == te.getPos().getX()) {
+							state = state.withProperty(FACING, te.getParentTile().getFacing());
+						}
+					}
+				}
 			}
     	}
         return state;
@@ -174,13 +197,14 @@ public abstract class BlockRailBase extends Block {
 		}
 		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, te.getFullHeight()+0.1, 1.0F);
 	}
-
+	
+	
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
 		TileRailBase te = TileRailBase.get(source, pos);
 		if (te == null) {
 	        return NULL_AABB;
 		}
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, te.getFullHeight(), 1.0F);
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Math.max(te.getFullHeight(),0.25), 1.0F);
 	}
 	
 	@Override
@@ -244,4 +268,23 @@ public abstract class BlockRailBase extends Block {
 		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
 		
 	}
+
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    {
+    	TileRailBase te = TileRailBase.get(blockAccess, pos);
+    	if (te != null && te.getAugment() == Augment.DETECTOR) {
+    		return te.getRedstoneLevel();
+    	}
+    	return 0;
+    }
+
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    {
+        return this.getWeakPower(blockState, blockAccess, pos, side);
+    }
+
+    public boolean canProvidePower(IBlockState state)
+    {
+        return true;
+    }
 }

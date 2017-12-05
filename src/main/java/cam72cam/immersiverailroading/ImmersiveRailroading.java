@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.blocks.BlockSteamHammer;
 import cam72cam.immersiverailroading.items.ItemHook;
 import cam72cam.immersiverailroading.items.ItemLargeWrench;
 import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemSteamHammer;
@@ -55,6 +56,8 @@ public class ImmersiveRailroading
 	
 	@ObjectHolder(ItemHook.NAME)
 	public static ItemHook ITEM_HOOK = new ItemHook();
+	
+	public static ItemRailAugment ITEM_AUGMENT = new ItemRailAugment();
 	
 	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL);
 	

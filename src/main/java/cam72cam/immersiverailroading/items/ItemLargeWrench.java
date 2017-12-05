@@ -1,9 +1,21 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 //TODO buildcraft.api.tools.IToolWrench
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class ItemLargeWrench extends Item {
 	public static final String NAME = "item_large_wrench";
@@ -13,5 +25,25 @@ public class ItemLargeWrench extends Item {
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
+	}
+	@Override
+	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+			if (BlockUtil.isIRRail(world, pos)) {
+				TileRailBase te = TileRailBase.get(world, pos);
+				if (te != null) {
+					Augment augment = te.getAugment();
+					if (augment != null) {
+						te.setAugment(null);
+
+						if(!world.isRemote) {
+							ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_AUGMENT, 1);
+							ItemRailAugment.setAugment(stack, augment);
+							ItemRailAugment.setGauge(stack, Gauge.from(te.getTrackGauge()));
+							world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), stack));
+						}
+					}
+				}
+			}
+		return EnumActionResult.PASS;
 	}
 }

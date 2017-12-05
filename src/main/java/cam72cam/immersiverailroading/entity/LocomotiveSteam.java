@@ -18,9 +18,8 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class LocomotiveSteam extends Locomotive implements IFluidHandler {
+public class LocomotiveSteam extends Locomotive {
 	// PSI
 	private static DataParameter<Float> BOILER_PRESSURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
 	// Celsius
@@ -148,7 +147,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
-				FluidUtil.tryFluidTransfer(this, tender, desiredDrain, true);
+				FluidUtil.tryFluidTransfer(this.theTank, tender.theTank, desiredDrain, true);
 			}
 			
 			if (this.ticksExisted % 20 == 0) {
@@ -173,7 +172,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 			if (getTankCapacity().MilliBuckets() > 0) {
 				if (rand.nextInt(100) == 0) {
 					int outputHorsepower = (int) Math.abs(getThrottle() * getAvailableHP());
-					drain(outputHorsepower * 10 / this.getDefinition().getHorsePower(gauge), true);
+					theTank.drain(outputHorsepower * 10 / this.getDefinition().getHorsePower(gauge), true);
 				}
 			}
 		}
@@ -244,7 +243,7 @@ public class LocomotiveSteam extends Locomotive implements IFluidHandler {
 		
 		if (changedBurnTime) {
 			setBurnTime(burnTime);
-			this.drain(this.getLiquidAmount() - (int)waterLevelMB, true);
+			theTank.drain(this.getLiquidAmount() - (int)waterLevelMB, true);
 		}
 		if (changedBurnMax) {
 			setBurnMax(burnMax);
