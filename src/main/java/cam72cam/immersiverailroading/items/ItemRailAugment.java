@@ -36,7 +36,7 @@ public class ItemRailAugment extends Item {
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
-        this.setMaxStackSize(1);
+        this.setMaxStackSize(16);
 	}
 	
 	@Override
@@ -74,7 +74,7 @@ public class ItemRailAugment extends Item {
 						}
 						te.setAugment(augment);
 						if (!player.isCreative()) {
-							stack.setCount(0);
+							stack.setCount(stack.getCount()-1);;
 						}
 						return EnumActionResult.SUCCESS;
 					}
@@ -96,7 +96,7 @@ public class ItemRailAugment extends Item {
         if (this.isInCreativeTab(tab))
         {
         	for (Augment augment : Augment.values()) {
-        		ItemStack stack = new ItemStack(this);
+        		ItemStack stack = new ItemStack(this, 8);
         		setAugment(stack, augment);
                 items.add(stack);
         	}
