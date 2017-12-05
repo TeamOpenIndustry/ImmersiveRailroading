@@ -45,4 +45,10 @@ public class Config {
 
 	@Comment("Cost to place down rail bed")
 	public static double BedCostMultiplier = 0.25;
+	
+	@Comment("Models require fuel")
+	public static boolean ModelFuelRequired = true;
+	
+	@Comment("Trains should break blocks")
+	public static boolean TrainsBreakBlocks = true;
 }
