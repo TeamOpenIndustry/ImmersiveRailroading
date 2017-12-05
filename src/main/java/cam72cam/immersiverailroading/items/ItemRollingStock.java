@@ -7,9 +7,12 @@ import javax.annotation.Nullable;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -70,6 +73,29 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		if (BlockUtil.isIRRail(worldIn, pos)) {
+			TileRailBase te = TileRailBase.get(worldIn, pos);
+			if (te.getAugment() != null) {
+				switch(te.getAugment()) {
+				case DETECTOR:
+				case FLUID_LOADER:
+				case FLUID_UNLOADER:
+				case ITEM_LOADER:
+				case ITEM_UNLOADER:
+					if (!worldIn.isRemote) {
+						boolean set = te.setAugmentFilter(getDefinitionID(player.getHeldItem(hand)));
+						if (set) {
+							player.sendMessage(ChatText.SET_AUGMENT_FILTER.getMessage(getDefinition(player.getHeldItem(hand)).name));
+						} else {
+							player.sendMessage(ChatText.RESET_AUGMENT_FILTER.getMessage());
+						}
+					}
+					return EnumActionResult.SUCCESS;
+				default:
+					break;
+				}
+			}
+		}
 		return tryPlaceStock(player, worldIn, pos, hand, null);
 	}
 	

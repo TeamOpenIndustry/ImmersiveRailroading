@@ -31,6 +31,8 @@ chat.immersiverailroading:build.missing.ties=Missing %s ties
 chat.immersiverailroading:build.missing.rails=Missing %s rails
 chat.immersiverailroading:build.missing.rail_bed=Missing %s rail_bed
 chat.immersiverailroading:build.missing.rail_bed_fill=Missing %s rail bed fill
+chat.immersiverailroading:augment.set=Set Augment to act only upon %s
+chat.immersiverailroading:augment.reset=Set Augment to act upon any stock 
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
