@@ -39,6 +39,7 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.render.RailItemModel;
+import cam72cam.immersiverailroading.render.RailAugmentItemModel;
 import cam72cam.immersiverailroading.render.RailBaseModel;
 import cam72cam.immersiverailroading.render.SteamHammerItemRender;
 import cam72cam.immersiverailroading.render.TileSteamHammerRender;
@@ -199,6 +200,9 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), ""));
+		
+		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT, 0,
+				new ModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT.getRegistryName(), ""));
 	}
 
 	@SubscribeEvent
@@ -207,6 +211,7 @@ public class ClientProxy extends CommonProxy {
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""), new RailItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""), new StockItemComponentModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_STEAM_HAMMER.getRegistryName(), ""), new SteamHammerItemRender());
+		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT.getRegistryName(), ""), new RailAugmentItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL.getRegistryName(), ""), new RailBaseModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL_GAG.getRegistryName(), ""), new RailBaseModel());
 	}

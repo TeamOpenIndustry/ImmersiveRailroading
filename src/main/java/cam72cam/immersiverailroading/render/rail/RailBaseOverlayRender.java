@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.BlockStainedGlass;
@@ -40,7 +41,7 @@ public class RailBaseOverlayRender {
 		for (TrackBase base : info.getBuilder(info.position).getTracksForRender()) {
 			if (!base.canPlaceTrack() ) {
 				hasIssue = true;
-				blockRenderer.getBlockModelRenderer().renderModel(info.world, new ScaledModel(gravelModel, base.getHeight()+0.1f), gravelState, base.getPos(), worldRenderer, false);
+				blockRenderer.getBlockModelRenderer().renderModel(info.world, new BakedScaledModel(gravelModel, base.getHeight()+0.2f), gravelState, base.getPos(), worldRenderer, false);
 			}
 		}
 		

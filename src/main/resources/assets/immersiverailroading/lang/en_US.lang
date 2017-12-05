@@ -1,5 +1,14 @@
 item.immersiverailroading:item_large_wrench.name=Large Wrench
 item.immersiverailroading:item_hook.name=Coupling Hook
+item.immersiverailroading:item_augment.SPEED_RETARDER.name=Speed Retarder
+item.immersiverailroading:item_augment.WATER_TROUGH.name=Water Trough
+item.immersiverailroading:item_augment.LOCO_CONTROL.name=Locomotive Control
+item.immersiverailroading:item_augment.ITEM_LOADER.name=Item Loader
+item.immersiverailroading:item_augment.ITEM_UNLOADER.name=Item Unloader
+item.immersiverailroading:item_augment.FLUID_LOADER.name=Fluid Loader
+item.immersiverailroading:item_augment.FLUID_UNLOADER.name=Fluid Unloader
+item.immersiverailroading:item_augment.DETECTOR.name=Detector
+
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
 tile.immersiverailroading:block_rail_preview.name=Rail Preview

@@ -5,12 +5,15 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.BufferUtil;
+import cam72cam.immersiverailroading.util.RedstoneUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
@@ -109,7 +112,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox() {
-		return this.getEntityBoundingBox();
+		return this.getEntityBoundingBox().contract(0, 0.5, 0).offset(0, 0.5, 0);
 	}
 
 	@Override
@@ -446,5 +449,49 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		}
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
 		return new PosRot(nextRear.subtractReverse(pos.position), VecUtil.toYaw(rearDelta));
+	}
+
+	public int getSpeedRetarderSlowdown(TickPos latest) {
+		int over = 0;
+		
+		for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
+			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+			pos = pos.add(latest.position);
+			BlockPos bp = new BlockPos(pos);
+			bp = bp.down();
+			IBlockState state = world.getBlockState(bp);
+			if (state.getBlock() != Blocks.AIR) {
+				if (BlockUtil.isIRRail(world, bp)) {
+					TileRailBase te = TileRailBase.get(world, bp);
+					if (te != null && te.getAugment() == Augment.SPEED_RETARDER) {
+						TileRail parent = te.getParentTile();
+						if (parent != null) {
+							int max = 0;
+							BlockPos tmpPos = bp;
+							while(true) {
+								tmpPos = tmpPos.offset(parent.getFacing());
+								TileRailBase tmp = TileRailBase.get(world, tmpPos);
+								if (tmp != null && tmp.getAugment() == Augment.SPEED_RETARDER) {
+									max = Math.max(max, RedstoneUtil.getPower(world, tmpPos));
+								} else {
+									break;
+								}
+							}
+							while(true) {
+								tmpPos = tmpPos.offset(parent.getFacing().getOpposite());
+								TileRailBase tmp = TileRailBase.get(world, tmpPos);
+								if (tmp != null && tmp.getAugment() == Augment.SPEED_RETARDER) {
+									max = Math.max(max, RedstoneUtil.getPower(world, tmpPos));
+								} else {
+									break;
+								}
+							}
+							over += max;
+						}
+					}
+				}
+			}
+		}
+		return over;
 	}
 }
