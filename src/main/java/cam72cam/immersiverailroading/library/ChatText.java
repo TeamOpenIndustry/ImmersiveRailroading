@@ -20,6 +20,8 @@ public enum ChatText {
 	BUILD_MISSING_RAILS("build.missing.rails"),
 	BUILD_MISSING_RAIL_BED("build.missing.rail_bed"),
 	BUILD_MISSING_RAIL_BED_FILL("build.missing.rail_bed_fill"),
+	SET_AUGMENT_FILTER("augment.set"),
+	RESET_AUGMENT_FILTER("augment.reset"),
 	;
 	
 	private String value;

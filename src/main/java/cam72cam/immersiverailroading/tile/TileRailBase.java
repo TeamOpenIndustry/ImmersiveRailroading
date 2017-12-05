@@ -52,6 +52,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	private BlockPos parent;
 	private float height = 0;
 	private Augment augment; 
+	private String augmentFilterID;
 	private int snowLayers = 0;
 	protected boolean flexible = false;
 	private boolean willBeReplaced = false; 
@@ -78,6 +79,15 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	public void setAugment(Augment augment) {
 		this.augment = augment;
 		this.markDirty();
+	}
+	public boolean setAugmentFilter(String definitionID) {
+		if (definitionID != augmentFilterID) {
+			this.augmentFilterID = definitionID;
+		} else {
+			this.augmentFilterID = null;
+		}
+		this.markDirty();
+		return this.augmentFilterID != null;
 	}
 	public Augment getAugment() {
 		return this.augment;
@@ -203,6 +213,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			createAugmentTank();
 			augmentTank.readFromNBT(nbt.getCompoundTag("augmentTank"));			
 		}
+		if (nbt.hasKey("augmentFilterID")) {
+			augmentFilterID = nbt.getString("augmentFilterID");
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -218,6 +231,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			nbt.setInteger("augment", this.augment.ordinal());
 			if (augmentTank != null) {
 				nbt.setTag("augmentTank", augmentTank.writeToNBT(new NBTTagCompound()));
+			}
+			if (augmentFilterID != null) {
+				nbt.setString("augmentFilterID", augmentFilterID);
 			}
 		}
 		
@@ -384,7 +400,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		List<T> stocks = this.world.getEntitiesWithinAABB(type, bb);
 		for (T stock : stocks) {
 			if (capability == null || stock.hasCapability(capability, null)) {
-				return stock;
+				if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
+					return stock;
+				}
 			}
 		}
 		return null;
