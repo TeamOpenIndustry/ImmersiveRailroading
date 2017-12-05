@@ -72,8 +72,6 @@ public class TileSteamHammer extends SyncdTileEntity implements ITickable {
 		}
 		
 		if (craftProgress == 1) {
-			this.chosenItem.setCount(1);
-			
 			if (!output.isEmpty()) {
 				this.world.spawnEntity(new EntityItem(world, this.pos.getX(), this.pos.getY()+1, this.pos.getZ(), output));
 			}
@@ -134,7 +132,6 @@ public class TileSteamHammer extends SyncdTileEntity implements ITickable {
 	}
 
 	public void setChoosenItem(ItemStack selected) {
-		selected.setCount(1);
 		this.chosenItem = selected.copy();
 		this.markDirty();
 	}
