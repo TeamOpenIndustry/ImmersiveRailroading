@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import blusunrize.immersiveengineering.api.energy.DieselHandler;
+import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
@@ -52,6 +54,9 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	protected int getAvailableHP() {
+		if (Config.ModelFuelRequired == false && this.gauge == Gauge.MODEL) {
+			return this.getDefinition().getHorsePower(gauge);
+		}
 		return this.getLiquidAmount() > 0 ? this.getDefinition().getHorsePower(gauge) : 0;
 	}
 

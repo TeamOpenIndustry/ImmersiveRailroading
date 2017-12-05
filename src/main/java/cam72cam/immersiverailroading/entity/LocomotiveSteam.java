@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
@@ -112,6 +113,9 @@ public class LocomotiveSteam extends Locomotive {
 	
 	@Override
 	protected int getAvailableHP() {
+		if (Config.ModelFuelRequired == false && this.gauge == Gauge.MODEL) {
+			return this.getDefinition().getHorsePower(gauge);
+		}
 		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
 	}
 	
