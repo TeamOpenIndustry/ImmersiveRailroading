@@ -215,10 +215,10 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			changedBurnTime = true;
 			if (boilerTemperature < 100 || waterLevelMB < this.getTankCapacity().MilliBuckets() * 0.75) {
-				boilerTemperature += 100/waterLevelMB * gauge.scale();
+				boilerTemperature += 100/waterLevelMB * Math.sqrt(gauge.scale());
 			}
 			if (boilerTemperature >= 100) {
-				boilerPressure += 100/waterLevelMB * gauge.scale();
+				boilerPressure += 100/waterLevelMB * Math.sqrt(gauge.scale());
 				if (rand.nextInt(10) == 0) {
 					waterLevelMB -= 1;
 				}
@@ -233,6 +233,11 @@ public class LocomotiveSteam extends Locomotive {
 				// cooling gas
 				boilerPressure = (float) Math.max(0, boilerPressure - 0.05);
 			}
+		}
+		
+		// This can go away once adding water drops the boiler pressure/temperature
+		if (boilerTemperature > 100 && gauge == Gauge.MODEL) {
+			boilerTemperature = 100;
 		}
 		
 		float throttle = Math.abs(getThrottle());
