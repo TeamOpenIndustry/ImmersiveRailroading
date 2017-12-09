@@ -13,6 +13,7 @@ import net.minecraft.world.World;
 
 public class SteamHammerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
+	private static MultiblockComponent piston = new MultiblockComponent(Blocks.PISTON);
 	private static BlockPos main = new BlockPos(2, 0, 0);
 	public static final String NAME = "STEAM_HAMMER";
 
@@ -24,6 +25,18 @@ public class SteamHammerMultiblock extends Multiblock {
 				},
 				{
 					steel, AIR, AIR, AIR, steel
+				},
+				{
+					steel, steel, steel, steel, steel
+				},
+				{
+					AIR, steel, steel, steel, AIR
+				},
+				{
+					AIR, AIR, piston, AIR, AIR
+				},
+				{
+					AIR, AIR, steel, AIR, AIR
 				}
 			}
 		});
