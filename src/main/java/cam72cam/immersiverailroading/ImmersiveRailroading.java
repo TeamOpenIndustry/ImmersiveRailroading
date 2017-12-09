@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.Logger;
 
+import cam72cam.immersiverailroading.blocks.BlockMultiblock;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.blocks.BlockRailPreview;
@@ -65,6 +66,8 @@ public class ImmersiveRailroading
 	public static BlockSteamHammer BLOCK_STEAM_HAMMER = new BlockSteamHammer();
 	
 	public static Item ITEM_STEAM_HAMMER = new ItemSteamHammer().setRegistryName(ImmersiveRailroading.BLOCK_STEAM_HAMMER.getRegistryName());
+	
+	public static BlockMultiblock BLOCK_MULTIBLOCK = new BlockMultiblock();
 	
 	private static Logger logger;
 	public static ImmersiveRailroading instance;
