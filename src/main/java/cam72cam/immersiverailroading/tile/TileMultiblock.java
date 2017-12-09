@@ -11,8 +11,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	
@@ -73,6 +76,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	public void update() {
 		this.renderTicks += 1;
 	}
+
+    @SideOnly(Side.CLIENT)
+    public AxisAlignedBB getRenderBoundingBox() {
+    	return INFINITE_EXTENT_AABB;
+    }
 	
 	public TileMultiblock getMain() {
 		return get(world, main);
@@ -133,7 +141,6 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 
 	public boolean isRender() {
 		if (offset == null) {
-			world.removeTileEntity(main);
 			return false;
 		}
 		//HACK
