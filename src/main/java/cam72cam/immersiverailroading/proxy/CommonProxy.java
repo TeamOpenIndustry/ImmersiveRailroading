@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.blocks.BlockMultiblock;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
@@ -26,6 +27,8 @@ import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
@@ -34,6 +37,7 @@ import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.net.SteamHammerSelectPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
@@ -88,6 +92,8 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.NETHER_BRICK);
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+    	
+    	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
     }
     
     public void init(FMLInitializationEvent event) {
@@ -116,10 +122,12 @@ public abstract class CommonProxy implements IGuiHandler {
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL);
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL_PREVIEW);
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_STEAM_HAMMER);
+		event.getRegistry().register(ImmersiveRailroading.BLOCK_MULTIBLOCK);
     	GameRegistry.registerTileEntity(TileRailGag.class, BlockRailGag.NAME);
     	GameRegistry.registerTileEntity(TileRail.class, BlockRail.NAME);
     	GameRegistry.registerTileEntity(TileRailPreview.class, BlockRailPreview.NAME);
     	GameRegistry.registerTileEntity(TileSteamHammer.class, BlockSteamHammer.NAME);
+    	GameRegistry.registerTileEntity(TileMultiblock.class, BlockMultiblock.NAME);
     }
     
     @SubscribeEvent
@@ -176,6 +184,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		case STEAM_LOCOMOTIVE:
 			return new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityIDorX));
 		case BLOCK_STEAM_HAMMER:
+			System.out.println("HERE");
 			TileSteamHammer te = TileSteamHammer.get(world, new BlockPos(entityIDorX, y, z));
 			if (te == null) {
 				return null;

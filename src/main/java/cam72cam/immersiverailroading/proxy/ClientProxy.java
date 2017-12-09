@@ -46,9 +46,11 @@ import cam72cam.immersiverailroading.render.TileSteamHammerRender;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.StockItemModel;
+import cam72cam.immersiverailroading.render.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.rail.TileRailPreviewRender;
 import cam72cam.immersiverailroading.render.rail.TileRailRender;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.tile.TileSteamHammer;
@@ -119,6 +121,7 @@ public class ClientProxy extends CommonProxy {
 		case RAIL_PREVIEW:
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		case BLOCK_STEAM_HAMMER:
+			System.out.println("HERE");
 			TileSteamHammer te = TileSteamHammer.get(world, new BlockPos(entityIDorPosX, posY, posZ));
 			if (te == null) {
 				return null;
@@ -182,6 +185,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRail.class, new TileRailRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileSteamHammer.class, new TileSteamHammerRender());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
 		
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH.getRegistryName(), ""));
