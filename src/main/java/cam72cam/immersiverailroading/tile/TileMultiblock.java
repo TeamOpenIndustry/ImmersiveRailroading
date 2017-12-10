@@ -25,35 +25,26 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 	
 	private IBlockState replaced;
-	private BlockPos main;
 	private BlockPos offset;
-	
-	//Main
 	private Rotation rotation;
 	private String name;
 	private long renderTicks;
 	
-	public void setAux(BlockPos main, BlockPos offset, IBlockState replaced) {
-		this.main = main;
-		this.offset = offset;
-		this.replaced = replaced;
-	}
-
-	public void setMain(String name, Rotation rot) {
+	public void configure(String name, Rotation rot, BlockPos offset, IBlockState replaced) {
 		this.name = name;
 		this.rotation = rot;
+		this.offset = offset;
+		this.replaced = replaced;
+		markDirty();
 	}
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		nbt = super.writeToNBT(nbt);
-		
-		if (name != null) {
-			nbt.setString("name", name);
-			nbt.setInteger("rotation", rotation.ordinal());
-		}
+
+		nbt.setString("name", name);
+		nbt.setInteger("rotation", rotation.ordinal());
 		nbt.setTag("replaced", NBTUtil.writeBlockState(new NBTTagCompound(), replaced));
-		nbt.setTag("main", NBTUtil.createPosTag(main));
 		nbt.setTag("offset", NBTUtil.createPosTag(offset));
 		
 		return nbt;
@@ -63,12 +54,9 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		
-		if (nbt.hasKey("name")) {
-			name = nbt.getString("name");
-			rotation = Rotation.values()[nbt.getInteger("rotation")];
-		}
+		name = nbt.getString("name");
+		rotation = Rotation.values()[nbt.getInteger("rotation")];
 		replaced = NBTUtil.readBlockState(nbt.getCompoundTag("replaced"));
-		main = NBTUtil.getPosFromTag(nbt.getCompoundTag("main"));
 		offset = NBTUtil.getPosFromTag(nbt.getCompoundTag("offset"));
 	}
 
@@ -82,27 +70,15 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     	return INFINITE_EXTENT_AABB;
     }
 	
-	public TileMultiblock getMain() {
-		return get(world, main);
-	}
-	
 	public BlockPos getOrigin() {
 		return pos.subtract(offset);
 	}
 	
 	public Multiblock getMultiblock() {
-		TileMultiblock teMain = getMain();
-		if (teMain != null) {
-			return MultiblockRegistry.get(teMain.name);
-		}
-		return null;
+		return MultiblockRegistry.get(name);
 	}
 	
 	public String getName() {
-		TileMultiblock mt = getMain();
-		if (mt != null) {
-			return mt.name;
-		}
 		return name;
 	}
 	
@@ -114,20 +90,13 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	 * Block Functions to pass on to the multiblock
 	 */
 	public void breakBlock() {
-		TileMultiblock teMain = getMain();
-		if (teMain != null) {
-			Multiblock mb = MultiblockRegistry.get(teMain.name);
-			mb.onBreak(world, getOrigin(), teMain.rotation);
-		}
+		Multiblock mb = MultiblockRegistry.get(name);
+		mb.onBreak(world, getOrigin(), rotation);
 	}
 
 	public boolean onBlockActivated(EntityPlayer player, EnumHand hand) {
-		TileMultiblock teMain = getMain();
-		if (teMain != null) {
-			Multiblock mb = MultiblockRegistry.get(teMain.name);
-			return mb.onBlockActivated(world, getOrigin(), teMain.rotation, player, hand, pos);
-		}
-		return false;
+		Multiblock mb = MultiblockRegistry.get(name);
+		return mb.onBlockActivated(world, getOrigin(), rotation, player, hand, pos);
 	}
 	
 	/*
@@ -140,18 +109,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 
 	public boolean isRender() {
-		if (offset == null) {
-			return false;
-		}
 		//HACK
 		return offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0;
 	}
 
 	public double getRotation() {
-		TileMultiblock mt = getMain();
-		if (mt == null) {
-			return 0;
-		}
-		return mt.rotation.rotate(EnumFacing.EAST).getHorizontalAngle();
+		return rotation.rotate(EnumFacing.EAST).getHorizontalAngle();
 	}
 }
