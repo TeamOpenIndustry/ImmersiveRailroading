@@ -14,7 +14,6 @@ import net.minecraft.world.World;
 public class SteamHammerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	private static MultiblockComponent piston = new MultiblockComponent(Blocks.PISTON);
-	private static BlockPos main = new BlockPos(2, 0, 0);
 	public static final String NAME = "STEAM_HAMMER";
 
 	public SteamHammerMultiblock() {
@@ -45,7 +44,6 @@ public class SteamHammerMultiblock extends Multiblock {
 
 	@Override
 	public void onCreate(World world, BlockPos origin, Rotation rot) {
-		BlockPos posMain = origin.add(main);
 		for (BlockPos offset : componentPositions) {
 			MultiblockComponent comp = lookup(offset);
 			if (comp == AIR) {
@@ -58,12 +56,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			world.setBlockState(pos, ImmersiveRailroading.BLOCK_MULTIBLOCK.getDefaultState());
 			TileMultiblock te = TileMultiblock.get(world, pos);
 			
-			te.setAux(posMain, offset, origState);
-			if (pos.equals(posMain)) {
-				te.setMain(NAME, rot);
-			}
-			
-			te.markDirty();
+			te.configure(NAME, rot, offset, origState);
 		}
 	}
 
