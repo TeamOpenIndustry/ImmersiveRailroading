@@ -45,7 +45,9 @@ public class ItemLargeWrench extends Item {
 					}
 				}
 			} else {
-				new SteamHammerMultiblock().tryCreate(world, pos);
+				if (!world.isRemote) {
+					new SteamHammerMultiblock().tryCreate(world, pos);
+				}
 			}
 		return EnumActionResult.PASS;
 	}

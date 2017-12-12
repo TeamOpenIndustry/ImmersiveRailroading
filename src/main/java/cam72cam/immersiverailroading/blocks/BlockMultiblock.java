@@ -29,10 +29,15 @@ public class BlockMultiblock extends Block {
 	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
 		TileMultiblock te = TileMultiblock.get(worldIn, pos);
 		if (te != null) {
+			// Multiblock break
 			te.breakBlock();
 			worldIn.destroyBlock(pos, true);
+		} else {
+			// Break during block restore
+			super.breakBlock(worldIn, pos, state);
 		}
 	}
+	
 	@Override
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		TileMultiblock te = TileMultiblock.get(worldIn, pos);
