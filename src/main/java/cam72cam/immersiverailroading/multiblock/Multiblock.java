@@ -14,12 +14,13 @@ import net.minecraft.world.World;
 public abstract class Multiblock {
 	// z y x
 	private final MultiblockComponent[][][] components;
-	protected final List<BlockPos> componentPositions = new ArrayList<BlockPos>();
+	protected final List<BlockPos> componentPositions;
 	
 	protected static final MultiblockComponent AIR = new MultiblockComponent(Blocks.AIR);
 
 	protected Multiblock(MultiblockComponent[][][] components) {
 		this.components = components;
+		componentPositions = new ArrayList<BlockPos>();
 		for (int z = 0; z < components.length; z++) {
 			MultiblockComponent[][] zcomp = components[z];
 			for (int y = 0; y < components[z].length; y++) {
@@ -40,10 +41,6 @@ public abstract class Multiblock {
 		MultiblockComponent component = lookup(offset);
 		return component.valid(world, pos);
 	}
-
-	public abstract void onCreate(World world, BlockPos origin, Rotation rot);
-	public abstract boolean onBlockActivated(World world, BlockPos origin, Rotation rotation, EntityPlayer player, EnumHand hand, BlockPos pos);
-	public abstract void onBreak(World world, BlockPos origin, Rotation rot);
 	
 	public boolean tryCreate(World world, BlockPos pos) {
 		for (BlockPos activationLocation : this.componentPositions) {
@@ -54,13 +51,34 @@ public abstract class Multiblock {
 					valid = valid && checkValid(world, origin, offset, rot);
 				}
 				if (valid) {
-					System.out.println("VALID!!!!");
-					onCreate(world, origin, rot);
+					instance(world, origin, rot).onCreate();
 					return true;
 				}
 			}
 		}
-		System.out.println("FAIL");
 		return false;
+	}
+	
+	public MultiblockInstance instance(World world, BlockPos origin, Rotation rot) {
+		return newInstance(world, origin, rot);
+	}
+	
+	protected abstract MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot);
+	public abstract class MultiblockInstance {
+		protected final World world;
+		protected final BlockPos origin;
+		protected final Rotation rot;
+		
+		public MultiblockInstance(World world, BlockPos origin, Rotation rot) {
+			this.world = world;
+			this.origin = origin;
+			this.rot = rot;
+		}
+		
+		public abstract void onCreate();
+		public abstract boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset);
+		public abstract boolean isRender(BlockPos offset);
+		public abstract void onBreak();
+
 	}
 }

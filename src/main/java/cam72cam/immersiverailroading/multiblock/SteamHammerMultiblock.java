@@ -41,48 +41,68 @@ public class SteamHammerMultiblock extends Multiblock {
 		});
 	}
 
-
 	@Override
-	public void onCreate(World world, BlockPos origin, Rotation rot) {
-		for (BlockPos offset : componentPositions) {
-			MultiblockComponent comp = lookup(offset);
-			if (comp == AIR) {
-				continue;
-			}
-			
-			BlockPos pos = origin.add(offset.rotate(rot));
-			IBlockState origState = world.getBlockState(pos);
-			
-			world.setBlockState(pos, ImmersiveRailroading.BLOCK_MULTIBLOCK.getDefaultState());
-			TileMultiblock te = TileMultiblock.get(world, pos);
-			
-			te.configure(NAME, rot, offset, origState);
-		}
+	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {
+		return new SteamHammerInstance(world, origin, rot);
 	}
-
-	public boolean onBlockActivated(World world, BlockPos origin, Rotation rotation, EntityPlayer player, EnumHand hand, BlockPos pos) {
-		if (!world.isRemote) {
-			player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_STEAM_HAMMER.ordinal(), world, origin.getX(), origin.getY(), origin.getZ());
+	private class SteamHammerInstance extends MultiblockInstance {
+		public SteamHammerInstance(World world, BlockPos origin, Rotation rot) {
+			super(world, origin, rot);
 		}
-		return true;
-	}
 
-	@Override
-	public void onBreak(World world, BlockPos origin, Rotation rot) {
-		for (BlockPos offset : componentPositions) {
-			MultiblockComponent comp = lookup(offset);
-			if (comp == AIR) {
-				continue;
+		@Override
+		public void onCreate() {
+			for (BlockPos offset : componentPositions) {
+				MultiblockComponent comp = lookup(offset);
+				if (comp == AIR) {
+					continue;
+				}
+				
+				BlockPos pos = origin.add(offset.rotate(rot));
+				IBlockState origState = world.getBlockState(pos);
+				
+				world.setBlockState(pos, ImmersiveRailroading.BLOCK_MULTIBLOCK.getDefaultState());
+				TileMultiblock te = TileMultiblock.get(world, pos);
+				
+				te.configure(NAME, rot, offset, origState);
+				System.out.println(te.getOrigin().equals(origin));
 			}
-			BlockPos pos = origin.add(offset.rotate(rot));
-			TileMultiblock te = TileMultiblock.get(world, pos);
-			if (te == null) {
-				System.out.println("NULL TE!");
-				System.out.println(pos);
-				continue;
+		}
+
+		@Override
+		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
+			if (offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0) {
+				if (!world.isRemote) {
+					player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_STEAM_HAMMER.ordinal(), world, origin.getX(), origin.getY(), origin.getZ());
+				}
+				return true;
 			}
-			
-			te.onBreak();
+			return false;
+		}
+
+		@Override
+		public void onBreak() {
+			if (world.isRemote) {
+				return;
+			}
+			for (BlockPos offset : componentPositions) {
+				MultiblockComponent comp = lookup(offset);
+				if (comp == AIR) {
+					continue;
+				}
+				BlockPos pos = origin.add(offset.rotate(rot));
+				TileMultiblock te = TileMultiblock.get(world, pos);
+				if (te == null) {
+					world.destroyBlock(pos, true);
+					continue;
+				}
+				te.onBreak();
+			}
+		}
+
+		@Override
+		public boolean isRender(BlockPos offset) {
+			return offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0;
 		}
 		
 	}

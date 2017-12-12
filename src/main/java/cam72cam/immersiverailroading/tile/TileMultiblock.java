@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
-import cam72cam.immersiverailroading.multiblock.Multiblock;
+import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +29,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	private Rotation rotation;
 	private String name;
 	private long renderTicks;
+	private MultiblockInstance mb;
 	
 	public void configure(String name, Rotation rot, BlockPos offset, IBlockState replaced) {
 		this.name = name;
@@ -44,8 +45,8 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 
 		nbt.setString("name", name);
 		nbt.setInteger("rotation", rotation.ordinal());
-		nbt.setTag("replaced", NBTUtil.writeBlockState(new NBTTagCompound(), replaced));
 		nbt.setTag("offset", NBTUtil.createPosTag(offset));
+		nbt.setTag("replaced", NBTUtil.writeBlockState(new NBTTagCompound(), replaced));
 		
 		return nbt;
 	}
@@ -56,8 +57,8 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		
 		name = nbt.getString("name");
 		rotation = Rotation.values()[nbt.getInteger("rotation")];
-		replaced = NBTUtil.readBlockState(nbt.getCompoundTag("replaced"));
 		offset = NBTUtil.getPosFromTag(nbt.getCompoundTag("offset"));
+		replaced = NBTUtil.readBlockState(nbt.getCompoundTag("replaced"));
 	}
 
 	@Override
@@ -71,11 +72,14 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     }
 	
 	public BlockPos getOrigin() {
-		return pos.subtract(offset);
+		return pos.subtract(offset.rotate(rotation));
 	}
 	
-	public Multiblock getMultiblock() {
-		return MultiblockRegistry.get(name);
+	public MultiblockInstance getMultiblock() {
+		if (this.mb == null) {
+			this.mb = MultiblockRegistry.get(name).instance(world, getOrigin(), rotation);
+		}
+		return this.mb;
 	}
 	
 	public String getName() {
@@ -90,13 +94,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	 * Block Functions to pass on to the multiblock
 	 */
 	public void breakBlock() {
-		Multiblock mb = MultiblockRegistry.get(name);
-		mb.onBreak(world, getOrigin(), rotation);
+		getMultiblock().onBreak();
 	}
 
 	public boolean onBlockActivated(EntityPlayer player, EnumHand hand) {
-		Multiblock mb = MultiblockRegistry.get(name);
-		return mb.onBlockActivated(world, getOrigin(), rotation, player, hand, pos);
+		return getMultiblock().onBlockActivated(player, hand, offset);
 	}
 	
 	/*
@@ -105,12 +107,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	
 	public void onBreak() {
 		world.removeTileEntity(pos);
-		world.setBlockState(pos, replaced);
+		world.setBlockState(pos, replaced, 3);
 	}
 
 	public boolean isRender() {
-		//HACK
-		return offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0;
+		return getMultiblock().isRender(offset);
 	}
 
 	public double getRotation() {
