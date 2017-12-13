@@ -5,12 +5,12 @@
 	"model": "immersiverailroading:models/rolling_stock/locomotives/alco_rs1.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"fuel_efficiency_%": 100,
-		"fuel_capacity_l": 6000,
-		"horsepower": 1500,
-		"tractive_effort_lbf": 61500,
-		"max_speed_kmh": 104.607,
-		"weight_kg": 112000
+		"fuel_efficiency_%": 60,
+		"fuel_capacity_l": 3800,
+		"horsepower": 1000,
+		"tractive_effort_lbf": 40425,
+		"max_speed_kmh": 105,
+		"weight_kg": 247500
 	},
 	"passenger": {
 		"slots": 3,
