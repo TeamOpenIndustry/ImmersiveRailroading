@@ -41,7 +41,11 @@ public class SteamHammerRender implements IMultiblockRender {
 		GL11.glTranslated(0.5, 0, 0.5);
 		GL11.glRotated(te.getRotation(), 0, 1, 0);
 		renderer.drawGroups(rest);
-		GL11.glTranslated(0, -(Math.abs(te.getRenderTicks() % 30 - 15)) / 14f, 0);
+		if (te.getCraftProgress() != 0) {
+			GL11.glTranslated(0, -(Math.abs((te.getRenderTicks() + partialTicks) % 10 - 5)) / 4f, 0);
+		} else {
+			GL11.glTranslated(0, -(Math.abs((te.getRenderTicks() + partialTicks) % 30 - 15)) / 14f, 0);
+		}
 		renderer.drawGroups(hammer);
 		GL11.glPopMatrix();
 		
