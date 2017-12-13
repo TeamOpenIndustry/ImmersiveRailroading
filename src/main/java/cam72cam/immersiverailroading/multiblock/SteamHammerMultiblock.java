@@ -14,13 +14,16 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.ItemStackHandler;
 
 public class SteamHammerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	private static MultiblockComponent piston = new MultiblockComponent(Blocks.PISTON);
 	public static final String NAME = "STEAM_HAMMER";
+	private static final BlockPos center = new BlockPos(2,0,0);
+	private static final BlockPos power = new BlockPos(2,5,0);
 
 	public SteamHammerMultiblock() {
 		super(NAME, new MultiblockComponent[][][] { // Z
@@ -51,14 +54,15 @@ public class SteamHammerMultiblock extends Multiblock {
 	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {
 		return new SteamHammerInstance(world, origin, rot);
 	}
-	private class SteamHammerInstance extends MultiblockInstance {
+	public class SteamHammerInstance extends MultiblockInstance {
+		
 		public SteamHammerInstance(World world, BlockPos origin, Rotation rot) {
 			super(world, origin, rot);
 		}
 
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
-			if (offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0) {
+			if (isCenter(offset)) {
 				if (!world.isRemote) {
 					BlockPos pos = getPos(offset);
 					player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_STEAM_HAMMER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
@@ -69,7 +73,7 @@ public class SteamHammerMultiblock extends Multiblock {
 		}
 		
 		private boolean isCenter(BlockPos offset) {
-			return offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0;
+			return offset.equals(center);
 		}
 
 		@Override
@@ -92,6 +96,17 @@ public class SteamHammerMultiblock extends Multiblock {
 				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(offset));
 				return;
 			}
+			
+			TileMultiblock powerTe = getTile(power);
+			if (powerTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(power));
+				return;
+			}
+			
+			if (!hasPower()) {
+				return;
+			}
+			
 			if (world.isRemote) {
 				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
 					world.playSound(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 2.0f, 0.2f, false);
@@ -100,11 +115,15 @@ public class SteamHammerMultiblock extends Multiblock {
 			}
 			
 			// Decrement craft progress down to 0
-			te.setCraftProgress(Math.max(0, te.getCraftProgress() - 1));
+			if (te.getCraftProgress() != 0) {
+				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+				energy.extractEnergy(32, false);
+				te.setCraftProgress(Math.max(0, te.getCraftProgress() - 1));
+			}
 			
 			float progress = te.getCraftProgress();
 			
-			IItemHandler container = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+			ItemStackHandler container = te.getContainer();
 			
 			ItemStack input = container.getStackInSlot(0);
 			ItemStack output = container.getStackInSlot(1);
@@ -114,7 +133,8 @@ public class SteamHammerMultiblock extends Multiblock {
 			if (progress == 0) {
 				// Try to start crafting
 				if (input.isItemEqual(steel) && output.isEmpty() && !te.getCraftItem().isEmpty()) {
-					container.extractItem(0, 1, false);
+					input.setCount(input.getCount() - 1);
+					container.setStackInSlot(0, input);;
 					progress = 100;
 					te.setCraftProgress(100);
 				}
@@ -122,8 +142,33 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				container.insertItem(1, te.getCraftItem().copy(), false);
+				container.setStackInSlot(1, te.getCraftItem().copy());
 			}
+		}
+
+		@Override
+		public boolean isInputSlot(int slot) {
+			return slot == 0;
+		}
+
+		@Override
+		public boolean isOutputSlot(int slot) {
+			return slot == 1;
+		}
+
+		@Override
+		public boolean canRecievePower(BlockPos offset) {
+			return offset.equals(power);
+		}
+
+		public boolean hasPower() {
+			TileMultiblock powerTe = getTile(power);
+			if (powerTe == null) {
+				return false;
+			}
+			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+			return energy.getEnergyStored() > 32;
+			
 		}
 	}
 }

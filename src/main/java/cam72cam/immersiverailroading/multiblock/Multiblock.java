@@ -102,6 +102,9 @@ public abstract class Multiblock {
 		public abstract int getInvSize(BlockPos offset);
 		public abstract boolean isRender(BlockPos offset);
 		public abstract void tick(BlockPos offset);
+		public abstract boolean isInputSlot(int slot);
+		public abstract boolean isOutputSlot(int slot);
+		public abstract boolean canRecievePower(BlockPos offset);
 		public void onBreak() {
 			for (BlockPos offset : componentPositions) {
 				MultiblockComponent comp = lookup(offset);
