@@ -8,14 +8,12 @@ import cam72cam.immersiverailroading.blocks.BlockMultiblock;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.blocks.BlockRailPreview;
-import cam72cam.immersiverailroading.blocks.BlockSteamHammer;
 import cam72cam.immersiverailroading.items.ItemHook;
 import cam72cam.immersiverailroading.items.ItemLargeWrench;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
-import cam72cam.immersiverailroading.items.ItemSteamHammer;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import net.minecraft.item.Item;
@@ -61,11 +59,6 @@ public class ImmersiveRailroading
 	public static ItemRailAugment ITEM_AUGMENT = new ItemRailAugment();
 	
 	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL);
-	
-	@ObjectHolder(BlockSteamHammer.NAME)
-	public static BlockSteamHammer BLOCK_STEAM_HAMMER = new BlockSteamHammer();
-	
-	public static Item ITEM_STEAM_HAMMER = new ItemSteamHammer().setRegistryName(ImmersiveRailroading.BLOCK_STEAM_HAMMER.getRegistryName());
 	
 	public static BlockMultiblock BLOCK_MULTIBLOCK = new BlockMultiblock();
 	
