@@ -7,9 +7,11 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -82,15 +84,18 @@ public class SteamHammerMultiblock extends Multiblock {
 
 		@Override
 		public void tick(BlockPos offset) {
-			if (world.isRemote) {
-				return;
-			}
 			if (!isCenter(offset)) {
 				return;
 			}
 			TileMultiblock te = getTile(offset);
 			if (te == null) {
 				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(offset));
+				return;
+			}
+			if (world.isRemote) {
+				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
+					world.playSound(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 2.0f, 0.2f, false);
+				}
 				return;
 			}
 			

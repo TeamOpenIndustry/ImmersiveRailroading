@@ -84,14 +84,14 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		replaced = NBTUtil.readBlockState(nbt.getCompoundTag("replaced"));
 		
 		container.deserializeNBT(nbt.getCompoundTag("inventory"));
-		craftItem.deserializeNBT(nbt.getCompoundTag("craftItem"));
+		craftItem = new ItemStack(nbt.getCompoundTag("craftItem"));
 		craftProgress = nbt.getInteger("craftProgress");
 	}
 
 	@Override
 	public void update() {
 		if (offset == null) {
-			// Not formed yet
+			// Not formed yet.  World may tick before configure is called 
 			return;
 		}
 		this.ticks += 1;
