@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.tile.TileSteamHammer;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
@@ -14,15 +14,15 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class SteamHammerSelectPacket implements IMessage {
+public class MultiblockSelectCraftPacket implements IMessage {
 	private ItemStack selected;
 	private BlockPos tilePreviewPos;
 	
-	public SteamHammerSelectPacket() {
+	public MultiblockSelectCraftPacket() {
 		// For Reflection
 	}
 
-	public SteamHammerSelectPacket(BlockPos tilePreviewPos, ItemStack selected, Gauge gauge) {
+	public MultiblockSelectCraftPacket(BlockPos tilePreviewPos, ItemStack selected, Gauge gauge) {
 		if (selected.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
 			ItemRollingStockComponent.setGauge(selected, gauge);
 		}
@@ -43,20 +43,20 @@ public class SteamHammerSelectPacket implements IMessage {
 		ByteBufUtils.writeItemStack(buf, selected);
 	}
 	
-	public static class Handler implements IMessageHandler<SteamHammerSelectPacket, IMessage> {
+	public static class Handler implements IMessageHandler<MultiblockSelectCraftPacket, IMessage> {
 		@Override
-		public IMessage onMessage(SteamHammerSelectPacket message, MessageContext ctx) {
+		public IMessage onMessage(MultiblockSelectCraftPacket message, MessageContext ctx) {
 			FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
 			return null;
 		}
 
-		private void handle(SteamHammerSelectPacket message, MessageContext ctx) {
-			TileSteamHammer tile = TileSteamHammer.get(ctx.getServerHandler().player.world, message.tilePreviewPos);
+		private void handle(MultiblockSelectCraftPacket message, MessageContext ctx) {
+			TileMultiblock tile = TileMultiblock.get(ctx.getServerHandler().player.world, message.tilePreviewPos);
 			if (tile == null) {
-				ImmersiveRailroading.warn("Got invalid hammer update packet at %s", message.tilePreviewPos);
+				ImmersiveRailroading.warn("Got invalid craft update packet at %s", message.tilePreviewPos);
 				return;
 			}
-			tile.setChoosenItem(message.selected);
+			tile.setCraftItem(message.selected);
 		}
 	}
 }

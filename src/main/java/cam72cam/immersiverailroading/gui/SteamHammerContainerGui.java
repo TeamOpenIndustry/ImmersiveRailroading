@@ -10,8 +10,8 @@ import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.net.SteamHammerSelectPacket;
-import cam72cam.immersiverailroading.tile.TileSteamHammer;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
@@ -24,7 +24,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 	private int inventoryRows;
 	private int horizSlots;
 	private Gauge gauge;
-	private TileSteamHammer tile;
+	private TileMultiblock tile;
 	private ItemPickerGUI stockSelector;
 	private ItemPickerGUI itemSelector;
 	private GuiButton gaugeButton;
@@ -51,13 +51,13 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 
 		stockSelector = new ItemPickerGUI(stock);
 		for (ItemStack itemStock : stock) {
-			if (isPartOf(tile.getChoosenItem(), itemStock)) {				
+			if (isPartOf(tile.getCraftItem(), itemStock)) {				
 				stockSelector.choosenItem = itemStock;
 			}
 		}
 		
 		itemSelector = new ItemPickerGUI(NonNullList.create());
-		itemSelector.choosenItem = tile.getChoosenItem();
+		itemSelector.choosenItem = tile.getCraftItem();
 		this.items = items;
 		
 		this.gauge = ItemRollingStockComponent.getGauge(itemSelector.choosenItem);
@@ -84,7 +84,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     		itemSelector.mouseClicked(mouseX, mouseY, mouseButton);
     		
     		if (!itemSelector.isActive) {
-    			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
+    			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
     		}
         	
         	return;
@@ -101,7 +101,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     			}
     			if (filteredItems.size() == 0) {
     				itemSelector.choosenItem = this.stockSelector.choosenItem;
-        			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.stockSelector.choosenItem, this.gauge));
+        			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), this.stockSelector.choosenItem, this.gauge));
     			} else {
 	    			itemSelector.setItems(filteredItems);
 	    			itemSelector.isActive = true;
@@ -114,7 +114,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 		if (gaugeButton.mousePressed(mc, mouseX, mouseY)) {
 			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
-			ImmersiveRailroading.net.sendToServer(new SteamHammerSelectPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
 			return;
 		}
     	

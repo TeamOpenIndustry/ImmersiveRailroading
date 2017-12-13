@@ -1,15 +1,19 @@
 package cam72cam.immersiverailroading.multiblock;
 
+import blusunrize.immersiveengineering.common.IEContent;
+import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 public class SteamHammerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
@@ -17,7 +21,7 @@ public class SteamHammerMultiblock extends Multiblock {
 	public static final String NAME = "STEAM_HAMMER";
 
 	public SteamHammerMultiblock() {
-		super(new MultiblockComponent[][][] { // Z
+		super(NAME, new MultiblockComponent[][][] { // Z
 			{ // Y
 				{ //X
 					steel, AIR, steel, AIR, steel
@@ -51,59 +55,70 @@ public class SteamHammerMultiblock extends Multiblock {
 		}
 
 		@Override
-		public void onCreate() {
-			for (BlockPos offset : componentPositions) {
-				MultiblockComponent comp = lookup(offset);
-				if (comp == AIR) {
-					continue;
-				}
-				
-				BlockPos pos = origin.add(offset.rotate(rot));
-				IBlockState origState = world.getBlockState(pos);
-				
-				world.setBlockState(pos, ImmersiveRailroading.BLOCK_MULTIBLOCK.getDefaultState());
-				TileMultiblock te = TileMultiblock.get(world, pos);
-				
-				te.configure(NAME, rot, offset, origState);
-				System.out.println(te.getOrigin().equals(origin));
-			}
-		}
-
-		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
 			if (offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0) {
 				if (!world.isRemote) {
-					player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_STEAM_HAMMER.ordinal(), world, origin.getX(), origin.getY(), origin.getZ());
+					BlockPos pos = getPos(offset);
+					player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_STEAM_HAMMER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
 				}
 				return true;
 			}
 			return false;
 		}
-
-		@Override
-		public void onBreak() {
-			if (world.isRemote) {
-				return;
-			}
-			for (BlockPos offset : componentPositions) {
-				MultiblockComponent comp = lookup(offset);
-				if (comp == AIR) {
-					continue;
-				}
-				BlockPos pos = origin.add(offset.rotate(rot));
-				TileMultiblock te = TileMultiblock.get(world, pos);
-				if (te == null) {
-					world.destroyBlock(pos, true);
-					continue;
-				}
-				te.onBreak();
-			}
+		
+		private boolean isCenter(BlockPos offset) {
+			return offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0;
 		}
 
 		@Override
 		public boolean isRender(BlockPos offset) {
-			return offset.getX() == 2 && offset.getY() == 0 && offset.getZ() == 0;
+			return isCenter(offset);
 		}
-		
+
+		@Override
+		public int getInvSize(BlockPos offset) {
+			return isCenter(offset) ? 2 : 0;
+		}
+
+		@Override
+		public void tick(BlockPos offset) {
+			if (world.isRemote) {
+				return;
+			}
+			if (!isCenter(offset)) {
+				return;
+			}
+			TileMultiblock te = getTile(offset);
+			if (te == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(offset));
+				return;
+			}
+			
+			// Decrement craft progress down to 0
+			te.setCraftProgress(Math.max(0, te.getCraftProgress() - 1));
+			
+			float progress = te.getCraftProgress();
+			
+			IItemHandler container = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+			
+			ItemStack input = container.getStackInSlot(0);
+			ItemStack output = container.getStackInSlot(1);
+			ItemStack steel = new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
+			
+			
+			if (progress == 0) {
+				// Try to start crafting
+				if (input.isItemEqual(steel) && output.isEmpty() && !te.getCraftItem().isEmpty()) {
+					container.extractItem(0, 1, false);
+					progress = 100;
+					te.setCraftProgress(100);
+				}
+			}
+			
+			if (progress == 1) {
+				// Stop crafting
+				container.insertItem(1, te.getCraftItem().copy(), false);
+			}
+		}
 	}
 }
