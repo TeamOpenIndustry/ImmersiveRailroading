@@ -5,7 +5,7 @@
 	"model": "immersiverailroading:models/rolling_stock/locomotives/alco_rs1.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"fuel_efficiency_%": 60,
+		"fuel_efficiency_%": 72,
 		"fuel_capacity_l": 3800,
 		"horsepower": 1000,
 		"tractive_effort_lbf": 40425,
