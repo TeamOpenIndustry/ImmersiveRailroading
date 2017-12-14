@@ -109,7 +109,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (world.isRemote) {
 				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
-					world.playSound(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 2.0f, 0.2f, false);
+					world.playSound(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
 				}
 				return;
 			}
@@ -127,12 +127,11 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			ItemStack input = container.getStackInSlot(0);
 			ItemStack output = container.getStackInSlot(1);
-			ItemStack steel = new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
 			
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.isItemEqual(steel) && output.isEmpty() && !te.getCraftItem().isEmpty()) {
+				if (input.isItemEqual(steelBlock()) && output.isEmpty() && !te.getCraftItem().isEmpty()) {
 					input.setCount(input.getCount() - 1);
 					container.setStackInSlot(0, input);;
 					progress = 100;
@@ -147,13 +146,20 @@ public class SteamHammerMultiblock extends Multiblock {
 		}
 
 		@Override
-		public boolean isInputSlot(int slot) {
-			return slot == 0;
+		public boolean canInsertItem(int slot, ItemStack stack) {
+			System.out.println(stack);
+			System.out.println(steelBlock());
+			return slot == 0 && stack.isItemEqual(steelBlock());
 		}
 
 		@Override
 		public boolean isOutputSlot(int slot) {
 			return slot == 1;
+		}
+
+		@Override
+		public int getSlotLimit(BlockPos offset, int slot) {
+			return isCenter(offset) ? 1 : 0;
 		}
 
 		@Override
@@ -169,6 +175,10 @@ public class SteamHammerMultiblock extends Multiblock {
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
 			
+		}
+		
+		public ItemStack steelBlock() {
+			return new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
 		}
 	}
 }

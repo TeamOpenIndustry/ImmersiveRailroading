@@ -62,4 +62,15 @@ public class BlockMultiblock extends Block {
 		// TESR Renderer
 		return EnumBlockRenderType.INVISIBLE;
 	}
+
+
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
+	
+	@Override
+	public boolean isFullCube(IBlockState state) {
+		return false;
+	}
 }

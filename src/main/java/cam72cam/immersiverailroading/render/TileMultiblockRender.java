@@ -24,7 +24,7 @@ public class TileMultiblockRender extends TileEntitySpecialRenderer<TileMultiblo
 	
 	@Override
 	public void render(TileMultiblock te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		if (te.isRender()) {
+		if (te.isLoaded() && te.isRender()) {
 			IMultiblockRender renderer = renderers.get(te.getName());
 			if (renderer != null) {
 				renderer.render(te, x, y, z, partialTicks);

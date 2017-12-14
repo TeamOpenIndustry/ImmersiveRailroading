@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -102,8 +103,9 @@ public abstract class Multiblock {
 		public abstract int getInvSize(BlockPos offset);
 		public abstract boolean isRender(BlockPos offset);
 		public abstract void tick(BlockPos offset);
-		public abstract boolean isInputSlot(int slot);
+		public abstract boolean canInsertItem(int slot, ItemStack stack);
 		public abstract boolean isOutputSlot(int slot);
+		public abstract int getSlotLimit(BlockPos offset, int slot);
 		public abstract boolean canRecievePower(BlockPos offset);
 		public void onBreak() {
 			for (BlockPos offset : componentPositions) {

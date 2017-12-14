@@ -50,13 +50,21 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
         protected void onContentsChanged(int slot) {
         	markDirty();
         }
+
+		@Override
+		public int getSlotLimit(int slot) {
+			if (isLoaded()) {
+				return Math.min(super.getSlotLimit(slot), getMultiblock().getSlotLimit(offset, slot));
+			}
+			return 0;
+		}
     };
     
     private EnergyStorage energy = new EnergyStorage(1000) {
     	@Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
     		int val = super.receiveEnergy(maxReceive, simulate);
-    		if (!simulate && val != 0 && hasWorld()) {
+    		if (!simulate && val != 0 && isLoaded()) {
     			markDirty();
     		}
     		return val;
@@ -65,7 +73,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     	@Override
         public int extractEnergy(int maxExtract, boolean simulate) {
     		int val = super.extractEnergy(maxExtract, simulate);
-    		if (!simulate && val != 0 && hasWorld()) {
+    		if (!simulate && val != 0 && isLoaded()) {
     			markDirty();
     		}
     		return val;
@@ -221,59 +229,63 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	
 	@Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return this.getMultiblock().getInvSize(offset) != 0;
-        }
-        if (capability == CapabilityEnergy.ENERGY) {
-        	return this.getMultiblock().canRecievePower(offset);
-        }
+		if (this.isLoaded()) {
+	        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+	            return this.getMultiblock().getInvSize(offset) != 0;
+	        }
+	        if (capability == CapabilityEnergy.ENERGY) {
+	        	return this.getMultiblock().canRecievePower(offset);
+	        }
+		}
         return super.hasCapability(capability, facing);
     }
 
 	@Override
     public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-        	if (this.getMultiblock().getInvSize(offset) != 0) {
-        		return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new IItemHandlerModifiable()  {
-					@Override
-					public int getSlots() {
-						return container.getSlots();
-					}
-					@Override
-					public ItemStack getStackInSlot(int slot) {
-						return container.getStackInSlot(slot);
-					}
-					@Override
-        	        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-        	        	if (getMultiblock().isInputSlot(slot)) {
-        	        		return container.insertItem(slot, stack, simulate);
-        	        	}
-        	        	return ItemStack.EMPTY;
-        	        }
-        	        @Override
-        	        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        	        	if (getMultiblock().isOutputSlot(slot)) {
-        	        		return container.extractItem(slot, amount, simulate);
-        	        	}
-        	        	return ItemStack.EMPTY;
-        	        }
-					@Override
-					public int getSlotLimit(int slot) {
-						return container.getSlotLimit(slot);
-					}
-					
-					@Override
-					public void setStackInSlot(int slot, ItemStack stack) {
-						container.setStackInSlot(slot, stack);
-					}
-        		});
-        	}
-        }
-        if (capability == CapabilityEnergy.ENERGY) {
-        	if (this.getMultiblock().canRecievePower(offset)) {
-        		return CapabilityEnergy.ENERGY.cast(this.energy);
-        	}
-        }
+		if (this.isLoaded()) {
+	        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+	        	if (this.getMultiblock().getInvSize(offset) != 0) {
+	        		return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new IItemHandlerModifiable()  {
+						@Override
+						public int getSlots() {
+							return container.getSlots();
+						}
+						@Override
+						public ItemStack getStackInSlot(int slot) {
+							return container.getStackInSlot(slot);
+						}
+						@Override
+	        	        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+	        	        	if (getMultiblock().canInsertItem(slot, stack)) {
+	        	        		return container.insertItem(slot, stack, simulate);
+	        	        	}
+	        	        	return stack;
+	        	        }
+	        	        @Override
+	        	        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+	        	        	if (getMultiblock().isOutputSlot(slot)) {
+	        	        		return container.extractItem(slot, amount, simulate);
+	        	        	}
+	        	        	return ItemStack.EMPTY;
+	        	        }
+						@Override
+						public int getSlotLimit(int slot) {
+							return container.getSlotLimit(slot);
+						}
+						
+						@Override
+						public void setStackInSlot(int slot, ItemStack stack) {
+							container.setStackInSlot(slot, stack);
+						}
+	        		});
+	        	}
+	        }
+	        if (capability == CapabilityEnergy.ENERGY) {
+	        	if (this.getMultiblock().canRecievePower(offset)) {
+	        		return CapabilityEnergy.ENERGY.cast(this.energy);
+	        	}
+	        }
+		}
         return super.getCapability(capability, facing);
     }
 }
