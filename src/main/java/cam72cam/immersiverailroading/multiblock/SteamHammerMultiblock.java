@@ -49,6 +49,11 @@ public class SteamHammerMultiblock extends Multiblock {
 			}
 		});
 	}
+	
+	@Override
+	public BlockPos placementPos() {
+		return new BlockPos(2, 0, 0);
+	}
 
 	@Override
 	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {

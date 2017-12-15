@@ -67,6 +67,18 @@ public abstract class Multiblock {
 		return false;
 	}
 	
+	public abstract BlockPos placementPos();
+	public void place(World world, EntityPlayer player, BlockPos pos, Rotation rot) {
+		BlockPos origin = pos.subtract(this.placementPos().rotate(rot));
+		for (BlockPos offset : this.componentPositions) {
+			MultiblockComponent component = lookup(offset);
+			BlockPos compPos = origin.add(offset.rotate(rot));
+			if (!component.valid(world, compPos) && world.isAirBlock(compPos)) {
+				component.place(world, player, compPos);
+			}
+		}
+	}
+	
 	public MultiblockInstance instance(World world, BlockPos origin, Rotation rot) {
 		return newInstance(world, origin, rot);
 	}
