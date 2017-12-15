@@ -119,7 +119,7 @@ public class ClientProxy extends CommonProxy {
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		case BLOCK_STEAM_HAMMER:
 			TileMultiblock te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
-			if (te == null) {
+			if (te == null || !te.isLoaded()) {
 				return null;
 			}
 			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, te));

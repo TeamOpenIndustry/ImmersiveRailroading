@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.blocks.BlockRailPreview;
 import cam72cam.immersiverailroading.items.ItemHook;
 import cam72cam.immersiverailroading.items.ItemLargeWrench;
+import cam72cam.immersiverailroading.items.ItemMultiblockPlacer;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
@@ -61,6 +62,8 @@ public class ImmersiveRailroading
 	public static Item ITEM_RAIL_BLOCK = new ItemRail(ImmersiveRailroading.BLOCK_RAIL);
 	
 	public static BlockMultiblock BLOCK_MULTIBLOCK = new BlockMultiblock();
+
+	public static ItemMultiblockPlacer ITEM_MB_PLACER = new ItemMultiblockPlacer();
 	
 	private static Logger logger;
 	public static ImmersiveRailroading instance;

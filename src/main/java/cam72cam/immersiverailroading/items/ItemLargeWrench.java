@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.items;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
+import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.entity.item.EntityItem;
@@ -46,7 +46,9 @@ public class ItemLargeWrench extends Item {
 				}
 			} else {
 				if (!world.isRemote) {
-					new SteamHammerMultiblock().tryCreate(world, pos);
+					for (String key : MultiblockRegistry.keys()) {
+						MultiblockRegistry.get(key).tryCreate(world, pos);
+					}
 				}
 			}
 		return EnumActionResult.PASS;
