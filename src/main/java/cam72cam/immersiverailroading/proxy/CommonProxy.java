@@ -28,6 +28,7 @@ import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -94,6 +95,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	
     	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
     	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
+    	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
     }
     
     public void init(FMLInitializationEvent event) {
