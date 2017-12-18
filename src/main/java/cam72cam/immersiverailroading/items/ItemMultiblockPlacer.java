@@ -54,7 +54,7 @@ public class ItemMultiblockPlacer extends Item {
 			if (facing == EnumFacing.UP) {
 				realPos = realPos.up();
 			}
-			MultiblockRegistry.get(current).place(world, player, realPos, BlockUtil.rotFromFacing(EnumFacing.fromAngle(player.rotationYawHead)));
+			MultiblockRegistry.get(current).place(world, player, realPos, BlockUtil.rotFromFacing(EnumFacing.fromAngle(player.rotationYawHead+180)));
 		}
 		return super.onItemUse(player, world, pos, hand, facing, hitX, hitY, hitZ);
 	}

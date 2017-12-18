@@ -14,7 +14,6 @@ public class MultiblockRegistry {
 	
 	public static void register(String name, Multiblock mb) {
 		entries.put(name, mb);
-		entries.put(name+"FOO", mb);
 	}
 	
 	public static Multiblock get(String name) {
