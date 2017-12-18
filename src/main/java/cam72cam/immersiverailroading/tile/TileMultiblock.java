@@ -197,7 +197,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 
 	public double getRotation() {
-		return rotation.rotate(EnumFacing.EAST).getHorizontalAngle();
+		return 180 - rotation.rotate(EnumFacing.EAST).getHorizontalAngle();
 	}
 	
 	/*

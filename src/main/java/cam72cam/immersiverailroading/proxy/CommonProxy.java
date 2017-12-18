@@ -27,6 +27,7 @@ import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -92,6 +93,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
     	
     	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
+    	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
     }
     
     public void init(FMLInitializationEvent event) {
