@@ -3,9 +3,11 @@ package cam72cam.immersiverailroading.render;
 import java.util.HashMap;
 import java.util.Map;
 
+import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
+import cam72cam.immersiverailroading.render.multiblock.BoilerRollerRender;
 import cam72cam.immersiverailroading.render.multiblock.IMultiblockRender;
 import cam72cam.immersiverailroading.render.multiblock.PlateRollerRender;
 import cam72cam.immersiverailroading.render.multiblock.RailRollerRender;
@@ -21,6 +23,7 @@ public class TileMultiblockRender extends TileEntitySpecialRenderer<TileMultiblo
 		renderers.put(SteamHammerMultiblock.NAME, new SteamHammerRender());
 		renderers.put(PlateRollerMultiblock.NAME, new PlateRollerRender());
 		renderers.put(RailRollerMultiblock.NAME, new RailRollerRender());
+		renderers.put(BoilerRollerMultiblock.NAME, new BoilerRollerRender());
 	}
 	
 	@Override
