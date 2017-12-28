@@ -13,7 +13,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.tile.TileRail;
 
 public class BlockRail extends BlockRailBase {
@@ -42,11 +42,11 @@ public class BlockRail extends BlockRailBase {
 			return ItemStack.EMPTY;
 		}
 		ItemStack stack = new ItemStack(this, 1);
-		ItemRail.setType(stack, tileEntity.getType());
-		ItemRail.setLength(stack, tileEntity.getLength());
-		ItemRail.setQuarters(stack, tileEntity.getTurnQuarters());
+		ItemTrackBlueprint.setType(stack, tileEntity.getType());
+		ItemTrackBlueprint.setLength(stack, tileEntity.getLength());
+		ItemTrackBlueprint.setQuarters(stack, tileEntity.getTurnQuarters());
 		//ItemRail.setPosType(stack, )
-		ItemRail.setBed(stack, tileEntity.getRailBed());
+		ItemTrackBlueprint.setBed(stack, tileEntity.getRailBed());
 		//ItemRail.setPreview(stack, )
 		
 		return stack;

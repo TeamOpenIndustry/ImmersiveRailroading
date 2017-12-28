@@ -30,10 +30,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 
 @Optional.Interface(iface = "mezz.jei.api.ingredients.ISlowRenderItem", modid = "jei")
-public class ItemRail extends ItemBlock {
+public class ItemTrackBlueprint extends ItemBlock {
 	public static final String NAME = "item_rail";
 
-	public ItemRail(Block block) {
+	public ItemTrackBlueprint(Block block) {
 		super(block);
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
@@ -50,7 +50,7 @@ public class ItemRail extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
-		if (ItemRail.isPreview(stack)) {
+		if (ItemTrackBlueprint.isPreview(stack)) {
 			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_PREVIEW.getDefaultState());
 			TileRailPreview te = TileRailPreview.get(world, pos);
 			if (te != null) {
