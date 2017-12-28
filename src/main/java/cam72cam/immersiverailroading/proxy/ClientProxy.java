@@ -23,6 +23,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
+import cam72cam.immersiverailroading.gui.RailRollerGUI;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.SteamHammerContainerGui;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
@@ -100,6 +101,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
 		System.out.println(GuiTypes.values()[ID]);
+		TileMultiblock te;
 		switch (GuiTypes.values()[ID]) {
 		case FREIGHT:
 			return new FreightContainerGui((CarFreight) world.getEntityByID(entityIDorPosX),
@@ -119,11 +121,17 @@ public class ClientProxy extends CommonProxy {
 		case RAIL_PREVIEW:
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		case BLOCK_STEAM_HAMMER:
-			TileMultiblock te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
+			te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
 			if (te == null || !te.isLoaded()) {
 				return null;
 			}
 			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, te));
+		case BLOCK_RAIL_ROLLER:
+			te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
+			if (te == null || !te.isLoaded()) {
+				return null;
+			}
+			return new RailRollerGUI(te);
 		default:
 			return null;
 		}

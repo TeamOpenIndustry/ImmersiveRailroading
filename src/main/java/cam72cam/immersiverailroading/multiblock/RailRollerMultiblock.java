@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.multiblock;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -61,16 +63,23 @@ public class RailRollerMultiblock extends Multiblock {
 
 	@Override
 	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {
-		return new PlateRollerInstance(world, origin, rot);
+		return new RailRollerInstance(world, origin, rot);
 	}
-	public class PlateRollerInstance extends MultiblockInstance {
+	public class RailRollerInstance extends MultiblockInstance {
 		
-		public PlateRollerInstance(World world, BlockPos origin, Rotation rot) {
+		public RailRollerInstance(World world, BlockPos origin, Rotation rot) {
 			super(world, origin, rot);
 		}
 
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
+			if (!player.isSneaking()) {
+				if (world.isRemote) {
+					BlockPos pos = getPos(offset);
+					player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_RAIL_ROLLER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
+				}
+				return true;
+			}
 			return false;
 		}
 
@@ -89,14 +98,11 @@ public class RailRollerMultiblock extends Multiblock {
 			if (!offset.equals(crafter)) {
 				return;
 			}
-			TileMultiblock craftingTe = getTile(offset);
+			TileMultiblock craftingTe = getTile(crafter);
 			if (craftingTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(offset));
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(crafter));
 				return;
 			}
-			
-			// TODO GUI to choose scale
-			craftingTe.setCraftItem(new ItemStack(ImmersiveRailroading.ITEM_RAIL, 16));
 			
 			TileMultiblock powerTe = getTile(power);
 			if (powerTe == null) {
@@ -188,6 +194,19 @@ public class RailRollerMultiblock extends Multiblock {
 		
 		public ItemStack steelBlock() {
 			return new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
+		}
+		
+		public void setCraftItem(ItemStack stack) {
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(crafter), stack));
+		}
+
+		public ItemStack getCraftItem() {
+			TileMultiblock craftingTe = getTile(crafter);
+			if (craftingTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(crafter));
+				return ItemStack.EMPTY;
+			}
+			return craftingTe.getCraftItem();
 		}
 	}
 }
