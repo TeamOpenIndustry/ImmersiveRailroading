@@ -26,7 +26,7 @@ public enum GuiText {
 	LOCO_WORKS("loco.works"),
 	LOCO_HORSE_POWER("loco.horse_power"),
 	LOCO_MAX_SPEED("loco.max_speed"),
-	STOCK_GAUGE("stock.gauge"),
+	GAUGE_TOOLTIP("stock.gauge"),
 	
 	NONE("none"),
 	;

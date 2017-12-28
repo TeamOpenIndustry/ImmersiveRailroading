@@ -30,13 +30,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import util.Matrix4;
 
-public class RailItemModel implements IBakedModel {
+public class TrackBlueprintItemModel implements IBakedModel {
 	private RailInfo info;
 
-	public RailItemModel() {
+	public TrackBlueprintItemModel() {
 	}
 	
-	public RailItemModel(ItemStack stack, World world) {
+	public TrackBlueprintItemModel(ItemStack stack, World world) {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
@@ -107,7 +107,7 @@ public class RailItemModel implements IBakedModel {
 		}
 
 		public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
-			return new RailItemModel(stack, world);
+			return new TrackBlueprintItemModel(stack, world);
 		}
 	}
 

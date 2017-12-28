@@ -108,7 +108,7 @@ public class ItemRailAugment extends Item {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(GuiText.STOCK_GAUGE.toString(getGauge(stack)));
+        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(getGauge(stack)));
     }
 
 	public static void setAugment(ItemStack stack, Augment augment) {

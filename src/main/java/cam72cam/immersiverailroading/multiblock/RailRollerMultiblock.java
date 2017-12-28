@@ -15,7 +15,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class RailRollerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
@@ -96,6 +95,9 @@ public class RailRollerMultiblock extends Multiblock {
 				return;
 			}
 			
+			// TODO GUI to choose scale
+			craftingTe.setCraftItem(new ItemStack(ImmersiveRailroading.ITEM_RAIL, 16));
+			
 			TileMultiblock powerTe = getTile(power);
 			if (powerTe == null) {
 				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(power));
@@ -134,17 +136,15 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			float progress = craftingTe.getCraftProgress();
 			
-			ItemStackHandler container = craftingTe.getContainer();
-			
-			ItemStack input = container.getStackInSlot(0);
-			ItemStack output = container.getStackInSlot(1);
+			ItemStack input = inputTe.getContainer().getStackInSlot(0);
+			ItemStack output = outputTe.getContainer().getStackInSlot(0);
 			
 			
 			if (progress == 0) {
 				// Try to start crafting
 				if (input.isItemEqual(steelBlock()) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
 					input.setCount(input.getCount() - 1);
-					container.setStackInSlot(0, input);;
+					inputTe.getContainer().setStackInSlot(0, input);;
 					progress = 100;
 					craftingTe.setCraftProgress(100);
 				}
@@ -152,13 +152,13 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				container.setStackInSlot(1, craftingTe.getCraftItem().copy());
+				outputTe.getContainer().setStackInSlot(0, craftingTe.getCraftItem().copy());
 			}
 		}
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return offset.equals(input) && stack.equals(steelBlock());
+			return offset.equals(input) && stack.isItemEqual(steelBlock());
 		}
 
 		@Override

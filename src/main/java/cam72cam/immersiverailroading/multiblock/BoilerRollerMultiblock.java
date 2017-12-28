@@ -15,13 +15,14 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 public class BoilerRollerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
+	private static MultiblockComponent temp = new MultiblockComponent(Blocks.WOODEN_SLAB);
 	public static final String NAME = "BOILER_MACHINE";
 	private static final BlockPos center = new BlockPos(2,0,0);
 	private static final BlockPos power = new BlockPos(2,5,0);
 	
 	private static MultiblockComponent[][][] componentGenerator() {
 		MultiblockComponent[] bed = new MultiblockComponent[] {
-				steel, steel, steel, steel, steel, steel
+				steel, temp, steel, steel, steel, steel
 		};
 		
 		MultiblockComponent[][][] result = new MultiblockComponent[][][] {
