@@ -34,7 +34,7 @@ d 1.000000
 illum 2
 map_Kd coal.png
 
-newmtl tuscanredmetal
+newmtl tuscanredwood
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -43,7 +43,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd tuscanredmetal.png
+map_Kd tuscanredwood.png
 
 newmtl wheelrust
 Ns 96.078431
