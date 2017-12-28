@@ -15,7 +15,6 @@ import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
@@ -55,30 +54,30 @@ public class RailBuilderRender {
 		}	
 		
 		renderOff = VecUtil.rotateYaw(renderOff, (info.direction == TrackDirection.LEFT ? -1 : 1) * info.quarter/4f * 90 - 90);
-		GlStateManager.translate(renderOff.x, renderOff.y, renderOff.z);
+		GL11.glTranslated(renderOff.x, renderOff.y, renderOff.z);
 		//GlStateManager.translate(info.getOffset().x, 0, info.getOffset().z);
-		GlStateManager.translate(-info.position.getX(), -info.position.getY(), -info.position.getZ());
-		GlStateManager.translate(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
+		GL11.glTranslated(-info.position.getX(), -info.position.getY(), -info.position.getZ());
+		GL11.glTranslated(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
 		
 		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90);
-		GlStateManager.translate(renderOff.x, renderOff.y, renderOff.z);
+		GL11.glTranslated(renderOff.x, renderOff.y, renderOff.z);
 
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
 			int displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);		
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
-				GlStateManager.pushMatrix();
-				GlStateManager.rotate(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
-				GlStateManager.translate(piece.x, piece.y, piece.z);
-				GlStateManager.rotate(piece.getYaw(), 0, 1, 0);
-				GlStateManager.rotate(piece.getPitch(), 1, 0, 0);
-				GlStateManager.rotate(-90, 0, 1, 0);
+				GL11.glPushMatrix();;
+				GL11.glRotatef(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
+				GL11.glTranslated(piece.x, piece.y, piece.z);
+				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
+				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
+				GL11.glRotatef(-90, 0, 1, 0);
 				float length = piece.getLength();
 				if (length == 1) {
 					length = (float) info.gauge.scale();
 				}
-				GlStateManager.scale(length, info.gauge.scale(), info.gauge.scale());
+				GL11.glScaled(length, info.gauge.scale(), info.gauge.scale());
 				if (piece.getGroups().size() != 0) {
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
@@ -94,7 +93,7 @@ public class RailBuilderRender {
 				} else {
 					baseRailModel.drawDirect();
 				}
-				GlStateManager.popMatrix();
+				GL11.glPopMatrix();;
 			}
 			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
