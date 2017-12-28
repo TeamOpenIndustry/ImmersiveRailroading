@@ -79,12 +79,20 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     	return ItemRollingStockComponent.getDefinitionID(item).equals(ItemRollingStock.getDefinitionID(stock));
     }
     
+    private void sendPacket() {
+    	ItemStack selected = this.itemSelector.choosenItem.copy();
+		if (selected.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+			ItemRollingStockComponent.setGauge(selected, gauge);
+		}
+		ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), selected));
+    }
+    
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
     	if (itemSelector.isActive) {
     		itemSelector.mouseClicked(mouseX, mouseY, mouseButton);
     		
     		if (!itemSelector.isActive) {
-    			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
+    			sendPacket();
     		}
         	
         	return;
@@ -101,7 +109,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     			}
     			if (filteredItems.size() == 0) {
     				itemSelector.choosenItem = this.stockSelector.choosenItem;
-        			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), this.stockSelector.choosenItem, this.gauge));
+        			sendPacket();
     			} else {
 	    			itemSelector.setItems(filteredItems);
 	    			itemSelector.isActive = true;
@@ -114,7 +122,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 		if (gaugeButton.mousePressed(mc, mouseX, mouseY)) {
 			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), this.itemSelector.choosenItem, this.gauge));
+			sendPacket();
 			return;
 		}
     	
