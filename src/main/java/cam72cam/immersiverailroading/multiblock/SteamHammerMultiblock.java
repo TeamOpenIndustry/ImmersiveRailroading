@@ -151,14 +151,14 @@ public class SteamHammerMultiblock extends Multiblock {
 		}
 
 		@Override
-		public boolean canInsertItem(int slot, ItemStack stack) {
+		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
 			System.out.println(stack);
 			System.out.println(steelBlock());
 			return slot == 0 && stack.isItemEqual(steelBlock());
 		}
 
 		@Override
-		public boolean isOutputSlot(int slot) {
+		public boolean isOutputSlot(BlockPos offset, int slot) {
 			return slot == 1;
 		}
 
