@@ -68,7 +68,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
         if (def != null) {
         	tooltip.addAll(def.getTooltip(gauge));
         }
-        tooltip.add(GuiText.STOCK_GAUGE.toString(gauge));
+        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(gauge));
     }
 	
 	@Override

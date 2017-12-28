@@ -38,9 +38,10 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
-import cam72cam.immersiverailroading.render.RailItemModel;
+import cam72cam.immersiverailroading.render.TrackBlueprintItemModel;
 import cam72cam.immersiverailroading.render.RailAugmentItemModel;
 import cam72cam.immersiverailroading.render.RailBaseModel;
+import cam72cam.immersiverailroading.render.RailItemRender;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.StockItemModel;
@@ -199,14 +200,18 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT.getRegistryName(), ""));
+		
+		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_RAIL, 0,
+				new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL.getRegistryName(), ""));
 	}
 
 	@SubscribeEvent
 	public static void onModelBakeEvent(ModelBakeEvent event) {
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), ""), new StockItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""), new RailItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""), new TrackBlueprintItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""), new StockItemComponentModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT.getRegistryName(), ""), new RailAugmentItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL.getRegistryName(), ""), new RailItemRender());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL.getRegistryName(), ""), new RailBaseModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL_GAG.getRegistryName(), ""), new RailBaseModel());
 	}

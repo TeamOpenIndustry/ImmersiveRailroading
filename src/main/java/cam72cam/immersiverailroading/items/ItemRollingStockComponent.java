@@ -70,7 +70,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
     {
 		overrideStackDisplayName(stack);
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(GuiText.STOCK_GAUGE.toString(getGauge(stack)));
+        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(getGauge(stack)));
     }
 	
 	@Override
