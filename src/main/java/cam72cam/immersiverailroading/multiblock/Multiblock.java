@@ -115,8 +115,8 @@ public abstract class Multiblock {
 		public abstract int getInvSize(BlockPos offset);
 		public abstract boolean isRender(BlockPos offset);
 		public abstract void tick(BlockPos offset);
-		public abstract boolean canInsertItem(int slot, ItemStack stack);
-		public abstract boolean isOutputSlot(int slot);
+		public abstract boolean canInsertItem(BlockPos offset, int slot, ItemStack stack);
+		public abstract boolean isOutputSlot(BlockPos offset, int slot);
 		public abstract int getSlotLimit(BlockPos offset, int slot);
 		public abstract boolean canRecievePower(BlockPos offset);
 		public void onBreak() {

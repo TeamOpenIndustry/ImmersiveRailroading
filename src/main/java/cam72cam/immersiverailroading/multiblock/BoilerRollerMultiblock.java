@@ -74,12 +74,12 @@ public class BoilerRollerMultiblock extends Multiblock {
 		}
 
 		@Override
-		public boolean canInsertItem(int slot, ItemStack stack) {
+		public boolean canInsertItem(BlockPos pos, int slot, ItemStack stack) {
 			return false;
 		}
 
 		@Override
-		public boolean isOutputSlot(int slot) {
+		public boolean isOutputSlot(BlockPos pos, int slot) {
 			return false;
 		}
 
