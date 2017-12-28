@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
 public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPreview> {
@@ -35,7 +34,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 		GL11.glPushMatrix();
 		{
 			// Move to specified position
-			GlStateManager.translate(x, y, z);
+			GL11.glTranslated(x, y, z);
 			
 			RailRenderUtil.render(info, true);
 		}
