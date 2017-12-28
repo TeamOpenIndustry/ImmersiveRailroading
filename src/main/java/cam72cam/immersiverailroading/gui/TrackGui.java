@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -79,12 +79,12 @@ public class TrackGui extends GuiScreen {
 
 	private void init(ItemStack stack) {
 		stack = stack.copy();
-		length = ItemRail.getLength(stack);
-		quarters = ItemRail.getQuarters(stack);
-		type = ItemRail.getType(stack);
-		gauge = ItemRail.getGauge(stack);
-		posType = ItemRail.getPosType(stack);
-		isPreview = ItemRail.isPreview(stack);
+		length = ItemTrackBlueprint.getLength(stack);
+		quarters = ItemTrackBlueprint.getQuarters(stack);
+		type = ItemTrackBlueprint.getType(stack);
+		gauge = ItemTrackBlueprint.getGauge(stack);
+		posType = ItemTrackBlueprint.getPosType(stack);
+		isPreview = ItemTrackBlueprint.isPreview(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
 		oreDict.add(new ItemStack(Items.AIR));
@@ -97,9 +97,9 @@ public class TrackGui extends GuiScreen {
 			}
 		}
 		bedSelector = new ItemPickerGUI(oreDict);
-		bedSelector.choosenItem = ItemRail.getBed(stack);
+		bedSelector.choosenItem = ItemTrackBlueprint.getBed(stack);
 		bedFillSelector = new ItemPickerGUI(oreDict);
-		bedFillSelector.choosenItem = ItemRail.getBedFill(stack);
+		bedFillSelector.choosenItem = ItemTrackBlueprint.getBedFill(stack);
 	}
 
 	@Override
