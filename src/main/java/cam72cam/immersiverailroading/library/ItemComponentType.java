@@ -39,7 +39,7 @@ public enum ItemComponentType {
 	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST),
 	STEAM_CHEST_FRONT(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_FRONT),
 	STEAM_CHEST_REAR(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_REAR),
-	BOILER_SEGMENT(AssemblyStep.BOILER, CraftingType.HAMMER, RenderComponentType.BOILER_SEGMENT_X),
+	BOILER_SEGMENT(AssemblyStep.BOILER, CraftingType.PLATE_BOILER, RenderComponentType.BOILER_SEGMENT_X),
 	PIPING(AssemblyStep.BOILER, CraftingType.HAMMER, RenderComponentType.PIPING),
 	
 	// WALCHERTS

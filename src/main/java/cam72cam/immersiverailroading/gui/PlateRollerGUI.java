@@ -4,9 +4,13 @@ import java.io.IOException;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock.RailRollerInstance;
+import cam72cam.immersiverailroading.library.PlateType;
+import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock.PlateRollerInstance;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -15,15 +19,33 @@ import net.minecraft.item.ItemStack;
 public class PlateRollerGUI extends GuiScreen {
 	private GuiButton gaugeButton;
 	private Gauge gauge;
-	private TileMultiblock te;
+	
+	private GuiButton plateButton;
+	private PlateType plate;
+
+	private GuiButton pickerButton;
+	private CraftPicker picker;
+	
+	private TileMultiblock tile;
+	private ItemStack currentItem;
 	
 	public PlateRollerGUI(TileMultiblock te) {
-		this.te = te;
+		this.tile = te;
 		if (te != null) {
-			gauge = ItemRail.getGauge(((RailRollerInstance) te.getMultiblock()).getCraftItem());
+			gauge = ItemRail.getGauge(((PlateRollerInstance) te.getMultiblock()).getCraftItem());
 		} else {
 			gauge = Gauge.STANDARD;
 		}
+		plate = PlateType.SMALL; //TODO
+		picker = new CraftPicker(te.getCraftItem(), CraftingType.PLATE_BOILER, (ItemStack item) -> {
+        	this.mc.displayGuiScreen(this);
+        	
+        	if (item != null) {
+        		currentItem = item;
+        		pickerButton.displayString = GuiText.SELECTOR_PLATE_BOILER.toString(item.getDisplayName());
+	        	sendPacket(currentItem);
+        	}
+        });
 	}
 
 	@Override
@@ -37,6 +59,12 @@ public class PlateRollerGUI extends GuiScreen {
 
 		gaugeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_GAUGE.toString(gauge));
 		this.buttonList.add(gaugeButton);
+		
+		plateButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate));
+		this.buttonList.add(plateButton);
+		
+		pickerButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLATE_BOILER.toString(currentItem != null ? currentItem.getDisplayName() : ""));
+		this.buttonList.add(pickerButton);
 	}
 	
 	@Override
@@ -44,8 +72,25 @@ public class PlateRollerGUI extends GuiScreen {
 		if (button == gaugeButton) {
 			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+			sendPacket(currentItem);
+		}
+		if (button == plateButton) {
+			plate = PlateType.values()[((plate.ordinal() + 1) % (PlateType.values().length))];
+			plateButton.displayString = GuiText.SELECTOR_PLATE_TYPE.toString(plate);
+			pickerButton.visible = plate == PlateType.BOILER;
+			sendPacket(currentItem);
+		}
+		if (button == pickerButton) {
+			this.mc.displayGuiScreen(picker);
 		}
 	}
+	
+	private void sendPacket(ItemStack selected) {
+		if (selected != null) {	
+			ItemRollingStockComponent.setGauge(selected, gauge);
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), selected));
+		}
+    }
 	
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
@@ -53,7 +98,7 @@ public class PlateRollerGUI extends GuiScreen {
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
         	ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_RAIL, (int) (16 / gauge.scale()));
         	ItemRail.setGauge(stack, gauge);
-        	((RailRollerInstance) te.getMultiblock()).setCraftItem(stack);
+        	((PlateRollerInstance) tile.getMultiblock()).setCraftItem(stack);
 
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)

@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.multiblock;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
@@ -73,6 +74,13 @@ public class PlateRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
+			if (!player.isSneaking()) {
+				if (world.isRemote) {
+					BlockPos pos = getPos(offset);
+					player.openGui(ImmersiveRailroading.instance, GuiTypes.PLATE_ROLLER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
+				}
+				return true;
+			}
 			return false;
 		}
 
