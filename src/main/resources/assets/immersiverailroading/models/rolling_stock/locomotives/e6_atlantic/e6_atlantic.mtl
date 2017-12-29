@@ -1,20 +1,10 @@
 # Blender MTL File: 'E6.blend'
-# Material Count: 34
+# Material Count: 28
 
 newmtl BRAKE_SKID
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.247968 0.247968 0.247968
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl CABFLOOR
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.069387 0.069387 0.069387
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
@@ -30,7 +20,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\chrome.png
+map_Kd chrome.png
 
 newmtl Material.001
 Ns 96.078431
@@ -41,63 +31,12 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\fire.png
-
-newmtl Material.002
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\wheelrust.png
-
-newmtl Material.026
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.179565 0.003281 0.005477
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl Material.027
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.313702 0.143216 0.028583
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
+map_Kd fire.png
 
 newmtl Material.043
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.036670 0.036670 0.036670
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl Material.044
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.168495 0.073540 0.003162
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl Material.045
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.019687 0.019687 0.019687
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
@@ -121,7 +60,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\black1.png
+map_Kd black1.png
 
 newmtl black1_black1.png
 Ns 96.078431
@@ -132,7 +71,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\black1.png
+map_Kd black1.png
 
 newmtl black2
 Ns 96.078431
@@ -143,7 +82,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\black2.png
+map_Kd black2.png
 
 newmtl brassdark
 Ns 96.078431
@@ -154,7 +93,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\brassdark.png
+map_Kd brassdark.png
 
 newmtl brasslight
 Ns 96.078431
@@ -165,7 +104,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\brasslight.png
+map_Kd brasslight.png
 
 newmtl brassreg
 Ns 96.078431
@@ -176,7 +115,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\brassreg.png
+map_Kd brassreg.png
 
 newmtl brassreg.001
 Ns 96.078431
@@ -187,7 +126,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\brassreg.png
+map_Kd brassreg.png
 
 newmtl cabwall1
 Ns 96.078431
@@ -198,7 +137,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\cabwall1.png
+map_Kd cabwall1.png
 
 newmtl frame
 Ns 96.078431
@@ -209,7 +148,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\frame.png
+map_Kd frame.png
 
 newmtl glass
 Ns 96.078431
@@ -220,7 +159,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\glass.png
+map_Kd glass.png
 
 newmtl glass.001
 Ns 96.078431
@@ -231,7 +170,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\glass.png
+map_Kd glass.png
 
 newmtl gold1
 Ns 96.078431
@@ -242,7 +181,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\gold1.png
+map_Kd gold1.png
 
 newmtl gold2
 Ns 96.078431
@@ -253,7 +192,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\gold2.png
+map_Kd gold2.png
 
 newmtl psigauge01
 Ns 96.078431
@@ -264,7 +203,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\psigauge01.png
+map_Kd psigauge01.png
 
 newmtl redwethered
 Ns 96.078431
@@ -275,7 +214,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Flatcars\\redwethered.png
+map_Kd redwethered.png
 
 newmtl rim01
 Ns 96.078431
@@ -286,7 +225,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\rim01.png
+map_Kd rim01.png
 
 newmtl rod01
 Ns 96.078431
@@ -297,7 +236,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\rod01.png
+map_Kd rod01.png
 
 newmtl rod01_black1.png
 Ns 96.078431
@@ -308,7 +247,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\Users\train\Documents\GitHub\ImmersiveRailroading\models\Textures\Passenger Car\black1.png
+map_Kd black1.png
 
 newmtl sightglass1
 Ns 96.078431
@@ -319,7 +258,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\sightglass1.png
+map_Kd sightglass1.png
 
 newmtl smokebox
 Ns 96.078431
@@ -330,7 +269,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Steam Locomotives\\smokebox.png
+map_Kd smokebox.png
 
 newmtl stripeyellow
 Ns 96.078431
@@ -341,7 +280,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Passenger Car\\stripeyellow.png
+map_Kd stripeyellow.png
 
 newmtl tuscanredwood
 Ns 96.078431
@@ -352,7 +291,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Boxcar\\tuscanredwood.png
+map_Kd tuscanredwood.png
 
 newmtl wheelrust
 Ns 96.078431
@@ -363,4 +302,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\train\\Documents\\GitHub\\ImmersiveRailroading\\models\\Textures\\Trucks\\wheelrust.png
+map_Kd wheelrust.png
