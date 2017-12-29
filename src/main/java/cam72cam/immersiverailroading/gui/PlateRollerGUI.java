@@ -101,7 +101,23 @@ public class PlateRollerGUI extends GuiScreen {
 	private void sendPacket() {
     	ItemPlate.setGauge(currentItem, gauge);
     	ItemPlate.setPlate(currentItem, plate);
-    	//TODO set count
+    	switch (plate) {
+		case BOILER:
+			currentItem.setCount(1);
+			break;
+		case LARGE:
+			currentItem.setCount(1);
+			break;
+		case MEDIUM:
+			currentItem.setCount(4);
+			break;
+		case SMALL:
+			currentItem.setCount(8);
+			break;
+		default:
+			break;
+    	}
+		currentItem.setCount(Math.max(1, (int) Math.floor(currentItem.getCount()/gauge.scale())));
     	((PlateRollerInstance) tile.getMultiblock()).setCraftItem(currentItem);
     }
 	
