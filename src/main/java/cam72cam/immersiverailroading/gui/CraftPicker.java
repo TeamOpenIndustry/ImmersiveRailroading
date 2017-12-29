@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.gui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -35,17 +37,34 @@ public class CraftPicker extends GuiScreen {
         ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
 
 		stockSelector = new ItemPickerGUI(stock, this::onStockExit);
+		List<ItemStack> toRemove = new ArrayList<ItemStack>();
 		for (ItemStack itemStock : stock) {
+			boolean hasComponent = false;
+			for (ItemStack item : items) {
+				if (isPartOf(itemStock, item)) {
+					if (ItemRollingStockComponent.getComponentType(item).crafting == craftType) {
+						hasComponent = true;
+						break;
+					}
+				}
+			}
+			if (!hasComponent) {
+				toRemove.add(itemStock);
+				continue;
+			}
 			if (isPartOf(itemStock, current)) {				
 				stockSelector.choosenItem = itemStock;
 			}
 		}
+		stock.removeAll(toRemove);
 		
+		toRemove = new ArrayList<ItemStack>();
 		for (ItemStack item : items) {
 			if (ItemRollingStockComponent.getComponentType(item).crafting != craftType) {
-				items.remove(item);
+				toRemove.add(item);
 			}
 		}
+		items.removeAll(toRemove);
 		
 		itemSelector = new ItemPickerGUI(NonNullList.create(), this::onItemExit);
 		if (current != null && current.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
