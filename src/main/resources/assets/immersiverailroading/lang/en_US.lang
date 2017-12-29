@@ -68,6 +68,11 @@ immersiverailroading:gauge.narrow=Narrow
 immersiverailroading:gauge.minecraft=Minecraft
 immersiverailroading:gauge.model=Model
 
+immersiverailroading:plate.small=Small Plate
+immersiverailroading:plate.medium=Medium Plate
+immersiverailroading:plate.large=Large Plate
+immersiverailroading:plate.boiler=Boiler Plate
+
 track.immersiverailroading:class.straight=Straight
 track.immersiverailroading:class.crossing=Crossing
 track.immersiverailroading:class.slope=Slope
