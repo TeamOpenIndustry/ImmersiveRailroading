@@ -20,7 +20,7 @@ public class PlateRollerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	public static final String NAME = "PLATE_MACHINE";
 	private static final BlockPos render = new BlockPos(2,0,0);
-	private static final BlockPos crafter = new BlockPos(2,1,14);
+	private static final BlockPos crafter = new BlockPos(2,0,14);
 	private static final BlockPos input = new BlockPos(2,0,0);
 	private static final BlockPos output = new BlockPos(2,0,29);
 	private static final BlockPos power = new BlockPos(1,4,14);
@@ -139,7 +139,7 @@ public class PlateRollerMultiblock extends Multiblock {
 		public ItemStack getCraftItem() {
 			TileMultiblock craftingTe = getTile(crafter);
 			if (craftingTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(crafter));
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT %s", getPos(crafter));
 				return ItemStack.EMPTY;
 			}
 			return craftingTe.getCraftItem();
