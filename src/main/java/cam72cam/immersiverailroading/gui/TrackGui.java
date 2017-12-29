@@ -96,23 +96,23 @@ public class TrackGui extends GuiScreen {
 				oreDict.add(ore);
 			}
 		}
-		bedSelector = new ItemPickerGUI(oreDict);
+		bedSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
+			bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
+			this.mc.displayGuiScreen(this);
+		});
 		bedSelector.choosenItem = ItemTrackBlueprint.getBed(stack);
-		bedFillSelector = new ItemPickerGUI(oreDict);
+		bedFillSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
+			bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
+			this.mc.displayGuiScreen(this);
+		});
 		bedFillSelector.choosenItem = ItemTrackBlueprint.getBedFill(stack);
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		if (bedSelector.isActive) {
-			bedSelector.drawScreen(mouseX, mouseY, partialTicks);
-		} else if (bedFillSelector.isActive) {
-			bedFillSelector.drawScreen(mouseX, mouseY, partialTicks);
-		} else {
-			this.drawDefaultBackground();
-	        this.lengthInput.drawTextBox();
-			super.drawScreen(mouseX, mouseY, partialTicks);
-		}
+		this.drawDefaultBackground();
+        this.lengthInput.drawTextBox();
+		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 	
 	@Override
@@ -202,10 +202,10 @@ public class TrackGui extends GuiScreen {
 			posTypeButton.displayString = GuiText.SELECTOR_POSITION.toString(posType);
 		}
 		if (button == bedTypeButton) {
-			bedSelector.isActive = true;
+			this.mc.displayGuiScreen(bedSelector);
 		}
 		if (button == bedFillButton) {
-			bedFillSelector.isActive = true;
+			this.mc.displayGuiScreen(bedFillSelector);
 		}
 		if (button == isPreviewCB) {
 			isPreview = isPreviewCB.isChecked();
@@ -215,14 +215,6 @@ public class TrackGui extends GuiScreen {
         this.lengthInput.textboxKeyTyped(typedChar, keyCode);
         // Enter or ESC
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
-        	if (bedSelector.isActive) {
-        		bedSelector.isActive = false;
-        		return;
-        	}
-        	if (bedFillSelector.isActive) {
-        		bedFillSelector.isActive = false;
-        		return;
-        	}
         	if (!this.lengthInput.getText().isEmpty()) {
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
@@ -239,24 +231,6 @@ public class TrackGui extends GuiScreen {
 	}
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
     {
-        if (bedSelector.isActive) {
-        	bedSelector.mouseClicked(mouseX, mouseY, mouseButton);
-
-			if (!bedSelector.isActive) {
-				bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
-			}
-        	
-        	return;
-        }
-        if (bedFillSelector.isActive) {
-        	bedFillSelector.mouseClicked(mouseX, mouseY, mouseButton);
-
-			if (!bedFillSelector.isActive) {
-				bedFillButton.displayString = GuiText.SELECTOR_RAIL_BED_FILL.toString(getBedFillName());
-			}
-        	
-        	return;
-        }
         super.mouseClicked(mouseX, mouseY, mouseButton);
         this.lengthInput.mouseClicked(mouseX, mouseY, mouseButton);
     }
