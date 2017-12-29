@@ -8,9 +8,11 @@ import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -96,6 +98,71 @@ public class PlateRollerMultiblock extends Multiblock {
 
 		@Override
 		public void tick(BlockPos offset) {
+			if (!offset.equals(crafter)) {
+				return;
+			}
+			TileMultiblock craftingTe = getTile(crafter);
+			if (craftingTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(crafter));
+				return;
+			}
+			
+			TileMultiblock powerTe = getTile(power);
+			if (powerTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(power));
+				return;
+			}
+			
+			TileMultiblock inputTe = getTile(input);
+			if (inputTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(input));
+				return;
+			}
+			
+			TileMultiblock outputTe = getTile(output);
+			if (outputTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(output));
+				return;
+			}
+			
+			if (!hasPower()) {
+				return;
+			}
+			
+			if (world.isRemote) {
+				if (craftingTe.getRenderTicks() % 10 == 0 && craftingTe.getCraftProgress() != 0) {
+					world.playSound(craftingTe.getPos().getX(), craftingTe.getPos().getY(), craftingTe.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+				}
+				return;
+			}
+			
+			// Decrement craft progress down to 0
+			if (craftingTe.getCraftProgress() != 0) {
+				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+				energy.extractEnergy(32, false);
+				craftingTe.setCraftProgress(Math.max(0, craftingTe.getCraftProgress() - 1));
+			}
+			
+			float progress = craftingTe.getCraftProgress();
+			
+			ItemStack input = inputTe.getContainer().getStackInSlot(0);
+			ItemStack output = outputTe.getContainer().getStackInSlot(0);
+			
+			
+			if (progress == 0) {
+				// Try to start crafting
+				if (input.isItemEqual(steelBlock()) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
+					input.setCount(input.getCount() - 1);
+					inputTe.getContainer().setStackInSlot(0, input);;
+					progress = 100;
+					craftingTe.setCraftProgress(100);
+				}
+			}
+			
+			if (progress == 1) {
+				// Stop crafting
+				outputTe.getContainer().setStackInSlot(0, craftingTe.getCraftItem().copy());
+			}
 		}
 
 		@Override
