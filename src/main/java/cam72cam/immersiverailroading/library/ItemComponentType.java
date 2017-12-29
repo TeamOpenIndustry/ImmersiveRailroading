@@ -6,36 +6,36 @@ import java.util.List;
 import cam72cam.immersiverailroading.util.TextUtil;
 
 public enum ItemComponentType {
-	FRAME(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.FRAME), //TODO
+	FRAME(AssemblyStep.FRAME, CraftingType.PLATE_LARGE, RenderComponentType.FRAME), //TODO
 	
 	// MALLET
-	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.FRONT_LOCOMOTIVE),
+	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.PLATE_LARGE, RenderComponentType.FRONT_LOCOMOTIVE),
 	
 	// STANDARD
 	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_POS_WHEEL_X),
-	BOGEY(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_POS),
+	BOGEY(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_POS),
 	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_FRONT_WHEEL_X),
-	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_FRONT),
+	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_FRONT),
 	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_REAR_WHEEL_X),
-	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_REAR),
+	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_REAR),
 	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.FRAME_WHEEL_X),
 	
 	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, RenderComponentType.SHELL),
 	
 	// LOCOMOTIVE
-	CAB(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.CAB),
-	BELL(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.BELL),
-	WHISTLE(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.WHISTLE),
-	HORN(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.HORN),
+	CAB(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, RenderComponentType.CAB),
+	BELL(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, RenderComponentType.BELL),
+	WHISTLE(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, RenderComponentType.WHISTLE),
+	HORN(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, RenderComponentType.HORN),
 	
 	// DIESEL
-	FUEL_TANK(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.FUEL_TANK),
+	FUEL_TANK(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FUEL_TANK),
 	ALTERNATOR(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.ALTERNATOR),
 	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.ENGINE_BLOCK),
 	PISTON(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.PISTON_X),
 	
 	//STEAM
-	FIREBOX(AssemblyStep.BOILER, CraftingType.HAMMER, RenderComponentType.FIREBOX),
+	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
 	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST),
 	STEAM_CHEST_FRONT(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_FRONT),
 	STEAM_CHEST_REAR(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_REAR),
