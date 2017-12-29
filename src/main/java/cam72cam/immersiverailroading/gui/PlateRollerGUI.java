@@ -3,14 +3,14 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRail;
-import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.items.BaseItemRollingStock;
+import cam72cam.immersiverailroading.items.ItemPlate;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock.PlateRollerInstance;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -31,21 +31,32 @@ public class PlateRollerGUI extends GuiScreen {
 	
 	public PlateRollerGUI(TileMultiblock te) {
 		this.tile = te;
-		if (te != null) {
-			gauge = ItemRail.getGauge(((PlateRollerInstance) te.getMultiblock()).getCraftItem());
-		} else {
-			gauge = Gauge.STANDARD;
+		currentItem = ((PlateRollerInstance) te.getMultiblock()).getCraftItem();
+		System.out.println(currentItem);
+		if (currentItem == null || currentItem.isEmpty()) {
+			currentItem = new ItemStack(ImmersiveRailroading.ITEM_PLATE, 1);
 		}
-		plate = PlateType.SMALL; //TODO
-		picker = new CraftPicker(te.getCraftItem(), CraftingType.PLATE_BOILER, (ItemStack item) -> {
+		System.out.println(currentItem);
+		
+		gauge = ItemPlate.getGauge(currentItem);
+		plate = ItemPlate.getPlate(currentItem);
+		picker = new CraftPicker(null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
         	this.mc.displayGuiScreen(this);
         	
         	if (item != null) {
-        		currentItem = item;
-        		pickerButton.displayString = GuiText.SELECTOR_PLATE_BOILER.toString(item.getDisplayName());
-	        	sendPacket(currentItem);
+        		String defID = BaseItemRollingStock.getDefinitionID(item);
+        		ItemPlate.setDefinitionID(currentItem, defID);
+        		updatePickerButton();
+	        	sendPacket();
         	}
         });
+	}
+	
+	private void updatePickerButton() {
+		EntityRollingStockDefinition def = ItemPlate.getDefinition(currentItem.copy());
+		if (def != null) {
+			pickerButton.displayString = GuiText.SELECTOR_PLATE_BOILER.toString(def.name);
+		}
 	}
 
 	@Override
@@ -63,7 +74,9 @@ public class PlateRollerGUI extends GuiScreen {
 		plateButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate));
 		this.buttonList.add(plateButton);
 		
-		pickerButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLATE_BOILER.toString(currentItem != null ? currentItem.getDisplayName() : ""));
+		pickerButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLATE_BOILER.toString(""));
+		pickerButton.visible = plate == PlateType.BOILER;
+		updatePickerButton();
 		this.buttonList.add(pickerButton);
 	}
 	
@@ -72,33 +85,31 @@ public class PlateRollerGUI extends GuiScreen {
 		if (button == gaugeButton) {
 			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
-			sendPacket(currentItem);
+			sendPacket();
 		}
 		if (button == plateButton) {
 			plate = PlateType.values()[((plate.ordinal() + 1) % (PlateType.values().length))];
 			plateButton.displayString = GuiText.SELECTOR_PLATE_TYPE.toString(plate);
 			pickerButton.visible = plate == PlateType.BOILER;
-			sendPacket(currentItem);
+			sendPacket();
 		}
 		if (button == pickerButton) {
 			this.mc.displayGuiScreen(picker);
 		}
 	}
 	
-	private void sendPacket(ItemStack selected) {
-		if (selected != null) {	
-			ItemRollingStockComponent.setGauge(selected, gauge);
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), selected));
-		}
+	private void sendPacket() {
+    	ItemPlate.setGauge(currentItem, gauge);
+    	ItemPlate.setPlate(currentItem, plate);
+    	//TODO set count
+    	((PlateRollerInstance) tile.getMultiblock()).setCraftItem(currentItem);
     }
 	
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
         // Enter or ESC
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
-        	ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_RAIL, (int) (16 / gauge.scale()));
-        	ItemRail.setGauge(stack, gauge);
-        	((PlateRollerInstance) tile.getMultiblock()).setCraftItem(stack);
+        	sendPacket();
 
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)
