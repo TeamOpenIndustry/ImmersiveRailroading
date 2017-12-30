@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemPlate;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.AssemblyStep;
@@ -166,7 +167,6 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			}
 		}
 		
-		boolean addedComponents = false;
 		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
 			ItemStack found = player.inventory.getStackInSlot(i);
 			if (found.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
@@ -176,21 +176,88 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 						if (toAdd.contains(type)) {
 							addComponent(type);
 							player.inventory.decrStackSize(i, 1);
-							addedComponents = true;
-							break;
+							return;
 						}
 					}
 				}
 			}
 		}
 		
-		if (!addedComponents) {
-			String comStr = "";
-			for (ItemComponentType component : toAdd) {
-				comStr += component.toString() + ", ";
+		int largePlates = 0;
+		int mediumPlates = 0;
+		int smallPlates = 0;
+		
+		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
+			ItemStack found = player.inventory.getStackInSlot(i);
+			if (found.getItem() == ImmersiveRailroading.ITEM_PLATE) {
+				if (ItemPlate.getGauge(found) == this.gauge) {
+					switch (ItemPlate.getPlate(found)) {
+					case LARGE:
+						largePlates+=found.getCount();
+						break;
+					case MEDIUM:
+						mediumPlates+=found.getCount();
+						break;
+					case SMALL:
+						smallPlates+=found.getCount();
+						break;
+					default:
+						break;
+					}
+				}
 			}
-			player.sendMessage(ChatText.STOCK_MISSING.getMessage(comStr));
 		}
+		
+		for (ItemComponentType type : toAdd) {
+			int platesStart = 0;
+			int platesUsed = 0;
+			
+			switch (type.crafting) {
+			case PLATE_LARGE:
+				platesStart = largePlates;
+				break;
+			case PLATE_MEDIUM:
+				platesStart = mediumPlates;
+				break;
+			case PLATE_SMALL:
+				platesStart = smallPlates;
+				break;
+			default:
+				continue;
+			}
+			
+			platesUsed = type.getCost(this.gauge, this.getDefinition());
+			if (platesStart < platesUsed) {
+				continue;
+			}
+			
+			for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
+				ItemStack found = player.inventory.getStackInSlot(i);
+				if (found.getItem() == ImmersiveRailroading.ITEM_PLATE) {
+					if (ItemPlate.getGauge(found) == this.gauge) {
+						if (ItemPlate.getPlate(found) == type.getPlateType()) {
+							ItemStack itemUsed = player.inventory.decrStackSize(i, platesUsed);
+							
+							platesUsed -= itemUsed.getCount();
+							
+							if (platesUsed <= 0) {
+								break;
+							}
+						}
+					}
+				}
+			}
+			
+			addComponent(type);
+			
+			return;
+		}
+		
+		String comStr = "";
+		for (ItemComponentType component : toAdd) {
+			comStr += component.toString() + ", ";
+		}
+		player.sendMessage(ChatText.STOCK_MISSING.getMessage(comStr));
 	}
 	
 	public ItemComponentType removeNextComponent(EntityPlayer player) {

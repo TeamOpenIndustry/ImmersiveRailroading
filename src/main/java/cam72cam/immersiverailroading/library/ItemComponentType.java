@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.library;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.TextUtil;
 
 public enum ItemComponentType {
@@ -40,7 +42,7 @@ public enum ItemComponentType {
 	STEAM_CHEST_FRONT(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_FRONT),
 	STEAM_CHEST_REAR(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_REAR),
 	BOILER_SEGMENT(AssemblyStep.BOILER, CraftingType.PLATE_BOILER, RenderComponentType.BOILER_SEGMENT_X),
-	PIPING(AssemblyStep.BOILER, CraftingType.HAMMER, RenderComponentType.PIPING),
+	PIPING(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.PIPING),
 	
 	// WALCHERTS
 	WHEEL_DRIVER(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.WHEEL_DRIVER_X),
@@ -122,5 +124,43 @@ public enum ItemComponentType {
 	@Override
 	public String toString() {
 		return TextUtil.translate("part.immersiverailroading:component." + super.toString().toLowerCase());
+	}
+
+	public int getCost(Gauge gauge, EntityRollingStockDefinition definition) {
+		RenderComponent comp = definition.getComponent(this.render.get(0), gauge);
+		
+		double mult = 0;
+		switch(this.crafting) {
+		case PLATE_LARGE:
+			mult = 0.25;
+			break;
+		case PLATE_MEDIUM:
+			mult = 0.5;
+			break;
+		case PLATE_SMALL:
+			mult = 1;
+			break;
+		default:
+			return 0;
+		}
+		
+		// Approximate
+		double size = comp.width() * comp.height() * 2 + comp.length() * comp.height() * 2 + comp.width() * comp.height() * 2;
+		size /= 4;
+		
+		return (int) Math.ceil(size * mult);
+	}
+
+	public PlateType getPlateType() {
+		switch (this.crafting) {
+		case PLATE_LARGE:
+			return PlateType.LARGE;
+		case PLATE_MEDIUM:
+			return PlateType.MEDIUM;
+		case PLATE_SMALL:
+			return PlateType.SMALL;
+		default:
+			return null;
+		}
 	}
 }
