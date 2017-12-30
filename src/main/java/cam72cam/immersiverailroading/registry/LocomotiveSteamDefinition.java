@@ -1,9 +1,7 @@
 package cam72cam.immersiverailroading.registry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.JsonObject;
@@ -11,7 +9,6 @@ import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -25,8 +22,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private ValveGearType valveGear;
 	private int numSlots;
 	private int width;
-	
-	private Map<String, Map<RenderComponentType, RenderComponent>> valveGearComponents;
 	
 	public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -62,8 +57,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	@Override
 	protected Set<String> parseComponents() {
 		Set<String> groups = super.parseComponents();
-		
-		valveGearComponents = new HashMap<String,Map<RenderComponentType, RenderComponent>>();
 		
 		switch (this.valveGear) {
 		case WALSCHAERTS:
@@ -110,63 +103,27 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				sides.add("RIGHT_REAR");
 			}
 			
-			//valveGearComponents
-			
 			RenderComponentType[] components = new RenderComponentType[] {
 				RenderComponentType.SIDE_ROD_SIDE,
 				RenderComponentType.MAIN_ROD_SIDE,
 				RenderComponentType.PISTON_ROD_SIDE,
 				RenderComponentType.CYLINDER_SIDE,
+				
+				RenderComponentType.UNION_LINK_SIDE,
+				RenderComponentType.COMBINATION_LEVER_SIDE,
+				RenderComponentType.VALVE_STEM_SIDE,
+				RenderComponentType.RADIUS_BAR_SIDE,
+				RenderComponentType.EXPANSION_LINK_SIDE,
+				RenderComponentType.ECCENTRIC_ROD_SIDE,
+				RenderComponentType.ECCENTRIC_CRANK_SIDE,
+				RenderComponentType.REVERSING_ARM_SIDE,
+				RenderComponentType.LIFTING_LINK_SIDE,
+				RenderComponentType.REACH_ROD_SIDE,
 			};
 			
 			for (String side : sides) {
 				for (RenderComponentType name : components) {
-					RenderComponent found = RenderComponent.parseSide(name, this, groups, side);
-					if (found == null) {
-						continue;
-					}
-					
-					addComponentIfExists(found, true);
-					
-					if (!valveGearComponents.containsKey(side)) {
-						valveGearComponents.put(side, new HashMap<RenderComponentType, RenderComponent>());
-					}
-					valveGearComponents.get(side).put(name, found);
-				}
-			}
-			
-			components = new RenderComponentType[] {
-					RenderComponentType.UNION_LINK_SIDE,
-					RenderComponentType.COMBINATION_LEVER_SIDE,
-					RenderComponentType.VALVE_STEM_SIDE,
-					RenderComponentType.RADIUS_BAR_SIDE,
-					RenderComponentType.EXPANSION_LINK_SIDE,
-					RenderComponentType.ECCENTRIC_ROD_SIDE,
-					RenderComponentType.ECCENTRIC_CRANK_SIDE,
-					RenderComponentType.REVERSING_ARM_SIDE,
-					RenderComponentType.LIFTING_LINK_SIDE,
-					RenderComponentType.REACH_ROD_SIDE,
-			};
-			
-			for (String side : sides) {
-				boolean hasRender = false;
-				for (RenderComponentType name : components) {
-					RenderComponent found = RenderComponent.parseSide(name, this, groups, side);
-					if (found == null) {
-						continue;
-					}
-					
-					hasRender = true;
-					
-					addComponentIfExists(found, false);
-					
-					if (!valveGearComponents.containsKey(side)) {
-						valveGearComponents.put(side, new HashMap<RenderComponentType, RenderComponent>());
-					}
-					valveGearComponents.get(side).put(name, found);
-				}
-				if (hasRender) {
-					itemComponents.add(ItemComponentType.WALCHERTS_LINKAGE);
+					addComponentIfExists(RenderComponent.parseSide(name, this, groups, side), true);
 				}
 			}
 		case CLIMAX:
@@ -176,11 +133,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		}
 		
 		return groups;
-	}
-	
-	public RenderComponent getComponent(RenderComponentType name, String side, Gauge gauge) {
-		RenderComponent comp = valveGearComponents.containsKey(side) ? valveGearComponents.get(side).get(name) : null;
-		return comp != null ? comp.scale(gauge) : null;
 	}
 
 	public FluidQuantity getTankCapacity(Gauge gauge) {

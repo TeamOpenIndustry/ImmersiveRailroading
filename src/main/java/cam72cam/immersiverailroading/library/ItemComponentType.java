@@ -14,13 +14,13 @@ public enum ItemComponentType {
 	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.PLATE_LARGE, RenderComponentType.FRONT_LOCOMOTIVE),
 	
 	// STANDARD
-	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_POS_WHEEL_X),
+	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS_WHEEL_X),
 	BOGEY(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_POS),
-	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_FRONT_WHEEL_X),
+	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_FRONT_WHEEL_X),
 	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_FRONT),
-	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.BOGEY_REAR_WHEEL_X),
+	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_REAR_WHEEL_X),
 	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_REAR),
-	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.FRAME_WHEEL_X),
+	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.FRAME_WHEEL_X),
 	
 	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, RenderComponentType.SHELL),
 	
@@ -33,25 +33,25 @@ public enum ItemComponentType {
 	// DIESEL
 	FUEL_TANK(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FUEL_TANK),
 	ALTERNATOR(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.ALTERNATOR),
-	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.ENGINE_BLOCK),
-	PISTON(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.PISTON_X),
+	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ENGINE_BLOCK),
+	PISTON(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.PISTON_X),
 	
 	//STEAM
 	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
-	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST),
-	STEAM_CHEST_FRONT(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_FRONT),
-	STEAM_CHEST_REAR(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.STEAM_CHEST_REAR),
+	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST),
+	STEAM_CHEST_FRONT(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_FRONT),
+	STEAM_CHEST_REAR(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_REAR),
 	BOILER_SEGMENT(AssemblyStep.BOILER, CraftingType.PLATE_BOILER, RenderComponentType.BOILER_SEGMENT_X),
 	PIPING(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.PIPING),
 	
 	// WALCHERTS
-	WHEEL_DRIVER(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.WHEEL_DRIVER_X),
-	WHEEL_DRIVER_FRONT(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.WHEEL_DRIVER_FRONT_X), // MALLET
-	WHEEL_DRIVER_REAR(AssemblyStep.WHEELS, CraftingType.HAMMER, RenderComponentType.WHEEL_DRIVER_REAR_X), // MALLET
+	WHEEL_DRIVER(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_X),
+	WHEEL_DRIVER_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_FRONT_X), // MALLET
+	WHEEL_DRIVER_REAR(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_REAR_X), // MALLET
 	
-	CYLINDER(AssemblyStep.FRAME, CraftingType.HAMMER, RenderComponentType.CYLINDER_SIDE),
+	CYLINDER(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.CYLINDER_SIDE),
 	SIDE_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.SIDE_ROD_SIDE),
-	MAIN_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.MAIN_ROD_SIDE),
+	MAIN_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING, RenderComponentType.MAIN_ROD_SIDE),
 	PISTON_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.PISTON_ROD_SIDE),
 	
 	UNION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.UNION_LINK_SIDE),
@@ -65,6 +65,7 @@ public enum ItemComponentType {
 	LIFTING_LINK(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.LIFTING_LINK_SIDE),
 	REACH_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.REACH_ROD_SIDE),
 	
+	// LEGACY
 	WALCHERTS_LINKAGE(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, 
 			RenderComponentType.UNION_LINK_SIDE,
 			RenderComponentType.COMBINATION_LEVER_SIDE,
