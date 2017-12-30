@@ -1,7 +1,9 @@
 package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemPlate;
@@ -18,6 +20,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public class EntityBuildableRollingStock extends EntityRollingStock {
@@ -253,11 +256,22 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			return;
 		}
 		
-		String comStr = "";
+		Map<ItemComponentType, Integer> addMap = new HashMap<ItemComponentType, Integer>();
 		for (ItemComponentType component : toAdd) {
-			comStr += component.toString() + ", ";
+			if (!addMap.containsKey(component)) {
+				addMap.put(component, 0);
+			}
+			addMap.put(component, addMap.get(component)+1);
 		}
-		player.sendMessage(ChatText.STOCK_MISSING.getMessage(comStr));
+		player.sendMessage(ChatText.STOCK_MISSING.getMessage(""));
+		
+		for (ItemComponentType component : addMap.keySet()) {
+			String str = String.format("%d x %s", addMap.get(component), component);
+			if (component.getPlateType() != null) {
+				str += String.format(" (%d x %s)", component.getCost(gauge, getDefinition()) * addMap.get(component), component.getPlateType());
+			}
+			player.sendMessage(new TextComponentString(str));
+		}
 	}
 	
 	public ItemComponentType removeNextComponent(EntityPlayer player) {
