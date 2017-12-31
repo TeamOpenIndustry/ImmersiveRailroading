@@ -62,7 +62,7 @@ public class ImmersiveRailroading
 	
 	public static ItemRailAugment ITEM_AUGMENT = new ItemRailAugment();
 	
-	public static Item ITEM_RAIL_BLOCK = new ItemTrackBlueprint(ImmersiveRailroading.BLOCK_RAIL);
+	public static Item ITEM_RAIL_BLOCK = new ItemTrackBlueprint();
 	
 	public static BlockMultiblock BLOCK_MULTIBLOCK = new BlockMultiblock();
 

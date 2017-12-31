@@ -13,14 +13,13 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
@@ -30,11 +29,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 
 @Optional.Interface(iface = "mezz.jei.api.ingredients.ISlowRenderItem", modid = "jei")
-public class ItemTrackBlueprint extends ItemBlock {
+public class ItemTrackBlueprint extends Item {
 	public static final String NAME = "item_rail";
 
-	public ItemTrackBlueprint(Block block) {
-		super(block);
+	public ItemTrackBlueprint() {
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
@@ -48,16 +46,15 @@ public class ItemTrackBlueprint extends ItemBlock {
 	}
 	
 	@Override
-	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
-    {
+	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		ItemStack stack = player.getHeldItem(hand);
 		if (ItemTrackBlueprint.isPreview(stack)) {
 			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_PREVIEW.getDefaultState());
 			TileRailPreview te = TileRailPreview.get(world, pos);
 			if (te != null) {
 				te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
 			}
-			// don't decrement stack regardless
-			return false;
+			return EnumActionResult.SUCCESS;
 		}
 		if (player.getEntityWorld().getBlockState(pos.down()).getBlock() instanceof BlockRailBase) {
 			pos = pos.down();
@@ -65,8 +62,7 @@ public class ItemTrackBlueprint extends ItemBlock {
 		
 		RailInfo info = new RailInfo(stack, player.world, player.getRotationYawHead(), pos, hitX, hitY, hitZ); 
 		info.build(player, pos);
-		// don't decrement stack regardless
-		return false;
+		return EnumActionResult.SUCCESS;
     }
 
 	@Override
