@@ -8,18 +8,18 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.TextUtil;
 
 public enum ItemComponentType {
-	FRAME(AssemblyStep.FRAME, CraftingType.PLATE_LARGE, RenderComponentType.FRAME), //TODO
+	FRAME(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, RenderComponentType.FRAME), //TODO
 	
 	// MALLET
-	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.PLATE_LARGE, RenderComponentType.FRONT_LOCOMOTIVE),
+	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, RenderComponentType.FRONT_LOCOMOTIVE),
 	
 	// STANDARD
 	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS_WHEEL_X),
-	BOGEY(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_POS),
+	BOGEY(AssemblyStep.WHEELS, CraftingType.CASTING_HAMMER, RenderComponentType.BOGEY_POS),
 	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_FRONT_WHEEL_X),
-	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_FRONT),
+	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING_HAMMER, RenderComponentType.BOGEY_FRONT),
 	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_REAR_WHEEL_X),
-	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.PLATE_MEDIUM, RenderComponentType.BOGEY_REAR),
+	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.CASTING_HAMMER, RenderComponentType.BOGEY_REAR),
 	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.FRAME_WHEEL_X),
 	
 	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, RenderComponentType.SHELL),
@@ -32,9 +32,9 @@ public enum ItemComponentType {
 	
 	// DIESEL
 	FUEL_TANK(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FUEL_TANK),
-	ALTERNATOR(AssemblyStep.SHELL, CraftingType.HAMMER, RenderComponentType.ALTERNATOR),
+	ALTERNATOR(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ALTERNATOR),
 	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ENGINE_BLOCK),
-	PISTON(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.PISTON_X),
+	PISTON(AssemblyStep.SHELL, CraftingType.CASTING_HAMMER, RenderComponentType.PISTON_X),
 	
 	//STEAM
 	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
@@ -49,24 +49,24 @@ public enum ItemComponentType {
 	WHEEL_DRIVER_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_FRONT_X), // MALLET
 	WHEEL_DRIVER_REAR(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_REAR_X), // MALLET
 	
-	CYLINDER(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.CYLINDER_SIDE),
-	SIDE_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.SIDE_ROD_SIDE),
-	MAIN_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING, RenderComponentType.MAIN_ROD_SIDE),
-	PISTON_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.PISTON_ROD_SIDE),
+	CYLINDER(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, RenderComponentType.CYLINDER_SIDE),
+	SIDE_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.SIDE_ROD_SIDE),
+	MAIN_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.MAIN_ROD_SIDE),
+	PISTON_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.PISTON_ROD_SIDE),
 	
-	UNION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.UNION_LINK_SIDE),
-	COMBINATION_LEVER(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.COMBINATION_LEVER_SIDE),
-	VALVE_STEM(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.VALVE_STEM_SIDE),
-	RADIUS_BAR(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.RADIUS_BAR_SIDE),
-	EXPANSION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.EXPANSION_LINK_SIDE),
-	ECCENTRIC_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.ECCENTRIC_ROD_SIDE),
-	ECCENTRIC_CRANK(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.ECCENTRIC_CRANK_SIDE),
-	REVERSING_ARM(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.REVERSING_ARM_SIDE),
-	LIFTING_LINK(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.LIFTING_LINK_SIDE),
-	REACH_ROD(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, RenderComponentType.REACH_ROD_SIDE),
+	UNION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.UNION_LINK_SIDE),
+	COMBINATION_LEVER(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.COMBINATION_LEVER_SIDE),
+	VALVE_STEM(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.VALVE_STEM_SIDE),
+	RADIUS_BAR(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.RADIUS_BAR_SIDE),
+	EXPANSION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.EXPANSION_LINK_SIDE),
+	ECCENTRIC_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.ECCENTRIC_ROD_SIDE),
+	ECCENTRIC_CRANK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.ECCENTRIC_CRANK_SIDE),
+	REVERSING_ARM(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.REVERSING_ARM_SIDE),
+	LIFTING_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.LIFTING_LINK_SIDE),
+	REACH_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.REACH_ROD_SIDE),
 	
-	// LEGACY
-	WALCHERTS_LINKAGE(AssemblyStep.VALVE_GEAR, CraftingType.HAMMER, 
+	// LEGACY, how do we depricate this??
+	WALCHERTS_LINKAGE(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, 
 			RenderComponentType.UNION_LINK_SIDE,
 			RenderComponentType.COMBINATION_LEVER_SIDE,
 			RenderComponentType.VALVE_STEM_SIDE,
@@ -127,7 +127,7 @@ public enum ItemComponentType {
 		return TextUtil.translate("part.immersiverailroading:component." + super.toString().toLowerCase());
 	}
 
-	public int getCost(Gauge gauge, EntityRollingStockDefinition definition) {
+	public int getPlateCost(Gauge gauge, EntityRollingStockDefinition definition) {
 		RenderComponent comp = definition.getComponent(this.render.get(0), gauge);
 		
 		double mult = 0;
@@ -163,5 +163,11 @@ public enum ItemComponentType {
 		default:
 			return null;
 		}
+	}
+
+	public int getCastCost(EntityRollingStockDefinition definition, Gauge gauge) {
+		RenderComponent comp = definition.getComponent(this.render.get(0), gauge);
+		double densityGues = 0.6;
+		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues);
 	}
 }

@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock.RailRollerInstance;
@@ -20,7 +20,7 @@ public class RailRollerGUI extends GuiScreen {
 	public RailRollerGUI(TileMultiblock te) {
 		this.te = te;
 		if (te != null) {
-			gauge = ItemRail.getGauge(((RailRollerInstance) te.getMultiblock()).getCraftItem());
+			gauge = ItemGauge.get(((RailRollerInstance) te.getMultiblock()).getCraftItem());
 		} else {
 			gauge = Gauge.STANDARD;
 		}
@@ -52,7 +52,7 @@ public class RailRollerGUI extends GuiScreen {
         // Enter or ESC
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
         	ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_RAIL, (int) (16 / gauge.scale()));
-        	ItemRail.setGauge(stack, gauge);
+        	ItemGauge.set(stack, gauge);
         	((RailRollerInstance) te.getMultiblock()).setCraftItem(stack);
 
 			this.mc.displayGuiScreen(null);

@@ -76,7 +76,7 @@ public class RailRollerMultiblock extends Multiblock {
 			if (!player.isSneaking()) {
 				if (world.isRemote) {
 					BlockPos pos = getPos(offset);
-					player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_RAIL_ROLLER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
+					player.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL_ROLLER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
 				}
 				return true;
 			}

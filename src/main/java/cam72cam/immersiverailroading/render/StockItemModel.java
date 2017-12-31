@@ -8,7 +8,8 @@ import javax.vecmath.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.items.ItemRollingStock;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -32,8 +33,8 @@ public class StockItemModel implements IBakedModel {
 	}
 	
 	public StockItemModel(ItemStack stack) {
-		scale = ItemRollingStock.getGauge(stack).scale();
-		String defID = ItemRollingStock.getDefinitionID(stack);
+		scale = ItemGauge.get(stack).scale();
+		String defID = ItemDefinition.getID(stack);
 		model = StockRenderCache.getRender(defID);
 		if (model == null) {
 			stack.setCount(0);

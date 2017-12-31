@@ -5,6 +5,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -66,7 +67,7 @@ public class RailInfo {
 		type = ItemTrackBlueprint.getType(stack);
 		length = ItemTrackBlueprint.getLength(stack);
 		quarters = ItemTrackBlueprint.getQuarters(stack);
-		gauge = ItemTrackBlueprint.getGauge(stack);
+		gauge = ItemGauge.get(stack);
 		railBed = ItemTrackBlueprint.getBed(stack);
 		railBedFill = ItemTrackBlueprint.getBedFill(stack);
 		world = worldIn;

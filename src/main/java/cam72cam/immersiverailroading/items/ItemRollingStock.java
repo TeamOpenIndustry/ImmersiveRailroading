@@ -6,6 +6,8 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -49,7 +51,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
         {
         	for (String defID : DefinitionManager.getDefinitionNames()) {
         		ItemStack stack = new ItemStack(this);
-				setDefinitionID(stack, defID);
+        		ItemDefinition.setID(stack, defID);
 				overrideStackDisplayName(stack);
                 items.add(stack);
         	}
@@ -61,10 +63,10 @@ public class ItemRollingStock extends BaseItemRollingStock {
     {
 		overrideStackDisplayName(stack);
 		
-		Gauge gauge = getGauge(stack);
+		Gauge gauge = ItemGauge.get(stack);
 		
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        EntityRollingStockDefinition def = getDefinition(stack);
+        EntityRollingStockDefinition def = ItemDefinition.get(stack);
         if (def != null) {
         	tooltip.addAll(def.getTooltip(gauge));
         }
@@ -83,9 +85,9 @@ public class ItemRollingStock extends BaseItemRollingStock {
 				case ITEM_LOADER:
 				case ITEM_UNLOADER:
 					if (!worldIn.isRemote) {
-						boolean set = te.setAugmentFilter(getDefinitionID(player.getHeldItem(hand)));
+						boolean set = te.setAugmentFilter(ItemDefinition.getID(player.getHeldItem(hand)));
 						if (set) {
-							player.sendMessage(ChatText.SET_AUGMENT_FILTER.getMessage(getDefinition(player.getHeldItem(hand)).name));
+							player.sendMessage(ChatText.SET_AUGMENT_FILTER.getMessage(ItemDefinition.get(player.getHeldItem(hand)).name));
 						} else {
 							player.sendMessage(ChatText.RESET_AUGMENT_FILTER.getMessage());
 						}

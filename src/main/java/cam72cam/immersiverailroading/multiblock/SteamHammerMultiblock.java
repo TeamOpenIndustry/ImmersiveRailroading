@@ -70,7 +70,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			if (isCenter(offset)) {
 				if (!world.isRemote) {
 					BlockPos pos = getPos(offset);
-					player.openGui(ImmersiveRailroading.instance, GuiTypes.BLOCK_STEAM_HAMMER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
+					player.openGui(ImmersiveRailroading.instance, GuiTypes.STEAM_HAMMER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
 				}
 				return true;
 			}

@@ -5,6 +5,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
@@ -15,7 +18,6 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
@@ -40,8 +42,8 @@ public class ItemPlate extends Item {
         {
         	for (PlateType plate : PlateType.values()) {
         		ItemStack stack = new ItemStack(this);
-        		setPlate(stack, plate);
-        		setGauge(stack, Gauge.STANDARD);
+        		ItemPlateType.set(stack, plate);
+        		ItemGauge.set(stack, Gauge.STANDARD);
         		
         		if (plate != PlateType.BOILER) {
 					stack.getUnlocalizedName();
@@ -51,7 +53,7 @@ public class ItemPlate extends Item {
 		        		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		        		if (def.getItemComponents().contains(ItemComponentType.BOILER_SEGMENT) ) {
 			        		stack = stack.copy();
-							setDefinitionID(stack, defID);
+			        		ItemDefinition.setID(stack, defID);
 							stack.getUnlocalizedName();
 			                items.add(stack);
 		        		}
@@ -63,9 +65,9 @@ public class ItemPlate extends Item {
 	
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		PlateType plate = getPlate(stack);
+		PlateType plate = ItemPlateType.get(stack);
 		if (plate == PlateType.BOILER) {
-			EntityRollingStockDefinition def = getDefinition(stack);
+			EntityRollingStockDefinition def = ItemDefinition.get(stack);
 			if (def != null) {
 				stack.setStackDisplayName(TextFormatting.RESET + plate.toString() + " " + def.name);
 			}
@@ -74,58 +76,12 @@ public class ItemPlate extends Item {
 		}
 		return super.getUnlocalizedName(stack) + "." + plate.toString();
 	}
-
-	public static void setGauge(ItemStack stack, Gauge gauge) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setDouble("gauge", gauge.value());
-	}
-	
-	public static Gauge getGauge(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge")){
-			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
-		}
-		return Gauge.STANDARD;
-	}
-	
-	public static void setPlate(ItemStack stack, PlateType plate) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger("plate", plate.ordinal());
-	}
-	
-	public static PlateType getPlate(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("plate")){
-			return PlateType.values()[stack.getTagCompound().getInteger("plate")];
-		}
-		return PlateType.SMALL;
-	}
-	
-	public static void setDefinitionID(ItemStack stack, String def) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setString("defID", def);
-	}
-	
-	public static String getDefinitionID(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return stack.getTagCompound().getString("defID");
-		}
-		stack.setCount(0);
-		return "BUG";
-	}
-	public static EntityRollingStockDefinition getDefinition(ItemStack stack) {
-		return DefinitionManager.getDefinition(getDefinitionID(stack));
-	}
 	
 	@SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(getGauge(stack)));
+        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
     }
 }
 
