@@ -18,29 +18,21 @@ import net.minecraftforge.energy.IEnergyStorage;
 public class RailRollerMultiblock extends Multiblock {
 	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	public static final String NAME = "RAIL_MACHINE";
-	private static final BlockPos render = new BlockPos(2,0,0);
-	private static final BlockPos crafter = new BlockPos(2,1,14);
-	private static final BlockPos input = new BlockPos(2,0,0);
-	private static final BlockPos output = new BlockPos(2,0,29);
-	private static final BlockPos power = new BlockPos(1,4,14);
+	private static final BlockPos render = new BlockPos(0,0,0);
+	private static final BlockPos crafter = new BlockPos(1,1,15);
+	private static final BlockPos input = new BlockPos(1,0,0);
+	private static final BlockPos output = new BlockPos(1,0,29);
+	private static final BlockPos power = new BlockPos(1,2,15);
 	
 	private static MultiblockComponent[][][] componentGenerator() {
 		MultiblockComponent[][][] result = new MultiblockComponent[30][][];
 		
 		MultiblockComponent[] bed = new MultiblockComponent[] {
-				steel, steel, steel, steel, steel
+				steel, steel
 		};
 		for (int i = 0; i < 30; i ++) {
 			if (i >= 11 && i <= 18) {
-				if (i >= 13 && i <=16) {
-					if (i == 14) {
-						result[i] = new MultiblockComponent[][] { bed, bed, bed, { AIR, steel, steel, steel, AIR}, { AIR, steel, AIR, AIR, AIR } };
-					} else {
-						result[i] = new MultiblockComponent[][] { bed, bed, bed, { AIR, steel, steel, steel, AIR} };
-					}
-				} else {
-					result[i] = new MultiblockComponent[][] { bed, bed, bed };
-				}
+				result[i] = new MultiblockComponent[][] { bed, bed, bed };
 			} else {
 				result[i] = new MultiblockComponent[][] { bed };
 			}
@@ -70,6 +62,7 @@ public class RailRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
+			System.out.println(offset);
 			if (!player.isSneaking()) {
 				//TODO place and pick items
 			}
@@ -185,6 +178,24 @@ public class RailRollerMultiblock extends Multiblock {
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
 			
+		}
+
+		public int getCraftProgress() {
+			TileMultiblock craftingTe = getTile(crafter);
+			if (craftingTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(crafter));
+				return 0;
+			}
+			return craftingTe.getCraftProgress();
+		}
+
+		public boolean outputFull() {
+			TileMultiblock outputTe = getTile(output);
+			if (outputTe == null) {
+				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(output));
+				return false;
+			}
+			return !outputTe.getContainer().getStackInSlot(0).isEmpty();
 		}
 	}
 }
