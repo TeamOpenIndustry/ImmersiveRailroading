@@ -13,11 +13,13 @@ import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ParticleUtil;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Rotation;
@@ -193,6 +195,10 @@ public class CastingMultiblock extends Multiblock {
 							world.removeEntity(item);
 						}
 					}
+				}
+				List<EntityLivingBase> living = world.getEntitiesWithinAABB(EntityLivingBase.class, bb.grow(0,2,0));
+				for (EntityLivingBase alive : living) {
+					alive.attackEntityFrom(new DamageSource("immersiverailroading:casting"), 5);
 				}
 			}
 			

@@ -130,3 +130,6 @@ part.immersiverailroading:component.walcherts_linkage=Walcherts Linkage
 itemGroup.immersiverailroading=Immersive Railroading
 itemGroup.immersiverailroading.stock=Immersive Railroading Stock
 itemGroup.immersiverailroading.components=Immersive Railroading Components
+
+death.attack.immersiverailroading:casting=%s discovered that molten metal does not make a good swimming pool
+death.attack.immersiverailroading:hitByTrain=%s failed to outrun a train

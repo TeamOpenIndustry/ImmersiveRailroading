@@ -315,7 +315,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 			double speedDamage = this.getCurrentSpeed().metric() / Config.entitySpeedDamage;
 			if (speedDamage > 1) {
-				entity.attackEntityFrom((new DamageSource("hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
+				entity.attackEntityFrom((new DamageSource("immersiverailroading:hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
 			}
 		}
 
