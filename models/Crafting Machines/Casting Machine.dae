@@ -4,8 +4,8 @@
         <contributor>
             <authoring_tool>SketchUp 8.0.15158</authoring_tool>
         </contributor>
-        <created>2017-12-30T23:49:18Z</created>
-        <modified>2017-12-30T23:49:18Z</modified>
+        <created>2017-12-31T14:52:08Z</created>
+        <modified>2017-12-31T14:52:08Z</modified>
         <unit meter="0.02539999969303608" name="inch" />
         <up_axis>Z_UP</up_axis>
     </asset>
@@ -528,7 +528,7 @@
         <material id="ID24" name="edge_color585858255">
             <instance_effect url="#ID25" />
         </material>
-        <material id="ID43" name="Color_D05_">
+        <material id="ID43" name="Color_D08_">
             <instance_effect url="#ID44" />
         </material>
         <material id="ID52" name="Color_006_">
@@ -572,7 +572,7 @@
                 <technique sid="COMMON">
                     <lambert>
                         <diffuse>
-                            <color>1 0.9490196078431372 0.8 1</color>
+                            <color>0.2196078431372549 0.1843137254901961 0.08627450980392157 1</color>
                         </diffuse>
                     </lambert>
                 </technique>
