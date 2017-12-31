@@ -1,11 +1,13 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import java.util.List;
+import java.util.Map;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -69,12 +72,26 @@ public abstract class Multiblock {
 	
 	public abstract BlockPos placementPos();
 	public void place(World world, EntityPlayer player, BlockPos pos, Rotation rot) {
+		Map<MultiblockComponent, Integer> missing = new HashMap<MultiblockComponent, Integer>();
 		BlockPos origin = pos.subtract(this.placementPos().rotate(rot));
 		for (BlockPos offset : this.componentPositions) {
 			MultiblockComponent component = lookup(offset);
 			BlockPos compPos = origin.add(offset.rotate(rot));
 			if (!component.valid(world, compPos) && world.isAirBlock(compPos)) {
-				component.place(world, player, compPos);
+				if (!component.place(world, player, compPos)) {
+					if (!missing.containsKey(component)) {
+						missing.put(component, 0);
+					}
+					missing.put(component, missing.get(component)+1);
+				}
+			}
+		}
+		
+		if (missing.size() != 0) {
+			player.sendMessage(new TextComponentString("Missing: "));
+			for (MultiblockComponent comp : missing.keySet()) {
+				//TODO localize
+				player.sendMessage(new TextComponentString(String.format("  - %d x %s", missing.get(comp), comp.name)));
 			}
 		}
 	}

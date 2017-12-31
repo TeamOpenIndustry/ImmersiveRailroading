@@ -16,28 +16,33 @@ import net.minecraft.world.World;
 public class MultiblockComponent {
 	private final Function<IBlockState, Boolean> blockCheck;
 	private final Function<ItemStack, Boolean> itemCheck;
+	public final String name;
 	private final IBlockState def;
 	
 	public MultiblockComponent() {
 		def = null;
+		name = "none";
 		this.blockCheck = (IBlockState target) -> true;
 		this.itemCheck = (ItemStack stack) -> false;
 	}
 	
 	public MultiblockComponent(Block block) {
 		def = block.getDefaultState();
+		name = block.getLocalizedName();
 		this.blockCheck = (IBlockState target) -> target.getBlock() == block;
 		this.itemCheck = (ItemStack stack) -> Block.getBlockFromItem(stack.getItem()) == block;
 	}
 	
 	public MultiblockComponent(IBlockState state, ItemStack stack) {
 		this.def = state;
+		this.name = stack.getDisplayName(); 
 		this.blockCheck = (IBlockState target) -> target.equals(state);
 		this.itemCheck = (ItemStack tstack) -> tstack.isItemEqual(stack);
 	}
 	
-	public MultiblockComponent(Function<IBlockState, Boolean> blockCheck, Function<ItemStack, Boolean> itemCheck, IBlockState def) {
+	public MultiblockComponent(Function<IBlockState, Boolean> blockCheck, Function<ItemStack, Boolean> itemCheck, IBlockState def, String name) {
 		this.def = def;
+		this.name = name;
 		this.blockCheck = blockCheck;
 		this.itemCheck = itemCheck;
 	}
@@ -46,12 +51,13 @@ public class MultiblockComponent {
 		return blockCheck.apply(world.getBlockState(pos));
 	}
 
-	public void place(World world, EntityPlayer player, BlockPos pos) {
+	public boolean place(World world, EntityPlayer player, BlockPos pos) {
 		if (player.isCreative()) {
 			if (def != null) {
 				world.setBlockState(pos, def);
 				world.notifyBlockUpdate(pos, def, def, 3);
 			}
+			return true;
 		} else {
 			for (int slot = 0; slot < player.inventory.getSizeInventory(); slot++) {
 				ItemStack stack = player.inventory.getStackInSlot(slot);
@@ -71,10 +77,11 @@ public class MultiblockComponent {
 						}
 						world.setBlockState(pos, def);
 						world.notifyBlockUpdate(pos, def, def, 3);
-						return;
+						return true;
 					}
 				}
 			}
+			return false;
 		}
 	}
 }
