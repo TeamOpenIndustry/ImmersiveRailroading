@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.blocks.BlockMultiblock;
 import cam72cam.immersiverailroading.blocks.BlockRail;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.blocks.BlockRailPreview;
-import cam72cam.immersiverailroading.blocks.BlockSteamHammer;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.entity.CarTank;
@@ -26,18 +26,24 @@ import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
+import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
-import cam72cam.immersiverailroading.net.SteamHammerSelectPacket;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.tile.TileSteamHammer;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -88,6 +94,12 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.NETHER_BRICK);
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+    	
+    	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
+    	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
+    	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
+    	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
+    	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
     }
     
     public void init(FMLInitializationEvent event) {
@@ -97,7 +109,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(MousePressPacket.Handler.class, MousePressPacket.class, 6, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(ItemRailUpdatePacket.Handler.class, ItemRailUpdatePacket.class, 7, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(BuildableStockSyncPacket.Handler.class, BuildableStockSyncPacket.class, 8, Side.CLIENT);
-    	ImmersiveRailroading.net.registerMessage(SteamHammerSelectPacket.Handler.class, SteamHammerSelectPacket.class, 9, Side.SERVER);
+    	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
     	
     	
     	
@@ -115,11 +127,11 @@ public abstract class CommonProxy implements IGuiHandler {
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL_GAG);
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL);
 		event.getRegistry().register(ImmersiveRailroading.BLOCK_RAIL_PREVIEW);
-		event.getRegistry().register(ImmersiveRailroading.BLOCK_STEAM_HAMMER);
+		event.getRegistry().register(ImmersiveRailroading.BLOCK_MULTIBLOCK);
     	GameRegistry.registerTileEntity(TileRailGag.class, BlockRailGag.NAME);
     	GameRegistry.registerTileEntity(TileRail.class, BlockRail.NAME);
     	GameRegistry.registerTileEntity(TileRailPreview.class, BlockRailPreview.NAME);
-    	GameRegistry.registerTileEntity(TileSteamHammer.class, BlockSteamHammer.NAME);
+    	GameRegistry.registerTileEntity(TileMultiblock.class, BlockMultiblock.NAME);
     }
     
     @SubscribeEvent
@@ -130,8 +142,11 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_LARGE_WRENCH);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_HOOK);
-    	event.getRegistry().register(ImmersiveRailroading.ITEM_STEAM_HAMMER);
     	event.getRegistry().register(ImmersiveRailroading.ITEM_AUGMENT);
+    	event.getRegistry().register(ImmersiveRailroading.ITEM_MANUAL);
+    	event.getRegistry().register(ImmersiveRailroading.ITEM_RAIL);
+    	event.getRegistry().register(ImmersiveRailroading.ITEM_PLATE);
+    	event.getRegistry().register(ImmersiveRailroading.ITEM_CAST_RAIL);
     }
     
     @SubscribeEvent
@@ -175,8 +190,8 @@ public abstract class CommonProxy implements IGuiHandler {
 			return new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityIDorX));
 		case STEAM_LOCOMOTIVE:
 			return new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityIDorX));
-		case BLOCK_STEAM_HAMMER:
-			TileSteamHammer te = TileSteamHammer.get(world, new BlockPos(entityIDorX, y, z));
+		case STEAM_HAMMER:
+			TileMultiblock te = TileMultiblock.get(world, new BlockPos(entityIDorX, y, z));
 			if (te == null) {
 				return null;
 			}

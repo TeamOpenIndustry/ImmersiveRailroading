@@ -1,7 +1,8 @@
 package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
@@ -114,14 +115,14 @@ public class ItemRailUpdatePacket implements IMessage {
 				}
 				stack = te.getItem();
 			}
-			ItemRail.setType(stack, message.type);
-			ItemRail.setGauge(stack, Gauge.from(message.gauge));
-			ItemRail.setLength(stack, message.length);
-			ItemRail.setQuarters(stack, message.quarters);
-			ItemRail.setPosType(stack, message.posType);
-			ItemRail.setBed(stack, message.bedStack);
-			ItemRail.setBedFill(stack, message.railBedFill);
-			ItemRail.setPreview(stack, message.isPreview);
+			ItemTrackBlueprint.setType(stack, message.type);
+			ItemGauge.set(stack, Gauge.from(message.gauge));
+			ItemTrackBlueprint.setLength(stack, message.length);
+			ItemTrackBlueprint.setQuarters(stack, message.quarters);
+			ItemTrackBlueprint.setPosType(stack, message.posType);
+			ItemTrackBlueprint.setBed(stack, message.bedStack);
+			ItemTrackBlueprint.setBedFill(stack, message.railBedFill);
+			ItemTrackBlueprint.setPreview(stack, message.isPreview);
 			if (message.tilePreviewPos == null) {
 				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 			} else {

@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.gui;
 
 import java.io.IOException;
+import java.util.function.Consumer;
+
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
@@ -9,15 +11,20 @@ import net.minecraft.util.NonNullList;
 public class ItemPickerGUI extends GuiScreen {
 	private NonNullList<ItemStack> items;
 	public ItemStack choosenItem;
-	public boolean isActive = false;
-
-	public ItemPickerGUI(NonNullList<ItemStack> items) {
+	private Consumer<ItemStack> onExit;
+	
+	public ItemPickerGUI(NonNullList<ItemStack> items, Consumer<ItemStack> onExit) {
 		this.items = items;
+		this.onExit = onExit;
 	}
 	
 	public void setItems(NonNullList<ItemStack> items ) {
 		this.items = items;
 		this.initGui();
+	}
+	
+	public boolean hasOptions() {
+		return this.items.size() != 0;
 	}
 	
 	@Override
@@ -60,10 +67,16 @@ public class ItemPickerGUI extends GuiScreen {
 		for (GuiButton itemButton: this.buttonList) {
 			if (itemButton == button) {
 				this.choosenItem = ((ItemButton)button).stack;
-				this.isActive = false;
+				onExit.accept(this.choosenItem);
 				break;
 			}
 		}
+	}
+	
+	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (keyCode == 1) {
+			onExit.accept(null);
+        }
 	}
 	
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {

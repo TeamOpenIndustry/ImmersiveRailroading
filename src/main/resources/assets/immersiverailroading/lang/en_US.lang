@@ -8,6 +8,10 @@ item.immersiverailroading:item_augment.ITEM_UNLOADER.name=Item Unloader
 item.immersiverailroading:item_augment.FLUID_LOADER.name=Fluid Loader
 item.immersiverailroading:item_augment.FLUID_UNLOADER.name=Fluid Unloader
 item.immersiverailroading:item_augment.DETECTOR.name=Detector
+item.immersiverailroading:item_rail_part.name=Rail Segment
+item.immersiverailroading:item_cast_rail.name=Rail Casting
+item.immersiverailroading:item_manual.name=Immersive Railroading Manual
+item.immersiverailroading:item_rail.name=Track Blueprint
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -43,6 +47,8 @@ gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
 gui.immersiverailroading:selector.position=Position: %s
 gui.immersiverailroading:selector.place_blueprint=Place Blueprint
+gui.immersiverailroading:selector.plate_type=Plate Type: %s
+gui.immersiverailroading:selector.plate_boiler=Plate Boiler: %s
 gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
@@ -59,12 +65,18 @@ gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.horse_power=Horse Power: %s
 gui.immersiverailroading:loco.max_speed=Max Speed:    %s
 gui.immersiverailroading:stock.gauge=Gauge: %s
+gui.immersiverailroading:cast.raw=Requires processing in the steam hammer before use!
 
 immersiverailroading:gauge.brunel=Brunel
 immersiverailroading:gauge.standard=Standard
 immersiverailroading:gauge.narrow=Narrow
 immersiverailroading:gauge.minecraft=Minecraft
 immersiverailroading:gauge.model=Model
+
+immersiverailroading:plate.small=Small Plate
+immersiverailroading:plate.medium=Medium Plate
+immersiverailroading:plate.large=Large Plate
+immersiverailroading:plate.boiler=Boiler Plate
 
 track.immersiverailroading:class.straight=Straight
 track.immersiverailroading:class.crossing=Crossing
@@ -119,6 +131,17 @@ part.immersiverailroading:component.lifting_link=Lifting Link
 part.immersiverailroading:component.reach_rod=Reach Rod
 part.immersiverailroading:component.walcherts_linkage=Walcherts Linkage
 
+
+immersiverailroading:crafting_type.casting=Casting
+immersiverailroading:crafting_type.casting_hammer=Casting,Steam Hammer
+immersiverailroading:crafting_type.plate_small=Plate Roller
+immersiverailroading:crafting_type.plate_medium=Plate Roller
+immersiverailroading:crafting_type.plate_large=Plate Roller
+immersiverailroading:crafting_type.plate_boiler=Plate Roller, Boiler Roller
+
 itemGroup.immersiverailroading=Immersive Railroading
 itemGroup.immersiverailroading.stock=Immersive Railroading Stock
 itemGroup.immersiverailroading.components=Immersive Railroading Components
+
+death.attack.immersiverailroading:casting=%s discovered that molten metal does not make a good swimming pool
+death.attack.immersiverailroading:hitByTrain=%s failed to outrun a train
