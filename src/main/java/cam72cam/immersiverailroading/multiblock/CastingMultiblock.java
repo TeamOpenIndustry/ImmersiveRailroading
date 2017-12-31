@@ -150,6 +150,11 @@ public class CastingMultiblock extends Multiblock {
 
 		@Override
 		public void tick(BlockPos offset) {
+			
+			if (world.isRemote) {
+				return;
+			}
+			
 			if (offset.equals(fluid)) {
 				TileMultiblock fluidTe = getTile(fluid);
 				AxisAlignedBB bb = new AxisAlignedBB(getPos(offset.add(0, 1, 0))).grow(3, 0, 3);
@@ -195,10 +200,12 @@ public class CastingMultiblock extends Multiblock {
 					craftTe.setCraftItem(ItemStack.EMPTY);
 					outTe.getContainer().setStackInSlot(0, item.copy());
 				} else {
-					if (outTe.getContainer().getStackInSlot(0).isEmpty()) {
-						if (fluidTe.getCraftProgress() > 0) {
-							fluidTe.setCraftProgress(fluidTe.getCraftProgress()-1);
-							craftTe.setCraftProgress(craftTe.getCraftProgress()+1);
+					if (craftTe.getCraftProgress() + fluidTe.getCraftProgress() >= cost) {
+						if (outTe.getContainer().getStackInSlot(0).isEmpty()) {
+							if (fluidTe.getCraftProgress() > 0) {
+								fluidTe.setCraftProgress(fluidTe.getCraftProgress()-1);
+								craftTe.setCraftProgress(craftTe.getCraftProgress()+1);
+							}
 						}
 					}
 				}

@@ -33,13 +33,12 @@ public class CastingGUI extends GuiScreen {
         	if (item != null) {
         		currentItem = item;
         		updatePickerButton();
-	        	sendPacket();
         	}
         });
 	}
 	
 	private void updatePickerButton() {
-		pickerButton.displayString = GuiText.SELECTOR_TYPE.toString(currentItem.getDisplayName());
+		pickerButton.displayString = GuiText.SELECTOR_TYPE.toString(currentItem.isEmpty() ? "" : currentItem.getDisplayName());
 	}
 
 	@Override
@@ -64,7 +63,6 @@ public class CastingGUI extends GuiScreen {
 		if (button == gaugeButton) {
 			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
-			sendPacket();
 		}
 		if (button == pickerButton) {
 			this.mc.displayGuiScreen(picker);
