@@ -1,8 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import blusunrize.immersiveengineering.common.IEContent;
-import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
@@ -136,25 +135,26 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.isItemEqual(steelBlock()) && output.isEmpty() && !te.getCraftItem().isEmpty()) {
-					input.setCount(input.getCount() - 1);
-					container.setStackInSlot(0, input);;
-					progress = 100;
+				if (!input.isEmpty() && ItemRawCast.get(input) && output.isEmpty()) {
 					te.setCraftProgress(100);
 				}
 			}
 			
 			if (progress == 1) {
 				// Stop crafting
-				container.setStackInSlot(1, te.getCraftItem().copy());
+				ItemStack out = input.copy();
+				out.setCount(1);
+				ItemRawCast.set(out, false);
+				container.setStackInSlot(1, out);
+				input.shrink(1);
+				container.setStackInSlot(0, input);;
+				progress = 100;
 			}
 		}
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			System.out.println(stack);
-			System.out.println(steelBlock());
-			return slot == 0 && stack.isItemEqual(steelBlock());
+			return slot == 0 && ItemRawCast.get(stack);
 		}
 
 		@Override
@@ -180,10 +180,6 @@ public class SteamHammerMultiblock extends Multiblock {
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
 			
-		}
-		
-		public ItemStack steelBlock() {
-			return new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
 		}
 	}
 }

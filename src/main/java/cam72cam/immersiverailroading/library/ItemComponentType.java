@@ -8,18 +8,18 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.TextUtil;
 
 public enum ItemComponentType {
-	FRAME(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, RenderComponentType.FRAME), //TODO
+	FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRAME), //TODO
 	
 	// MALLET
-	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, RenderComponentType.FRONT_LOCOMOTIVE),
+	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRONT_LOCOMOTIVE),
 	
 	// STANDARD
 	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS_WHEEL_X),
-	BOGEY(AssemblyStep.WHEELS, CraftingType.CASTING_HAMMER, RenderComponentType.BOGEY_POS),
+	BOGEY(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS),
 	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_FRONT_WHEEL_X),
-	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING_HAMMER, RenderComponentType.BOGEY_FRONT),
+	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_FRONT),
 	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_REAR_WHEEL_X),
-	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.CASTING_HAMMER, RenderComponentType.BOGEY_REAR),
+	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_REAR),
 	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.FRAME_WHEEL_X),
 	
 	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, RenderComponentType.SHELL),

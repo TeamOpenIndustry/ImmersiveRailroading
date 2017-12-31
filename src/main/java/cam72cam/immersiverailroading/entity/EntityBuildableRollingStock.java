@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -175,7 +176,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			ItemStack found = player.inventory.getStackInSlot(i);
 			if (found.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
 				if (ItemDefinition.getID(found).equals(this.defID)) {
-					if (player.isCreative() || ItemGauge.get(found) == this.gauge) {
+					if ((player.isCreative() || ItemGauge.get(found) == this.gauge) && !ItemRollingStockComponent.requiresHammering(found)) {
 						ItemComponentType type = ItemComponent.getComponentType(found);
 						if (toAdd.contains(type)) {
 							addComponent(type);

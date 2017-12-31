@@ -10,6 +10,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
+import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -60,6 +62,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 	        		ItemStack stack = new ItemStack(this);
 	        		ItemDefinition.setID(stack, defID);
 	        		ItemComponent.setComponentType(stack, item);
+	        		ItemRawCast.set(stack, false);
 					overrideStackDisplayName(stack);
 	                items.add(stack);	
         		}
@@ -67,12 +70,19 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
         }
     }
 	
+	public static boolean requiresHammering(ItemStack stack) {
+		return ItemComponent.getComponentType(stack).crafting == CraftingType.CASTING_HAMMER && ItemRawCast.get(stack); 
+	}
+	
 	@SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
 		overrideStackDisplayName(stack);
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
+        if (requiresHammering(stack)) {
+        	tooltip.add("§c" + GuiText.RAW_CAST_TOOLTIP.toString() + "§f");
+        }
     }
 	
 	@Override

@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -72,6 +73,7 @@ public class CastingGUI extends GuiScreen {
 	private void sendPacket() {
 		ItemGauge.set(currentItem, gauge);
 		currentItem.setCount(1);
+		ItemRawCast.set(currentItem, true);
     	((CastingInstance) tile.getMultiblock()).setCraftItem(currentItem);
     }
 	
