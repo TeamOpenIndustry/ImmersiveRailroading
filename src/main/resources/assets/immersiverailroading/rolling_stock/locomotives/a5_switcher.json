@@ -1,0 +1,31 @@
+{
+	"era": "steam",
+	"name": "A5 Switcher",
+	"works": "PRR Juniata Shops",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/a5_switcher/a5_switcher.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"max_psi": 185,
+		"water_capacity_l": 13000, 
+		"horsepower": 2000,
+		"tractive_effort_lbf": 13690,
+		"max_speed_kmh": 120,
+		"valve_gear": "walschaerts",
+		"weight_kg": 59760
+	},
+	"firebox": {
+		"slots": 4,
+		"width": 2
+	},
+	"passenger": {
+		"slots": 3,
+		"center_x": -3,
+		"center_y": 2,
+		"length": 2,
+		"width": 2.5
+	},
+	"trucks": {
+		"front": 1, 
+		"rear": -1
+	}
+}
