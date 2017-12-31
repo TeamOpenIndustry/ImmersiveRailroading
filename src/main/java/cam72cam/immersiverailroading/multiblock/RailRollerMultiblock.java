@@ -62,9 +62,31 @@ public class RailRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
-			System.out.println(offset);
 			if (!player.isSneaking()) {
-				//TODO place and pick items
+				ItemStack held = player.getHeldItem(hand);
+				if (held.isEmpty() && outputFull()) {
+					TileMultiblock outputTe = getTile(output);
+					if (outputTe == null) {
+						ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(output));
+						return false;
+					}
+					
+					player.setHeldItem(hand, outputTe.getContainer().getStackInSlot(0));
+					outputTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
+				} else if (held.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL) {
+					TileMultiblock inputTe = getTile(input);
+					if (inputTe == null) {
+						ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(input));
+						return false;
+					}
+					if (inputTe.getContainer().getStackInSlot(0).isEmpty()) {
+						ItemStack inputStack = held.copy();
+						inputStack.setCount(1);
+						inputTe.getContainer().setStackInSlot(0, inputStack);
+						held.shrink(1);
+						player.setHeldItem(hand, held);
+					}
+				}
 			}
 			return false;
 		}
