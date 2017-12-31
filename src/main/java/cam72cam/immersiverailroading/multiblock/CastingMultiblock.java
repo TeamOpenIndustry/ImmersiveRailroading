@@ -12,14 +12,19 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -152,6 +157,18 @@ public class CastingMultiblock extends Multiblock {
 		public void tick(BlockPos offset) {
 			
 			if (world.isRemote) {
+				
+				if (offset.getZ() > 7 && offset.getY() > 1 && isPouring()) {
+					Vec3d pos = new Vec3d(getPos(offset).add(0, 1, 0)).addVector(0.5, 0.5, 0.5);
+					if (Math.random() < 0.01) {
+						ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, pos);
+						ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, pos);
+					}
+					if (Math.random() < 0.001) {
+						world.playSound(pos.x, pos.y, pos.z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f, false);
+					}
+				}
+				
 				return;
 			}
 			
@@ -200,11 +217,13 @@ public class CastingMultiblock extends Multiblock {
 					craftTe.setCraftItem(ItemStack.EMPTY);
 					outTe.getContainer().setStackInSlot(0, item.copy());
 				} else {
-					if (craftTe.getCraftProgress() + fluidTe.getCraftProgress() >= cost) {
-						if (outTe.getContainer().getStackInSlot(0).isEmpty()) {
-							if (fluidTe.getCraftProgress() > 0) {
-								fluidTe.setCraftProgress(fluidTe.getCraftProgress()-1);
-								craftTe.setCraftProgress(craftTe.getCraftProgress()+1);
+					if (craftTe.getRenderTicks() % 10 == 0) {
+						if (craftTe.getCraftProgress() + fluidTe.getCraftProgress() >= cost) {
+							if (outTe.getContainer().getStackInSlot(0).isEmpty()) {
+								if (fluidTe.getCraftProgress() > 0) {
+									fluidTe.setCraftProgress(fluidTe.getCraftProgress()-1);
+									craftTe.setCraftProgress(craftTe.getCraftProgress()+1);
+								}
 							}
 						}
 					}
