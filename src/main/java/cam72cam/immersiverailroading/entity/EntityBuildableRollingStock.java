@@ -269,8 +269,20 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		for (ItemComponentType component : addMap.keySet()) {
 			String str = String.format("%d x %s", addMap.get(component), component);
-			if (component.getPlateType() != null) {
+			switch (component.crafting) {
+			case CASTING:
+			case CASTING_HAMMER:
+			case PLATE_BOILER:
+				str += String.format(" (%s)", component.crafting.toString());
+				break;
+			case PLATE_LARGE:
+			case PLATE_MEDIUM:
+			case PLATE_SMALL:
 				str += String.format(" (%d x %s)", component.getPlateCost(gauge, getDefinition()) * addMap.get(component), component.getPlateType());
+				break;
+			default:
+				break;
+			
 			}
 			player.sendMessage(new TextComponentString(str));
 		}
