@@ -77,6 +77,39 @@ public class PlateRollerMultiblock extends Multiblock {
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
 			if (!player.isSneaking()) {
+				ItemStack held = player.getHeldItem(hand);
+				if (held.isEmpty()) {
+					TileMultiblock outputTe = getTile(output);
+					if (outputTe == null) {
+						ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(output));
+						return false;
+					}
+					
+					if (!outputTe.getContainer().getStackInSlot(0).isEmpty()) {
+						if (!world.isRemote) {
+							player.setHeldItem(hand, outputTe.getContainer().getStackInSlot(0));
+							outputTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
+						}
+						return true;
+					}
+				} else if (held.isItemEqual(steelBlock())) {
+					TileMultiblock inputTe = getTile(input);
+					if (inputTe == null) {
+						ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(input));
+						return false;
+					}
+					if (inputTe.getContainer().getStackInSlot(0).isEmpty()) {
+						if (!world.isRemote) {
+							ItemStack inputStack = held.copy();
+							inputStack.setCount(1);
+							inputTe.getContainer().setStackInSlot(0, inputStack);
+							held.shrink(1);
+							player.setHeldItem(hand, held);
+						}
+					}
+					return true;
+				}
+				
 				if (world.isRemote) {
 					BlockPos pos = getPos(offset);
 					player.openGui(ImmersiveRailroading.instance, GuiTypes.PLATE_ROLLER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
