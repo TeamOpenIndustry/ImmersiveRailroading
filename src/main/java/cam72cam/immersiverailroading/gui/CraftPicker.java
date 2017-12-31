@@ -28,10 +28,12 @@ public class CraftPicker extends GuiScreen {
         NonNullList<ItemStack> stock = NonNullList.create();
         
         if (craftType == CraftingType.CASTING_HAMMER) {
+        	stock.add(new ItemStack(ImmersiveRailroading.ITEM_CAST_RAIL, 1));
+        	
         	//TODO RECIPES! 
-        	stock.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
-	        stock.add(new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1));
-	        ImmersiveRailroading.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
+        	//stock.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
+	        //stock.add(new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1));
+	        //ImmersiveRailroading.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
         }
         
         ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
@@ -61,6 +63,10 @@ public class CraftPicker extends GuiScreen {
 			}
 		}
 		stock.removeAll(toRemove);
+		
+		if (craftType == CraftingType.CASTING) {
+        	stock.add(new ItemStack(ImmersiveRailroading.ITEM_CAST_RAIL, 1));
+		}
 		
 		toRemove = new ArrayList<ItemStack>();
 		for (ItemStack item : items) {

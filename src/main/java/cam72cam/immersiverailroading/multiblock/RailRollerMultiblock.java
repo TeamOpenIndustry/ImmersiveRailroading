@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import blusunrize.immersiveengineering.common.IEContent;
-import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -74,11 +71,7 @@ public class RailRollerMultiblock extends Multiblock {
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
 			if (!player.isSneaking()) {
-				if (world.isRemote) {
-					BlockPos pos = getPos(offset);
-					player.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL_ROLLER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
-				}
-				return true;
+				//TODO place and pick items
 			}
 			return false;
 		}
@@ -148,9 +141,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.isItemEqual(steelBlock()) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
-					input.setCount(input.getCount() - 1);
-					inputTe.getContainer().setStackInSlot(0, input);;
+				if (input.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL && output.isEmpty()) {
 					progress = 100;
 					craftingTe.setCraftProgress(100);
 				}
@@ -158,13 +149,17 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				outputTe.getContainer().setStackInSlot(0, craftingTe.getCraftItem().copy());
+				ItemStack out = new ItemStack(ImmersiveRailroading.ITEM_RAIL, 10);
+				ItemGauge.set(out, ItemGauge.get(input));
+				outputTe.getContainer().setStackInSlot(0, out);
+				input.shrink(1);
+				inputTe.getContainer().setStackInSlot(0, input);;
 			}
 		}
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return offset.equals(input) && stack.isItemEqual(steelBlock());
+			return offset.equals(input) && stack.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL;
 		}
 
 		@Override
@@ -190,23 +185,6 @@ public class RailRollerMultiblock extends Multiblock {
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
 			
-		}
-		
-		public ItemStack steelBlock() {
-			return new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
-		}
-		
-		public void setCraftItem(ItemStack stack) {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(crafter), stack));
-		}
-
-		public ItemStack getCraftItem() {
-			TileMultiblock craftingTe = getTile(crafter);
-			if (craftingTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(crafter));
-				return ItemStack.EMPTY;
-			}
-			return craftingTe.getCraftItem();
 		}
 	}
 }

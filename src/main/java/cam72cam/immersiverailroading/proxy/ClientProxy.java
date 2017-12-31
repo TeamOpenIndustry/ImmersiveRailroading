@@ -25,7 +25,6 @@ import cam72cam.immersiverailroading.gui.CastingGUI;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
 import cam72cam.immersiverailroading.gui.PlateRollerGUI;
-import cam72cam.immersiverailroading.gui.RailRollerGUI;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.SteamHammerContainerGui;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
@@ -128,12 +127,6 @@ public class ClientProxy extends CommonProxy {
 				return null;
 			}
 			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, te));
-		case RAIL_ROLLER:
-			te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
-			if (te == null || !te.isLoaded()) {
-				return null;
-			}
-			return new RailRollerGUI(te);
 		case PLATE_ROLLER:
 			te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
 			if (te == null || !te.isLoaded()) {
