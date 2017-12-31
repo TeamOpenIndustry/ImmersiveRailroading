@@ -61,6 +61,7 @@ gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.horse_power=Horse Power: %s
 gui.immersiverailroading:loco.max_speed=Max Speed:    %s
 gui.immersiverailroading:stock.gauge=Gauge: %s
+gui.immersiverailroading:cast.raw=Requires processing in the steam hammer before use!
 
 immersiverailroading:gauge.brunel=Brunel
 immersiverailroading:gauge.standard=Standard
