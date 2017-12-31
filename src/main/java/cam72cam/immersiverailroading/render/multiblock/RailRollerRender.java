@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock.RailRollerInstance;
 import cam72cam.immersiverailroading.render.OBJRender;
@@ -20,7 +21,7 @@ public class RailRollerRender implements IMultiblockRender {
 
 	public RailRollerRender() {
 		try {
-			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/rail_machine.obj"), 0.1f));
+			this.renderer = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.1f));
 			input = new ArrayList<String>();
 			output = new ArrayList<String>();
 			rest = new ArrayList<String>();
