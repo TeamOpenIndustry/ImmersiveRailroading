@@ -216,8 +216,17 @@ public class CastingMultiblock extends Multiblock {
 					return;
 				}
 				
-				ItemComponentType component = ItemComponent.getComponentType(item);
-				int cost = component.getCastCost(ItemDefinition.get(item), ItemGauge.get(item));
+				int cost = 0;
+				
+				if (item.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+					ItemComponentType component = ItemComponent.getComponentType(item);
+					cost = component.getCastCost(ItemDefinition.get(item), ItemGauge.get(item));
+				} else if (item.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL) {
+					cost = (int) Math.ceil(20 * ItemGauge.get(item).scale());
+				} else {
+					System.out.println("BAD CAST");
+					cost = 10;
+				}
 				if (craftTe.getCraftProgress() >= cost) {
 					craftTe.setCraftProgress(0);
 					craftTe.setCraftItem(ItemStack.EMPTY);
