@@ -23,7 +23,7 @@ public static final String NAME = "item_cast_rail";
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
-        this.setMaxStackSize(1);
+        this.setMaxStackSize(16);
 	}
 	
 	@SideOnly(Side.CLIENT)
