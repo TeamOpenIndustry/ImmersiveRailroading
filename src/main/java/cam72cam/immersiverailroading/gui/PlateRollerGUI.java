@@ -3,8 +3,9 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.BaseItemRollingStock;
-import cam72cam.immersiverailroading.items.ItemPlate;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -38,14 +39,14 @@ public class PlateRollerGUI extends GuiScreen {
 		}
 		System.out.println(currentItem);
 		
-		gauge = ItemPlate.getGauge(currentItem);
-		plate = ItemPlate.getPlate(currentItem);
+		gauge = ItemGauge.get(currentItem);
+		plate = ItemPlateType.get(currentItem);
 		picker = new CraftPicker(null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
         	this.mc.displayGuiScreen(this);
         	
         	if (item != null) {
-        		String defID = BaseItemRollingStock.getDefinitionID(item);
-        		ItemPlate.setDefinitionID(currentItem, defID);
+        		String defID = ItemDefinition.getID(item);
+        		ItemDefinition.setID(currentItem, defID);
         		updatePickerButton();
 	        	sendPacket();
         	}
@@ -53,7 +54,7 @@ public class PlateRollerGUI extends GuiScreen {
 	}
 	
 	private void updatePickerButton() {
-		EntityRollingStockDefinition def = ItemPlate.getDefinition(currentItem.copy());
+		EntityRollingStockDefinition def = ItemDefinition.get(currentItem.copy());
 		if (def != null) {
 			pickerButton.displayString = GuiText.SELECTOR_PLATE_BOILER.toString(def.name);
 		}
@@ -99,8 +100,8 @@ public class PlateRollerGUI extends GuiScreen {
 	}
 	
 	private void sendPacket() {
-    	ItemPlate.setGauge(currentItem, gauge);
-    	ItemPlate.setPlate(currentItem, plate);
+		ItemGauge.set(currentItem, gauge);
+		ItemPlateType.set(currentItem, plate);
     	switch (plate) {
 		case BOILER:
 			currentItem.setCount(1);

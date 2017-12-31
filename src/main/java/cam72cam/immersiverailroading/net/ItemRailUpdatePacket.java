@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
@@ -115,7 +116,7 @@ public class ItemRailUpdatePacket implements IMessage {
 				stack = te.getItem();
 			}
 			ItemTrackBlueprint.setType(stack, message.type);
-			ItemTrackBlueprint.setGauge(stack, Gauge.from(message.gauge));
+			ItemGauge.set(stack, Gauge.from(message.gauge));
 			ItemTrackBlueprint.setLength(stack, message.length);
 			ItemTrackBlueprint.setQuarters(stack, message.quarters);
 			ItemTrackBlueprint.setPosType(stack, message.posType);

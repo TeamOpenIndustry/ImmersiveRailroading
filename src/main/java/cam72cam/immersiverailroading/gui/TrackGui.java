@@ -7,6 +7,7 @@ import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -82,7 +83,7 @@ public class TrackGui extends GuiScreen {
 		length = ItemTrackBlueprint.getLength(stack);
 		quarters = ItemTrackBlueprint.getQuarters(stack);
 		type = ItemTrackBlueprint.getType(stack);
-		gauge = ItemTrackBlueprint.getGauge(stack);
+		gauge = ItemGauge.get(stack);
 		posType = ItemTrackBlueprint.getPosType(stack);
 		isPreview = ItemTrackBlueprint.isPreview(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();

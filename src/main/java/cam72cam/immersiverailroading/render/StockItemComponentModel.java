@@ -9,7 +9,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
@@ -44,9 +46,9 @@ public class StockItemComponentModel implements IBakedModel {
 	}
 	
 	public StockItemComponentModel(ItemStack stack) {
-		scale = ItemRollingStockComponent.getGauge(stack).scale();
-		String defID = ItemRollingStockComponent.getDefinitionID(stack);
-		ItemComponentType item = ItemRollingStockComponent.getComponentType(stack);
+		scale = ItemGauge.get(stack).scale();
+		String defID = ItemDefinition.getID(stack);
+		ItemComponentType item = ItemComponent.getComponentType(stack);
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		
 		if (def == null) {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import cam72cam.immersiverailroading.items.ItemRailAugment;
+import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
 import cam72cam.immersiverailroading.library.Augment;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.state.IBlockState;
@@ -29,7 +29,7 @@ public class RailAugmentItemModel implements IBakedModel {
 	}
 	
 	public RailAugmentItemModel(ItemStack stack, World world) {
-		Augment augment = ItemRailAugment.getAugment(stack);
+		Augment augment = ItemAugmentType.get(stack);
 		if (augment != null) {
 			color = augment.tempColor();
 		}

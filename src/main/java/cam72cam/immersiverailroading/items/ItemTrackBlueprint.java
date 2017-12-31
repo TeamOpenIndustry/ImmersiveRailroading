@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -73,7 +73,7 @@ public class ItemTrackBlueprint extends ItemBlock {
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(GuiText.TRACK_TYPE.toString(getType(stack)));
-        tooltip.add(GuiText.TRACK_GAUGE.toString(getGauge(stack)));
+        tooltip.add(GuiText.TRACK_GAUGE.toString(ItemGauge.get(stack)));
         tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
         tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack)));
         tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
@@ -122,20 +122,6 @@ public class ItemTrackBlueprint extends ItemBlock {
 			return stack.getTagCompound().getInteger("quarters");
 		}
 		return 3;
-	}
-	
-	public static void setGauge(ItemStack stack, Gauge gauge) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setDouble("gauge", gauge.value());
-	}
-	
-	public static Gauge getGauge(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
-		}
-		return Gauge.STANDARD;
 	}
 	
 	public static void setPosType(ItemStack stack, TrackPositionType posType) {

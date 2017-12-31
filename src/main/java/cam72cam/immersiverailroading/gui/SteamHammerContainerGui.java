@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -35,7 +35,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         this.xSize = paddingRight + horizSlots * slotSize + paddingLeft;
         this.ySize = 114 + this.inventoryRows * slotSize;
         
-        picker = new CraftPicker(tile.getCraftItem(), CraftingType.HAMMER, (ItemStack item) -> {
+        picker = new CraftPicker(tile.getCraftItem(), CraftingType.CASTING_HAMMER, (ItemStack item) -> {
         	this.mc.displayGuiScreen(this);
         	
         	if (item != null) {
@@ -43,8 +43,8 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
 	        	sendPacket(currentItem);
         	}
         });
-		
-		this.gauge = ItemRollingStockComponent.getGauge(tile.getCraftItem());
+        
+		this.gauge = ItemGauge.get(tile.getCraftItem());
 		
 		currentItem = tile.getCraftItem();
     }
@@ -57,7 +57,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     
     private void sendPacket(ItemStack selected) {
 		if (selected.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
-			ItemRollingStockComponent.setGauge(selected, gauge);
+			ItemGauge.set(selected, gauge);
 		}
 		ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(tile.getPos(), selected));
     }

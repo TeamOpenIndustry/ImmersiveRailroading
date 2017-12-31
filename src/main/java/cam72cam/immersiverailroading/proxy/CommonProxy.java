@@ -27,6 +27,7 @@ import cam72cam.immersiverailroading.gui.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
@@ -98,6 +99,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
     	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
     	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
+    	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
     }
     
     public void init(FMLInitializationEvent event) {
@@ -187,7 +189,7 @@ public abstract class CommonProxy implements IGuiHandler {
 			return new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityIDorX));
 		case STEAM_LOCOMOTIVE:
 			return new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityIDorX));
-		case BLOCK_STEAM_HAMMER:
+		case STEAM_HAMMER:
 			TileMultiblock te = TileMultiblock.get(world, new BlockPos(entityIDorX, y, z));
 			if (te == null) {
 				return null;

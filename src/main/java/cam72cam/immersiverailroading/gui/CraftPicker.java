@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRollingStock;
-import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemTabs;
+import cam72cam.immersiverailroading.items.nbt.ItemComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.library.CraftingType;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
@@ -27,9 +27,9 @@ public class CraftPicker extends GuiScreen {
         
         NonNullList<ItemStack> stock = NonNullList.create();
         
-        if (craftType == CraftingType.HAMMER) {
-	        stock.add(new ItemStack(ImmersiveRailroading.ITEM_LARGE_WRENCH, 1));
-	        stock.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
+        if (craftType == CraftingType.CASTING_HAMMER) {
+        	//TODO RECIPES! 
+        	stock.add(new ItemStack(ImmersiveRailroading.ITEM_HOOK, 1));
 	        stock.add(new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1));
 	        ImmersiveRailroading.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
         }
@@ -42,7 +42,11 @@ public class CraftPicker extends GuiScreen {
 			boolean hasComponent = false;
 			for (ItemStack item : items) {
 				if (isPartOf(itemStock, item)) {
-					if (ItemRollingStockComponent.getComponentType(item).crafting == craftType) {
+					if (ItemComponent.getComponentType(item).crafting == craftType) {
+						hasComponent = true;
+						break;
+					}
+					if (craftType == CraftingType.CASTING && ItemComponent.getComponentType(item).crafting == CraftingType.CASTING_HAMMER) {
 						hasComponent = true;
 						break;
 					}
@@ -60,9 +64,13 @@ public class CraftPicker extends GuiScreen {
 		
 		toRemove = new ArrayList<ItemStack>();
 		for (ItemStack item : items) {
-			if (ItemRollingStockComponent.getComponentType(item).crafting != craftType) {
-				toRemove.add(item);
+			if (ItemComponent.getComponentType(item).crafting == craftType) {
+				continue;
 			}
+			if (craftType == CraftingType.CASTING && ItemComponent.getComponentType(item).crafting == CraftingType.CASTING_HAMMER) {
+				continue;
+			}
+			toRemove.add(item);
 		}
 		items.removeAll(toRemove);
 		
@@ -83,7 +91,7 @@ public class CraftPicker extends GuiScreen {
     	if (item.getItem() != ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
     		return false;
     	}
-    	return ItemRollingStockComponent.getDefinitionID(item).equals(ItemRollingStock.getDefinitionID(stock));
+    	return ItemDefinition.getID(item).equals(ItemDefinition.getID(stock));
     }
 	
 	private void setupItemSelector() {

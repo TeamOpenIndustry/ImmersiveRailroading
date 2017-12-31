@@ -5,6 +5,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -17,7 +19,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -46,8 +47,8 @@ public class ItemRailAugment extends Item {
 				TileRailBase te = TileRailBase.get(world, pos);
 				if (te != null) {
 					ItemStack stack = player.getHeldItem(hand);
-					if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == getGauge(stack))) {
-						Augment augment = getAugment(stack);
+					if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == ItemGauge.get(stack))) {
+						Augment augment = ItemAugmentType.get(stack);
 						TileRail parent = te.getParentTile();
 						if (parent == null) {
 							return EnumActionResult.FAIL;
@@ -87,7 +88,7 @@ public class ItemRailAugment extends Item {
 	@Override
 	public String getUnlocalizedName(ItemStack stack)
     {
-        return super.getUnlocalizedName() + "." + getAugment(stack).name();
+        return super.getUnlocalizedName() + "." + ItemAugmentType.get(stack).name();
     }
 	
 	@Override
@@ -97,7 +98,7 @@ public class ItemRailAugment extends Item {
         {
         	for (Augment augment : Augment.values()) {
         		ItemStack stack = new ItemStack(this, 8);
-        		setAugment(stack, augment);
+        		ItemAugmentType.set(stack, augment);
                 items.add(stack);
         	}
         }
@@ -108,35 +109,6 @@ public class ItemRailAugment extends Item {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(getGauge(stack)));
+        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
     }
-
-	public static void setAugment(ItemStack stack, Augment augment) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger("augment", augment.ordinal());
-	}
-	
-	public static Augment getAugment(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return Augment.values()[stack.getTagCompound().getInteger("augment")];
-		}
-		return Augment.WATER_TROUGH;
-	}
-	
-	public static void setGauge(ItemStack stack, Gauge gauge) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setDouble("gauge", gauge.value());
-	}
-	
-	public static Gauge getGauge(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge")){
-			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
-		}
-		return Gauge.STANDARD;
-	}
-	
 }
