@@ -1,0 +1,26 @@
+{
+	"name": "A5 Slope Tender",
+	"model": "immersiverailroading:models/rolling_stock/tender/a5_tender/a5_tender.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 55000
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": 4,
+		"center_y": 1.8,
+		"length": 1,
+		"width": 2.5
+	},
+	"tank": {
+		"capacity_l":  12000
+	},
+	"tender": {
+		"slots": 48,
+		"width": 12
+	},
+	"trucks": {
+		"front": 2.58, 
+		"rear": -2.58
+	}
+}
