@@ -127,6 +127,14 @@ part.immersiverailroading:component.lifting_link=Lifting Link
 part.immersiverailroading:component.reach_rod=Reach Rod
 part.immersiverailroading:component.walcherts_linkage=Walcherts Linkage
 
+
+immersiverailroading:crafting_type.casting=Casting
+immersiverailroading:crafting_type.casting_hammer=Casting,Steam Hammer
+immersiverailroading:crafting_type.plate_small=Plate Roller
+immersiverailroading:crafting_type.plate_medium=Plate Roller
+immersiverailroading:crafting_type.plate_large=Plate Roller
+immersiverailroading:crafting_type.plate_boiler=Plate Roller, Boiler Roller
+
 itemGroup.immersiverailroading=Immersive Railroading
 itemGroup.immersiverailroading.stock=Immersive Railroading Stock
 itemGroup.immersiverailroading.components=Immersive Railroading Components
