@@ -47,6 +47,8 @@ public class ItemTrackBlueprint extends Item {
 	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		pos = pos.up();
+		
 		ItemStack stack = player.getHeldItem(hand);
 		if (ItemTrackBlueprint.isPreview(stack)) {
 			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_PREVIEW.getDefaultState());
