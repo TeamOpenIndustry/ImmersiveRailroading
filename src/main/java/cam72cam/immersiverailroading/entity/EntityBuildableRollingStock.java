@@ -1,11 +1,16 @@
 package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
 import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.ChatText;
@@ -17,6 +22,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public class EntityBuildableRollingStock extends EntityRollingStock {
@@ -166,30 +172,119 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			}
 		}
 		
-		boolean addedComponents = false;
 		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
 			ItemStack found = player.inventory.getStackInSlot(i);
 			if (found.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
-				if (ItemRollingStockComponent.getDefinitionID(found).equals(this.defID)) {
-					if (player.isCreative() || ItemRollingStockComponent.getGauge(found) == this.gauge) {
-						ItemComponentType type = ItemRollingStockComponent.getComponentType(found);
+				if (ItemDefinition.getID(found).equals(this.defID)) {
+					if ((player.isCreative() || ItemGauge.get(found) == this.gauge) && !ItemRollingStockComponent.requiresHammering(found)) {
+						ItemComponentType type = ItemComponent.getComponentType(found);
 						if (toAdd.contains(type)) {
 							addComponent(type);
 							player.inventory.decrStackSize(i, 1);
-							addedComponents = true;
-							break;
+							return;
 						}
 					}
 				}
 			}
 		}
 		
-		if (!addedComponents) {
-			String comStr = "";
-			for (ItemComponentType component : toAdd) {
-				comStr += component.toString() + ", ";
+		int largePlates = 0;
+		int mediumPlates = 0;
+		int smallPlates = 0;
+		
+		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
+			ItemStack found = player.inventory.getStackInSlot(i);
+			if (found.getItem() == ImmersiveRailroading.ITEM_PLATE) {
+				if (ItemGauge.get(found) == this.gauge) {
+					switch (ItemPlateType.get(found)) {
+					case LARGE:
+						largePlates+=found.getCount();
+						break;
+					case MEDIUM:
+						mediumPlates+=found.getCount();
+						break;
+					case SMALL:
+						smallPlates+=found.getCount();
+						break;
+					default:
+						break;
+					}
+				}
 			}
-			player.sendMessage(ChatText.STOCK_MISSING.getMessage(comStr));
+		}
+		
+		for (ItemComponentType type : toAdd) {
+			int platesStart = 0;
+			int platesUsed = 0;
+			
+			switch (type.crafting) {
+			case PLATE_LARGE:
+				platesStart = largePlates;
+				break;
+			case PLATE_MEDIUM:
+				platesStart = mediumPlates;
+				break;
+			case PLATE_SMALL:
+				platesStart = smallPlates;
+				break;
+			default:
+				continue;
+			}
+			
+			platesUsed = type.getPlateCost(this.gauge, this.getDefinition());
+			if (platesStart < platesUsed) {
+				continue;
+			}
+			
+			for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
+				ItemStack found = player.inventory.getStackInSlot(i);
+				if (found.getItem() == ImmersiveRailroading.ITEM_PLATE) {
+					if (ItemGauge.get(found) == this.gauge) {
+						if (ItemPlateType.get(found) == type.getPlateType()) {
+							ItemStack itemUsed = player.inventory.decrStackSize(i, platesUsed);
+							
+							platesUsed -= itemUsed.getCount();
+							
+							if (platesUsed <= 0) {
+								break;
+							}
+						}
+					}
+				}
+			}
+			
+			addComponent(type);
+			
+			return;
+		}
+		
+		Map<ItemComponentType, Integer> addMap = new HashMap<ItemComponentType, Integer>();
+		for (ItemComponentType component : toAdd) {
+			if (!addMap.containsKey(component)) {
+				addMap.put(component, 0);
+			}
+			addMap.put(component, addMap.get(component)+1);
+		}
+		player.sendMessage(ChatText.STOCK_MISSING.getMessage(""));
+		
+		for (ItemComponentType component : addMap.keySet()) {
+			String str = String.format("%d x %s", addMap.get(component), component);
+			switch (component.crafting) {
+			case CASTING:
+			case CASTING_HAMMER:
+			case PLATE_BOILER:
+				str += String.format(" (%s)", component.crafting.toString());
+				break;
+			case PLATE_LARGE:
+			case PLATE_MEDIUM:
+			case PLATE_SMALL:
+				str += String.format(" (%d x %s)", component.getPlateCost(gauge, getDefinition()) * addMap.get(component), component.getPlateType());
+				break;
+			default:
+				break;
+			
+			}
+			player.sendMessage(new TextComponentString(str));
 		}
 	}
 	
@@ -226,9 +321,9 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		
 		ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
-		ItemRollingStockComponent.setDefinitionID(item, defID);
-		ItemRollingStockComponent.setGauge(item, gauge);
-		ItemRollingStockComponent.setComponentType(item, toRemove);
+		ItemDefinition.setID(item, defID);
+		ItemGauge.set(item, gauge);
+		ItemComponent.setComponentType(item, toRemove);
 		world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, item));
 		
 		return toRemove;
@@ -264,15 +359,15 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		if (this.isBuilt) {
 			ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK, 1, 0);
-			ItemRollingStock.setDefinitionID(item, defID);
-			ItemRollingStock.setGauge(item, gauge);
+			ItemDefinition.setID(item, defID);
+			ItemGauge.set(item, gauge);
 			world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
 		} else {
 			for (ItemComponentType component : this.builtItems) {
 				ItemStack item = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
-				ItemRollingStockComponent.setDefinitionID(item, defID);
-				ItemRollingStockComponent.setGauge(item, gauge);
-				ItemRollingStockComponent.setComponentType(item, component);
+				ItemDefinition.setID(item, defID);
+				ItemGauge.set(item, gauge);
+				ItemComponent.setComponentType(item, component);
 				world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
 			}
 		}

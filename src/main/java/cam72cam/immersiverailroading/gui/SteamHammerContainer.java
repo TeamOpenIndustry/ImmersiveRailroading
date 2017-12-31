@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
-import cam72cam.immersiverailroading.tile.TileSteamHammer;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -11,9 +11,9 @@ import net.minecraftforge.items.SlotItemHandler;
 
 public class SteamHammerContainer extends ContainerBase {
 	protected int numRows;
-	protected TileSteamHammer tile;
+	protected TileMultiblock tile;
 
-	public SteamHammerContainer(IInventory playerInventory, TileSteamHammer tile) {
+	public SteamHammerContainer(IInventory playerInventory, TileMultiblock tile) {
         int horizSlots = 10;
 		this.numRows = 4;
 		this.tile = tile;

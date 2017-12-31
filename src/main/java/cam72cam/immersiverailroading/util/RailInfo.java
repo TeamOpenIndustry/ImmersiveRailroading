@@ -3,7 +3,9 @@ package cam72cam.immersiverailroading.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -62,14 +64,14 @@ public class RailInfo {
 	
 	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
 		position = pos;
-		type = ItemRail.getType(stack);
-		length = ItemRail.getLength(stack);
-		quarters = ItemRail.getQuarters(stack);
-		gauge = ItemRail.getGauge(stack);
-		railBed = ItemRail.getBed(stack);
-		railBedFill = ItemRail.getBedFill(stack);
+		type = ItemTrackBlueprint.getType(stack);
+		length = ItemTrackBlueprint.getLength(stack);
+		quarters = ItemTrackBlueprint.getQuarters(stack);
+		gauge = ItemGauge.get(stack);
+		railBed = ItemTrackBlueprint.getBed(stack);
+		railBedFill = ItemTrackBlueprint.getBedFill(stack);
 		world = worldIn;
-		TrackPositionType posType = ItemRail.getPosType(stack);
+		TrackPositionType posType = ItemTrackBlueprint.getPosType(stack);
 		
 		yawHead = yawHead % 360 + 360;
 		direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
@@ -159,7 +161,7 @@ public class RailInfo {
 				int fill = 0;
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
+					if (playerStack.getItem() == ImmersiveRailroading.ITEM_RAIL && ItemGauge.get(playerStack) == builder.gauge) {
 						rails += playerStack.getCount();
 					}
 					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("plankTreatedWood"), playerStack)) {
@@ -200,7 +202,7 @@ public class RailInfo {
 				List<ItemStack> drops = new ArrayList<ItemStack>();
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (OreDictionaryContainsMatch(false, OreDictionary.getOres("stickSteel"), playerStack)) {
+					if (playerStack.getItem() == ImmersiveRailroading.ITEM_RAIL && ItemGauge.get(playerStack) == builder.gauge) {
 						if (rails > playerStack.getCount()) {
 							rails -= playerStack.getCount();
 							ItemStack copy = playerStack.copy();

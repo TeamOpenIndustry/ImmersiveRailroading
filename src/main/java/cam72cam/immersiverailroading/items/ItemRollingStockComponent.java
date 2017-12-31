@@ -7,6 +7,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.ItemComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
+import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -15,7 +20,6 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -41,9 +45,9 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 	
 	@Override
 	protected void overrideStackDisplayName(ItemStack stack) {
-		EntityRollingStockDefinition def = getDefinition(stack);
+		EntityRollingStockDefinition def = ItemDefinition.get(stack);
 		if (def != null) {
-			stack.setStackDisplayName(TextFormatting.RESET + def.name + " " + getComponentType(stack).toString());
+			stack.setStackDisplayName(TextFormatting.RESET + def.name + " " + ItemComponent.getComponentType(stack).toString());
 		}
 	}
 	
@@ -56,8 +60,9 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
         		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
         		for (ItemComponentType item : new LinkedHashSet<ItemComponentType>(def.getItemComponents())) {
 	        		ItemStack stack = new ItemStack(this);
-	        		setDefinitionID(stack, defID);
-					setComponentType(stack, item);
+	        		ItemDefinition.setID(stack, defID);
+	        		ItemComponent.setComponentType(stack, item);
+	        		ItemRawCast.set(stack, false);
 					overrideStackDisplayName(stack);
 	                items.add(stack);	
         		}
@@ -65,36 +70,29 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
         }
     }
 	
+	public static boolean requiresHammering(ItemStack stack) {
+		return ItemComponent.getComponentType(stack).crafting == CraftingType.CASTING_HAMMER && ItemRawCast.get(stack); 
+	}
+	
 	@SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
 		overrideStackDisplayName(stack);
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(GuiText.STOCK_GAUGE.toString(getGauge(stack)));
+        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
+        if (requiresHammering(stack)) {
+        	tooltip.add("§c" + GuiText.RAW_CAST_TOOLTIP.toString() + "§f");
+        }
     }
 	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		if (getComponentType(player.getHeldItem(hand)) != ItemComponentType.FRAME) {
+		if (ItemComponent.getComponentType(player.getHeldItem(hand)) != ItemComponentType.FRAME) {
 			return EnumActionResult.FAIL;
 		}
 		
 		List<ItemComponentType> frame = new ArrayList<ItemComponentType>();
 		frame.add(ItemComponentType.FRAME);
 		return tryPlaceStock(player, worldIn, pos, hand, frame);
-	}
-	
-	public static ItemComponentType getComponentType(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return ItemComponentType.values()[stack.getTagCompound().getInteger("componentType")];
-		}
-		stack.setCount(0);
-		return ItemComponentType.values()[0];
-	}
-	public static void setComponentType(ItemStack stack, ItemComponentType item) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger("componentType", item.ordinal());
 	}
 }

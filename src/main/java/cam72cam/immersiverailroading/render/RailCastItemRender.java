@@ -8,43 +8,54 @@ import javax.vecmath.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import util.Matrix4;
 
-public class SteamHammerItemRender implements IBakedModel {
-	private static OBJRender renderer;
+public class RailCastItemRender implements IBakedModel {
+	private static OBJRender model;
+	private static List<String> groups;
 
-	public SteamHammerItemRender() {
+	static {
 		try {
-			if (renderer == null) {
-				renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f));
+			model = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.05f));
+			groups = new ArrayList<String>();
+			
+			for (String groupName : model.model.groups())  {
+				if (groupName.contains("INPUT_CAST")) {
+					groups.add(groupName);
+				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			ImmersiveRailroading.catching(e);
 		}
 	}
-	
+
+
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
-		
 		GL11.glPushMatrix();
-		double scale = 0.2;
-		GL11.glScaled(scale, scale, scale);
-		renderer.draw();
+		{
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+			GL11.glRotated(90, 1, 0, 0);
+			GL11.glTranslated(0, -1, 1);
+			GL11.glTranslated(-0.5, 0.6, 0.6);
+			model.drawGroups(groups);
+			tex.restore();
+		}
 		GL11.glPopMatrix();
-		
-		tex.restore();
 		return new ArrayList<BakedQuad>();
 	}
 
@@ -65,39 +76,23 @@ public class SteamHammerItemRender implements IBakedModel {
 
 	@Override
 	public TextureAtlasSprite getParticleTexture() {
-		return null;
+		return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(Blocks.IRON_BLOCK.getDefaultState()).getParticleTexture();
 	}
 
 	@Override
 	public ItemOverrideList getOverrides() {
 		return ItemOverrideList.NONE;
 	}
-
+	
 	@Override
 	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		switch (cameraTransformType) {
-		case THIRD_PERSON_LEFT_HAND:
-		case THIRD_PERSON_RIGHT_HAND:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-60), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
-		case FIRST_PERSON_LEFT_HAND:
-		case FIRST_PERSON_RIGHT_HAND:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-30), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
-		case GROUND:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5,0,0.5).toMatrix4f());
-		case FIXED:
-			// Item Frame
-			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case GUI:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5, 0, 0).rotate(Math.toRadians(+5+90), 0, 1, 0).toMatrix4f());
-		case HEAD:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().translate(0, 0, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
-		case NONE:
+			Matrix4f m = new Matrix4().translate(0, -0.5, 0).scale(1, 0.1, 1).toMatrix4f();
+			return Pair.of(defaultVal.getLeft(), m);
+		default:
 			return defaultVal;
 		}
-		return defaultVal;
 	}
 }

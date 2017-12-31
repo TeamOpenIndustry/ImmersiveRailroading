@@ -163,6 +163,9 @@ public class EntityRollingStockDefinition {
 			if (c.pos.equals(pos)) {
 				return c.scale(gauge);
 			}
+			if (c.side.equals(pos)) {
+				return c.scale(gauge);
+			}
 		}
 		return null;
 	}
