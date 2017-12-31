@@ -97,7 +97,7 @@ public class ItemRailAugment extends Item {
         if (this.isInCreativeTab(tab))
         {
         	for (Augment augment : Augment.values()) {
-        		ItemStack stack = new ItemStack(this, 8);
+        		ItemStack stack = new ItemStack(this, 1);
         		ItemAugmentType.set(stack, augment);
                 items.add(stack);
         	}

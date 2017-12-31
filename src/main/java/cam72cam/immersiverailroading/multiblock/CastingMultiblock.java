@@ -223,6 +223,9 @@ public class CastingMultiblock extends Multiblock {
 					cost = component.getCastCost(ItemDefinition.get(item), ItemGauge.get(item));
 				} else if (item.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL) {
 					cost = (int) Math.ceil(20 * ItemGauge.get(item).scale());
+				} else if (item.getItem() == ImmersiveRailroading.ITEM_AUGMENT) {
+					cost = (int) Math.ceil(8 * ItemGauge.get(item).scale());
+					item.setCount(8);
 				} else {
 					System.out.println("BAD CAST");
 					cost = 10;
