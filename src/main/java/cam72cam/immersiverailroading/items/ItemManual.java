@@ -2,10 +2,14 @@ package cam72cam.immersiverailroading.items;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -17,27 +21,43 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemMultiblockPlacer extends Item {
-	public static final String NAME = "item_mb_placer";
+public class ItemManual extends Item {
+	public static final String NAME = "item_manual";
 	
-	public ItemMultiblockPlacer() {
+	public ItemManual() {
 		super();
 		
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
+        //TODO LOCALIZATION
 	}
+	
+	@SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
+    {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        tooltip.add(GuiText.SELECTOR_TYPE.toString(ItemMultiblockType.get(stack)));
+    }
 	
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-		if (!world.isRemote && player.isSneaking()) {
-			ItemStack item = player.getHeldItem(hand);
-			String current = ItemMultiblockType.get(item);
-			List<String> keys = MultiblockRegistry.keys();
-			current = keys.get((keys.indexOf(current) + 1) % (keys.size()));
-			ItemMultiblockType.set(item, current);
-			player.sendMessage(new TextComponentString("MB: " + current));
+		if (player.isSneaking()) {
+			if (!world.isRemote) {
+				ItemStack item = player.getHeldItem(hand);
+				String current = ItemMultiblockType.get(item);
+				List<String> keys = MultiblockRegistry.keys();
+				current = keys.get((keys.indexOf(current) + 1) % (keys.size()));
+				ItemMultiblockType.set(item, current);
+				player.sendMessage(new TextComponentString("Placing: " + current));
+			}
+		} else {
+			if (world.isRemote) {
+				player.sendMessage(new TextComponentString("Coming Soon..."));
+			}
 		}
 		return super.onItemRightClick(world, player, hand);
 	}
@@ -56,6 +76,6 @@ public class ItemMultiblockPlacer extends Item {
 			}
 			MultiblockRegistry.get(current).place(world, player, realPos, BlockUtil.rotFromFacing(EnumFacing.fromAngle(player.rotationYawHead+180)));
 		}
-		return super.onItemUse(player, world, pos, hand, facing, hitX, hitY, hitZ);
+		return EnumActionResult.SUCCESS;
 	}
 }

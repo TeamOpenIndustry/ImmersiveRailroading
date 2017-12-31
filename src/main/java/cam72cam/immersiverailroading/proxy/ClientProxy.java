@@ -226,6 +226,9 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_PLATE, 0,
 				new ModelResourceLocation(ImmersiveRailroading.ITEM_PLATE.getRegistryName(), ""));
+		
+		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_MANUAL, 0,
+				new ModelResourceLocation("minecraft:written_book", ""));
 	}
 
 	@SubscribeEvent
