@@ -21,7 +21,6 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class BoilerRollerMultiblock extends Multiblock {
-	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	private static MultiblockComponent slab = new MultiblockComponent(Blocks.STONE_SLAB);
 	public static final String NAME = "BOILER_MACHINE";
 	private static final BlockPos render = new BlockPos(2,0,0);
@@ -30,7 +29,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 	
 	private static MultiblockComponent[][][] componentGenerator() {
 		MultiblockComponent[] bed = new MultiblockComponent[] {
-				steel, steel, steel, steel, steel, steel
+				L_ENG(), L_ENG(), L_ENG(), L_ENG(), H_ENG(), H_ENG()
 		};
 		MultiblockComponent[] table = new MultiblockComponent[] {
 				slab, slab, slab, slab, AIR, AIR

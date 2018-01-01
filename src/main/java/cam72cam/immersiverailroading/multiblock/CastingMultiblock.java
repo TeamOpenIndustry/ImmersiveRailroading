@@ -32,8 +32,8 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class CastingMultiblock extends Multiblock {
-	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
-	private static MultiblockComponent sand = new MultiblockComponent(Blocks.SAND);
+	private static MultiblockComponent STONE = new MultiblockComponent(Blocks.STONEBRICK);
+	private static MultiblockComponent SAND = new MultiblockComponent(Blocks.SAND);
 	public static final String NAME = "CASTING";
 	private static final BlockPos render = new BlockPos(3,3,7);
 	private static final BlockPos fluid = new BlockPos(3,3,3);
@@ -48,22 +48,22 @@ public class CastingMultiblock extends Multiblock {
 			MultiblockComponent[] base = new MultiblockComponent[] { AIR, AIR, AIR, AIR, AIR, AIR, AIR };
 			if (z > 0 && z < 6) {
 				if (z > 1 && z < 5) {
-					base = new MultiblockComponent[] { AIR, steel, steel, steel, steel, steel, AIR };
+					base = new MultiblockComponent[] { AIR, STEEL(), STEEL(), STEEL(), STEEL(), STEEL(), AIR };
 				} else {
-					base = new MultiblockComponent[] { AIR, AIR, steel, steel, steel, AIR, AIR };
+					base = new MultiblockComponent[] { AIR, AIR, STEEL(), STEEL(), STEEL(), AIR, AIR };
 				}
 			}
 			
 
-			MultiblockComponent[] top = new MultiblockComponent[] { AIR, AIR, steel, steel, steel, AIR, AIR };
-			MultiblockComponent[] topfirst = new MultiblockComponent[] { AIR, AIR, steel, steel, steel, AIR, AIR };
+			MultiblockComponent[] top = new MultiblockComponent[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
+			MultiblockComponent[] topfirst = new MultiblockComponent[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
 			if (z > 0 && z < 6) {
 				if (z > 1 && z < 5) {
-					top = new MultiblockComponent[] { steel, AIR, AIR, AIR, AIR, AIR, steel };
-					topfirst = new MultiblockComponent[] { steel, steel, steel, steel, steel, steel, steel };
+					top = new MultiblockComponent[] { CASING(), AIR, AIR, AIR, AIR, AIR, CASING() };
+					topfirst = new MultiblockComponent[] { CASING(), CASING(), CASING(), H_ENG(), CASING(), CASING(), CASING() };
 				} else {
-					top = new MultiblockComponent[] { AIR, steel, AIR, AIR, AIR, steel, AIR };
-					topfirst = new MultiblockComponent[] { AIR, steel, steel, steel, steel, steel, AIR };
+					top = new MultiblockComponent[] { AIR, CASING(), AIR, AIR, AIR, CASING(), AIR };
+					topfirst = new MultiblockComponent[] { AIR, CASING(), CASING(), H_ENG(), CASING(), CASING(), AIR };
 				}
 			}
 
@@ -82,22 +82,22 @@ public class CastingMultiblock extends Multiblock {
 		for (int z = 7; z < 7+16; z++) {
 			if (z == 7) {
 				bp[z] = new MultiblockComponent[][] {
-					{ AIR, steel, steel, steel, steel, steel, AIR },
-					{ AIR, steel, steel, steel, steel, steel, AIR },
-					{ AIR, steel, steel, steel, steel, steel, AIR },
-					{ AIR, AIR, AIR, steel, AIR, AIR, AIR },
+					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
+					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
+					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
+					{ AIR, AIR, AIR, STEEL(), AIR, AIR, AIR },
 				};
 			} else if (z == 7+16-1) {
 				bp[z] = new MultiblockComponent[][] {
-					{ AIR, steel, steel, steel, steel, steel, AIR },
-					{ AIR, steel, steel, steel, steel, steel, AIR },
-					{ AIR, steel, steel, steel, steel, steel, AIR },
+					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
+					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
+					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 				};
 			} else {
 				bp[z] = new MultiblockComponent[][] {
-					{ AIR, steel, sand, sand, sand, steel, AIR },
-					{ AIR, steel, sand, sand, sand, steel, AIR },
-					{ AIR, steel, sand, sand, sand, steel, AIR },
+					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
+					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
+					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
 				};
 			}
 		}

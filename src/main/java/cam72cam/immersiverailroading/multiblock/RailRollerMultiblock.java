@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
@@ -16,7 +15,6 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class RailRollerMultiblock extends Multiblock {
-	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	public static final String NAME = "RAIL_MACHINE";
 	private static final BlockPos render = new BlockPos(0,0,0);
 	private static final BlockPos crafter = new BlockPos(1,1,15);
@@ -28,11 +26,17 @@ public class RailRollerMultiblock extends Multiblock {
 		MultiblockComponent[][][] result = new MultiblockComponent[30][][];
 		
 		MultiblockComponent[] bed = new MultiblockComponent[] {
-				steel, steel
+				S_SCAF(), S_SCAF()
 		};
 		for (int i = 0; i < 30; i ++) {
 			if (i >= 11 && i <= 18) {
-				result[i] = new MultiblockComponent[][] { bed, bed, bed };
+				result[i] = new MultiblockComponent[][] { {
+					L_ENG(), L_ENG()
+				}, {
+					H_ENG(), H_ENG()
+				}, {
+					L_ENG(), L_ENG()
+				}};
 			} else {
 				result[i] = new MultiblockComponent[][] { bed };
 			}

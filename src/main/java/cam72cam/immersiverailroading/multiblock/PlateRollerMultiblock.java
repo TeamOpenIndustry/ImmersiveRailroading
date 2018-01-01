@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
@@ -19,7 +18,6 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class PlateRollerMultiblock extends Multiblock {
-	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	public static final String NAME = "PLATE_MACHINE";
 	private static final BlockPos render = new BlockPos(2,0,0);
 	private static final BlockPos crafter = new BlockPos(2,0,14);
@@ -31,21 +29,24 @@ public class PlateRollerMultiblock extends Multiblock {
 		MultiblockComponent[][][] result = new MultiblockComponent[30][][];
 		
 		MultiblockComponent[] bed = new MultiblockComponent[] {
-				steel, steel, steel, steel, steel
+				L_ENG(), S_SCAF(), S_SCAF(), S_SCAF(), L_ENG()
 		};
 		MultiblockComponent[] mid = new MultiblockComponent[] {
-				steel, AIR, AIR, AIR, steel
+				L_ENG(), AIR, AIR, AIR, L_ENG()
+		};
+		MultiblockComponent[] top = new MultiblockComponent[] {
+				H_ENG(), H_ENG(), H_ENG(), H_ENG(), H_ENG()
 		};
 		for (int i = 0; i < 30; i ++) {
 			if (i >= 11 && i <= 18) {
 				if (i >= 13 && i <=16) {
 					if (i == 14) {
-						result[i] = new MultiblockComponent[][] { bed, mid, bed, { AIR, steel, steel, steel, AIR}, { AIR, steel, AIR, AIR, AIR } };
+						result[i] = new MultiblockComponent[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR}, { AIR, H_ENG(), AIR, AIR, AIR } };
 					} else {
-						result[i] = new MultiblockComponent[][] { bed, mid, bed, { AIR, steel, steel, steel, AIR} };
+						result[i] = new MultiblockComponent[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR} };
 					}
 				} else {
-					result[i] = new MultiblockComponent[][] { bed, mid, bed };
+					result[i] = new MultiblockComponent[][] { bed, mid, top };
 				}
 			} else {
 				result[i] = new MultiblockComponent[][] { bed };
