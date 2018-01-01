@@ -273,7 +273,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		if (this.getParent() == null) {
 			return null;
 		}
-		return TileRail.get(world, this.getParent());
+		TileRail te = TileRail.get(world, this.getParent());
+		if (!te.isLoaded()) {
+			return null;
+		}
+		return te;
 	}
 	public void setReplaced(NBTTagCompound replaced) {
 		this.replaced = replaced;
@@ -362,8 +366,16 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 		
+		if (tile == null) {
+			return currentPosition;
+		}
+		
 		if (SwitchUtil.getSwitchState(tile, currentPosition) == SwitchState.STRAIGHT) {
 			tile = tile.getParentTile();
+		}
+
+		if (tile == null) {
+			return currentPosition;
 		}
 		
 		double distanceMeters = motion.lengthVector();

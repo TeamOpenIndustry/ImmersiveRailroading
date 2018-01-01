@@ -192,19 +192,13 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
 		TileRailBase te = TileRailBase.get(source, pos);
-		if (te == null) {
-	        return NULL_AABB;
-		}
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, te.getFullHeight()+0.1, 1.0F);
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, (te == null ? 0 : te.getFullHeight())+0.1, 1.0F);
 	}
 	
 	
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
 		TileRailBase te = TileRailBase.get(source, pos);
-		if (te == null) {
-	        return NULL_AABB;
-		}
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Math.max(te.getFullHeight(),0.25), 1.0F);
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Math.max(te == null ? 0 : te.getFullHeight(),0.25), 1.0F);
 	}
 	
 	@Override
