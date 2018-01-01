@@ -274,7 +274,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			return null;
 		}
 		TileRail te = TileRail.get(world, this.getParent());
-		if (!te.isLoaded()) {
+		if (te == null || !te.isLoaded()) {
 			return null;
 		}
 		return te;
