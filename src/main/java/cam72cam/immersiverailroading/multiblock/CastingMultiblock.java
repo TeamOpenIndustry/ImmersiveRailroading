@@ -127,7 +127,13 @@ public class CastingMultiblock extends Multiblock {
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
 			TileMultiblock outTe = getTile(output);
+			if (outTe == null) {
+				return false;
+			}
 			TileMultiblock craftTe = getTile(craft);
+			if (craftTe == null) {
+				return false;
+			}
 			if (!outTe.getContainer().getStackInSlot(0).isEmpty()) {
 				if (!world.isRemote) {
 					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outTe.getContainer().getStackInSlot(0)));
@@ -176,6 +182,9 @@ public class CastingMultiblock extends Multiblock {
 			
 			if (offset.equals(fluid)) {
 				TileMultiblock fluidTe = getTile(fluid);
+				if (fluidTe == null) {
+					return;
+				}
 				AxisAlignedBB bb = new AxisAlignedBB(getPos(offset.add(0, 1, 0))).grow(3, 0, 3);
 				List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, bb);
 				for (EntityItem item : items) {
@@ -208,8 +217,17 @@ public class CastingMultiblock extends Multiblock {
 				}
 				
 				TileMultiblock fluidTe = getTile(fluid);
+				if (fluidTe == null) {
+					return;
+				}
 				TileMultiblock craftTe = getTile(craft);
+				if (craftTe == null) {
+					return;
+				}
 				TileMultiblock outTe = getTile(output);
+				if (outTe == null) {
+					return;
+				}
 				
 				ItemStack item = craftTe.getCraftItem();
 				if (item == null || item.isEmpty()) {
@@ -250,6 +268,9 @@ public class CastingMultiblock extends Multiblock {
 			
 			if (offset.equals(power)) {
 				TileMultiblock powerTe = getTile(power);
+				if (powerTe == null) {
+					return;
+				}
 				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 				energy.extractEnergy(32, false);
 			}
@@ -290,11 +311,17 @@ public class CastingMultiblock extends Multiblock {
 
 		public boolean isPouring() {
 			TileMultiblock craftTe = getTile(craft);
+			if (craftTe == null) {
+				return false;
+			}
 			return craftTe.getCraftProgress() != 0;
 		}
 
 		public double getSteelLevel() {
 			TileMultiblock fluidTe = getTile(fluid);
+			if (fluidTe == null) {
+				return 0;
+			}
 			return fluidTe.getCraftProgress() * 4.5 / max_volume;
 		}
 
@@ -305,7 +332,6 @@ public class CastingMultiblock extends Multiblock {
 		public ItemStack getCraftItem() {
 			TileMultiblock craftingTe = getTile(craft);
 			if (craftingTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT %s", getPos(craft));
 				return ItemStack.EMPTY;
 			}
 			return craftingTe.getCraftItem();

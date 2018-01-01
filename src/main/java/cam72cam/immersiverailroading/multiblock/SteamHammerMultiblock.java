@@ -97,13 +97,11 @@ public class SteamHammerMultiblock extends Multiblock {
 			}
 			TileMultiblock te = getTile(offset);
 			if (te == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(offset));
 				return;
 			}
 			
 			TileMultiblock powerTe = getTile(power);
 			if (powerTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(power));
 				return;
 			}
 			
