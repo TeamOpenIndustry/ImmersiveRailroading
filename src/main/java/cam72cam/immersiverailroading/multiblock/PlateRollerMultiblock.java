@@ -81,7 +81,6 @@ public class PlateRollerMultiblock extends Multiblock {
 				if (held.isEmpty()) {
 					TileMultiblock outputTe = getTile(output);
 					if (outputTe == null) {
-						ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(output));
 						return false;
 					}
 					
@@ -95,7 +94,6 @@ public class PlateRollerMultiblock extends Multiblock {
 				} else if (held.isItemEqual(steelBlock())) {
 					TileMultiblock inputTe = getTile(input);
 					if (inputTe == null) {
-						ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(input));
 						return false;
 					}
 					if (inputTe.getContainer().getStackInSlot(0).isEmpty()) {
@@ -136,25 +134,21 @@ public class PlateRollerMultiblock extends Multiblock {
 			}
 			TileMultiblock craftingTe = getTile(crafter);
 			if (craftingTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(crafter));
 				return;
 			}
 			
 			TileMultiblock powerTe = getTile(power);
 			if (powerTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(power));
 				return;
 			}
 			
 			TileMultiblock inputTe = getTile(input);
 			if (inputTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(input));
 				return;
 			}
 			
 			TileMultiblock outputTe = getTile(output);
 			if (outputTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT ", getPos(output));
 				return;
 			}
 			
@@ -239,7 +233,6 @@ public class PlateRollerMultiblock extends Multiblock {
 		public ItemStack getCraftItem() {
 			TileMultiblock craftingTe = getTile(crafter);
 			if (craftingTe == null) {
-				ImmersiveRailroading.warn("INVALID MULTIBLOCK TILE AT %s", getPos(crafter));
 				return ItemStack.EMPTY;
 			}
 			return craftingTe.getCraftItem();
