@@ -3,6 +3,11 @@ package cam72cam.immersiverailroading.multiblock;
 import java.util.List;
 import java.util.Map;
 
+import blusunrize.immersiveengineering.common.IEContent;
+import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
+import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
+import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration1;
+import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 
@@ -27,6 +32,35 @@ public abstract class Multiblock {
 	protected final List<BlockPos> componentPositions;
 	
 	protected static final MultiblockComponent AIR = new MultiblockComponent(Blocks.AIR);
+	protected static final MultiblockComponent STEEL() {
+		IBlockState data = IEContent.blockStorage.getStateFromMeta(BlockTypes_MetalsAll.STEEL.getMeta());
+		ItemStack stack = new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
+		return new MultiblockComponent(data, stack);
+	}
+	
+	protected static final MultiblockComponent CASING() {
+		IBlockState data = IEContent.blockStoneDecoration.getStateFromMeta(BlockTypes_StoneDecoration.BLASTBRICK.getMeta());
+		ItemStack stack = new ItemStack(IEContent.blockStoneDecoration,1, BlockTypes_StoneDecoration.BLASTBRICK.getMeta());
+		return new MultiblockComponent(data, stack);
+	}
+	
+	protected static final MultiblockComponent L_ENG() {
+		IBlockState data = IEContent.blockMetalDecoration0.getStateFromMeta(BlockTypes_MetalDecoration0.LIGHT_ENGINEERING.getMeta());
+		ItemStack stack = new ItemStack(IEContent.blockMetalDecoration0,1, BlockTypes_MetalDecoration0.LIGHT_ENGINEERING.getMeta());
+		return new MultiblockComponent(data, stack);
+	}
+	protected static final MultiblockComponent H_ENG() {
+		IBlockState data = IEContent.blockMetalDecoration0.getStateFromMeta(BlockTypes_MetalDecoration0.HEAVY_ENGINEERING.getMeta());
+		ItemStack stack = new ItemStack(IEContent.blockMetalDecoration0,1, BlockTypes_MetalDecoration0.HEAVY_ENGINEERING.getMeta());
+		return new MultiblockComponent(data, stack);
+	}
+	protected static final MultiblockComponent S_SCAF() {
+		
+		IBlockState data = IEContent.blockMetalDecoration1.getStateFromMeta(BlockTypes_MetalDecoration1.STEEL_SCAFFOLDING_0.getMeta());
+		ItemStack stack = new ItemStack(IEContent.blockMetalDecoration1,1, BlockTypes_MetalDecoration1.STEEL_SCAFFOLDING_0.getMeta());
+		return new MultiblockComponent(data, stack);
+	}
+
 
 	protected Multiblock(String name, MultiblockComponent[][][] components) {
 		this.name = name;

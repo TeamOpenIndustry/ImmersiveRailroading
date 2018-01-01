@@ -18,7 +18,6 @@ import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class SteamHammerMultiblock extends Multiblock {
-	private static MultiblockComponent steel = new MultiblockComponent(Blocks.IRON_BLOCK);
 	private static MultiblockComponent piston = new MultiblockComponent(Blocks.PISTON);
 	public static final String NAME = "STEAM_HAMMER";
 	private static final BlockPos center = new BlockPos(2,0,0);
@@ -28,22 +27,22 @@ public class SteamHammerMultiblock extends Multiblock {
 		super(NAME, new MultiblockComponent[][][] { // Z
 			{ // Y
 				{ //X
-					steel, AIR, steel, AIR, steel
+					L_ENG(), AIR, STEEL(), AIR, L_ENG()
 				},
 				{
-					steel, AIR, AIR, AIR, steel
+					L_ENG(), AIR, AIR, AIR, L_ENG()
 				},
 				{
-					steel, steel, steel, steel, steel
+					L_ENG(), L_ENG(), H_ENG(), L_ENG(), L_ENG()
 				},
 				{
-					AIR, steel, steel, steel, AIR
+					AIR, L_ENG(), H_ENG(), L_ENG(), AIR
 				},
 				{
 					AIR, AIR, piston, AIR, AIR
 				},
 				{
-					AIR, AIR, steel, AIR, AIR
+					AIR, AIR, H_ENG(), AIR, AIR
 				}
 			}
 		});
