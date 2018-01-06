@@ -10,6 +10,7 @@ import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecor
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.immersiverailroading.util.BlockUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -106,26 +107,42 @@ public abstract class Multiblock {
 	
 	public abstract BlockPos placementPos();
 	public void place(World world, EntityPlayer player, BlockPos pos, Rotation rot) {
-		Map<MultiblockComponent, Integer> missing = new HashMap<MultiblockComponent, Integer>();
+		Map<String, Integer> missing = new HashMap<String, Integer>();
 		BlockPos origin = pos.subtract(this.placementPos().rotate(rot));
 		for (BlockPos offset : this.componentPositions) {
 			MultiblockComponent component = lookup(offset);
 			BlockPos compPos = origin.add(offset.rotate(rot));
-			if (!component.valid(world, compPos) && world.isAirBlock(compPos)) {
-				if (!component.place(world, player, compPos)) {
-					if (!missing.containsKey(component)) {
-						missing.put(component, 0);
+			if (!component.valid(world, compPos)) {
+				if (!world.isAirBlock(compPos)) {
+					if (BlockUtil.canBeReplaced(world, compPos, false)) {
+						world.destroyBlock(compPos, true);
+					} else {
+						//TODO Localization
+						player.sendMessage(new TextComponentString(String.format("Invalid block at x=%s y=%s z=%s", compPos.getX(), compPos.getY(), compPos.getZ())));
+						return;
 					}
-					missing.put(component, missing.get(component)+1);
+				}
+			}
+		}
+		
+		for (BlockPos offset : this.componentPositions) {
+			MultiblockComponent component = lookup(offset);
+			BlockPos compPos = origin.add(offset.rotate(rot));
+			if (!component.valid(world, compPos)) {
+				if (!component.place(world, player, compPos)) {
+					if (!missing.containsKey(component.name)) {
+						missing.put(component.name, 0);
+					}
+					missing.put(component.name, missing.get(component.name)+1);
 				}
 			}
 		}
 		
 		if (missing.size() != 0) {
 			player.sendMessage(new TextComponentString("Missing: "));
-			for (MultiblockComponent comp : missing.keySet()) {
+			for (String name : missing.keySet()) {
 				//TODO localize
-				player.sendMessage(new TextComponentString(String.format("  - %d x %s", missing.get(comp), comp.name)));
+				player.sendMessage(new TextComponentString(String.format("  - %d x %s", missing.get(name), name)));
 			}
 		}
 	}
