@@ -26,8 +26,12 @@ public class OBJModel {
 
 	public Map<String, Material> materials = new HashMap<String, Material>();
 	public float darken;
-
+	
 	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
+		this(modelLoc, darken, 1);
+	}
+
+	public OBJModel(ResourceLocation modelLoc, float darken, double scale) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		Scanner reader = new Scanner(input);
 		this.darken = darken;
@@ -63,7 +67,7 @@ public class OBJModel {
 				groups.put(currentGroupName, currentGroup);
 				break;
 			case "v":
-				vertices.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
+				vertices.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])).scale(scale));
 				break;
 			case "vn":
 				vertexNormals.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));

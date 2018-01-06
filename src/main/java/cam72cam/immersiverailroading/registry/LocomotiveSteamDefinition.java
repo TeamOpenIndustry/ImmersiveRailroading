@@ -36,12 +36,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public void parseJson(JsonObject data) throws Exception {
 		super.parseJson(data);
 		JsonObject properties = data.get("properties").getAsJsonObject();
-		tankCapacity = FluidQuantity.FromLiters(properties.get("water_capacity_l").getAsInt());
-		maxPSI = properties.get("max_psi").getAsInt();
+		tankCapacity = FluidQuantity.FromLiters((int) (properties.get("water_capacity_l").getAsInt() * internal_scale));
+		maxPSI = (int) (properties.get("max_psi").getAsInt() * internal_scale);
 		valveGear = ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase());
 		JsonObject firebox = data.get("firebox").getAsJsonObject();
-		this.numSlots = firebox.get("slots").getAsInt();
-		this.width = firebox.get("width").getAsInt();
+		this.numSlots = (int) (firebox.get("slots").getAsInt() * internal_scale);
+		this.width = (int) (firebox.get("width").getAsInt() * internal_scale);
 	}
 
 	@Override
@@ -74,6 +74,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		case CLIMAX:
 			break;
 		case SHAY:
+			break;
+		case HIDDEN:
+			for (int i = 0; i < 10; i++) {
+				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
+			}
 			break;
 		}
 		
@@ -129,6 +134,8 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		case CLIMAX:
 			break;
 		case SHAY:
+			break;
+		case HIDDEN:
 			break;
 		}
 		

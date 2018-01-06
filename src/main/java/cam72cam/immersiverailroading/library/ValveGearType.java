@@ -5,4 +5,5 @@ public enum ValveGearType {
 	MALLET_WALSCHAERTS,
 	SHAY,
 	CLIMAX,
+	HIDDEN
 }
