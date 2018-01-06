@@ -15,8 +15,10 @@ public class SyncdTileEntity extends TileEntity {
 	@Override
 	public void markDirty() {
 		super.markDirty();
-		world.notifyBlockUpdate(getPos(), world.getBlockState(getPos()), world.getBlockState(getPos()), 1 + 2 + 8);
-		world.notifyNeighborsOfStateChange(pos, this.getBlockType(), true);
+		if (!world.isRemote) {
+			world.notifyBlockUpdate(getPos(), world.getBlockState(getPos()), world.getBlockState(getPos()), 1 + 2 + 8);
+			world.notifyNeighborsOfStateChange(pos, this.getBlockType(), true);
+		}
 	}
 	
 	public void writeUpdateNBT(NBTTagCompound nbt) {
@@ -39,7 +41,9 @@ public class SyncdTileEntity extends TileEntity {
 		this.readFromNBT(pkt.getNbtCompound());
 		this.readUpdateNBT(pkt.getNbtCompound());
 		super.onDataPacket(net, pkt);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
+		if (updateRerender()) {
+			world.markBlockRangeForRenderUpdate(getPos(), getPos());
+		}
 		hasTileData = true;
 	}
 	
@@ -51,12 +55,18 @@ public class SyncdTileEntity extends TileEntity {
 		return tag;
 	}
 	
+	public boolean updateRerender() {
+		return false;
+	}
+	
 	@Override 
 	public void handleUpdateTag(NBTTagCompound tag) {
 		this.readFromNBT(tag);
 		this.readUpdateNBT(tag);
 		super.handleUpdateTag(tag);
-		world.markBlockRangeForRenderUpdate(getPos(), getPos());
+		if (updateRerender()) {
+			world.markBlockRangeForRenderUpdate(getPos(), getPos());
+		}
 		hasTileData = true;
 	}
 }
