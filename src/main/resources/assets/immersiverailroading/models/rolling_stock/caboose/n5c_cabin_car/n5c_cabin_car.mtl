@@ -1,5 +1,5 @@
 # Blender MTL File: 'N5c Cabin Car Backup.blend'
-# Material Count: 10
+# Material Count: 12
 
 newmtl Black1
 Ns 96.078431
@@ -11,14 +11,6 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd black1.png
-
-newmtl None
-Ns 0
-Ka 0.000000 0.000000 0.000000
-Kd 0.8 0.8 0.8
-Ks 0.8 0.8 0.8
-d 1
-illum 2
 
 newmtl black1
 Ns 96.078431
@@ -64,6 +56,17 @@ d 1.000000
 illum 2
 map_Kd chrome.png
 
+newmtl dirtygrey
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd dirtygrey.png
+
 newmtl frame
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
@@ -74,6 +77,28 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd frame.png
+
+newmtl glass
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd glass.png
+
+newmtl redweathered
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd redwethered.png
 
 newmtl spring
 Ns 96.078431
