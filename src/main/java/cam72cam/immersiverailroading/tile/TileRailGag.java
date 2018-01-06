@@ -10,4 +10,8 @@ public class TileRailGag extends TileRailBase {
     {
         return false;
     }
+	
+	public boolean updateRerender() {
+		return true;
+	}
 }
