@@ -6,7 +6,6 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -52,6 +51,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		frontYaw = BufferUtil.readFloat(additionalData);
 		rearYaw = BufferUtil.readFloat(additionalData);
 		tickPosID = additionalData.readInt();
+		
+		positions = new ArrayList<TickPos>();
+		
+		for (int numPositions =additionalData.readInt(); numPositions > 0; numPositions --) {
+			TickPos pos = new TickPos();
+			pos.read(additionalData);
+			positions.add(pos);
+		}
 	}
 
 	@Override
@@ -60,8 +67,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		BufferUtil.writeFloat(buffer, frontYaw);
 		BufferUtil.writeFloat(buffer, rearYaw);
 		buffer.writeInt((int)tickPosID);
-
-		this.sendToObserving(new MRSSyncPacket(this, this.positions));
+		
+		buffer.writeInt(positions.size());
+		for (TickPos pos : positions ) {
+			pos.write(buffer);
+		}
 	}
 
 	@Override
