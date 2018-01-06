@@ -9,14 +9,42 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import trackapi.lib.ITrackTile;
+import trackapi.lib.Util;
 
 public class MovementTrack {
 
 	private static TileRailBase directRailFromPosition(World world, Vec3d position) {
 		return TileRailBase.get(world, new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 	}
+	
 
 	public static Vec3d nextPosition(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
+		double maxDelta = 0.5;
+		if (distanceMeters > maxDelta) {
+			double dist = 0;
+			while (dist < distanceMeters - maxDelta) {
+				dist += maxDelta;
+				ITrackTile te = Util.getTileEntity(world, currentPosition, true);
+				if (te == null) {
+					return currentPosition;
+				}
+				Vec3d pastPos = currentPosition;
+				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromYaw(maxDelta, trainYaw));
+				trainYaw = VecUtil.toYaw(pastPos.subtractReverse(currentPosition));
+			}
+
+			ITrackTile te = Util.getTileEntity(world, currentPosition, true);
+			if (te == null) {
+				return currentPosition;
+			}
+			return te.getNextPosition(currentPosition, VecUtil.fromYaw(distanceMeters % maxDelta, trainYaw));
+		} else {
+			return nextPositionInner(world, currentPosition, rail, trainYaw, distanceMeters);
+		}
+	}
+
+	public static Vec3d nextPositionInner(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
 		Vec3d delta = VecUtil.fromYaw(distanceMeters, trainYaw);
 		
 		if (rail == null) {
