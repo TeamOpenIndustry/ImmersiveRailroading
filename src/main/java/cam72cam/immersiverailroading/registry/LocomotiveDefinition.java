@@ -37,9 +37,9 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 		
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		
-		power = properties.get("horsepower").getAsInt();
-		traction = properties.get("tractive_effort_lbf").getAsInt();
-		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble());
+		power = (int) (properties.get("horsepower").getAsInt() * internal_scale);
+		traction = (int) (properties.get("tractive_effort_lbf").getAsInt() * internal_scale);
+		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_scale);
 	}
 	
 	@Override

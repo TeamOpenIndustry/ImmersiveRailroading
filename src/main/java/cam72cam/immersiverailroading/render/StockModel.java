@@ -244,6 +244,11 @@ public class StockModel extends OBJRender {
 			break;
 		case SHAY:
 			break;
+		case HIDDEN:
+			{
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
+				drawDrivingWheels(stock, wheels);
+			}
 		}
 		
 		// Draw remaining groups

@@ -56,6 +56,7 @@ public class EntityRollingStockDefinition {
 	private double passengerCompartmentWidth;
 	private int weight;
 	private int maxPassengers;
+	protected double internal_scale;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
@@ -82,22 +83,26 @@ public class EntityRollingStockDefinition {
 		if (data.has("darken_model")) {
 			darken = data.get("darken_model").getAsFloat();
 		}
-		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken);
+		this.internal_scale = 1;
+		if (data.has("model_gauge_m")) { 
+			internal_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
+		}
+		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_scale);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
-		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0);
-		passengerCompartmentLength = passenger.get("length").getAsDouble();
-		passengerCompartmentWidth = passenger.get("width").getAsDouble();
+		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0).scale(internal_scale);
+		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_scale;
+		passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_scale;
 		maxPassengers = passenger.get("slots").getAsInt();
 
-		bogeyFront = data.get("trucks").getAsJsonObject().get("front").getAsFloat();
-		bogeyRear = data.get("trucks").getAsJsonObject().get("rear").getAsFloat();
+		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_scale);
+		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_scale);
 		
 		frontBounds = -model.minOfGroup(model.groups()).x;
 		rearBounds = model.maxOfGroup(model.groups()).x;
 		widthBounds = model.widthOfGroups(model.groups());
 		heightBounds = model.heightOfGroups(model.groups());
 		
-		weight = data.get("properties").getAsJsonObject().get("weight_kg").getAsInt();
+		weight = (int) (data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_scale);
 	}
 	
 	protected void addComponentIfExists(RenderComponent renderComponent, boolean itemComponent) {

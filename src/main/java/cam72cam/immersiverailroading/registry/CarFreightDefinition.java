@@ -31,8 +31,8 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 	public void parseJson(JsonObject data) throws Exception {
 		super.parseJson(data);
 		JsonObject freight = data.get("freight").getAsJsonObject();
-		this.numSlots = freight.get("slots").getAsInt();
-		this.width = freight.get("width").getAsInt();
+		this.numSlots = (int) (freight.get("slots").getAsInt() * internal_scale);
+		this.width = (int) (freight.get("width").getAsInt() * internal_scale);
 		this.validCargo = new ArrayList<String>();
 		for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
 			validCargo.add(el.getAsString());
