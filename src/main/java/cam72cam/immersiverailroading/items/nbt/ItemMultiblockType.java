@@ -16,6 +16,9 @@ public class ItemMultiblockType {
 		if (stack.getTagCompound() != null){
 			return stack.getTagCompound().getString("name");
 		}
+		if (MultiblockRegistry.keys().size() == 0) {
+			return "";
+		}
 		return MultiblockRegistry.keys().get(0);
 	}
 }

@@ -94,12 +94,6 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.NETHER_BRICK);
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
-    	
-    	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
-    	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
-    	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
-    	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
-    	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
     }
     
     public void init(FMLInitializationEvent event) {
@@ -111,7 +105,11 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(BuildableStockSyncPacket.Handler.class, BuildableStockSyncPacket.class, 8, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
     	
-    	
+    	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
+    	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
+    	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
+    	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
+    	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
     	
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     }
