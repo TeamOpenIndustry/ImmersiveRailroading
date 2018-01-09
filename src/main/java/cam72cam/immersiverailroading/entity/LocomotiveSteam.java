@@ -28,6 +28,7 @@ public class LocomotiveSteam extends Locomotive {
 	// Map<Slot, TicksToBurn>
 	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
+	private boolean gonnaExplode;
 	
 	public LocomotiveSteam(World world) {
 		this(world, null);
@@ -264,11 +265,24 @@ public class LocomotiveSteam extends Locomotive {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
+			this.gonnaExplode = true;
 			if (Config.explosionsEnabled) {
-				world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure, true);
+				for (int i = 0; i < 5; i++) {
+					world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
+				}
 			}
 			world.removeEntity(this);
 		}
+	}
+	
+	@Override
+	public void setDead() {
+		if (this.gonnaExplode) {
+			this.isDead = true;
+			return;
+		}
+		// Don't do drops if from explosion
+		super.setDead();
 	}
 
 	@Override
