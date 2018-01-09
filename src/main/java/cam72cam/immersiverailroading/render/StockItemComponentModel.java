@@ -100,6 +100,9 @@ public class StockItemComponentModel implements IBakedModel {
 		
 		GL11.glPopMatrix();
 		
+		// Model can only be rendered once.  If mods go through the itemrenderer as they are supposed to this should work just fine
+		groups = null;
+		
 		return new ArrayList<BakedQuad>();
 	}
 
