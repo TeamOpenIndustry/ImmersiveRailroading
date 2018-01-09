@@ -8,8 +8,8 @@
 		"max_psi": 205,
 		"water_capacity_l": 27000, 
 		"horsepower": 4200,
-		"tractive_effort_lbf": 44460000,
-		"max_speed_kmh": 120000,
+		"tractive_effort_lbf": 44460,
+		"max_speed_kmh": 120,
 		"valve_gear": "walschaerts",
 		"weight_kg": 140110
 	},
