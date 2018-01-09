@@ -68,6 +68,9 @@ public class StockItemModel implements IBakedModel {
 			
 			tex.restore();
 			cull.restore();
+			
+			// Model can only be rendered once.  If mods go through the itemrenderer as they are supposed to this should work just fine
+			model = null;
 		}
 		return new ArrayList<BakedQuad>();
 	}
