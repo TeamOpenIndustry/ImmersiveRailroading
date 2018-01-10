@@ -8,15 +8,21 @@ import java.util.Map;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.ParticleUtil;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
@@ -139,6 +145,27 @@ public class LocomotiveSteam extends Locomotive {
 		super.onUpdate();
 
 		if (world.isRemote) {
+			// Particles
+			
+			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.SMOKE_X, gauge);
+			if (smokes != null) {
+				for (RenderComponent smoke : smokes) {
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					EntitySmokeParticle sp = new EntitySmokeParticle(world);
+					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+					world.spawnEntity(sp);
+					//ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_LARGE, particlePos);
+				}
+			}
+			
+			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
+			if (smokes != null) {
+				for (RenderComponent steam : steams) {
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					ParticleUtil.spawnParticle(world, EnumParticleTypes.CLOUD, particlePos);
+				}
+			}
+			
 			return;
 		}
 		
