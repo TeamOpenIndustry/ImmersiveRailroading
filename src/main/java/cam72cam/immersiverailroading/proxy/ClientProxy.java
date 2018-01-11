@@ -18,6 +18,7 @@ import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -41,6 +42,7 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.render.TrackBlueprintItemModel;
+import cam72cam.immersiverailroading.render.ParticleRender;
 import cam72cam.immersiverailroading.render.PlateItemModel;
 import cam72cam.immersiverailroading.render.RailAugmentItemModel;
 import cam72cam.immersiverailroading.render.RailBaseModel;
@@ -184,12 +186,21 @@ public class ClientProxy extends CommonProxy {
 			return new StockEntityRender(manager);
 		}
 	};
+	
+	public static final IRenderFactory<EntitySmokeParticle> PARTICLE_RENDER = new IRenderFactory<EntitySmokeParticle>() {
+		@Override
+		public Render<? super EntitySmokeParticle> createRenderFor(RenderManager manager) {
+			return new ParticleRender(manager);
+		}
+	};
 
 	@SubscribeEvent
 	public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
 		for (Class<? extends EntityRollingStock> type : entityClasses) {
 			RenderingRegistry.registerEntityRenderingHandler(type, RENDER_INSTANCE);
 		}
+
+		RenderingRegistry.registerEntityRenderingHandler(EntitySmokeParticle.class, PARTICLE_RENDER);
 	}
 
 	@SubscribeEvent
