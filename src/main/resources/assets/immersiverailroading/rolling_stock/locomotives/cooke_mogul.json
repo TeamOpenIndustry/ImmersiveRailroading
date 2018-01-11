@@ -1,0 +1,32 @@
+{
+	"era": "steam",
+	"name": "DSP&P Mogul",
+	"works": "Cooke Locomotive and Machine Works",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/cooke_mogul/cooke_mogul.obj",
+	"darken_model": "-0.05",
+	"model_gauge_m": 0.83,
+	"properties": {
+		"max_psi": 150,
+		"water_capacity_l": 1000, 
+		"horsepower": 400,
+		"tractive_effort_lbf": 13770,
+		"max_speed_kmh": 48,
+		"valve_gear": "hidden",
+		"weight_kg": 28690
+	},
+	"firebox": {
+		"slots": 6,
+		"width": 3
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": -2,
+		"center_y": 1.3,
+		"length": 1.6,
+		"width": 2.4
+	},
+	"trucks": {
+		"front": 1.5, 
+		"rear": -1.3
+	}
+}
