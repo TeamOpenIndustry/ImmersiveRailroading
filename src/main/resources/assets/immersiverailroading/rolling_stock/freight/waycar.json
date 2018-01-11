@@ -1,0 +1,25 @@
+{
+	"name": "Waycar",
+	"model": "immersiverailroading:models/rolling_stock/caboose/waycar/waycar.obj",
+	"darken_model": "-0.05",
+	"model_gauge_m": 2.14,
+	"properties": {
+		"weight_kg": 8000
+	},
+	"passenger": {
+		"slots": 4,
+		"center_x": 0,
+		"center_y": 1,
+		"length": 8,
+		"width": 2
+	},
+	"freight": {
+		"slots": 3,
+		"width": 3,
+		"cargo": ["all"]
+	},
+	"trucks": {
+		"front": 1, 
+		"rear": -1
+	}
+}
