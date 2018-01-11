@@ -147,6 +147,10 @@ public class LocomotiveSteam extends Locomotive {
 		if (world.isRemote) {
 			// Particles
 			
+			if (this.ticksExisted % 2 != 0) {
+				return;
+			}
+			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.SMOKE_X, gauge);
 			if (smokes != null) {
 				for (RenderComponent smoke : smokes) {
@@ -154,7 +158,6 @@ public class LocomotiveSteam extends Locomotive {
 					EntitySmokeParticle sp = new EntitySmokeParticle(world);
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 					world.spawnEntity(sp);
-					//ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_LARGE, particlePos);
 				}
 			}
 			

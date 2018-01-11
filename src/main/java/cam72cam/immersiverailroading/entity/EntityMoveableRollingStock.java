@@ -356,7 +356,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
 			entity.setPosition(pos.x, pos.y, pos.z);
 		}
-		if (!world.isRemote && this.ticksExisted % 10 != 0 && Config.TrainsBreakBlocks && this.getCurrentSpeed().metric() > 0.5) {
+		if (!world.isRemote && this.ticksExisted % 10 != 0 && Config.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
 			bb = this.getCollisionBoundingBox();
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
