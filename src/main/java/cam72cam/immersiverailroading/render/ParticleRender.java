@@ -75,7 +75,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 		GL11.glPushMatrix();
 		{
 			float darken = 0.9f-particle.darken*0.9f;
-			float alpha = (160 - particle.ticksExisted - partialTicks)/160f * (0.7f + particle.thickness * 2);
+			float alpha = (160 - particle.ticksExisted - partialTicks)/160f * (0.2f + particle.thickness * 2);
 			
 			shader.bind();
 			shader.paramFloat("ALPHA", alpha);
@@ -83,11 +83,11 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 
 			GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 			GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+			//GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 
 			GL11.glColor4f(0.3f, 0.3f, 0.3f, 0.5f);
 
@@ -100,6 +100,9 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 			int te = 4;
 			// double rad = Math.sqrt(particle.ticksExisted/160.0);
 			for (int i = 0; i < te; i++) {
+				if (i == 2) {
+					continue;
+				}
 				Vec3d offset = VecUtil.fromYaw((particle.ticksExisted + partialTicks) / 40.0 * particle.size, i * 360.0f / te);
 				GL11.glPushMatrix();
 				{
