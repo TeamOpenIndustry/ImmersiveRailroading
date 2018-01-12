@@ -75,7 +75,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 		GL11.glPushMatrix();
 		{
 			float darken = 0.9f-particle.darken*0.9f;
-			float alpha = (160 - particle.ticksExisted - partialTicks)/160f * (0.2f + particle.thickness * 2);
+			float alpha = (particle.lifespan - particle.ticksExisted - partialTicks)/(float)particle.lifespan * (0.2f + particle.thickness * 2);
 			
 			shader.bind();
 			shader.paramFloat("ALPHA", alpha);
