@@ -13,7 +13,6 @@ import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,7 +20,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
@@ -147,25 +145,33 @@ public class LocomotiveSteam extends Locomotive {
 		if (world.isRemote) {
 			// Particles
 			
-			if (this.ticksExisted % 2 != 0) {
-				return;
-			}
-			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.SMOKE_X, gauge);
 			if (smokes != null) {
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
-					EntitySmokeParticle sp = new EntitySmokeParticle(world);
-					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					world.spawnEntity(sp);
+					if (this.ticksExisted % 1 == 0 ) {
+						float darken = 0;
+						float thickness = Math.abs(this.getThrottle())/2;
+						for (int i : this.getBurnTime().values()) {
+							darken += i > 0 ? 1 : 0;
+						}
+						darken /= this.getInventorySize() - 2;
+						EntitySmokeParticle sp = new EntitySmokeParticle(world, 160, darken, thickness, 1);
+						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+						sp.setVelocity(this.motionX, this.motionY + 0.5, this.motionZ);
+						world.spawnEntity(sp);
+					}
 				}
 			}
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
-			if (smokes != null) {
+			if (smokes != null && this.getBoilerPressure() == this.getDefinition().getMaxPSI(gauge)) {
 				for (RenderComponent steam : steams) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
-					ParticleUtil.spawnParticle(world, EnumParticleTypes.CLOUD, particlePos);
+					EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, 0.4);
+					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+					sp.setVelocity(this.motionX, this.motionY + 0.2, this.motionZ);
+					world.spawnEntity(sp);
 				}
 			}
 			
