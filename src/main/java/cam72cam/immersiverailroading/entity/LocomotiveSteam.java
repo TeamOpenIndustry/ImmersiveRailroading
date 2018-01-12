@@ -149,14 +149,22 @@ public class LocomotiveSteam extends Locomotive {
 			if (smokes != null) {
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					particlePos = particlePos.subtract(this.motionX, this.motionY, this.motionZ);
 					if (this.ticksExisted % 1 == 0 ) {
 						float darken = 0;
 						float thickness = Math.abs(this.getThrottle())/2;
 						for (int i : this.getBurnTime().values()) {
-							darken += i > 0 ? 1 : 0;
+							darken += i >= 1 ? 1 : 0;
 						}
-						darken /= this.getInventorySize() - 2;
-						EntitySmokeParticle sp = new EntitySmokeParticle(world, 160, darken, thickness, 1);
+						if (darken == 0) {
+							break;
+						}
+						darken /= this.getInventorySize() - 2.0;
+						darken *= 0.5;
+						int lifespan = (int) (2*160);
+						double size = (1 + this.getThrottle()) / 2;
+						lifespan *= size;
+						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, size);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 						sp.setVelocity(this.motionX, this.motionY + 0.5, this.motionZ);
 						world.spawnEntity(sp);
