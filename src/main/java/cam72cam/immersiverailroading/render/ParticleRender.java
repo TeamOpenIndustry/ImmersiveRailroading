@@ -4,12 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Scanner;
-
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBFragmentShader;
-import org.lwjgl.opengl.ARBShaderObjects;
-import org.lwjgl.opengl.ARBVertexShader;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -28,8 +23,7 @@ import net.minecraft.util.math.Vec3d;
 public class ParticleRender extends Render<EntitySmokeParticle> {
 
 	private int textureID;
-	private int dl;
-	private int program;
+	private GLSLShader shader;
 
 	public ParticleRender(RenderManager renderManager) {
 		super(renderManager);
@@ -41,9 +35,8 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 			input = ImmersiveRailroading.proxy.getResourceStream(imageLoc);
 			image = TextureUtil.readBufferedImage(input);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return;
+			throw new RuntimeException("Error loading particle texture");
 		}
 		int size = image.getWidth();
 
@@ -57,10 +50,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 				buffer.put((byte) ((pixel >> 16) & 0xFF));
 				buffer.put((byte) ((pixel >> 8) & 0xFF));
 				buffer.put((byte) ((pixel >> 0) & 0xFF));
-				int alpha = (pixel >> 24) & 0xFF;
-				// System.out.println(alpha);
-				// alpha = alpha / 5;
-				buffer.put((byte) alpha);
+				buffer.put((byte) ((pixel >> 24) & 0xFF));
 			}
 		}
 		buffer.flip();
@@ -68,68 +58,12 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 		textureID = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 		TextureUtil.allocateTexture(textureID, size, size);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, size, size, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-
-		/*
-		 * dl = GL11.glGenLists(1);
-		 * 
-		 * GL11.glNewList(dl, GL11.GL_COMPILE); GL11.glRotated(45, 0, 0, 1);
-		 * GL11.glBegin(GL11.GL_QUADS); GL11.glTexCoord2d(0, 0);
-		 * GL11.glVertex3d(-1, -1, 0); GL11.glTexCoord2d(0, 1);
-		 * GL11.glVertex3d(-1, 1, 0); GL11.glTexCoord2d(1, 1);
-		 * GL11.glVertex3d(1, 1, 0); GL11.glColor4f(1, 1, 1, 0);
-		 * GL11.glTexCoord2d(1, 0); GL11.glVertex3d(1, -1, 0); GL11.glEnd();
-		 * 
-		 * GL11.glEndList();
-		 */
-
-		int vertShader = ARBShaderObjects.glCreateShaderObjectARB(ARBVertexShader.GL_VERTEX_SHADER_ARB);
-		int fragShader = ARBShaderObjects.glCreateShaderObjectARB(ARBFragmentShader.GL_FRAGMENT_SHADER_ARB);
-		ARBShaderObjects.glShaderSourceARB(vertShader, readShader("smoke_vert.c"));
-		ARBShaderObjects.glCompileShaderARB(vertShader);
-        if (ARBShaderObjects.glGetObjectParameteriARB(vertShader, ARBShaderObjects.GL_OBJECT_COMPILE_STATUS_ARB) == GL11.GL_FALSE)
-        throw new RuntimeException("Error creating shader: " + getLogInfo(vertShader));
 		
-		ARBShaderObjects.glShaderSourceARB(fragShader, readShader("smoke_frag.c"));
-		ARBShaderObjects.glCompileShaderARB(fragShader);
-        if (ARBShaderObjects.glGetObjectParameteriARB(fragShader, ARBShaderObjects.GL_OBJECT_COMPILE_STATUS_ARB) == GL11.GL_FALSE)
-        throw new RuntimeException("Error creating shader: " + getLogInfo(fragShader));
-		
-		program = ARBShaderObjects.glCreateProgramObjectARB();
-		ARBShaderObjects.glAttachObjectARB(program, vertShader);
-		ARBShaderObjects.glAttachObjectARB(program, fragShader);
-		ARBShaderObjects.glLinkProgramARB(program);
-	    if (ARBShaderObjects.glGetObjectParameteriARB(program, ARBShaderObjects.GL_OBJECT_LINK_STATUS_ARB) == GL11.GL_FALSE) {
-            System.err.println(getLogInfo(program));
-        }
-	    ARBShaderObjects.glValidateProgramARB(program);
-        if (ARBShaderObjects.glGetObjectParameteriARB(program, ARBShaderObjects.GL_OBJECT_VALIDATE_STATUS_ARB) == GL11.GL_FALSE) {
-            System.err.println(getLogInfo(program));
-            return;
-        }
+		shader = new GLSLShader("smoke_vert.c", "smoke_frag.c");
 	}
-	private String readShader(String fname) {
-		InputStream input;
-		try {
-			input = ImmersiveRailroading.proxy.getResourceStream(new ResourceLocation("immersiverailroading:particles/" + fname));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "";
-		}
-		Scanner reader = new Scanner(input);
-		String text = "";
-		while(reader.hasNextLine()) {
-			text = text + reader.nextLine();
-		}
-		reader.close();
-		return text;
-	}
-	private static String getLogInfo(int obj) {
-	    return ARBShaderObjects.glGetInfoLogARB(obj, ARBShaderObjects.glGetObjectParameteriARB(obj, ARBShaderObjects.GL_OBJECT_INFO_LOG_LENGTH_ARB));
-	    }
 
 	@Override
 	public boolean shouldRender(EntitySmokeParticle entity, ICamera camera, double camX, double camY, double camZ) {
@@ -140,11 +74,12 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 	public void doRender(EntitySmokeParticle particle, double x, double y, double z, float entityYaw, float partialTicks) {
 		GL11.glPushMatrix();
 		{
-			ARBShaderObjects.glUseProgramObjectARB(program);
-			float darken = 0.9f;
-			float alpha = (160 - particle.ticksExisted)/160f * 2;
-			ARBShaderObjects.glUniform1fARB(ARBShaderObjects.glGetUniformLocationARB(program, "FOO"), alpha);
-			ARBShaderObjects.glUniform3fARB(ARBShaderObjects.glGetUniformLocationARB(program, "DARKEN"), darken, darken, darken);
+			float darken = 0.9f-particle.darken*0.9f;
+			float alpha = (160 - particle.ticksExisted - partialTicks)/160f * (0.7f + particle.thickness * 2);
+			
+			shader.bind();
+			shader.paramFloat("ALPHA", alpha);
+			shader.paramFloat("DARKEN", darken, darken, darken);
 
 			GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
@@ -165,11 +100,11 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 			int te = 4;
 			// double rad = Math.sqrt(particle.ticksExisted/160.0);
 			for (int i = 0; i < te; i++) {
-				Vec3d offset = VecUtil.fromYaw(particle.ticksExisted / 40.0, i * 360.0f / te);
+				Vec3d offset = VecUtil.fromYaw((particle.ticksExisted + partialTicks) / 40.0 * particle.size, i * 360.0f / te);
 				GL11.glPushMatrix();
 				{
 					GL11.glTranslated(offset.x, 0, offset.z);
-					double scale = (particle.ticksExisted) / 20.0;
+					double scale = (particle.ticksExisted + partialTicks) / 20.0 * particle.size * (particle.motionY*8);
 					GL11.glScaled(scale, scale, scale);
 					// GL11.glCallList(this.dl);
 					
@@ -177,7 +112,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 					GL11.glTranslated(0.5, 0, 0);
 					GL11.glRotated(-particle.rot, 0, 0, 1);
 
-					double angle = particle.ticksExisted;
+					double angle = particle.ticksExisted + partialTicks;
 					if (i == 1) {
 						GL11.glRotated(angle, 0, 0, 1);	
 					}
@@ -207,7 +142,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 			cull.restore();
 			light.restore();
 			
-			ARBShaderObjects.glUseProgramObjectARB(0);
+			shader.unbind();
 		}
 		GL11.glPopMatrix();
 	}

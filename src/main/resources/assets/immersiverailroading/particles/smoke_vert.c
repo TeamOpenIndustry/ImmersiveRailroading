@@ -1,5 +1,5 @@
 varying float DEPTH;
-uniform float FOO;
+uniform float ALPHA;
 
 void main() {
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
@@ -9,5 +9,5 @@ void main() {
     	DEPTH = 1.0;
     }
     DEPTH = (1.0-DEPTH);
-    DEPTH = FOO;
+    DEPTH = ALPHA;
 }
