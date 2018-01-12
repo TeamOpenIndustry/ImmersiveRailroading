@@ -144,12 +144,13 @@ public class LocomotiveSteam extends Locomotive {
 
 		if (world.isRemote) {
 			// Particles
+			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.SMOKE_X, gauge);
 			if (smokes != null) {
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
-					particlePos = particlePos.subtract(this.motionX, this.motionY, this.motionZ);
+					particlePos = particlePos.subtract(fakeMotion);
 					if (this.ticksExisted % 1 == 0 ) {
 						float darken = 0;
 						float thickness = Math.abs(this.getThrottle())/2;
@@ -166,7 +167,7 @@ public class LocomotiveSteam extends Locomotive {
 						lifespan *= size;
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, size);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-						sp.setVelocity(this.motionX, this.motionY + 0.5, this.motionZ);
+						sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.5, fakeMotion.z);
 						world.spawnEntity(sp);
 					}
 				}
@@ -178,7 +179,7 @@ public class LocomotiveSteam extends Locomotive {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, 0.4);
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					sp.setVelocity(this.motionX, this.motionY + 0.2, this.motionZ);
+					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2, fakeMotion.z);
 					world.spawnEntity(sp);
 				}
 			}
