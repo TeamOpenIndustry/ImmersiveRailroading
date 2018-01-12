@@ -1,13 +1,7 @@
 package cam72cam.immersiverailroading.render;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -16,51 +10,15 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class ParticleRender extends Render<EntitySmokeParticle> {
 
-	private int textureID;
 	private GLSLShader shader;
 
 	public ParticleRender(RenderManager renderManager) {
 		super(renderManager);
-		ResourceLocation imageLoc = new ResourceLocation("immersiverailroading:particles/smoke.png");
-
-		InputStream input;
-		BufferedImage image;
-		try {
-			input = ImmersiveRailroading.proxy.getResourceStream(imageLoc);
-			image = TextureUtil.readBufferedImage(input);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new RuntimeException("Error loading particle texture");
-		}
-		int size = image.getWidth();
-
-		int[] pixels = new int[size * size];
-		image.getRGB(0, 0, size, size, pixels, 0, size);
-
-		ByteBuffer buffer = BufferUtils.createByteBuffer(size * size * 4);
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
-				int pixel = pixels[y * size + x];
-				buffer.put((byte) ((pixel >> 16) & 0xFF));
-				buffer.put((byte) ((pixel >> 8) & 0xFF));
-				buffer.put((byte) ((pixel >> 0) & 0xFF));
-				buffer.put((byte) ((pixel >> 24) & 0xFF));
-			}
-		}
-		buffer.flip();
-
-		textureID = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-		TextureUtil.allocateTexture(textureID, size, size);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, size, size, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 		
 		shader = new GLSLShader("smoke_vert.c", "smoke_frag.c");
 	}
