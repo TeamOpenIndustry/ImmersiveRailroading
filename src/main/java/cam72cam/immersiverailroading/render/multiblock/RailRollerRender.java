@@ -40,7 +40,8 @@ public class RailRollerRender implements IMultiblockRender {
 	}
 	
 	public void render(TileMultiblock te, double x, double y, double z, float partialTicks) {
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, this.renderer.hasTexture());
+		this.renderer.bindTexture();
 		
 		GL11.glPushMatrix();
 		GL11.glTranslated(x, y, z);
@@ -74,6 +75,7 @@ public class RailRollerRender implements IMultiblockRender {
 		renderer.drawGroups(rest);;
 		GL11.glPopMatrix();
 		
+		this.renderer.restoreTexture();
 		tex.restore();
 	}
 }
