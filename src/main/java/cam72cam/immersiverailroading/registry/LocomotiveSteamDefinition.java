@@ -88,7 +88,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		}
 		
 		for (int i = 0; i < 20; i++) {
-			addComponentIfExists(RenderComponent.parseID(RenderComponentType.SMOKE_X, this, groups, i), false);
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.PARTICLE_CHIMNEY_X, this, groups, i), false);
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.PRESSURE_VALVE_X, this, groups, i), false);
 		}
 		

@@ -62,7 +62,7 @@ public enum RenderComponentType {
 	
 	
 	// PARTICLES
-	SMOKE_X("SMOKE_#ID#"),
+	PARTICLE_CHIMNEY_X("CHIMNEY_#ID#"),
 	PRESSURE_VALVE_X("PRESSURE_VALVE_#ID#"),
 	
 	// REST
