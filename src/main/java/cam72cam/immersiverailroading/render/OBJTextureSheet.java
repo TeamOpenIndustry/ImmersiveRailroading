@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Face;
+import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -39,6 +40,7 @@ public class OBJTextureSheet {
 		public ResourceLocation tex;
 
 		private BufferedImage image;
+		private boolean isFlatMaterial;
 
 		
 		SubTexture(ResourceLocation tex) throws IOException {
@@ -47,7 +49,25 @@ public class OBJTextureSheet {
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
 			this.tex = tex;
+			isFlatMaterial = false;
 		}
+		SubTexture(String name, int r, int g, int b, int a) {
+			image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
+			for (int x = 0; x < 8; x ++) {
+				for (int y = 0; y < 8; y ++) {					
+					image.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+				}
+			}
+			realWidth = image.getWidth();
+			realHeight = image.getHeight();
+			minU = 0;
+			maxU = 1;
+			minV = 0;
+			maxV = 1;
+			this.tex = new ResourceLocation("generated:" + name);
+			isFlatMaterial = true;
+		}
+		
 		public void extendSpace(Vec2f tex) {
 			float u = tex.x;
 			float v = -tex.y;
@@ -101,10 +121,16 @@ public class OBJTextureSheet {
 		}
 		
 		public float convertU(float relativeU) {
+			if (isFlatMaterial) {
+				relativeU = 0.5f;
+			}
 			return originX / (float)sheetWidth + (relativeU - minU) * ((float)this.realWidth / sheetWidth);
 		}
 		
 		public float convertV(float relativeV) {
+			if (isFlatMaterial) {
+				relativeV = 0.5f;
+			}
 			return originY / (float)sheetHeight + (relativeV - minV) * ((float)this.realHeight / sheetHeight);
 		}
 	}
@@ -116,20 +142,32 @@ public class OBJTextureSheet {
 			List<Face> quads = model.groups.get(groupName);
 			for (Face face : quads) {
 				String mtlName = face.mtl;
-				if (model.materials.get(mtlName).texKd == null) {
-					continue;
-				}
-				if (!mappings.containsKey(mtlName)) {
-					try {
-						mappings.put(mtlName, new SubTexture(model.materials.get(mtlName).texKd));
-					} catch (IOException e) {
-						e.printStackTrace();
+				if (model.materials.get(mtlName).texKd != null) {
+					if (!mappings.containsKey(mtlName)) {
+						try {
+							mappings.put(mtlName, new SubTexture(model.materials.get(mtlName).texKd));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
-				}
-				for (int[] point : face.points) {
-					Vec2f vt = point[1] != -1 ? model.vertexTextures.get(point[1]) : null;
-					if (vt != null) {
-						mappings.get(mtlName).extendSpace(vt);
+					for (int[] point : face.points) {
+						Vec2f vt = point[1] != -1 ? model.vertexTextures.get(point[1]) : null;
+						if (vt != null) {
+							mappings.get(mtlName).extendSpace(vt);
+						}
+					}
+				} else if (model.materials.get(mtlName).Kd != null) {
+					if (!mappings.containsKey(mtlName)) {
+						Material currentMTL = model.materials.get(mtlName);
+						int r = (int) (Math.max(0, currentMTL .Kd.get(0) - model.darken) * 255);
+						int g = (int) (Math.max(0, currentMTL.Kd.get(1) - model.darken) * 255);
+						int b = (int) (Math.max(0, currentMTL.Kd.get(2) - model.darken) * 255);
+						int a = (int) (currentMTL.Kd.get(3) * 255);
+						currentMTL.Kd.put(0, 1);
+						currentMTL.Kd.put(1, 1);
+						currentMTL.Kd.put(2, 1);
+						currentMTL.Kd.put(3, 1);
+						mappings.put(mtlName, new SubTexture(mtlName, r,g,b,a));
 					}
 				}
 			}
