@@ -146,7 +146,7 @@ public class LocomotiveSteam extends Locomotive {
 			// Particles
 			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
-			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.SMOKE_X, gauge);
+			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
 			if (smokes != null) {
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
