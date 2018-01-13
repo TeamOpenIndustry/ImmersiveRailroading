@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -33,6 +34,7 @@ public class LocomotiveSteam extends Locomotive {
 	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private boolean gonnaExplode;
+	private double driverDiameter;
 	
 	public LocomotiveSteam(World world) {
 		this(world, null);
@@ -71,6 +73,26 @@ public class LocomotiveSteam extends Locomotive {
 		setBoilerPressure(nbttagcompound.getFloat("boiler_psi"));
 		dataManager.set(BURN_TIME, (NBTTagCompound) nbttagcompound.getTag("burn_time"));
 		dataManager.set(BURN_MAX, (NBTTagCompound) nbttagcompound.getTag("burn_max"));
+		
+
+	}
+	
+	@Override
+	public void readSpawnData(ByteBuf additionalData) {
+		super.readSpawnData(additionalData);
+
+		List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
+		if (driving != null) {
+			for (RenderComponent driver : driving) {
+				driverDiameter = Math.max(driverDiameter, driver.height());
+			}
+		}
+		driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
+		if (driving != null) {
+			for (RenderComponent driver : driving) {
+				driverDiameter = Math.max(driverDiameter, driver.height());
+			}
+		}
 	}
 	
 	public float getBoilerTemperature() {
@@ -145,36 +167,14 @@ public class LocomotiveSteam extends Locomotive {
 		if (world.isRemote) {
 			// Particles
 			
-			if (this.ticksExisted % 2 != 0) {
-				//return;
-			}
-			
 			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 
-			
-			double diameter = 0;
-			List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
-			if (driving != null) {
-				for (RenderComponent driver : driving) {
-					diameter = Math.max(diameter, driver.height());
-				}
-			}
-			driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
-			if (driving != null) {
-				for (RenderComponent driver : driving) {
-					diameter = Math.max(diameter, driver.height());
-				}
-			}
-			
 			double phase = 0;
 			
-			if (diameter != 0) {
-				double circumference = (diameter * Math.PI);
+			if (driverDiameter != 0) {
+				double circumference = (driverDiameter * Math.PI);
 				phase = (this.distanceTraveled % circumference)/circumference;
 				phase = Math.abs(Math.cos(phase*Math.PI*4));
-			}
-			if (phase > 0.98) {
-				//world.playSound(this.posX, this.posY, this.posZ, SoundEvents.BLOCK_SAND_PLACE, SoundCategory.BLOCKS, (float) phase*2, 0.2f, false);
 			}
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
@@ -194,18 +194,20 @@ public class LocomotiveSteam extends Locomotive {
 						}
 						darken /= this.getInventorySize() - 2.0;
 						darken *= 0.5;
-						double size = (1 + this.getThrottle()) / 2;
-						size *= 0.7;
-						if (phase != 0 && this.getThrottle() > 0.01) {
-							size += phase * phase * phase;
-						}
 						
-						int lifespan = (int) (200 * (1 + this.getThrottle()) / 2);
+						int lifespan = (int) (200 * (1 + Math.abs(this.getThrottle())) / 2);
 						//lifespan *= size;
 						
-						float verticalSpeed = (0.5f + this.getThrottle()) * ((float)smoke.width() / 0.6f);
+						float verticalSpeed = (0.5f + Math.abs(this.getThrottle())) * ((float)smoke.width() / 0.6f);
 						
-						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, smoke.width()); //size
+						double size = smoke.width();
+						if (phase != 0 && Math.abs(this.getThrottle()) > 0.01 && Math.abs(this.getCurrentSpeed().metric()) < 30) {
+							double phaseSpike = Math.pow(phase, 8);
+							size *= 1 + phaseSpike*1.5;
+							verticalSpeed *= 1 + phaseSpike/2;
+						}
+						
+						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, size);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 						sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
 						world.spawnEntity(sp);
