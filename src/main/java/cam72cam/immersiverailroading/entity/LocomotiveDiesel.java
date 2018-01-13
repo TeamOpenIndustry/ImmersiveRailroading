@@ -8,9 +8,13 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
@@ -63,6 +67,27 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		
+		if (world.isRemote) {
+			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
+			
+			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
+			float throttle = Math.abs(this.getThrottle());
+			if (exhausts != null && throttle > 0 && this.getLiquidAmount() > 0) {
+				for (RenderComponent exhaust : exhausts) {
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					
+					EntitySmokeParticle sp = new EntitySmokeParticle(world, (int) (40 * (1+throttle)), throttle, throttle, exhaust.width());
+					
+					particlePos = particlePos.subtract(fakeMotion);
+					
+					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.4, fakeMotion.z);
+					world.spawnEntity(sp);
+				}
+			}
+			return;
+		}
 		
 		if (this.getLiquidAmount() > 0 && getThrottle() != 0) {
 			int burnTime = DieselHandler.getBurnTime(this.getLiquid());
