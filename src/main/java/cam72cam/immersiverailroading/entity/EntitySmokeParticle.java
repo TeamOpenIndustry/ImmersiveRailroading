@@ -10,16 +10,18 @@ public class EntitySmokeParticle extends Entity {
 	public final int lifespan;
 	public final float darken;
 	public final float thickness;
-	public final double size;
+	public final double diameter;
+	public double radius;
+	public float alpha;
 
 
-	public EntitySmokeParticle(World worldIn, int lifespan, float darken, float thickness, double size) {
+	public EntitySmokeParticle(World worldIn, int lifespan, float darken, float thickness, double diameter) {
 		super(worldIn);
 		this.rot = Math.random() * 360;
 		this.lifespan = lifespan;
 		this.darken = darken;
 		this.thickness = thickness;
-		this.size = size;
+		this.diameter = diameter;
 	}
 	
 	@Override
@@ -44,23 +46,26 @@ public class EntitySmokeParticle extends Entity {
 
 	@Override
 	public void onUpdate() {
-		//super.onUpdate();
-		
 		if (!world.isRemote) {
 			return;
 		}
 		
-		//this.setPosition(this.posX, this.posY+0.2*(this.ticksExisted/20.0), this.posZ);
-		//this.posY += this.posY+0.2*(this.ticksExisted/20.0);
-		//this.setPosition(this.posX, this.posY+0.2, this.posZ);
+		this.prevPosX = this.posX;
+		this.prevPosY = this.posY;
+		this.prevPosZ = this.posZ;
 		
-		double calcY = 0.2*(this.ticksExisted/20.0);
+		double life = this.ticksExisted / (float)this.lifespan;
 		
-		//this.motionY = 0.2 * (this.ticksExisted/20.0);
+		double expansionRate = 16;
+		
+		this.radius = this.diameter * (Math.sqrt(life)*expansionRate+1) * 0.5;
+		
+		this.alpha = (thickness+0.2f) * (1-(float)Math.sqrt(life));
+
+		// Slow down Y drift
+		this.motionY *= 0.9f;
+			
 		this.motionX *= 0.97f;
-		if (this.motionY > calcY) {
-			this.motionY *= 0.97f;
-		}
 		this.motionZ *= 0.97f;
 		
 		this.posX += this.motionX;

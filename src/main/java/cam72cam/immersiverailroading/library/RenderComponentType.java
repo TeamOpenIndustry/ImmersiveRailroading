@@ -62,7 +62,7 @@ public enum RenderComponentType {
 	
 	
 	// PARTICLES
-	PARTICLE_CHIMNEY_X("CHIMNEY_#ID#"),
+	PARTICLE_CHIMNEY_X("CHIM[I]*NEY_#ID#"),
 	PRESSURE_VALVE_X("PRESSURE_VALVE_#ID#"),
 	
 	// REST
