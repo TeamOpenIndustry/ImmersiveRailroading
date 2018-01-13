@@ -144,10 +144,42 @@ public class LocomotiveSteam extends Locomotive {
 
 		if (world.isRemote) {
 			// Particles
+			
+			if (this.ticksExisted % 2 != 0) {
+				//return;
+			}
+			
 			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
+
+			
+			double diameter = 0;
+			List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
+			if (driving != null) {
+				for (RenderComponent driver : driving) {
+					diameter = Math.max(diameter, driver.height());
+				}
+			}
+			driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
+			if (driving != null) {
+				for (RenderComponent driver : driving) {
+					diameter = Math.max(diameter, driver.height());
+				}
+			}
+			
+			double phase = 0;
+			
+			if (diameter != 0) {
+				double circumference = (diameter * Math.PI);
+				phase = (this.distanceTraveled % circumference)/circumference;
+				phase = Math.abs(Math.cos(phase*Math.PI*4));
+			}
+			if (phase > 0.98) {
+				//world.playSound(this.posX, this.posY, this.posZ, SoundEvents.BLOCK_SAND_PLACE, SoundCategory.BLOCKS, (float) phase*2, 0.2f, false);
+			}
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
 			if (smokes != null) {
+				//System.out.println(phase);
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					particlePos = particlePos.subtract(fakeMotion);
@@ -162,22 +194,43 @@ public class LocomotiveSteam extends Locomotive {
 						}
 						darken /= this.getInventorySize() - 2.0;
 						darken *= 0.5;
-						int lifespan = (int) (2*160);
 						double size = (1 + this.getThrottle()) / 2;
-						lifespan *= size;
-						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, size);
+						size *= 0.7;
+						if (phase != 0 && this.getThrottle() > 0.01) {
+							size += phase * phase * phase;
+						}
+						
+						int lifespan = (int) (200 * (1 + this.getThrottle()) / 2);
+						//lifespan *= size;
+						
+						float verticalSpeed = (0.5f + this.getThrottle()) * ((float)smoke.width() / 0.6f);
+						
+						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, smoke.width()); //size
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-						sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.5, fakeMotion.z);
+						sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
 						world.spawnEntity(sp);
 					}
 				}
 			}
+			/*
+			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
+			if (pistons != null && this.getCurrentSpeed().metric() > 0.1 && this.getCurrentSpeed().metric() < 10) {
+				for (RenderComponent piston : pistons) {
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.2f, 3);
+					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+					double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.1;
+					Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
+					sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
+					world.spawnEntity(sp);
+				}
+			}*/
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
-			if (smokes != null && this.getBoilerPressure() == this.getDefinition().getMaxPSI(gauge)) {
+			if (steams != null && this.getBoilerPressure() == this.getDefinition().getMaxPSI(gauge)) {
 				for (RenderComponent steam : steams) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
-					EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, 0.4);
+					EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, steam.width());
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2, fakeMotion.z);
 					world.spawnEntity(sp);
