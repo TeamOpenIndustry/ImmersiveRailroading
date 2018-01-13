@@ -1,0 +1,31 @@
+{
+	"era": "steam",
+	"name": "J1A Texas Class",
+	"works": "PRR Juniata Shops",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/j1a_texas/j1a_texas.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"max_psi": 270,
+		"water_capacity_l": 79000, 
+		"horsepower": 8600,
+		"tractive_effort_lbf": 95484,
+		"max_speed_kmh": 120,
+		"valve_gear": "walschaerts",
+		"weight_kg": 263072
+	},
+	"firebox": {
+		"slots": 18,
+		"width": 6
+	},
+	"passenger": {
+		"slots": 4,
+		"center_x": -9,
+		"center_y": 2.3,
+		"length": 1,
+		"width": 2.8
+	},
+	"trucks": {
+		"front": 3, 
+		"rear": -3.5
+	}
+}

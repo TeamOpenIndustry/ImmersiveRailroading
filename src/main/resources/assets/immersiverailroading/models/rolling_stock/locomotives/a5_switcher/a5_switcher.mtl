@@ -1,5 +1,5 @@
 # Blender MTL File: 'A5.blend'
-# Material Count: 20
+# Material Count: 19
 
 newmtl Material.001
 Ns 96.078431
@@ -11,6 +11,14 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd fire.png
+
+newmtl None
+Ns 0
+Ka 0.000000 0.000000 0.000000
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2
 
 newmtl black1
 Ns 96.078431
@@ -123,28 +131,6 @@ illum 2
 map_Kd psigauge01.png
 
 newmtl redwethered
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd redwethered.png
-
-newmtl redwethered.002
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd redwethered.png
-
-newmtl redwethered.003
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
