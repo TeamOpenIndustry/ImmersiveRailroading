@@ -207,6 +207,8 @@ public class LocomotiveSteam extends Locomotive {
 							verticalSpeed *= 1 + phaseSpike/2;
 						}
 						
+						particlePos = particlePos.subtract(fakeMotion);
+						
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, size);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 						sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
@@ -232,6 +234,7 @@ public class LocomotiveSteam extends Locomotive {
 			if (steams != null && this.getBoilerPressure() == this.getDefinition().getMaxPSI(gauge)) {
 				for (RenderComponent steam : steams) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					particlePos = particlePos.subtract(fakeMotion);
 					EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, steam.width());
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2, fakeMotion.z);
