@@ -48,11 +48,13 @@ public class RailCastItemRender implements IBakedModel {
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		GL11.glPushMatrix();
 		{
-			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
+			model.bindTexture();
 			GL11.glRotated(90, 1, 0, 0);
 			GL11.glTranslated(0, -1, 1);
 			GL11.glTranslated(-0.5, 0.6, 0.6);
 			model.drawGroups(groups);
+			model.restoreTexture();
 			tex.restore();
 		}
 		GL11.glPopMatrix();
