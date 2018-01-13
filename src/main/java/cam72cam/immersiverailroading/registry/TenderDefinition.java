@@ -21,8 +21,8 @@ public class TenderDefinition extends CarTankDefinition {
 		super.parseJson(data);
 		
 		JsonObject tender = data.get("tender").getAsJsonObject();
-		this.numSlots = tender.get("slots").getAsInt();
-		this.width = tender.get("width").getAsInt();
+		this.numSlots = (int)Math.ceil(tender.get("slots").getAsInt() * internal_scale);
+		this.width = (int)Math.ceil(tender.get("width").getAsInt() * internal_scale);
 	}
 	
 	@Override

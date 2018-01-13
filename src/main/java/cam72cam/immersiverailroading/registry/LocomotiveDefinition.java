@@ -37,8 +37,8 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 		
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		
-		power = (int) (properties.get("horsepower").getAsInt() * internal_scale);
-		traction = (int) (properties.get("tractive_effort_lbf").getAsInt() * internal_scale);
+		power = (int)Math.ceil(properties.get("horsepower").getAsInt() * internal_scale);
+		traction = (int)Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_scale);
 		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_scale);
 	}
 	
@@ -64,14 +64,14 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 	}
 	
 	public int getHorsePower(Gauge gauge) {
-		return (int) (gauge.scale() * this.power);
+		return (int)Math.ceil(gauge.scale() * this.power);
 	}
 	
 	/**
 	 * @return tractive effort in newtons
 	 */
 	public int getStartingTractionNewtons(Gauge gauge) {
-		return (int) (gauge.scale() * this.traction * 4.44822);
+		return (int)Math.ceil(gauge.scale() * this.traction * 4.44822);
 	}
 
 	public Speed getMaxSpeed(Gauge gauge) {

@@ -102,7 +102,7 @@ public class EntityRollingStockDefinition {
 		widthBounds = model.widthOfGroups(model.groups());
 		heightBounds = model.heightOfGroups(model.groups());
 		
-		weight = (int) (data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_scale);
+		weight = (int)Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_scale);
 	}
 	
 	protected void addComponentIfExists(RenderComponent renderComponent, boolean itemComponent) {
@@ -304,7 +304,7 @@ public class EntityRollingStockDefinition {
 	 * @return Stock Weight in Kg
 	 */
 	public int getWeight(Gauge gauge) {
-		return (int) (gauge.scale() * this.weight);
+		return (int)Math.ceil(gauge.scale() * this.weight);
 	}
 
 	public double getHeight(Gauge gauge) {
