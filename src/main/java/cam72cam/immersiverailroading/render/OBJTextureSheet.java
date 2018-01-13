@@ -148,6 +148,7 @@ public class OBJTextureSheet {
 							mappings.put(mtlName, new SubTexture(model.materials.get(mtlName).texKd));
 						} catch (IOException e) {
 							e.printStackTrace();
+							continue;
 						}
 					}
 					for (int[] point : face.points) {
