@@ -160,6 +160,16 @@ public class LocomotiveSteam extends Locomotive {
 		setBurnTime(burnTime);
 	}
 	
+	private double getPhase(int spikes, float offsetDegrees) {
+		if (driverDiameter == 0) {
+			return 0;
+		}
+		double circumference = (driverDiameter * Math.PI);
+		double phase = (this.distanceTraveled % circumference)/circumference;
+		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
+		return phase;
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -168,17 +178,10 @@ public class LocomotiveSteam extends Locomotive {
 			// Particles
 			
 			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
-
-			double phase = 0;
-			
-			if (driverDiameter != 0) {
-				double circumference = (driverDiameter * Math.PI);
-				phase = (this.distanceTraveled % circumference)/circumference;
-				phase = Math.abs(Math.cos(phase*Math.PI*4));
-			}
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
 			if (smokes != null) {
+				double phase = getPhase(4, 0);
 				//System.out.println(phase);
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
@@ -216,19 +219,52 @@ public class LocomotiveSteam extends Locomotive {
 					}
 				}
 			}
-			/*
+			
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
-			if (pistons != null && this.getCurrentSpeed().metric() > 0.1 && this.getCurrentSpeed().metric() < 10) {
+			double csm = Math.abs(this.getCurrentSpeed().metric());
+			if (pistons != null && csm > 0.1 && csm  < 20 && this.getBoilerPressure() > 0) {
 				for (RenderComponent piston : pistons) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
-					EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.2f, 3);
+					float phaseOffset = 0;
+					switch (piston.side) {
+					case "LEFT":
+						phaseOffset = 45+90;
+						break;
+					case "RIGHT":
+						phaseOffset = -45+90;
+						break;
+					case "LEFT_FRONT":
+						phaseOffset = 45+90;
+						break;
+					case "RIGHT_FRONT":
+						phaseOffset = -45+90;
+						break;
+					case "LEFT_REAR":
+						phaseOffset = 90;
+						break;
+					case "RIGHT_REAR":
+						phaseOffset = 0;
+						break;
+					default:
+						continue;
+					}
+					
+					double phase = this.getPhase(2, phaseOffset);
+					double phaseSpike = Math.pow(phase, 4);
+					
+					if (phaseSpike < 0.6) {
+						continue;
+					}
+					
+					
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.max(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.1;
+					double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3;
 					Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
 					sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
 					world.spawnEntity(sp);
 				}
-			}*/
+			}
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
 			if (steams != null && this.getBoilerPressure() == this.getDefinition().getMaxPSI(gauge)) {
