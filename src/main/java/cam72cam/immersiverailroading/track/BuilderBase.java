@@ -198,7 +198,7 @@ public abstract class BuilderBase {
 			return ;
 		}
 		for(TrackBase track : tracks) {
-			track.placeTrack();
+			track.placeTrack().markDirty();;
 		}
 	}
 	

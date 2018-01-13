@@ -71,7 +71,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 
 	public void setHeight(float height) {
 		this.height = height;
-		this.markDirty();
 	}
 	public float getHeight() {
 		return this.height;
@@ -122,7 +121,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	}
 	public void setParent(BlockPos pos) {
 		this.parent = pos.subtract(this.pos);
-		this.markDirty();
 	}
 	
 	public boolean isFlexible() {
@@ -281,7 +279,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	}
 	public void setReplaced(NBTTagCompound replaced) {
 		this.replaced = replaced;
-		this.markDirty();
 	}
 	public NBTTagCompound getReplaced() {
 		return replaced;

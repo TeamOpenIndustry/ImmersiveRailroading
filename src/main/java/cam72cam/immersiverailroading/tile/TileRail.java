@@ -71,7 +71,6 @@ public class TileRail extends TileRailBase {
 	}
 	public void setFacing(EnumFacing value) {
 		this.facing = value;
-		this.markDirty();
 	}
 	
 	public TrackItems getType() {
@@ -79,19 +78,16 @@ public class TileRail extends TileRailBase {
 	}
 	public void setType(TrackItems value) {
 		this.type = value;
-		this.markDirty();
 	}
 	public ItemStack getRailBed() {
 		return this.railBed;
 	}
 	public void setRailBed(ItemStack railBed) {
 		this.railBed = railBed;
-		this.markDirty();
 	}
 	
 	public void setGauge(Gauge gauge) {
 		this.gauge = gauge;
-		this.markDirty();
 	}
 	public Gauge getGauge() {
 		return this.gauge;
@@ -122,7 +118,6 @@ public class TileRail extends TileRailBase {
 		} else {
 			this.center = center;
 		}
-		this.markDirty();
 	}
 
 	public TrackDirection getDirection() {
@@ -130,7 +125,6 @@ public class TileRail extends TileRailBase {
 	}
 	public void setDirection(TrackDirection dir) {
 		this.direction = dir;
-		this.markDirty();
 	}
 	
 	
@@ -139,7 +133,6 @@ public class TileRail extends TileRailBase {
 	}
 	public void setPlacementPosition(Vec3d placementPosition) {
 		this.placementPosition = placementPosition.subtract(pos.getX(), pos.getY(), pos.getZ());
-		this.markDirty();
 	}
 	
 	
@@ -154,7 +147,6 @@ public class TileRail extends TileRailBase {
 	}
 	public void setLength(int length) {
 		this.length = length;
-		this.markDirty();
 	}
 
 	public int getRotationQuarter() {
@@ -162,7 +154,6 @@ public class TileRail extends TileRailBase {
 	}
 	public void setRotationQuarter(int val) {
 		this.rotationQuarter = val;
-		this.markDirty();
 	}
 
 	public int getTurnQuarters() {
@@ -170,7 +161,6 @@ public class TileRail extends TileRailBase {
 	}
 	public void setTurnQuarters(int quarters) {
 		this.turnQuarters = quarters;
-		this.markDirty();
 	}
 	
 
@@ -275,7 +265,6 @@ public class TileRail extends TileRailBase {
 
 	public void setDrops(List<ItemStack> drops) {
 		this.drops = drops;
-		this.markDirty();
 	}
 	public void spawnDrops() {
 		if (!world.isRemote) {
