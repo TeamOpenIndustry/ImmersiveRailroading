@@ -36,7 +36,7 @@ public class FluidQuantity {
 	}
 
 	public FluidQuantity scale(double scale) {
-		return new FluidQuantity((int)(mb * scale));
+		return new FluidQuantity((int)Math.ceil(mb * scale));
 	}
 
 	public FluidQuantity min(FluidQuantity min) {
@@ -44,5 +44,9 @@ public class FluidQuantity {
 			return min;
 		}
 		return this;
+	}
+
+	public FluidQuantity roundBuckets() {
+		return FromBuckets((int)Math.ceil(mb/(double)Fluid.BUCKET_VOLUME));
 	}
 }

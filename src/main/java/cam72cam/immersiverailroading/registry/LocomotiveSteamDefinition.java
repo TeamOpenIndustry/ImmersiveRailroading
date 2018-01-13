@@ -36,12 +36,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public void parseJson(JsonObject data) throws Exception {
 		super.parseJson(data);
 		JsonObject properties = data.get("properties").getAsJsonObject();
-		tankCapacity = FluidQuantity.FromLiters((int) (properties.get("water_capacity_l").getAsInt() * internal_scale));
-		maxPSI = (int) (properties.get("max_psi").getAsInt() * internal_scale);
+		tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_scale));
+		maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_scale);
 		valveGear = ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase());
 		JsonObject firebox = data.get("firebox").getAsJsonObject();
-		this.numSlots = (int) (firebox.get("slots").getAsInt() * internal_scale);
-		this.width = (int) (firebox.get("width").getAsInt() * internal_scale);
+		this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_scale);
+		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_scale);
 	}
 
 	@Override
@@ -59,7 +59,9 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		Set<String> groups = super.parseComponents();
 		
 		switch (this.valveGear) {
+		case STEPHENSON:
 		case WALSCHAERTS:
+		case HIDDEN:
 			for (int i = 0; i < 10; i++) {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
 			}
@@ -75,10 +77,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			break;
 		case SHAY:
 			break;
-		case HIDDEN:
-			for (int i = 0; i < 10; i++) {
-				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
-			}
+		default:
 			break;
 		}
 		
@@ -102,6 +101,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		List<String> sides = new ArrayList<String>();
 		
 		switch (this.valveGear) {
+		case STEPHENSON:
 		case WALSCHAERTS:
 			sides.add("RIGHT");
 			sides.add("LEFT");
@@ -148,11 +148,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	}
 
 	public FluidQuantity getTankCapacity(Gauge gauge) {
-		return this.tankCapacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1));
+		return this.tankCapacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1)).roundBuckets();
 	}
 	
 	public int getMaxPSI(Gauge gauge) {
-		return (int) (this.maxPSI * gauge.scale());
+		return (int) Math.ceil(this.maxPSI * gauge.scale());
 	}
 	public ValveGearType getValveGear() {
 		return valveGear;

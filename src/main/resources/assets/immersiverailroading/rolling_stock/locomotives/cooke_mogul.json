@@ -4,14 +4,14 @@
 	"works": "Cooke Locomotive and Machine Works",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/cooke_mogul/cooke_mogul.obj",
 	"darken_model": "-0.05",
-	"model_gauge_m": 0.83,
+	"model_gauge_m": 0.88,
 	"properties": {
 		"max_psi": 150,
-		"water_capacity_l": 1000, 
+		"water_capacity_l": 10000, 
 		"horsepower": 400,
 		"tractive_effort_lbf": 13770,
 		"max_speed_kmh": 48,
-		"valve_gear": "hidden",
+		"valve_gear": "stephenson",
 		"weight_kg": 28690
 	},
 	"firebox": {
@@ -22,7 +22,7 @@
 		"slots": 2,
 		"center_x": -2,
 		"center_y": 1.3,
-		"length": 1.6,
+		"length": 0.8,
 		"width": 2.4
 	},
 	"trucks": {
