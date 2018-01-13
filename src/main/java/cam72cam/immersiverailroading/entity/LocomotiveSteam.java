@@ -256,7 +256,7 @@ public class LocomotiveSteam extends Locomotive {
 					}
 					
 					
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.max(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 					double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3;
