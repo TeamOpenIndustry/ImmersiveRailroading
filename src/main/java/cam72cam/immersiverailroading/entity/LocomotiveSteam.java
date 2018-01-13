@@ -177,6 +177,10 @@ public class LocomotiveSteam extends Locomotive {
 		if (world.isRemote) {
 			// Particles
 			
+			if (!Config.particlesEnabled) {
+				return;
+			}
+			
 			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);

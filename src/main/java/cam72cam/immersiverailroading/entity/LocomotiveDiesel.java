@@ -69,6 +69,10 @@ public class LocomotiveDiesel extends Locomotive {
 		super.onUpdate();
 		
 		if (world.isRemote) {
+			if (!Config.particlesEnabled) {
+				return;
+			}
+			
 			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
