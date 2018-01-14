@@ -11,8 +11,10 @@ import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.registry.CarPassengerDefinition;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.client.util.ITooltipFlag;
@@ -47,15 +49,26 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	@Override
 	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if (this.isInCreativeTab(tab))
-        {
-        	for (String defID : DefinitionManager.getDefinitionNames()) {
-        		ItemStack stack = new ItemStack(this);
-        		ItemDefinition.setID(stack, defID);
-				overrideStackDisplayName(stack);
-                items.add(stack);
-        	}
-        }
+    	for (String defID : DefinitionManager.getDefinitionNames()) {
+    		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+    		if (def instanceof CarPassengerDefinition) {
+    			if (tab != ItemTabs.PASSENGER_TAB) {
+    				continue;
+    			}
+    		} else if (def instanceof LocomotiveDefinition) {
+    			if (tab != ItemTabs.LOCOMOTIVE_TAB) {
+    				continue;
+    			}
+    		} else {
+    			if (tab != ItemTabs.STOCK_TAB) {
+    				continue;
+    			}
+    		}
+    		ItemStack stack = new ItemStack(this);
+    		ItemDefinition.setID(stack, defID);
+			overrideStackDisplayName(stack);
+            items.add(stack);
+    	}
     }
 	
 	@SideOnly(Side.CLIENT)
