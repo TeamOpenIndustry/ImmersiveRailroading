@@ -70,8 +70,6 @@ public class IconTextureSheet {
 	
 			GlStateManager.translate(texSize, -texSize, 0);
 			
-			GL11.glEnable(GL11.GL_DEPTH);
-			
 			GL11.glClearColor(1, 1, 1, 1);
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			
@@ -104,20 +102,6 @@ public class IconTextureSheet {
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, uPx, vPx, texSize, texSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 			
-			/*
-			buffer.position(0);
-			System.out.println("FOO");
-			System.out.println(buffer.get(0 + 0));
-			System.out.println(buffer.get(0 + 1));
-			System.out.println(buffer.get(0 + 2));
-			System.out.println(buffer.get(0 + 3));
-			
-			System.out.println(GL11.glGetInteger(GL11.GL_RED_BITS));
-			System.out.println(GL11.glGetInteger(GL11.GL_GREEN_BITS));
-			System.out.println(GL11.glGetInteger(GL11.GL_BLUE_BITS));
-			System.out.println(GL11.glGetInteger(GL11.GL_ALPHA_BITS));
-			*/
-			
 			if (debug) {
 				buffer.position(0);
 				debugIcon(buffer);
@@ -126,7 +110,7 @@ public class IconTextureSheet {
 		GL11.glPopMatrix();
 		
 		uPx += texSize;
-		if (uPx > maxSheetSize + texSize) {
+		if (uPx >= maxSheetSize + texSize) {
 			uPx = 0;
 			vPx += texSize;
 		}
