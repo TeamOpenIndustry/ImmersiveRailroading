@@ -51,6 +51,7 @@ import cam72cam.immersiverailroading.render.RailItemRender;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.StockItemModel;
+import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.rail.TileRailPreviewRender;
@@ -64,6 +65,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.IResource;
@@ -72,6 +75,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -349,19 +353,35 @@ public class ClientProxy extends CommonProxy {
 		 * To fix this we render the entity the player is riding by hand at the end of the render loop
 		 * This is a bad hack but it works
 		 * 
-		 * BUG: Lighting is not setup correctly
-		 * BUG: Entity is rendered twice (check render pass and is riding???)
 		 */
-		if (Minecraft.getMinecraft().player.isRiding()) {
-			Entity toRender = Minecraft.getMinecraft().player.getLowestRidingEntity();
-			if (toRender instanceof EntityRollingStock) {
-		        GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
-	            RenderHelper.enableStandardItemLighting();
-				Minecraft.getMinecraft().getRenderManager().renderEntityStatic(toRender, event.getPartialTicks(), true);
-	            RenderHelper.disableStandardItemLighting();
-				color.restore();
-			}
-		}
+		
+		Minecraft.getMinecraft().mcProfiler.startSection("ir_entity");
+		
+		List<EntityRollingStock> entities = Minecraft.getMinecraft().player.getEntityWorld().getEntities(EntityRollingStock.class, EntitySelectors.IS_ALIVE);
+		
+
+        GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
+        RenderHelper.enableStandardItemLighting();
+        Minecraft.getMinecraft().entityRenderer.enableLightmap();
+        float partialTicks = event.getPartialTicks();
+        ICamera camera = new Frustum();
+        Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
+        double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * (double)partialTicks;
+        double d1 = playerrRender.lastTickPosY + (playerrRender.posY - playerrRender.lastTickPosY) * (double)partialTicks;
+        double d2 = playerrRender.lastTickPosZ + (playerrRender.posZ - playerrRender.lastTickPosZ) * (double)partialTicks;
+        camera.setPosition(d0, d1, d2);
+        for (EntityRollingStock entity : entities) {
+        	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox()) ) {
+        		Minecraft.getMinecraft().mcProfiler.startSection("render");
+        		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity, partialTicks, true);
+        		Minecraft.getMinecraft().mcProfiler.endSection();;
+        	}
+        }
+        Minecraft.getMinecraft().entityRenderer.disableLightmap();;
+        RenderHelper.disableStandardItemLighting();
+        color.restore();
+        
+        Minecraft.getMinecraft().mcProfiler.endSection();;
 	}
 	
 	@SubscribeEvent
@@ -419,6 +439,9 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
+		if (tickCount % 40 == 39 ) {
+			StockRenderCache.doImageCache();
+		}
 		tickCount++;
 		
 		if (offsetCount != 0 && tickCount > 40) {

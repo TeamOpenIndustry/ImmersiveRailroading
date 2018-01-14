@@ -140,7 +140,9 @@ immersiverailroading:crafting_type.plate_large=Plate Roller
 immersiverailroading:crafting_type.plate_boiler=Plate Roller, Boiler Roller
 
 itemGroup.immersiverailroading=Immersive Railroading
+itemGroup.immersiverailroading.locomotive=Immersive Railroading Locomotives
 itemGroup.immersiverailroading.stock=Immersive Railroading Stock
+itemGroup.immersiverailroading.passenger=Immersive Railroading Passenger
 itemGroup.immersiverailroading.components=Immersive Railroading Components
 
 death.attack.immersiverailroading:casting=%s discovered that molten metal does not make a good swimming pool

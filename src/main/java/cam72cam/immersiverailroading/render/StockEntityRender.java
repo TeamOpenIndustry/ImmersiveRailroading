@@ -18,11 +18,12 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 
 	@Override
 	public boolean shouldRender(EntityRollingStock livingEntity, ICamera camera, double camX, double camY, double camZ) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public void doRender(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
+		
 		String def = stock.getDefinitionID();
 		
 		StockModel model = StockRenderCache.getRender(def);

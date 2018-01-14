@@ -92,6 +92,10 @@ public class OBJRender {
 		boolean has_vn = true;
 
 		for (String group : groupNames) {
+			if (group.contains("EXHAUST_") || group.contains("CHIMNEY_") || group.contains("PRESSURE_VALVE_") || group.contains("CHIMINEY_")) {
+				//Skip particle emitters
+				continue;
+			}
 			quads.addAll(model.groups.get(group));
 		}
 
