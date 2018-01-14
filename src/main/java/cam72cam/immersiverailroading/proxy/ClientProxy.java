@@ -51,6 +51,7 @@ import cam72cam.immersiverailroading.render.RailItemRender;
 import cam72cam.immersiverailroading.render.StockEntityRender;
 import cam72cam.immersiverailroading.render.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.StockItemModel;
+import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.rail.TileRailPreviewRender;
@@ -419,6 +420,9 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
+		if (tickCount % 40 == 39 ) {
+			StockRenderCache.doImageCache();
+		}
 		tickCount++;
 		
 		if (offsetCount != 0 && tickCount > 40) {
