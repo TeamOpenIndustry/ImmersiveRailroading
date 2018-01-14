@@ -8,6 +8,7 @@ import javax.vecmath.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -35,7 +36,7 @@ public class StockItemModel implements IBakedModel {
 	
 	public StockItemModel(ItemStack stack) {
 		scale = ItemGauge.get(stack).scale();
-		this.defID = ItemDefinition.getID(stack);
+		defID = ItemDefinition.getID(stack);
 		model = StockRenderCache.getRender(defID);
 		if (model == null) {
 			stack.setCount(0);
@@ -56,7 +57,7 @@ public class StockItemModel implements IBakedModel {
 		 * before actually setting up the correct GL context.
 		 */
 		
-		if (this.defID != null) {
+		if (this.defID != null && Config.enableIconCache) {
 			boolean hasIcon = StockRenderCache.renderIcon(defID);
 			if (!hasIcon) {
 				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
@@ -73,8 +74,24 @@ public class StockItemModel implements IBakedModel {
 				tex.restore();
 				cull.restore();
 			}
+		} else if (model != null) {
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
+			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+			
+			GL11.glPushMatrix();
+			double scale = 0.2 * Math.sqrt(this.scale);
+			GL11.glScaled(scale, scale, scale);
+			model.bindTexture();
+			model.draw();
+			model.restoreTexture();
+			GL11.glPopMatrix();
+			
+			tex.restore();
+			cull.restore();
+			
+			// Model can only be rendered once.  If mods go through the itemrenderer as they are supposed to this should work just fine
+			model = null;
 		}
-		
 		return new ArrayList<BakedQuad>();
 	}
 
