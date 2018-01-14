@@ -8,6 +8,7 @@ import javax.vecmath.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -28,13 +29,14 @@ import util.Matrix4;
 public class StockItemModel implements IBakedModel {
 	private OBJRender model;
 	private double scale;
+	private String defID;
 
 	public StockItemModel() {
 	}
 	
 	public StockItemModel(ItemStack stack) {
 		scale = ItemGauge.get(stack).scale();
-		String defID = ItemDefinition.getID(stack);
+		defID = ItemDefinition.getID(stack);
 		model = StockRenderCache.getRender(defID);
 		if (model == null) {
 			stack.setCount(0);
@@ -54,7 +56,25 @@ public class StockItemModel implements IBakedModel {
 		 * This is probably really fragile if someone calls getQuads
 		 * before actually setting up the correct GL context.
 		 */
-		if (model != null) {
+		
+		if (this.defID != null && Config.enableIconCache) {
+			boolean hasIcon = StockRenderCache.renderIcon(defID);
+			if (!hasIcon) {
+				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
+				GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+				
+				GL11.glPushMatrix();
+				double scale = 0.2 * Math.sqrt(this.scale);
+				GL11.glScaled(scale, scale, scale);
+				model.bindTexture();
+				model.draw();
+				model.restoreTexture();
+				GL11.glPopMatrix();
+				
+				tex.restore();
+				cull.restore();
+			}
+		} else if (model != null) {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 			
