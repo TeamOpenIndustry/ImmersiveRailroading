@@ -51,7 +51,10 @@ public class Config {
 	
 	@Comment("Trains should break blocks")
 	public static boolean TrainsBreakBlocks = true;
-	
+
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
+
+	@Comment("Use Icon Cache (experimental)")
+	public static boolean enableIconCache = false;
 }
