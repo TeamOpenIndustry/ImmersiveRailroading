@@ -358,7 +358,9 @@ public class ClientProxy extends CommonProxy {
 			if (toRender instanceof EntityRollingStock) {
 		        GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
 	            RenderHelper.enableStandardItemLighting();
+	            Minecraft.getMinecraft().entityRenderer.enableLightmap();
 				Minecraft.getMinecraft().getRenderManager().renderEntityStatic(toRender, event.getPartialTicks(), true);
+	            Minecraft.getMinecraft().entityRenderer.disableLightmap();;
 	            RenderHelper.disableStandardItemLighting();
 				color.restore();
 			}
