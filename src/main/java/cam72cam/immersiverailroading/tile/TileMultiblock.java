@@ -79,6 +79,10 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     		return val;
     	}
     };
+    
+    public boolean isLoaded() {
+    	return super.isLoaded() && this.name != null;
+    }
 	
 	public void configure(String name, Rotation rot, BlockPos offset, IBlockState replaced) {
 		this.name = name;
