@@ -175,10 +175,16 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	}
 	
 	@SideOnly(Side.CLIENT)
+	@Override
 	public boolean isInRangeToRenderDist(double distance)
     {
         return true;
     }
+	
+	@Override
+	public boolean shouldRenderInPass(int pass) {
+		return false;
+	}
 
 	public void triggerResimulate() {
 	}
