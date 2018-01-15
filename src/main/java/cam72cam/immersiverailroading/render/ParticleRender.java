@@ -29,6 +29,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 
 	@Override
 	public void doRender(EntitySmokeParticle particle, double x, double y, double z, float entityYaw, float partialTicks) {
+		Minecraft.getMinecraft().mcProfiler.startSection("ir_particles");
 		GL11.glPushMatrix();
 		{
 			float darken = 0.9f-particle.darken*0.9f;
@@ -88,6 +89,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 			shader.unbind();
 		}
 		GL11.glPopMatrix();
+		Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 
 	@Override
