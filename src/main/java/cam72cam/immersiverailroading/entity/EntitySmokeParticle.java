@@ -2,7 +2,10 @@ package cam72cam.immersiverailroading.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntitySmokeParticle extends Entity {
 
@@ -27,8 +30,14 @@ public class EntitySmokeParticle extends Entity {
 	@Override
 	public boolean shouldRenderInPass(int pass)
     {
-        return pass == 1;
+        return false;
     }
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public AxisAlignedBB getRenderBoundingBox() {
+		return new AxisAlignedBB(radius, radius, radius, -radius, -radius, -radius).offset(this.getPositionVector());
+	}
 	
 
 	@Override
