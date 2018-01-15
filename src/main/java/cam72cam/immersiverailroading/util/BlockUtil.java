@@ -21,6 +21,11 @@ import trackapi.lib.Util;
 
 public class BlockUtil {
 	public static boolean canBeReplaced(World world, BlockPos pos, boolean allowFlex) {
+		
+		if (world.isAirBlock(pos)) {
+			return true;
+		}
+		
 		Block block = world.getBlockState(pos).getBlock();
 		
 		if (block == null) {
