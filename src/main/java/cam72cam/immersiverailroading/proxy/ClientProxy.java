@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.proxy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,7 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -356,13 +359,15 @@ public class ClientProxy extends CommonProxy {
 		 */
 		
 		Minecraft.getMinecraft().mcProfiler.startSection("ir_entity");
-		
-		List<EntityRollingStock> entities = Minecraft.getMinecraft().player.getEntityWorld().getEntities(EntityRollingStock.class, EntitySelectors.IS_ALIVE);
-		
 
         GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
         RenderHelper.enableStandardItemLighting();
         Minecraft.getMinecraft().entityRenderer.enableLightmap();
+        
+        GlStateManager.matrixMode(5888);
+        GlStateManager.enableAlpha();
+        GlStateManager.enableCull();
+        
         float partialTicks = event.getPartialTicks();
         ICamera camera = new Frustum();
         Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
@@ -370,13 +375,36 @@ public class ClientProxy extends CommonProxy {
         double d1 = playerrRender.lastTickPosY + (playerrRender.posY - playerrRender.lastTickPosY) * (double)partialTicks;
         double d2 = playerrRender.lastTickPosZ + (playerrRender.posZ - playerrRender.lastTickPosZ) * (double)partialTicks;
         camera.setPosition(d0, d1, d2);
+        
+        List<EntityRollingStock> entities = Minecraft.getMinecraft().player.getEntityWorld().getEntities(EntityRollingStock.class, EntitySelectors.IS_ALIVE);
         for (EntityRollingStock entity : entities) {
         	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox()) ) {
-        		Minecraft.getMinecraft().mcProfiler.startSection("render");
+        		Minecraft.getMinecraft().mcProfiler.startSection("render_stock");
         		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity, partialTicks, true);
         		Minecraft.getMinecraft().mcProfiler.endSection();;
         	}
         }
+        
+        GlStateManager.depthMask(false);
+        
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        Vec3d ep = player.getPositionEyes(partialTicks);
+        
+        List<EntitySmokeParticle> smokeEnts = player.getEntityWorld().getEntities(EntitySmokeParticle.class, EntitySelectors.IS_ALIVE);
+        Comparator<EntitySmokeParticle> compare = (EntitySmokeParticle e1, EntitySmokeParticle e2) -> {
+        	Double p1 = e1.getPositionVector().distanceTo(ep);
+        	Double p2 = e1.getPositionVector().distanceTo(ep);
+        	return p1.compareTo(p2);
+        };
+        Collections.sort(smokeEnts,  compare);
+        for (EntitySmokeParticle entity : smokeEnts) {
+        	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox()) ) {
+        		Minecraft.getMinecraft().mcProfiler.startSection("render_particle");
+        		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity, partialTicks, true);
+        		Minecraft.getMinecraft().mcProfiler.endSection();;
+        	}
+        }
+        
         Minecraft.getMinecraft().entityRenderer.disableLightmap();;
         RenderHelper.disableStandardItemLighting();
         color.restore();
