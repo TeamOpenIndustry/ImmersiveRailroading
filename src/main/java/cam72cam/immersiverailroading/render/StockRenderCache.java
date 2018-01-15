@@ -9,6 +9,8 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.render.entity.StockModel;
+import cam72cam.immersiverailroading.render.item.IconTextureSheet;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 
 public class StockRenderCache {

@@ -1,8 +1,9 @@
-package cam72cam.immersiverailroading.render;
+package cam72cam.immersiverailroading.render.entity;
 
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

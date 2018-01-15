@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render;
+package cam72cam.immersiverailroading.render.tile;
 
 import java.util.HashMap;
 import java.util.Map;

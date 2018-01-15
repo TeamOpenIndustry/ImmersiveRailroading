@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render;
+package cam72cam.immersiverailroading.render.item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.render.BakedScaledModel;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

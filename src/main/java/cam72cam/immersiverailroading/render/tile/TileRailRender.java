@@ -1,7 +1,8 @@
-package cam72cam.immersiverailroading.render.rail;
+package cam72cam.immersiverailroading.render.tile;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
