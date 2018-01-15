@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render.item;
+package cam72cam.immersiverailroading.render.block;
 
 import java.util.ArrayList;
 import java.util.List;
