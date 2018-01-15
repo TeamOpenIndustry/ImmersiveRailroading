@@ -52,7 +52,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 			GL11.glTranslated(particle.motionX * partialTicks, particle.motionY * partialTicks, particle.motionZ * partialTicks);
 			
 			// Rotate to look at player
-			Vec3d offsetForRot = Minecraft.getMinecraft().player.getPositionVector().subtract(particle.getPositionVector());
+			Vec3d offsetForRot = Minecraft.getMinecraft().player.getPositionVector().addVector(0, 1.5, 0).subtract(particle.getPositionVector());
 			GL11.glRotated(180 - VecUtil.toYaw(offsetForRot), 0, 1, 0);
 			GL11.glRotated(180 - VecUtil.toPitch(offsetForRot)+90, 1, 0, 0);
 
