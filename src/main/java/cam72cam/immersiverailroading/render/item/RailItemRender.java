@@ -1,40 +1,34 @@
-package cam72cam.immersiverailroading.render;
+package cam72cam.immersiverailroading.render.item;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix4f;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.immersiverailroading.render.OBJRender;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.ForgeHooksClient;
-import util.Matrix4;
 
-public class RailCastItemRender implements IBakedModel {
-	private static OBJRender model;
+public class RailItemRender implements IBakedModel {
+	private static OBJRender baseRailModel;
 	private static List<String> groups;
 
 	static {
 		try {
-			model = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.05f));
+			baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"), 0.05f));
 			groups = new ArrayList<String>();
 			
-			for (String groupName : model.model.groups())  {
-				if (groupName.contains("INPUT_CAST")) {
+			for (String groupName : baseRailModel.model.groups())  {
+				if (groupName.contains("RAIL_LEFT")) {
 					groups.add(groupName);
 				}
 			}
@@ -48,14 +42,10 @@ public class RailCastItemRender implements IBakedModel {
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		GL11.glPushMatrix();
 		{
-			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-			model.bindTexture();
-			GL11.glRotated(90, 1, 0, 0);
-			GL11.glTranslated(0, -1, 1);
-			GL11.glTranslated(-0.5, 0.6, 0.6);
-			model.drawGroups(groups);
-			model.restoreTexture();
-			tex.restore();
+			GL11.glTranslated(0, 0.2, 0.55);
+			baseRailModel.bindTexture();
+			baseRailModel.drawGroups(groups);
+			baseRailModel.restoreTexture();
 		}
 		GL11.glPopMatrix();
 		return new ArrayList<BakedQuad>();
@@ -84,17 +74,5 @@ public class RailCastItemRender implements IBakedModel {
 	@Override
 	public ItemOverrideList getOverrides() {
 		return ItemOverrideList.NONE;
-	}
-	
-	@Override
-	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
-		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
-		switch (cameraTransformType) {
-		case GUI:
-			Matrix4f m = new Matrix4().translate(0, -0.5, 0).scale(1, 0.1, 1).toMatrix4f();
-			return Pair.of(defaultVal.getLeft(), m);
-		default:
-			return defaultVal;
-		}
 	}
 }
