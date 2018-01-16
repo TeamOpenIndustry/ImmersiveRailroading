@@ -11,6 +11,6 @@ void main() {
 	af = sin(v_texCoord.x * 3.1415);
 	ad = sin(v_texCoord.y * 3.1415);
 	at = (af * ad + ( sin(v_texCoord.x * 20.0) * sin(v_texCoord.y * 20.0) / 20.0 )) * ALPHA;
-	tmp = DARKEN * ( (v_texCoord.x + 19.0) / 20.0 );
+	tmp = DARKEN * ( (v_texCoord.x + 1.0) / 2.0 );
 	gl_FragColor = vec4(tmp, at);
 }
