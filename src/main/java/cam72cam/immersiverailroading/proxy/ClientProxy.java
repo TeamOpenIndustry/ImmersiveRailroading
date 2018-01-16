@@ -397,6 +397,17 @@ public class ClientProxy extends CommonProxy {
         	return p1.compareTo(p2);
         };
         Collections.sort(smokeEnts,  compare);
+        
+
+		Minecraft.getMinecraft().mcProfiler.startSection("ir_particles");
+		
+        ParticleRender.shader.bind();
+		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
+		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        
         for (EntitySmokeParticle entity : smokeEnts) {
         	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox()) ) {
         		Minecraft.getMinecraft().mcProfiler.startSection("render_particle");
@@ -404,6 +415,15 @@ public class ClientProxy extends CommonProxy {
         		Minecraft.getMinecraft().mcProfiler.endSection();;
         	}
         }
+
+		blend.restore();
+		tex.restore();
+		cull.restore();
+		light.restore();
+		
+		ParticleRender.shader.unbind();
+		
+		Minecraft.getMinecraft().mcProfiler.endSection();
         
         Minecraft.getMinecraft().entityRenderer.disableLightmap();;
         RenderHelper.disableStandardItemLighting();
