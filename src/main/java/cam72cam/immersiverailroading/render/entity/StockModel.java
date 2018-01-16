@@ -324,7 +324,7 @@ public class StockModel extends OBJRender {
 			Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
 			GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
 
-			GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()), 0, 1, 0);
+			GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation())+180, 0, 1, 0);
 			GlStateManager.translate(-frontVec.x, 0, 0);
 			drawComponent(frontBogey);
 			if (frontBogeyWheels != null) {
