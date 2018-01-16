@@ -364,7 +364,7 @@ public class ClientProxy extends CommonProxy {
         RenderHelper.enableStandardItemLighting();
         Minecraft.getMinecraft().entityRenderer.enableLightmap();
 
-		GLBoolTracker alpha = new GLBoolTracker(GL11.GL_ALPHA, true);
+		GlStateManager.enableAlpha();
         
         float partialTicks = event.getPartialTicks();
         ICamera camera = new Frustum();
@@ -428,8 +428,6 @@ public class ClientProxy extends CommonProxy {
         color.restore();
         
         GlStateManager.depthMask(true);
-        
-        alpha.restore();
         
         Minecraft.getMinecraft().mcProfiler.endSection();;
 	}
