@@ -25,7 +25,7 @@
 		"width": 2.8
 	},
 	"trucks": {
-		"front": 3, 
+		"front": 3.5, 
 		"rear": -3.5
 	}
 }
