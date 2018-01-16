@@ -202,13 +202,15 @@ public class LocomotiveSteam extends Locomotive {
 						darken /= this.getInventorySize() - 2.0;
 						darken *= 0.5;
 						
-						int lifespan = (int) (200 * (1 + Math.abs(this.getThrottle())) / 2);
+						double smokeMod = Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2));
+						
+						int lifespan = (int) (200 * (1 + Math.abs(this.getThrottle())) * smokeMod * gauge.scale());
 						//lifespan *= size;
 						
-						float verticalSpeed = (0.5f + Math.abs(this.getThrottle())) * ((float)smoke.width() / 0.6f);
+						float verticalSpeed = (0.5f + Math.abs(this.getThrottle())) * (float)gauge.scale();
 						
-						double size = smoke.width();
-						if (phase != 0 && Math.abs(this.getThrottle()) > 0.01 && Math.abs(this.getCurrentSpeed().metric()) < 30) {
+						double size = smoke.width() * (0.8 + smokeMod);
+						if (phase != 0 && Math.abs(this.getThrottle()) > 0.01 && Math.abs(this.getCurrentSpeed().metric()) / gauge.scale() < 30) {
 							double phaseSpike = Math.pow(phase, 8);
 							size *= 1 + phaseSpike*1.5;
 							verticalSpeed *= 1 + phaseSpike/2;
@@ -225,7 +227,7 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
-			double csm = Math.abs(this.getCurrentSpeed().metric());
+			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
 			if (pistons != null && csm > 0.1 && csm  < 20 && this.getBoilerPressure() > 0) {
 				for (RenderComponent piston : pistons) {
 					float phaseOffset = 0;
@@ -263,7 +265,7 @@ public class LocomotiveSteam extends Locomotive {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3;
+					double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3 * gauge.scale();
 					Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
 					sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
 					world.spawnEntity(sp);
@@ -277,7 +279,7 @@ public class LocomotiveSteam extends Locomotive {
 					particlePos = particlePos.subtract(fakeMotion);
 					EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, steam.width());
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2, fakeMotion.z);
+					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z);
 					world.spawnEntity(sp);
 				}
 			}
