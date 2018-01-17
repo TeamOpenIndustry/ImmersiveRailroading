@@ -16,6 +16,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.obj.Face;
@@ -24,7 +25,6 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -64,7 +64,10 @@ public class EntityRollingStockDefinition {
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
-	private double[][] heightMap;
+	
+	private Map<RenderComponent, double[][]> partMapCache = new HashMap<RenderComponent, double[][]>();
+	private int xRes;
+	private int zRes;
 
 	public EntityRollingStockDefinition(String defID, JsonObject data) throws Exception {
 		this.defID = defID;
@@ -80,6 +83,8 @@ public class EntityRollingStockDefinition {
 		parseJson(data);
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
+		
+		initHeightMap();
 	}
 
 	public void parseJson(JsonObject data) throws Exception  {
@@ -266,87 +271,85 @@ public class EntityRollingStockDefinition {
 		}
 	}
 	
-	public double[][] createHeightMap() {
+	private void initHeightMap() {
 		double ratio = 8;
-		int xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
-		int zRes = (int) Math.ceil(this.widthBounds * ratio);
-		double[][] heightMap = new double[xRes][zRes];
+		xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
+		zRes = (int) Math.ceil(this.widthBounds * ratio);
 		
-		int precision = 10; 
+		int precision = (int) Math.ceil(this.heightBounds * 4); 
 		
-		for (String group : model.groups.keySet()) {
-			List<Face> faces = model.groups.get(group);
-			for (Face face : faces) {
-				Path2D path = new Path2D.Double();
-				double fheight = 0;
-				boolean first = true;
-				for (int[] point : face.points) {
-					Vec3d vert = model.vertices.get(point[0]);
-					vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
-					if (first) {
-						path.moveTo(vert.x, vert.z);
-					} else {
-						path.lineTo(vert.x, vert.z);
-					}
-					fheight += vert.y / face.points.length;
-					first = false;
-				}
-				Area a = new Area(path);
-				Rectangle2D bounds = a.getBounds2D();
-				for (int x = 0; x < xRes; x++) {
-					for (int z = 1; z < zRes; z++) {
-						double relX = ((xRes-1)-x) / ratio;
-						double relZ = z / ratio;
-						if (bounds.contains(relX, relZ) && a.contains(relX, relZ)) {
-							double relHeight = fheight / heightBounds;
-							relHeight = ((int)(relHeight * precision))/(double)precision;
-							heightMap[x][z] = Math.max(heightMap[x][z], relHeight);
+		for (List<RenderComponent> rcl : this.renderComponents.values()) {
+			for (RenderComponent rc : rcl) {
+				double[][] heightMap = new double[xRes][zRes];
+				for (String group : rc.modelIDs) {
+					List<Face> faces = model.groups.get(group);
+					for (Face face : faces) {
+						Path2D path = new Path2D.Double();
+						double fheight = 0;
+						boolean first = true;
+						for (int[] point : face.points) {
+							Vec3d vert = model.vertices.get(point[0]);
+							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
+							if (first) {
+								path.moveTo(vert.x, vert.z);
+							} else {
+								path.lineTo(vert.x, vert.z);
+							}
+							fheight += vert.y / face.points.length;
+							first = false;
+						}
+						Area a = new Area(path);
+						Rectangle2D bounds = a.getBounds2D();
+						for (int x = 0; x < xRes; x++) {
+							for (int z = 1; z < zRes; z++) {
+								double relX = ((xRes-1)-x) / ratio;
+								double relZ = z / ratio;
+								if (bounds.contains(relX, relZ) && a.contains(relX, relZ)) {
+									double relHeight = fheight / heightBounds;
+									relHeight = ((int)Math.ceil(relHeight * precision))/(double)precision;
+									heightMap[x][z] = Math.max(heightMap[x][z], relHeight);
+								}
+							}
 						}
 					}
 				}
+				
+				partMapCache.put(rc, heightMap);
 			}
+		}
+	}
+	
+	public double[][] createHeightMap(EntityBuildableRollingStock stock) {
+		double[][] heightMap = new double[xRes][zRes];
+		
+
+		List<RenderComponentType> availComponents = new ArrayList<RenderComponentType>();
+		for (ItemComponentType item : stock.getItemComponents()) {
+			availComponents.addAll(item.render);
 		}
 		
-		/*
-		for (Vec3d v : model.vertices) {
-			int cx = (xRes-1) - (int) Math.max(0, Math.min(xRes-1, (v.x + this.rearBounds) * ratio));
-			int cz = (int) Math.max(0, Math.min(xRes-1, (v.z + this.widthBounds/2) * ratio));
-			heightMap[cx][cz] = Math.max(1, v.y / heightBounds);
-		}*/
-		/*
-		for (int x = 0; x < xRes; x++) {
-			for (int z = 1; z < zRes; z++) {
-				heightMap[x][z] = (x + z) / ((double)(xRes-1) + (zRes-1));
+		for (List<RenderComponent> rcl : this.renderComponents.values()) {
+			for (RenderComponent rc : rcl) {
+				if (availComponents.contains(rc.type)) {
+					availComponents.remove(rc.type);
+				} else {
+					continue;
+				}
+				double[][] pm = partMapCache.get(rc);
+				for (int x = 0; x < xRes; x++) {
+					for (int z = 1; z < zRes; z++) {
+						heightMap[x][z] = Math.max(heightMap[x][z], pm[x][z]);
+					}
+				}
 			}
 		}
-
-		File file = new File("/home/gilligan/foo_hm_" + this.name + ".png"); // The
-		String format = "PNG"; // Example: "PNG" or "JPG"
-		BufferedImage image = new BufferedImage(xRes, zRes, BufferedImage.TYPE_INT_RGB);
-
-		for (int x = 0; x < xRes; x++) {
-			for (int z = 1; z < zRes; z++) {
-				int r = (int) (0xFF * heightMap[x][z]);
-				int g = (int) (0xFF * heightMap[x][z]);
-				int b = (int) (0xFF * heightMap[x][z]);
-				image.setRGB(x, z, (0xFF << 24) | (r << 16) | (g << 8) | b);
-			}
-		}
-		try {
-			ImageIO.write(image, format, file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
 		
 		return heightMap;
 	}
 
-	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {
-		if (this.heightMap == null) {
-			this.heightMap = createHeightMap();
-		}
-		return new RealBB(gauge.scale() * frontBounds, gauge.scale() * -rearBounds, gauge.scale() * widthBounds,
-				gauge.scale() * heightBounds, stock.rotationYaw, this.heightMap).offset(stock.getPositionVector());
+	public RealBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {
+		return (RealBB) new RealBB(gauge.scale() * frontBounds, gauge.scale() * -rearBounds, gauge.scale() * widthBounds,
+				gauge.scale() * heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
 	}
 	
 	List<Vec3d> blocksInBounds = null;
