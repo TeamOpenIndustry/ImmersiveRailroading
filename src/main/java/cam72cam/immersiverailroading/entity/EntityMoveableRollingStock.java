@@ -40,6 +40,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private Speed currentSpeed;
 	public List<TickPos> positions = new ArrayList<TickPos>();
 	private AxisAlignedBB boundingBox;
+	private double[][] heightMapCache;
 
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -124,11 +125,23 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public AxisAlignedBB getCollisionBoundingBox() {
 		return this.getEntityBoundingBox().contract(0, 0.5, 0).offset(0, 0.5, 0);
 	}
+	
+	public void clearHeightMap() {
+		this.heightMapCache = null;
+		this.boundingBox = null;
+	}
+	
+	private double[][] getHeightMap() {
+		if (this.heightMapCache == null) {
+			this.heightMapCache = this.getDefinition().createHeightMap(this);
+		}
+		return this.heightMapCache;
+	}
 
 	@Override
 	public AxisAlignedBB getEntityBoundingBox() {
 		if (this.boundingBox == null) {
-			this.boundingBox = this.getDefinition().getBounds(this, this.gauge);
+			this.boundingBox = this.getDefinition().getBounds(this, this.gauge).withHeightMap(this.getHeightMap());
 		}
 		return this.boundingBox;
 	}
@@ -138,8 +151,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public AxisAlignedBB getRenderBoundingBox()
     {
 		AxisAlignedBB bb = this.getEntityBoundingBox();
-		bb = new AxisAlignedBB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
-        return bb.grow(50);
+        return new AxisAlignedBB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
     }
 	
 	/*

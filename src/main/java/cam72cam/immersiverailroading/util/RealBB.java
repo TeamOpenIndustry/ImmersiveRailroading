@@ -263,4 +263,10 @@ public class RealBB extends AxisAlignedBB {
 		}
 		return null;
 	}
+
+	public AxisAlignedBB withHeightMap(double[][] heightMap) {
+		RealBB bb = this.clone();
+		bb.heightMap = heightMap;
+		return bb;
+	}
 }
