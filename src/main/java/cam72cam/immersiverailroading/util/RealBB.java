@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
-import java.awt.Polygon;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
 import net.minecraft.util.EnumFacing;
@@ -23,12 +24,17 @@ public class RealBB extends AxisAlignedBB {
 	private double centerX;
 	private double centerY;
 	private double centerZ;
+	private double[][] heightMap;
 	
 	public RealBB(double front, double rear, double width, double height, float yaw) {
-		this(front, rear, width, height, yaw, 0, 0, 0);		
+		this(front, rear, width, height, yaw, null);		
 	}
 	
-	private RealBB(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
+	public RealBB(double front, double rear, double width, double height, float yaw, double[][] heightMap) {
+		this(front, rear, width, height, yaw, 0, 0, 0, heightMap);
+	}
+	
+	private RealBB(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ, double[][] heightMap) {
 		this(constructorParams(front, rear, width, height, yaw, centerX, centerY, centerZ));
 		this.front = front;
 		this.rear = rear;
@@ -38,12 +44,13 @@ public class RealBB extends AxisAlignedBB {
 		this.centerX = centerX;
 		this.centerY = centerY;
 		this.centerZ = centerZ;
+		this.heightMap = heightMap;
 	}
 	
 	private RealBB(double[] constructorParams) {
 		super(constructorParams[0], constructorParams[1], constructorParams[2], constructorParams[3], constructorParams[4], constructorParams[5]);
 	}
-	
+
 	private static AxisAlignedBB newBB(Vec3d min, Vec3d max) {
 		//Why the fuck is this ClientOnly?
 		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
@@ -64,7 +71,7 @@ public class RealBB extends AxisAlignedBB {
 	}
 	
 	public RealBB clone() {
-		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ);
+		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ, heightMap);
 	}
 	public AxisAlignedBB setMaxY(double y2) {
 		return this.clone();
@@ -144,7 +151,7 @@ public class RealBB extends AxisAlignedBB {
 		return 0;
 	}
 	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
-		if (other.minY < this.maxY) {
+		if (this.maxY > other.minY) {
 			return 0.1;
 		} else {
 			return 0;
@@ -153,36 +160,67 @@ public class RealBB extends AxisAlignedBB {
 	public double calculateZOffset(AxisAlignedBB other, double offsetZ) {
 		return 0;
 	}
+	
+	@Override
 	public boolean intersects(double x1, double y1, double z1, double x2, double y2, double z2) {
-		boolean doesIntersect = true;
+		if (!super.intersects(x1, y1, z1, x2, y2, z2)) {
+			return false;
+		}
 		
 		double actualYMin = this.centerY;
 		double actualYMax = this.centerY + this.height;
-		doesIntersect = doesIntersect && actualYMin < y2 && actualYMax > y1;
-		
-		Vec3d origin = VecUtil.rotateYaw(new Vec3d(this.rear, 0, -this.width/2), yaw).addVector(this.centerX, 0, this.centerZ);
-		Vec3d point1 = VecUtil.fromYaw(front - rear, yaw).add(origin);
-		Vec3d point2 = VecUtil.fromYaw(width, yaw + 90).add(origin); // might be +90
-		Vec3d opposite = VecUtil.rotateYaw(new Vec3d(this.front, 0, this.width/2), yaw).addVector(this.centerX, 0, this.centerZ);
-		
-		
-		// Scale by 100 
-		int[] xp = new int[] { (int) (100 * origin.x), (int) (100 * point1.x), (int) (100 * opposite.x), (int) (100 * point2.x)};
-		int[] zp = new int[] { (int) (100 * origin.z), (int) (100 * point1.z), (int) (100 * opposite.z), (int) (100 * point2.z)};
-		
-		Polygon rect = new Polygon(xp, zp, 4);
-		
-		if (x1 == x2 && y1 == y2 && z1 == z2) {
-			// Single point
-			doesIntersect = doesIntersect && rect.contains(x1*100, z1*100);	
-		} else {
-			// AABB
-			Rectangle2D r = new Rectangle2D.Double(x1*100, z1*100, 0, 0);
-			r.add(x2*100, z2*100);
-			doesIntersect = doesIntersect && rect.intersects(r );
+		if (! (actualYMin < y2 && actualYMax > y1)) {
+			return false;
 		}
-		return doesIntersect;
+		
+		Rectangle2D otherRect = new Rectangle2D.Double(x1, z1, 0, 0);
+		if (x1 == x2 && z1 == z2) {
+			otherRect.add(x2+0.2, z2 + 0.2);
+		} else {
+			otherRect.add(x2, z2);
+		}
+		
+		Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width/2, 0, 0);
+		myRect.add(this.front, this.width/2);
+		
+		Area otherArea = new Area(otherRect);
+		Area myArea = new Area(myRect);
+		
+		AffineTransform myTransform = new AffineTransform();
+		myTransform.translate(this.centerX, this.centerZ);
+		myArea.transform(myTransform);
+		
+		AffineTransform otherTransform = new AffineTransform();
+		otherTransform.rotate(Math.toRadians(180-yaw+90), this.centerX, this.centerZ);
+		otherArea.transform(otherTransform);
+
+		if (!otherArea.intersects(myArea.getBounds2D())) {
+			return false;
+		}
+		if (this.heightMap != null) {
+			int xRes = this.heightMap.length-1;
+			int zRes = this.heightMap[0].length-1;
+			
+			double length = this.front-this.rear;
+			
+			double px = otherArea.getBounds2D().getCenterX() - (this.centerX - length/2);
+			double pz = otherArea.getBounds2D().getCenterY() - (this.centerZ - width/2);
+			
+			double cx = Math.max(0, Math.min(length, px));
+			double cz = Math.max(0, Math.min(width, pz));
+			
+			cx = (cx/length*xRes);
+			cz = (cz/width*zRes);
+			
+			actualYMin = this.centerY;
+			actualYMax = this.centerY + this.height * this.heightMap[(int) cx][(int) cz];
+			
+			return actualYMin < y2 && actualYMax > y1;
+		}
+		
+		return true;
 	}
+	
 	public boolean contains(Vec3d vec) {
 		return this.intersects(vec.x, vec.y, vec.z, vec.x, vec.y, vec.z);
 	}

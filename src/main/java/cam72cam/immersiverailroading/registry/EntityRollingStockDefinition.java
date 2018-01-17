@@ -262,8 +262,19 @@ public class EntityRollingStockDefinition {
 	}
 
 	public AxisAlignedBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {
+		int xRes = 20;
+		int zRes = 20;
+		double[][] heightMap = new double[xRes][zRes];
+		double steps = 5;
+		
+		for (int x = 0; x < xRes; x++) {
+			for (int z = 0; z < zRes; z++) {
+				heightMap[x][z] = ((int)((x + z) / ((double)(xRes-1) + (zRes-1)) * steps))/steps;
+			}
+		}
+		
 		return new RealBB(gauge.scale() * frontBounds, gauge.scale() * -rearBounds, gauge.scale() * widthBounds,
-				gauge.scale() * heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
+				gauge.scale() * heightBounds, stock.rotationYaw, heightMap).offset(stock.getPositionVector());
 	}
 	
 	List<Vec3d> blocksInBounds = null;
