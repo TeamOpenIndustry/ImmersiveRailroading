@@ -38,6 +38,7 @@ public enum ItemComponentType {
 	
 	//STEAM
 	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
+	SMOKEBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.SMOKEBOX),
 	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST),
 	STEAM_CHEST_FRONT(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_FRONT),
 	STEAM_CHEST_REAR(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_REAR),
