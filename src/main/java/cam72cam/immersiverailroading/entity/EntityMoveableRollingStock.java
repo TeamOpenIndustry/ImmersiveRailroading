@@ -292,7 +292,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    	this.clearPositionCache();
 	    }
 
-		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox());
+		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
 		for (Entity entity : entitiesWithin) {
 			if (entity instanceof EntityMoveableRollingStock) {
 				// rolling stock collisions handled by looking at the front and
@@ -333,7 +333,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		// Riding on top of cars
 		AxisAlignedBB bb = this.getCollisionBoundingBox();
-		bb = bb.offset(0, this.getDefinition().getHeight(gauge)+1, 0);
+		bb = bb.expand(0, gauge.scale(), 0);
 		List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
 		for (Entity entity : entitiesAbove) {
 			if (entity instanceof EntityMoveableRollingStock) {
