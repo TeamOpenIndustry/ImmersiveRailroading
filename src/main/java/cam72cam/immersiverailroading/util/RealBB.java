@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.util;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -154,9 +153,9 @@ public class RealBB extends AxisAlignedBB {
 		return 0;
 	}
 	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
-		double hack = 0.05;
+		double hack = 0.04;
 		other = other.grow(hack, 0, hack);
-		if (other.minY < intersectsAt(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ).getRight()) {
+		if (other.minY < intersectsAt(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ, true).getRight()) {
 			return 0.1;
 		} else {
 			return 0;
@@ -168,9 +167,9 @@ public class RealBB extends AxisAlignedBB {
 	
 	@Override
 	public boolean intersects(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-		return intersectsAt(minX, minY, minZ, maxX, maxY, maxZ).getLeft();
+		return intersectsAt(minX, minY, minZ, maxX, maxY, maxZ, true).getLeft();
 	}
-	public Pair<Boolean, Double> intersectsAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+	public Pair<Boolean, Double> intersectsAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, boolean useHeightmap) {
 		if (!super.intersects(minX, minY, minZ, maxX, maxY, maxZ)) {
 			return Pair.of(false, minY);
 		}
@@ -205,7 +204,7 @@ public class RealBB extends AxisAlignedBB {
 		if (!otherArea.intersects(myArea.getBounds2D())) {
 			return Pair.of(false, minY);
 		}
-		if (this.heightMap != null) {
+		if (this.heightMap != null && useHeightmap) {
 			int xRes = this.heightMap.length-1;
 			int zRes = this.heightMap[0].length-1;
 			
@@ -216,25 +215,26 @@ public class RealBB extends AxisAlignedBB {
 
 			Rectangle2D bds = otherArea.getBounds2D();
 			
-			double[][] coords = new double [][] {
-				{ bds.getCenterX(), bds.getCenterY() },
-				{ bds.getMinX(), bds.getMinY() },
-				{ bds.getMinX(), bds.getMaxY() },
-				{ bds.getMaxX(), bds.getMinY() },
-				{ bds.getMaxX(), bds.getMaxY() },
-			};
+
+			double px = bds.getMinX() - (this.centerX - length/2);
+			double pz =bds.getMinY() - (this.centerZ - width/2);
+			double Px = bds.getMaxX() - (this.centerX - length/2);
+			double Pz =bds.getMaxY() - (this.centerZ - width/2);
 			
-			for (double[] coord : coords) {
-				double px = coord[0] - (this.centerX - length/2);
-				double pz = coord[1] - (this.centerZ - width/2);
-				
-				double cx = Math.max(0, Math.min(length, px));
-				double cz = Math.max(0, Math.min(width, pz));
-				
-				cx = (cx/length*xRes);
-				cz = (cz/width*zRes);
-				
-				actualYMax = Math.max(actualYMax, this.centerY + this.height * this.heightMap[(int) cx][(int) cz]);
+			double cx = Math.max(0, Math.min(length, px));
+			double cz = Math.max(0, Math.min(width, pz));
+			double Cx = Math.max(0, Math.min(length, Px));
+			double Cz = Math.max(0, Math.min(width, Pz));
+
+			cx = (cx/length*xRes);
+			cz = (cz/width*zRes);
+			Cx = (Cx/length*xRes);
+			Cz = (Cz/width*zRes);
+			
+			for (int x = (int) cx; x < (int)Cx; x++) {
+				for (int z = (int) cz; z < (int)Cz; z++) {
+					actualYMax = Math.max(actualYMax, this.centerY + this.height * this.heightMap[x][z]);
+				}
 			}
 
 			return Pair.of(actualYMin < maxY && actualYMax > minY, actualYMax);
@@ -244,7 +244,7 @@ public class RealBB extends AxisAlignedBB {
 	}
 	
 	public boolean contains(Vec3d vec) {
-		return this.intersects(vec.x, vec.y, vec.z, vec.x, vec.y, vec.z);
+		return this.intersectsAt(vec.x, vec.y, vec.z, vec.x, vec.y, vec.z, false).getLeft();
 	}
 	public RayTraceResult calculateIntercept(Vec3d vecA, Vec3d vecB) {
 		// This does NOT set enumfacing.  The places where this code (entity) is used don't use that value as of 1.12.
