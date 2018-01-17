@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.util;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
 import net.minecraft.util.EnumFacing;
@@ -151,7 +152,9 @@ public class RealBB extends AxisAlignedBB {
 		return 0;
 	}
 	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
-		if (this.maxY > other.minY) {
+		double hack = 0.04;
+		other = other.grow(hack, 0, hack);
+		if (other.minY < intersectsAt(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ)) {
 			return 0.1;
 		} else {
 			return 0;
@@ -161,23 +164,87 @@ public class RealBB extends AxisAlignedBB {
 		return 0;
 	}
 	
-	@Override
-	public boolean intersects(double x1, double y1, double z1, double x2, double y2, double z2) {
-		if (!super.intersects(x1, y1, z1, x2, y2, z2)) {
-			return false;
-		}
-		
-		double actualYMin = this.centerY;
-		double actualYMax = this.centerY + this.height;
-		if (! (actualYMin < y2 && actualYMax > y1)) {
-			return false;
-		}
-		
+	public double intersectsAt(double x1, double y1, double z1, double x2, double y2, double z2) {
 		Rectangle2D otherRect = new Rectangle2D.Double(x1, z1, 0, 0);
 		if (x1 == x2 && z1 == z2) {
 			otherRect.add(x2+0.2, z2 + 0.2);
 		} else {
 			otherRect.add(x2, z2);
+		}
+		
+		Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width/2, 0, 0);
+		myRect.add(this.front, this.width/2);
+		
+		Area otherArea = new Area(otherRect);
+		Area myArea = new Area(myRect);
+		
+		AffineTransform myTransform = new AffineTransform();
+		myTransform.translate(this.centerX, this.centerZ);
+		myArea.transform(myTransform);
+		
+		AffineTransform otherTransform = new AffineTransform();
+		otherTransform.rotate(Math.toRadians(180-yaw+90), this.centerX, this.centerZ);
+		otherArea.transform(otherTransform);
+
+		if (!otherArea.intersects(myArea.getBounds2D())) {
+			System.out.println("WARNING");
+			//return false;
+		}
+		if (this.heightMap != null) {
+			int xRes = this.heightMap.length-1;
+			int zRes = this.heightMap[0].length-1;
+			
+			double length = this.front-this.rear;
+			
+			double actualYMin = this.centerY;
+			double actualYMax = this.centerY;
+			
+			Rectangle2D bds = otherArea.getBounds2D();
+			
+			double[][] coords = new double [][] {
+				{ bds.getCenterX(), bds.getCenterY() },
+				{ bds.getMinX(), bds.getMinY() },
+				{ bds.getMinX(), bds.getMaxY() },
+				{ bds.getMaxX(), bds.getMinY() },
+				{ bds.getMaxX(), bds.getMaxY() },
+			};
+			
+			for (double[] coord : coords) {
+				double px = coord[0] - (this.centerX - length/2);
+				double pz = coord[1] - (this.centerZ - width/2);
+				
+				double cx = Math.max(0, Math.min(length, px));
+				double cz = Math.max(0, Math.min(width, pz));
+				
+				cx = (cx/length*xRes);
+				cz = (cz/width*zRes);
+				
+				actualYMax = Math.max(actualYMax, this.centerY + this.height * this.heightMap[(int) cx][(int) cz]);
+			}
+			
+			return actualYMax;
+		}
+		System.out.println("WARN2");
+		return this.maxY;
+	}
+	
+	@Override
+	public boolean intersects(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+		if (!super.intersects(minX, minY, minZ, maxX, maxY, maxZ)) {
+			return false;
+		}
+		
+		double actualYMin = this.centerY;
+		double actualYMax = this.centerY + this.height;
+		if (! (actualYMin < maxY && actualYMax > minY)) {
+			return false;
+		}
+		
+		Rectangle2D otherRect = new Rectangle2D.Double(minX, minZ, 0, 0);
+		if (minX == maxX && minZ == maxZ) {
+			otherRect.add(maxX+0.2, maxZ + 0.2);
+		} else {
+			otherRect.add(maxX, maxZ);
 		}
 		
 		Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width/2, 0, 0);
@@ -203,19 +270,33 @@ public class RealBB extends AxisAlignedBB {
 			
 			double length = this.front-this.rear;
 			
-			double px = otherArea.getBounds2D().getCenterX() - (this.centerX - length/2);
-			double pz = otherArea.getBounds2D().getCenterY() - (this.centerZ - width/2);
-			
-			double cx = Math.max(0, Math.min(length, px));
-			double cz = Math.max(0, Math.min(width, pz));
-			
-			cx = (cx/length*xRes);
-			cz = (cz/width*zRes);
-			
 			actualYMin = this.centerY;
-			actualYMax = this.centerY + this.height * this.heightMap[(int) cx][(int) cz];
+			actualYMax = this.centerY;
+
+			Rectangle2D bds = otherArea.getBounds2D();
 			
-			return actualYMin < y2 && actualYMax > y1;
+			double[][] coords = new double [][] {
+				{ bds.getCenterX(), bds.getCenterY() },
+				{ bds.getMinX(), bds.getMinY() },
+				{ bds.getMinX(), bds.getMaxY() },
+				{ bds.getMaxX(), bds.getMinY() },
+				{ bds.getMaxX(), bds.getMaxY() },
+			};
+			
+			for (double[] coord : coords) {
+				double px = coord[0] - (this.centerX - length/2);
+				double pz = coord[1] - (this.centerZ - width/2);
+				
+				double cx = Math.max(0, Math.min(length, px));
+				double cz = Math.max(0, Math.min(width, pz));
+				
+				cx = (cx/length*xRes);
+				cz = (cz/width*zRes);
+				
+				actualYMax = Math.max(actualYMax, this.centerY + this.height * this.heightMap[(int) cx][(int) cz]);
+			}
+			
+			return actualYMin < maxY && actualYMax > minY;
 		}
 		
 		return true;

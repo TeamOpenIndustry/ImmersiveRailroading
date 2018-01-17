@@ -265,7 +265,7 @@ public class EntityRollingStockDefinition {
 		int xRes = 20;
 		int zRes = 20;
 		double[][] heightMap = new double[xRes][zRes];
-		double steps = 5;
+		double steps = 10;
 		
 		for (int x = 0; x < xRes; x++) {
 			for (int z = 0; z < zRes; z++) {
