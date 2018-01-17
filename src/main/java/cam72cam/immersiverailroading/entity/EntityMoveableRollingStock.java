@@ -137,7 +137,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	@SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox()
     {
-        return this.getEntityBoundingBox().grow(50);
+		AxisAlignedBB bb = this.getEntityBoundingBox();
+		bb = new AxisAlignedBB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
+        return bb.grow(50);
     }
 	
 	/*
