@@ -31,12 +31,13 @@ public class Face {
 	public static List<Face> parse(String[] args, String currentMaterial) {
 		List<Face> res = new ArrayList<Face>();
 		if (args.length == 3) {
-			res.add(new Face(currentMaterial, args[0], args[0], args[1], args[2]));
+			res.add(new Face(currentMaterial, args[0], args[1], args[2]));
 		} else if (args.length == 4) {
-			res.add(new Face(currentMaterial, args));
+			res.add(new Face(currentMaterial, args[0], args[1], args[2]));
+			res.add(new Face(currentMaterial, args[2], args[3], args[0]));
 		} else {
 			for (int i = 2; i < args.length; i++) {
-				res.add(new Face(currentMaterial, args[0], args[0], args[i-1], args[i]));
+				res.add(new Face(currentMaterial, args[0], args[i-1], args[i]));
 			}
 		}
 		return res;
