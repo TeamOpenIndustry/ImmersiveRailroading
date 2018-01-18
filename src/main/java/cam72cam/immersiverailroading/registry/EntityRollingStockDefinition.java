@@ -332,6 +332,8 @@ public class EntityRollingStockDefinition {
 			for (RenderComponent rc : rcl) {
 				if (availComponents.contains(rc.type)) {
 					availComponents.remove(rc.type);
+				} else if (rc.type == RenderComponentType.REMAINING && stock.isBuilt()) {
+					//pass
 				} else {
 					continue;
 				}
