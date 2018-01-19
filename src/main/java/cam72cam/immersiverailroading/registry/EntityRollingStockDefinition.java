@@ -50,6 +50,8 @@ public class EntityRollingStockDefinition {
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
 	private float bogeyRear;
+	private float couplerOffsetFront;
+	private float couplerOffsetRear;
 
 	public  double frontBounds;
 	public  double rearBounds;
@@ -105,6 +107,11 @@ public class EntityRollingStockDefinition {
 
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_scale);
+		
+		if (data.has("couplers")) {
+			couplerOffsetFront = (float) (data.get("couplers").getAsJsonObject().get("front_offset").getAsFloat() * internal_scale);
+			couplerOffsetRear = (float) (data.get("couplers").getAsJsonObject().get("rear_offset").getAsFloat() * internal_scale);
+		}
 		
 		frontBounds = -model.minOfGroup(model.groups()).x;
 		rearBounds = model.maxOfGroup(model.groups()).x;
@@ -262,9 +269,9 @@ public class EntityRollingStockDefinition {
 	public double getCouplerPosition(CouplerType coupler, Gauge gauge) {
 		switch(coupler) {
 		case FRONT:
-			return gauge.scale() * (this.frontBounds);
+			return gauge.scale() * (this.frontBounds + couplerOffsetFront);
 		case BACK:
-			return gauge.scale() * (this.rearBounds);
+			return gauge.scale() * (this.rearBounds + couplerOffsetRear);
 		default:
 			return 0;
 		}
