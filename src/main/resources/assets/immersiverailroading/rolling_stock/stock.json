@@ -3,5 +3,5 @@
 	"locomotives": [ "a1_peppercorn", "big_boy", "gp-7", "ge_b40_8", "k4_pacific", "e6_atlantic", "a5_switcher", "alco_rs1", "firefly", "cooke_mogul", "j1a_texas", "iron_duke" ],
 	"passenger": [ "br_coach_mk1","p70coach1" ],
 	"tank": [ "tank_us", "tank_us2", "kamx_t" ],
-	"tender": [ "a1_peppercorn_tender", "k4_tender", "big_boy_tender","e6_tender","a5_tender" ]
+	"tender": [ "a1_peppercorn_tender", "k4_tender", "big_boy_tender","e6_tender","a5_tender","coast_to_coast"]
 }
