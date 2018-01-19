@@ -21,12 +21,14 @@ import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.NBTUtil;
+import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -172,6 +174,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		if (world.isRemote) {
 			// Only couple server side
+			
+			ParticleUtil.spawnParticle(world, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
+			ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
+			
 			return;
 		}
 		
@@ -229,7 +235,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				
 				EntityCoupleableRollingStock stock = potential.getLeft();
 				CouplerType otherCoupler = potential.getRight();
-
+				System.out.println(this.rotationYaw);
+				System.out.println(stock.rotationYaw);
 				this.setCoupledUUID(coupler, stock.getPersistentID());
 				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
 			}
@@ -592,7 +599,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private Vec3d getCouplerPositionTo(CouplerType coupler, TickPos myPos, TickPos coupledPos) {
 		//	Take the current position
 		//	Add
-		//		The Vector between the two couplers
+		//		The Vector between the two entities
 		//		which has been normalized
 		//  	then scaled to the distance between the stock position and the coupler
 		//
@@ -616,12 +623,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
 			if (couplerFrontPosition == null) {
-				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getLength(gauge)/2 + Config.couplerRange + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
+				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().frontBounds - this.getDefinition().getBogeyFront(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerFrontPosition;
 		} else {
 			if (couplerRearPosition == null) {
-				couplerRearPosition = predictFrontBogeyPosition(pos, (float) (this.getDefinition().getLength(gauge)/2 + Config.couplerRange - this.getDefinition().getBogeyFront(gauge))).add(pos.position).addVector(0, 1, 0);
+				couplerRearPosition = predictFrontBogeyPosition(pos, (float) (this.getDefinition().rearBounds + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerRearPosition;
 		}
@@ -665,13 +672,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		
 		/*
-		 * 1. |-----+-----| |-----+-----|
-		 * 2. |-----+---|=|----+-----|
-		 * 3. |---|=+====+|-----|
+		 * 1. |-----a-----| |-----b-----|
+		 * 2. |-----a---|=|----b-----|
+		 * 3. |---|=a====b|-----|
+		 * Keep in mind that we want to make sure that our other coupler might be a better fit
 		 */
 
 		// getCouplerPosition is a somewhat expensive call, minimize if possible
 		Vec3d myCouplerPos = this.getCouplerPosition(coupler);
+		Vec3d myOppositeCouplerPos = this.getCouplerPosition(coupler.opposite());
 		
 		for (EntityCoupleableRollingStock stock : nearBy) {
 			Vec3d stockFrontPos = stock.getCouplerPosition(CouplerType.FRONT);
@@ -692,6 +701,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			double myCouplerToOtherCoupler = myCouplerPos.distanceTo(stockCouplerPos);
 			double myCenterToMyCoupler = this.getPositionVector().distanceTo(myCouplerPos);
 			double myCenterToOtherCoupler = this.getPositionVector().distanceTo(stockCouplerPos);
+			double myCouplerToOtherCenter = myCouplerPos.distanceTo(stock.getPositionVector());
+			double myOppositeCouplerToOtherCenter = myOppositeCouplerPos.distanceTo(stock.getPositionVector());
 
 			if (myCouplerToOtherCoupler > bestDistance) {
 				// Current best match is closer, should be a small edge case when stock is almost entirely overlapping
@@ -710,6 +721,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				if (!myBB.contains(stockCouplerPos)) {
 					continue;
 				}
+			}
+			
+			if (myCouplerToOtherCenter > myOppositeCouplerToOtherCenter) {
+				// My other coupler is a much better fit
+				continue;
 			}
 			
 			// findByUUID seems to work around a memcpy issue where refs are not updated

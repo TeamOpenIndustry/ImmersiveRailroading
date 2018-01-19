@@ -15,7 +15,6 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -53,7 +52,7 @@ public class EntityRollingStockDefinition {
 	private float bogeyRear;
 
 	public  double frontBounds;
-	private double rearBounds;
+	public  double rearBounds;
 	private double heightBounds;
 	private double widthBounds;
 	private double passengerCompartmentLength;
@@ -263,9 +262,9 @@ public class EntityRollingStockDefinition {
 	public double getCouplerPosition(CouplerType coupler, Gauge gauge) {
 		switch(coupler) {
 		case FRONT:
-			return gauge.scale() * (this.frontBounds + Config.couplerRange);
+			return gauge.scale() * (this.frontBounds);
 		case BACK:
-			return gauge.scale() * (this.rearBounds + Config.couplerRange);
+			return gauge.scale() * (this.rearBounds);
 		default:
 			return 0;
 		}
