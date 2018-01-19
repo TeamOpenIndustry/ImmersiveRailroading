@@ -20,5 +20,9 @@
 	"trucks": {
 		"front": 4.3, 
 		"rear": -4.3
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -0.08
 	}
 }

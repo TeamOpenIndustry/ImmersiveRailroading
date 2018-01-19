@@ -155,8 +155,9 @@ public class RealBB extends AxisAlignedBB {
 	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
 		double hack = 0.04;
 		other = other.grow(hack, 0, hack);
-		if (other.minY < intersectsAt(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ, true).getRight()) {
-			return 0.1;
+		Double intersect = intersectsAt(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ, true).getRight();
+		if (other.minY < intersect) {
+			return Math.min(0.1, intersect - other.minY);
 		} else {
 			return 0;
 		}

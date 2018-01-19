@@ -341,7 +341,7 @@ public class StockModel extends OBJRender {
 					Vec3d wheelPos = wheel.center();
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
-					GlStateManager.rotate((float) (-360 * relDist / circumference), 0, 0, 1);
+					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
 					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
 					drawComponent(wheel);
 					GlStateManager.popMatrix();
