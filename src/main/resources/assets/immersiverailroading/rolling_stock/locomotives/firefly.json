@@ -10,7 +10,7 @@
 		"water_capacity_l": 10000, 
 		"horsepower": 200,
 		"tractive_effort_lbf": 5000,
-		"max_speed_kmh": 60,
+		"max_speed_kmh": 100,
 		"valve_gear": "hidden",
 		"weight_kg": 21772
 	},
