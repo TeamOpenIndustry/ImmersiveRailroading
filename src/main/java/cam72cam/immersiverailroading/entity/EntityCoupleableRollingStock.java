@@ -769,19 +769,30 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public final void mapTrain(EntityCoupleableRollingStock prev, boolean direction, boolean followDisengaged, BiConsumer<EntityCoupleableRollingStock, Boolean> fn) {
 		fn.accept(this, direction);
 		for (CouplerType coupler : CouplerType.values()) {
-			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
-			if (coupled != null && !coupled.getUniqueID().equals(prev.getUniqueID())) {
-				boolean iAmCoupled = this.isCouplerEngaged(coupler);
-				CouplerType otherCoupler = coupled.getCouplerFor(this);
-				if (otherCoupler == null) {
-					//this.decouple(coupler);
-					continue;
-				}
-				boolean otherIsCoupled = coupled.isCouplerEngaged(otherCoupler); 
-				if ((iAmCoupled && otherIsCoupled) || followDisengaged) {
-					coupled.mapTrain(this, coupler.opposite() == otherCoupler ? direction : !direction, followDisengaged, fn);
-				}
+			if (this.getCoupledUUID(coupler) == null) {
+				continue;
 			}
+			
+			if (this.getCoupledUUID(coupler).equals(prev.getUniqueID())) {
+				continue;
+			}
+			
+			if (!(followDisengaged || this.isCouplerEngaged(coupler))) {
+				continue;
+			}
+			
+			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
+			
+			if (coupled == null) {
+				continue;
+			}
+			
+			CouplerType otherCoupler = coupled.getCouplerFor(this);
+			if (!(followDisengaged || coupled.isCouplerEngaged(otherCoupler))) {
+				continue;
+			}
+
+			coupled.mapTrain(this, coupler.opposite() == otherCoupler ? direction : !direction, followDisengaged, fn);
 		}
 	}
 
