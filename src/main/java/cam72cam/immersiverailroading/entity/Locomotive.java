@@ -128,7 +128,7 @@ public abstract class Locomotive extends FreightTank {
 	
 	private double getAppliedTractiveEffort(Speed speed) {
 		double locoEfficiency = 0.7f; //TODO config
-		double outputHorsepower = Math.abs(getThrottle() * getAvailableHP());
+		double outputHorsepower = Math.abs(Math.pow(getThrottle(), 2) * getAvailableHP());
 		
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(0.0001, Math.abs(speed.metric()))));
 		return tractiveEffortNewtons;
