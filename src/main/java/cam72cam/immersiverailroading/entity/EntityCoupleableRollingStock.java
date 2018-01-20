@@ -21,14 +21,12 @@ import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.NBTUtil;
-import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -175,8 +173,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (world.isRemote) {
 			// Only couple server side
 			
-			ParticleUtil.spawnParticle(world, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
-			ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
+			//ParticleUtil.spawnParticle(world, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
+			//ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
 			
 			return;
 		}
@@ -235,8 +233,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				
 				EntityCoupleableRollingStock stock = potential.getLeft();
 				CouplerType otherCoupler = potential.getRight();
-				System.out.println(this.rotationYaw);
-				System.out.println(stock.rotationYaw);
 				this.setCoupledUUID(coupler, stock.getPersistentID());
 				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
 			}
@@ -293,7 +289,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			
 			simulateCoupledRollingStock();
 			
-			for (EntityCoupleableRollingStock stock : this.getTrain()) {
+			List<EntityCoupleableRollingStock> tr = this.getTrain();
+			for (EntityCoupleableRollingStock stock : tr) {
 				stock.resimulate = false;
 			}
 		}
@@ -515,8 +512,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public CouplerType getCouplerFor(EntityCoupleableRollingStock stock) {
+		if (stock == null) {
+			return null;
+		}
 		for (CouplerType coupler : CouplerType.values()) {
-			if (this.getCoupled(coupler) == stock) {
+			if (stock.getUniqueID().equals(this.getCoupledUUID(coupler))) {
 				return coupler;
 			}
 		}
