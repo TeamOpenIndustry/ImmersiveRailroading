@@ -477,8 +477,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	public int getSpeedRetarderSlowdown(TickPos latest) {
 		int over = 0;
-		
+		double y = -1;
 		for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
+			if (y == -1) {
+				y = pos.y;
+			}
+			if (pos.y != y) {
+				break;
+			}
 			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 			pos = pos.add(latest.position);
 			BlockPos bp = new BlockPos(pos);
