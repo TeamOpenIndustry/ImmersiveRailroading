@@ -112,20 +112,45 @@ public class ImmersiveRailroading
     }
     
     public static void debug(String msg, Object...params) {
+    	if (logger == null) {
+    		System.out.println("DEBUG: " + String.format(msg, params));
+    		return;
+    	}
+    	
     	if (Config.debugLog) {
     		logger.info(String.format(msg, params));
     	}
     }
     public static void info(String msg, Object...params) {
+    	if (logger == null) {
+    		System.out.println("INFO: " + String.format(msg, params));
+    		return;
+    	}
+    	
     	logger.info(String.format(msg, params));
     }
     public static void warn(String msg, Object...params) {
+    	if (logger == null) {
+    		System.out.println("WARN: " + String.format(msg, params));
+    		return;
+    	}
+    	
     	logger.warn(String.format(msg, params));
     }
     public static void error(String msg, Object...params) {
+    	if (logger == null) {
+    		System.out.println("ERROR: " + String.format(msg, params));
+    		return;
+    	}
+    	
     	logger.error(String.format(msg, params));
     }
 	public static void catching(Throwable ex) {
+    	if (logger == null) {
+    		ex.printStackTrace();
+    		return;
+    	}
+    	
 		logger.catching(ex);
 	}
 }
