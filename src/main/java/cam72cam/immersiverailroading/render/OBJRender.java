@@ -132,8 +132,8 @@ public class OBJRender {
 					has_vn = false;
 				}
 				if (vt != null) {
-					texBuffer.put(texture.convertU(face.mtl, vt.x));
-					texBuffer.put(texture.convertV(face.mtl, -vt.y));
+					texBuffer.put(texture.convertU(face.mtl, vt.x - face.offsetUV.x));
+					texBuffer.put(texture.convertV(face.mtl, -(vt.y) - face.offsetUV.y));
 				} else {
 					texBuffer.put(texture.convertU(face.mtl, 0));
 					texBuffer.put(texture.convertV(face.mtl, 0));
