@@ -169,7 +169,7 @@ public class OBJTextureSheet {
 		}
 		
 		public Integer size() {
-			return getAbsoluteWidth() * getAbsoluteHeight();
+			return getAbsoluteHeight();
 		}
 	}
 	
