@@ -36,6 +36,9 @@ public class Config {
 	
 	@Comment({"Print extra chunk loading info"})
 	public static boolean debugLog = false;
+	
+	@Comment({"Override GPU Max texture settings !DEV USE ONLY! (-1 == disable)"})
+	public static int overrideGPUTexSize = -1;
 
 	@Comment("Cost to place down a tie")
 	public static double TieCostMultiplier = 0.25;
