@@ -174,4 +174,18 @@ public class OBJRender {
 		// Reset draw color (IMPORTANT)
 		GL11.glColor4f(1, 1, 1, 1);
 	}
+
+	public void freeGL() {
+		if (this.hasTexture()) {
+			this.texture.freeGL();
+		}
+		if (this.displayList != null) {
+			GL11.glDeleteLists(this.displayList, 1);
+		}
+		for (Map<Iterable<String>, Integer> list : this.displayLists.values()) {
+			for (Integer dl : list.values()) {
+				GL11.glDeleteLists(dl, 1);
+			}
+		}
+	}
 }

@@ -199,5 +199,4 @@ public class IconTextureSheet {
 		
 		return true;
 	}
-
 }

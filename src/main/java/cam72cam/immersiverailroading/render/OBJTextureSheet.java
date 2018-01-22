@@ -301,4 +301,8 @@ public class OBJTextureSheet {
 		}
 		return 0;
 	}
+	
+	public void freeGL() {
+		GL11.glDeleteTextures(textureID);
+	}
 }

@@ -18,6 +18,9 @@ public class StockRenderCache {
 	private static IconTextureSheet icon_cache;
 
 	public static void clearRenderCache() {
+		for (StockModel model : render_cache.values()) {
+			model.freeGL();
+		}
 		render_cache = new HashMap<String, StockModel>();
 		icon_cache = null;
 		primeCache();
