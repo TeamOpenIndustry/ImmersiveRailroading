@@ -32,7 +32,6 @@ public class RailBaseOverlayRender {
 
 		// Start drawing
 		try {
-			System.err.println("DRAW: " + Thread.currentThread().getId());
 			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 	
 			// From IE
