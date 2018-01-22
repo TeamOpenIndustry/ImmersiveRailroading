@@ -18,13 +18,15 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Items;
 
 public class RailBaseRender {
+	private static BufferBuilder worldRenderer = new BufferBuilder(2048);
+	
 	/*
 	 * This returns a cached buffer as rails don't change their model often
 	 * This drastically reduces the overhead of rendering these complex models
 	 * 
 	 * We also draw the railbed here since drawing a model for each gag eats FPS 
 	 */
-	protected static BufferBuilder getBaseBuffer(RailInfo info) {
+	private static BufferBuilder getBaseBuffer(RailInfo info) {
 		// Get model for current state
 		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 		
@@ -35,7 +37,6 @@ public class RailBaseRender {
 		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
 		
 		// Create render targets
-		BufferBuilder worldRenderer = new BufferBuilder(2048);
 
 		// Start drawing
 		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
@@ -51,13 +52,17 @@ public class RailBaseRender {
 		worldRenderer.finishDrawing();
 		return worldRenderer;
 	}
+	
+	private static synchronized void drawSync(RailInfo info) {
+		RailRenderUtil.draw(getBaseBuffer(info));
+	}
 
 	private static Map<String, Integer> displayLists = new HashMap<String, Integer>();
 	public static void draw(RailInfo info) {
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
 			int displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			RailRenderUtil.draw(getBaseBuffer(info));
+			drawSync(info);
 			GL11.glEndList();
 			displayLists.put(RailRenderUtil.renderID(info), displayList);
 		}
