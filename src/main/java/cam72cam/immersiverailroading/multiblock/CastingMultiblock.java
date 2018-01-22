@@ -198,6 +198,16 @@ public class CastingMultiblock extends Multiblock {
 							stack.shrink(1);
 							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + 9);
 						}
+					} else if (stack.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT && ItemComponent.getComponentType(stack).crafting.isCasting()) {
+						// TODO drain more power on melt
+						int cost = ItemComponent.getComponentType(stack).getCastCost(ItemDefinition.get(stack), ItemGauge.get(stack));
+						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + cost) {
+							if (!hasPower()) {
+								break;
+							}
+							stack.shrink(1);
+							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + cost);
+						}
 					} else {
 						if (fluidTe.getCraftProgress() > 0) {
 							// TODO play fizzle noise
