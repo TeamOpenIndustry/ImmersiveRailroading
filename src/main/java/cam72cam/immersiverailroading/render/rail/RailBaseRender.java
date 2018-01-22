@@ -1,11 +1,9 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.render.BakedScaledModel;
+import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -59,7 +57,7 @@ public class RailBaseRender {
 		RailRenderUtil.draw(getBaseBuffer(info));
 	}
 
-	private static Map<String, Integer> displayLists = new HashMap<String, Integer>();
+	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void draw(RailInfo info) {
 		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
 			int displayList = GL11.glGenLists(1);
