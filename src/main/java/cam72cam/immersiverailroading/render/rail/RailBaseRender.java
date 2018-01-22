@@ -39,17 +39,19 @@ public class RailBaseRender {
 		// Create render targets
 
 		// Start drawing
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-
-		// From IE
-		worldRenderer.color(255, 255, 255, 255);
-		
-		// This is evil but really fast :D
-		for (TrackBase base : info.getBuilder().getTracksForRender()) {
-			blockRenderer.getBlockModelRenderer().renderModel(info.world, new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale()), gravelState, base.getPos(), worldRenderer, false);
+		try {
+			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+	
+			// From IE
+			worldRenderer.color(255, 255, 255, 255);
+			
+			// This is evil but really fast :D
+			for (TrackBase base : info.getBuilder().getTracksForRender()) {
+				blockRenderer.getBlockModelRenderer().renderModel(info.world, new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale()), gravelState, base.getPos(), worldRenderer, false);
+			}
+		} finally {
+			worldRenderer.finishDrawing();
 		}
-		
-		worldRenderer.finishDrawing();
 		return worldRenderer;
 	}
 	
