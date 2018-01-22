@@ -11,6 +11,10 @@ public enum CraftingType {
 	PLATE_BOILER,
 	;
 	
+	public boolean isCasting() {
+		return this == CASTING || this == CASTING_HAMMER;
+	}
+	
 	@Override
 	public String toString() {
 		return TextUtil.translate("immersiverailroading:crafting_type." + super.toString().toLowerCase());
