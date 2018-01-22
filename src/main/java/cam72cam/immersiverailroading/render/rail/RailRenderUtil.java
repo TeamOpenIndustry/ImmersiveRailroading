@@ -31,7 +31,7 @@ public class RailRenderUtil {
 		
 		
 			RailBaseRender.draw(info);
-			RailRenderUtil.draw(RailBaseOverlayRender.getOverlayBuffer(info));
+			RailBaseOverlayRender.draw(info);
 			GL11.glPopMatrix();
 		}
 		
