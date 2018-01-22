@@ -130,10 +130,14 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 				//System.out.println(String.format("NOP CHUNK %s %s", chunk.x, chunk.z));
 			} else {
 				ImmersiveRailroading.debug("UNLOADED CHUNK %s %s", chunk.x, chunk.z);
-				ForgeChunkManager.unforceChunk(ticket, chunk);
+				try {
+					ForgeChunkManager.unforceChunk(ticket, chunk);
+				} catch (Exception ex) {
+					ImmersiveRailroading.catching(ex);
+				}
 			}
 		}
-		
+		 
 		for (ChunkPos pos : loaded) {
 			ImmersiveRailroading.debug("LOADED CHUNK %s %s", pos.chunkX, pos.chunkZ);
 			try {
