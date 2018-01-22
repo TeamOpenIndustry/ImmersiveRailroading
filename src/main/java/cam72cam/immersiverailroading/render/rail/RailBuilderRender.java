@@ -1,15 +1,13 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -31,7 +29,7 @@ public class RailBuilderRender {
 		}
 	}
 
-	private static Map<String, Integer> displayLists = new HashMap<String, Integer>();
+	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void renderRailBuilder(RailInfo info) {
 
 		Vec3d renderOff = new Vec3d(-0.5, 0, -0.5);
