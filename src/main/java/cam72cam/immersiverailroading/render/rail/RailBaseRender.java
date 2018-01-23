@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.render.BakedModelCache;
 import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -17,6 +18,8 @@ import net.minecraft.init.Items;
 
 public class RailBaseRender {
 	private static BufferBuilder worldRenderer = new BufferBuilder(2048);
+	private static BlockRendererDispatcher blockRenderer;
+	private static BakedModelCache scaled = new BakedModelCache();
 	
 	/*
 	 * This returns a cached buffer as rails don't change their model often
@@ -25,14 +28,15 @@ public class RailBaseRender {
 	 * We also draw the railbed here since drawing a model for each gag eats FPS 
 	 */
 	private static BufferBuilder getBaseBuffer(RailInfo info) {
-		// Get model for current state
-		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+		if (blockRenderer == null) {
+			// Get model for current state
+			blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+		}
 		
 		if (info.railBed.getItem() == Items.AIR) {
 			return null;
 		}
 		IBlockState gravelState = BlockUtil.itemToBlockState(info.railBed);
-		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
 		
 		// Create render targets
 
@@ -45,7 +49,12 @@ public class RailBaseRender {
 			
 			// This is evil but really fast :D
 			for (TrackBase base : info.getBuilder().getTracksForRender()) {
-				blockRenderer.getBlockModelRenderer().renderModel(info.world, new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale()), gravelState, base.getPos(), worldRenderer, false);
+				String key = gravelState.toString() + base.getHeight() + ":"  + info.gauge.scale();
+				if (!scaled.containsKey(key)) {
+					IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
+					scaled.put(key, new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale()));
+				}
+				blockRenderer.getBlockModelRenderer().renderModel(info.world, scaled.get(key), gravelState, base.getPos(), worldRenderer, false);
 			}
 		} finally {
 			worldRenderer.finishDrawing();
