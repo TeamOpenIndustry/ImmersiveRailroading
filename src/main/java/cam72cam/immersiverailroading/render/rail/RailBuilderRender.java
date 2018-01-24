@@ -60,8 +60,9 @@ public class RailBuilderRender {
 		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90);
 		GL11.glTranslated(renderOff.x, renderOff.y, renderOff.z);
 
-		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
-			int displayList = GL11.glGenLists(1);
+		Integer displayList = displayLists.get(RailRenderUtil.renderID(info));
+		if (displayList == null) {
+			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);		
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
@@ -100,7 +101,7 @@ public class RailBuilderRender {
 		}
 		
 		baseRailModel.bindTexture();
-		GL11.glCallList(displayLists.get(RailRenderUtil.renderID(info)));
+		GL11.glCallList(displayList);
 		baseRailModel.restoreTexture();
 	}
 }

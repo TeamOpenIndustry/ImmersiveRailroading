@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Items;
 
 public class RailBaseRender {
-	private static BufferBuilder worldRenderer = new BufferBuilder(2048);
 	private static BlockRendererDispatcher blockRenderer;
 	private static BakedModelCache scaled = new BakedModelCache();
 	
@@ -39,7 +38,8 @@ public class RailBaseRender {
 		IBlockState gravelState = BlockUtil.itemToBlockState(info.railBed);
 		
 		// Create render targets
-
+		BufferBuilder worldRenderer = new BufferBuilder(2048);
+		
 		// Start drawing
 		try {
 			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
@@ -50,11 +50,13 @@ public class RailBaseRender {
 			// This is evil but really fast :D
 			for (TrackBase base : info.getBuilder().getTracksForRender()) {
 				String key = gravelState.toString() + base.getHeight() + ":"  + info.gauge.scale();
-				if (!scaled.containsKey(key)) {
+				IBakedModel model = scaled.get(key);
+				if (model == null) {
 					IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
-					scaled.put(key, new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale()));
+					model = new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale());
+					scaled.put(key, model);
 				}
-				blockRenderer.getBlockModelRenderer().renderModel(info.world, scaled.get(key), gravelState, base.getPos(), worldRenderer, false);
+				blockRenderer.getBlockModelRenderer().renderModel(info.world, model, gravelState, base.getPos(), worldRenderer, false);
 			}
 		} finally {
 			worldRenderer.finishDrawing();
@@ -68,13 +70,14 @@ public class RailBaseRender {
 
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void draw(RailInfo info) {
-		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
-			int displayList = GL11.glGenLists(1);
+		Integer displayList = displayLists.get(RailRenderUtil.renderID(info));
+		if (displayList == null) {
+			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
 			drawSync(info);
 			GL11.glEndList();
 			displayLists.put(RailRenderUtil.renderID(info), displayList);
 		}
-		GL11.glCallList(displayLists.get(RailRenderUtil.renderID(info)));
+		GL11.glCallList(displayList);
 	}
 }
