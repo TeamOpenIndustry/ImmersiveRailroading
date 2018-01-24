@@ -20,6 +20,7 @@ public class BlockMultiblock extends Block {
 
 	public BlockMultiblock() {
 		super(Material.IRON);
+		setHardness(2.0F);
 		
         setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));

@@ -43,8 +43,8 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
 	public static final PropertyEnum<EnumFacing> FACING = new PropertyEnum<EnumFacing>("FACING", EnumFacing.class);
 	
-	public BlockRailBase(Material materialIn) {
-		super(materialIn);
+	public BlockRailBase() {
+		super(Material.IRON);
 		setHardness(1.0F);
 		setSoundType(SoundType.METAL);
 		
