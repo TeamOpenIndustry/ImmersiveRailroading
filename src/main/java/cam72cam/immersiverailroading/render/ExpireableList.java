@@ -48,12 +48,6 @@ public class ExpireableList<K,V> {
 		}
 	}
 
-	public boolean containsKey(K key) {
-		synchronized(this) {
-			return map.containsKey(key);
-		}
-	}
-
 	public void put(K key, V displayList) {
 		synchronized(this) {
 			mapUsage.put(key, timeS());

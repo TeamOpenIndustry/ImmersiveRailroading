@@ -17,7 +17,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 
 public class RailBaseOverlayRender {
-	private static BufferBuilder worldRenderer = new BufferBuilder(2048);
 	private static BlockRendererDispatcher blockRenderer;
 	private static IBlockState gravelState;
 	private static IBakedModel gravelModel;
@@ -33,6 +32,7 @@ public class RailBaseOverlayRender {
 		}
 		
 		// Create render targets
+		BufferBuilder worldRenderer = new BufferBuilder(2048);
 		
 		worldRenderer.setTranslation(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 
@@ -50,11 +50,13 @@ public class RailBaseOverlayRender {
 				if (!base.canPlaceTrack() ) {
 					hasIssue = true;
 					String key = ""+ base.getHeight();
-					if (!scaled.containsKey(key)) {
-						scaled.put(key, new BakedScaledModel(gravelModel, base.getHeight() + 0.2f));
+					IBakedModel model = scaled.get(key);
+					if (model == null) {
+						model = new BakedScaledModel(gravelModel, base.getHeight() + 0.2f);
+						scaled.put(key, model);
 					}
 					
-					blockRenderer.getBlockModelRenderer().renderModel(info.world, scaled.get(key), gravelState, base.getPos(), worldRenderer, false);
+					blockRenderer.getBlockModelRenderer().renderModel(info.world, model, gravelState, base.getPos(), worldRenderer, false);
 				}
 			}
 			
