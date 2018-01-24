@@ -113,8 +113,8 @@ public class EntityRollingStockDefinition {
 			couplerOffsetRear = (float) (data.get("couplers").getAsJsonObject().get("rear_offset").getAsFloat() * internal_scale);
 		}
 		
-		frontBounds = -model.minOfGroup(model.groups()).x;
-		rearBounds = model.maxOfGroup(model.groups()).x;
+		frontBounds = -model.minOfGroup(model.groups()).x + couplerOffsetFront;
+		rearBounds = model.maxOfGroup(model.groups()).x + couplerOffsetRear;
 		widthBounds = model.widthOfGroups(model.groups());
 		heightBounds = model.heightOfGroups(model.groups());
 		
@@ -269,9 +269,9 @@ public class EntityRollingStockDefinition {
 	public double getCouplerPosition(CouplerType coupler, Gauge gauge) {
 		switch(coupler) {
 		case FRONT:
-			return gauge.scale() * (this.frontBounds + couplerOffsetFront);
+			return gauge.scale() * (this.frontBounds);
 		case BACK:
-			return gauge.scale() * (this.rearBounds + couplerOffsetRear);
+			return gauge.scale() * (this.rearBounds);
 		default:
 			return 0;
 		}
