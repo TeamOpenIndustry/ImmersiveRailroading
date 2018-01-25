@@ -7,7 +7,7 @@
 	"properties": {
 		"max_psi": 185,
 		"water_capacity_l": 13000, 
-		"horsepower": 2000,
+		"horsepower": 3800,
 		"tractive_effort_lbf": 13690,
 		"max_speed_kmh": 120,
 		"valve_gear": "walschaerts",

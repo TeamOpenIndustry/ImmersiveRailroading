@@ -2,7 +2,7 @@
 	"era": "steam",
 	"name": "K4 Pacific",
 	"works": "Baldwin Locomotive Works",
-	"model": "immersiverailroading:models/rolling_stock/locomotives/k4_pacific.obj",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/k4_pacific/k4_pacific.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"max_psi": 205,
