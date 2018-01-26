@@ -73,7 +73,7 @@ public class LocomotiveDiesel extends Locomotive {
 				return;
 			}
 			
-			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
+			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
 			float throttle = Math.abs(this.getThrottle());

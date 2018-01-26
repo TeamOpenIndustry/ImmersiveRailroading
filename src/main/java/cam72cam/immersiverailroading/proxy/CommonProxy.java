@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.blocks.BlockRailPreview;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
@@ -49,6 +50,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -167,8 +169,15 @@ public abstract class CommonProxy implements IGuiHandler {
 	
 	@SubscribeEvent
 	public static void onWorldTick(WorldTickEvent event) {
-		// Only fired server side
-		ChunkManager.handleWorldTick(event.world);
+		if (!event.world.isRemote) {
+			ChunkManager.handleWorldTick(event.world);
+			// We do this here as to let all the entities do their tick first.  Otherwise some might be one tick ahead
+			// if we did this in the onUpdate method
+			List<EntityCoupleableRollingStock> entities = event.world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.IS_ALIVE);
+			for (EntityCoupleableRollingStock stock : entities) {
+				stock.tickPosRemainingCheck();
+			}
+		}
 	}
 
 	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
@@ -197,13 +206,5 @@ public abstract class CommonProxy implements IGuiHandler {
 		default:
 			return null;
     	}
-    }
-    
-    public void addTickMetric(double tickPosOffset) {
-    	// NOP
-    }
-    
-    public double serverTicksPerClientTick() {
-    	return 1;
     }
 }

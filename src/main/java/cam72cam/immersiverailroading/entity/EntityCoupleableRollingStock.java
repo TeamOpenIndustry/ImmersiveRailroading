@@ -237,12 +237,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
 			}
 		}
-		
-		
-		if (world.isRemote) {
-			return;
-		}
-		
+	}
+	
+	public void tickPosRemainingCheck() {
 		if (this.getRemainingPositions() < 20 || resimulate) {
 			TickPos lastPos = this.getCurrentTickPosAndPrune();
 			if (lastPos == null) {
