@@ -485,38 +485,12 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 	
+	private static int tickCount = 0;
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
 		if (tickCount % 40 == 39 ) {
 			StockRenderCache.doImageCache();
 		}
 		tickCount++;
-		
-		if (offsetCount != 0 && tickCount > 40) {
-			tickCount = 0;
-			double tickOffset = offsetAggregator / offsetCount;
-			if (tickOffset > 0) {
-				skew *= 1 - (Math.min(10, tickOffset) / 20); // Slow down client ticks
-			}
-			if (tickOffset < 0) {
-				skew *= 1 + (Math.min(10, -tickOffset) / 20); // Speed up client ticks
-			}
-			offsetCount = 0;
-			offsetAggregator = 0;
-		}
 	}
-
-	private static int tickCount = 0;
-	private static double skew = 1;
-	private static double offsetAggregator = 0.0;
-	private static double offsetCount = 0;
-    
-    public void addTickMetric(double tickPosOffset) {
-    	offsetCount++;
-    	offsetAggregator += tickPosOffset;
-    }
-    
-    public double serverTicksPerClientTick() {
-    	return skew;
-    }
 }
