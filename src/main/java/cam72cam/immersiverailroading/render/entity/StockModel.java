@@ -445,6 +445,7 @@ public class StockModel extends OBJRender {
 		RenderComponent returnCrank = def.getComponent(RenderComponentType.ECCENTRIC_CRANK_SIDE, side, stock.gauge);
 		RenderComponent returnCrankRod = def.getComponent(RenderComponentType.ECCENTRIC_ROD_SIDE, side, stock.gauge);
 		RenderComponent slottedLink = def.getComponent(RenderComponentType.EXPANSION_LINK_SIDE, side, stock.gauge);
+		RenderComponent radiusBar = def.getComponent(RenderComponentType.RADIUS_BAR_SIDE, side, stock.gauge);
 		
 		// Center of the connecting rod, may not line up with a wheel directly
 		Vec3d connRodPos = connectingRod.center();
@@ -497,14 +498,11 @@ public class StockModel extends OBJRender {
 		double pistonDelta = connRodMovment.x - connRodRadius;
 		
 		// Draw piston rod and cross head
-		// combo lever will be moved
 		GL11.glPushMatrix();
 		{
 			GL11.glTranslated(pistonDelta, 0, 0);
 			drawComponent(pistonRod);
 			drawComponent(crossHead);
-			// TODO rotate combination lever
-			drawComponent(combinationLever);
 		}
 		GL11.glPopMatrix();
 
@@ -563,7 +561,6 @@ public class StockModel extends OBJRender {
 		{
 			// Move to origin
 			GL11.glTranslated(slottedLinkRotPoint.x, slottedLinkRotPoint.y, 0);
-			//GL11.glTranslated(returnCrankRodFarPoint.x, returnCrankRodFarPoint.y, 0);
 			
 			// Rotate around center point
 			GL11.glRotated(slottedLinkRot, 0, 0, 1);
@@ -571,6 +568,56 @@ public class StockModel extends OBJRender {
 			// Draw slotted link at current position
 			GL11.glTranslated(-slottedLinkRotPoint.x, -slottedLinkRotPoint.y, 0);
 			drawComponent(slottedLink);
+		}
+		GL11.glPopMatrix();
+		
+		float throttle = stock.getThrottle();
+		double forwardMax = (slottedLink.min().y - slottedLinkRotPoint.y) * 0.4;
+		double forwardMin = (slottedLink.max().y - slottedLinkRotPoint.y) * 0.65;
+		double throttleSlotPos = 0;
+		if (throttle > 0) {
+			throttleSlotPos = forwardMax * throttle;
+		} else {
+			throttleSlotPos = forwardMin * -throttle;
+		}
+		
+		double radiusBarSliding = Math.sin(Math.toRadians(-slottedLinkRot)) * (throttleSlotPos);
+		
+		Vec3d radiusBarClose = radiusBar.max();
+		throttleSlotPos += slottedLinkRotPoint.y - radiusBarClose.y;
+		
+		float raidiusBarAngle = VecUtil.toYaw(new Vec3d(radiusBar.length(), 0, throttleSlotPos))+90;
+		
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(0, throttleSlotPos, 0);
+			
+			GL11.glTranslated(radiusBarSliding, 0, 0);
+			
+			GL11.glTranslated(radiusBarClose.x, radiusBarClose.y, 0);
+			GL11.glRotated(raidiusBarAngle, 0, 0, 1);
+			GL11.glTranslated(-radiusBarClose.x, -radiusBarClose.y, 0);
+			drawComponent(radiusBar);
+		}
+		GL11.glPopMatrix();
+		
+		Vec3d radiusBarFar = radiusBar.min();
+		//radiusBarSliding != correct TODO angle offset
+		Vec3d radiusBarFarPoint = radiusBarFar.addVector(radiusBarSliding + combinationLever.width()/2, 0, 0);
+		
+		Vec3d combinationLeverRotPos = combinationLever.min().addVector(combinationLever.width()/2, combinationLever.width()/2, 0);
+		
+		Vec3d delta = radiusBarFarPoint.subtract(combinationLeverRotPos.addVector(pistonDelta, 0, 0));
+		
+		float combinationLeverAngle = VecUtil.toYaw(new Vec3d(delta.x, 0, delta.y));
+
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(pistonDelta, 0, 0);
+			GL11.glTranslated(combinationLeverRotPos.x, combinationLeverRotPos.y, 0);
+			GL11.glRotated(combinationLeverAngle, 0, 0, 1);
+			GL11.glTranslated(-combinationLeverRotPos.x, -combinationLeverRotPos.y, 0);
+			drawComponent(combinationLever);
 		}
 		GL11.glPopMatrix();
 	}
