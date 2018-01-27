@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraftforge.common.config.Config.Comment;
 
 @net.minecraftforge.common.config.Config(modid=ImmersiveRailroading.MODID)
@@ -52,6 +53,9 @@ public class Config {
 	@Comment("Models require fuel")
 	public static boolean ModelFuelRequired = true;
 	
+	@Comment("All gauges require fuel")
+	public static boolean FuelRequired = true;
+	
 	@Comment("Trains should break blocks")
 	public static boolean TrainsBreakBlocks = true;
 
@@ -60,4 +64,8 @@ public class Config {
 
 	@Comment("Use Icon Cache (experimental)")
 	public static boolean enableIconCache = false;
+
+	public static boolean isFuelRequired(Gauge gauge) {
+		return !(!FuelRequired || (!ModelFuelRequired && gauge.equals(Gauge.MODEL)));
+	}
 }
