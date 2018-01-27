@@ -15,12 +15,16 @@ import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ElytraSound;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
@@ -35,6 +39,7 @@ public class LocomotiveSteam extends Locomotive {
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private boolean gonnaExplode;
 	private double driverDiameter;
+	private MovingSoundRollingStock sound;
 	
 	public LocomotiveSteam(World world) {
 		this(world, null);
@@ -170,6 +175,7 @@ public class LocomotiveSteam extends Locomotive {
 		return phase;
 	}
 	
+	private boolean phaseOn = false;
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -180,12 +186,31 @@ public class LocomotiveSteam extends Locomotive {
 			if (!Config.particlesEnabled) {
 				return;
 			}
+			/*
+			if (this.sound == null) {
+				this.sound = new MovingSoundRollingStock(this, SoundEvents.BLOCK_SAND_BREAK, SoundCategory.MASTER);
+				this.sound.setDynamicRate();
+				Minecraft.getMinecraft().getSoundHandler().playSound(sound);
+			}*/
+			
+			double phase = getPhase(4, 0);
+			
+			if (!phaseOn) {
+				if (phase > 0.8) {
+					world.playSound(this.posX, this.posY, this.posZ, SoundEvents.BLOCK_SAND_BREAK, SoundCategory.MASTER, 1, (float) this.getCurrentSpeed().minecraft()*2, true);
+					phaseOn = true;
+				}
+			} else {
+				if (phase < 0.8) {
+					phaseOn = false;
+				}
+			}
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
 			if (smokes != null) {
-				double phase = getPhase(4, 0);
+				phase = getPhase(4, 0);
 				//System.out.println(phase);
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
@@ -254,7 +279,7 @@ public class LocomotiveSteam extends Locomotive {
 						continue;
 					}
 					
-					double phase = this.getPhase(2, phaseOffset);
+					phase = this.getPhase(2, phaseOffset);
 					double phaseSpike = Math.pow(phase, 4);
 					
 					if (phaseSpike < 0.6) {
