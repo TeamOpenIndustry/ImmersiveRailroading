@@ -23,7 +23,7 @@ public class FreightContainerGui extends ContainerGuiBase {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         int i = (this.width - this.xSize) / 2;
-        int j = (this.height - this.ySize) / 2;
+        int j = (this.height - this.ySize) / 4;
     	
     	int currY = j;
         
