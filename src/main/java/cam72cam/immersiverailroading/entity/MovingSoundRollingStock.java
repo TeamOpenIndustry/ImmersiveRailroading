@@ -52,7 +52,10 @@ public class MovingSoundRollingStock extends MovingSound {
 	    	double maxSpeed = Math.abs(loco.getDefinition().getMaxSpeed(loco.gauge).minecraft());
 	        if (this.dyamicRate) {
 	    		// Set repeat delay to speed
-	            this.repeatDelay = (int) (1 - speed/maxSpeed);
+	            this.repeatDelay = (int) (20 * (1 - speed/maxSpeed));
+	            if (loco.ticksExisted % 20 == 0) { 
+	            	System.out.println(this.repeatDelay);
+	            }
 	        }
 	        
 	        if (this.dynamicPitch) {
