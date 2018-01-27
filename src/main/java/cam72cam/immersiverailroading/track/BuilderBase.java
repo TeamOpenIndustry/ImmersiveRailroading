@@ -244,4 +244,21 @@ public abstract class BuilderBase {
 	public void setDrops(List<ItemStack> drops) {
 		this.drops = drops;
 	}
+
+	public void clearArea() {
+		for (TrackBase track : tracks) {
+			for (int i = 0; i < 6 * gauge.scale(); i++) {
+				BlockPos main = track.getPos().up(i);
+				if (!BlockUtil.isRail(world, main)) {
+					world.destroyBlock(main, false);
+				}
+				for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+					BlockPos pos = main.offset(facing);
+					if (!BlockUtil.isRail(world, pos)) {
+						world.destroyBlock(pos, false);
+					}
+				}
+			}
+		}
+	}
 }
