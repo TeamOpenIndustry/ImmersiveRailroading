@@ -54,6 +54,7 @@ import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -171,10 +172,12 @@ public abstract class CommonProxy implements IGuiHandler {
 	public static void onWorldTick(WorldTickEvent event) {
 		if (!event.world.isRemote) {
 			ChunkManager.handleWorldTick(event.world);
+			WorldServer world = event.world.getMinecraftServer().getWorld(event.world.provider.getDimension());
 			// We do this here as to let all the entities do their tick first.  Otherwise some might be one tick ahead
 			// if we did this in the onUpdate method
-			List<EntityCoupleableRollingStock> entities = event.world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.IS_ALIVE);
+			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.IS_ALIVE);
 			for (EntityCoupleableRollingStock stock : entities) {
+				stock = stock.findByUUID(stock.getPersistentID());
 				stock.tickPosRemainingCheck();
 			}
 		}
