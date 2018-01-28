@@ -8,7 +8,7 @@
 		"max_psi": 185,
 		"water_capacity_l": 13000, 
 		"horsepower": 3800,
-		"tractive_effort_lbf": 13690,
+		"tractive_effort_lbf": 28450,
 		"max_speed_kmh": 120,
 		"valve_gear": "walschaerts",
 		"weight_kg": 59760
@@ -21,8 +21,13 @@
 		"slots": 3,
 		"center_x": -3.3,
 		"center_y": 2,
+<<<<<<< HEAD
+		"length": 1.6,
+		"width": 3
+=======
 		"length": 0.5,
 		"width": 2.3
+>>>>>>> c963bf5ffb1ee6cf14a932a1d40d77a4c2e3965a
 	},
 	"trucks": {
 		"front": 1, 
