@@ -62,6 +62,9 @@ public class OBJRender {
 	public void drawDirect() {
 		drawDirectGroups(model.groups.keySet());
 	}
+	public void drawDirect(double scale) {
+		drawDirectGroups(model.groups.keySet(), scale);
+	}
 
 	public Map<Double, Map<Iterable<String>, Integer>> displayLists = new HashMap<Double, Map<Iterable<String>, Integer>>();
 

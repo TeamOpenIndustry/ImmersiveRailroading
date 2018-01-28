@@ -7,9 +7,9 @@
 	},
 	"passenger": {
 		"slots": 8,
-		"center_x": 5,
-		"center_y": 0.8,
-		"length": 18,
+		"center_x": 0,
+		"center_y": 1.2,
+		"length": 9.5,
 		"width": 2.4
 	},
 	"freight": {
