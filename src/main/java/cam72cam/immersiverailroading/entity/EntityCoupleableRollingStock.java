@@ -240,7 +240,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	public void tickPosRemainingCheck() {
-		if (this.getRemainingPositions() < 20 || resimulate) {
+		if (this.getRemainingPositions() < 10 || resimulate) {
 			TickPos lastPos = this.getCurrentTickPosAndPrune();
 			if (lastPos == null) {
 				this.triggerResimulate();
@@ -255,6 +255,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 						return;
 					}
 				}
+			}
+			
+			if (resimulate && this.ticksExisted % 5 != 0) {
+				// Resimulate every 5 ticks, this will cut down on packet storms
+				return;
 			}
 			
 			boolean isStuck = false;
