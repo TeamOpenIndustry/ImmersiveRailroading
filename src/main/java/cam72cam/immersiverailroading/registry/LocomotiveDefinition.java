@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.Speed;
 
-public class LocomotiveDefinition extends EntityRollingStockDefinition  {
+public abstract class LocomotiveDefinition extends EntityRollingStockDefinition  {
 	private String works;
 	private int power;
 	private int traction;
@@ -76,5 +76,9 @@ public class LocomotiveDefinition extends EntityRollingStockDefinition  {
 
 	public Speed getMaxSpeed(Gauge gauge) {
 		return Speed.fromMinecraft(gauge.scale() * this.maxSpeed.minecraft());
+	}
+	
+	public double getBrakePower() {
+		return 1;
 	}
 }

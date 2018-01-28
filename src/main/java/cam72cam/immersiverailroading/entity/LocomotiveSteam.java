@@ -145,7 +145,7 @@ public class LocomotiveSteam extends Locomotive {
 	
 	@Override
 	protected int getAvailableHP() {
-		if (Config.ModelFuelRequired == false && this.gauge == Gauge.MODEL) {
+		if (!Config.isFuelRequired(gauge)) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
@@ -221,7 +221,7 @@ public class LocomotiveSteam extends Locomotive {
 						for (int i : this.getBurnTime().values()) {
 							darken += i >= 1 ? 1 : 0;
 						}
-						if (darken == 0) {
+						if (darken == 0 && Config.isFuelRequired(gauge)) {
 							break;
 						}
 						darken /= this.getInventorySize() - 2.0;
@@ -253,7 +253,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
-			if (pistons != null && csm > 0.1 && csm  < 20 && this.getBoilerPressure() > 0) {
+			if (pistons != null && csm > 0.1 && csm  < 20 && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 				for (RenderComponent piston : pistons) {
 					float phaseOffset = 0;
 					switch (piston.side) {
@@ -298,7 +298,7 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
-			if (steams != null && this.getBoilerPressure() == this.getDefinition().getMaxPSI(gauge)) {
+			if (steams != null && (this.getBoilerPressure() >= this.getDefinition().getMaxPSI(gauge) || !Config.isFuelRequired(gauge))) {
 				for (RenderComponent steam : steams) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					particlePos = particlePos.subtract(fakeMotion);
