@@ -89,6 +89,15 @@ public class DefinitionManager {
 					ex.printStackTrace();
 				}
 			}
+			for (JsonElement hand_car : stock.get("hand_car").getAsJsonArray()) {
+				try {
+					String defID = "rolling_stock/hand_car/" + hand_car.getAsString() + ".json";
+					JsonObject data = getJsonData(defID);
+					definitions.put(defID, new HandCarDefinition(defID, data));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
 		}
 	}
 
