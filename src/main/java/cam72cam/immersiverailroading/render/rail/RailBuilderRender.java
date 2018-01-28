@@ -72,12 +72,12 @@ public class RailBuilderRender {
 				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
 				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
 				GL11.glRotatef(-90, 0, 1, 0);
-				float length = piece.getLength();
-				if (length == 1) {
-					length = (float) info.gauge.scale();
-				}
-				GL11.glScaled(length, info.gauge.scale(), info.gauge.scale());
+				
 				if (piece.getGroups().size() != 0) {
+					if (piece.getLength() != 1) {
+						GL11.glScaled(piece.getLength() / info.gauge.scale(), 1, 1);
+					}
+					
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
 					for (String baseGroup : piece.getGroups()) {
@@ -88,9 +88,9 @@ public class RailBuilderRender {
 						}
 					}
 					
-					baseRailModel.drawDirectGroups(groups);
+					baseRailModel.drawDirectGroups(groups, info.gauge.scale());
 				} else {
-					baseRailModel.drawDirect();
+					baseRailModel.drawDirect(info.gauge.scale());
 				}
 				GL11.glPopMatrix();;
 			}
