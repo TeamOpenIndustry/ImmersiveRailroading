@@ -1,10 +1,14 @@
 package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -757,6 +761,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public final List<EntityCoupleableRollingStock> getTrain() {
 		return getTrain(true);
 	}
+	
+	
 
 	public final List<EntityCoupleableRollingStock> getTrain(boolean followDisengaged) {
 		List<EntityCoupleableRollingStock> train = new ArrayList<EntityCoupleableRollingStock>();
@@ -769,33 +775,72 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	public final void mapTrain(EntityCoupleableRollingStock prev, boolean direction, boolean followDisengaged, BiConsumer<EntityCoupleableRollingStock, Boolean> fn) {
-		fn.accept(this, direction);
-		for (CouplerType coupler : CouplerType.values()) {
-			if (this.getCoupledUUID(coupler) == null) {
-				continue;
-			}
-			
-			if (this.getCoupledUUID(coupler).equals(prev.getUniqueID())) {
-				continue;
-			}
-			
-			if (!(followDisengaged || this.isCouplerEngaged(coupler))) {
-				continue;
-			}
-			
-			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
-			
-			if (coupled == null) {
-				continue;
-			}
-			
-			CouplerType otherCoupler = coupled.getCouplerFor(this);
-			if (!(followDisengaged || coupled.isCouplerEngaged(otherCoupler))) {
-				continue;
-			}
-
-			coupled.mapTrain(this, coupler.opposite() == otherCoupler ? direction : !direction, followDisengaged, fn);
+		for (DirectionalStock stock : getDirectionalTrain(followDisengaged)) {
+			fn.accept(stock.stock, stock.direction);
 		}
+	}
+	
+
+	public static class DirectionalStock {
+		public final EntityCoupleableRollingStock stock;
+		public final boolean direction;
+
+		public DirectionalStock(EntityCoupleableRollingStock stock, boolean direction) {
+			this.stock = stock;
+			this.direction = direction;
+		}
+	}
+	
+	public Collection<DirectionalStock> getDirectionalTrain(boolean followDisengaged) {
+		Map<UUID, DirectionalStock> train = new HashMap<UUID, DirectionalStock>();
+		
+		Function<DirectionalStock, DirectionalStock> next = (DirectionalStock current) -> {
+			for (CouplerType coupler : CouplerType.values()) {
+				EntityCoupleableRollingStock stock = current.stock;
+				boolean direction = current.direction;
+				
+				if (stock.getCoupledUUID(coupler) == null) {
+					continue;
+				}
+				
+				if (train.containsKey(stock.getCoupledUUID(coupler))) {
+					continue;
+				}
+				
+				if (!(followDisengaged || stock.isCouplerEngaged(coupler))) {
+					continue;
+				}
+				
+				EntityCoupleableRollingStock coupled = stock.getCoupled(coupler);
+				
+				if (coupled == null) {
+					continue;
+				}
+				
+				CouplerType otherCoupler = coupled.getCouplerFor(stock);
+				if (!(followDisengaged || coupled.isCouplerEngaged(otherCoupler))) {
+					continue;
+				}
+				
+				return new DirectionalStock(coupled, coupler.opposite() == otherCoupler ? direction : !direction);
+			}
+			return null;
+		};
+		
+		
+		DirectionalStock start = new DirectionalStock(this, true);
+		train.put(start.stock.getPersistentID(), start);
+		
+		for (int i = 0; i < 2; i ++) {
+			// Will fire for both front and back
+			
+			for (DirectionalStock current = next.apply(start); current != null; current = next.apply(current)) {
+				train.put(current.stock.getPersistentID(), current);
+			}
+		}
+		
+		
+		return train.values();
 	}
 
 	public EntityCoupleableRollingStock findByUUID(UUID uuid) {
