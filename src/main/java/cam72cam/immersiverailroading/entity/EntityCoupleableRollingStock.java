@@ -2,10 +2,8 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -36,7 +34,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import scala.reflect.internal.util.Set;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
 
