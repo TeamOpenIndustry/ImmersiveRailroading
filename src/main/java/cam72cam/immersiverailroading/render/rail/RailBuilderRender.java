@@ -12,14 +12,13 @@ import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class RailBuilderRender {
 	
 	private static OBJRender baseRailModel;
+	private static OBJRender baseRailModelModel;
 	
 	static {
 		try {
@@ -27,10 +26,17 @@ public class RailBuilderRender {
 		} catch (Exception e) {
 			ImmersiveRailroading.catching(e);
 		}
+		try {
+			baseRailModelModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m_model.obj"), 0.05f));
+		} catch (Exception e) {
+			ImmersiveRailroading.catching(e);
+		}
 	}
 
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void renderRailBuilder(RailInfo info) {
+		
+		OBJRender model = info.gauge != Gauge.MODEL ? baseRailModel : baseRailModelModel;
 
 		Vec3d renderOff = new Vec3d(-0.5, 0, -0.5);
 
@@ -58,7 +64,7 @@ public class RailBuilderRender {
 		GL11.glTranslated(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
 		
 		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90);
-		GL11.glTranslated(renderOff.x, renderOff.y, renderOff.z);
+		GL11.glTranslated(renderOff.x, renderOff.y, renderOff.z); 
 
 		Integer displayList = displayLists.get(RailRenderUtil.renderID(info));
 		if (displayList == null) {
@@ -72,36 +78,35 @@ public class RailBuilderRender {
 				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
 				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
 				GL11.glRotatef(-90, 0, 1, 0);
-				float length = piece.getLength();
-				if (length == 1) {
-					length = (float) info.gauge.scale();
-				}
-				GL11.glScaled(length, info.gauge.scale(), info.gauge.scale());
+				
 				if (piece.getGroups().size() != 0) {
+					if (piece.getLength() != 1) {
+						GL11.glScaled(piece.getLength() / info.gauge.scale(), 1, 1);
+					}
+					
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
 					for (String baseGroup : piece.getGroups()) {
-						for (String groupName : baseRailModel.model.groups())  {
+						for (String groupName : model.model.groups())  {
 							if (groupName.contains(baseGroup)) {
 								groups.add(groupName);
 							}
 						}
 					}
 					
-					baseRailModel.drawDirectGroups(groups);
+					model.drawDirectGroups(groups, info.gauge.scale());
 				} else {
-					baseRailModel.drawDirect();
+					model.drawDirect(info.gauge.scale());
 				}
 				GL11.glPopMatrix();;
 			}
-			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 			GL11.glEndList();
 			displayLists.put(RailRenderUtil.renderID(info), displayList);
 		}
 		
-		baseRailModel.bindTexture();
+		model.bindTexture();
 		GL11.glCallList(displayList);
-		baseRailModel.restoreTexture();
+		model.restoreTexture();
 	}
 }

@@ -1,0 +1,28 @@
+{
+	"era": "manual",
+	"name": "Hand Car",
+	"works": "misc",
+	"model": "immersiverailroading:models/rolling_stock/hand_car/hand_car_1.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 1000,
+		"horsepower": 1,
+		"tractive_effort_lbf": 1000,
+		"max_speed_kmh": 20
+	},
+	"passenger": {
+		"slots": 4,
+		"center_x": 0,
+		"center_y": 0.7,
+		"length": 1,
+		"width": 1
+	},
+	"trucks": {
+		"front": 0.5, 
+		"rear": -0.5
+	},
+	"couplers": {
+		"front_offset": 0.1,
+		"rear_offset": 0.1
+	}
+}

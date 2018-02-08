@@ -27,11 +27,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class EntityRollingStockDefinition {
+public abstract class EntityRollingStockDefinition {
 	
-	public EntityRollingStock instance(World world) {
-		return null;
-	}
+	public abstract EntityRollingStock instance(World world);
 	
 	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge) {
 		EntityRollingStock stock = instance(world);

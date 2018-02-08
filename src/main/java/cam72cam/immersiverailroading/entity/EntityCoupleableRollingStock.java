@@ -1,10 +1,13 @@
 package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -290,11 +293,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			
 			simulateCoupledRollingStock();
-			
-			List<EntityCoupleableRollingStock> tr = this.getTrain();
-			for (EntityCoupleableRollingStock stock : tr) {
-				stock.resimulate = false;
-			}
 		}
 	}
 
@@ -322,14 +320,18 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 
 	public void simulateCoupledRollingStock() {
+		Collection<DirectionalStock> train = this.getDirectionalTrain(true);
 		for (int tickOffset = 1; tickOffset < this.positions.size(); tickOffset++) {
 			boolean onTrack = true;
-			for (CouplerType coupler : CouplerType.values()) {
-				EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
-				if (coupled != null) {
-					onTrack = coupled.recursiveMove(this, tickOffset) && onTrack;
+			
+			for (DirectionalStock stock : train) {
+				if (stock.stock.getUniqueID().equals(this.getUniqueID())) {
+					//Skip self
+					continue;
 				}
+				onTrack &= stock.stock.simulateMove(stock.prev, tickOffset);
 			}
+			
 			if (!onTrack) {
 				for (int i = tickOffset; i < this.positions.size(); i ++) {
 					this.positions.get(i).position = this.positions.get(tickOffset).position;
@@ -341,19 +343,26 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				break;
 			}
 		}
-		for (EntityCoupleableRollingStock entity : this.getTrain(true)) {
-			entity.sendToObserving(new MRSSyncPacket(entity, entity.positions));			
+		for (DirectionalStock entity : train) {
+			entity.stock.sendToObserving(new MRSSyncPacket(entity.stock, entity.stock.positions));
+			entity.stock.resimulate = false;
 		}
 	}
 
 	// This breaks with looped rolling stock
-	private boolean recursiveMove(EntityCoupleableRollingStock parent, int tickOffset) {
+	private boolean simulateMove(EntityCoupleableRollingStock parent, int tickOffset) {
 		if (this.positions.size() < tickOffset) {
 			ImmersiveRailroading.warn("MISSING START POS " + tickOffset);
 			return true;
 		}
 		
 		TickPos currentPos = this.positions.get(tickOffset-1);
+		
+		if (parent.positions.size() <= tickOffset) {
+			//TODO better hack
+			return currentPos.isOffTrack;
+		}
+		
 		TickPos parentPos = parent.positions.get(tickOffset);
 		boolean onTrack = !currentPos.isOffTrack;
 		
@@ -370,10 +379,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			parent.decouple(this);
 			this.decouple(parent);
 			ImmersiveRailroading.warn("COUPLER NULL");
-			return true;
+			return onTrack;
 		}
-		
-		boolean skipCalc = false;
 		
 		if ((!this.isCouplerEngaged(coupler) || !parent.isCouplerEngaged(otherCoupler))) {
 			if (parent.positions.size() >= 2) {
@@ -381,13 +388,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				double prevDist = currentPos.position.distanceTo(parent.positions.get(tickOffset-1).position);
 				double dist = currentPos.position.distanceTo(parent.positions.get(tickOffset).position);
 				if (prevDist <= dist) {
-					this.positions.add(this.moveRollingStock(getMovement(currentPos, false).minecraft(), currentPos.tickID));;
-					skipCalc = true;
+					TickPos nextPos = this.moveRollingStock(getMovement(currentPos, false).minecraft(), currentPos.tickID);
+					this.positions.add(nextPos);
+					if (nextPos.isOffTrack) {
+						onTrack = false;
+					}
+					return onTrack;
 				}
 			}
 		}
-		
-		if (!skipCalc) {
 		
 		Vec3d myOffset = this.getCouplerPositionTo(coupler, currentPos, parentPos);
 		Vec3d otherOffset = parent.getCouplerPositionTo(otherCoupler, parentPos, currentPos);
@@ -396,7 +405,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			if (!world.isRemote) {
 				ImmersiveRailroading.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), parent.getPersistentID()));
 			}
-			return true;
+			return onTrack;
 		}
 		
 		double distance = myOffset.distanceTo(otherOffset);
@@ -422,18 +431,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			for (CouplerType toChunk : CouplerType.values()) {
 				ChunkManager.flagEntityPos(this.world, new BlockPos(this.getCouplerPosition(toChunk, nextPos)));
 			}
-		}
-		}
-		
-		for (CouplerType nextCoupler : CouplerType.values()) {
-			EntityCoupleableRollingStock coupled = this.getCoupled(nextCoupler);
-
-			if (coupled == null || coupled == parent) {
-				// Either end of train or wrong iteration direction
-				continue;
-			}
-			
-			onTrack = coupled.recursiveMove(this, tickOffset) ? onTrack : false;
 		}
 
 		return onTrack;
@@ -757,6 +754,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public final List<EntityCoupleableRollingStock> getTrain() {
 		return getTrain(true);
 	}
+	
+	
 
 	public final List<EntityCoupleableRollingStock> getTrain(boolean followDisengaged) {
 		List<EntityCoupleableRollingStock> train = new ArrayList<EntityCoupleableRollingStock>();
@@ -769,33 +768,77 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	public final void mapTrain(EntityCoupleableRollingStock prev, boolean direction, boolean followDisengaged, BiConsumer<EntityCoupleableRollingStock, Boolean> fn) {
-		fn.accept(this, direction);
-		for (CouplerType coupler : CouplerType.values()) {
-			if (this.getCoupledUUID(coupler) == null) {
-				continue;
-			}
-			
-			if (this.getCoupledUUID(coupler).equals(prev.getUniqueID())) {
-				continue;
-			}
-			
-			if (!(followDisengaged || this.isCouplerEngaged(coupler))) {
-				continue;
-			}
-			
-			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
-			
-			if (coupled == null) {
-				continue;
-			}
-			
-			CouplerType otherCoupler = coupled.getCouplerFor(this);
-			if (!(followDisengaged || coupled.isCouplerEngaged(otherCoupler))) {
-				continue;
-			}
-
-			coupled.mapTrain(this, coupler.opposite() == otherCoupler ? direction : !direction, followDisengaged, fn);
+		for (DirectionalStock stock : getDirectionalTrain(followDisengaged)) {
+			fn.accept(stock.stock, stock.direction);
 		}
+	}
+	
+
+	public static class DirectionalStock {
+		public final EntityCoupleableRollingStock prev;
+		public final EntityCoupleableRollingStock stock;
+		public final boolean direction;
+
+		public DirectionalStock(EntityCoupleableRollingStock prev, EntityCoupleableRollingStock stock, boolean direction) {
+			this.prev = prev;
+			this.stock = stock;
+			this.direction = direction;
+		}
+	}
+	
+	public Collection<DirectionalStock> getDirectionalTrain(boolean followDisengaged) {
+		HashSet<UUID> trainMap = new HashSet<UUID>();
+		List<DirectionalStock> trainList = new ArrayList<DirectionalStock>();
+		
+		Function<DirectionalStock, DirectionalStock> next = (DirectionalStock current) -> {
+			for (CouplerType coupler : CouplerType.values()) {
+				EntityCoupleableRollingStock stock = current.stock;
+				boolean direction = current.direction;
+				
+				if (stock.getCoupledUUID(coupler) == null) {
+					continue;
+				}
+				
+				if (trainMap.contains(stock.getCoupledUUID(coupler))) {
+					continue;
+				}
+				
+				if (!(followDisengaged || stock.isCouplerEngaged(coupler))) {
+					continue;
+				}
+				
+				EntityCoupleableRollingStock coupled = stock.getCoupled(coupler);
+				
+				if (coupled == null) {
+					continue;
+				}
+				
+				CouplerType otherCoupler = coupled.getCouplerFor(stock);
+				if (!(followDisengaged || coupled.isCouplerEngaged(otherCoupler))) {
+					continue;
+				}
+				
+				return new DirectionalStock(stock, coupled, coupler.opposite() == otherCoupler ? direction : !direction);
+			}
+			return null;
+		};
+		
+		
+		DirectionalStock start = new DirectionalStock(null, this, true);
+		trainMap.add(start.stock.getPersistentID());
+		trainList.add(start);
+		
+		for (int i = 0; i < 2; i ++) {
+			// Will fire for both front and back
+			
+			for (DirectionalStock current = next.apply(start); current != null; current = next.apply(current)) {
+				trainMap.add(current.stock.getPersistentID());
+				trainList.add(current);
+			}
+		}
+		
+		
+		return trainList;
 	}
 
 	public EntityCoupleableRollingStock findByUUID(UUID uuid) {
