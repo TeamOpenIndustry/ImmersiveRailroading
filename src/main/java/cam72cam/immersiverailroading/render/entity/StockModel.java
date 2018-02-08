@@ -267,6 +267,7 @@ public class StockModel extends OBJRender {
 			}
 			break;
 		case T1:
+			drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT, stock.gauge));
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
 				drawDrivingWheels(stock, wheels);
