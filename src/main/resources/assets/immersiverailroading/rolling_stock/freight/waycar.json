@@ -2,7 +2,7 @@
 	"name": "Waycar",
 	"model": "immersiverailroading:models/rolling_stock/caboose/waycar/waycar.obj",
 	"darken_model": "-0.05",
-	"model_gauge_m": 2.14,
+	"model_gauge_m": 1,
 	"properties": {
 		"weight_kg": 8000
 	},

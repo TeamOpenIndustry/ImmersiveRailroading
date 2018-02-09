@@ -1,0 +1,35 @@
+{
+	"era": "steam",
+	"name": "PS-4 Class",
+	"works": "ALCO Schenectady / ALCO Richmond",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/ps4_class/ps4_class.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"max_psi": 200,
+		"water_capacity_l": 64000, 
+		"horsepower": 4200,
+		"tractive_effort_lbf": 47500,
+		"max_speed_kmh": 145,
+		"valve_gear": "walschaerts",
+		"weight_kg": 154221
+	},
+	"firebox": {
+		"slots": 18,
+		"width": 6
+	},
+	"passenger": {
+		"slots": 4,
+		"center_x": -6,
+		"center_y": 2.1,
+		"length": 1,
+		"width": 2.5
+	},
+	"trucks": {
+		"front": 2, 
+		"rear": -2
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -1
+	}
+}
