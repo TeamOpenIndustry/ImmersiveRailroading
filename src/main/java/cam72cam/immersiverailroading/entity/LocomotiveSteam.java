@@ -194,7 +194,8 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
-	private Map<String, String> sndCache = new HashMap<String, String>();
+	private List<String> sndCache = new ArrayList<String>();
+	private int sndCacheId = 0;
 	private Map<String, MovingSoundRollingStock> repeating = new HashMap<String, MovingSoundRollingStock>();
 	private SoundEvent horn;
 	private SoundEvent idle;
@@ -229,6 +230,9 @@ public class LocomotiveSteam extends Locomotive {
 				this.idle = new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "idle"));
 				this.idleRep = new MovingSoundRollingStock(this, this.idle, SoundCategory.MASTER);
 				idleRep.setDynamicRate();
+				for (int i = 0; i < 16; i ++) {
+					sndCache.add(ClientProxy.newSound(new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER)));
+				}
 				Minecraft.getMinecraft().getSoundHandler().playSound(idleRep);
 			}
 			double phase = getPhase(4, 0);
@@ -359,11 +363,9 @@ public class LocomotiveSteam extends Locomotive {
 						if (phase > 0.8) {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	if (!sndCache.containsKey(key)) {
-					    		sndCache.put(key, ClientProxy.newSound(new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER)));
-					    	}
-					    	
-					    	ClientProxy.play(sndCache.get(key), 1, (float) (1-speed/maxSpeed), posX, posY, posZ);
+					    	ClientProxy.play(sndCache.get(sndCacheId), 0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
+					    	sndCacheId++;
+					    	sndCacheId = sndCacheId % sndCache.size();
 							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
 							phaseOn.put(key, true);
 						}
@@ -383,11 +385,9 @@ public class LocomotiveSteam extends Locomotive {
 						if (phase > 0.8) {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	if (!sndCache.containsKey(key)) {
-					    		sndCache.put(key, ClientProxy.newSound(new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER)));
-					    	}
-					    	
-					    	ClientProxy.play(sndCache.get(key), 1, (float) (1-speed/maxSpeed/2), posX, posY, posZ);
+					    	ClientProxy.play(sndCache.get(sndCacheId), 0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
+					    	sndCacheId++;
+					    	sndCacheId = sndCacheId % sndCache.size();
 							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
 							phaseOn.put(key, true);
 						}
