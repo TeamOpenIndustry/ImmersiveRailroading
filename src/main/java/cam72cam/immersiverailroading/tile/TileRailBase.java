@@ -6,10 +6,14 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Freight;
+import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -61,6 +65,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 	public ItemStack railBedCache = null;
 	private FluidTank augmentTank = null;
 	private int redstoneLevel = 0;
+	private StockDetectorMode redstoneMode = StockDetectorMode.SIMPLE;
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
@@ -87,6 +92,13 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		}
 		this.markDirty();
 		return this.augmentFilterID != null;
+	}
+	public StockDetectorMode nextAugmentRedstoneMode() {
+		if (this.augment != Augment.DETECTOR) {
+			return null;
+		}
+		redstoneMode = StockDetectorMode.values()[((redstoneMode.ordinal() + 1) % (StockDetectorMode.values().length))];
+		return redstoneMode;
 	}
 	public Augment getAugment() {
 		return this.augment;
@@ -214,6 +226,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		if (nbt.hasKey("augmentFilterID")) {
 			augmentFilterID = nbt.getString("augmentFilterID");
 		}
+		if (nbt.hasKey("redstoneMode")) {
+			redstoneMode = StockDetectorMode.values()[nbt.getInteger("redstoneMode")];
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -234,6 +249,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 				nbt.setString("augmentFilterID", augmentFilterID);
 			}
 		}
+		nbt.setInteger("redstoneMode", redstoneMode.ordinal());
 		
 		nbt.setInteger("version", 3);
 		
@@ -417,8 +433,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		return null;
 	}
 	
-	public EntityRollingStock getStockNearBy(Capability<?> capability){
-		return getStockNearBy(EntityRollingStock.class, capability);
+	public EntityMoveableRollingStock getStockNearBy(Capability<?> capability){
+		return getStockNearBy(EntityMoveableRollingStock.class, capability);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -438,7 +454,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
 				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-					EntityRollingStock stock = getStockNearBy(capability);
+					EntityMoveableRollingStock stock = getStockNearBy(capability);
 					if (stock != null) {
 						return stock.getCapability(capability, null);
 					}
@@ -509,7 +525,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 		ticksExisted += 1;
 		
 		Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
-		EntityRollingStock stock;
+		EntityMoveableRollingStock stock;
 		switch (this.augment) {
 		case FLUID_LOADER:
 			if (this.augmentTank == null) {
@@ -553,10 +569,35 @@ public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickab
 			}
 			break;
 		case DETECTOR:
-			boolean provideRedstone = this.getStockNearBy(null) != null;
-			boolean currentRedstone = redstoneLevel != 0;
-			if (provideRedstone != currentRedstone) {
-				this.redstoneLevel = provideRedstone ? 15 : 0;
+			stock = this.getStockNearBy(null);
+			int currentRedstone = redstoneLevel;
+			int newRedstone = 0;
+
+			switch (this.redstoneMode ) {
+			case SIMPLE:
+				newRedstone = stock != null ? 15 : 0;
+				break;
+			case SPEED:
+				newRedstone = stock != null ? (int)Math.floor(stock.getCurrentSpeed().metric()/10) : 0;
+				break;
+			case PASSENGERS:
+				newRedstone = stock != null ? Math.min(15, stock.getPassengers().size()) : 0;
+				break;
+			case CARGO:
+				if (stock != null && stock instanceof Freight) {
+					newRedstone = stock != null ? ((Freight)stock).getPercentCargoFull()*15/100 : 0;
+				}
+				break;
+			case LIQUID:
+				if (stock != null && stock instanceof FreightTank) {
+					newRedstone = stock != null ? ((FreightTank)stock).getPercentLiquidFull()*15/100 : 0;
+				}
+				break;
+			}
+			
+			
+			if (newRedstone != currentRedstone) {
+				this.redstoneLevel = newRedstone;
 				this.markDirty(); //TODO overkill
 			}
 			break;

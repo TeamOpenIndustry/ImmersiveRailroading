@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -27,6 +28,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -262,6 +264,15 @@ public abstract class BlockRailBase extends Block {
 		Block block = Block.getBlockFromItem(stack.getItem());
 		TileRailBase te = TileRailBase.get(worldIn, pos);
 		if (te != null) {
+			if (block == Blocks.REDSTONE_TORCH) {
+				StockDetectorMode next = te.nextAugmentRedstoneMode();
+				if (next != null) {
+					if (!worldIn.isRemote) {
+						playerIn.sendMessage(new TextComponentString(next.toString()));
+					}
+					return true;
+				}
+			}
 			if (block == Blocks.SNOW_LAYER) {
 				if (!worldIn.isRemote) {
 					te.handleSnowTick();
