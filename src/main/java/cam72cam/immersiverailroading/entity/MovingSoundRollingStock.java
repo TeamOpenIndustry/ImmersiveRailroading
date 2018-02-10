@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
+import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -13,6 +14,7 @@ public class MovingSoundRollingStock extends MovingSound {
 	public MovingSoundRollingStock(EntityRollingStock train, SoundEvent soundIn, SoundCategory categoryIn) {
 		super(soundIn, categoryIn);
 		this.train = train;
+		this.attenuationType = ISound.AttenuationType.NONE;
 	}
 	
 	public void setVolume(float volume) {
@@ -25,9 +27,16 @@ public class MovingSoundRollingStock extends MovingSound {
 		this.donePlaying = true;
 	}
 	
+	public int getRepeatDelay()
+    {
+		System.out.println("CHECK");
+        return this.repeatDelay;
+    }
+	
 	public void setDynamicRate() {
 		this.repeat = true;
 		this.dyamicRate = true;
+		this.update();
 	}
 	
 	public void setDynamicPitch() {
@@ -50,18 +59,8 @@ public class MovingSoundRollingStock extends MovingSound {
         	Locomotive loco = (Locomotive) train;
 	    	double speed = Math.abs(loco.getCurrentSpeed().minecraft());
 	    	double maxSpeed = Math.abs(loco.getDefinition().getMaxSpeed(loco.gauge).minecraft());
-	        if (this.dyamicRate) {
-	    		// Set repeat delay to speed
-	            this.repeatDelay = (int) (20 * (1 - speed/maxSpeed));
-	            if (loco.ticksExisted % 20 == 0) { 
-	            	System.out.println(this.repeatDelay);
-	            }
-	        }
-	        
-	        if (this.dynamicPitch) {
-	        	// Set pitch to speed
-	        	this.pitch = (int) (1 + speed/maxSpeed);
-	        }
+        	this.pitch = (float) (1+speed/maxSpeed)/2;
         }
 	}
+	
 }
