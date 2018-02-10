@@ -76,6 +76,6 @@ public class ItemManual extends Item {
 			}
 			MultiblockRegistry.get(current).place(world, player, realPos, BlockUtil.rotFromFacing(EnumFacing.fromAngle(player.rotationYawHead+180)));
 		}
-		return EnumActionResult.PASS;
+		return EnumActionResult.SUCCESS;
 	}
 }

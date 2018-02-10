@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.render.tile;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL11;
+
 import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
@@ -15,6 +17,7 @@ import cam72cam.immersiverailroading.render.multiblock.PlateRollerRender;
 import cam72cam.immersiverailroading.render.multiblock.RailRollerRender;
 import cam72cam.immersiverailroading.render.multiblock.SteamHammerRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
 public class TileMultiblockRender extends TileEntitySpecialRenderer<TileMultiblock> {
@@ -39,7 +42,9 @@ public class TileMultiblockRender extends TileEntitySpecialRenderer<TileMultiblo
 		if (te.isLoaded() && te.isRender()) {
 			IMultiblockRender renderer = renderers.get(te.getName());
 			if (renderer != null) {
+				GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 				renderer.render(te, x, y, z, partialTicks);
+				blend.restore();
 			}
 		}
 	}

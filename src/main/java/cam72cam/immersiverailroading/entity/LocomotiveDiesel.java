@@ -5,7 +5,6 @@ import java.util.List;
 
 import blusunrize.immersiveengineering.api.energy.DieselHandler;
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
@@ -58,7 +57,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	protected int getAvailableHP() {
-		if (Config.ModelFuelRequired == false && this.gauge == Gauge.MODEL) {
+		if (!Config.isFuelRequired(gauge)) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return this.getLiquidAmount() > 0 ? this.getDefinition().getHorsePower(gauge) : 0;
@@ -73,11 +72,11 @@ public class LocomotiveDiesel extends Locomotive {
 				return;
 			}
 			
-			Vec3d fakeMotion = VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
+			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
 			float throttle = Math.abs(this.getThrottle());
-			if (exhausts != null && throttle > 0 && this.getLiquidAmount() > 0) {
+			if (exhausts != null && throttle > 0 && (this.getLiquidAmount() > 0 || !Config.isFuelRequired(gauge))) {
 				for (RenderComponent exhaust : exhausts) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					

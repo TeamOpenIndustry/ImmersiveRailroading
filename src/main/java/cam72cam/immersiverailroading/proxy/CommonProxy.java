@@ -15,8 +15,10 @@ import cam72cam.immersiverailroading.blocks.BlockRailPreview;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
+import cam72cam.immersiverailroading.entity.HandCar;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -49,9 +51,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -72,6 +76,7 @@ import net.minecraftforge.oredict.OreDictionary;
 public abstract class CommonProxy implements IGuiHandler {
 	protected static List<Class<? extends EntityRollingStock>> entityClasses = new ArrayList<Class<? extends EntityRollingStock>>();
 	protected String configDir;
+	private static String cacheDir;
     static {
     	entityClasses.add(LocomotiveSteam.class);
     	entityClasses.add(LocomotiveDiesel.class);
@@ -79,10 +84,19 @@ public abstract class CommonProxy implements IGuiHandler {
     	entityClasses.add(CarFreight.class);
     	entityClasses.add(CarTank.class);
     	entityClasses.add(Tender.class);
+    	entityClasses.add(HandCar.class);
+    }
+    
+    public static String getCacheFile(String fname) {
+    	return cacheDir + fname;
     }
     
     public void preInit(FMLPreInitializationEvent event) throws IOException {
     	configDir = event.getModConfigurationDirectory().getAbsolutePath() + File.separator + ImmersiveRailroading.MODID;
+    	// foo/config/immersiverailroading/../../cache/fname
+    	cacheDir = configDir + File.separator + ".." + File.separator + ".." + File.separator + "cache" + File.separator;
+    	new File(cacheDir).mkdirs();
+    	
     	DefinitionManager.initDefinitions();
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.BRICK_BLOCK);
     	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.COBBLESTONE);
@@ -167,8 +181,17 @@ public abstract class CommonProxy implements IGuiHandler {
 	
 	@SubscribeEvent
 	public static void onWorldTick(WorldTickEvent event) {
-		// Only fired server side
-		ChunkManager.handleWorldTick(event.world);
+		if (!event.world.isRemote) {
+			ChunkManager.handleWorldTick(event.world);
+			WorldServer world = event.world.getMinecraftServer().getWorld(event.world.provider.getDimension());
+			// We do this here as to let all the entities do their tick first.  Otherwise some might be one tick ahead
+			// if we did this in the onUpdate method
+			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.IS_ALIVE);
+			for (EntityCoupleableRollingStock stock : entities) {
+				stock = stock.findByUUID(stock.getPersistentID());
+				stock.tickPosRemainingCheck();
+			}
+		}
 	}
 
 	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
@@ -197,13 +220,5 @@ public abstract class CommonProxy implements IGuiHandler {
 		default:
 			return null;
     	}
-    }
-    
-    public void addTickMetric(double tickPosOffset) {
-    	// NOP
-    }
-    
-    public double serverTicksPerClientTick() {
-    	return 1;
     }
 }

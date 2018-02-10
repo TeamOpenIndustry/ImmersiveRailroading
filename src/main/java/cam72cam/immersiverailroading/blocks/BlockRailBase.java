@@ -2,8 +2,11 @@ package cam72cam.immersiverailroading.blocks;
 
 import javax.annotation.Nonnull;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -24,6 +27,8 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -43,12 +48,34 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
 	public static final PropertyEnum<EnumFacing> FACING = new PropertyEnum<EnumFacing>("FACING", EnumFacing.class);
 	
-	public BlockRailBase(Material materialIn) {
-		super(materialIn);
+	public BlockRailBase() {
+		super(Material.IRON);
 		setHardness(1.0F);
 		setSoundType(SoundType.METAL);
 		
 		setCreativeTab(ItemTabs.MAIN_TAB);
+	}
+
+	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+		ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1);
+		TileRailBase rail = TileRailBase.get(world, pos);
+		if (rail == null || !rail.isLoaded()) {
+			return stack;
+		}
+		
+		TileRail parent = rail.getParentTile();
+		if (parent == null || !parent.isLoaded()) {
+			return stack;
+		}
+		ItemTrackBlueprint.setType(stack, parent.getType());
+		ItemTrackBlueprint.setLength(stack, parent.getLength());
+		ItemTrackBlueprint.setQuarters(stack, parent.getTurnQuarters());
+		//ItemRail.setPosType(stack, )
+		ItemTrackBlueprint.setBed(stack, parent.getRailBed());
+		//ItemRail.setPreview(stack, )
+		
+		return stack;
 	}
 	
 	@Override
@@ -237,6 +264,15 @@ public abstract class BlockRailBase extends Block {
 		Block block = Block.getBlockFromItem(stack.getItem());
 		TileRailBase te = TileRailBase.get(worldIn, pos);
 		if (te != null) {
+			if (block == Blocks.REDSTONE_TORCH) {
+				StockDetectorMode next = te.nextAugmentRedstoneMode();
+				if (next != null) {
+					if (!worldIn.isRemote) {
+						playerIn.sendMessage(new TextComponentString(next.toString()));
+					}
+					return true;
+				}
+			}
 			if (block == Blocks.SNOW_LAYER) {
 				if (!worldIn.isRemote) {
 					te.handleSnowTick();
