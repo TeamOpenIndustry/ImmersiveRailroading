@@ -20,6 +20,7 @@ public class MRSSyncPacket implements IMessage {
 	private int dimension;
 	private int entityID;
 	private List<TickPos> positions;
+	private double serverTPS;
 
 	public MRSSyncPacket() {
 		// Reflect constructor
@@ -29,16 +30,31 @@ public class MRSSyncPacket implements IMessage {
 		this.dimension = mrs.dimension;
 		this.entityID = mrs.getEntityId();
 		this.positions = positions;
+		long[] ttl = mrs.world.getMinecraftServer().tickTimeArray;
+		double ttms = avg(ttl) * 1.0E-6D;
+		this.serverTPS = Math.min(1000.0 / ttms, 20);
+	}
+	
+	private double avg(long[] ttl) {
+		if (ttl.length == 0) {
+			return 0.01;
+		}
+		long sum = 0;
+		for (long tt : ttl) {
+			sum += tt;
+		}
+		return sum / ttl.length;
 	}
 
 	public void applyTo(EntityMoveableRollingStock mrs) {
-		mrs.handleTickPosPacket(this.positions);
+		mrs.handleTickPosPacket(this.positions, this.serverTPS);
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(dimension);
 		buf.writeInt(entityID);
+		buf.writeDouble(serverTPS);
 		buf.writeInt(positions.size());
 		for (TickPos pos : positions ) {
 			pos.write(buf);
@@ -50,6 +66,7 @@ public class MRSSyncPacket implements IMessage {
 	public void fromBytes(ByteBuf buf) {
 		dimension = buf.readInt();
 		entityID = buf.readInt();
+		serverTPS = buf.readDouble();
 		
 		positions = new ArrayList<TickPos>();
 		

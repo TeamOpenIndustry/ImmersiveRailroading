@@ -71,7 +71,7 @@ public class StockItemComponentModel implements IBakedModel {
 		}
 		
 		center = renderer.model.centerOfGroups(groups);
-		width = renderer.model.widthOfGroups(groups);
+		width = renderer.model.heightOfGroups(groups);
 		length = renderer.model.lengthOfGroups(groups);
 	}
 

@@ -20,6 +20,7 @@ public class BlockMultiblock extends Block {
 
 	public BlockMultiblock() {
 		super(Material.IRON);
+		setHardness(2.0F);
 		
         setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
         setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
@@ -30,7 +31,14 @@ public class BlockMultiblock extends Block {
 		TileMultiblock te = TileMultiblock.get(worldIn, pos);
 		if (te != null) {
 			// Multiblock break
-			te.breakBlock();
+			try {
+				te.breakBlock();
+			} catch (Exception ex) {
+				ImmersiveRailroading.catching(ex);
+				// Something broke
+				// TODO figure out why
+				worldIn.setBlockToAir(pos);
+			}
 			worldIn.destroyBlock(pos, true);
 		} else {
 			// Break during block restore

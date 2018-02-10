@@ -9,7 +9,7 @@
 		"water_capacity_l": 26000, 
 		"horsepower": 2488,
 		"tractive_effort_lbf": 31275,
-		"max_speed_kmh": 120,
+		"max_speed_kmh": 185,
 		"valve_gear": "walschaerts",
 		"weight_kg": 110110
 	},
@@ -19,9 +19,9 @@
 	},
 	"passenger": {
 		"slots": 4,
-		"center_x": -4.5,
+		"center_x": -5.5,
 		"center_y": 2,
-		"length": 1,
+		"length": 0.3,
 		"width": 2.5
 	},
 	"trucks": {

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
@@ -77,7 +76,7 @@ public class StockModel extends OBJRender {
 		
 		if (stock instanceof EntityMoveableRollingStock) {
 			EntityMoveableRollingStock mstock = (EntityMoveableRollingStock) stock;
-			this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * ImmersiveRailroading.proxy.serverTicksPerClientTick() * partialTicks * 1.1; 
+			this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * mstock.getTickSkew() * partialTicks * 1.1; 
 		} else {
 			this.distanceTraveled = 0;
 		}
@@ -258,14 +257,34 @@ public class StockModel extends OBJRender {
 			}
 			break;
 		case STEPHENSON:
-			List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
-			drawDrivingWheels(stock, wheels);
-			RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
-			RenderComponent wheel = wheels.get(wheels.size() / 2);
-			drawStephenson(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
-			drawStephenson(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
+			{
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
+				drawDrivingWheels(stock, wheels);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				RenderComponent wheel = wheels.get(wheels.size() / 2);
+				drawStephenson(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
+				drawStephenson(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
+			}
 			break;
-		default:
+		case T1:
+			drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT, stock.gauge));
+			{
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
+				drawDrivingWheels(stock, wheels);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				RenderComponent wheel = wheels.get(wheels.size() / 2);
+				drawT1(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center());
+				drawT1(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center());
+			}
+			{
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, stock.gauge);
+				drawDrivingWheels(stock, wheels);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				RenderComponent wheel = wheels.get(wheels.size() / 2);
+				
+				drawT1(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, wheel.height(), center.center(), wheel.center());
+				drawT1(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR, wheel.height(), center.center(), wheel.center());
+			}
 			break;
 		}
 		
@@ -429,7 +448,77 @@ public class StockModel extends OBJRender {
 		GlStateManager.popMatrix();
 		
 	}
-
+	
+	private void drawT1(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
+		LocomotiveSteamDefinition def = stock.getDefinition();
+		
+		double circumference = diameter * (float) Math.PI;
+		double relDist = distanceTraveled % circumference;
+		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
+		
+		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
+		RenderComponent drivingRod = def.getComponent(RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
+		RenderComponent pistonRod = def.getComponent(RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
+		
+		// Center of the connecting rod, may not line up with a wheel directly
+		Vec3d connRodPos = connectingRod.center();
+		// Wheel Center is the center of all wheels, may not line up with a wheel directly
+		// The difference between these centers is the radius of the connecting rod movement
+		double connRodRadius = connRodPos.x - wheelCenter.x;
+		// Find new connecting rod pos based on the connecting rod rod radius 
+		Vec3d connRodMovment = VecUtil.fromYaw(connRodRadius, (float) wheelAngle);
+		
+		// Draw Connecting Rod
+		GL11.glPushMatrix();
+		{
+			// Move to origin
+			GL11.glTranslated(-connRodRadius, 0, 0);
+			// Apply connection rod movement
+			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+			
+			drawComponent(connectingRod);
+		}
+		GL11.glPopMatrix();
+		
+		// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
+		// Y: Center of the rod
+		// Z: does not really matter due to rotation axis
+		Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height()/2, drivingRod.center().y, drivingRod.max().z);
+		// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
+		float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
+		
+		// Draw driving rod
+		GL11.glPushMatrix();
+		{
+			// Move to conn rod center
+			GL11.glTranslated(-connRodRadius, 0, 0);
+			// Apply conn rod movement
+			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+			
+			// Move to rot point center
+			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+			// Rotate rod angle
+			GL11.glRotated(drivingRodAngle, 0, 0, 1);
+			// Move back from rot point center
+			GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+			
+			drawComponent(drivingRod);
+		}
+		GL11.glPopMatrix();
+		
+		// Piston movement is rod movement offset by the rotation radius
+		// Not 100% accurate, missing the offset due to angled driving rod
+		double pistonDelta = connRodMovment.x - connRodRadius;
+		
+		// Draw piston rod and cross head
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(pistonDelta, 0, 0);
+			drawComponent(pistonRod);
+		}
+		GL11.glPopMatrix();
+	}
+	
 	private void drawWalschaerts(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
 		LocomotiveSteamDefinition def = stock.getDefinition();
 		
@@ -440,111 +529,185 @@ public class StockModel extends OBJRender {
 		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
 		RenderComponent drivingRod = def.getComponent(RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
 		RenderComponent pistonRod = def.getComponent(RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
-
-		Vec3d connRodPos = connectingRod.center();
-		double connRodOffset = connRodPos.x - wheelCenter.x;
-		Vec3d drivingRodMin = drivingRod.min();
-		Vec3d drivingRodMax = drivingRod.max();
-		double drivingRodHeight = drivingRodMax.y - drivingRodMin.y;
-		double drivingRodLength = drivingRodMax.x - drivingRodMin.x;
-		double drivingRodCenterLength = drivingRodLength - drivingRodHeight;
-
-		Vec3d connRodMovment = VecUtil.fromYaw(connRodOffset, (float) wheelAngle);
-		double drivingRodHoriz = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - connRodMovment.z * connRodMovment.z);
-
-		double pistonDelta = connRodMovment.x - 0.3;
-
 		RenderComponent crossHead = def.getComponent(RenderComponentType.UNION_LINK_SIDE, side, stock.gauge);
 		RenderComponent combinationLever = def.getComponent(RenderComponentType.COMBINATION_LEVER_SIDE, side, stock.gauge);
 		RenderComponent returnCrank = def.getComponent(RenderComponentType.ECCENTRIC_CRANK_SIDE, side, stock.gauge);
 		RenderComponent returnCrankRod = def.getComponent(RenderComponentType.ECCENTRIC_ROD_SIDE, side, stock.gauge);
 		RenderComponent slottedLink = def.getComponent(RenderComponentType.EXPANSION_LINK_SIDE, side, stock.gauge);
+		RenderComponent radiusBar = def.getComponent(RenderComponentType.RADIUS_BAR_SIDE, side, stock.gauge);
 		
-		double returnCrankHeight = returnCrank.height();
-		double returnCrankLength = returnCrank.length();
-		Vec3d returnCrankPos = returnCrank.center();
-		float returnCrankAngle = 180 - 60;
-
-		double returnCrankRodHeight = returnCrankRod.height();
-		double returnCrankRodLength = returnCrankRod.length();
-		Vec3d returnCrankRodCenter = returnCrankRod.center();
-		Vec3d crankOffset = VecUtil.fromYaw(returnCrankLength - returnCrankHeight, (float) (90 + wheelAngle + returnCrankAngle));
-
-		Vec3d slottedLinkMin = slottedLink.min();
-		double slottedLinkWidth = slottedLink.length();
-		Vec3d slottedLinkCenter = slottedLink.center();
+		// Center of the connecting rod, may not line up with a wheel directly
+		Vec3d connRodPos = connectingRod.center();
+		// Wheel Center is the center of all wheels, may not line up with a wheel directly
+		// The difference between these centers is the radius of the connecting rod movement
+		double connRodRadius = connRodPos.x - wheelCenter.x;
+		// Find new connecting rod pos based on the connecting rod rod radius 
+		Vec3d connRodMovment = VecUtil.fromYaw(connRodRadius, (float) wheelAngle);
 		
-		Vec3d returnCrankRodPos = new Vec3d(connRodMovment.x, connRodMovment.z, 0);
-		returnCrankRodPos = returnCrankRodPos.addVector(wheelPos.x, wheelPos.y, returnCrankRodCenter.z);
-		returnCrankRodPos = returnCrankRodPos.addVector(crankOffset.x, crankOffset.z, 0);
-		// This line is not taking into account the fact that it is attached
-		// to a swing arm. Therefore this and the following lines are "close
-		// enough", but not quite left
-		Vec3d returnCrankRodOffset = new Vec3d(returnCrankRodPos.x - slottedLinkMin.x,
-				returnCrankRodPos.y - slottedLinkMin.y - slottedLinkWidth / 2, 0);
-		float returnCrankRodAngle = (float) Math.toDegrees(MathHelper.atan2(returnCrankRodOffset.y, returnCrankRodOffset.x));
-		Vec3d returnCrankRodActual = VecUtil.fromYaw(returnCrankRodLength - returnCrankHeight, returnCrankRodAngle);
-		returnCrankRodActual = new Vec3d(returnCrankRodPos.x - returnCrankRodActual.z,
-				returnCrankRodPos.y + returnCrankRodActual.x, 0);
-		float slottedLinkAngle = (float) Math
-				.toDegrees(MathHelper.atan2(-slottedLinkCenter.x + returnCrankRodActual.x, slottedLinkCenter.y - returnCrankRodActual.y));
-
-		// CONNECTING_ROD_LEFT
-		// DRIVING_ROD_LEFT
-		GlStateManager.pushMatrix();
+		// Draw Connecting Rod
+		GL11.glPushMatrix();
 		{
-			GlStateManager.translate(-connRodOffset, 0, 0);
-			GlStateManager.translate(connRodMovment.x, connRodMovment.z, 0);
+			// Move to origin
+			GL11.glTranslated(-connRodRadius, 0, 0);
+			// Apply connection rod movement
+			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+			
 			drawComponent(connectingRod);
-
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(connRodPos.x, connRodPos.y, connRodPos.z);
-			GlStateManager.rotate((float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRodHoriz)), 0, 0, 1);
-			GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
+		}
+		GL11.glPopMatrix();
+		
+		// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
+		// Y: Center of the rod
+		// Z: does not really matter due to rotation axis
+		Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height()/2, drivingRod.center().y, drivingRod.max().z);
+		// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
+		float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
+		
+		// Draw driving rod
+		GL11.glPushMatrix();
+		{
+			// Move to conn rod center
+			GL11.glTranslated(-connRodRadius, 0, 0);
+			// Apply conn rod movement
+			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+			
+			// Move to rot point center
+			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+			// Rotate rod angle
+			GL11.glRotated(drivingRodAngle, 0, 0, 1);
+			// Move back from rot point center
+			GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+			
 			drawComponent(drivingRod);
-			GlStateManager.popMatrix();
 		}
-		GlStateManager.popMatrix();
-		// RETURN_CRANK_LEFT
-		GlStateManager.pushMatrix();
+		GL11.glPopMatrix();
+		
+		// Piston movement is rod movement offset by the rotation radius
+		// Not 100% accurate, missing the offset due to angled driving rod
+		double pistonDelta = connRodMovment.x - connRodRadius;
+		
+		// Draw piston rod and cross head
+		GL11.glPushMatrix();
 		{
-			GlStateManager.translate(connRodMovment.x, connRodMovment.z, 0);
-			GlStateManager.translate(wheelPos.x, wheelPos.y, returnCrankPos.z);
-			GlStateManager.rotate((float) (wheelAngle + returnCrankAngle), 0, 0, 1);
-			GlStateManager.translate(-returnCrankLength / 2 + returnCrankHeight / 2, 0, 0);
-			GlStateManager.translate(-returnCrankPos.x, -returnCrankPos.y, -returnCrankPos.z);
-			drawComponent(returnCrank);
-		}
-		GlStateManager.popMatrix();
-		// RETURN_CRANK_ROD_LEFT
-		GlStateManager.pushMatrix();
-		{
-			GlStateManager.translate(returnCrankRodPos.x, returnCrankRodPos.y, returnCrankRodPos.z);
-			GlStateManager.rotate(returnCrankRodAngle, 0, 0, 1);
-			GlStateManager.translate(-returnCrankRodLength / 2 + returnCrankRodHeight / 2, 0, 0);
-			GlStateManager.translate(-returnCrankRodCenter.x, -returnCrankRodCenter.y, -returnCrankRodCenter.z);
-			drawComponent(returnCrankRod);
-		}
-		GlStateManager.popMatrix();
-		// SLOTTED_LINK_LEFT
-		GlStateManager.pushMatrix();
-		{
-			GlStateManager.translate(slottedLinkCenter.x, slottedLinkCenter.y, slottedLinkCenter.z);
-			GlStateManager.rotate(slottedLinkAngle, 0, 0, 1);
-			GlStateManager.translate(-slottedLinkCenter.x, -slottedLinkCenter.y, -slottedLinkCenter.z);
-			drawComponent(slottedLink);
-		}
-		GlStateManager.popMatrix();
-		// PISTON_LEFT
-		GlStateManager.pushMatrix();
-		{
-			GlStateManager.translate(pistonDelta, 0, 0);
+			GL11.glTranslated(pistonDelta, 0, 0);
 			drawComponent(pistonRod);
 			drawComponent(crossHead);
-			// TODO rotate combination lever
+		}
+		GL11.glPopMatrix();
+
+		Vec3d returnCrankRotPoint = returnCrank.max().addVector(-returnCrank.height()/2, -returnCrank.height()/2, 0);
+		Vec3d wheelRotationOffset = VecUtil.fromYaw(returnCrankRotPoint.x - wheelPos.x, (float) wheelAngle);
+		Vec3d returnCrankOriginOffset = wheelPos.addVector(wheelRotationOffset.x, wheelRotationOffset.z, 0);
+		double returnCrankAngle = wheelAngle + 90 + 30;
+		GL11.glPushMatrix();
+		{
+			// Move to crank offset from origin
+			GL11.glTranslated(returnCrankOriginOffset.x, returnCrankOriginOffset.y, 0);
+			// Rotate crank
+			GL11.glRotated(returnCrankAngle, 0, 0, 1);
+			// Draw return crank at current position
+			GL11.glTranslated(-returnCrankRotPoint.x, -returnCrankRotPoint.y, 0);
+			drawComponent(returnCrank);			
+		}
+		GL11.glPopMatrix();
+
+		// We take the length of the crank and subtract the radius on either side.
+		// We use rod radius and crank radius since it can be a funny shape 
+		double returnCrankLength = -(returnCrank.length() - returnCrank.height()/2 - returnCrankRod.height()/2);
+		// Rotation offset around the return crank point
+		Vec3d returnCrankRotationOffset = VecUtil.fromYaw(returnCrankLength, (float) returnCrankAngle-90);
+		// Combine wheel->crankpoint offset and the crankpoint->crankrod offset 
+		Vec3d returnCrankRodOriginOffset = returnCrankOriginOffset.addVector(returnCrankRotationOffset.x, returnCrankRotationOffset.z, 0);
+		// Point about which the return crank rotates
+		Vec3d returnCrankRodRotPoint = returnCrankRod.max().addVector(-returnCrankRod.height()/2, -returnCrankRod.height()/2, 0);
+		// Length between return crank rod centers
+		double returnCrankRodLength = returnCrankRod.length() - returnCrankRod.height()/2; 
+		// Height that the return crank rod should shoot for
+		double slottedLinkLowest = slottedLink.min().y + slottedLink.width()/2;
+		// Fudge
+		double returnCrankRodFudge = Math.abs(slottedLink.center().x - (returnCrankRodOriginOffset.x - returnCrankRodLength))/3;
+		// Angle the return crank rod should be at to hit the slotted link
+		float returnCrankRodRot = VecUtil.toYaw(new Vec3d(slottedLinkLowest - returnCrankRodOriginOffset.y + returnCrankRodFudge, 0, returnCrankRodLength));
+		GL11.glPushMatrix();
+		{
+			// Move to crank rod offset from origin
+			GL11.glTranslated(returnCrankRodOriginOffset.x, returnCrankRodOriginOffset.y, 0);
+			
+			GL11.glRotated(returnCrankRodRot, 0, 0, 1);
+			
+			// Draw return crank rod at current position
+			GL11.glTranslated(-returnCrankRodRotPoint.x, -returnCrankRodRotPoint.y, 0);
+			drawComponent(returnCrankRod);
+		}
+		GL11.glPopMatrix();
+		
+		Vec3d returnCrankRodRotationOffset = VecUtil.fromYaw(returnCrankRodLength, (float) returnCrankRodRot+90);
+		Vec3d returnCrankRodFarPoint = returnCrankRodOriginOffset.addVector(returnCrankRodRotationOffset.x, returnCrankRodRotationOffset.z, 0);
+		// Slotted link rotation point
+		Vec3d slottedLinkRotPoint = slottedLink.center();
+		double slottedLinkRot = Math.toDegrees(MathHelper.atan2(-slottedLinkRotPoint.x + returnCrankRodFarPoint.x, slottedLinkRotPoint.y - returnCrankRodFarPoint.y));
+		GL11.glPushMatrix();
+		{
+			// Move to origin
+			GL11.glTranslated(slottedLinkRotPoint.x, slottedLinkRotPoint.y, 0);
+			
+			// Rotate around center point
+			GL11.glRotated(slottedLinkRot, 0, 0, 1);
+			
+			// Draw slotted link at current position
+			GL11.glTranslated(-slottedLinkRotPoint.x, -slottedLinkRotPoint.y, 0);
+			drawComponent(slottedLink);
+		}
+		GL11.glPopMatrix();
+		
+		float throttle = stock.getThrottle();
+		double forwardMax = (slottedLink.min().y - slottedLinkRotPoint.y) * 0.4;
+		double forwardMin = (slottedLink.max().y - slottedLinkRotPoint.y) * 0.65;
+		double throttleSlotPos = 0;
+		if (throttle > 0) {
+			throttleSlotPos = forwardMax * throttle;
+		} else {
+			throttleSlotPos = forwardMin * -throttle;
+		}
+		
+		double radiusBarSliding = Math.sin(Math.toRadians(-slottedLinkRot)) * (throttleSlotPos);
+		
+		Vec3d radiusBarClose = radiusBar.max();
+		throttleSlotPos += slottedLinkRotPoint.y - radiusBarClose.y;
+		
+		float raidiusBarAngle = VecUtil.toYaw(new Vec3d(radiusBar.length(), 0, throttleSlotPos))+90;
+		
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(0, throttleSlotPos, 0);
+			
+			GL11.glTranslated(radiusBarSliding, 0, 0);
+			
+			GL11.glTranslated(radiusBarClose.x, radiusBarClose.y, 0);
+			GL11.glRotated(raidiusBarAngle, 0, 0, 1);
+			GL11.glTranslated(-radiusBarClose.x, -radiusBarClose.y, 0);
+			drawComponent(radiusBar);
+		}
+		GL11.glPopMatrix();
+		
+		Vec3d radiusBarFar = radiusBar.min();
+		//radiusBarSliding != correct TODO angle offset
+		Vec3d radiusBarFarPoint = radiusBarFar.addVector(radiusBarSliding + combinationLever.width()/2, 0, 0);
+		
+		Vec3d combinationLeverRotPos = combinationLever.min().addVector(combinationLever.width()/2, combinationLever.width()/2, 0);
+		
+		Vec3d delta = radiusBarFarPoint.subtract(combinationLeverRotPos.addVector(pistonDelta, 0, 0));
+		
+		float combinationLeverAngle = VecUtil.toYaw(new Vec3d(delta.x, 0, delta.y));
+
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(pistonDelta, 0, 0);
+			GL11.glTranslated(combinationLeverRotPos.x, combinationLeverRotPos.y, 0);
+			GL11.glRotated(combinationLeverAngle, 0, 0, 1);
+			GL11.glTranslated(-combinationLeverRotPos.x, -combinationLeverRotPos.y, 0);
 			drawComponent(combinationLever);
 		}
-		GlStateManager.popMatrix();
-		
+		GL11.glPopMatrix();
 	}
 }

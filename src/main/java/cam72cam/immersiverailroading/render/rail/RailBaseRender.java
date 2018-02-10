@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.render.BakedModelCache;
 import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -16,7 +17,8 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Items;
 
 public class RailBaseRender {
-	private static BufferBuilder worldRenderer = new BufferBuilder(2048);
+	private static BlockRendererDispatcher blockRenderer;
+	private static BakedModelCache scaled = new BakedModelCache();
 	
 	/*
 	 * This returns a cached buffer as rails don't change their model often
@@ -25,17 +27,19 @@ public class RailBaseRender {
 	 * We also draw the railbed here since drawing a model for each gag eats FPS 
 	 */
 	private static BufferBuilder getBaseBuffer(RailInfo info) {
-		// Get model for current state
-		final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+		if (blockRenderer == null) {
+			// Get model for current state
+			blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+		}
 		
 		if (info.railBed.getItem() == Items.AIR) {
 			return null;
 		}
 		IBlockState gravelState = BlockUtil.itemToBlockState(info.railBed);
-		IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
 		
 		// Create render targets
-
+		BufferBuilder worldRenderer = new BufferBuilder(2048);
+		
 		// Start drawing
 		try {
 			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
@@ -45,7 +49,14 @@ public class RailBaseRender {
 			
 			// This is evil but really fast :D
 			for (TrackBase base : info.getBuilder().getTracksForRender()) {
-				blockRenderer.getBlockModelRenderer().renderModel(info.world, new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale()), gravelState, base.getPos(), worldRenderer, false);
+				String key = gravelState.toString() + base.getHeight() + ":"  + info.gauge.scale();
+				IBakedModel model = scaled.get(key);
+				if (model == null) {
+					IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
+					model = new BakedScaledModel(gravelModel, base.getHeight() + 0.1f * (float)info.gauge.scale());
+					scaled.put(key, model);
+				}
+				blockRenderer.getBlockModelRenderer().renderModel(info.world, model, gravelState, base.getPos(), worldRenderer, false);
 			}
 		} finally {
 			worldRenderer.finishDrawing();
@@ -59,13 +70,14 @@ public class RailBaseRender {
 
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void draw(RailInfo info) {
-		if (!displayLists.containsKey(RailRenderUtil.renderID(info))) {
-			int displayList = GL11.glGenLists(1);
+		Integer displayList = displayLists.get(RailRenderUtil.renderID(info));
+		if (displayList == null) {
+			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
 			drawSync(info);
 			GL11.glEndList();
 			displayLists.put(RailRenderUtil.renderID(info), displayList);
 		}
-		GL11.glCallList(displayLists.get(RailRenderUtil.renderID(info)));
+		GL11.glCallList(displayList);
 	}
 }

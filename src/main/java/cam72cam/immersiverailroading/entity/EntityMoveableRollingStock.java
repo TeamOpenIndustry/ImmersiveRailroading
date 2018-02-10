@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
@@ -41,6 +40,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public List<TickPos> positions = new ArrayList<TickPos>();
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
+	private double tickSkew = 1;
 
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -189,14 +189,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		this.currentSpeed = newSpeed;
 	}
 	
-	public void handleTickPosPacket(List<TickPos> newPositions) {
+	public void handleTickPosPacket(List<TickPos> newPositions, double serverTPS) {
 		if (newPositions.size() != 0) {
-	    	this.clearPositionCache();
-			if (this.ticksExisted > 5) {
-				ImmersiveRailroading.proxy.addTickMetric(tickPosID - newPositions.get(0).tickID);
-			}
+			this.clearPositionCache();
 			this.tickPosID = newPositions.get(0).tickID;
 		}
+		this.tickSkew = serverTPS / 20;
 		this.positions = newPositions;
 	}
 	
@@ -232,13 +230,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 	private double skewScalar(double curr, double next) {
 		if (world.isRemote) {
-			return curr + (next - curr) * ImmersiveRailroading.proxy.serverTicksPerClientTick();
+			return curr + (next - curr) * this.getTickSkew();
 		}
 		return next;
 	}
 	private float skewScalar(float curr, float next) {
 		if (world.isRemote) {
-			return curr + (next - curr) * (float)ImmersiveRailroading.proxy.serverTicksPerClientTick();
+			return curr + (next - curr) * this.getTickSkew();
 		}
 		return next;
 	}
@@ -257,7 +255,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public void onUpdate() {
 		super.onUpdate();
 		
-		this.tickPosID += world.isRemote ? ImmersiveRailroading.proxy.serverTicksPerClientTick() : 1;
+		this.tickPosID += world.isRemote ? this.getTickSkew() : 1;
 		
 		// Apply position tick
 		TickPos currentPos = getCurrentTickPosAndPrune();
@@ -345,13 +343,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 		// Riding on top of cars
 		AxisAlignedBB bb = this.getCollisionBoundingBox();
-		bb = bb.expand(0, gauge.scale(), 0);
+		bb = bb.offset(0, gauge.scale()*2, 0);
 		List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
 		for (Entity entity : entitiesAbove) {
 			if (entity instanceof EntityMoveableRollingStock) {
 				continue;
 			}
-			if (this.isPassenger(entity)) {
+			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
 				continue;
 			}
 			
@@ -523,5 +521,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 		}
 		return over;
+	}
+
+	public float getTickSkew() {
+		return (float) this.tickSkew;
 	}
 }
