@@ -261,6 +261,9 @@ public abstract class BuilderBase {
 					}
 				}
 			}
+			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
+				world.destroyBlock(track.getPos().down(), false);
+			}
 		}
 	}
 }
