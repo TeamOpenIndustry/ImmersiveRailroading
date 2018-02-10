@@ -17,6 +17,7 @@ import java.util.Set;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -66,6 +67,7 @@ public abstract class EntityRollingStockDefinition {
 	private int weight;
 	private int maxPassengers;
 	protected double internal_scale;
+	public Gauge recommended_gauge;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
@@ -99,8 +101,10 @@ public abstract class EntityRollingStockDefinition {
 			darken = data.get("darken_model").getAsFloat();
 		}
 		this.internal_scale = 1;
+		this.recommended_gauge = Gauge.STANDARD;
 		if (data.has("model_gauge_m")) { 
-			internal_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
+			this.internal_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
+			this.recommended_gauge = Gauge.from(data.get("model_gauge_m").getAsDouble());
 		}
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_scale);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
@@ -474,6 +478,7 @@ public abstract class EntityRollingStockDefinition {
 
 	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = new ArrayList<String>();
+		tips.add(GuiText.RECOMMENDED_GAUGE_TOOLTIP.toString(this.recommended_gauge));
 		return tips;
 	}
 
