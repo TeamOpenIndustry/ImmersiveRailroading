@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.items;
 
+import java.util.HashSet;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -8,10 +9,11 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemTool;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -20,11 +22,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ItemLargeWrench extends Item {
+public class ItemLargeWrench extends ItemTool {
 	public static final String NAME = "item_large_wrench";
 	
 	public ItemLargeWrench() {
-		super();
+		super(8, -3.2F, ToolMaterial.IRON, new HashSet<Block>());
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
