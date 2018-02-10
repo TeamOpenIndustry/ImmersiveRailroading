@@ -164,8 +164,15 @@ public class TrackGui extends GuiScreen {
 		this.lengthInput.setValidator(this.integerFilter);
 		this.lengthInput.setFocused(true);
 
-		this.quartersSlider = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 30, GuiText.SELECTOR_QUARTERS.toString(), 1, 4, quarters,
-				null);
+		this.quartersSlider = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 30, "", 1, 4, quarters,
+				null) {
+			@Override
+			public void updateSlider() {
+				super.updateSlider();
+				displayString = GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/4));
+			}
+		};
+		quartersSlider.updateSlider();
 		quartersSlider.showDecimal = false;
 		quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		this.buttonList.add(quartersSlider);
