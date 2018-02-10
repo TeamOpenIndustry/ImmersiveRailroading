@@ -59,7 +59,7 @@ public class MovingSoundRollingStock extends MovingSound {
         	Locomotive loco = (Locomotive) train;
 	    	double speed = Math.abs(loco.getCurrentSpeed().minecraft());
 	    	double maxSpeed = Math.abs(loco.getDefinition().getMaxSpeed(loco.gauge).minecraft());
-        	this.pitch = (float) (1+speed/maxSpeed)/2;
+        	//this.pitch = (float) (1+speed/maxSpeed)/2;
         }
 	}
 	
