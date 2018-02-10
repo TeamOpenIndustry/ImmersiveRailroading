@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
@@ -17,6 +19,8 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ElytraSound;
+import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,10 +28,13 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
+
+import net.minecraft.util.SoundEvent;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
@@ -37,9 +44,10 @@ public class LocomotiveSteam extends Locomotive {
 	// Map<Slot, TicksToBurn>
 	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
+	private static DataParameter<Integer> HORN = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.VARINT);
 	private boolean gonnaExplode;
 	private double driverDiameter;
-	private MovingSoundRollingStock sound;
+	private SoundEvent chuff;
 	
 	public LocomotiveSteam(World world) {
 		this(world, null);
@@ -52,6 +60,7 @@ public class LocomotiveSteam extends Locomotive {
 		this.getDataManager().register(BOILER_TEMPERATURE, 0f);
 		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
 		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
+		this.getDataManager().register(HORN, 0);
 	}
 
 	public LocomotiveSteamDefinition getDefinition() {
@@ -175,7 +184,20 @@ public class LocomotiveSteam extends Locomotive {
 		return phase;
 	}
 	
-	private boolean phaseOn = false;
+	public void handleKeyPress(Entity source, KeyTypes key) {
+		if (key == KeyTypes.HORN) {
+			this.getDataManager().set(HORN, 5);
+		} else {
+			super.handleKeyPress(source, key);
+		}
+	}
+	
+	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
+	private Map<String, MovingSoundRollingStock> repeating = new HashMap<String, MovingSoundRollingStock>();
+	private SoundEvent horn;
+	private SoundEvent idle;
+	private MovingSoundRollingStock idleRep;
+	private MovingSoundRollingStock hornMov;
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -186,25 +208,57 @@ public class LocomotiveSteam extends Locomotive {
 			if (!Config.particlesEnabled) {
 				return;
 			}
+			SoundHandler snd = Minecraft.getMinecraft().getSoundHandler();
+			if (this.getDataManager().get(HORN) != 0 && !snd.isSoundPlaying(hornMov)) {
+				snd.playSound(hornMov);
+			}
+			
 			/*
 			if (this.sound == null) {
 				this.sound = new MovingSoundRollingStock(this, SoundEvents.BLOCK_SAND_BREAK, SoundCategory.MASTER);
 				this.sound.setDynamicRate();
 				Minecraft.getMinecraft().getSoundHandler().playSound(sound);
-			}*/
-			
+			}
+			*/
+			if (this.chuff == null) {
+				this.chuff = new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff"));
+				this.horn = new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "horn"));
+				this.hornMov = new MovingSoundRollingStock(this, this.horn, SoundCategory.MASTER);
+				this.idle = new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "idle"));
+				this.idleRep = new MovingSoundRollingStock(this, this.idle, SoundCategory.MASTER);
+				idleRep.setDynamicRate();
+				Minecraft.getMinecraft().getSoundHandler().playSound(idleRep);
+			}
 			double phase = getPhase(4, 0);
-			
-			if (!phaseOn) {
-				if (phase > 0.8) {
-					world.playSound(this.posX, this.posY, this.posZ, SoundEvents.BLOCK_SAND_BREAK, SoundCategory.MASTER, 1, (float) this.getCurrentSpeed().minecraft()*2, true);
-					phaseOn = true;
+			/*
+			if (this.getCurrentSpeed().metric() < 40) {
+				if (!phaseOn) {
+					if (phase > 0.8) {
+						world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) 0.8, false);
+						phaseOn = true;
+					}
+				} else {
+					if (phase < 0.8) {
+						phaseOn = false;
+					}
+				}
+				if (repeating != null) {
+					Minecraft.getMinecraft().getSoundHandler().stopSound(repeating);;
+					repeating = null;
 				}
 			} else {
-				if (phase < 0.8) {
-					phaseOn = false;
+				if (repeating == null) {
+					this.repeating = new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER);
+					repeating.setDynamicRate();
+					Minecraft.getMinecraft().getSoundHandler().playSound(repeating);
 				}
-			}
+			}*/
+			/*
+			if (repeating == null) {
+				this.repeating = new MovingSoundRollingStock(this, this.sound, SoundCategory.MASTER);
+				repeating.setDynamicRate();
+				Minecraft.getMinecraft().getSoundHandler().playSound(repeating);
+			}*/
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
@@ -253,7 +307,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
-			if (pistons != null && csm > 0.1 && csm  < 20 && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
+			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 				for (RenderComponent piston : pistons) {
 					float phaseOffset = 0;
 					switch (piston.side) {
@@ -282,18 +336,62 @@ public class LocomotiveSteam extends Locomotive {
 					phase = this.getPhase(2, phaseOffset);
 					double phaseSpike = Math.pow(phase, 4);
 					
-					if (phaseSpike < 0.6) {
-						continue;
+					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 ) {
+						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+						EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
+						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+						double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3 * gauge.scale();
+						Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
+						sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
+						world.spawnEntity(sp);
 					}
 					
-					
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
-					EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
-					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3 * gauge.scale();
-					Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
-					sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
-					world.spawnEntity(sp);
+					if (Math.abs(this.getCurrentSpeed().metric()) < 5) {
+						if (!phaseOn.containsKey(piston.side)) {
+							phaseOn.put(piston.side, false);
+						}
+						
+						if (!phaseOn.get(piston.side)) {
+							if (phase > 0.8) {
+						    	double speed = Math.abs(getCurrentSpeed().minecraft());
+						    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
+								world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
+								phaseOn.put(piston.side, true);
+							}
+						} else {
+							if (phase < 0.8) {
+								phaseOn.put(piston.side, false);
+							}
+						}
+						if (repeating.containsKey(piston.side + "0")) {
+							Minecraft.getMinecraft().getSoundHandler().stopSound(repeating.get(piston.side+"0"));
+							repeating.remove(piston.side+"0");
+						}
+						if (repeating.containsKey(piston.side + "1")) {
+							Minecraft.getMinecraft().getSoundHandler().stopSound(repeating.get(piston.side+"1"));
+							repeating.remove(piston.side+"1");
+						}
+					} else {
+						if (!repeating.containsKey(piston.side+"0"))  {
+							if (phase > 0.9) {
+								System.out.println("START " + piston.side+"0 " + this.ticksExisted);
+								MovingSoundRollingStock ms = new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER);
+								ms.setDynamicPitch();
+								repeating.put(piston.side+"0", ms);
+								Minecraft.getMinecraft().getSoundHandler().playSound(ms);
+							}
+						}
+						if (!repeating.containsKey(piston.side+"1"))  {
+							if (phase < 0.1) {
+								System.out.println("START " + piston.side+"1 " + this.ticksExisted);
+								MovingSoundRollingStock ms = new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER);
+								ms.setDynamicPitch();
+								repeating.put(piston.side+"1", ms);
+								Minecraft.getMinecraft().getSoundHandler().playSound(ms);
+							}
+						}
+						phaseOn.clear();
+					}
 				}
 			}
 			
@@ -310,6 +408,10 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			return;
+		}
+		
+		if (this.getDataManager().get(HORN) > 0) {
+			this.getDataManager().set(HORN, this.getDataManager().get(HORN)-1);
 		}
 		
 		if (!this.isBuilt()) {
