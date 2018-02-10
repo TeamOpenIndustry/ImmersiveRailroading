@@ -3,23 +3,30 @@ package cam72cam.immersiverailroading.registry;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.util.EnumFacing;
@@ -60,6 +67,7 @@ public abstract class EntityRollingStockDefinition {
 	private int weight;
 	private int maxPassengers;
 	protected double internal_scale;
+	public Gauge recommended_gauge;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
@@ -93,8 +101,10 @@ public abstract class EntityRollingStockDefinition {
 			darken = data.get("darken_model").getAsFloat();
 		}
 		this.internal_scale = 1;
+		this.recommended_gauge = Gauge.STANDARD;
 		if (data.has("model_gauge_m")) { 
-			internal_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
+			this.internal_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
+			this.recommended_gauge = Gauge.from(data.get("model_gauge_m").getAsDouble());
 		}
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_scale);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
@@ -275,7 +285,92 @@ public abstract class EntityRollingStockDefinition {
 		}
 	}
 	
+	private boolean loadHeightMaps() {
+		try {
+			File f = new File(CommonProxy.getCacheFile("heightmap_" + this.model.checksum));
+			if (f.exists()) {
+				ImmersiveRailroading.info("Loading heighmap...");
+				Scanner reader = new Scanner(f);
+				
+				String[] header = reader.nextLine().split(" ");
+				xRes = Integer.parseInt(header[0]);
+				zRes = Integer.parseInt(header[1]);
+				
+				while(reader.hasNextLine()) {
+					String name = reader.nextLine();
+					RenderComponent rc = null;
+					for (List<RenderComponent> rcl : this.renderComponents.values()) {
+						for (RenderComponent rc_pot : rcl) {
+							if (rc_pot.toString().equals(name)) {
+								rc = rc_pot;
+								break;
+							}
+						}
+						if (rc != null) {
+							break;
+						}
+					}
+
+					double[][] heightMap = new double[xRes][zRes];
+					
+					for (int x = 0; x < xRes; x++) {
+						String[] data = reader.nextLine().split(" ");
+						for (int z = 0; z < zRes; z++) {
+							heightMap[x][z] = Double.parseDouble(data[z]);
+						}
+					}
+					
+					this.partMapCache.put(rc, heightMap);
+				}
+				
+				reader.close();
+				return true;
+			}
+		} catch (FileNotFoundException e) {
+			ImmersiveRailroading.catching(e);
+		}
+		return false;
+	}
+	
+	private void writeHeightMaps() {
+		try {
+			File f = new File(CommonProxy.getCacheFile("heightmap_" + this.model.checksum));
+			PrintWriter pw = new PrintWriter(f);
+			
+			// Header
+			pw.println(xRes + " " + zRes);
+			
+			for (RenderComponent rc : this.partMapCache.keySet()) {
+				String key = rc.toString();
+				double[][] map = this.partMapCache.get(rc);
+				//Name
+				pw.println(key);
+
+				//Data
+				for (int x = 0; x < xRes; x++) {
+					String line = "";
+					String sep = "";
+					for (int z = 0; z < zRes; z++) {
+						line += sep + map[x][z];
+						sep = " ";
+					}
+					pw.println(line);
+				}
+			}
+			
+			pw.close();
+		} catch (FileNotFoundException e) {
+			ImmersiveRailroading.catching(e);
+		}
+	}
+	
 	private void initHeightMap() {
+		if (loadHeightMaps()) {
+			return;
+		}
+		
+		ImmersiveRailroading.info("Generating model heightmap...");
+		
 		double ratio = 8;
 		xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
 		zRes = (int) Math.ceil(this.widthBounds * ratio);
@@ -321,6 +416,8 @@ public abstract class EntityRollingStockDefinition {
 				partMapCache.put(rc, heightMap);
 			}
 		}
+		
+		writeHeightMaps();
 	}
 	
 	public double[][] createHeightMap(EntityBuildableRollingStock stock) {
@@ -381,6 +478,7 @@ public abstract class EntityRollingStockDefinition {
 
 	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = new ArrayList<String>();
+		tips.add(GuiText.RECOMMENDED_GAUGE_TOOLTIP.toString(this.recommended_gauge));
 		return tips;
 	}
 

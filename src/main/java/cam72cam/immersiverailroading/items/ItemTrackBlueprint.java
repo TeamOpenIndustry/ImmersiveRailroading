@@ -73,11 +73,11 @@ public class ItemTrackBlueprint extends Item {
         tooltip.add(GuiText.TRACK_TYPE.toString(getType(stack)));
         tooltip.add(GuiText.TRACK_GAUGE.toString(ItemGauge.get(stack)));
         tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
-        tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack)));
         tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
         tooltip.add(GuiText.TRACK_RAIL_BED.toString(getBed(stack).getDisplayName()));
         tooltip.add(GuiText.TRACK_RAIL_BED_FILL.toString(getBedFill(stack).getDisplayName()));
         tooltip.add((isPreview(stack) ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString());
+        tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack) * 90.0/4 ));
 	}
 
 	public static void setType(ItemStack stack, TrackItems type) {

@@ -70,6 +70,12 @@ public class BuilderSwitch extends BuilderBase {
 	}
 	
 	@Override
+	public void clearArea() {
+		straightBuilder.clearArea();
+		turnBuilder.clearArea();
+	}
+	
+	@Override
 	public List<TrackBase> getTracksForRender() {
 		List<TrackBase> data = straightBuilder.getTracksForRender();
 		// TODO flag for in hand render

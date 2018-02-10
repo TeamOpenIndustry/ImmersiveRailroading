@@ -4,7 +4,7 @@
 	"works": "Cooke Locomotive and Machine Works",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/cooke_mogul/cooke_mogul.obj",
 	"darken_model": "-0.05",
-	"model_gauge_m": 0.88,
+	"model_gauge_m": 1,
 	"properties": {
 		"max_psi": 150,
 		"water_capacity_l": 10000, 

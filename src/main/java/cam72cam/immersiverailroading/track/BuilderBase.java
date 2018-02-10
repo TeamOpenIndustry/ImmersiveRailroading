@@ -252,12 +252,17 @@ public abstract class BuilderBase {
 				if (!BlockUtil.isRail(world, main)) {
 					world.destroyBlock(main, false);
 				}
-				for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-					BlockPos pos = main.offset(facing);
-					if (!BlockUtil.isRail(world, pos)) {
-						world.destroyBlock(pos, false);
+				if (gauge != Gauge.MODEL) {
+					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+						BlockPos pos = main.offset(facing);
+						if (!BlockUtil.isRail(world, pos)) {
+							world.destroyBlock(pos, false);
+						}
 					}
 				}
+			}
+			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
+				world.destroyBlock(track.getPos().down(), false);
 			}
 		}
 	}

@@ -29,11 +29,13 @@ public abstract class Freight extends EntityCoupleableRollingStock {
     };
     
 	protected static DataParameter<Integer> CARGO_ITEMS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
+	protected static DataParameter<Integer> PERCENT_FULL = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 
 	public Freight(World world, String defID) {
 		super(world, defID);
 		
 		this.getDataManager().register(CARGO_ITEMS, 0);
+		this.getDataManager().register(PERCENT_FULL, 0);
 	}
 	
 	protected void onInventoryChanged() {
@@ -100,10 +102,19 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	 */
 	protected void handleMass() {
 		int itemInsideCount = 0;
+		int stacksWithStuff = 0;
 		for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 			itemInsideCount += cargoItems.getStackInSlot(slot).getCount();
+			if (cargoItems.getStackInSlot(slot).getCount() != 0) {
+				stacksWithStuff += 1;
+			}
 		}
 		this.getDataManager().set(CARGO_ITEMS, itemInsideCount);
+		this.getDataManager().set(PERCENT_FULL, stacksWithStuff * 100 / this.getInventorySize());
+	}
+	
+	public int getPercentCargoFull() {
+		return this.getDataManager().get(PERCENT_FULL);
 	}
 
 	@Override
