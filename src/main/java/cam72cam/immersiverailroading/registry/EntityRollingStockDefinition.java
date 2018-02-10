@@ -3,11 +3,15 @@ package cam72cam.immersiverailroading.registry;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import com.google.gson.JsonObject;
@@ -15,11 +19,13 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import net.minecraft.util.EnumFacing;
@@ -275,7 +281,92 @@ public abstract class EntityRollingStockDefinition {
 		}
 	}
 	
+	private boolean loadHeightMaps() {
+		try {
+			File f = new File(CommonProxy.getCacheFile("heightmap_" + this.model.checksum));
+			if (f.exists()) {
+				ImmersiveRailroading.info("Loading heighmap...");
+				Scanner reader = new Scanner(f);
+				
+				String[] header = reader.nextLine().split(" ");
+				xRes = Integer.parseInt(header[0]);
+				zRes = Integer.parseInt(header[1]);
+				
+				while(reader.hasNextLine()) {
+					String name = reader.nextLine();
+					RenderComponent rc = null;
+					for (List<RenderComponent> rcl : this.renderComponents.values()) {
+						for (RenderComponent rc_pot : rcl) {
+							if (rc_pot.toString().equals(name)) {
+								rc = rc_pot;
+								break;
+							}
+						}
+						if (rc != null) {
+							break;
+						}
+					}
+
+					double[][] heightMap = new double[xRes][zRes];
+					
+					for (int x = 0; x < xRes; x++) {
+						String[] data = reader.nextLine().split(" ");
+						for (int z = 0; z < zRes; z++) {
+							heightMap[x][z] = Double.parseDouble(data[z]);
+						}
+					}
+					
+					this.partMapCache.put(rc, heightMap);
+				}
+				
+				reader.close();
+				return true;
+			}
+		} catch (FileNotFoundException e) {
+			ImmersiveRailroading.catching(e);
+		}
+		return false;
+	}
+	
+	private void writeHeightMaps() {
+		try {
+			File f = new File(CommonProxy.getCacheFile("heightmap_" + this.model.checksum));
+			PrintWriter pw = new PrintWriter(f);
+			
+			// Header
+			pw.println(xRes + " " + zRes);
+			
+			for (RenderComponent rc : this.partMapCache.keySet()) {
+				String key = rc.toString();
+				double[][] map = this.partMapCache.get(rc);
+				//Name
+				pw.println(key);
+
+				//Data
+				for (int x = 0; x < xRes; x++) {
+					String line = "";
+					String sep = "";
+					for (int z = 0; z < zRes; z++) {
+						line += sep + map[x][z];
+						sep = " ";
+					}
+					pw.println(line);
+				}
+			}
+			
+			pw.close();
+		} catch (FileNotFoundException e) {
+			ImmersiveRailroading.catching(e);
+		}
+	}
+	
 	private void initHeightMap() {
+		if (loadHeightMaps()) {
+			return;
+		}
+		
+		ImmersiveRailroading.info("Generating model heightmap...");
+		
 		double ratio = 8;
 		xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
 		zRes = (int) Math.ceil(this.widthBounds * ratio);
@@ -321,6 +412,8 @@ public abstract class EntityRollingStockDefinition {
 				partMapCache.put(rc, heightMap);
 			}
 		}
+		
+		writeHeightMaps();
 	}
 	
 	public double[][] createHeightMap(EntityBuildableRollingStock stock) {
