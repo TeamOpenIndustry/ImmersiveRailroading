@@ -254,6 +254,10 @@ public abstract class FreightTank extends Freight {
 		}
 		return fLoad;
 	}
+	
+	public int getPercentLiquidFull() {
+		return this.getLiquidAmount() * 100 / this.getTankCapacity().MilliBuckets();
+	}
 
 	private List<ISyncableSlots> listners = new ArrayList<ISyncableSlots>();
 	@Override
