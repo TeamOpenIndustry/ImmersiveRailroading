@@ -31,28 +31,30 @@ public class ItemLargeWrench extends Item {
 	}
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-			if (BlockUtil.isIRRail(world, pos)) {
-				TileRailBase te = TileRailBase.get(world, pos);
-				if (te != null) {
-					Augment augment = te.getAugment();
-					if (augment != null) {
-						te.setAugment(null);
+		if (BlockUtil.isIRRail(world, pos)) {
+			TileRailBase te = TileRailBase.get(world, pos);
+			if (te != null) {
+				Augment augment = te.getAugment();
+				if (augment != null) {
+					te.setAugment(null);
 
-						if(!world.isRemote) {
-							ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_AUGMENT, 1);
-							ItemAugmentType.set(stack, augment);
-							ItemGauge.set(stack, Gauge.from(te.getTrackGauge()));
-							world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), stack));
-						}
+					if(!world.isRemote) {
+						ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_AUGMENT, 1);
+						ItemAugmentType.set(stack, augment);
+						ItemGauge.set(stack, Gauge.from(te.getTrackGauge()));
+						world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), stack));
 					}
-				}
-			} else {
-				if (!world.isRemote) {
-					for (String key : MultiblockRegistry.keys()) {
-						MultiblockRegistry.get(key).tryCreate(world, pos);
-					}
+					return EnumActionResult.SUCCESS;
 				}
 			}
+		} else {
+			for (String key : MultiblockRegistry.keys()) {
+				if (MultiblockRegistry.get(key).tryCreate(world, pos)) {
+					System.out.print("DONE");
+					return EnumActionResult.SUCCESS;
+				}
+			}
+		}
 		return EnumActionResult.PASS;
 	}
 }
