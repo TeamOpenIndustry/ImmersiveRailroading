@@ -512,6 +512,24 @@ public class ClientProxy extends CommonProxy {
 	public static String newSound(ISound p_sound) {
 		if (sndSystem == null) {
 			try {
+				Field sndSystemFiedl = SoundManager.class.getDeclaredField("field_148620_e");
+		        sndSystemFiedl.setAccessible(true);
+		        sndSystem = (SoundSystem) sndSystemFiedl.get(manager);
+		
+			} catch (NoSuchFieldException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if (sndSystem == null) {
+			try {
 				Field sndSystemFiedl = SoundManager.class.getDeclaredField("sndSystem");
 		        sndSystemFiedl.setAccessible(true);
 		        sndSystem = (SoundSystem) sndSystemFiedl.get(manager);
