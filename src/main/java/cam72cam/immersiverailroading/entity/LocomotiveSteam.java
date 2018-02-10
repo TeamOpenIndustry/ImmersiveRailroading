@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -193,6 +194,7 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
+	private Map<String, String> sndCache = new HashMap<String, String>();
 	private Map<String, MovingSoundRollingStock> repeating = new HashMap<String, MovingSoundRollingStock>();
 	private SoundEvent horn;
 	private SoundEvent idle;
@@ -346,51 +348,53 @@ public class LocomotiveSteam extends Locomotive {
 						world.spawnEntity(sp);
 					}
 					
-					if (Math.abs(this.getCurrentSpeed().metric()) < 5) {
-						if (!phaseOn.containsKey(piston.side)) {
-							phaseOn.put(piston.side, false);
-						}
-						
-						if (!phaseOn.get(piston.side)) {
-							if (phase > 0.8) {
-						    	double speed = Math.abs(getCurrentSpeed().minecraft());
-						    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-								world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
-								phaseOn.put(piston.side, true);
-							}
-						} else {
-							if (phase < 0.8) {
-								phaseOn.put(piston.side, false);
-							}
-						}
-						if (repeating.containsKey(piston.side + "0")) {
-							Minecraft.getMinecraft().getSoundHandler().stopSound(repeating.get(piston.side+"0"));
-							repeating.remove(piston.side+"0");
-						}
-						if (repeating.containsKey(piston.side + "1")) {
-							Minecraft.getMinecraft().getSoundHandler().stopSound(repeating.get(piston.side+"1"));
-							repeating.remove(piston.side+"1");
+
+					phase = this.getPhase(1, phaseOffset);
+					String key = piston.side + "fore";
+					if (!phaseOn.containsKey(key)) {
+						phaseOn.put(key, false);
+					}
+					
+					if (!phaseOn.get(key)) {
+						if (phase > 0.8) {
+					    	double speed = Math.abs(getCurrentSpeed().minecraft());
+					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
+					    	if (!sndCache.containsKey(key)) {
+					    		sndCache.put(key, ClientProxy.newSound(new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER)));
+					    	}
+					    	
+					    	ClientProxy.play(sndCache.get(key), 1, (float) (1-speed/maxSpeed), posX, posY, posZ);
+							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
+							phaseOn.put(key, true);
 						}
 					} else {
-						if (!repeating.containsKey(piston.side+"0"))  {
-							if (phase > 0.9) {
-								System.out.println("START " + piston.side+"0 " + this.ticksExisted);
-								MovingSoundRollingStock ms = new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER);
-								ms.setDynamicPitch();
-								repeating.put(piston.side+"0", ms);
-								Minecraft.getMinecraft().getSoundHandler().playSound(ms);
-							}
+						if (phase < 0.8) {
+							phaseOn.put(key, false);
 						}
-						if (!repeating.containsKey(piston.side+"1"))  {
-							if (phase < 0.1) {
-								System.out.println("START " + piston.side+"1 " + this.ticksExisted);
-								MovingSoundRollingStock ms = new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER);
-								ms.setDynamicPitch();
-								repeating.put(piston.side+"1", ms);
-								Minecraft.getMinecraft().getSoundHandler().playSound(ms);
-							}
+					}
+					
+					phase = this.getPhase(1, phaseOffset+45);
+					key = piston.side + "back";
+					if (!phaseOn.containsKey(key)) {
+						phaseOn.put(key, false);
+					}
+					
+					if (!phaseOn.get(key)) {
+						if (phase > 0.8) {
+					    	double speed = Math.abs(getCurrentSpeed().minecraft());
+					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
+					    	if (!sndCache.containsKey(key)) {
+					    		sndCache.put(key, ClientProxy.newSound(new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER)));
+					    	}
+					    	
+					    	ClientProxy.play(sndCache.get(key), 1, (float) (1-speed/maxSpeed/2), posX, posY, posZ);
+							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
+							phaseOn.put(key, true);
 						}
-						phaseOn.clear();
+					} else {
+						if (phase < 0.8) {
+							phaseOn.put(key, false);
+						}
 					}
 				}
 			}

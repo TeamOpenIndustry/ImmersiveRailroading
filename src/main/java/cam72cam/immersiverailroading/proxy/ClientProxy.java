@@ -2,6 +2,11 @@ package cam72cam.immersiverailroading.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,7 +69,12 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
+import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.Sound;
+import net.minecraft.client.audio.SoundEventAccessor;
+import net.minecraft.client.audio.SoundManager;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -82,6 +92,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -92,6 +103,7 @@ import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
@@ -106,10 +118,15 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
+import paulscode.sound.SoundSystem;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
+
+	private static SoundManager manager;
+
+	private static SoundSystem sndSystem;
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
@@ -486,6 +503,83 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 	}
+	
+	@SubscribeEvent
+	public static void onSoundLoad(SoundLoadEvent event) {
+		manager = event.getManager();
+	}
+	
+	public static String newSound(ISound p_sound) {
+		if (sndSystem == null) {
+			try {
+				Field sndSystemFiedl = SoundManager.class.getDeclaredField("sndSystem");
+		        sndSystemFiedl.setAccessible(true);
+		        sndSystem = (SoundSystem) sndSystemFiedl.get(manager);
+		
+			} catch (NoSuchFieldException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
+		p_sound.createAccessor(manager.sndHandler);
+		Sound sound = p_sound.getSound();
+
+        String s = MathHelper.getRandomUUID(ThreadLocalRandom.current()).toString();
+
+        ResourceLocation resourcelocation1 = sound.getSoundAsOggLocation();
+        boolean flag = p_sound.canRepeat() && p_sound.getRepeatDelay() == 0;
+        float f = 1;
+
+        sndSystem.newSource(false, s, getURLForSoundResource(resourcelocation1), resourcelocation1.toString(), flag, p_sound.getXPosF(), p_sound.getYPosF(), p_sound.getZPosF(), p_sound.getAttenuationType().getTypeInt(), f);
+        
+        return s;
+	}
+	
+	public static void play(String sourcename, float pitch, float vol, double x, double y, double z) {
+		sndSystem.stop(sourcename);
+		sndSystem.setPosition(sourcename, (float)x, (float)y, (float)z);
+		sndSystem.setPitch(sourcename, pitch);
+		sndSystem.setVolume(sourcename, vol);
+        sndSystem.play(sourcename);	
+    }
+	
+    private static URL getURLForSoundResource(final ResourceLocation p_148612_0_)
+    {
+        String s = String.format("%s:%s:%s", "mcsounddomain", p_148612_0_.getResourceDomain(), p_148612_0_.getResourcePath());
+        URLStreamHandler urlstreamhandler = new URLStreamHandler()
+        {
+            protected URLConnection openConnection(URL p_openConnection_1_)
+            {
+                return new URLConnection(p_openConnection_1_)
+                {
+                    public void connect() throws IOException
+                    {
+                    }
+                    public InputStream getInputStream() throws IOException
+                    {
+                        return Minecraft.getMinecraft().getResourceManager().getResource(p_148612_0_).getInputStream();
+                    }
+                };
+            }
+        };
+
+        try
+        {
+            return new URL((URL)null, s, urlstreamhandler);
+        }
+        catch (MalformedURLException var4)
+        {
+            throw new Error("TODO: Sanely handle url exception! :D");
+        }
+    }
 	
 	private static int tickCount = 0;
 	@SubscribeEvent
