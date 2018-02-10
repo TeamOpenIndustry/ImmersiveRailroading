@@ -66,6 +66,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
 			}
 			break;
+		case T1:
 		case MALLET_WALSCHAERTS:
 			for (int i = 0; i < 10; i++) {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
@@ -76,8 +77,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		case CLIMAX:
 			break;
 		case SHAY:
-			break;
-		default:
 			break;
 		}
 		
@@ -106,6 +105,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		case WALSCHAERTS:
 			sides.add("RIGHT");
 			sides.add("LEFT");
+		case T1:
 		case MALLET_WALSCHAERTS:
 			if (sides.size() == 0) {
 				sides.add("LEFT_FRONT");

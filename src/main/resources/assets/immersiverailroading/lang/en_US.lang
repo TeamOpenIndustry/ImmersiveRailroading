@@ -42,7 +42,7 @@ gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
 gui.immersiverailroading:selector.type=Type: %s
 gui.immersiverailroading:selector.gauge=Gauge: %s
-gui.immersiverailroading:selector.quarters=Curve Quarters: 
+gui.immersiverailroading:selector.quarters=%s Degree Turn
 gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
 gui.immersiverailroading:selector.position=Position: %s
@@ -54,7 +54,7 @@ gui.immersiverailroading:none=None
 gui.immersiverailroading:track.type=Type:      %s
 gui.immersiverailroading:track.length=Length:    %s
 gui.immersiverailroading:track.gauge=Gauge:     %s
-gui.immersiverailroading:track.quarters=Quarters: %s
+gui.immersiverailroading:track.quarters=%s Degree Turn
 gui.immersiverailroading:track.position=Position:   %s
 gui.immersiverailroading:track.rail_bed=Bed:        %s
 gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
@@ -65,6 +65,7 @@ gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.horse_power=Horse Power: %s
 gui.immersiverailroading:loco.max_speed=Max Speed:    %s
 gui.immersiverailroading:stock.gauge=Gauge: %s
+gui.immersiverailroading:stock.recommended_gauge=Recommended Gauge: %s
 gui.immersiverailroading:cast.raw=Requires processing in the steam hammer before use!
 
 immersiverailroading:gauge.brunel=Brunel
@@ -130,6 +131,7 @@ part.immersiverailroading:component.reversing_arm=Reversing Arm
 part.immersiverailroading:component.lifting_link=Lifting Link
 part.immersiverailroading:component.reach_rod=Reach Rod
 part.immersiverailroading:component.walcherts_linkage=Walcherts Linkage
+part.immersiverailroading:component.smokebox=Smokebox
 
 
 immersiverailroading:crafting_type.casting=Casting
@@ -147,3 +149,9 @@ itemGroup.immersiverailroading.components=Immersive Railroading Components
 
 death.attack.immersiverailroading:casting=%s discovered that molten metal does not make a good swimming pool
 death.attack.immersiverailroading:hitByTrain=%s failed to outrun a train
+
+immersiverailroading:detector_mode.simple=Detecting Stock
+immersiverailroading:detector_mode.speed=Detecting Speed
+immersiverailroading:detector_mode.passengers=Detecting Number of Passengers
+immersiverailroading:detector_mode.cargo=Detecting Cargo Percentage Full
+immersiverailroading:detector_mode.liquid=Detecting Liquid Percentage Full

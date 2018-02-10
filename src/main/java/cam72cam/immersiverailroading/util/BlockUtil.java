@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
+import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockSnow;
@@ -44,6 +45,9 @@ public class BlockUtil {
 			return true;
 		}
 		if (block instanceof BlockSnow) {
+			return true;
+		}
+		if (block instanceof BlockLeaves) {
 			return true;
 		}
 		if (block == ImmersiveRailroading.BLOCK_RAIL_PREVIEW) {

@@ -42,43 +42,44 @@ public class ItemRailAugment extends Item {
 	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		if(!world.isRemote) {
-			if (BlockUtil.isIRRail(world, pos)) {
-				TileRailBase te = TileRailBase.get(world, pos);
-				if (te != null) {
-					ItemStack stack = player.getHeldItem(hand);
-					if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == ItemGauge.get(stack))) {
-						Augment augment = ItemAugmentType.get(stack);
-						TileRail parent = te.getParentTile();
-						if (parent == null) {
+		if (BlockUtil.isIRRail(world, pos)) {
+			TileRailBase te = TileRailBase.get(world, pos);
+			if (te != null) {
+				ItemStack stack = player.getHeldItem(hand);
+				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == ItemGauge.get(stack))) {
+					Augment augment = ItemAugmentType.get(stack);
+					TileRail parent = te.getParentTile();
+					if (parent == null) {
+						return EnumActionResult.FAIL;
+					}
+					switch(augment) {
+					case WATER_TROUGH:
+						if (parent.getRotationQuarter() != 0) {
 							return EnumActionResult.FAIL;
 						}
-						switch(augment) {
-						case WATER_TROUGH:
-							if (parent.getRotationQuarter() != 0) {
-								return EnumActionResult.FAIL;
-							}
-							if (parent.getType() != TrackItems.STRAIGHT) {
-								return EnumActionResult.FAIL; 
-							}
-							break;
-						case SPEED_RETARDER:
-							switch(parent.getType()) {
-							case SWITCH:
-							case TURN:
-								return EnumActionResult.FAIL; 
-							default:
-								break;
-							}
+						if (parent.getType() != TrackItems.STRAIGHT) {
+							return EnumActionResult.FAIL; 
+						}
+						break;
+					case SPEED_RETARDER:
+						switch(parent.getType()) {
+						case SWITCH:
+						case TURN:
+							return EnumActionResult.FAIL; 
 						default:
 							break;
 						}
+					default:
+						break;
+					}
+
+					if(!world.isRemote) {
 						te.setAugment(augment);
 						if (!player.isCreative()) {
 							stack.setCount(stack.getCount()-1);;
 						}
-						return EnumActionResult.SUCCESS;
 					}
+					return EnumActionResult.SUCCESS;
 				}
 			}
 		}

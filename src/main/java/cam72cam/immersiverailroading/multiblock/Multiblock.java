@@ -97,7 +97,9 @@ public abstract class Multiblock {
 					valid = valid && checkValid(world, origin, offset, rot);
 				}
 				if (valid) {
-					instance(world, origin, rot).onCreate();
+					if (!world.isRemote) {
+						instance(world, origin, rot).onCreate();
+					}
 					return true;
 				}
 			}

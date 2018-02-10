@@ -111,4 +111,9 @@ public class RenderComponent {
 	public RenderComponent scale(Gauge gauge) {
 		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge.scale());
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s%s%s%s%s", this.type, this.id, this.side, this.pos, this.scale);
+	}
 }

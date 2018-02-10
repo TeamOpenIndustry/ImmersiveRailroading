@@ -1,4 +1,4 @@
-# Blender MTL File: '2-6-0tenderwip.blend'
+# Blender MTL File: '2-6-0tenderwip (1).blend'
 # Material Count: 10
 
 newmtl Wood
@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd .
+map_Kd wood.png
 
 newmtl brass
 Ns 96.078431
@@ -21,7 +21,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd .
+map_Kd brass.png
 
 newmtl graphitedblack
 Ns 96.078431
@@ -32,7 +32,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd .
+map_Kd graphitedblack.png
 
 newmtl logface
 Ns 96.078431
@@ -43,7 +43,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd .
+map_Kd logface.png
 
 newmtl logside
 Ns 96.078431
@@ -54,7 +54,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd .
+map_Kd logside.png
 
 newmtl paintedblack
 Ns 96.078431
@@ -65,7 +65,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd .
+map_Kd paintedblack.png
 
 newmtl paintedblack2
 Ns 96.078431
@@ -76,34 +76,37 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd .
+map_Kd paintedblack2.png
 
-newmtl slidergrey
+newmtl rodgrey
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
-Kd 0.193815 0.193815 0.193815
+Kd 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd rodgrey.png
 
 newmtl trimwhite
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
-Kd 0.538451 0.538451 0.538451
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd trimwhite.png
 
 newmtl wheelrim
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
-Kd 0.074277 0.074277 0.074277
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd wheelrim.png
