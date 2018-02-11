@@ -12,11 +12,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import io.netty.util.internal.ThreadLocalRandom;
-import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import paulscode.sound.SoundSystem;
 
 public class IRSoundManager {
@@ -69,27 +67,17 @@ public class IRSoundManager {
 		}
 	}
 	
-	public ISound createSound(ResourceLocation oggLocation, AttenuationType aType, Vec3d pos) {
+	public ISound createSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance) {
         String identifier = MathHelper.getRandomUUID(ThreadLocalRandom.current()).toString();
-        boolean repeats = false;
-        float f = 1;
         
         SoundSystem sndSystem = this.soundSystem.get();
 		if (sndSystem == null) {
 			return null;
 		}
-
-		sndSystem.newSource(false, identifier, getURLForSoundResource.apply(oggLocation), oggLocation.toString(), repeats, (float)pos.x, (float)pos.y, (float)pos.z, aType.getTypeInt(), f);
 		
-		ClientSound snd = new ClientSound(identifier, sndSystem);
+		ClientSound snd = new ClientSound(identifier, sndSystem, oggLocation, getURLForSoundResource.apply(oggLocation), repeats, attenuationDistance);
 		this.sounds.add(snd);
         
         return snd;
-	}
-	
-	public void tick() {
-		for (ISound snd : sounds) {
-			snd.tick();
-		}
 	}
 }

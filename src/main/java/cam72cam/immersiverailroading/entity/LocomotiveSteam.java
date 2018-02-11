@@ -229,10 +229,16 @@ public class LocomotiveSteam extends Locomotive {
 				this.idleRep = new MovingSoundRollingStock(this, this.idle, SoundCategory.MASTER);
 				idleRep.setDynamicRate();
 				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/chuff.ogg"), AttenuationType.NONE, new Vec3d(this.posX, this.posY, this.posZ)));
+					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/chuff.ogg"), false, 100));
 				}
 				Minecraft.getMinecraft().getSoundHandler().playSound(idleRep);
 			}
+
+			for (int i = 0; i < 16; i ++) {
+				sndCache.get(i).setPosition(this.posX, this.posY, this.posZ);
+			}
+			
+			
 			double phase = getPhase(4, 0);
 			/*
 			if (this.getCurrentSpeed().metric() < 40) {
