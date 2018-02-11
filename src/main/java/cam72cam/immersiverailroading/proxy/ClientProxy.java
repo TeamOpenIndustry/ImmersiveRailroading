@@ -67,7 +67,6 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -499,8 +498,8 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@Override
-	public ISound newSound(ResourceLocation oggLocation, AttenuationType aType, Vec3d pos) {
-		return manager.createSound(oggLocation, aType, pos);
+	public ISound newSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance) {
+		return manager.createSound(oggLocation, repeats, attenuationDistance);
 	}
 	
 	private static int tickCount = 0;
