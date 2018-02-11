@@ -3,14 +3,14 @@
 	"name": "EMD SW1500",
 	"works": "Electro-Motive Division",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/emd_sw1500.obj",
-	"darken_model": "-0.03",
+	"darken_model": "-0.01",
 	"properties": {
 		"fuel_efficiency_%": 72,
-		"fuel_capacity_l": 3200,
+		"fuel_capacity_l": 3000,
 		"horsepower": 1500,
 		"tractive_effort_lbf": 38000,
 		"max_speed_kmh": 97,
-		"weight_kg": 248000
+		"weight_kg": 112491
 	},
 	"passenger": {
 		"slots": 3,
