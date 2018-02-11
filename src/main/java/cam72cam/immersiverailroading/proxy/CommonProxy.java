@@ -42,11 +42,13 @@ import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import net.minecraft.block.Block;
+import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -54,6 +56,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
@@ -197,7 +200,9 @@ public abstract class CommonProxy implements IGuiHandler {
 	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
 	public abstract List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException;
 	
-
+	public ISound newSound(ResourceLocation oggLocation, AttenuationType aType, Vec3d pos) {
+		return null;
+	}
 
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int entityIDorX, int y, int z) {
