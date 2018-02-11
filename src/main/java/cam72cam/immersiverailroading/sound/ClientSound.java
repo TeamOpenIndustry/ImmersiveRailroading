@@ -4,6 +4,7 @@ import java.net.URL;
 
 import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 import paulscode.sound.SoundSystem;
 
 public class ClientSound implements ISound {
@@ -34,20 +35,30 @@ public class ClientSound implements ISound {
 	}
 	
 	@Override
-	public void play(float pitch, float vol, double x, double y, double z) {
-		if (sndSystem.playing(id)) {
-			sndSystem.stop(id);
-		}
-		sndSystem.setPosition(id, (float)x, (float)y, (float)z);
+	public void play(float pitch, float vol, Vec3d pos) {
+		stop();
+		sndSystem.setPosition(id, (float)pos.x, (float)pos.y, (float)pos.z);
 		sndSystem.setPitch(id, pitch);
 		sndSystem.setVolume(id, vol);
         sndSystem.play(id);
     }
 	
 	@Override
-	public void setPosition(double x, double y, double z) {
-		if (sndSystem.playing(id)) {
-			sndSystem.setPosition(id, (float)x, (float)y, (float)z);
+	public void setPosition(Vec3d pos) {
+		if (isPlaying()) {
+			sndSystem.setPosition(id, (float)pos.x, (float)pos.y, (float)pos.z);
+		}
+	}
+	
+	@Override
+	public boolean isPlaying() {
+		return sndSystem.playing(id);
+	}
+
+	@Override
+	public void stop() {
+		if (isPlaying()) {
+			sndSystem.stop(id);
 		}
 	}
 }
