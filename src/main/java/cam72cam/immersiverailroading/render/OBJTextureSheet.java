@@ -142,7 +142,7 @@ public class OBJTextureSheet {
 			image = null;
 		}
 		public int copiesU() {
-			return (maxU - minU);
+			return (maxU - minU)+1;
 		}
 		public int copiesV() {
 			return (maxV - minV);
