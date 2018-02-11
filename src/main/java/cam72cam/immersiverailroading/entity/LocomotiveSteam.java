@@ -18,9 +18,6 @@ import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound.AttenuationType;
-import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,12 +26,9 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
-
-import net.minecraft.util.SoundEvent;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
@@ -47,7 +41,6 @@ public class LocomotiveSteam extends Locomotive {
 	private static DataParameter<Integer> HORN = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.VARINT);
 	private boolean gonnaExplode;
 	private double driverDiameter;
-	private SoundEvent chuff;
 	
 	public LocomotiveSteam(World world) {
 		this(world, null);
@@ -195,80 +188,40 @@ public class LocomotiveSteam extends Locomotive {
 	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
 	private List<ISound> sndCache = new ArrayList<ISound>();
 	private int sndCacheId = 0;
-	private SoundEvent horn;
-	private SoundEvent idle;
-	private MovingSoundRollingStock idleRep;
-	private MovingSoundRollingStock hornMov;
+	private ISound horn;
+	private ISound idle;
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
 
 		if (world.isRemote) {
-			// Particles
+			// Particles and Sound
 			
 			if (!Config.particlesEnabled) {
 				return;
 			}
-			SoundHandler snd = Minecraft.getMinecraft().getSoundHandler();
-			if (this.getDataManager().get(HORN) != 0 && !snd.isSoundPlaying(hornMov)) {
-				snd.playSound(hornMov);
+			
+			if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
+				horn.play(1, 1, getPositionVector());
 			}
 			
-			/*
-			if (this.sound == null) {
-				this.sound = new MovingSoundRollingStock(this, SoundEvents.BLOCK_SAND_BREAK, SoundCategory.MASTER);
-				this.sound.setDynamicRate();
-				Minecraft.getMinecraft().getSoundHandler().playSound(sound);
-			}
-			*/
-			if (this.chuff == null) {
-				this.chuff = new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff"));
-				this.horn = new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "horn"));
-				this.hornMov = new MovingSoundRollingStock(this, this.horn, SoundCategory.MASTER);
-				this.idle = new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "idle"));
-				this.idleRep = new MovingSoundRollingStock(this, this.idle, SoundCategory.MASTER);
-				idleRep.setDynamicRate();
+			if (this.sndCache.size() == 0) {
+				this.horn = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/horn.ogg"), false, 100);
+				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/idle.ogg"), true, 40);
 				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/chuff.ogg"), false, 100));
+					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/chuff.ogg"), false, 50));
 				}
-				Minecraft.getMinecraft().getSoundHandler().playSound(idleRep);
+				idle.play(1, 1, getPositionVector());
 			}
 
+			// Update sound positions
+			horn.setPosition(getPositionVector());
+			idle.setPosition(getPositionVector());
 			for (int i = 0; i < 16; i ++) {
-				sndCache.get(i).setPosition(this.posX, this.posY, this.posZ);
+				sndCache.get(i).setPosition(getPositionVector());
 			}
 			
-			
 			double phase = getPhase(4, 0);
-			/*
-			if (this.getCurrentSpeed().metric() < 40) {
-				if (!phaseOn) {
-					if (phase > 0.8) {
-						world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) 0.8, false);
-						phaseOn = true;
-					}
-				} else {
-					if (phase < 0.8) {
-						phaseOn = false;
-					}
-				}
-				if (repeating != null) {
-					Minecraft.getMinecraft().getSoundHandler().stopSound(repeating);;
-					repeating = null;
-				}
-			} else {
-				if (repeating == null) {
-					this.repeating = new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER);
-					repeating.setDynamicRate();
-					Minecraft.getMinecraft().getSoundHandler().playSound(repeating);
-				}
-			}*/
-			/*
-			if (repeating == null) {
-				this.repeating = new MovingSoundRollingStock(this, this.sound, SoundCategory.MASTER);
-				repeating.setDynamicRate();
-				Minecraft.getMinecraft().getSoundHandler().playSound(repeating);
-			}*/
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
@@ -356,8 +309,6 @@ public class LocomotiveSteam extends Locomotive {
 						world.spawnEntity(sp);
 					}
 					
-
-					phase = this.getPhase(1, phaseOffset);
 					String key = piston.side + "fore";
 					if (!phaseOn.containsKey(key)) {
 						phaseOn.put(key, false);
@@ -367,32 +318,9 @@ public class LocomotiveSteam extends Locomotive {
 						if (phase > 0.8) {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	sndCache.get(sndCacheId).play(0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
+					    	sndCache.get(sndCacheId).play(0.6f, (float) (1-speed/maxSpeed), getPositionVector());
 					    	sndCacheId++;
 					    	sndCacheId = sndCacheId % sndCache.size();
-							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
-							phaseOn.put(key, true);
-						}
-					} else {
-						if (phase < 0.8) {
-							phaseOn.put(key, false);
-						}
-					}
-					
-					phase = this.getPhase(1, phaseOffset+45);
-					key = piston.side + "back";
-					if (!phaseOn.containsKey(key)) {
-						phaseOn.put(key, false);
-					}
-					
-					if (!phaseOn.get(key)) {
-						if (phase > 0.8) {
-					    	double speed = Math.abs(getCurrentSpeed().minecraft());
-					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	sndCache.get(sndCacheId).play(0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
-					    	sndCacheId++;
-					    	sndCacheId = sndCacheId % sndCache.size();
-							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
 							phaseOn.put(key, true);
 						}
 					} else {
@@ -560,6 +488,9 @@ public class LocomotiveSteam extends Locomotive {
 		if (this.gonnaExplode) {
 			this.isDead = true;
 			return;
+		}
+		if (idle != null) {
+			idle.stop();
 		}
 		// Don't do drops if from explosion
 		super.setDead();
