@@ -12,17 +12,16 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
+import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ElytraSound;
+import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -194,9 +193,8 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
-	private List<String> sndCache = new ArrayList<String>();
+	private List<ISound> sndCache = new ArrayList<ISound>();
 	private int sndCacheId = 0;
-	private Map<String, MovingSoundRollingStock> repeating = new HashMap<String, MovingSoundRollingStock>();
 	private SoundEvent horn;
 	private SoundEvent idle;
 	private MovingSoundRollingStock idleRep;
@@ -231,7 +229,7 @@ public class LocomotiveSteam extends Locomotive {
 				this.idleRep = new MovingSoundRollingStock(this, this.idle, SoundCategory.MASTER);
 				idleRep.setDynamicRate();
 				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ClientProxy.newSound(new MovingSoundRollingStock(this, this.chuff, SoundCategory.MASTER)));
+					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/chuff.ogg"), AttenuationType.NONE, new Vec3d(this.posX, this.posY, this.posZ)));
 				}
 				Minecraft.getMinecraft().getSoundHandler().playSound(idleRep);
 			}
@@ -363,7 +361,7 @@ public class LocomotiveSteam extends Locomotive {
 						if (phase > 0.8) {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	ClientProxy.play(sndCache.get(sndCacheId), 0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
+					    	sndCache.get(sndCacheId).play(0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
 					    	sndCacheId++;
 					    	sndCacheId = sndCacheId % sndCache.size();
 							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
@@ -385,7 +383,7 @@ public class LocomotiveSteam extends Locomotive {
 						if (phase > 0.8) {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	ClientProxy.play(sndCache.get(sndCacheId), 0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
+					    	sndCache.get(sndCacheId).play(0.6f, (float) (1-speed/maxSpeed), posX, posY, posZ);
 					    	sndCacheId++;
 					    	sndCacheId = sndCacheId % sndCache.size();
 							//world.playSound(this.posX, this.posY, this.posZ, new SoundEvent(new ResourceLocation(ImmersiveRailroading.MODID, "chuff")), SoundCategory.MASTER, 1, (float) (1 + speed/maxSpeed), false);
