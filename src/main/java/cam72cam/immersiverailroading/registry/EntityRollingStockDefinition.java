@@ -400,7 +400,7 @@ public abstract class EntityRollingStockDefinition {
 						Area a = new Area(path);
 						Rectangle2D bounds = a.getBounds2D();
 						for (int x = 0; x < xRes; x++) {
-							for (int z = 1; z < zRes; z++) {
+							for (int z = 0; z < zRes; z++) {
 								double relX = ((xRes-1)-x) / ratio;
 								double relZ = z / ratio;
 								if (bounds.contains(relX, relZ) && a.contains(relX, relZ)) {
@@ -440,7 +440,7 @@ public abstract class EntityRollingStockDefinition {
 				}
 				double[][] pm = partMapCache.get(rc);
 				for (int x = 0; x < xRes; x++) {
-					for (int z = 1; z < zRes; z++) {
+					for (int z = 0; z < zRes; z++) {
 						heightMap[x][z] = Math.max(heightMap[x][z], pm[x][z]);
 					}
 				}
