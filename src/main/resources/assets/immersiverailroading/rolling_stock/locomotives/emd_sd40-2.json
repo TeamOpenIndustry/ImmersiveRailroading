@@ -3,7 +3,7 @@
 	"name": "EMD SD40-2",
 	"works": "Electro-Motive Division",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/emd_sd40-2/emd_sd40-2.obj",
-	"darken_model": "-0.00",
+	"darken_model": "-0.05",
 	"properties": {
 		"fuel_efficiency_%": 68,
 		"fuel_capacity_l": 3200,
