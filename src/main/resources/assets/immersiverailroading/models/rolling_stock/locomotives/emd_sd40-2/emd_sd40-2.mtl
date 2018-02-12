@@ -1,4 +1,4 @@
-# Blender MTL File: 'sd40-2 7.blend'
+# Blender MTL File: 'EMD SD40-2.blend'
 # Material Count: 35
 
 newmtl Material
@@ -252,12 +252,13 @@ illum 2
 newmtl SD40-2_material_paint_green
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
-Kd 0.003822 0.053301 0.003220
+Kd 0.586081 0.586081 0.586081
 Ks 0.148000 0.148000 0.148000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd green.png
 
 newmtl SD40-2_material_paint_green_rail
 Ns 96.078431
@@ -272,12 +273,12 @@ illum 2
 newmtl SD40-2_material_paint_green_stripes
 Ns 96.078431
 Ka 0.800000 0.800000 0.800000
-Kd 0.004777 0.066626 0.004025
-Ks 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.148000 0.148000 0.148000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 1
+illum 2
 map_Kd stripes_texture.png
 
 newmtl SD40-2_material_platform
