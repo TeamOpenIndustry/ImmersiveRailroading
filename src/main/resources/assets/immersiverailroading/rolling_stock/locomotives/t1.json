@@ -1,6 +1,6 @@
 {
 	"era": "steam",
-	"name": "T1 Pacific",
+	"name": "T1",
 	"works": "Baldwin Locomotive Works",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/t1/t1.obj",
 	"darken_model": "-0.05",
