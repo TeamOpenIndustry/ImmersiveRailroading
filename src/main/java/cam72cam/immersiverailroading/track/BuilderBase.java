@@ -252,7 +252,7 @@ public abstract class BuilderBase {
 				if (!BlockUtil.isRail(world, main)) {
 					world.destroyBlock(main, false);
 				}
-				if (gauge != Gauge.MODEL) {
+				if (gauge != Gauge.MODEL && Config.enableSideBlockClearing) {
 					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
 						BlockPos pos = main.offset(facing);
 						if (!BlockUtil.isRail(world, pos)) {
