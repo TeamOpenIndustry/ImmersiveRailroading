@@ -96,6 +96,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	configDir = event.getModConfigurationDirectory().getAbsolutePath() + File.separator + ImmersiveRailroading.MODID;
     	// foo/config/immersiverailroading/../../cache/fname
     	cacheDir = configDir + File.separator + ".." + File.separator + ".." + File.separator + "cache" + File.separator;
+    	new File(configDir).mkdirs();
     	new File(cacheDir).mkdirs();
     	
     	DefinitionManager.initDefinitions();

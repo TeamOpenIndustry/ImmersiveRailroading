@@ -22,7 +22,6 @@ chat.immersiverailroading:stock.built=%s ist vollständig!
 chat.immersiverailroading:stock.dissasembled=%s wurde demontiert!
 chat.immersiverailroading:stock.missing=Fehlende Teile: %s
 chat.immersiverailroading:stock.invalid=Fehler: Es existiern auf diesem server keine Fahrzeuge. Kann nicht Plaziert werden
-
 chat.immersiverailroading:stock.wrong_gauge=Falsche Spurweite!
 chat.immersiverailroading:stock.placement=Dieses Fahrzeug muss auf einer geraden Schiene platziert werden!
 chat.immersiverailroading:coupler.front=Vordere
@@ -36,7 +35,7 @@ chat.immersiverailroading:build.missing.ties=Es fehlen %s Bindungen
 chat.immersiverailroading:build.missing.rails=Es Fehlen %s Schienen
 chat.immersiverailroading:build.missing.rail_bed=Es fehlen %s Schienenbett
 chat.immersiverailroading:build.missing.rail_bed_fill=Es fehlen %s Schienenbett Füllung
-chat.immersiverailroading:augment.set=Die Verbesserung aktiviert nun nurnoch dann, wenn eine %s darüberfährt
+chat.immersiverailroading:augment.set=Die Verbesserung aktiviert nun nurnoch dann, wenn eine/ein %s darüberfährt
 chat.immersiverailroading:augment.reset=Die Verbesserung aktiviert nun bei jedem Fahrzeug
 
 gui.immersiverailroading:label.brake=Bremse
@@ -55,8 +54,8 @@ gui.immersiverailroading:none=Nichts
 gui.immersiverailroading:track.type=Typ:      %s
 gui.immersiverailroading:track.length=Länge:    %s
 gui.immersiverailroading:track.gauge=Spurweite:     %s
-gui.immersiverailroading:track.quarters=Virtel: %s
-gui.immersiverailroading:track.position=Platzierung:   %s
+gui.immersiverailroading:track.quarters=%s grad Kurve
+gui.immersiverailroading:track.position=Position:   %s
 gui.immersiverailroading:track.rail_bed=Bett:        %s
 gui.immersiverailroading:track.rail_bed_fill=Bett Füllung:    %s
 gui.immersiverailroading:track.place_blueprint_true=Platziere:      Entwurf
@@ -72,7 +71,7 @@ immersiverailroading:gauge.brunel=Breitspur
 immersiverailroading:gauge.standard=Normalspur
 immersiverailroading:gauge.narrow=Schmalspur
 immersiverailroading:gauge.minecraft=Minecraftspur
-immersiverailroading:gauge.model=Modelleisenbahn
+immersiverailroading:gauge.model=Modellspur
 
 immersiverailroading:plate.small=Kleine Platte
 immersiverailroading:plate.medium=Mittelgroße Platte
@@ -130,6 +129,7 @@ part.immersiverailroading:component.reversing_arm=Reversing Arm
 part.immersiverailroading:component.lifting_link=Lifting Link
 part.immersiverailroading:component.reach_rod=Steuerstange
 part.immersiverailroading:component.walcherts_linkage=Walcherts Linkage
+part.immersiverailroading:component.smokebox=Rauchkammer
 
 immersiverailroading:crafting_type.casting=Gießen
 immersiverailroading:crafting_type.casting_hammer=Gießen, Dampfhammer
@@ -146,3 +146,9 @@ itemGroup.immersiverailroading.components=Immersive Railroading Bauelemente
 
 death.attack.immersiverailroading:casting=%s hat herausgefunden, dass sich geschmolzenes Metall nicht so gut zum schwimmen eignet
 death.attack.immersiverailroading:hitByTrain=%s versagte bei dem Versuch vor einem Zug wegzurennen
+
+immersiverailroading:detector_mode.simple=Fahrzeuge erkennen
+immersiverailroading:detector_mode.speed=Geschwindigkeit erkennen
+immersiverailroading:detector_mode.passengers=Anzahl an passagieren erkennen
+immersiverailroading:detector_mode.cargo=Volle Güterwagen erkennen
+immersiverailroading:detector_mode.liquid=Volle Tankwagen erkennen
