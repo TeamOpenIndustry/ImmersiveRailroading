@@ -171,14 +171,12 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	
 	@Override
 	public void updatePassenger(Entity passenger) {
-		if (this.isPassenger(passenger)) {
-			if (!world.isRemote) {
-				Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
-				pos = pos.add(passengerPositions.get(passenger.getPersistentID()));
-				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
-				pos = pos.add(this.getPositionVector());
-				passenger.setPosition(pos.x, pos.y, pos.z);
-			}
+		if (this.isPassenger(passenger) && passengerPositions.containsKey(passenger.getPersistentID())) {
+			Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
+			pos = pos.add(passengerPositions.get(passenger.getPersistentID()));
+			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+			pos = pos.add(this.getPositionVector());
+			passenger.setPosition(pos.x, pos.y, pos.z);
 			
 			passenger.prevRotationYaw = passenger.rotationYaw;
 			passenger.rotationYaw += (this.rotationYaw - this.prevRotationYaw);
@@ -192,14 +190,16 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (passengerPositions.containsKey(passenger.getPersistentID()) ) {
 			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
 			
-			Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3, this.rotationYaw + (ppos.z > 0 ? 90 : -90));
+			Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
+			
 			ppos = ppos.add(this.getDefinition().getPassengerCenter(gauge));
 			Vec3d offppos = VecUtil.rotateYaw(ppos, this.rotationYaw);
 			
 			delta = delta.addVector(offppos.x, offppos.y, 0);
+			delta = delta.add(this.getPositionVector());
 			
 			passengerPositions.remove(passenger.getPersistentID());
-			passenger.setPositionAndUpdate(passenger.posX += delta.x, passenger.posY, passenger.posZ += delta.z);
+			passenger.setPositionAndUpdate(delta.x, passenger.posY, delta.z);
 		}
 	}
 
