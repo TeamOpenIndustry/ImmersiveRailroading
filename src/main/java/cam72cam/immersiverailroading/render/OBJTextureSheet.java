@@ -142,10 +142,10 @@ public class OBJTextureSheet {
 			image = null;
 		}
 		public int copiesU() {
-			return (maxU - minU);
+			return (maxU - minU)+1;
 		}
 		public int copiesV() {
-			return (maxV - minV);
+			return (maxV - minV)+1;
 		}
 		public int getAbsoluteWidth() {
 			return realWidth * copiesU();

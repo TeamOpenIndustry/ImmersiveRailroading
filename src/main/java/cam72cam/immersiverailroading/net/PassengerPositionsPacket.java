@@ -67,8 +67,7 @@ public class PassengerPositionsPacket implements IMessage {
 			}
 			
 			EntityRidableRollingStock entity = matches.get(0);
-			
-			entity.passengerPositions = message.passengerPositions;
+			entity.handlePassengerPositions(message.passengerPositions);
 		}
 	}
 }
