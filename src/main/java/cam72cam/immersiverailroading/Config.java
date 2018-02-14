@@ -68,6 +68,9 @@ public class Config {
 	@Comment("Break blocks around the border of the tracks in creative")
 	public static boolean enableSideBlockClearing = true;
 
+	@Comment("Keep rolling stock loaded even when it is not moving")
+	public static boolean keepStockLoaded = false;
+
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!FuelRequired || (!ModelFuelRequired && gauge.equals(Gauge.MODEL)));
 	}
