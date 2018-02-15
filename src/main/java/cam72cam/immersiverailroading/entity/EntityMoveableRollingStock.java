@@ -526,4 +526,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public float getTickSkew() {
 		return (float) this.tickSkew;
 	}
+
+	public Vec3d getVelocity() {
+		return new Vec3d(this.motionX, this.motionY, this.motionZ);
+	}
 }

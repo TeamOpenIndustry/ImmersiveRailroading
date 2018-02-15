@@ -203,10 +203,10 @@ public class LocomotiveSteam extends Locomotive {
 			}
 
 			// Update sound positions
-			whistle.setPosition(getPositionVector());
-			idle.setPosition(getPositionVector());
+			whistle.update(getPositionVector(), getVelocity());
+			idle.update(getPositionVector(), getVelocity());;
 			for (int i = 0; i < sndCache.size(); i ++) {
-				sndCache.get(i).setPosition(getPositionVector());
+				sndCache.get(i).update(getPositionVector(), getVelocity());;
 			}
 			
 			double phase = getPhase(4, 0);
