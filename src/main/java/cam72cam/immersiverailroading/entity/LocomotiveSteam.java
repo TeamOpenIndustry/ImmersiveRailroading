@@ -201,7 +201,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 				
 				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40);
-				idle.setVolume(0.2f);
+				idle.setVolume(0.1f);
 				this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40);
 				pressure.setVolume(0.5f);
 			}
@@ -322,6 +322,7 @@ public class LocomotiveSteam extends Locomotive {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
 					    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.max(0.3f, Math.abs(this.getThrottle()));
+					    	volume = (float) Math.sqrt(volume);
 					    	double fraction = 3;
 					    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
 					    	pitch += (this.ticksExisted % 10) / 300.0;
