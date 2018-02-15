@@ -5,19 +5,24 @@ import java.util.List;
 
 import blusunrize.immersiveengineering.api.energy.DieselHandler;
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
+import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
 public class LocomotiveDiesel extends Locomotive {
+
+	private ISound horn;
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -25,7 +30,6 @@ public class LocomotiveDiesel extends Locomotive {
 
 	public LocomotiveDiesel(World world, String defID) {
 		super(world, defID);
-		//runSound.setDynamicPitch();
 	}
 
 	public LocomotiveDieselDefinition getDefinition() {
@@ -70,6 +74,14 @@ public class LocomotiveDiesel extends Locomotive {
 		if (world.isRemote) {
 			if (!Config.particlesEnabled) {
 				return;
+			}
+			
+			if (this.horn == null) {
+				this.horn = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/gp-7/horn.ogg"), false, 100);
+			}
+			
+			if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
+				horn.play(1, 1, getPositionVector());
 			}
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);

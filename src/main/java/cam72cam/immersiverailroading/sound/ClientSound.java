@@ -61,4 +61,9 @@ public class ClientSound implements ISound {
 			sndSystem.stop(id);
 		}
 	}
+
+	@Override
+	public void terminate() {
+		sndSystem.removeSource(id);
+	}
 }

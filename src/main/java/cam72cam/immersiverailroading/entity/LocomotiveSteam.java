@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
@@ -18,7 +17,6 @@ import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -38,7 +36,6 @@ public class LocomotiveSteam extends Locomotive {
 	// Map<Slot, TicksToBurn>
 	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
-	private static DataParameter<Integer> HORN = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.VARINT);
 	private boolean gonnaExplode;
 	private double driverDiameter;
 	
@@ -53,7 +50,6 @@ public class LocomotiveSteam extends Locomotive {
 		this.getDataManager().register(BOILER_TEMPERATURE, 0f);
 		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
 		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
-		this.getDataManager().register(HORN, 0);
 	}
 
 	public LocomotiveSteamDefinition getDefinition() {
@@ -177,18 +173,10 @@ public class LocomotiveSteam extends Locomotive {
 		return phase;
 	}
 	
-	public void handleKeyPress(Entity source, KeyTypes key) {
-		if (key == KeyTypes.HORN) {
-			this.getDataManager().set(HORN, 5);
-		} else {
-			super.handleKeyPress(source, key);
-		}
-	}
-	
 	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
 	private List<ISound> sndCache = new ArrayList<ISound>();
 	private int sndCacheId = 0;
-	private ISound horn;
+	private ISound whistle;
 	private ISound idle;
 	@Override
 	public void onUpdate() {
@@ -201,23 +189,23 @@ public class LocomotiveSteam extends Locomotive {
 				return;
 			}
 			
-			if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
-				horn.play(1, 1, getPositionVector());
+			if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying()) {
+				whistle.play(1, 1, getPositionVector());
 			}
 			
 			if (this.sndCache.size() == 0) {
-				this.horn = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/horn.ogg"), false, 100);
-				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/idle.ogg"), true, 40);
+				this.whistle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/whistle.ogg"), false, 150);
+				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/idle.ogg"), true, 40);
 				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/chuff.ogg"), false, 50));
+					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/chuff.ogg"), false, 80));
 				}
-				idle.play(1, 1, getPositionVector());
+				idle.play(1, 0.3f, getPositionVector());
 			}
 
 			// Update sound positions
-			horn.setPosition(getPositionVector());
+			whistle.setPosition(getPositionVector());
 			idle.setPosition(getPositionVector());
-			for (int i = 0; i < 16; i ++) {
+			for (int i = 0; i < sndCache.size(); i ++) {
 				sndCache.get(i).setPosition(getPositionVector());
 			}
 			
@@ -309,7 +297,7 @@ public class LocomotiveSteam extends Locomotive {
 						world.spawnEntity(sp);
 					}
 					
-					String key = piston.side + "fore";
+					String key = piston.side;
 					if (!phaseOn.containsKey(key)) {
 						phaseOn.put(key, false);
 					}
@@ -318,7 +306,11 @@ public class LocomotiveSteam extends Locomotive {
 						if (phase > 0.8) {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	sndCache.get(sndCacheId).play(0.6f, (float) (1-speed/maxSpeed), getPositionVector());
+					    	float volume = (float) Math.max(1-speed/maxSpeed, 0.5);
+					    	double fraction = 3;
+					    	float pitch = (float) (speed/maxSpeed/fraction  + 2/fraction );
+					    	pitch += (this.ticksExisted % 10) / 300.0;
+					    	sndCache.get(sndCacheId).play(pitch, volume, getPositionVector());
 					    	sndCacheId++;
 					    	sndCacheId = sndCacheId % sndCache.size();
 							phaseOn.put(key, true);
@@ -344,10 +336,6 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			return;
-		}
-		
-		if (this.getDataManager().get(HORN) > 0) {
-			this.getDataManager().set(HORN, this.getDataManager().get(HORN)-1);
 		}
 		
 		if (!this.isBuilt()) {

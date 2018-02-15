@@ -98,6 +98,7 @@ import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -495,6 +496,11 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onSoundLoad(SoundLoadEvent event) {
 		manager = new IRSoundManager(event.getManager());
+	}
+	
+	@SubscribeEvent
+	public static void onWorldUnload(Unload event) {
+		manager.stop();
 	}
 	
 	@Override

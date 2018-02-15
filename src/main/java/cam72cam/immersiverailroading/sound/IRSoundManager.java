@@ -80,4 +80,11 @@ public class IRSoundManager {
         
         return snd;
 	}
+
+	public void stop() {
+		for (ISound sound : this.sounds) {
+			sound.stop();
+			sound.terminate();
+		}
+	}
 }
