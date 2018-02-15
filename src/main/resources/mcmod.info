@@ -1,13 +1,13 @@
 [
 {
-  "modid": "immsersiverailroading",
+  "modid": "immersiverailroading",
   "name": "Immersive Railroading",
   "description": "Adds Railroading to Minecraft in the style of Immersive Engineering",
-  "version": "${version}",
+  "version": "",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["cam72cam,StuffedCroc"],
+  "authorList": ["cam72cam", "thelegend5550", "WrongWeekend", "DennisTheCan", "FriedrichLP", "StuffedCroc"],
   "credits": "",
   "logoFile": "",
   "screenshots": [],
