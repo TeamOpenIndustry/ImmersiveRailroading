@@ -195,15 +195,15 @@ public class LocomotiveSteam extends Locomotive {
 			
 			if (this.sndCache.size() == 0) {
 				this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150);
-				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40);
-				idle.play(1f, 0.2f, getPositionVector());
-				
-				this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40);
-				pressure.setVolume(0.5f);
-				
+
 				for (int i = 0; i < 16; i ++) {
 					sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80));
 				}
+				
+				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40);
+				idle.setVolume(0.2f);
+				this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40);
+				pressure.setVolume(0.5f);
 			}
 
 			// Update sound positions
@@ -212,6 +212,16 @@ public class LocomotiveSteam extends Locomotive {
 			pressure.update(getPositionVector(), getVelocity());
 			for (int i = 0; i < sndCache.size(); i ++) {
 				sndCache.get(i).update(getPositionVector(), getVelocity());
+			}
+			
+			if (this.getBoilerTemperature() > 0) {
+				if (!idle.isPlaying()) {
+					idle.play();
+				}
+			} else {
+				if (idle.isPlaying()) {
+					idle.stop();
+				}
 			}
 			
 			double phase = getPhase(4, 0);
