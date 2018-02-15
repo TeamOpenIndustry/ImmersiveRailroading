@@ -78,10 +78,21 @@ public class LocomotiveDiesel extends Locomotive {
 				return;
 			}
 			
+			boolean hasFuel = (this.getLiquidAmount() > 0 || !Config.isFuelRequired(gauge));
+			
 			if (this.horn == null) {
 				this.horn = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/gp-7/horn.ogg"), false, 100);
-				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"), true, 50);
-				this.idle.play(1, 1, getPositionVector());
+				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"), true, 80);
+			}
+			
+			if (hasFuel) {
+				if (!idle.isPlaying()) {
+					this.idle.play(1, 1, getPositionVector());
+				}
+			} else {
+				if (idle.isPlaying()) {
+					idle.stop();
+				}
 			}
 			
 			if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
@@ -107,7 +118,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
 			float throttle = Math.abs(this.getThrottle());
-			if (exhausts != null && throttle > 0 && (this.getLiquidAmount() > 0 || !Config.isFuelRequired(gauge))) {
+			if (exhausts != null && throttle > 0 && hasFuel) {
 				for (RenderComponent exhaust : exhausts) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					
@@ -137,6 +148,18 @@ public class LocomotiveDiesel extends Locomotive {
 				theTank.drain(1, true);
 			}
 		}
+	}
+	
+	@Override
+	public void setDead() {
+		if (idle != null) {
+			idle.stop();
+		}
+		if (horn != null) {
+			horn.stop();
+		}
+		// Don't do drops if from explosion
+		super.setDead();
 	}
 
 	@Override
