@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.sound;
 import net.minecraft.util.math.Vec3d;
 
 public interface ISound {
+	public void play();
 	public void play(float pitch, float vol, Vec3d pos);
 	public void stop();
 	public void update(Vec3d pos, Vec3d vel);

@@ -178,6 +178,7 @@ public class LocomotiveSteam extends Locomotive {
 	private int sndCacheId = 0;
 	private ISound whistle;
 	private ISound idle;
+	private ISound pressure;
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -196,17 +197,21 @@ public class LocomotiveSteam extends Locomotive {
 			if (this.sndCache.size() == 0) {
 				this.whistle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/whistle.ogg"), false, 150);
 				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/idle.ogg"), true, 40);
+				this.pressure = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/idle.ogg"), true, 40);
+				pressure.setPitch(1.3f);
+				pressure.setVolume(0.5f);
 				for (int i = 0; i < 16; i ++) {
 					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/chuff.ogg"), false, 80));
 				}
-				idle.play(1, 0.3f, getPositionVector());
+				idle.play(1f, 0.2f, getPositionVector());
 			}
 
 			// Update sound positions
 			whistle.update(getPositionVector(), getVelocity());
-			idle.update(getPositionVector(), getVelocity());;
+			idle.update(getPositionVector(), getVelocity());
+			pressure.update(getPositionVector(), getVelocity());
 			for (int i = 0; i < sndCache.size(); i ++) {
-				sndCache.get(i).update(getPositionVector(), getVelocity());;
+				sndCache.get(i).update(getPositionVector(), getVelocity());
 			}
 			
 			double phase = getPhase(4, 0);
@@ -306,11 +311,11 @@ public class LocomotiveSteam extends Locomotive {
 						if (phase > 0.8) {
 					    	double speed = Math.abs(getCurrentSpeed().minecraft());
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	float volume = (float) Math.max(1-speed/maxSpeed, 0.5);
+					    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.max(0.3f, Math.abs(this.getThrottle()));
 					    	double fraction = 3;
 					    	float pitch = (float) (speed/maxSpeed/fraction  + 2/fraction );
 					    	pitch += (this.ticksExisted % 10) / 300.0;
-					    	sndCache.get(sndCacheId).play(pitch, volume, getPositionVector());
+					    	sndCache.get(sndCacheId).play(pitch, volume * 0.75f, getPositionVector());
 					    	sndCacheId++;
 					    	sndCacheId = sndCacheId % sndCache.size();
 							phaseOn.put(key, true);
@@ -325,6 +330,9 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
 			if (steams != null && (this.getBoilerPressure() >= this.getDefinition().getMaxPSI(gauge) || !Config.isFuelRequired(gauge))) {
+				if (!pressure.isPlaying()) {
+					pressure.play();
+				}
 				for (RenderComponent steam : steams) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					particlePos = particlePos.subtract(fakeMotion);
@@ -332,6 +340,10 @@ public class LocomotiveSteam extends Locomotive {
 					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z);
 					world.spawnEntity(sp);
+				}
+			} else {
+				if (pressure.isPlaying()) {
+					pressure.stop();;
 				}
 			}
 			
