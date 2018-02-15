@@ -9,8 +9,9 @@ public interface ISound {
 	public void update(Vec3d pos, Vec3d vel);
 	public void setPosition(Vec3d pos);
 	public void setPitch(float f);
-	void setVelocity(Vec3d vel);
+	public void setVelocity(Vec3d vel);
 	public void setVolume(float f);
 	public boolean isPlaying();
 	public void terminate();
+	void updateBaseSoundLevel(float baseSoundMultiplier);
 }
