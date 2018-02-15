@@ -17,6 +17,7 @@ import org.lwjgl.opengl.GLContext;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
@@ -98,6 +99,7 @@ import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.EntityEvent.EnteringChunk;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -501,6 +503,38 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onWorldUnload(Unload event) {
 		manager.stop();
+	}
+	
+	private static int sndCacheId = 0;
+	private static List<ISound> sndCache;
+	
+	@SubscribeEvent
+	public static void onEnterChunk(EnteringChunk event) {
+		if (event.getEntity() instanceof EntityMoveableRollingStock) {
+			
+			if(event.getNewChunkX() == event.getOldChunkX() && event.getNewChunkZ() % 4 == 0) {
+				return;
+			}
+			
+			if(event.getNewChunkZ() == event.getOldChunkZ() && event.getNewChunkX() % 4 == 0) {
+				return;
+			}
+			
+			// This is super fragile
+			if (sndCache == null) {
+				sndCache = new ArrayList<ISound>();
+				for (int i = 0; i < 16; i ++) {
+					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40));
+				}
+			}
+			
+			ISound snd = sndCache.get(sndCacheId);
+			// TODO Doppler update
+			snd.play(0.5f + (float) Math.abs(((EntityMoveableRollingStock)event.getEntity()).getCurrentSpeed().metric() / 300f), 0.3f, event.getEntity().getPositionVector());
+	    	sndCacheId++;
+	    	sndCacheId = sndCacheId % sndCache.size();
+			
+		}
 	}
 	
 	@Override
