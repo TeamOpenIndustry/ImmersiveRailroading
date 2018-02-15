@@ -9,12 +9,16 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	private FluidQuantity fuelCapacity;
 	private int fuelEfficiency;
+	public ResourceLocation idle;
+	public ResourceLocation horn;
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -48,6 +52,20 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		fuelCapacity = FluidQuantity.FromLiters((int)Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_scale));
 		fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
+		
+		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
+		
+		if (sounds != null && sounds.has("idle")) {
+			idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
+		} else {
+			idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
+		}
+		
+		if (sounds != null && sounds.has("horn")) {
+			horn = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("horn").getAsString());
+		} else {
+			horn = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
+		}
 	}
 
 	@Override

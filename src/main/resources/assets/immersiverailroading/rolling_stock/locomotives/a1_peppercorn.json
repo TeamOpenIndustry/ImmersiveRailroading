@@ -31,5 +31,10 @@
 	"couplers": {
 		"front_offset": 0,
 		"rear_offset": -0.4
+	},
+	"sounds": {
+		"whistle": "sounds/steam/a1_peppercorn/whistle.ogg",
+		"idle": "sounds/steam/a1_peppercorn/whistle.ogg",
+		"chuff": "sounds/steam/a1_peppercorn/whistle.ogg"
 	}
 }

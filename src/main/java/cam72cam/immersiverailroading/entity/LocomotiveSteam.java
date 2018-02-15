@@ -23,7 +23,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
@@ -195,15 +194,16 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			if (this.sndCache.size() == 0) {
-				this.whistle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/whistle.ogg"), false, 150);
-				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/idle.ogg"), true, 40);
-				this.pressure = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/idle.ogg"), true, 40);
-				pressure.setPitch(1.3f);
-				pressure.setVolume(0.5f);
-				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/a1_peppercorn/chuff.ogg"), false, 80));
-				}
+				this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150);
+				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40);
 				idle.play(1f, 0.2f, getPositionVector());
+				
+				this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40);
+				pressure.setVolume(0.5f);
+				
+				for (int i = 0; i < 16; i ++) {
+					sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80));
+				}
 			}
 
 			// Update sound positions

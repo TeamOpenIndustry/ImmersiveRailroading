@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -13,6 +14,7 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -22,6 +24,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private ValveGearType valveGear;
 	private int numSlots;
 	private int width;
+	
+	public ResourceLocation whistle;
+	public ResourceLocation idle;
+	public ResourceLocation chuff;
+	public ResourceLocation pressure;
 	
 	public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -42,6 +49,32 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		JsonObject firebox = data.get("firebox").getAsJsonObject();
 		this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_scale);
 		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_scale);
+		
+		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
+		
+		if (sounds != null && sounds.has("whistle")) {
+			whistle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
+		} else {
+			whistle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
+		}
+		
+		if (sounds != null && sounds.has("idle")) {
+			idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
+		} else {
+			idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
+		}
+		
+		if (sounds != null && sounds.has("chuff")) {
+			chuff = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString());
+		} else {
+			chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
+		}
+		
+		if (sounds != null && sounds.has("pressure")) {
+			pressure = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString());
+		} else {
+			pressure = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
+		}
 	}
 
 	@Override
