@@ -20,15 +20,18 @@ public class ClientSound implements ISound {
 	private Vec3d pos;
 	private Vec3d velocity;
 	private float lastPitch = 1;
+	private float baseSoundMultiplier;
+	private float currentVolume = 1;
 	
 	/*
 	 * TODO figure out snd system reload!
 	 */
 
-	public ClientSound(String identifier, SoundSystem sndSystem, ResourceLocation oggLocation, URL resource, boolean repeats, float attenuationDistance) {
+	public ClientSound(String identifier, SoundSystem sndSystem, ResourceLocation oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance) {
 		this.id = identifier;
 		this.sndSystem = sndSystem;
 		this.resource = resource;
+		this.baseSoundMultiplier = baseSoundMultiplier;
 		this.repeats = repeats;
 		this.oggLocation = oggLocation;
 		this.attenuationDistance = attenuationDistance;
@@ -107,7 +110,14 @@ public class ClientSound implements ISound {
 	
 	@Override
 	public void setVolume(float f) {
-		sndSystem.setVolume(id, f);
+		this.currentVolume  = f;
+		sndSystem.setVolume(id, f * baseSoundMultiplier);
+	}
+	
+	@Override
+	public void updateBaseSoundLevel(float baseSoundMultiplier) {
+		this.baseSoundMultiplier = baseSoundMultiplier;
+		setVolume(currentVolume);
 	}
 	
 	@Override

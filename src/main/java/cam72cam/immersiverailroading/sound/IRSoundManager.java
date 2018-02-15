@@ -12,8 +12,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import io.netty.util.internal.ThreadLocalRandom;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import paulscode.sound.SoundSystem;
 
@@ -22,11 +24,15 @@ public class IRSoundManager {
 	private Function<ResourceLocation, URL> getURLForSoundResource;
 	private Supplier<SoundSystem> soundSystem;
 	private List<ISound> sounds = new ArrayList<ISound>();
+	private float lastSoundLevel;
+	private SoundCategory category = SoundCategory.AMBIENT;
 
 	public IRSoundManager(SoundManager manager) {
 		this.manager = manager;
 		
 		initSoundSystem(Pair.of("field_148620_e", "func_148612_a"), Pair.of("sndSystem", "getURLForSoundResource"));
+		
+		lastSoundLevel = Minecraft.getMinecraft().gameSettings.getSoundLevel(category);
 	}
 	
 	@SafeVarargs
@@ -78,10 +84,20 @@ public class IRSoundManager {
 		//TODO only do this once
 		//sndSystem.changeDopplerFactor(1);
 		
-		ClientSound snd = new ClientSound(identifier, sndSystem, oggLocation, getURLForSoundResource.apply(oggLocation), repeats, attenuationDistance);
+		ClientSound snd = new ClientSound(identifier, sndSystem, oggLocation, getURLForSoundResource.apply(oggLocation), lastSoundLevel, repeats, attenuationDistance);
 		this.sounds.add(snd);
         
         return snd;
+	}
+	
+	public void tick() {
+		float newSoundLevel = Minecraft.getMinecraft().gameSettings.getSoundLevel(category);
+		if (newSoundLevel != lastSoundLevel) {
+			lastSoundLevel = newSoundLevel;
+			for (ISound sound : this.sounds) {
+				sound.updateBaseSoundLevel(lastSoundLevel);
+			}
+		}
 	}
 
 	public void stop() {

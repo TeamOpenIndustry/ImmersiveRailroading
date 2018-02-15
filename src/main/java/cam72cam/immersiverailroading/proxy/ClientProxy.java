@@ -549,5 +549,6 @@ public class ClientProxy extends CommonProxy {
 			StockRenderCache.doImageCache();
 		}
 		tickCount++;
+		manager.tick();
 	}
 }
