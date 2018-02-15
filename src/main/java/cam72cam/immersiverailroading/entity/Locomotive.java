@@ -13,12 +13,10 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.world.World;
 
 public abstract class Locomotive extends FreightTank {
-	//private MovingSoundRollingStock hornSound;
-	//private MovingSoundRollingStock idleSound;
-	//protected MovingSoundRollingStock runSound;
 
 	private static DataParameter<Float> THROTTLE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
+	protected static DataParameter<Integer> HORN = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
 	
 
 	private static final float throttleNotch = 0.04f;
@@ -30,10 +28,7 @@ public abstract class Locomotive extends FreightTank {
 
 		this.getDataManager().register(THROTTLE, 0f);
 		this.getDataManager().register(AIR_BRAKE, 0f);
-
-		// hornSound = EnumSounds.get(this.getClass()).getHorn(this);
-		// idleSound = EnumSounds.get(this.getClass()).getIdle(this);
-		// runSound = EnumSounds.get(this.getClass()).getRun(this);
+		this.getDataManager().register(HORN, 0);
 
 		this.entityCollisionReduction = 0.99F;
 	}
@@ -71,18 +66,13 @@ public abstract class Locomotive extends FreightTank {
 		setThrottle(nbttagcompound.getFloat("throttle"));
 		setAirBrake(nbttagcompound.getFloat("brake"));
 	}
-
-	@Override
-	public void setDead() {
-		super.setDead();
-		//System.out.println("Stopping audio");
-		//Minecraft.getMinecraft().getSoundHandler().stopSound(idleSound);
-		//Minecraft.getMinecraft().getSoundHandler().stopSound(runSound);
-	}
 	
 	@Override
 	public void handleKeyPress(Entity source, KeyTypes key) {
 		switch(key) {
+		case HORN:
+			this.getDataManager().set(HORN, 5);
+			break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {
 				setThrottle(getThrottle() + throttleNotch);
@@ -118,8 +108,12 @@ public abstract class Locomotive extends FreightTank {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		// runSound.setVolume(getSpeed().minecraft() > 0 ? 1 : 0);
-		// idleSound.setVolume(getSpeed().minecraft() > 0 ? 0 : 1);
+		
+		if (!world.isRemote) {
+			if (this.getDataManager().get(HORN) > 0) {
+				this.getDataManager().set(HORN, this.getDataManager().get(HORN)-1);
+			}
+		}
 		
 		simulateWheelSlip();
 	}
@@ -169,12 +163,6 @@ public abstract class Locomotive extends FreightTank {
 	 * 
 	 * Misc Helper functions
 	 */
-
-	public void soundHorn() {
-		//if (!Minecraft.getMinecraft().getSoundHandler().isSoundPlaying(hornSound)) {
-		//	Minecraft.getMinecraft().getSoundHandler().playSound(hornSound);
-		//}
-	}
 	
 	public float getThrottle() {
 		return dataManager.get(THROTTLE);

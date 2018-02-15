@@ -7,4 +7,5 @@ public interface ISound {
 	public void stop();
 	public void setPosition(Vec3d pos);
 	public boolean isPlaying();
+	public void terminate();
 }
