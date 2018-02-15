@@ -74,6 +74,9 @@ public class IRSoundManager {
 		if (sndSystem == null) {
 			return null;
 		}
+
+		//TODO only do this once
+		//sndSystem.changeDopplerFactor(1);
 		
 		ClientSound snd = new ClientSound(identifier, sndSystem, oggLocation, getURLForSoundResource.apply(oggLocation), repeats, attenuationDistance);
 		this.sounds.add(snd);

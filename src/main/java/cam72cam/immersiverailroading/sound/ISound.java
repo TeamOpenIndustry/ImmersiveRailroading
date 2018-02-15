@@ -5,7 +5,11 @@ import net.minecraft.util.math.Vec3d;
 public interface ISound {
 	public void play(float pitch, float vol, Vec3d pos);
 	public void stop();
+	public void update(Vec3d pos, Vec3d vel);
 	public void setPosition(Vec3d pos);
+	public void setPitch(float f);
+	void setVelocity(Vec3d vel);
+	public void setVolume(float f);
 	public boolean isPlaying();
 	public void terminate();
 }

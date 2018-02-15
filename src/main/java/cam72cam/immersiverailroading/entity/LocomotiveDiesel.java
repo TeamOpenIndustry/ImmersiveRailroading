@@ -23,6 +23,8 @@ import net.minecraftforge.fluids.*;
 public class LocomotiveDiesel extends Locomotive {
 
 	private ISound horn;
+	private ISound idle;
+	private float soundThrottle;
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -78,11 +80,28 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			if (this.horn == null) {
 				this.horn = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/gp-7/horn.ogg"), false, 100);
+				this.idle = ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"), true, 50);
+				this.idle.play(1, 1, getPositionVector());
 			}
 			
 			if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
 				horn.play(1, 1, getPositionVector());
 			}
+			
+			horn.update(getPositionVector(), getVelocity());
+			idle.update(getPositionVector(), getVelocity());
+			
+			float absThrottle = Math.abs(this.getThrottle());
+			if (this.soundThrottle > absThrottle) {
+				this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
+			} else if (this.soundThrottle < Math.abs(this.getThrottle())) {
+				this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
+			}
+			
+			idle.setPitch(0.7f+this.soundThrottle/4);
+			idle.setVolume(Math.max(0.1f, this.soundThrottle));
+			// Apply doppler effect
+			horn.setPitch(1);
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
@@ -119,7 +138,7 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 		}
 	}
-	
+
 	@Override
 	public List<Fluid> getFluidFilter() {
 		ArrayList<Fluid> filter = new ArrayList<Fluid>();
