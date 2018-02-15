@@ -50,6 +50,11 @@ public class ClientSound implements ISound {
     }
 	
 	@Override
+	public void play() {
+		sndSystem.play(id);
+	}
+	
+	@Override
 	public void setPosition(Vec3d pos) {
 		this.pos = pos;
 		
