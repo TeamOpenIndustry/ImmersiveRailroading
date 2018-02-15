@@ -323,9 +323,9 @@ public class LocomotiveSteam extends Locomotive {
 					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
 					    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.max(0.3f, Math.abs(this.getThrottle()));
 					    	double fraction = 3;
-					    	float pitch = (float) (speed/maxSpeed/fraction  + 2/fraction );
+					    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
 					    	pitch += (this.ticksExisted % 10) / 300.0;
-					    	sndCache.get(sndCacheId).play(pitch, volume * 0.75f, getPositionVector());
+					    	sndCache.get(sndCacheId).play(pitch, volume, getPositionVector());
 					    	sndCacheId++;
 					    	sndCacheId = sndCacheId % sndCache.size();
 							phaseOn.put(key, true);
