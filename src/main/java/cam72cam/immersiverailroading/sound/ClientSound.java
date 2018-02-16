@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.sound;
 
 import java.net.URL;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound.AttenuationType;
@@ -36,7 +37,7 @@ public class ClientSound implements ISound {
 		this.baseSoundMultiplier = baseSoundMultiplier;
 		this.repeats = repeats;
 		this.oggLocation = oggLocation;
-		this.attenuationDistance = attenuationDistance * (float)gauge.scale();
+		this.attenuationDistance = attenuationDistance * (float)gauge.scale() * (float)Config.soundDistanceScale;
 		this.gauge = gauge;
 		
 		this.init();

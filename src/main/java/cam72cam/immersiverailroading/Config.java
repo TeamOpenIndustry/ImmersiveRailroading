@@ -70,6 +70,9 @@ public class Config {
 
 	@Comment("Keep rolling stock loaded even when it is not moving")
 	public static boolean keepStockLoaded = false;
+	
+	@Comment("Sound Distance Multiplier")
+	public static double soundDistanceScale = 1;
 
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!FuelRequired || (!ModelFuelRequired && gauge.equals(Gauge.MODEL)));
