@@ -34,7 +34,7 @@
 	},
 	"sounds": {
 		"whistle": "sounds/steam/a1_peppercorn/whistle.ogg",
-		"idle": "sounds/steam/a1_peppercorn/whistle.ogg",
-		"chuff": "sounds/steam/a1_peppercorn/whistle.ogg"
+		"idle": "sounds/steam/a1_peppercorn/idle.ogg",
+		"chuff": "sounds/steam/a1_peppercorn/chuff.ogg"
 	}
 }

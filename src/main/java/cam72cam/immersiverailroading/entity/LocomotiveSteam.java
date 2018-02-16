@@ -189,7 +189,7 @@ public class LocomotiveSteam extends Locomotive {
 				return;
 			}
 			
-			if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying()) {
+			if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 				whistle.play(1, 1, getPositionVector());
 			}
 			
