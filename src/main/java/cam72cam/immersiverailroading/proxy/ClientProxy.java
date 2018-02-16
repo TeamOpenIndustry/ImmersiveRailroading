@@ -101,6 +101,7 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityEvent.EnteringChunk;
+import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -502,6 +503,17 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@SubscribeEvent
+	public static void onWorldLoad(Load event) {		
+		// This is super fragile
+		sndCache = new ArrayList<ISound>();
+		for (int i = 0; i < 16; i ++) {
+			sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40, Gauge.STANDARD));
+		}
+		
+		//TODO render
+	}
+	
+	@SubscribeEvent
 	public static void onWorldUnload(Unload event) {
 		manager.stop();
 	}
@@ -519,14 +531,6 @@ public class ClientProxy extends CommonProxy {
 			
 			if(event.getNewChunkZ() == event.getOldChunkZ() && event.getNewChunkX() % 4 == 0) {
 				return;
-			}
-			
-			// This is super fragile
-			if (sndCache == null) {
-				sndCache = new ArrayList<ISound>();
-				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40, Gauge.STANDARD));
-				}
 			}
 			
 			ISound snd = sndCache.get(sndCacheId);

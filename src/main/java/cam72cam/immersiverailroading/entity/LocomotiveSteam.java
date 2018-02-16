@@ -207,7 +207,7 @@ public class LocomotiveSteam extends Locomotive {
 			if (this.sndCache.size() == 0) {
 				this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
 
-				for (int i = 0; i < 16; i ++) {
+				for (int i = 0; i < 32; i ++) {
 					sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, gauge));
 				}
 				
