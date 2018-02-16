@@ -161,6 +161,17 @@ public class LocomotiveSteam extends Locomotive {
 		}
 		setBurnTime(burnTime);
 	}
+
+	private double getPhase(int spikes, float offsetDegrees, double perc) {
+		if (driverDiameter == 0) {
+			return 0;
+		}
+		double circumference = (driverDiameter * Math.PI);
+		double skewDistance = this.distanceTraveled - this.getCurrentSpeed().minecraft() * perc;
+		double phase = (skewDistance % circumference)/circumference;
+		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
+		return phase;
+	}
 	
 	private double getPhase(int spikes, float offsetDegrees) {
 		if (driverDiameter == 0) {
@@ -317,23 +328,27 @@ public class LocomotiveSteam extends Locomotive {
 						phaseOn.put(key, false);
 					}
 					
-					if (!phaseOn.get(key)) {
-						if (phase > 0.8) {
-					    	double speed = Math.abs(getCurrentSpeed().minecraft());
-					    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-					    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.max(0.3f, Math.abs(this.getThrottle()));
-					    	volume = (float) Math.sqrt(volume);
-					    	double fraction = 3;
-					    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
-					    	pitch += (this.ticksExisted % 10) / 300.0;
-					    	sndCache.get(sndCacheId).play(pitch, volume, getPositionVector());
-					    	sndCacheId++;
-					    	sndCacheId = sndCacheId % sndCache.size();
-							phaseOn.put(key, true);
-						}
-					} else {
-						if (phase < 0.8) {
-							phaseOn.put(key, false);
+					for (int i = 0; i < 10; i++) {
+						phase = this.getPhase(2, phaseOffset + 45, 1-i/10.0);
+						
+						if (!phaseOn.get(key)) {
+							if (phase > 0.5) {
+						    	double speed = Math.abs(getCurrentSpeed().minecraft());
+						    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
+						    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.max(0.3f, Math.abs(this.getThrottle()));
+						    	volume = (float) Math.sqrt(volume);
+						    	double fraction = 3;
+						    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
+						    	pitch += (this.ticksExisted % 10) / 300.0;
+						    	sndCache.get(sndCacheId).play(pitch, volume, getPositionVector());
+						    	sndCacheId++;
+						    	sndCacheId = sndCacheId % sndCache.size();
+								phaseOn.put(key, true);
+							}
+						} else {
+							if (phase < 0.5) {
+								phaseOn.put(key, false);
+							}
 						}
 					}
 				}
@@ -493,7 +508,7 @@ public class LocomotiveSteam extends Locomotive {
 			world.removeEntity(this);
 		}
 	}
-	
+
 	@Override
 	public void setDead() {
 		if (this.gonnaExplode) {
