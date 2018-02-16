@@ -49,12 +49,16 @@ public class ClientSound implements ISound {
 		setPosition(pos);
 		setPitch(pitch);
 		setVolume(vol);
-        sndSystem.play(id);
+		play();
     }
 	
 	@Override
 	public void play() {
-		sndSystem.play(id);
+		if (repeats || pos == null || Minecraft.getMinecraft().player == null) {
+			sndSystem.play(id);
+		} else if (Minecraft.getMinecraft().player.getPositionVector().distanceTo(pos) < this.attenuationDistance * 1.1) {
+			sndSystem.play(id);
+		}
 	}
 	
 	@Override
