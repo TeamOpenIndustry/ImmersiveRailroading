@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.sound;
 
 import java.net.URL;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -22,19 +23,21 @@ public class ClientSound implements ISound {
 	private float lastPitch = 1;
 	private float baseSoundMultiplier;
 	private float currentVolume = 1;
+	private Gauge gauge;
 	
 	/*
 	 * TODO figure out snd system reload!
 	 */
 
-	public ClientSound(String identifier, SoundSystem sndSystem, ResourceLocation oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance) {
+	public ClientSound(String identifier, SoundSystem sndSystem, ResourceLocation oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance, Gauge gauge) {
 		this.id = identifier;
 		this.sndSystem = sndSystem;
 		this.resource = resource;
 		this.baseSoundMultiplier = baseSoundMultiplier;
 		this.repeats = repeats;
 		this.oggLocation = oggLocation;
-		this.attenuationDistance = attenuationDistance;
+		this.attenuationDistance = attenuationDistance * (float)gauge.scale();
+		this.gauge = gauge;
 		
 		this.init();
 	}
@@ -83,7 +86,7 @@ public class ClientSound implements ISound {
 	public void setPitch(float f) {
 		this.lastPitch  = f;
 		if (this.pos == null || this.velocity == null) {
-			sndSystem.setPitch(id, f);
+			sndSystem.setPitch(id, f / (float)Math.sqrt(Math.sqrt(gauge.scale())));
 		} else {
 			//Doppler shift
 			
@@ -103,7 +106,7 @@ public class ClientSound implements ISound {
 			}
 			
 			
-			sndSystem.setPitch(id, f);
+			sndSystem.setPitch(id, f / (float)Math.sqrt(Math.sqrt(gauge.scale())));
 		}
 	}
 	
@@ -115,7 +118,7 @@ public class ClientSound implements ISound {
 	@Override
 	public void setVolume(float f) {
 		this.currentVolume  = f;
-		sndSystem.setVolume(id, f * baseSoundMultiplier);
+		sndSystem.setVolume(id, f * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
 	
 	@Override
