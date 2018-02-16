@@ -74,6 +74,9 @@ public class Config {
 	@Comment("Sound Distance Multiplier")
 	public static double soundDistanceScale = 1;
 
+	@Comment("Enable priming of item render cache.  Disable this if you keep crashing right before the loading screen")
+	public static boolean enableItemRenderPriming = true;
+
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!FuelRequired || (!ModelFuelRequired && gauge.equals(Gauge.MODEL)));
 	}
