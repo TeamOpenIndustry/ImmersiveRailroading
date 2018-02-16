@@ -41,6 +41,7 @@ import cam72cam.immersiverailroading.gui.TrackGui;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
@@ -524,12 +525,13 @@ public class ClientProxy extends CommonProxy {
 			if (sndCache == null) {
 				sndCache = new ArrayList<ISound>();
 				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40));
+					sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40, Gauge.STANDARD));
 				}
 			}
 			
 			ISound snd = sndCache.get(sndCacheId);
 			// TODO Doppler update
+			snd.setPitch((float) (1/((EntityMoveableRollingStock)event.getEntity()).gauge.scale()));
 			snd.play(0.5f + (float) Math.abs(((EntityMoveableRollingStock)event.getEntity()).getCurrentSpeed().metric() / 300f), 0.3f, event.getEntity().getPositionVector());
 	    	sndCacheId++;
 	    	sndCacheId = sndCacheId % sndCache.size();
@@ -538,8 +540,8 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@Override
-	public ISound newSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance) {
-		return manager.createSound(oggLocation, repeats, attenuationDistance);
+	public ISound newSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
+		return manager.createSound(oggLocation, repeats, attenuationDistance, gauge);
 	}
 	
 	private static int tickCount = 0;

@@ -194,15 +194,15 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			if (this.sndCache.size() == 0) {
-				this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150);
+				this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
 
 				for (int i = 0; i < 16; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80));
+					sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, gauge));
 				}
 				
-				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40);
+				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40, gauge);
 				idle.setVolume(0.1f);
-				this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40);
+				this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
 				pressure.setVolume(0.5f);
 			}
 

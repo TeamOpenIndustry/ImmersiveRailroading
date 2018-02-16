@@ -80,8 +80,8 @@ public class LocomotiveDiesel extends Locomotive {
 			boolean hasFuel = (this.getLiquidAmount() > 0 || !Config.isFuelRequired(gauge));
 			
 			if (this.horn == null) {
-				this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100);
-				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80);
+				this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, gauge);
+				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
 			}
 			
 			if (hasFuel) {

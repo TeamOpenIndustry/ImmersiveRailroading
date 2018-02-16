@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
@@ -73,7 +74,7 @@ public class IRSoundManager {
 		}
 	}
 	
-	public ISound createSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance) {
+	public ISound createSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
         String identifier = MathHelper.getRandomUUID(ThreadLocalRandom.current()).toString();
         
         SoundSystem sndSystem = this.soundSystem.get();
@@ -84,7 +85,7 @@ public class IRSoundManager {
 		//TODO only do this once
 		//sndSystem.changeDopplerFactor(1);
 		
-		ClientSound snd = new ClientSound(identifier, sndSystem, oggLocation, getURLForSoundResource.apply(oggLocation), lastSoundLevel, repeats, attenuationDistance);
+		ClientSound snd = new ClientSound(identifier, sndSystem, oggLocation, getURLForSoundResource.apply(oggLocation), lastSoundLevel, repeats, attenuationDistance, gauge);
 		this.sounds.add(snd);
         
         return snd;
