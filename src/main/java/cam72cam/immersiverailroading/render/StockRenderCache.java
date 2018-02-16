@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLContext;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -16,6 +17,7 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 public class StockRenderCache {
 	private static Map<String, StockModel> render_cache = new HashMap<String, StockModel>();
 	private static IconTextureSheet icon_cache;
+	private static boolean cacheOk = true;
 
 	public static void clearRenderCache() {
 		for (StockModel model : render_cache.values()) {
@@ -23,6 +25,7 @@ public class StockRenderCache {
 		}
 		render_cache = new HashMap<String, StockModel>();
 		icon_cache = null;
+		cacheOk = false;
 		primeCache();
 	}
 
@@ -72,6 +75,17 @@ public class StockRenderCache {
 			}
 		}
 		return render_cache.get(defID);
+	}
+
+	public static void tryCache() {
+		if (!cacheOk && Config.enableItemRenderPriming && GLContext.getCapabilities().OpenGL11) {
+			cacheOk = true;
+			
+			for (String def : DefinitionManager.getDefinitionNames()) {
+				ImmersiveRailroading.info("Priming Render Cache: %s", def);;
+				StockRenderCache.getRender(def).draw();
+			}
+		}
 	}
 
 }

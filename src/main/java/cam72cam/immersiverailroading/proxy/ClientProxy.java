@@ -509,8 +509,6 @@ public class ClientProxy extends CommonProxy {
 		for (int i = 0; i < 16; i ++) {
 			sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40, Gauge.STANDARD));
 		}
-		
-		//TODO render
 	}
 	
 	@SubscribeEvent
@@ -556,5 +554,7 @@ public class ClientProxy extends CommonProxy {
 		}
 		tickCount++;
 		manager.tick();
+		
+		StockRenderCache.tryCache();
 	}
 }
