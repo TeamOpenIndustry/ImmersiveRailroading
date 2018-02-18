@@ -3,6 +3,7 @@
 		"firefly",
 		"iron_duke",
 		"cooke_mogul",
+		"k36",
 		"a1_peppercorn",
 		"big_boy",
 		"k4_pacific",
@@ -19,6 +20,7 @@
 	],
 	"tender": [
 		"cooke_tender",
+		"k36_tender",
 		"a1_peppercorn_tender",
 		"big_boy_tender",
 		"k4_tender",
@@ -48,7 +50,8 @@
 		"usra_hopper_55t",
 		"n5c_cabin_car",
 		"drgw_3000class_boxcar",
-		"waycar"
+		"waycar",
+		"drgw_3000class_boxcar"
 	],
 	"tank": [
 		"tank_us",
