@@ -1,0 +1,36 @@
+{
+	"era": "steam",
+	"name": "D&RGW K36",
+	"works": "Baldwin Locomotive Works",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/k36/k36.obj",
+	"darken_model": "-0.05",
+	"model_gauge_m": 1,
+	"properties": {
+		"max_psi": 195,
+		"water_capacity_l": 11356, 
+		"horsepower": 1600,
+		"tractive_effort_lbf": 36164,
+		"max_speed_kmh": 88,
+		"valve_gear": "walschaerts",
+		"weight_kg": 84867
+	},
+	"firebox": {
+		"slots": 8,
+		"width": 6
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": -5.25,
+		"center_y": 1.4,
+		"length": 1.8,
+		"width": 2.7
+	},
+	"trucks": {
+		"front": 1, 
+		"rear": -1
+	},
+	"couplers": {
+		"front_offset": 0,
+		"rear_offset": -1
+	}
+}
