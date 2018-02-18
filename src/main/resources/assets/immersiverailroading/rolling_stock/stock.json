@@ -25,6 +25,7 @@
 		"e6_tender",
 		"a5_tender",
 		"coast_to_coast",
+		"t1_tender",
 		"ps4_tender_big"
 	],
 	"hand_car": [
@@ -46,6 +47,7 @@
 		"ttx_huskykline_1",
 		"usra_hopper_55t",
 		"n5c_cabin_car",
+		"drgw_3000class_boxcar",
 		"waycar"
 	],
 	"tank": [

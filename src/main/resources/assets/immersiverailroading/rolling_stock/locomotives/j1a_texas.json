@@ -31,5 +31,10 @@
 	"couplers": {
 		"front_offset": -0.08,
 		"rear_offset": -1
+	},
+	"sounds": {
+		"whistle": "sounds/steam/j1a_sounds/whistle.ogg",
+		"idle": "sounds/steam/j1a_sounds/idle.ogg",
+		"chuff": "sounds/steam/j1a_sounds/chuff.ogg"
 	}
 }
