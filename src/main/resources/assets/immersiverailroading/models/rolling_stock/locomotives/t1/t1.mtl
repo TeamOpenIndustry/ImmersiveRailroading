@@ -1,5 +1,5 @@
 # Blender MTL File: 'T1.blend'
-# Material Count: 23
+# Material Count: 25
 
 newmtl BRAKE_SKID
 Ns 96.078431
@@ -129,6 +129,28 @@ d 1.000000
 illum 2
 map_Kd darkgrey.png
 
+newmtl darkgrey.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd darkgrey.png
+
+newmtl darkgrey.002
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd darkgrey.png
+
 newmtl fireboxgrey
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
@@ -184,7 +206,7 @@ d 1.000000
 illum 2
 map_Kd gold1.png
 
-newmtl light
+newmtl light.002
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -239,7 +261,7 @@ d 1.000000
 illum 2
 map_Kd spring.png
 
-newmtl vent2
+newmtl vent2.002
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
