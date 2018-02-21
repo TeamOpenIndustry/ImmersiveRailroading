@@ -33,7 +33,7 @@
 		"rear_offset": -1
 	},
 	"sounds": {
-		"whistle": "soundsr/steam/k4_sounds/whistle.ogg",
+		"whistle": "sounds/steam/k4_sounds/whistle.ogg",
 		"idle": "sounds/steam/k4_sounds/idle.ogg",
 		"chuff": "sounds/steam/k4_sounds/chuff.ogg"
 	}
