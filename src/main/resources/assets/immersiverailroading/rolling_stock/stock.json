@@ -10,8 +10,9 @@
 		"e6_atlantic",
 		"a5_switcher",
 		"j1a_texas",
-		"ps4_class",
 		"t1",
+		"ps4_class",
+		"class_38",
 		"gp-7",
 		"ge_b40_8",
 		"alco_rs1",
@@ -28,7 +29,8 @@
 		"a5_tender",
 		"coast_to_coast",
 		"t1_tender",
-		"ps4_tender_big"
+		"ps4_tender_big",
+		"class_38_tender"
 	],
 	"hand_car": [
 		"hand_car_1"

@@ -1,0 +1,30 @@
+{
+	"name": "Class 38 Tender",
+	"model": "immersiverailroading:models/rolling_stock/tender/class_38_tender/class_38_tender.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 51890
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": 4.4,
+		"center_y": 2.3,
+		"length": 1,
+		"width": 1.5
+	},
+	"tank": {
+		"capacity_l":  20000
+	},
+	"tender": {
+		"slots": 46,
+		"width": 16
+	},
+	"trucks": {
+		"front": 2.4, 
+		"rear": -2.4
+	},
+	"couplers": {
+		"front_offset": -0.5,
+		"rear_offset": -0.1
+	}
+}
