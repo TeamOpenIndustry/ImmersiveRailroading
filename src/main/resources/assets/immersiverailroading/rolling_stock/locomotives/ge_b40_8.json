@@ -2,7 +2,7 @@
 	"era": "diesel",
 	"name": "GE B40-8",
 	"works": "General Electric",
-	"model": "immersiverailroading:models/rolling_stock/locomotives/ge_b40_8.obj",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/ge_b40_8/ge_b40_8.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"fuel_efficiency_%": 65,
@@ -17,7 +17,7 @@
 		"center_x": 6.5,
 		"center_y": 2.5,
 		"length": 2,
-		"width": 2
+		"width": 2.4
 	},
 	"trucks": {
 		"front": 4.7, 
