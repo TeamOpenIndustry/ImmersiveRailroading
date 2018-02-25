@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import trackapi.lib.ITrackTile;
+import trackapi.lib.ITrack;
 import trackapi.lib.Util;
 
 public class MovementTrack {
@@ -25,7 +25,7 @@ public class MovementTrack {
 			double dist = 0;
 			while (dist < distanceMeters - maxDelta) {
 				dist += maxDelta;
-				ITrackTile te = Util.getTileEntity(world, currentPosition, true);
+				ITrack te = Util.getTileEntity(world, currentPosition, true);
 				if (te == null) {
 					return currentPosition;
 				}
@@ -34,7 +34,7 @@ public class MovementTrack {
 				trainYaw = VecUtil.toYaw(pastPos.subtractReverse(currentPosition));
 			}
 
-			ITrackTile te = Util.getTileEntity(world, currentPosition, true);
+			ITrack te = Util.getTileEntity(world, currentPosition, true);
 			if (te == null) {
 				return currentPosition;
 			}

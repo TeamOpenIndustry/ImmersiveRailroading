@@ -45,9 +45,9 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import trackapi.lib.ITrackTile;
+import trackapi.lib.ITrack;
 
-public class TileRailBase extends SyncdTileEntity implements ITrackTile, ITickable {
+public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileRailBase ? (TileRailBase) te : null;

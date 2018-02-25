@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import trackapi.lib.ITrackTile;
+import trackapi.lib.ITrack;
 import trackapi.lib.Util;
 
 public class MovementSimulator {
@@ -97,8 +97,8 @@ public class MovementSimulator {
 		return position;
 	}
 	
-	private ITrackTile findTrack(Vec3d currentPosition, float trainYaw) {
-		ITrackTile te = Util.getTileEntity(world, currentPosition, true);
+	private ITrack findTrack(Vec3d currentPosition, float trainYaw) {
+		ITrack te = Util.getTileEntity(world, currentPosition, true);
 		if (te != null && te.getTrackGauge() == gauge) {
 			return te;
 		}
@@ -115,7 +115,7 @@ public class MovementSimulator {
 	
 
 	public Vec3d nextPosition(Vec3d currentPosition, float rotationYaw, float bogeyYaw, double distance) {
-		ITrackTile rail = findTrack(currentPosition, rotationYaw);
+		ITrack rail = findTrack(currentPosition, rotationYaw);
 		if (rail == null) {
 			position.isOffTrack = true;
 			return currentPosition;
