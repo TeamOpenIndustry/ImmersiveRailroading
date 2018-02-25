@@ -310,11 +310,6 @@ public abstract class EntityRollingStockDefinition {
 							break;
 						}
 					}
-
-					if (!rc.type.collisionsEnabled) {
-						continue;
-					}
-
 					double[][] heightMap = new double[xRes][zRes];
 					
 					for (int x = 0; x < xRes; x++) {
@@ -323,8 +318,11 @@ public abstract class EntityRollingStockDefinition {
 							heightMap[x][z] = Double.parseDouble(data[z]);
 						}
 					}
-					
-					this.partMapCache.put(rc, heightMap);
+
+
+					if (rc.type.collisionsEnabled) {
+						this.partMapCache.put(rc, heightMap);
+					}
 				}
 				
 				reader.close();
