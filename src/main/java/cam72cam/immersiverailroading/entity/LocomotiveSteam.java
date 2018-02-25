@@ -449,7 +449,7 @@ public class LocomotiveSteam extends Locomotive {
 				burnTime.put(slot, time - 1);
 			}
 			changedBurnTime = true;
-			if (boilerTemperature < 100 || waterLevelMB < this.getTankCapacity().MilliBuckets() * 0.75) {
+			if (boilerTemperature < 100 || waterLevelMB < this.getTankCapacity().MilliBuckets() * 0.4) {
 				boilerTemperature += 100/waterLevelMB * Math.sqrt(gauge.scale());
 			}
 			if (boilerTemperature >= 100) {
