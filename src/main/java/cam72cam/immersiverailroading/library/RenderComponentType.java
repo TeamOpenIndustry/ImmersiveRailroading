@@ -63,17 +63,22 @@ public enum RenderComponentType {
 	
 	
 	// PARTICLES
-	PARTICLE_CHIMNEY_X("CHIM[I]*NEY_#ID#"),
-	PRESSURE_VALVE_X("PRESSURE_VALVE_#ID#"),
-	DIESEL_EXHAUST_X("EXHAUST_#ID#"),
+	PARTICLE_CHIMNEY_X("CHIM[I]*NEY_#ID#", false),
+	PRESSURE_VALVE_X("PRESSURE_VALVE_#ID#", false),
+	DIESEL_EXHAUST_X("EXHAUST_#ID#", false),
 	
 	// REST
 	REMAINING(""),
 	;
 	
 	public final String regex;
+	public final boolean collisionsEnabled;
 	
 	RenderComponentType(String regex) {
+		this(regex, true);
+	}
+	RenderComponentType(String regex, boolean collide) {
 		this.regex = ".*" + regex + ".*";
+		this.collisionsEnabled = collide;
 	}
 }
