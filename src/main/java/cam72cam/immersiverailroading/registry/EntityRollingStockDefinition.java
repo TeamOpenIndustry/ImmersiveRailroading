@@ -311,6 +311,10 @@ public abstract class EntityRollingStockDefinition {
 						}
 					}
 
+					if (!rc.type.collisionsEnabled) {
+						continue;
+					}
+
 					double[][] heightMap = new double[xRes][zRes];
 					
 					for (int x = 0; x < xRes; x++) {
@@ -379,6 +383,9 @@ public abstract class EntityRollingStockDefinition {
 		
 		for (List<RenderComponent> rcl : this.renderComponents.values()) {
 			for (RenderComponent rc : rcl) {
+				if (!rc.type.collisionsEnabled) {
+					continue;
+				}
 				double[][] heightMap = new double[xRes][zRes];
 				for (String group : rc.modelIDs) {
 					List<Face> faces = model.groups.get(group);
@@ -431,6 +438,10 @@ public abstract class EntityRollingStockDefinition {
 		
 		for (List<RenderComponent> rcl : this.renderComponents.values()) {
 			for (RenderComponent rc : rcl) {
+				if (!rc.type.collisionsEnabled) {
+					continue;
+				}
+				
 				if (availComponents.contains(rc.type)) {
 					availComponents.remove(rc.type);
 				} else if (rc.type == RenderComponentType.REMAINING && stock.isBuilt()) {
