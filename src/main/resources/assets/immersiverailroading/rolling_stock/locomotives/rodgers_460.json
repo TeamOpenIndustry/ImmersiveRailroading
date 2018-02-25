@@ -1,0 +1,40 @@
+{
+	"era": "steam",
+	"name": "Rodgers Ten Wheeler",
+	"works": "Rodgers Locomotive Works",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/rodgers_460/rodgers_460.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"max_psi": 180,
+		"water_capacity_l": 15000, 
+		"horsepower": 2800,
+		"tractive_effort_lbf": 21922,
+		"max_speed_kmh": 130,
+		"valve_gear": "stephenson",
+		"weight_kg": 71803
+	},
+	"firebox": {
+		"slots": 18,
+		"width": 6
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": -2.95,
+		"center_y": 2.17,
+		"length": 2.54,
+		"width": 2.98
+	},
+	"trucks": {
+		"front": 2, 
+		"rear": -2
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -1.4
+	},
+	"sounds": {
+		"whistle": "sounds/steam/k4_sounds/whistle.ogg",
+		"idle": "sounds/steam/k4_sounds/idle.ogg",
+		"chuff": "sounds/steam/k4_sounds/chuff.ogg"
+	}
+}

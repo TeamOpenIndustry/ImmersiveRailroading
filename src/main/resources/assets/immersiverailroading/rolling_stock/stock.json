@@ -13,9 +13,11 @@
 		"t1",
 		"ps4_class",
 		"class_38",
+		"rodgers_460",
 		"gp-7",
 		"ge_b40_8",
 		"ge_b40_8w",
+		"ge_c44_9cw",
 		"alco_rs1",
 		"emd_sw1500",
 		"emd_sd40-2"
@@ -31,7 +33,8 @@
 		"coast_to_coast",
 		"t1_tender",
 		"ps4_tender_big",
-		"class_38_tender"
+		"class_38_tender",
+		"rodgers_460_tender"
 	],
 	"hand_car": [
 		"hand_car_1"
