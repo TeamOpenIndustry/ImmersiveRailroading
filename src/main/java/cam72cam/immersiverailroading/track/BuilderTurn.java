@@ -63,7 +63,7 @@ public class BuilderTurn extends BuilderBase {
 		
 		float flexAngle = 6;
 		
-		for (float angle = startAngle; angle > endAngle; angle-=angleDelta) {
+		for (float angle = startAngle; angle >= endAngle - angleDelta; angle-=angleDelta) {
 			
 			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
 				int gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+q))+1-xPos;
