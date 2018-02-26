@@ -56,7 +56,9 @@
 		"usra_hopper_55t",
 		"n5c_cabin_car",
 		"drgw_3000class_boxcar",
-		"waycar"
+		"waycar",
+		"4394a_db",
+		"flatcar_ark"
 	],
 	"tank": [
 		"tank_us",
