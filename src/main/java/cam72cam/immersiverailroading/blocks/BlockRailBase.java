@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -219,7 +220,11 @@ public abstract class BlockRailBase extends Block {
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
 		TileRailBase te = TileRailBase.get(source, pos);
-		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, (te == null ? 0 : te.getFullHeight())+0.1, 1.0F);
+		double height = 0.1;
+		if (te != null && te.isLoaded()) {
+			height = te.getFullHeight() +0.1 * (te.getTrackGauge() / Gauge.STANDARD.value());
+		}
+		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height, 1.0F);
 	}
 	
 	
