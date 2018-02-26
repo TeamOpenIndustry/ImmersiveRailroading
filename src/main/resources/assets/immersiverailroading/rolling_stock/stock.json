@@ -14,13 +14,15 @@
 		"ps4_class",
 		"class_38",
 		"rodgers_460",
+		"br01",
 		"gp-7",
 		"ge_b40_8",
 		"ge_b40_8w",
 		"ge_c44_9cw",
 		"alco_rs1",
 		"emd_sw1500",
-		"emd_sd40-2"
+		"emd_sd40-2",
+		"sd90mac"
 	],
 	"tender": [
 		"cooke_tender",
@@ -34,7 +36,8 @@
 		"t1_tender",
 		"ps4_tender_big",
 		"class_38_tender",
-		"rodgers_460_tender"
+		"rodgers_460_tender",
+		"br01_tender"
 	],
 	"hand_car": [
 		"hand_car_1"
