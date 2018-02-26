@@ -1,10 +1,10 @@
 {
-	"name": "3000 Series Boxcar",
-	"model": "immersiverailroading:models/rolling_stock/freight/drgw_3000class_boxcar/drgw_3000class_boxcar.obj",
+	"name": "1000 Series Gondola",
+	"model": "immersiverailroading:models/rolling_stock/freight/drgw_1000class_gondola/drgw_1000class_gondola.obj",
 	"darken_model": "-0.05",
 	"model_gauge_m": 2.7,
 	"properties": {
-		"weight_kg": 10300
+		"weight_kg": 10200
 	},
 	"passenger": {
 		"slots": 4,
