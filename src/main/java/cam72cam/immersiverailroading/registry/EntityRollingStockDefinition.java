@@ -310,7 +310,6 @@ public abstract class EntityRollingStockDefinition {
 							break;
 						}
 					}
-
 					double[][] heightMap = new double[xRes][zRes];
 					
 					for (int x = 0; x < xRes; x++) {
@@ -319,8 +318,11 @@ public abstract class EntityRollingStockDefinition {
 							heightMap[x][z] = Double.parseDouble(data[z]);
 						}
 					}
-					
-					this.partMapCache.put(rc, heightMap);
+
+
+					if (rc.type.collisionsEnabled) {
+						this.partMapCache.put(rc, heightMap);
+					}
 				}
 				
 				reader.close();
@@ -379,6 +381,9 @@ public abstract class EntityRollingStockDefinition {
 		
 		for (List<RenderComponent> rcl : this.renderComponents.values()) {
 			for (RenderComponent rc : rcl) {
+				if (!rc.type.collisionsEnabled) {
+					continue;
+				}
 				double[][] heightMap = new double[xRes][zRes];
 				for (String group : rc.modelIDs) {
 					List<Face> faces = model.groups.get(group);
@@ -431,6 +436,10 @@ public abstract class EntityRollingStockDefinition {
 		
 		for (List<RenderComponent> rcl : this.renderComponents.values()) {
 			for (RenderComponent rc : rcl) {
+				if (!rc.type.collisionsEnabled) {
+					continue;
+				}
+				
 				if (availComponents.contains(rc.type)) {
 					availComponents.remove(rc.type);
 				} else if (rc.type == RenderComponentType.REMAINING && stock.isBuilt()) {

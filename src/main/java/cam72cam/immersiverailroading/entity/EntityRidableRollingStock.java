@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -100,7 +101,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	@Override
 	public boolean shouldRiderSit() {
-		return false;
+		return this.gauge == Gauge.MODEL || this.gauge == Gauge.MINECRAFT;
 	}
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();
@@ -176,6 +177,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			pos = pos.add(passengerPositions.get(passenger.getPersistentID()));
 			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 			pos = pos.add(this.getPositionVector());
+			if (passenger instanceof EntityPlayer && shouldRiderSit()) {
+				pos = pos.subtract(0, 0.75, 0);
+			}
 			passenger.setPosition(pos.x, pos.y, pos.z);
 			
 			passenger.prevRotationYaw = passenger.rotationYaw;
@@ -212,6 +216,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 					pos = pos.add(passengerPositions.get(id));
 					pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 					pos = pos.add(this.getPositionVector());
+					if (ent instanceof EntityPlayer && shouldRiderSit()) {
+						pos = pos.subtract(0, 0.75, 0);
+					}
 					ent.setPosition(pos.x, pos.y, pos.z);
 					break;
 				}

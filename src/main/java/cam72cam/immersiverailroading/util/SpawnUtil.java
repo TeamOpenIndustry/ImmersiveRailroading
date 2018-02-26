@@ -22,12 +22,12 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import trackapi.lib.ITrackTile;
+import trackapi.lib.ITrack;
 import trackapi.lib.Util;
 
 public class SpawnUtil {
 	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
-		ITrackTile initte = Util.getTileEntity(worldIn, new Vec3d(pos.add(0, 0.7, 0)), true);
+		ITrack initte = Util.getTileEntity(worldIn, new Vec3d(pos.add(0, 0.7, 0)), true);
 		if (initte == null) {
 			return EnumActionResult.FAIL;
 		}
