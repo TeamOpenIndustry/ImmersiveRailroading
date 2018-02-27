@@ -21,8 +21,7 @@
 		"ge_c44_9cw",
 		"alco_rs1",
 		"emd_sw1500",
-		"emd_sd40-2",
-		"sd90mac"
+		"emd_sd40-2"
 	],
 	"tender": [
 		"cooke_tender",
@@ -61,9 +60,7 @@
 		"russell_snow_plow",
 		"drgw_3000class_boxcar",
 		"drgw_1000class_gondola",
-		"waycar",
-		"4394a_db",
-		"flatcar_ark"
+		"waycar"
 	],
 	"tank": [
 		"tank_us",
