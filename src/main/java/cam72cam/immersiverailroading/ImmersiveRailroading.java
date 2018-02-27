@@ -33,11 +33,11 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
-@Mod(modid = ImmersiveRailroading.MODID, name="ImmersiveRailroading", version = ImmersiveRailroading.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", dependencies = "required-after:trackapi;required-after:immersiveengineering")
+@Mod(modid = ImmersiveRailroading.MODID, name="ImmersiveRailroading", version = ImmersiveRailroading.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", dependencies = "required-after:trackapi@[1.1,);required-after:immersiveengineering")
 public class ImmersiveRailroading
 {
     public static final String MODID = "immersiverailroading";
-    public static final String VERSION = "0.5.0";
+    public static final String VERSION = "0.5.1";
 	public static final int ENTITY_SYNC_DISTANCE = 512;
     public static final String ORE_RAIL_BED = "railBed";
     
