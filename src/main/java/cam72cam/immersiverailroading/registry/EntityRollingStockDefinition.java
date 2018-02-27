@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
@@ -124,7 +125,30 @@ public abstract class EntityRollingStockDefinition {
 		frontBounds = -model.minOfGroup(model.groups()).x + couplerOffsetFront;
 		rearBounds = model.maxOfGroup(model.groups()).x + couplerOffsetRear;
 		widthBounds = model.widthOfGroups(model.groups());
-		heightBounds = model.heightOfGroups(model.groups());
+		
+		// Bad hack for height bounds
+		ArrayList<String> heightGroups = new ArrayList<String>();
+		for (String group : model.groups()) {
+			boolean ignore = false;
+			for (RenderComponentType rct : RenderComponentType.values()) {
+				if (rct.collisionsEnabled) {
+					continue;
+				}
+				for (int i = 0; i < 10; i++) {
+					if (Pattern.matches(rct.regex.replace("#ID#", "" + i), group)) {
+						ignore = true;
+						break;
+					}
+				}
+				if (ignore) {
+					break;
+				}
+			}
+			if (!ignore) {
+				heightGroups.add(group);
+			}
+		}
+		heightBounds = model.heightOfGroups(heightGroups);
 		
 		weight = (int)Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_scale);
 	}
