@@ -521,13 +521,19 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onEnterChunk(EnteringChunk event) {
+		if (!event.getEntity().getEntityWorld().isRemote) {
+			// Somehow loading a chunk in the server thread can call a client event handler
+			// what the fuck forge???
+			return;
+		}
+		
 		if (event.getEntity() instanceof EntityMoveableRollingStock) {
 			
-			if(event.getNewChunkX() == event.getOldChunkX() && event.getNewChunkZ() % 4 == 0) {
+			if(event.getNewChunkX() == event.getOldChunkX() && event.getNewChunkZ() % 4 != 0) {
 				return;
 			}
 			
-			if(event.getNewChunkZ() == event.getOldChunkZ() && event.getNewChunkX() % 4 == 0) {
+			if(event.getNewChunkZ() == event.getOldChunkZ() && event.getNewChunkX() % 4 != 0) {
 				return;
 			}
 			
