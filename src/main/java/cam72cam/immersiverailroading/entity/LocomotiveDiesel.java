@@ -143,6 +143,7 @@ public class LocomotiveDiesel extends Locomotive {
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime /= Math.abs(getThrottle())*10;
 			burnTime *= 1/gauge.scale();
+			burnTime = Math.max(burnTime, 1); // Prevent div by zero
 			if (this.ticksExisted % burnTime == 0) {
 				theTank.drain(1, true);
 			}
