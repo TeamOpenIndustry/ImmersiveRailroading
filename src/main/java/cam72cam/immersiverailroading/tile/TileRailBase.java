@@ -126,7 +126,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public BlockPos getParent() {
 		if (parent == null) {
 			ImmersiveRailroading.warn("Invalid block without parent");
-			world.setBlockToAir(pos);
+			if (ticksExisted > 1) {
+				// Might be null during init
+				world.setBlockToAir(pos);
+			}
 			return null;
 		}
 		return parent.add(pos);
@@ -516,13 +519,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return;
 		}
 		
+		ticksExisted += 1;
+		
 		if (this.augment == null) {
 			return;
 		}
-		
-		
-		
-		ticksExisted += 1;
 		
 		Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
 		EntityMoveableRollingStock stock;
