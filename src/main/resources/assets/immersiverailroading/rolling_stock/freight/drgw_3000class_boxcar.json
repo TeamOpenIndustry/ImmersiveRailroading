@@ -3,6 +3,7 @@
 	"model": "immersiverailroading:models/rolling_stock/freight/drgw_3000class_boxcar/drgw_3000class_boxcar.obj",
 	"darken_model": "-0.05",
 	"model_gauge_m": 2.7,
+	"recommended_gauge_m": 0.9144,
 	"properties": {
 		"weight_kg": 10300
 	},
