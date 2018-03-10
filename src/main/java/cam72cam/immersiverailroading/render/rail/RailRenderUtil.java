@@ -83,9 +83,10 @@ public class RailRenderUtil {
         }
 
 		try {
-			Method cleanerMethod = vertexBufferIn.getClass().getMethod("cleaner");
+			ByteBuffer buffer = vertexBufferIn.getByteBuffer();
+			Method cleanerMethod = buffer.getClass().getMethod("cleaner");
 			cleanerMethod.setAccessible(true);
-			Object cleaner = cleanerMethod.invoke(vertexBufferIn);
+			Object cleaner = cleanerMethod.invoke(buffer);
 			Method cleanMethod = cleaner.getClass().getMethod("clean");
 			cleanMethod.setAccessible(true);
 			cleanMethod.invoke(cleaner);
