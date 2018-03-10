@@ -316,19 +316,26 @@ public class ClientProxy extends CommonProxy {
 		// if the entity being clicked is within the requisite distance.
 		// We need to override that distance because train centers are further away
 		// than 36m.
-		if ((event.getButton() == 0 || event.getButton() == 1) && event.isButtonstate()) {
+		
+		int attackID = Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode() + 100;
+		int useID = Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode() + 100;
+		
+		if ((event.getButton() == attackID || event.getButton() == useID) && event.isButtonstate()) {
 			if (Minecraft.getMinecraft().objectMouseOver == null) {
 				return;
 			}
+			
+			int button = attackID == event.getButton() ? 0 : 1;
+			
 			Entity entity = Minecraft.getMinecraft().objectMouseOver.entityHit;
 			if (entity != null && entity instanceof EntityRidableRollingStock) {
-				ImmersiveRailroading.net.sendToServer(new MousePressPacket(event.getButton(), entity.world.provider.getDimension(), entity.getEntityId()));
+				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, entity.world.provider.getDimension(), entity.getEntityId()));
 				event.setCanceled(true);
 				return;
 			}
 			Entity riding = Minecraft.getMinecraft().player.getRidingEntity();
 			if (riding != null && riding instanceof EntityRidableRollingStock) {
-				ImmersiveRailroading.net.sendToServer(new MousePressPacket(event.getButton(), riding.world.provider.getDimension(), riding.getEntityId()));
+				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, riding.world.provider.getDimension(), riding.getEntityId()));
 				event.setCanceled(true);
 				return;
 			}
