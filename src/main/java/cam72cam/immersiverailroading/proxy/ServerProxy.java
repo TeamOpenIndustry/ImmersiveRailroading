@@ -19,11 +19,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.server.FMLServerHandler;
 
 @EventBusSubscriber(Side.SERVER)
 public class ServerProxy extends CommonProxy {
+	private static int tickCount = 0;
 
 	public void init(FMLInitializationEvent event) {
 		super.init(event);
@@ -101,5 +105,19 @@ public class ServerProxy extends CommonProxy {
 		}
 		
 		return res;
+	}
+	
+	@SubscribeEvent
+	public static void onServerTick(TickEvent.ServerTickEvent event) {
+		if (event.phase != Phase.START) {
+			return;
+		}
+		tickCount++;
+	}
+
+
+	@Override
+	public int getTicks() {
+		return tickCount;
 	}
 }
