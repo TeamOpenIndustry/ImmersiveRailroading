@@ -64,6 +64,8 @@
 		"russell_snow_plow",
 		"drgw_3000class_boxcar",
 		"drgw_1000class_gondola",
+		"drgw_5500class_stockcar",
+		"drgw_rail_and_tie_outfit",
 		"waycar"
 	],
 	"tank": [
