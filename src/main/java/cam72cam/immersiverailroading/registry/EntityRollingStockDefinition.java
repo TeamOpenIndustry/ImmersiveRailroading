@@ -69,6 +69,7 @@ public abstract class EntityRollingStockDefinition {
 	private int maxPassengers;
 	protected double internal_scale;
 	public Gauge recommended_gauge;
+	public Boolean shouldSit;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
@@ -116,6 +117,9 @@ public abstract class EntityRollingStockDefinition {
 		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_scale;
 		passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_scale;
 		maxPassengers = passenger.get("slots").getAsInt();
+		if (passenger.has("should_sit")) {
+			shouldSit = passenger.get("should_sit").getAsBoolean();
+		}
 
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_scale);
