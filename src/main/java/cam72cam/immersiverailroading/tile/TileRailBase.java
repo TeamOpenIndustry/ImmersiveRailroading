@@ -545,6 +545,29 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			if (stock != null) {
 				transferAll(stock.getCapability(capability, null), this.augmentTank, 10);
 			}
+			
+			if (this.augmentTank.getFluidAmount() != 0) {
+				for (EnumFacing facing : EnumFacing.values()) {
+					BlockPos npos = pos.offset(facing);
+					if (world.isAirBlock(npos) || BlockUtil.isIRRail(world, npos)) {
+						continue;
+					}
+					
+					TileEntity nte = world.getTileEntity(npos);
+					if (nte == null) {
+						continue;
+					}
+					try {
+						if (nte.hasCapability(capability, facing.getOpposite())) {
+							IFluidHandler cap = nte.getCapability(capability, facing.getOpposite());
+							transferAll(augmentTank, cap, 100);
+						}
+					} catch (Exception ex) {
+						ImmersiveRailroading.catching(ex);
+					}
+				}
+			}
+			
 			break;
 		case WATER_TROUGH:
 			if (this.augmentTank == null) {
