@@ -1,0 +1,31 @@
+{
+	"era": "diesel",
+	"name": "GE 40-Ton Diesel-Electric Boxcab",
+	"works": "General Electric",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/ge_40_ton_boxcab/ge_40_ton_boxcab.obj",
+    "model_gauge_m": 0.9144,
+	"darken_model": "-0.1",
+	"properties": {
+		"fuel_efficiency_%": 90,
+		"fuel_capacity_l": 852,
+		"horsepower": 300,
+		"tractive_effort_lbf": 21000,
+		"max_speed_kmh": 60,
+		"weight_kg": 35834
+	},
+	"passenger": {
+		"slots": 2,
+		"center_x": 2.76,
+		"center_y": 1.2,
+		"length": 0.44,
+		"width": 2
+	},
+	"trucks": {
+		"front": 1.85, 
+		"rear": -1.85
+	},
+	"couplers": {
+		"front_offset": -0.09,
+		"rear_offset": -0.09
+	}
+}

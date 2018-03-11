@@ -126,7 +126,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public BlockPos getParent() {
 		if (parent == null) {
 			ImmersiveRailroading.warn("Invalid block without parent");
-			world.setBlockToAir(pos);
+			if (ticksExisted > 1) {
+				// Might be null during init
+				world.setBlockToAir(pos);
+			}
 			return null;
 		}
 		return parent.add(pos);
@@ -516,13 +519,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return;
 		}
 		
+		ticksExisted += 1;
+		
 		if (this.augment == null) {
 			return;
 		}
-		
-		
-		
-		ticksExisted += 1;
 		
 		Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
 		EntityMoveableRollingStock stock;
@@ -544,6 +545,29 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			if (stock != null) {
 				transferAll(stock.getCapability(capability, null), this.augmentTank, 10);
 			}
+			
+			if (this.augmentTank.getFluidAmount() != 0) {
+				for (EnumFacing facing : EnumFacing.values()) {
+					BlockPos npos = pos.offset(facing);
+					if (world.isAirBlock(npos) || BlockUtil.isIRRail(world, npos)) {
+						continue;
+					}
+					
+					TileEntity nte = world.getTileEntity(npos);
+					if (nte == null) {
+						continue;
+					}
+					try {
+						if (nte.hasCapability(capability, facing.getOpposite())) {
+							IFluidHandler cap = nte.getCapability(capability, facing.getOpposite());
+							transferAll(augmentTank, cap, 100);
+						}
+					} catch (Exception ex) {
+						ImmersiveRailroading.catching(ex);
+					}
+				}
+			}
+			
 			break;
 		case WATER_TROUGH:
 			if (this.augmentTank == null) {

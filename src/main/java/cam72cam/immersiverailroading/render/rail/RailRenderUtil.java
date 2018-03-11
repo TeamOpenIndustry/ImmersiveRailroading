@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.rail;
 
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -80,6 +81,18 @@ public class RailRenderUtil {
             // moved to VertexFormatElement.postDraw
             vertexformatelement1.getUsage().postDraw(vertexformat, i1, i, bytebuffer);
         }
+
+		try {
+			ByteBuffer buffer = vertexBufferIn.getByteBuffer();
+			Method cleanerMethod = buffer.getClass().getMethod("cleaner");
+			cleanerMethod.setAccessible(true);
+			Object cleaner = cleanerMethod.invoke(buffer);
+			Method cleanMethod = cleaner.getClass().getMethod("clean");
+			cleanMethod.setAccessible(true);
+			cleanMethod.invoke(cleaner);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	public static String renderID(RailInfo info) {
