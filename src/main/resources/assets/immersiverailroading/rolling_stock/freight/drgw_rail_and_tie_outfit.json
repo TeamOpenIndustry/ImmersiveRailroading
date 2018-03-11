@@ -1,6 +1,6 @@
 {
-	"name": "1000 Series Gondola",
-	"model": "immersiverailroading:models/rolling_stock/freight/drgw_1000class_gondola/drgw_1000class_gondola.obj",
+	"name": "Rail & Tie Car",
+	"model": "immersiverailroading:models/rolling_stock/freight/drgw_rail_and_tie_outfit/drgw_rail_and_tie_outfit.obj",
 	"darken_model": "-0.05",
 	"model_gauge_m": 2.7,
 	"recommended_gauge_m": 0.9144,
@@ -10,13 +10,13 @@
 	"passenger": {
 		"slots": 4,
 		"center_x": 0,
-		"center_y": 3,
+		"center_y": 4,
 		"length": 9,
 		"width": 3.5
 	},
 	"freight": {
-		"slots": 32,
-		"width": 8,
+		"slots": 24,
+		"width": 6,
 		"cargo": ["all"]
 	},
 	"trucks": {
@@ -24,7 +24,7 @@
 		"rear": -9.3
 	},
 	"couplers": {
-		"front_offset": -0.20,
-		"rear_offset": -0.20
+		"front_offset": -0.22,
+		"rear_offset": -0.22
 	}
 }
