@@ -12,6 +12,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import paulscode.sound.CommandObject;
 import paulscode.sound.SoundSystem;
 
 public class ClientSound implements ISound {
@@ -77,13 +78,16 @@ public class ClientSound implements ISound {
 			init();
 		}
 		
-		sndSystem.get().setVolume(id, currentVolume * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale())));
+		SoundSystem snd = sndSystem.get();
+		
+		float vol = currentVolume * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
+		snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
 		if (currentPos != null) {
-			sndSystem.get().setPosition(id, (float)currentPos.x, (float)currentPos.y, (float)currentPos.z);
+			snd.CommandQueue(new CommandObject(CommandObject.SET_POSITION, id, (float)currentPos.x, (float)currentPos.y, (float)currentPos.z));
 		}
 		
 		if (currentPos == null || velocity == null) {
-			sndSystem.get().setPitch(id, currentPitch / (float)Math.sqrt(Math.sqrt(gauge.scale())));
+			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, currentPitch / (float)Math.sqrt(Math.sqrt(gauge.scale()))));
 		} else {
 			//Doppler shift
 			
@@ -104,7 +108,10 @@ public class ClientSound implements ISound {
 			}
 			
 			sndSystem.get().setPitch(id, appliedPitch / (float)Math.sqrt(Math.sqrt(gauge.scale())));
+			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, appliedPitch / (float)Math.sqrt(Math.sqrt(gauge.scale()))));
 		}
+		
+		snd.interruptCommandThread();
 	}
 	
 	@Override
