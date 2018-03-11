@@ -86,7 +86,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			if (hasFuel) {
 				if (!idle.isPlaying()) {
-					this.idle.play(1, 1, getPositionVector());
+					this.idle.play(getPositionVector());
 				}
 			} else {
 				if (idle.isPlaying()) {
@@ -95,11 +95,8 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 			
 			if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
-				horn.play(1, 1, getPositionVector());
+				horn.play(getPositionVector());
 			}
-			
-			horn.update(getPositionVector(), getVelocity());
-			idle.update(getPositionVector(), getVelocity());
 			
 			float absThrottle = Math.abs(this.getThrottle());
 			if (this.soundThrottle > absThrottle) {
@@ -107,11 +104,20 @@ public class LocomotiveDiesel extends Locomotive {
 			} else if (this.soundThrottle < Math.abs(this.getThrottle())) {
 				this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 			}
+
+			if (horn.isPlaying()) {
+				horn.setPosition(getPositionVector());
+				horn.setVelocity(getVelocity());
+				horn.update();
+			}
 			
-			idle.setPitch(0.7f+this.soundThrottle/4);
-			idle.setVolume(Math.max(0.1f, this.soundThrottle));
-			// Apply doppler effect
-			horn.setPitch(1);
+			if (idle.isPlaying()) {
+				idle.setPitch(0.7f+this.soundThrottle/4);
+				idle.setVolume(Math.max(0.1f, this.soundThrottle));
+				idle.setPosition(getPositionVector());
+				idle.setVelocity(getVelocity());
+				idle.update();
+			}
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			

@@ -506,7 +506,11 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onSoundLoad(SoundLoadEvent event) {
-		manager = new IRSoundManager(event.getManager());
+		if (manager == null) {
+			manager = new IRSoundManager(event.getManager());
+		} else {
+			manager.handleReload();
+		}
 	}
 	
 	@SubscribeEvent
@@ -547,7 +551,9 @@ public class ClientProxy extends CommonProxy {
 			ISound snd = sndCache.get(sndCacheId);
 			// TODO Doppler update
 			snd.setPitch((float) (1/((EntityMoveableRollingStock)event.getEntity()).gauge.scale()));
-			snd.play(0.5f + (float) Math.abs(((EntityMoveableRollingStock)event.getEntity()).getCurrentSpeed().metric() / 300f), 0.3f, event.getEntity().getPositionVector());
+			//0.5f + (float) Math.abs(((EntityMoveableRollingStock)event.getEntity()).getCurrentSpeed().metric() / 300f)
+			snd.setVolume(0.3f);
+			snd.play(event.getEntity().getPositionVector());
 	    	sndCacheId++;
 	    	sndCacheId = sndCacheId % sndCache.size();
 			

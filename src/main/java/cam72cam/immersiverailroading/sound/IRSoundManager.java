@@ -12,12 +12,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
-import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.MathHelper;
 import paulscode.sound.SoundSystem;
 
 public class IRSoundManager {
@@ -27,6 +25,7 @@ public class IRSoundManager {
 	private List<ISound> sounds = new ArrayList<ISound>();
 	private float lastSoundLevel;
 	private SoundCategory category = SoundCategory.AMBIENT;
+	private SoundSystem cachedSnd;
 
 	public IRSoundManager(SoundManager manager) {
 		this.manager = manager;
@@ -60,7 +59,10 @@ public class IRSoundManager {
 		        sndSystemField.setAccessible(true);
 		        this.soundSystem = () -> {
 		        	try {
-						return (paulscode.sound.SoundSystem) sndSystemField.get(manager);
+		        		if (cachedSnd == null) {
+		        			cachedSnd = (paulscode.sound.SoundSystem) sndSystemField.get(manager);
+		        		}
+						return cachedSnd;
 					} catch (Exception e) {
 						ImmersiveRailroading.catching(e);
 						return null;
@@ -75,17 +77,12 @@ public class IRSoundManager {
 	}
 	
 	public ISound createSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
-        String identifier = MathHelper.getRandomUUID(ThreadLocalRandom.current()).toString();
-        
         SoundSystem sndSystem = this.soundSystem.get();
 		if (sndSystem == null) {
 			return null;
 		}
-
-		//TODO only do this once
-		//sndSystem.changeDopplerFactor(1);
 		
-		ClientSound snd = new ClientSound(identifier, sndSystem, oggLocation, getURLForSoundResource.apply(oggLocation), lastSoundLevel, repeats, attenuationDistance, gauge);
+		ClientSound snd = new ClientSound(this.soundSystem, oggLocation, getURLForSoundResource.apply(oggLocation), lastSoundLevel, repeats, attenuationDistance, gauge);
 		this.sounds.add(snd);
         
         return snd;
@@ -105,6 +102,13 @@ public class IRSoundManager {
 		for (ISound sound : this.sounds) {
 			sound.stop();
 			sound.terminate();
+		}
+	}
+
+	public void handleReload() {
+		this.cachedSnd = null;
+		for (ISound sound : this.sounds) {
+			sound.reload();
 		}
 	}
 }
