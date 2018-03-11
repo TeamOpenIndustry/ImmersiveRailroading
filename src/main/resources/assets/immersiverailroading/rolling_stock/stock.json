@@ -14,6 +14,7 @@
 		"ps4_class",
 		"class_38",
 		"rodgers_460",
+		"skookum",
 		"br01",
 		"gp-7",
 		"ge_b40_8",
@@ -36,6 +37,7 @@
 		"ps4_tender_big",
 		"class_38_tender",
 		"rodgers_460_tender",
+		"skookum_tender",
 		"br01_tender"
 	],
 	"hand_car": [
@@ -55,6 +57,7 @@
 		"dw_gondola",
 		"prr_flatcar_1",
 		"ttx_huskykline_1",
+		"autorack_trilevel",
 		"usra_hopper_55t",
 		"n5c_cabin_car",
 		"russell_snow_plow",
