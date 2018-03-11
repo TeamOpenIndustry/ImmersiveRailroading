@@ -101,6 +101,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	@Override
 	public boolean shouldRiderSit() {
+		if (this.getDefinition().shouldSit != null) {
+			return this.getDefinition().shouldSit;
+		}
 		return this.gauge == Gauge.MODEL || this.gauge == Gauge.MINECRAFT;
 	}
 

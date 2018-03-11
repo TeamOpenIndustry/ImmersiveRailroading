@@ -69,6 +69,7 @@ public abstract class EntityRollingStockDefinition {
 	private int maxPassengers;
 	protected double internal_scale;
 	public Gauge recommended_gauge;
+	public Boolean shouldSit;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
@@ -107,12 +108,18 @@ public abstract class EntityRollingStockDefinition {
 			this.internal_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
 			this.recommended_gauge = Gauge.from(data.get("model_gauge_m").getAsDouble());
 		}
+		if (data.has("recommended_gauge_m")) {
+			this.recommended_gauge = Gauge.from(data.get("recommended_gauge_m").getAsDouble());
+		}
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_scale);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
 		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0).scale(internal_scale);
 		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_scale;
 		passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_scale;
 		maxPassengers = passenger.get("slots").getAsInt();
+		if (passenger.has("should_sit")) {
+			shouldSit = passenger.get("should_sit").getAsBoolean();
+		}
 
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_scale);

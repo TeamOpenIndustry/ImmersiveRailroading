@@ -196,51 +196,41 @@ public class LocomotiveSteam extends Locomotive {
 		if (world.isRemote) {
 			// Particles and Sound
 			
-			if (!Config.particlesEnabled) {
-				return;
-			}
-			
-			if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
-				whistle.play(1, 1, getPositionVector());
-			}
-			
-			if (this.sndCache.size() == 0) {
-				this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
-
-				for (int i = 0; i < 32; i ++) {
-					sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, gauge));
+			if (Config.soundEnabled) {
+				if (this.sndCache.size() == 0) {
+					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
+	
+					for (int i = 0; i < 32; i ++) {
+						sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, gauge));
+					}
+					
+					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40, gauge);
+					idle.setVolume(0.1f);
+					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
+					pressure.setVolume(0.5f);
 				}
 				
-				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40, gauge);
-				idle.setVolume(0.1f);
-				this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
-				pressure.setVolume(0.5f);
-			}
-
-			// Update sound positions
-			whistle.update(getPositionVector(), getVelocity());
-			idle.update(getPositionVector(), getVelocity());
-			pressure.update(getPositionVector(), getVelocity());
-			for (int i = 0; i < sndCache.size(); i ++) {
-				sndCache.get(i).update(getPositionVector(), getVelocity());
-			}
-			
-			if (this.getBoilerTemperature() > 0) {
-				if (!idle.isPlaying()) {
-					idle.play();
+				if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
+					whistle.play(getPositionVector());
 				}
-			} else {
-				if (idle.isPlaying()) {
-					idle.stop();
+				
+				if (this.getBoilerTemperature() > 0) {
+					if (!idle.isPlaying()) {
+						idle.play(getPositionVector());
+					}
+				} else {
+					if (idle.isPlaying()) {
+						idle.stop();
+					}
 				}
 			}
 			
-			double phase = getPhase(4, 0);
+			double phase;
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
-			if (smokes != null) {
+			if (smokes != null && Config.particlesEnabled) {
 				phase = getPhase(4, 0);
 				//System.out.println(phase);
 				for (RenderComponent smoke : smokes) {
@@ -313,7 +303,7 @@ public class LocomotiveSteam extends Locomotive {
 					phase = this.getPhase(2, phaseOffset);
 					double phaseSpike = Math.pow(phase, 4);
 					
-					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 ) {
+					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && Config.particlesEnabled) {
 						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
@@ -321,6 +311,10 @@ public class LocomotiveSteam extends Locomotive {
 						Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
 						sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
 						world.spawnEntity(sp);
+					}
+					
+					if (!Config.soundEnabled) {
+						continue;
 					}
 					
 					String key = piston.side;
@@ -340,7 +334,10 @@ public class LocomotiveSteam extends Locomotive {
 						    	double fraction = 3;
 						    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
 						    	pitch += (this.ticksExisted % 10) / 300.0;
-						    	sndCache.get(sndCacheId).play(pitch, volume, getPositionVector());
+						    	ISound snd = sndCache.get(sndCacheId);
+						    	snd.setPitch(pitch);
+						    	snd.setVolume(volume);
+						    	snd.play(getPositionVector());
 						    	sndCacheId++;
 						    	sndCacheId = sndCacheId % sndCache.size();
 								phaseOn.put(key, true);
@@ -356,20 +353,51 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
 			if (steams != null && (this.getBoilerPressure() >= this.getDefinition().getMaxPSI(gauge) || !Config.isFuelRequired(gauge))) {
-				if (!pressure.isPlaying()) {
-					pressure.play();
+				if (Config.soundEnabled) {
+					if (!pressure.isPlaying()) {
+						pressure.play(getPositionVector());
+					}
 				}
-				for (RenderComponent steam : steams) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
-					particlePos = particlePos.subtract(fakeMotion);
-					EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, steam.width());
-					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z);
-					world.spawnEntity(sp);
+				if (Config.particlesEnabled) {
+					for (RenderComponent steam : steams) {
+						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+						particlePos = particlePos.subtract(fakeMotion);
+						EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, steam.width());
+						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+						sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z);
+						world.spawnEntity(sp);
+					}
 				}
 			} else {
+				if (Config.soundEnabled && pressure.isPlaying()) {
+					pressure.stop();
+				}
+			}
+			
+			if (Config.soundEnabled) {
+				// Update sound positions
+				if (whistle.isPlaying()) {
+					whistle.setPosition(getPositionVector());
+					whistle.setVelocity(getVelocity());
+					whistle.update();
+				}
+				if (idle.isPlaying()) {
+					idle.setPosition(getPositionVector());
+					idle.setVelocity(getVelocity());
+					idle.update();
+				}
 				if (pressure.isPlaying()) {
-					pressure.stop();;
+					pressure.setPosition(getPositionVector());
+					pressure.setVelocity(getVelocity());
+					pressure.update();
+				}
+				for (int i = 0; i < sndCache.size(); i ++) {
+					ISound snd = sndCache.get(i);
+					if (snd.isPlaying()) {
+						snd.setPosition(getPositionVector());
+						snd.setVelocity(getVelocity());
+						snd.update();
+					}
 				}
 			}
 			
