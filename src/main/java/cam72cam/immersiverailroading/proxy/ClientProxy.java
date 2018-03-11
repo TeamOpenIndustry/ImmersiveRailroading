@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
@@ -535,6 +536,10 @@ public class ClientProxy extends CommonProxy {
 		if (!event.getEntity().getEntityWorld().isRemote) {
 			// Somehow loading a chunk in the server thread can call a client event handler
 			// what the fuck forge???
+			return;
+		}
+		
+		if (!Config.soundEnabled) {
 			return;
 		}
 		

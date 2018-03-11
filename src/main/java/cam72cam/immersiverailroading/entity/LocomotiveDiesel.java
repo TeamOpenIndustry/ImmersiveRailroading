@@ -73,50 +73,54 @@ public class LocomotiveDiesel extends Locomotive {
 		super.onUpdate();
 		
 		if (world.isRemote) {
-			if (!Config.particlesEnabled) {
-				return;
-			}
 			
 			boolean hasFuel = (this.getLiquidAmount() > 0 || !Config.isFuelRequired(gauge));
 			
-			if (this.horn == null) {
-				this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, gauge);
-				this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
-			}
-			
-			if (hasFuel) {
-				if (!idle.isPlaying()) {
-					this.idle.play(getPositionVector());
+			if (Config.soundEnabled) {
+				if (this.horn == null) {
+					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, gauge);
+					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
 				}
-			} else {
+				
+				if (hasFuel) {
+					if (!idle.isPlaying()) {
+						this.idle.play(getPositionVector());
+					}
+				} else {
+					if (idle.isPlaying()) {
+						idle.stop();
+					}
+				}
+				
+				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
+					horn.play(getPositionVector());
+				}
+				
+				float absThrottle = Math.abs(this.getThrottle());
+				if (this.soundThrottle > absThrottle) {
+					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
+				} else if (this.soundThrottle < Math.abs(this.getThrottle())) {
+					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
+				}
+	
+				if (horn.isPlaying()) {
+					horn.setPosition(getPositionVector());
+					horn.setVelocity(getVelocity());
+					horn.update();
+				}
+				
 				if (idle.isPlaying()) {
-					idle.stop();
+					idle.setPitch(0.7f+this.soundThrottle/4);
+					idle.setVolume(Math.max(0.1f, this.soundThrottle));
+					idle.setPosition(getPositionVector());
+					idle.setVelocity(getVelocity());
+					idle.update();
 				}
 			}
 			
-			if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
-				horn.play(getPositionVector());
-			}
 			
-			float absThrottle = Math.abs(this.getThrottle());
-			if (this.soundThrottle > absThrottle) {
-				this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-			} else if (this.soundThrottle < Math.abs(this.getThrottle())) {
-				this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
-			}
-
-			if (horn.isPlaying()) {
-				horn.setPosition(getPositionVector());
-				horn.setVelocity(getVelocity());
-				horn.update();
-			}
-			
-			if (idle.isPlaying()) {
-				idle.setPitch(0.7f+this.soundThrottle/4);
-				idle.setVolume(Math.max(0.1f, this.soundThrottle));
-				idle.setPosition(getPositionVector());
-				idle.setVelocity(getVelocity());
-				idle.update();
+			if (!Config.particlesEnabled) {
+				return;
 			}
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);

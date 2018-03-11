@@ -62,6 +62,9 @@ public class Config {
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
+	@Comment("Enable Sounds")
+	public static boolean soundEnabled = true;
+
 	@Comment("Use Icon Cache (experimental)")
 	public static boolean enableIconCache = false;
 	
