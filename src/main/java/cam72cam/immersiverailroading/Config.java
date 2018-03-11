@@ -80,6 +80,9 @@ public class Config {
 	@Comment("Enable priming of item render cache.  Disable this if you keep crashing right before the loading screen")
 	public static boolean enableItemRenderPriming = true;
 
+	@Comment("Re-configure the sound system to use more audo channels (fixes audio cutting out at high speed)")
+	public static boolean overrideSoundChannels = true;
+
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!FuelRequired || (!ModelFuelRequired && gauge.equals(Gauge.MODEL)));
 	}

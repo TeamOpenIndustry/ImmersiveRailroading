@@ -110,12 +110,14 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
+import paulscode.sound.SoundSystemConfig;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -168,6 +170,13 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 	
+	@Override
+	public void preInit(FMLPreInitializationEvent event) throws IOException {
+		super.preInit(event);
+		if (Config.overrideSoundChannels) {
+			SoundSystemConfig.setNumberNormalChannels(2000);
+		}
+	}
 
 	@Override
 	public void init(FMLInitializationEvent event) {
