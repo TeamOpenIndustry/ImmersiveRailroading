@@ -19,6 +19,8 @@ import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
@@ -197,6 +199,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		int largePlates = 0;
 		int mediumPlates = 0;
 		int smallPlates = 0;
+		int wood = 0;
 		
 		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
 			ItemStack found = player.inventory.getStackInSlot(i);
@@ -217,9 +220,40 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 					}
 				}
 			}
+			if (found.getItem() == Item.getItemFromBlock(Blocks.PLANKS)) {
+				wood += found.getCount();
+			}
 		}
 		
 		for (ItemComponentType type : toAdd) {
+			if (type.isWooden(getDefinition())) {
+				int woodUsed = type.getWoodCost(this.gauge, this.getDefinition());
+				if (wood < woodUsed) {
+					continue;
+				}
+				
+				for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
+					ItemStack found = player.inventory.getStackInSlot(i);
+					if (found.getItem() == Item.getItemFromBlock(Blocks.PLANKS)) {
+						ItemStack itemUsed = player.inventory.decrStackSize(i, woodUsed);
+						
+						woodUsed -= itemUsed.getCount();
+						
+						if (woodUsed <= 0) {
+							break;
+						}
+					}
+				}
+				
+				addComponent(type);
+			}
+		}
+		
+		for (ItemComponentType type : toAdd) {
+			if (type.isWooden(getDefinition())) {
+				continue;
+			}
+			
 			int platesStart = 0;
 			int platesUsed = 0;
 			
@@ -275,20 +309,24 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		for (ItemComponentType component : addMap.keySet()) {
 			String str = String.format("%d x %s", addMap.get(component), component);
+			if (!component.isWooden(getDefinition())) {
 			switch (component.crafting) {
-			case CASTING:
-			case CASTING_HAMMER:
-			case PLATE_BOILER:
-				str += String.format(" (%s)", component.crafting.toString());
-				break;
-			case PLATE_LARGE:
-			case PLATE_MEDIUM:
-			case PLATE_SMALL:
-				str += String.format(" (%d x %s)", component.getPlateCost(gauge, getDefinition()) * addMap.get(component), component.getPlateType());
-				break;
-			default:
-				break;
-			
+				case CASTING:
+				case CASTING_HAMMER:
+				case PLATE_BOILER:
+					str += String.format(" (%s)", component.crafting.toString());
+					break;
+				case PLATE_LARGE:
+				case PLATE_MEDIUM:
+				case PLATE_SMALL:
+					str += String.format(" (%d x %s)", component.getPlateCost(gauge, getDefinition()) * addMap.get(component), component.getPlateType());
+					break;
+				default:
+					break;
+				}
+			} else {
+				//TODO localize
+				str += String.format(" (%d x %s)", component.getWoodCost(gauge, getDefinition()), "Wood Planks");
 			}
 			player.sendMessage(new TextComponentString(str));
 		}
