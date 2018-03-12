@@ -9,6 +9,8 @@ import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.library.CraftingType;
+import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -31,20 +33,30 @@ public class CraftPicker extends GuiScreen {
         ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.PASSENGER_TAB, stock);
         ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
 
-		stockSelector = new ItemPickerGUI(stock, this::onStockExit);
 		List<ItemStack> toRemove = new ArrayList<ItemStack>();
+		for (ItemStack item : items) {
+			ItemComponentType comp = ItemComponent.getComponentType(item);
+			EntityRollingStockDefinition def = ItemDefinition.get(item);
+			if (comp.isWooden(def)) {
+				toRemove.add(item);
+				continue;
+			}
+			boolean isCastable = craftType == CraftingType.CASTING && comp.crafting == CraftingType.CASTING_HAMMER;
+			if (comp.crafting != craftType && !isCastable) {
+				toRemove.add(item);
+			}
+		}
+		items.removeAll(toRemove);
+        
+
+		stockSelector = new ItemPickerGUI(stock, this::onStockExit);
+		toRemove = new ArrayList<ItemStack>();
 		for (ItemStack itemStock : stock) {
 			boolean hasComponent = false;
 			for (ItemStack item : items) {
 				if (isPartOf(itemStock, item)) {
-					if (ItemComponent.getComponentType(item).crafting == craftType) {
-						hasComponent = true;
-						break;
-					}
-					if (craftType == CraftingType.CASTING && ItemComponent.getComponentType(item).crafting == CraftingType.CASTING_HAMMER) {
-						hasComponent = true;
-						break;
-					}
+					hasComponent = true;
+					break;
 				}
 			}
 			if (!hasComponent) {
@@ -61,19 +73,6 @@ public class CraftPicker extends GuiScreen {
         	stock.add(new ItemStack(ImmersiveRailroading.ITEM_CAST_RAIL, 1));
 	        ImmersiveRailroading.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
 		}
-		
-		toRemove = new ArrayList<ItemStack>();
-		for (ItemStack item : items) {
-			//TODO remove wooden items
-			if (ItemComponent.getComponentType(item).crafting == craftType) {
-				continue;
-			}
-			if (craftType == CraftingType.CASTING && ItemComponent.getComponentType(item).crafting == CraftingType.CASTING_HAMMER) {
-				continue;
-			}
-			toRemove.add(item);
-		}
-		items.removeAll(toRemove);
 		
 		itemSelector = new ItemPickerGUI(NonNullList.create(), this::onItemExit);
 		if (current != null && current.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
