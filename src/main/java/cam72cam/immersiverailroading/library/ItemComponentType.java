@@ -171,4 +171,15 @@ public enum ItemComponentType {
 		double densityGues = 0.6;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues);
 	}
+
+	public int getWoodCost(Gauge gauge, EntityRollingStockDefinition definition) {
+		RenderComponent comp = definition.getComponent(this.render.get(0), gauge);
+		double densityGues = 4;
+		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues);
+	}
+	
+	public boolean isWooden(EntityRollingStockDefinition definition) {
+		RenderComponent component = definition.getComponent(this.render.get(0), Gauge.STANDARD);
+		return component.isWooden();
+	}
 }

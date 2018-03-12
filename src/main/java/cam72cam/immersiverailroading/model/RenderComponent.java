@@ -17,6 +17,7 @@ public class RenderComponent {
 	public final Set<String> modelIDs;
 	public final String pos;
 	public final double scale;
+	private boolean wooden;
 	
 	public static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups) {
 		return parse(name, def, groups, -1, "", "");
@@ -43,9 +44,14 @@ public class RenderComponent {
 		
 		String idStr = id != -1 ? "" + id : "";
 		
+		comp.wooden = true;
+		
 		for (String group : groups) {
 			if (Pattern.matches(name.regex.replace("#SIDE#", side).replaceAll("#ID#", idStr).replaceAll("#POS#", pos), group)) {
 				comp.modelIDs.add(group);
+				if (!group.contains("WOOD")) {
+					comp.wooden = false;
+				}
 			}
 		}
 		if (comp.modelIDs.size() == 0) {
@@ -70,7 +76,7 @@ public class RenderComponent {
 		this(null, def, 0, null, null);
 	}
 
-	private RenderComponent(Set<String> modelIDs, RenderComponentType type, EntityRollingStockDefinition def, int id, String side, String pos, double scale) {
+	private RenderComponent(Set<String> modelIDs, RenderComponentType type, EntityRollingStockDefinition def, int id, String side, String pos, double scale, boolean wooden) {
 		this.modelIDs = modelIDs;
 		this.type = type;
 		this.def = def;
@@ -78,6 +84,7 @@ public class RenderComponent {
 		this.side = side;
 		this.pos = pos;
 		this.scale = scale;
+		this.wooden = wooden;
 	}
 
 	public Vec3d min() {
@@ -107,9 +114,13 @@ public class RenderComponent {
 		Vec3d max = max();
 		return max.z - min.z;
 	}
+	
+	public boolean isWooden() {
+		return wooden;
+	}
 
 	public RenderComponent scale(Gauge gauge) {
-		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge.scale());
+		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge.scale(), wooden);
 	}
 	
 	@Override

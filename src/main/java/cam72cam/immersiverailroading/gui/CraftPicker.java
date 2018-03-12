@@ -64,6 +64,7 @@ public class CraftPicker extends GuiScreen {
 		
 		toRemove = new ArrayList<ItemStack>();
 		for (ItemStack item : items) {
+			//TODO remove wooden items
 			if (ItemComponent.getComponentType(item).crafting == craftType) {
 				continue;
 			}

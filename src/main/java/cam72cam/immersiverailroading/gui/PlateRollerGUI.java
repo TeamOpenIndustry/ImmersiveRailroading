@@ -33,7 +33,6 @@ public class PlateRollerGUI extends GuiScreen {
 	public PlateRollerGUI(TileMultiblock te) {
 		this.tile = te;
 		currentItem = ((PlateRollerInstance) te.getMultiblock()).getCraftItem();
-		System.out.println(currentItem);
 		if (currentItem == null || currentItem.isEmpty()) {
 			currentItem = new ItemStack(ImmersiveRailroading.ITEM_PLATE, 1);
 		}
