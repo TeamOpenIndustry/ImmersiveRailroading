@@ -39,6 +39,7 @@ import cam72cam.immersiverailroading.gui.TrackGui;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
+import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -51,6 +52,7 @@ import cam72cam.immersiverailroading.render.item.RailItemRender;
 import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.item.StockItemModel;
 import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
+import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
@@ -384,11 +386,12 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onRenderMouseover(DrawBlockHighlightEvent event) {
+		EntityPlayer player = event.getPlayer();
+		ItemStack stack = event.getPlayer().getHeldItemMainhand();
+		BlockPos pos = event.getTarget().getBlockPos();
+		
 		if (event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
-			if (event.getPlayer().getHeldItemMainhand().getItem() == ImmersiveRailroading.ITEM_RAIL_BLOCK) {
-				EntityPlayer player = event.getPlayer();
-				ItemStack stack = event.getPlayer().getHeldItemMainhand();
-				BlockPos pos = event.getTarget().getBlockPos();
+			if (stack.getItem() == ImmersiveRailroading.ITEM_RAIL_BLOCK) {
 				
 				Vec3d vec = event.getTarget().hitVec;
 		        float hitX = (float)(vec.x - (double)pos.getX());
@@ -419,6 +422,35 @@ public class ClientProxy extends CommonProxy {
 	                GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
 	                
 	                RailRenderUtil.render(info, true);
+
+					blend.restore();
+				}
+				GL11.glPopMatrix();
+			}
+			if (stack.getItem() == ImmersiveRailroading.ITEM_MANUAL) {
+				pos = pos.up();
+				
+				GL11.glPushMatrix();
+				{
+					GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
+					
+					GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
+					if (GLContext.getCapabilities().OpenGL14) {
+						GL14.glBlendColor(1, 1, 1, 0.3f);
+					}
+					
+	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)event.getPartialTicks();
+	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)event.getPartialTicks();
+	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)event.getPartialTicks();
+	                GL11.glTranslated(-d0, -d1, -d2);
+	                
+	                GL11.glTranslated(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5);
+	                
+	                GL11.glRotated(-(int)((player.rotationYaw+45) / 90) * 90, 0, 1, 0);
+	                
+	                GL11.glTranslated(-0.5, -0.5, -0.5);
+	                
+	                MBBlueprintRender.draw(player.getEntityWorld(), ItemMultiblockType.get(stack));
 
 					blend.restore();
 				}

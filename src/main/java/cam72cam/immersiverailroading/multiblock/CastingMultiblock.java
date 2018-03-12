@@ -42,7 +42,7 @@ public class CastingMultiblock extends Multiblock {
 	private static final BlockPos power = new BlockPos(3,7,0);
 	public static final double max_volume = 5 * 4 * 4.5 * 9;
 
-	private static MultiblockComponent[][][] blueprint() {
+	private static MultiblockComponent[][][] cast_blueprint() {
 		MultiblockComponent[][][] bp = new MultiblockComponent[7+16][][];
 		for (int z = 0; z < 7; z++) {
 			MultiblockComponent[] base = new MultiblockComponent[] { AIR, AIR, AIR, AIR, AIR, AIR, AIR };
@@ -106,7 +106,7 @@ public class CastingMultiblock extends Multiblock {
 	}
 	
 	public CastingMultiblock() {
-		super(NAME, blueprint());
+		super(NAME, cast_blueprint());
 	}
 	
 	@Override
