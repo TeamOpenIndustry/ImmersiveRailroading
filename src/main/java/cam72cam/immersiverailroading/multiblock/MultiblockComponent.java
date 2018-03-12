@@ -17,7 +17,7 @@ public class MultiblockComponent {
 	private final Function<IBlockState, Boolean> blockCheck;
 	private final Function<ItemStack, Boolean> itemCheck;
 	public final String name;
-	private final IBlockState def;
+	protected final IBlockState def;
 	
 	public MultiblockComponent() {
 		def = null;

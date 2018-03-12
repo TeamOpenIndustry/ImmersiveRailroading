@@ -149,6 +149,15 @@ public abstract class Multiblock {
 		}
 	}
 	
+	public Map<BlockPos, IBlockState> blueprint() {
+		Map<BlockPos, IBlockState> result = new HashMap<BlockPos, IBlockState>();
+		for (BlockPos offset : this.componentPositions) {
+			MultiblockComponent component = lookup(offset);
+			result.put(offset, component.def);
+		}
+		return result;
+	}
+	
 	public MultiblockInstance instance(World world, BlockPos origin, Rotation rot) {
 		return newInstance(world, origin, rot);
 	}
