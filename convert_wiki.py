@@ -55,8 +55,10 @@ for root, dirs, files in os.walk("ImmersiveRailroading.wiki"):
                             label = match.group(1)
                             link = match.group(2)
                             if "https://github.com/cam72cam/ImmersiveRailroading/wiki/" in link:
-                                link = link.replace("https://github.com/cam72cam/ImmersiveRailroading/wiki/", "").lower()
-                            line = line.replace(txt, "[link{immersiverailroading:%s}]%s[link{}]" % (link, label))
+                                link = link.replace("https://github.com/cam72cam/ImmersiveRailroading/wiki/", "immersiverailroading:").lower()
+                            else:
+                                link += "#www"
+                            line = line.replace(txt, "[link{%s}]%s[link{}]" % (link, label))
 
                     line = line.replace("***", "")
 
