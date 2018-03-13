@@ -32,6 +32,7 @@ public enum GuiText {
 	RAW_CAST_TOOLTIP("cast.raw"),
 	TANK_CAPACITY_TOOLTIP("stock.tank_capacity"),
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
+	WEIGHT_TOOLTIP("stock.weight"),
 	
 	NONE("none"),
 	;
