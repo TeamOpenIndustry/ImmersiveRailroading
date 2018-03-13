@@ -145,15 +145,15 @@ public class StockItemModel implements IBakedModel {
 			return Pair.of(defaultVal.getLeft(),
 					new Matrix4().rotate(Math.toRadians(10), 1, 0, 0).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case GROUND:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(-0.5, 0.25, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case FIXED:
 			// Item Frame
-			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5, 0.25, 0.5).toMatrix4f());
 		case GUI:
 			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5, 0, 0).rotate(Math.toRadians(+5+90), 0, 1, 0).toMatrix4f());
 		case HEAD:
 			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().translate(0, 0, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
+					new Matrix4().scale(2,2,2).translate(-0.5, 0.6, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case NONE:
 			return defaultVal;
 		}
