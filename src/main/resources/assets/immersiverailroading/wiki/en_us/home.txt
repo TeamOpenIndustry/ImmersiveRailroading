@@ -5,7 +5,7 @@ Immersive Railroading is a mod for Minecraft with Immersive Engineering integrat
 
 [link{immersiverailroading:getting-started}]Getting Started[link{}]
 
-Want new looks and more detailed textures? Come check out the resource packs here [linkimg]
+Want new looks and more detailed textures? Come check out the resource packs [link{immersiverailroading:https://minecraft.curseforge.com/projects/immersive-railroading}]here[link{}]
 
 
 [prefix{l}] Tools[prefix{}]
