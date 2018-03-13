@@ -126,7 +126,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public BlockPos getParent() {
 		if (parent == null) {
 			ImmersiveRailroading.warn("Invalid block without parent");
-			if (ticksExisted > 1) {
+			if (ticksExisted > 1 && !world.isRemote) {
 				// Might be null during init
 				world.setBlockToAir(pos);
 			}
