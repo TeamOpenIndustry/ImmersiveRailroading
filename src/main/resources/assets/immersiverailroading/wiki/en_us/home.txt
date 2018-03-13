@@ -1,11 +1,11 @@
 [image{200, 20, 0.264169068204, immersiverailroading:wiki/images/awyy1y7.png}]
 
 
-Immersive Railroading is a mod for Minecraft with Immersive Engineering integration that uses Track API (download [link{immersiverailroading:https://minecraft.curseforge.com/projects/track-api}]here[link{}])
+Immersive Railroading is a mod for Minecraft with Immersive Engineering integration that uses Track API ([link{https://minecraft.curseforge.com/projects/track-api#www}]Download Here[link{}])
 
 [link{immersiverailroading:getting-started}]Getting Started[link{}]
 
-Want new looks and more detailed textures? Come check out the resource packs [link{immersiverailroading:https://minecraft.curseforge.com/projects/immersive-railroading}]here[link{}]
+Want new looks and more detailed textures? Come check out the [link{https://minecraft.curseforge.com/projects/immersive-railroading#www}]resource packs[link{}]
 
 
 [prefix{l}] Tools[prefix{}]
