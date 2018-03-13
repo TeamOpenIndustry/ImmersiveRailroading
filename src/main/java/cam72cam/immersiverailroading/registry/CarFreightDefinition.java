@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -37,6 +38,13 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 		for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
 			validCargo.add(el.getAsString());
 		}
+	}
+	
+	@Override
+	public List<String> getTooltip(Gauge gauge) {
+		List<String> tips = super.getTooltip(gauge);
+		tips.add(GuiText.FREIGHT_CAPACITY_TOOLTIP.toString(this.getInventorySize(gauge)));
+		return tips;
 	}
 	
 	public EntityRollingStock instance(World world) {

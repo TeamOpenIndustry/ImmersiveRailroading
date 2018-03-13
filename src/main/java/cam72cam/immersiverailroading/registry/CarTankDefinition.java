@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
@@ -45,6 +46,13 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 				fluidFilter.add(allowedFluid);
 			}
 		}
+	}
+	
+	@Override
+	public List<String> getTooltip(Gauge gauge) {
+		List<String> tips = super.getTooltip(gauge);
+		tips.add(GuiText.TANK_CAPACITY_TOOLTIP.toString(this.getTankCapaity(gauge).Buckets()));
+		return tips;
 	}
 
 	@Override
