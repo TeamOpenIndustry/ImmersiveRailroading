@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.items;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -21,6 +23,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -56,7 +61,20 @@ public class ItemManual extends Item {
 			}
 		} else {
 			if (world.isRemote) {
-				player.sendMessage(new TextComponentString("Coming Soon..."));
+				if (Loader.isModLoaded("igwmod")) {
+					// This is lousy code...
+					try {
+						Class<?> cls = Class.forName("igwmod.gui.GuiWiki");
+						Object wiki = cls.newInstance();
+						FMLCommonHandler.instance().showGuiScreen(wiki);
+						Method scf = cls.getMethod("setCurrentFile", String.class, Object[].class);
+						scf.invoke(wiki, "immersiverailroading:home", new Object[] {});
+					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException e) {
+						e.printStackTrace();
+					}
+				} else {
+					player.sendMessage(ForgeHooks.newChatWithLinks("https://github.com/cam72cam/ImmersiveRailroading/wiki"));
+				}
 			}
 		}
 		return super.onItemRightClick(world, player, hand);
