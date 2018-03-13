@@ -83,6 +83,9 @@ public class Config {
 	@Comment("Re-configure the sound system to use more audo channels (fixes audio cutting out at high speed)")
 	public static boolean overrideSoundChannels = true;
 
+	@Comment("Clear blocsk in creative mode when placing tracks")
+	public static boolean creativePlacementClearsBlocks = true;
+
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!FuelRequired || (!ModelFuelRequired && gauge.equals(Gauge.MODEL)));
 	}
