@@ -1,0 +1,8 @@
+The Track Roller is used to create track pieces for use with Track Blueprints. Placing it requires the user to have 16 Heavy Engineering Blocks, 44 Steel Scaffolding, and 32 Light Engineering Blocks.
+
+The Track Roller requires a clear, level space that is 30 blocks deep, 2 blocks wide, and 3 blocks tall. When placed, the short side will be facing the player, and offset 1 block to the right. After placing, right-click with a Large Wrench anywhere on the arrangement of blocks to assemble the machine.
+
+The Track Roller requires power to operate, which can be input at the top of the multiblock via any RF-compatible method of power transfer. To create track sections, make a Rail Casting in the [link{immersiverailroading:casting-basin}]Casting Basin[link{}] and, with the casting in hand, right-click the Track Roller. After the animation completes, right-click the multiblock to receive 10 track segments in a given gauge.
+
+These Track Segments are used with the Track Blueprint to lay down sections of track.
+

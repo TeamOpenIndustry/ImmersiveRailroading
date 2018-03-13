@@ -1,0 +1,6 @@
+This tool is used to lay down rails for rolling stock to travel on. It is crafted with a piece of paper and six Steel Ingots in an H shape, like so:
+
+[image{200, 60, 1.01102941176, immersiverailroading:wiki/images/3yocbiv.png}]
+
+With the blueprint in hand, right-click in midair to change its settings. Right-click a block to place the railbed, which requires Track Segments from the [link{immersiverailroading:track-roller}]Track Roller[link{}] and Treated Wood Planks.
+

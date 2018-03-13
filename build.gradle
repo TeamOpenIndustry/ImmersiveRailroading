@@ -7,6 +7,14 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
+
+repositories {
+	maven {
+		name = "IGW"
+		url = "http://maven.k-4u.nl/"
+	}
+}
+
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
@@ -62,6 +70,8 @@ dependencies {
 	compile files(
 		'TrackAPI-1.1_1.12.jar'
 	)
+
+	compile "igwmod:IGW-Mod-1.12.2:1.4.3-14:userdev"
 }
 
 processResources {
