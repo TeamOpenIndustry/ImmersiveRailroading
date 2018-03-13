@@ -65,7 +65,6 @@ gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.horse_power=Horse Power: %s
 gui.immersiverailroading:loco.max_speed=Max Speed:    %s
 gui.immersiverailroading:stock.gauge=Gauge: %s
-gui.immersiverailroading:stock.recommended_gauge=Recommended Gauge: %s
 gui.immersiverailroading:cast.raw=Requires processing in the steam hammer before use!
 gui.immersiverailroading:stock.tank_capacity=Capacity: %s Buckets
 gui.immersiverailroading:stock.freight_capacity=Capacity: %s Stacks
