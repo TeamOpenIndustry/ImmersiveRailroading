@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -518,7 +517,7 @@ public abstract class EntityRollingStockDefinition {
 
 	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = new ArrayList<String>();
-		tips.add(GuiText.RECOMMENDED_GAUGE_TOOLTIP.toString(this.recommended_gauge));
+		//tips.add(GuiText.RECOMMENDED_GAUGE_TOOLTIP.toString(this.recommended_gauge));
 		return tips;
 	}
 
