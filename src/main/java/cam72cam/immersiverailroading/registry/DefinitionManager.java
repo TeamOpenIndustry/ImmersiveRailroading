@@ -113,11 +113,7 @@ public class DefinitionManager {
 	}
 
 	public static EntityRollingStockDefinition getDefinition(String defID) {
-		EntityRollingStockDefinition val = definitions.get(defID);
-		if (val == null) {
-			ImmersiveRailroading.warn("Invalid stock ID: " + defID);
-		}
-		return val;
+		return definitions.get(defID);
 	}
 
 	public static Collection<EntityRollingStockDefinition> getDefinitions() {

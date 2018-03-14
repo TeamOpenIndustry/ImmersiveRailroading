@@ -18,7 +18,7 @@ public class ItemDefinition {
 			return stack.getTagCompound().getString("defID");
 		}
 		stack.setCount(0);
-		return "BUG";
+		return "";
 	}
 	
 	public static EntityRollingStockDefinition get(ItemStack stack) {
