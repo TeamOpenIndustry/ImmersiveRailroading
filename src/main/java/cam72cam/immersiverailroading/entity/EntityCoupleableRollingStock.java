@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
@@ -140,7 +141,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-		if (player.getHeldItem(hand).getItem() == ImmersiveRailroading.ITEM_HOOK) {
+		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_HOOK) {
 			CouplerType coupler = CouplerType.FRONT;
 			if (this.getCouplerPosition(CouplerType.FRONT).distanceTo(player.getPositionVector()) > this.getCouplerPosition(CouplerType.BACK).distanceTo(player.getPositionVector())) {
 				coupler = CouplerType.BACK;

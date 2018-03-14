@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -51,7 +52,7 @@ public class ItemTrackBlueprint extends Item {
 		
 		ItemStack stack = player.getHeldItem(hand);
 		if (ItemTrackBlueprint.isPreview(stack)) {
-			world.setBlockState(pos, ImmersiveRailroading.BLOCK_RAIL_PREVIEW.getDefaultState());
+			world.setBlockState(pos, IRBlocks.BLOCK_RAIL_PREVIEW.getDefaultState());
 			TileRailPreview te = TileRailPreview.get(world, pos);
 			if (te != null) {
 				te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
