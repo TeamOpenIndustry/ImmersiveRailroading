@@ -39,7 +39,7 @@ public class ItemTrackBlueprint extends Item {
 	}
 	
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if (worldIn.isRemote) {
+		if (worldIn.isRemote && handIn == EnumHand.MAIN_HAND) {
             playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
         }
         return super.onItemRightClick(worldIn, playerIn, handIn);
