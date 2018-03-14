@@ -18,7 +18,7 @@ public class ItemGauge {
 			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
 		}
 		
-		EntityRollingStockDefinition def = ItemDefinition.get(stack);
+		EntityRollingStockDefinition def = ItemDefinition.get(stack.copy());
 		if (def != null) {
 			return def.recommended_gauge;
 		}
