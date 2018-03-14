@@ -8,6 +8,7 @@ import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration1;
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -184,7 +185,7 @@ public abstract class Multiblock {
 				BlockPos pos = getPos(offset);
 				IBlockState origState = world.getBlockState(pos);
 				
-				world.setBlockState(pos, ImmersiveRailroading.BLOCK_MULTIBLOCK.getDefaultState());
+				world.setBlockState(pos, IRBlocks.BLOCK_MULTIBLOCK.getDefaultState());
 				TileMultiblock te = TileMultiblock.get(world, pos);
 				
 				te.configure(name, rot, offset, origState);

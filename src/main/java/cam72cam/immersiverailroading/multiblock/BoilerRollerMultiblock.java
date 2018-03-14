@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -79,7 +79,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 					
 					player.setHeldItem(hand, craftTe.getContainer().getStackInSlot(1));
 					craftTe.getContainer().setStackInSlot(1, ItemStack.EMPTY);
-				} else if (held.getItem() == ImmersiveRailroading.ITEM_PLATE && ItemPlateType.get(held) == PlateType.BOILER) {
+				} else if (held.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(held) == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
 					if (craftTe == null) {
 						return false;
@@ -147,7 +147,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.getItem() == ImmersiveRailroading.ITEM_PLATE && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
+				if (input.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
 					progress = 100;
 					craftTe.setCraftProgress(100);
 				}
@@ -155,7 +155,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 1);
+				ItemStack out = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
 				ItemGauge.set(out, ItemGauge.get(input));
 				ItemDefinition.setID(out, ItemDefinition.getID(input));
 				ItemComponent.setComponentType(out, ItemComponentType.BOILER_SEGMENT);

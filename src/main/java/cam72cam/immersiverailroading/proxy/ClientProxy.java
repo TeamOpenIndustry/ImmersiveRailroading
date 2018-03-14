@@ -13,6 +13,8 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
@@ -241,48 +243,48 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
 		
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_LARGE_WRENCH.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_LARGE_WRENCH, 0,
+				new ModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.getRegistryName(), ""));
 
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_HOOK, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_HOOK.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_HOOK, 0,
+				new ModelResourceLocation(IRItems.ITEM_HOOK.getRegistryName(), ""));
 		
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT, 0,
+				new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName(), ""));
 
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 0,
+				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""));
 
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK, 0,
+				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName(), ""));
 		
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_AUGMENT, 0,
+				new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName(), ""));
 		
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_RAIL, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RAIL, 0,
+				new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName(), ""));
 		
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_CAST_RAIL, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_CAST_RAIL.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CAST_RAIL, 0,
+				new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName(), ""));
 		
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_PLATE, 0,
-				new ModelResourceLocation(ImmersiveRailroading.ITEM_PLATE.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PLATE, 0,
+				new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName(), ""));
 		
-		ModelLoader.setCustomModelResourceLocation(ImmersiveRailroading.ITEM_MANUAL, 0,
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
 	}
 
 	@SubscribeEvent
 	public static void onModelBakeEvent(ModelBakeEvent event) {
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK.getRegistryName(), ""), new StockItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL_BLOCK.getRegistryName(), ""), new TrackBlueprintItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""), new StockItemComponentModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_AUGMENT.getRegistryName(), ""), new RailAugmentItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_RAIL.getRegistryName(), ""), new RailItemRender());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_CAST_RAIL.getRegistryName(), ""), new RailCastItemRender());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.ITEM_PLATE.getRegistryName(), ""), new PlateItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL.getRegistryName(), ""), new RailBaseModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(ImmersiveRailroading.BLOCK_RAIL_GAG.getRegistryName(), ""), new RailBaseModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName(), ""), new StockItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName(), ""), new TrackBlueprintItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""), new StockItemComponentModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName(), ""), new RailAugmentItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName(), ""), new RailItemRender());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName(), ""), new RailCastItemRender());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName(), ""), new PlateItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL.getRegistryName(), ""), new RailBaseModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL_GAG.getRegistryName(), ""), new RailBaseModel());
 	}
 
 	@SubscribeEvent
@@ -397,7 +399,7 @@ public class ClientProxy extends CommonProxy {
 		BlockPos pos = event.getTarget().getBlockPos();
 		
 		if (event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
-			if (stack.getItem() == ImmersiveRailroading.ITEM_RAIL_BLOCK) {
+			if (stack.getItem() == IRItems.ITEM_TRACK_BLUEPRINT) {
 				
 				Vec3d vec = event.getTarget().hitVec;
 		        float hitX = (float)(vec.x - (double)pos.getX());
@@ -433,7 +435,7 @@ public class ClientProxy extends CommonProxy {
 				}
 				GL11.glPopMatrix();
 			}
-			if (stack.getItem() == ImmersiveRailroading.ITEM_MANUAL) {
+			if (stack.getItem() == IRItems.ITEM_MANUAL) {
 				pos = pos.up();
 				
 				GL11.glPushMatrix();

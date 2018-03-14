@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
@@ -25,13 +25,13 @@ public class CraftPicker extends GuiScreen {
 		this.onChoose = onChoose;
 		this.items = NonNullList.create();
 		
-        ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(ItemTabs.COMPONENT_TAB, items);
+        IRItems.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(ItemTabs.COMPONENT_TAB, items);
         
         NonNullList<ItemStack> stock = NonNullList.create();
 
-        ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.LOCOMOTIVE_TAB, stock);
-        ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.PASSENGER_TAB, stock);
-        ImmersiveRailroading.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
+        IRItems.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.LOCOMOTIVE_TAB, stock);
+        IRItems.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.PASSENGER_TAB, stock);
+        IRItems.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
 
 		List<ItemStack> toRemove = new ArrayList<ItemStack>();
 		for (ItemStack item : items) {
@@ -70,12 +70,12 @@ public class CraftPicker extends GuiScreen {
 		stock.removeAll(toRemove);
 		
 		if (craftType == CraftingType.CASTING) {
-        	stock.add(new ItemStack(ImmersiveRailroading.ITEM_CAST_RAIL, 1));
-	        ImmersiveRailroading.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
+        	stock.add(new ItemStack(IRItems.ITEM_CAST_RAIL, 1));
+	        IRItems.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
 		}
 		
 		itemSelector = new ItemPickerGUI(NonNullList.create(), this::onItemExit);
-		if (current != null && current.getItem() == ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+		if (current != null && current.getItem() == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
 			itemSelector.choosenItem = current;
 		}
 	}
@@ -85,10 +85,10 @@ public class CraftPicker extends GuiScreen {
 			return false;
 		}
 		
-    	if (stock.getItem() != ImmersiveRailroading.ITEM_ROLLING_STOCK) {
+    	if (stock.getItem() != IRItems.ITEM_ROLLING_STOCK) {
     		return false;
     	}
-    	if (item.getItem() != ImmersiveRailroading.ITEM_ROLLING_STOCK_COMPONENT) {
+    	if (item.getItem() != IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
     		return false;
     	}
     	return ItemDefinition.getID(item).equals(ItemDefinition.getID(stock));

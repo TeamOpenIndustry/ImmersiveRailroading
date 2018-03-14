@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.items;
 
 import java.util.HashSet;
+
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -41,7 +43,7 @@ public class ItemLargeWrench extends ItemTool {
 					te.setAugment(null);
 
 					if(!world.isRemote) {
-						ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_AUGMENT, 1);
+						ItemStack stack = new ItemStack(IRItems.ITEM_AUGMENT, 1);
 						ItemAugmentType.set(stack, augment);
 						ItemGauge.set(stack, Gauge.from(te.getTrackGauge()));
 						world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), stack));

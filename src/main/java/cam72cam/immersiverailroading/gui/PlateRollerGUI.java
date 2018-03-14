@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import java.io.IOException;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
@@ -34,7 +34,7 @@ public class PlateRollerGUI extends GuiScreen {
 		this.tile = te;
 		currentItem = ((PlateRollerInstance) te.getMultiblock()).getCraftItem();
 		if (currentItem == null || currentItem.isEmpty()) {
-			currentItem = new ItemStack(ImmersiveRailroading.ITEM_PLATE, 1);
+			currentItem = new ItemStack(IRItems.ITEM_PLATE, 1);
 		}
 		System.out.println(currentItem);
 		

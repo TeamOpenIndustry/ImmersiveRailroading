@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.track;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -19,7 +19,7 @@ public class TrackRail extends TrackBase {
 	private Vec3d placementPosition;
 
 	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackItems type, int length, int quarter, Vec3d placementPosition) {
-		super(builder, rel_x, rel_y, rel_z, ImmersiveRailroading.BLOCK_RAIL, rel_rotation);
+		super(builder, rel_x, rel_y, rel_z, IRBlocks.BLOCK_RAIL, rel_rotation);
 		this.type = type;
 		this.quarter = quarter;
 		this.length = length;

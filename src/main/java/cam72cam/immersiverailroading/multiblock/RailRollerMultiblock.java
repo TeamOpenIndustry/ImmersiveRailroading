@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
@@ -76,7 +76,7 @@ public class RailRollerMultiblock extends Multiblock {
 					
 					player.setHeldItem(hand, outputTe.getContainer().getStackInSlot(0));
 					outputTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
-				} else if (held.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL) {
+				} else if (held.getItem() == IRItems.ITEM_CAST_RAIL) {
 					TileMultiblock inputTe = getTile(input);
 					if (inputTe == null) {
 						return false;
@@ -154,7 +154,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL && output.isEmpty()) {
+				if (input.getItem() == IRItems.ITEM_CAST_RAIL && output.isEmpty()) {
 					progress = 100;
 					craftingTe.setCraftProgress(100);
 				}
@@ -162,7 +162,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(ImmersiveRailroading.ITEM_RAIL, 10);
+				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 10);
 				ItemGauge.set(out, ItemGauge.get(input));
 				outputTe.getContainer().setStackInSlot(0, out);
 				input.shrink(1);
@@ -172,7 +172,7 @@ public class RailRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return offset.equals(input) && stack.getItem() == ImmersiveRailroading.ITEM_CAST_RAIL;
+			return offset.equals(input) && stack.getItem() == IRItems.ITEM_CAST_RAIL;
 		}
 
 		@Override

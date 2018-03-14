@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import javax.annotation.Nonnull;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.Augment;
@@ -59,7 +59,7 @@ public abstract class BlockRailBase extends Block {
 
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-		ItemStack stack = new ItemStack(ImmersiveRailroading.ITEM_RAIL_BLOCK, 1);
+		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		TileRailBase rail = TileRailBase.get(world, pos);
 		if (rail == null || !rail.isLoaded()) {
 			return stack;
