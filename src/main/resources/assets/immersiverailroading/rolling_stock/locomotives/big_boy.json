@@ -3,7 +3,7 @@
 	"name": "Big Boy (4000 class)",
 	"works": "American Locomotive Company",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/big_boy.obj",
-	"darken_model": "0.05",
+	"darken_model": "0.03",
 	"properties": {
 		"max_psi": 300,
 		"water_capacity_l": 95000, 

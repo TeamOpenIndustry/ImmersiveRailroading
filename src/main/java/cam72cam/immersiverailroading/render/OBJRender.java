@@ -114,9 +114,10 @@ public class OBJRender {
 			float b = 0;
 			float a = 0;
 			if (currentMTL.Kd != null) {
-				r = Math.max(0, currentMTL.Kd.get(0) - model.darken);
-				g = Math.max(0, currentMTL.Kd.get(1) - model.darken);
-				b = Math.max(0, currentMTL.Kd.get(2) - model.darken);
+				float mult = 1 - model.darken * 5;
+				r = Math.max(0, currentMTL.Kd.get(0) * mult);
+				g = Math.max(0, currentMTL.Kd.get(1) * mult);
+				b = Math.max(0, currentMTL.Kd.get(2) * mult);
 				a = currentMTL.Kd.get(3);
 			}
 			for (int[] point : face.points) {

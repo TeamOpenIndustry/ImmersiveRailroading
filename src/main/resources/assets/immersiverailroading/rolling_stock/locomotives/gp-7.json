@@ -3,7 +3,7 @@
 	"name": "GP-7",
 	"works": "Electro-Motive Division",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/gp-7.obj",
-	"darken_model": "0.05",
+	"darken_model": "0.03",
 	"properties": {
 		"fuel_efficiency_%": 100,
 		"fuel_capacity_l": 6000,

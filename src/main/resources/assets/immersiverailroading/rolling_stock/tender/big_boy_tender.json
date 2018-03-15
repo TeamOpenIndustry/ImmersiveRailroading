@@ -1,7 +1,7 @@
 {
 	"name": "Big Boy (4000 class) Tender",
 	"model": "immersiverailroading:models/rolling_stock/tender/centipede_tender.obj",
-	"darken_model": "0.05",
+	"darken_model": "0.03",
 	"properties": {
 		"weight_kg": 74389
 	},

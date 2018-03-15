@@ -3,7 +3,7 @@
 	"name": "Firefly",
 	"works": "Great Western Railway",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/firefly/firefly.obj",
-	"darken_model": "0.05",
+	"darken_model": "0.03",
 	"model_gauge_m": 2.17,
 	"properties": {
 		"max_psi": 100,

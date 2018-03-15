@@ -3,7 +3,7 @@
 	"name": "A1 Peppercorn",
 	"works": "A1 Steam Locomotive Trust",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/a1_peppercorn.obj",
-	"darken_model": "0.05",
+	"darken_model": "0.03",
 	"properties": {
 		"max_psi": 250,
 		"water_capacity_l": 27000, 
