@@ -1,7 +1,7 @@
 {
 	"name": "Flat Car",
 	"model": "immersiverailroading:models/rolling_stock/freight/flat_car.obj",
-	"darken_model": "0.05",
+	"darken_model": "0.03",
 	"properties": {
 		"weight_kg": 72574
 	},
