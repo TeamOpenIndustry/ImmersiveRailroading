@@ -74,7 +74,6 @@ dependencies {
 
 	compile "igwmod:IGW-Mod-1.12.2:1.4.3-14:userdev"
 	compile "li.cil.oc:OpenComputers:MC1.12.2-1.7.+:api"
-	compile "li.cil.oc:OpenComputers:MC1.12.2-1.7.+:doc"
 	runtime "li.cil.oc:OpenComputers:MC1.12.2-1.7.+"
 }
 
