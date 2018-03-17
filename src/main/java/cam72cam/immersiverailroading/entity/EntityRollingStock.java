@@ -62,6 +62,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		return this.defID;
 	}
 	
+	@Override
 	public void onUpdate() {
 		if (!world.isRemote && this.ticksExisted % 5 == 0) {
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
@@ -112,6 +113,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 * Player Interactions
 	 */
 	
+	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		return false;
 	}

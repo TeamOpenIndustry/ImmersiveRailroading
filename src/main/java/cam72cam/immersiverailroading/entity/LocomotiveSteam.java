@@ -54,6 +54,7 @@ public class LocomotiveSteam extends Locomotive {
 		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
 	}
 
+	@Override
 	public LocomotiveSteamDefinition getDefinition() {
 		return super.getDefinition(LocomotiveSteamDefinition.class);
 	}
@@ -63,6 +64,7 @@ public class LocomotiveSteam extends Locomotive {
 		return GuiTypes.STEAM_LOCOMOTIVE;
 	}
 	
+	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
 		nbttagcompound.setFloat("boiler_temperature", getBoilerTemperature());
@@ -130,13 +132,13 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	public Map<Integer, Integer> getBurnTime() {
-		return NBTtoMap((NBTTagCompound)this.dataManager.get(BURN_TIME));
+		return NBTtoMap(this.dataManager.get(BURN_TIME));
 	}
 	private void setBurnTime(Map<Integer, Integer> burnTime) {
 		this.dataManager.set(BURN_TIME, mapToNBT(burnTime));
 	}
 	public Map<Integer, Integer> getBurnMax() {
-		return NBTtoMap((NBTTagCompound)this.dataManager.get(BURN_MAX));
+		return NBTtoMap(this.dataManager.get(BURN_MAX));
 	}
 	private void setBurnMax(Map<Integer, Integer> burnMax) {
 		this.dataManager.set(BURN_MAX, mapToNBT(burnMax));

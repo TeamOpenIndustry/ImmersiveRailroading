@@ -641,7 +641,7 @@ public class StockModel extends OBJRender {
 		}
 		GL11.glPopMatrix();
 		
-		Vec3d returnCrankRodRotationOffset = VecUtil.fromYaw(returnCrankRodLength, (float) returnCrankRodRot+90);
+		Vec3d returnCrankRodRotationOffset = VecUtil.fromYaw(returnCrankRodLength, returnCrankRodRot+90);
 		Vec3d returnCrankRodFarPoint = returnCrankRodOriginOffset.addVector(returnCrankRodRotationOffset.x, returnCrankRodRotationOffset.z, 0);
 		// Slotted link rotation point
 		Vec3d slottedLinkRotPoint = slottedLink.center();

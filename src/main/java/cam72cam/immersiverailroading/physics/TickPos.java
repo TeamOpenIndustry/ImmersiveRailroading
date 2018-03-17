@@ -34,6 +34,7 @@ public class TickPos {
 		this.rotationPitch = rotationPitch;
 	}
 
+	@Override
 	public TickPos clone() {
 		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, rotationPitch, isOffTrack);
 	}

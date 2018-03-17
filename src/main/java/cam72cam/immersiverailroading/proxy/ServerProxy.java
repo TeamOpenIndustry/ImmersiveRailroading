@@ -29,6 +29,7 @@ import net.minecraftforge.fml.server.FMLServerHandler;
 public class ServerProxy extends CommonProxy {
 	private static int tickCount = 0;
 
+	@Override
 	public void init(FMLInitializationEvent event) {
 		super.init(event);
 	}
@@ -43,7 +44,8 @@ public class ServerProxy extends CommonProxy {
     	return null;
     }
 
-    public World getWorld(int dimension)  {
+    @Override
+	public World getWorld(int dimension)  {
 		return FMLServerHandler.instance().getServer().getWorld(dimension);
 	}
     

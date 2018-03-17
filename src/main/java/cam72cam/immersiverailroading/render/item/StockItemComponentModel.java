@@ -133,6 +133,7 @@ public class StockItemComponentModel implements IBakedModel {
 			super(new ArrayList<ItemOverride>());
 		}
 
+		@Override
 		public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
 			return new StockItemComponentModel(stack);
 		}

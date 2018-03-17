@@ -17,6 +17,7 @@ public class CarTank extends FreightTank {
 		super(world, defID);
 	}
 	
+	@Override
 	public CarTankDefinition getDefinition() {
 		return super.getDefinition(CarTankDefinition.class);
 	}

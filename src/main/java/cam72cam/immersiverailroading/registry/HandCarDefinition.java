@@ -11,6 +11,7 @@ public class HandCarDefinition extends LocomotiveDefinition {
 		super(defID, data);
 	}
 
+	@Override
 	public EntityRollingStock instance(World world) {
 		return new HandCar(world, defID);
 	}

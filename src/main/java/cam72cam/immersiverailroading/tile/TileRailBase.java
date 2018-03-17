@@ -72,6 +72,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	
+	@Override
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
 	}
@@ -159,11 +160,13 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		return railBedCache;
 	}
 	
+	@Override
 	public void writeUpdateNBT(NBTTagCompound nbt) {
 		if (this.getRenderRailBed() != null) {
 			nbt.setTag("renderBed", this.getRenderRailBed().serializeNBT());
 		}
 	}
+	@Override
 	public void readUpdateNBT(NBTTagCompound nbt) {
 		if (nbt.hasKey("renderBed")) {
 			this.railBedCache = new ItemStack(nbt.getCompoundTag("renderBed"));

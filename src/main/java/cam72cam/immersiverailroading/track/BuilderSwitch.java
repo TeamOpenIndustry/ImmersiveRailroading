@@ -37,22 +37,27 @@ public class BuilderSwitch extends BuilderBase {
 		}
 	}
 	
+	@Override
 	public int costTies() {
 		return straightBuilder.costTies() + turnBuilder.costTies();
 	}
 	
+	@Override
 	public int costRails() {
 		return straightBuilder.costRails() + turnBuilder.costRails();
 	}
 
+	@Override
 	public int costBed() {
 		return straightBuilder.costBed() + turnBuilder.costBed();
 	}
 	
+	@Override
 	public int costFill() {
 		return straightBuilder.costFill() + turnBuilder.costFill();
 	}
 	
+	@Override
 	public void setDrops(List<ItemStack> drops) {
 		straightBuilder.setDrops(drops);
 	}

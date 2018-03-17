@@ -18,6 +18,7 @@ public class Tender extends CarTank {
 		super(world, defID);
 	}
 	
+	@Override
 	public TenderDefinition getDefinition() {
 		return super.getDefinition(TenderDefinition.class);
 	}

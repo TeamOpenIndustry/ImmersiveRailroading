@@ -5,11 +5,13 @@ public class TileRailGag extends TileRailBase {
 		this.flexible = flexible;
 	}
 	
+	@Override
 	public boolean hasFastRenderer()
     {
         return false;
     }
 	
+	@Override
 	public boolean updateRerender() {
 		return true;
 	}

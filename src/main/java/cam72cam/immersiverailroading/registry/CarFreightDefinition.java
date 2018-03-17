@@ -47,6 +47,7 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 		return tips;
 	}
 	
+	@Override
 	public EntityRollingStock instance(World world) {
 		return new CarFreight(world, defID);
 	}

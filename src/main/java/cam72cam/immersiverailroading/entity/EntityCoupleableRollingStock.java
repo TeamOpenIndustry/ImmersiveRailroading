@@ -51,6 +51,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			return this == FRONT ? BACK : FRONT;
 		}
 		
+		@Override
 		public String toString() {
 			return (this == FRONT ? ChatText.COUPLER_FRONT : ChatText.COUPLER_BACK).toString();
 		}
@@ -639,7 +640,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		List<EntityCoupleableRollingStock> nearBy = world.getEntities(EntityCoupleableRollingStock.class, new Predicate<EntityCoupleableRollingStock>()
 	    {
-	        public boolean apply(@Nullable EntityCoupleableRollingStock entity)
+	        @Override
+			public boolean apply(@Nullable EntityCoupleableRollingStock entity)
 	        {
 	        	if (entity == null) {
 	        		return false;
