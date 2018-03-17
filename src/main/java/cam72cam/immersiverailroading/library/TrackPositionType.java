@@ -5,7 +5,10 @@ import cam72cam.immersiverailroading.util.TextUtil;
 public enum TrackPositionType {
 	FIXED,
 	PIXELS,
-	SMOOTH;
+	PIXELS_LOCKED,
+	SMOOTH,
+	SMOOTH_LOCKED,
+	;
 	
 	@Override
 	public String toString() {

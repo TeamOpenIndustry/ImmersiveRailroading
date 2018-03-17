@@ -101,8 +101,47 @@ public class RailInfo {
 			hitX = ((int)(hitX * 16)) / 16f;
 			hitZ = ((int)(hitZ * 16)) / 16f;
 			break;
+		case PIXELS_LOCKED:
+			hitX = ((int)(hitX * 16)) / 16f;
+			hitZ = ((int)(hitZ * 16)) / 16f;
+			
+			if (quarter != 0) {
+				break;
+			}
+			
+			switch (facing) {
+			case EAST:
+			case WEST:
+				hitZ = 0.5f;
+				break;
+			case NORTH:
+			case SOUTH:
+				hitX = 0.5f;
+				break;
+			default:
+				break;
+			}
+			break;
 		case SMOOTH:
 			// NOP
+			break;
+		case SMOOTH_LOCKED:
+			if (quarters != 0) {
+				break;
+			}
+			
+			switch (facing) {
+			case EAST:
+			case WEST:
+				hitZ = 0.5f;
+				break;
+			case NORTH:
+			case SOUTH:
+				hitX = 0.5f;
+				break;
+			default:
+				break;
+			}
 			break;
 		}
 		
