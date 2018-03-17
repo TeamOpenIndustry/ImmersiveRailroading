@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.LocoControlMode;
 import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.physics.MovementTrack;
@@ -66,6 +67,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private FluidTank augmentTank = null;
 	private int redstoneLevel = 0;
 	private StockDetectorMode redstoneMode = StockDetectorMode.SIMPLE;
+	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD; 
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
@@ -93,12 +95,17 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		this.markDirty();
 		return this.augmentFilterID != null;
 	}
-	public StockDetectorMode nextAugmentRedstoneMode() {
-		if (this.augment != Augment.DETECTOR) {
+	public String nextAugmentRedstoneMode() {
+		switch(this.augment) {
+		case DETECTOR:
+			redstoneMode = StockDetectorMode.values()[((redstoneMode.ordinal() + 1) % (StockDetectorMode.values().length))];
+			return redstoneMode.toString();
+		case LOCO_CONTROL:
+			controlMode = LocoControlMode.values()[((controlMode.ordinal() + 1) % (LocoControlMode.values().length))];
+			return controlMode.toString();
+		default:
 			return null;
 		}
-		redstoneMode = StockDetectorMode.values()[((redstoneMode.ordinal() + 1) % (StockDetectorMode.values().length))];
-		return redstoneMode;
 	}
 	public Augment getAugment() {
 		return this.augment;
@@ -232,6 +239,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (nbt.hasKey("redstoneMode")) {
 			redstoneMode = StockDetectorMode.values()[nbt.getInteger("redstoneMode")];
 		}
+		if (nbt.hasKey("controlMode")) {
+			controlMode = LocoControlMode.values()[nbt.getInteger("controlMode")];
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -253,6 +263,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			}
 		}
 		nbt.setInteger("redstoneMode", redstoneMode.ordinal());
+		nbt.setInteger("controlMode", controlMode.ordinal());
 		
 		nbt.setInteger("version", 3);
 		
@@ -584,11 +595,23 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			Locomotive loco = this.getStockNearBy(Locomotive.class, null);
 			if (loco != null) {
 				int power = RedstoneUtil.getPower(world, pos);
-				loco.setThrottle(power/15f);
-				if (power == 0) {
-					loco.setAirBrake(1);
-				} else {
-					loco.setAirBrake(0);
+				
+				switch(controlMode) {
+				case THROTTLE_FORWARD:
+					loco.setThrottle(power/15f);
+					break;
+				case THROTTLE_REVERSE:
+					loco.setThrottle(-power/15f);
+					break;
+				case BRAKE:
+					loco.setAirBrake(power/15f);
+					break;
+				case HORN:
+					loco.setHorn(5);
+					break;
+				case COMPUTER:
+					//NOP
+					break;
 				}
 			}
 			break;
