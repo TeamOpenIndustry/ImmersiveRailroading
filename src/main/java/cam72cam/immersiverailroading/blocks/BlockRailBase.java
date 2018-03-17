@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import javax.annotation.Nonnull;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
@@ -187,12 +188,26 @@ public abstract class BlockRailBase extends Block {
 		}
 		boolean isOriginAir = tileEntity.getParentTile() == null || tileEntity.getParentTile().getParentTile() == null;
 		boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false);
-		if (isOriginAir || !isOnRealBlock) {
+		
+		if (isOriginAir) {
 			if (tryBreakRail(world, pos)) { 
 				tileEntity.getWorld().destroyBlock(pos, true);
 			}
 			return;
 		}
+		
+		if (!isOnRealBlock) {
+			double floating = tileEntity.getParentTile().percentFloating();
+			System.out.println(floating);
+			if (floating > Config.trackFloatingPercent) {
+				if (tryBreakRail(world, pos)) { 
+					tileEntity.getWorld().destroyBlock(pos, true);
+				}
+				return;
+			}
+		}
+		
+		
 		
 		IBlockState up = world.getBlockState(pos.up());
 		if (up.getBlock() == Blocks.SNOW_LAYER) {

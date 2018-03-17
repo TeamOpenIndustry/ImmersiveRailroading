@@ -86,6 +86,9 @@ public class Config {
 	@Comment("Clear blocsk in creative mode when placing tracks")
 	public static boolean creativePlacementClearsBlocks = true;
 
+	@Comment("If more than X% of the tracks are above non solid blocks, break the track")
+	public static double trackFloatingPercent = 0.05;
+
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!FuelRequired || (!ModelFuelRequired && gauge.equals(Gauge.MODEL)));
 	}

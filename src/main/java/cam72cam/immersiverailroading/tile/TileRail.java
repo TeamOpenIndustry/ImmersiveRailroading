@@ -21,6 +21,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 
 public class TileRail extends TileRailBase {
@@ -275,5 +276,19 @@ public class TileRail extends TileRailBase {
 				drops = new ArrayList<ItemStack>();
 			}
 		}
+	}
+
+	public double percentFloating() {
+		RailInfo buildInfo = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY);
+		
+		List<TrackBase> tracks = buildInfo.getBuilder(pos).getTracksForRender();
+		double floating = 0;
+		
+		for (TrackBase track : tracks) {
+			if (!world.isSideSolid(track.getPos().down(), EnumFacing.UP, false)) {
+				floating += 1.0 / tracks.size();
+			}
+		}
+		return floating;
 	}
 }
