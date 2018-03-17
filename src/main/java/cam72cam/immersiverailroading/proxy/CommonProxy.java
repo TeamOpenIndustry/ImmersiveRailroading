@@ -46,6 +46,7 @@ import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
+import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
@@ -132,6 +133,8 @@ public abstract class CommonProxy implements IGuiHandler {
     	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
     	
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
+    	
+    	CompatLoader.load();
     }
     
 	public void serverStarting(FMLServerStartingEvent event) {

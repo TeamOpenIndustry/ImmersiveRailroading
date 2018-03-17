@@ -50,7 +50,7 @@ public abstract class EntityRollingStockDefinition {
 		return stock;
 	}
 
-	protected String defID;
+	public final String defID;
 	public String name = "Unknown";
 	private OBJModel model;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
