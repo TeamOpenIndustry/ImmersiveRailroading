@@ -353,7 +353,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
 			if (steams != null && (this.getBoilerPressure() >= this.getDefinition().getMaxPSI(gauge) || !Config.isFuelRequired(gauge))) {
-				if (Config.soundEnabled) {
+				if (Config.soundEnabled && Config.soundPressureValve) {
 					if (!pressure.isPlaying()) {
 						pressure.play(getPositionVector());
 					}
