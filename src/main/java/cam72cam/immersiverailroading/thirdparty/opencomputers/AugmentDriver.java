@@ -3,12 +3,14 @@ package cam72cam.immersiverailroading.thirdparty.opencomputers;
 import java.util.HashMap;
 import java.util.Map;
 
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -127,7 +129,7 @@ public class AugmentDriver implements DriverBlock {
 		}
 
 		@Callback(doc = "function():table -- returns an info dump about the current car")
-		public Object[] carInfo(Context context, Arguments arguments) throws Exception {
+		public Object[] info(Context context, Arguments arguments) {
 			TileRailBase te = TileRailBase.get(world, pos);
 			EntityMoveableRollingStock stock = te.getStockNearBy(null);
 			if (stock != null) {
@@ -175,6 +177,25 @@ public class AugmentDriver implements DriverBlock {
 					info.put("cargo_percent", freight.getPercentCargoFull());
 					info.put("cargo_size", freight.getInventorySize());
 				}
+				return new Object[] { info };
+			}
+			return null;
+		}
+		
+		@Callback(doc = "function():table -- returns an info dump about the current consist")
+		public Object[] consist(Context context, Arguments arguments) {
+			TileRailBase te = TileRailBase.get(world, pos);
+			EntityCoupleableRollingStock stock = te.getStockNearBy(EntityCoupleableRollingStock.class, null);
+			if (stock != null) {
+				PhysicsAccummulator acc = new PhysicsAccummulator(stock.getCurrentSpeed());
+				stock.mapTrain(stock, true, true, acc::accumulate);
+				Map<String, Object> info = new HashMap<String, Object>();
+				
+				info.put("cars", acc.count);
+				info.put("tractive_effort_N", acc.tractiveEffortNewtons);
+				info.put("weight_kg", acc.massToMoveKg);
+				info.put("speed_km", stock.getCurrentSpeed().metric());
+				
 				return new Object[] { info };
 			}
 			return null;
