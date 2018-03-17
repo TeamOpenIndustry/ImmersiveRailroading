@@ -74,6 +74,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 		return ItemComponent.getComponentType(stack).crafting == CraftingType.CASTING_HAMMER && ItemRawCast.get(stack); 
 	}
 	
+	@Override
 	@SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {

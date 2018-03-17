@@ -39,6 +39,7 @@ public abstract class Locomotive extends FreightTank {
 	 * 
 	 */
 	
+	@Override
 	public LocomotiveDefinition getDefinition() {
 		return super.getDefinition(LocomotiveDefinition.class);
 	}

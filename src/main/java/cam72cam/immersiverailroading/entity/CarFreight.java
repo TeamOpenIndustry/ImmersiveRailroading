@@ -12,6 +12,7 @@ public class CarFreight extends Freight {
 		super(world, defID);
 	}
 	
+	@Override
 	public CarFreightDefinition getDefinition() {
 		return super.getDefinition(CarFreightDefinition.class);
 	}

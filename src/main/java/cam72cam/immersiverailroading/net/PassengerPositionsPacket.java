@@ -56,7 +56,8 @@ public class PassengerPositionsPacket implements IMessage {
 		private void handle(PassengerPositionsPacket message, MessageContext ctx) {
 			List<EntityRidableRollingStock> matches = ImmersiveRailroading.proxy.getWorld(message.dimension).getEntities(EntityRidableRollingStock.class, new Predicate<EntityRidableRollingStock>()
 		    {
-		        public boolean apply(@Nullable EntityRidableRollingStock entity)
+		        @Override
+				public boolean apply(@Nullable EntityRidableRollingStock entity)
 		        {
 		            return entity != null && entity.getPersistentID().equals(message.stockID);
 		        }

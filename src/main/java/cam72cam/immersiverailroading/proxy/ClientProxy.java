@@ -208,6 +208,7 @@ public class ClientProxy extends CommonProxy {
 		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
 	}
 	
+	@Override
 	public World getWorld(int dimension)  {
 		return FMLClientHandler.instance().getWorldClient();
 	}
@@ -356,10 +357,12 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
+	@Override
 	public InputStream getResourceStream(ResourceLocation modelLoc) throws IOException {
 		return Minecraft.getMinecraft().getResourceManager().getResource(modelLoc).getInputStream();
 	}
 	
+	@Override
 	public List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException {
 		List<InputStream> res = new ArrayList<InputStream>();
 		for (IResource resource : Minecraft.getMinecraft().getResourceManager().getAllResources(modelLoc)) {
@@ -402,9 +405,9 @@ public class ClientProxy extends CommonProxy {
 			if (stack.getItem() == IRItems.ITEM_TRACK_BLUEPRINT) {
 				
 				Vec3d vec = event.getTarget().hitVec;
-		        float hitX = (float)(vec.x - (double)pos.getX());
-		        float hitY = (float)(vec.y - (double)pos.getY());
-		        float hitZ = (float)(vec.z - (double)pos.getZ());
+		        float hitX = (float)(vec.x - pos.getX());
+		        float hitY = (float)(vec.y - pos.getY());
+		        float hitZ = (float)(vec.z - pos.getZ());
 		        
 		        if (player.getEntityWorld().getBlockState(pos).getBlock() instanceof BlockRailBase) {
 		        	pos = pos.down();
@@ -422,9 +425,9 @@ public class ClientProxy extends CommonProxy {
 						GL14.glBlendColor(1, 1, 1, 0.5f);
 					}
 					
-	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)event.getPartialTicks();
-	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)event.getPartialTicks();
-	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)event.getPartialTicks();
+	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
+	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
+	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
 	                GL11.glTranslated(-d0, -d1, -d2);
 	                
 	                GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
@@ -447,9 +450,9 @@ public class ClientProxy extends CommonProxy {
 						GL14.glBlendColor(1, 1, 1, 0.3f);
 					}
 					
-	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)event.getPartialTicks();
-	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)event.getPartialTicks();
-	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)event.getPartialTicks();
+	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
+	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
+	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
 	                GL11.glTranslated(-d0, -d1, -d2);
 	                
 	                GL11.glTranslated(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5);

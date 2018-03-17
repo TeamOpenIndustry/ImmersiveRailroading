@@ -126,7 +126,8 @@ public class CraftPicker extends GuiScreen {
 		}
 	}
     
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    @Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
     	if (stockSelector.choosenItem != null) {
     		setupItemSelector();

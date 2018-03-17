@@ -72,12 +72,15 @@ public class RealBB extends AxisAlignedBB {
 		return new double[] { newthis.maxX, newthis.maxY + height, newthis.maxZ, newthis.minX, newthis.minY, newthis.minZ };
 	}
 	
+	@Override
 	public RealBB clone() {
 		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ, heightMap);
 	}
+	@Override
 	public AxisAlignedBB setMaxY(double y2) {
 		return this.clone();
 	}
+	@Override
 	public AxisAlignedBB contract(double x, double y, double z) {
 		RealBB expanded = this.clone();
 		
@@ -97,6 +100,7 @@ public class RealBB extends AxisAlignedBB {
 		
 		return expanded.clone();
 	}
+	@Override
 	public AxisAlignedBB expand(double x, double y, double z) {
 		RealBB expanded = this.clone();
 		
@@ -116,6 +120,7 @@ public class RealBB extends AxisAlignedBB {
 		
 		return expanded.clone();
 	}
+	@Override
 	public AxisAlignedBB grow(double x, double y, double z) {
 		RealBB growed = this.clone();
 		growed.front += x;
@@ -125,9 +130,11 @@ public class RealBB extends AxisAlignedBB {
 		growed.width += z + z;
 		return growed;
 	}
+	@Override
 	public AxisAlignedBB intersect(AxisAlignedBB p_191500_1_) {
 		return this.clone();
 	}
+	@Override
 	public AxisAlignedBB union(AxisAlignedBB other) {
 		return this.clone();
 	}
@@ -149,9 +156,11 @@ public class RealBB extends AxisAlignedBB {
 		return offsetted.clone();
 	}
 	
+	@Override
 	public double calculateXOffset(AxisAlignedBB other, double offsetX) {
 		return 0;
 	}
+	@Override
 	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
 		double hack = 0.04;
 		other = other.grow(hack, 0, hack);
@@ -162,6 +171,7 @@ public class RealBB extends AxisAlignedBB {
 			return 0;
 		}
 	}
+	@Override
 	public double calculateZOffset(AxisAlignedBB other, double offsetZ) {
 		return 0;
 	}
@@ -244,9 +254,11 @@ public class RealBB extends AxisAlignedBB {
 		return Pair.of(true, this.maxY);
 	}
 	
+	@Override
 	public boolean contains(Vec3d vec) {
 		return this.intersectsAt(vec.x, vec.y, vec.z, vec.x, vec.y, vec.z, false).getLeft();
 	}
+	@Override
 	public RayTraceResult calculateIntercept(Vec3d vecA, Vec3d vecB) {
 		// This does NOT set enumfacing.  The places where this code (entity) is used don't use that value as of 1.12.
 		int steps = 10;

@@ -152,6 +152,7 @@ public class RailInfo {
 		}
 	}
 	
+	@Override
 	public RailInfo clone() {
 		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill);
 		return c;

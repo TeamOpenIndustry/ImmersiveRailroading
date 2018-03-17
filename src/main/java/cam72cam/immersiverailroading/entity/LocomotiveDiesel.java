@@ -35,6 +35,7 @@ public class LocomotiveDiesel extends Locomotive {
 		super(world, defID);
 	}
 
+	@Override
 	public LocomotiveDieselDefinition getDefinition() {
 		return super.getDefinition(LocomotiveDieselDefinition.class);
 	}

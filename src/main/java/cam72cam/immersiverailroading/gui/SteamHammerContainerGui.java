@@ -23,7 +23,8 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         this.ySize = 114 + this.inventoryRows * slotSize;
     }
     
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+    @Override
+	protected void keyTyped(char typedChar, int keyCode) throws IOException {
         if (keyCode == 1) {
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)

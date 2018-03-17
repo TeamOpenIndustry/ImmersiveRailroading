@@ -31,9 +31,9 @@ public class RenderOverride {
 		
         ICamera camera = new Frustum();
         Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
-        double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * (double)partialTicks;
-        double d1 = playerrRender.lastTickPosY + (playerrRender.posY - playerrRender.lastTickPosY) * (double)partialTicks;
-        double d2 = playerrRender.lastTickPosZ + (playerrRender.posZ - playerrRender.lastTickPosZ) * (double)partialTicks;
+        double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * partialTicks;
+        double d1 = playerrRender.lastTickPosY + (playerrRender.posY - playerrRender.lastTickPosY) * partialTicks;
+        double d2 = playerrRender.lastTickPosZ + (playerrRender.posZ - playerrRender.lastTickPosZ) * partialTicks;
         camera.setPosition(d0, d1, d2);
         
         List<EntityRollingStock> entities = Minecraft.getMinecraft().player.getEntityWorld().getEntities(EntityRollingStock.class, EntitySelectors.IS_ALIVE);

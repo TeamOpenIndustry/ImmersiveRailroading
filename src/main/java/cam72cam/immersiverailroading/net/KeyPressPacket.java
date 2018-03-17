@@ -64,7 +64,8 @@ public class KeyPressPacket implements IMessage {
 			
 			List<EntityRidableRollingStock> matches = ctx.getServerHandler().player.getServerWorld().getEntities(EntityRidableRollingStock.class, new Predicate<EntityRidableRollingStock>()
 		    {
-		        public boolean apply(@Nullable EntityRidableRollingStock entity)
+		        @Override
+				public boolean apply(@Nullable EntityRidableRollingStock entity)
 		        {
 		            return entity != null && entity.getEntityId() == message.targetEntityID;
 		        }

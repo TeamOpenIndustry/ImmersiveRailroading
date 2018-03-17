@@ -244,6 +244,7 @@ public abstract class BlockRailBase extends Block {
 	}
 	
 	
+	@Override
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
 		TileRailBase te = TileRailBase.get(source, pos);
 		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Math.max(te == null ? 0 : te.getFullHeight(),0.25), 1.0F);
@@ -303,7 +304,7 @@ public abstract class BlockRailBase extends Block {
 			if (block == Blocks.SNOW) {
 				if (!worldIn.isRemote) {
 					for (int i = 0; i < 8; i ++) {
-						((TileRailBase) te).handleSnowTick();
+						te.handleSnowTick();
 					}
 				}
 				return true;
@@ -320,7 +321,8 @@ public abstract class BlockRailBase extends Block {
 		
 	}
 
-    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    @Override
+	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
     	TileRailBase te = TileRailBase.get(blockAccess, pos);
     	if (te != null && te.getAugment() == Augment.DETECTOR) {
@@ -329,12 +331,14 @@ public abstract class BlockRailBase extends Block {
     	return 0;
     }
 
-    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
+    @Override
+	public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         return this.getWeakPower(blockState, blockAccess, pos, side);
     }
 
-    public boolean canProvidePower(IBlockState state)
+    @Override
+	public boolean canProvidePower(IBlockState state)
     {
         return true;
     }

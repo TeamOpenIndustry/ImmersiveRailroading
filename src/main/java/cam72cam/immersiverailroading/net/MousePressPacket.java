@@ -56,7 +56,8 @@ public class MousePressPacket implements IMessage {
 		private void handle(MousePressPacket message, MessageContext ctx) {
 			List<EntityRidableRollingStock> matches = ctx.getServerHandler().player.getServerWorld().getEntities(EntityRidableRollingStock.class, new Predicate<EntityRidableRollingStock>()
 		    {
-		        public boolean apply(@Nullable EntityRidableRollingStock entity)
+		        @Override
+				public boolean apply(@Nullable EntityRidableRollingStock entity)
 		        {
 		            return entity != null && entity.getEntityId() == message.targetEntityID;
 		        }

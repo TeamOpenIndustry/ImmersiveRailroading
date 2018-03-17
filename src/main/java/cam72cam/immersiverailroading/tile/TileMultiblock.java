@@ -80,7 +80,8 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     	}
     };
     
-    public boolean isLoaded() {
+    @Override
+	public boolean isLoaded() {
     	return super.isLoaded() && this.name != null;
     }
 	

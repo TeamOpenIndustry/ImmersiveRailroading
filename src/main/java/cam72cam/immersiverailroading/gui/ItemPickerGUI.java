@@ -63,6 +63,7 @@ public class ItemPickerGUI extends GuiScreen {
 		}
 	}
 	
+	@Override
 	public void actionPerformed(GuiButton button) throws IOException {
 		for (GuiButton itemButton: this.buttonList) {
 			if (itemButton == button) {
@@ -73,12 +74,14 @@ public class ItemPickerGUI extends GuiScreen {
 		}
 	}
 	
+	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
         if (keyCode == 1) {
 			onExit.accept(null);
         }
 	}
 	
+	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 	}

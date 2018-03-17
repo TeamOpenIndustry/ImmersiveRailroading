@@ -77,6 +77,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
         return new CreativeTabs[]{ ItemTabs.LOCOMOTIVE_TAB, ItemTabs.PASSENGER_TAB, ItemTabs.STOCK_TAB };
     }
 	
+	@Override
 	@SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {

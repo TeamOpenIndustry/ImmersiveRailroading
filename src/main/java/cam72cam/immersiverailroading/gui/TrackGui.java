@@ -49,6 +49,7 @@ public class TrackGui extends GuiScreen {
 	private ItemPickerGUI bedFillSelector;
 
 	private final Predicate<String> integerFilter = new Predicate<String>() {
+		@Override
 		public boolean apply(@Nullable String inputString) {
 			if (StringUtils.isNullOrEmpty(inputString)) {
 				return true;
@@ -127,12 +128,14 @@ public class TrackGui extends GuiScreen {
 		return false;
 	}
 	
+	@Override
 	public void setWorldAndResolution(Minecraft mc, int width, int height) {
 		super.setWorldAndResolution(mc, width, height);
 		bedSelector.setWorldAndResolution(mc, width, height);
 		bedFillSelector.setWorldAndResolution(mc, width, height);
 	}
 	
+	@Override
 	public void setGuiSize(int w, int h) {
 		this.setGuiSize(w, h);
 		bedSelector.setGuiSize(w, h);
@@ -152,6 +155,7 @@ public class TrackGui extends GuiScreen {
 		return GuiText.NONE.toString();
 	}
 
+	@Override
 	public void initGui() {
 		int buttonID = 0;
 
@@ -195,6 +199,7 @@ public class TrackGui extends GuiScreen {
 		bedSelector.initGui();
 	}
 
+	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == typeButton) {
 			type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
@@ -219,6 +224,7 @@ public class TrackGui extends GuiScreen {
 			isPreview = isPreviewCB.isChecked();
 		}
 	}
+	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
         this.lengthInput.textboxKeyTyped(typedChar, keyCode);
         // Enter or ESC
@@ -237,6 +243,7 @@ public class TrackGui extends GuiScreen {
 				this.mc.setIngameFocus();
         }
 	}
+	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, mouseButton);
