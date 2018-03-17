@@ -89,7 +89,9 @@ track.immersiverailroading:class.switch=Switch
 
 track.immersiverailroading:position.fixed=Fixed
 track.immersiverailroading:position.pixels=Pixels
+track.immersiverailroading:position.pixels_locked=Pixels Locked
 track.immersiverailroading:position.smooth=Smooth
+track.immersiverailroading:position.smooth_locked=Smooth Locked
 
 part.immersiverailroading:component.frame=Frame
 part.immersiverailroading:component.front_frame=Front Frame
