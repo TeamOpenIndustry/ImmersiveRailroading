@@ -4,9 +4,32 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 
 public class SyncdTileEntity extends TileEntity {
 	public boolean hasTileData;
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends SyncdTileEntity> T get(IBlockAccess world, BlockPos pos, EnumCreateEntityType type) {
+		TileEntity te;
+		if (world instanceof World) {
+			te = ((World)world).getChunkFromBlockCoords(pos).getTileEntity(pos, type);
+		} else {
+			te = world.getTileEntity(pos);
+		}
+		
+		if (te instanceof SyncdTileEntity) {
+			try {
+				return (T) te;
+			} catch (ClassCastException e) {
+				return null;
+			}
+		}
+		return null;
+	}
 	
 	public boolean isLoaded() {
 		return this.hasWorld() && (!world.isRemote || hasTileData);

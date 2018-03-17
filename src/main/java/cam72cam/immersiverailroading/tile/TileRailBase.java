@@ -38,6 +38,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -50,8 +51,7 @@ import trackapi.lib.ITrack;
 
 public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
-		TileEntity te = world.getTileEntity(pos);
-		return te instanceof TileRailBase ? (TileRailBase) te : null;
+		return SyncdTileEntity.get(world, pos, EnumCreateEntityType.IMMEDIATE);
 	}
 	
 	private BlockPos parent;
