@@ -64,6 +64,9 @@ public class Config {
 
 	@Comment("Enable Sounds")
 	public static boolean soundEnabled = true;
+	
+	@Comment("Enable Pressure Valve Sound")
+	public static boolean soundPressureValve = true;
 
 	@Comment("Use Icon Cache (experimental)")
 	public static boolean enableIconCache = false;
