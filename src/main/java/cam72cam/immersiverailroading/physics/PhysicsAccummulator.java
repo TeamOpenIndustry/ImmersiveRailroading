@@ -10,12 +10,13 @@ public class PhysicsAccummulator {
 	//http://www.republiclocomotive.com/locomotive-power-calculations.html
 	//http://www.wplives.org/forms_and_documents/Air_Brake_Principles.pdf
 
-	double tractiveEffortNewtons = 0;
-	double airBrake = 0;
+	public double tractiveEffortNewtons = 0;
+	public double airBrake = 0;
 	//lbs
-	double rollingResistanceNewtons = 0;
-	double gradeForceNewtons = 0;
-	double massToMoveKg = 0;
+	public double rollingResistanceNewtons = 0;
+	public double gradeForceNewtons = 0;
+	public double massToMoveKg = 0;
+	public int count = 0;
 	Speed speed;
 	
 	public PhysicsAccummulator(Speed speed) {
@@ -23,6 +24,8 @@ public class PhysicsAccummulator {
 	}
 
 	public void accumulate(EntityRollingStock stock, Boolean direction) {
+		count++;
+		
 		massToMoveKg += stock.getWeight();
 		
 		if (!(stock instanceof EntityMoveableRollingStock)){
