@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.Logger;
 
+import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import net.minecraft.world.World;
@@ -68,7 +69,7 @@ public class ImmersiveRailroading
     		return;
     	}
     	
-    	if (Config.debugLog) {
+    	if (ConfigDebug.debugLog) {
     		logger.info(String.format(msg, params));
     	}
     }

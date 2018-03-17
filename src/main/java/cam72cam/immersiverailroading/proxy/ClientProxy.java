@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -172,7 +172,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void preInit(FMLPreInitializationEvent event) throws IOException {
 		super.preInit(event);
-		if (Config.overrideSoundChannels) {
+		if (ConfigSound.overrideSoundChannels) {
 			SoundSystemConfig.setNumberNormalChannels(2000);
 		}
 		
@@ -501,7 +501,7 @@ public class ClientProxy extends CommonProxy {
 			return;
 		}
 		
-		if (!Config.soundEnabled) {
+		if (!ConfigSound.soundEnabled) {
 			return;
 		}
 		

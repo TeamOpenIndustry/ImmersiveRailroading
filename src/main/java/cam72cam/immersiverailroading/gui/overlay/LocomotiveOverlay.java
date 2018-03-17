@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -27,8 +27,8 @@ public class LocomotiveOverlay extends Gui {
 		screenWidth = scaled.getScaledWidth();
 		screenHeight = scaled.getScaledHeight();
 		
-		currPosX = (int) (screenWidth * (Config.GUIPositionHorizontal/100f));
-		currPosY = (int) (screenHeight * ((Config.GUIPositionVertical-10)/100f));
+		currPosX = (int) (screenWidth * (ConfigGraphics.GUIPositionHorizontal/100f));
+		currPosY = (int) (screenHeight * ((ConfigGraphics.GUIPositionVertical-10)/100f));
 	}
 
 	public void drawGauge(int color, float liquidAmount, float tankCapacity, String units) {

@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -185,7 +185,7 @@ public class RailInfo {
 	public boolean build(EntityPlayer player, BlockPos pos) {
 		BuilderBase builder = getBuilder(pos);
 		
-		if (player.isCreative() && Config.creativePlacementClearsBlocks) {
+		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks) {
 			builder.clearArea();
 		}
 		

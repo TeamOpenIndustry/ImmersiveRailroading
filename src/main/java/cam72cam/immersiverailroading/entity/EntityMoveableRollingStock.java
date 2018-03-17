@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
@@ -335,7 +335,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// Force update
 			entity.onUpdate();
 
-			double speedDamage = this.getCurrentSpeed().metric() / Config.entitySpeedDamage;
+			double speedDamage = this.getCurrentSpeed().metric() / ConfigDamage.entitySpeedDamage;
 			if (speedDamage > 1) {
 				entity.attackEntityFrom((new DamageSource("immersiverailroading:hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
 			}
@@ -368,7 +368,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
 			entity.setPosition(pos.x, pos.y, pos.z);
 		}
-		if (!world.isRemote && this.ticksExisted % 5 == 0 && Config.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
+		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
 			bb = this.getCollisionBoundingBox();
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
