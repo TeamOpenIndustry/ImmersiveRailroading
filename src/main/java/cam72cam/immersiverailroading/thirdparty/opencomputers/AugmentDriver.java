@@ -6,8 +6,11 @@ import java.util.Map;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
+import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import li.cil.oc.api.Network;
 import li.cil.oc.api.driver.DriverBlock;
@@ -75,18 +78,8 @@ public class AugmentDriver implements DriverBlock {
 			case DETECTOR:
 				val = new DetectorAugment();
 				break;
-			case FLUID_LOADER:
-			case FLUID_UNLOADER:
-				val = new FluidAugment();
-				break;
-			case ITEM_LOADER:
-			case ITEM_UNLOADER:
-				break;
 			case LOCO_CONTROL:
-				break;
-			case SPEED_RETARDER:
-				break;
-			case WATER_TROUGH:
+				val = new LocoControlAugment();
 				break;
 			default:
 				break;
@@ -120,6 +113,23 @@ public class AugmentDriver implements DriverBlock {
 					info.put("passengers", stock.getPassengers().size());
 					info.put("speed", stock.getCurrentSpeed().metric());
 					info.put("weight", stock.getWeight());
+
+					if (stock instanceof Locomotive) {
+						LocomotiveDefinition locoDef = ((Locomotive)stock).getDefinition();
+						info.put("horsepower", locoDef.getHorsePower(stock.gauge));
+						info.put("traction", locoDef.getStartingTractionNewtons(stock.gauge));
+						info.put("max_speed", locoDef.getMaxSpeed(stock.gauge).metric());
+						
+						Locomotive loco = (Locomotive)stock;
+						info.put("brake", loco.getAirBrake());
+						info.put("throttle", loco.getThrottle());
+						
+						if (stock instanceof LocomotiveSteam) {
+							LocomotiveSteam steam = (LocomotiveSteam)stock;
+							info.put("pressure", steam.getBoilerPressure());
+							info.put("temperature", steam.getBoilerTemperature());
+						}
+					}
 					
 					FluidStack fluid = getFluid();
 					if (fluid != null) {
@@ -130,7 +140,7 @@ public class AugmentDriver implements DriverBlock {
 						info.put("fluid_amount", 0);
 					}
 					if (stock instanceof FreightTank) {
-						info.put("fluid_max", ((FreightTank)stock).getTankCapacity());
+						info.put("fluid_max", ((FreightTank)stock).getTankCapacity().MilliBuckets());
 					}
 					
 					if (stock instanceof Freight) {
@@ -144,12 +154,36 @@ public class AugmentDriver implements DriverBlock {
 			}
 		}
 		
-		public class FluidAugment extends AbstractValue {
-			@Callback(doc = "function():int, string -- returns the current fluid info in the car")
-			public Object[] carFluid(Context context, Arguments arguments) throws Exception {
-				FluidStack fluid = getFluid();
-				if (fluid != null) {
-					return new Object[] { fluid.amount, fluid.getFluid().getName() };
+		public class LocoControlAugment extends AbstractValue {
+			@Callback(doc = "function(double) -- sets the locomotive throttle")
+			public Object[] setThrottle(Context context, Arguments arguments) throws Exception {
+				TileRailBase te = TileRailBase.get(world, pos);
+				Locomotive stock = te.getStockNearBy(Locomotive.class, null);
+				if (stock != null) {
+					//stock = (Locomotive) stock.findByUUID(stock.getPersistentID());
+					stock.setThrottle((float) arguments.checkDouble(0));
+				}
+				return null;
+			}
+			
+			@Callback(doc = "function(double) -- sets the locomotive brake")
+			public Object[] setBrake(Context context, Arguments arguments) throws Exception {
+				TileRailBase te = TileRailBase.get(world, pos);
+				Locomotive stock = te.getStockNearBy(Locomotive.class, null);
+				if (stock != null) {
+					//stock = (Locomotive) stock.findByUUID(stock.getPersistentID());
+					stock.setAirBrake((float) arguments.checkDouble(0));
+				}
+				return null;
+			}
+			
+			@Callback(doc = "function() -- fires the locomotive horn")
+			public Object[] horn(Context context, Arguments arguments) throws Exception {
+				TileRailBase te = TileRailBase.get(world, pos);
+				Locomotive stock = te.getStockNearBy(Locomotive.class, null);
+				if (stock != null) {
+					//stock = (Locomotive) stock.findByUUID(stock.getPersistentID());
+					stock.setHorn(5);
 				}
 				return null;
 			}

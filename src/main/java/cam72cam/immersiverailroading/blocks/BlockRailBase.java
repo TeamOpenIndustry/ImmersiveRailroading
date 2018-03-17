@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -270,10 +269,10 @@ public abstract class BlockRailBase extends Block {
 		TileRailBase te = TileRailBase.get(worldIn, pos);
 		if (te != null) {
 			if (block == Blocks.REDSTONE_TORCH) {
-				StockDetectorMode next = te.nextAugmentRedstoneMode();
+				String next = te.nextAugmentRedstoneMode();
 				if (next != null) {
 					if (!worldIn.isRemote) {
-						playerIn.sendMessage(new TextComponentString(next.toString()));
+						playerIn.sendMessage(new TextComponentString(next));
 					}
 					return true;
 				}
