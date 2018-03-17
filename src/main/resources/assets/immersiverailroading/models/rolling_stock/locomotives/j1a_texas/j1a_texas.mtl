@@ -1,5 +1,5 @@
 # Blender MTL File: 'J1A.blend'
-# Material Count: 25
+# Material Count: 28
 
 newmtl None
 Ns 0
@@ -32,6 +32,17 @@ illum 2
 map_Kd black1.png
 
 newmtl black1.003
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.799993 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd black1.png
+
+newmtl black1_black1.png
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.799993 0.800000 0.800000
@@ -251,6 +262,28 @@ d 1.000000
 illum 2
 map_Kd tuscanredwood.png
 
+newmtl vent
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd vent.png
+
+newmtl vent2
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd vent2.png
+
 newmtl wheelrust
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
@@ -271,4 +304,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd yellowwhethered.png
+map_Kd black1.png
