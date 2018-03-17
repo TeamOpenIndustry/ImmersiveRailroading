@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import net.minecraftforge.fluids.Fluid;
 
 public class FluidQuantity {
@@ -16,7 +16,7 @@ public class FluidQuantity {
 	}
 	
 	public static FluidQuantity FromLiters(int liters) {
-		return new FluidQuantity(liters * Config.MB_PER_LITER);
+		return new FluidQuantity(liters * ConfigBalance.MB_PER_LITER);
 	}
 	
 	public static FluidQuantity FromMillibuckets(int mb) {
@@ -28,7 +28,7 @@ public class FluidQuantity {
 	}
 	
 	public int Liters() {
-		return mb / Config.MB_PER_LITER;
+		return mb / ConfigBalance.MB_PER_LITER;
 	}
 	
 	public int MilliBuckets() {

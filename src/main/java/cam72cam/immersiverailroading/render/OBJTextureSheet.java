@@ -13,7 +13,7 @@ import java.util.Map;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
@@ -218,8 +218,8 @@ public class OBJTextureSheet {
 			}
 		}
 		int maxSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
-		if (Config.overrideGPUTexSize != -1) {
-			maxSize = Config.overrideGPUTexSize;
+		if (ConfigGraphics.overrideGPUTexSize != -1) {
+			maxSize = ConfigGraphics.overrideGPUTexSize;
 		}
 		
 		int currentX = 0;

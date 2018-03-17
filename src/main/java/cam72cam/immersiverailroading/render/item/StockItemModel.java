@@ -8,7 +8,7 @@ import javax.vecmath.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.render.OBJRender;
@@ -59,7 +59,7 @@ public class StockItemModel implements IBakedModel {
 		 * before actually setting up the correct GL context.
 		 */
 		
-		if (this.defID != null && Config.enableIconCache) {
+		if (this.defID != null && ConfigGraphics.enableIconCache) {
 			boolean hasIcon = StockRenderCache.renderIcon(defID);
 			if (!hasIcon) {
 				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());

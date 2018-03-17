@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import javax.annotation.Nonnull;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
@@ -199,7 +199,7 @@ public abstract class BlockRailBase extends Block {
 		if (!isOnRealBlock) {
 			double floating = tileEntity.getParentTile().percentFloating();
 			System.out.println(floating);
-			if (floating > Config.trackFloatingPercent) {
+			if (floating > ConfigBalance.trackFloatingPercent) {
 				if (tryBreakRail(world, pos)) { 
 					tileEntity.getWorld().destroyBlock(pos, true);
 				}

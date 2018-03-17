@@ -15,7 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Predicate;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
@@ -183,7 +183,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			return;
 		}
 		
-		if (this.getCurrentSpeed().minecraft() != 0 || Config.keepStockLoaded) {
+		if (this.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
 			ChunkManager.flagEntityPos(this.world, this.getPosition());
 			if (this.lastKnownFront != null) {
 				ChunkManager.flagEntityPos(this.world, this.lastKnownFront);
@@ -222,7 +222,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				if (otherCoupler == null) {
 					continue;
 				}
-				if (this.getCouplerPosition(coupler).distanceTo(coupled.getCouplerPosition(otherCoupler)) > Config.couplerRange*4) {
+				if (this.getCouplerPosition(coupler).distanceTo(coupled.getCouplerPosition(otherCoupler)) > ConfigDebug.couplerRange*4) {
 					this.decouple(coupled);
 				}
 			}
@@ -711,7 +711,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			
 			if (myCenterToMyCoupler < myCenterToOtherCoupler && this.isCouplerEngaged(coupler) && stock.isCouplerEngaged(otherCoupler)) {
 				// diagram 1, check that it is not too far away
-				if (myCouplerToOtherCoupler > Config.couplerRange) {
+				if (myCouplerToOtherCoupler > ConfigDebug.couplerRange) {
 					// Not close enough to consider
 					continue;
 				}

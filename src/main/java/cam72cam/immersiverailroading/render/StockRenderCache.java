@@ -6,7 +6,7 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -37,7 +37,7 @@ public class StockRenderCache {
 	}
 
 	public static void doImageCache() {
-		if (Config.enableIconCache && icon_cache == null) {
+		if (ConfigGraphics.enableIconCache && icon_cache == null) {
 			System.out.println("Initializing Icon Cache...");
 			icon_cache = new IconTextureSheet();
 			for (String defID : DefinitionManager.getDefinitionNames()) {
@@ -78,7 +78,7 @@ public class StockRenderCache {
 	}
 
 	public static void tryCache() {
-		if (!cacheOk && Config.enableItemRenderPriming && GLContext.getCapabilities().OpenGL11) {
+		if (!cacheOk && ConfigGraphics.enableItemRenderPriming && GLContext.getCapabilities().OpenGL11) {
 			cacheOk = true;
 			
 			for (String def : DefinitionManager.getDefinitionNames()) {

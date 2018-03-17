@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
@@ -122,7 +122,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	public boolean handleSnowTick() {
-		if (this.snowLayers < (Config.deepSnow ? 8 : 1)) {
+		if (this.snowLayers < (ConfigDebug.deepSnow ? 8 : 1)) {
 			this.snowLayers += 1;
 			this.markDirty();
 			return true;

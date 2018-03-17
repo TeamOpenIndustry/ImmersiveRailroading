@@ -1,5 +1,5 @@
 package cam72cam.immersiverailroading.entity;
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -158,7 +158,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	
 	@Override
 	public double getWeight() {
-		double fLoad = Config.blockWeight * this.getDataManager().get(CARGO_ITEMS);
+		double fLoad = ConfigBalance.blockWeight * this.getDataManager().get(CARGO_ITEMS);
 		fLoad = fLoad + super.getWeight();
 		return fLoad;
 	}

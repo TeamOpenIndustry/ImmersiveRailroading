@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigDamage;
+import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -196,7 +199,7 @@ public class LocomotiveSteam extends Locomotive {
 		if (world.isRemote) {
 			// Particles and Sound
 			
-			if (Config.soundEnabled) {
+			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
 					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
 	
@@ -230,7 +233,7 @@ public class LocomotiveSteam extends Locomotive {
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
-			if (smokes != null && Config.particlesEnabled) {
+			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
 				//System.out.println(phase);
 				for (RenderComponent smoke : smokes) {
@@ -303,7 +306,7 @@ public class LocomotiveSteam extends Locomotive {
 					phase = this.getPhase(2, phaseOffset);
 					double phaseSpike = Math.pow(phase, 4);
 					
-					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && Config.particlesEnabled) {
+					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
 						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
@@ -313,7 +316,7 @@ public class LocomotiveSteam extends Locomotive {
 						world.spawnEntity(sp);
 					}
 					
-					if (!Config.soundEnabled) {
+					if (!ConfigSound.soundEnabled) {
 						continue;
 					}
 					
@@ -353,12 +356,12 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
 			if (steams != null && (this.getBoilerPressure() >= this.getDefinition().getMaxPSI(gauge) || !Config.isFuelRequired(gauge))) {
-				if (Config.soundEnabled && Config.soundPressureValve) {
+				if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
 					if (!pressure.isPlaying()) {
 						pressure.play(getPositionVector());
 					}
 				}
-				if (Config.particlesEnabled) {
+				if (ConfigGraphics.particlesEnabled) {
 					for (RenderComponent steam : steams) {
 						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 						particlePos = particlePos.subtract(fakeMotion);
@@ -369,12 +372,12 @@ public class LocomotiveSteam extends Locomotive {
 					}
 				}
 			} else {
-				if (Config.soundEnabled && pressure.isPlaying()) {
+				if (ConfigSound.soundEnabled && pressure.isPlaying()) {
 					pressure.stop();
 				}
 			}
 			
-			if (Config.soundEnabled) {
+			if (ConfigSound.soundEnabled) {
 				// Update sound positions
 				if (whistle.isPlaying()) {
 					whistle.setPosition(getPositionVector());
@@ -528,7 +531,7 @@ public class LocomotiveSteam extends Locomotive {
 			// Half max pressure and high boiler temperature
 			//EXPLODE
 			this.gonnaExplode = true;
-			if (Config.explosionsEnabled) {
+			if (ConfigDamage.explosionsEnabled) {
 				for (int i = 0; i < 5; i++) {
 					world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
 				}
