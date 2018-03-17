@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.tile.SyncdTileEntity;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
@@ -31,6 +32,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
@@ -176,7 +178,7 @@ public abstract class BlockRailBase extends Block {
 
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
-		TileRailBase tileEntity = TileRailBase.get(world, pos);
+		TileRailBase tileEntity = SyncdTileEntity.get(world, pos, EnumCreateEntityType.CHECK); // Prevent recursive loading
 		if (tileEntity == null) {
 			return;
 		}
