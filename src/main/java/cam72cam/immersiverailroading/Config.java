@@ -33,7 +33,7 @@ public class Config {
 	public static int MB_PER_LITER = 1;
 
 	@Comment({"DEBUG: Buckets infinite fill/empty tanks"})
-	public static boolean debugInfiniteLiquids = true;
+	public static boolean debugInfiniteLiquids = false;
 	
 	@Comment({"Print extra chunk loading info"})
 	public static boolean debugLog = false;
