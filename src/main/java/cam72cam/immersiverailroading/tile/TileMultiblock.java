@@ -99,6 +99,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		nbt = super.writeToNBT(nbt);
+		
+		if (name == null) {
+			// Probably in some weird block break path
+			return nbt;
+		}
 
 		nbt.setString("name", name);
 		nbt.setInteger("rotation", rotation.ordinal());
@@ -153,7 +158,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 	
 	public MultiblockInstance getMultiblock() {
-		if (this.mb == null) {
+		if (this.mb == null && this.isLoaded()) {
 			this.mb = MultiblockRegistry.get(name).instance(world, getOrigin(), rotation);
 		}
 		return this.mb;
@@ -175,7 +180,9 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	 * Block Functions to pass on to the multiblock
 	 */
 	public void breakBlock() {
-		getMultiblock().onBreak();
+		if (getMultiblock() != null) {
+			getMultiblock().onBreak();
+		}
 	}
 
 	public boolean onBlockActivated(EntityPlayer player, EnumHand hand) {
