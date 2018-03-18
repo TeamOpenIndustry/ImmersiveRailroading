@@ -10,11 +10,7 @@
 		"skookum",
 		"gp-7",
 		"ge_b40_8",
-		"ge_c44_9cw",
-		"ge_40_ton_boxcab",
-		"alco_rs1",
-		"emd_sw1500",
-		"emd_sd40-2"
+		"ge_c44_9cw"
 	],
 	"tender": [
 		"cooke_tender",
@@ -29,8 +25,6 @@
 		"hand_car_1"
 	],
 	"passenger": [
-		"br_coach_mk1",
-		"p70coach1"
 	],
 	"freight": [
 		"boxcar_us",
