@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.Config.ConfigDamage;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -439,101 +438,128 @@ public class LocomotiveSteam extends Locomotive {
 			}
 		}
 		
-		// Water to steam
-		if (getBoilerTemperature() >= 100) {
-			if (getTankCapacity().MilliBuckets() > 0) {
-				if (rand.nextInt(100) == 0) {
-					int outputHorsepower = (int) Math.abs(getThrottle() * getAvailableHP());
-					theTank.drain(outputHorsepower * 10 / this.getDefinition().getHorsePower(gauge), true);
-				}
-			}
-		}
-		
+		float boilerTemperature = getBoilerTemperature();
+		float boilerPressure = getBoilerPressure();
+		float waterLevelMB = this.getLiquidAmount();
 		Map<Integer, Integer> burnTime = getBurnTime();
 		Map<Integer, Integer> burnMax = getBurnMax();
 		Boolean changedBurnTime = false;
 		Boolean changedBurnMax = false;
+		int burningSlots = 0;
+		float waterUsed = 0;
 		
-		float waterLevelMB = this.getLiquidAmount();
-		float boilerTemperature = this.getBoilerTemperature();
-		float boilerPressure = this.getBoilerPressure();
-		
-		// TODO actual gas and fluid temp calculations
-		
-		for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
-			if (waterLevelMB == 0) {
-				// Don't burn if completely out of water
-				// Prevents beginner mistakes
-				continue;
-			}
-			int time = burnTime.containsKey(slot) ? burnTime.get(slot) : 0;
-			if (time <= 0) {
-				ItemStack stack = this.cargoItems.getStackInSlot(slot);
-				if (stack.getCount() <= 0 || !TileEntityFurnace.isItemFuel(stack)) {
-					continue;
+		if (this.getLiquidAmount() > 0) {
+			for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
+				int remainingTime = burnTime.containsKey(slot) ? burnTime.get(slot) : 0;
+				if (remainingTime <= 0) {
+					ItemStack stack = this.cargoItems.getStackInSlot(slot);
+					if (stack.getCount() <= 0 || !TileEntityFurnace.isItemFuel(stack)) {
+						continue;
+					}
+					remainingTime = (int) (BurnUtil.getBurnTime(stack) * 1/gauge.scale() * (Config.ConfigBalance.locoSteamFuelEfficiency / 100.0));
+					burnTime.put(slot, remainingTime);
+					burnMax.put(slot, remainingTime);
+					stack.setCount(stack.getCount()-1);
+					this.cargoItems.setStackInSlot(slot, stack);
+					changedBurnMax = true;
+				} else {
+					burnTime.put(slot, remainingTime - 1);
 				}
-				time = (int) (BurnUtil.getBurnTime(stack) * 1/gauge.scale());
-				burnTime.put(slot, time);
-				burnMax.put(slot, time);
-				stack.setCount(stack.getCount()-1);
-				this.cargoItems.setStackInSlot(slot, stack);
-				changedBurnMax = true;
-			} else {
-				burnTime.put(slot, time - 1);
-			}
-			changedBurnTime = true;
-			if (boilerTemperature < 100 || waterLevelMB < this.getTankCapacity().MilliBuckets() * 0.4) {
-				boilerTemperature += 100/waterLevelMB * Math.sqrt(gauge.scale());
-			}
-			if (boilerTemperature >= 100) {
-				boilerPressure += 100/waterLevelMB * Math.sqrt(gauge.scale());
-				if (rand.nextInt(10) == 0) {
-					waterLevelMB -= 1;
-				}
+				changedBurnTime = true;
+				burningSlots += 1;
 			}
 		}
 		
-		if (!changedBurnTime) {
-			if (boilerPressure <= 0 || boilerTemperature > 100) {
-				//cooling firebox
-				boilerTemperature = (float) Math.max(0, boilerTemperature-0.05);
-			} else {
-				// cooling gas
-				boilerPressure = (float) Math.max(0, boilerPressure - 0.05);
-			}
+		double energyKCalDeltaTick = 0;
+		
+		if (burningSlots != 0 && this.getLiquidAmount() > 0) {
+			energyKCalDeltaTick += burningSlots * coalEnergyKCalTick();
+		}
+
+		// Assume the boiler is a cube...
+		double boilerVolume = this.getTankCapacity().Buckets();
+		double boilerEdgeM = Math.pow(boilerVolume, 1.0/3.0);
+		double boilerAreaM = 6 * Math.pow(boilerEdgeM, 2);
+
+		if (boilerTemperature > 0) {
+			// Decrease temperature due to heat loss
+			// Estimate Kw emitter per m^2: (TdegC/10)^2 / 100
+			double radiatedKwHr = Math.pow(boilerTemperature/10, 2) / 100 * boilerAreaM * 2;
+			double radiatedKCalHr = radiatedKwHr * 859.85;
+			double radiatedKCalTick = radiatedKCalHr / 60 / 60 / 20 * ConfigBalance.locoHeatTimeScale;
+			energyKCalDeltaTick -= radiatedKCalTick / 1000;
 		}
 		
-		// This can go away once adding water drops the boiler pressure/temperature
-		if (boilerTemperature > 100 && gauge == Gauge.MODEL) {
-			boilerTemperature = 100;
+		if (energyKCalDeltaTick != 0) {
+			// Change temperature
+			// 1 KCal raises 1KG water at STP 1 degree
+			// 1 KG of water == 1 m^3 of water 
+			// TODO what happens when we change liters per mb FluidQuantity.FromMillibuckets((int) waterLevelMB).Liters()
+			boilerTemperature += energyKCalDeltaTick / (waterLevelMB / 1000);
+		}
+		
+		if (boilerTemperature > 100) {
+			// Assume linear relationship between temperature and pressure
+			// Max 2 degree per second
+			float heatTransfer = Math.min(2.0f/20, boilerTemperature - 100);
+			boilerPressure += heatTransfer;
+
+			if (this.getPercentLiquidFull() > 25) {
+				boilerTemperature -= heatTransfer;
+			}
+			
+			// Pressure relief valve
+			int maxPSI = this.getDefinition().getMaxPSI(gauge);
+			if (boilerPressure > maxPSI) {
+				waterUsed += boilerPressure - maxPSI; 
+				boilerPressure = maxPSI;
+			}
+		} else {
+			if (boilerPressure > 0) {
+				// Reduce pressure by needed temperature
+				boilerPressure = Math.max(0, boilerPressure - (100 - boilerTemperature));
+				boilerTemperature = 100;
+			}
 		}
 		
 		float throttle = Math.abs(getThrottle());
 		if (throttle != 0 && boilerPressure > 0) {
-			boilerPressure = Math.max(0, boilerPressure - throttle * (this.cargoItems.getSlots()-2) * 100/waterLevelMB);
+			double burnableSlots = this.cargoItems.getSlots()-2;
+			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
+			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
+			
+			float delta = (float) (throttle * maxPressureTick);
+			
+			boilerPressure = Math.max(0, boilerPressure - delta);
+			waterUsed += delta * Config.ConfigBalance.locoWaterUsage;
 		}
 		
-		if (boilerPressure > this.getDefinition().getMaxPSI(gauge)) {
-			// TODO hissing and steam of pressure relief valve
-			boilerPressure = this.getDefinition().getMaxPSI(gauge);
+		if (waterUsed != 0) {
+			if (waterUsed > 0) {
+				theTank.drain((int) Math.floor(waterUsed), true);
+				waterUsed = waterUsed % 1;
+			}
+			// handle remainder
+			if (Math.random() <= waterUsed) {
+				theTank.drain(1, true);
+			}
 		}
 		
+		setBoilerPressure(boilerPressure);
+		setBoilerTemperature(boilerTemperature);
 		if (changedBurnTime) {
 			setBurnTime(burnTime);
-			theTank.drain(this.getLiquidAmount() - (int)waterLevelMB, true);
 		}
 		if (changedBurnMax) {
 			setBurnMax(burnMax);
 		}
-		setBoilerTemperature(boilerTemperature);
-		setBoilerPressure(boilerPressure);
 		
 		if (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 1.1 || (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 0.5 && boilerTemperature > 150)) {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
 			this.gonnaExplode = true;
-			if (ConfigDamage.explosionsEnabled) {
+			if (Config.ConfigDamage.explosionsEnabled) {
 				for (int i = 0; i < 5; i++) {
 					world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
 				}
@@ -587,5 +613,16 @@ public class LocomotiveSteam extends Locomotive {
 		List<Fluid> filter = new ArrayList<Fluid>();
 		filter.add(FluidRegistry.WATER);
 		return filter;
+	}
+
+	private double coalEnergyKCalTick() {
+		// Coal density = 800 KG/m3 (engineering toolbox)
+		double coalEnergyDensity = 30000; // KJ/KG (engineering toolbox)
+		double coalEnergyKJ = coalEnergyDensity / 9; // Assume each slot is burning 1/9th of a coal block
+		double coalEnergyBTU = coalEnergyKJ * 0.958; // 1 KJ = 0.958 BTU
+		double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
+		double coalBurnTicks = 1600; // This is a bit of fudge
+		double coalEnergyKCalTick = coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
+		return coalEnergyKCalTick;
 	}
 }

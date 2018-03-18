@@ -154,6 +154,7 @@ public class LocomotiveDiesel extends Locomotive {
 				burnTime = 200; //Default to 200 for unregistered liquids
 			}
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
+			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
 			burnTime /= Math.abs(getThrottle())*10;
 			burnTime *= 1/gauge.scale();
 			burnTime = Math.max(burnTime, 1); // Prevent div by zero
