@@ -179,7 +179,8 @@ public abstract class BlockRailBase extends Block {
 
 	@Override
 	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
-		TileRailBase tileEntity = SyncdTileEntity.get(world, pos, EnumCreateEntityType.CHECK); // Prevent recursive loading
+		SyncdTileEntity syncd = SyncdTileEntity.get(world, pos, EnumCreateEntityType.CHECK);
+		TileRailBase tileEntity = syncd instanceof TileRailBase ? (TileRailBase)syncd : null; // Prevent recursive loading
 		if (tileEntity == null) {
 			return;
 		}

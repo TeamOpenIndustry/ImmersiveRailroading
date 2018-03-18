@@ -12,8 +12,7 @@ import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 public class SyncdTileEntity extends TileEntity {
 	public boolean hasTileData;
 	
-	@SuppressWarnings("unchecked")
-	public static <T extends SyncdTileEntity> T get(IBlockAccess world, BlockPos pos, EnumCreateEntityType type) {
+	public static SyncdTileEntity get(IBlockAccess world, BlockPos pos, EnumCreateEntityType type) {
 		TileEntity te;
 		if (world instanceof World) {
 			te = ((World)world).getChunkFromBlockCoords(pos).getTileEntity(pos, type);
@@ -22,11 +21,7 @@ public class SyncdTileEntity extends TileEntity {
 		}
 		
 		if (te instanceof SyncdTileEntity) {
-			try {
-				return (T) te;
-			} catch (ClassCastException e) {
-				return null;
-			}
+			return (SyncdTileEntity) te;
 		}
 		return null;
 	}

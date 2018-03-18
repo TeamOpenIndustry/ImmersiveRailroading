@@ -51,7 +51,8 @@ import trackapi.lib.ITrack;
 
 public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
-		return SyncdTileEntity.get(world, pos, EnumCreateEntityType.IMMEDIATE);
+		SyncdTileEntity te = SyncdTileEntity.get(world, pos, EnumCreateEntityType.IMMEDIATE);
+		return te instanceof TileRailBase ? (TileRailBase)te : null;
 	}
 	
 	private BlockPos parent;
