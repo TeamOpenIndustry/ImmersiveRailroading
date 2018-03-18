@@ -20,6 +20,9 @@ public class ItemTabs {
 		public ItemStack getTabIconItem() {
 			NonNullList<ItemStack> items = NonNullList.create();
 			IRItems.ITEM_ROLLING_STOCK.getSubItems(this, items);
+			if (items.size() == 0) {
+				return new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1);
+			}
 			return items.get(0);
 		}
 	};
@@ -29,6 +32,9 @@ public class ItemTabs {
 		public ItemStack getTabIconItem() {
 			NonNullList<ItemStack> items = NonNullList.create();
 			IRItems.ITEM_ROLLING_STOCK.getSubItems(this, items);
+			if (items.size() == 0) {
+				return new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1);
+			}
 			return items.get(0);
 		}
 	};
@@ -38,6 +44,9 @@ public class ItemTabs {
 		public ItemStack getTabIconItem() {
 			NonNullList<ItemStack> items = NonNullList.create();
 			IRItems.ITEM_ROLLING_STOCK.getSubItems(this, items);
+			if (items.size() == 0) {
+				return new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1);
+			}
 			return items.get(0);
 		}
 	};
@@ -47,6 +56,9 @@ public class ItemTabs {
 		public ItemStack getTabIconItem() {
 			NonNullList<ItemStack> items = NonNullList.create();
 			IRItems.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(this, items);
+			if (items.size() == 0) {
+				return new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1);
+			}
 			return items.get(0);
 		}
 	};

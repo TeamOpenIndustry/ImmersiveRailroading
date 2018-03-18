@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.registry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,16 +23,51 @@ public class DefinitionManager {
 
 	public static void initDefinitions() throws IOException {
 		definitions = new LinkedHashMap<String, EntityRollingStockDefinition>();
-
-		ResourceLocation resource = new ResourceLocation(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
 		
-		List<InputStream> inputs = ImmersiveRailroading.proxy.getResourceStreamAll(resource);
+		List<String> blacklist = new ArrayList<String>();
+		
+		ResourceLocation blacklist_json = new ResourceLocation(ImmersiveRailroading.MODID, "rolling_stock/blacklist.json");
+		
+		List<InputStream> inputs = ImmersiveRailroading.proxy.getResourceStreamAll(blacklist_json);
+		for (InputStream input : inputs) {
+			JsonParser parser = new JsonParser();
+			JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+			
+			for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
+				blacklist.add(locomotive.getAsString());
+			}
+			for (JsonElement tender : stock.get("tender").getAsJsonArray()) {
+				blacklist.add(tender.getAsString());
+			}
+			for (JsonElement passenger_car : stock.get("passenger").getAsJsonArray()) {
+				blacklist.add(passenger_car.getAsString());
+			}
+			for (JsonElement freight_car : stock.get("freight").getAsJsonArray()) {
+				blacklist.add(freight_car.getAsString());
+			}
+			for (JsonElement tank_car : stock.get("tank").getAsJsonArray()) {
+				blacklist.add(tank_car.getAsString());
+			}
+			for (JsonElement hand_car : stock.get("hand_car").getAsJsonArray()) {
+				blacklist.add(hand_car.getAsString());
+			}
+		}
+		
+
+		ResourceLocation stock_json = new ResourceLocation(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
+		
+		inputs = ImmersiveRailroading.proxy.getResourceStreamAll(stock_json);
 		for (InputStream input : inputs) {
 		
 			JsonParser parser = new JsonParser();
 			JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
 			
 			for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
+				if (blacklist.contains(locomotive.getAsString())) {
+					ImmersiveRailroading.info("Skipping blacklisted %s", locomotive.getAsString());
+					continue;
+				}
+				
 				try {
 					String defID = "rolling_stock/locomotives/" + locomotive .getAsString()+ ".json";
 					JsonObject data = getJsonData(defID);
@@ -54,6 +90,10 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement tender : stock.get("tender").getAsJsonArray()) {
+				if (blacklist.contains(tender.getAsString())) {
+					ImmersiveRailroading.info("Skipping blacklisted %s", tender.getAsString());
+					continue;
+				}
 				try {
 					String defID = "rolling_stock/tender/" + tender.getAsString() + ".json";
 					JsonObject data = getJsonData(defID);
@@ -63,6 +103,10 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement passenger_car : stock.get("passenger").getAsJsonArray()) {
+				if (blacklist.contains(passenger_car.getAsString())) {
+					ImmersiveRailroading.info("Skipping blacklisted %s", passenger_car.getAsString());
+					continue;
+				}
 				try {
 					String defID = "rolling_stock/passenger/" + passenger_car.getAsString() + ".json";
 					JsonObject data = getJsonData(defID);
@@ -72,6 +116,10 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement freight_car : stock.get("freight").getAsJsonArray()) {
+				if (blacklist.contains(freight_car.getAsString())) {
+					ImmersiveRailroading.info("Skipping blacklisted %s", freight_car.getAsString());
+					continue;
+				}
 				try {
 					String defID = "rolling_stock/freight/" + freight_car.getAsString() + ".json";
 					JsonObject data = getJsonData(defID);
@@ -81,6 +129,10 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement tank_car : stock.get("tank").getAsJsonArray()) {
+				if (blacklist.contains(tank_car.getAsString())) {
+					ImmersiveRailroading.info("Skipping blacklisted %s", tank_car.getAsString());
+					continue;
+				}
 				try {
 					String defID = "rolling_stock/tank/" + tank_car.getAsString() + ".json";
 					JsonObject data = getJsonData(defID);
@@ -90,6 +142,10 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement hand_car : stock.get("hand_car").getAsJsonArray()) {
+				if (blacklist.contains(hand_car.getAsString())) {
+					ImmersiveRailroading.info("Skipping blacklisted %s", hand_car.getAsString());
+					continue;
+				}
 				try {
 					String defID = "rolling_stock/hand_car/" + hand_car.getAsString() + ".json";
 					JsonObject data = getJsonData(defID);
