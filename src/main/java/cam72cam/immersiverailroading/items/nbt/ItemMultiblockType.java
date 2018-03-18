@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.items.nbt;
 
+import java.util.List;
+
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,12 +15,16 @@ public class ItemMultiblockType {
 	}
 	
 	public static String get(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return stack.getTagCompound().getString("name");
+		List<String> keys = MultiblockRegistry.keys();
+		if (stack.getTagCompound() != null) {
+			String name = stack.getTagCompound().getString("name");
+			if (keys.contains(name)) {
+				return name;
+			}
 		}
-		if (MultiblockRegistry.keys().size() == 0) {
+		if (keys.size() == 0) {
 			return "";
 		}
-		return MultiblockRegistry.keys().get(0);
+		return keys.get(0);
 	}
 }
