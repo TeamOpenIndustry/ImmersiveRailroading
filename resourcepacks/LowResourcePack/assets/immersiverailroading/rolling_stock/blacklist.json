@@ -1,0 +1,54 @@
+{
+	"locomotives": [
+		"iron_duke",
+		"cooke_mogul",
+		"big_boy",
+		"e6_atlantic",
+		"j1a_texas",
+		"t1",
+		"ps4_class",
+		"skookum",
+		"gp-7",
+		"ge_b40_8",
+		"ge_c44_9cw",
+		"ge_40_ton_boxcab",
+		"alco_rs1",
+		"emd_sw1500",
+		"emd_sd40-2"
+	],
+	"tender": [
+		"cooke_tender",
+		"big_boy_tender",
+		"e6_tender",
+		"coast_to_coast",
+		"t1_tender",
+		"ps4_tender_big",
+		"skookum_tender"
+	],
+	"hand_car": [
+		"hand_car_1"
+	],
+	"passenger": [
+		"br_coach_mk1",
+		"p70coach1"
+	],
+	"freight": [
+		"boxcar_us",
+		"boxcar_x26",
+		"flatcar_us",
+		"70t_hopper_slsf",
+		"prr_flatcar_1",
+		"ttx_huskykline_1",
+		"autorack_trilevel",
+		"n5c_cabin_car",
+		"drgw_3000class_boxcar",
+		"drgw_1000class_gondola",
+		"drgw_rail_and_tie_outfit",
+		"waycar"
+	],
+	"tank": [
+		"tank_us",
+		"tank_us2",
+		"slag_car_1"
+	]
+}
