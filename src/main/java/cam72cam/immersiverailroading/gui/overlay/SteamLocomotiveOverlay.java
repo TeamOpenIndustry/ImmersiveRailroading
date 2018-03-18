@@ -16,7 +16,7 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		}
 		LocomotiveSteam loco = (LocomotiveSteam) riding;
 		drawGauge(0xAA0F0FFF, ((float)loco.getLiquidAmount())/Fluid.BUCKET_VOLUME, loco.getTankCapacity().Buckets(), "B");
-		drawGauge(0x99DDDDDD, (int) loco.getBoilerPressure(), loco.getDefinition().getMaxPSI(loco.gauge), "PSI");
+		drawGauge(0x99DDDDDD, loco.getBoilerPressure(), loco.getDefinition().getMaxPSI(loco.gauge), "PSI");
 		
 		int boilerColor = 0x99d1c715;
 		if (loco.getBoilerTemperature() > 95) {
@@ -26,7 +26,7 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 			boilerColor = 0x99a21010;
 		}
 		
-		drawGauge(boilerColor, (int) loco.getBoilerTemperature(), 150, "C");
+		drawGauge(boilerColor, loco.getBoilerTemperature(), 150, "C");
 		
 		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
