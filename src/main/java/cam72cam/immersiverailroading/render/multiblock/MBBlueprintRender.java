@@ -32,6 +32,10 @@ public class MBBlueprintRender {
 		worldRenderer.color(255, 255, 255, 255);
 		
 		Multiblock mb = MultiblockRegistry.get(name);
+		if (mb == null) {
+			// Some wrappers (Akashic Tome) remove the metadata
+			return;
+		}
 		Map<BlockPos, IBlockState> bp = mb.blueprint();
 		for (BlockPos pos : bp.keySet()) {
 			
