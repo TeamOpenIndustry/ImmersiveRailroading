@@ -97,7 +97,7 @@ public class OBJModel {
 				break;
 			}
 		}
-		reader.close();
+		reader.close(); // closes input
 
 		if (materialPaths.size() == 0) {
 			return;
@@ -189,6 +189,7 @@ public class OBJModel {
 			if (currentMTL != null) {
 				materials.put(currentMTL.name, currentMTL);
 			}
+			reader.close(); // closes input
 		}
 	}
 	

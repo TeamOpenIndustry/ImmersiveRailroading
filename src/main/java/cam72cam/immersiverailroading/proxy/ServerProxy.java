@@ -90,11 +90,15 @@ public class ServerProxy extends CommonProxy {
 
 	@Override
 	public InputStream getResourceStream(ResourceLocation location) throws IOException {
-		List<InputStream> res = getResourceStreamAll(location);
-		if (res.size() > 0) {
-			return res.get(0);
+		InputStream chosen = null;
+		for (InputStream strm : getResourceStreamAll(location)) {
+			if (chosen == null) {
+				chosen = strm;
+			} else {
+				strm.close();
+			}
 		}
-		return null;
+		return chosen;
 	}
 
 	@Override
