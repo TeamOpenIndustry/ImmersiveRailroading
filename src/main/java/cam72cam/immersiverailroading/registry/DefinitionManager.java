@@ -32,6 +32,7 @@ public class DefinitionManager {
 		for (InputStream input : inputs) {
 			JsonParser parser = new JsonParser();
 			JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+			input.close();
 			
 			for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
 				blacklist.add(locomotive.getAsString());
@@ -61,6 +62,7 @@ public class DefinitionManager {
 		
 			JsonParser parser = new JsonParser();
 			JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+			input.close();
 			
 			for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
 				if (blacklist.contains(locomotive.getAsString())) {
@@ -165,6 +167,9 @@ public class DefinitionManager {
 
 		JsonParser parser = new JsonParser();
 		JsonObject result = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+		
+		input.close();
+		
 		return result;
 	}
 

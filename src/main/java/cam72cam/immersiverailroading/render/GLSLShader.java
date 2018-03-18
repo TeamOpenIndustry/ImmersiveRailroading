@@ -74,7 +74,7 @@ public class GLSLShader {
 		while(reader.hasNextLine()) {
 			text = text + reader.nextLine();
 		}
-		reader.close();
+		reader.close(); // closes input
 		return text;
 	}
 	private static String getLogInfo(int obj) {
