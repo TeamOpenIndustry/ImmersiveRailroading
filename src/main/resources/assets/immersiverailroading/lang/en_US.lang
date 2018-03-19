@@ -16,7 +16,7 @@ item.immersiverailroading:item_rail.name=Track Blueprint
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
 tile.immersiverailroading:block_rail_preview.name=Rail Preview
-tile.immersiverailroading:block_steam_hammer.name=Steam Hammer
+tile.immersiverailroading:block_steam_hammer.name=Power Hammer
 
 chat.immersiverailroading:stock.built=%s is complete!
 chat.immersiverailroading:stock.dissasembled=%s is disassembled!
@@ -139,7 +139,7 @@ part.immersiverailroading:component.smokebox=Smokebox
 
 
 immersiverailroading:crafting_type.casting=Casting
-immersiverailroading:crafting_type.casting_hammer=Casting,Steam Hammer
+immersiverailroading:crafting_type.casting_hammer=Casting,Power Hammer
 immersiverailroading:crafting_type.plate_small=Plate Roller
 immersiverailroading:crafting_type.plate_medium=Plate Roller
 immersiverailroading:crafting_type.plate_large=Plate Roller
