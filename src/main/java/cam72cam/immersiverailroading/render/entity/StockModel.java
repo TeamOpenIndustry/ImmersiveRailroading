@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -406,9 +408,9 @@ public class StockModel extends OBJRender {
 		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 		
-		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
-		RenderComponent drivingRod = def.getComponent(RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
-		RenderComponent pistonRod = def.getComponent(RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
+		RenderComponent connectingRod = requireComponent(def, RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
+		RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
+		RenderComponent pistonRod = requireComponent(def, RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
 
 		Vec3d connRodPos = connectingRod.center();
 		double connRodOffset = connRodPos.x - wheelCenter.x;
@@ -456,9 +458,9 @@ public class StockModel extends OBJRender {
 		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 		
-		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
-		RenderComponent drivingRod = def.getComponent(RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
-		RenderComponent pistonRod = def.getComponent(RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
+		RenderComponent connectingRod = requireComponent(def, RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
+		RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
+		RenderComponent pistonRod = requireComponent(def, RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
 		
 		// Center of the connecting rod, may not line up with a wheel directly
 		Vec3d connRodPos = connectingRod.center();
@@ -519,6 +521,15 @@ public class StockModel extends OBJRender {
 		GL11.glPopMatrix();
 	}
 	
+	private RenderComponent requireComponent(LocomotiveSteamDefinition def, RenderComponentType rct, String side, Gauge gauge) {
+		RenderComponent comp = def.getComponent(rct, side, gauge);
+		if (comp == null) {
+			ImmersiveRailroading.error("Missing component for %s: %s %s", def.name, rct, side);
+		}
+		
+		return comp;
+	}
+	
 	private void drawWalschaerts(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
 		LocomotiveSteamDefinition def = stock.getDefinition();
 		
@@ -526,15 +537,15 @@ public class StockModel extends OBJRender {
 		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
 		
-		RenderComponent connectingRod = def.getComponent(RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
-		RenderComponent drivingRod = def.getComponent(RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
-		RenderComponent pistonRod = def.getComponent(RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
-		RenderComponent crossHead = def.getComponent(RenderComponentType.UNION_LINK_SIDE, side, stock.gauge);
-		RenderComponent combinationLever = def.getComponent(RenderComponentType.COMBINATION_LEVER_SIDE, side, stock.gauge);
-		RenderComponent returnCrank = def.getComponent(RenderComponentType.ECCENTRIC_CRANK_SIDE, side, stock.gauge);
-		RenderComponent returnCrankRod = def.getComponent(RenderComponentType.ECCENTRIC_ROD_SIDE, side, stock.gauge);
-		RenderComponent slottedLink = def.getComponent(RenderComponentType.EXPANSION_LINK_SIDE, side, stock.gauge);
-		RenderComponent radiusBar = def.getComponent(RenderComponentType.RADIUS_BAR_SIDE, side, stock.gauge);
+		RenderComponent connectingRod = requireComponent(def, RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
+		RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
+		RenderComponent pistonRod = requireComponent(def, RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
+		RenderComponent crossHead = requireComponent(def, RenderComponentType.UNION_LINK_SIDE, side, stock.gauge);
+		RenderComponent combinationLever = requireComponent(def, RenderComponentType.COMBINATION_LEVER_SIDE, side, stock.gauge);
+		RenderComponent returnCrank = requireComponent(def, RenderComponentType.ECCENTRIC_CRANK_SIDE, side, stock.gauge);
+		RenderComponent returnCrankRod = requireComponent(def, RenderComponentType.ECCENTRIC_ROD_SIDE, side, stock.gauge);
+		RenderComponent slottedLink = requireComponent(def, RenderComponentType.EXPANSION_LINK_SIDE, side, stock.gauge);
+		RenderComponent radiusBar = requireComponent(def, RenderComponentType.RADIUS_BAR_SIDE, side, stock.gauge);
 		
 		// Center of the connecting rod, may not line up with a wheel directly
 		Vec3d connRodPos = connectingRod.center();
