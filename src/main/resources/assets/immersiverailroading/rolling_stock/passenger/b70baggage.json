@@ -1,0 +1,28 @@
+{
+	"name": "PRR B70 Baggage",
+	"model": "immersiverailroading:models/rolling_stock/passenger/b70baggage/b70baggage.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 18143
+	},
+	"passenger": {
+		"slots": 6,
+		"center_x": 0,
+		"center_y": 1.4,
+		"length": 11,
+		"width": 2
+	},
+	"freight": {
+		"slots": 36,
+		"width": 12,
+		"cargo": ["all"]
+	},
+	"trucks": {
+		"front": 8.55, 
+		"rear": -8.55
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -0.08
+	}
+}
