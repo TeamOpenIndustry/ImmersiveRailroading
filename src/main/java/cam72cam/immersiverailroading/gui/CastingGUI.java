@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
+import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -31,20 +32,19 @@ public class CastingGUI extends GuiScreen {
 	
 	private TileMultiblock tile;
 	private ItemStack currentItem;
-	private double fluidPercent;
 	
 	public CastingGUI(TileMultiblock te) {
 		this.tile = te;
 		currentItem = ((CastingInstance) te.getMultiblock()).getCraftItem();
-		fluidPercent = ((CastingInstance) te.getMultiblock()).getSteelLevel();
 		
 		gauge = ItemGauge.get(currentItem);
-		picker = new CraftPicker(null, CraftingType.CASTING, (ItemStack item) -> {
+		picker = new CraftPicker(currentItem, CraftingType.CASTING, (ItemStack item) -> {
         	this.mc.displayGuiScreen(this);
         	
         	if (item != null) {
         		currentItem = item;
         		updatePickerButton();
+    			sendItemPacket();
         	}
         });
 	}
@@ -65,19 +65,19 @@ public class CastingGUI extends GuiScreen {
 	@Override
 	public void initGui() {
 		int buttonID = 0;
-
-		gaugeButton = new GuiButton(buttonID++, this.width / 2, this.height / 4, 100, 20, GuiText.SELECTOR_GAUGE.toString(gauge));
-		this.buttonList.add(gaugeButton);
 		
-		singleCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 20, 100, 20, "Single Cast");
-		this.buttonList.add(singleCastButton);
-		
-		repeatCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 40, 100, 20, "Repeat Cast");
-		this.buttonList.add(repeatCastButton);
-		
-		pickerButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 + 105, GuiText.SELECTOR_TYPE.toString(""));
+		pickerButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 20-10, GuiText.SELECTOR_TYPE.toString(""));
 		updatePickerButton();
 		this.buttonList.add(pickerButton);
+
+		gaugeButton = new GuiButton(buttonID++, this.width / 2, this.height / 4-10, 100, 20, GuiText.SELECTOR_GAUGE.toString(gauge));
+		this.buttonList.add(gaugeButton);
+		
+		singleCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 20-10, 100, 20, "Single Casting");
+		this.buttonList.add(singleCastButton);
+		
+		repeatCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 40-10, 100, 20, "Multiple Casting");
+		this.buttonList.add(repeatCastButton);
 		
 	}
 	
@@ -86,16 +86,31 @@ public class CastingGUI extends GuiScreen {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		
+
+		double fluidPercent = ((CastingInstance) tile.getMultiblock()).getSteelLevel();
+		int progress = this.tile.getCraftProgress();
 		float cost = ItemCastingCost.getCastCost(currentItem);
-		
     	
     	this.mc.getTextureManager().bindTexture(CASTING_GUI_TEXTURE);
 
         GUIHelpers.texturedRect(this.width / 2 - 100, this.height / 4, 200, 100);
 
 		GUIHelpers.drawTankBlock(this.width / 2 - 94.5, this.height / 4 + 3, 56.7, 60, FluidRegistry.LAVA, (float) fluidPercent, false, 0x99fb7e15);
-		GUIHelpers.drawTankBlock(this.width / 2 - 28.5, this.height / 4 + 67, 125.2, 30, FluidRegistry.LAVA, this.tile.getCraftProgress()/cost, false, 0x998c1919);
+		GUIHelpers.drawTankBlock(this.width / 2 - 28.5, this.height / 4 + 67, 125.2, 30, FluidRegistry.LAVA, progress/cost, false, 0x998c1919);
+
+		singleCastButton.packedFGColour = 0;
+		repeatCastButton.packedFGColour = 0;
+		switch (tile.getCraftMode()) {
+		case SINGLE:
+			singleCastButton.packedFGColour = 0xcc4334;
+			break;
+		case REPEAT:
+			repeatCastButton.packedFGColour = 0xcc4334;
+			break;
+		case STOPPED:
+			// no highlighting
+			break;
+		}
 	}
 	
 	@Override
@@ -103,23 +118,32 @@ public class CastingGUI extends GuiScreen {
 		if (button == gaugeButton) {
 			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+			sendItemPacket();
 		}
 		if (button == pickerButton) {
 			this.mc.displayGuiScreen(picker);
 		}
 		if (button == singleCastButton) {
-			sendPacket();
-			this.mc.displayGuiScreen(null);
-			if (this.mc.currentScreen == null)
-				this.mc.setIngameFocus();
+			if (tile.getCraftMode() != CraftingMachineMode.SINGLE) {
+				tile.setCraftMode(CraftingMachineMode.SINGLE);
+			} else {
+				tile.setCraftMode(CraftingMachineMode.STOPPED);
+			}
+		}
+		if (button == repeatCastButton) {
+			if (tile.getCraftMode() != CraftingMachineMode.REPEAT) {
+				tile.setCraftMode(CraftingMachineMode.REPEAT);
+			} else {
+				tile.setCraftMode(CraftingMachineMode.STOPPED);
+			}
 		}
 	}
 	
-	private void sendPacket() {
+	private void sendItemPacket() {
 		ItemGauge.set(currentItem, gauge);
 		currentItem.setCount(1);
 		ItemRawCast.set(currentItem, true);
-    	((CastingInstance) tile.getMultiblock()).setCraftItem(currentItem);
+		tile.setCraftItem(currentItem);
     }
 	
 	@Override

@@ -1,6 +1,9 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 
 import javax.annotation.Nonnull;
 
@@ -79,6 +82,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     		return val;
     	}
     };
+	private CraftingMachineMode craftMode;
     
     @Override
 	public boolean isLoaded() {
@@ -113,6 +117,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		nbt.setTag("inventory", container.serializeNBT());
 		nbt.setTag("craftItem", craftItem.serializeNBT());
 		nbt.setInteger("craftProgress", craftProgress);
+		nbt.setInteger("craftMode", craftMode.ordinal());
 		
 		nbt.setInteger("energy", energy.getEnergyStored());
 		
@@ -131,6 +136,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		container.deserializeNBT(nbt.getCompoundTag("inventory"));
 		craftItem = new ItemStack(nbt.getCompoundTag("craftItem"));
 		craftProgress = nbt.getInteger("craftProgress");
+		
+		craftMode = CraftingMachineMode.STOPPED;
+		if (nbt.hasKey("craftMode")) {
+			craftMode = CraftingMachineMode.values()[nbt.getInteger("craftMode")];
+		}
 		
 		// Empty and then refill energy storage
 		energy.extractEnergy(energy.getEnergyStored(), false);
@@ -226,14 +236,35 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		}
 	}
 	
+	public CraftingMachineMode getCraftMode() {
+		return craftMode;
+	}
+	
+	public void setCraftMode(CraftingMachineMode mode) {
+		if (!world.isRemote) {
+			if (craftMode != mode) {
+				craftMode = mode;
+				this.markDirty();
+			}
+		} else {
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), craftItem, mode));
+		}
+	}
+	
 	public ItemStack getCraftItem() {
 		return craftItem;
 	}
 
 	public void setCraftItem(ItemStack selected) {
-		this.craftItem = selected.copy();
-		this.craftProgress = 0;
-		this.markDirty();
+		if (!world.isRemote) {
+			if (craftItem == null || selected == null || !selected.isItemEqual(craftItem)) {
+				this.craftItem = selected.copy();
+				this.craftProgress = 0;
+				this.markDirty();
+			}
+		} else {
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), selected, craftMode));
+		}
 	}
 	
 	/*
