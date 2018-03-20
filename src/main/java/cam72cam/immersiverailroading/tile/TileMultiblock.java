@@ -232,6 +232,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 
 	public void setCraftItem(ItemStack selected) {
 		this.craftItem = selected.copy();
+		this.craftProgress = 0;
 		this.markDirty();
 	}
 	
