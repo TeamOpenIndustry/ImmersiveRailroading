@@ -257,7 +257,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 
 	public void setCraftItem(ItemStack selected) {
 		if (!world.isRemote) {
-			if (craftItem == null || selected == null || !selected.isItemEqual(craftItem)) {
+			if (craftItem == null || selected == null || !ItemStack.areItemStacksEqualUsingNBTShareTag(selected, craftItem)) {
 				this.craftItem = selected.copy();
 				this.craftProgress = 0;
 				this.markDirty();

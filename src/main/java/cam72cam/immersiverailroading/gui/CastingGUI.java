@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstance;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
@@ -83,6 +84,20 @@ public class CastingGUI extends GuiScreen {
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		singleCastButton.packedFGColour = 0;
+		repeatCastButton.packedFGColour = 0;
+		switch (tile.getCraftMode()) {
+		case SINGLE:
+			singleCastButton.packedFGColour = 0xcc4334;
+			break;
+		case REPEAT:
+			repeatCastButton.packedFGColour = 0xcc4334;
+			break;
+		case STOPPED:
+			// no highlighting
+			break;
+		}
+		
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -97,20 +112,11 @@ public class CastingGUI extends GuiScreen {
 
 		GUIHelpers.drawTankBlock(this.width / 2 - 94.5, this.height / 4 + 3, 56.7, 60, FluidRegistry.LAVA, (float) fluidPercent, false, 0x99fb7e15);
 		GUIHelpers.drawTankBlock(this.width / 2 - 28.5, this.height / 4 + 67, 125.2, 30, FluidRegistry.LAVA, progress/cost, false, 0x998c1919);
-
-		singleCastButton.packedFGColour = 0;
-		repeatCastButton.packedFGColour = 0;
-		switch (tile.getCraftMode()) {
-		case SINGLE:
-			singleCastButton.packedFGColour = 0xcc4334;
-			break;
-		case REPEAT:
-			repeatCastButton.packedFGColour = 0xcc4334;
-			break;
-		case STOPPED:
-			// no highlighting
-			break;
-		}
+		
+		String fillStr = String.format("%s/%s", (int)(fluidPercent * CastingMultiblock.max_volume), (int)CastingMultiblock.max_volume);
+		String castStr = String.format("%s/%s", progress, (int)cost);
+		this.drawCenteredString(this.fontRenderer, fillStr, this.width / 2 - 94 + 27, this.height / 4 + 3 + 25, 14737632);
+		this.drawCenteredString(this.fontRenderer, castStr, this.width / 2 - 28 + 60, this.height / 4 + 67 + 10, 14737632);
 	}
 	
 	@Override
