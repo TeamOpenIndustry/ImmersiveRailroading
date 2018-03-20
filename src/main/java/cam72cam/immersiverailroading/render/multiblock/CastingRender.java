@@ -52,7 +52,7 @@ public class CastingRender implements IMultiblockRender {
 		if (tmb.isPouring()) {
 			renderer.drawGroups(flowing_steel);
 		}
-		double steelLevel = tmb.getSteelLevel();
+		double steelLevel = tmb.getSteelLevel() * 4.5;
 		if (steelLevel != 0) {
 			GL11.glPushMatrix();
 			GL11.glTranslated(0, steelLevel, 0);

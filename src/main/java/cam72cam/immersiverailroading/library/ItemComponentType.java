@@ -5,6 +5,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.immersiverailroading.util.TextUtil;
 
 public enum ItemComponentType {
@@ -167,6 +168,9 @@ public enum ItemComponentType {
 	}
 
 	public int getCastCost(EntityRollingStockDefinition definition, Gauge gauge) {
+		if (definition == null) {
+			return ItemCastingCost.BAD_CAST_COST;
+		}
 		RenderComponent comp = definition.getComponent(this.render.get(0), gauge);
 		double densityGues = 0.6;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues);
