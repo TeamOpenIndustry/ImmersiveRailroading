@@ -118,7 +118,7 @@ public class PlateRollerGUI extends GuiScreen {
 			break;
     	}
 		currentItem.setCount(Math.max(1, (int) Math.floor(currentItem.getCount()/gauge.scale())));
-    	((PlateRollerInstance) tile.getMultiblock()).setCraftItem(currentItem);
+		tile.setCraftItem(currentItem);
     }
 	
 	@Override

@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
@@ -15,26 +16,30 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class MultiblockSelectCraftPacket implements IMessage {
 	private ItemStack selected;
 	private BlockPos tilePreviewPos;
+	private CraftingMachineMode mode;
 	
 	public MultiblockSelectCraftPacket() {
 		// For Reflection
 	}
 
-	public MultiblockSelectCraftPacket(BlockPos tilePreviewPos, ItemStack selected) {
+	public MultiblockSelectCraftPacket(BlockPos tilePreviewPos, ItemStack selected, CraftingMachineMode mode) {
 		this.tilePreviewPos = tilePreviewPos;
 		this.selected = selected;
+		this.mode = mode;
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		this.tilePreviewPos = new BlockPos(BufferUtil.readVec3i(buf));
 		this.selected = ByteBufUtils.readItemStack(buf);
+		this.mode = CraftingMachineMode.values()[buf.readInt()];
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
 		BufferUtil.writeVec3i(buf, tilePreviewPos);
 		ByteBufUtils.writeItemStack(buf, selected);
+		buf.writeInt(mode.ordinal());
 	}
 	
 	public static class Handler implements IMessageHandler<MultiblockSelectCraftPacket, IMessage> {
@@ -51,6 +56,7 @@ public class MultiblockSelectCraftPacket implements IMessage {
 				return;
 			}
 			tile.setCraftItem(message.selected);
+			tile.setCraftMode(message.mode);
 		}
 	}
 }

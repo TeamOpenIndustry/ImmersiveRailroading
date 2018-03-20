@@ -4,7 +4,6 @@ import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -225,10 +224,6 @@ public class PlateRollerMultiblock extends Multiblock {
 		
 		public ItemStack steelBlock() {
 			return new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
-		}
-		
-		public void setCraftItem(ItemStack stack) {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(crafter), stack));
 		}
 
 		public ItemStack getCraftItem() {
