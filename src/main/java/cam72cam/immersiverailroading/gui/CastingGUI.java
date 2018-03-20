@@ -73,10 +73,10 @@ public class CastingGUI extends GuiScreen {
 		gaugeButton = new GuiButton(buttonID++, this.width / 2, this.height / 4-10, 100, 20, GuiText.SELECTOR_GAUGE.toString(gauge));
 		this.buttonList.add(gaugeButton);
 		
-		singleCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 20-10, 100, 20, "Single Casting");
+		singleCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 20-10, 100, 20, GuiText.SELECTOR_CAST_SINGLE.toString());
 		this.buttonList.add(singleCastButton);
 		
-		repeatCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 40-10, 100, 20, "Multiple Casting");
+		repeatCastButton = new GuiButton(buttonID++, this.width / 2, this.height / 4 + 40-10, 100, 20, GuiText.SELECTOR_CAST_REPEAT.toString());
 		this.buttonList.add(repeatCastButton);
 		
 	}
