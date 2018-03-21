@@ -9,10 +9,12 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock.StaticPassenger;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class BufferUtil {
 
@@ -117,5 +119,21 @@ public class BufferUtil {
 		}
 		
 		return items;
+	}
+
+	public static void writeStaticPassengers(ByteBuf buffer, List<StaticPassenger> staticPassengers) {
+		buffer.writeInt(staticPassengers.size());
+		for (StaticPassenger pass : staticPassengers) {
+			ByteBufUtils.writeTag(buffer, pass.writeNBT());
+		}
+	}
+	
+	public static List<StaticPassenger> readStaticPassengers(ByteBuf buffer) {
+		List<StaticPassenger> staticPassengers = new ArrayList<StaticPassenger>();
+		int count = buffer.readInt();
+		for (int i = 0; i < count; i++) {
+			staticPassengers.add(new StaticPassenger(ByteBufUtils.readTag(buffer)));
+		}
+		return staticPassengers;
 	}
 }
