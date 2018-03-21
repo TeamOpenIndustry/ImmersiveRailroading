@@ -209,7 +209,7 @@ public class CastingMultiblock extends Multiblock {
 						}
 					}
 				}
-				List<EntityLivingBase> living = world.getEntitiesWithinAABB(EntityLivingBase.class, bb.grow(0,1.5,0));
+				List<EntityLivingBase> living = world.getEntitiesWithinAABB(EntityLivingBase.class, bb.expand(0,2.5,0));
 				for (EntityLivingBase alive : living) {
 					alive.attackEntityFrom(new DamageSource("immersiverailroading:casting"), 5);
 				}
