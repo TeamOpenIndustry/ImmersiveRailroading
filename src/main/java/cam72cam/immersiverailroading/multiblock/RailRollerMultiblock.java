@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.multiblock;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -73,8 +74,9 @@ public class RailRollerMultiblock extends Multiblock {
 					if (outputTe == null) {
 						return false;
 					}
-					
-					player.setHeldItem(hand, outputTe.getContainer().getStackInSlot(0));
+
+					ItemStack outstack = outputTe.getContainer().getStackInSlot(0);
+					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
 					outputTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
 				} else if (held.getItem() == IRItems.ITEM_CAST_RAIL) {
 					TileMultiblock inputTe = getTile(input);

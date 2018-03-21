@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
@@ -77,7 +78,9 @@ public class BoilerRollerMultiblock extends Multiblock {
 						return false;
 					}
 					
-					player.setHeldItem(hand, craftTe.getContainer().getStackInSlot(1));
+					ItemStack outstack = craftTe.getContainer().getStackInSlot(1);
+					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
+					
 					craftTe.getContainer().setStackInSlot(1, ItemStack.EMPTY);
 				} else if (held.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(held) == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
