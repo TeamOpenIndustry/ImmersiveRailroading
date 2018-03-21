@@ -5,6 +5,7 @@ import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -86,7 +87,8 @@ public class PlateRollerMultiblock extends Multiblock {
 					
 					if (!outputTe.getContainer().getStackInSlot(0).isEmpty()) {
 						if (!world.isRemote) {
-							player.setHeldItem(hand, outputTe.getContainer().getStackInSlot(0));
+							ItemStack outstack = outputTe.getContainer().getStackInSlot(0);
+							world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
 							outputTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
 						}
 						return true;
