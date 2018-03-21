@@ -57,8 +57,9 @@ import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
+import cam72cam.immersiverailroading.render.entity.MagicEntityRender;
+import cam72cam.immersiverailroading.render.entity.MagicEntity;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
-import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.entity.StockEntityRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.tile.TileMultiblockRender;
@@ -123,6 +124,8 @@ public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
 
 	private static IRSoundManager manager;
+
+	private static MagicEntity magical;
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
@@ -226,6 +229,13 @@ public class ClientProxy extends CommonProxy {
 			return new ParticleRender(manager);
 		}
 	};
+	
+	public static final IRenderFactory<MagicEntity> MAGIC_RENDER = new IRenderFactory<MagicEntity>() {
+		@Override
+		public Render<? super MagicEntity> createRenderFor(RenderManager manager) {
+			return new MagicEntityRender(manager);
+		}
+	};
 
 	@SubscribeEvent
 	public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
@@ -234,6 +244,7 @@ public class ClientProxy extends CommonProxy {
 		}
 
 		RenderingRegistry.registerEntityRenderingHandler(EntitySmokeParticle.class, PARTICLE_RENDER);
+		RenderingRegistry.registerEntityRenderingHandler(MagicEntity.class, MAGIC_RENDER);
 	}
 
 	@SubscribeEvent
@@ -382,8 +393,10 @@ public class ClientProxy extends CommonProxy {
 		 * This is a bad hack but it works
 		 * 
 		 */
+		
+		// This has been moved to MagicEntity which is probably a better solution
         
-        RenderOverride.renderStockAndParticles(event.getPartialTicks());
+        //RenderOverride.renderStockAndParticles(event.getPartialTicks());
 	}
 	
 	@SubscribeEvent
@@ -486,11 +499,14 @@ public class ClientProxy extends CommonProxy {
 		for (int i = 0; i < 16; i ++) {
 			sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40, Gauge.STANDARD));
 		}
+		magical = new MagicEntity(event.getWorld());
+		event.getWorld().loadedEntityList.add(magical);
 	}
 	
 	@SubscribeEvent
 	public static void onWorldUnload(Unload event) {
 		manager.stop();
+		magical = null;
 	}
 	
 	private static int sndCacheId = 0;
@@ -540,6 +556,10 @@ public class ClientProxy extends CommonProxy {
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
 		if (event.phase != Phase.START) {
 			return;
+		}
+		
+		if (magical != null) {
+			magical.onUpdate();
 		}
 		
 		if (tickCount % 40 == 39 ) {
