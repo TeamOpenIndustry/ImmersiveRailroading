@@ -347,7 +347,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			this.setSnowLayers(1);
 			int snowDown = snow -1;
 			for (int i = 1; i <= 3; i ++) {
-				EnumFacing[] horiz = EnumFacing.HORIZONTALS;
+				EnumFacing[] horiz = EnumFacing.HORIZONTALS.clone();
 				if (Math.random() > 0.5) {
 					// Split between sides of the track
 					ArrayUtils.reverse(horiz);
