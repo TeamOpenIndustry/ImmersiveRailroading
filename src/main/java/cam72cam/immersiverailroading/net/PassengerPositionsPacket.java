@@ -10,6 +10,7 @@ import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock.StaticPassenger;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.math.Vec3d;
@@ -22,6 +23,7 @@ public class PassengerPositionsPacket implements IMessage {
 	private int dimension;
 	private UUID stockID;
 	private Map<UUID, Vec3d> passengerPositions;
+	private List<StaticPassenger> staticPassengers;
 	
 	public PassengerPositionsPacket() {
 		//Reflection
@@ -30,6 +32,7 @@ public class PassengerPositionsPacket implements IMessage {
 		this.dimension = stock.getEntityWorld().provider.getDimension();
 		this.stockID = stock.getPersistentID();
 		this.passengerPositions = stock.passengerPositions;
+		this.staticPassengers = stock.staticPassengers;
 	}
 
 	@Override
@@ -37,6 +40,7 @@ public class PassengerPositionsPacket implements IMessage {
 		dimension = buf.readInt();
 		stockID = BufferUtil.readUUID(buf);
 		passengerPositions = BufferUtil.readPlayerPositions(buf);
+		staticPassengers = BufferUtil.readStaticPassengers(buf);
 	}
 
 	@Override
@@ -44,6 +48,7 @@ public class PassengerPositionsPacket implements IMessage {
 		buf.writeInt(dimension);
 		BufferUtil.writeUUID(buf, stockID);
 		BufferUtil.writePlayerPositions(buf, passengerPositions);
+		BufferUtil.writeStaticPassengers(buf, staticPassengers);
 	}
 	
 	public static class Handler implements IMessageHandler<PassengerPositionsPacket, IMessage> {
@@ -69,6 +74,7 @@ public class PassengerPositionsPacket implements IMessage {
 			
 			EntityRidableRollingStock entity = matches.get(0);
 			entity.handlePassengerPositions(message.passengerPositions);
+			entity.staticPassengers = message.staticPassengers;
 		}
 	}
 }
