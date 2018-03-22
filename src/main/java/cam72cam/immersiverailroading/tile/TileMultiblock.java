@@ -42,6 +42,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	private BlockPos offset;
 	private Rotation rotation;
 	private String name;
+	private CraftingMachineMode craftMode = CraftingMachineMode.STOPPED;
 	private long ticks;
 	private MultiblockInstance mb;
 	
@@ -82,7 +83,6 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     		return val;
     	}
     };
-	private CraftingMachineMode craftMode;
     
     @Override
 	public boolean isLoaded() {

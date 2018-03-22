@@ -1,10 +1,9 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import blusunrize.immersiveengineering.common.IEContent;
-import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.immersiverailroading.util.OreHelper;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -93,7 +92,7 @@ public class PlateRollerMultiblock extends Multiblock {
 						}
 						return true;
 					}
-				} else if (held.isItemEqual(steelBlock())) {
+				} else if (OreHelper.matches(held, "blockSteel", false)) {
 					TileMultiblock inputTe = getTile(input);
 					if (inputTe == null) {
 						return false;
@@ -180,7 +179,7 @@ public class PlateRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.isItemEqual(steelBlock()) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
+				if ( OreHelper.matches(input, "blockSteel", false) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
 					input.setCount(input.getCount() - 1);
 					inputTe.getContainer().setStackInSlot(0, input);;
 					progress = 100;
@@ -196,7 +195,7 @@ public class PlateRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return offset.equals(input) && stack.isItemEqual(steelBlock());
+			return offset.equals(input) && OreHelper.matches(stack, "blockSteel", false);
 		}
 
 		@Override
@@ -222,10 +221,6 @@ public class PlateRollerMultiblock extends Multiblock {
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
 			
-		}
-		
-		public ItemStack steelBlock() {
-			return new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
 		}
 
 		public ItemStack getCraftItem() {
