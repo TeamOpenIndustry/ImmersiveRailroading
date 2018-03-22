@@ -97,7 +97,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		for (EntityLiving entityliving : world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double) i - dist, (double) j - 7.0D,
 				(double) k - dist, (double) i + dist, (double) j + dist, (double) k + dist))) {
 			if (entityliving.getLeashed() && entityliving.getLeashHolder() == player) {
-				if (canFitPassenger(entityliving)) {
+				if (canFitPassenger(entityliving) && this.getDefinition().acceptsLivestock()) {
 					entityliving.clearLeashed(true, !player.isCreative());
 					this.addStaticPassenger(entityliving, player.getPositionVector());
 					return true;

@@ -548,4 +548,12 @@ public abstract class EntityRollingStockDefinition {
 	public int getMaxPassengers() {
 		return this.maxPassengers;
 	}
+
+	public boolean acceptsPassengers() {
+		return false;
+	}
+	
+	public boolean acceptsLivestock() {
+		return false;
+	}
 }

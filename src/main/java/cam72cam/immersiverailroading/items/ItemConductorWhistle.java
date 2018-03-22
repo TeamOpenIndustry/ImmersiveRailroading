@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.registry.CarPassengerDefinition;
 import cam72cam.immersiverailroading.sound.ISound;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -59,8 +58,7 @@ public class ItemConductorWhistle extends Item {
 					for (EntityVillager villager : villagers) {
 						EntityCoupleableRollingStock closest = null;
 						for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
-							// TODO check against car.getDefinition().isPassengerCar()
-							if (car.canFitPassenger(villager) && car.getDefinition() instanceof CarPassengerDefinition) {
+							if (car.canFitPassenger(villager) && car.getDefinition().acceptsPassengers()) {
 								if (closest == null || closest.getPositionVector().distanceTo(villager.getPositionVector()) > car.getPositionVector().distanceTo(villager.getPositionVector())) {
 									closest = car;
 								}
