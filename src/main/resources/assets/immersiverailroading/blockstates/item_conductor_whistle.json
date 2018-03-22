@@ -1,0 +1,37 @@
+{
+	"forge_marker": 1,
+	"defaults":
+	{
+		"model": "immersiverailroading:whistle.obj"
+	},
+	"variants": {
+		"normal": [{
+			"transform": {
+				"firstperson": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0.5],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"thirdperson": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0.5],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"gui": {
+				  	"scale": 0.125,
+					"translation": [-0.3, 0, 0],
+					"rotation": {"y": -90}
+				},
+				"ground": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0, 0],
+					"rotation": {"y": -90}
+				},
+				"fixed": {
+				  	"scale": 0.1,
+					"rotation": {"y": -90}
+				}
+			}
+		}]
+	}
+}

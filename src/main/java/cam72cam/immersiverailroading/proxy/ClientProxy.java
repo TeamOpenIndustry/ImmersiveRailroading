@@ -261,6 +261,9 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_HOOK, 0,
 				new ModelResourceLocation(IRItems.ITEM_HOOK.getRegistryName(), ""));
 		
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE, 0,
+				new ModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.getRegistryName(), ""));
+		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT, 0,
 				new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName(), ""));
 
