@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.items.ItemCastRail;
+import cam72cam.immersiverailroading.items.ItemConductorWhistle;
 import cam72cam.immersiverailroading.items.ItemHook;
 import cam72cam.immersiverailroading.items.ItemLargeWrench;
 import cam72cam.immersiverailroading.items.ItemManual;
@@ -23,5 +24,5 @@ public class IRItems {
 	public static ItemRail ITEM_RAIL = new ItemRail();
 	public static ItemPlate ITEM_PLATE = new ItemPlate();
 	public static ItemCastRail ITEM_CAST_RAIL = new ItemCastRail();
-
+	public static ItemConductorWhistle ITEM_CONDUCTOR_WHISTLE = new ItemConductorWhistle(); 
 }

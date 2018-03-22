@@ -106,7 +106,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 
 		if (player.getHeldItemMainhand().getItem() == Items.LEAD) {
-			EntityLiving passenger = this.removeStaticPasssenger(player.getPositionVector());
+			EntityLiving passenger = this.removeStaticPasssenger(player.getPositionVector(), false);
 			if (passenger != null) {
 				if (passenger.canBeLeashedTo(player)) {
 					passenger.setLeashHolder(player, true);
