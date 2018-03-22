@@ -63,8 +63,8 @@ public class Config {
 		@Comment("How much water the locomotive should use")
 		public static float locoWaterUsage = 10;
 
-		@Comment("How much you get payed per meter the villager traveled")
-		public static double villagerPayoutPerMeter = 0.01;
+		@Comment("How much you get payed per meter the villager traveled (default 1 emerald per km)")
+		public static double villagerPayoutPerMeter = 0.001;
 
 		public static double villagerConductorDistance = 50;
 	}
