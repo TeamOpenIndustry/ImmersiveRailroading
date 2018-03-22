@@ -51,6 +51,7 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.OreHelper;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -125,16 +126,17 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(ItemRailUpdatePacket.Handler.class, ItemRailUpdatePacket.class, 7, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(BuildableStockSyncPacket.Handler.class, BuildableStockSyncPacket.class, 8, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
+
+    	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
+    	
+    	CompatLoader.load();
+    	OreHelper.init();
     	
     	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
     	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
     	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
     	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
     	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
-    	
-    	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
-    	
-    	CompatLoader.load();
     }
     
 	public void serverStarting(FMLServerStartingEvent event) {

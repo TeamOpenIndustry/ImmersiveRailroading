@@ -2,13 +2,12 @@ package cam72cam.immersiverailroading.multiblock;
 
 import java.util.List;
 
-import blusunrize.immersiveengineering.common.IEContent;
-import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsAll;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
+import cam72cam.immersiverailroading.util.OreHelper;
 import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -184,7 +183,7 @@ public class CastingMultiblock extends Multiblock {
 				for (EntityItem item : items) {
 					ItemStack stack = item.getItem();
 					int cost = ItemCastingCost.getCastCost(stack);
-					if(steelBlock().isItemEqual(stack)) {
+					if(OreHelper.matches(stack, "blockSteel", false)) {
 						// TODO drain more power on melt
 						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + 9) {
 							if (!hasPower()) {
@@ -192,6 +191,15 @@ public class CastingMultiblock extends Multiblock {
 							}
 							stack.shrink(1);
 							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + 9);
+						}
+					} else if(OreHelper.matches(stack, "ingotSteel", false)) {
+						// TODO drain more power on melt
+						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + 1) {
+							if (!hasPower()) {
+								break;
+							}
+							stack.shrink(1);
+							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + 1);
 						}
 					} else if (cost != ItemCastingCost.BAD_CAST_COST) {
 						// TODO drain more power on melt
@@ -303,10 +311,6 @@ public class CastingMultiblock extends Multiblock {
 			}
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
-		}
-		
-		public ItemStack steelBlock() {
-			return new ItemStack(IEContent.blockStorage,1, BlockTypes_MetalsAll.STEEL.getMeta());
 		}
 
 		public boolean isPouring() {
