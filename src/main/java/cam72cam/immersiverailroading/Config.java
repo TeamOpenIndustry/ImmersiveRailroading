@@ -66,6 +66,7 @@ public class Config {
 		@Comment("How much you get payed per meter the villager traveled (default 1 emerald per km)")
 		public static double villagerPayoutPerMeter = 0.001;
 
+		@Comment("Distance the villagers will hear the conductor's whistle")
 		public static double villagerConductorDistance = 50;
 	}
 
