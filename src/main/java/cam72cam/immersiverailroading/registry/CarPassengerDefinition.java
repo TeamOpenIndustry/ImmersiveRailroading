@@ -16,4 +16,9 @@ public class CarPassengerDefinition extends EntityRollingStockDefinition {
 	public EntityRollingStock instance(World world) {
 		return new CarPassenger(world, defID);
 	}
+
+	@Override
+	public boolean acceptsPassengers() {
+		return true;
+	}
 }

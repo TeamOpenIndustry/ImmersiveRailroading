@@ -59,4 +59,9 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 	public int getInventoryWidth(Gauge gauge) {
 		return MathHelper.ceil(width * gauge.scale());
 	}
+	
+	@Override
+	public boolean acceptsLivestock() {
+		return true;
+	}
 }
