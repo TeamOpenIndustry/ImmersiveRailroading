@@ -505,9 +505,9 @@ public abstract class EntityRollingStockDefinition {
 			double maxY = gauge.scale() * heightBounds;
 			double minZ = gauge.scale() * -widthBounds / 2;
 			double maxZ = gauge.scale() * widthBounds / 2;
-			for (double x = minX; x <= maxX; x++) {
-				for (double y = minY; y <= maxY; y++) {
-					for (double z = minZ; z <= maxZ; z++) {
+			for (double x = minX; x <= maxX+1; x++) {
+				for (double y = minY; y <= maxY+1; y++) {
+					for (double z = minZ; z <= maxZ+1; z++) {
 						blocksInBounds.add(new Vec3d(x,y,z));
 					}
 				}

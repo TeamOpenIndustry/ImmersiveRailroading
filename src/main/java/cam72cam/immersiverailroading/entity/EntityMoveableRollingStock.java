@@ -369,7 +369,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			entity.setPosition(pos.x, pos.y, pos.z);
 		}
 		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
-			bb = this.getCollisionBoundingBox();
+			bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
@@ -377,9 +377,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				BlockPos bp = new BlockPos(pos);
 				IBlockState state = world.getBlockState(bp);
 				if (state.getBlock() != Blocks.AIR) {
-					if (!BlockUtil.isRail(world, bp)) {
-						if (bb.contains(pos)) { // This is slow, do it as little as possible
-							if (!BlockUtil.isRail(world, bp.up())) {
+					if (!BlockUtil.isIRRail(world, bp)) {
+						AxisAlignedBB bbb = state.getCollisionBoundingBox(world, bp).offset(bp);
+						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
+							if (!BlockUtil.isIRRail(world, bp.up())) {
 								world.destroyBlock(bp, true);										
 							}
 						}
