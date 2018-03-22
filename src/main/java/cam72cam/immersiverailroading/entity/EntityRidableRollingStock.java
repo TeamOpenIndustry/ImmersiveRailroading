@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -16,10 +17,16 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -113,7 +120,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 	
 	@Override
-	protected boolean canFitPassenger(Entity passenger) {
+	public boolean canFitPassenger(Entity passenger) {
 		return this.getPassengers().size() + this.staticPassengers.size() < this.getDefinition().getMaxPassengers();
 	}
 	
@@ -220,18 +227,22 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		super.removePassenger(passenger);
 		if (passengerPositions.containsKey(passenger.getPersistentID()) ) {
 			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
-			
-			Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
-			
-			ppos = ppos.add(this.getDefinition().getPassengerCenter(gauge));
-			Vec3d offppos = VecUtil.rotateYaw(ppos, this.rotationYaw);
-			
-			delta = delta.addVector(offppos.x, offppos.y, 0);
-			delta = delta.add(this.getPositionVector());
+			Vec3d delta = dismountPos(ppos);
 			
 			passengerPositions.remove(passenger.getPersistentID());
 			passenger.setPositionAndUpdate(delta.x, passenger.posY, delta.z);
 		}
+	}
+	
+	public Vec3d dismountPos(Vec3d ppos) {
+		Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
+		
+		ppos = ppos.add(this.getDefinition().getPassengerCenter(gauge));
+		Vec3d offppos = VecUtil.rotateYaw(ppos, this.rotationYaw);
+		
+		delta = delta.addVector(offppos.x, offppos.y, 0);
+		delta = delta.add(this.getPositionVector());
+		return new Vec3d(delta.x, this.posY, delta.z);
 	}
 
 	public void handlePassengerPositions(Map<UUID, Vec3d> passengerPositions) {
@@ -258,12 +269,16 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		public NBTTagCompound data;
 		public UUID uuid;
 		public float rotation;
+		private BlockPos startPos;
+		public boolean isVillager;
 		public Object cache;
 
 		public StaticPassenger(EntityLiving entityliving ) {
 			ident = EntityList.getKey(entityliving);
 			data = entityliving.writeToNBT(new NBTTagCompound());
 			uuid = entityliving.getPersistentID();
+			startPos = entityliving.getPosition();
+			isVillager = entityliving instanceof EntityVillager;
 			rotation = (float) (Math.random() * 360);
 		}
 		
@@ -272,6 +287,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			data = init.getCompoundTag("data");
 			uuid = UUID.fromString(init.getString("uuid"));
 			rotation = init.getFloat("rotation");
+			startPos = NBTUtil.getPosFromTag(init.getCompoundTag("pos"));
+			isVillager = init.getBoolean("isVillager");
 		}
 		
 		public NBTTagCompound writeNBT() {
@@ -280,6 +297,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			init.setTag("data", data);
 			init.setString("uuid", uuid.toString());
 			init.setFloat("rotation", rotation);
+			init.setTag("pos", NBTUtil.createPosTag(startPos));
+			init.setBoolean("isVillager", isVillager);
 			return init;
 		}
 
@@ -301,7 +320,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		Vec3d off = VecUtil.rotateYaw(center.subtract(pos), -this.rotationYaw);
 		
 		off = this.getDefinition().correctPassengerBounds(gauge, off);
-		int wiggle = 2;
+		int wiggle = sp.isVillager ? 10 : 2;
 		off = off.addVector((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
 		off = this.getDefinition().correctPassengerBounds(gauge, off);
 		off = off.addVector(0, -off.y, 0);
@@ -312,17 +331,38 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		sendToObserving(new PassengerPositionsPacket(this));
 	}
 	
-	public EntityLiving removeStaticPasssenger(Vec3d pos) {
+	public EntityLiving removeStaticPasssenger(Vec3d pos, boolean isVillager) {
 		if (staticPassengers.size() > 0) {
-			int index = staticPassengers.size()-1;
+			int index = -1;
+			for (int i = staticPassengers.size()-1; i >= 0; i++) {
+				if (staticPassengers.get(i).isVillager == isVillager) {
+					index = i;
+					break;
+				}
+			}
+			if (index == -1) {
+				return null;
+			}
 			StaticPassenger passenger = staticPassengers.get(index);
 			staticPassengers.remove(index);
-			passengerPositions.remove(passenger.uuid);
+			Vec3d ppos = passengerPositions.remove(passenger.uuid);
 			
 			sendToObserving(new PassengerPositionsPacket(this));
 			
+			if (passenger.isVillager) {
+				ppos = dismountPos(ppos);
+
+				double distanceMoved = pos.distanceTo(new Vec3d(passenger.startPos));
+
+				int payout = (int) Math.floor(distanceMoved * Config.ConfigBalance.villagerPayoutPerMeter);
+				world.spawnEntity(new EntityItem(world, pos.x, pos.y, pos.z, new ItemStack(Items.EMERALD, payout)));
+				
+				pos = ppos;
+			}
+			
 			EntityLiving ent = passenger.respawn(world, pos);
 			world.spawnEntity(ent);
+			
 			return ent;
 		}
 		return null;
@@ -336,7 +376,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			return;
 		}
 		
-		while (this.removeStaticPasssenger(this.getPositionVector()) != null) {
+		while (this.removeStaticPasssenger(this.getPositionVector(), true) != null) {
+			//Unmounts all riding ents
+		}
+		
+		while (this.removeStaticPasssenger(this.getPositionVector(), false) != null) {
 			//Unmounts all riding ents
 		}
 	}
