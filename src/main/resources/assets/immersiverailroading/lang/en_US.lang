@@ -12,6 +12,7 @@ item.immersiverailroading:item_rail_part.name=Rail Segment
 item.immersiverailroading:item_cast_rail.name=Rail Casting
 item.immersiverailroading:item_manual.name=Immersive Railroading Manual
 item.immersiverailroading:item_rail.name=Track Blueprint
+item.immersiverailroading:item_conductor_whistle.name=Conductor's Whistle
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
