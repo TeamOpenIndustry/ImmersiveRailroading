@@ -39,7 +39,7 @@ chat.immersiverailroading:augment.set=Die Verbesserung aktiviert nun nurnoch dan
 chat.immersiverailroading:augment.reset=Die Verbesserung aktiviert nun bei jedem Fahrzeug
 
 gui.immersiverailroading:label.brake=Bremse
-gui.immersiverailroading:label.throttle=Drosseln
+gui.immersiverailroading:label.throttle=Gas
 gui.immersiverailroading:selector.type=Typ: %s
 gui.immersiverailroading:selector.gauge=Spurweite: %s
 gui.immersiverailroading:selector.quarters=Virtelkurven: 
