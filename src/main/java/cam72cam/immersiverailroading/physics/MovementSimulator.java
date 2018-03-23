@@ -7,7 +7,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import trackapi.lib.ITrack;
-import trackapi.lib.Util;
 
 public class MovementSimulator {
 	private World world;
@@ -56,8 +55,9 @@ public class MovementSimulator {
 		
 		Vec3d nextFront = nextPosition(front, position.rotationYaw, position.frontYaw, moveDistance);
 		Vec3d nextRear = nextPosition(rear, position.rotationYaw, position.rearYaw, moveDistance);
-		if (nextFront.equals(front) || nextRear == rear) {
+		if (nextFront.equals(front) || nextRear.equals(rear)) {
 			origPosition.speed = Speed.ZERO;
+			nextPosition(front, position.rotationYaw, position.frontYaw, moveDistance);
 			if (position.isOffTrack) {
 				origPosition.isOffTrack = true;
 			}
@@ -97,25 +97,9 @@ public class MovementSimulator {
 		return position;
 	}
 	
-	private ITrack findTrack(Vec3d currentPosition, float trainYaw) {
-		ITrack te = Util.getTileEntity(world, currentPosition, true);
-		if (te != null && te.getTrackGauge() == gauge) {
-			return te;
-		}
-		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(-1, trainYaw)), true);
-		if (te != null && te.getTrackGauge() == gauge) {
-			return te;
-		}
-		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(1, trainYaw)), true);
-		if (te != null && te.getTrackGauge() == gauge) {
-			return te;
-		}
-		return null;
-	}
-	
 
 	public Vec3d nextPosition(Vec3d currentPosition, float rotationYaw, float bogeyYaw, double distance) {
-		ITrack rail = findTrack(currentPosition, rotationYaw);
+		ITrack rail = MovementTrack.findTrack(world, currentPosition, rotationYaw, gauge);
 		if (rail == null) {
 			position.isOffTrack = true;
 			return currentPosition;
