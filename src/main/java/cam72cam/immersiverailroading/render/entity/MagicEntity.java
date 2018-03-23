@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -31,7 +32,23 @@ public class MagicEntity extends Entity {
 			return;
 		}
 		Vec3d pos = player.getPositionVector();
+		pos = pos.add(player.getLookVec());
 		this.setPosition(pos.x, pos.y, pos.z);
+	}
+
+	@Override
+	public AxisAlignedBB getEntityBoundingBox() {
+		return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+	}
+	
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox() {
+		return null;
+	}
+	
+	@Override
+	public AxisAlignedBB getRenderBoundingBox() {
+		return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
 	}
 	
 	public boolean shouldRenderInPass(int pass)

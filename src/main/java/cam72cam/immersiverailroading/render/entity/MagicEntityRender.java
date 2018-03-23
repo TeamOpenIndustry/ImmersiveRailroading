@@ -18,7 +18,9 @@ public class MagicEntityRender extends Render<MagicEntity> {
 
 	@Override
 	public void doRender(MagicEntity particle, double x, double y, double z, float entityYaw, float partialTicks) {
-		RenderOverride.renderStockAndParticles(partialTicks);
+		RenderOverride.renderTiles(partialTicks);
+		RenderOverride.renderStock(partialTicks);
+		RenderOverride.renderParticles(partialTicks);
 	}
 
 	@Override
