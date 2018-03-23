@@ -37,7 +37,6 @@ public class LocomotiveSteam extends Locomotive {
 	// Map<Slot, TicksToBurn>
 	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
-	private boolean gonnaExplode;
 	private double driverDiameter;
 	
 	public LocomotiveSteam(World world) {
