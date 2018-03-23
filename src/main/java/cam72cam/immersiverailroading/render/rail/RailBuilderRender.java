@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
@@ -31,6 +32,10 @@ public class RailBuilderRender {
 		} catch (Exception e) {
 			ImmersiveRailroading.catching(e);
 		}
+	}
+	
+	public static OBJRender getModel(Gauge gauge) {
+		return gauge != Gauge.MODEL ? baseRailModel : baseRailModelModel;
 	}
 
 	private static DisplayListCache displayLists = new DisplayListCache();
@@ -106,7 +111,9 @@ public class RailBuilderRender {
 		}
 		
 		model.bindTexture();
+		Minecraft.getMinecraft().mcProfiler.startSection("dl");
 		GL11.glCallList(displayList);
+		Minecraft.getMinecraft().mcProfiler.endSection();;
 		model.restoreTexture();
 	}
 }

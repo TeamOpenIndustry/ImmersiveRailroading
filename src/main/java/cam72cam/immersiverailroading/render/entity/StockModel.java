@@ -22,6 +22,7 @@ import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -58,8 +59,9 @@ public class StockModel extends OBJRender {
 				// remove first
 				availComponents.remove(component.type);
 			}
-			
+			Minecraft.getMinecraft().mcProfiler.startSection("render");
 			drawGroups(component.modelIDs, component.scale);
+			Minecraft.getMinecraft().mcProfiler.endSection();
 		}
 	}
 	
