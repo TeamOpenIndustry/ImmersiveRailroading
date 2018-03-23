@@ -18,7 +18,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
-@Mod(modid = ImmersiveRailroading.MODID, name="ImmersiveRailroading", version = ImmersiveRailroading.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", dependencies = "required-after:trackapi@[1.1,);required-after:immersiveengineering")
+@Mod(modid = ImmersiveRailroading.MODID, name="ImmersiveRailroading", version = ImmersiveRailroading.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", dependencies = "required-after:trackapi@[1.1,);after:immersiveengineering")
 public class ImmersiveRailroading
 {
     public static final String MODID = "immersiverailroading";

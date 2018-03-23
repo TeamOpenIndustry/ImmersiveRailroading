@@ -1,9 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import blusunrize.immersiveengineering.api.energy.DieselHandler;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
@@ -14,6 +12,7 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.sound.ISound;
+import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.Entity;
@@ -149,7 +148,7 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 		
 		if (this.getLiquidAmount() > 0 && getThrottle() != 0) {
-			int burnTime = DieselHandler.getBurnTime(this.getLiquid());
+			int burnTime = BurnUtil.getBurnTime(this.getLiquid());
 			if (burnTime == 0) {
 				burnTime = 200; //Default to 200 for unregistered liquids
 			}
@@ -178,14 +177,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public List<Fluid> getFluidFilter() {
-		ArrayList<Fluid> filter = new ArrayList<Fluid>();
-		filter.add(FluidRegistry.getFluid("oil"));
-		filter.add(FluidRegistry.getFluid("fuel"));
-		filter.add(FluidRegistry.getFluid("diesel"));
-		filter.add(FluidRegistry.getFluid("ethanol"));
-		filter.add(FluidRegistry.getFluid("biofuel"));
-		filter.add(FluidRegistry.getFluid("biodiesel"));
-		return filter;
+		return BurnUtil.burnableFluids();
 	}
 
 	@Override
