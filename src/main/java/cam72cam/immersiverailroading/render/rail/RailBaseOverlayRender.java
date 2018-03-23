@@ -2,76 +2,71 @@ package cam72cam.immersiverailroading.render.rail;
 
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.render.BakedModelCache;
-import cam72cam.immersiverailroading.render.BakedScaledModel;
+import cam72cam.immersiverailroading.track.BuilderBase.PosRot;
 import cam72cam.immersiverailroading.track.TrackBase;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.block.BlockStainedGlass;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
 
 public class RailBaseOverlayRender {
-	private static BlockRendererDispatcher blockRenderer;
-	private static IBlockState gravelState;
-	private static IBakedModel gravelModel;
-	private static BakedModelCache scaled = new BakedModelCache();
 	
-	private static BufferBuilder getOverlayBuffer(RailInfo info) {
-		if (blockRenderer == null) {
-			// Get model for current state
-			blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
+	private static void doDraw(RailInfo info) {
+		GL11.glTranslated(-info.position.getX(), -info.position.getY(), -info.position.getZ());
+		
+		GL11.glColor4f(1, 0, 0, 1);
+		
 			
-			gravelState = Blocks.STAINED_GLASS.getDefaultState().withProperty(BlockStainedGlass.COLOR, EnumDyeColor.RED);
-			gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
-		}
-		
-		// Create render targets
-		BufferBuilder worldRenderer = new BufferBuilder(2048);
-		
-		worldRenderer.setTranslation(-info.position.getX(), -info.position.getY(), -info.position.getZ());
+		for (TrackBase base : info.getBuilder(info.position).getTracksForRender()) {
+			if (!base.canPlaceTrack() ) {
+				GL11.glPushMatrix();
+				PosRot pos = base.getPos();
+				GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ()+1);
+				GL11.glScaled(1, base.getHeight() + 0.2f, 1);
 
-		// Start drawing
-		try {
-			worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-	
-			// From IE
-			worldRenderer.color(255, 255, 255, 255);
-			
-			boolean hasIssue = false;
-			
-			// This is evil but really fast :D
-			for (TrackBase base : info.getBuilder(info.position).getTracksForRender()) {
-				if (!base.canPlaceTrack() ) {
-					hasIssue = true;
-					String key = ""+ base.getHeight();
-					IBakedModel model = scaled.get(key);
-					if (model == null) {
-						model = new BakedScaledModel(gravelModel, base.getHeight() + 0.2f);
-						scaled.put(key, model);
-					}
-					
-					blockRenderer.getBlockModelRenderer().renderModel(info.world, model, gravelState, base.getPos(), worldRenderer, false);
-				}
+				GL11.glBegin(GL11.GL_QUADS);
+				// front
+			    GL11.glVertex3f(0.0f, 0.0f, 0.0f);
+			    GL11.glVertex3f(1.0f, 0.0f, 0.0f);
+			    GL11.glVertex3f(1.0f, 1.0f, 0.0f);
+			    GL11.glVertex3f(0.0f, 1.0f, 0.0f);
+			    // back
+			    GL11.glVertex3f(0.0f, 0.0f, -1.0f);
+			    GL11.glVertex3f(1.0f, 0.0f, -1.0f);
+			    GL11.glVertex3f(1.0f, 1.0f, -1.0f);
+			    GL11.glVertex3f(0.0f, 1.0f, -1.0f);
+			    // right
+			    GL11.glVertex3f(1.0f, 0.0f, 0.0f);
+			    GL11.glVertex3f(1.0f, 0.0f, -1.0f);
+			    GL11.glVertex3f(1.0f, 1.0f, -1.0f);
+			    GL11.glVertex3f(1.0f, 1.0f, 0.0f);
+			    // left
+			    GL11.glVertex3f(0.0f, 0.0f, 0.0f);
+			    GL11.glVertex3f(0.0f, 0.0f, -1.0f);
+			    GL11.glVertex3f(0.0f, 1.0f, -1.0f);
+			    GL11.glVertex3f(0.0f, 1.0f, 0.0f);
+			    // top
+			    GL11.glVertex3f(0.0f, 1.0f, 0.0f);
+			    GL11.glVertex3f(1.0f, 1.0f, 0.0f);
+			    GL11.glVertex3f(1.0f, 1.0f, -1.0f);
+			    GL11.glVertex3f(0.0f, 1.0f, -1.0f);
+			    // bottom
+			    GL11.glVertex3f(0.0f, 0.0f, 0.0f);
+			    GL11.glVertex3f(1.0f, 0.0f, 0.0f);
+			    GL11.glVertex3f(1.0f, 0.0f, -1.0f);
+			    GL11.glVertex3f(0.0f, 0.0f, -1.0f);
+				GL11.glEnd();
+				
+			    GL11.glPopMatrix();
 			}
-			
-			if (!hasIssue) {
-				return null;
-			}
-			
-		} finally {
-			worldRenderer.finishDrawing();
 		}
-		
-		return worldRenderer;
 	}
 
-	public static synchronized void draw(RailInfo info) {
-		RailRenderUtil.draw(RailBaseOverlayRender.getOverlayBuffer(info));
+	public static void draw(RailInfo info) {
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
+		GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
+		GL11.glPushMatrix();
+		doDraw(info);
+		GL11.glPopMatrix();
+		tex.restore();
+		color.restore();
 	}
 }
