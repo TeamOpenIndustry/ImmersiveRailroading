@@ -67,6 +67,9 @@ public class RailRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
+			if (world.isRemote) {
+				return false;
+			}
 			if (!player.isSneaking()) {
 				ItemStack held = player.getHeldItem(hand);
 				if (held.isEmpty() && outputFull()) {
