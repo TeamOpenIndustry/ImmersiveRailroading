@@ -137,7 +137,7 @@ public class AugmentDriver implements DriverBlock {
 				EntityRollingStockDefinition def = stock.getDefinition();
 
 				info.put("id", def.defID);
-				info.put("name", def.name);
+				info.put("name", def.name());
 
 				info.put("passengers", stock.getPassengers().size());
 				info.put("speed", stock.getCurrentSpeed().metric());

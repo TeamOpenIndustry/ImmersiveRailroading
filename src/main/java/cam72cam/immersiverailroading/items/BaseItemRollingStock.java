@@ -21,7 +21,7 @@ public abstract class BaseItemRollingStock extends Item {
 	protected void overrideStackDisplayName(ItemStack stack) {
 		EntityRollingStockDefinition def = ItemDefinition.get(stack);
 		if (def != null) {
-			stack.setStackDisplayName(TextFormatting.RESET + def.name);
+			stack.setStackDisplayName(TextFormatting.RESET + def.name());
 		}
 	}
 	

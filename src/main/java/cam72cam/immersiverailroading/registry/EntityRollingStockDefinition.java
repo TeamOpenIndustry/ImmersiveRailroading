@@ -30,6 +30,7 @@ import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
+import cam72cam.immersiverailroading.util.TextUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
@@ -51,7 +52,7 @@ public abstract class EntityRollingStockDefinition {
 	}
 
 	public final String defID;
-	public String name = "Unknown";
+	private String name = "Unknown";
 	private OBJModel model;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
@@ -514,6 +515,13 @@ public abstract class EntityRollingStockDefinition {
 			}
 		}
 		return blocksInBounds;
+	}
+	
+	public String name() {
+		String[] sp = this.defID.replaceAll(".json", "").split("/");
+		String localStr = String.format("%s:entity.%s.%s", ImmersiveRailroading.MODID, sp[sp.length-2], sp[sp.length-1]); 
+		String transStr = TextUtil.translate(localStr);
+		return localStr != transStr ? transStr : name;
 	}
 
 	public List<String> getTooltip(Gauge gauge) {
