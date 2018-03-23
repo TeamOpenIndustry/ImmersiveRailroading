@@ -39,7 +39,7 @@ chat.immersiverailroading:augment.set=Die Verbesserung aktiviert nun nurnoch dan
 chat.immersiverailroading:augment.reset=Die Verbesserung aktiviert nun bei jedem Fahrzeug
 
 gui.immersiverailroading:label.brake=Bremse
-gui.immersiverailroading:label.throttle=Drosseln
+gui.immersiverailroading:label.throttle=Gas
 gui.immersiverailroading:selector.type=Typ: %s
 gui.immersiverailroading:selector.gauge=Spurweite: %s
 gui.immersiverailroading:selector.quarters=Virtelkurven: 
@@ -152,3 +152,28 @@ immersiverailroading:detector_mode.speed=Geschwindigkeit erkennen
 immersiverailroading:detector_mode.passengers=Anzahl an passagieren erkennen
 immersiverailroading:detector_mode.cargo=Volle Güterwagen erkennen
 immersiverailroading:detector_mode.liquid=Volle Tankwagen erkennen
+
+chat.immersiverailroading:build.invalid_block=Ungültiger Block  bei x=%s y=%s z=%s
+chat.immersiverailroading:misc.wood_planks=Holzplanken
+gui.immersiverailroading:selector.cast_repeat=Wiederholter Gießvorgang
+gui.immersiverailroading:selector.cast_single=Einzelner Gießvorgang
+gui.immersiverailroading:stock.freight_capacity=Volumen:       %s Stacks
+gui.immersiverailroading:stock.tank_capacity=Volumen:       %s Eimer
+gui.immersiverailroading:stock.weight=Gewicht:          %s Kg
+immersiverailroading:keys.decrease_brake=Bremse reduzieren
+immersiverailroading:keys.decrease_throttle=Gas reduzieren
+immersiverailroading:keys.horn=Zug Horn
+immersiverailroading:keys.increase_brake=Bremse verstärken
+immersiverailroading:keys.increase_throttle=Gas erhöhen
+immersiverailroading:keys.zero_brake=Bremse zurücksetzten
+immersiverailroading:keys.zero_throttle=Gas zurücksetzen
+immersiverailroading:loco_control_mode.brake=Bremse
+immersiverailroading:loco_control_mode.computer=Computer
+immersiverailroading:loco_control_mode.horn=Horn
+immersiverailroading:loco_control_mode.throttle_forward=Vorwärts
+immersiverailroading:loco_control_mode.throttle_reverse=Rückwärts
+item.immersiverailroading:item_conductor_whistle.name=Schaffners Pfeife
+key.categories.immersiverailroading=Immersive Railroading
+part.immersiverailroading:component.firebox=Feuerbox
+track.immersiverailroading:position.pixels_locked=Pixelgenau
+track.immersiverailroading:position.smooth_locked=Weich
