@@ -165,14 +165,14 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	public void setDead() {
+		super.setDead();
+		
 		if (idle != null) {
 			idle.stop();
 		}
 		if (horn != null) {
 			horn.stop();
 		}
-		// Don't do drops if from explosion
-		super.setDead();
 	}
 
 	@Override

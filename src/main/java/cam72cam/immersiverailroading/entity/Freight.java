@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -172,8 +173,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 	
 	@Override
-	public void setDead() {
-		super.setDead();
+	public void onDeath(StockDeathType type) {
+		super.onDeath(type);
 		
 		if (world.isRemote) {
 			return;

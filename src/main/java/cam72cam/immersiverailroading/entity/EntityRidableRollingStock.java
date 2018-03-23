@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -369,12 +370,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 	
 	@Override
-	public void setDead() {
-		super.setDead();
-		
-		if (world.isRemote) {
-			return;
-		}
+	public void onDeath(StockDeathType type) {
+		super.onDeath(type);
 		
 		while (this.removeStaticPasssenger(this.getPositionVector(), true) != null) {
 			//Unmounts all riding ents
