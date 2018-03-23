@@ -138,6 +138,7 @@ public class AugmentDriver implements DriverBlock {
 
 				info.put("id", def.defID);
 				info.put("name", def.name());
+				info.put("tag", stock.tag);
 
 				info.put("passengers", stock.getPassengers().size());
 				info.put("speed", stock.getCurrentSpeed().metric());
@@ -197,6 +198,26 @@ public class AugmentDriver implements DriverBlock {
 				info.put("speed_km", stock.getCurrentSpeed().metric());
 				
 				return new Object[] { info };
+			}
+			return null;
+		}
+		
+		@Callback(doc = "function():table -- gets the stock's tag")
+		public Object[] getTag(Context context, Arguments arguments) {
+			TileRailBase te = TileRailBase.get(world, pos);
+			EntityMoveableRollingStock stock = te.getStockNearBy(null);
+			if (stock != null) {
+				return new Object[] {stock.tag};
+			}
+			return null;
+		}
+		
+		@Callback(doc = "function():table -- sets the stock's tag")
+		public Object[] setTag(Context context, Arguments arguments) {
+			TileRailBase te = TileRailBase.get(world, pos);
+			EntityMoveableRollingStock stock = te.getStockNearBy(null);
+			if (stock != null) {
+				stock.tag = arguments.checkString(0);
 			}
 			return null;
 		}

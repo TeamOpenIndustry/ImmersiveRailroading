@@ -30,6 +30,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	
 	protected String defID;
 	public Gauge gauge;
+	public String tag;
 
 	public EntityRollingStock(World world, String defID) {
 		super(world);
@@ -87,18 +88,21 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	public void readSpawnData(ByteBuf additionalData) {
 		defID = BufferUtil.readString(additionalData);
 		gauge = Gauge.from(additionalData.readDouble());
+		tag = BufferUtil.readString(additionalData);
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		BufferUtil.writeString(buffer, defID);
 		buffer.writeDouble(gauge.value());
+		BufferUtil.writeString(buffer, tag);
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		nbttagcompound.setString("defID", defID);
 		nbttagcompound.setDouble("gauge", gauge.value());
+		nbttagcompound.setString("tag", tag);
 	}
 
 	@Override
@@ -109,6 +113,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		} else {
 			gauge = Gauge.STANDARD;
 		}
+		
+		tag = nbttagcompound.getString("tag");
 	}
 
 	@Override
