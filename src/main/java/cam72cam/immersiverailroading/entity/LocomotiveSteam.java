@@ -558,7 +558,6 @@ public class LocomotiveSteam extends Locomotive {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
-			this.gonnaExplode = true;
 			if (Config.ConfigDamage.explosionsEnabled) {
 				for (int i = 0; i < 5; i++) {
 					world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
@@ -570,19 +569,14 @@ public class LocomotiveSteam extends Locomotive {
 
 	@Override
 	public void setDead() {
-		if (this.gonnaExplode) {
-			this.isDead = true;
-			return;
-		}
+		super.setDead();
+		
 		if (idle != null) {
 			idle.stop();
 		}
 		if (pressure != null) {
 			pressure.stop();
 		}
-		
-		// Don't do drops if from explosion
-		super.setDead();
 	}
 
 	@Override
