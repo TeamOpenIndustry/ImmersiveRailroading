@@ -30,7 +30,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	
 	protected String defID;
 	public Gauge gauge;
-	public String tag;
+	public String tag = "";
 
 	public EntityRollingStock(World world, String defID) {
 		super(world);
