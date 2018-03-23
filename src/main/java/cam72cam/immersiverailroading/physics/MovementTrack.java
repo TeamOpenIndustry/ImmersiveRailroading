@@ -18,6 +18,22 @@ public class MovementTrack {
 		return TileRailBase.get(world, new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
 	}
 	
+	public static ITrack findTrack(World world, Vec3d currentPosition, float trainYaw, double gauge) {
+		ITrack te = Util.getTileEntity(world, currentPosition, true);
+		if (te != null && te.getTrackGauge() == gauge) {
+			return te;
+		}
+		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(-1, trainYaw)), true);
+		if (te != null && te.getTrackGauge() == gauge) {
+			return te;
+		}
+		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(1, trainYaw)), true);
+		if (te != null && te.getTrackGauge() == gauge) {
+			return te;
+		}
+		return null;
+	}
+	
 
 	public static Vec3d nextPosition(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
 		double maxDelta = 0.5;
@@ -25,7 +41,7 @@ public class MovementTrack {
 			double dist = 0;
 			while (dist < distanceMeters - maxDelta) {
 				dist += maxDelta;
-				ITrack te = Util.getTileEntity(world, currentPosition, true);
+				ITrack te = findTrack(world, currentPosition, trainYaw, rail.getTrackGauge());
 				if (te == null) {
 					return currentPosition;
 				}
@@ -34,7 +50,7 @@ public class MovementTrack {
 				trainYaw = VecUtil.toYaw(pastPos.subtractReverse(currentPosition));
 			}
 
-			ITrack te = Util.getTileEntity(world, currentPosition, true);
+			ITrack te = findTrack(world, currentPosition, trainYaw, rail.getTrackGauge());
 			if (te == null) {
 				return currentPosition;
 			}
