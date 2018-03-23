@@ -248,9 +248,19 @@ public class AugmentDriver implements DriverBlock {
 			TileRailBase te = TileRailBase.get(world, pos);
 			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
 			if (stock != null) {
-				stock.setThrottle((float) arguments.checkDouble(0));
+				stock.setThrottle(normalize(arguments.checkDouble(0)));
 			}
 			return null;
+		}
+		
+		private float normalize(double val) {
+			if (val > 1) {
+				return 1;
+			}
+			if (val < -1) {
+				return -1;
+			}
+			return (float)val;
 		}
 
 		@Callback(doc = "function(double) -- sets the locomotive brake")
@@ -258,7 +268,7 @@ public class AugmentDriver implements DriverBlock {
 			TileRailBase te = TileRailBase.get(world, pos);
 			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
 			if (stock != null) {
-				stock.setAirBrake((float) arguments.checkDouble(0));
+				stock.setAirBrake(normalize(arguments.checkDouble(0)));
 			}
 			return null;
 		}
