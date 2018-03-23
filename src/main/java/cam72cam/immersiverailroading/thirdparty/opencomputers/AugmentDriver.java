@@ -139,6 +139,11 @@ public class AugmentDriver implements DriverBlock {
 				info.put("id", def.defID);
 				info.put("name", def.name());
 				info.put("tag", stock.tag);
+				EnumFacing dir = EnumFacing.fromAngle(stock.rotationYaw);
+				if (stock.getCurrentSpeed().metric() < 0) {
+					dir = dir.getOpposite();
+				}
+				info.put("direction", dir.toString());
 
 				info.put("passengers", stock.getPassengers().size());
 				info.put("speed", stock.getCurrentSpeed().metric());
@@ -196,6 +201,11 @@ public class AugmentDriver implements DriverBlock {
 				info.put("tractive_effort_N", acc.tractiveEffortNewtons);
 				info.put("weight_kg", acc.massToMoveKg);
 				info.put("speed_km", stock.getCurrentSpeed().metric());
+				EnumFacing dir = EnumFacing.fromAngle(stock.rotationYaw);
+				if (stock.getCurrentSpeed().metric() < 0) {
+					dir = dir.getOpposite();
+				}
+				info.put("direction", dir.toString());
 				
 				return new Object[] { info };
 			}
