@@ -129,7 +129,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			this.markDirty();
 			return true;
 		}
-		return false;
+		return !ConfigDebug.deepSnow;
 	}
 
 	public BlockPos getParent() {
