@@ -39,5 +39,8 @@ public class OreHelper {
 		if (!OreDictionary.doesOreNameExist("scaffoldingSteel")) {
 			OreDictionary.registerOre("irLightEngineering", new ItemStack(Blocks.IRON_BARS));
 		}
+		if (!OreDictionary.doesOreNameExist("blockSteel")) {
+			OreDictionary.registerOre("blockSteel", new ItemStack(Blocks.IRON_BLOCK));
+		}
 	}
 }
