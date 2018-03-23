@@ -145,7 +145,7 @@ public class AugmentDriver implements DriverBlock {
 				}
 				info.put("direction", dir.toString());
 
-				info.put("passengers", stock.getPassengers().size());
+				info.put("passengers", stock.getPassengers().size() + stock.staticPassengers.size());
 				info.put("speed", stock.getCurrentSpeed().metric());
 				info.put("weight", stock.getWeight());
 
