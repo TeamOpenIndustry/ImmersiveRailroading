@@ -5,7 +5,7 @@ item.immersiverailroading:item_augment.WATER_TROUGH.name=Wasserbelader
 item.immersiverailroading:item_augment.LOCO_CONTROL.name=Geschwindigkeitsregler
 item.immersiverailroading:item_augment.ITEM_LOADER.name=Gegenstands belader
 item.immersiverailroading:item_augment.ITEM_UNLOADER.name=Gegenstands entlader
-item.immersiverailroading:item_augment.FLUID_LOADER.nameFlüssigkeits belader
+item.immersiverailroading:item_augment.FLUID_LOADER.name=Flüssigkeits belader
 item.immersiverailroading:item_augment.FLUID_UNLOADER.name=Flüssigkeits entlader
 item.immersiverailroading:item_augment.DETECTOR.name=Sensor
 item.immersiverailroading:item_rail_part.name=Schienensegment
