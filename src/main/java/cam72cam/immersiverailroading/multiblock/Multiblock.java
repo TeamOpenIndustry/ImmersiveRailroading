@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BlockUtil;
 
@@ -103,8 +104,7 @@ public abstract class Multiblock {
 					if (BlockUtil.canBeReplaced(world, compPos, false)) {
 						world.destroyBlock(compPos, true);
 					} else {
-						//TODO Localization
-						player.sendMessage(new TextComponentString(String.format("Invalid block at x=%s y=%s z=%s", compPos.getX(), compPos.getY(), compPos.getZ())));
+						player.sendMessage(ChatText.INVALID_BLOCK.getMessage(compPos.getX(), compPos.getY(), compPos.getZ()));
 						return;
 					}
 				}
@@ -125,9 +125,8 @@ public abstract class Multiblock {
 		}
 		
 		if (missing.size() != 0) {
-			player.sendMessage(new TextComponentString("Missing: "));
+			player.sendMessage(ChatText.STOCK_MISSING.getMessage());
 			for (String name : missing.keySet()) {
-				//TODO localize
 				player.sendMessage(new TextComponentString(String.format("  - %d x %s", missing.get(name), name)));
 			}
 		}

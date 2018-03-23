@@ -22,6 +22,8 @@ public enum ChatText {
 	BUILD_MISSING_RAIL_BED_FILL("build.missing.rail_bed_fill"),
 	SET_AUGMENT_FILTER("augment.set"),
 	RESET_AUGMENT_FILTER("augment.reset"),
+	WOOD_PLANKS("misc.wood_planks"),
+	INVALID_BLOCK("build.invalid_block"),
 	;
 	
 	private String value;

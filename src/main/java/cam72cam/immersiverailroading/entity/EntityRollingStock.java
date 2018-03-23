@@ -40,6 +40,11 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.entityCollisionReduction = 1F;
 		super.ignoreFrustumCheck = true;
 	}
+	
+	@Override
+	public String getName() {
+		return this.getDefinition().name();
+	}
 
 	public EntityRollingStockDefinition getDefinition() {
 		return this.getDefinition(EntityRollingStockDefinition.class);

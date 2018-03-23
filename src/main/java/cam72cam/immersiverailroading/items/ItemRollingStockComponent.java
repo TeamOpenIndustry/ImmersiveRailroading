@@ -47,7 +47,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 	protected void overrideStackDisplayName(ItemStack stack) {
 		EntityRollingStockDefinition def = ItemDefinition.get(stack);
 		if (def != null) {
-			stack.setStackDisplayName(TextFormatting.RESET + def.name + " " + ItemComponent.getComponentType(stack).toString());
+			stack.setStackDisplayName(TextFormatting.RESET + def.name() + " " + ItemComponent.getComponentType(stack).toString());
 		}
 	}
 	

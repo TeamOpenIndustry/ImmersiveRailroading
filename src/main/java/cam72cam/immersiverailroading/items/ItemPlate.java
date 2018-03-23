@@ -69,7 +69,7 @@ public class ItemPlate extends Item {
 		if (plate == PlateType.BOILER) {
 			EntityRollingStockDefinition def = ItemDefinition.get(stack);
 			if (def != null) {
-				stack.setStackDisplayName(TextFormatting.RESET + plate.toString() + " " + def.name);
+				stack.setStackDisplayName(TextFormatting.RESET + plate.toString() + " " + def.name());
 			}
 		} else {
 			stack.setStackDisplayName(TextFormatting.RESET + plate.toString());

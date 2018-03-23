@@ -163,7 +163,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	
 	public void addNextComponent(EntityPlayer player) {
 		if (this.isBuilt()) {
-			player.sendMessage(ChatText.STOCK_BUILT.getMessage(this.getDefinition().name));
+			player.sendMessage(ChatText.STOCK_BUILT.getMessage(this.getDefinition().name()));
 			return;
 		}
 		
@@ -325,8 +325,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 					break;
 				}
 			} else {
-				//TODO localize
-				str += String.format(" (%d x %s)", component.getWoodCost(gauge, getDefinition()), "Wood Planks");
+				str += String.format(" (%d x %s)", component.getWoodCost(gauge, getDefinition()), ChatText.WOOD_PLANKS.toString());
 			}
 			player.sendMessage(new TextComponentString(str));
 		}
@@ -339,7 +338,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		this.isBuilt = false;
 		if (this.builtItems.size() <= 1) {
-			player.sendMessage(ChatText.STOCK_DISSASEMBLED.getMessage(this.getDefinition().name));
+			player.sendMessage(ChatText.STOCK_DISSASEMBLED.getMessage(this.getDefinition().name()));
 			return null;
 		}
 		

@@ -524,7 +524,7 @@ public class StockModel extends OBJRender {
 	private RenderComponent requireComponent(LocomotiveSteamDefinition def, RenderComponentType rct, String side, Gauge gauge) {
 		RenderComponent comp = def.getComponent(rct, side, gauge);
 		if (comp == null) {
-			ImmersiveRailroading.error("Missing component for %s: %s %s", def.name, rct, side);
+			ImmersiveRailroading.error("Missing component for %s: %s %s", def.name(), rct, side);
 		}
 		
 		return comp;

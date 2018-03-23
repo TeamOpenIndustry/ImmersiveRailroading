@@ -37,7 +37,9 @@ chat.immersiverailroading:build.missing.rails=Missing %s rails
 chat.immersiverailroading:build.missing.rail_bed=Missing %s rail_bed
 chat.immersiverailroading:build.missing.rail_bed_fill=Missing %s rail bed fill
 chat.immersiverailroading:augment.set=Set Augment to act only upon %s
-chat.immersiverailroading:augment.reset=Set Augment to act upon any stock 
+chat.immersiverailroading:augment.reset=Set Augment to act upon any stock
+chat.immersiverailroading:misc.wood_planks=Wood Planks
+chat.immersiverailroading:build.invalid_block=Invalid block at x=%s y=%s z=%s
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
@@ -167,3 +169,12 @@ immersiverailroading:loco_control_mode.throttle_reverse=Throttle Reverse
 immersiverailroading:loco_control_mode.brake=Brake
 immersiverailroading:loco_control_mode.horn=Horn
 immersiverailroading:loco_control_mode.computer=Computer
+
+key.categories.immersiverailroading=Immersive Railroading
+immersiverailroading:keys.increase_throttle=Increase Throttle
+immersiverailroading:keys.zero_throttle=Zero Throttle
+immersiverailroading:keys.decrease_throttle=Decrease Throttle
+immersiverailroading:keys.increase_brake=Increase Air Brake
+immersiverailroading:keys.zero_brake=Zero Air Brake
+immersiverailroading:keys.decrease_brake=Decrease Air Brake
+immersiverailroading:keys.horn=Sound Horn
