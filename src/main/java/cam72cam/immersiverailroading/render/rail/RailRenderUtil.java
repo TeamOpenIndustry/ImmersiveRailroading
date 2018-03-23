@@ -31,8 +31,8 @@ public class RailRenderUtil {
 			GL11.glTranslated(Math.floor(info.placementPosition.x), Math.floor(info.placementPosition.y), Math.floor(info.placementPosition.z));
 		
 		
-			RailBaseRender.draw(info);
-			RailBaseOverlayRender.draw(info);
+			RailBaseRender.draw(info.clone());
+			RailBaseOverlayRender.draw(info.clone());
 			GL11.glPopMatrix();
 		}
 		
