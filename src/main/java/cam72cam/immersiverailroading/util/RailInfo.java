@@ -124,7 +124,7 @@ public class RailInfo {
 			// NOP
 			break;
 		case SMOOTH_LOCKED:
-			if (quarters != 0) {
+			if (quarter != 0) {
 				break;
 			}
 			
