@@ -471,7 +471,9 @@ public class ClientProxy extends CommonProxy {
 	                
 	                GL11.glTranslated(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5);
 	                
-	                GL11.glRotated(-(int)((player.rotationYaw+45) / 90) * 90, 0, 1, 0);
+	                if (Math.random() < 0.1) {
+	                }
+	                GL11.glRotated(-(int)(((player.rotationYaw%360+360)%360+45) / 90) * 90, 0, 1, 0);
 	                
 	                GL11.glTranslated(-0.5, -0.5, -0.5);
 	                
