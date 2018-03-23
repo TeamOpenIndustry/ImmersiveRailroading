@@ -78,6 +78,8 @@ public class ClientSound implements ISound {
 			init();
 		}
 		
+		Minecraft.getMinecraft().mcProfiler.startSection("irSound");
+		
 		SoundSystem snd = sndSystem.get();
 		
 		float vol = currentVolume * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
@@ -110,6 +112,8 @@ public class ClientSound implements ISound {
 			sndSystem.get().setPitch(id, appliedPitch / (float)Math.sqrt(Math.sqrt(gauge.scale())));
 			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, appliedPitch / (float)Math.sqrt(Math.sqrt(gauge.scale()))));
 		}
+
+		Minecraft.getMinecraft().mcProfiler.endSection();
 		
 		snd.interruptCommandThread();
 	}
