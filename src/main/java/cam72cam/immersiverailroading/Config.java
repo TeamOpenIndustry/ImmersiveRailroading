@@ -33,6 +33,12 @@ public class Config {
 		@Comment("All gauges require fuel")
 		public static boolean FuelRequired = true;
 
+		@Comment("Slope Multiplier: Higher numbers increase slowdown, lower numbers decrease slowdown")
+		public static double slopeMultiplier = 1.0;
+		
+		@Comment("Brake Multiplier: Higher numbers increase slowdown, lower numbers decrease slowdown")
+		public static double brakeMultiplier = 1.0;
+		
 		@Comment({ "How heavy is a single block in Kg" })
 		public static int blockWeight = 10;
 

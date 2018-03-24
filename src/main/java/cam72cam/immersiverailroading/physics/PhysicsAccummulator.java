@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
@@ -42,7 +43,7 @@ public class PhysicsAccummulator {
 		rollingResistanceNewtons += 0.0015 * stockMassLb * 4.44822f;
 		
 		// SHOULD THIS HAVE DIRECTION MULT?
-		double grade = -Math.tan(Math.toRadians(latest.rotationPitch % 90));
+		double grade = -Math.tan(Math.toRadians(latest.rotationPitch % 90)) * Config.ConfigBalance.slopeMultiplier;
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
@@ -58,7 +59,8 @@ public class PhysicsAccummulator {
 	
 	public Speed getVelocity() {
 		// 0.25 = steel wheel on steel rail
-		double brakeAdhesion =  massToMoveKg * 0.25;
+		// 0.25 = assume 1/4th brake force could be applied using air brake
+		double brakeAdhesion =  massToMoveKg * 0.25 * 0.25 * Config.ConfigBalance.brakeMultiplier;
 		double airBrakeNewtons = brakeAdhesion * Math.min(airBrake, 1) * 4.44822f;
 		
 		// a = f (to newtons) * m (to newtons)
