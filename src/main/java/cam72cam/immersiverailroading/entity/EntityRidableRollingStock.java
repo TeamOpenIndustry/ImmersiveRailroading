@@ -21,7 +21,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
@@ -335,7 +335,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	public EntityLiving removeStaticPasssenger(Vec3d pos, boolean isVillager) {
 		if (staticPassengers.size() > 0) {
 			int index = -1;
-			for (int i = staticPassengers.size()-1; i >= 0; i++) {
+			for (int i = staticPassengers.size()-1; i >= 0; i--) {
 				if (staticPassengers.get(i).isVillager == isVillager) {
 					index = i;
 					break;
@@ -356,7 +356,12 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				double distanceMoved = pos.distanceTo(new Vec3d(passenger.startPos));
 
 				int payout = (int) Math.floor(distanceMoved * Config.ConfigBalance.villagerPayoutPerMeter);
-				world.spawnEntity(new EntityItem(world, pos.x, pos.y, pos.z, new ItemStack(Items.EMERALD, payout)));
+				
+				List<Item> payouts = Config.ConfigBalance.getVillagerPayout(); 
+				if (payouts.size() != 0) {
+					int type = (int)(Math.random() * 100) % payouts.size();
+					world.spawnEntity(new EntityItem(world, pos.x, pos.y, pos.z, new ItemStack(payouts.get(type), payout)));
+				}
 				
 				pos = ppos;
 			}
