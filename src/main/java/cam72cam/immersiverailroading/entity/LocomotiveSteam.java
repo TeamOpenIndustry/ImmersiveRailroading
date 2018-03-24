@@ -498,7 +498,8 @@ public class LocomotiveSteam extends Locomotive {
 			// 1 KCal raises 1KG water at STP 1 degree
 			// 1 KG of water == 1 m^3 of water 
 			// TODO what happens when we change liters per mb FluidQuantity.FromMillibuckets((int) waterLevelMB).Liters()
-			boilerTemperature += energyKCalDeltaTick / (waterLevelMB / 1000);
+			//  +1 prevents div by zero
+			boilerTemperature += energyKCalDeltaTick / ((waterLevelMB + 1) / 1000);
 		}
 		
 		if (boilerTemperature > 100) {
