@@ -161,9 +161,46 @@ public class MovementTrack {
 			TileRailBase directRail = directRailFromPosition(world, outPosition);
 			if (directRail != null) {
 				outPosition = new Vec3d(outPosition.x, directRail.getPos().getY() + directRail.getHeight(), outPosition.z);
+				if (rail.getType() == TrackItems.SLOPE) {
+					Vec3d offset = outPosition.subtract(currentPosition).normalize();
+					float prevHeight = directRail.getPos().getY() + directRail.getHeight();
+					float nextHeight = directRail.getPos().getY() + directRail.getHeight();
+					float prevDist = 0;
+					float nextDist = 0;
+					
+					TileRailBase prev = directRailFromPosition(world, outPosition.subtract(offset));
+					if (prev == null) {
+						prev = directRailFromPosition(world, outPosition.subtract(offset).addVector(0, 1, 0));
+					}
+					if (prev == null) {
+						prev = directRailFromPosition(world, outPosition.subtract(offset).addVector(0, -1, 0));
+					}
+					if (prev != null) {
+						prevHeight = prev.getPos().getY() + prev.getHeight();
+						prevDist = (float) new Vec3d(prev.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition); 
+					}
+					TileRailBase next = directRailFromPosition(world, outPosition.add(offset));
+					if (next == null ) {
+						next = directRailFromPosition(world, outPosition.add(offset).addVector(0, 1, 0));
+					}
+					if (next == null ) {
+						next = directRailFromPosition(world, outPosition.add(offset).addVector(0, -1, 0));
+					}
+					if (next != null) {
+						nextHeight = next.getPos().getY() + next.getHeight();
+						nextDist = (float) new Vec3d(next.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition);
+					}
+					
+					if (prevDist + nextDist != 0) {
+						float height = (prevHeight * nextDist + nextHeight * prevDist) / (nextDist + prevDist); 
+						
+						outPosition = new Vec3d(outPosition.x, height, outPosition.z);
+					}
+				}
 			} else {
 				outPosition = new Vec3d(outPosition.x, currentPosition.y, outPosition.z);
 			}
+
 			
 			return outPosition;
 		}
