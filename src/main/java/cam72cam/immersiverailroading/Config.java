@@ -34,7 +34,7 @@ public class Config {
 		public static boolean FuelRequired = true;
 
 		@Comment({ "How heavy is a single block in Kg" })
-		public static int blockWeight = 100;
+		public static int blockWeight = 10;
 
 		@Comment({ "MilliBuckets per Liter" })
 		public static int MB_PER_LITER = 1;
