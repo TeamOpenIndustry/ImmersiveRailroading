@@ -25,6 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	

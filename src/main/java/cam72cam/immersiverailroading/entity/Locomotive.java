@@ -11,6 +11,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
 public abstract class Locomotive extends FreightTank {
 
@@ -131,7 +132,7 @@ public abstract class Locomotive extends FreightTank {
 	
 	private void simulateWheelSlip() {
 		double applied = getAppliedTractiveEffort(this.getCurrentSpeed());
-		double actual = this.getDefinition().getStartingTractionNewtons(gauge);
+		double actual = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient();
 		if (applied > actual) {
 			double speedMultiplier = 1;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
 			this.distanceTraveled += Math.copySign(Math.min((applied / actual - 1)/100, 0.8), getThrottle()) * speedMultiplier; //Wheel Slip
@@ -146,11 +147,11 @@ public abstract class Locomotive extends FreightTank {
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
 		
 		
-		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons(gauge)) {
+		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient()) {
 			// CRC Handbook of Physical Quantities. Boca Raton, FL: CRC Press, 1997: 145-156.
 			double us = 0.74;
 			double uk = 0.57;
-			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons(gauge) * (uk/us);
+			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons(gauge) * (uk/us) * slipCoefficient();
 		}
 		
 		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
@@ -187,5 +188,25 @@ public abstract class Locomotive extends FreightTank {
 			dataManager.set(AIR_BRAKE, newAirBrake);
 			triggerResimulate();
 		}
+	}
+	
+	public double slipCoefficient() {
+		double slipMult = 1.0;
+		World world = getEntityWorld();
+		if (world.isRaining() && world.canSeeSky(getPosition())) {
+			Biome biome = world.getBiome(getPosition());
+			if (biome.canRain()) {
+				slipMult = 0.6;
+			}
+			if (biome.isSnowyBiome()) {
+				slipMult = 0.4;
+			}
+		}
+		// Wheel balance messing with friction
+		if (this.getCurrentSpeed().metric() != 0) {
+			double balance = 1 - 0.005 * Math.abs(this.getCurrentSpeed().metric());
+			slipMult *= balance;
+		}
+		return slipMult;
 	}
 }
