@@ -72,7 +72,7 @@ public abstract class BlockRailBase extends Block {
 		if (parent == null || !parent.isLoaded()) {
 			return stack;
 		}
-		ItemGauge.setGauge(stack, parent.getGauge());
+		ItemGauge.set(stack, parent.getGauge());
 		ItemTrackBlueprint.setType(stack, parent.getType());
 		ItemTrackBlueprint.setLength(stack, parent.getLength());
 		ItemTrackBlueprint.setQuarters(stack, parent.getTurnQuarters());
