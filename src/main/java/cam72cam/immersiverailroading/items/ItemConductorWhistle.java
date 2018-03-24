@@ -36,6 +36,7 @@ public class ItemConductorWhistle extends Item {
 			}
 			if (!whistle.isPlaying()) {
 				whistle.setPitch((float) (Math.random() / 4 + 0.75));
+				whistle.setVolume(0.7f);
 				whistle.play(player.getPositionVector());
 			}
 		} else {
