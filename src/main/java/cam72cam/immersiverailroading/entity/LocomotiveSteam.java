@@ -499,8 +499,7 @@ public class LocomotiveSteam extends Locomotive {
 		
 		if (boilerTemperature > 100) {
 			// Assume linear relationship between temperature and pressure
-			// Max 2 degree per second
-			float heatTransfer = Math.min(2.0f/20, boilerTemperature - 100);
+			float heatTransfer = boilerTemperature - 100;
 			boilerPressure += heatTransfer;
 
 			if (this.getPercentLiquidFull() > 25) {
