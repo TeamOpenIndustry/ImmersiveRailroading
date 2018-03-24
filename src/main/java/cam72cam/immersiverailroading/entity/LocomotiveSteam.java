@@ -526,6 +526,7 @@ public class LocomotiveSteam extends Locomotive {
 			double burnableSlots = this.cargoItems.getSlots()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
 			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
+			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen capability to balance heat loss
 			
 			float delta = (float) (throttle * maxPressureTick);
 			
