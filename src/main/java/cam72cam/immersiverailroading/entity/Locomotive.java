@@ -1,11 +1,13 @@
 package cam72cam.immersiverailroading.entity;
 
 
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -22,6 +24,9 @@ public abstract class Locomotive extends FreightTank {
 
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
+	
+	private boolean deadMansSwitch;
+	private int deadManChangeTimeout;
 
 
 	public Locomotive(World world, String defID) {
@@ -60,6 +65,7 @@ public abstract class Locomotive extends FreightTank {
 		super.writeEntityToNBT(nbttagcompound);
 		nbttagcompound.setFloat("throttle", getThrottle());
 		nbttagcompound.setFloat("brake", getAirBrake());
+		nbttagcompound.setBoolean("deadMansSwitch", deadMansSwitch);
 	}
 
 	@Override
@@ -67,6 +73,7 @@ public abstract class Locomotive extends FreightTank {
 		super.readEntityFromNBT(nbttagcompound);
 		setThrottle(nbttagcompound.getFloat("throttle"));
 		setAirBrake(nbttagcompound.getFloat("brake"));
+		deadMansSwitch = nbttagcompound.getBoolean("deadMansSwitch");
 	}
 	
 	@Override
@@ -101,6 +108,17 @@ public abstract class Locomotive extends FreightTank {
 				setAirBrake(getAirBrake() - airBrakeNotch);
 			}
 			break;
+		case DEAD_MANS_SWITCH:
+			if (deadManChangeTimeout == 0) { 
+				deadMansSwitch = !deadMansSwitch;
+				if (deadMansSwitch) {
+					source.sendMessage(ChatText.DEADMANS_SWITCH_ENABLED.getMessage());
+				} else {
+					source.sendMessage(ChatText.DEADMANS_SWITCH_DISABLED.getMessage());
+				}
+				this.deadManChangeTimeout = 5;
+			}
+			break;
 		default:
 			super.handleKeyPress(source, key);
 			break;
@@ -112,6 +130,23 @@ public abstract class Locomotive extends FreightTank {
 		super.onUpdate();
 		
 		if (!world.isRemote) {
+			if (deadManChangeTimeout > 0) {
+				deadManChangeTimeout -= 1;
+			}
+			
+			if (deadMansSwitch && !this.getCurrentSpeed().isZero()) {
+				boolean hasDriver = false;
+				for (Entity entity : this.getPassengers()) {
+					if (entity instanceof EntityPlayer) {
+						hasDriver = true;
+						break;
+					}
+				}
+				if (!hasDriver) {
+					this.setThrottle(0);
+					this.setAirBrake(1);
+				}
+			}
 			if (this.getDataManager().get(HORN) > 0) {
 				this.getDataManager().set(HORN, this.getDataManager().get(HORN)-1);
 			}

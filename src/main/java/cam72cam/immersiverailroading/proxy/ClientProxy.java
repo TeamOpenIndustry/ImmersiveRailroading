@@ -197,6 +197,7 @@ public class ClientProxy extends CommonProxy {
 		keys.put(KeyTypes.AIR_BRAKE_ZERO, new KeyBinding("immersiverailroading:keys.zero_brake", Keyboard.KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.AIR_BRAKE_DOWN, new KeyBinding("immersiverailroading:keys.decrease_brake", Keyboard.KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.HORN, new KeyBinding("immersiverailroading:keys.horn", Keyboard.KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.DEAD_MANS_SWITCH, new KeyBinding("immersiverailroading:keys.dead_mans_switch", Keyboard.KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID));
 		
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_UP));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_DOWN));
@@ -205,6 +206,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_DOWN));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_ZERO));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.HORN));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.DEAD_MANS_SWITCH));
 		
 		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
 	}
