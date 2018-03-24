@@ -70,13 +70,14 @@ public class RailBaseRender {
 
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void draw(RailInfo info) {
-		Integer displayList = displayLists.get(RailRenderUtil.renderID(info));
+		String id = RailRenderUtil.renderID(info);
+		Integer displayList = displayLists.get(id);
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
 			drawSync(info);
 			GL11.glEndList();
-			displayLists.put(RailRenderUtil.renderID(info), displayList);
+			displayLists.put(id, displayList);
 		}
 		GL11.glCallList(displayList);
 	}
