@@ -50,7 +50,7 @@ public class PhysicsAccummulator {
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(speed) * (direction ? 1 : -1);
-			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2));
+			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient();
 		}
 		
 		int slowdown = movable.getSpeedRetarderSlowdown(latest);
