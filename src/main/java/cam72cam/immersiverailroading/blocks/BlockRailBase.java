@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -71,6 +72,7 @@ public abstract class BlockRailBase extends Block {
 		if (parent == null || !parent.isLoaded()) {
 			return stack;
 		}
+		ItemGauge.setGauge(stack, parent.getGauge());
 		ItemTrackBlueprint.setType(stack, parent.getType());
 		ItemTrackBlueprint.setLength(stack, parent.getLength());
 		ItemTrackBlueprint.setQuarters(stack, parent.getTurnQuarters());
