@@ -34,6 +34,9 @@ public class LocomotiveSteam extends Locomotive {
 	private static DataParameter<Float> BOILER_PRESSURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
 	// Celsius
 	private static DataParameter<Float> BOILER_TEMPERATURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
+
+	private static DataParameter<Boolean> PRESSURE_VALVE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
+	
 	// Map<Slot, TicksToBurn>
 	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
@@ -48,6 +51,7 @@ public class LocomotiveSteam extends Locomotive {
 		
 		this.getDataManager().register(BOILER_PRESSURE, 0f);
 		this.getDataManager().register(BOILER_TEMPERATURE, 0f);
+		this.getDataManager().register(PRESSURE_VALVE, false);
 		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
 		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
 	}
@@ -355,7 +359,7 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
-			if (steams != null && (this.getBoilerPressure() >= this.getDefinition().getMaxPSI(gauge) || !Config.isFuelRequired(gauge))) {
+			if (steams != null && (this.getDataManager().get(PRESSURE_VALVE) || !Config.isFuelRequired(gauge))) {
 				if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
 					if (!pressure.isPlaying()) {
 						pressure.play(getPositionVector());
@@ -508,6 +512,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			// Pressure relief valve
 			int maxPSI = this.getDefinition().getMaxPSI(gauge);
+			this.getDataManager().set(PRESSURE_VALVE, boilerPressure > maxPSI);
 			if (boilerPressure > maxPSI) {
 				waterUsed += boilerPressure - maxPSI; 
 				boilerPressure = maxPSI;
