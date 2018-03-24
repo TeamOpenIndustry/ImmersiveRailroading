@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PlateType;
-import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock.PlateRollerInstance;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import net.minecraft.client.gui.GuiButton;
@@ -32,7 +31,7 @@ public class PlateRollerGUI extends GuiScreen {
 	
 	public PlateRollerGUI(TileMultiblock te) {
 		this.tile = te;
-		currentItem = ((PlateRollerInstance) te.getMultiblock()).getCraftItem();
+		currentItem = te.getCraftItem();
 		if (currentItem == null || currentItem.isEmpty()) {
 			currentItem = new ItemStack(IRItems.ITEM_PLATE, 1);
 		}

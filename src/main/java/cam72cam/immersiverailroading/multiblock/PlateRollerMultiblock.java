@@ -110,7 +110,7 @@ public class PlateRollerMultiblock extends Multiblock {
 				}
 				
 				if (world.isRemote) {
-					BlockPos pos = getPos(offset);
+					BlockPos pos = getPos(crafter);
 					player.openGui(ImmersiveRailroading.instance, GuiTypes.PLATE_ROLLER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
 				}
 				return true;
@@ -221,14 +221,6 @@ public class PlateRollerMultiblock extends Multiblock {
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
 			
-		}
-
-		public ItemStack getCraftItem() {
-			TileMultiblock craftingTe = getTile(crafter);
-			if (craftingTe == null) {
-				return ItemStack.EMPTY;
-			}
-			return craftingTe.getCraftItem();
 		}
 	}
 }
