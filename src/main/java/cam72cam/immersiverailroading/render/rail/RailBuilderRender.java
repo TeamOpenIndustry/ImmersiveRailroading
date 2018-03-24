@@ -71,7 +71,8 @@ public class RailBuilderRender {
 		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90);
 		GL11.glTranslated(renderOff.x, renderOff.y, renderOff.z); 
 
-		Integer displayList = displayLists.get(RailRenderUtil.renderID(info));
+		String renderID = RailRenderUtil.renderID(info);
+		Integer displayList = displayLists.get(renderID);
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);		
@@ -107,7 +108,7 @@ public class RailBuilderRender {
 			}
 
 			GL11.glEndList();
-			displayLists.put(RailRenderUtil.renderID(info), displayList);
+			displayLists.put(renderID, displayList);
 		}
 		
 		model.bindTexture();
