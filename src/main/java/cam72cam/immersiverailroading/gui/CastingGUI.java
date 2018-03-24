@@ -105,6 +105,9 @@ public class CastingGUI extends GuiScreen {
 		double fluidPercent = ((CastingInstance) tile.getMultiblock()).getSteelLevel();
 		int progress = this.tile.getCraftProgress();
 		float cost = ItemCastingCost.getCastCost(currentItem);
+		if(cost == ItemCastingCost.BAD_CAST_COST) {
+			cost = 0;
+		}
     	
     	this.mc.getTextureManager().bindTexture(CASTING_GUI_TEXTURE);
 
