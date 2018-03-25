@@ -2,9 +2,11 @@ package cam72cam.immersiverailroading.thirdparty.opencomputers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
@@ -21,6 +23,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedEnvironment;
+import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.prefab.AbstractManagedEnvironment;
 import net.minecraft.util.EnumFacing;
@@ -36,7 +39,6 @@ public class AugmentDriver implements DriverBlock {
 	@Override
 	public ManagedEnvironment createEnvironment(World world, BlockPos pos, EnumFacing facing) {
 		TileRailBase te = TileRailBase.get(world, pos);
-		
 		if (te == null) {
 			return null;
 		}
@@ -81,15 +83,47 @@ public class AugmentDriver implements DriverBlock {
 	}
 
 	public abstract class AugmentManagerBase extends AbstractManagedEnvironment implements NamedBlock {
+		private final static int delayTicks = 5; 
 
 		protected final World world;
 		protected final BlockPos pos;
+		private int ticksAlive;
+		private UUID wasOverhead;
+		protected Class<? extends EntityRollingStock> typeFilter = EntityRollingStock.class;
 
 		public AugmentManagerBase(World world, BlockPos pos) {
 			this.world = world;
 			this.pos = pos;
 			setNode(Network.newNode(this, Visibility.Network).withComponent("ir_augment", Visibility.Network).create());
 		}
+
+		@Override
+	    public boolean canUpdate() {
+	        return true;
+	    }
+		
+		@Override
+	    public void update() {
+			Node node = this.node();
+			if (this.ticksAlive == 0) {
+				TileRailBase te = TileRailBase.get(world, pos);
+				EntityRollingStock nearby = te.getStockNearBy(typeFilter, null);
+				wasOverhead = nearby != null ? nearby.getPersistentID() : null;
+			}
+			
+			if (node != null && this.ticksAlive % delayTicks == 0) {
+				TileRailBase te = TileRailBase.get(world, pos);
+				EntityRollingStock nearby = te.getStockNearBy(typeFilter, null);
+				UUID isOverhead = nearby != null ? nearby.getPersistentID() : null;
+				if (isOverhead != wasOverhead) {
+					node.sendToReachable("computer.signal", "ir_train_overhead", te.getAugment().toString(), isOverhead == null ? null : isOverhead.toString());
+				}
+				
+				wasOverhead = isOverhead;
+			}
+			
+			this.ticksAlive +=1;
+	    }
 
 		@Callback(doc = "function():string -- returns the current augment type")
 		public Object[] getAugmentType(Context context, Arguments args) {
@@ -116,7 +150,7 @@ public class AugmentDriver implements DriverBlock {
 		public String preferredName() {
 			return "ir_augment_detector";
 		}
-
+		
 		private FluidStack getFluid() {
 			TileRailBase te = TileRailBase.get(world, pos);
 			Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
@@ -236,6 +270,7 @@ public class AugmentDriver implements DriverBlock {
 	public class LocoControlAugment extends AugmentManagerBase {
 		public LocoControlAugment(World world, BlockPos pos) {
 			super(world, pos);
+			typeFilter = Locomotive.class;
 		}
 
 		@Override
