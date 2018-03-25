@@ -7,7 +7,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 public class TenderContainer extends ContainerBase {
 	
@@ -28,10 +27,10 @@ public class TenderContainer extends ContainerBase {
 		currY = offsetTopBar(0, currY, horizSlots);
 		currY = offsetSlotBlock(0, currY, horizSlots, numRows);
 		
-		this.addSlotToContainer(new SlotItemHandler(itemHandler, stock.getInventorySize()-2, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
-		this.addSlotToContainer(new SlotItemHandler(itemHandler, stock.getInventorySize()-1, 0 + paddingLeft + slotSize * horizSlots - slotSize - 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new FilteredSlot(itemHandler, stock.getInventorySize()-2, 0 + paddingLeft + 5, currY - numRows * slotSize + 4, FilteredSlot.FLUID_CONTAINER));
+		this.addSlotToContainer(new FilteredSlot(itemHandler, stock.getInventorySize()-1, 0 + paddingLeft + slotSize * horizSlots - slotSize - 5, currY - numRows * slotSize + 4, FilteredSlot.NONE));
 		
-		currY = addSlotBlock(itemHandler, stock.getInventorySize()-2, 0, currY, horizSlots);
+		currY = addFilteredSlotBlock(itemHandler, stock.getInventorySize()-2, 0, currY, horizSlots, FilteredSlot.BURNABLE);
 		
     	currY = offsetPlayerInventoryConnector(0, currY, width, horizSlots);
     	currY = addPlayerInventory(playerInventory, currY, horizSlots);
