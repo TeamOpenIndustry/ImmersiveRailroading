@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
 
@@ -165,5 +166,22 @@ public abstract class ContainerGuiBase extends GuiContainer {
     		drawFluid(fluid, x, y + height - fullHeight, width, fullHeight, 2);
     	}
     	GlStateManager.color(1, 1, 1, 1);
+	}
+
+	public void drawSlotOverlay(ItemStack stack, int i, int j) {
+		i++;
+		j++;
+		
+    	this.mc.getRenderItem().renderItemIntoGUI(stack, i, j);
+    	this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+    	
+    	GlStateManager.enableAlpha();;
+        GlStateManager.disableDepth();
+        int j1 = i;
+        int k1 = j;
+        Gui.drawRect(j1, k1, j1 + 16, k1 + 16, -2130706433);
+        GlStateManager.enableDepth();
+        
+        GL11.glColor4f(1,1,1,1);
 	}
 }

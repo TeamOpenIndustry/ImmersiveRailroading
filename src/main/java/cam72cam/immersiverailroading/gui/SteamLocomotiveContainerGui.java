@@ -5,12 +5,15 @@ import java.util.Map;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 
 public class SteamLocomotiveContainerGui extends ContainerGuiBase {
 	
 	private int inventoryRows;
 	private int horizSlots;
 	private LocomotiveSteam stock;
+	private ItemStack template;
 
     public SteamLocomotiveContainerGui(LocomotiveSteam stock, SteamLocomotiveContainer container) {
         super(container);
@@ -19,6 +22,7 @@ public class SteamLocomotiveContainerGui extends ContainerGuiBase {
         this.horizSlots = stock.getInventoryWidth();
         this.xSize = paddingRight + horizSlots*2 * slotSize + paddingLeft;
         this.ySize = 114 + this.inventoryRows * slotSize*2;
+        this.template = new ItemStack(Items.WATER_BUCKET);
     }
 
 	@Override
@@ -39,6 +43,7 @@ public class SteamLocomotiveContainerGui extends ContainerGuiBase {
     	int quantY = currY - inventoryRows * slotSize + inventoryRows * slotSize/2 - 4;
     	
     	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + 4);
+    	drawSlotOverlay(template, i + paddingLeft+5, currY - inventoryRows * slotSize + 4);
     	drawSlot(i + paddingLeft + slotSize * horizSlots*2 - slotSize-5, currY - inventoryRows * slotSize + 4);
     	
     	currY = drawBottomBar(i, currY, horizSlots*2);

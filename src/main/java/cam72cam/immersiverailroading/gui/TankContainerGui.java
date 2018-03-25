@@ -2,12 +2,15 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.entity.FreightTank;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 
 public class TankContainerGui extends ContainerGuiBase {
 	
 	private int inventoryRows;
 	private int horizSlots;
 	private FreightTank stock;
+	private ItemStack template;
 
     public TankContainerGui(FreightTank stock, TankContainer container) {
         super(container);
@@ -16,6 +19,7 @@ public class TankContainerGui extends ContainerGuiBase {
         this.horizSlots = 10;
         this.xSize = paddingRight + horizSlots * slotSize + paddingLeft;
         this.ySize = 114 + this.inventoryRows * slotSize;
+        this.template = new ItemStack(Items.BUCKET);
     }
 
     @Override
@@ -35,6 +39,8 @@ public class TankContainerGui extends ContainerGuiBase {
     	int quantY = currY - inventoryRows * slotSize + inventoryRows * slotSize/2;
 
     	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + 4);
+    	drawSlotOverlay(template, i + paddingLeft+5, currY - inventoryRows * slotSize + 4);
+		
     	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + 4);
     	
     	currY = drawPlayerInventoryConnector(i, currY, width, horizSlots);
