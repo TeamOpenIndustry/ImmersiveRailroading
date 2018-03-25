@@ -34,8 +34,8 @@ public class TenderContainerGui extends ContainerGuiBase {
     	int quantX = i + paddingLeft + horizSlots * slotSize/2;
     	int quantY = currY - inventoryRows * slotSize + inventoryRows * slotSize/2;
     	
-    	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
-    	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
+    	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + 4);
+    	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + 4);
 
     	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows, stock.getInventorySize() - 2);
     	
