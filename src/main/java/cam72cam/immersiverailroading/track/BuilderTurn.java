@@ -166,6 +166,18 @@ public class BuilderTurn extends BuilderBase {
 				data.add(new VecYawPitch(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
 			}
 		}
+		
+		if (info.switchState != SwitchState.NONE) {
+			double dir = info.direction == TrackDirection.RIGHT ? -1 : 1;
+			dir = dir * info.gauge.scale();
+			double off = -0.5 + 0.2 * dir;
+			if (info.switchState == SwitchState.STRAIGHT) {
+				 off += 0.2 * dir;
+			}
+			float angle = info.quarter/4f * 90;
+			Vec3d pos = VecUtil.rotateYaw(new Vec3d(off, 0.11 * info.gauge.scale(),  info.gauge.scale()), angle-90);
+			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 180, "RAIL_BASE"));
+		}
 
 		return data;
 	}
