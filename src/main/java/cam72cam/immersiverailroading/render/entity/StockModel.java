@@ -191,7 +191,12 @@ public class StockModel extends OBJRender {
 		drawComponent(def.getComponent(RenderComponentType.FUEL_TANK, stock.gauge));
 		drawComponent(def.getComponent(RenderComponentType.ALTERNATOR, stock.gauge));
 		drawComponent(def.getComponent(RenderComponentType.ENGINE_BLOCK, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.GEARBOX, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.FLUID_COUPLING, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.FINAL_DRIVE, stock.gauge));
+		drawComponent(def.getComponent(RenderComponentType.TORQUE_CONVERTER, stock.gauge));
 		drawComponents(def.getComponents(RenderComponentType.FAN_X, stock.gauge));
+		drawComponents(def.getComponents(RenderComponentType.DRIVE_SHAFT_X, stock.gauge));
 		
 		drawComponents(def.getComponents(RenderComponentType.CAB, stock.gauge));
 		drawComponents(def.getComponents(RenderComponentType.WHISTLE, stock.gauge));

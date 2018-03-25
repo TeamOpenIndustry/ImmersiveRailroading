@@ -37,6 +37,11 @@ public enum ItemComponentType {
 	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ENGINE_BLOCK),
 	PISTON(AssemblyStep.SHELL, CraftingType.CASTING_HAMMER, RenderComponentType.PISTON_X),
 	FAN(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FAN_X),
+	DRIVE_SHAFT(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.DRIVE_SHAFT_X),
+	GEARBOX(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.GEARBOX),
+	FLUID_COUPLING(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FLUID_COUPLING),
+	FINAL_DRIVE(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FINAL_DRIVE),
+	TORQUE_CONVERTER(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.TORQUE_CONVERTER),
 	
 	//STEAM
 	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
