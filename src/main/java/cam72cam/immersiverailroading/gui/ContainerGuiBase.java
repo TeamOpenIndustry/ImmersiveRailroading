@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.gui;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -52,21 +54,27 @@ public abstract class ContainerGuiBase extends GuiContainer {
     	this.drawTexturedModalRect(x, y, paddingLeft, topOffset, slotSize, slotSize);
     }
     
-    public int drawSlotRow(int x, int y, int slots) {
+    public int drawSlotRow(int x, int y, int slots, int numSlots) {
     	// Left Side
         this.drawTexturedModalRect(x, y, 0, topOffset, paddingLeft, slotSize);
         // Middle Slots
         for (int k = 1; k <= slots; k++) {
-        	drawSlot(x + paddingLeft + (k-1) * slotSize, y);
+        	if (k <= numSlots) {
+        		drawSlot(x + paddingLeft + (k-1) * slotSize, y);
+        	} else {
+        		Gui.drawRect(x + paddingLeft + (k-1) * slotSize, y, x + paddingLeft + (k-1) * slotSize + slotSize, y + slotSize, 0xFF444444);
+        	}
         }
+		GL11.glColor4f(1, 1, 1, 1);
         // Right Side
     	this.drawTexturedModalRect(x + paddingLeft + slots * slotSize, y, paddingLeft + stdUiHorizSlots * slotSize, topOffset, paddingRight, slotSize);
     	return y + slotSize;
     }
 
-	public int drawSlotBlock(int x, int y, int slotX, int slotY) {
+	public int drawSlotBlock(int x, int y, int slotX, int slotY, int numSlots) {
 		for (int i = 0; i < slotY; i++) {
-			y = drawSlotRow(x, y, slotX);
+			y = drawSlotRow(x, y, slotX, numSlots);
+			numSlots -= slotX;
 		}
 		return y;
 	}

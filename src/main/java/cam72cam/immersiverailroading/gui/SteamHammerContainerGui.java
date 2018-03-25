@@ -42,7 +42,7 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
         this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         
         currY = drawTopBar(i, currY, horizSlots);
-    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows);
+    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows, horizSlots * inventoryRows);
     	
     	GL11.glPushMatrix();
     	int scale = 4;

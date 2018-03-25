@@ -9,11 +9,13 @@ public class FreightContainerGui extends ContainerGuiBase {
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
 	private int inventoryRows;
 	private int horizSlots;
+	private int numSlots;
 
     public FreightContainerGui(CarFreight stock, FreightContainer container) {
         super(container);
         this.inventoryRows = container.numRows;
         this.horizSlots = stock.getInventoryWidth();
+        this.numSlots = container.numSlots;
         this.xSize = paddingRight + horizSlots * slotSize + paddingLeft;
         this.ySize = 114 + this.inventoryRows * slotSize;
     }
@@ -28,7 +30,7 @@ public class FreightContainerGui extends ContainerGuiBase {
     	int currY = j;
         
     	currY = drawTopBar(i, currY, horizSlots);
-    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows);
+    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows, numSlots);
     	currY = drawPlayerInventoryConnector(i, currY, width, horizSlots);
     	currY = drawPlayerInventory((width - playerXSize) / 2, currY);
     }
