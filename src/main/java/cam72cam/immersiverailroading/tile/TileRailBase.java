@@ -98,6 +98,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		return this.augmentFilterID != null;
 	}
 	public String nextAugmentRedstoneMode() {
+		if (this.augment == null) {
+			return null;
+		}
 		switch(this.augment) {
 		case DETECTOR:
 			redstoneMode = StockDetectorMode.values()[((redstoneMode.ordinal() + 1) % (StockDetectorMode.values().length))];
