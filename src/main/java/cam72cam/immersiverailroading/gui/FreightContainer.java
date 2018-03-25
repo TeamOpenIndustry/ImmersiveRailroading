@@ -12,11 +12,13 @@ public class FreightContainer extends ContainerBase {
 	
 	private CarFreight freight;
 	protected int numRows;
+	protected int numSlots;
 
 	public FreightContainer(IInventory playerInventory, CarFreight stock) {
 		this.freight = stock;
         int horizSlots = stock.getInventoryWidth();
 		this.numRows = (int) Math.ceil((double)stock.getInventorySize() / horizSlots);
+		this.numSlots = stock.getInventorySize(); 
 		
 		IItemHandler itemHandler = this.freight.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 		

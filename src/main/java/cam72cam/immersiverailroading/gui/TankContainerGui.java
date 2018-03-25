@@ -28,7 +28,7 @@ public class TankContainerGui extends ContainerGuiBase {
         this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         
         currY = drawTopBar(i, currY, horizSlots);
-    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows);
+    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows, horizSlots * inventoryRows);
     	
     	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, stock.getLiquid(), stock.getLiquidAmount() / (float)stock.getTankCapacity().MilliBuckets());
     	int quantX = i + paddingLeft + horizSlots * slotSize/2;

@@ -28,7 +28,7 @@ public class TenderContainerGui extends ContainerGuiBase {
         this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         
         currY = drawTopBar(i, currY, horizSlots);
-    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows);
+    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows, horizSlots * inventoryRows);
     	
     	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, stock.getLiquid(), stock.getLiquidAmount() / (float)stock.getTankCapacity().MilliBuckets());
     	int quantX = i + paddingLeft + horizSlots * slotSize/2;
@@ -37,7 +37,7 @@ public class TenderContainerGui extends ContainerGuiBase {
     	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
     	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
 
-    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows);
+    	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows, stock.getInventorySize() - 2);
     	
     	currY = drawPlayerInventoryConnector(i, currY, width, horizSlots);
     	currY = drawPlayerInventory((width - playerXSize) / 2, currY);
