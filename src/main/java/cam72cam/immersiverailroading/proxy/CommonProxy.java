@@ -106,16 +106,17 @@ public abstract class CommonProxy implements IGuiHandler {
     	new File(cacheDir).mkdirs();
     	
     	DefinitionManager.initDefinitions();
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.BRICK_BLOCK);
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.COBBLESTONE);
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.DIRT);
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.GRAVEL);
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.LOG, 1, OreDictionary.WILDCARD_VALUE));
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, Blocks.NETHER_BRICK);
-    	OreDictionary.registerOre(ImmersiveRailroading.ORE_RAIL_BED, new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+    	;
+    	OreHelper.IR_RAIL_BED.add(Blocks.BRICK_BLOCK);
+    	OreHelper.IR_RAIL_BED.add(Blocks.COBBLESTONE);
+    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(Blocks.DIRT);
+    	OreHelper.IR_RAIL_BED.add(Blocks.GRAVEL);
+    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.LOG, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(Blocks.NETHER_BRICK);
+    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
     }
     
     public void init(FMLInitializationEvent event) {
@@ -130,7 +131,6 @@ public abstract class CommonProxy implements IGuiHandler {
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
     	CompatLoader.load();
-    	OreHelper.init();
     	
     	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
     	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
