@@ -404,7 +404,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onOverlayEvent(RenderGameOverlayEvent.Pre event) {
-		if (event.getType() == ElementType.CHAT) {
+		if (event.getType() == ElementType.ALL) {
 			new SteamLocomotiveOverlay().draw();
 			new DieselLocomotiveOverlay().draw();
 			new HandCarOverlay().draw();

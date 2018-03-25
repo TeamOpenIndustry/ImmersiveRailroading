@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import org.lwjgl.opengl.GL11;
+
 import cam72cam.immersiverailroading.ConfigGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -15,11 +17,11 @@ public class LocomotiveOverlay extends Gui {
 	
 	private static final int gaugeWidth = 10;
 	private static final int gaugeHeight = 50;
-	private static final int gaugeSpacer = 30;
+	private static final int gaugeSpacer = 10;
 	
 	private static final int scalarWidth = 10;
 	private static final int scalarHeight = 50;
-	private static final int scalarSpacer = 30;
+	private static final int scalarSpacer = 10;
 
 	public LocomotiveOverlay() {
 		mc = Minecraft.getMinecraft();
@@ -37,8 +39,22 @@ public class LocomotiveOverlay extends Gui {
 		drawRect(currPosX, currPosY, currPosX + gaugeWidth, currPosY + gaugeHeight, 0xFF4d4d4d);
 		int quantHeight = (int)(gaugeHeight * (liquidAmount / tankCapacity));
 		drawRect(currPosX, currPosY + (gaugeHeight - quantHeight), currPosX + gaugeWidth, currPosY + gaugeHeight, color);
-		drawCenteredString(mc.fontRenderer, amount, currPosX + gaugeWidth/2, currPosY-12, 0xFFFFFF);
-		drawCenteredString(mc.fontRenderer, capacity, currPosX + gaugeWidth/2, currPosY + gaugeHeight + 2, 0xFFFFFF);
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(currPosX + gaugeWidth/2, currPosY-6, 0);
+			double scale = 0.5;
+			GL11.glScaled(scale, scale, scale);
+			drawCenteredString(mc.fontRenderer, amount, 0, 0, 0xFFFFFF);
+		}
+		GL11.glPopMatrix();
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(currPosX + gaugeWidth/2, currPosY + gaugeHeight + 2, 0);
+			double scale = 0.5;
+			GL11.glScaled(scale, scale, scale);
+			drawCenteredString(mc.fontRenderer, capacity, 0, 0, 0xFFFFFF);
+		}
+		GL11.glPopMatrix();
 		currPosX += gaugeWidth + gaugeSpacer;
 	}
 
@@ -50,7 +66,14 @@ public class LocomotiveOverlay extends Gui {
 		drawRect(currPosX, currPosY + quantHeight, currPosX + scalarWidth, currPosY + quantHeight + 5, 0xFF999999);
 		//drawCenteredString(mc.fontRenderer, minStr, currPosX + scalarWidth/2, currPosY + scalarHeight + 2, 0xFFFFFF);
 		//drawCenteredString(mc.fontRenderer, maxStr, currPosX + scalarWidth/2, currPosY-12, 0xFFFFFF);
-		drawCenteredString(mc.fontRenderer, string, currPosX + scalarWidth/2, currPosY-12, 0xFFFFFF);
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(currPosX + scalarWidth/2, currPosY-6, 0);
+			double scale = 0.5;
+			GL11.glScaled(scale, scale, scale);
+			drawCenteredString(mc.fontRenderer, string, 0, 0, 0xFFFFFF);
+		}
+		GL11.glPopMatrix();
 		currPosX += scalarWidth + scalarSpacer;
 	}
 }
