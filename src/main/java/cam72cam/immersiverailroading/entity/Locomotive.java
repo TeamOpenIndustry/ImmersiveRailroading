@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -167,7 +168,7 @@ public abstract class Locomotive extends FreightTank {
 	
 	private void simulateWheelSlip() {
 		double applied = getAppliedTractiveEffort(this.getCurrentSpeed());
-		double actual = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient();
+		double actual = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
 		if (applied > actual) {
 			double speedMultiplier = 1;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
 			this.distanceTraveled += Math.copySign(Math.min((applied / actual - 1)/100, 0.8), getThrottle()) * speedMultiplier; //Wheel Slip
@@ -182,11 +183,11 @@ public abstract class Locomotive extends FreightTank {
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
 		
 		
-		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient()) {
+		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier) {
 			// CRC Handbook of Physical Quantities. Boca Raton, FL: CRC Press, 1997: 145-156.
 			double us = 0.74;
 			double uk = 0.57;
-			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons(gauge) * (uk/us) * slipCoefficient();
+			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons(gauge) * (uk/us) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
 		}
 		
 		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
