@@ -18,6 +18,9 @@ public class RenderStaticRiders {
 				pass.cache = cached;
 			}
 			Vec3d pos = stock.passengerPositions.get(pass.uuid);
+			if (pos == null) {
+				continue;
+			}
 			pos = pos.add(stock.getDefinition().getPassengerCenter(stock.gauge));
 			pos = VecUtil.rotateYaw(pos, stock.rotationYaw);
 			//TileEntityMobSpawnerRenderer
