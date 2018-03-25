@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.OreHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -91,7 +92,7 @@ public class TrackGui extends GuiScreen {
 		
 		oreDict.add(new ItemStack(Items.AIR));
 		
-		for (ItemStack ore : OreDictionary.getOres(ImmersiveRailroading.ORE_RAIL_BED)) {
+		for (ItemStack ore : OreHelper.IR_RAIL_BED.getOres()) {
 			if (ore.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
 				ore.getItem().getSubItems(ore.getItem().getCreativeTab(), oreDict);
 			} else {

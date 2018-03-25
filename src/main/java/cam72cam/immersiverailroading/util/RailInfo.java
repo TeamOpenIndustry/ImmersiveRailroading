@@ -207,7 +207,7 @@ public class RailInfo {
 					if (playerStack.getItem() == IRItems.ITEM_RAIL && ItemGauge.get(playerStack) == builder.gauge) {
 						rails += playerStack.getCount();
 					}
-					if (OreHelper.matches(playerStack, "plankTreatedWood", false)) {
+					if (OreHelper.IR_TIE.matches(playerStack, false)) {
 						ties += playerStack.getCount();
 					}
 					if (railBed.getItem() != Items.AIR && railBed.getItem() == playerStack.getItem() && railBed.getMetadata() == playerStack.getMetadata()) {
@@ -260,7 +260,7 @@ public class RailInfo {
 							rails = 0;
 						}
 					}
-					if (OreHelper.matches(playerStack, "plankTreatedWood", false)) {
+					if (OreHelper.IR_TIE.matches(playerStack, false)) {
 						if (ties > playerStack.getCount()) {
 							ties -= playerStack.getCount();
 							ItemStack copy = playerStack.copy();

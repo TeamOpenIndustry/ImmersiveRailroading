@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.multiblock;
 
 import java.util.function.Function;
 
-import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.OreHelper.OreAbstract;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,15 +29,15 @@ public class MultiblockComponent {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public MultiblockComponent(String name) {
-		ItemStack stack = OreHelper.exampleStack(name);
+	public MultiblockComponent(OreAbstract name) {
+		ItemStack stack = name.example();
 		this.name = stack.getDisplayName();
 		this.def = Block.getBlockFromItem(stack.getItem()).getStateFromMeta(stack.getMetadata());
 		this.blockCheck = (IBlockState target) -> {
 			Block block = target.getBlock();
 			Item item = Item.getItemFromBlock(block);
 			int meta = block.getMetaFromState(target);
-			return OreHelper.matches(new ItemStack(item, 1, meta), name, false);
+			return name.matches(new ItemStack(item, 1, meta), false);
 		};
 		this.itemCheck = (ItemStack tstack) -> tstack.isItemEqual(stack);
 	}

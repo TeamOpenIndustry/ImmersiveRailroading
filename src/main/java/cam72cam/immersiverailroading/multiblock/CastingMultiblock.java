@@ -183,7 +183,7 @@ public class CastingMultiblock extends Multiblock {
 				for (EntityItem item : items) {
 					ItemStack stack = item.getItem();
 					int cost = ItemCastingCost.getCastCost(stack);
-					if(OreHelper.matches(stack, "blockSteel", false)) {
+					if(OreHelper.IR_STEEL_BLOCK.matches(stack, false)) {
 						// TODO drain more power on melt
 						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + 9) {
 							if (!hasPower()) {
@@ -192,7 +192,7 @@ public class CastingMultiblock extends Multiblock {
 							stack.shrink(1);
 							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + 9);
 						}
-					} else if(OreHelper.matches(stack, "ingotSteel", false)) {
+					} else if(OreHelper.IR_STEEL_INGOT.matches(stack, false)) {
 						// TODO drain more power on melt
 						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + 1) {
 							if (!hasPower()) {
