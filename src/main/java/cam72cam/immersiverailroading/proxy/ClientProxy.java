@@ -565,6 +565,19 @@ public class ClientProxy extends CommonProxy {
 		
 		if (magical != null) {
 			magical.onUpdate();
+			
+			if (magical.isDead) {
+				magical.isDead = false;
+				ImmersiveRailroading.warn("Reanimating magic entity");
+				magical.world.spawnEntity(magical);
+			}
+			if (tickCount % 20 == 0) {
+				if (!magical.world.loadedEntityList.contains(magical)) {
+					ImmersiveRailroading.warn("Respawning magic entity");
+					magical.isDead = false;
+					magical.world.spawnEntity(magical);
+				}
+			}
 		}
 		
 		if (tickCount % 40 == 39 ) {
