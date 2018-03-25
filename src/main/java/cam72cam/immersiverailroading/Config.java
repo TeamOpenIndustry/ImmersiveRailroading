@@ -45,6 +45,9 @@ public class Config {
 		@Comment("Brake Multiplier: Higher numbers increase slowdown, lower numbers decrease slowdown")
 		public static double brakeMultiplier = 1.0;
 		
+		@Comment("Traction Multiplier: Higher numbers decreases wheel slip, lower numders increase wheel slip")
+		public static double tractionMultiplier = 1.0;
+		
 		@Comment({ "How heavy is a single block in Kg" })
 		public static int blockWeight = 10;
 

@@ -17,6 +17,7 @@ public class PhysicsAccummulator {
 	public double rollingResistanceNewtons = 0;
 	public double gradeForceNewtons = 0;
 	public double massToMoveKg = 0;
+	public double brakeAdhesionNewtons = 0;
 	public int count = 0;
 	Speed speed;
 	
@@ -51,6 +52,11 @@ public class PhysicsAccummulator {
 			Locomotive loco = (Locomotive) stock;
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(speed) * (direction ? 1 : -1);
 			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient();
+			brakeAdhesionNewtons += loco.getDefinition().getStartingTractionNewtons(stock.gauge); 
+		} else {
+			// Air brake only applies 1/4th
+			// 0.25 = steel wheel on steel rail	
+			brakeAdhesionNewtons += stock.getWeight() * 0.25 * 0.25 * 4.44822f;
 		}
 		
 		int slowdown = movable.getSpeedRetarderSlowdown(latest);
@@ -58,10 +64,7 @@ public class PhysicsAccummulator {
 	}
 	
 	public Speed getVelocity() {
-		// 0.25 = steel wheel on steel rail
-		// 0.25 = assume 1/4th brake force could be applied using air brake
-		double brakeAdhesion =  massToMoveKg * 0.25 * 0.25 * Config.ConfigBalance.brakeMultiplier;
-		double airBrakeNewtons = brakeAdhesion * Math.min(airBrake, 1) * 4.44822f;
+		double airBrakeNewtons = brakeAdhesionNewtons * Math.min(airBrake, 1) * Config.ConfigBalance.brakeMultiplier;
 		
 		// a = f (to newtons) * m (to newtons)
 		double tractiveAccell = tractiveEffortNewtons / massToMoveKg;
