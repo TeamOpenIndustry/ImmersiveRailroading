@@ -38,8 +38,8 @@ public class SteamLocomotiveContainerGui extends ContainerGuiBase {
     	int quantX = i + paddingLeft + horizSlots*2 * slotSize/2;
     	int quantY = currY - inventoryRows * slotSize + inventoryRows * slotSize/2 - 4;
     	
-    	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
-    	drawSlot(i + paddingLeft + slotSize * horizSlots*2 - slotSize-5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
+    	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + 4);
+    	drawSlot(i + paddingLeft + slotSize * horizSlots*2 - slotSize-5, currY - inventoryRows * slotSize + 4);
     	
     	currY = drawBottomBar(i, currY, horizSlots*2);
 

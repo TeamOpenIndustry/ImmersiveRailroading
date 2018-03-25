@@ -34,8 +34,8 @@ public class TankContainerGui extends ContainerGuiBase {
     	int quantX = i + paddingLeft + horizSlots * slotSize/2;
     	int quantY = currY - inventoryRows * slotSize + inventoryRows * slotSize/2;
 
-    	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
-    	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
+    	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + 4);
+    	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + 4);
     	
     	currY = drawPlayerInventoryConnector(i, currY, width, horizSlots);
     	currY = drawPlayerInventory((width - playerXSize) / 2, currY);

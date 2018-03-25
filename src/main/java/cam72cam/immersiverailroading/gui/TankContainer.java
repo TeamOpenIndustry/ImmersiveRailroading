@@ -28,8 +28,8 @@ public class TankContainer extends ContainerBase {
 		currY = offsetTopBar(0, currY, horizSlots);
 		currY = offsetSlotBlock(0, currY, horizSlots, numRows);
 		
-		this.addSlotToContainer(new SlotItemHandler(itemHandler, 0, 0 + paddingLeft + 5, currY - numRows * slotSize + (int)(slotSize * 1.5)));
-		this.addSlotToContainer(new SlotItemHandler(itemHandler, 1, 0 + paddingLeft + slotSize * horizSlots - slotSize - 5, currY - numRows * slotSize + (int)(slotSize * 1.5)));
+		this.addSlotToContainer(new SlotItemHandler(itemHandler, 0, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new SlotItemHandler(itemHandler, 1, 0 + paddingLeft + slotSize * horizSlots - slotSize - 5, currY - numRows * slotSize + 4));
 		
     	currY = offsetPlayerInventoryConnector(0, currY, width, horizSlots);
     	currY = addPlayerInventory(playerInventory, currY, horizSlots);
