@@ -40,6 +40,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		for (int i = 0; i < 20; i++) {
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.PISTON_X, this, groups, i), true);
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.DIESEL_EXHAUST_X, this, groups, i), false);
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.FAN_X, this, groups, i), true);
 		}
 		
 		return groups;

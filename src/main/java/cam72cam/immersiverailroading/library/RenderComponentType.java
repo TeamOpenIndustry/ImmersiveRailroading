@@ -25,6 +25,7 @@ public enum RenderComponentType {
 	ENGINE_BLOCK("ENGINE_BLOCK"),
 	CRANKSHAFT("CRANKSHAFT"),
 	PISTON_X("PISTON_#ID#"),
+	FAN_X("FAN_X"),
 	
 	
 	//STEAM

@@ -36,6 +36,7 @@ public enum ItemComponentType {
 	ALTERNATOR(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ALTERNATOR),
 	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ENGINE_BLOCK),
 	PISTON(AssemblyStep.SHELL, CraftingType.CASTING_HAMMER, RenderComponentType.PISTON_X),
+	FAN(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FAN_X),
 	
 	//STEAM
 	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
