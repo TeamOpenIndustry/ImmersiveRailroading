@@ -126,6 +126,9 @@ public class Config {
 		@Comment({ "DEBUG: Buckets infinite fill/empty tanks" })
 		public static boolean debugInfiniteLiquids = false;
 
+		@Comment({"Time between open computers poll ticks for augments"})
+		public static int ocPollDelayTicks = 1;
+
 	}
 
 	public static boolean isFuelRequired(Gauge gauge) {
