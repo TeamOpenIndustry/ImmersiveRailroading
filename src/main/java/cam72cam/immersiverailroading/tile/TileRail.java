@@ -49,8 +49,6 @@ public class TileRail extends TileRailBase {
 	
 	private List<ItemStack> drops;
 	
-	public boolean snowRenderFlagDirty = true;
-	
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -255,11 +253,11 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY);
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY, null);
 		}
-		info.snowRenderFlagDirty = this.snowRenderFlagDirty;
-		this.snowRenderFlagDirty = false;
-		info.switchState = this.switchState;
+		// Changes moment to moment
+		info.switchState = switchState;
+		
 		return info;
 	}
 
@@ -279,7 +277,7 @@ public class TileRail extends TileRailBase {
 	}
 
 	public double percentFloating() {
-		RailInfo buildInfo = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY);
+		RailInfo buildInfo = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY, switchState);
 		
 		List<TrackBase> tracks = buildInfo.getBuilder(pos).getTracksForRender();
 		double floating = 0;
