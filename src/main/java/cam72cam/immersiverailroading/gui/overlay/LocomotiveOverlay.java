@@ -30,7 +30,8 @@ public class LocomotiveOverlay extends Gui {
 		screenHeight = scaled.getScaledHeight();
 		
 		currPosX = (int) (screenWidth * (ConfigGraphics.GUIPositionHorizontal/100f));
-		currPosY = (int) (screenHeight * ((ConfigGraphics.GUIPositionVertical-10)/100f));
+		currPosY = (int) (screenHeight * (ConfigGraphics.GUIPositionVertical/100f));
+		currPosY -= 50;
 	}
 
 	public void drawGauge(int color, float liquidAmount, float tankCapacity, String units) {
