@@ -232,9 +232,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			// Nothing yet ...
 		}
 		parent = getNBTBlockPos(nbt, "parent");
-		if (world != null && this.getParentTile() != null) {
-			this.getParentTile().snowRenderFlagDirty = true;
-		}
 		
 		if (nbt.hasKey("augmentTank")) {
 			createAugmentTank();

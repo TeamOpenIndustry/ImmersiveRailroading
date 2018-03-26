@@ -42,11 +42,10 @@ public class RailInfo {
 	public ItemStack railBedFill;
 
 	// Used for tile rendering only
-	public boolean snowRenderFlagDirty = false;
 	public SwitchState switchState = SwitchState.NONE;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -59,6 +58,7 @@ public class RailInfo {
 		this.placementPosition = placementPosition;
 		this.railBed = railBed;
 		this.railBedFill = railBedFill;
+		this.switchState = switchState;
 	}
 	
 	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
@@ -152,7 +152,7 @@ public class RailInfo {
 	
 	@Override
 	public RailInfo clone() {
-		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill);
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill, switchState);
 		return c;
 	}
 	
