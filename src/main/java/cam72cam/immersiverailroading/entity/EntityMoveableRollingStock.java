@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
@@ -385,7 +386,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						bbb = bbb.offset(bp);
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
 							if (!BlockUtil.isIRRail(world, bp.up())) {
-								world.destroyBlock(bp, true);										
+								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));										
 							}
 						}
 					} else {
