@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
 import net.minecraft.util.math.Vec3d;
 
 public class OBJRender {
@@ -51,10 +52,11 @@ public class OBJRender {
 
 	public void draw() {
 		if (displayList == null) {
-			displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			drawDirect();
-			GL11.glEndList();
+			if (!ClientProxy.renderCacheLimiter.canRender()) {
+				return;
+			}
+			
+			displayList = ClientProxy.renderCacheLimiter.newList(() -> drawDirect());
 		}
 		GL11.glCallList(displayList);
 	}
@@ -74,10 +76,12 @@ public class OBJRender {
 		}
 		
 		if (!displayLists.get(scale).containsKey(groupNames)) {
+			if (!ClientProxy.renderCacheLimiter.canRender()) {
+				return;
+			}
+			
 			int groupsDisplayList = GL11.glGenLists(1);
-			GL11.glNewList(groupsDisplayList, GL11.GL_COMPILE);
-			drawDirectGroups(groupNames, scale);
-			GL11.glEndList();
+			groupsDisplayList = ClientProxy.renderCacheLimiter.newList(() -> drawDirectGroups(groupNames, scale));
 			displayLists.get(scale).put(groupNames, groupsDisplayList);
 		}
 		GL11.glCallList(displayLists.get(scale).get(groupNames));

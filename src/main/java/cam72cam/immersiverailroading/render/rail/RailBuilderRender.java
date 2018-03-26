@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
@@ -74,8 +75,12 @@ public class RailBuilderRender {
 		String renderID = RailRenderUtil.renderID(info);
 		Integer displayList = displayLists.get(renderID);
 		if (displayList == null) {
-			displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);		
+
+			if (!ClientProxy.renderCacheLimiter.canRender()) {
+				return;
+			}
+			
+			displayList = ClientProxy.renderCacheLimiter.newList(() -> {		
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GL11.glPushMatrix();;
@@ -107,7 +112,7 @@ public class RailBuilderRender {
 				GL11.glPopMatrix();;
 			}
 
-			GL11.glEndList();
+			});
 			displayLists.put(renderID, displayList);
 		}
 		

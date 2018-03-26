@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.BakedModelCache;
 import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.render.DisplayListCache;
@@ -73,10 +74,11 @@ public class RailBaseRender {
 		String id = RailRenderUtil.renderID(info);
 		Integer displayList = displayLists.get(id);
 		if (displayList == null) {
-			displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			drawSync(info);
-			GL11.glEndList();
+			if (!ClientProxy.renderCacheLimiter.canRender()) {
+				return;
+			}
+			
+			displayList = ClientProxy.renderCacheLimiter.newList(() ->drawSync(info));
 			displayLists.put(id, displayList);
 		}
 		GL11.glCallList(displayList);
