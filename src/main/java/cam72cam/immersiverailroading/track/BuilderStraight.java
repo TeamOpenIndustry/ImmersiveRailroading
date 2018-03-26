@@ -17,6 +17,7 @@ public class BuilderStraight extends BuilderBase {
 	protected float angle;
 	public int mainX;
 	public int mainZ;
+	protected HashSet<Pair<Integer, Integer>> positions;
 	
 	public BuilderStraight(RailInfo info, BlockPos pos) {
 		this(info, pos, false);
@@ -29,7 +30,7 @@ public class BuilderStraight extends BuilderBase {
 			info.quarter = -info.quarter; 
 		}
 		
-		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
+		positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
 		angle = info.quarter/4f * 90;
@@ -61,7 +62,6 @@ public class BuilderStraight extends BuilderBase {
 		}
 		
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
-		
 		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
 		tracks.add(main);
 		

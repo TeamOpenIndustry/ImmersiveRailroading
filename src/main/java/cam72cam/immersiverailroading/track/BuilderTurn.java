@@ -24,6 +24,7 @@ public class BuilderTurn extends BuilderBase {
 	
 	private int mainX;
 	private int mainZ;
+	protected HashSet<Pair<Integer, Integer>> positions;
 
 	public BuilderTurn(RailInfo info, BlockPos pos) {
 		super(info, pos);
@@ -33,7 +34,7 @@ public class BuilderTurn extends BuilderBase {
 		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
 		int zMult = 1;
 		
-		HashSet<Pair<Integer, Integer>> positions = new HashSet<Pair<Integer, Integer>>();
+		positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		double hack = -0.5;
 		float angleDelta = (float) (90 / (Math.PI * radius/2));

@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.track;
 
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
@@ -19,10 +21,29 @@ public class BuilderSwitch extends BuilderBase {
 		info.quarter = 0;
 		
 		RailInfo turnInfo = info.clone();
+		RailInfo straightInfo = info.clone();
 		turnInfo.type = TrackItems.TURN;
 
-		straightBuilder = new BuilderStraight(info, pos, true);
+		{
+			turnBuilder = new BuilderTurn(turnInfo, pos);
+			straightBuilder = new BuilderStraight(straightInfo, pos, true);
+			
+			double maxOverlap = 0;
+			
+			straightBuilder.positions.retainAll(turnBuilder.positions);
+			
+			for (Pair<Integer, Integer> straight : straightBuilder.positions) {
+				maxOverlap = Math.max(maxOverlap, new Vec3d(straight.getKey(), 0, straight.getValue()).lengthVector());
+			}
+			
+			maxOverlap *= 1.2;
+			straightInfo.length = (int) Math.ceil(maxOverlap) + 1;
+		}
+		
+
 		turnBuilder = new BuilderTurn(turnInfo, pos);
+		straightBuilder = new BuilderStraight(straightInfo, pos, true);
+		
 		turnBuilder.overrideFlexible = true;
 		
 		for(TrackBase turn : turnBuilder.tracks) {
