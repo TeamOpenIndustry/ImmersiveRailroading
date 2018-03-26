@@ -8,9 +8,15 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 
 public class ClientResourceReloadListener implements IResourceManagerReloadListener {
+	public static boolean skipFirst = true; 
 
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
+		if (skipFirst) {
+			skipFirst = false;
+			return;
+		}
+		
 		try {
 			DefinitionManager.initDefinitions();
 		} catch (IOException e) {
