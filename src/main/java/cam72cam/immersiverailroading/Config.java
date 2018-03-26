@@ -28,6 +28,9 @@ public class Config {
 
 		@Comment("Clear blocsk in creative mode when placing tracks")
 		public static boolean creativePlacementClearsBlocks = true;
+
+		@Comment("Requires solid blocks to be placed under the rails")
+		public static boolean requireSolidBlocks = true;
 	}
 
 	public static ConfigBalance balance;
