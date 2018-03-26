@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.gui;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -12,13 +14,13 @@ public class ItemButton extends GuiButton {
 	public ItemStack stack;
 
 	public ItemButton(int buttonId, ItemStack stack, int x, int y) {
-		super(buttonId, x, y, 16, 16, "");
+		super(buttonId, x, y, 32, 32, "");
 		this.stack = stack;
 	}
 	
 	@Override
 	public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-		Gui.drawRect(x, y, x+16, y+16, 0xFFFFFFFF);
+		Gui.drawRect(x, y, x+32, y+32, 0xFFFFFFFF);
 		RenderHelper.enableStandardItemLighting();
 
         FontRenderer font = stack.getItem().getFontRenderer(stack);
@@ -26,11 +28,17 @@ public class ItemButton extends GuiButton {
         	font = mc.fontRenderer;
         }
 		//mc.getRenderItem().renderItemIntoGUI(stack, x, y);
-        mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
-		mc.getRenderItem().renderItemOverlays(font, stack, x, y);
+        GL11.glPushMatrix();
+        {
+        	GL11.glTranslated(x, y, 0);
+        	GL11.glScaled(2, 2, 1);
+	        mc.getRenderItem().renderItemAndEffectIntoGUI(stack, 0, 0);
+			mc.getRenderItem().renderItemOverlays(font, stack, 0, 0);
+        }
+        GL11.glPopMatrix();
 	}
 
 	public boolean isMouseOver(int mouseX, int mouseY) {
-		return mouseX >= this.x && mouseX < this.x + 16 && mouseY >= this.y && mouseY < this.y + 16;
+		return mouseX >= this.x && mouseX < this.x + 32 && mouseY >= this.y && mouseY < this.y + 32;
 	}
 }
