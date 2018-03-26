@@ -539,8 +539,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		switch (coupler) {
 		case FRONT:
 			frontCouplerEngaged = engaged;
+			break;
 		case BACK:
 			backCouplerEngaged = engaged;
+			break;
 		}
 	}
 
