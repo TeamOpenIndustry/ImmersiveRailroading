@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -41,7 +42,8 @@ public abstract class TrackBase {
 	public boolean canPlaceTrack() {
 		PosRot pos = getPos();
 		IBlockState down = builder.world.getBlockState(pos.down());
-		boolean downOK = down.isTopSolid() || (BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.railBedFill.getItem() != Items.AIR);
+		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.world.isAirBlock(pos.down())) || 
+				(BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.railBedFill.getItem() != Items.AIR);
 		return BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) && downOK;
 	}
 
