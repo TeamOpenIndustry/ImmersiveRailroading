@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -16,6 +17,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -45,7 +47,7 @@ public class RenderOverride {
 	
 	public static void renderStock(float partialTicks) {
         int pass = MinecraftForgeClient.getRenderPass();
-        if (pass != 0) {
+        if (pass != 0 && ConfigGraphics.useShaderFriendlyRender) {
         	return;
         }
         
@@ -66,10 +68,12 @@ public class RenderOverride {
 	
 	public static void renderParticles(float partialTicks) {
 		int pass = MinecraftForgeClient.getRenderPass();
-        if (pass != 1) {
+        if (pass != 1 && ConfigGraphics.useShaderFriendlyRender) {
         	return;
         }
 		Minecraft.getMinecraft().mcProfiler.startSection("ir_particles");
+		
+		GlStateManager.depthMask(false);
 		
         ICamera camera = getCamera(partialTicks);
         Vec3d ep = getCameraPos(partialTicks);
@@ -107,12 +111,15 @@ public class RenderOverride {
 		
 		ParticleRender.shader.unbind();
 		
+
+		GlStateManager.depthMask(true);
+		
 		Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 
 	public static void renderTiles(float partialTicks) {
         int pass = MinecraftForgeClient.getRenderPass();
-        if (pass != 0) {
+        if (pass != 0 && ConfigGraphics.useShaderFriendlyRender) {
         	return;
         }
         
