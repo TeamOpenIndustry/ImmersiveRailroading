@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -144,8 +145,11 @@ public class RenderOverride {
 	        	        int j = i % 65536;
 	        	        int k = i / 65536;
 	        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-	        			
+	        			info = info.clone();
 	        			GL11.glTranslated(relPos.x, relPos.y, relPos.z);	
+	        			if (info.type == TrackItems.SWITCH) {
+	        				info.type = TrackItems.STRAIGHT;
+	        			}
 		        		RailBuilderRender.renderRailBuilder(info);
 	        		}
 	        		GL11.glPopMatrix();
@@ -159,3 +163,4 @@ public class RenderOverride {
         Minecraft.getMinecraft().mcProfiler.endSection();;
 	}
 }
+ 
