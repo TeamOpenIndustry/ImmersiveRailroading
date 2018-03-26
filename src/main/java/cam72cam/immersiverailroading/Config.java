@@ -31,6 +31,9 @@ public class Config {
 
 		@Comment("Requires solid blocks to be placed under the rails")
 		public static boolean requireSolidBlocks = true;
+
+		@Comment("Drop snowballs when the train can't push a block out of the way")
+		public static boolean dropSnowBalls = false;
 	}
 
 	public static ConfigBalance balance;
