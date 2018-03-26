@@ -605,8 +605,6 @@ public class ClientProxy extends CommonProxy {
 		}
 		tickCount++;
 		manager.tick();
-		
-		StockRenderCache.tryCache();
 	}
 
 
