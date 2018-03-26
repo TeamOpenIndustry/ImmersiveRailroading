@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.entity;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -13,7 +14,7 @@ public class MagicEntityRender extends Render<MagicEntity> {
 	
 	@Override
 	public boolean shouldRender(MagicEntity entity, ICamera camera, double camX, double camY, double camZ) {
-		return true;
+		return ConfigGraphics.useShaderFriendlyRender;
 	}
 
 	@Override

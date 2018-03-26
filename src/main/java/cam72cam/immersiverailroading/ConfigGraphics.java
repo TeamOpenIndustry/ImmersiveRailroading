@@ -24,6 +24,9 @@ public class ConfigGraphics {
 	@Comment("Use Icon Cache (experimental)")
 	public static boolean enableIconCache = false;
 
+	@Comment("If you are having render problems in game, try setting this to false")
+	public static boolean useShaderFriendlyRender = true;
+
 	@Comment({ "Self explanitory" })
 	public static boolean trainsOnTheBrain = true;
 

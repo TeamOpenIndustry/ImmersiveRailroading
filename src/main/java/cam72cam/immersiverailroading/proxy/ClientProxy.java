@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
@@ -60,6 +61,7 @@ import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.entity.MagicEntityRender;
 import cam72cam.immersiverailroading.render.entity.MagicEntity;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
+import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.entity.StockEntityRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.tile.TileMultiblockRender;
@@ -74,6 +76,8 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -396,10 +400,23 @@ public class ClientProxy extends CommonProxy {
 		 * This is a bad hack but it works
 		 * 
 		 */
-		
-		// This has been moved to MagicEntity which is probably a better solution
-        
-        //RenderOverride.renderStockAndParticles(event.getPartialTicks());
+
+		if (!ConfigGraphics.useShaderFriendlyRender) {
+			float partialTicks = event.getPartialTicks();
+
+			GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
+			RenderHelper.enableStandardItemLighting();
+			Minecraft.getMinecraft().entityRenderer.enableLightmap();
+			GlStateManager.enableAlpha();
+			RenderOverride.renderTiles(partialTicks);
+			RenderOverride.renderStock(partialTicks);
+			RenderOverride.renderParticles(partialTicks);
+
+			GlStateManager.disableAlpha();
+			Minecraft.getMinecraft().entityRenderer.disableLightmap();
+			RenderHelper.disableStandardItemLighting();
+			color.restore();
+		}
 	}
 	
 	@SubscribeEvent
