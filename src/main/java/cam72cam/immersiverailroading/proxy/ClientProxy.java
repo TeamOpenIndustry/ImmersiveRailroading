@@ -56,6 +56,7 @@ import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.item.StockItemModel;
 import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
+import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.entity.MagicEntityRender;
@@ -132,6 +133,7 @@ public class ClientProxy extends CommonProxy {
 	private static IRSoundManager manager;
 
 	private static MagicEntity magical;
+	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
@@ -417,6 +419,7 @@ public class ClientProxy extends CommonProxy {
 			RenderHelper.disableStandardItemLighting();
 			color.restore();
 		}
+		renderCacheLimiter.reset();
 	}
 	
 	@SubscribeEvent
