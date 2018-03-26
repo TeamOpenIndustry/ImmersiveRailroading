@@ -93,7 +93,7 @@ public class AugmentDriver implements DriverBlock {
 		public AugmentManagerBase(World world, BlockPos pos) {
 			this.world = world;
 			this.pos = pos;
-			setNode(Network.newNode(this, Visibility.Network).withComponent("ir_augment", Visibility.Network).create());
+			setNode(Network.newNode(this, Visibility.Network).withComponent(preferredName(), Visibility.Network).create());
 		}
 
 		@Override
@@ -115,7 +115,8 @@ public class AugmentDriver implements DriverBlock {
 				EntityRollingStock nearby = te.getStockNearBy(typeFilter, null);
 				UUID isOverhead = nearby != null ? nearby.getPersistentID() : null;
 				if (isOverhead != wasOverhead) {
-					node.sendToReachable("computer.signal", "ir_train_overhead", te.getAugment().toString(), isOverhead == null ? null : isOverhead.toString());
+					Node neighbor = node.neighbors().iterator().next();
+					neighbor.sendToReachable("computer.signal", "ir_train_overhead", te.getAugment().toString(), isOverhead == null ? null : isOverhead.toString());
 				}
 				
 				wasOverhead = isOverhead;
@@ -135,7 +136,7 @@ public class AugmentDriver implements DriverBlock {
 
 		@Override
 		public int priority() {
-			return 0;
+			return 3;
 		}
 	}
 
