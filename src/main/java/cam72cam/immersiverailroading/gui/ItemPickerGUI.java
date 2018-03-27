@@ -49,13 +49,13 @@ public class ItemPickerGUI extends GuiScreen {
 		if (width == 0 || height == 0) {
 			return;
 		}
-		int startX = this.width / 4;
-		int startY = this.height / 4;
+		int startX = this.width / 16;
+		int startY = this.height / 8;
 		
-		int stacksX = this.width/2 / 32;
+		int stacksX = this.width * 7/8 / 32;
 		
 		this.buttonList.clear();
-		
+		startX += Math.max(0, (stacksX - items.size())/2) * 32;
 		for (int i = 0; i < items.size(); i++) {
 			int col = i % stacksX;
 			int row = i / stacksX;
