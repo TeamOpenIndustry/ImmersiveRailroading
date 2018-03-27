@@ -522,7 +522,7 @@ public class ClientProxy extends CommonProxy {
 		// This is super fragile
 		sndCache = new ArrayList<ISound>();
 		for (int i = 0; i < 16; i ++) {
-			sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 40, Gauge.STANDARD));
+			sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, Gauge.STANDARD));
 		}
 		magical = new MagicEntity(event.getWorld());
 		event.getWorld().loadedEntityList.add(magical);
@@ -551,19 +551,20 @@ public class ClientProxy extends CommonProxy {
 		
 		if (event.getEntity() instanceof EntityMoveableRollingStock) {
 			
-			if(event.getNewChunkX() == event.getOldChunkX() && event.getNewChunkZ() % 4 != 0) {
+			if(event.getNewChunkX() == event.getOldChunkX() && event.getNewChunkZ() % 8 != 0) {
 				return;
 			}
 			
-			if(event.getNewChunkZ() == event.getOldChunkZ() && event.getNewChunkX() % 4 != 0) {
+			if(event.getNewChunkZ() == event.getOldChunkZ() && event.getNewChunkX() % 8 != 0) {
 				return;
 			}
 			
 			ISound snd = sndCache.get(sndCacheId);
 			// TODO Doppler update
-			snd.setPitch((float) (1/((EntityMoveableRollingStock)event.getEntity()).gauge.scale()));
-			//0.5f + (float) Math.abs(((EntityMoveableRollingStock)event.getEntity()).getCurrentSpeed().metric() / 300f)
-			snd.setVolume(0.3f);
+			EntityMoveableRollingStock stock = ((EntityMoveableRollingStock)event.getEntity());
+			float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
+			snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
+			snd.setVolume(0.01f + adjust);
 			snd.play(event.getEntity().getPositionVector());
 	    	sndCacheId++;
 	    	sndCacheId = sndCacheId % sndCache.size();

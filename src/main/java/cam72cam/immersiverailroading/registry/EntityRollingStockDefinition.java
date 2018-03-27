@@ -71,6 +71,7 @@ public abstract class EntityRollingStockDefinition {
 	protected double internal_scale;
 	public Gauge recommended_gauge;
 	public Boolean shouldSit;
+	public ResourceLocation wheel_sound;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
@@ -159,6 +160,13 @@ public abstract class EntityRollingStockDefinition {
 		heightBounds = model.heightOfGroups(heightGroups);
 		
 		weight = (int)Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_scale);
+		
+		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
+		if (sounds != null && sounds.has("wheels")) {
+			wheel_sound = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("wheels").getAsString());
+		} else {
+			wheel_sound = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
+		}
 	}
 	
 	protected void addComponentIfExists(RenderComponent renderComponent, boolean itemComponent) {

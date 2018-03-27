@@ -199,6 +199,11 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		
+		if (this.ticksExisted < 2) {
+			// Prevent explosions
+			return;
+		}
 
 		if (world.isRemote) {
 			// Particles and Sound
@@ -214,7 +219,7 @@ public class LocomotiveSteam extends Locomotive {
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40, gauge);
 					idle.setVolume(0.1f);
 					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
-					pressure.setVolume(0.5f);
+					pressure.setVolume(0.3f);
 				}
 				
 				if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
