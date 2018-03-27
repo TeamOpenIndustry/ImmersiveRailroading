@@ -4,7 +4,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.opengl.GL11;
+
+import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
@@ -23,7 +27,6 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -45,6 +48,19 @@ public class RenderOverride {
         return camera;
 	}
 	
+	private static boolean isInRenderDistance(Vec3d pos) {
+		// max rail length is 100, 50 is center
+		return Minecraft.getMinecraft().player.getPositionVector().distanceTo(pos) < ((Minecraft.getMinecraft().gameSettings.renderDistanceChunks+1) * 16 + 50);
+	}
+	
+	private static final Predicate<Entity> IN_RENDER_DISTANCE = new Predicate<Entity>()
+    {
+        public boolean apply(@Nullable Entity p_apply_1_)
+        {
+            return isInRenderDistance(p_apply_1_.getPositionVector());
+        }
+    };
+	
 	public static void renderStock(float partialTicks) {
         int pass = MinecraftForgeClient.getRenderPass();
         if (pass != 0 && ConfigGraphics.useShaderFriendlyRender) {
@@ -56,9 +72,9 @@ public class RenderOverride {
         ICamera camera = getCamera(partialTicks);
         
         World world = Minecraft.getMinecraft().player.getEntityWorld();
-        List<EntityRollingStock> entities = world.getEntities(EntityRollingStock.class, EntitySelectors.IS_ALIVE);
+        List<EntityRollingStock> entities = world.getEntities(EntityRollingStock.class, IN_RENDER_DISTANCE);
         for (EntityRollingStock entity : entities) {
-        	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox()) ) {
+        	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox())) {
         		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity, partialTicks, true);
         	}
         }
@@ -79,7 +95,7 @@ public class RenderOverride {
         Vec3d ep = getCameraPos(partialTicks);
         
         World world = Minecraft.getMinecraft().player.getEntityWorld();
-        List<EntitySmokeParticle> smokeEnts = world.getEntities(EntitySmokeParticle.class, EntitySelectors.IS_ALIVE);
+        List<EntitySmokeParticle> smokeEnts = world.getEntities(EntitySmokeParticle.class, IN_RENDER_DISTANCE);
         Comparator<EntitySmokeParticle> compare = (EntitySmokeParticle e1, EntitySmokeParticle e2) -> {
         	Double p1 = e1.getPositionVector().squareDistanceTo(ep);
         	Double p2 = e1.getPositionVector().squareDistanceTo(ep);
@@ -137,7 +153,7 @@ public class RenderOverride {
 	        model.bindTexture();
 	        List<TileEntity> entities = Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList;
 	        for (TileEntity te : entities) {
-	        	if (te instanceof TileRail && camera.isBoundingBoxInFrustum(te.getRenderBoundingBox())) {
+	        	if (te instanceof TileRail && camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(((TileRail) te).getPlacementPosition())) {
 	        		Vec3d relPos = new Vec3d(te.getPos());
 	        		
 	        		RailInfo info = ((TileRail) te).getRailRenderInfo();
