@@ -160,18 +160,22 @@ public abstract class Locomotive extends FreightTank {
 	
 	private double getAppliedTractiveEffort(Speed speed) {
 		double locoEfficiency = 0.7f; //TODO config
-		double outputHorsepower = Math.abs(Math.pow(getThrottle(), 2) * getAvailableHP());
+		double outputHorsepower = Math.abs(Math.pow(getThrottle(), 3) * getAvailableHP());
 		
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(0.0001, Math.abs(speed.metric()))));
 		return tractiveEffortNewtons;
 	}
 	
+	private static double lastSlip = 0;
 	private void simulateWheelSlip() {
-		double applied = getAppliedTractiveEffort(this.getCurrentSpeed());
+		double applied = getAppliedTractiveEffort(getCurrentSpeed());
 		double actual = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
 		if (applied > actual) {
-			double speedMultiplier = 1;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
-			this.distanceTraveled += Math.copySign(Math.min((applied / actual - 1)/100, 0.8), getThrottle()) * speedMultiplier; //Wheel Slip
+			double speedMultiplier = 1 + Math.abs(lastSlip)*2;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
+			lastSlip = Math.copySign(Math.min((applied / actual - 1)/100 * speedMultiplier, 0.8), getThrottle());
+			this.distanceTraveled += lastSlip; //Wheel Slip
+		} else {
+			lastSlip = 0;
 		}
 	}
 	
