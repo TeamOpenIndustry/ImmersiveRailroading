@@ -73,7 +73,7 @@ public class OreHelper {
 	public static final OreAbstract IR_SCAFFOLDING = new OreAbstract("irScaffolding", "scaffoldingSteel", new ItemStack(Blocks.IRON_BARS));
 	public static final OreAbstract IR_STEEL_BLOCK = new OreAbstract("blockSteel", new ItemStack(Blocks.IRON_BLOCK));
 	public static final OreAbstract IR_STEEL_INGOT = new OreAbstract("ingotSteel", new ItemStack(Items.IRON_INGOT));
-	public static final OreAbstract IR_TIE = new OreAbstract("irTie", "treatedWood", new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+	public static final OreAbstract IR_TIE = new OreAbstract("irTie", "plankTreatedWood", new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
 	public static final OreAbstract IR_RAIL_BED = new OreAbstract("railBed", new ItemStack(Blocks.GRAVEL));
 	
 	
