@@ -46,7 +46,7 @@ public class StockRenderCache {
 						GL11.glRotated(95, 0, 1, 0);
 						GL11.glRotated(180, 0, 1, 0);
 						model.bindTexture();
-						model.draw();
+						model.drawDirect();
 					}
 					GL11.glPopMatrix();
 					tex.restore();
