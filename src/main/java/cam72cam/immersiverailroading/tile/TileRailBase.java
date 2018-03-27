@@ -559,7 +559,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			}
 			stock = this.getStockNearBy(capability);
 			if (stock != null) {
-				transferAll(this.augmentTank, stock.getCapability(capability, null), 10);
+				transferAll(this.augmentTank, stock.getCapability(capability, null), 100);
 			}
 			break;
 		case FLUID_UNLOADER:
@@ -568,7 +568,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			}
 			stock = this.getStockNearBy(capability);
 			if (stock != null) {
-				transferAll(stock.getCapability(capability, null), this.augmentTank, 10);
+				transferAll(stock.getCapability(capability, null), this.augmentTank, 100);
 			}
 			
 			if (this.augmentTank.getFluidAmount() != 0) {
