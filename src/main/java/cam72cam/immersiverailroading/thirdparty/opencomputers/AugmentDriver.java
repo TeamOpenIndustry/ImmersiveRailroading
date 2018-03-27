@@ -125,15 +125,6 @@ public class AugmentDriver implements DriverBlock {
 			this.ticksAlive +=1;
 	    }
 
-		@Callback(doc = "function():string -- returns the current augment type")
-		public Object[] getAugmentType(Context context, Arguments args) {
-			Augment augment = TileRailBase.get(world, pos).getAugment();
-			if (augment != null) {
-				return new Object[] { augment.toString() };
-			}
-			return null;
-		}
-
 		@Override
 		public int priority() {
 			return 3;
@@ -265,6 +256,20 @@ public class AugmentDriver implements DriverBlock {
 			}
 			return null;
 		}
+
+		@Callback(doc = "function():string -- returns the current augment type")
+		public Object[] getAugmentType(Context context, Arguments args) {
+			Augment augment = TileRailBase.get(world, pos).getAugment();
+			if (augment != null) {
+				return new Object[] { augment.toString() };
+			}
+			return null;
+		}
+		
+		@Callback(doc = "function():array -- returns the position of the augment")
+		public Object[] getPos(Context context, Arguments args) {
+			return new Object[] {this.pos.getX(), this.pos.getY(), this.pos.getZ()};
+		}
 	}
 
 	public class LocoControlAugment extends AugmentManagerBase {
@@ -316,6 +321,20 @@ public class AugmentDriver implements DriverBlock {
 				stock.setHorn(5);
 			}
 			return null;
+		}
+
+		@Callback(doc = "function():string -- returns the current augment type")
+		public Object[] getAugmentType(Context context, Arguments args) {
+			Augment augment = TileRailBase.get(world, pos).getAugment();
+			if (augment != null) {
+				return new Object[] { augment.toString() };
+			}
+			return null;
+		}
+		
+		@Callback(doc = "function():array -- returns the position of the augment")
+		public Object[] getPos(Context context, Arguments args) {
+			return new Object[] {this.pos.getX(), this.pos.getY(), this.pos.getZ()};
 		}
 	}
 }
