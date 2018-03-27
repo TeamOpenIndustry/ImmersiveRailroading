@@ -153,29 +153,34 @@ public class RenderOverride {
 	        model.bindTexture();
 	        List<TileEntity> entities = Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList;
 	        for (TileEntity te : entities) {
-	        	if (te instanceof TileRail && camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(((TileRail) te).getPlacementPosition())) {
-	        		Vec3d relPos = new Vec3d(te.getPos());
-	        		
-	        		RailInfo info = ((TileRail) te).getRailRenderInfo();
-	        		if (info == null) {
-	        			// Still loading...
+	        	if (te instanceof TileRail) {
+	        		if (!((TileRail) te).isLoaded()) {
 	        			continue;
 	        		}
-	        		
-	        		GL11.glPushMatrix();
-	        		{
-	        	        int i = te.getWorld().getCombinedLight(te.getPos(), 0);
-	        	        int j = i % 65536;
-	        	        int k = i / 65536;
-	        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-	        			info = info.clone();
-	        			GL11.glTranslated(relPos.x, relPos.y, relPos.z);	
-	        			if (info.type == TrackItems.SWITCH) {
-	        				info.type = TrackItems.STRAIGHT;
-	        			}
-		        		RailBuilderRender.renderRailBuilder(info);
-	        		}
-	        		GL11.glPopMatrix();
+		        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(((TileRail) te).getPlacementPosition())) {
+		        		Vec3d relPos = new Vec3d(te.getPos());
+		        		
+		        		RailInfo info = ((TileRail) te).getRailRenderInfo();
+		        		if (info == null) {
+		        			// Still loading...
+		        			continue;
+		        		}
+		        		
+		        		GL11.glPushMatrix();
+		        		{
+		        	        int i = te.getWorld().getCombinedLight(te.getPos(), 0);
+		        	        int j = i % 65536;
+		        	        int k = i / 65536;
+		        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+		        			info = info.clone();
+		        			GL11.glTranslated(relPos.x, relPos.y, relPos.z);	
+		        			if (info.type == TrackItems.SWITCH) {
+		        				info.type = TrackItems.STRAIGHT;
+		        			}
+			        		RailBuilderRender.renderRailBuilder(info);
+		        		}
+		        		GL11.glPopMatrix();
+		        	}	
 	        	}
 	        }
 	        model.restoreTexture();
