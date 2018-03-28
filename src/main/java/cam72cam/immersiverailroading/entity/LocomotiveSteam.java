@@ -361,8 +361,6 @@ public class LocomotiveSteam extends Locomotive {
 						    	sndCacheId++;
 						    	sndCacheId = sndCacheId % sndCache.size();
 								phaseOn.put(key, true);
-								
-								System.out.println(tickMod);
 
 								tickMod += tickDelt;
 								if (tickMod > 8) {

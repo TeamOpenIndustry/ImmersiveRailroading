@@ -97,12 +97,17 @@ public class IRSoundManager {
 			}
 		}
 	}
+	
+	public boolean hasSounds() {
+		return this.sounds.size() != 0;
+	}
 
 	public void stop() {
 		for (ISound sound : this.sounds) {
 			sound.stop();
 			sound.terminate();
 		}
+		this.sounds = new ArrayList<ISound>();
 	}
 
 	public void handleReload() {
