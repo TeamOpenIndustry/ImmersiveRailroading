@@ -208,11 +208,15 @@ public abstract class Multiblock {
 		protected TileMultiblock getTile(BlockPos offset) {
 			TileMultiblock te = TileMultiblock.get(world, getPos(offset));
 			if (te == null) {
-				ImmersiveRailroading.warn("Multiblock TE is null: %s %s %s %s", getPos(offset), offset, world.isRemote, this.getClass());
+				if (!world.isRemote) {
+					ImmersiveRailroading.warn("Multiblock TE is null: %s %s %s %s", getPos(offset), offset, world.isRemote, this.getClass());
+				}
 				return null;
 			}
 			if (!te.isLoaded()) {
-				ImmersiveRailroading.info("Multiblock is still loading: %s %s %s %s", getPos(offset), offset, world.isRemote, this.getClass());
+				if (!world.isRemote) {
+					ImmersiveRailroading.info("Multiblock is still loading: %s %s %s %s", getPos(offset), offset, world.isRemote, this.getClass());
+				}
 				return null;
 			}
 			return te;
