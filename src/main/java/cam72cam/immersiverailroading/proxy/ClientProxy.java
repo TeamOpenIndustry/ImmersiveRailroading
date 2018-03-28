@@ -614,7 +614,10 @@ public class ClientProxy extends CommonProxy {
 		return tickCount;
 	}
 	
-
+	@Override
+	public int getRenderDistance() {
+		return Minecraft.getMinecraft().gameSettings.renderDistanceChunks;
+	}
 	
 	@SubscribeEvent
 	public static void configChanged(OnConfigChangedEvent event) {
