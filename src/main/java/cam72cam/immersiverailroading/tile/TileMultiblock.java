@@ -146,6 +146,12 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		energy.extractEnergy(energy.getEnergyStored(), false);
 		energy.receiveEnergy(nbt.getInteger("energy"), false);
 	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public double getMaxRenderDistanceSquared() {
+		return Math.pow(ImmersiveRailroading.proxy.getRenderDistance()*16, 2);
+	}
 
 	@Override
 	public void update() {
