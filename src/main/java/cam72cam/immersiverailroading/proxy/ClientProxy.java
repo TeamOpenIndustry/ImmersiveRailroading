@@ -518,20 +518,21 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@SubscribeEvent
-	public static void onWorldLoad(Load event) {		
-		// This is super fragile
-		sndCache = new ArrayList<ISound>();
-		for (int i = 0; i < 16; i ++) {
-			sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, Gauge.STANDARD));
+	public static void onWorldLoad(Load event) {
+		manager.handleReload();
+		
+		if (sndCache == null) {
+			sndCache = new ArrayList<ISound>();
+			for (int i = 0; i < 16; i ++) {
+				sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, Gauge.STANDARD));
+			}
 		}
-		magical = new MagicEntity(event.getWorld());
-		event.getWorld().loadedEntityList.add(magical);
 	}
 	
 	@SubscribeEvent
 	public static void onWorldUnload(Unload event) {
-		manager.stop();
-		magical = null;
+		//manager.stop();
+		//sndCache = null;
 	}
 	
 	private static int sndCacheId = 0;
@@ -549,7 +550,7 @@ public class ClientProxy extends CommonProxy {
 			return;
 		}
 		
-		if (event.getEntity() instanceof EntityMoveableRollingStock) {
+		if (sndCache != null && event.getEntity() instanceof EntityMoveableRollingStock) {
 			
 			if(event.getNewChunkX() == event.getOldChunkX() && event.getNewChunkZ() % 8 != 0) {
 				return;
@@ -583,20 +584,40 @@ public class ClientProxy extends CommonProxy {
 		if (event.phase != Phase.START) {
 			return;
 		}
+				
+		EntityPlayerSP player = Minecraft.getMinecraft().player;
+		World world = null;
+		if (player != null) {
+			world = player.world;
+		}
 		
-		if (magical != null) {
-			magical.onUpdate();
-			
-			if (magical.isDead) {
-				magical.isDead = false;
-				ImmersiveRailroading.warn("Reanimating magic entity");
-				magical.world.spawnEntity(magical);
+		if (world == null && manager != null && manager.hasSounds()) {
+			System.out.println("Unloading IR sound system");
+			manager.stop();
+			sndCache = null;
+		}
+		
+		if (world != null) {
+			if (magical == null) {
+				magical = new MagicEntity(world);
+				world.spawnEntity(magical);
 			}
-			if (tickCount % 20 == 0) {
-				if (!magical.world.loadedEntityList.contains(magical)) {
-					ImmersiveRailroading.warn("Respawning magic entity");
+			
+			if (magical != null) {
+				magical.onUpdate();
+				
+				if (magical.isDead) {
 					magical.isDead = false;
+					ImmersiveRailroading.warn("Reanimating magic entity");
 					magical.world.spawnEntity(magical);
+				}
+				if (tickCount % 20 == 0) {
+					if (!world.loadedEntityList.contains(magical)) {
+						ImmersiveRailroading.warn("Respawning magic entity");
+						magical.world.removeEntity(magical);
+						magical.isDead = false;
+						world.spawnEntity(magical);
+					}
 				}
 			}
 		}

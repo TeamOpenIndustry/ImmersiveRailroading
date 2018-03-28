@@ -23,6 +23,7 @@ public class MagicEntity extends Entity {
 
 	public MagicEntity(World worldIn) {
 		super(worldIn);
+		this.forceSpawn = true;
 	}
 	
 	@Override
