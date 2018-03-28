@@ -227,6 +227,14 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 	
 	@Override
+	public void setDead() {
+		super.setDead();
+		if (this.wheel_sound != null) {
+			wheel_sound.stop();
+		}
+	}
+	
+	@Override
 	public double getWeight() {
 		double fLoad = ConfigBalance.blockWeight * this.getDataManager().get(CARGO_ITEMS);
 		fLoad = fLoad + super.getWeight();
