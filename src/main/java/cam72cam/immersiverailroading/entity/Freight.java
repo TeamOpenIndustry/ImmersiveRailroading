@@ -72,7 +72,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 					this.sndRand = (float)Math.random()/10;
 				}
 				
-				if (this.getCurrentSpeed().metric() > 5) {
+				if (Math.abs(this.getCurrentSpeed().metric()) > 5) {
 					if (!wheel_sound.isPlaying()) {
 						wheel_sound.play(this.getPositionVector());
 					}
