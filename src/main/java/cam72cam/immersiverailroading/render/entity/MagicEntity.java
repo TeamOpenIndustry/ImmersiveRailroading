@@ -32,8 +32,8 @@ public class MagicEntity extends Entity {
 		if (player == null) {
 			return;
 		}
-		Vec3d pos = player.getPositionVector();
-		pos = pos.add(player.getLookVec());
+		Vec3d pos = player.getPositionEyes(0);
+		pos = pos.add(player.getLookVec().scale(2));
 		this.setPosition(pos.x, pos.y, pos.z);
 	}
 
