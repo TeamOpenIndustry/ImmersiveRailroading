@@ -14,8 +14,8 @@
 		"weight_kg": 263072
 	},
 	"firebox": {
-		"slots": 18,
-		"width": 6
+		"slots": 24,
+		"width": 8
 	},
 	"passenger": {
 		"slots": 4,
