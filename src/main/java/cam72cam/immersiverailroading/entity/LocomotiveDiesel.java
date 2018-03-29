@@ -148,7 +148,7 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 		
 		if (this.getLiquidAmount() > 0 && getThrottle() != 0) {
-			int burnTime = BurnUtil.getBurnTime(this.getLiquid());
+			float burnTime = BurnUtil.getBurnTime(this.getLiquid());
 			if (burnTime == 0) {
 				burnTime = 200; //Default to 200 for unregistered liquids
 			}
@@ -156,8 +156,9 @@ public class LocomotiveDiesel extends Locomotive {
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
 			burnTime /= Math.abs(getThrottle())*10;
 			burnTime *= 1/gauge.scale();
+			burnTime /= 50;
 			burnTime = Math.max(burnTime, 1); // Prevent div by zero
-			if (this.ticksExisted % burnTime == 0) {
+			if (this.ticksExisted % (int)burnTime == 0) {
 				theTank.drain(1, true);
 			}
 		}

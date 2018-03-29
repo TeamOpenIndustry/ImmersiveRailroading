@@ -56,7 +56,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		super.parseJson(data);
 		
 		JsonObject properties = data.get("properties").getAsJsonObject();
-		fuelCapacity = FluidQuantity.FromLiters((int)Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_scale));
+		fuelCapacity = FluidQuantity.FromLiters((int)Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_scale * 10));
 		fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
