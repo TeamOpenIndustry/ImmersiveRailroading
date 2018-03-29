@@ -22,8 +22,8 @@
 		"slots": 2,
 		"center_x": -2,
 		"center_y": 1.3,
-		"length": 0.8,
-		"width": 2.4
+		"length": 0.5,
+		"width": 2.2
 	},
 	"trucks": {
 		"front": 1.5, 
