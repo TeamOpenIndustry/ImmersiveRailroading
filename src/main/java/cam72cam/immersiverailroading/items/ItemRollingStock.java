@@ -100,6 +100,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
 			if (te.getAugment() != null) {
 				switch(te.getAugment()) {
 				case DETECTOR:
+				case LOCO_CONTROL:
 				case FLUID_LOADER:
 				case FLUID_UNLOADER:
 				case ITEM_LOADER:
