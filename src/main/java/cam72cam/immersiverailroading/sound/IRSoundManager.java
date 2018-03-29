@@ -110,7 +110,12 @@ public class IRSoundManager {
 		this.sounds = new ArrayList<ISound>();
 	}
 
-	public void handleReload() {
+	public void handleReload(boolean soft) {
+		if (soft) {
+			for (ISound sound : this.sounds) {
+				sound.stop();
+			}
+		}
 		this.cachedSnd = null;
 		for (ISound sound : this.sounds) {
 			sound.reload();

@@ -513,13 +513,13 @@ public class ClientProxy extends CommonProxy {
 		if (manager == null) {
 			manager = new IRSoundManager(event.getManager());
 		} else {
-			manager.handleReload();
+			manager.handleReload(false);
 		}
 	}
 	
 	@SubscribeEvent
 	public static void onWorldLoad(Load event) {
-		manager.handleReload();
+		manager.handleReload(true);
 		
 		if (sndCache == null) {
 			sndCache = new ArrayList<ISound>();
