@@ -196,14 +196,14 @@ public class ClientProxy extends CommonProxy {
 	public void init(FMLInitializationEvent event) {
 		super.init(event);
 		
-		keys.put(KeyTypes.THROTTLE_UP, new KeyBinding("immersiverailroading:keys.increase_throttle", Keyboard.KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.THROTTLE_ZERO, new KeyBinding("immersiverailroading:keys.zero_throttle", Keyboard.KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.THROTTLE_DOWN, new KeyBinding("immersiverailroading:keys.decrease_throttle", Keyboard.KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.AIR_BRAKE_UP, new KeyBinding("immersiverailroading:keys.increase_brake", Keyboard.KEY_NUMPAD7, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.AIR_BRAKE_ZERO, new KeyBinding("immersiverailroading:keys.zero_brake", Keyboard.KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.AIR_BRAKE_DOWN, new KeyBinding("immersiverailroading:keys.decrease_brake", Keyboard.KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.HORN, new KeyBinding("immersiverailroading:keys.horn", Keyboard.KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.DEAD_MANS_SWITCH, new KeyBinding("immersiverailroading:keys.dead_mans_switch", Keyboard.KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.THROTTLE_UP, new KeyBinding("ir_keys.increase_throttle", Keyboard.KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.THROTTLE_ZERO, new KeyBinding("ir_keys.zero_throttle", Keyboard.KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.THROTTLE_DOWN, new KeyBinding("ir_keys.decrease_throttle", Keyboard.KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.AIR_BRAKE_UP, new KeyBinding("ir_keys.increase_brake", Keyboard.KEY_NUMPAD7, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.AIR_BRAKE_ZERO, new KeyBinding("ir_keys.zero_brake", Keyboard.KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.AIR_BRAKE_DOWN, new KeyBinding("ir_keys.decrease_brake", Keyboard.KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.HORN, new KeyBinding("ir_keys.horn", Keyboard.KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.DEAD_MANS_SWITCH, new KeyBinding("ir_keys.dead_mans_switch", Keyboard.KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID));
 		
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_UP));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_DOWN));
