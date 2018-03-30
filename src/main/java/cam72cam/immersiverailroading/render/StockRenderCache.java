@@ -54,21 +54,8 @@ public class StockRenderCache {
 			System.out.println("Initializing Icon Cache...");
 			icon_cache = new IconTextureSheet();
 			for (String defID : DefinitionManager.getDefinitionNames()) {
-				StockModel model = getRender(defID);
-				icon_cache.add(defID, () -> {
-					GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
-					GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, true);
-					GL11.glPushMatrix();
-					{
-						GL11.glRotated(95, 0, 1, 0);
-						GL11.glRotated(180, 0, 1, 0);
-						model.bindTexture();
-						model.drawDirect();
-					}
-					GL11.glPopMatrix();
-					tex.restore();
-					cull.restore();
-				});
+				//StockModel model = getRender(defID);
+				icon_cache.add(defID, () -> {});
 			}
 		}
 	}
@@ -92,6 +79,6 @@ public class StockRenderCache {
 
 	public static void tryPrime() {
 		tryPrimeRenderCache();
-		tryPrimeImageCache();
+		//tryPrimeImageCache();
 	}
 }

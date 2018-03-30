@@ -7,6 +7,7 @@ public class Face {
 	public int[][] points; 
 	public String mtl;
 	public Vec2f offsetUV = new Vec2f(0, 0);
+	public Float depthCache;
 
 	public Face(String mtl, String...args) {
 		this.mtl = mtl;

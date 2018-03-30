@@ -1,11 +1,18 @@
 package cam72cam.immersiverailroading.proxy;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -48,6 +55,8 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.item.PlateItemModel;
 import cam72cam.immersiverailroading.render.item.RailAugmentItemModel;
 import cam72cam.immersiverailroading.render.item.RailCastItemRender;
@@ -64,6 +73,7 @@ import cam72cam.immersiverailroading.render.entity.MagicEntity;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
 import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.entity.StockEntityRender;
+import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.tile.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.tile.TileRailPreviewRender;
@@ -82,7 +92,10 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.IResource;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -100,8 +113,10 @@ import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ModelLoader.White;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
@@ -134,6 +149,8 @@ public class ClientProxy extends CommonProxy {
 
 	private static MagicEntity magical;
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
+
+	public static TextureMap texMap;
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
@@ -293,6 +310,78 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
+	}
+	
+	public static final class StockIcon extends TextureAtlasSprite
+    {
+
+        private EntityRollingStockDefinition def;
+        
+        private static String defConvert(String defID) {
+        	String[] sp = defID.split("/");
+        	return sp[sp.length-1].replaceAll(".json", "");
+        }
+
+		public StockIcon(EntityRollingStockDefinition def)
+        {
+            super(defConvert(def.defID));
+            this.def = def;
+            this.width = this.height = 64;
+        }
+
+        @Override
+        public boolean hasCustomLoader(IResourceManager manager, ResourceLocation location)
+        {
+            return true;
+        }
+
+        @Override
+        public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
+        {
+            BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+            
+            String[][] map = def.getIcon(this.getIconWidth());
+
+            StockModel renderer = StockRenderCache.getRender(def.defID);
+    		try {
+    		for (int x = 0; x < this.getIconWidth(); x++) {
+    			for (int y = 0; y < this.getIconHeight(); y++) {
+    				if (map[x][y] != null && map[x][y] != "") {
+    					int color = renderer.texture.samp(map[x][y]);
+    					image.setRGB(x, this.getIconWidth() - (y + 1), color);
+    				} else {
+    					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
+    				}
+    			}
+    		}
+    		}
+    		catch (Exception ex) {
+    			ex.printStackTrace();
+    		}
+            
+            int[][] pixels = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
+            pixels[0] = new int[image.getWidth() * image.getHeight()];
+            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels[0], 0, image.getWidth());
+            this.clearFramesTextureData();
+            this.framesTextureData.add(pixels);
+            /*
+            try {
+    			ImageIO.write(image, "PNG", new File("/home/gilligan/foo" + Math.random() + ".png"));
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}*/
+            
+            return false;
+        }
+    }
+	
+	@SubscribeEvent
+	public static void onTextureStich(TextureStitchEvent.Pre event) {
+		texMap = event.getMap();
+		for (String defID : DefinitionManager.getDefinitionNames()) {
+			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+			texMap.setTextureEntry(new StockIcon(def));
+		}
 	}
 
 	@SubscribeEvent
