@@ -1,18 +1,13 @@
 package cam72cam.immersiverailroading.registry;
 
-import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -29,7 +24,6 @@ import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
-import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.TextUtil;
@@ -327,92 +321,7 @@ public abstract class EntityRollingStockDefinition {
 		}
 	}
 	
-	private boolean loadHeightMaps() {
-		try {
-			File f = new File(CommonProxy.getCacheFile("heightmap_" + this.model.checksum));
-			if (f.exists()) {
-				ImmersiveRailroading.info("Loading heighmap...");
-				Scanner reader = new Scanner(f);
-				
-				String[] header = reader.nextLine().split(" ");
-				xRes = Integer.parseInt(header[0]);
-				zRes = Integer.parseInt(header[1]);
-				
-				while(reader.hasNextLine()) {
-					String name = reader.nextLine();
-					RenderComponent rc = null;
-					for (List<RenderComponent> rcl : this.renderComponents.values()) {
-						for (RenderComponent rc_pot : rcl) {
-							if (rc_pot.toString().equals(name)) {
-								rc = rc_pot;
-								break;
-							}
-						}
-						if (rc != null) {
-							break;
-						}
-					}
-					double[][] heightMap = new double[xRes][zRes];
-					
-					for (int x = 0; x < xRes; x++) {
-						String[] data = reader.nextLine().split(" ");
-						for (int z = 0; z < zRes; z++) {
-							heightMap[x][z] = Double.parseDouble(data[z]);
-						}
-					}
-
-
-					if (rc.type.collisionsEnabled) {
-						this.partMapCache.put(rc, heightMap);
-					}
-				}
-				
-				reader.close();
-				return true;
-			}
-		} catch (FileNotFoundException e) {
-			ImmersiveRailroading.catching(e);
-		}
-		return false;
-	}
-	
-	private void writeHeightMaps() {
-		try {
-			File f = new File(CommonProxy.getCacheFile("heightmap_" + this.model.checksum));
-			PrintWriter pw = new PrintWriter(f);
-			
-			// Header
-			pw.println(xRes + " " + zRes);
-			
-			for (RenderComponent rc : this.partMapCache.keySet()) {
-				String key = rc.toString();
-				double[][] map = this.partMapCache.get(rc);
-				//Name
-				pw.println(key);
-
-				//Data
-				for (int x = 0; x < xRes; x++) {
-					String line = "";
-					String sep = "";
-					for (int z = 0; z < zRes; z++) {
-						line += sep + map[x][z];
-						sep = " ";
-					}
-					pw.println(line);
-				}
-			}
-			
-			pw.close();
-		} catch (FileNotFoundException e) {
-			ImmersiveRailroading.catching(e);
-		}
-	}
-	
 	private void initHeightMap() {
-		if (loadHeightMaps()) {
-			return;
-		}
-		
 		ImmersiveRailroading.info("Generating model heightmap...");
 		
 		double ratio = 8;
@@ -437,20 +346,22 @@ public abstract class EntityRollingStockDefinition {
 							Vec3d vert = model.vertices.get(point[0]);
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
-								path.moveTo(vert.x, vert.z);
+								path.moveTo(vert.x * ratio, vert.z * ratio);
 							} else {
-								path.lineTo(vert.x, vert.z);
+								path.lineTo(vert.x * ratio, vert.z * ratio);
 							}
 							fheight += vert.y / face.points.length;
 							first = false;
 						}
-						Area a = new Area(path);
-						Rectangle2D bounds = a.getBounds2D();
+						Rectangle2D bounds = path.getBounds2D();
+						if (bounds.getWidth() * bounds.getHeight() < 1) {
+							continue;
+						}
 						for (int x = 0; x < xRes; x++) {
 							for (int z = 0; z < zRes; z++) {
-								double relX = ((xRes-1)-x) / ratio;
-								double relZ = z / ratio;
-								if (bounds.contains(relX, relZ) && a.contains(relX, relZ)) {
+								double relX = ((xRes-1)-x);
+								double relZ = z;
+								if (bounds.contains(relX, relZ) && path.contains(relX, relZ)) {
 									double relHeight = fheight / heightBounds;
 									relHeight = ((int)Math.ceil(relHeight * precision))/(double)precision;
 									heightMap[x][z] = Math.max(heightMap[x][z], relHeight);
@@ -463,8 +374,6 @@ public abstract class EntityRollingStockDefinition {
 				partMapCache.put(rc, heightMap);
 			}
 		}
-		
-		writeHeightMaps();
 	}
 	
 	public String[][] getIcon(int i) {
