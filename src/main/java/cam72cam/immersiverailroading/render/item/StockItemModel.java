@@ -2,8 +2,11 @@ package cam72cam.immersiverailroading.render.item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
@@ -11,7 +14,6 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -23,11 +25,14 @@ import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.model.ItemLayerModel;
+import net.minecraftforge.common.model.TRSRTransformation;
 import util.Matrix4;
 
 public class StockItemModel implements IBakedModel {
@@ -62,60 +67,12 @@ public class StockItemModel implements IBakedModel {
 		 * before actually setting up the correct GL context.
 		 */
 		
+		
 		if (this.defID != null && ConfigGraphics.enableIconCache) {
-			String[] sp = defID.split("/");
-			String base = sp[sp.length-1].replaceAll(".json", "");
-			TextureAtlasSprite uv = ClientProxy.texMap.getAtlasSprite(base);
-			GL11.glPushMatrix();
-			{
-				GL11.glTranslated(0, 0, 0.5);
-				GL11.glRotated(-90, 0, 1, 0);
-				
-				GL11.glColor4f(1, 1, 1, 1);
-				
-				int size = 1;
-				GL11.glBegin(GL11.GL_QUADS);
-				GL11.glTexCoord2d(uv.getMinU(), uv.getMaxV());
-				GL11.glVertex3d(0, 0, 0);
-				GL11.glTexCoord2d(uv.getMinU(), uv.getMinV());
-				GL11.glVertex3d(0, size, 0);
-				GL11.glTexCoord2d(uv.getMaxU(), uv.getMinV());
-				GL11.glVertex3d(-size, size, 0);
-				GL11.glTexCoord2d(uv.getMaxU(), uv.getMaxV());
-				GL11.glVertex3d(-size, 0, 0);
-				GL11.glEnd();
-			}
-			GL11.glPopMatrix();
-			/*
-			 * 
-			 * 
-			GL11.glTexCoord2d(uv.u, uv.v + delta);
-			GL11.glVertex3d(0, 0, 0);
-			GL11.glTexCoord2d(uv.u, uv.v);
-			GL11.glVertex3d(0, size, 0);
-			GL11.glTexCoord2d(uv.u + delta, uv.v);
-			GL11.glVertex3d(-size, size, 0);
-			GL11.glTexCoord2d(uv.u + delta, uv.v + delta);
-			GL11.glVertex3d(-size, 0, 0);
-			 * 
-			 * 
-			 * 
-			boolean hasIcon = StockRenderCache.renderIcon(defID);
-			if (!hasIcon) {
-				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
-				GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-				
-				GL11.glPushMatrix();
-				double scale = 0.2 * Math.sqrt(this.scale);
-				GL11.glScaled(scale, scale, scale);
-				model.bindTexture();
-				model.draw();
-				model.restoreTexture();
-				GL11.glPopMatrix();
-				
-				tex.restore();
-				cull.restore();
-			}*/
+			TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(defID);
+			TRSRTransformation rot = new TRSRTransformation(EnumFacing.EAST);
+			TRSRTransformation trans = new TRSRTransformation(new Vector3f(-0.5f, 0, 0), null, null, null);
+			return ItemLayerModel.getQuadsForSprite(0, sprite, DefaultVertexFormats.ITEM, Optional.ofNullable(rot.compose(trans)));
 		} else if (model != null) {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
