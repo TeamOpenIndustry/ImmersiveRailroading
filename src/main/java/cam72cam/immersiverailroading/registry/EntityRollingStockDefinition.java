@@ -343,7 +343,7 @@ public abstract class EntityRollingStockDefinition {
 						double fheight = 0;
 						boolean first = true;
 						for (int[] point : face.points) {
-							Vec3d vert = model.vertices.get(point[0]);
+							Vec3d vert = model.vertices[point[0]];
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
 								path.moveTo(vert.x * ratio, vert.z * ratio);
@@ -407,7 +407,7 @@ public abstract class EntityRollingStockDefinition {
 				if (o1.depthCache == null) {
 					double sum = 0;
 					for (int[] point : o1.points) {
-						Vec3d pt = model.vertices.get(point[0]);
+						Vec3d pt = model.vertices[point[0]];
 						sum += pt.x;
 					}
 					o1.depthCache = (float) (sum / o1.points.length);
@@ -415,7 +415,7 @@ public abstract class EntityRollingStockDefinition {
 				if (o2.depthCache == null) {
 					double sum = 0;
 					for (int[] point : o2.points) {
-						Vec3d pt = model.vertices.get(point[0]);
+						Vec3d pt = model.vertices[point[0]];
 						sum += pt.x;
 					}
 					o2.depthCache = (float) (sum / o2.points.length);
@@ -429,7 +429,7 @@ public abstract class EntityRollingStockDefinition {
 			Path2D path = new Path2D.Double();
 			boolean first = true;
 			for (int[] point : face.points) {
-				Vec3d vert = model.vertices.get(point[0]);
+				Vec3d vert = model.vertices[point[0]];
 				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {
 					path.moveTo(vert.z / nx, vert.y / nx);

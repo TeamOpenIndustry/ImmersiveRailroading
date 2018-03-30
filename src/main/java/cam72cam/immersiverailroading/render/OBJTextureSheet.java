@@ -200,7 +200,7 @@ public class OBJTextureSheet {
 					}
 					List<Vec2f> vts = new ArrayList<Vec2f>();
 					for (int[] point : face.points) {
-						Vec2f vt = point[1] != -1 ? model.vertexTextures.get(point[1]) : null;
+						Vec2f vt = point[1] != -1 ? model.vertexTextures[point[1]] : null;
 						if (vt != null) {
 							vts.add(vt);
 						}
