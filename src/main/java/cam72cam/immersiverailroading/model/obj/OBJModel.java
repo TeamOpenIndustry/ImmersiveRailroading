@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.RelativeResource;
 import net.minecraft.util.ResourceLocation;
@@ -28,16 +26,12 @@ public class OBJModel {
 
 	public Map<String, Material> materials = new HashMap<String, Material>();
 	public float darken;
-	public final String checksum;
 	
 	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
 		this(modelLoc, darken, 1);
 	}
 
 	public OBJModel(ResourceLocation modelLoc, float darken, double scale) throws Exception {
-		
-		this.checksum = DigestUtils.md5Hex(ImmersiveRailroading.proxy.getResourceStream(modelLoc));
-		
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		Scanner reader = new Scanner(input);
 		this.darken = darken;

@@ -91,6 +91,9 @@ public class DefinitionManager {
 					ex.printStackTrace();
 				}
 			}
+			
+			long tim = System.currentTimeMillis();
+			
 			for (JsonElement tender : stock.get("tender").getAsJsonArray()) {
 				if (blacklist.contains(tender.getAsString())) {
 					ImmersiveRailroading.info("Skipping blacklisted %s", tender.getAsString());
@@ -156,6 +159,7 @@ public class DefinitionManager {
 					ex.printStackTrace();
 				}
 			}
+			System.out.println(System.currentTimeMillis() - tim);
 		}
 	}
 
