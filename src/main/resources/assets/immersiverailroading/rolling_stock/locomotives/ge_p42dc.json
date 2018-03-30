@@ -1,0 +1,30 @@
+{
+	"era": "diesel",
+	"name": "GE P42DC",
+	"works": "General Electric",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/ge_p42dc/ge_p42dc.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"fuel_efficiency_%": 55,
+		"fuel_capacity_l": 8300,
+		"horsepower": 4000,
+		"tractive_effort_lbf": 63000,
+		"max_speed_kmh": 177,
+		"weight_kg": 121672
+	},
+	"passenger": {
+		"slots": 4,
+		"center_x": 9,
+		"center_y": 2.4,
+		"length": 1,
+		"width": 1.6
+	},
+	"trucks": {
+		"front": 7.3, 
+		"rear": -7.3
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -0.08
+	}
+}

@@ -1,16 +1,6 @@
 # Blender MTL File: 'TTX_HuskyKline_1.blend'
 # Material Count: 7
 
-newmtl Material.008
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.038941 0.026168 0.020061
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-
 newmtl bearings1
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
@@ -56,6 +46,17 @@ illum 2
 map_Kd spring.png
 
 newmtl wheelrust
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wheelrust.png
+
+newmtl wheelrust.001
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
