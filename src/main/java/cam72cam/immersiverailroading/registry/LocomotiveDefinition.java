@@ -59,6 +59,7 @@ public abstract class LocomotiveDefinition extends EntityRollingStockDefinition 
 		List<String> tips = super.getTooltip(gauge);
 		tips.add(GuiText.LOCO_WORKS.toString(this.works));
 		tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower(gauge)));
+		tips.add(GuiText.LOCO_TRACTION.toString(this.getStartingTractionNewtons(gauge)));
 		tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed(gauge).metricString()));
 		return tips;
 	}
