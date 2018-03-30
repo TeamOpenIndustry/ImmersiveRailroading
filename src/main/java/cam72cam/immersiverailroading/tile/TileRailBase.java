@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -205,13 +206,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		
 		
 		height = nbt.getFloat("height");
-		int oldSnowLayers = snowLayers;
 		snowLayers = nbt.getInteger("snowLayers");
-		if (oldSnowLayers > snowLayers && world != null && world.isRemote) {
-			for (int i = 0; i < 30 * (oldSnowLayers); i ++) {
-				ParticleUtil.spawnParticle(world, EnumParticleTypes.SNOWBALL, this.getCenterOfRail().addVector(Math.random() * 4-2, 1, Math.random() * 4-2));
-			}
-		}
 		flexible = nbt.getBoolean("flexible");
 		if (nbt.hasKey("replaced")) {
 			replaced = nbt.getCompoundTag("replaced");
@@ -535,6 +530,14 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		
 		ticksExisted += 1;
+		
+		if (Config.ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
+			if ((int)(Math.random() * Config.ConfigDebug.snowMeltRate * 10) == 0) {
+				if (!world.isRaining()) {
+					this.setSnowLayers(this.snowLayers -= 1);
+				}
+			}
+		}
 		
 		if (ticksExisted % (20 * 5) == 0) {
 			// Double check every 5 seconds that the master is not gone
