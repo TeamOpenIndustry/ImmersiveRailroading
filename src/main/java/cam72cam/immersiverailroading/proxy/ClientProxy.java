@@ -88,7 +88,6 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
@@ -143,8 +142,6 @@ public class ClientProxy extends CommonProxy {
 
 	private static MagicEntity magical;
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
-
-	public static TextureMap texMap;
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
@@ -312,7 +309,7 @@ public class ClientProxy extends CommonProxy {
 
 		public StockIcon(EntityRollingStockDefinition def)
         {
-            super(def.defID);
+            super(new ResourceLocation(ImmersiveRailroading.MODID, def.defID).toString());
             this.def = def;
             this.width = this.height = 64;
         }
@@ -360,10 +357,11 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onTextureStich(TextureStitchEvent.Pre event) {
-		texMap = event.getMap();
-		for (String defID : DefinitionManager.getDefinitionNames()) {
-			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
-			texMap.setTextureEntry(new StockIcon(def));
+		if (ConfigGraphics.enableIconCache) {
+			for (String defID : DefinitionManager.getDefinitionNames()) {
+				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+				event.getMap().setTextureEntry(new StockIcon(def));
+			}
 		}
 	}
 

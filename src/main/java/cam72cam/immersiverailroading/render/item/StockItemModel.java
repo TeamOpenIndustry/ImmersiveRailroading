@@ -6,12 +6,13 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3f;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import com.google.common.collect.ImmutableList;
+
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.render.OBJRender;
@@ -29,16 +30,17 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ItemLayerModel;
-import net.minecraftforge.common.model.TRSRTransformation;
 import util.Matrix4;
 
 public class StockItemModel implements IBakedModel {
 	private OBJRender model;
 	private double scale;
 	private String defID;
+	private ImmutableList<BakedQuad> iconQuads;
 
 	public StockItemModel() {
 	}
@@ -50,6 +52,7 @@ public class StockItemModel implements IBakedModel {
 		if (model == null) {
 			stack.setCount(0);
 		}
+		iconQuads = null;
 	}
 	
 	@Override
@@ -69,10 +72,12 @@ public class StockItemModel implements IBakedModel {
 		
 		
 		if (this.defID != null && ConfigGraphics.enableIconCache) {
-			TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(defID);
-			TRSRTransformation rot = new TRSRTransformation(EnumFacing.EAST);
-			TRSRTransformation trans = new TRSRTransformation(new Vector3f(-0.5f, 0, 0), null, null, null);
-			return ItemLayerModel.getQuadsForSprite(0, sprite, DefaultVertexFormats.ITEM, Optional.ofNullable(rot.compose(trans)));
+			if (iconQuads == null) {
+				TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(new ResourceLocation(ImmersiveRailroading.MODID, defID).toString());
+				iconQuads = ItemLayerModel.getQuadsForSprite(-1, sprite, DefaultVertexFormats.ITEM, Optional.empty());
+			}
+			
+			return iconQuads.asList();
 		} else if (model != null) {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
@@ -133,6 +138,11 @@ public class StockItemModel implements IBakedModel {
 	@Override
 	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
+		
+		if (ConfigGraphics.enableIconCache) {
+			return defaultVal;
+		}
+		
 		switch (cameraTransformType) {
 		case THIRD_PERSON_LEFT_HAND:
 		case THIRD_PERSON_RIGHT_HAND:

@@ -469,7 +469,7 @@ public abstract class EntityRollingStockDefinition {
 	
 	public String[][] getIcon(int i) {
 		
-		ImmersiveRailroading.info("Generating model icon map...");
+		ImmersiveRailroading.info("Generating model icon map %s...", this.defID);
 		
 		String[][] map = new String[i][i];
 		
@@ -521,24 +521,26 @@ public abstract class EntityRollingStockDefinition {
 			boolean first = true;
 			for (int[] point : face.points) {
 				Vec3d vert = model.vertices.get(point[0]);
-				vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
+				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {
-					path.moveTo(vert.z, vert.y);
+					path.moveTo(vert.z / nx, vert.y / nx);
 				} else {
-					path.lineTo(vert.z, vert.y);
+					path.lineTo(vert.z / nx, vert.y / nx);
 				}
 				first = false;
 			}
-			Area a = new Area(path);
-			Rectangle2D bounds = a.getBounds2D();
+			Rectangle2D bounds = path.getBounds2D();
+			if (bounds.getWidth() * bounds.getHeight() < 1) {
+				continue;
+			}
 			for (int z = 0; z < map.length; z++) {
 				for (int y = 0; y < map[z].length; y++) {
 					if (map[z][y] != null) {
 						continue;
 					}
-					double relZ = z * nx - xoff;
-					double relY = y * nx;
-					if (bounds.contains(relZ, relY) && a.contains(relZ, relY)) {
+					double relZ = z - xoff / nx;
+					double relY = y ;
+					if (bounds.contains(relZ, relY) && path.contains(relZ, relY)) {
 						map[z][y] = mtl.name;
 					}
 				}
