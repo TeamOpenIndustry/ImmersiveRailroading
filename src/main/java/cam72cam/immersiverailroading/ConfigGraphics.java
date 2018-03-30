@@ -14,7 +14,7 @@ public class ConfigGraphics {
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
-	@Comment("Enable priming of item render cache.  Disable this if you keep crashing right before the loading screen")
+	@Comment("Enable priming of item render cache.  Disable this if you keep crashing in the world loading screen")
 	public static boolean enableItemRenderPriming = true;
 
 	@Comment({ "Override GPU Max texture settings !DEV USE ONLY! (-1 == disable)" })

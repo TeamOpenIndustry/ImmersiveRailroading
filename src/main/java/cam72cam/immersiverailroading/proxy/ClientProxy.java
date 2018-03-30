@@ -598,6 +598,8 @@ public class ClientProxy extends CommonProxy {
 		}
 		
 		if (world != null) {
+			StockRenderCache.tryPrime();
+			
 			if (magical == null) {
 				magical = new MagicEntity(world);
 				world.spawnEntity(magical);
@@ -622,9 +624,6 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 		
-		if (tickCount % 40 == 39 ) {
-			StockRenderCache.doImageCache();
-		}
 		tickCount++;
 		manager.tick();
 	}
