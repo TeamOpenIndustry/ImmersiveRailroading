@@ -1,9 +1,6 @@
 package cam72cam.immersiverailroading.proxy;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -11,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import javax.imageio.ImageIO;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -116,7 +111,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.ModelLoader.White;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
@@ -314,17 +308,11 @@ public class ClientProxy extends CommonProxy {
 	
 	public static final class StockIcon extends TextureAtlasSprite
     {
-
         private EntityRollingStockDefinition def;
-        
-        private static String defConvert(String defID) {
-        	String[] sp = defID.split("/");
-        	return sp[sp.length-1].replaceAll(".json", "");
-        }
 
 		public StockIcon(EntityRollingStockDefinition def)
         {
-            super(defConvert(def.defID));
+            super(def.defID);
             this.def = def;
             this.width = this.height = 64;
         }
@@ -343,7 +331,6 @@ public class ClientProxy extends CommonProxy {
             String[][] map = def.getIcon(this.getIconWidth());
 
             StockModel renderer = StockRenderCache.getRender(def.defID);
-    		try {
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
     				if (map[x][y] != null && map[x][y] != "") {
@@ -353,10 +340,6 @@ public class ClientProxy extends CommonProxy {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
     				}
     			}
-    		}
-    		}
-    		catch (Exception ex) {
-    			ex.printStackTrace();
     		}
             
             int[][] pixels = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
