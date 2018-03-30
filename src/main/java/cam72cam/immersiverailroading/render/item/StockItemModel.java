@@ -11,10 +11,12 @@ import org.lwjgl.opengl.GL11;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
@@ -47,6 +49,7 @@ public class StockItemModel implements IBakedModel {
 	
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
+		
 		/*
 		 * I am an evil wizard!
 		 * 
@@ -60,6 +63,43 @@ public class StockItemModel implements IBakedModel {
 		 */
 		
 		if (this.defID != null && ConfigGraphics.enableIconCache) {
+			String[] sp = defID.split("/");
+			String base = sp[sp.length-1].replaceAll(".json", "");
+			TextureAtlasSprite uv = ClientProxy.texMap.getAtlasSprite(base);
+			GL11.glPushMatrix();
+			{
+				GL11.glTranslated(0, 0, 0.5);
+				GL11.glRotated(-90, 0, 1, 0);
+				
+				GL11.glColor4f(1, 1, 1, 1);
+				
+				int size = 1;
+				GL11.glBegin(GL11.GL_QUADS);
+				GL11.glTexCoord2d(uv.getMinU(), uv.getMaxV());
+				GL11.glVertex3d(0, 0, 0);
+				GL11.glTexCoord2d(uv.getMinU(), uv.getMinV());
+				GL11.glVertex3d(0, size, 0);
+				GL11.glTexCoord2d(uv.getMaxU(), uv.getMinV());
+				GL11.glVertex3d(-size, size, 0);
+				GL11.glTexCoord2d(uv.getMaxU(), uv.getMaxV());
+				GL11.glVertex3d(-size, 0, 0);
+				GL11.glEnd();
+			}
+			GL11.glPopMatrix();
+			/*
+			 * 
+			 * 
+			GL11.glTexCoord2d(uv.u, uv.v + delta);
+			GL11.glVertex3d(0, 0, 0);
+			GL11.glTexCoord2d(uv.u, uv.v);
+			GL11.glVertex3d(0, size, 0);
+			GL11.glTexCoord2d(uv.u + delta, uv.v);
+			GL11.glVertex3d(-size, size, 0);
+			GL11.glTexCoord2d(uv.u + delta, uv.v + delta);
+			GL11.glVertex3d(-size, 0, 0);
+			 * 
+			 * 
+			 * 
 			boolean hasIcon = StockRenderCache.renderIcon(defID);
 			if (!hasIcon) {
 				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
@@ -75,7 +115,7 @@ public class StockItemModel implements IBakedModel {
 				
 				tex.restore();
 				cull.restore();
-			}
+			}*/
 		} else if (model != null) {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);

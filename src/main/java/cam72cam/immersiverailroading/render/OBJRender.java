@@ -19,7 +19,7 @@ import net.minecraft.util.math.Vec3d;
 public class OBJRender {
 
 	public OBJModel model;
-	private OBJTextureSheet texture;
+	public OBJTextureSheet texture;
 	private int prevTexture = -1;
 
 	public OBJRender(OBJModel model) {

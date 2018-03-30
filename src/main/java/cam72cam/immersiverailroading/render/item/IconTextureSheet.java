@@ -12,6 +12,10 @@ import javax.imageio.ImageIO;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.render.StockRenderCache;
+import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -33,10 +37,10 @@ public class IconTextureSheet {
 	public final int textureID;
 	private int uPx;
 	private int vPx;
-	private boolean debug;
+	private boolean debug = true;
 	
 	private static final int maxSheetSize = 2048;//sane default
-	private static final int texSize = 128;
+	private static final int texSize = 64;
 	private static final int bpp = 4;
 	
 	public IconTextureSheet() {
@@ -54,60 +58,54 @@ public class IconTextureSheet {
 		
 		icons.put(defID, uv);
 		
-		GL11.glPushMatrix();
-		{			
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			
-			GL11.glLoadIdentity();
-	
-			Minecraft mc = Minecraft.getMinecraft();
-			ScaledResolution scaledresolution = new ScaledResolution(mc);
-			GlStateManager.translate(0, 0, -2000.0F);
-			GL11.glTranslated(0, scaledresolution.getScaledHeight_double(), 0);
-	
-			double resScale = 1.0 / scaledresolution.getScaleFactor();
-			GL11.glScaled(resScale, resScale, resScale);
-	
-			GlStateManager.translate(texSize, -texSize, 0);
-			
-			GL11.glClearColor(1, 1, 1, 1);
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			
-			GL11.glTranslated(-(texSize/2), 0, 0);
-			int scale = 20;
-			GL11.glScaled(scale, scale, scale);
-			render.run();
-			
-			ByteBuffer buffer = BufferUtils.createByteBuffer(texSize * texSize * bpp);
-			GL11.glReadPixels(0, 0, texSize, texSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-			
-			
-			for (int x = 0; x < texSize; x++) {
-				for (int y = 0; y < texSize; y++) {
-					int i = (x + (texSize * y)) * bpp;
-					int r = buffer.get(i) & 0xFF;
-					int g = buffer.get(i + 1) & 0xFF;
-					int b = buffer.get(i + 2) & 0xFF;
-					if (r == 255 && g == 255 && b == 255) {
-						buffer.put(i+3, (byte) 0);
-					}
+		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+		ByteBuffer buffer = BufferUtils.createByteBuffer(texSize * texSize * bpp);
+		String[][] map = def.getIcon(texSize);
+		
+		StockModel renderer = StockRenderCache.getRender(defID);
+		
+		for (int x = 0; x < texSize; x++) {
+			for (int y = 0; y < texSize; y++) {
+				/*
+				int color = map[x][y];
+				int red = color >> 16 & 255;
+				int green = color >> 8 & 255;
+	            int blue = color & 255;
+	            int alpha = color >> 24 & 255;
+	            alpha = 0xFF;
+	            */
+				int i = (x + (texSize * y)) * bpp;
+				
+				if (map[x][y] != null && map[x][y] != "") {
+					int color = renderer.texture.samp(map[x][y]);
 					
-					buffer.put(i, (byte) (buffer.get(i) + 50));
-					buffer.put(i+1, (byte) (buffer.get(i+1) + 50));
-					buffer.put(i+2, (byte) (buffer.get(i+2) + 50));
+					int red = color >> 16 & 255;
+					int green = color >> 8 & 255;
+		            int blue = color & 255;
+		            //int alpha = color >> 24 & 255;
+					
+					buffer.put(i, (byte)red);
+					buffer.put(i+1, (byte)green);
+					buffer.put(i+2, (byte)blue);
+					//buffer.put(i+2, (byte)blue);
+				} else {
+					buffer.put(i, (byte) 0);
+					buffer.put(i+1, (byte) 0);
+					buffer.put(i+2, (byte) 0);
+					//buffer.put(i+3, (byte) 0);
 				}
 			}
-			
-			
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, uPx, vPx, texSize, texSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-			
-			if (debug) {
-				buffer.position(0);
-				debugIcon(buffer);
-			}
 		}
-		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, uPx, vPx, texSize, texSize, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+		
+		if (debug) {
+			buffer.position(0);
+			debugIcon(buffer);
+		}
 		
 		uPx += texSize;
 		if (uPx >= maxSheetSize + texSize) {

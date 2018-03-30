@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.obj.Face;
+import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -463,6 +465,86 @@ public abstract class EntityRollingStockDefinition {
 		}
 		
 		writeHeightMaps();
+	}
+	
+	public String[][] getIcon(int i) {
+		
+		ImmersiveRailroading.info("Generating model icon map...");
+		
+		String[][] map = new String[i][i];
+		
+		// Distance per pixel
+		double nx = Math.max(this.heightBounds, this.widthBounds) / map.length;
+		double xoff = 0;
+		if (this.heightBounds > this.widthBounds) {
+			xoff = (this.heightBounds - this.widthBounds) / 2;
+		}
+		
+		List<Face> faces = new ArrayList<Face>();
+		for (List<RenderComponent> rcl : this.renderComponents.values()) {
+			for (RenderComponent rc : rcl) {
+				if (!rc.type.collisionsEnabled) {
+					continue;
+				}
+				for (String group : rc.modelIDs) {
+					faces.addAll(model.groups.get(group));
+				}
+			}
+		}
+		
+		faces.sort(new Comparator<Face>() {
+			@Override
+			public int compare(Face o1, Face o2) {
+				if (o1.depthCache == null) {
+					double sum = 0;
+					for (int[] point : o1.points) {
+						Vec3d pt = model.vertices.get(point[0]);
+						sum += pt.x;
+					}
+					o1.depthCache = (float) (sum / o1.points.length);
+				}
+				if (o2.depthCache == null) {
+					double sum = 0;
+					for (int[] point : o2.points) {
+						Vec3d pt = model.vertices.get(point[0]);
+						sum += pt.x;
+					}
+					o2.depthCache = (float) (sum / o2.points.length);
+				}
+				return o1.depthCache.compareTo(o2.depthCache);
+			}
+		});
+		
+		for (Face face : faces) {
+			Material mtl = model.materials.get(face.mtl);
+			Path2D path = new Path2D.Double();
+			boolean first = true;
+			for (int[] point : face.points) {
+				Vec3d vert = model.vertices.get(point[0]);
+				vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
+				if (first) {
+					path.moveTo(vert.z, vert.y);
+				} else {
+					path.lineTo(vert.z, vert.y);
+				}
+				first = false;
+			}
+			Area a = new Area(path);
+			Rectangle2D bounds = a.getBounds2D();
+			for (int z = 0; z < map.length; z++) {
+				for (int y = 0; y < map[z].length; y++) {
+					if (map[z][y] != null) {
+						continue;
+					}
+					double relZ = z * nx - xoff;
+					double relY = y * nx;
+					if (bounds.contains(relZ, relY) && a.contains(relZ, relY)) {
+						map[z][y] = mtl.name;
+					}
+				}
+			}
+		}
+		return map;
 	}
 	
 	public double[][] createHeightMap(EntityBuildableRollingStock stock) {
