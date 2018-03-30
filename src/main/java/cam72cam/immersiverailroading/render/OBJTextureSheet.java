@@ -31,7 +31,7 @@ public class OBJTextureSheet {
 	private OBJModel model;
 	
 	private  class SubTexture {
-		private int realWidth;
+		public int realWidth;
 		private int realHeight;
 		private int sheetWidth;
 		private int sheetHeight;
@@ -143,10 +143,10 @@ public class OBJTextureSheet {
 			image = null;
 		}
 		public int copiesU() {
-			return (maxU - minU)+1;
+			return maxU - minU;
 		}
 		public int copiesV() {
-			return (maxV - minV)+1;
+			return maxV - minV;
 		}
 		public int getAbsoluteWidth() {
 			return realWidth * copiesU();
@@ -239,7 +239,7 @@ public class OBJTextureSheet {
 				rowHeight = 0;
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
-			currentX += tex.getAbsoluteWidth();
+			currentX += tex.getAbsoluteWidth() + 1; // I HAVE NO IDEA WHY +1 FIXES THIS!!!
 			this.sheetWidth = Math.max(this.sheetWidth, currentX);
 			this.sheetHeight = Math.max(this.sheetHeight, currentY + rowHeight); 
 		}
