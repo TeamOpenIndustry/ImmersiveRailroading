@@ -117,6 +117,9 @@ public class Config {
 		@Comment({ "Deep Snow on tracks" })
 		public static boolean deepSnow = false;
 
+		@Comment({ "How fast deep snow should melt, 0 = disabled, 20 = fast, 400 = slow" })
+		public static int snowMeltRate = 0;
+
 		@Comment("Keep rolling stock loaded even when it is not moving")
 		public static boolean keepStockLoaded = false;
 
