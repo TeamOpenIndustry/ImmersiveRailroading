@@ -1,8 +1,8 @@
-# Blender MTL File: 'rodgers_460_tender.blend'
+# Blender MTL File: 'None'
 # Material Count: 6
 
 newmtl coal
-Ns 96.078431
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -13,7 +13,7 @@ illum 2
 map_Kd coal.png
 
 newmtl graphite1
-Ns 96.078431
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -24,7 +24,7 @@ illum 2
 map_Kd graphite1.png
 
 newmtl graphite2
-Ns 96.078431
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -35,7 +35,7 @@ illum 2
 map_Kd graphite2.png
 
 newmtl paintedblack
-Ns 96.078431
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -46,7 +46,7 @@ illum 2
 map_Kd paintedblack.png
 
 newmtl paintedblack2
-Ns 96.078431
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -57,7 +57,7 @@ illum 2
 map_Kd paintedblack2.png
 
 newmtl rodgrey1
-Ns 96.078431
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
