@@ -15,8 +15,8 @@
 		"width": 3.5
 	},
 	"freight": {
-		"slots": 32,
-		"width": 8,
+		"slots": 64,
+		"width": 16,
 		"cargo": ["all"]
 	},
 	"trucks": {
