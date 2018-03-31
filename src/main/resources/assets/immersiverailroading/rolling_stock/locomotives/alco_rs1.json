@@ -2,7 +2,7 @@
 	"era": "diesel",
 	"name": "ALCO RS-1",
 	"works": "American Locomotive Company",
-	"model": "immersiverailroading:models/rolling_stock/locomotives/alco_rs1.obj",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/alco_rs1/alco_rs1.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"fuel_efficiency_%": 70,
