@@ -22,9 +22,40 @@ import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
 public class DefinitionManager {
 
 	private static Map<String, EntityRollingStockDefinition> definitions;
+	
+	@FunctionalInterface
+	private static interface JsonLoader {
+		EntityRollingStockDefinition apply(String defID, JsonObject data) throws Exception;
+	}; 
+	
+	private static Map<String, JsonLoader> jsonLoaders;
+	
+	static {
+		jsonLoaders = new LinkedHashMap<String, JsonLoader>();
+		jsonLoaders.put("locomotives", (String defID, JsonObject data) -> {
+			String era = data.get("era").getAsString();
+			switch (era) {
+			case "steam":
+					return new LocomotiveSteamDefinition(defID, data);
+			case "diesel":
+				return new LocomotiveDieselDefinition(defID, data);
+			default:
+				ImmersiveRailroading.warn("Invalid era %s in %s", era, defID);
+				return null;
+			}
+		});
+
+		jsonLoaders.put("tender", (String defID, JsonObject data) -> new TenderDefinition(defID, data));
+		jsonLoaders.put("passenger", (String defID, JsonObject data) -> new CarPassengerDefinition(defID, data));
+		jsonLoaders.put("freight", (String defID, JsonObject data) -> new CarFreightDefinition(defID, data));
+		jsonLoaders.put("tank", (String defID, JsonObject data) -> new CarTankDefinition(defID, data));
+		jsonLoaders.put("hand_car", (String defID, JsonObject data) -> new HandCarDefinition(defID, data));
+	}
 
 	public static void initDefinitions() throws IOException {
 		definitions = new LinkedHashMap<String, EntityRollingStockDefinition>();
+		
+		Set<String> defTypes = jsonLoaders.keySet();
 		
 		List<String> blacklist = new ArrayList<String>();
 		
@@ -36,27 +67,15 @@ public class DefinitionManager {
 			JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
 			input.close();
 			
-			for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
-				blacklist.add(locomotive.getAsString());
-			}
-			for (JsonElement tender : stock.get("tender").getAsJsonArray()) {
-				blacklist.add(tender.getAsString());
-			}
-			for (JsonElement passenger_car : stock.get("passenger").getAsJsonArray()) {
-				blacklist.add(passenger_car.getAsString());
-			}
-			for (JsonElement freight_car : stock.get("freight").getAsJsonArray()) {
-				blacklist.add(freight_car.getAsString());
-			}
-			for (JsonElement tank_car : stock.get("tank").getAsJsonArray()) {
-				blacklist.add(tank_car.getAsString());
-			}
-			for (JsonElement hand_car : stock.get("hand_car").getAsJsonArray()) {
-				blacklist.add(hand_car.getAsString());
+			for (String defType : defTypes) {
+				if (stock.has(defType)) {
+					for (JsonElement defName : stock.get(defType).getAsJsonArray()) {
+						blacklist.add(defName.getAsString());
+					}
+				}
 			}
 		}
 		
-
 		ResourceLocation stock_json = new ResourceLocation(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
 		
 		inputs = ImmersiveRailroading.proxy.getResourceStreamAll(stock_json);
@@ -67,118 +86,33 @@ public class DefinitionManager {
 			input.close();
 
 			int steps = 0;
-			steps += stock.get("locomotives").getAsJsonArray().size();
-			steps += stock.get("tender").getAsJsonArray().size();
-			steps += stock.get("passenger").getAsJsonArray().size();
-			steps += stock.get("freight").getAsJsonArray().size();
-			steps += stock.get("tank").getAsJsonArray().size();
-			steps += stock.get("hand_car").getAsJsonArray().size();
+			
+			for (String defType : defTypes) {
+				if (stock.has(defType)) {
+					steps += stock.get(defType).getAsJsonArray().size();
+				}
+			}
 			
 	        ProgressBar bar = ProgressManager.push("Generating Heightmaps", steps);
-			
-			for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
-				bar.step(locomotive.getAsString());
-				
-				if (blacklist.contains(locomotive.getAsString())) {
-					ImmersiveRailroading.info("Skipping blacklisted %s", locomotive.getAsString());
-					continue;
-				}
-				
-				try {
-					String defID = "rolling_stock/locomotives/" + locomotive .getAsString()+ ".json";
-					JsonObject data = getJsonData(defID);
-					String era = data.get("era").getAsString();
-					LocomotiveDefinition loco = null;
-					switch (era) {
-					case "steam":
-						loco = new LocomotiveSteamDefinition(defID, data);
-						break;
-					case "diesel":
-						loco = new LocomotiveDieselDefinition(defID, data);
-						break;
-					default:
-						ImmersiveRailroading.warn("Invalid era %s in %s", era, defID);
-						continue;
+	        
+	        
+	        for (String defType : defTypes) {
+				if (stock.has(defType)) {
+					for (JsonElement defName : stock.get(defType).getAsJsonArray()) {
+						bar.step(defName.getAsString());
+						
+						if (blacklist.contains(defName.getAsString())) {
+							ImmersiveRailroading.info("Skipping blacklisted %s", defName.getAsString());
+							continue;
+						}
+						try {
+							String defID = String.format("rolling_stock/%s/%s.json", defType, defName.getAsString());
+							JsonObject data = getJsonData(defID);
+							definitions.put(defID, jsonLoaders.get(defType).apply(defID, data));
+						} catch (Exception ex) {
+							ImmersiveRailroading.catching(ex);
+						}
 					}
-					definitions.put(defID, loco);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			
-			for (JsonElement tender : stock.get("tender").getAsJsonArray()) {
-				bar.step(tender.getAsString());
-				
-				if (blacklist.contains(tender.getAsString())) {
-					ImmersiveRailroading.info("Skipping blacklisted %s", tender.getAsString());
-					continue;
-				}
-				try {
-					String defID = "rolling_stock/tender/" + tender.getAsString() + ".json";
-					JsonObject data = getJsonData(defID);
-					definitions.put(defID, new TenderDefinition(defID, data));
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			for (JsonElement passenger_car : stock.get("passenger").getAsJsonArray()) {
-				bar.step(passenger_car.getAsString());
-				
-				if (blacklist.contains(passenger_car.getAsString())) {
-					ImmersiveRailroading.info("Skipping blacklisted %s", passenger_car.getAsString());
-					continue;
-				}
-				try {
-					String defID = "rolling_stock/passenger/" + passenger_car.getAsString() + ".json";
-					JsonObject data = getJsonData(defID);
-					definitions.put(defID, new CarPassengerDefinition(defID, data));
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			for (JsonElement freight_car : stock.get("freight").getAsJsonArray()) {
-				bar.step(freight_car.getAsString());
-				
-				if (blacklist.contains(freight_car.getAsString())) {
-					ImmersiveRailroading.info("Skipping blacklisted %s", freight_car.getAsString());
-					continue;
-				}
-				try {
-					String defID = "rolling_stock/freight/" + freight_car.getAsString() + ".json";
-					JsonObject data = getJsonData(defID);
-					definitions.put(defID, new CarFreightDefinition(defID, data));
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			for (JsonElement tank_car : stock.get("tank").getAsJsonArray()) {
-				bar.step(tank_car.getAsString());
-				
-				if (blacklist.contains(tank_car.getAsString())) {
-					ImmersiveRailroading.info("Skipping blacklisted %s", tank_car.getAsString());
-					continue;
-				}
-				try {
-					String defID = "rolling_stock/tank/" + tank_car.getAsString() + ".json";
-					JsonObject data = getJsonData(defID);
-					definitions.put(defID, new CarTankDefinition(defID, data));
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			for (JsonElement hand_car : stock.get("hand_car").getAsJsonArray()) {
-				bar.step(hand_car.getAsString());
-				
-				if (blacklist.contains(hand_car.getAsString())) {
-					ImmersiveRailroading.info("Skipping blacklisted %s", hand_car.getAsString());
-					continue;
-				}
-				try {
-					String defID = "rolling_stock/hand_car/" + hand_car.getAsString() + ".json";
-					JsonObject data = getJsonData(defID);
-					definitions.put(defID, new HandCarDefinition(defID, data));
-				} catch (Exception ex) {
-					ex.printStackTrace();
 				}
 			}
 			
