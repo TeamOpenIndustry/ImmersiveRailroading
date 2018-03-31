@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -54,6 +53,8 @@ public class ItemRailAugment extends Item {
 					}
 					switch(augment) {
 					case WATER_TROUGH:
+						return EnumActionResult.FAIL;
+						/*
 						if (parent.getRotationQuarter() != 0) {
 							return EnumActionResult.FAIL;
 						}
@@ -61,6 +62,7 @@ public class ItemRailAugment extends Item {
 							return EnumActionResult.FAIL; 
 						}
 						break;
+						*/
 					case SPEED_RETARDER:
 						switch(parent.getType()) {
 						case SWITCH:
@@ -98,6 +100,9 @@ public class ItemRailAugment extends Item {
         if (this.isInCreativeTab(tab))
         {
         	for (Augment augment : Augment.values()) {
+        		if (augment == Augment.WATER_TROUGH) {
+        			continue;
+        		}
         		ItemStack stack = new ItemStack(this, 1);
         		ItemAugmentType.set(stack, augment);
                 items.add(stack);
