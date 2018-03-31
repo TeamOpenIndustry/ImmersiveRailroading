@@ -20,7 +20,20 @@ public class HandCar extends Locomotive {
 
 	@Override
 	protected int getAvailableHP() {
-		return this.getDefinition().getHorsePower(gauge) * this.getPassengers().size();
+		int passengers = 0;
+		for (Entity passenger : this.getPassengers()) {
+			if (passenger instanceof EntityPlayer) {
+				EntityPlayer player = (EntityPlayer) passenger;
+				if (!player.isCreative()) {
+					if (player.getFoodStats().getFoodLevel() > 0) {
+						passengers++;
+					}
+				} else {
+					passengers++;
+				}
+			}
+		}
+		return this.getDefinition().getHorsePower(gauge) * passengers;
 	}
 	
 	@Override
@@ -36,7 +49,9 @@ public class HandCar extends Locomotive {
 				if (passenger instanceof EntityPlayer) {
 					EntityPlayer player = (EntityPlayer) passenger;
 					if (!player.isCreative()) {
-						player.getFoodStats().setFoodLevel(player.getFoodStats().getFoodLevel() - 1);
+						if (player.getFoodStats().getFoodLevel() > 0) {
+							player.getFoodStats().setFoodLevel(player.getFoodStats().getFoodLevel() - 1);
+						}
 					}
 				}
 			}
