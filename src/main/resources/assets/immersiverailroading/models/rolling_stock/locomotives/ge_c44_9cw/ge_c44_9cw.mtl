@@ -1,5 +1,5 @@
 # Blender MTL File: 'GE C44-9CW.blend'
-# Material Count: 26
+# Material Count: 27
 
 newmtl None
 Ns 0
@@ -129,6 +129,17 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd red2.png
+
+newmtl rod01
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd rod01.png
 
 newmtl silverclean
 Ns 96.078431
