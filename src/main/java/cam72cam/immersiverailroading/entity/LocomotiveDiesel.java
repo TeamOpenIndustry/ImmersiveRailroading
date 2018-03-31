@@ -25,6 +25,7 @@ public class LocomotiveDiesel extends Locomotive {
 	private ISound horn;
 	private ISound idle;
 	private float soundThrottle;
+	private float internalBurn = 0;
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -147,20 +148,26 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 		
-		if (this.getLiquidAmount() > 0 && getThrottle() != 0) {
+		if (this.getLiquidAmount() > 0) {
 			float burnTime = BurnUtil.getBurnTime(this.getLiquid());
 			if (burnTime == 0) {
 				burnTime = 200; //Default to 200 for unregistered liquids
 			}
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
-			burnTime /= Math.abs(getThrottle())*10;
-			burnTime *= 1/gauge.scale();
-			burnTime /= 50;
-			burnTime = Math.max(burnTime, 1); // Prevent div by zero
-			if (this.ticksExisted % (int)burnTime == 0) {
+			
+			while (internalBurn < 0 && this.getLiquidAmount() > 0) {
+				internalBurn += burnTime;
 				theTank.drain(1, true);
 			}
+			
+			float consumption = Math.abs(getThrottle()) + 0.05f;
+			consumption *= 100;
+			consumption *= gauge.scale();
+
+			ImmersiveRailroading.info("%s - %s", internalBurn, consumption);
+			
+			internalBurn -= consumption;
 		}
 	}
 	
