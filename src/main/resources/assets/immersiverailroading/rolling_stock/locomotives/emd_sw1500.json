@@ -2,7 +2,7 @@
 	"era": "diesel",
 	"name": "EMD SW1500",
 	"works": "Electro-Motive Division",
-	"model": "immersiverailroading:models/rolling_stock/locomotives/emd_sw1500.obj",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/emd_sw1500/emd_sw1500.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"fuel_efficiency_%": 72,
