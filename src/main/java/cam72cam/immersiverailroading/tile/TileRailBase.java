@@ -87,6 +87,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	public void setAugment(Augment augment) {
 		this.augment = augment;
+		setAugmentFilter(null);
 		this.markDirty();
 	}
 	public boolean setAugmentFilter(String definitionID) {
