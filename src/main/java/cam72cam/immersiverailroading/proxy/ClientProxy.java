@@ -82,6 +82,10 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiDisconnected;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiMultiplayer;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -99,6 +103,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -114,6 +119,7 @@ import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityEvent.EnteringChunk;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -142,6 +148,8 @@ public class ClientProxy extends CommonProxy {
 
 	private static MagicEntity magical;
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
+
+	private static String missingResources;
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
@@ -462,6 +470,26 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@SubscribeEvent
+	public static void onEntityJoin(EntityJoinWorldEvent event) {
+		if (Minecraft.getMinecraft().isSingleplayer()) {
+			return;
+		}
+		
+		if(event.getEntity() instanceof EntityRollingStock) {
+			EntityRollingStock stock = (EntityRollingStock)event.getEntity();
+			String defID = stock.getDefinitionID();
+			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+			if (def == null) {
+				String error = String.format("Missing definition %s, do you have all of the required resource packs?", defID);
+				ImmersiveRailroading.error(error);
+				event.setCanceled(true);
+				
+				missingResources = error;
+			}
+		}
+	}
+	
+	@SubscribeEvent
 	public static void onHackRenderEvent(RenderWorldLastEvent event) {
 		/*
 		 * Minecraft does NOT support rendering entities which overlap with the field of view but don't exist in it
@@ -653,6 +681,13 @@ public class ClientProxy extends CommonProxy {
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
 		if (event.phase != Phase.START) {
 			return;
+		}
+		
+		if (missingResources != null) {
+			Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString(missingResources));
+			Minecraft.getMinecraft().loadWorld((WorldClient)null);
+			Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", new TextComponentString(missingResources)));
+			missingResources = null;
 		}
 				
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
