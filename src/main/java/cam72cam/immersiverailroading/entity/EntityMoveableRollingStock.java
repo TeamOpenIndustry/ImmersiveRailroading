@@ -481,6 +481,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	public int getSpeedRetarderSlowdown(TickPos latest) {
 		int over = 0;
+		int max = 0;
 		for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 			if (pos.y != 0) {
 				continue;
@@ -493,36 +494,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				if (BlockUtil.isIRRail(world, bp)) {
 					TileRailBase te = TileRailBase.get(world, bp);
 					if (te != null && te.getAugment() == Augment.SPEED_RETARDER) {
-						TileRail parent = te.getParentTile();
-						System.out.println("FOUND");
-						if (parent != null) {
-							int max = 0;
-							BlockPos tmpPos = bp;
-							while(true) {
-								tmpPos = tmpPos.offset(parent.getFacing());
-								TileRailBase tmp = TileRailBase.get(world, tmpPos);
-								if (tmp != null && tmp.getAugment() == Augment.SPEED_RETARDER) {
-									max = Math.max(max, RedstoneUtil.getPower(world, tmpPos));
-								} else {
-									break;
-								}
-							}
-							while(true) {
-								tmpPos = tmpPos.offset(parent.getFacing().getOpposite());
-								TileRailBase tmp = TileRailBase.get(world, tmpPos);
-								if (tmp != null && tmp.getAugment() == Augment.SPEED_RETARDER) {
-									max = Math.max(max, RedstoneUtil.getPower(world, tmpPos));
-								} else {
-									break;
-								}
-							}
-							over += max;
-						}
+						max = Math.max(max, RedstoneUtil.getPower(world, bp));
+						over += 1;
 					}
 				}
 			}
 		}
-		return over;
+		return over * max;
 	}
 
 	public float getTickSkew() {
