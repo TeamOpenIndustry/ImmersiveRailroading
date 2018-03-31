@@ -1,24 +1,10 @@
-[image{200, 20, 0.264169068204, immersiverailroading:wiki/images/awyy1y7.png}]
+[image{200, 13, 0.264169068204, immersiverailroading:wiki/images/awyy1y7.png}]
 
 
-Immersive Railroading is a mod for Minecraft with Immersive Engineering integration that uses Track API ([link{https://minecraft.curseforge.com/projects/track-api#www}]Download Here[link{}])
+Immersive Railroading is a Minecraft mod for 1.12, 1.11, and 1.10.
 
-[link{immersiverailroading:getting-started}]Getting Started[link{}]
+It adds a new transport system (item, fluids, players, animals, villagers) to the game. It is based on real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
+
+
 
 Want new looks and more detailed textures? Come check out the [link{https://minecraft.curseforge.com/projects/immersive-railroading#www}]resource packs[link{}]
-
-
-[prefix{l}] Tools[prefix{}]
-[link{immersiverailroading:blueprint-book}]Blueprint Book[link{}] · [link{immersiverailroading:blueprint-book}]Track Blueprint[link{}]
-
-[prefix{l}] Machines[prefix{}]
-[link{immersiverailroading:track-roller}]Track Roller[link{}] · [link{immersiverailroading:casting-basin}]Casting Basin[link{}] · [link{immersiverailroading:steam-hammer}]Steam Hammer[link{}] · [link{immersiverailroading:plate-rolling-machine}]Plate Rolling Machine[link{}] · [link{immersiverailroading:boiler-roller}]Boiler Roller[link{}]
-
-[prefix{l}] Parts[prefix{}]
-WIP. Check back later!
-
-[prefix{l}] Locomotives[prefix{}]
-WIP. Check back later!
-
-[prefix{l}] Rolling Stock[prefix{}]
-WIP. Check back later!

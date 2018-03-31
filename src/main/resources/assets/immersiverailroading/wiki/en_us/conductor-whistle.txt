@@ -1,0 +1,15 @@
+[prefix{l}] Overview[prefix{}]
+
+The Conductor's whistle is used to make villagers mount the nearest train to the player.  It affects villagers in a 50 block radius (configurable).
+
+[image{200, 78, 0.555555555556, immersiverailroading:wiki/images/gd7s4wj.png}]
+
+Right clicking with the whistle causes the villagers to board passenger cars (up to the max number allowed in the car).
+
+Shift + right clicking with the whistle causes the villagers to disembark from the passenger cars.
+
+Villagers will pay you 1 emerald for each KM traveled (1000 blocks).  This is calculated as the crow flies, if you just take them in a circle there will be no reward.
+
+[image{200, 328, 0.537109375, immersiverailroading:wiki/images/3j1oirb.png}]
+
+[image{200, 487, 0.537109375, immersiverailroading:wiki/images/zu6adwe.png}]

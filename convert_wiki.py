@@ -1,4 +1,5 @@
 
+import math
 import os
 import re
 import subprocess
@@ -45,9 +46,9 @@ for root, dirs, files in os.walk("ImmersiveRailroading.wiki"):
                             iw, ih = Image.open(imgdir + "/" + imgname).size
                             scale = 275.0 / iw
 
-                            line = line.replace(txt, "[image{200, %s, %s, immersiverailroading:wiki/images/%s}]" % (cnt * 20, scale, imgname))
+                            line = line.replace(txt, "[image{200, %s, %s, immersiverailroading:wiki/images/%s}]" % (int(cnt * 13), scale, imgname))
 
-                            cnt += (ih * scale) / 20
+                            cnt += ((ih * scale) / 13) -1
                     if "[" in line:
                         rgx = r"\[([^!\[\]]*)\]\(([^\(\)]*)\)"
                         for i, match in enumerate(re.finditer(rgx, line)):
@@ -61,11 +62,14 @@ for root, dirs, files in os.walk("ImmersiveRailroading.wiki"):
                             line = line.replace(txt, "[link{%s}]%s[link{}]" % (link, label))
 
                     line = line.replace("***", "")
+                    linelen = len(line)
 
                     if line.strip().startswith("###"):
-                        line = "[prefix{m}]" + line.replace("###", "") + "[prefix{}]"
+                        line = "[prefix{n}]" + line.replace("###", "") + "[prefix{}]"
+                        cnt += 0
                     if line.strip().startswith("##"):
                         line = "[prefix{l}]" + line.replace("##", "") + "[prefix{}]"
+                        cnt += 1
                         
                     of.write(line + "\n")
-                    cnt+=1
+                    cnt+=math.ceil((linelen)/58.0)

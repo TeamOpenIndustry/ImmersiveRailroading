@@ -1,11 +1,15 @@
-The Casting Basin requires a clear space 7 blocks wide, 24 blocks long, and 9 blocks high to place. It needs 114 Stone Bricks, 15 Heavy Engineering Blocks, 126 blocks of Sand, 86 Blast Bricks, and 64 Steel Blocks.
-
-Placement is centered on the shorter, 7-block side, and the machine is assembled by right-clicking it anywhere with a Large Wrench.
-
-Power is input through the top of the machine, on the color-coded orange block.
-
-[image{200, 140, 0.171982489056, immersiverailroading:wiki/images/2ainsil.png}]
+[prefix{l}] Overview[prefix{}]
 
 The Basin creates different parts for rolling stock, specifically wheels and frames, as well as the Rail Cast for use with the [link{immersiverailroading:track-roller}]Track Roller[link{}]. The Gauge selector changes between gauges.
 
-To create a selected part, drop Steel Blocks into the Basin and make sure it has power. The part will be created in short order - right-click on the Basin with an empty slot to retrieve the part.
+[prefix{l}] Construction[prefix{}]
+
+[image{200, 117, 0.537109375, immersiverailroading:wiki/images/bpyyuxc.png}]
+
+Power is input through the top of the machine, on the color-coded yellow/orange block.
+
+[prefix{l}] Usage[prefix{}]
+
+To create a selected part, drop Steel Blocks or Steel Ingots into the Basin and make sure it has power. The part will be created in short order - right-click on the Basin to retrieve the part.
+
+Parts made in the casting basin can be recycled by dropping them back into the basin

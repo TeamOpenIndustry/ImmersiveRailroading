@@ -1,6 +1,62 @@
+[prefix{l}] Overview[prefix{}]
+
 This tool is used to lay down rails for rolling stock to travel on. It is crafted with a piece of paper and six Steel Ingots in an H shape, like so:
 
-[image{200, 60, 1.01102941176, immersiverailroading:wiki/images/3yocbiv.png}]
+[image{200, 78, 1.01102941176, immersiverailroading:wiki/images/3yocbiv.png}]
 
-With the blueprint in hand, right-click in midair to change its settings. Right-click a block to place the railbed, which requires Track Segments from the [link{immersiverailroading:track-roller}]Track Roller[link{}] and Treated Wood Planks.
+With the blueprint in hand, right-click in midair to change its settings. Right-click a block to place the railbed, which requires Track Segments from the [link{immersiverailroading:track-roller}]Track Roller[link{}] and Treated Wood Planks (Normal planks if IE is not installed).
+
+[prefix{l}] In game UI[prefix{}]
+
+[image{200, 334, 0.537109375, immersiverailroading:wiki/images/sqj20wa.png}]
+
+[prefix{l}] Settings[prefix{}]
+
+[prefix{n}] Type:[prefix{}]
+
+This setting determines what shape your track will take.  Current options are Straight, Crossing, Slope, Turn, and Switch.
+
+[prefix{n}] Length:[prefix{}]
+
+This setting determines how many blocks long the piece of track is.
+
+[prefix{n}] Turn Degrees:[prefix{}]
+
+This setting shows up only for Turn and Switch types.  It determines how large/long the turn's angle should be.
+
+[prefix{n}] Rail Bed:[prefix{}]
+
+This setting determines what visual rail bed should be placed between the rail ties.  This option is useful for debugging when you want to see where the track blocks will actually be placed.  Entries are pulled from the railBed ore dictionary and can be added to.
+
+[image{200, 727, 0.537109375, immersiverailroading:wiki/images/zu2vdhp.png}]
+
+[prefix{n}] Rail Bed Fill:[prefix{}]
+
+This setting is useful for building bridges.  It auto-places blocks from your inventory under the rail bed as it builds the tracks.  It uses the same railBed ore dictionary.
+
+[image{200, 938, 0.537109375, immersiverailroading:wiki/images/zerk2jt.png}]
+
+[prefix{n}] Position:[prefix{}]
+
+This setting determines how the track should be locked to the rail bed.
+
+* Fixed: Locks the track directly to the rail bed, no flexibility at all
+* Pixels: Allows free placement of the track (rounded to the nearest 16th of a block)
+* Pixels Locked: Allows free placement of the track forward and backward, but locks side to side motion
+* Pixels: Allows free placement of the track
+* Pixels Locked: Allows free placement of the track forward and backward, but locks side to side motion
+
+[prefix{n}] Gauge:[prefix{}]
+
+This setting determines what gauge the track should be built at
+
+[prefix{n}] Place Blueprint:[prefix{}]
+
+You can place down a blueprint which renders the track in-world.  This allows you to plan, move and shape the track as you go.
+
+Right clicking on a placed blueprint will allow you to change the settings without having to replace it.
+
+Shift + right clicking on a placed blueprint will allow you to shift it's position if it is in any mode except Fixed.
+
+Breaking the block will remove the blueprint.  Shift + breaking the block will attempt to place the blueprint.
 

@@ -1,0 +1,9 @@
+[prefix{l}] Overview[prefix{}]
+
+The large wrench has several purposes.
+
+* Form Multiblock Machines
+* Assemble locomotives/rolling stock
+* Disassemble locomotives/rolling stock (shift + click)
+
+[image{200, 91, 0.563524590164, immersiverailroading:wiki/images/disy6pw.png}]
