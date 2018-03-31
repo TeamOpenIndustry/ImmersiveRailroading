@@ -394,7 +394,7 @@ d 1.000000
 illum 2
 map_Kd smokebox.png
 
-newmtl smokebox_smokebox.png
+newmtl smokebox_NONE
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.196950 0.196950 0.196950
