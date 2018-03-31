@@ -164,8 +164,6 @@ public class LocomotiveDiesel extends Locomotive {
 			float consumption = Math.abs(getThrottle()) + 0.05f;
 			consumption *= 100;
 			consumption *= gauge.scale();
-
-			ImmersiveRailroading.info("%s - %s", internalBurn, consumption);
 			
 			internalBurn -= consumption;
 		}
