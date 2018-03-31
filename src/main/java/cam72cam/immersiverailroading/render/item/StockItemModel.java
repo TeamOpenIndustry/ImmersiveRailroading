@@ -26,6 +26,7 @@ import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -71,14 +72,13 @@ public class StockItemModel implements IBakedModel {
 		 */
 		
 		
-		if (this.defID != null && ConfigGraphics.enableIconCache) {
-			if (iconQuads == null) {
-				TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(new ResourceLocation(ImmersiveRailroading.MODID, defID).toString());
-				iconQuads = ItemLayerModel.getQuadsForSprite(-1, sprite, DefaultVertexFormats.ITEM, Optional.empty());
+		if (ConfigGraphics.enableIconCache) {
+			if (iconQuads != null) {
+				return iconQuads.asList();
 			}
-			
-			return iconQuads.asList();
-		} else if (model != null) {
+		}
+		
+		if (model != null) {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 			
@@ -139,8 +139,17 @@ public class StockItemModel implements IBakedModel {
 	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		
-		if (ConfigGraphics.enableIconCache) {
-			return defaultVal;
+		if (ConfigGraphics.enableIconCache && this.defID != null) {
+			if (iconQuads == null) {
+				TextureMap map = Minecraft.getMinecraft().getTextureMapBlocks();
+				TextureAtlasSprite sprite = map.getAtlasSprite(new ResourceLocation(ImmersiveRailroading.MODID, defID).toString());
+				if (!sprite.equals(map.getMissingSprite())) {					
+					iconQuads = ItemLayerModel.getQuadsForSprite(-1, sprite, DefaultVertexFormats.ITEM, Optional.empty());
+				}
+			}
+			if (iconQuads != null) {
+				return defaultVal;
+			}
 		}
 		
 		switch (cameraTransformType) {
