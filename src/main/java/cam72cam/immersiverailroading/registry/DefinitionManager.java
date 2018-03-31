@@ -16,6 +16,8 @@ import com.google.gson.JsonParser;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.ProgressManager;
+import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
 
 public class DefinitionManager {
 
@@ -59,12 +61,24 @@ public class DefinitionManager {
 		
 		inputs = ImmersiveRailroading.proxy.getResourceStreamAll(stock_json);
 		for (InputStream input : inputs) {
-		
+			
 			JsonParser parser = new JsonParser();
 			JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
 			input.close();
+
+			int steps = 0;
+			steps += stock.get("locomotives").getAsJsonArray().size();
+			steps += stock.get("tender").getAsJsonArray().size();
+			steps += stock.get("passenger").getAsJsonArray().size();
+			steps += stock.get("freight").getAsJsonArray().size();
+			steps += stock.get("tank").getAsJsonArray().size();
+			steps += stock.get("hand_car").getAsJsonArray().size();
+			
+	        ProgressBar bar = ProgressManager.push("Generating Heightmaps", steps);
 			
 			for (JsonElement locomotive : stock.get("locomotives").getAsJsonArray()) {
+				bar.step(locomotive.getAsString());
+				
 				if (blacklist.contains(locomotive.getAsString())) {
 					ImmersiveRailroading.info("Skipping blacklisted %s", locomotive.getAsString());
 					continue;
@@ -92,9 +106,9 @@ public class DefinitionManager {
 				}
 			}
 			
-			long tim = System.currentTimeMillis();
-			
 			for (JsonElement tender : stock.get("tender").getAsJsonArray()) {
+				bar.step(tender.getAsString());
+				
 				if (blacklist.contains(tender.getAsString())) {
 					ImmersiveRailroading.info("Skipping blacklisted %s", tender.getAsString());
 					continue;
@@ -108,6 +122,8 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement passenger_car : stock.get("passenger").getAsJsonArray()) {
+				bar.step(passenger_car.getAsString());
+				
 				if (blacklist.contains(passenger_car.getAsString())) {
 					ImmersiveRailroading.info("Skipping blacklisted %s", passenger_car.getAsString());
 					continue;
@@ -121,6 +137,8 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement freight_car : stock.get("freight").getAsJsonArray()) {
+				bar.step(freight_car.getAsString());
+				
 				if (blacklist.contains(freight_car.getAsString())) {
 					ImmersiveRailroading.info("Skipping blacklisted %s", freight_car.getAsString());
 					continue;
@@ -134,6 +152,8 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement tank_car : stock.get("tank").getAsJsonArray()) {
+				bar.step(tank_car.getAsString());
+				
 				if (blacklist.contains(tank_car.getAsString())) {
 					ImmersiveRailroading.info("Skipping blacklisted %s", tank_car.getAsString());
 					continue;
@@ -147,6 +167,8 @@ public class DefinitionManager {
 				}
 			}
 			for (JsonElement hand_car : stock.get("hand_car").getAsJsonArray()) {
+				bar.step(hand_car.getAsString());
+				
 				if (blacklist.contains(hand_car.getAsString())) {
 					ImmersiveRailroading.info("Skipping blacklisted %s", hand_car.getAsString());
 					continue;
@@ -159,7 +181,8 @@ public class DefinitionManager {
 					ex.printStackTrace();
 				}
 			}
-			System.out.println(System.currentTimeMillis() - tim);
+			
+			ProgressManager.pop(bar);
 		}
 	}
 
