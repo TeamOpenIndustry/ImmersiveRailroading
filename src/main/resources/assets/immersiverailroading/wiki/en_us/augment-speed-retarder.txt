@@ -1,0 +1,5 @@
+The Speed Retarder Augment is used to slow down locomotives/stock which are passing overhead.  Right click on a track segment to apply the augment.
+
+The brake force is proportional to the number of augments side by side and the redstone signal given.
+
+[image{200, 78, 0.537109375, immersiverailroading:wiki/images/xfqsnxa.png}]

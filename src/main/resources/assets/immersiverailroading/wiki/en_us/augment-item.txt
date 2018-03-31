@@ -1,0 +1,8 @@
+The Item Loader/Unloader Augments are used to interface with the inventory of the locomotive or stock which is overhead.  Right click on a track segment to apply the augment.  It can be filtered by right clicking on the augment with a locomotive or rolling stock item.
+
+The augments do not pull from adjacent inventories, nor do they push to adjacent inventories.
+
+
+
+[image{200, 104, 0.537109375, immersiverailroading:wiki/images/sugyi27.png}]
+[image{200, 263, 0.537109375, immersiverailroading:wiki/images/exsmiao.png}]
