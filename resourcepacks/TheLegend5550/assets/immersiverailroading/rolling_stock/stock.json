@@ -1,0 +1,21 @@
+{
+	"locomotives": [
+		"j1a_texas",
+		"t1",
+		"ps4_class",
+		"ge_p42dc"
+	],
+	"tender": [
+		"coast_to_coast",
+		"t1_tender",
+		"ps4_tender_big"
+	],
+	"hand_car": [
+	],
+	"passenger": [
+	],
+	"freight": [
+	],
+	"tank": [
+	]
+}
