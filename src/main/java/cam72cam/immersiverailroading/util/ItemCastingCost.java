@@ -20,8 +20,11 @@ public class ItemCastingCost {
 		} else if (item.getItem() == IRItems.ITEM_AUGMENT) {
 			cost = (int) Math.ceil(8 * ItemGauge.get(item).scale());
 			item.setCount(8);
+		} else if (OreHelper.IR_STEEL_BLOCK.matches(item, false)) {
+			return 9;
+		} else if (OreHelper.IR_STEEL_INGOT.matches(item, false)) {
+			return 1;
 		} else {
-			System.out.println("BAD CAST");
 			cost = BAD_CAST_COST;
 		}
 		return cost;

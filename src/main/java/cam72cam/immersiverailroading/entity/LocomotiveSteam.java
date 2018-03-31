@@ -245,7 +245,6 @@ public class LocomotiveSteam extends Locomotive {
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
-				//System.out.println(phase);
 				for (RenderComponent smoke : smokes) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					particlePos = particlePos.subtract(fakeMotion);
