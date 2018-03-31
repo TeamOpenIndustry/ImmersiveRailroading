@@ -13,7 +13,6 @@
 		"rodgers_460",
 		"skookum",
 		"br01",
-		"gp-7",
 		"ge_b40_8",
 		"ge_b40_8w",
 		"ge_c44_9cw",
@@ -44,10 +43,8 @@
 		"p70coach1"
 	],
 	"freight": [
-		"boxcar_us",
 		"boxcar_x26",
 		"usra_boxcar_classrr40",
-		"flatcar_us",
 		"70t_hopper_slsf",
 		"attx_flatcar_1",
 		"dw_gondola",
@@ -64,7 +61,6 @@
 		"waycar"
 	],
 	"tank": [
-		"tank_us",
 		"tank_us2",
 		"kamx_t",
 		"slag_car_1"
