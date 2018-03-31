@@ -1,9 +1,5 @@
 {
 	"locomotives": [
-		"firefly",
-		"iron_duke",
-		"cooke_mogul",
-		"k36",
 		"a1_peppercorn",
 		"big_boy",
 		"k4_pacific",
@@ -19,11 +15,13 @@
 		"ge_40_ton_boxcab",
 		"alco_rs1",
 		"emd_sw1500",
-		"emd_sd40-2"
+		"emd_sd40-2",
+		"cooke_mogul",
+		"k36",
+		"firefly",
+		"iron_duke"
 	],
 	"tender": [
-		"cooke_tender",
-		"k36_tender",
 		"a1_peppercorn_tender",
 		"big_boy_tender",
 		"k4_tender",
@@ -32,7 +30,9 @@
 		"class_38_tender",
 		"rodgers_460_tender",
 		"skookum_tender",
-		"br01_tender"
+		"br01_tender",
+		"cooke_tender",
+		"k36_tender"
 	],
 	"hand_car": [
 		"hand_car_1"
