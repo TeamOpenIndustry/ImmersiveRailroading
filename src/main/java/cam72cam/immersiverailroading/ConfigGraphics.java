@@ -21,7 +21,7 @@ public class ConfigGraphics {
 	public static int overrideGPUTexSize = -1;
 
 	@RequiresMcRestart
-	@Comment("Use Icon Cache (experimental)")
+	@Comment("Generate static icons.  Drastically reduces render overhead for IR items")
 	public static boolean enableIconCache = false;
 
 	@Comment("If you are having render problems in game, try setting this to false")
