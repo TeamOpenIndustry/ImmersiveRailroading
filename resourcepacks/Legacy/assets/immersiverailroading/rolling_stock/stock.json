@@ -1,0 +1,18 @@
+{
+	"locomotives": [
+		"gp-7"
+	],
+	"tender": [
+	],
+	"hand_car": [
+	],
+	"passenger": [
+	],
+	"freight": [
+		"boxcar_us",
+		"flatcar_us"
+	],
+	"tank": [
+		"tank_us"
+	]
+}
