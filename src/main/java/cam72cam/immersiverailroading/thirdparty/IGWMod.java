@@ -16,6 +16,7 @@ public class IGWMod {
 				skipLine();
 				addSectionHeader("Guides");
 				pageEntries.add("getting-started");
+				pageEntries.add("open-computers");
 				skipLine();
 				addSectionHeader("Tools");
 				pageEntries.add("blueprint-book");
@@ -30,6 +31,14 @@ public class IGWMod {
 				pageEntries.add("steam-hammer");
 				pageEntries.add("plate-rolling-machine");
 				pageEntries.add("boiler-roller");
+				skipLine();
+				addSectionHeader("Augments");
+				pageEntries.add("augment-detector");
+				pageEntries.add("augment-control");
+				pageEntries.add("augment-item");
+				pageEntries.add("augment-fluid");
+				pageEntries.add("augment-speed-retarder");
+
 			}
 
 			@Override

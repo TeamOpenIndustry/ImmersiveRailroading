@@ -1,0 +1,15 @@
+The Detector Augment is used to check what locomotive/stock is passing overhead.  Right click on a track segment to apply the augment.  It can be filtered by right clicking on the augment with a locomotive or rolling stock item.
+
+By default, the detector outputs a redstone signal of there is a locomotive or other stock above it.
+
+It can be re-configured to output redstone proportional to a few different events:
+
+* Speed
+* Number of passengers
+* Freight Cargo fullness
+* Liquid Cargo fullness
+
+This is accomplished by right-clicking the augment with a redstone torch
+
+[image{200, 195, 0.537109375, immersiverailroading:wiki/images/8csrnwi.png}]
+[image{200, 354, 0.537109375, immersiverailroading:wiki/images/jb6rpfp.png}]
