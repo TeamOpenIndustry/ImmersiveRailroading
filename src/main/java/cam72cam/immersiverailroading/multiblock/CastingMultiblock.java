@@ -43,9 +43,9 @@ public class CastingMultiblock extends Multiblock {
 			MultiblockComponent[] base = new MultiblockComponent[] { AIR, AIR, AIR, AIR, AIR, AIR, AIR };
 			if (z > 0 && z < 6) {
 				if (z > 1 && z < 5) {
-					base = new MultiblockComponent[] { AIR, STEEL(), STEEL(), STEEL(), STEEL(), STEEL(), AIR };
+					base = new MultiblockComponent[] { AIR, S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), AIR };
 				} else {
-					base = new MultiblockComponent[] { AIR, AIR, STEEL(), STEEL(), STEEL(), AIR, AIR };
+					base = new MultiblockComponent[] { AIR, AIR, S_SCAF(), S_SCAF(), S_SCAF(), AIR, AIR };
 				}
 			}
 			
