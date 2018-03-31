@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.thirdparty;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.ItemTabs;
 import igwmod.api.WikiRegistry;
 import igwmod.gui.GuiWiki;
 import igwmod.gui.tabs.BaseWikiTab;
@@ -21,6 +20,9 @@ public class IGWMod {
 				addSectionHeader("Tools");
 				pageEntries.add("blueprint-book");
 				pageEntries.add("track-blueprint");
+				pageEntries.add("large-wrench");
+				pageEntries.add("coupling-hook");
+				pageEntries.add("conductor-whistle");
 				skipLine();
 				addSectionHeader("Machines");
 				pageEntries.add("track-roller");
@@ -28,13 +30,6 @@ public class IGWMod {
 				pageEntries.add("steam-hammer");
 				pageEntries.add("plate-rolling-machine");
 				pageEntries.add("boiler-roller");
-				skipLine();
-				addSectionHeader("Parts");
-				skipLine();
-				addSectionHeader("Locomotives");
-				skipLine();
-				addSectionHeader("Rolling Stock");
-
 			}
 
 			@Override
@@ -45,7 +40,7 @@ public class IGWMod {
 			@Override
 			public ItemStack renderTabIcon(GuiWiki gui) {
 				NonNullList<ItemStack> items = NonNullList.create();
-				IRItems.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.LOCOMOTIVE_TAB, items);
+				items.add(new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT));
 				return items.get(0);
 			}
 

@@ -1,0 +1,17 @@
+[prefix{l}] Overview[prefix{}]
+
+This item is used check the coupling status of stock and set the coupling mode.  It is crafted as follows:
+
+[image{200, 65, 0.553319919517, immersiverailroading:wiki/images/vxbqrma.png}]
+
+[prefix{l}] Usage[prefix{}]
+
+Right clicking on a piece of rolling stock near a coupler will tell you where it is coupled to and the current coupling mode.
+
+[image{200, 281, 0.537109375, immersiverailroading:wiki/images/7tm3nwu.png}]
+
+Shift + right clicking on a piece of rolling stock near a coupler will set the coupler mode.
+
+* Shunting mode means that the cars can bump into each other, but they won't couple.
+
+* Normal mode means that when cars bump into each other they will couple and form a train.
