@@ -153,7 +153,6 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
-		System.out.println(GuiTypes.values()[ID]);
 		TileMultiblock te;
 		switch (GuiTypes.values()[ID]) {
 		case FREIGHT:
@@ -697,7 +696,7 @@ public class ClientProxy extends CommonProxy {
 		}
 		
 		if (world == null && manager != null && manager.hasSounds()) {
-			System.out.println("Unloading IR sound system");
+			ImmersiveRailroading.warn("Unloading IR sound system");
 			manager.stop();
 			sndCache = null;
 		}

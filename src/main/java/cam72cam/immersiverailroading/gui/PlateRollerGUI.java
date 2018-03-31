@@ -35,7 +35,6 @@ public class PlateRollerGUI extends GuiScreen {
 		if (currentItem == null || currentItem.isEmpty()) {
 			currentItem = new ItemStack(IRItems.ITEM_PLATE, 1);
 		}
-		System.out.println(currentItem);
 		
 		gauge = ItemGauge.get(currentItem);
 		plate = ItemPlateType.get(currentItem);

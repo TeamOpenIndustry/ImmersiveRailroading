@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
-import cam72cam.immersiverailroading.util.OreHelper;
 import cam72cam.immersiverailroading.util.ParticleUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -181,27 +180,12 @@ public class CastingMultiblock extends Multiblock {
 				AxisAlignedBB bb = new AxisAlignedBB(getPos(offset.add(0, 1, 0))).grow(3, 0, 3);
 				List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, bb);
 				for (EntityItem item : items) {
+					if (!hasPower()) {
+						break;
+					}
 					ItemStack stack = item.getItem();
 					int cost = ItemCastingCost.getCastCost(stack);
-					if(OreHelper.IR_STEEL_BLOCK.matches(stack, false)) {
-						// TODO drain more power on melt
-						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + 9) {
-							if (!hasPower()) {
-								break;
-							}
-							stack.shrink(1);
-							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + 9);
-						}
-					} else if(OreHelper.IR_STEEL_INGOT.matches(stack, false)) {
-						// TODO drain more power on melt
-						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + 1) {
-							if (!hasPower()) {
-								break;
-							}
-							stack.shrink(1);
-							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + 1);
-						}
-					} else if (cost != ItemCastingCost.BAD_CAST_COST) {
+					if (cost != ItemCastingCost.BAD_CAST_COST) {
 						// TODO drain more power on melt
 						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + cost) {
 							if (!hasPower()) {

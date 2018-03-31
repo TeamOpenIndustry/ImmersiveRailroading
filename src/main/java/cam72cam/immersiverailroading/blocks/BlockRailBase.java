@@ -202,7 +202,6 @@ public abstract class BlockRailBase extends Block {
 		
 		if (!isOnRealBlock) {
 			double floating = tileEntity.getParentTile().percentFloating();
-			System.out.println(floating);
 			if (floating > ConfigBalance.trackFloatingPercent) {
 				if (tryBreakRail(world, pos)) { 
 					tileEntity.getWorld().destroyBlock(pos, true);
