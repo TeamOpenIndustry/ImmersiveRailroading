@@ -43,12 +43,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public void parseJson(JsonObject data) throws Exception {
 		super.parseJson(data);
 		JsonObject properties = data.get("properties").getAsJsonObject();
-		tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_scale));
-		maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_scale);
+		tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_inv_scale));
+		maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_inv_scale);
 		valveGear = ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase());
 		JsonObject firebox = data.get("firebox").getAsJsonObject();
-		this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_scale);
-		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_scale);
+		this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
+		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		

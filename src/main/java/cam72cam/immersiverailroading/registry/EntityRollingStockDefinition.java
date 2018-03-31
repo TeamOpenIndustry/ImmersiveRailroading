@@ -64,7 +64,8 @@ public abstract class EntityRollingStockDefinition {
 	private double passengerCompartmentWidth;
 	private int weight;
 	private int maxPassengers;
-	protected double internal_scale;
+	protected double internal_model_scale;
+	protected double internal_inv_scale;
 	public Gauge recommended_gauge;
 	public Boolean shouldSit;
 	public ResourceLocation wheel_sound;
@@ -100,31 +101,35 @@ public abstract class EntityRollingStockDefinition {
 		if (data.has("darken_model")) {
 			darken = data.get("darken_model").getAsFloat();
 		}
-		this.internal_scale = 1;
+		this.internal_model_scale = 1;
+		this.internal_inv_scale = 1;
 		this.recommended_gauge = Gauge.STANDARD;
 		if (data.has("model_gauge_m")) { 
-			this.internal_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
 			this.recommended_gauge = Gauge.from(data.get("model_gauge_m").getAsDouble());
+			this.internal_model_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
 		}
 		if (data.has("recommended_gauge_m")) {
 			this.recommended_gauge = Gauge.from(data.get("recommended_gauge_m").getAsDouble());
 		}
-		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_scale);
+		if (this.recommended_gauge != Gauge.STANDARD) {
+			this.internal_inv_scale = Gauge.STANDARD.value() / recommended_gauge.value();
+		}
+		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
-		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0).scale(internal_scale);
-		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_scale;
-		passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_scale;
+		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0).scale(internal_model_scale);
+		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_model_scale;
+		passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_model_scale;
 		maxPassengers = passenger.get("slots").getAsInt();
 		if (passenger.has("should_sit")) {
 			shouldSit = passenger.get("should_sit").getAsBoolean();
 		}
 
-		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_scale);
-		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_scale);
+		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_model_scale);
+		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_model_scale);
 		
 		if (data.has("couplers")) {
-			couplerOffsetFront = (float) (data.get("couplers").getAsJsonObject().get("front_offset").getAsFloat() * internal_scale);
-			couplerOffsetRear = (float) (data.get("couplers").getAsJsonObject().get("rear_offset").getAsFloat() * internal_scale);
+			couplerOffsetFront = (float) (data.get("couplers").getAsJsonObject().get("front_offset").getAsFloat() * internal_model_scale);
+			couplerOffsetRear = (float) (data.get("couplers").getAsJsonObject().get("rear_offset").getAsFloat() * internal_model_scale);
 		}
 		
 		frontBounds = -model.minOfGroup(model.groups()).x + couplerOffsetFront;
@@ -155,7 +160,7 @@ public abstract class EntityRollingStockDefinition {
 		}
 		heightBounds = model.heightOfGroups(heightGroups);
 		
-		weight = (int)Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_scale);
+		weight = (int)Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_inv_scale);
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		if (sounds != null && sounds.has("wheels")) {

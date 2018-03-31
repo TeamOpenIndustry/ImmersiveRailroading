@@ -34,7 +34,7 @@ public class CarTankDefinition extends EntityRollingStockDefinition {
 	public void parseJson(JsonObject data) throws Exception {
 		super.parseJson(data);
 		JsonObject tank = data.get("tank").getAsJsonObject();
-		capacity = FluidQuantity.FromLiters((int)Math.ceil(tank.get("capacity_l").getAsInt() * internal_scale));
+		capacity = FluidQuantity.FromLiters((int)Math.ceil(tank.get("capacity_l").getAsInt() * internal_inv_scale));
 		if (tank.has("whitelist")) {
 			fluidFilter = new ArrayList<Fluid>();
 			for(JsonElement allowed : tank.get("whitelist").getAsJsonArray()) {

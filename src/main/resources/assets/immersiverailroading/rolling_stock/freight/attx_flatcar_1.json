@@ -9,12 +9,12 @@
 		"slots": 12,
 		"center_x": 0,
 		"center_y": 1.2,
-		"length": 18,
+		"length": 9,
 		"width": 2
 	},
 	"freight": {
 		"slots": 60,
-		"width": 30,
+		"width": 15,
 		"cargo": ["all"]
 	},
 	"trucks": {
