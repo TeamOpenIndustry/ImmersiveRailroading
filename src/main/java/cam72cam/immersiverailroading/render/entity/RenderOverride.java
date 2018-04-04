@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.entity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -151,7 +152,7 @@ public class RenderOverride {
 		
 	        OBJRender model = RailBuilderRender.getModel(Gauge.STANDARD); 
 	        model.bindTexture();
-	        List<TileEntity> entities = Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList;
+	        List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
 	        for (TileEntity te : entities) {
 	        	if (te instanceof TileRail) {
 	        		if (!((TileRail) te).isLoaded()) {
