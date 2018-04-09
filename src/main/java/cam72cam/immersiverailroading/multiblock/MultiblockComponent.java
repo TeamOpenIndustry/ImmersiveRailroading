@@ -39,7 +39,7 @@ public class MultiblockComponent {
 			int meta = block.getMetaFromState(target);
 			return name.matches(new ItemStack(item, 1, meta), false);
 		};
-		this.itemCheck = (ItemStack tstack) -> tstack.isItemEqual(stack);
+		this.itemCheck = (ItemStack tstack) -> name.matches(tstack, false);
 	}
 	
 	public MultiblockComponent(Block block) {
