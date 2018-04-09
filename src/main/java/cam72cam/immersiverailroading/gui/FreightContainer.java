@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.entity.CarFreight;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -31,36 +28,7 @@ public class FreightContainer extends ContainerBase {
 	}
 
 	@Override
-	public boolean canInteractWith(EntityPlayer playerIn) {
-		return true;
+	public int numSlots() {
+		return freight.getInventorySize();
 	}
-	
-	@Override
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        ItemStack itemstack = null;
-        Slot slot = this.inventorySlots.get(index);
-
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
-            if (index <= freight.getInventorySize()) {
-            	if (!this.mergeItemStack(itemstack1, freight.getInventorySize(), this.inventorySlots.size(), false)) {
-                    return ItemStack.EMPTY;
-                }
-            } else {
-            	if (!this.mergeItemStack(itemstack1, 0, freight.getInventorySize()-1, false)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-            
-
-            if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
-            } else {
-                slot.onSlotChanged();
-            }
-        }
-
-        return itemstack;
-    }
 }
