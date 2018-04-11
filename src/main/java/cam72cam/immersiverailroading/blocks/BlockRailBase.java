@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -161,20 +162,29 @@ public abstract class BlockRailBase extends Block {
 	}
 	
 	public static boolean tryBreakRail(IBlockAccess world, BlockPos pos) {
-		TileRailBase rail = TileRailBase.get(world, pos);
-		if (rail != null) {
-			if (rail.getReplaced() != null) {
-				// new object here is important
-				TileRailGag newGag = new TileRailGag();
-				newGag.readFromNBT(rail.getReplaced());
-				
-				// Only do replacement if parent still exists
-				if (newGag.getParent() != null && TileRailBase.get(world, newGag.getParent()) != null) {
-					rail.getWorld().setTileEntity(pos, newGag);
-					newGag.markDirty();
-					breakParentIfExists(rail);
-					return false;
+		try {
+			TileRailBase rail = TileRailBase.get(world, pos);
+			if (rail != null) {
+				if (rail.getReplaced() != null) {
+					// new object here is important
+					TileRailGag newGag = new TileRailGag();
+					newGag.readFromNBT(rail.getReplaced());
+					
+					// Only do replacement if parent still exists
+					if (newGag.getParent() != null && TileRailBase.get(world, newGag.getParent()) != null) {
+						rail.getWorld().setTileEntity(pos, newGag);
+						newGag.markDirty();
+						breakParentIfExists(rail);
+						return false;
+					}
 				}
+			}
+		} catch (StackOverflowError ex) {
+			ImmersiveRailroading.error("Invalid recursive rail block at %s", pos);
+			ImmersiveRailroading.catching(ex);
+			TileRailBase rail = TileRailBase.get(world, pos);
+			if (rail != null) {
+				rail.getWorld().setBlockToAir(pos);
 			}
 		}
 		return true;
@@ -203,7 +213,7 @@ public abstract class BlockRailBase extends Block {
 		if (!isOnRealBlock) {
 			double floating = tileEntity.getParentTile().percentFloating();
 			if (floating > ConfigBalance.trackFloatingPercent) {
-				if (tryBreakRail(world, pos)) { 
+				if (tryBreakRail(world, pos)) {
 					tileEntity.getWorld().destroyBlock(pos, true);
 				}
 				return;
