@@ -13,9 +13,13 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -111,6 +115,20 @@ public class ServerProxy extends CommonProxy {
 		}
 		
 		return res;
+	}
+	
+	@SubscribeEvent
+	public static void onEntityJoin(EntityJoinWorldEvent event) {
+		if(event.getEntity() instanceof EntityRollingStock) {
+			EntityRollingStock stock = (EntityRollingStock)event.getEntity();
+			String defID = stock.getDefinitionID();
+			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+			if (def == null) {
+				String error = String.format("Missing definition %s, do you have all of the required resource packs?", defID);
+				ImmersiveRailroading.error(error);
+				event.setCanceled(true);
+			}
+		}
 	}
 	
 	@SubscribeEvent
