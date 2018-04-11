@@ -69,7 +69,7 @@ public class RailBuilderRender {
 		GL11.glTranslated(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 		GL11.glTranslated(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z);
 		
-		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90);
+		renderOff = VecUtil.fromYaw((info.gauge.value() - Gauge.STANDARD.value()) * 0.34828 *2, info.facing.getOpposite().getHorizontalAngle()-90 + (info.direction == TrackDirection.LEFT ? -1 : 1) * info.quarter/4f * 90);
 		GL11.glTranslated(renderOff.x, renderOff.y, renderOff.z); 
 
 		String renderID = RailRenderUtil.renderID(info);
