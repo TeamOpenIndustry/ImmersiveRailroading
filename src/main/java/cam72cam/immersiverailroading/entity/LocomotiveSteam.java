@@ -541,6 +541,8 @@ public class LocomotiveSteam extends Locomotive {
 				boilerPressure = Math.max(0, boilerPressure - (100 - boilerTemperature));
 				boilerTemperature = 100;
 			}
+
+			this.getDataManager().set(PRESSURE_VALVE, false);
 		}
 		
 		float throttle = Math.abs(getThrottle());
