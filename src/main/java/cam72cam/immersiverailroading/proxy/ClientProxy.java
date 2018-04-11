@@ -470,9 +470,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
-		if (Minecraft.getMinecraft().isSingleplayer()) {
-			return;
-		}
+		
 		
 		if(event.getEntity() instanceof EntityRollingStock) {
 			EntityRollingStock stock = (EntityRollingStock)event.getEntity();
@@ -483,7 +481,9 @@ public class ClientProxy extends CommonProxy {
 				ImmersiveRailroading.error(error);
 				event.setCanceled(true);
 				
-				missingResources = error;
+				if (!Minecraft.getMinecraft().isSingleplayer()) {
+					missingResources = error;
+				}
 			}
 		}
 	}
