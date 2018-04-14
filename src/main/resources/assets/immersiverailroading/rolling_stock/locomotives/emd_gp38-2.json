@@ -1,0 +1,34 @@
+{
+	"era": "diesel",
+	"name": "EMD GP38-2",
+	"works": "Electro-Motive Division",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/emd_gp38-2/emd_gp38-2.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"fuel_efficiency_%": 58,
+		"fuel_capacity_l": 6435,
+		"horsepower": 2000,
+		"tractive_effort_lbf": 54700,
+		"max_speed_kmh": 110,
+		"weight_kg": 113398
+	},
+	"passenger": {
+		"slots": 3,
+		"center_x": 5,
+		"center_y": 2.3,
+		"length": 0.9,
+		"width": 2.9
+	},
+	"trucks": {
+		"front": 5.2, 
+		"rear": -5.2
+	},
+    "couplers": {
+		"front_offset": -0.09,
+		"rear_offset": -0.09
+	},
+	"sounds": {
+		"horn": "sounds/diesel/gp38_2/horn.ogg",
+		"idle": "sounds/diesel/gp38_2/notch6.ogg"
+	}
+}
