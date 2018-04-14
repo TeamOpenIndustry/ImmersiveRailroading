@@ -6,11 +6,11 @@
 	"darken_model": "-0.05",
 	"properties": {
 		"fuel_efficiency_%": 68,
-		"fuel_capacity_l": 3200,
+		"fuel_capacity_l": 12113,
 		"horsepower": 3000,
-		"tractive_effort_lbf": 82000,
-		"max_speed_kmh": 134,
-		"weight_kg": 167000
+		"tractive_effort_lbf": 82100,
+		"max_speed_kmh": 110,
+		"weight_kg": 166921
 	},
 	"passenger": {
 		"slots": 3,
