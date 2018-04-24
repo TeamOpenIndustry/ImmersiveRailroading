@@ -702,7 +702,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					newRedstone = stock != null ? 15 : 0;
 					break;
 				case SPEED:
-					newRedstone = stock != null ? (int)Math.floor(stock.getCurrentSpeed().metric()/10) : 0;
+					newRedstone = stock != null ? (int)Math.floor(Math.abs(stock.getCurrentSpeed().metric())/10) : 0;
 					break;
 				case PASSENGERS:
 					newRedstone = stock != null ? Math.min(15, stock.getPassengers().size() + stock.staticPassengers.size()) : 0;
