@@ -1,0 +1,28 @@
+{
+	"name": "USRA H31 Hopper",
+	"model": "immersiverailroading:models/rolling_stock/freight/h31_hopper/h31_hopper.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"weight_kg": 18279
+	},
+	"passenger": {
+		"slots": 1,
+		"center_x": 4,
+		"center_y": 1.2,
+		"length": 2,
+		"width": 2
+	},
+	"freight": {
+		"slots": 90,
+		"width": 18,
+		"cargo": ["all"]
+	},
+	"trucks": {
+		"front": 3.4, 
+		"rear": -3.4
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -0.08
+	}
+}

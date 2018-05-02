@@ -1,0 +1,34 @@
+{
+	"era": "diesel",
+	"name": "EMD SD70MAC",
+	"works": "Electro-Motive Division",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/emd_sd70mac/emd_sd70mac.obj",
+	"darken_model": "-0.05",
+	"properties": {
+		"fuel_efficiency_%": 68,
+		"fuel_capacity_l": 18927,
+		"horsepower": 4000,
+		"tractive_effort_lbf": 175500,
+		"max_speed_kmh": 110,
+		"weight_kg": 188240
+	},
+	"passenger": {
+		"slots": 4,
+		"center_x": 8,
+		"center_y": 2.65,
+		"length": 0.9,
+		"width": 2.9
+	},
+	"trucks": {
+		"front": 7.4, 
+		"rear": -7.4
+	},
+    "couplers": {
+		"front_offset": -0.09,
+		"rear_offset": -0.09
+	},
+	"sounds": {
+		"horn": "sounds/diesel/horns/k5lla2.ogg",
+		"idle": "sounds/diesel/emd710g3/710_notch6.ogg"
+	}
+}

@@ -1,5 +1,5 @@
 # Blender MTL File: 'EMD GP38-2.blend'
-# Material Count: 24
+# Material Count: 23
 
 newmtl None
 Ns 0
@@ -174,17 +174,6 @@ d 1.000000
 illum 2
 map_Kd metal.png
 
-newmtl metal_metal.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd metal.png
-
 newmtl metal_metal.png.001
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
@@ -196,7 +185,7 @@ d 1.000000
 illum 2
 map_Kd metal.png
 
-newmtl metal_metal.png.003
+newmtl metal_metal.png.002
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -207,7 +196,7 @@ d 1.000000
 illum 2
 map_Kd metal.png
 
-newmtl metal_metal.png.004
+newmtl metal_metal.png.003
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
