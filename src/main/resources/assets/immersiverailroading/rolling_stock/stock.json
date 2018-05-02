@@ -19,6 +19,7 @@
 		"ge_c44_9cw",
 		"emd_gp38-2",
 		"emd_sd40-2",
+		"emd_sd70mac",
 		"emd_sw1500",
 		"alco_rs1"
 	],
@@ -47,6 +48,7 @@
 		"boxcar_x26",
 		"usra_boxcar_classrr40",
 		"70t_hopper_slsf",
+		"h31_hopper",
 		"attx_flatcar_1",
 		"dw_gondola",
 		"prr_flatcar_1",

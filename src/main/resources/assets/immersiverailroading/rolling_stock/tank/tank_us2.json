@@ -1,6 +1,6 @@
 {
 	"name": "Tank US 2",
-	"model": "immersiverailroading:models/rolling_stock/tank/tank_us2.obj",
+	"model": "immersiverailroading:models/rolling_stock/tank/tank_us2/tank_us2.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 38060
