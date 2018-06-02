@@ -525,6 +525,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	public boolean isCouplerEngaged(CouplerType coupler) {
+		if (coupler == null) {
+			return false;
+		}
 		switch (coupler) {
 		case FRONT:
 			return frontCouplerEngaged;
