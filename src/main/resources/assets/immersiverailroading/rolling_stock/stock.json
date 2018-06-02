@@ -21,6 +21,9 @@
 		"emd_sd40-2",
 		"emd_sd70mac",
 		"emd_sw1500",
+		"ge_emd_sd44c-9",
+		"ge_emd_sd44c-9_hn",
+		"nswgr_900_class_railmotor",
 		"alco_rs1"
 	],
 	"tender": [
@@ -47,6 +50,7 @@
 	"freight": [
 		"boxcar_x26",
 		"usra_boxcar_classrr40",
+		"hi_cube_boxcar_1",
 		"70t_hopper_slsf",
 		"h31_hopper",
 		"attx_flatcar_1",
@@ -59,6 +63,7 @@
 		"drgw_1000class_gondola",
 		"drgw_5500class_stockcar",
 		"drgw_rail_and_tie_outfit",
+		"test",
 		"waycar"
 	],
 	"tank": [
