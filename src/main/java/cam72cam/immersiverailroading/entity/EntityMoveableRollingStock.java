@@ -18,6 +18,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -317,6 +318,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 			if (! (entity instanceof EntityLivingBase)) {
 				continue;
+			}
+			
+			if (entity instanceof EntityPlayer) {
+				if (entity.ticksExisted < 20 * 5) {
+					// Give the player a chance to get out of the way
+					continue;
+				}
 			}
 
 			
