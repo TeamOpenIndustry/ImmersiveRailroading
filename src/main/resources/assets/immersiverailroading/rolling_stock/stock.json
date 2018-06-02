@@ -50,9 +50,7 @@
 	"freight": [
 		"boxcar_x26",
 		"usra_boxcar_classrr40",
-		"hi_cube_boxcar_1",
 		"70t_hopper_slsf",
-		"h31_hopper",
 		"attx_flatcar_1",
 		"dw_gondola",
 		"prr_flatcar_1",
@@ -63,7 +61,6 @@
 		"drgw_1000class_gondola",
 		"drgw_5500class_stockcar",
 		"drgw_rail_and_tie_outfit",
-		"test",
 		"waycar"
 	],
 	"tank": [
