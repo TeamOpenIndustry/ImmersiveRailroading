@@ -265,7 +265,7 @@ public class LocomotiveSteam extends Locomotive {
 						int lifespan = (int) (200 * (1 + Math.abs(this.getThrottle())) * smokeMod * gauge.scale());
 						//lifespan *= size;
 						
-						float verticalSpeed = (0.5f + Math.abs(this.getThrottle())) * (float)gauge.scale();
+						float verticalSpeed = 0.5f;//(0.5f + Math.abs(this.getThrottle())) * (float)gauge.scale();
 						
 						double size = smoke.width() * (0.8 + smokeMod);
 						if (phase != 0 && Math.abs(this.getThrottle()) > 0.01 && Math.abs(this.getCurrentSpeed().metric()) / gauge.scale() < 30) {

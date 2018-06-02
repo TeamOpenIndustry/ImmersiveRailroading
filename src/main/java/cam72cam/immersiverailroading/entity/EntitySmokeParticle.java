@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -85,6 +86,16 @@ public class EntitySmokeParticle extends Entity {
 		this.posX += this.motionX;
 		this.posY += this.motionY;
 		this.posZ += this.motionZ;
+		
+		if (this.motionX != 0 && world.getBlockState(new BlockPos(this.getPositionVector().addVector(0, this.motionX*2, 0))).causesSuffocation()) {
+			this.motionX = 0;
+		}
+		if (this.motionY != 0 && world.getBlockState(new BlockPos(this.getPositionVector().addVector(0, this.motionY*2, 0))).causesSuffocation()) {
+			this.motionY = 0;
+		}
+		if (this.motionZ != 0 && world.getBlockState(new BlockPos(this.getPositionVector().addVector(0, this.motionZ*2, 0))).causesSuffocation()) {
+			this.motionZ = 0;
+		}
 		
 		if (ticks >= this.lifespan) {
 			world.removeEntity(this);
