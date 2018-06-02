@@ -20,6 +20,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
+import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
@@ -247,6 +248,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				CouplerType otherCoupler = potential.getRight();
 				this.setCoupledUUID(coupler, stock.getPersistentID());
 				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
+				this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
 			}
 		}
 	}

@@ -96,6 +96,24 @@ public class IRSoundManager {
 				sound.updateBaseSoundLevel(lastSoundLevel);
 			}
 		}
+		
+
+		if (ImmersiveRailroading.proxy.getTicks() % 20 == 0) {
+			// Clean up disposed sounds
+			
+			List<ISound> toRemove = new ArrayList<ISound>();
+			for (ISound sound : this.sounds) {
+				if (sound.isDisposable() && !sound.isPlaying()) {
+					toRemove.add(sound);
+				}
+			}
+			
+			for (ISound sound : toRemove) {
+				sounds.remove(sound);
+				sound.stop();
+				sound.terminate();
+			}
+		}
 	}
 	
 	public boolean hasSounds() {

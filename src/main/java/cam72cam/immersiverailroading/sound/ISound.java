@@ -14,4 +14,6 @@ public interface ISound {
 	public boolean isPlaying();
 	void updateBaseSoundLevel(float baseSoundMultiplier);
 	void reload();
+	public void disposable();
+	public boolean isDisposable();
 }
