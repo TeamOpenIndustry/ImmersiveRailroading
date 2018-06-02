@@ -284,6 +284,30 @@ public class LocomotiveSteam extends Locomotive {
 				}
 			}
 			
+			List<RenderComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE, gauge);
+			if (	whistles != null &&
+					(this.getDataManager().get(HORN) != 0 || whistle != null && whistle.isPlaying()) && 
+					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
+				) {
+				for (RenderComponent whistle : whistles) {
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(whistle.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					particlePos = particlePos.subtract(fakeMotion);
+					
+					float darken = 0;
+					float thickness = 1;
+					double smokeMod = Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2));
+					int lifespan = (int) (40 * (1 + smokeMod * gauge.scale()));
+					float verticalSpeed = 0.8f;
+					double size = 0.3 * (0.8 + smokeMod);
+					
+					particlePos = particlePos.subtract(fakeMotion);
+					
+					EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan, darken, thickness, size);
+					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+					sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
+					world.spawnEntity(sp);
+				}
+			}
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
 			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
