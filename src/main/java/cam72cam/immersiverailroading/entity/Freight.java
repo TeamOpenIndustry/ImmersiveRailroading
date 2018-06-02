@@ -78,7 +78,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 					}
 					float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
 					wheel_sound.setPitch(adjust + 0.7f + this.sndRand);
-					wheel_sound.setVolume(0.5f * adjust);
+					wheel_sound.setVolume(adjust);
 					
 					wheel_sound.setPosition(getPositionVector());
 					wheel_sound.setVelocity(getVelocity());
