@@ -108,6 +108,23 @@ public class MovementTrack {
 		} else if (rail.getType() == TrackItems.CROSSING) {
 			delta = VecUtil.fromYaw(distance, EnumFacing.fromAngle(trainYaw).getHorizontalAngle());
 			return currentPosition.add(delta);
+		} else if (rail.getType() == TrackItems.TURNTABLE) {
+			currentPosition = currentPosition.add(delta);
+			
+			Vec3d center = new Vec3d(rail.getParentTile().getPos()).addVector(0.5, 0, 0.5);
+			
+			double fromCenter = currentPosition.distanceTo(center);
+			
+			float angle = 360/16.0f * rail.getParentTile().getTablePos();
+			
+			Vec3d forward = center.add(VecUtil.fromYaw(fromCenter, angle));
+			Vec3d backward = center.add(VecUtil.fromYaw(fromCenter, angle + 180));
+			
+			if (forward.distanceTo(currentPosition) < backward.distanceTo(currentPosition)) {
+				return forward;
+			} else {
+				return backward;
+			}
 		} else {
 			// delta should be in the direction of rotationYaw instead of front or rear
 			// since large changes can occur if the train is way off center

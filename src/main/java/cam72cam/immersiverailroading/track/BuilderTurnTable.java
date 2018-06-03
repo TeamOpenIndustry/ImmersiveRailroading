@@ -14,6 +14,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class BuilderTurnTable extends BuilderBase {
 	protected HashSet<Pair<Integer, Integer>> positions;
+	private BlockPos offset;
 	
 	public BuilderTurnTable(RailInfo info, BlockPos pos) {
 		this(info, pos, false);
@@ -27,6 +28,8 @@ public class BuilderTurnTable extends BuilderBase {
 		positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
+		offset = new BlockPos(0, 0, info.length);
+		
 		double radius = info.length;
 		
 		for (double irad = 1; irad <= radius + 1; irad++) {
@@ -36,8 +39,8 @@ public class BuilderTurnTable extends BuilderBase {
 			}
 		}
 		
-		this.setParentPos(new BlockPos(0, 0, 0));
-		TrackRail main = new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
+		this.setParentPos(new BlockPos(offset));
+		TrackRail main = new TrackRail(this, offset.getX(), offset.getY(), offset.getZ(), EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
@@ -45,7 +48,7 @@ public class BuilderTurnTable extends BuilderBase {
 				// Skip parent block
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, pair.getLeft(), 0, pair.getRight());
+			TrackBase tg = new TrackGag(this, pair.getLeft() + offset.getX(), 0, pair.getRight() + offset.getZ());
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
 			}
@@ -64,8 +67,12 @@ public class BuilderTurnTable extends BuilderBase {
 		
 		for (float angle = 0; angle < 360; angle +=22.5) {
 			Vec3d gagPos = VecUtil.rotateYaw(new Vec3d(0, 0, info.length), angle-90);
-			data.add(new VecYawPitch(gagPos.x, gagPos.y, gagPos.z, -angle));
+			data.add(new VecYawPitch(gagPos.x + offset.getX(), gagPos.y, gagPos.z + offset.getZ(), -angle));
 		}
+		
+		float angle = 360/16.0f * info.tablePos;
+		data.add(new VecYawPitch(offset.getX(), offset.getY(), offset.getZ(), -angle, 0, info.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
+		
 		return data;
 	}
 }
