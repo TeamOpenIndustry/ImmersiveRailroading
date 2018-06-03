@@ -8,6 +8,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
@@ -15,6 +17,7 @@ import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.CouplerAugmentMode;
 import cam72cam.immersiverailroading.library.LocoControlMode;
 import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -72,7 +75,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private FluidTank augmentTank = null;
 	private int redstoneLevel = 0;
 	private StockDetectorMode redstoneMode = StockDetectorMode.SIMPLE;
-	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD; 
+	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD;
+	private CouplerAugmentMode couplerMode = CouplerAugmentMode.ENGAGED;
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
@@ -113,6 +117,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		case LOCO_CONTROL:
 			controlMode = LocoControlMode.values()[((controlMode.ordinal() + 1) % (LocoControlMode.values().length))];
 			return controlMode.toString();
+		case COUPLER:
+			couplerMode = CouplerAugmentMode.values()[((couplerMode.ordinal() + 1) % (CouplerAugmentMode.values().length))];
+			return couplerMode.toString();
 		default:
 			return null;
 		}
@@ -245,6 +252,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (nbt.hasKey("controlMode")) {
 			controlMode = LocoControlMode.values()[nbt.getInteger("controlMode")];
 		}
+		if (nbt.hasKey("couplerMode")) {
+			couplerMode = CouplerAugmentMode.values()[nbt.getInteger("couplerMode")];
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -267,6 +277,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		nbt.setInteger("redstoneMode", redstoneMode.ordinal());
 		nbt.setInteger("controlMode", controlMode.ordinal());
+		nbt.setInteger("couplerMode", couplerMode.ordinal());
 		
 		nbt.setInteger("version", 3);
 		
@@ -431,6 +442,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case DETECTOR:
 			case LOCO_CONTROL:
 			case SPEED_RETARDER:
+			case COUPLER:
+				break;
+			default:
 				break;
 			}
 		}
@@ -480,6 +494,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case DETECTOR:
 			case LOCO_CONTROL:
 			case SPEED_RETARDER:
+			case COUPLER:
+				break;
+			default:
 				break;
 			}
 		}
@@ -725,6 +742,25 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					this.markDirty(); //TODO overkill
 				}
 				break;
+			case COUPLER:
+				stock = this.getStockNearBy(null);
+				int power = RedstoneUtil.getPower(world, pos);
+				if (stock != null && stock instanceof EntityCoupleableRollingStock && power > 0) {
+					EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock)stock;
+					switch (couplerMode) {
+					case ENGAGED:
+						for (CouplerType coupler : CouplerType.values()) {
+							couplable.setCouplerEngaged(coupler, true);
+						}
+						break;
+					case DISENGAGED:
+						for (CouplerType coupler : CouplerType.values()) {
+							couplable.setCouplerEngaged(coupler, false);
+						}
+						break;
+					}
+					break;
+				}
 			default:
 				break;
 			}

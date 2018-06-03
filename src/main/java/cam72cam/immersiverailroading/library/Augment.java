@@ -10,7 +10,8 @@ public enum Augment {
 	ITEM_UNLOADER,
 	FLUID_LOADER,
 	FLUID_UNLOADER,
-	DETECTOR
+	DETECTOR,
+	COUPLER,
 	;
 	
 	public EnumDyeColor tempColor() {
@@ -31,6 +32,8 @@ public enum Augment {
 			return EnumDyeColor.GRAY;
 		case WATER_TROUGH:
 			return EnumDyeColor.CYAN;
+		case COUPLER:
+			return EnumDyeColor.ORANGE;
 		}
 		return null;
 	}
