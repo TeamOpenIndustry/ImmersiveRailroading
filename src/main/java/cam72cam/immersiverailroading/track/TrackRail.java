@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.tile.TileRail;
 public class TrackRail extends TrackBase {
 
 	private TrackItems type;
-	private Vec3d center;
 	private int length;
 	private int quarter;
 	private int turnQuarters;
@@ -26,17 +25,11 @@ public class TrackRail extends TrackBase {
 		this.placementPosition = placementPosition;
 	}
 	
-	public void setRotationCenter(Vec3d center) {
-		//center = builder.convertRelativeCenterPositions(rel_cx, rel_cy, rel_cz, EnumFacing.NORTH);
-		this.center = center;
-	}
-	
 	@Override
 	public TileEntity placeTrack() {
 		TileRail tileRail = (TileRail) super.placeTrack();
 		
 		tileRail.setFacing(super.getFacing());
-		tileRail.setCenter(center);
 		tileRail.setType(type);
 		tileRail.setLength(this.length);
 		tileRail.setDirection(direction);

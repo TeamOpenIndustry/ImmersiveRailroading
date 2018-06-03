@@ -22,9 +22,11 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.track.BuilderTurn;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.track.TrackRail;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 
 public class TileRail extends TileRailBase {
 	public static TileRail get(IBlockAccess world, BlockPos pos) {
@@ -106,19 +108,16 @@ public class TileRail extends TileRailBase {
 
 	public Vec3d getCenter() {
 		if (center == null) {
-			return null;
+			Vec3d off = BuilderTurn.followCurve(this.getRailRenderInfo(), 1, null);
+			off = VecUtil.rotateYaw(off, this.facing.getHorizontalAngle() + 90);
+			System.out.println(off);
+			System.out.println(this.getPlacementPosition());
+			center = new Vec3d(-off.x, 0, -off.z).add(this.getPlacementPosition());
 		}
-		return center.addVector(pos.getX(), pos.getY(), pos.getZ());
+		return center;
 	}
 	public double getRadius() {
 		return length;
-	}
-	public void setCenter(Vec3d center) {
-		if (center != null) {
-			this.center = center.subtract(pos.getX(), pos.getY(), pos.getZ());
-		} else {
-			this.center = center;
-		}
 	}
 
 	public TrackDirection getDirection() {
@@ -209,7 +208,6 @@ public class TileRail extends TileRailBase {
 		}
 		
 		railBed = new ItemStack(nbt.getCompoundTag("railBed"));
-		center = getNBTVec3d(nbt, "center");
 		placementPosition = getNBTVec3d(nbt, "placementPosition");
 		gauge = Gauge.from(nbt.getDouble("gauge"));
 	}
@@ -242,7 +240,6 @@ public class TileRail extends TileRailBase {
 		}
 		
 		nbt.setTag("railBed", railBed.serializeNBT());
-		setNBTVec3d(nbt, "center", center);
 		setNBTVec3d(nbt, "placementPosition", placementPosition);
 		nbt.setDouble("gauge", gauge.value());
 		

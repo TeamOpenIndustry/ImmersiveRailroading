@@ -3,10 +3,8 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
 import org.apache.commons.lang3.tuple.Pair;
 
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -18,84 +16,43 @@ import net.minecraft.util.math.Vec3d;
 
 public class BuilderTurn extends BuilderBase {
 
-	private float realStartAngle;
-	private float startAngle;
-	private float endAngle;
-	
 	private int mainX;
 	private int mainZ;
-	protected HashSet<Pair<Integer, Integer>> positions;
+	public HashSet<Pair<Integer, Integer>> positions;
 
 	public BuilderTurn(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		double radius = info.length;
-
-		int xMult = info.direction == TrackDirection.LEFT ? -1 : 1;
-		int zMult = 1;
-		
 		positions = new HashSet<Pair<Integer, Integer>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
-		double hack = -0.5;
-		float angleDelta = (float) (90 / (Math.PI * radius/2));
-		
-		
-		startAngle = 90 - info.quarter/4f * 90;
-		endAngle = startAngle - info.quarters/4f * 90;
-		//endAngle = startAngle - 90;
-		
-		if (info.direction == TrackDirection.LEFT) {
-			startAngle = 180 + 90 + info.quarter/4f * 90;
-			endAngle = startAngle + info.quarters/4f * 90;
-			//endAngle = startAngle + 360;
-		}
-
-		int xPos = (int)(Math.sin(Math.toRadians(startAngle)) * (radius+hack+xMult));
-		int zPos = (int)(Math.cos(Math.toRadians(startAngle)) * (radius+hack+zMult));
-		double xAbsPos = (Math.sin(Math.toRadians(startAngle)) * (radius+hack));
-		double zAbsPos = (Math.cos(Math.toRadians(startAngle)) * (radius+hack));
-		realStartAngle = startAngle;
-		
-		if (info.direction == TrackDirection.LEFT) {
-			float tmp = startAngle;
-			startAngle = endAngle;
-			endAngle = tmp;
-		}
 		
 		float flexAngle = 6;
 		
-		for (float angle = startAngle; angle >= endAngle - angleDelta; angle-=angleDelta) {
-			
+		followCurve(info, 0.5f, (double gagX, double gagZ, float angle, float angleDelta, int counter, float startAngle, float endAngle) -> {
 			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
-				int gagX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack+q))+1-xPos;
-				int gagZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack+q))-zPos;
-				positions.add(Pair.of(gagX, gagZ));
+				int posX = (int)(gagX + Math.sin(Math.toRadians(angle)) * q);
+				int posZ = (int)(gagZ + Math.cos(Math.toRadians(angle)) * q);
+				positions.add(Pair.of(posX, posZ));
 				if (angle > startAngle-flexAngle || angle < endAngle+flexAngle)
-					flexPositions.add(Pair.of(gagX, gagZ));
+					flexPositions.add(Pair.of(posX, posZ));
 			}
+			
 			if (Math.ceil(angle) == Math.ceil((startAngle + endAngle)/2)) {
-				mainX = (int)(Math.sin(Math.toRadians(angle)) * (radius+hack))+1-xPos;
-				mainZ = (int)(Math.cos(Math.toRadians(angle)) * (radius+hack))-zPos;
+				mainX = (int)gagX;
+				mainZ = (int)gagZ;
 			}
-		}
+		});
 
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
 		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, info.length, info.quarter, info.placementPosition);
-		
-		Vec3d center = new Vec3d(-xAbsPos, 0, -zAbsPos-0.5); 
-		center = VecUtil.rotateYaw(center, info.facing.getHorizontalAngle() - 90);
-		center = info.placementPosition.add(center);
-		
-		turnTrack.setRotationCenter(center);
 		turnTrack.setDirection(info.direction);
 		turnTrack.setTurnQuarters(info.quarters);
 		
-		xMult = 1;
 		tracks.add(turnTrack);
 		for (Pair<Integer, Integer> pair : positions) {
-			int gagX = pair.getLeft() * xMult; 
-			int gagZ = pair.getRight() * zMult;
+			int gagX = pair.getLeft(); 
+			int gagZ = pair.getRight();
 			if (gagX == mainX && gagZ == mainZ) {
 				// Skip parent block
 				continue;
@@ -118,38 +75,17 @@ public class BuilderTurn extends BuilderBase {
 		// This is NOT perfect.  It is good enough for now.  
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		float radius = info.length;
-		
-		
-		float angleDelta = (90 / ((float)Math.PI * (radius)/2)) * (float)gauge.scale();
-		
-		radius -= 1;
-		
-		double xPos = Math.sin(Math.toRadians(realStartAngle)) * (radius);
-		double zPos = Math.cos(Math.toRadians(realStartAngle)) * (radius);
-		
-		int counter = 0;
-			
-		//float gaugeAngle = angleDelta * (1/(float)gauge.scale() - 1)/2;
-		for (float angle = startAngle; angle > endAngle - angleDelta*0.99; angle-=angleDelta) {
-			if (angle < endAngle) {
-				angle = endAngle;
-			}
-			
-			double gagX = Math.sin(Math.toRadians(angle)) * radius - xPos;
-			double gagZ = Math.cos(Math.toRadians(angle)) * radius - zPos;
+		followCurve(info, 1, (double gagX, double gagZ, float angle, float angleDelta, int counter, float startAngle, float endAngle) -> {
 			float switchAngle = 0;
 			float switchOffset = 0;
 			if (info.switchState == SwitchState.STRAIGHT) {
 				if (info.direction == TrackDirection.RIGHT ) {
 					if (angle > startAngle - 4*angleDelta) {
-						counter++;
 						switchOffset = (4-counter) / 30f * -(float)gauge.scale();
 						switchAngle = angleDelta * info.length / 30;
 					}
 				} else {
 					if (angle < endAngle + 4*angleDelta) {
-						counter++;
 						switchOffset = (counter) / 30f * (float)gauge.scale();
 						switchAngle = -angleDelta * info.length / 30;
 					}
@@ -161,7 +97,7 @@ public class BuilderTurn extends BuilderBase {
 				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2, "RAIL_BASE", "RAIL_RIGHT"));
 				data.add(new VecYawPitch(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
 			}
-		}
+		});
 		
 		if (info.switchState != SwitchState.NONE) {
 			double dir = info.direction == TrackDirection.RIGHT ? -1 : 1;
@@ -176,5 +112,50 @@ public class BuilderTurn extends BuilderBase {
 		}
 
 		return data;
+	}
+	
+	@FunctionalInterface
+	public interface RailFunc {
+		void accept(double gagX, double gagZ, float angle, float angleDelta, int i, float startAngle, float endAngle);
+	}
+	
+	public static Vec3d followCurve(RailInfo info, float delta, RailFunc fn) {
+		float radius = info.length;
+		
+		float startAngle = 90 - info.quarter/4f * 90;
+		float endAngle = startAngle - info.quarters/4f * 90;
+		
+		if (info.direction == TrackDirection.LEFT) {
+			startAngle = 180 + 90 + info.quarter/4f * 90;
+			endAngle = startAngle + info.quarters/4f * 90;
+		}
+		
+		float realStartAngle = startAngle;
+		
+		float angleDelta = (90 / ((float)Math.PI * (radius)/2)) * (float)info.gauge.scale() * delta;
+		
+		if (info.direction == TrackDirection.LEFT) {
+			float tmp = startAngle;
+			startAngle = endAngle - angleDelta;
+			endAngle = tmp - angleDelta;
+		}
+		
+		radius -= 1;
+		
+		double xPos = Math.sin(Math.toRadians(realStartAngle)) * (radius);
+		double zPos = Math.cos(Math.toRadians(realStartAngle)) * (radius);
+		
+		if (fn != null) {
+			int counter = 0;
+			
+			for (float angle = startAngle; angle >= endAngle; angle-=angleDelta) {
+				double gagX = Math.sin(Math.toRadians(angle)) * radius - xPos;
+				double gagZ = Math.cos(Math.toRadians(angle)) * radius - zPos;
+	
+				fn.accept(gagX, gagZ, angle, angleDelta, ++counter, startAngle, endAngle);
+			}
+		}
+		
+		return new Vec3d(xPos, 0, zPos);
 	}
 }
