@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.math.BlockPos;
@@ -28,17 +30,32 @@ public class MovementSimulator {
 		position.isOffTrack = false;
 		TickPos origPosition = position.clone();
 
+		Vec3d front = frontBogeyPosition();
+		Vec3d rear = rearBogeyPosition();
+		
 		if (Math.abs(moveDistance) < 0.001) {
+			boolean isTurnTable = false;
+			
+			TileRailBase frontBase = TileRailBase.get(world, new BlockPos(front));
+			TileRailBase rearBase = TileRailBase.get(world, new BlockPos(rear));
+			isTurnTable = frontBase != null &&
+					frontBase.getParentTile() != null &&
+					frontBase.getParentTile().getType() == TrackItems.TURNTABLE;
+			isTurnTable = rearBase != null &&
+					rearBase.getParentTile() != null &&
+					rearBase.getParentTile().getType() == TrackItems.TURNTABLE;
+			
 			position.speed = Speed.ZERO;
-			return position;
+			
+			if (!isTurnTable) {
+				return position;
+			}
 		}
 		
 		position.speed = Speed.fromMinecraft(moveDistance);
 
 		boolean isReverse = moveDistance < 0;
 
-		Vec3d front = frontBogeyPosition();
-		Vec3d rear = rearBogeyPosition();
 		
 		if (isReverse) {
 			moveDistance = -moveDistance;
@@ -65,8 +82,10 @@ public class MovementSimulator {
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
-		position.frontYaw = VecUtil.toYaw(frontDelta);
-		position.rearYaw = VecUtil.toYaw(rearDelta);
+		if (position.speed != Speed.ZERO) {
+			position.frontYaw = VecUtil.toYaw(frontDelta);
+			position.rearYaw = VecUtil.toYaw(rearDelta);
+		}
 
 		Vec3d currCenter = VecUtil.between(front, rear);
 		Vec3d nextCenter = VecUtil.between(nextFront, nextRear);
@@ -81,9 +100,11 @@ public class MovementSimulator {
 			position.rearYaw += 180;
 			//rotationYaw += 180;
 			//position.rotationPitch = -position.rotationPitch;
-			position.rotationYaw = (position.rotationYaw + 360f) % 360f;
-			position.frontYaw = (position.frontYaw + 360f) % 360f;
-			position.rearYaw = (position.rearYaw + 360f) % 360f;
+			if (position.speed != Speed.ZERO) {
+				position.rotationYaw = (position.rotationYaw + 360f) % 360f;
+				position.frontYaw = (position.frontYaw + 360f) % 360f;
+				position.rearYaw = (position.rearYaw + 360f) % 360f;
+			}
 		}
 		
 		

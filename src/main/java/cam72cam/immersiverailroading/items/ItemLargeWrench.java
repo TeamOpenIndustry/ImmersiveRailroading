@@ -8,7 +8,9 @@ import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.Block;
@@ -49,6 +51,12 @@ public class ItemLargeWrench extends ItemTool {
 						world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), stack));
 					}
 					return EnumActionResult.SUCCESS;
+				}
+				TileRail parent = te.getParentTile();
+				if (!world.isRemote) {
+					if (parent != null && parent.getType() == TrackItems.TURNTABLE) {
+						parent.nextTablePos();
+					}
 				}
 			}
 		} else {
