@@ -28,7 +28,7 @@ public class BuilderTurn extends BuilderBase {
 		
 		float flexAngle = 6;
 		
-		followCurve(info, 0.5f, (double gagX, double gagZ, float angle, float angleDelta, int counter, float startAngle, float endAngle) -> {
+		followCurve(info, 0.25f, (double gagX, double gagZ, float angle, float angleDelta, int counter, float startAngle, float endAngle) -> {
 			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
 				int posX = (int)(gagX + Math.sin(Math.toRadians(angle)) * q);
 				int posZ = (int)(gagZ + Math.cos(Math.toRadians(angle)) * q);
@@ -137,7 +137,15 @@ public class BuilderTurn extends BuilderBase {
 		if (info.direction == TrackDirection.LEFT) {
 			float tmp = startAngle;
 			startAngle = endAngle - angleDelta;
-			endAngle = tmp - angleDelta;
+			endAngle = tmp;
+		}
+		float hack = (float) ((1-1/info.gauge.scale()) * angleDelta)/2;
+		if (info.direction == TrackDirection.RIGHT) {
+			startAngle -= hack;
+			endAngle += hack;
+		} else {
+			startAngle += hack;
+			endAngle += hack;
 		}
 		
 		radius -= 1;
@@ -148,7 +156,14 @@ public class BuilderTurn extends BuilderBase {
 		if (fn != null) {
 			int counter = 0;
 			
-			for (float angle = startAngle; angle >= endAngle; angle-=angleDelta) {
+			for (float angle = startAngle; angle >= endAngle + (startAngle-endAngle)/2; angle-=angleDelta) {
+				double gagX = Math.sin(Math.toRadians(angle)) * radius - xPos;
+				double gagZ = Math.cos(Math.toRadians(angle)) * radius - zPos;
+	
+				fn.accept(gagX, gagZ, angle, angleDelta, ++counter, startAngle, endAngle);
+			}
+			
+			for (float angle = endAngle; angle <= endAngle + (startAngle-endAngle)/2 + angleDelta; angle+=angleDelta) {
 				double gagX = Math.sin(Math.toRadians(angle)) * radius - xPos;
 				double gagZ = Math.cos(Math.toRadians(angle)) * radius - zPos;
 	
