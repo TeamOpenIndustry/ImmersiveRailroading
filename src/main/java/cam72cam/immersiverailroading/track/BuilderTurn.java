@@ -79,35 +79,35 @@ public class BuilderTurn extends BuilderBase {
 			float switchAngle = 0;
 			float switchOffset = 0;
 			if (info.switchState == SwitchState.STRAIGHT) {
-				if (info.direction == TrackDirection.RIGHT ) {
+				if (info.direction == TrackDirection.RIGHT) {
 					if (angle > startAngle - 4*angleDelta) {
 						switchOffset = (4-counter) / 30f * -(float)gauge.scale();
 						switchAngle = angleDelta * info.length / 30;
 					}
 				} else {
 					if (angle < endAngle + 4*angleDelta) {
-						switchOffset = (counter) / 30f * (float)gauge.scale();
+						switchOffset = ((angle - endAngle)/angleDelta - 4) / 30f * -(float)gauge.scale();
 						switchAngle = -angleDelta * info.length / 30;
 					}
 				}
 			}
 			if (switchAngle == 0) {
-				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + switchAngle));
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90));
 			} else {
-				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2, "RAIL_BASE", "RAIL_RIGHT"));
-				data.add(new VecYawPitch(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90, "RAIL_RIGHT", "RAIL_BASE"));
+				data.add(new VecYawPitch(gagX + switchOffset, 0, gagZ, angle+90 + switchAngle, "RAIL_LEFT"));
 			}
 		});
 		
 		if (info.switchState != SwitchState.NONE) {
 			double dir = info.direction == TrackDirection.RIGHT ? -1 : 1;
 			dir = dir * info.gauge.scale();
-			double off = -0.5 + 0.2 * dir;
+			double off = 0.2 * dir;
 			if (info.switchState == SwitchState.STRAIGHT) {
 				 off += 0.2 * dir;
 			}
 			float angle = info.quarter/4f * 90;
-			Vec3d pos = VecUtil.rotateYaw(new Vec3d(off, 0.11 * info.gauge.scale(),  info.gauge.scale()), angle-90);
+			Vec3d pos = VecUtil.rotateYaw(new Vec3d(off, 0.11 * info.gauge.scale(),  0), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 180, "RAIL_BASE"));
 		}
 
