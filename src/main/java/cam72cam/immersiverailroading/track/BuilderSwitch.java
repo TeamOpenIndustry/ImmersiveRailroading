@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -116,19 +117,15 @@ public class BuilderSwitch extends BuilderBase {
 		return data;
 	}
 
-	private boolean between(double start, double end, double offset) {
-		return Math.abs(start - end) < offset;
-	}
-
 	public boolean isOnStraight(Vec3d position) {
-		if (between(straightBuilder.x + info.placementPosition.x, position.x, gauge.scale())) {
-			return true;
+		for (float dist = 0; dist < info.length; dist += gauge.scale()/8) {
+			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
+			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.facing.getHorizontalAngle() + 90 + 180);
+			gagPos = gagPos.add(info.placementPosition);
+			if (gagPos.distanceTo(position) < gauge.scale()/4) {
+				return true;
+			}
 		}
-		
-		if (between(straightBuilder.z + info.placementPosition.z, position.z, gauge.scale())) {
-			return true;
-		}
-		
 		return false;
 	}
 }
