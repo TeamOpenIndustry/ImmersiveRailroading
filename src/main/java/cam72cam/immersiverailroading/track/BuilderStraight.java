@@ -87,11 +87,11 @@ public class BuilderStraight extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
+		Vec3d pos = VecUtil.rotateYaw(new Vec3d(0, 0, info.length/2.0-0.5), angle-90);
 		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		for (double i = 0; i < info.length-gauge.scale()/2; i+=gauge.scale()) {
-			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
+			pos = VecUtil.rotateYaw(new Vec3d(0, 0, i-0.25), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}
 		return data;

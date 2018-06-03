@@ -18,13 +18,14 @@ public class BuilderSwitch extends BuilderBase {
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		info.quarter = 0;
+		//info.quarter = 0;
 		
 		RailInfo turnInfo = info.clone();
 		RailInfo straightInfo = info.clone();
 		turnInfo.type = TrackItems.TURN;
 
 		{
+			turnInfo.length += 1;
 			turnBuilder = new BuilderTurn(turnInfo, pos);
 			straightBuilder = new BuilderStraight(straightInfo, pos, true);
 			

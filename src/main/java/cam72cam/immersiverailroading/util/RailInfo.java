@@ -19,6 +19,7 @@ import cam72cam.immersiverailroading.track.BuilderSlope;
 import cam72cam.immersiverailroading.track.BuilderStraight;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.BuilderTurn;
+import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -168,9 +169,10 @@ public class RailInfo {
 			return new BuilderTurn(this, pos);
 		case SWITCH:
 			return new BuilderSwitch(this, pos);
-		default:
-			return null;
+		case TURNTABLE:
+			return new BuilderTurnTable(this, pos);
 		}
+		return null;
 	}
 	
 	private BuilderBase builder;

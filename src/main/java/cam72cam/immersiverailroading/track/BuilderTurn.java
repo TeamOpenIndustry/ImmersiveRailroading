@@ -120,29 +120,24 @@ public class BuilderTurn extends BuilderBase {
 		
 		float radius = info.length;
 		
-		float angleDelta = (90 / ((float)Math.PI * (radius+1)/2)) * (float)gauge.scale();
 		
-		double hack = 0.05;
+		float angleDelta = (90 / ((float)Math.PI * (radius)/2)) * (float)gauge.scale();
 		
-		double xPos = Math.floor(Math.sin(Math.toRadians(realStartAngle)) * (radius+hack));
-		double zPos = Math.floor(Math.cos(Math.toRadians(realStartAngle)) * (radius+hack));
+		radius -= 1;
 		
-		// Magic numbers
-		hack = 0.7 * (gauge.value() - Gauge.STANDARD.value()/2);
-		
-		if (info.direction == TrackDirection.LEFT) {
-			xPos += 1;
-			zPos += 1;
-		} else {
-			xPos -= 1;
-		}
-		xPos += 1-gauge.scale();
+		double xPos = Math.sin(Math.toRadians(realStartAngle)) * (radius);
+		double zPos = Math.cos(Math.toRadians(realStartAngle)) * (radius);
 		
 		int counter = 0;
 			
-		for (float angle = startAngle-angleDelta/2; angle > endAngle-angleDelta; angle-=angleDelta) {
-			double gagX = Math.sin(Math.toRadians(angle)) * (radius+hack)-xPos;
-			double gagZ = Math.cos(Math.toRadians(angle)) * (radius+hack)-zPos;
+		//float gaugeAngle = angleDelta * (1/(float)gauge.scale() - 1)/2;
+		for (float angle = startAngle; angle > endAngle - angleDelta*0.99; angle-=angleDelta) {
+			if (angle < endAngle) {
+				angle = endAngle;
+			}
+			
+			double gagX = Math.sin(Math.toRadians(angle)) * radius - xPos;
+			double gagZ = Math.cos(Math.toRadians(angle)) * radius - zPos;
 			float switchAngle = 0;
 			float switchOffset = 0;
 			if (info.switchState == SwitchState.STRAIGHT) {
@@ -161,7 +156,7 @@ public class BuilderTurn extends BuilderBase {
 				}
 			}
 			if (switchAngle == 0) {
-				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2 + switchAngle));
+				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + switchAngle));
 			} else {
 				data.add(new VecYawPitch(gagX, 0, gagZ, angle+90 + angleDelta/2, "RAIL_BASE", "RAIL_RIGHT"));
 				data.add(new VecYawPitch(gagX + switchOffset, 0, gagZ, angle+90 + angleDelta/2 + switchAngle, "RAIL_LEFT"));
