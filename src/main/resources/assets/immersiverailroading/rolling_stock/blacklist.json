@@ -1,5 +1,9 @@
 {
 	"locomotives": [
+		"ge_40_ton_boxcab",
+		"ge_b40_8",
+		"ge_b40_8w",
+		"ge_c44_9cw"
 	],
 	"tender": [
 	],
