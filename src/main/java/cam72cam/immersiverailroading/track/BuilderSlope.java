@@ -24,14 +24,18 @@ public class BuilderSlope extends BuilderStraight {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		float slope = (1.0F/(info.length + 1));
+		float slope = (1.0F/(info.length));
+		float slopeAngle = (float) -Math.toDegrees(MathHelper.atan2(1, info.length));
+		float actualLength = (float)new Vec3d(info.length, 1, 0).lengthVector();
 		
-		Vec3d pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, 0), angle-90);
-		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, (float) -Math.toDegrees(MathHelper.atan2(1, info.length)), info.length, "RAIL_RIGHT", "RAIL_LEFT"));
+		Vec3d pos = VecUtil.rotateYaw(new Vec3d(0, actualLength/2 * slope, actualLength/2.0-0.5), angle-90);
+		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, slopeAngle, actualLength, "RAIL_RIGHT", "RAIL_LEFT"));
 		
-		for (double i = 0; i < info.length-gauge.scale()/2; i+=gauge.scale()) {
-			pos = VecUtil.rotateYaw(new Vec3d(-0.5, 0, i), angle-90);
-			data.add(new VecYawPitch(pos.x, pos.y + slope * i, pos.z, -angle, (float) -Math.toDegrees(MathHelper.atan2(1, info.length)), "RAIL_BASE"));
+		double trackOffset = (1-info.gauge.scale())/4;
+		
+		for (double i = -trackOffset; i < info.length - trackOffset; i+=gauge.scale()) {
+			pos = VecUtil.rotateYaw(new Vec3d(0, 0, i-0.25), angle-90);
+			data.add(new VecYawPitch(pos.x, pos.y + slope * (i+gauge.scale()), pos.z, -angle, slopeAngle, "RAIL_BASE"));
 		}
 		return data;
 	}
