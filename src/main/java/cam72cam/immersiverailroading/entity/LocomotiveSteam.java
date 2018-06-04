@@ -19,6 +19,8 @@ import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -211,7 +213,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
-					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
+					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, true, 150, gauge);
 	
 					for (int i = 0; i < 32; i ++) {
 						sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, gauge));
@@ -225,6 +227,31 @@ public class LocomotiveSteam extends Locomotive {
 				
 				if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 					whistle.play(getPositionVector());
+				}
+				
+				if (whistle.isPlaying()) {
+					if (this.getDataManager().get(HORN) < 1) {
+						whistle.stop();
+					} else {
+						if (this.getPassengers().size() > 0) {
+							Entity pass = this.getPassengers().get(0);
+							float perc = (pass.rotationPitch+90) / 180;
+							perc = Math.max(perc, 0.3f);
+							perc = Math.min(perc, 0.7f);
+							perc += 0.3f;
+							if (perc > 0.8) {
+								perc = 1;
+							} else {
+								perc = 0.9f;
+							}
+							float rat = 7.0f;
+							perc = (pass.rotationPitch+90) / 180;
+							perc += 0.25f;
+							perc = (rat - 1 + perc) / rat;
+							whistle.setPitch(perc);
+							whistle.setVolume((float) Math.pow((pass.rotationPitch+90) / 180, 0.5));
+						}
+					}
 				}
 				
 				if (this.getBoilerTemperature() > 0) {
