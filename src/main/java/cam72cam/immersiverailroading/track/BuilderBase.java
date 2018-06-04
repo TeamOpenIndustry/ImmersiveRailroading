@@ -7,6 +7,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.init.Items;
@@ -253,7 +254,7 @@ public abstract class BuilderBase {
 				if (!BlockUtil.isRail(world, main)) {
 					world.destroyBlock(main, false);
 				}
-				if (gauge != Gauge.MODEL && ConfigDamage.enableSideBlockClearing) {
+				if (gauge != Gauge.MODEL && ConfigDamage.enableSideBlockClearing && info.type != TrackItems.SLOPE && info.type != TrackItems.TURNTABLE) {
 					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
 						BlockPos pos = main.offset(facing);
 						if (!BlockUtil.isRail(world, pos)) {
