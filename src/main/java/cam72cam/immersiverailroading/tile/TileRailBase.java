@@ -608,7 +608,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 			if (this.getParentTile() == null || this.getParentTile().getParentTile() == null) {
 				// Fire update event
-				getWorld().destroyBlock(getPos(), true);
+				if (BlockRailBase.tryBreakRail(world, pos)) {
+					getWorld().destroyBlock(pos, true);
+				}
 				return;
 			}
 
