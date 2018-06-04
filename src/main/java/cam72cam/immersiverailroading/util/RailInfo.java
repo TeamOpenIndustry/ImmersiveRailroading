@@ -44,10 +44,10 @@ public class RailInfo {
 
 	// Used for tile rendering only
 	public SwitchState switchState = SwitchState.NONE;
-	public int tablePos = 0;
+	public double tablePos = 0;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState, int tablePos) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState, double tablePos) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;

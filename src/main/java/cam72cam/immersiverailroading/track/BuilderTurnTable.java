@@ -34,7 +34,7 @@ public class BuilderTurnTable extends BuilderBase {
 		double radius = info.length;
 		
 		for (double irad = 1; irad <= radius + 1; irad++) {
-			for (double angle = 0; angle < 360; angle++) {
+			for (double angle = 0; angle < 360; angle+=0.5) {
 				Vec3d gagPos = VecUtil.fromYaw(irad, (float) angle);
 				positions.add(Pair.of((int)gagPos.x, (int)gagPos.z));
 			}
@@ -62,8 +62,8 @@ public class BuilderTurnTable extends BuilderBase {
 			TrackBase tg = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY(), pair.getRight() + offset.getZ());
 			tg.setHeight(0.000001f);
 			tg.solidNotRequired = true;
-			if (toCenter > info.length-1.5) {
-				tg.setFlexible();
+			if (toCenter > info.length-0.5) {
+				tg.setHeight(0);
 			}
 			tracks.add(tg);
 		}
@@ -83,7 +83,7 @@ public class BuilderTurnTable extends BuilderBase {
 			data.add(new VecYawPitch(gagPos.x + offset.getX(), gagPos.y + offset.getY(), gagPos.z + offset.getZ(), -angle));
 		}
 		
-		float angle = 360/16.0f * info.tablePos;
+		float angle = 360/16.0f * (float)info.tablePos - info.facing.getHorizontalAngle();
 		data.add(new VecYawPitch(offset.getX(), offset.getY(), offset.getZ(), -angle, 0, info.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		return data;

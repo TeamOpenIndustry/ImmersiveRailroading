@@ -109,13 +109,15 @@ public class MovementTrack {
 			delta = VecUtil.fromYaw(distance, EnumFacing.fromAngle(trainYaw).getHorizontalAngle());
 			return currentPosition.add(delta);
 		} else if (rail.getType() == TrackItems.TURNTABLE) {
+			double tablePos = rail.getParentTile().getTablePos();
+			
 			currentPosition = currentPosition.add(delta);
 			
 			Vec3d center = new Vec3d(rail.getParentTile().getPos()).addVector(0.5, 1, 0.5);
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			
-			float angle = 360/16.0f * rail.getParentTile().getTablePos();
+			float angle = 360/16.0f * (float)tablePos;
 			
 			Vec3d forward = center.add(VecUtil.fromYaw(fromCenter, angle));
 			Vec3d backward = center.add(VecUtil.fromYaw(fromCenter, angle + 180));
