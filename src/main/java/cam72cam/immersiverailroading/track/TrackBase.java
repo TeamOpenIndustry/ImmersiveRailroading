@@ -46,7 +46,7 @@ public abstract class TrackBase {
 		IBlockState down = builder.world.getBlockState(pos.down());
 		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.world.isAirBlock(pos.down())) || 
 				(BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.railBedFill.getItem() != Items.AIR) ||
-				solidNotRequired;
+				solidNotRequired || BlockUtil.isIRRail(builder.world, pos);
 		return BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) && downOK;
 	}
 
