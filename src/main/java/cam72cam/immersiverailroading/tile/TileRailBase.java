@@ -6,8 +6,10 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -80,6 +82,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
+	public boolean blockUpdate;
 	
 	@Override
 	public boolean isLoaded() {
@@ -598,13 +601,27 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			}
 		}
 		
-		if (ticksExisted % (20 * 5) == 0) {
+		if (ticksExisted > 1 && (ticksExisted % (20 * 5) == 0 || blockUpdate)) {
 			// Double check every 5 seconds that the master is not gone
 			// Wont fire on first due to incr above
+			blockUpdate = false;
 
 			if (this.getParentTile() == null || this.getParentTile().getParentTile() == null) {
 				// Fire update event
 				getWorld().destroyBlock(getPos(), true);
+				return;
+			}
+
+			boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false) || !Config.ConfigDamage.requireSolidBlocks && !world.isAirBlock(pos.down()) || BlockUtil.isIRRail(getWorld(), pos.down());
+			
+			if (!isOnRealBlock) {
+				double floating = getParentTile().percentFloating();
+				if (floating > ConfigBalance.trackFloatingPercent) {
+					if (BlockRailBase.tryBreakRail(world, pos)) {
+						getWorld().destroyBlock(pos, true);
+					}
+					return;
+				}
 			}
 		}
 		

@@ -111,7 +111,7 @@ public class MovementTrack {
 		} else if (rail.getType() == TrackItems.TURNTABLE) {
 			currentPosition = currentPosition.add(delta);
 			
-			Vec3d center = new Vec3d(rail.getParentTile().getPos()).addVector(0.5, 0, 0.5);
+			Vec3d center = new Vec3d(rail.getParentTile().getPos()).addVector(0.5, 1, 0.5);
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			

@@ -25,10 +25,11 @@ public class BuilderTurnTable extends BuilderBase {
 		
 		info.quarter = 0;
 		
-		positions = new HashSet<Pair<Integer, Integer>>();
-		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
+		info.length = Math.min(info.length, (int)(30 * info.gauge.scale()));
 		
-		offset = new BlockPos(0, 0, info.length);
+		positions = new HashSet<Pair<Integer, Integer>>();
+		
+		offset = new BlockPos(0, 1, info.length);
 		
 		double radius = info.length;
 		
@@ -39,17 +40,29 @@ public class BuilderTurnTable extends BuilderBase {
 			}
 		}
 		
-		this.setParentPos(new BlockPos(offset));
-		TrackRail main = new TrackRail(this, offset.getX(), offset.getY(), offset.getZ(), EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
+		this.setParentPos(new BlockPos(offset.down()));
+		TrackRail main = new TrackRail(this, offset.getX(), offset.getY()-1, offset.getZ(), EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
-			if (pair.getLeft() == 0 && pair.getRight() == 0) {
-				// Skip parent block
+			double toCenter = new Vec3d(pair.getLeft(), 0, pair.getRight()).lengthVector();
+			
+			if (toCenter > info.length + 0.5) {
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, pair.getLeft() + offset.getX(), 0, pair.getRight() + offset.getZ());
-			if (flexPositions.contains(pair)) {
+			
+			if (!(pair.getLeft() == 0 && pair.getRight() == 0)) {
+				TrackGag tgu = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY()-1, pair.getRight() + offset.getZ());
+				if (toCenter > info.length-0.5) {
+					tgu.setHeight(1);
+				}
+				tracks.add(tgu);
+			}
+			
+			TrackBase tg = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY(), pair.getRight() + offset.getZ());
+			tg.setHeight(0.000001f);
+			tg.solidNotRequired = true;
+			if (toCenter > info.length-1.5) {
 				tg.setFlexible();
 			}
 			tracks.add(tg);
@@ -67,7 +80,7 @@ public class BuilderTurnTable extends BuilderBase {
 		
 		for (float angle = 0; angle < 360; angle +=22.5) {
 			Vec3d gagPos = VecUtil.rotateYaw(new Vec3d(0, 0, info.length), angle-90);
-			data.add(new VecYawPitch(gagPos.x + offset.getX(), gagPos.y, gagPos.z + offset.getZ(), -angle));
+			data.add(new VecYawPitch(gagPos.x + offset.getX(), gagPos.y + offset.getY(), gagPos.z + offset.getZ(), -angle));
 		}
 		
 		float angle = 360/16.0f * info.tablePos;

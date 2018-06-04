@@ -65,6 +65,9 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (info.type == TrackItems.CROSSING) {
 			scale = 0.95 / 3;
 		}
+		if (info.type == TrackItems.TURNTABLE) {
+			scale *= 0.25;
+		}
 		GL11.glScaled(scale, -scale*2, scale);
 
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
