@@ -19,7 +19,6 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
@@ -45,7 +44,7 @@ public class TileRail extends TileRailBase {
 	private Vec3d center;
 	
 	private SwitchState switchState = SwitchState.NONE;
-	private int tablePos = 0;
+	private double tablePos = 0;
 	
 	private int length;
 	private int rotationQuarter;
@@ -164,11 +163,11 @@ public class TileRail extends TileRailBase {
 		this.turnQuarters = quarters;
 	}
 	
-	public int getTablePos() {
+	public double getTablePos() {
 		return tablePos;
 	}
-	public void nextTablePos() {
-		tablePos = (tablePos + 1 % 8);
+	public void nextTablePos(boolean back) {
+		tablePos = (tablePos + 1.0/length * (back ? 1 : -1)) % 8;
 		this.markDirty();
 		
 		List<EntityCoupleableRollingStock> ents = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, new AxisAlignedBB(-length, 0, -length, length, 5, length).offset(this.getPos()));
@@ -223,7 +222,7 @@ public class TileRail extends TileRailBase {
 		railBed = new ItemStack(nbt.getCompoundTag("railBed"));
 		placementPosition = getNBTVec3d(nbt, "placementPosition");
 		gauge = Gauge.from(nbt.getDouble("gauge"));
-		tablePos = nbt.getInteger("tablePos");
+		tablePos = nbt.getDouble("tablePos");
 	}
 
 	@Override
@@ -257,7 +256,7 @@ public class TileRail extends TileRailBase {
 		setNBTVec3d(nbt, "placementPosition", placementPosition);
 		nbt.setDouble("gauge", gauge.value());
 		
-		nbt.setInteger("tablePos", tablePos);
+		nbt.setDouble("tablePos", tablePos);
 		
 		return super.writeToNBT(nbt);
 	}
