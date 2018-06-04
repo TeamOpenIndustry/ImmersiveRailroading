@@ -74,9 +74,12 @@ public class RailInfo {
 		railBedFill = ItemTrackBlueprint.getBedFill(stack);
 		world = worldIn;
 		TrackPositionType posType = ItemTrackBlueprint.getPosType(stack);
+		direction = ItemTrackBlueprint.getDirection(stack);
 		
 		yawHead = yawHead % 360 + 360;
-		direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
+		if (direction == TrackDirection.NONE) {
+			direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
+		}
 		//quarter = MathHelper.floor((yawHead % 90f) /(90)*4);
 		float yawPartial = (yawHead+3600) % 90f;
 		if (direction == TrackDirection.LEFT) {
@@ -86,11 +89,17 @@ public class RailInfo {
 			quarter = 0;
 		} else if (yawPartial < 30) {
 			quarter = 1;
-		} else {
+		} else if (yawPartial < 45) {
 			quarter = 2;
+		} else {
+			quarter = 3;
 		}
 		
-		facing = EnumFacing.fromAngle(yawHead);
+		if (direction == TrackDirection.LEFT) {
+			facing = EnumFacing.fromAngle(yawHead + 45 - 15/2);
+		} else {
+			facing = EnumFacing.fromAngle(yawHead - 45 + 15/2);			
+		}
 
 		
 		switch(posType) {

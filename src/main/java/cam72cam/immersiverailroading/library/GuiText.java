@@ -10,6 +10,7 @@ public enum GuiText {
 	SELECTOR_RAIL_BED("selector.rail_bed"),
 	SELECTOR_RAIL_BED_FILL("selector.rail_bed_fill"),
 	SELECTOR_POSITION("selector.position"),
+	SELECTOR_DIRECTION("selector.direction"),
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),
 	SELECTOR_GAUGE("selector.gauge"),
 	SELECTOR_PLATE_TYPE("selector.plate_type"),
@@ -24,6 +25,7 @@ public enum GuiText {
 	TRACK_RAIL_BED("track.rail_bed"),
 	TRACK_RAIL_BED_FILL("track.rail_bed_fill"),
 	TRACK_POSITION("track.position"),
+	TRACK_DIRECTION("track.direction"),
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
 	

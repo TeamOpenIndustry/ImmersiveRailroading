@@ -52,6 +52,7 @@ gui.immersiverailroading:selector.quarters=%s Degree Turn
 gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
 gui.immersiverailroading:selector.position=Position: %s
+gui.immersiverailroading:selector.direction=Direction: %s
 gui.immersiverailroading:selector.place_blueprint=Place Blueprint
 gui.immersiverailroading:selector.plate_type=Plate Type: %s
 gui.immersiverailroading:selector.plate_boiler=Plate Boiler: %s
@@ -64,6 +65,7 @@ gui.immersiverailroading:track.length=Length:    %s
 gui.immersiverailroading:track.gauge=Gauge:     %s
 gui.immersiverailroading:track.quarters=%s Degree Turn
 gui.immersiverailroading:track.position=Position:   %s
+gui.immersiverailroading:track.direction=Direction:  %s
 gui.immersiverailroading:track.rail_bed=Bed:        %s
 gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
 gui.immersiverailroading:track.place_blueprint_true=Place:      Blueprint
@@ -94,6 +96,7 @@ track.immersiverailroading:class.straight=Straight
 track.immersiverailroading:class.crossing=Crossing
 track.immersiverailroading:class.slope=Slope
 track.immersiverailroading:class.turn=Turn
+track.immersiverailroading:class.turntable=Turn Table
 track.immersiverailroading:class.switch=Switch
 
 track.immersiverailroading:position.fixed=Fixed
@@ -101,6 +104,10 @@ track.immersiverailroading:position.pixels=Pixels
 track.immersiverailroading:position.pixels_locked=Pixels Locked
 track.immersiverailroading:position.smooth=Smooth
 track.immersiverailroading:position.smooth_locked=Smooth Locked
+
+track.immersiverailroading:direction.none=Flexible
+track.immersiverailroading:direction.left=Lock Right
+track.immersiverailroading:direction.right=Lock Left
 
 part.immersiverailroading:component.frame=Frame
 part.immersiverailroading:component.front_frame=Front Frame

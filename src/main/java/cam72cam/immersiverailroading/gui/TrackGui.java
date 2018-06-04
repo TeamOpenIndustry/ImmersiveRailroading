@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
@@ -43,7 +44,9 @@ public class TrackGui extends GuiScreen {
 	private boolean isPreview;
 	private TrackItems type;
 	private TrackPositionType posType;
+	private TrackDirection direction;
 	private GuiButton posTypeButton;
+	private GuiButton directionButton;
 	private GuiButton bedTypeButton;
 	private ItemPickerGUI bedSelector;
 	private GuiButton bedFillButton;
@@ -87,6 +90,7 @@ public class TrackGui extends GuiScreen {
 		type = ItemTrackBlueprint.getType(stack);
 		gauge = ItemGauge.get(stack);
 		posType = ItemTrackBlueprint.getPosType(stack);
+		direction = ItemTrackBlueprint.getDirection(stack);
 		isPreview = ItemTrackBlueprint.isPreview(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
@@ -191,6 +195,9 @@ public class TrackGui extends GuiScreen {
 		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_POSITION.toString(posType));
 		this.buttonList.add(posTypeButton);
 		
+		directionButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_DIRECTION.toString(direction));
+		this.buttonList.add(directionButton);
+		
 		gaugeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_GAUGE.toString(gauge));
 		this.buttonList.add(gaugeButton);
 		
@@ -215,6 +222,10 @@ public class TrackGui extends GuiScreen {
 			posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
 			posTypeButton.displayString = GuiText.SELECTOR_POSITION.toString(posType);
 		}
+		if (button == directionButton) {
+			direction = TrackDirection.values()[((direction.ordinal() + 1) % (TrackDirection.values().length))];
+			directionButton.displayString = GuiText.SELECTOR_DIRECTION.toString(direction);
+		}
 		if (button == bedTypeButton) {
 			this.mc.displayGuiScreen(bedSelector);
 		}
@@ -233,10 +244,10 @@ public class TrackGui extends GuiScreen {
         	if (!this.lengthInput.getText().isEmpty()) {
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
         		} else {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
         		}
         	}
 			this.mc.displayGuiScreen(null);
