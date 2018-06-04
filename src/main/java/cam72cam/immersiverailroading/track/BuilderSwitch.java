@@ -27,8 +27,8 @@ public class BuilderSwitch extends BuilderBase {
 
 		{
 			turnInfo.length += 1;
-			turnBuilder = new BuilderTurn(turnInfo, pos);
-			straightBuilder = new BuilderStraight(straightInfo, pos, true);
+			turnBuilder = new BuilderTurn(turnInfo.clone(), pos);
+			straightBuilder = new BuilderStraight(straightInfo.clone(), pos, true);
 			
 			double maxOverlap = 0;
 			
