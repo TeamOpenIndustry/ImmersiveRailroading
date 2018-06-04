@@ -33,6 +33,7 @@ public class RailBaseModel implements IBakedModel {
 			ItemStack bed = railState.getValue(BlockRailBase.RAIL_BED);
 			if (bed != null) { // wait for tile to be initialized
 				float height = railState.getValue(BlockRailBase.HEIGHT).floatValue();
+				float tileHeight = height;
 				int snow = railState.getValue(BlockRailBase.SNOW).intValue();
 				Augment augment = railState.getValue(BlockRailBase.AUGMENT);
 				double gauged = railState.getValue(BlockRailBase.GAUGE).doubleValue();
@@ -79,7 +80,7 @@ public class RailBaseModel implements IBakedModel {
 					state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snow);
 					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
 					return model.getQuads(state, side, rand);
-				} else if (bed.getItem() != Items.AIR) {
+				} else if (bed.getItem() != Items.AIR && tileHeight != 0.000001f) {
 					ItemStack item = bed;
 					state = BlockUtil.itemToBlockState(item);
 					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
