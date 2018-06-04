@@ -49,7 +49,7 @@ public class BuilderStraight extends BuilderBase {
 				}
 			}
 			if (endOfTrack) {
-				if (Math.ceil(dist) == Math.ceil(actualLength)) {
+				if (Math.ceil(dist) == Math.ceil(actualLength-1)) {
 					mainX = (int) gagPos.x;
 					mainZ = (int) gagPos.z;
 				}
