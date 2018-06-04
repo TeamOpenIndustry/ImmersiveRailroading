@@ -40,7 +40,7 @@ public class BuilderStraight extends BuilderBase {
 		for (float dist = 0; dist < actualLength; dist += 0.25) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
 			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
-				Vec3d nextUp = VecUtil.fromYaw(q, 90);
+				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
 				positions.add(Pair.of(posX, posZ));
