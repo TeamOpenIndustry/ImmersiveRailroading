@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
@@ -76,6 +77,7 @@ public class ItemTrackBlueprint extends Item {
         tooltip.add(GuiText.TRACK_GAUGE.toString(ItemGauge.get(stack)));
         tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
         tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
+        tooltip.add(GuiText.TRACK_DIRECTION.toString(getDirection(stack)));
         tooltip.add(GuiText.TRACK_RAIL_BED.toString(getBed(stack).getDisplayName()));
         tooltip.add(GuiText.TRACK_RAIL_BED_FILL.toString(getBedFill(stack).getDisplayName()));
         tooltip.add((isPreview(stack) ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString());
@@ -136,6 +138,20 @@ public class ItemTrackBlueprint extends Item {
 			return TrackPositionType.values()[stack.getTagCompound().getInteger("pos_type")];
 		}
 		return TrackPositionType.FIXED;
+	}
+	
+	public static void setDirection(ItemStack stack, TrackDirection posType) {
+		if (stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().setInteger("direction", posType.ordinal());
+	}
+	
+	public static TrackDirection getDirection(ItemStack stack) {
+		if (stack.getTagCompound() != null){
+			return TrackDirection.values()[stack.getTagCompound().getInteger("direction")];
+		}
+		return TrackDirection.NONE;
 	}
 
 	public static ItemStack getBed(ItemStack stack) {

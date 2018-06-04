@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
@@ -26,6 +27,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	private TrackItems type;
 	private double gauge;
 	private TrackPositionType posType;
+	public TrackDirection direction;
 	private ItemStack bedStack;
 	private ItemStack railBedFill;
 	private boolean isPreview;
@@ -36,7 +38,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
@@ -46,9 +48,10 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
 		this.gauge = gauge;
+		this.direction = direction;
 	}
 
-	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
 		this.tilePreviewPos = tilePreviewPos;
 		this.length = length;
 		this.quarters = quarters;
@@ -58,6 +61,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
 		this.gauge = gauge;
+		this.direction = direction;
 	}
 
 	@Override
@@ -72,6 +76,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.type = TrackItems.values()[buf.readInt()];
 		this.gauge = buf.readDouble();
 		this.posType = TrackPositionType.values()[buf.readInt()];
+		this.direction = TrackDirection.values()[buf.readInt()];
 		this.bedStack = ByteBufUtils.readItemStack(buf);
 		this.railBedFill = ByteBufUtils.readItemStack(buf);
 		this.isPreview = buf.readBoolean();
@@ -90,6 +95,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		buf.writeInt(type.ordinal());
 		buf.writeDouble(gauge);
 		buf.writeInt(posType.ordinal());
+		buf.writeInt(direction.ordinal());
 		ByteBufUtils.writeItemStack(buf, bedStack);
 		ByteBufUtils.writeItemStack(buf, railBedFill);
 		buf.writeBoolean(isPreview);
@@ -120,6 +126,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemTrackBlueprint.setLength(stack, message.length);
 			ItemTrackBlueprint.setQuarters(stack, message.quarters);
 			ItemTrackBlueprint.setPosType(stack, message.posType);
+			ItemTrackBlueprint.setDirection(stack, message.direction);
 			ItemTrackBlueprint.setBed(stack, message.bedStack);
 			ItemTrackBlueprint.setBedFill(stack, message.railBedFill);
 			ItemTrackBlueprint.setPreview(stack, message.isPreview);
