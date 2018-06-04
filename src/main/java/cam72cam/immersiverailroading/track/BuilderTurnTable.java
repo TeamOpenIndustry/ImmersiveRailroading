@@ -55,6 +55,7 @@ public class BuilderTurnTable extends BuilderBase {
 				TrackGag tgu = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY()-1, pair.getRight() + offset.getZ());
 				if (toCenter > info.length-0.5) {
 					tgu.setHeight(1);
+					tgu.setFlexible();
 				}
 				tracks.add(tgu);
 			}
@@ -64,6 +65,9 @@ public class BuilderTurnTable extends BuilderBase {
 			tg.solidNotRequired = true;
 			if (toCenter > info.length-0.5) {
 				tg.setHeight(0);
+			}
+			if (toCenter > info.length-1.5) {
+				tg.setFlexible();
 			}
 			tracks.add(tg);
 		}
