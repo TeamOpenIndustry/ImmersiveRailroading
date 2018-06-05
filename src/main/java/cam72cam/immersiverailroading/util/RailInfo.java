@@ -78,11 +78,11 @@ public class RailInfo {
 		
 		yawHead = yawHead % 360 + 360;
 		if (direction == TrackDirection.NONE) {
-			direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
+			direction = (yawHead % 90 < 45) ? TrackDirection.LEFT : TrackDirection.RIGHT;
 		}
 		//quarter = MathHelper.floor((yawHead % 90f) /(90)*4);
 		float yawPartial = (yawHead+3600) % 90f;
-		if (direction == TrackDirection.LEFT) {
+		if (direction == TrackDirection.RIGHT) {
 			yawPartial = 90-yawPartial;
 		}
 		if (yawPartial < 90.0/8*1) {
@@ -95,7 +95,7 @@ public class RailInfo {
 			quarter = 3;
 		} else {
 			quarter = 0;
-			if (direction == TrackDirection.LEFT) {
+			if (direction == TrackDirection.RIGHT) {
 				yawHead -= 90;
 			} else {
 				yawHead += 90;
@@ -103,7 +103,7 @@ public class RailInfo {
 		}
 		
 		//facing = EnumFacing.fromAngle(yawHead);
-		if (direction == TrackDirection.LEFT) {
+		if (direction == TrackDirection.RIGHT) {
 			facing = EnumFacing.fromAngle(yawHead + 45);
 		} else {
 			facing = EnumFacing.fromAngle(yawHead - 45);

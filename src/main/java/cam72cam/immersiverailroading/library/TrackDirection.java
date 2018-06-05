@@ -4,8 +4,8 @@ import cam72cam.immersiverailroading.util.TextUtil;
 
 public enum TrackDirection {
 	NONE,
-	LEFT,
-	RIGHT;
+	RIGHT,
+	LEFT;
 	
 	@Override
 	public String toString() {

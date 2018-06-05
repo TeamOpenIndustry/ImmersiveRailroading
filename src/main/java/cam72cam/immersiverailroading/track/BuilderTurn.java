@@ -79,7 +79,7 @@ public class BuilderTurn extends BuilderBase {
 			float switchAngle = 0;
 			float switchOffset = 0;
 			if (info.switchState == SwitchState.STRAIGHT) {
-				if (info.direction == TrackDirection.RIGHT) {
+				if (info.direction == TrackDirection.LEFT) {
 					if (angle > startAngle - 4*angleDelta) {
 						switchOffset = (4-counter) / 30f * -(float)gauge.scale();
 						switchAngle = angleDelta * info.length / 30;
@@ -100,7 +100,7 @@ public class BuilderTurn extends BuilderBase {
 		});
 		
 		if (info.switchState != SwitchState.NONE) {
-			double dir = info.direction == TrackDirection.RIGHT ? -1 : 1;
+			double dir = info.direction == TrackDirection.LEFT ? -1 : 1;
 			dir = dir * info.gauge.scale();
 			double off = 0.2 * dir;
 			if (info.switchState == SwitchState.STRAIGHT) {
@@ -125,7 +125,7 @@ public class BuilderTurn extends BuilderBase {
 		float startAngle = 90 - info.quarter/4f * 90;
 		float endAngle = startAngle - info.quarters/4f * 90;
 		
-		if (info.direction == TrackDirection.LEFT) {
+		if (info.direction == TrackDirection.RIGHT) {
 			startAngle = 180 + 90 + info.quarter/4f * 90;
 			endAngle = startAngle + info.quarters/4f * 90;
 		}
@@ -134,13 +134,13 @@ public class BuilderTurn extends BuilderBase {
 		
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2)) * (float)info.gauge.scale() * delta;
 		
-		if (info.direction == TrackDirection.LEFT) {
+		if (info.direction == TrackDirection.RIGHT) {
 			float tmp = startAngle;
 			startAngle = endAngle - angleDelta;
 			endAngle = tmp;
 		}
 		float hack = (float) ((1-1/info.gauge.scale()) * angleDelta)/2;
-		if (info.direction == TrackDirection.RIGHT) {
+		if (info.direction == TrackDirection.LEFT) {
 			startAngle -= hack;
 			endAngle += hack;
 		} else {

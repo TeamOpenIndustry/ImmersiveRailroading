@@ -26,7 +26,7 @@ public class BuilderStraight extends BuilderBase {
 	public BuilderStraight(RailInfo info, BlockPos pos, boolean endOfTrack) {
 		super(info, pos);
 		
-		if (info.direction == TrackDirection.LEFT) {
+		if (info.direction == TrackDirection.RIGHT) {
 			info.quarter = -info.quarter; 
 		}
 		
