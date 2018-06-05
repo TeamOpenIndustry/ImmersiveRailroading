@@ -85,20 +85,28 @@ public class RailInfo {
 		if (direction == TrackDirection.LEFT) {
 			yawPartial = 90-yawPartial;
 		}
-		if (yawPartial < 15) {
+		if (yawPartial < 90.0/8*1) {
 			quarter = 0;
-		} else if (yawPartial < 30) {
+		} else if (yawPartial < 90.0/8*3) {
 			quarter = 1;
-		} else if (yawPartial < 45) {
+		} else if (yawPartial < 90.0/8*5) {
 			quarter = 2;
-		} else {
+		} else if (yawPartial < 90.0/8*7){
 			quarter = 3;
+		} else {
+			quarter = 0;
+			if (direction == TrackDirection.LEFT) {
+				yawHead -= 90;
+			} else {
+				yawHead += 90;
+			}
 		}
 		
+		//facing = EnumFacing.fromAngle(yawHead);
 		if (direction == TrackDirection.LEFT) {
-			facing = EnumFacing.fromAngle(yawHead + 45 - 15/2);
+			facing = EnumFacing.fromAngle(yawHead + 45);
 		} else {
-			facing = EnumFacing.fromAngle(yawHead - 45 + 15/2);			
+			facing = EnumFacing.fromAngle(yawHead - 45);
 		}
 
 		
