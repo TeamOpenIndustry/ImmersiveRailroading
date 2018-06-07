@@ -150,7 +150,7 @@ public class RenderOverride {
 	        GL11.glTranslated(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 			GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 		
-	        OBJRender model = RailBuilderRender.getModel(Gauge.STANDARD); 
+	        OBJRender model = RailBuilderRender.getModel(Gauge.from(Gauge.STANDARD)); 
 	        model.bindTexture();
 	        List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
 	        for (TileEntity te : entities) {

@@ -230,7 +230,7 @@ public abstract class BlockRailBase extends Block {
 		TileRailBase te = TileRailBase.get(source, pos);
 		double height = 0.1;
 		if (te != null && te.isLoaded()) {
-			height = te.getFullHeight() +0.1 * (te.getTrackGauge() / Gauge.STANDARD.value());
+			height = te.getFullHeight() +0.1 * (te.getTrackGauge() / Gauge.STANDARD);
 		}
 		return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height, 1.0F);
 	}

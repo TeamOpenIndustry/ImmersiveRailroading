@@ -51,7 +51,7 @@ public class ItemConductorWhistle extends Item {
 					player.getPositionVector(), Vec3d.ZERO,
 					0.7f, (float) (Math.random() / 4 + 0.75), 
 					(int) (Config.ConfigBalance.villagerConductorDistance * 1.2f), 
-					Gauge.STANDARD
+					Gauge.from(Gauge.STANDARD)
 			);
 			ImmersiveRailroading.net.sendToAllAround(packet, new TargetPoint(player.dimension, player.posX, player.posY, player.posZ, Config.ConfigBalance.villagerConductorDistance * 1.2f));
 			

@@ -215,7 +215,7 @@ public class TrackGui extends GuiScreen {
 			quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
 		}
 		if (button == gaugeButton) {
-			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
+			gauge = gauge.next();
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
 		}
 		if (button == posTypeButton) {

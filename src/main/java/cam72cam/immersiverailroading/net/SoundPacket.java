@@ -42,7 +42,7 @@ public class SoundPacket implements IMessage {
 		volume = buf.readFloat();
 		pitch = buf.readFloat();
 		distance = buf.readInt();
-		gauge = Gauge.values()[buf.readInt()];
+		gauge = Gauge.from(buf.readDouble());
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class SoundPacket implements IMessage {
 		buf.writeFloat(volume);
 		buf.writeFloat(pitch);
 		buf.writeInt(distance);
-		buf.writeInt(gauge.ordinal());
+		buf.writeDouble(gauge.value());
 	}
 	
 	public static class Handler implements IMessageHandler<SoundPacket, IMessage> {

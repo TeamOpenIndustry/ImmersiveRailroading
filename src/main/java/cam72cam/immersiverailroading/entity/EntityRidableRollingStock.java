@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
@@ -135,7 +134,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (this.getDefinition().shouldSit != null) {
 			return this.getDefinition().shouldSit;
 		}
-		return this.gauge == Gauge.MODEL || this.gauge == Gauge.MINECRAFT;
+		return this.gauge.shouldSit();
 	}
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();

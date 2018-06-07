@@ -33,13 +33,13 @@ public class RailBuilderRender {
 	}
 	
 	public static OBJRender getModel(Gauge gauge) {
-		return gauge != Gauge.MODEL ? baseRailModel : baseRailModelModel;
+		return gauge.isModel() ? baseRailModel : baseRailModelModel;
 	}
 
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void renderRailBuilder(RailInfo info) {
 		
-		OBJRender model = info.gauge != Gauge.MODEL ? baseRailModel : baseRailModelModel;
+		OBJRender model = info.gauge.isModel() ? baseRailModel : baseRailModelModel;
 
 		GL11.glTranslated(-info.position.getX(), -info.position.getY(), -info.position.getZ());
 		GL11.glTranslated(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z); 

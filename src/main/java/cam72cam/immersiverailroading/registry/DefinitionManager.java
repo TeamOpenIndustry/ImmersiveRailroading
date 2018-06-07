@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gson.JsonElement;
@@ -15,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ProgressManager;
 import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
@@ -51,8 +53,38 @@ public class DefinitionManager {
 		jsonLoaders.put("tank", (String defID, JsonObject data) -> new CarTankDefinition(defID, data));
 		jsonLoaders.put("hand_car", (String defID, JsonObject data) -> new HandCarDefinition(defID, data));
 	}
+	
+	private static void initGauges() throws IOException {
+		ResourceLocation gauges_json = new ResourceLocation(ImmersiveRailroading.MODID, "rolling_stock/gauges.json");
+		
+		List<Double> toRemove = new ArrayList<Double>();
+		
+		List<InputStream> inputs = ImmersiveRailroading.proxy.getResourceStreamAll(gauges_json);
+		for (InputStream input : inputs) {
+			JsonParser parser = new JsonParser();
+			JsonObject gauges = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+			input.close();
+			
+			if (gauges.has("register")) {
+				for (Entry<String, JsonElement> gauge : gauges.get("register").getAsJsonObject().entrySet()) {
+					Gauge.register(gauge.getValue().getAsDouble(), gauge.getKey());
+				}
+			}
+			if (gauges.has("remove")) {
+				for (JsonElement gauge : gauges.get("remove").getAsJsonArray()) {
+					toRemove.add(gauge.getAsDouble());
+				}
+			}
+		}
+		
+		for (double gauge : toRemove) {
+			Gauge.remove(gauge);
+		}
+	}
 
 	public static void initDefinitions() throws IOException {
+		initGauges();
+		
 		definitions = new LinkedHashMap<String, EntityRollingStockDefinition>();
 		
 		Set<String> defTypes = jsonLoaders.keySet();
