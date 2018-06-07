@@ -16,6 +16,9 @@ public class Config {
 	public static class ConfigDamage {
 		@Comment({ "Enable Boiler Explosions" })
 		public static boolean explosionsEnabled = true;
+		
+		@Comment({ "Enable Boilder Explosion block damage" })
+		public static boolean explosionDamageEnabled = true;
 
 		@Comment({ "km/h to damage 1 heart on collision" })
 		public static double entitySpeedDamage = 10;
