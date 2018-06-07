@@ -103,16 +103,17 @@ public abstract class EntityRollingStockDefinition {
 		}
 		this.internal_model_scale = 1;
 		this.internal_inv_scale = 1;
-		this.recommended_gauge = Gauge.STANDARD;
+		// TODO Gauge.from(Gauge.STANDARD).value() what happens when != Gauge.STANDARD
+		this.recommended_gauge = Gauge.from(Gauge.STANDARD);
 		if (data.has("model_gauge_m")) { 
 			this.recommended_gauge = Gauge.from(data.get("model_gauge_m").getAsDouble());
-			this.internal_model_scale = Gauge.STANDARD.value() / data.get("model_gauge_m").getAsDouble();
+			this.internal_model_scale = Gauge.STANDARD / data.get("model_gauge_m").getAsDouble();
 		}
 		if (data.has("recommended_gauge_m")) {
 			this.recommended_gauge = Gauge.from(data.get("recommended_gauge_m").getAsDouble());
 		}
-		if (this.recommended_gauge != Gauge.STANDARD) {
-			this.internal_inv_scale = Gauge.STANDARD.value() / recommended_gauge.value();
+		if (this.recommended_gauge != Gauge.from(Gauge.STANDARD)) {
+			this.internal_inv_scale = Gauge.STANDARD / recommended_gauge.value();
 		}
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
 		JsonObject passenger = data.get("passenger").getAsJsonObject();

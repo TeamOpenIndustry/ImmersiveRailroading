@@ -43,7 +43,7 @@ public class ItemPlate extends Item {
         	for (PlateType plate : PlateType.values()) {
         		ItemStack stack = new ItemStack(this);
         		ItemPlateType.set(stack, plate);
-        		ItemGauge.set(stack, Gauge.STANDARD);
+        		ItemGauge.set(stack, Gauge.from(Gauge.STANDARD));
         		
         		if (plate != PlateType.BOILER) {
 					stack.getUnlocalizedName();

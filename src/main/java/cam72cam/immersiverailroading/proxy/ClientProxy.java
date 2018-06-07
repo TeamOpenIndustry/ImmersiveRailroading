@@ -621,7 +621,7 @@ public class ClientProxy extends CommonProxy {
 		if (sndCache == null) {
 			sndCache = new ArrayList<ISound>();
 			for (int i = 0; i < 16; i ++) {
-				sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, Gauge.STANDARD));
+				sndCache.add(ImmersiveRailroading.proxy.newSound(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, Gauge.from(Gauge.STANDARD)));
 			}
 		}
 	}

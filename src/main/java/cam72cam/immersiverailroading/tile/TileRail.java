@@ -214,7 +214,7 @@ public class TileRail extends TileRailBase {
 			}
 			setNBTVec3d(nbt, "placementPosition", getNBTVec3d(nbt, "placementPosition").subtract(pos.getX(), pos.getY(), pos.getZ()));
 		case 2:
-			nbt.setDouble("gauge", Gauge.STANDARD.value());
+			nbt.setDouble("gauge", Gauge.STANDARD);
 		case 3:
 			// nothing yet...
 		}

@@ -111,7 +111,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		if (nbttagcompound.hasKey("gauge")) {
 			gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
 		} else {
-			gauge = Gauge.STANDARD;
+			gauge = Gauge.from(Gauge.STANDARD);
 		}
 		
 		tag = nbttagcompound.getString("tag");

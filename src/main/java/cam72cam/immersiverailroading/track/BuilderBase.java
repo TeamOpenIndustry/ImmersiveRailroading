@@ -254,7 +254,7 @@ public abstract class BuilderBase {
 				if (!BlockUtil.isRail(world, main)) {
 					world.destroyBlock(main, false);
 				}
-				if (gauge != Gauge.MODEL && ConfigDamage.enableSideBlockClearing && info.type != TrackItems.SLOPE && info.type != TrackItems.TURNTABLE) {
+				if (gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.type != TrackItems.SLOPE && info.type != TrackItems.TURNTABLE) {
 					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
 						BlockPos pos = main.offset(facing);
 						if (!BlockUtil.isRail(world, pos)) {

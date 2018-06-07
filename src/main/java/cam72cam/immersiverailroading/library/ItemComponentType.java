@@ -189,7 +189,7 @@ public enum ItemComponentType {
 	}
 	
 	public boolean isWooden(EntityRollingStockDefinition definition) {
-		RenderComponent component = definition.getComponent(this.render.get(0), Gauge.STANDARD);
+		RenderComponent component = definition.getComponent(this.render.get(0), Gauge.from(Gauge.STANDARD));
 		return component.isWooden();
 	}
 }

@@ -22,6 +22,6 @@ public class ItemGauge {
 		if (def != null) {
 			return def.recommended_gauge;
 		}
-		return Gauge.STANDARD;
+		return Gauge.from(Gauge.STANDARD);
 	}
 }

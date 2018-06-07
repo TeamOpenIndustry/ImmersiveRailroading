@@ -125,7 +125,7 @@ public class CastingGUI extends GuiScreen {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == gaugeButton) {
-			gauge = Gauge.values()[((gauge.ordinal() + 1) % (Gauge.values().length))];
+			gauge = gauge.next();
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
 			sendItemPacket();
 		}
