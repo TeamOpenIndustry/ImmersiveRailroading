@@ -30,8 +30,8 @@ public class BuilderTurn extends BuilderBase {
 		
 		followCurve(info, 0.25f, (double gagX, double gagZ, float angle, float angleDelta, int counter, float startAngle, float endAngle) -> {
 			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
-				int posX = (int)(gagX + Math.sin(Math.toRadians(angle)) * q);
-				int posZ = (int)(gagZ + Math.cos(Math.toRadians(angle)) * q);
+				int posX = (int)Math.round(gagX + Math.sin(Math.toRadians(angle)) * q);
+				int posZ = (int)Math.round(gagZ + Math.cos(Math.toRadians(angle)) * q);
 				positions.add(Pair.of(posX, posZ));
 				if (angle > startAngle-flexAngle || angle < endAngle+flexAngle)
 					flexPositions.add(Pair.of(posX, posZ));
@@ -136,7 +136,7 @@ public class BuilderTurn extends BuilderBase {
 		
 		if (info.direction == TrackDirection.RIGHT) {
 			float tmp = startAngle;
-			startAngle = endAngle - angleDelta;
+			startAngle = endAngle;
 			endAngle = tmp;
 		}
 		float hack = (float) ((1-1/info.gauge.scale()) * angleDelta)/2;
@@ -144,7 +144,7 @@ public class BuilderTurn extends BuilderBase {
 			startAngle -= hack;
 			endAngle += hack;
 		} else {
-			startAngle += hack;
+			startAngle -= hack;
 			endAngle += hack;
 		}
 		
