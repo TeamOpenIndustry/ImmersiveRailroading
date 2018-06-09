@@ -6,10 +6,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import cam72cam.immersiverailroading.Config.ConfigBalance;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
+import net.minecraft.init.Items;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class BuilderTurnTable extends BuilderBase {
@@ -91,5 +95,31 @@ public class BuilderTurnTable extends BuilderBase {
 		data.add(new VecYawPitch(offset.getX(), offset.getY(), offset.getZ(), -angle, 0, info.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		return data;
+	}
+	
+	public int costTies() {
+		return MathHelper.ceil((this.info.length + 8) * ConfigBalance.TieCostMultiplier);
+	}
+	
+	public int costRails() {
+		return MathHelper.ceil((this.info.length + 8)*2/3 * ConfigBalance.RailCostMultiplier);
+	}
+	
+	public int costBed() {
+		//TODO more accurate
+		return MathHelper.ceil(this.tracks.size()/2.0 * 0.1 * ConfigBalance.BedCostMultiplier);
+	}
+
+	public int costFill() {
+		int fillCount = 0;
+		for (TrackBase track : tracks) {
+			if (track.rel_y == 1) {
+				continue;
+			}
+			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
+				fillCount += 1;
+			}
+		}
+		return MathHelper.ceil(this.info.railBedFill.getItem() != Items.AIR ? fillCount : 0);
 	}
 }

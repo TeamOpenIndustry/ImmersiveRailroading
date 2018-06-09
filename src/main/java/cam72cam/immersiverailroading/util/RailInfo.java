@@ -239,23 +239,29 @@ public class RailInfo {
 					}
 				}
 				
+				boolean isOk = true;
+				
 				if (ties < builder.costTies()) {
 					player.sendMessage(ChatText.BUILD_MISSING_TIES.getMessage(builder.costTies() - ties));
-					return false;
+					isOk = false;
 				}
 				
 				if (rails < builder.costRails()) {
 					player.sendMessage(ChatText.BUILD_MISSING_RAILS.getMessage(builder.costRails() - rails));
-					return false;
+					isOk = false;
 				}
 				
 				if (railBed.getItem() != Items.AIR && bed < builder.costBed()) {
 					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED.getMessage(builder.costBed() - bed));
-					return false;
+					isOk = false;
 				}
 				
 				if (railBedFill.getItem() != Items.AIR && fill < builder.costFill()) {
 					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED_FILL.getMessage(builder.costFill() - fill));
+					isOk = false;
+				}
+				
+				if (!isOk) {
 					return false;
 				}
 
