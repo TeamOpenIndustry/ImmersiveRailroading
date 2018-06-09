@@ -82,9 +82,10 @@ public class LocomotiveOverlay extends Gui {
 	}
 	
 	public void drawSpeedText(String text) {
+		drawRect(12, 265, 80, 248, 0xFF4d4d4d);
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(50, 250, 0);
+			GL11.glTranslated(46, 253, 0);
 			double scale = 1;
 			GL11.glScaled(scale, scale, scale);
 			drawCenteredString(mc.fontRenderer, text, 0, 0, 0xFFFFFF);
