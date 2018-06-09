@@ -27,6 +27,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.entity.Entity;
 import net.minecraftforge.fluids.*;
 
 public class LocomotiveSteam extends Locomotive {
@@ -193,7 +194,9 @@ public class LocomotiveSteam extends Locomotive {
 	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
 	private List<ISound> sndCache = new ArrayList<ISound>();
 	private int sndCacheId = 0;
-	private ISound whistle;
+	private ISound whistle1;
+	private ISound whistle2;
+	private ISound whistle3;
 	private ISound idle;
 	private ISound pressure;
 	private int tickMod = 0;
@@ -211,7 +214,11 @@ public class LocomotiveSteam extends Locomotive {
 			
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
-					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
+					this.whistle1 = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, true, 150, gauge);
+					whistle1.setPitch(0.75f);
+					this.whistle2 = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, true, 150, gauge);
+					whistle2.setPitch(1);
+					this.whistle3 = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, true, 150, gauge);
 	
 					for (int i = 0; i < 32; i ++) {
 						sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, gauge));
@@ -223,8 +230,45 @@ public class LocomotiveSteam extends Locomotive {
 					pressure.setVolume(0.3f);
 				}
 				
-				if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
-					whistle.play(getPositionVector());
+				if (this.getDataManager().get(HORN) != 0 && !whistle1.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
+					//whistle1.play(getPositionVector());
+				}
+				
+				if (this.getDataManager().get(HORN) < 1) {
+					whistle1.stop();
+					whistle2.stop();
+				} else {
+					if (this.getPassengers().size() > 0) {
+						Entity pass = this.getPassengers().get(0);
+						float perc = (pass.rotationPitch+90) / 180;
+						if (perc > 0.65) {
+							perc = 0.65f;
+						}
+						perc -= 0.15;
+						perc *= 2;
+						
+						if (perc > 0) {
+							
+							if (!whistle1.isPlaying()) {
+								whistle1.play(getPositionVector());
+							}
+						
+							if (perc > 0.25) {
+								if (!whistle2.isPlaying()) {
+									whistle2.play(getPositionVector());
+								}
+							} else {
+								if (whistle2.isPlaying()) {
+									whistle2.stop();
+								}
+							}
+							whistle1.setPitch(0.75f + perc/5);
+							whistle1.setVolume((float) Math.min(0.75, Math.pow(perc*2, 8)));
+
+							whistle2.setPitch(0.9f + perc/5);
+							whistle2.setVolume((float) Math.pow(perc*2-0.25, 4));
+						}
+					}
 				}
 				
 				if (this.getBoilerTemperature() > 0) {
@@ -286,7 +330,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE, gauge);
 			if (	whistles != null &&
-					(this.getDataManager().get(HORN) != 0 || whistle != null && whistle.isPlaying()) && 
+					(this.getDataManager().get(HORN) != 0 || whistle1 != null && whistle1.isPlaying()) && 
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
 				) {
 				for (RenderComponent whistle : whistles) {
@@ -424,10 +468,15 @@ public class LocomotiveSteam extends Locomotive {
 			
 			if (ConfigSound.soundEnabled) {
 				// Update sound positions
-				if (whistle.isPlaying()) {
-					whistle.setPosition(getPositionVector());
-					whistle.setVelocity(getVelocity());
-					whistle.update();
+				if (whistle1.isPlaying()) {
+					whistle1.setPosition(getPositionVector());
+					whistle1.setVelocity(getVelocity());
+					whistle1.update();
+				}
+				if (whistle2.isPlaying()) {
+					whistle2.setPosition(getPositionVector());
+					whistle2.setVelocity(getVelocity());
+					whistle2.update();
 				}
 				if (idle.isPlaying()) {
 					idle.setPosition(getPositionVector());
