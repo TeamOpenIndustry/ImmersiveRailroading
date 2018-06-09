@@ -81,6 +81,7 @@ public class ItemTrackBlueprint extends Item {
         tooltip.add(GuiText.TRACK_RAIL_BED.toString(getBed(stack).getDisplayName()));
         tooltip.add(GuiText.TRACK_RAIL_BED_FILL.toString(getBedFill(stack).getDisplayName()));
         tooltip.add((isPreview(stack) ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString());
+        tooltip.add((getPlaceEmbankment(stack) ? GuiText.TRACK_PLACE_EMBANKMENT_TRUE : GuiText.TRACK_PLACE_EMBANKMENT_FALSE).toString());
         tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack) * 90.0/4 ));
 	}
 
@@ -186,5 +187,15 @@ public class ItemTrackBlueprint extends Item {
 	}
 	public static void setPreview(ItemStack stack, boolean value) {
 		stack.getTagCompound().setBoolean("isPreview", value);
+	}
+	public static boolean getPlaceEmbankment(ItemStack stack) {
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("placeEmbankment")) { 
+			return stack.getTagCompound().getBoolean("placeEmbankment");
+		} else {
+			return false;
+		}
+	}
+	public static void setPlaceEmbankment(ItemStack stack, boolean value) {
+		stack.getTagCompound().setBoolean("placeEmbankment", value);
 	}
 }
