@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraftforge.fluids.Fluid;
 
 public class SteamLocomotiveOverlay extends LocomotiveOverlay {
+	
 	public void draw() {
 		Entity riding = mc.player.getRidingEntity();
 		if (riding == null) {
@@ -30,5 +31,7 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		
 		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
+		
+		drawSpeedText(loco.getCurrentSpeed().metricString());
 	}
 }

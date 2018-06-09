@@ -22,6 +22,9 @@ public class LocomotiveOverlay extends Gui {
 	private static final int scalarWidth = 10;
 	private static final int scalarHeight = 50;
 	private static final int scalarSpacer = 10;
+	
+	/*private static final int textHeight = 20;
+	private static final int textVerticalSpacing = 5;*/
 
 	public LocomotiveOverlay() {
 		mc = Minecraft.getMinecraft();
@@ -76,5 +79,16 @@ public class LocomotiveOverlay extends Gui {
 		}
 		GL11.glPopMatrix();
 		currPosX += scalarWidth + scalarSpacer;
+	}
+	
+	public void drawSpeedText(String text) {
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(50, 250, 0);
+			double scale = 1;
+			GL11.glScaled(scale, scale, scale);
+			drawCenteredString(mc.fontRenderer, text, 0, 0, 0xFFFFFF);
+		}
+		GL11.glPopMatrix();
 	}
 }

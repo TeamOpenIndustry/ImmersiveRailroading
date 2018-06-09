@@ -53,8 +53,8 @@ public abstract class TrackBase {
 	public TileEntity placeTrack() { 
 		PosRot pos = getPos();
 		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.placeEmbankment) {
-			for (int x = 1; x < 255; x++) {
-				if (builder.info.placeEmbankment == true && BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
+			for (int x = 1; x < 30; x++) {
+				if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
 					builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
 				} else {
 					break;
