@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.GuiText;
 import net.minecraft.entity.Entity;
@@ -36,6 +37,14 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		if (speed < 0) {
 			speed = speed * (-1);
 		}
-		drawSpeedText(String.format("%.2f km/h", speed));
+		if (ConfigGraphics.speedUnit == "km/h") {
+			drawSpeedText(String.format("%.2f km/h", speed));
+		} else if (ConfigGraphics.speedUnit == "mph") {
+			speed = speed * 0.621371;
+			drawSpeedText(String.format("%.2f mph", speed));
+		} else if (ConfigGraphics.speedUnit == "m/s") {
+			speed = speed /3.6;
+			drawSpeedText(String.format("%.2f m/s", speed));
+		}
 	}
 }

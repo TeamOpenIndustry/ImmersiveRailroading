@@ -32,5 +32,8 @@ public class ConfigGraphics {
 
 	@Comment({ "Self explanitory" })
 	public static boolean trainsOnTheBrain = true;
+	
+	@Comment({ "What unit to use for speedometer. (km/h, mph or m/s)" })
+	public static String speedUnit = "mph";
 
 }
