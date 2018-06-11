@@ -30,8 +30,12 @@ public class LocomotiveDiesel extends Locomotive {
 	private ISound idle;
 	private float soundThrottle;
 	private float internalBurn = 0;
+	private boolean canTurnOnOff = true;
+	private int turnOnOffDelay = 20;
+	private int tick = 0;
 	
 	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
+	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -40,6 +44,7 @@ public class LocomotiveDiesel extends Locomotive {
 	public LocomotiveDiesel(World world, String defID) {
 		super(world, defID);
 		this.getDataManager().register(ENGINE_TEMPERATURE, 0f);
+		this.getDataManager().register(TURNED_ON, false);
 	}
 	
 	public float getEngineTemperature() {
@@ -48,6 +53,14 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	private void setEngineTemperature(float temp) {
 		this.dataManager.set(ENGINE_TEMPERATURE, temp);
+	}
+	
+	public void setTurnedOn(boolean value) {
+		this.dataManager.set(TURNED_ON, value);
+	}
+	
+	public boolean getTurnedOn() {
+		return this.dataManager.get(TURNED_ON);
 	}
 	
 	@Override
@@ -74,14 +87,24 @@ public class LocomotiveDiesel extends Locomotive {
 		setTurnedOn(nbttagcompound.getBoolean("turned_on"));
 	}
 	
-	
 	/*
 	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
 	 */
 	@Override
 	public void handleKeyPress(Entity source, KeyTypes key) {
-		super.handleKeyPress(source, key);
-		
+		switch(key) {
+			case START_STOP_ENGINE:
+				if (getTurnedOn() && canTurnOnOff) {
+					setTurnedOn(false);
+					canTurnOnOff = false;
+				} else if (getTurnedOn() == false && canTurnOnOff){
+					setTurnedOn(true);
+					canTurnOnOff = false;
+				}
+				break;
+			default:
+				super.handleKeyPress(source, key);
+		}
 		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 	
@@ -193,15 +216,23 @@ public class LocomotiveDiesel extends Locomotive {
 				theTank.drain(1, true);
 			}*/
 			
-			float heatUpSpeed = (70 / (20 * 60 * 20)) / Config.ConfigBalance.dielseLocoHeatTimeScale;
+			float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
 			
 			if (getTurnedOn()) {
 				if (getEngineTemperature() < 150 && this.getLiquidAmount() > 0) {
 					setEngineTemperature(getEngineTemperature() + heatUpSpeed);
 					theTank.drain(1, true);
 				}
+				if (getEngineTemperature() > 150) {
+					setEngineTemperature(150);
+				}
 			} else {
-				
+				if (getEngineTemperature() > 0) {
+					setEngineTemperature(getEngineTemperature() - 0.05f);
+				}
+				if (getEngineTemperature() < 0) {
+					setEngineTemperature(0);
+				}
 			}
 			
 			float consumption = Math.abs(getThrottle()) + 0.05f;
@@ -209,6 +240,14 @@ public class LocomotiveDiesel extends Locomotive {
 			consumption *= gauge.scale();
 			
 			internalBurn -= consumption;
+			
+			if (canTurnOnOff == false) {
+				tick++;
+				if (tick == turnOnOffDelay) {
+					tick = 0;
+					canTurnOnOff = true;
+				}
+			}
 		}
 	}
 	

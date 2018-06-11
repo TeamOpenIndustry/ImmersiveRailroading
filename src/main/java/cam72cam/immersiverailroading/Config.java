@@ -82,7 +82,7 @@ public class Config {
 		public static int locoHeatTimeScale = 72;
 		
 		@Comment("How fast the diesel locomotive should heat up. 1 is real world (slow), 72 is scaled to minecraft time")
-		public static int dielseLocoHeatTimeScale = 72;
+		public static int dieselLocoHeatTimeScale = 72;
 
 		@Comment("How much water the locomotive should use")
 		public static float locoWaterUsage = 10;
