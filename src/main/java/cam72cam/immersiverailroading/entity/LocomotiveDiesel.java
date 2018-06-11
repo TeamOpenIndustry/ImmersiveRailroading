@@ -120,7 +120,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (!Config.isFuelRequired(gauge)) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
-		if (this.getLiquidAmount() > 0 && this.getEngineTemperature() > 70 && this.getTurnedOn()) {
+		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && getTurnedOn()) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -141,8 +141,11 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				
 				if (hasFuel) {
-					if (!idle.isPlaying()) {
+					if (!idle.isPlaying() && getTurnedOn()) {
 						this.idle.play(getPositionVector());
+					}
+					if (idle.isPlaying() && getTurnedOn() == false) {
+						idle.stop();
 					}
 				} else {
 					if (idle.isPlaying()) {
@@ -155,9 +158,9 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
-				if (this.soundThrottle > absThrottle) {
+				if (this.soundThrottle > absThrottle && getEngineTemperature() > 70 && getTurnedOn()) {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-				} else if (this.soundThrottle < Math.abs(this.getThrottle())) {
+				} else if (this.soundThrottle < absThrottle && getEngineTemperature() > 70 && getTurnedOn()) {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 				}
 	
@@ -185,7 +188,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
 			float throttle = Math.abs(this.getThrottle());
-			if (exhausts != null && throttle > 0 && hasFuel) {
+			if (exhausts != null && throttle > 0 && hasFuel && getEngineTemperature() > 70 && getTurnedOn()) {
 				for (RenderComponent exhaust : exhausts) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					
@@ -228,7 +231,7 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 			} else {
 				if (getEngineTemperature() > 0) {
-					setEngineTemperature(getEngineTemperature() - 0.05f);
+					setEngineTemperature(getEngineTemperature() - 0.02f);
 				}
 				if (getEngineTemperature() < 0) {
 					setEngineTemperature(0);
