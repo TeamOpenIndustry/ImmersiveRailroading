@@ -20,7 +20,6 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> THROTTLE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	protected static DataParameter<Integer> HORN = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
 	
 
 	private static final float throttleNotch = 0.04f;
@@ -36,7 +35,6 @@ public abstract class Locomotive extends FreightTank {
 		this.getDataManager().register(THROTTLE, 0f);
 		this.getDataManager().register(AIR_BRAKE, 0f);
 		this.getDataManager().register(HORN, 0);
-		this.getDataManager().register(TURNED_ON, false);
 
 		this.entityCollisionReduction = 0.99F;
 	}
@@ -119,13 +117,6 @@ public abstract class Locomotive extends FreightTank {
 					source.sendMessage(ChatText.DEADMANS_SWITCH_DISABLED.getMessage());
 				}
 				this.deadManChangeTimeout = 5;
-			}
-			break;
-		case START_STOP_ENGINE:
-			if (getTurnedOn()) {
-				setTurnedOn(false);
-			} else if (getTurnedOn() == false){
-				setTurnedOn(true);
 			}
 			break;
 		default:
@@ -236,12 +227,6 @@ public abstract class Locomotive extends FreightTank {
 			dataManager.set(AIR_BRAKE, newAirBrake);
 			triggerResimulate();
 		}
-	}
-	public void setTurnedOn(boolean value) {
-		this.dataManager.set(TURNED_ON, value);
-	}
-	public boolean getTurnedOn() {
-		return this.dataManager.get(TURNED_ON);
 	}
 	
 	public double slipCoefficient() {
