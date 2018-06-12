@@ -1,7 +1,9 @@
 package cam72cam.immersiverailroading;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.init.Items;
@@ -93,6 +95,18 @@ public class Config {
 		@Comment("Villager payout items")
 		public static String[] villagerPayoutItems = new String[] {
 			Items.EMERALD.getRegistryName().toString()
+		};
+		
+		@Comment("Fuels for diesel Locomotives")
+		public static String[] dieselSubstitutes = new String[] {
+			"olive_oil"
+		};
+		
+		@Comment("Water Substitutes")
+		public static String[] waterSubstitutes = new String[] {
+			"dist_water",
+			"hot_spring_water",
+			"purified_water"
 		};
 		
 		public static List<Item> getVillagerPayout() {

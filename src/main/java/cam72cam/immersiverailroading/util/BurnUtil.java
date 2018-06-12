@@ -5,15 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cam72cam.immersiverailroading.Config;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class BurnUtil {
 	private static Map<String, Integer> info = new HashMap<String, Integer>();
 	
-	static {
+	public static void loadInfo() {
+		info.clear();
 		// BC
 		info.put("oil", 100);
 		info.put("oil_heavy", 70);
@@ -29,6 +32,12 @@ public class BurnUtil {
 		info.put("biofuel", 170);
 		info.put("ethanol", 170);
 		info.put("gasoline", 100);
+		String[] list = Config.ConfigBalance.dieselSubstitutes;
+		for (int i = 0; i < list.length; i++) {
+			if (FluidRegistry.getFluid(list[i]) != null) {
+				info.put(list[i], 200);
+			}
+		}
 	}
 	
 	public static int getBurnTime(ItemStack stack) {
@@ -36,6 +45,7 @@ public class BurnUtil {
 	}
 	
 	public static int getBurnTime(Fluid fluid) {
+		loadInfo();
 		if (info.containsKey(fluid.getName())) {
 			return info.get(fluid.getName());
 		}
