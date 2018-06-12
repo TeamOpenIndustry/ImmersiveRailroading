@@ -157,7 +157,7 @@ public class LocomotiveDiesel extends Locomotive {
 				if (hasFuel) {
 					if (!idle.isPlaying() && getTurnedOn()) {
 						this.idle.play(getPositionVector());
-					} else if (!idle.isPlaying()) {
+					} else if (!idle.isPlaying() && !getTurnedOn()) {
 						this.idle.play(getPositionVector());
 					}
 					if (idle.isPlaying() && !getTurnedOn()) {
@@ -240,16 +240,13 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			if (getTurnedOn()) {
 				if (getEngineTemperature() < 73 && this.getLiquidAmount() > 0) {
-					while (internalBurn < 0 && this.getLiquidAmount() > 0) {
-						internalBurn += burnTime;
-						setEngineTemperature(getEngineTemperature() + heatUpSpeed);
-						theTank.drain(1, true);
-					}
+					theTank.drain(1, true);
+					setEngineTemperature(getEngineTemperature() + heatUpSpeed);
 				}
 				if (getEngineTemperature() > 150) {
 					setEngineTemperature(150);
 				}
-				if (this.getCurrentSpeed().metric() < 10 && getEngineTemperature() > 70) {
+				if (this.getThrottle() == 0f && getEngineTemperature() > 70) {
 					setEngineTemperature(getEngineTemperature() - 0.02f);
 				}
 			} else {
@@ -260,16 +257,12 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 			}
 			
-			if (getEngineTemperature() > 70 && getTurnedOn() && this.getCurrentSpeed().metric() > 10) {
-				setEngineTemperature(getEngineTemperature() + (float) ((heatUpSpeed / 2000) * this.getCurrentSpeed().metric()));
-			}
-			
-			if (getEngineTemperature() == 150 && Config.ConfigDamage.canEnginesOverheat) {
-				setEngineOverheated(true);
-			}
-			
-			if (getEngineOverheated() && getEngineTemperature() == 0 && this.getCurrentSpeed().metric() == 0) {
-				setEngineOverheated(false);
+			if (getEngineTemperature() > 70 && getTurnedOn() && this.getThrottle() > 0f) {
+				while (internalBurn < 0 && this.getLiquidAmount() > 0) {
+					internalBurn += burnTime / (this.getThrottle() * 10);
+					theTank.drain(1, true);
+				}
+				setEngineTemperature(getEngineTemperature() + (float) (heatUpSpeed * this.getThrottle()) / 10);
 			}
 			
 			float consumption = Math.abs(getThrottle()) + 0.05f;
@@ -285,6 +278,15 @@ public class LocomotiveDiesel extends Locomotive {
 					canTurnOnOff = true;
 				}
 			}
+		}
+		
+		if (getEngineTemperature() >= 150 && Config.ConfigDamage.canEnginesOverheat) {
+			setEngineOverheated(true);
+			setTurnedOn(false);
+		}
+		
+		if (getEngineOverheated() && getEngineTemperature() == 0 && this.getCurrentSpeed().metric() == 0) {
+			setEngineOverheated(false);
 		}
 	}
 	
