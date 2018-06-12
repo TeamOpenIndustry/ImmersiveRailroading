@@ -32,10 +32,9 @@ public class BurnUtil {
 		info.put("biofuel", 170);
 		info.put("ethanol", 170);
 		info.put("gasoline", 100);
-		String[] list = Config.ConfigBalance.dieselSubstitutes;
-		for (int i = 0; i < list.length; i++) {
-			if (FluidRegistry.getFluid(list[i]) != null) {
-				info.put(list[i], 200);
+		for (String fluid : Config.ConfigBalance.dieselSubstitutes) {
+			if (FluidRegistry.getFluid(fluid) != null) {
+				info.put(fluid, 200);
 			}
 		}
 	}
