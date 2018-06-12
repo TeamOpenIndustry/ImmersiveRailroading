@@ -16,9 +16,6 @@ public class DieselLocomotiveOverlay extends LocomotiveOverlay {
 		}
 		LocomotiveDiesel loco = (LocomotiveDiesel) riding;
 		drawGauge(0xAA79650c, ((float)loco.getLiquidAmount())/Fluid.BUCKET_VOLUME, loco.getTankCapacity().Buckets(), "B");
-		
-		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
-		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
 		int boilerColor = 0x99d1c715;
 		if (loco.getEngineTemperature() > 75) {
 			boilerColor = 0x99d16c15;
@@ -26,7 +23,9 @@ public class DieselLocomotiveOverlay extends LocomotiveOverlay {
 		if (loco.getEngineTemperature() > 100) {
 			boilerColor = 0x99a21010;
 		}
-		
 		drawGauge(boilerColor, loco.getEngineTemperature(), 150, "C");
+		
+		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
+		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
 	}
 }
