@@ -141,10 +141,12 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				
 				if (hasFuel) {
-					if (!idle.isPlaying() && getTurnedOn()) {
+					if (!idle.isPlaying() && getTurnedOn() && Config.isFuelRequired(gauge)) {
+						this.idle.play(getPositionVector());
+					} else {
 						this.idle.play(getPositionVector());
 					}
-					if (idle.isPlaying() && getTurnedOn() == false) {
+					if (idle.isPlaying() && getTurnedOn() == false && Config.isFuelRequired(gauge)) {
 						idle.stop();
 					}
 				} else {
@@ -158,10 +160,16 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
-				if (this.soundThrottle > absThrottle && getEngineTemperature() > 70 && getTurnedOn()) {
+				if (this.soundThrottle > absThrottle && getEngineTemperature() > 70 && getTurnedOn() && Config.isFuelRequired(gauge)) {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-				} else if (this.soundThrottle < absThrottle && getEngineTemperature() > 70 && getTurnedOn()) {
+				} else if (this.soundThrottle < absThrottle && getEngineTemperature() > 70 && getTurnedOn() && Config.isFuelRequired(gauge)) {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
+				} else {
+					if (this.soundThrottle > absThrottle) {
+						this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
+					} else if (this.soundThrottle < absThrottle) {
+						this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
+					}
 				}
 	
 				if (horn.isPlaying()) {
@@ -222,20 +230,26 @@ public class LocomotiveDiesel extends Locomotive {
 			float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
 			
 			if (getTurnedOn()) {
-				if (getEngineTemperature() < 150 && this.getLiquidAmount() > 0) {
+				if (getEngineTemperature() < 73 && this.getLiquidAmount() > 0) {
 					setEngineTemperature(getEngineTemperature() + heatUpSpeed);
 					theTank.drain(1, true);
 				}
 				if (getEngineTemperature() > 150) {
 					setEngineTemperature(150);
 				}
+				if (this.getCurrentSpeed().metric() < 10 && getEngineTemperature() > 70) {
+					setEngineTemperature(getEngineTemperature() - 0.02f);
+				}
 			} else {
 				if (getEngineTemperature() > 0) {
 					setEngineTemperature(getEngineTemperature() - 0.02f);
-				}
-				if (getEngineTemperature() < 0) {
+				} else {
 					setEngineTemperature(0);
 				}
+			}
+			
+			if (getEngineTemperature() > 70 && getTurnedOn() && this.getCurrentSpeed().metric() > 10) {
+				setEngineTemperature(getEngineTemperature() + (float) ((heatUpSpeed / 2000) * this.getCurrentSpeed().metric()));
 			}
 			
 			float consumption = Math.abs(getThrottle()) + 0.05f;
