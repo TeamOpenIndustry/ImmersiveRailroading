@@ -34,9 +34,9 @@ public class LocomotiveDiesel extends Locomotive {
 	private int turnOnOffDelay = 20;
 	private int tick = 0;
 	
-	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
-	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
-	private static DataParameter<Boolean> ENGINE_OVERHEATED = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
+	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.FLOAT);
+	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
+	private static DataParameter<Boolean> ENGINE_OVERHEATED = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -132,7 +132,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (!Config.isFuelRequired(gauge)) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
-		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && getTurnedOn() && getEngineOverheated() == false) {
+		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && getTurnedOn() && !getEngineOverheated()) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -141,6 +141,8 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		
+		boolean canDrive = (getEngineTemperature() > 70 && getTurnedOn() && Config.isFuelRequired(gauge));
 		
 		if (world.isRemote) {
 			
@@ -153,12 +155,12 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				
 				if (hasFuel) {
-					if (!idle.isPlaying() && getTurnedOn() && Config.isFuelRequired(gauge)) {
+					if (!idle.isPlaying() && getTurnedOn()) {
 						this.idle.play(getPositionVector());
-					} else if (!idle.isPlaying() && !Config.isFuelRequired(gauge)) {
+					} else if (!idle.isPlaying()) {
 						this.idle.play(getPositionVector());
 					}
-					if (idle.isPlaying() && getTurnedOn() == false && Config.isFuelRequired(gauge)) {
+					if (idle.isPlaying() && !getTurnedOn()) {
 						idle.stop();
 					}
 				} else {
@@ -172,9 +174,9 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
-				if (this.soundThrottle > absThrottle && getEngineTemperature() > 70 && getTurnedOn() && Config.isFuelRequired(gauge)) {
+				if (this.soundThrottle > absThrottle && canDrive) {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-				} else if (this.soundThrottle < absThrottle && getEngineTemperature() > 70 && getTurnedOn() && Config.isFuelRequired(gauge)) {
+				} else if (this.soundThrottle < absThrottle && canDrive) {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 				} else if (!Config.isFuelRequired(gauge)) {
 					if (this.soundThrottle > absThrottle) {
@@ -234,17 +236,15 @@ public class LocomotiveDiesel extends Locomotive {
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
 			
-			/*while (internalBurn < 0 && this.getLiquidAmount() > 0) {
-				internalBurn += burnTime;
-				theTank.drain(1, true);
-			}*/
-			
 			float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
 			
 			if (getTurnedOn()) {
 				if (getEngineTemperature() < 73 && this.getLiquidAmount() > 0) {
-					setEngineTemperature(getEngineTemperature() + heatUpSpeed);
-					theTank.drain(1, true);
+					while (internalBurn < 0 && this.getLiquidAmount() > 0) {
+						internalBurn += burnTime;
+						setEngineTemperature(getEngineTemperature() + heatUpSpeed);
+						theTank.drain(1, true);
+					}
 				}
 				if (getEngineTemperature() > 150) {
 					setEngineTemperature(150);
