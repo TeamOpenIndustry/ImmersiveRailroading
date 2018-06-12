@@ -36,6 +36,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
 	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
+	private static DataParameter<Boolean> ENGINE_OVERHEATED = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -45,6 +46,7 @@ public class LocomotiveDiesel extends Locomotive {
 		super(world, defID);
 		this.getDataManager().register(ENGINE_TEMPERATURE, 0f);
 		this.getDataManager().register(TURNED_ON, false);
+		this.getDataManager().register(ENGINE_OVERHEATED, false);
 	}
 	
 	public float getEngineTemperature() {
@@ -63,6 +65,14 @@ public class LocomotiveDiesel extends Locomotive {
 		return this.dataManager.get(TURNED_ON);
 	}
 	
+	public void setEngineOverheated(boolean value) {
+		this.dataManager.set(ENGINE_OVERHEATED, value);
+	}
+	
+	public boolean getEngineOverheated() {
+		return this.dataManager.get(ENGINE_OVERHEATED);
+	}
+	
 	@Override
 	public LocomotiveDieselDefinition getDefinition() {
 		return super.getDefinition(LocomotiveDieselDefinition.class);
@@ -78,6 +88,7 @@ public class LocomotiveDiesel extends Locomotive {
 		super.writeEntityToNBT(nbttagcompound);
 		nbttagcompound.setFloat("engine_temperature", getEngineTemperature());
 		nbttagcompound.setBoolean("turned_on", getTurnedOn());
+		nbttagcompound.setBoolean("engine_overheated", getEngineOverheated());
 	}
 	
 	@Override
@@ -85,6 +96,7 @@ public class LocomotiveDiesel extends Locomotive {
 		super.readEntityFromNBT(nbttagcompound);
 		setEngineTemperature(nbttagcompound.getFloat("engine_temperature"));
 		setTurnedOn(nbttagcompound.getBoolean("turned_on"));
+		setEngineOverheated(nbttagcompound.getBoolean("egnine_overheated"));
 	}
 	
 	/*
@@ -120,7 +132,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (!Config.isFuelRequired(gauge)) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
-		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && getTurnedOn()) {
+		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && getTurnedOn() && getEngineOverheated() == false) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -143,7 +155,7 @@ public class LocomotiveDiesel extends Locomotive {
 				if (hasFuel) {
 					if (!idle.isPlaying() && getTurnedOn() && Config.isFuelRequired(gauge)) {
 						this.idle.play(getPositionVector());
-					} else {
+					} else if (!idle.isPlaying() && !Config.isFuelRequired(gauge)) {
 						this.idle.play(getPositionVector());
 					}
 					if (idle.isPlaying() && getTurnedOn() == false && Config.isFuelRequired(gauge)) {
@@ -164,7 +176,7 @@ public class LocomotiveDiesel extends Locomotive {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
 				} else if (this.soundThrottle < absThrottle && getEngineTemperature() > 70 && getTurnedOn() && Config.isFuelRequired(gauge)) {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
-				} else {
+				} else if (!Config.isFuelRequired(gauge)) {
 					if (this.soundThrottle > absThrottle) {
 						this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
 					} else if (this.soundThrottle < absThrottle) {
@@ -252,6 +264,14 @@ public class LocomotiveDiesel extends Locomotive {
 				setEngineTemperature(getEngineTemperature() + (float) ((heatUpSpeed / 2000) * this.getCurrentSpeed().metric()));
 			}
 			
+			if (getEngineTemperature() == 150 && Config.ConfigDamage.canEnginesOverheat) {
+				setEngineOverheated(true);
+			}
+			
+			if (getEngineOverheated() && getEngineTemperature() == 0 && this.getCurrentSpeed().metric() == 0) {
+				setEngineOverheated(false);
+			}
+			
 			float consumption = Math.abs(getThrottle()) + 0.05f;
 			consumption *= 100;
 			consumption *= gauge.scale();
@@ -293,7 +313,8 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		this.setEngineTemperature(0);
+		setEngineTemperature(0);
+		setEngineOverheated(false);
 		setTurnedOn(false);
 	}
 }
