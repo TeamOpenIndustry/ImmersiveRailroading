@@ -69,6 +69,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private Augment augment; 
 	private String augmentFilterID;
 	private int snowLayers = 0;
+	public int daysUntouched = 0;
 	protected boolean flexible = false;
 	private boolean willBeReplaced = false; 
 	private NBTTagCompound replaced;
@@ -132,6 +133,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	public int getSnowLayers() {
 		return this.snowLayers;
+	}
+	public int getDaysUntouched() {
+		return this.daysUntouched;
 	}
 	public void setSnowLayers(int snowLayers) {
 		this.snowLayers = snowLayers;

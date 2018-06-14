@@ -47,6 +47,7 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyItemStack RAIL_BED = new PropertyItemStack("RAIL_BED");
 	public static final PropertyFloat HEIGHT = new PropertyFloat("HEIGHT");
 	public static final PropertyFloat SNOW = new PropertyFloat("SNOW");
+	public static final PropertyFloat DAYS_UNTOUCHED = new PropertyFloat("DAYS_UNTOUCHED");
 	public static final PropertyFloat GAUGE = new PropertyFloat("GAUGE");
 	public static final PropertyEnum<Augment> AUGMENT = new PropertyEnum<Augment>("AUGMENT", Augment.class);
 	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
@@ -116,6 +117,7 @@ public abstract class BlockRailBase extends Block {
         	RAIL_BED,
         	HEIGHT,
         	SNOW,
+        	DAYS_UNTOUCHED,
         	GAUGE,
         	AUGMENT,
         	LIQUID,
@@ -133,6 +135,7 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(RAIL_BED, te.getRenderRailBed());
 				state = state.withProperty(HEIGHT, te.getHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
+				state = state.withProperty(DAYS_UNTOUCHED, (float)te.getSnowLayers());
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
