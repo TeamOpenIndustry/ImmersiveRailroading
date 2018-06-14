@@ -14,6 +14,7 @@ public class LocomotiveOverlay extends Gui {
 	private int screenHeight;
 	private int currPosX;
 	private int currPosY;
+	private int currSpeedPosX;
 	
 	private static final int gaugeWidth = 10;
 	private static final int gaugeHeight = 50;
@@ -33,6 +34,7 @@ public class LocomotiveOverlay extends Gui {
 		screenHeight = scaled.getScaledHeight();
 		
 		currPosX = (int) (screenWidth * (ConfigGraphics.GUIPositionHorizontal/100f));
+		currSpeedPosX = (int) (screenWidth * (ConfigGraphics.GUIPositionHorizontal/100f));
 		currPosY = (int) (screenHeight * (ConfigGraphics.GUIPositionVertical/100f));
 		currPosY -= 50;
 	}
@@ -82,10 +84,11 @@ public class LocomotiveOverlay extends Gui {
 	}
 	
 	public void drawSpeedText(String text) {
-		drawRect(12, 265, 80, 248, 0xFF4d4d4d);
+		drawRect(currSpeedPosX, currPosY - 10, currSpeedPosX + 68, currPosY - 27, 0xFF4d4d4d);//drawRect(12, 265, 80, 248, 0xFF4d4d4d);
+		System.out.println("x: " + currSpeedPosX + "   y: " + currPosY);
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(46, 253, 0);
+			GL11.glTranslated(currSpeedPosX + 34, currPosY - 22, 0);
 			double scale = 1;
 			GL11.glScaled(scale, scale, scale);
 			drawCenteredString(mc.fontRenderer, text, 0, 0, 0xFFFFFF);
