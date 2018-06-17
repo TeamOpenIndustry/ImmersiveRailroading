@@ -67,8 +67,12 @@ public class LocomotiveDiesel extends Locomotive {
 		this.dataManager.set(ENGINE_OVERHEATED, value);
 	}
 	
-	public boolean getEngineOverheated() {
+	public boolean isEngineOverheated() {
 		return this.dataManager.get(ENGINE_OVERHEATED);
+	}
+	
+	public boolean isRunning() {
+		return isTurnedOn() && getEngineTemperature() > 70 && !isEngineOverheated();
 	}
 	
 	@Override
@@ -86,7 +90,7 @@ public class LocomotiveDiesel extends Locomotive {
 		super.writeEntityToNBT(nbttagcompound);
 		nbttagcompound.setFloat("engine_temperature", getEngineTemperature());
 		nbttagcompound.setBoolean("turned_on", isTurnedOn());
-		nbttagcompound.setBoolean("engine_overheated", getEngineOverheated());
+		nbttagcompound.setBoolean("engine_overheated", isEngineOverheated());
 	}
 	
 	@Override
@@ -127,7 +131,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (!Config.isFuelRequired(gauge)) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
-		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && isTurnedOn() && !getEngineOverheated()) {
+		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && isTurnedOn() && !isEngineOverheated()) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -136,8 +140,6 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		
-		boolean canDrive = (getEngineTemperature() > 70 && isTurnedOn() && Config.isFuelRequired(gauge));
 		
 		if (world.isRemote) {
 			
@@ -149,13 +151,13 @@ public class LocomotiveDiesel extends Locomotive {
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
 				}
 				
-				if (hasFuel) {
-					if (!idle.isPlaying() && isTurnedOn()) {
+				if (hasFuel && isRunning()) {
+					if (!idle.isPlaying()) {
 						this.idle.play(getPositionVector());
 					} else if (!idle.isPlaying() && !isTurnedOn()) {
 						this.idle.play(getPositionVector());
 					}
-					if (idle.isPlaying() && !isTurnedOn()) {
+					if (idle.isPlaying()) {
 						idle.stop();
 					}
 				} else {
@@ -169,9 +171,9 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
-				if (this.soundThrottle > absThrottle && canDrive) {
+				if (this.soundThrottle > absThrottle) {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-				} else if (this.soundThrottle < absThrottle && canDrive) {
+				} else if (this.soundThrottle < absThrottle) {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 				} else if (!Config.isFuelRequired(gauge)) {
 					if (this.soundThrottle > absThrottle) {
@@ -205,7 +207,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
 			float throttle = Math.abs(this.getThrottle());
-			if (exhausts != null && throttle > 0 && hasFuel && getEngineTemperature() > 70 && isTurnedOn()) {
+			if (exhausts != null && throttle > 0 && hasFuel && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					
@@ -252,7 +254,7 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 			}
 			
-			if (getEngineTemperature() > 70 && isTurnedOn() && this.getThrottle() > 0f) {
+			if (this.getThrottle() > 0f && isRunning()) {
 				while (internalBurn < 0 && this.getLiquidAmount() > 0) {
 					internalBurn += burnTime / (this.getThrottle() * 10);
 					theTank.drain(1, true);
@@ -272,7 +274,7 @@ public class LocomotiveDiesel extends Locomotive {
 			setTurnedOn(false);
 		}
 		
-		if (getEngineOverheated() && getEngineTemperature() == 0 && this.getCurrentSpeed().metric() == 0) {
+		if (isEngineOverheated() && getEngineTemperature() == 0 && this.getCurrentSpeed().metric() == 0) {
 			setEngineOverheated(false);
 		}
 		
