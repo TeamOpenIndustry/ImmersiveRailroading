@@ -42,7 +42,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	public LocomotiveDiesel(World world, String defID) {
 		super(world, defID);
-		this.getDataManager().register(ENGINE_TEMPERATURE, 0f);
+		this.getDataManager().register(ENGINE_TEMPERATURE, ambientTemperature());
 		this.getDataManager().register(TURNED_ON, false);
 		this.getDataManager().register(ENGINE_OVERHEATED, false);
 	}
@@ -248,7 +248,9 @@ public class LocomotiveDiesel extends Locomotive {
 		// Constant amount of radiated heat
 		// not realistic, the hotter it gets the more heat it radiates
 		// See steam loco code for example
-		engineTemperature -= coolDownSpeed;
+		if (engineTemperature > ambientTemperature()) {
+			engineTemperature -= coolDownSpeed;
+		}
 		
 
 		if (isRunning()) {
