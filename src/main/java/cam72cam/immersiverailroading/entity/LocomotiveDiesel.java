@@ -94,7 +94,7 @@ public class LocomotiveDiesel extends Locomotive {
 		super.readEntityFromNBT(nbttagcompound);
 		setEngineTemperature(nbttagcompound.getFloat("engine_temperature"));
 		setTurnedOn(nbttagcompound.getBoolean("turned_on"));
-		setEngineOverheated(nbttagcompound.getBoolean("egnine_overheated"));
+		setEngineOverheated(nbttagcompound.getBoolean("engine_overheated"));
 	}
 	
 	/*
