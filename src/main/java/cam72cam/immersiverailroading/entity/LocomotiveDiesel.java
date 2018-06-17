@@ -167,12 +167,6 @@ public class LocomotiveDiesel extends Locomotive {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
 				} else if (this.soundThrottle < absThrottle) {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
-				} else if (!Config.isFuelRequired(gauge)) {
-					if (this.soundThrottle > absThrottle) {
-						this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-					} else if (this.soundThrottle < absThrottle) {
-						this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
-					}
 				}
 	
 				if (horn.isPlaying()) {
