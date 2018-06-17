@@ -254,11 +254,11 @@ public class LocomotiveDiesel extends Locomotive {
 		if (isRunning()) {
 			engineTemperature += heatUpSpeed * consumption;
 			
-			if (engineTemperature > 150) {
+			if (engineTemperature > 150 && Config.ConfigDamage.canEnginesOverheat) {
 				engineTemperature = 150;
 				setEngineOverheated(true);
 			}
-			if (engineTemperature < 100 && isEngineOverheated()) {
+			if ((engineTemperature < 100 || !Config.ConfigDamage.canEnginesOverheat) && isEngineOverheated()) {
 				setEngineOverheated(false);
 			}
 		}
