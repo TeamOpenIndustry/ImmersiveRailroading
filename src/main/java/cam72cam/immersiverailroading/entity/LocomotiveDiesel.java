@@ -72,7 +72,10 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	public boolean isRunning() {
-		return isTurnedOn() && getEngineTemperature() > 70 && !isEngineOverheated();
+		if (!Config.isFuelRequired(gauge)) {
+			return isTurnedOn();
+		}
+		return isTurnedOn() && !isEngineOverheated() && this.getLiquidAmount() > 0;
 	}
 	
 	@Override
@@ -109,7 +112,7 @@ public class LocomotiveDiesel extends Locomotive {
 		switch(key) {
 			case START_STOP_ENGINE:
 				if (turnOnOffDelay == 0) {
-					turnOnOffDelay = 20;
+					turnOnOffDelay = 10;
 					setTurnedOn(!isTurnedOn());
 				}
 				break;
@@ -128,10 +131,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	protected int getAvailableHP() {
-		if (!Config.isFuelRequired(gauge)) {
-			return this.getDefinition().getHorsePower(gauge);
-		}
-		if (this.getLiquidAmount() > 0 && getEngineTemperature() > 70 && isTurnedOn() && !isEngineOverheated()) {
+		if (isRunning() && getEngineTemperature() > 70) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -142,23 +142,15 @@ public class LocomotiveDiesel extends Locomotive {
 		super.onUpdate();
 		
 		if (world.isRemote) {
-			
-			boolean hasFuel = (this.getLiquidAmount() > 0 || !Config.isFuelRequired(gauge));
-			
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
 					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, gauge);
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
 				}
 				
-				if (hasFuel && isRunning()) {
+				if (isRunning()) {
 					if (!idle.isPlaying()) {
 						this.idle.play(getPositionVector());
-					} else if (!idle.isPlaying() && !isTurnedOn()) {
-						this.idle.play(getPositionVector());
-					}
-					if (idle.isPlaying()) {
-						idle.stop();
 					}
 				} else {
 					if (idle.isPlaying()) {
@@ -166,7 +158,7 @@ public class LocomotiveDiesel extends Locomotive {
 					}
 				}
 				
-				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
+				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
 					horn.play(getPositionVector());
 				}
 				
@@ -206,8 +198,8 @@ public class LocomotiveDiesel extends Locomotive {
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
-			float throttle = Math.abs(this.getThrottle());
-			if (exhausts != null && throttle > 0 && hasFuel && isRunning()) {
+			float throttle = Math.abs(this.getThrottle()) + 0.05f;
+			if (exhausts != null && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					
@@ -224,6 +216,12 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 			return;
 		}
+
+		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
+		float coolDownSpeed = heatUpSpeed/2; //TODO configurable per loco?
+		
+		float engineTemperature = getEngineTemperature();
+		float consumption = Math.abs(getThrottle()) + 0.05f;
 		
 		if (this.getLiquidAmount() > 0) {
 			float burnTime = BurnUtil.getBurnTime(this.getLiquid());
@@ -233,27 +231,6 @@ public class LocomotiveDiesel extends Locomotive {
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
 			
-			float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
-			
-			if (isTurnedOn()) {
-				if (getEngineTemperature() < 73 && this.getLiquidAmount() > 0) {
-					theTank.drain(1, true);
-					setEngineTemperature(getEngineTemperature() + heatUpSpeed);
-				}
-				if (getEngineTemperature() > 150) {
-					setEngineTemperature(150);
-				}
-				if (this.getThrottle() == 0f && getEngineTemperature() > 70) {
-					setEngineTemperature(getEngineTemperature() - 0.02f);
-				}
-			} else {
-				if (getEngineTemperature() > 0) {
-					setEngineTemperature(getEngineTemperature() - 0.02f);
-				} else {
-					setEngineTemperature(0);
-				}
-			}
-			
 			if (this.getThrottle() > 0f && isRunning()) {
 				while (internalBurn < 0 && this.getLiquidAmount() > 0) {
 					internalBurn += burnTime / (this.getThrottle() * 10);
@@ -262,20 +239,28 @@ public class LocomotiveDiesel extends Locomotive {
 				setEngineTemperature(getEngineTemperature() + (float) (heatUpSpeed * this.getThrottle()) / 10);
 			}
 			
-			float consumption = Math.abs(getThrottle()) + 0.05f;
 			consumption *= 100;
 			consumption *= gauge.scale();
 			
 			internalBurn -= consumption;
 		}
+
+		// Constant amount of radiated heat
+		// not realistic, the hotter it gets the more heat it radiates
+		// See steam loco code for example
+		engineTemperature -= coolDownSpeed;
 		
-		if (getEngineTemperature() >= 150 && Config.ConfigDamage.canEnginesOverheat) {
-			setEngineOverheated(true);
-			setTurnedOn(false);
-		}
-		
-		if (isEngineOverheated() && getEngineTemperature() == 0 && this.getCurrentSpeed().metric() == 0) {
-			setEngineOverheated(false);
+
+		if (isRunning()) {
+			engineTemperature += heatUpSpeed * consumption;
+			
+			if (engineTemperature > 150) {
+				engineTemperature = 150;
+				setEngineOverheated(true);
+			}
+			if (engineTemperature < 100 && isEngineOverheated()) {
+				setEngineOverheated(false);
+			}
 		}
 		
 		if (turnOnOffDelay > 0) {
