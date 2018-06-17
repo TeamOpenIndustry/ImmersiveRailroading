@@ -215,9 +215,9 @@ public class LocomotiveDiesel extends Locomotive {
 		float coolDownSpeed = heatUpSpeed/2; //TODO configurable per loco?
 		
 		float engineTemperature = getEngineTemperature();
-		float consumption = Math.abs(getThrottle()) + 0.05f;
 		
-		if (this.getLiquidAmount() > 0) {
+		if (this.getLiquidAmount() > 0 && isRunning()) {
+			float consumption = Math.abs(getThrottle()) + 0.05f;
 			float burnTime = BurnUtil.getBurnTime(this.getLiquid());
 			if (burnTime == 0) {
 				burnTime = 200; //Default to 200 for unregistered liquids
@@ -225,11 +225,9 @@ public class LocomotiveDiesel extends Locomotive {
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
 			
-			if (isRunning()) {
-				while (internalBurn < 0 && this.getLiquidAmount() > 0) {
-					internalBurn += burnTime / (this.getThrottle() * 10);
-					theTank.drain(1, true);
-				}
+			while (internalBurn < 0 && this.getLiquidAmount() > 0) {
+				internalBurn += burnTime;
+				theTank.drain(1, true);
 			}
 			
 			consumption *= 100;
@@ -247,7 +245,7 @@ public class LocomotiveDiesel extends Locomotive {
 		
 
 		if (isRunning()) {
-			engineTemperature += heatUpSpeed * consumption;
+			engineTemperature += heatUpSpeed * Math.abs(getThrottle()) + 0.1f;
 			
 			if (engineTemperature > 150 && Config.ConfigDamage.canEnginesOverheat) {
 				engineTemperature = 150;
