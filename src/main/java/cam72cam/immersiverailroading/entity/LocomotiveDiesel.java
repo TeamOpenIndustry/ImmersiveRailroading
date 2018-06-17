@@ -245,7 +245,7 @@ public class LocomotiveDiesel extends Locomotive {
 		
 
 		if (isRunning()) {
-			engineTemperature += heatUpSpeed * Math.abs(getThrottle()) + 0.1f;
+			engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
 			
 			if (engineTemperature > 150 && Config.ConfigDamage.canEnginesOverheat) {
 				engineTemperature = 150;
