@@ -225,12 +225,11 @@ public class LocomotiveDiesel extends Locomotive {
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
 			
-			if (this.getThrottle() > 0f && isRunning()) {
+			if (isRunning()) {
 				while (internalBurn < 0 && this.getLiquidAmount() > 0) {
 					internalBurn += burnTime / (this.getThrottle() * 10);
 					theTank.drain(1, true);
 				}
-				setEngineTemperature(getEngineTemperature() + (float) (heatUpSpeed * this.getThrottle()) / 10);
 			}
 			
 			consumption *= 100;
@@ -289,7 +288,7 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		setEngineTemperature(0);
+		setEngineTemperature(ambientTemperature());
 		setEngineOverheated(false);
 		setTurnedOn(false);
 	}
