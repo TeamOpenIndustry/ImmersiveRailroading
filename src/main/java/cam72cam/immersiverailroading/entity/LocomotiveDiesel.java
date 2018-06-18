@@ -211,6 +211,7 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 
+		//calculate heat up/cool down speed with engine size and it's heat capacity (cast iron -> 0.46 kj/kg K). Calculate surface area and then how fast it would heat up/cool down in the real world
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
 		float coolDownSpeed = heatUpSpeed/2; //TODO configurable per loco?
 		
@@ -242,16 +243,15 @@ public class LocomotiveDiesel extends Locomotive {
 		if (engineTemperature > ambientTemperature()) {
 			engineTemperature -= coolDownSpeed;
 		}
-		
 
 		if (isRunning()) {
 			engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
 			
-			if (engineTemperature > 150 && Config.ConfigDamage.canEnginesOverheat) {
+			if (engineTemperature > 150 && Config.ConfigBalance.canDieselEnginesOverheat) {
 				engineTemperature = 150;
 				setEngineOverheated(true);
 			}
-			if ((engineTemperature < 100 || !Config.ConfigDamage.canEnginesOverheat) && isEngineOverheated()) {
+			if ((engineTemperature < 100 || !Config.ConfigBalance.canDieselEnginesOverheat) && isEngineOverheated()) {
 				setEngineOverheated(false);
 			}
 		}

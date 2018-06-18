@@ -34,9 +34,6 @@ public class Config {
 
 		@Comment("Drop snowballs when the train can't push a block out of the way")
 		public static boolean dropSnowBalls = false;
-		
-		@Comment("Allow diesel locomotive engine overheating")
-		public static boolean canEnginesOverheat = true;
 	}
 
 	public static ConfigBalance balance;
@@ -100,6 +97,9 @@ public class Config {
 		public static String[] villagerPayoutItems = new String[] {
 			Items.EMERALD.getRegistryName().toString()
 		};
+		
+		@Comment("Allow diesel locomotive engine overheating")
+		public static boolean canDieselEnginesOverheat = true;
 		
 		public static List<Item> getVillagerPayout() {
 			List<Item> items = new ArrayList<Item>();
