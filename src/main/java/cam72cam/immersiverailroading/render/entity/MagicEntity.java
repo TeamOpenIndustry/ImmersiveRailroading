@@ -64,6 +64,7 @@ public class MagicEntity extends Entity {
 
 	@Override
 	protected void entityInit() {
+		this.setEntityId(-31415);
 	}
 
 	@Override
