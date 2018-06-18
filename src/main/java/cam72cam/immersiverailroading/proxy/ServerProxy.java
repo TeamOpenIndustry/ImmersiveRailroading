@@ -37,11 +37,6 @@ public class ServerProxy extends CommonProxy {
 	public void init(FMLInitializationEvent event) {
 		super.init(event);
 	}
-	
-	@Override
-	public void serverStarting(FMLServerStartingEvent event) {
-		event.registerServerCommand(new ReloadResourcesCommand());
-	}
 
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
