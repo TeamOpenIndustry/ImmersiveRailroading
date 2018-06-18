@@ -31,6 +31,7 @@ public class LocomotiveDiesel extends Locomotive {
 	private float soundThrottle;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
+	private static final float throttleNotch = 0.04f;
 	
 	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.FLOAT);
 	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
@@ -116,6 +117,16 @@ public class LocomotiveDiesel extends Locomotive {
 					setTurnedOn(!isTurnedOn());
 				}
 				break;
+			case THROTTLE_UP:
+				if (getEngineTemperature() > 75 && getThrottle() < 1 && !isEngineOverheated()) {
+					setThrottle(getThrottle() + throttleNotch);
+				}
+				break;
+			case THROTTLE_DOWN:
+				if (getEngineTemperature() > 75 && getThrottle() > -1 && !isEngineOverheated()) {
+					setThrottle(getThrottle() - throttleNotch);
+				}
+				break;
 			default:
 				super.handleKeyPress(source, key);
 		}
@@ -131,7 +142,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	protected int getAvailableHP() {
-		if (isRunning() && getEngineTemperature() > 70) {
+		if (isRunning() && getEngineTemperature() > 75) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -210,12 +221,19 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 			return;
 		}
-
-		//calculate heat up/cool down speed with engine size and it's heat capacity (cast iron -> 0.46 kj/kg K). Calculate surface area and then how fast it would heat up/cool down in the real world
-		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
-		float coolDownSpeed = heatUpSpeed/2; //TODO configurable per loco?
+		
+		//todo: engine doesnt heat up when driving
+		//todo: engine temperature set to ambient as soon as engines are turned off
 		
 		float engineTemperature = getEngineTemperature();
+		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
+		float engineHeatEnergy = (float) (0.65f * (15000f * (engineTemperature - ambientTemperature())) * gauge.scale());
+		float castIronHeatTransfer = 0.65f * (engineTemperature * ambientTemperature()) * 2f;
+		float heatTransferPerTick = castIronHeatTransfer / 20;
+		float coolDownSpeed = 0;
+		if (engineHeatEnergy - heatTransferPerTick >= 0) {
+			coolDownSpeed = heatTransferPerTick * Config.ConfigBalance.dieselLocoHeatTimeScale;
+		}
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
 			float consumption = Math.abs(getThrottle()) + 0.05f;
@@ -235,25 +253,30 @@ public class LocomotiveDiesel extends Locomotive {
 			consumption *= gauge.scale();
 			
 			internalBurn -= consumption;
-		}
-
-		// Constant amount of radiated heat
-		// not realistic, the hotter it gets the more heat it radiates
-		// See steam loco code for example
-		if (engineTemperature > ambientTemperature()) {
-			engineTemperature -= coolDownSpeed;
+			if (engineTemperature < 75) {
+				setEngineTemperature(engineTemperature + heatUpSpeed);
+			}
 		}
 
 		if (isRunning()) {
-			engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
+			if (engineTemperature > 70 && !isEngineOverheated()) {
+				engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
+			}
 			
 			if (engineTemperature > 150 && Config.ConfigBalance.canDieselEnginesOverheat) {
 				engineTemperature = 150;
 				setEngineOverheated(true);
 			}
-			if ((engineTemperature < 100 || !Config.ConfigBalance.canDieselEnginesOverheat) && isEngineOverheated()) {
+			if ((engineTemperature < 50 || !Config.ConfigBalance.canDieselEnginesOverheat) && isEngineOverheated()) {
 				setEngineOverheated(false);
 			}
+		}
+		if (this.getThrottle() == 0 && (engineTemperature > 75 || (!isTurnedOn() && engineTemperature >= ambientTemperature()))) {
+			engineTemperature -= coolDownSpeed;
+		}
+		
+		if (engineTemperature < ambientTemperature() && !isTurnedOn()) {
+			setEngineTemperature(ambientTemperature());
 		}
 		
 		if (turnOnOffDelay > 0) {
