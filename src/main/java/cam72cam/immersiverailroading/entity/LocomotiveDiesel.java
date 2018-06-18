@@ -46,6 +46,7 @@ public class LocomotiveDiesel extends Locomotive {
 		this.getDataManager().register(ENGINE_TEMPERATURE, ambientTemperature());
 		this.getDataManager().register(TURNED_ON, false);
 		this.getDataManager().register(ENGINE_OVERHEATED, false);
+		setEngineTemperature(ambientTemperature());
 	}
 	
 	public float getEngineTemperature() {
@@ -115,16 +116,6 @@ public class LocomotiveDiesel extends Locomotive {
 				if (turnOnOffDelay == 0) {
 					turnOnOffDelay = 10;
 					setTurnedOn(!isTurnedOn());
-				}
-				break;
-			case THROTTLE_UP:
-				if (getEngineTemperature() > 75 && getThrottle() < 1 && !isEngineOverheated()) {
-					setThrottle(getThrottle() + throttleNotch);
-				}
-				break;
-			case THROTTLE_DOWN:
-				if (getEngineTemperature() > 75 && getThrottle() > -1 && !isEngineOverheated()) {
-					setThrottle(getThrottle() - throttleNotch);
 				}
 				break;
 			default:
@@ -227,13 +218,7 @@ public class LocomotiveDiesel extends Locomotive {
 		
 		float engineTemperature = getEngineTemperature();
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
-		float engineHeatEnergy = (float) (0.65f * (15000f * (engineTemperature - ambientTemperature())) * gauge.scale());
-		float castIronHeatTransfer = 0.65f * (engineTemperature * ambientTemperature()) * 2f;
-		float heatTransferPerTick = castIronHeatTransfer / 20;
-		float coolDownSpeed = 0;
-		if (engineHeatEnergy - heatTransferPerTick >= 0) {
-			coolDownSpeed = heatTransferPerTick * Config.ConfigBalance.dieselLocoHeatTimeScale;
-		}
+		float coolDownSpeed = heatUpSpeed * ((engineTemperature - ambientTemperature()) / 200);
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
 			float consumption = Math.abs(getThrottle()) + 0.05f;
@@ -254,13 +239,13 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			internalBurn -= consumption;
 			if (engineTemperature < 75) {
-				setEngineTemperature(engineTemperature + heatUpSpeed);
+				engineTemperature += heatUpSpeed;
 			}
 		}
 
 		if (isRunning()) {
 			if (engineTemperature > 70 && !isEngineOverheated()) {
-				engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
+				engineTemperature += (heatUpSpeed / 5) * (Math.abs(getThrottle()) + 0.1f);
 			}
 			
 			if (engineTemperature > 150 && Config.ConfigBalance.canDieselEnginesOverheat) {
@@ -271,17 +256,15 @@ public class LocomotiveDiesel extends Locomotive {
 				setEngineOverheated(false);
 			}
 		}
-		if (this.getThrottle() == 0 && (engineTemperature > 75 || (!isTurnedOn() && engineTemperature >= ambientTemperature()))) {
+		if (getThrottle() == 0 && engineTemperature > 74 || !isTurnedOn() && engineTemperature > ambientTemperature()) {
 			engineTemperature -= coolDownSpeed;
-		}
-		
-		if (engineTemperature < ambientTemperature() && !isTurnedOn()) {
-			setEngineTemperature(ambientTemperature());
 		}
 		
 		if (turnOnOffDelay > 0) {
 			turnOnOffDelay -= 1;
 		}
+		
+		setEngineTemperature(engineTemperature);
 	}
 	
 	@Override
