@@ -13,6 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 public abstract class TrackBase {
 	public BuilderBase builder;
@@ -52,15 +53,27 @@ public abstract class TrackBase {
 
 	public TileEntity placeTrack() { 
 		PosRot pos = getPos();
-		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.placeEmbankment) {
-			for (int x = 1; x < 30; x++) {
+		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.embankmentHeight > 0) {
+			for (int x = 1; x < builder.info.embankmentHeight; x++) {
+				if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
+						builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
+				}
+				for (int i = 1; i < x; i++) {
+					if (BlockUtil.canBeReplaced(builder.world, getBlockBeside(this.getFacing(), false, pos, i), false)) {
+						builder.world.setBlockState(getBlockBeside(this.getFacing(), false, pos, i), BlockUtil.itemToBlockState(builder.info.railBedFill));
+					}
+					if (BlockUtil.canBeReplaced(builder.world, getBlockBeside(this.getFacing(), true, pos, i), false)) {
+						builder.world.setBlockState(getBlockBeside(this.getFacing(), true, pos, i), BlockUtil.itemToBlockState(builder.info.railBedFill));
+					}
+				}
+				
 				if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
 					builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
 				} else {
 					break;
 				}
 			}
-		} else if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.placeEmbankment == false) {
+		} else if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.embankmentHeight == 0) {
 			builder.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.railBedFill));
 		}
 		
@@ -98,6 +111,37 @@ public abstract class TrackBase {
 		tr.setHeight(getHeight());
 		return tr;
 	}
+	
+	public BlockPos getBlockBeside (EnumFacing facing, boolean left, BlockPos pos, int distance) {
+		if (!left) {
+			switch (facing) {
+				case NORTH:
+					return pos.west(distance);
+				case SOUTH:
+					return pos.east(distance);
+				case EAST:
+					return pos.north(distance);
+				case WEST:
+					return pos.south(distance);
+				default:
+					return null;
+			}
+		} else {
+			switch (facing) {
+				case NORTH:
+					return pos.east(distance);
+				case SOUTH:
+					return pos.west(distance);
+				case EAST:
+					return pos.south(distance);
+				case WEST:
+					return pos.north(distance);
+				default:
+					return null;
+			}
+		}
+	}
+	
 	public IBlockState getBlockState() {
 		return block.getDefaultState();
 	}

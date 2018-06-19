@@ -236,8 +236,8 @@ public abstract class BuilderBase {
 	public int costFill() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
-			if (track.builder.info.placeEmbankment) {
-				for (int x = 1; x < 255; x++) {
+			if (track.builder.info.embankmentHeight > 0) {
+				for (int x = 1; x < track.builder.info.embankmentHeight; x++) {
 					if (BlockUtil.canBeReplaced(world, track.getPos().down(x), false)) {
 						fillCount++;
 					} else {

@@ -41,14 +41,14 @@ public class RailInfo {
 	public Vec3d placementPosition;
 	public ItemStack railBed;
 	public ItemStack railBedFill;
-	public boolean placeEmbankment;
+	public int embankmentHeight;
 
 	// Used for tile rendering only
 	public SwitchState switchState = SwitchState.NONE;
 	public double tablePos = 0;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState, double tablePos, boolean placeEmbankment) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState, double tablePos, int embankmentHeight) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -63,7 +63,7 @@ public class RailInfo {
 		this.railBedFill = railBedFill;
 		this.switchState = switchState;
 		this.tablePos = tablePos;
-		this.placeEmbankment = placeEmbankment;
+		this.embankmentHeight = embankmentHeight;
 	}
 	
 	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
@@ -74,7 +74,7 @@ public class RailInfo {
 		gauge = ItemGauge.get(stack);
 		railBed = ItemTrackBlueprint.getBed(stack);
 		railBedFill = ItemTrackBlueprint.getBedFill(stack);
-		placeEmbankment = ItemTrackBlueprint.getPlaceEmbankment(stack);
+		embankmentHeight = ItemTrackBlueprint.getEmbankmentHeight(stack);
 		world = worldIn;
 		TrackPositionType posType = ItemTrackBlueprint.getPosType(stack);
 		direction = ItemTrackBlueprint.getDirection(stack);
@@ -175,7 +175,7 @@ public class RailInfo {
 	
 	@Override
 	public RailInfo clone() {
-		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill, switchState, tablePos, placeEmbankment);
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill, switchState, tablePos, embankmentHeight);
 		return c;
 	}
 	

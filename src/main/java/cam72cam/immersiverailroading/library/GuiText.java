@@ -17,7 +17,7 @@ public enum GuiText {
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),
 	SELECTOR_CAST_SINGLE("selector.cast_single"),
 	SELECTOR_CAST_REPEAT("selector.cast_repeat"),
-	SELECTOR_PLACE_EMBANKMENT("selector.place_embankment"),
+	SELECTOR_EMBANKMENT_HEIGHT("selector.embankment_height"),
 
 	TRACK_TYPE("track.type"),
 	TRACK_LENGTH("track.length"),
@@ -29,8 +29,6 @@ public enum GuiText {
 	TRACK_DIRECTION("track.direction"),
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
-	TRACK_PLACE_EMBANKMENT_TRUE("track.place_embarkment_true"),
-	TRACK_PLACE_EMBANKMENT_FALSE("track.place_embarkment_false"),
 	
 	LOCO_WORKS("loco.works"),
 	LOCO_HORSE_POWER("loco.horse_power"),

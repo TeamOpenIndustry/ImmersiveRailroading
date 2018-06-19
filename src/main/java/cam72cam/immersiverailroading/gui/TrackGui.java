@@ -35,7 +35,7 @@ public class TrackGui extends GuiScreen {
 	private GuiTextField lengthInput;
 	private GuiSlider quartersSlider;
 	private GuiCheckBox isPreviewCB;
-	public GuiCheckBox placeEmbankmentCB;
+	public GuiSlider placeEmbankment;
 	private GuiButton gaugeButton;
 
 	private int slot;
@@ -43,7 +43,7 @@ public class TrackGui extends GuiScreen {
 	private int quarters;
 	private Gauge gauge;
 	private boolean isPreview;
-	private boolean placeEmbankment;
+	private int embankmentHeight;
 	private TrackItems type;
 	private TrackPositionType posType;
 	private TrackDirection direction;
@@ -94,7 +94,7 @@ public class TrackGui extends GuiScreen {
 		posType = ItemTrackBlueprint.getPosType(stack);
 		direction = ItemTrackBlueprint.getDirection(stack);
 		isPreview = ItemTrackBlueprint.isPreview(stack);
-		placeEmbankment = ItemTrackBlueprint.getPlaceEmbankment(stack);
+		embankmentHeight = ItemTrackBlueprint.getEmbankmentHeight(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
 		oreDict.add(new ItemStack(Items.AIR));
@@ -195,6 +195,16 @@ public class TrackGui extends GuiScreen {
 		bedFillButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getBedFillName()));
 		this.buttonList.add(bedFillButton);
 		
+		this.placeEmbankment = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, "", 0, 50, embankmentHeight, null) {
+			@Override
+			public void updateSlider() {
+				super.updateSlider();
+				displayString = GuiText.SELECTOR_EMBANKMENT_HEIGHT.toString();
+			}
+		};
+		placeEmbankment.updateSlider();
+		this.buttonList.add(placeEmbankment);
+		
 		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_POSITION.toString(posType));
 		this.buttonList.add(posTypeButton);
 		
@@ -203,9 +213,6 @@ public class TrackGui extends GuiScreen {
 		
 		gaugeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_GAUGE.toString(gauge));
 		this.buttonList.add(gaugeButton);
-		
-		placeEmbankmentCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_PLACE_EMBANKMENT.toString(), placeEmbankment);
-		this.buttonList.add(placeEmbankmentCB);
 		
 		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview);
 		this.buttonList.add(isPreviewCB);
@@ -241,9 +248,6 @@ public class TrackGui extends GuiScreen {
 		if (button == isPreviewCB) {
 			isPreview = isPreviewCB.isChecked();
 		}
-		if (button == placeEmbankmentCB) {
-			placeEmbankment = placeEmbankmentCB.isChecked();
-		}
 	}
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
@@ -253,10 +257,10 @@ public class TrackGui extends GuiScreen {
         	if (!this.lengthInput.getText().isEmpty()) {
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, placeEmbankment));
+    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, embankmentHeight));
         		} else {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, placeEmbankment));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, embankmentHeight));
         		}
         	}
 			this.mc.displayGuiScreen(null);

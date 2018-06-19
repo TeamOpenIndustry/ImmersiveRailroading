@@ -31,7 +31,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	private ItemStack bedStack;
 	private ItemStack railBedFill;
 	private boolean isPreview;
-	private boolean placeEmbankment;
+	private int embankmentHeight;
 	private BlockPos tilePreviewPos;
 	
 	public ItemRailUpdatePacket() {
@@ -39,7 +39,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, boolean placeEmbankment) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, int embankmentHeight) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
@@ -48,12 +48,12 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = bedStack;
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
-		this.placeEmbankment = placeEmbankment;
+		this.embankmentHeight = embankmentHeight;
 		this.gauge = gauge;
 		this.direction = direction;
 	}
 
-	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, boolean placeEmbankment) {
+	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, int embankmentHeight) {
 		this.tilePreviewPos = tilePreviewPos;
 		this.length = length;
 		this.quarters = quarters;
@@ -62,7 +62,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = bedStack;
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
-		this.placeEmbankment = placeEmbankment;
+		this.embankmentHeight = embankmentHeight;
 		this.gauge = gauge;
 		this.direction = direction;
 	}
@@ -83,7 +83,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = ByteBufUtils.readItemStack(buf);
 		this.railBedFill = ByteBufUtils.readItemStack(buf);
 		this.isPreview = buf.readBoolean();
-		this.placeEmbankment = buf.readBoolean();
+		this.embankmentHeight = buf.readInt();
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		ByteBufUtils.writeItemStack(buf, bedStack);
 		ByteBufUtils.writeItemStack(buf, railBedFill);
 		buf.writeBoolean(isPreview);
-		buf.writeBoolean(placeEmbankment);
+		buf.writeInt(embankmentHeight);
 	}
 	
 	public static class Handler implements IMessageHandler<ItemRailUpdatePacket, IMessage> {
@@ -135,7 +135,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemTrackBlueprint.setBed(stack, message.bedStack);
 			ItemTrackBlueprint.setBedFill(stack, message.railBedFill);
 			ItemTrackBlueprint.setPreview(stack, message.isPreview);
-			ItemTrackBlueprint.setPlaceEmbankment(stack, message.placeEmbankment);
+			ItemTrackBlueprint.setEmbankmentHeight(stack, message.embankmentHeight);
 			if (message.tilePreviewPos == null) {
 				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 			} else {
