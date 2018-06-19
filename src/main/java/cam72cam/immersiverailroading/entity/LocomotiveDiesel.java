@@ -46,7 +46,6 @@ public class LocomotiveDiesel extends Locomotive {
 		this.getDataManager().register(ENGINE_TEMPERATURE, ambientTemperature());
 		this.getDataManager().register(TURNED_ON, false);
 		this.getDataManager().register(ENGINE_OVERHEATED, false);
-		setEngineTemperature(ambientTemperature());
 	}
 	
 	public float getEngineTemperature() {
@@ -242,9 +241,11 @@ public class LocomotiveDiesel extends Locomotive {
 				engineTemperature += heatUpSpeed;
 			}
 		}
+		
+		engineTemperature -= coolDownSpeed;
 
 		if (isRunning()) {
-			if (engineTemperature > 70 && !isEngineOverheated()) {
+			if (!isEngineOverheated()) {
 				engineTemperature += (heatUpSpeed / 5) * (Math.abs(getThrottle()) + 0.1f);
 			}
 			
@@ -255,9 +256,6 @@ public class LocomotiveDiesel extends Locomotive {
 			if ((engineTemperature < 50 || !Config.ConfigBalance.canDieselEnginesOverheat) && isEngineOverheated()) {
 				setEngineOverheated(false);
 			}
-		}
-		if (getThrottle() == 0 && engineTemperature > 74 || !isTurnedOn() && engineTemperature > ambientTemperature()) {
-			engineTemperature -= coolDownSpeed;
 		}
 		
 		if (turnOnOffDelay > 0) {
