@@ -22,11 +22,16 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
+	
+	private static DataParameter<Integer> LOCK_TYPE = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.VARINT);
 	
 	protected String defID;
 	public Gauge gauge;
@@ -41,6 +46,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.isImmuneToFire = true;
 		super.entityCollisionReduction = 1F;
 		super.ignoreFrustumCheck = true;
+		
+		this.getDataManager().register(LOCK_TYPE, 0);
 	}
 	
 	@Override
@@ -67,6 +74,14 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	}
 	public String getDefinitionID() {
 		return this.defID;
+	}
+	
+	public int getLockType () {
+		return this.getDataManager().get(LOCK_TYPE);
+	}
+	
+	public void setLockType (int value) {
+		this.getDataManager().set(LOCK_TYPE, value);
 	}
 	
 	@Override
@@ -103,6 +118,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		nbttagcompound.setString("defID", defID);
 		nbttagcompound.setDouble("gauge", gauge.value());
 		nbttagcompound.setString("tag", tag);
+		nbttagcompound.setInteger("lock_type", getLockType());
 	}
 
 	@Override
@@ -115,6 +131,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		}
 		
 		tag = nbttagcompound.getString("tag");
+		setLockType(nbttagcompound.getInteger("lock_type"));
 	}
 
 	@Override
