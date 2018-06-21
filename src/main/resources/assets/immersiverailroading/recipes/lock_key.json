@@ -1,0 +1,21 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:item_lock_key"
+  },
+  "pattern": [
+    "   ",
+    "ggg",
+    " ii"
+  ],
+  "key": {
+    "g": {
+      "type": "forge:ore_dict",
+      "ore": "ingotGold"
+    }
+	"i": {
+		"type": "forge:ore_dict",
+		"ore": "ingotIron"
+	}
+  }
+}
