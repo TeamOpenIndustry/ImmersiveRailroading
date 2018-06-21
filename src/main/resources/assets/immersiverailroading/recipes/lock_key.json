@@ -12,7 +12,7 @@
     "g": {
       "type": "forge:ore_dict",
       "ore": "ingotGold"
-    }
+    },
 	"i": {
 		"type": "forge:ore_dict",
 		"ore": "ingotIron"
