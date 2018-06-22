@@ -39,6 +39,10 @@ public enum GuiText {
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
 	WEIGHT_TOOLTIP("stock.weight"),
 	
+	LABEL_KEY_1("label.key_1"),
+	LABEL_KEY_2("label.key_2"),
+	LABEL_KEY_3("label.key_3"),
+	
 	NONE("none"),
 	;
 	

@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.items.ItemCastRail;
 import cam72cam.immersiverailroading.items.ItemConductorWhistle;
 import cam72cam.immersiverailroading.items.ItemHook;
 import cam72cam.immersiverailroading.items.ItemLargeWrench;
+import cam72cam.immersiverailroading.items.ItemLockKey;
 import cam72cam.immersiverailroading.items.ItemManual;
 import cam72cam.immersiverailroading.items.ItemPlate;
 import cam72cam.immersiverailroading.items.ItemRail;
@@ -24,5 +25,6 @@ public class IRItems {
 	public static ItemRail ITEM_RAIL = new ItemRail();
 	public static ItemPlate ITEM_PLATE = new ItemPlate();
 	public static ItemCastRail ITEM_CAST_RAIL = new ItemCastRail();
-	public static ItemConductorWhistle ITEM_CONDUCTOR_WHISTLE = new ItemConductorWhistle(); 
+	public static ItemConductorWhistle ITEM_CONDUCTOR_WHISTLE = new ItemConductorWhistle();
+	public static ItemLockKey ITEM_LOCK_KEY = new ItemLockKey();
 }

@@ -14,6 +14,7 @@ item.immersiverailroading:item_cast_rail.name=Rail Casting
 item.immersiverailroading:item_manual.name=Immersive Railroading Manual
 item.immersiverailroading:item_rail.name=Track Blueprint
 item.immersiverailroading:item_conductor_whistle.name=Conductor's Whistle
+item.immersiverailroading:item_lock_key.name=Key
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -46,6 +47,9 @@ chat.immersiverailroading:build.invalid_block=Invalid block at x=%s y=%s z=%s
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
+gui.immersiverailroading:label.key_1=Right-click once to allow only you to enter/break the train
+gui.immersiverailroading:label.key_2=Right-click again to allow everyone to enter but not break this train
+gui.immersiverailroading:label.key_3=Right-click again to allow everyone to enter/break this train
 gui.immersiverailroading:selector.type=Type: %s
 gui.immersiverailroading:selector.gauge=Gauge: %s
 gui.immersiverailroading:selector.quarters=%s Degree Turn
