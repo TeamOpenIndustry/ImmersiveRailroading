@@ -6,13 +6,17 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 import com.google.gson.JsonObject;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemLockKey;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -21,17 +25,43 @@ import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializer;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
-	private static DataParameter<Integer> LOCK_TYPE = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.VARINT);
+	public static final DataSerializer<UUID> PLAYER_UUID = new DataSerializer<UUID>()
+    {
+        public void write(PacketBuffer buf, UUID playerId)
+        {
+            buf.writeUniqueId(playerId);
+        }
+        public UUID read(PacketBuffer buf) throws IOException
+        {
+            return buf.readUniqueId();
+        }
+        public DataParameter<UUID> createKey(int id)
+        {
+            return new DataParameter<UUID>(id, this);
+        }
+        public UUID copyValue(UUID playerId)
+        {
+            return playerId;
+        }
+    };
+	
+	private static DataParameter<Integer> LOCK_TYPE = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.VARINT);	//0=everyone can enter/break, 1=everyone can enter, 2=no one can enter/break
+	private static DataParameter<UUID> LOCK_OWNER = EntityDataManager.createKey(EntityRollingStock.class, PLAYER_UUID);
 	
 	protected String defID;
 	public Gauge gauge;
@@ -82,6 +112,23 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	
 	public void setLockType (int value) {
 		this.getDataManager().set(LOCK_TYPE, value);
+	}
+	
+	public void switchLockType () {
+		int lockType = getLockType();
+		lockType++;
+		if (lockType == 3) {
+			lockType = 0;
+		}
+		setLockType(lockType);
+	}
+	
+	public UUID getLockOwner() {
+		return this.getDataManager().get(LOCK_OWNER);
+	}
+	
+	public void setLockOwner(UUID playerId) {
+		this.getDataManager().set(LOCK_OWNER, playerId);
 	}
 	
 	@Override
@@ -144,7 +191,14 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-		return false;
+		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_LOCK_KEY) {
+			System.out.println(getLockType());
+			switchLockType();
+			System.out.println(getLockType());
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override

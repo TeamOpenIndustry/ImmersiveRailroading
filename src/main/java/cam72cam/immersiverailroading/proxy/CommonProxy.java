@@ -175,6 +175,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(IRItems.ITEM_PLATE);
     	event.getRegistry().register(IRItems.ITEM_CAST_RAIL);
     	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE);
+    	event.getRegistry().register(IRItems.ITEM_LOCK_KEY);
     }
     
     @SubscribeEvent

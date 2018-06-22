@@ -110,12 +110,13 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		} else if (player.isRiding() && player.getRidingEntity().getPersistentID() == this.getPersistentID()) {
 			return false;
 		} else {
-			if (!this.world.isRemote) {
+			if (!this.world.isRemote && getLockType() == 0 || getLockType() == 1 || getLockOwner() == player.getUniqueID()) {
 				passengerPositions.put(player.getPersistentID(), new Vec3d(0, 0, 0));
 				player.startRiding(this);
+				return true;
+			} else {
+				return false;
 			}
-
-			return true;
 		}
 	}
 	
