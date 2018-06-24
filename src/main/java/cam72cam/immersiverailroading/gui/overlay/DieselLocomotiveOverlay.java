@@ -17,7 +17,7 @@ public class DieselLocomotiveOverlay extends LocomotiveOverlay {
 		LocomotiveDiesel loco = (LocomotiveDiesel) riding;
 		drawGauge(0xAA79650c, ((float)loco.getLiquidAmount())/Fluid.BUCKET_VOLUME, loco.getTankCapacity().Buckets(), "B");
 		int heatColor = 0x99d1c715;
-		if (loco.getEngineTemperature() > 75) {
+		if (loco.getEngineTemperature() > 70) {
 			heatColor = 0x99d16c15;
 		}
 		if (loco.getEngineTemperature() > 100) {
