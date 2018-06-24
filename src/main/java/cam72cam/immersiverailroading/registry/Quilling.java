@@ -11,7 +11,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.util.ResourceLocation;
 
 public class Quilling {
-	public List<Chime> chimes = new ArrayList<Chime>(); 
+	public List<Chime> chimes = new ArrayList<Chime>();
+	public double maxPull;
 	
 	public class Chime {
 		public final double pull_start; 
@@ -31,7 +32,9 @@ public class Quilling {
 
 	public Quilling(JsonArray jsonElement) {
 		for (JsonElement quill : jsonElement) {
-			chimes.add(new Chime(quill.getAsJsonObject()));
+			Chime chime = new Chime(quill.getAsJsonObject());
+			chimes.add(chime);
+			maxPull = Math.max(maxPull, chime.pull_end);
 		}
 	}
 

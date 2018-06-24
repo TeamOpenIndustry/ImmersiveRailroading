@@ -235,83 +235,83 @@ public class LocomotiveSteam extends Locomotive {
 					pressure.setVolume(0.3f);
 				}
 				
-				if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
-					//whistle1.play(getPositionVector());
-				}
-				
 				if (this.getDataManager().get(HORN) < 1) {
-					whistle.stop();
 					pullString = 0;
 					soundDampener = 0;
 					for (ISound chime : chimes) {
-						chime.stop();
+						if (chime.isPlaying()) {
+							chime.stop();
+						}
 					}
 				} else {
-					
-					if (this.getDefinition().quill == null) {
-						
-					} else {
-						float maxDelta = 1/20f;
-						float delta = 0;
-						if (this.getDataManager().get(HORN) > 5) {
-							if (soundDampener < 0.4) {
-								soundDampener = 0.4f;
+					if (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge)) {
+						if (this.getDefinition().quill == null) {
+							if (!this.whistle.isPlaying()) {
+								this.whistle.play(getPositionVector());
 							}
-							if (soundDampener < 1) {
-								soundDampener += 0.1;
-							}
-							if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
-								for (Entity pass : this.getPassengers()) {
-									if (pass.getPersistentID() != this.getDataManager().get(HORN_PLAYER).get()) {
-										continue;
+						} else {
+							float maxDelta = 1/20f;
+							float delta = 0;
+							if (this.getDataManager().get(HORN) > 5) {
+								if (soundDampener < 0.4) {
+									soundDampener = 0.4f;
+								}
+								if (soundDampener < 1) {
+									soundDampener += 0.1;
+								}
+								if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
+									for (Entity pass : this.getPassengers()) {
+										if (pass.getPersistentID() != this.getDataManager().get(HORN_PLAYER).get()) {
+											continue;
+										}
+										
+										float newString = (pass.rotationPitch+90) / 180;
+										delta = newString - pullString;
 									}
+								} else {
+									delta = (float)this.getDefinition().quill.maxPull-pullString;
+								}
+							} else {
+								if (soundDampener > 0) {
+									soundDampener -= 0.07;
+								}
+								// Player probably released key or has net lag
+								delta = -pullString; 
+							}
+							
+							if (pullString == 0) {
+								pullString += delta*0.55;
+							} else {
+								pullString += Math.max(Math.min(delta, maxDelta), -maxDelta);
+							}
+							pullString = Math.min(pullString, (float)this.getDefinition().quill.maxPull);
+							
+							for (int i = 0; i < this.getDefinition().quill.chimes.size(); i++) {
+								ISound sound = this.chimes.get(i);
+								Chime chime = this.getDefinition().quill.chimes.get(i);
+								
+								double perc = pullString;
+								// Clamp to start/end
+								perc = Math.min(perc, chime.pull_end);
+								perc -= chime.pull_start;
+								
+								//Scale to clamped range
+								perc /= chime.pull_end - chime.pull_start;
+								
+								if (perc > 0) {
 									
-									float newString = (pass.rotationPitch+90) / 180;
-									delta = newString - pullString;
-								}
-							} else {
-								delta = 1-pullString;
-							}
-						} else {
-							if (soundDampener > 0) {
-								soundDampener -= 0.1;
-							}
-							// Player probably released key or has net lag
-							delta = -pullString; 
-						}
-						
-						if (pullString == 0) {
-							pullString += delta*0.55;
-						} else {
-							pullString += Math.max(Math.min(delta, maxDelta), -maxDelta);
-						}
-							
-							
-						for (int i = 0; i < this.getDefinition().quill.chimes.size(); i++) {
-							ISound sound = this.chimes.get(i);
-							Chime chime = this.getDefinition().quill.chimes.get(i);
-							
-							double perc = pullString;
-							// Clamp to start/end
-							perc = Math.min(perc, chime.pull_end);
-							perc -= chime.pull_start;
-							
-							//Scale to clamped range
-							perc /= chime.pull_end - chime.pull_start;
-							
-							if (perc > 0) {
-								
-								double pitch = (chime.pitch_end - chime.pitch_start) * perc + chime.pitch_start;
-
-								sound.setPitch((float) pitch);
-								sound.setVolume((float) (perc * soundDampener));
-								
-								if (!sound.isPlaying()) {
-									sound.play(getPositionVector());
-								}
-							} else {
-								if (sound.isPlaying()) {
-									sound.stop();
+									double pitch = (chime.pitch_end - chime.pitch_start) * perc + chime.pitch_start;
+	
+									sound.setPitch((float) pitch);
+									sound.setVolume((float) (perc * soundDampener));
+									
+									if (!sound.isPlaying()) {
+										sound.play(getPositionVector());
+									}
+								} else {
+									if (sound.isPlaying()) {
+										sound.stop();
+									}
 								}
 							}
 						}
