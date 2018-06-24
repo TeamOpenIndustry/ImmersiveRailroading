@@ -87,7 +87,7 @@ public abstract class Locomotive extends FreightTank {
 	public void handleKeyPress(Entity source, KeyTypes key) {
 		switch(key) {
 		case HORN:
-			setHorn(5, source.getPersistentID());
+			setHorn(10, source.getPersistentID());
 			break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {

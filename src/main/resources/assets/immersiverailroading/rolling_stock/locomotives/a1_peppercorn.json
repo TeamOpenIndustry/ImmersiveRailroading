@@ -52,9 +52,9 @@
 				"sample": "sounds/steam/a1_peppercorn/whistle.ogg"
 			},
 			{
-				"pull_start": 0.7, 
-				"pull_end": 0.8,
-				"pitch_start": 0.7,
+				"pull_start": 0.6, 
+				"pull_end": 0.7,
+				"pitch_start": 0.95,
 				"pitch_end": 1,
 				"sample": "sounds/steam/a1_peppercorn/whistle_high.ogg"
 			}

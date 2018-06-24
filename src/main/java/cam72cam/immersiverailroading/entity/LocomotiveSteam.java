@@ -197,6 +197,8 @@ public class LocomotiveSteam extends Locomotive {
 	private int sndCacheId = 0;
 	private ISound whistle;
 	private List<ISound> chimes = new ArrayList<ISound>();
+	private float pullString = 0;
+	private float soundDampener = 0;
 	private ISound idle;
 	private ISound pressure;
 	private int tickMod = 0;
@@ -239,25 +241,57 @@ public class LocomotiveSteam extends Locomotive {
 				
 				if (this.getDataManager().get(HORN) < 1) {
 					whistle.stop();
+					pullString = 0;
+					soundDampener = 0;
 					for (ISound chime : chimes) {
 						chime.stop();
 					}
 				} else {
-					for (Entity pass : this.getPassengers()) {
-						if (this.getDataManager().get(HORN_PLAYER).isPresent() && pass.getPersistentID() != this.getDataManager().get(HORN_PLAYER).get()) {
-							continue;
+					
+					if (this.getDefinition().quill == null) {
+						
+					} else {
+						float maxDelta = 1/20f;
+						float delta = 0;
+						if (this.getDataManager().get(HORN) > 5) {
+							if (soundDampener < 0.4) {
+								soundDampener = 0.4f;
+							}
+							if (soundDampener < 1) {
+								soundDampener += 0.1;
+							}
+							if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
+								for (Entity pass : this.getPassengers()) {
+									if (pass.getPersistentID() != this.getDataManager().get(HORN_PLAYER).get()) {
+										continue;
+									}
+									
+									float newString = (pass.rotationPitch+90) / 180;
+									delta = newString - pullString;
+								}
+							} else {
+								delta = 1-pullString;
+							}
+						} else {
+							if (soundDampener > 0) {
+								soundDampener -= 0.1;
+							}
+							// Player probably released key or has net lag
+							delta = -pullString; 
 						}
 						
-						if (this.getDefinition().quill == null) {
-							continue;
+						if (pullString == 0) {
+							pullString += delta*0.55;
+						} else {
+							pullString += Math.max(Math.min(delta, maxDelta), -maxDelta);
 						}
-						
-						
+							
+							
 						for (int i = 0; i < this.getDefinition().quill.chimes.size(); i++) {
 							ISound sound = this.chimes.get(i);
 							Chime chime = this.getDefinition().quill.chimes.get(i);
 							
-							double perc = (pass.rotationPitch+90) / 180;
+							double perc = pullString;
 							// Clamp to start/end
 							perc = Math.min(perc, chime.pull_end);
 							perc -= chime.pull_start;
@@ -266,15 +300,15 @@ public class LocomotiveSteam extends Locomotive {
 							perc /= chime.pull_end - chime.pull_start;
 							
 							if (perc > 0) {
-								if (!sound.isPlaying()) {
-									sound.play(getPositionVector());
-								}
 								
 								double pitch = (chime.pitch_end - chime.pitch_start) * perc + chime.pitch_start;
 
 								sound.setPitch((float) pitch);
-								sound.setVolume((float) perc);
+								sound.setVolume((float) (perc * soundDampener));
 								
+								if (!sound.isPlaying()) {
+									sound.play(getPositionVector());
+								}
 							} else {
 								if (sound.isPlaying()) {
 									sound.stop();
