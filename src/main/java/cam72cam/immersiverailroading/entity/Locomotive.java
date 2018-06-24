@@ -1,6 +1,10 @@
 package cam72cam.immersiverailroading.entity;
 
 
+import java.util.UUID;
+
+import com.google.common.base.Optional;
+
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -21,6 +25,7 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> THROTTLE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	protected static DataParameter<Integer> HORN = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
+	protected static DataParameter<Optional<UUID>> HORN_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 	
 
 	private static final float throttleNotch = 0.04f;
@@ -36,6 +41,7 @@ public abstract class Locomotive extends FreightTank {
 		this.getDataManager().register(THROTTLE, 0f);
 		this.getDataManager().register(AIR_BRAKE, 0f);
 		this.getDataManager().register(HORN, 0);
+		this.getDataManager().register(HORN_PLAYER, Optional.absent());
 
 		this.entityCollisionReduction = 0.99F;
 	}
@@ -81,7 +87,7 @@ public abstract class Locomotive extends FreightTank {
 	public void handleKeyPress(Entity source, KeyTypes key) {
 		switch(key) {
 		case HORN:
-			setHorn(5);
+			setHorn(5, source.getPersistentID());
 			break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {
@@ -150,6 +156,8 @@ public abstract class Locomotive extends FreightTank {
 			}
 			if (this.getDataManager().get(HORN) > 0) {
 				this.getDataManager().set(HORN, this.getDataManager().get(HORN)-1);
+			} else if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
+				this.getDataManager().set(HORN_PLAYER, Optional.absent());
 			}
 		}
 		
@@ -216,8 +224,15 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 	
-	public void setHorn(int val) {
-		this.getDataManager().set(HORN, val);
+	public void setHorn(int val, UUID uuid) {
+		UUID currentPlayer = this.getDataManager().get(HORN_PLAYER).isPresent() ? this.getDataManager().get(HORN_PLAYER).get() : null;
+		if (currentPlayer == null && uuid != null) {
+			currentPlayer = uuid;
+			this.getDataManager().set(HORN_PLAYER, Optional.of(uuid));
+		}
+		if (currentPlayer == null || currentPlayer == uuid) {
+			this.getDataManager().set(HORN, val);
+		}
 	}
 	
 	public float getAirBrake() {
