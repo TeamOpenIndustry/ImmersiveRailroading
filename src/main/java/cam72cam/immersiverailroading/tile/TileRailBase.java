@@ -720,7 +720,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 						loco.setAirBrake(power/15f);
 						break;
 					case HORN:
-						loco.setHorn(5, null);
+						loco.setHorn(40, null);
 						break;
 					case COMPUTER:
 						//NOP
