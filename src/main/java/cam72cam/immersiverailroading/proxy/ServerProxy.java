@@ -40,7 +40,7 @@ public class ServerProxy extends CommonProxy {
 	
 	@Override
 	public void serverStarting(FMLServerStartingEvent event) {
-		event.registerServerCommand(new ReloadResourcesCommand());
+		event.registerServerCommand(new ReloadResourceCommand());
 	}
 
     @Override
