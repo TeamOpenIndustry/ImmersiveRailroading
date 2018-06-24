@@ -318,7 +318,7 @@ public class AugmentDriver implements DriverBlock {
 			TileRailBase te = TileRailBase.get(world, pos);
 			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
 			if (stock != null) {
-				stock.setHorn(5);
+				stock.setHorn(5, null);
 			}
 			return null;
 		}
