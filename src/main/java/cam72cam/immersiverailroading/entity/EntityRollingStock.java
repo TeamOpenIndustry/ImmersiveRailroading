@@ -219,4 +219,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 
 	public void triggerResimulate() {
 	}
+
+	public void renderTick(float partialTicks) {
+	}
 }
