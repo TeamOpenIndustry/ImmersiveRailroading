@@ -184,8 +184,6 @@ public class RealBB extends AxisAlignedBB {
 		if (!super.intersects(minX, minY, minZ, maxX, maxY, maxZ)) {
 			return Pair.of(false, minY);
 		}
-		if (true)
-			return Pair.of(true, minY); 
 		
 		double actualYMin = this.centerY;
 		double actualYMax = this.centerY + this.height;
