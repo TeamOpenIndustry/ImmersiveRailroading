@@ -177,10 +177,6 @@ public class TileRail extends TileRailBase {
 			stock.triggerResimulate();
 		}
 	}
-	
-	public int getEmbankmentHeight() {
-		return embankmentHeight;
-	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
@@ -276,7 +272,7 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY, null, 0, getEmbankmentHeight());
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY, null, 0, 0);
 		}
 		// Changes moment to moment
 		info.switchState = switchState;

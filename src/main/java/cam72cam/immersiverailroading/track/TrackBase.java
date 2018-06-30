@@ -53,28 +53,33 @@ public abstract class TrackBase {
 
 	public TileEntity placeTrack() { 
 		PosRot pos = getPos();
-		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.embankmentHeight > 0) {
-			for (int x = 1; x < builder.info.embankmentHeight; x++) {
-				if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
+		System.out.println("1");
+		System.out.println(builder.info.embankmentHeight);
+		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
+			System.out.println("2");
+			if (builder.info.embankmentHeight > 0) {
+				System.out.println("3");
+				for (int x = 1; x < builder.info.embankmentHeight; x++) {
+					System.out.println("4");
+					if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
 						builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
-				}
-				for (int i = 1; i < x; i++) {
-					if (BlockUtil.canBeReplaced(builder.world, getBlockBeside(this.getFacing(), false, pos, i), false)) {
-						builder.world.setBlockState(getBlockBeside(this.getFacing(), false, pos, i), BlockUtil.itemToBlockState(builder.info.railBedFill));
+					} else {
+						break;
 					}
-					if (BlockUtil.canBeReplaced(builder.world, getBlockBeside(this.getFacing(), true, pos, i), false)) {
-						builder.world.setBlockState(getBlockBeside(this.getFacing(), true, pos, i), BlockUtil.itemToBlockState(builder.info.railBedFill));
+					if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
+							builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
+							System.out.println("5");
+					}
+					for (int i = 1; i < x; i++) {
+						System.out.println("6");
+						for (EnumFacing dir : EnumFacing.HORIZONTALS) {
+							builder.world.setBlockState(pos.offset(dir, i).down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
+						}
 					}
 				}
-				
-				if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
-					builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
-				} else {
-					break;
-				}
+			} else {
+				builder.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.railBedFill));
 			}
-		} else if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.embankmentHeight == 0) {
-			builder.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.railBedFill));
 		}
 		
 		NBTTagCompound replaced = null;
@@ -110,36 +115,6 @@ public abstract class TrackBase {
 		}
 		tr.setHeight(getHeight());
 		return tr;
-	}
-	
-	public BlockPos getBlockBeside (EnumFacing facing, boolean left, BlockPos pos, int distance) {
-		if (!left) {
-			switch (facing) {
-				case NORTH:
-					return pos.west(distance);
-				case SOUTH:
-					return pos.east(distance);
-				case EAST:
-					return pos.north(distance);
-				case WEST:
-					return pos.south(distance);
-				default:
-					return null;
-			}
-		} else {
-			switch (facing) {
-				case NORTH:
-					return pos.east(distance);
-				case SOUTH:
-					return pos.west(distance);
-				case EAST:
-					return pos.south(distance);
-				case WEST:
-					return pos.north(distance);
-				default:
-					return null;
-			}
-		}
 	}
 	
 	public IBlockState getBlockState() {
