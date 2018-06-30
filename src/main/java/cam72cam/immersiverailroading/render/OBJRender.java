@@ -124,10 +124,10 @@ public class OBJRender {
 				b = Math.max(0, currentMTL.Kd.get(2) * mult);
 				a = currentMTL.Kd.get(3);
 			}
-			for (int[] point : face.points) {
-				Vec3d v = model.vertices[point[0]];
-				Vec2f vt = point[1] != -1 ? model.vertexTextures[point[1]] : null;
-				Vec3d vn = point[2] != -1 ? model.vertexNormals[point[2]] : null;
+			for (int[] point : face.points()) {
+				Vec3d v = model.vertices(point[0]);
+				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
+				Vec3d vn = point[2] != -1 ? model.vertexNormals(point[2]) : null;
 				
 				vertexBuffer.put((float) (v.x * scale));
 				vertexBuffer.put((float) (v.y * scale));
