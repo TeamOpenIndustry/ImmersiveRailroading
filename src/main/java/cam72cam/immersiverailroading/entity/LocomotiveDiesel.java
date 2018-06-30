@@ -31,7 +31,6 @@ public class LocomotiveDiesel extends Locomotive {
 	private float soundThrottle;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
-	private static final float throttleNotch = 0.04f;
 	
 	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.FLOAT);
 	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
@@ -217,7 +216,7 @@ public class LocomotiveDiesel extends Locomotive {
 		
 		float engineTemperature = getEngineTemperature();
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
-		float coolDownSpeed = heatUpSpeed * ((engineTemperature - ambientTemperature()) / 200);
+		float coolDownSpeed = heatUpSpeed * ((engineTemperature - ambientTemperature()) / 130);
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
 			float consumption = Math.abs(getThrottle()) + 0.05f;
@@ -246,16 +245,17 @@ public class LocomotiveDiesel extends Locomotive {
 
 		if (isRunning()) {
 			if (!isEngineOverheated()) {
-				engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
+				engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f) / 1.7f;
 			}
 			
 			if (engineTemperature > 150 && Config.ConfigBalance.canDieselEnginesOverheat) {
 				engineTemperature = 150;
 				setEngineOverheated(true);
 			}
-			if ((engineTemperature < 50 || !Config.ConfigBalance.canDieselEnginesOverheat) && isEngineOverheated()) {
-				setEngineOverheated(false);
-			}
+		}
+		
+		if (engineTemperature < 50 && isEngineOverheated()) {
+			setEngineOverheated(false);
 		}
 		
 		if (turnOnOffDelay > 0) {
