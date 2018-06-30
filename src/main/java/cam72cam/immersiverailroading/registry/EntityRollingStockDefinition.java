@@ -92,7 +92,7 @@ public abstract class EntityRollingStockDefinition {
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
 		
-		//initHeightMap();
+		initHeightMap();
 	}
 
 	public void parseJson(JsonObject data) throws Exception  {
