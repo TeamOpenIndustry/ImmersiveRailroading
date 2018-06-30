@@ -83,6 +83,9 @@ public class DefinitionManager {
 	}
 
 	public static void initDefinitions() throws IOException {
+		System.gc();
+		long mem = Runtime.getRuntime().freeMemory();
+
 		initGauges();
 		
 		definitions = new LinkedHashMap<String, EntityRollingStockDefinition>();
@@ -150,6 +153,9 @@ public class DefinitionManager {
 			
 			ProgressManager.pop(bar);
 		}
+
+		System.gc();
+		ImmersiveRailroading.warn("%s %s", Runtime.getRuntime().freeMemory() - mem, Runtime.getRuntime().freeMemory());
 	}
 
 	private static JsonObject getJsonData(String defID) throws IOException {

@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.RelativeResource;
 import net.minecraft.util.ResourceLocation;
@@ -20,11 +22,13 @@ public class OBJModel {
 	public List<String> materialPaths = new ArrayList<String>();
 	// LinkedHashMap is ordered
 	public Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
-	public Vec3d[] vertices;
-	public Vec3d[] vertexNormals;
-	public Vec2f[] vertexTextures;
+	public double[] vertices;
+	public double[] vertexNormals;
+	public float[] vertexTextures;
+	public int[] faces;
 
 	public Map<String, Material> materials = new HashMap<String, Material>();
+	//public Map<Integer, String> mtlLookup = new HashMap<Integer, String>();
 	public float darken;
 	
 	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
@@ -42,9 +46,10 @@ public class OBJModel {
 		List<String> materialPaths = new ArrayList<String>();
 		String currentMaterial = null;
 		
-		List<Vec3d> vertices = new ArrayList<Vec3d>();
-		List<Vec3d> vertexNormals = new ArrayList<Vec3d>();
-		List<Vec2f> vertexTextures = new ArrayList<Vec2f>();
+		List<Integer> faces = new ArrayList<Integer>();
+		List<Double> vertices = new ArrayList<Double>();
+		List<Double> vertexNormals = new ArrayList<Double>();
+		List<Float> vertexTextures = new ArrayList<Float>();
 
 		while (reader.hasNextLine()) {
 			String line = reader.nextLine();
@@ -67,21 +72,26 @@ public class OBJModel {
 				break;
 			case "o":
 			case "g":
+				groups.put(currentGroupName, currentGroup);
 				currentGroupName = args[0];
 				currentGroup = new ArrayList<Face>();
-				groups.put(currentGroupName, currentGroup);
 				break;
 			case "v":
-				vertices.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])).scale(scale));
+				vertices.add(Double.parseDouble(args[0]) * scale);
+				vertices.add(Double.parseDouble(args[1]) * scale);
+				vertices.add(Double.parseDouble(args[2]) * scale);
 				break;
 			case "vn":
-				vertexNormals.add(new Vec3d(Float.parseFloat(args[0]), Float.parseFloat(args[1]), Float.parseFloat(args[2])));
+				vertexNormals.add(Double.parseDouble(args[0]));
+				vertexNormals.add(Double.parseDouble(args[1]));
+				vertexNormals.add(Double.parseDouble(args[2]));
 				break;
 			case "vt":
-				vertexTextures.add(new Vec2f(Float.parseFloat(args[0]), Float.parseFloat(args[1])));
+				vertexTextures.add(Float.parseFloat(args[0]));
+				vertexTextures.add(Float.parseFloat(args[1]));
 				break;
 			case "f":
-				currentGroup.addAll(Face.parse(args, currentMaterial));
+				currentGroup.addAll(Face.parse(this, args, currentMaterial, faces));
 				break;
 			case "s":
 				//Ignore
@@ -95,11 +105,14 @@ public class OBJModel {
 				break;
 			}
 		}
+		groups.put(currentGroupName, currentGroup);
+		
 		reader.close(); // closes input
 		
-		this.vertices = vertices.toArray(new Vec3d[vertices.size()]);
-		this.vertexNormals = vertexNormals.toArray(new Vec3d[vertexNormals.size()]);
-		this.vertexTextures = vertexTextures.toArray(new Vec2f[vertexTextures.size()]);
+		this.vertices = ArrayUtils.toPrimitive(vertices.toArray(new Double[0]));
+		this.vertexNormals = ArrayUtils.toPrimitive(vertexNormals.toArray(new Double[0]));
+		this.vertexTextures = ArrayUtils.toPrimitive(vertexTextures.toArray(new Float[0]));
+		this.faces = ArrayUtils.toPrimitive(faces.toArray(new Integer[0]));
 
 		if (materialPaths.size() == 0) {
 			return;
@@ -206,8 +219,8 @@ public class OBJModel {
 			for (String group : groupNames) {
 				List<Face> faces = groups.get(group);
 				for (Face face : faces) {
-					for (int[] point : face.points) {
-						Vec3d v = vertices[point[0]];
+					for (int[] point : face.points()) {
+						Vec3d v = vertices(point[0]);
 						if (min == null) {
 							min = new Vec3d(v.x, v.y, v.z);
 						} else {
@@ -239,8 +252,8 @@ public class OBJModel {
 			for (String group : groupNames) {
 				List<Face> faces = groups.get(group);
 				for (Face face : faces) {
-					for (int[] point : face.points) {
-						Vec3d v = vertices[point[0]];
+					for (int[] point : face.points()) {
+						Vec3d v = vertices(point[0]);
 						if (max == null) {
 							max = new Vec3d(v.x, v.y, v.z);
 						} else {
@@ -286,5 +299,15 @@ public class OBJModel {
 		Vec3d min = minOfGroup(groupNames);
 		Vec3d max = maxOfGroup(groupNames);
 		return max.z - min.z;
+	}
+	
+	public Vec3d vertices(int i) {
+		return new Vec3d(vertices[i*3+0], vertices[i*3+1], vertices[i*3+2]);
+	}
+	public Vec3d vertexNormals(int i) {
+		return new Vec3d(vertexNormals[i*3+0], vertexNormals[i*3+1], vertexNormals[i*3+2]);
+	}
+	public Vec2f vertexTextures(int i) {
+		return new Vec2f(vertexTextures[i*2+0], vertexTextures[i*2+1]);
 	}
 }
