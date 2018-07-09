@@ -1,9 +1,8 @@
 package cam72cam.immersiverailroading;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.init.Items;
