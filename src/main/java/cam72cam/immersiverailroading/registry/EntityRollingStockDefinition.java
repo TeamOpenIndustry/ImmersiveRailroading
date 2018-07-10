@@ -215,6 +215,10 @@ public abstract class EntityRollingStockDefinition {
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_25, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_50, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_75, this, groups), true);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_100, this, groups), true);
 		
 		return groups;
 	}
