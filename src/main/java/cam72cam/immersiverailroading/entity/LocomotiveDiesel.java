@@ -220,7 +220,7 @@ public class LocomotiveDiesel extends Locomotive {
 		float engineTemperature = getEngineTemperature();
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
 		float coolDownSpeed = heatUpSpeed * (float)Math.pow(((engineTemperature - ambientTemperature()) / 130), 2);
-
+		
 		engineTemperature -= coolDownSpeed;
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
@@ -242,7 +242,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			internalBurn -= consumption;
 			
-			engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
+			engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.2f);
 			
 			if (engineTemperature > 150) {
 				engineTemperature = 150;
