@@ -33,6 +33,14 @@
 		"rear_offset": -0.3
 	},
 	"sounds": {
-		"whistle": "sounds/steam/big_boy/whistle.ogg"
+		"quilling": [
+			{
+				"pull_start": 0.25,
+				"pull_end": 0.55,
+				"pitch_start": 0.9,
+				"pitch_end": 1,
+				"sample": "sounds/steam/big_boy/whistle.ogg"
+			}
+		]
 	}
 }
