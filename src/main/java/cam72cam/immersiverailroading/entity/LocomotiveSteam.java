@@ -50,7 +50,7 @@ public class LocomotiveSteam extends Locomotive {
 		super(world, defID);
 		
 		this.getDataManager().register(BOILER_PRESSURE, 0f);
-		this.getDataManager().register(BOILER_TEMPERATURE, 0f);
+		this.getDataManager().register(BOILER_TEMPERATURE, ambientTemperature());
 		this.getDataManager().register(PRESSURE_VALVE, false);
 		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
 		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
@@ -159,7 +159,7 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		this.setBoilerTemperature(0);
+		this.setBoilerTemperature(ambientTemperature());
 		this.setBoilerPressure(0);
 		
 		Map<Integer, Integer> burnTime = getBurnTime();
@@ -227,7 +227,7 @@ public class LocomotiveSteam extends Locomotive {
 					whistle.play(getPositionVector());
 				}
 				
-				if (this.getBoilerTemperature() > 0) {
+				if (this.getBoilerTemperature() > this.ambientTemperature() + 5) {
 					if (!idle.isPlaying()) {
 						idle.play(getPositionVector());
 					}
@@ -528,6 +528,7 @@ public class LocomotiveSteam extends Locomotive {
 		if (boilerTemperature > 0) {
 			// Decrease temperature due to heat loss
 			// Estimate Kw emitter per m^2: (TdegC/10)^2 / 100
+			// TODO consider ambientTemperature
 			double radiatedKwHr = Math.pow(boilerTemperature/10, 2) / 100 * boilerAreaM * 2;
 			double radiatedKCalHr = radiatedKwHr * 859.85;
 			double radiatedKCalTick = radiatedKCalHr / 60 / 60 / 20 * ConfigBalance.locoHeatTimeScale;
@@ -594,7 +595,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 		
 		setBoilerPressure(boilerPressure);
-		setBoilerTemperature(boilerTemperature);
+		setBoilerTemperature(Math.max(boilerTemperature, ambientTemperature()));
 		if (changedBurnTime) {
 			setBurnTime(burnTime);
 		}
