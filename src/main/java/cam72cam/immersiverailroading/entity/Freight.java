@@ -1,10 +1,8 @@
 package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
-import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.StockDeathType;
-import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -33,10 +31,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
         	Freight.this.onInventoryChanged();
         }
     };
-
-	private ISound wheel_sound;
-
-	private float sndRand;
     
 	protected static DataParameter<Integer> CARGO_ITEMS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 	protected static DataParameter<Integer> PERCENT_FULL = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
@@ -60,37 +54,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	 * 
 	 * EntityRollingStock Overrides
 	 */
-	
-	@Override
-	public void onUpdate() {
-		super.onUpdate();
-		
-		if (world.isRemote) {
-			if (ConfigSound.soundEnabled) {
-				if (this.wheel_sound == null) {
-					wheel_sound = ImmersiveRailroading.proxy.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
-					this.sndRand = (float)Math.random()/10;
-				}
-				
-				if (Math.abs(this.getCurrentSpeed().metric()) > 5) {
-					if (!wheel_sound.isPlaying()) {
-						wheel_sound.play(this.getPositionVector());
-					}
-					float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
-					wheel_sound.setPitch(adjust + 0.7f + this.sndRand);
-					wheel_sound.setVolume(adjust);
-					
-					wheel_sound.setPosition(getPositionVector());
-					wheel_sound.setVelocity(getVelocity());
-					wheel_sound.update();
-				} else {
-					if (wheel_sound.isPlaying()) {
-						wheel_sound.stop();;
-					}
-				}
-			}
-		}
-	}
 	
 	@Override
 	public void onAssemble() {
@@ -223,14 +186,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 				world.spawnEntity(new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack.copy()));
 				itemstack.setCount(0);
 			}
-		}
-	}
-	
-	@Override
-	public void setDead() {
-		super.setDead();
-		if (this.wheel_sound != null) {
-			wheel_sound.stop();
 		}
 	}
 	
