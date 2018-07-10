@@ -16,6 +16,10 @@ import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
@@ -26,6 +30,11 @@ public class LocomotiveDiesel extends Locomotive {
 	private ISound idle;
 	private float soundThrottle;
 	private float internalBurn = 0;
+	private int turnOnOffDelay = 0;
+	
+	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.FLOAT);
+	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
+	private static DataParameter<Boolean> ENGINE_OVERHEATED = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
 
 	public LocomotiveDiesel(World world) {
 		this(world, null);
@@ -33,8 +42,42 @@ public class LocomotiveDiesel extends Locomotive {
 
 	public LocomotiveDiesel(World world, String defID) {
 		super(world, defID);
+		this.getDataManager().register(ENGINE_TEMPERATURE, ambientTemperature());
+		this.getDataManager().register(TURNED_ON, false);
+		this.getDataManager().register(ENGINE_OVERHEATED, false);
 	}
-
+	
+	public float getEngineTemperature() {
+		return this.dataManager.get(ENGINE_TEMPERATURE);
+	}
+	
+	private void setEngineTemperature(float temp) {
+		this.dataManager.set(ENGINE_TEMPERATURE, temp);
+	}
+	
+	public void setTurnedOn(boolean value) {
+		this.dataManager.set(TURNED_ON, value);
+	}
+	
+	public boolean isTurnedOn() {
+		return this.dataManager.get(TURNED_ON);
+	}
+	
+	public void setEngineOverheated(boolean value) {
+		this.dataManager.set(ENGINE_OVERHEATED, value);
+	}
+	
+	public boolean isEngineOverheated() {
+		return this.dataManager.get(ENGINE_OVERHEATED) && Config.ConfigBalance.canDieselEnginesOverheat;
+	}
+	
+	public boolean isRunning() {
+		if (!Config.isFuelRequired(gauge)) {
+			return isTurnedOn();
+		}
+		return isTurnedOn() && !isEngineOverheated() && this.getLiquidAmount() > 0;
+	}
+	
 	@Override
 	public LocomotiveDieselDefinition getDefinition() {
 		return super.getDefinition(LocomotiveDieselDefinition.class);
@@ -45,14 +88,37 @@ public class LocomotiveDiesel extends Locomotive {
 		return GuiTypes.DIESEL_LOCOMOTIVE;
 	}
 	
+	@Override
+	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+		super.writeEntityToNBT(nbttagcompound);
+		nbttagcompound.setFloat("engine_temperature", getEngineTemperature());
+		nbttagcompound.setBoolean("turned_on", isTurnedOn());
+		nbttagcompound.setBoolean("engine_overheated", isEngineOverheated());
+	}
+	
+	@Override
+	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+		super.readEntityFromNBT(nbttagcompound);
+		setEngineTemperature(nbttagcompound.getFloat("engine_temperature"));
+		setTurnedOn(nbttagcompound.getBoolean("turned_on"));
+		setEngineOverheated(nbttagcompound.getBoolean("engine_overheated"));
+	}
 	
 	/*
 	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
 	 */
 	@Override
 	public void handleKeyPress(Entity source, KeyTypes key) {
-		super.handleKeyPress(source, key);
-		
+		switch(key) {
+			case START_STOP_ENGINE:
+				if (turnOnOffDelay == 0) {
+					turnOnOffDelay = 10;
+					setTurnedOn(!isTurnedOn());
+				}
+				break;
+			default:
+				super.handleKeyPress(source, key);
+		}
 		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 	
@@ -64,11 +130,17 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
+	public void setThrottle(float newThrottle) {
+		newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
+		super.setThrottle(newThrottle);
+	}
+	
+	@Override
 	protected int getAvailableHP() {
-		if (!Config.isFuelRequired(gauge)) {
+		if (isRunning() && getEngineTemperature() > 75) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
-		return this.getLiquidAmount() > 0 ? this.getDefinition().getHorsePower(gauge) : 0;
+		return 0;
 	}
 
 	@Override
@@ -76,16 +148,13 @@ public class LocomotiveDiesel extends Locomotive {
 		super.onUpdate();
 		
 		if (world.isRemote) {
-			
-			boolean hasFuel = (this.getLiquidAmount() > 0 || !Config.isFuelRequired(gauge));
-			
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
 					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, gauge);
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
 				}
 				
-				if (hasFuel) {
+				if (isRunning()) {
 					if (!idle.isPlaying()) {
 						this.idle.play(getPositionVector());
 					}
@@ -95,14 +164,14 @@ public class LocomotiveDiesel extends Locomotive {
 					}
 				}
 				
-				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying()) {
+				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
 					horn.play(getPositionVector());
 				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
 				if (this.soundThrottle > absThrottle) {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-				} else if (this.soundThrottle < Math.abs(this.getThrottle())) {
+				} else if (this.soundThrottle < absThrottle) {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 				}
 	
@@ -129,8 +198,8 @@ public class LocomotiveDiesel extends Locomotive {
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
-			float throttle = Math.abs(this.getThrottle());
-			if (exhausts != null && throttle > 0 && hasFuel) {
+			float throttle = Math.abs(this.getThrottle()) + 0.05f;
+			if (exhausts != null && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {
 					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 					
@@ -148,7 +217,14 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 		
-		if (this.getLiquidAmount() > 0) {
+		float engineTemperature = getEngineTemperature();
+		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
+		float coolDownSpeed = heatUpSpeed * (float)Math.pow(((engineTemperature - ambientTemperature()) / 130), 2);
+		
+		engineTemperature -= coolDownSpeed;
+		
+		if (this.getLiquidAmount() > 0 && isRunning()) {
+			float consumption = Math.abs(getThrottle()) + 0.05f;
 			float burnTime = BurnUtil.getBurnTime(this.getLiquid());
 			if (burnTime == 0) {
 				burnTime = 200; //Default to 200 for unregistered liquids
@@ -161,12 +237,28 @@ public class LocomotiveDiesel extends Locomotive {
 				theTank.drain(1, true);
 			}
 			
-			float consumption = Math.abs(getThrottle()) + 0.05f;
 			consumption *= 100;
 			consumption *= gauge.scale();
 			
 			internalBurn -= consumption;
+			
+			engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.2f);
+			
+			if (engineTemperature > 150) {
+				engineTemperature = 150;
+				setEngineOverheated(true);
+			}
 		}
+		
+		if (engineTemperature < 100 && isEngineOverheated()) {
+			setEngineOverheated(false);
+		}
+		
+		if (turnOnOffDelay > 0) {
+			turnOnOffDelay -= 1;
+		}
+		
+		setEngineTemperature(engineTemperature);
 	}
 	
 	@Override
@@ -189,5 +281,13 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public FluidQuantity getTankCapacity() {
 		return this.getDefinition().getFuelCapacity(gauge);
+	}
+	
+	@Override
+	public void onDissassemble() {
+		super.onDissassemble();
+		setEngineTemperature(ambientTemperature());
+		setEngineOverheated(false);
+		setTurnedOn(false);
 	}
 }
