@@ -68,7 +68,7 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	public boolean isEngineOverheated() {
-		return this.dataManager.get(ENGINE_OVERHEATED);
+		return this.dataManager.get(ENGINE_OVERHEATED) && Config.ConfigBalance.canDieselEnginesOverheat;
 	}
 	
 	public boolean isRunning() {
@@ -211,12 +211,11 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 		
-		//todo: engine doesnt heat up when driving
-		//todo: engine temperature set to ambient as soon as engines are turned off
-		
 		float engineTemperature = getEngineTemperature();
-		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale;
-		float coolDownSpeed = heatUpSpeed * ((engineTemperature - ambientTemperature()) / 130);
+		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
+		float coolDownSpeed = heatUpSpeed * (float)Math.pow(((engineTemperature - ambientTemperature()) / 130), 2);
+
+		engineTemperature -= coolDownSpeed;
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
 			float consumption = Math.abs(getThrottle()) + 0.05f;
@@ -236,25 +235,16 @@ public class LocomotiveDiesel extends Locomotive {
 			consumption *= gauge.scale();
 			
 			internalBurn -= consumption;
-			if (engineTemperature < 75) {
-				engineTemperature += heatUpSpeed;
-			}
-		}
-		
-		engineTemperature -= coolDownSpeed;
-
-		if (isRunning()) {
-			if (!isEngineOverheated()) {
-				engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f) / 1.7f;
-			}
 			
-			if (engineTemperature > 150 && Config.ConfigBalance.canDieselEnginesOverheat) {
+			engineTemperature += heatUpSpeed * (Math.abs(getThrottle()) + 0.1f);
+			
+			if (engineTemperature > 150) {
 				engineTemperature = 150;
 				setEngineOverheated(true);
 			}
 		}
 		
-		if (engineTemperature < 50 && isEngineOverheated()) {
+		if (engineTemperature < 100 && isEngineOverheated()) {
 			setEngineOverheated(false);
 		}
 		
