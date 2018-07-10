@@ -44,8 +44,14 @@ public class EntitySmokeParticle extends Entity {
 	}
 	
 
+	private static int hackID = -1; 
 	@Override
-	protected void entityInit() {		
+	protected void entityInit() {
+		hackID --;
+		this.setEntityId(-31415 + hackID);
+		if (hackID < -31415 * 10) {
+			hackID = -31415;
+		}
 	}
 
 	@Override
