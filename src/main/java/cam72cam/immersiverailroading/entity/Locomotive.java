@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.entity;
 
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -248,5 +247,11 @@ public abstract class Locomotive extends FreightTank {
 			slipMult *= balance;
 		}
 		return slipMult;
+	}
+	
+	public float ambientTemperature() {
+		float mctemp = world.getBiome(this.getPosition()).getTemperature(getPosition());
+		//https://www.reddit.com/r/Minecraft/comments/3eh7yu/the_rl_temperature_of_minecraft_biomes_revealed/ctex050/
+		return (13.6484805403f*mctemp)+7.0879687222f;
 	}
 }

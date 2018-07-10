@@ -78,8 +78,11 @@ public class Config {
 		@Comment("Steam Fuel Efficiency")
 		public static int locoSteamFuelEfficiency = 100;
 
-		@Comment("How fast the locomotive should heat up.  1 is real world (slow), 72 is scaled to minecraft time")
+		@Comment("How fast the steam locomotive should heat up.  1 is real world (slow), 72 is scaled to minecraft time")
 		public static int locoHeatTimeScale = 72;
+		
+		@Comment("How fast the diesel locomotive should heat up. 1 is real world (slow), 72 is scaled to minecraft time")
+		public static int dieselLocoHeatTimeScale = 72;
 
 		@Comment("How much water the locomotive should use")
 		public static float locoWaterUsage = 10;
@@ -94,6 +97,9 @@ public class Config {
 		public static String[] villagerPayoutItems = new String[] {
 			Items.EMERALD.getRegistryName().toString()
 		};
+		
+		@Comment("Allow diesel locomotive engine overheating")
+		public static boolean canDieselEnginesOverheat = true;
 		
 		public static List<Item> getVillagerPayout() {
 			List<Item> items = new ArrayList<Item>();

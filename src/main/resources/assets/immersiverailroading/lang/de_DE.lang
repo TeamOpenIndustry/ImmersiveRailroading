@@ -191,3 +191,4 @@ ir_keys.zero_brake=Brmese zurücksetzen
 ir_keys.decrease_brake=Bremse reduzieren
 ir_keys.horn=Signalhorn
 ir_keys.dead_mans_switch=Totmannknopf
+ir_keys.start_stop_engine=Motor an-/ausschalten
