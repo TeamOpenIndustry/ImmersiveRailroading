@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.render;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -44,26 +47,26 @@ public class OBJTextureSheet {
 		public ResourceLocation tex;
 
 		private boolean isFlatMaterial;
-		private  final int[] pixels;
+		private final BufferedImage image;
 		
 		public final int sampPx;
 
 		
 		SubTexture(ResourceLocation tex) throws IOException {
 			InputStream input = ImmersiveRailroading.proxy.getResourceStream(tex);
-			BufferedImage image = TextureUtil.readBufferedImage(input);
+			image = TextureUtil.readBufferedImage(input);
 			input.close();
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
 			this.tex = tex;
 			isFlatMaterial = false;
 
-			pixels = new int[realWidth * realHeight];
-	        image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
+			int[] pixels = new int[1];
+	        image.getRGB(0, 0, 1, 1, pixels, 0, realWidth);
 	        sampPx = pixels[0];
 		}
 		SubTexture(String name, int r, int g, int b, int a) {
-			BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
+			image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
 			for (int x = 0; x < 8; x ++) {
 				for (int y = 0; y < 8; y ++) {					
 					image.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
@@ -78,8 +81,8 @@ public class OBJTextureSheet {
 			this.tex = new ResourceLocation("generated:" + name);
 			isFlatMaterial = true;
 			
-			pixels = new int[realWidth * realHeight];
-	        image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
+			int[] pixels = new int[1];
+	        image.getRGB(0, 0, 1, 1, pixels, 0, realWidth);
 	        
 	        sampPx = pixels[0];
 		}
@@ -113,16 +116,37 @@ public class OBJTextureSheet {
 			
 			return offset;
 		}
-		public void upload(int textureID, int originX, int originY, int sheetWidth, int sheetHeight) {
+		
+		public BufferedImage convertToBufferedImage(Image image)
+		{
+		    BufferedImage newImage = new BufferedImage(
+		        image.getWidth(null), image.getHeight(null),
+		        BufferedImage.TYPE_INT_ARGB);
+		    Graphics2D g = newImage.createGraphics();
+		    g.drawImage(image, 0, 0, null);
+		    g.dispose();
+		    return newImage;
+		}
+		
+		public void upload(int textureID, int originX, int originY, int sheetWidth, int sheetHeight, Function<Integer, Integer> scale) {
 			this.originX = originX;
 			this.originY = originY;
 			this.sheetWidth = sheetWidth;
 			this.sheetHeight = sheetHeight;
+			
+			BufferedImage scaled = null;
+			if (scale.apply(realWidth) == 1 || scale.apply(realHeight) == 1 || scale.apply(realWidth) == realWidth) {
+				scaled = image;
+			} else {
+				scaled = convertToBufferedImage(image.getScaledInstance(scale.apply(realWidth), scale.apply(realHeight), BufferedImage.SCALE_FAST));
+			}
+			int[] pixels = new int[scale.apply(realWidth) * scale.apply(realHeight)];
+			scaled.getRGB(0, 0, scale.apply(realWidth), scale.apply(realHeight), pixels, 0, scale.apply(realWidth));
 
-	        ByteBuffer buffer = BufferUtils.createByteBuffer(realWidth * realHeight * 4);
-	        for(int y = 0; y < realHeight; y++){
-	            for(int x = 0; x < realWidth; x++){
-	                int pixel = pixels[y * realWidth + x];
+	        ByteBuffer buffer = BufferUtils.createByteBuffer(scale.apply(realWidth) * scale.apply(realHeight) * 4);
+	        for(int y = 0; y < scale.apply(realHeight); y++){
+	            for(int x = 0; x < scale.apply(realWidth); x++){
+	                int pixel = pixels[y * scale.apply(realWidth) + x];
 	                buffer.put((byte) ((pixel >> 16) & 0xFF));
 	                buffer.put((byte) ((pixel >> 8) & 0xFF));
 	                buffer.put((byte) ((pixel >> 0)& 0xFF));
@@ -134,15 +158,17 @@ public class OBJTextureSheet {
 			
 			for (int cU = 0; cU < copiesU(); cU++) {
 				for (int cV = 0; cV < copiesV(); cV++) {
-					int offX = originX + this.realWidth * cU;
-					int offY = originY + this.realHeight * cV;
-					if (offX + realWidth > this.sheetWidth) {
-						realWidth = this.sheetWidth - offX;
-						
+					int offX = scale.apply(originX) + scale.apply(this.realWidth) * cU;
+					int offY = scale.apply(originY) + scale.apply(this.realHeight) * cV;
+					
+					int offXNS = originX + this.realWidth * cU;
+					if (offXNS + realWidth > sheetWidth) {
+						realWidth = sheetWidth - offXNS;
 					}
-					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+					
+					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, scale.apply(realWidth), scale.apply(realHeight), GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 
-					if (offX + realWidth >= this.sheetWidth) {
+					if (offX + realWidth >= sheetWidth) {
 						return;
 					}
 				}
@@ -199,8 +225,8 @@ public class OBJTextureSheet {
 						}
 					}
 					List<Vec2f> vts = new ArrayList<Vec2f>();
-					for (int[] point : face.points) {
-						Vec2f vt = point[1] != -1 ? model.vertexTextures[point[1]] : null;
+					for (int[] point : face.points()) {
+						Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 						if (vt != null) {
 							vts.add(vt);
 						}
@@ -256,8 +282,15 @@ public class OBJTextureSheet {
 		currentX = 0;
 		currentY = 0;
 		rowHeight = 0;
+		
+		Function<Integer, Integer> scaleFn = (Integer val) -> {
+			if (val == 1) {
+				return 1;
+			}
+			return (int)Math.ceil(val/ConfigGraphics.textureScale);
+		};
 
-		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
+		TextureUtil.allocateTexture(textureID, scaleFn.apply(sheetWidth), scaleFn.apply(sheetHeight));
 		
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
@@ -279,7 +312,7 @@ public class OBJTextureSheet {
 				ImmersiveRailroading.debug("NEXT_LINE");
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
-			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
+			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight, scaleFn);
 			currentX += tex.getAbsoluteWidth();
 		}
 	}
