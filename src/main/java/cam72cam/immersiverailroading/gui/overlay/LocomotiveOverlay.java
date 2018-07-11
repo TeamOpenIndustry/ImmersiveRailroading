@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui.overlay;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -94,5 +95,21 @@ public class LocomotiveOverlay extends Gui {
 			drawCenteredString(mc.fontRenderer, text, 0, 0, 0xFFFFFF);
 		}
 		GL11.glPopMatrix();
+	}
+	
+	public void drawSpeedDisplay(Locomotive loco) {
+		double speed = Math.abs(loco.getCurrentSpeed().metric());
+		if (ConfigGraphics.speedUnit == "kmh") {
+			drawSpeedText(String.format("%.2f km/h", speed));
+		} else if (ConfigGraphics.speedUnit == "mph") {
+			speed = speed * 0.621371;
+			drawSpeedText(String.format("%.2f mph", speed));
+		} else if (ConfigGraphics.speedUnit == "ms") {
+			speed = speed /3.6;
+			drawSpeedText(String.format("%.2f m/s", speed));
+		} else {
+			speed = speed * 0.621371;
+			drawSpeedText(String.format("%.2f mph", speed));
+		}
 	}
 }
