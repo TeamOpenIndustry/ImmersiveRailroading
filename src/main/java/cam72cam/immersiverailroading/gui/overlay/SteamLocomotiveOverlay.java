@@ -32,10 +32,7 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
 		
-		double speed = loco.getCurrentSpeed().metric();
-		if (speed < 0) {
-			speed = speed * (-1);
-		}
+		double speed = Math.abs(loco.getCurrentSpeed().metric());
 		if (ConfigGraphics.speedUnit == "kmh") {
 			drawSpeedText(String.format("%.2f km/h", speed));
 		} else if (ConfigGraphics.speedUnit == "mph") {
@@ -44,6 +41,9 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		} else if (ConfigGraphics.speedUnit == "ms") {
 			speed = speed /3.6;
 			drawSpeedText(String.format("%.2f m/s", speed));
+		} else {
+			speed = speed * 0.621371;
+			drawSpeedText(String.format("%.2f mph", speed));
 		}
 	}
 }
