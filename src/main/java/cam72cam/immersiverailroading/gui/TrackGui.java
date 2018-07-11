@@ -35,6 +35,7 @@ public class TrackGui extends GuiScreen {
 	private GuiTextField lengthInput;
 	private GuiSlider quartersSlider;
 	private GuiCheckBox isPreviewCB;
+	public GuiSlider embankmentSlider;
 	private GuiButton gaugeButton;
 
 	private int slot;
@@ -42,6 +43,7 @@ public class TrackGui extends GuiScreen {
 	private int quarters;
 	private Gauge gauge;
 	private boolean isPreview;
+	private int embankmentHeight;
 	private TrackItems type;
 	private TrackPositionType posType;
 	private TrackDirection direction;
@@ -92,6 +94,7 @@ public class TrackGui extends GuiScreen {
 		posType = ItemTrackBlueprint.getPosType(stack);
 		direction = ItemTrackBlueprint.getDirection(stack);
 		isPreview = ItemTrackBlueprint.isPreview(stack);
+		embankmentHeight = ItemTrackBlueprint.getEmbankmentHeight(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
 		oreDict.add(new ItemStack(Items.AIR));
@@ -192,6 +195,19 @@ public class TrackGui extends GuiScreen {
 		bedFillButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getBedFillName()));
 		this.buttonList.add(bedFillButton);
 		
+		this.embankmentSlider = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, "", 0, 50, embankmentHeight, 
+				null) {
+			@Override
+			public void updateSlider() {
+				super.updateSlider();
+				displayString = GuiText.SELECTOR_EMBANKMENT_HEIGHT.toString() + ": " + this.getValue();
+			}
+		};
+		embankmentSlider.visible = GuiText.SELECTOR_RAIL_BED_FILL != null;
+		embankmentSlider.showDecimal = false;
+		embankmentSlider.updateSlider();
+		this.buttonList.add(embankmentSlider);
+		
 		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_POSITION.toString(posType));
 		this.buttonList.add(posTypeButton);
 		
@@ -244,10 +260,10 @@ public class TrackGui extends GuiScreen {
         	if (!this.lengthInput.getText().isEmpty()) {
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, embankmentSlider.getValueInt()));
         		} else {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, embankmentSlider.getValueInt()));
         		}
         	}
 			this.mc.displayGuiScreen(null);

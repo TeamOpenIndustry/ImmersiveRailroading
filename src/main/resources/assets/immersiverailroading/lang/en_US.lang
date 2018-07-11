@@ -54,6 +54,7 @@ gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
 gui.immersiverailroading:selector.position=Position: %s
 gui.immersiverailroading:selector.direction=Direction: %s
 gui.immersiverailroading:selector.place_blueprint=Place Blueprint
+gui.immersiverailroading:selector.embankment_height=Embankment height
 gui.immersiverailroading:selector.plate_type=Plate Type: %s
 gui.immersiverailroading:selector.plate_boiler=Plate Boiler: %s
 gui.immersiverailroading:selector.cast_single=Single Casting
@@ -70,6 +71,8 @@ gui.immersiverailroading:track.rail_bed=Bed:        %s
 gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
 gui.immersiverailroading:track.place_blueprint_true=Place:      Blueprint
 gui.immersiverailroading:track.place_blueprint_false=Place:      Track
+gui.immersiverailroading:track.place_embankment_true=Place:      Embankment
+gui.immersiverailroading:track.place_embankment_false=Place:      Track
 
 gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.horse_power=Horse Power: %s

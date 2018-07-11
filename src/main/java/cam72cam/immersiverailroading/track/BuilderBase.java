@@ -236,9 +236,21 @@ public abstract class BuilderBase {
 	public int costFill() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
-			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
-				fillCount += 1;
+			if (track.builder.info.embankmentHeight > 0) {
+				for (int x = 1; x < track.builder.info.embankmentHeight; x++) {
+					if (BlockUtil.canBeReplaced(world, track.getPos().down(x), false)) {
+						fillCount++;
+					} else {
+						break;
+					}
+				}
+			} else {
+				if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
+					fillCount++;
+				}
 			}
+			
+			
 		}
 		return MathHelper.ceil(this.info.railBedFill.getItem() != Items.AIR ? fillCount : 0);
 	}

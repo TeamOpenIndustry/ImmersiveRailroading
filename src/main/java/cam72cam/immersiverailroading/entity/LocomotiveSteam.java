@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.ConfigGraphics;
@@ -27,10 +29,11 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
-
 public class LocomotiveSteam extends Locomotive {
 	// PSI
 	private static DataParameter<Float> BOILER_PRESSURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
@@ -705,14 +708,25 @@ public class LocomotiveSteam extends Locomotive {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
-			if (Config.ConfigDamage.explosionsEnabled) {
-				for (int i = 0; i < 5; i++) {
-					world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
-				}
+			for (int i = 0; i < 5; i++) {
+				world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
 			}
 			world.removeEntity(this);
 		}
 	}
+	
+	public Explosion causeTerrainFriendlyExplosion(@Nullable Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking)
+    {
+        Explosion explosion = new Explosion(this.world, entityIn, x, y, z, strength, isFlaming, isSmoking);
+        explosion.doExplosionB(true);
+        for (Entity entity : world.getLoadedEntityList()) {
+			double distance = Math.sqrt(Math.pow((entity.posX - this.posX), 2) + Math.pow((entity.posY - this.posY), 2) + Math.pow((entity.posY - this.posY), 2));
+			if (distance < 10) {
+				entity.attackEntityFrom(DamageSource.causeExplosionDamage(explosion), (float) (10 - distance) * 2);
+			}
+        }
+        return explosion;
+    }
 
 	@Override
 	public void setDead() {

@@ -187,4 +187,13 @@ public class ItemTrackBlueprint extends Item {
 	public static void setPreview(ItemStack stack, boolean value) {
 		stack.getTagCompound().setBoolean("isPreview", value);
 	}
+	public static int getEmbankmentHeight(ItemStack stack) {
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("embankmentHeight")) { 
+			return stack.getTagCompound().getInteger("embankmentHeight");
+		}
+		return 0;
+	}
+	public static void setEmbankmentHeight(ItemStack stack, int value) {
+		stack.getTagCompound().setInteger("embankmentHeight", value);
+	}
 }
