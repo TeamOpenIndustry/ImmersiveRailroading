@@ -25,8 +25,8 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int numSlots;
 	private int width;
 	
-	public ResourceLocation whistle;
 	public Quilling quill;
+	public ResourceLocation whistle;
 	public ResourceLocation idle;
 	public ResourceLocation chuff;
 	public ResourceLocation pressure;
@@ -53,32 +53,33 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
-		if (sounds != null && sounds.has("whistle")) {
-			whistle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
-		} else {
-			whistle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
-		}
+		quill = new Quilling(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
+		whistle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
+		idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
+		chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
+		pressure = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
 		
-		if (sounds != null && sounds.has("idle")) {
-			idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
-		} else {
-			idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
-		}
 		
-		if (sounds != null && sounds.has("chuff")) {
-			chuff = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString());
-		} else {
-			chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
-		}
-		
-		if (sounds != null && sounds.has("pressure")) {
-			pressure = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString());
-		} else {
-			pressure = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
-		}
-		
-		if (sounds != null && sounds.has("quilling")) {
-			quill = new Quilling(sounds.get("quilling").getAsJsonArray());
+		if (sounds != null) {
+			if (sounds.has("whistle")) {
+				whistle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
+			}
+			
+			if (sounds.has("idle")) {
+				idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
+			}
+			
+			if (sounds.has("chuff")) {
+				chuff = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString());
+			}
+			
+			if (sounds.has("pressure")) {
+				pressure = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString());
+			}
+			
+			if (sounds.has("quilling")) {
+				quill = new Quilling(sounds.get("quilling").getAsJsonArray());
+			}
 		}
 	}
 
