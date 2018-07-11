@@ -55,6 +55,8 @@ public class TileRail extends TileRailBase {
 	
 	private List<ItemStack> drops;
 	
+	private int embankmentHeight;
+	
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -223,6 +225,7 @@ public class TileRail extends TileRailBase {
 		placementPosition = getNBTVec3d(nbt, "placementPosition");
 		gauge = Gauge.from(nbt.getDouble("gauge"));
 		tablePos = nbt.getDouble("tablePos");
+		embankmentHeight = nbt.getInteger("embankmentHeight");
 	}
 
 	@Override
@@ -258,6 +261,8 @@ public class TileRail extends TileRailBase {
 		
 		nbt.setDouble("tablePos", tablePos);
 		
+		nbt.setInteger("embankmentHeight", embankmentHeight);
+		
 		return super.writeToNBT(nbt);
 	}
 
@@ -267,7 +272,7 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY, null, 0);
+			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY, null, 0, 0);
 		}
 		// Changes moment to moment
 		info.switchState = switchState;

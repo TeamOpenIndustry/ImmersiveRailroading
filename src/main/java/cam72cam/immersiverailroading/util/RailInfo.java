@@ -41,13 +41,14 @@ public class RailInfo {
 	public Vec3d placementPosition;
 	public ItemStack railBed;
 	public ItemStack railBedFill;
+	public int embankmentHeight;
 
 	// Used for tile rendering only
 	public SwitchState switchState = SwitchState.NONE;
 	public double tablePos = 0;
 	
 	
-	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState, double tablePos) {
+	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState, double tablePos, int embankmentHeight) {
 		this.position = position;
 		this.world = world;
 		this.facing = facing;
@@ -62,6 +63,7 @@ public class RailInfo {
 		this.railBedFill = railBedFill;
 		this.switchState = switchState;
 		this.tablePos = tablePos;
+		this.embankmentHeight = embankmentHeight;
 	}
 	
 	public RailInfo(ItemStack stack, World worldIn, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
@@ -72,6 +74,7 @@ public class RailInfo {
 		gauge = ItemGauge.get(stack);
 		railBed = ItemTrackBlueprint.getBed(stack);
 		railBedFill = ItemTrackBlueprint.getBedFill(stack);
+		embankmentHeight = ItemTrackBlueprint.getEmbankmentHeight(stack);
 		world = worldIn;
 		TrackPositionType posType = ItemTrackBlueprint.getPosType(stack);
 		direction = ItemTrackBlueprint.getDirection(stack);
@@ -172,7 +175,7 @@ public class RailInfo {
 	
 	@Override
 	public RailInfo clone() {
-		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill, switchState, tablePos);
+		RailInfo c = new RailInfo(position, world, facing, type, direction, length, quarter, quarters, gauge, placementPosition, railBed, railBedFill, switchState, tablePos, embankmentHeight);
 		return c;
 	}
 	
@@ -239,29 +242,23 @@ public class RailInfo {
 					}
 				}
 				
-				boolean isOk = true;
-				
 				if (ties < builder.costTies()) {
 					player.sendMessage(ChatText.BUILD_MISSING_TIES.getMessage(builder.costTies() - ties));
-					isOk = false;
+					return false;
 				}
 				
 				if (rails < builder.costRails()) {
 					player.sendMessage(ChatText.BUILD_MISSING_RAILS.getMessage(builder.costRails() - rails));
-					isOk = false;
+					return false;
 				}
 				
 				if (railBed.getItem() != Items.AIR && bed < builder.costBed()) {
 					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED.getMessage(builder.costBed() - bed));
-					isOk = false;
+					return false;
 				}
 				
 				if (railBedFill.getItem() != Items.AIR && fill < builder.costFill()) {
 					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED_FILL.getMessage(builder.costFill() - fill));
-					isOk = false;
-				}
-				
-				if (!isOk) {
 					return false;
 				}
 

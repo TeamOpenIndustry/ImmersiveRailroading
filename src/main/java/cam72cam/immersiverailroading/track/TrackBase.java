@@ -50,11 +50,35 @@ public abstract class TrackBase {
 		return BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) && downOK;
 	}
 
-	public TileEntity placeTrack() {
+	public TileEntity placeTrack() { 
 		PosRot pos = getPos();
-
+		System.out.println("1");
+		System.out.println(builder.info.embankmentHeight);
 		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
-			builder.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.railBedFill));
+			System.out.println("2");
+			if (builder.info.embankmentHeight > 0) {
+				System.out.println("3");
+				for (int x = 1; x < builder.info.embankmentHeight; x++) {
+					System.out.println("4");
+					if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
+						builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
+					} else {
+						break;
+					}
+					if (BlockUtil.canBeReplaced(builder.world, pos.down(x), false)) {
+							builder.world.setBlockState(pos.down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
+							System.out.println("5");
+					}
+					for (int i = 1; i < x; i++) {
+						System.out.println("6");
+						for (EnumFacing dir : EnumFacing.HORIZONTALS) {
+							builder.world.setBlockState(pos.offset(dir, i).down(x), BlockUtil.itemToBlockState(builder.info.railBedFill));
+						}
+					}
+				}
+			} else {
+				builder.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.railBedFill));
+			}
 		}
 		
 		NBTTagCompound replaced = null;
@@ -91,6 +115,7 @@ public abstract class TrackBase {
 		tr.setHeight(getHeight());
 		return tr;
 	}
+	
 	public IBlockState getBlockState() {
 		return block.getDefaultState();
 	}

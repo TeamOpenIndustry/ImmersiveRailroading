@@ -17,6 +17,7 @@ public enum GuiText {
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),
 	SELECTOR_CAST_SINGLE("selector.cast_single"),
 	SELECTOR_CAST_REPEAT("selector.cast_repeat"),
+	SELECTOR_EMBANKMENT_HEIGHT("selector.embankment_height"),
 
 	TRACK_TYPE("track.type"),
 	TRACK_LENGTH("track.length"),
