@@ -261,7 +261,7 @@ public class LocomotiveSteam extends Locomotive {
 								}
 								if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
 									for (Entity pass : this.getPassengers()) {
-										if (pass.getPersistentID() != this.getDataManager().get(HORN_PLAYER).get()) {
+										if (!pass.getPersistentID().equals(this.getDataManager().get(HORN_PLAYER).get())) {
 											continue;
 										}
 										

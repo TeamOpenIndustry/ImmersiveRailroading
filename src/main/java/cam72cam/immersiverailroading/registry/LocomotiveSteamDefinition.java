@@ -53,7 +53,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
-		quill = new Quilling(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
 		whistle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
 		idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
 		chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
@@ -80,6 +79,9 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			if (sounds.has("quilling")) {
 				quill = new Quilling(sounds.get("quilling").getAsJsonArray());
 			}
+		}
+		if (whistle == null && quill == null) {
+			quill = new Quilling(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
 		}
 	}
 
