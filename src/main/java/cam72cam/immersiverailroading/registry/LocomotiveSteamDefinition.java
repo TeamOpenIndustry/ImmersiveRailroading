@@ -57,11 +57,14 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
 		chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
 		pressure = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
+
+		boolean whistleSet = false;
 		
 		
 		if (sounds != null) {
 			if (sounds.has("whistle")) {
 				whistle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
+				whistleSet = true;
 			}
 			
 			if (sounds.has("idle")) {
@@ -78,9 +81,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			
 			if (sounds.has("quilling")) {
 				quill = new Quilling(sounds.get("quilling").getAsJsonArray());
+				whistleSet = true;
 			}
 		}
-		if (whistle == null && quill == null) {
+		if (!whistleSet) {
 			quill = new Quilling(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
 		}
 	}
