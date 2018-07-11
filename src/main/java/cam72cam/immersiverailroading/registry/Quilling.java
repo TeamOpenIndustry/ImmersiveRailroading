@@ -28,6 +28,14 @@ public class Quilling {
 			pitch_end = data.get("pitch_end").getAsDouble();
 			sample = new ResourceLocation(ImmersiveRailroading.MODID, data.get("sample").getAsString());
 		}
+		
+		public Chime(double pull_start, double pull_end, double pitch_start, double pitch_end, ResourceLocation sample) {
+			this.pull_start = pull_start; 
+			this.pull_end = pull_end;
+			this.pitch_start = pitch_start;
+			this.pitch_end = pitch_end;
+			this.sample = sample;
+		}
 	}
 
 	public Quilling(JsonArray jsonElement) {
@@ -36,6 +44,13 @@ public class Quilling {
 			chimes.add(chime);
 			maxPull = Math.max(maxPull, chime.pull_end);
 		}
+	}
+
+	public Quilling(ResourceLocation sample) {
+		double pitchUp = 0.14;
+		chimes.add(new Chime(0.15, 0.45, 0.75+pitchUp, 0.85+pitchUp, sample));
+		chimes.add(new Chime(0.4, 0.55, 0.95+pitchUp, 1+pitchUp, sample));
+		maxPull = 0.55;
 	}
 
 }
