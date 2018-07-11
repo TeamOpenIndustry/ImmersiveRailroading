@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
-import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.GuiText;
 import net.minecraft.entity.Entity;
@@ -39,18 +38,6 @@ public class DieselLocomotiveOverlay extends LocomotiveOverlay {
 		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
 		
-		double speed = Math.abs(loco.getCurrentSpeed().metric());
-		if (ConfigGraphics.speedUnit == "kmh") {
-			drawSpeedText(String.format("%.2f km/h", speed));
-		} else if (ConfigGraphics.speedUnit == "mph") {
-			speed = speed * 0.621371;
-			drawSpeedText(String.format("%.2f mph", speed));
-		} else if (ConfigGraphics.speedUnit == "ms") {
-			speed = speed /3.6;
-			drawSpeedText(String.format("%.2f m/s", speed));
-		} else {
-			speed = speed * 0.621371;
-			drawSpeedText(String.format("%.2f mph", speed));
-		}
+		drawSpeedDisplay(loco);
 	}
 }
