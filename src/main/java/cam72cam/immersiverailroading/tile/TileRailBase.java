@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
@@ -20,6 +21,7 @@ import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.CouplerAugmentMode;
+import cam72cam.immersiverailroading.library.DismounterMode;
 import cam72cam.immersiverailroading.library.LocoControlMode;
 import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -31,6 +33,11 @@ import cam72cam.immersiverailroading.util.SwitchUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -52,6 +59,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -79,6 +87,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private StockDetectorMode redstoneMode = StockDetectorMode.SIMPLE;
 	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD;
 	private CouplerAugmentMode couplerMode = CouplerAugmentMode.ENGAGED;
+	private DismounterMode dismounterMode = DismounterMode.ALL;
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
@@ -123,6 +132,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		case COUPLER:
 			couplerMode = CouplerAugmentMode.values()[((couplerMode.ordinal() + 1) % (CouplerAugmentMode.values().length))];
 			return couplerMode.toString();
+		case DISMOUNTER:
+			dismounterMode = DismounterMode.values()[((dismounterMode.ordinal() + 1) % (DismounterMode.values().length))];
+			return dismounterMode.toString();
 		default:
 			return null;
 		}
@@ -258,6 +270,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (nbt.hasKey("couplerMode")) {
 			couplerMode = CouplerAugmentMode.values()[nbt.getInteger("couplerMode")];
 		}
+		if (nbt.hasKey("dismounterMode")) {
+			dismounterMode = DismounterMode.values()[nbt.getInteger("dismounterMode")];
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -281,6 +296,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		nbt.setInteger("redstoneMode", redstoneMode.ordinal());
 		nbt.setInteger("controlMode", controlMode.ordinal());
 		nbt.setInteger("couplerMode", couplerMode.ordinal());
+		nbt.setInteger("dismounterMode", dismounterMode.ordinal());
 		
 		nbt.setInteger("version", 3);
 		
@@ -565,6 +581,15 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 	}
 	
+	public void transferAllEntities(EntityRollingStock source, EnumFacing side, List<Entity> toRemove) {
+		for (Entity entity : source.getPassengers()) {
+			if (toRemove.contains(entity)) {
+				BlockPos pos = entity.getPosition().offset(side);
+				entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+			}
+		}
+	}
+	
 	private <T> List<T> getCapsNearby(Capability<T> cap) {
 		List<T> found = new ArrayList<T>();
 		
@@ -778,6 +803,22 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 						}
 						break;
 					}
+					break;
+				}
+			case DISMOUNTER:
+				List<Entity> toRemove = new ArrayList<Entity>();
+				switch (dismounterMode) {
+				case ALL:
+					
+					break;
+				case VILLAGER:
+					
+					break;
+				case PASSIVE:
+					
+					break;
+				case HOSTILE:
+					
 					break;
 				}
 			default:
