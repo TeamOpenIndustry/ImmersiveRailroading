@@ -1,9 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
 import cam72cam.immersiverailroading.util.LiquidUtil;
