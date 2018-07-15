@@ -86,7 +86,6 @@ public class LocomotiveOverlay extends Gui {
 	
 	public void drawSpeedText(String text) {
 		drawRect(currSpeedPosX, currPosY - 10, currSpeedPosX + 68, currPosY - 27, 0xFF4d4d4d);//drawRect(12, 265, 80, 248, 0xFF4d4d4d);
-		System.out.println("x: " + currSpeedPosX + "   y: " + currPosY);
 		GL11.glPushMatrix();
 		{
 			GL11.glTranslated(currSpeedPosX + 34, currPosY - 22, 0);
