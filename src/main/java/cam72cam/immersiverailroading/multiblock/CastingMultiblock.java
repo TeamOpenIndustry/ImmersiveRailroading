@@ -157,6 +157,11 @@ public class CastingMultiblock extends Multiblock {
 		public void tick(BlockPos offset) {
 			
 			TileMultiblock powerTe = getTile(power);
+			
+			if (powerTe == null) {
+				return;
+			}
+			
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			
 			if (world.isRemote) {
@@ -263,9 +268,7 @@ public class CastingMultiblock extends Multiblock {
 			}
 			
 			if (offset.equals(power)) {
-				if (powerTe != null) {
-					energy.extractEnergy(32, false);
-				}
+				energy.extractEnergy(32, false);
 			}
 		}
 
