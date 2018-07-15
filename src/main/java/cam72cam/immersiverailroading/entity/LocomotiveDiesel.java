@@ -122,7 +122,7 @@ public class LocomotiveDiesel extends Locomotive {
 		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 	
-	public void setThrottleMap(EntityRollingStock stock, boolean direction) {
+	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
 		if (stock instanceof LocomotiveDiesel) {
 			((LocomotiveDiesel) stock).setThrottle(this.getThrottle() * (direction ? 1 : -1));
 			((LocomotiveDiesel) stock).setAirBrake(this.getAirBrake());

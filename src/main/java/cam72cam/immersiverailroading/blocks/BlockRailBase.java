@@ -56,6 +56,7 @@ public abstract class BlockRailBase extends Block {
 		super(Material.IRON);
 		setHardness(1.0F);
 		setSoundType(SoundType.METAL);
+		
 		setCreativeTab(ItemTabs.MAIN_TAB);
 	}
 
