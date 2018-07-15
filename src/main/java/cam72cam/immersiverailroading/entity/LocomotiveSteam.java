@@ -18,6 +18,7 @@ import cam72cam.immersiverailroading.registry.Quilling.Chime;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.LiquidUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -755,14 +756,7 @@ public class LocomotiveSteam extends Locomotive {
 
 	@Override
 	public List<Fluid> getFluidFilter() {
-		List<Fluid> filter = new ArrayList<Fluid>();
-		filter.add(FluidRegistry.WATER);
-		for (String fluid : Config.ConfigBalance.waterSubstitutes) {
-			if (FluidRegistry.getFluid(fluid) != null) {
-				filter.add(FluidRegistry.getFluid(fluid));
-			}
-		}
-		return filter;
+		return LiquidUtil.getWater();
 	}
 
 	private double coalEnergyKCalTick() {
