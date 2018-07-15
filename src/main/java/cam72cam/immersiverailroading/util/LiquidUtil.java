@@ -10,7 +10,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 public class LiquidUtil {
 	public static List<Fluid> getWater() {
 		List<Fluid> filter = new ArrayList<Fluid>();
-		filter.add(FluidRegistry.WATER);
 		for (String fluid : Config.ConfigBalance.waterTypes) {
 			if (FluidRegistry.getFluid(fluid) != null) {
 				filter.add(FluidRegistry.getFluid(fluid));
