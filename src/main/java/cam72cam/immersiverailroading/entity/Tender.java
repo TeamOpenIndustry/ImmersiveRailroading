@@ -6,6 +6,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
+import cam72cam.immersiverailroading.util.LiquidUtil;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
@@ -31,14 +32,7 @@ public class Tender extends CarTank {
 
 	@Override
 	public List<Fluid> getFluidFilter() {
-		List<Fluid> filter = new ArrayList<Fluid>();
-		filter.add(FluidRegistry.WATER);
-		for (String fluid : Config.ConfigBalance.waterSubstitutes) {
-			if (FluidRegistry.getFluid(fluid) != null) {
-				filter.add(FluidRegistry.getFluid(fluid));
-			}
-		}
-		return filter;
+		return LiquidUtil.getWater();
 	}
 
 	@Override
