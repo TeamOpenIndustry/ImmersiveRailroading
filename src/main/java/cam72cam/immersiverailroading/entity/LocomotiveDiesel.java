@@ -119,22 +119,35 @@ public class LocomotiveDiesel extends Locomotive {
 			default:
 				super.handleKeyPress(source, key);
 		}
-		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 	
 	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
 		if (stock instanceof LocomotiveDiesel) {
-			((LocomotiveDiesel) stock).setThrottle(this.getThrottle() * (direction ? 1 : -1));
-			((LocomotiveDiesel) stock).setAirBrake(this.getAirBrake());
+			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
+			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());
 		}
 	}
 	
-	@Override
-	public void setThrottle(float newThrottle) {
+	private void realSetThrottle(float newThrottle) {
 		if (Config.isFuelRequired(gauge)) {
 			newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
 		}
 		super.setThrottle(newThrottle);
+	}
+	private void realAirBrake(float newAirBrake) {
+		super.setAirBrake(newAirBrake);;
+	}
+	
+	@Override
+	public void setThrottle(float newThrottle) {
+		realSetThrottle(newThrottle);
+		this.mapTrain(this, true, false, this::setThrottleMap);
+	}
+	
+	@Override
+	public void setAirBrake(float newAirBrake) {
+		realAirBrake(newAirBrake);
+		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 	
 	@Override
