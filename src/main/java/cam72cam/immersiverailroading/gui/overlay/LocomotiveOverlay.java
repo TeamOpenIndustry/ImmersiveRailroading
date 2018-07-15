@@ -84,31 +84,30 @@ public class LocomotiveOverlay extends Gui {
 		currPosX += scalarWidth + scalarSpacer;
 	}
 	
-	public void drawSpeedText(String text) {
-		drawRect(currSpeedPosX, currPosY - 10, currSpeedPosX + 68, currPosY - 27, 0xFF4d4d4d);//drawRect(12, 265, 80, 248, 0xFF4d4d4d);
+	public void drawSpeedDisplay(Locomotive loco, int offset) {
+		double speed = Math.abs(loco.getCurrentSpeed().metric());
+		String text = "";
+		switch (ConfigGraphics.speedUnit) {
+		case "mph":
+			text = String.format("%.2f mph", speed * 0.621371);
+			break;
+		case "ms":
+			text = String.format("%.2f m/s", speed / 3.6);
+			break;
+		case "kmh":
+		default:
+			text = String.format("%.2f km/h", speed);
+			break;
+		}
+		
+		drawRect(currSpeedPosX + offset, currPosY - 10, currSpeedPosX + offset + 50, currPosY - 19, 0xFF4d4d4d);//drawRect(12, 265, 80, 248, 0xFF4d4d4d);
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(currSpeedPosX + 34, currPosY - 22, 0);
-			double scale = 1;
+			GL11.glTranslated(currSpeedPosX + 25 + offset, currPosY - 17, 0);
+			double scale = 0.75;
 			GL11.glScaled(scale, scale, scale);
 			drawCenteredString(mc.fontRenderer, text, 0, 0, 0xFFFFFF);
 		}
 		GL11.glPopMatrix();
-	}
-	
-	public void drawSpeedDisplay(Locomotive loco) {
-		double speed = Math.abs(loco.getCurrentSpeed().metric());
-		if (ConfigGraphics.speedUnit == "kmh") {
-			drawSpeedText(String.format("%.2f km/h", speed));
-		} else if (ConfigGraphics.speedUnit == "mph") {
-			speed = speed * 0.621371;
-			drawSpeedText(String.format("%.2f mph", speed));
-		} else if (ConfigGraphics.speedUnit == "ms") {
-			speed = speed /3.6;
-			drawSpeedText(String.format("%.2f m/s", speed));
-		} else {
-			speed = speed * 0.621371;
-			drawSpeedText(String.format("%.2f mph", speed));
-		}
 	}
 }
