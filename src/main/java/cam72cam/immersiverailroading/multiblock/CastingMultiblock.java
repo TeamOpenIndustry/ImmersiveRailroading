@@ -263,7 +263,9 @@ public class CastingMultiblock extends Multiblock {
 			}
 			
 			if (offset.equals(power)) {
-				energy.extractEnergy(32, false);
+				if (powerTe != null) {
+					energy.extractEnergy(32, false);
+				}
 			}
 		}
 
