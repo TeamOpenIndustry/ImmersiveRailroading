@@ -1,7 +1,9 @@
 package cam72cam.immersiverailroading;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.init.Items;
@@ -98,6 +100,38 @@ public class Config {
 			Items.EMERALD.getRegistryName().toString()
 		};
 		
+		@Comment("Fuels for diesel Locomotives")
+		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();
+		static {
+			dieselFuels.clear();
+			// BC
+			dieselFuels.put("oil", 100);
+			dieselFuels.put("oil_heavy", 70);
+			dieselFuels.put("oil_dense", 110);
+			dieselFuels.put("oil_distilled", 50);
+			dieselFuels.put("fuel_dense", 110);
+			dieselFuels.put("fuel_mixed_heavy", 130);
+			dieselFuels.put("fuel_light", 150);
+			dieselFuels.put("fuel_mixed_light", 100);
+			// IE/IP
+			dieselFuels.put("diesel", 200);
+			dieselFuels.put("biodiesel", 170);
+			dieselFuels.put("biofuel", 170);
+			dieselFuels.put("ethanol", 170);
+			dieselFuels.put("gasoline", 100);
+			
+			// Other
+			dieselFuels.put("olive_oil", 40);
+		};
+		
+		@Comment("Water Substitutes")
+		public static String[] waterTypes = new String[] {
+			"water",
+			"dist_water",
+			"hot_spring_water",
+			"purified_water"
+		};
+
 		@Comment("Allow diesel locomotive engine overheating")
 		public static boolean canDieselEnginesOverheat = true;
 		
