@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.library.SpeedDisplayType;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.RequiresMcRestart;
 
@@ -37,6 +38,6 @@ public class ConfigGraphics {
 	public static boolean trainsOnTheBrain = true;
 	
 	@Comment({ "What unit to use for speedometer. (kmh, mph or ms)" })
-	public static String speedUnit = "mph";
+	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
 
 }

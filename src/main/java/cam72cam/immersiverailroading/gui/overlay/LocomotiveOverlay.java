@@ -88,13 +88,13 @@ public class LocomotiveOverlay extends Gui {
 		double speed = Math.abs(loco.getCurrentSpeed().metric());
 		String text = "";
 		switch (ConfigGraphics.speedUnit) {
-		case "mph":
+		case mph:
 			text = String.format("%.2f mph", speed * 0.621371);
 			break;
-		case "ms":
+		case ms:
 			text = String.format("%.2f m/s", speed / 3.6);
 			break;
-		case "kmh":
+		case kmh:
 		default:
 			text = String.format("%.2f km/h", speed);
 			break;
