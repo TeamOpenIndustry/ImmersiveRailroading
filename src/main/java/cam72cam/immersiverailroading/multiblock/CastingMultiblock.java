@@ -156,8 +156,15 @@ public class CastingMultiblock extends Multiblock {
 		@Override
 		public void tick(BlockPos offset) {
 			
+			TileMultiblock powerTe = getTile(power);
+			
+			if (powerTe == null) {
+				return;
+			}
+			
+			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+			
 			if (world.isRemote) {
-				
 				if (offset.getZ() > 7 && offset.getY() > 1 && isPouring()) {
 					Vec3d pos = new Vec3d(getPos(offset).add(0, 1, 0)).addVector(0.5, 0.5, 0.5);
 					if (Math.random() < 0.01) {
@@ -186,17 +193,16 @@ public class CastingMultiblock extends Multiblock {
 					ItemStack stack = item.getItem();
 					int cost = ItemCastingCost.getCastCost(stack);
 					if (cost != ItemCastingCost.BAD_CAST_COST) {
-						// TODO drain more power on melt
 						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + cost) {
 							if (!hasPower()) {
 								break;
 							}
+							energy.extractEnergy(32, false);
 							stack.shrink(1);
 							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + cost);
 						}
 					} else {
 						if (fluidTe.getCraftProgress() > 0) {
-							// TODO play fizzle noise
 							world.removeEntity(item);
 						}
 					}
@@ -262,11 +268,6 @@ public class CastingMultiblock extends Multiblock {
 			}
 			
 			if (offset.equals(power)) {
-				TileMultiblock powerTe = getTile(power);
-				if (powerTe == null) {
-					return;
-				}
-				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 				energy.extractEnergy(32, false);
 			}
 		}
