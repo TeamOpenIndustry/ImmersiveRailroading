@@ -234,7 +234,8 @@ public class LocomotiveDiesel extends Locomotive {
 		
 		float engineTemperature = getEngineTemperature();
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
-		float coolDownSpeed = heatUpSpeed * (float)Math.pow(((engineTemperature - ambientTemperature()) / 130), 2);
+		float ambientDelta = engineTemperature - ambientTemperature();
+		float coolDownSpeed = heatUpSpeed * Math.copySign((float)Math.pow(ambientDelta / 130, 2), ambientDelta);
 		
 		engineTemperature -= coolDownSpeed;
 		
