@@ -14,11 +14,13 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
+import cam72cam.immersiverailroading.registry.Quilling.Chime;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -50,7 +52,7 @@ public class LocomotiveSteam extends Locomotive {
 		super(world, defID);
 		
 		this.getDataManager().register(BOILER_PRESSURE, 0f);
-		this.getDataManager().register(BOILER_TEMPERATURE, 0f);
+		this.getDataManager().register(BOILER_TEMPERATURE, ambientTemperature());
 		this.getDataManager().register(PRESSURE_VALVE, false);
 		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
 		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
@@ -159,7 +161,7 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		this.setBoilerTemperature(0);
+		this.setBoilerTemperature(ambientTemperature());
 		this.setBoilerPressure(0);
 		
 		Map<Integer, Integer> burnTime = getBurnTime();
@@ -194,6 +196,9 @@ public class LocomotiveSteam extends Locomotive {
 	private List<ISound> sndCache = new ArrayList<ISound>();
 	private int sndCacheId = 0;
 	private ISound whistle;
+	private List<ISound> chimes = new ArrayList<ISound>();
+	private float pullString = 0;
+	private float soundDampener = 0;
 	private ISound idle;
 	private ISound pressure;
 	private int tickMod = 0;
@@ -212,6 +217,13 @@ public class LocomotiveSteam extends Locomotive {
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
 					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
+					whistle.setPitch(1);
+					
+					if (this.getDefinition().quill != null) {
+						for (Chime chime : this.getDefinition().quill.chimes) {
+							this.chimes.add(ImmersiveRailroading.proxy.newSound(chime.sample, true, 150, gauge));
+						}
+					}
 	
 					for (int i = 0; i < 32; i ++) {
 						sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, gauge));
@@ -223,11 +235,90 @@ public class LocomotiveSteam extends Locomotive {
 					pressure.setVolume(0.3f);
 				}
 				
-				if (this.getDataManager().get(HORN) != 0 && !whistle.isPlaying() && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
-					whistle.play(getPositionVector());
+				if (this.getDataManager().get(HORN) < 1) {
+					pullString = 0;
+					soundDampener = 0;
+					for (ISound chime : chimes) {
+						if (chime.isPlaying()) {
+							chime.stop();
+						}
+					}
+				} else {
+					if (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge)) {
+						if (this.getDefinition().quill == null) {
+							if (!this.whistle.isPlaying()) {
+								this.whistle.play(getPositionVector());
+							}
+						} else {
+							float maxDelta = 1/20f;
+							float delta = 0;
+							if (this.getDataManager().get(HORN) > 5) {
+								if (soundDampener < 0.4) {
+									soundDampener = 0.4f;
+								}
+								if (soundDampener < 1) {
+									soundDampener += 0.1;
+								}
+								if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
+									for (Entity pass : this.getPassengers()) {
+										if (!pass.getPersistentID().equals(this.getDataManager().get(HORN_PLAYER).get())) {
+											continue;
+										}
+										
+										float newString = (pass.rotationPitch+90) / 180;
+										delta = newString - pullString;
+									}
+								} else {
+									delta = (float)this.getDefinition().quill.maxPull-pullString;
+								}
+							} else {
+								if (soundDampener > 0) {
+									soundDampener -= 0.07;
+								}
+								// Player probably released key or has net lag
+								delta = -pullString; 
+							}
+							
+							if (pullString == 0) {
+								pullString += delta*0.55;
+							} else {
+								pullString += Math.max(Math.min(delta, maxDelta), -maxDelta);
+							}
+							pullString = Math.min(pullString, (float)this.getDefinition().quill.maxPull);
+							
+							for (int i = 0; i < this.getDefinition().quill.chimes.size(); i++) {
+								ISound sound = this.chimes.get(i);
+								Chime chime = this.getDefinition().quill.chimes.get(i);
+								
+								double perc = pullString;
+								// Clamp to start/end
+								perc = Math.min(perc, chime.pull_end);
+								perc -= chime.pull_start;
+								
+								//Scale to clamped range
+								perc /= chime.pull_end - chime.pull_start;
+								
+								if (perc > 0) {
+									
+									double pitch = (chime.pitch_end - chime.pitch_start) * perc + chime.pitch_start;
+	
+									sound.setPitch((float) pitch);
+									sound.setVolume((float) (perc * soundDampener));
+									
+									if (!sound.isPlaying()) {
+										sound.play(getPositionVector());
+									}
+								} else {
+									if (sound.isPlaying()) {
+										sound.stop();
+									}
+								}
+							}
+						}
+					}
 				}
 				
-				if (this.getBoilerTemperature() > 0) {
+				if (this.getBoilerTemperature() > this.ambientTemperature() + 5) {
 					if (!idle.isPlaying()) {
 						idle.play(getPositionVector());
 					}
@@ -429,6 +520,13 @@ public class LocomotiveSteam extends Locomotive {
 					whistle.setVelocity(getVelocity());
 					whistle.update();
 				}
+				for (ISound chime : chimes) {
+					if (chime.isPlaying()) {
+						chime.setPosition(getPositionVector());
+						chime.setVelocity(getVelocity());
+						chime.update();
+					}
+				}
 				if (idle.isPlaying()) {
 					idle.setPosition(getPositionVector());
 					idle.setVelocity(getVelocity());
@@ -528,6 +626,7 @@ public class LocomotiveSteam extends Locomotive {
 		if (boilerTemperature > 0) {
 			// Decrease temperature due to heat loss
 			// Estimate Kw emitter per m^2: (TdegC/10)^2 / 100
+			// TODO consider ambientTemperature
 			double radiatedKwHr = Math.pow(boilerTemperature/10, 2) / 100 * boilerAreaM * 2;
 			double radiatedKCalHr = radiatedKwHr * 859.85;
 			double radiatedKCalTick = radiatedKCalHr / 60 / 60 / 20 * ConfigBalance.locoHeatTimeScale;
@@ -594,7 +693,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 		
 		setBoilerPressure(boilerPressure);
-		setBoilerTemperature(boilerTemperature);
+		setBoilerTemperature(Math.max(boilerTemperature, ambientTemperature()));
 		if (changedBurnTime) {
 			setBurnTime(burnTime);
 		}
@@ -618,6 +717,10 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	public void setDead() {
 		super.setDead();
+
+		for (ISound chime : chimes) {
+			chime.stop();
+		}
 		
 		if (idle != null) {
 			idle.stop();

@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.library.SpeedDisplayType;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.RequiresMcRestart;
 
@@ -30,7 +31,13 @@ public class ConfigGraphics {
 	@Comment("Limit GPU load while models/world is loading.  1 == slow load, 3 == reasonable load, 10 = fast load, 100 = as fast as possible")
 	public static int limitGraphicsLoadMS = 3;
 
+	@Comment({ "Scale the textures to reduce GPU memory usage (1 == normal, 1.5 == low, 2 == super low" })
+	public static double textureScale = 1;
+
 	@Comment({ "Self explanitory" })
 	public static boolean trainsOnTheBrain = true;
+	
+	@Comment({ "What unit to use for speedometer. (kmh, mph or ms)" })
+	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
 
 }

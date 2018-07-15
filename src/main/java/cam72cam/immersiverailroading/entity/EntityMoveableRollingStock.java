@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -42,6 +45,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
+
+	private float sndRand;
+
+	private ISound wheel_sound;
 
 	public EntityMoveableRollingStock(World world, String defID) {
 		super(world, defID);
@@ -255,6 +262,32 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		
+		if (world.isRemote) {
+			if (ConfigSound.soundEnabled) {
+				if (this.wheel_sound == null) {
+					wheel_sound = ImmersiveRailroading.proxy.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
+					this.sndRand = (float)Math.random()/10;
+				}
+				
+				if (Math.abs(this.getCurrentSpeed().metric()) > 5) {
+					if (!wheel_sound.isPlaying()) {
+						wheel_sound.play(this.getPositionVector());
+					}
+					float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
+					wheel_sound.setPitch(adjust + 0.7f + this.sndRand);
+					wheel_sound.setVolume(adjust);
+					
+					wheel_sound.setPosition(getPositionVector());
+					wheel_sound.setVelocity(getVelocity());
+					wheel_sound.update();
+				} else {
+					if (wheel_sound.isPlaying()) {
+						wheel_sound.stop();;
+					}
+				}
+			}
+		}
 		
 		this.tickPosID += world.isRemote ? this.getTickSkew() : 1;
 		
@@ -516,5 +549,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	public Vec3d getVelocity() {
 		return new Vec3d(this.motionX, this.motionY, this.motionZ);
+	}
+	
+	@Override
+	public void setDead() {
+		super.setDead();
+		if (this.wheel_sound != null) {
+			wheel_sound.stop();
+		}
 	}
 }
