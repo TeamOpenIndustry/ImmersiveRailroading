@@ -131,13 +131,15 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	public void setThrottle(float newThrottle) {
-		newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
+		if (Config.isFuelRequired(gauge)) {
+			newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
+		}
 		super.setThrottle(newThrottle);
 	}
 	
 	@Override
 	protected int getAvailableHP() {
-		if (isRunning() && getEngineTemperature() > 75) {
+		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
