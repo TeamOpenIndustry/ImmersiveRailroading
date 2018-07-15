@@ -584,11 +584,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	public void transferAllEntities(EntityRollingStock source, EnumFacing side, DismounterMode toRemove) {
+		if (source != null) {
 			switch (dismounterMode) {
 			case ALL:
 				for (Entity entity : source.getPassengers()) {
-					BlockPos pos = entity.getPosition().offset(side, 3);
-					entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+					entity.dismountRidingEntity();
 				}
 				break;
 			case VILLAGER:
@@ -624,6 +624,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 				break;
 			}
+		}
 	}
 	
 	private <T> List<T> getCapsNearby(Capability<T> cap) {
