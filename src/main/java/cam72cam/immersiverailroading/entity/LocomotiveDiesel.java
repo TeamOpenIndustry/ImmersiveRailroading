@@ -98,10 +98,10 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readEntityFromNBT(nbttagcompound);
 		setEngineTemperature(nbttagcompound.getFloat("engine_temperature"));
 		setTurnedOn(nbttagcompound.getBoolean("turned_on"));
 		setEngineOverheated(nbttagcompound.getBoolean("engine_overheated"));
+		super.readEntityFromNBT(nbttagcompound);
 	}
 	
 	/*
