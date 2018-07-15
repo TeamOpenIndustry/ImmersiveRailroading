@@ -420,43 +420,64 @@ public class StockModel extends OBJRender {
 		RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
 		RenderComponent pistonRod = requireComponent(def, RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
 
+
+		// Center of the connecting rod, may not line up with a wheel directly
 		Vec3d connRodPos = connectingRod.center();
-		double connRodOffset = connRodPos.x - wheelCenter.x;
-		Vec3d drivingRodMin = drivingRod.min();
-		Vec3d drivingRodMax = drivingRod.max();
-		double drivingRodHeight = drivingRodMax.y - drivingRodMin.y;
-		double drivingRodLength = drivingRodMax.x - drivingRodMin.x;
-		double drivingRodCenterLength = drivingRodLength - drivingRodHeight;
-
-		Vec3d connRodMovment = VecUtil.fromYaw(connRodOffset, (float) wheelAngle);
-		double drivingRodHoriz = Math.sqrt(drivingRodCenterLength * drivingRodCenterLength - connRodMovment.z * connRodMovment.z);
-
-		double pistonDelta = connRodMovment.x - 0.3;
-
-		// CONNECTING_ROD_LEFT
-		// DRIVING_ROD_LEFT
-		GlStateManager.pushMatrix();
+		// Wheel Center is the center of all wheels, may not line up with a wheel directly
+		// The difference between these centers is the radius of the connecting rod movement
+		double connRodRadius = connRodPos.x - wheelCenter.x;
+		// Find new connecting rod pos based on the connecting rod rod radius 
+		Vec3d connRodMovment = VecUtil.fromYaw(connRodRadius, (float) wheelAngle);
+		
+		// Draw Connecting Rod
+		GL11.glPushMatrix();
 		{
-			GlStateManager.translate(-connRodOffset, 0, 0);
-			GlStateManager.translate(connRodMovment.x, connRodMovment.z, 0);
+			// Move to origin
+			GL11.glTranslated(-connRodRadius, 0, 0);
+			// Apply connection rod movement
+			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+			
 			drawComponent(connectingRod);
-
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(connRodPos.x, connRodPos.y, connRodPos.z);
-			GlStateManager.rotate((float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRodHoriz)), 0, 0, 1);
-			GlStateManager.translate(-connRodPos.x, -connRodPos.y, -connRodPos.z);
-			drawComponent(drivingRod);
-			GlStateManager.popMatrix();
 		}
-		GlStateManager.popMatrix();
-		// PISTON_LEFT
-		GlStateManager.pushMatrix();
+		GL11.glPopMatrix();
+		
+		// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
+		// Y: Center of the rod
+		// Z: does not really matter due to rotation axis
+		Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height()/2, drivingRod.center().y, drivingRod.max().z);
+		// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
+		float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
+		
+		// Draw driving rod
+		GL11.glPushMatrix();
 		{
-			GlStateManager.translate(pistonDelta, 0, 0);
+			// Move to conn rod center
+			GL11.glTranslated(-connRodRadius, 0, 0);
+			// Apply conn rod movement
+			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+			
+			// Move to rot point center
+			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+			// Rotate rod angle
+			GL11.glRotated(drivingRodAngle, 0, 0, 1);
+			// Move back from rot point center
+			GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+			
+			drawComponent(drivingRod);
+		}
+		GL11.glPopMatrix();
+		
+		// Piston movement is rod movement offset by the rotation radius
+		// Not 100% accurate, missing the offset due to angled driving rod
+		double pistonDelta = connRodMovment.x - connRodRadius;
+		
+		// Draw piston rod and cross head
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(pistonDelta, 0, 0);
 			drawComponent(pistonRod);
 		}
-		GlStateManager.popMatrix();
-		
+		GL11.glPopMatrix();
 	}
 	
 	private void drawT1(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
