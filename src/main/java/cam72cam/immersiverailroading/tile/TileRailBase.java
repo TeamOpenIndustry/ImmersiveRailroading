@@ -38,6 +38,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -581,13 +583,47 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 	}
 	
-	public void transferAllEntities(EntityRollingStock source, EnumFacing side, List<Entity> toRemove) {
-		for (Entity entity : source.getPassengers()) {
-			if (toRemove.contains(entity)) {
-				BlockPos pos = entity.getPosition().offset(side);
-				entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+	public void transferAllEntities(EntityRollingStock source, EnumFacing side, DismounterMode toRemove) {
+			switch (dismounterMode) {
+			case ALL:
+				for (Entity entity : source.getPassengers()) {
+					BlockPos pos = entity.getPosition().offset(side, 3);
+					entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+				}
+				break;
+			case VILLAGER:
+				for (Entity entity : source.getPassengers()) {
+					if (entity instanceof EntityVillager) {
+						BlockPos pos = entity.getPosition().offset(side);
+						entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+					}
+				}
+				break;
+			case PASSIVE:
+				for (Entity entity : source.getPassengers()) {
+					if (entity instanceof EntityAnimal) {
+						BlockPos pos = entity.getPosition().offset(side);
+						entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+					}
+				}
+				break;
+			case HOSTILE:
+				for (Entity entity : source.getPassengers()) {
+					if (entity instanceof EntityMob) {
+						BlockPos pos = entity.getPosition().offset(side);
+						entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+					}
+				}
+				break;
+			case PLAYER:
+				for (Entity entity : source.getPassengers()) {
+					if (entity instanceof EntityPlayer) {
+						BlockPos pos = entity.getPosition().offset(side);
+						entity.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+					}
+				}
+				break;
 			}
-		}
 	}
 	
 	private <T> List<T> getCapsNearby(Capability<T> cap) {
@@ -806,21 +842,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					break;
 				}
 			case DISMOUNTER:
-				List<Entity> toRemove = new ArrayList<Entity>();
-				switch (dismounterMode) {
-				case ALL:
-					
-					break;
-				case VILLAGER:
-					
-					break;
-				case PASSIVE:
-					
-					break;
-				case HOSTILE:
-					
-					break;
-				}
+				stock = this.getStockNearBy(null);
+				transferAllEntities(stock, EnumFacing.WEST, dismounterMode);
 			default:
 				break;
 			}
