@@ -293,6 +293,9 @@ public class AugmentDriver implements DriverBlock {
 			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
 			if (stock != null) {
 				stock.setThrottle(normalize(arguments.checkDouble(0)));
+				if (stock instanceof LocomotiveDiesel) {
+					stock.mapTrain(stock, true, false, ((LocomotiveDiesel)stock)::setThrottleMap);
+				}
 			}
 			return null;
 		}
@@ -313,6 +316,9 @@ public class AugmentDriver implements DriverBlock {
 			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
 			if (stock != null) {
 				stock.setAirBrake(normalize(arguments.checkDouble(0)));
+				if (stock instanceof LocomotiveDiesel) {
+					stock.mapTrain(stock, true, false, ((LocomotiveDiesel)stock)::setThrottleMap);
+				}
 			}
 			return null;
 		}
