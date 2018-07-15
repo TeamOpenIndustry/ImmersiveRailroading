@@ -27,6 +27,8 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 	public void doRender(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
 		Minecraft.getMinecraft().mcProfiler.startSection("ir_stock");
 		
+		stock.renderTick(partialTicks);
+		
 		String def = stock.getDefinitionID();
 		
 		StockModel model = StockRenderCache.getRender(def);

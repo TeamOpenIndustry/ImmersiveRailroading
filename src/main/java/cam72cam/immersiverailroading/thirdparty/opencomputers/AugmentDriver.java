@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
@@ -189,6 +190,9 @@ public class AugmentDriver implements DriverBlock {
 						info.put("pressure", steam.getBoilerPressure());
 						info.put("temperature", steam.getBoilerTemperature());
 					}
+					if (stock instanceof LocomotiveDiesel) {
+						info.put("temperature", ((LocomotiveDiesel)stock).getEngineTemperature());
+					}
 				}
 
 				FluidStack fluid = getFluid();
@@ -318,7 +322,7 @@ public class AugmentDriver implements DriverBlock {
 			TileRailBase te = TileRailBase.get(world, pos);
 			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
 			if (stock != null) {
-				stock.setHorn(5);
+				stock.setHorn(arguments.optInteger(0, 40), null);
 			}
 			return null;
 		}

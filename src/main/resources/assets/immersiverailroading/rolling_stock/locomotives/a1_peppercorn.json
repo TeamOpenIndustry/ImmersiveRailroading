@@ -35,6 +35,29 @@
 	"sounds": {
 		"whistle": "sounds/steam/a1_peppercorn/whistle.ogg",
 		"idle": "sounds/steam/a1_peppercorn/idle.ogg",
-		"chuff": "sounds/steam/a1_peppercorn/chuff.ogg"
+		"chuff": "sounds/steam/a1_peppercorn/chuff.ogg",
+		"quilling": [
+			{
+				"pull_start": 0.15, 
+				"pull_end": 0.45,
+				"pitch_start": 0.75,
+				"pitch_end": 0.85,
+				"sample": "sounds/steam/a1_peppercorn/quill.ogg"
+			},
+			{
+				"pull_start": 0.35, 
+				"pull_end": 0.55,
+				"pitch_start": 0.95,
+				"pitch_end": 1.0,
+				"sample": "sounds/steam/a1_peppercorn/quill.ogg"
+			},
+			{
+				"pull_start": 0.6, 
+				"pull_end": 0.7,
+				"pitch_start": 0.95,
+				"pitch_end": 1,
+				"sample": "sounds/steam/a1_peppercorn/quill_high.ogg"
+			}
+		]
 	}
 }

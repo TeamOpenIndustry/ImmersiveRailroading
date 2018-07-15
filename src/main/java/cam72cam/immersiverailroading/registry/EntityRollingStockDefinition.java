@@ -348,15 +348,15 @@ public abstract class EntityRollingStockDefinition {
 						Path2D path = new Path2D.Double();
 						double fheight = 0;
 						boolean first = true;
-						for (int[] point : face.points) {
-							Vec3d vert = model.vertices[point[0]];
+						for (int[] point : face.points()) {
+							Vec3d vert = model.vertices(point[0]);
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
 								path.moveTo(vert.x * ratio, vert.z * ratio);
 							} else {
 								path.lineTo(vert.x * ratio, vert.z * ratio);
 							}
-							fheight += vert.y / face.points.length;
+							fheight += vert.y / face.points().length;
 							first = false;
 						}
 						Rectangle2D bounds = path.getBounds2D();
@@ -412,19 +412,19 @@ public abstract class EntityRollingStockDefinition {
 			public int compare(Face o1, Face o2) {
 				if (o1.depthCache == null) {
 					double sum = 0;
-					for (int[] point : o1.points) {
-						Vec3d pt = model.vertices[point[0]];
+					for (int[] point : o1.points()) {
+						Vec3d pt = model.vertices(point[0]);
 						sum += pt.x;
 					}
-					o1.depthCache = (float) (sum / o1.points.length);
+					o1.depthCache = (float) (sum / o1.points().length);
 				}
 				if (o2.depthCache == null) {
 					double sum = 0;
-					for (int[] point : o2.points) {
-						Vec3d pt = model.vertices[point[0]];
+					for (int[] point : o2.points()) {
+						Vec3d pt = model.vertices(point[0]);
 						sum += pt.x;
 					}
-					o2.depthCache = (float) (sum / o2.points.length);
+					o2.depthCache = (float) (sum / o2.points().length);
 				}
 				return o1.depthCache.compareTo(o2.depthCache);
 			}
@@ -434,8 +434,8 @@ public abstract class EntityRollingStockDefinition {
 			Material mtl = model.materials.get(face.mtl);
 			Path2D path = new Path2D.Double();
 			boolean first = true;
-			for (int[] point : face.points) {
-				Vec3d vert = model.vertices[point[0]];
+			for (int[] point : face.points()) {
+				Vec3d vert = model.vertices(point[0]);
 				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {
 					path.moveTo(vert.z / nx, vert.y / nx);

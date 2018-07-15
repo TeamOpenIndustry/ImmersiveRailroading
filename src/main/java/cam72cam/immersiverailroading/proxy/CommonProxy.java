@@ -141,7 +141,9 @@ public abstract class CommonProxy implements IGuiHandler {
     	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
     }
     
+
 	public void serverStarting(FMLServerStartingEvent event) {
+		event.registerServerCommand(new IRCommand());
 	}
     
     public abstract World getWorld(int dimension);
