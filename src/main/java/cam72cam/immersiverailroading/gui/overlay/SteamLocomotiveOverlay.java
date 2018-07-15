@@ -30,5 +30,7 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		
 		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
+		
+		drawSpeedDisplay(loco, 20);
 	}
 }
