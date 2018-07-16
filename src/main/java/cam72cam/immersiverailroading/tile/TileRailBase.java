@@ -613,11 +613,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 				return;
 			}
-
-			boolean isOnRealBlock = world.isSideSolid(pos.down(), EnumFacing.UP, false) || !Config.ConfigDamage.requireSolidBlocks && !world.isAirBlock(pos.down()) || BlockUtil.isIRRail(getWorld(), pos.down());
 			
-			if (!isOnRealBlock) {
-				double floating = getParentTile().percentFloating();
+			if (this instanceof TileRail) {
+				double floating = ((TileRail)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
 					if (BlockRailBase.tryBreakRail(world, pos)) {
 						getWorld().destroyBlock(pos, true);
