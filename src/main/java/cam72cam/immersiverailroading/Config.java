@@ -41,6 +41,7 @@ public class Config {
 	public static ConfigBalance balance;
 
 	public static class ConfigBalance {
+		
 		@Comment("Models require fuel")
 		public static boolean ModelFuelRequired = true;
 
@@ -150,6 +151,9 @@ public class Config {
 	public static ConfigDebug debug;
 
 	public static class ConfigDebug {
+		
+		@Comment({ "Speed up IR stock server tick stepping to compensate for tps lag" })
+		public static boolean serverTickCompensation = true;
 
 		@Comment({ "Range between couplers to try coupling" })
 		public static double couplerRange = 0.3;
@@ -171,6 +175,9 @@ public class Config {
 
 		@Comment({"Time between open computers poll ticks for augments"})
 		public static int ocPollDelayTicks = 1;
+		
+		@Comment({"DEV ONLY: How much to artifically lag the server (per world)"})
+		public static int lagServer = 0;
 
 	}
 

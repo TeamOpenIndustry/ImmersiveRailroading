@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.proxy.CommonProxy;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -30,20 +32,7 @@ public class MRSSyncPacket implements IMessage {
 		this.dimension = mrs.dimension;
 		this.entityID = mrs.getEntityId();
 		this.positions = positions;
-		long[] ttl = mrs.world.getMinecraftServer().tickTimeArray;
-		double ttms = avg(ttl) * 1.0E-6D;
-		this.serverTPS = Math.min(1000.0 / ttms, 20);
-	}
-	
-	private double avg(long[] ttl) {
-		if (ttl.length == 0) {
-			return 0.01;
-		}
-		long sum = 0;
-		for (long tt : ttl) {
-			sum += tt;
-		}
-		return sum / ttl.length;
+		this.serverTPS = ConfigDebug.serverTickCompensation ? 20 : CommonProxy.getServerTPS(mrs.getEntityWorld(), positions.size());
 	}
 
 	public void applyTo(EntityMoveableRollingStock mrs) {

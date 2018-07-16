@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -200,6 +201,9 @@ public abstract class CommonProxy implements IGuiHandler {
 		if (event.phase != Phase.START) {
 			return;
 		}
+		
+		
+		
 		if (!event.world.isRemote) {
 			ChunkManager.handleWorldTick(event.world);
 			WorldServer world = event.world.getMinecraftServer().getWorld(event.world.provider.getDimension());
@@ -209,6 +213,12 @@ public abstract class CommonProxy implements IGuiHandler {
 			for (EntityCoupleableRollingStock stock : entities) {
 				stock = stock.findByUUID(stock.getPersistentID());
 				stock.tickPosRemainingCheck();
+			}
+			
+			try {
+				Thread.sleep(ConfigDebug.lagServer);
+			} catch (InterruptedException e) {
+				ImmersiveRailroading.catching(e);
 			}
 		}
 	}
@@ -247,5 +257,22 @@ public abstract class CommonProxy implements IGuiHandler {
 
 	public int getRenderDistance() {
 		return 8;
+	}
+	
+	public static double getServerTPS(World world, double sampleSize) {
+		long[] ttl = world.getMinecraftServer().tickTimeArray;
+		
+		sampleSize = Math.min(sampleSize, ttl.length);
+		double ttus = 0;
+		for (int i = 0; i < sampleSize; i++) {
+			ttus += ttl[ttl.length - 1 - i] / sampleSize;
+		}
+		
+		if (ttus == 0) {
+			ttus = 0.01;
+		}
+		
+		double ttms = ttus * 1.0E-6D;
+		return Math.min(1000.0 / ttms, 20);
 	}
 }
