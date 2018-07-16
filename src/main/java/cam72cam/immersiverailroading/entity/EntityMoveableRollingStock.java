@@ -347,82 +347,84 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    	this.clearPositionCache();
 	    }
 
-		List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
-		for (Entity entity : entitiesWithin) {
-			if (entity instanceof EntityMoveableRollingStock) {
-				// rolling stock collisions handled by looking at the front and
-				// rear coupler offsets
-				continue;
-			} 
-
-			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
-				// Don't apply bb to passengers
-				continue;
-			}
-
-			if (! (entity instanceof EntityLivingBase)) {
-				continue;
-			}
-			
-			if (entity instanceof EntityPlayer) {
-				if (entity.ticksExisted < 20 * 5) {
-					// Give the player a chance to get out of the way
+	    if (this.getCurrentSpeed().metric() > 1) {
+			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
+			for (Entity entity : entitiesWithin) {
+				if (entity instanceof EntityMoveableRollingStock) {
+					// rolling stock collisions handled by looking at the front and
+					// rear coupler offsets
+					continue;
+				} 
+	
+				if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
+					// Don't apply bb to passengers
 					continue;
 				}
+	
+				if (! (entity instanceof EntityLivingBase)) {
+					continue;
+				}
+				
+				if (entity instanceof EntityPlayer) {
+					if (entity.ticksExisted < 20 * 5) {
+						// Give the player a chance to get out of the way
+						continue;
+					}
+				}
+	
+				
+				// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
+				// We need to do a forward lookup
+				if (!this.getCollisionBoundingBox().intersects(entity.getEntityBoundingBox())) {
+					// miss
+					continue;
+				}
+	
+				// Move entity
+				
+				entity.motionX = this.motionX * 2;
+				entity.motionY = 0;
+				entity.motionZ = this.motionZ * 2;
+				// Force update
+				entity.onUpdate();
+	
+				double speedDamage = this.getCurrentSpeed().metric() / ConfigDamage.entitySpeedDamage;
+				if (speedDamage > 1) {
+					entity.attackEntityFrom((new DamageSource("immersiverailroading:hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
+				}
 			}
-
-			
-			// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
-			// We need to do a forward lookup
-			if (!this.getCollisionBoundingBox().intersects(entity.getEntityBoundingBox())) {
-				// miss
-				continue;
+	
+			// Riding on top of cars
+			AxisAlignedBB bb = this.getCollisionBoundingBox();
+			bb = bb.offset(0, gauge.scale()*2, 0);
+			List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
+			for (Entity entity : entitiesAbove) {
+				if (entity instanceof EntityMoveableRollingStock) {
+					continue;
+				}
+				if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
+					continue;
+				}
+				
+				if (! (entity instanceof EntityLivingBase)) {
+					continue;
+				}
+	
+				// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
+				// We need to do a forward lookup
+				if (!bb.intersects(entity.getEntityBoundingBox())) {
+					// miss
+					continue;
+				}
+				
+				//Vec3d pos = entity.getPositionVector();
+				//pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
+				//entity.setPosition(pos.x, pos.y, pos.z);
+				entity.setVelocity(this.motionX, entity.motionY + this.motionY, this.motionZ);
 			}
-
-			// Move entity
-			
-			entity.motionX = this.motionX * 2;
-			entity.motionY = 0;
-			entity.motionZ = this.motionZ * 2;
-			// Force update
-			entity.onUpdate();
-
-			double speedDamage = this.getCurrentSpeed().metric() / ConfigDamage.entitySpeedDamage;
-			if (speedDamage > 1) {
-				entity.attackEntityFrom((new DamageSource("immersiverailroading:hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
-			}
-		}
-
-		// Riding on top of cars
-		AxisAlignedBB bb = this.getCollisionBoundingBox();
-		bb = bb.offset(0, gauge.scale()*2, 0);
-		List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
-		for (Entity entity : entitiesAbove) {
-			if (entity instanceof EntityMoveableRollingStock) {
-				continue;
-			}
-			if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
-				continue;
-			}
-			
-			if (! (entity instanceof EntityLivingBase)) {
-				continue;
-			}
-
-			// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
-			// We need to do a forward lookup
-			if (!bb.intersects(entity.getEntityBoundingBox())) {
-				// miss
-				continue;
-			}
-			
-			Vec3d pos = entity.getPositionVector();
-			pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
-			entity.setPosition(pos.x, pos.y, pos.z);
-			entity.setVelocity(this.motionX, this.motionY, this.motionZ);
-		}
+	    }
 		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
-			bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
+			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
