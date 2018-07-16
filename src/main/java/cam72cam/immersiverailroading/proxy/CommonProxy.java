@@ -112,6 +112,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreHelper.IR_RAIL_BED.add(Blocks.BRICK_BLOCK);
     	OreHelper.IR_RAIL_BED.add(Blocks.COBBLESTONE);
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(Blocks.GRASS);
     	OreHelper.IR_RAIL_BED.add(Blocks.DIRT);
     	OreHelper.IR_RAIL_BED.add(Blocks.GRAVEL);
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
