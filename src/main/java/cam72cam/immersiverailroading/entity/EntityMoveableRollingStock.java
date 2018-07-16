@@ -381,7 +381,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				}
 	
 				// Move entity
-				
+
 				entity.motionX = this.motionX * 2;
 				entity.motionY = 0;
 				entity.motionZ = this.motionZ * 2;
@@ -420,7 +420,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				//Vec3d pos = entity.getPositionVector();
 				//pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
 				//entity.setPosition(pos.x, pos.y, pos.z);
-				entity.setVelocity(this.motionX, entity.motionY + this.motionY, this.motionZ);
+
+				entity.motionX = this.motionX;
+				entity.motionY = entity.motionY + this.motionY;
+				entity.motionZ = this.motionZ;
 			}
 	    }
 		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
