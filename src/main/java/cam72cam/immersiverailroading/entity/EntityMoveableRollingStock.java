@@ -7,9 +7,11 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
+import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -263,6 +265,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	public void onUpdate() {
 		super.onUpdate();
 		
+
+		if (!world.isRemote) {
+			if (ConfigDebug.serverTickCompensation) {
+				this.tickSkew = 20 / CommonProxy.getServerTPS(getEntityWorld(), 1);
+			} else {
+				this.tickSkew = 1;
+			}
+		}
+		
 		if (world.isRemote) {
 			if (ConfigSound.soundEnabled) {
 				if (this.wheel_sound == null) {
@@ -289,7 +300,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 		}
 		
-		this.tickPosID += world.isRemote ? this.getTickSkew() : 1;
+		this.tickPosID += this.getTickSkew();
 		
 		// Apply position tick
 		TickPos currentPos = getCurrentTickPosAndPrune();
