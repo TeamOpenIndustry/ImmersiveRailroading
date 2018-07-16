@@ -291,28 +291,32 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
+	private List<TrackBase> trackCheckCache;
 	public double percentFloating() {
-		RailInfo buildInfo = this.getRailRenderInfo().clone();
-		if (info == null) {
-			return 0;
+		if (trackCheckCache == null) {
+			RailInfo buildInfo = this.getRailRenderInfo().clone();
+			if (info == null) {
+				return 0;
+			}
+			
+			trackCheckCache = buildInfo.getBuilder().getTracksForRender();
 		}
 		
-		List<TrackBase> tracks = buildInfo.getBuilder().getTracksForRender();
 		double floating = 0;
 		
 		BlockPos offset = null;
-		for (TrackBase track : tracks) {
+		for (TrackBase track : trackCheckCache) {
 			if (track instanceof TrackRail) {
 				offset = this.getPos().subtract(new BlockPos(track.getPos().getX(), 0, track.getPos().getZ()));
 				break;
 			}
 		}
 		
-		for (TrackBase track : tracks) {
+		for (TrackBase track : trackCheckCache) {
 			BlockPos tpos = track.getPos().down().add(offset);
 			boolean isOnRealBlock = world.isSideSolid(tpos, EnumFacing.UP, false) || !Config.ConfigDamage.requireSolidBlocks && !world.isAirBlock(tpos);
 			if (!isOnRealBlock) {
-				floating += 1.0 / tracks.size();
+				floating += 1.0 / trackCheckCache.size();
 			}
 		}
 		return floating;
