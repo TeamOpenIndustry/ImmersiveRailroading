@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.BlockTallGrass;

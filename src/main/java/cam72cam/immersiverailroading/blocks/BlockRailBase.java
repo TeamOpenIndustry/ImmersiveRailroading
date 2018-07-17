@@ -35,6 +35,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
@@ -318,8 +319,7 @@ public abstract class BlockRailBase extends Block {
 	}
 
     @Override
-	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
+	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
     	TileRailBase te = TileRailBase.get(blockAccess, pos);
     	if (te != null && te.getAugment() == Augment.DETECTOR) {
     		return te.getRedstoneLevel();
@@ -328,19 +328,22 @@ public abstract class BlockRailBase extends Block {
     }
 
     @Override
-	public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
+	public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
         return this.getWeakPower(blockState, blockAccess, pos, side);
     }
 
     @Override
-	public boolean canProvidePower(IBlockState state)
-    {
+	public boolean canProvidePower(IBlockState state) {
         return true;
     }
     
     @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer() {
     	 return BlockRenderLayer.CUTOUT_MIPPED;
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass) {
+        return renderPass == 1 ? BiomeColorHelper.getGrassColorAtPos(worldIn, pos) : 16777215;
     }
 }
