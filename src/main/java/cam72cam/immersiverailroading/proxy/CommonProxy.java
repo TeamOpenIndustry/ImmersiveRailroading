@@ -208,6 +208,7 @@ public abstract class CommonProxy implements IGuiHandler {
 				stock = stock.findByUUID(stock.getPersistentID());
 				stock.tickPosRemainingCheck();
 			}
+			IRWorldSaveData.get(world).incrementTick();
 		}
 	}
 	

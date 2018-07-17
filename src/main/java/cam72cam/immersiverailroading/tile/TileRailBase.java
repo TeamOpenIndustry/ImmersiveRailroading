@@ -24,6 +24,7 @@ import cam72cam.immersiverailroading.library.LocoControlMode;
 import cam72cam.immersiverailroading.library.StockDetectorMode;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.physics.MovementTrack;
+import cam72cam.immersiverailroading.proxy.IRWorldSaveData;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.RedstoneUtil;
@@ -69,7 +70,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private Augment augment; 
 	private String augmentFilterID;
 	private int snowLayers = 0;
-	public int daysUntouched = 0;
+	public long ticksLastTouched = 0;
 	protected boolean flexible = false;
 	private boolean willBeReplaced = false; 
 	private NBTTagCompound replaced;
@@ -134,8 +135,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public int getSnowLayers() {
 		return this.snowLayers;
 	}
-	public int getDaysUntouched() {
-		return this.daysUntouched;
+	public long getDaysUntouched() {
+		return (IRWorldSaveData.get(world).getTotalTicks() - this.ticksLastTouched) / 24000;
 	}
 	public void setSnowLayers(int snowLayers) {
 		this.snowLayers = snowLayers;
@@ -262,6 +263,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (nbt.hasKey("couplerMode")) {
 			couplerMode = CouplerAugmentMode.values()[nbt.getInteger("couplerMode")];
 		}
+		if (nbt.hasKey("ticksLastTouched")) {
+			ticksLastTouched = nbt.getLong("ticksLastTouched");
+		} else {
+			ticksLastTouched = IRWorldSaveData.get(world).getTotalTicks();
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -287,6 +293,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		nbt.setInteger("couplerMode", couplerMode.ordinal());
 		
 		nbt.setInteger("version", 3);
+		
+		nbt.setLong("ticksLastTouched", ticksLastTouched);
 		
 		
 		return super.writeToNBT(nbt);
@@ -629,6 +637,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					return;
 				}
 			}
+		}
+		
+		if (this.getStockNearBy(null) != null ) {
+			ticksLastTouched = IRWorldSaveData.get(world).getTotalTicks();
 		}
 		
 		if (this.augment == null) {

@@ -25,6 +25,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
@@ -135,7 +136,7 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(RAIL_BED, te.getRenderRailBed());
 				state = state.withProperty(HEIGHT, te.getHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
-				state = state.withProperty(DAYS_UNTOUCHED, (float)te.getSnowLayers());
+				state = state.withProperty(DAYS_UNTOUCHED, (float)te.getDaysUntouched());
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
@@ -336,5 +337,10 @@ public abstract class BlockRailBase extends Block {
 	public boolean canProvidePower(IBlockState state)
     {
         return true;
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public BlockRenderLayer getBlockLayer() {
+    	 return BlockRenderLayer.CUTOUT_MIPPED;
     }
 }

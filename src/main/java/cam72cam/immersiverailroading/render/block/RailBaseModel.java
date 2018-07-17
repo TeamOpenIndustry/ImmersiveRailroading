@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -35,6 +36,7 @@ public class RailBaseModel implements IBakedModel {
 				float height = railState.getValue(BlockRailBase.HEIGHT).floatValue();
 				float tileHeight = height;
 				int snow = railState.getValue(BlockRailBase.SNOW).intValue();
+				int daysUntouched = railState.getValue(BlockRailBase.DAYS_UNTOUCHED).intValue();
 				Augment augment = railState.getValue(BlockRailBase.AUGMENT);
 				double gauged = railState.getValue(BlockRailBase.GAUGE).doubleValue();
 				double liquid = railState.getValue(BlockRailBase.LIQUID);
@@ -81,10 +83,14 @@ public class RailBaseModel implements IBakedModel {
 					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
 					return model.getQuads(state, side, rand);
 				} else if (bed.getItem() != Items.AIR && tileHeight != 0.000001f) {
+					List<BakedQuad> quads = new ArrayList<BakedQuad>();
 					ItemStack item = bed;
 					state = BlockUtil.itemToBlockState(item);
 					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-					return new BakedScaledModel(model, height).getQuads(state, side, rand);
+					quads.addAll(new BakedScaledModel(model, height).getQuads(state, side, rand));
+					IBlockState grassState = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
+					quads.addAll(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(grassState).getQuads(grassState, side, rand));
+					return quads;
 				}
 			}
 		}
