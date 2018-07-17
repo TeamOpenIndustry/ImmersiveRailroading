@@ -169,20 +169,17 @@ public abstract class Locomotive extends FreightTank {
 		double locoEfficiency = 0.7f; //TODO config
 		double outputHorsepower = Math.abs(Math.pow(getThrottle(), 3) * getAvailableHP());
 		
-		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(0.0001, Math.abs(speed.metric()))));
+		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
 		return tractiveEffortNewtons;
 	}
 	
-	private static double lastSlip = 0;
 	private void simulateWheelSlip() {
-		double applied = getAppliedTractiveEffort(getCurrentSpeed());
-		double actual = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
-		if (applied > actual) {
-			double speedMultiplier = 1 + Math.abs(lastSlip)*2;//Math.min(1, Math.abs(this.getCurrentSpeed().metric() * Math.abs(this.getThrottle()) * 2));//Hack for starting
-			lastSlip = Math.copySign(Math.min((applied / actual - 1)/100 * speedMultiplier, 0.8), getThrottle());
-			this.distanceTraveled += lastSlip; //Wheel Slip
-		} else {
-			lastSlip = 0;
+		double tractiveEffortNewtons = getAppliedTractiveEffort(getCurrentSpeed());
+		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
+		staticTractiveEffort *= 1.5; // Fudge factor
+		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
+		if (adhesionFactor > 1) {
+			this.distanceTraveled += Math.copySign(Math.min((adhesionFactor-1)/10, 1), getThrottle());
 		}
 	}
 	
@@ -192,13 +189,16 @@ public abstract class Locomotive extends FreightTank {
 		}
 		
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
+		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
+		staticTractiveEffort *= 1.5; // Fudge factor
 		
+		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
 		
-		if (tractiveEffortNewtons > this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier) {
+		if (adhesionFactor > 1) {
 			// CRC Handbook of Physical Quantities. Boca Raton, FL: CRC Press, 1997: 145-156.
 			double us = 0.74;
 			double uk = 0.57;
-			tractiveEffortNewtons = this.getDefinition().getStartingTractionNewtons(gauge) * (uk/us) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
+			tractiveEffortNewtons = staticTractiveEffort * (uk/us) / adhesionFactor;
 		}
 		
 		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
