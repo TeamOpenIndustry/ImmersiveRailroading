@@ -2,7 +2,7 @@
 {
   "modid": "immersiverailroading",
   "name": "Immersive Railroading",
-  "description": "Adds Railroading to Minecraft in the style of Immersive Engineering",
+  "description": "Adds Railroading to Minecraft",
   "version": "",
   "mcversion": "${mcversion}",
   "url": "",
