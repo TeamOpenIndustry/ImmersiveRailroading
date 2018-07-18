@@ -606,8 +606,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			// Wont fire on first due to incr above
 			blockUpdate = false;
 
-			/*
-			if (this.getParentTile() == null || this.getParentTile().getParentTile() == null) {
+			if (this.getParentTile() == null) {
 				// Fire update event
 				if (BlockRailBase.tryBreakRail(world, pos)) {
 					getWorld().destroyBlock(pos, true);
@@ -623,7 +622,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					}
 					return;
 				}
-			}*/
+			}
 		}
 		
 		if (this.augment == null) {

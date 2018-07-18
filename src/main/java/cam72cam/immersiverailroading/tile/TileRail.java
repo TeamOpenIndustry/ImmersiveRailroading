@@ -314,6 +314,9 @@ public class TileRail extends TileRailBase {
 		
 		for (TrackBase track : trackCheckCache) {
 			BlockPos tpos = track.getPos().down().add(offset);
+			if (!world.isBlockLoaded(tpos)) {
+				return 0;
+			}
 			boolean isOnRealBlock = world.isSideSolid(tpos, EnumFacing.UP, false) || !Config.ConfigDamage.requireSolidBlocks && !world.isAirBlock(tpos);
 			if (!isOnRealBlock) {
 				floating += 1.0 / trackCheckCache.size();
