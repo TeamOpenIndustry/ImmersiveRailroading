@@ -32,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -546,7 +547,17 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 			pos = pos.add(latest.position);
 			BlockPos bp = new BlockPos(pos);
-			IBlockState state = world.getBlockState(bp);
+			
+			
+			IBlockState state = Blocks.AIR.getDefaultState();
+			try {
+	            Chunk chunk = world.getChunkFromBlockCoords(bp);
+	            state = chunk.getBlockState(bp);
+			} catch (Exception ex) {
+				// eat this exception
+				// Faster than calling isOutsideBuildHeight
+			}
+			
 			if (state.getBlock() != Blocks.AIR) {
 				if (BlockUtil.isIRRail(world, bp)) {
 					TileRailBase te = TileRailBase.get(world, bp);
