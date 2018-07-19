@@ -275,6 +275,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				// Resimulate every 5 ticks, this will cut down on packet storms
 				return;
 			}
+			/*
 			
 			boolean isStuck = false;
 			for (EntityBuildableRollingStock stock : this.getTrain()) {
@@ -301,7 +302,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					ChunkManager.flagEntityPos(this.world, new BlockPos(pos.position));
 				}
 				positions.add(pos);
-			}
+			}*/
 			
 			simulateCoupledRollingStock();
 		}
@@ -312,48 +313,58 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 * Movement Handlers
 	 * 
 	 */
-	
-	public Speed getMovement(Speed speed) {
-		
-		// ABS
-		//speed = Speed.fromMinecraft(Math.abs(speed.minecraft()));
-		
-		PhysicsAccummulator acc = new PhysicsAccummulator(speed);
-		this.mapTrain(this, true, true, acc::accumulate);
-		return acc.getVelocity();
-	}
 
 	private Speed getMovement(TickPos currentPos, boolean followStock) {
 		PhysicsAccummulator acc = new PhysicsAccummulator(currentPos.speed);
 		this.mapTrain(this, true, followStock, acc::accumulate);
 		return acc.getVelocity();
 	}
+
+	private Speed getMovement(TickPos currentPos, Collection<DirectionalStock> train) {
+		PhysicsAccummulator acc = new PhysicsAccummulator(currentPos.speed);
+		for (DirectionalStock stock : train) {
+			acc.accumulate(stock.stock, stock.direction);
+		}
+		return acc.getVelocity();
+	}
 	
 
 	public void simulateCoupledRollingStock() {
+		TickPos lastPos = this.getCurrentTickPosAndPrune();
+		this.positions = new ArrayList<TickPos>();
+		positions.add(lastPos);
+		
+		
+		
 		Collection<DirectionalStock> train = this.getDirectionalTrain(true);
-		for (int tickOffset = 1; tickOffset < this.positions.size(); tickOffset++) {
-			boolean onTrack = true;
+
+		Speed simSpeed = this.getCurrentSpeed();
+		boolean isStuck = false;
+		for (DirectionalStock stock : train) {
+			if (!stock.stock.areWheelsBuilt()) {
+				isStuck = true;
+			}
+		}
+		
+		
+		for (int tickOffset = 1; tickOffset < 30; tickOffset++) {
+			simSpeed = this.getMovement(this.positions.get(tickOffset-1), train);
+			if (isStuck) {
+				simSpeed = Speed.ZERO;
+			}
+			TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + tickOffset - 1);
+			positions.add(pos);
 			
 			for (DirectionalStock stock : train) {
 				if (stock.stock.getUniqueID().equals(this.getUniqueID())) {
 					//Skip self
 					continue;
 				}
-				onTrack &= stock.stock.simulateMove(stock.prev, tickOffset);
-			}
-			
-			if (!onTrack) {
-				for (int i = tickOffset; i < this.positions.size(); i ++) {
-					this.positions.get(i).position = this.positions.get(tickOffset).position;
-					this.positions.get(i).speed = Speed.ZERO;
-				}
-				for (EntityCoupleableRollingStock entity : this.getTrain(true)) {
-					entity.positions.get(entity.positions.size()-1).speed = Speed.ZERO;
-				}
-				break;
+				isStuck &= !stock.stock.simulateMove(stock.prev, tickOffset);
 			}
 		}
+		
+		
 		for (DirectionalStock entity : train) {
 			entity.stock.sendToObserving(new MRSSyncPacket(entity.stock, entity.stock.positions));
 			entity.stock.resimulate = false;
