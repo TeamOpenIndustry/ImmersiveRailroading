@@ -238,7 +238,7 @@ public class ClientProxy extends CommonProxy {
 		
 		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
 		
-		BlockColors blockColors = new BlockColors();
+		BlockColors blockColors = Minecraft.getMinecraft().getBlockColors();
 		blockColors.registerBlockColorHandler(new IBlockColor() {
 			@Override
 			public int colorMultiplier(IBlockState state, IBlockAccess worldIn, BlockPos pos, int tintIndex) {

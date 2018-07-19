@@ -118,6 +118,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
     	OreHelper.IR_RAIL_BED.add(Blocks.NETHER_BRICK);
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(Blocks.GRASS);
     }
     
     public void init(FMLInitializationEvent event) {
