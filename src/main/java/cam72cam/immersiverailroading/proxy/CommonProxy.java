@@ -22,6 +22,7 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.HandCar;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -210,6 +211,15 @@ public abstract class CommonProxy implements IGuiHandler {
 			// We do this here as to let all the entities do their tick first.  Otherwise some might be one tick ahead
 			// if we did this in the onUpdate method
 			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.IS_ALIVE);
+			
+			// Try locomotives first
+			for (EntityCoupleableRollingStock stock : entities) {
+				if (stock instanceof Locomotive) {
+					stock = stock.findByUUID(stock.getPersistentID());
+					stock.tickPosRemainingCheck();
+				}
+			}
+			// Try rest
 			for (EntityCoupleableRollingStock stock : entities) {
 				stock = stock.findByUUID(stock.getPersistentID());
 				stock.tickPosRemainingCheck();

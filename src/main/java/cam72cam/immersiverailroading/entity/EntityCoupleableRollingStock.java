@@ -268,6 +268,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			
 			// Only simulate on locomotives if we can help it.
+			/*
 			if (!(this instanceof Locomotive)) {
 				for (EntityCoupleableRollingStock stock : this.getTrain()) {
 					if (stock instanceof Locomotive) {
@@ -276,6 +277,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					}
 				}
 			}
+			*/
 			
 			if (resimulate && this.ticksExisted % 5 != 0) {
 				// Resimulate every 5 ticks, this will cut down on packet storms
