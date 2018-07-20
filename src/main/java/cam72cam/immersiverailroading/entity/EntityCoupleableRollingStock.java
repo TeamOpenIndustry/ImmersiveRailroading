@@ -194,6 +194,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		if (this.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
 			ChunkManager.flagEntityPos(this.world, this.getPosition());
+			ChunkManager.flagEntityPos(this.world, new BlockPos(this.guessCouplerPosition(CouplerType.FRONT)));
+			ChunkManager.flagEntityPos(this.world, new BlockPos(this.guessCouplerPosition(CouplerType.BACK)));
 			if (this.lastKnownFront != null) {
 				ChunkManager.flagEntityPos(this.world, this.lastKnownFront);
 			}
@@ -253,6 +255,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 	}
 	
+	private Vec3d guessCouplerPosition(CouplerType coupler) {
+		return this.getPositionVector().add(VecUtil.fromYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.rotationYaw));
+	}
+
 	public void tickPosRemainingCheck() {
 		if (this.getRemainingPositions() < 10 || resimulate) {
 			TickPos lastPos = this.getCurrentTickPosAndPrune();
@@ -315,13 +321,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 */
 
 	private Speed getMovement(TickPos currentPos, boolean followStock) {
-		PhysicsAccummulator acc = new PhysicsAccummulator(currentPos.speed);
+		PhysicsAccummulator acc = new PhysicsAccummulator(currentPos);
 		this.mapTrain(this, true, followStock, acc::accumulate);
 		return acc.getVelocity();
 	}
 
 	private Speed getMovement(TickPos currentPos, Collection<DirectionalStock> train) {
-		PhysicsAccummulator acc = new PhysicsAccummulator(currentPos.speed);
+		PhysicsAccummulator acc = new PhysicsAccummulator(currentPos);
 		for (DirectionalStock stock : train) {
 			acc.accumulate(stock.stock, stock.direction);
 		}
@@ -471,11 +477,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		switch (coupler) {
 		case FRONT:
 			coupledFront = id;
-			lastKnownFront = null;
+			if (id == null) {
+				lastKnownFront = null;
+			}
 			break;
 		case BACK:
 			coupledBack = id;
-			lastKnownRear = null;
+			if (id == null) {
+				lastKnownRear = null;
+			}
 			break;
 		}
 		

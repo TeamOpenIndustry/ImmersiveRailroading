@@ -222,7 +222,7 @@ public class AugmentDriver implements DriverBlock {
 			TileRailBase te = TileRailBase.get(world, pos);
 			EntityCoupleableRollingStock stock = te.getStockNearBy(EntityCoupleableRollingStock.class, null);
 			if (stock != null) {
-				PhysicsAccummulator acc = new PhysicsAccummulator(stock.getCurrentSpeed());
+				PhysicsAccummulator acc = new PhysicsAccummulator(stock.getCurrentTickPosAndPrune());
 				stock.mapTrain(stock, true, true, acc::accumulate);
 				Map<String, Object> info = new HashMap<String, Object>();
 				
