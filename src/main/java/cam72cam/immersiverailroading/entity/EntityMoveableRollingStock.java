@@ -22,6 +22,7 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -349,7 +350,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 
 	    if (this.getCurrentSpeed().metric() > 1) {
-			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(Entity.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
+			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(EntityLiving.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					// rolling stock collisions handled by looking at the front and
@@ -398,7 +399,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// Riding on top of cars
 			AxisAlignedBB bb = this.getCollisionBoundingBox();
 			bb = bb.offset(0, gauge.scale()*2, 0);
-			List<Entity> entitiesAbove = world.getEntitiesWithinAABB(Entity.class, bb);
+			List<Entity> entitiesAbove = world.getEntitiesWithinAABB(EntityLiving.class, bb);
 			for (Entity entity : entitiesAbove) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					continue;
@@ -434,6 +435,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 				pos = pos.add(this.getPositionVector());
 				BlockPos bp = new BlockPos(pos);
+				
+				if (!world.isBlockLoaded(bp)) {
+					continue;
+				}
+				
 				IBlockState state = world.getBlockState(bp);
 				if (state.getBlock() != Blocks.AIR) {
 					if (!BlockUtil.isIRRail(world, bp)) {
@@ -548,6 +554,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			pos = pos.add(latest.position);
 			BlockPos bp = new BlockPos(pos);
 			
+			if (!world.isBlockLoaded(bp)) {
+				continue;
+			}
 			
 			IBlockState state = Blocks.AIR.getDefaultState();
 			try {
