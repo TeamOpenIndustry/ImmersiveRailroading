@@ -35,16 +35,13 @@ public class PhysicsAccummulator {
 		}
 		
 		EntityMoveableRollingStock movable = ((EntityMoveableRollingStock)stock);
-
-		// THIS ONLY WORKS FOR CURRENT USES AND CAN BREAK
-		TickPos latest = movable.positions.get(movable.positions.size()-1);
 		
 		// SHOULD THIS HAVE DIRECTION MULT?
 		double stockMassLb = 2.20462 * stock.getWeight();
 		rollingResistanceNewtons += 0.0015 * stockMassLb * 4.44822f;
 		
 		// SHOULD THIS HAVE DIRECTION MULT?
-		double grade = -Math.tan(Math.toRadians(latest.rotationPitch % 90)) * Config.ConfigBalance.slopeMultiplier;
+		double grade = -Math.tan(Math.toRadians(pos.rotationPitch % 90)) * Config.ConfigBalance.slopeMultiplier;
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
@@ -59,7 +56,7 @@ public class PhysicsAccummulator {
 			brakeAdhesionNewtons += stock.getWeight() * 0.25 * 0.25 * 4.44822f;
 		}
 		
-		int slowdown = movable.getSpeedRetarderSlowdown(latest);
+		int slowdown = movable.getSpeedRetarderSlowdown(pos);
 		rollingResistanceNewtons += slowdown * stockMassLb / 300;
 	}
 	

@@ -201,8 +201,17 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	 */
 
 	public void sendToObserving(IMessage packet) {
-		ImmersiveRailroading.net.sendToAllAround(packet,
-				new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+		boolean found = false;
+		for (EntityPlayer player : world.playerEntities) {
+			if (player.getPositionVector().distanceTo(this.getPositionVector()) < ImmersiveRailroading.ENTITY_SYNC_DISTANCE) {
+				found = true;
+				break;
+			}
+		}
+		if (found) {
+			ImmersiveRailroading.net.sendToAllAround(packet,
+					new TargetPoint(this.dimension, this.posX, this.posY, this.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+		}
 	}
 	
 	@SideOnly(Side.CLIENT)

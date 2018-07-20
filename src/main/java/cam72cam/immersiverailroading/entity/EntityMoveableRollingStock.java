@@ -27,13 +27,14 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -432,6 +433,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
+				if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
+					continue;
+				}
 				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
 				pos = pos.add(this.getPositionVector());
 				BlockPos bp = new BlockPos(pos);
@@ -543,14 +547,20 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return new PosRot(nextRear.subtractReverse(pos.position), VecUtil.toYaw(rearDelta));
 	}
 
+	private BlockPos lastRetarderPos = null;
+	private int lastRetarderValue = 0;
 	public int getSpeedRetarderSlowdown(TickPos latest) {
+		if (new BlockPos(latest.position).equals(lastRetarderPos)) {
+			return lastRetarderValue;
+		}
+		
 		int over = 0;
 		int max = 0;
 		for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 			if (pos.y != 0) {
 				continue;
 			}
-			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+			pos = VecUtil.rotateYaw(pos, latest.rotationYaw);
 			pos = pos.add(latest.position);
 			BlockPos bp = new BlockPos(pos);
 			
@@ -558,26 +568,24 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				continue;
 			}
 			
-			IBlockState state = Blocks.AIR.getDefaultState();
 			try {
-	            Chunk chunk = world.getChunkFromBlockCoords(bp);
-	            state = chunk.getBlockState(bp);
-			} catch (Exception ex) {
-				// eat this exception
-				// Faster than calling isOutsideBuildHeight
-			}
-			
-			if (state.getBlock() != Blocks.AIR) {
-				if (BlockUtil.isIRRail(world, bp)) {
-					TileRailBase te = TileRailBase.get(world, bp);
-					if (te != null && te.getAugment() == Augment.SPEED_RETARDER) {
+				TileEntity potentialTE = world.getChunkFromBlockCoords(bp).getTileEntity(bp, EnumCreateEntityType.CHECK);
+				if (potentialTE != null && potentialTE instanceof TileRailBase) {
+					TileRailBase te = (TileRailBase)potentialTE;
+					if (te.getAugment() == Augment.SPEED_RETARDER) {
 						max = Math.max(max, RedstoneUtil.getPower(world, bp));
 						over += 1;
 					}
 				}
+			} catch (Exception ex) {
+				// eat this exception
+				// Faster than calling isOutsideBuildHeight
+				ImmersiveRailroading.catching(ex);
 			}
 		}
-		return over * max;
+		lastRetarderPos = new BlockPos(latest.position);
+		lastRetarderValue = over * max; 
+		return lastRetarderValue;
 	}
 
 	public float getTickSkew() {
