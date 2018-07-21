@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.tile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -85,6 +86,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
+	public boolean shouldGrowGrass = new Random().nextBoolean();
 	
 	@Override
 	public boolean isLoaded() {
@@ -268,6 +270,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		} else {
 			ticksLastTouched = IRWorldSaveData.get(world).getTotalTicks();
 		}
+		if (nbt.hasKey("shouldGrowGrass")) {
+			shouldGrowGrass = nbt.getBoolean("shouldGrowGrass");
+		} else {
+			shouldGrowGrass = world.rand.nextBoolean();
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -296,6 +303,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		
 		nbt.setLong("ticksLastTouched", ticksLastTouched);
 		
+		nbt.setBoolean("shouldGrowGrass", shouldGrowGrass);
 		
 		return super.writeToNBT(nbt);
 	}
@@ -639,8 +647,15 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			}
 		}
 		
-		if (this.getStockNearBy(null) != null ) {
+		if (this.getStockNearBy(null) != null) {
+			boolean shouldReRender = this.getDaysUntouched() > 1;
 			ticksLastTouched = IRWorldSaveData.get(world).getTotalTicks();
+			
+			super.markDirty();
+			
+			if (shouldReRender) {
+				this.markDirty();
+			}
 		}
 		
 		if (this.augment == null) {

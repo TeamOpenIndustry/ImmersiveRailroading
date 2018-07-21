@@ -19,6 +19,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -55,6 +56,7 @@ public abstract class BlockRailBase extends Block {
 	public static final PropertyEnum<Augment> AUGMENT = new PropertyEnum<Augment>("AUGMENT", Augment.class);
 	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
 	public static final PropertyEnum<EnumFacing> FACING = new PropertyEnum<EnumFacing>("FACING", EnumFacing.class);
+	public static final PropertyFloat SHOULD_GROW_GRASS = new PropertyFloat("SHOULD_GROW_GRASS");
 	
 	public BlockRailBase() {
 		super(Material.IRON);
@@ -125,6 +127,7 @@ public abstract class BlockRailBase extends Block {
         	AUGMENT,
         	LIQUID,
         	FACING,
+        	SHOULD_GROW_GRASS,
         });
     }
 
@@ -142,6 +145,7 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
+				state = state.withProperty(SHOULD_GROW_GRASS, te.shouldGrowGrass ? 0f : 1f);
 				TileRail parent = te.getParentTile();
 				if (parent != null) {
 					if (parent.getFacing().getAxis() == Axis.X) {

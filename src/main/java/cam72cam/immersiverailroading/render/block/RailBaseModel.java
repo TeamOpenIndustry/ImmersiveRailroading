@@ -2,14 +2,12 @@ package cam72cam.immersiverailroading.render.block;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.BlockTallGrass;
@@ -18,7 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
-import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -26,9 +23,7 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class RailBaseModel implements IBakedModel {
@@ -47,6 +42,7 @@ public class RailBaseModel implements IBakedModel {
 				double liquid = railState.getValue(BlockRailBase.LIQUID);
 				EnumFacing facing = railState.getValue(BlockRailBase.FACING);
 				Gauge gauge = Gauge.from(gauged);
+				boolean shouldGrowGrass = railState.getValue(BlockRailBase.SHOULD_GROW_GRASS) == 0f;
 				
 				if (augment != null) {
 					height = height + 0.1f * (float)gauge.scale() * 1.25f;
@@ -93,9 +89,7 @@ public class RailBaseModel implements IBakedModel {
 					state = BlockUtil.itemToBlockState(item);
 					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
 					quads.addAll(new BakedScaledModel(model, height).getQuads(state, side, rand));
-					Random rnd = new Random();
-					int random = rnd.nextInt(2);
-					if (random == 1) {
+					if (shouldGrowGrass) {
 						IBlockState grassState = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
 						quads.addAll(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(grassState).getQuads(grassState, side, rand));
 					}
