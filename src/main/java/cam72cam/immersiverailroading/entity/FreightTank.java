@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.gui.ISyncableSlots;
+import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -97,6 +98,14 @@ public abstract class FreightTank extends Freight {
 			return null;
 		}
 		return FluidRegistry.getFluid(type);
+	}
+	
+	@Override
+	protected void initContainerFilter() {
+		cargoItems.filter.clear();
+		cargoItems.filter.put(0, SlotFilter.FLUID_CONTAINER);
+		cargoItems.filter.put(1, SlotFilter.FLUID_CONTAINER);
+		cargoItems.defaultFilter = SlotFilter.NONE;
 	}
 	
 	

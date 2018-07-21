@@ -1,9 +1,12 @@
 package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
+
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.util.VecUtil;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,7 +26,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 public abstract class Freight extends EntityCoupleableRollingStock {
-	protected ItemStackHandler cargoItems = new ItemStackHandler(0) {
+	protected FilteredStackHandler cargoItems = new FilteredStackHandler(0) {
         @Override
         protected void onContentsChanged(int slot) {
             // We need to tell the tile entity that something has changed so
@@ -170,6 +173,17 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			}
 		}
 		handleMass();
+		initContainerFilter();
+	}
+	
+	@Override
+	public void readSpawnData(ByteBuf additionalData) {
+		super.readSpawnData(additionalData);
+		initContainerFilter();
+	}
+	
+	protected void initContainerFilter() {
+		
 	}
 	
 	@Override
