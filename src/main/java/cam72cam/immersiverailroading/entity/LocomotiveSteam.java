@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -57,6 +58,7 @@ public class LocomotiveSteam extends Locomotive {
 		this.getDataManager().register(PRESSURE_VALVE, false);
 		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
 		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
+		
 	}
 
 	@Override
@@ -729,6 +731,14 @@ public class LocomotiveSteam extends Locomotive {
 		if (pressure != null) {
 			pressure.stop();
 		}
+	}
+
+	@Override
+	protected void initContainerFilter() {
+		cargoItems.filter.clear();
+		this.cargoItems.filter.put(getInventorySize()-2, SlotFilter.FLUID_CONTAINER);
+		this.cargoItems.filter.put(getInventorySize()-1, SlotFilter.FLUID_CONTAINER);
+		this.cargoItems.defaultFilter = SlotFilter.BURNABLE;
 	}
 
 	@Override
