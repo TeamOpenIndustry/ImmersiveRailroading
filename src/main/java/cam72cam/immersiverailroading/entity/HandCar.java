@@ -18,6 +18,7 @@ public class HandCar extends Locomotive {
 		super(world, defID);
 	}
 
+	//finds available horse power from riders
 	@Override
 	protected int getAvailableHP() {
 		int passengers = 0;

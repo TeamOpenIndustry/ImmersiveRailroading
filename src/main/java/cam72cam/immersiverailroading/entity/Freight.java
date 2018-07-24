@@ -23,6 +23,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 public abstract class Freight extends EntityCoupleableRollingStock {
+	//sets up the inventory handler
 	protected ItemStackHandler cargoItems = new ItemStackHandler(0) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -31,17 +32,20 @@ public abstract class Freight extends EntityCoupleableRollingStock {
         	Freight.this.onInventoryChanged();
         }
     };
-    
+
+	//creates information regarding inventory and stores it in to the entity manager
 	protected static DataParameter<Integer> CARGO_ITEMS = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 	protected static DataParameter<Integer> PERCENT_FULL = EntityDataManager.createKey(Freight.class, DataSerializers.VARINT);
 
+	//this method is for identifing the freight code wise with is metadata
 	public Freight(World world, String defID) {
 		super(world, defID);
 		
 		this.getDataManager().register(CARGO_ITEMS, 0);
 		this.getDataManager().register(PERCENT_FULL, 0);
 	}
-	
+
+	//runs the change mass function if inventory is changed nearby
 	protected void onInventoryChanged() {
 		if (!world.isRemote) {
 			handleMass();
@@ -64,7 +68,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		
+
+		//places inventory on the ground if the freight is broken
 		if (!world.isRemote) {		
 			for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 				ItemStack itemstack = cargoItems.getStackInSlot(slot);
@@ -79,6 +84,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		this.cargoItems.setSize(0);
 	}
 
+	//runtime for usage of the freight
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if ((super.processInitialInteract(player, hand))) {
@@ -94,6 +100,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		double i = player.posX;
 		double j = player.posY;
 		double k = player.posZ;
+
 
 		for (EntityLiving entityliving : world.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double) i - dist, (double) j - 7.0D,
 				(double) k - dist, (double) i + dist, (double) j + dist, (double) k + dist))) {

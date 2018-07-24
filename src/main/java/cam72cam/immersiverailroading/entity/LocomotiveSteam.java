@@ -37,38 +37,43 @@ public class LocomotiveSteam extends Locomotive {
 	private static DataParameter<Float> BOILER_PRESSURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
 	// Celsius
 	private static DataParameter<Float> BOILER_TEMPERATURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
-
+	//Popvalve active
 	private static DataParameter<Boolean> PRESSURE_VALVE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
 	
 	// Map<Slot, TicksToBurn>
 	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
 	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
+	//used in programming of the side rod movements
 	private double driverDiameter;
 	
 	public LocomotiveSteam(World world) {
 		this(world, null);
 	}
 
+	//this method is for identifing the locomotive code wise with is metadata
 	public LocomotiveSteam(World world, String defID) {
 		super(world, defID);
 		
 		this.getDataManager().register(BOILER_PRESSURE, 0f);
 		this.getDataManager().register(BOILER_TEMPERATURE, ambientTemperature());
 		this.getDataManager().register(PRESSURE_VALVE, false);
-		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
-		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
+		this.getDataManager().register(BURN_TIME, new NBTTagCompound());//how long the fuel has been furning for
+		this.getDataManager().register(BURN_MAX, new NBTTagCompound());//how long the fuel can burn for
 	}
 
+	//gets definition of a steam locomotive from the locomotive class
 	@Override
 	public LocomotiveSteamDefinition getDefinition() {
 		return super.getDefinition(LocomotiveSteamDefinition.class);
 	}
 
+	//sets the Gui to steam setup (what to show and colors)
 	@Override
 	public GuiTypes guiType() {
 		return GuiTypes.STEAM_LOCOMOTIVE;
 	}
-	
+
+	//sets the entity data to a NBT, similar to the locomotivesteam method
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
@@ -78,6 +83,7 @@ public class LocomotiveSteam extends Locomotive {
 		nbttagcompound.setTag("burn_max", dataManager.get(BURN_MAX));
 	}
 
+	//reads the entity data from the NBT, similar to the locomotivesteam method
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
@@ -88,17 +94,20 @@ public class LocomotiveSteam extends Locomotive {
 		
 
 	}
-	
+
+	//used in creation/spawning of the locomotive into the world
 	@Override
 	public void readSpawnData(ByteBuf additionalData) {
 		super.readSpawnData(additionalData);
 
 		List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
+		//used if the lovomotive is moving
 		if (driving != null) {
 			for (RenderComponent driver : driving) {
 				driverDiameter = Math.max(driverDiameter, driver.height());
 			}
 		}
+		//used for mallet/compound locomotives
 		driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
 		if (driving != null) {
 			for (RenderComponent driver : driving) {
@@ -128,6 +137,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 		return data;
 	}
+
 	private Map<Integer, Integer> NBTtoMap(NBTTagCompound nbt) {
 		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
 		for (String key : nbt.getKeySet()) {
@@ -149,7 +159,7 @@ public class LocomotiveSteam extends Locomotive {
 		this.dataManager.set(BURN_MAX, mapToNBT(burnMax));
 	}
 	
-	
+	//returns the horse power, uses the horse power for the gauge if fuel required for the gauge is not true, uses the locomotive's stats if the fuel is required for the gauge
 	@Override
 	protected int getAvailableHP() {
 		if (!Config.isFuelRequired(gauge)) {
@@ -158,7 +168,8 @@ public class LocomotiveSteam extends Locomotive {
 		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
 	}
 	
-	
+
+	//resets the boiler temperature, burn times, and pressure in the locomotive if it is either A: Dissassmbled, or B: taken off the tracks (turned into the item)
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
@@ -172,6 +183,7 @@ public class LocomotiveSteam extends Locomotive {
 		setBurnTime(burnTime);
 	}
 
+	//returns the phase of the locomotive wheel with a persentage offset (perc)
 	private double getPhase(int spikes, float offsetDegrees, double perc) {
 		if (driverDiameter == 0) {
 			return 0;
@@ -182,7 +194,19 @@ public class LocomotiveSteam extends Locomotive {
 		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
 		return phase;
 	}
-	
+
+	private double getPhaseFlipped(int spikes, float offsetDegrees, double perc) {
+		if (driverDiameter == 0) {
+			return 0;
+		}
+		double circumference = (driverDiameter * Math.PI);
+		double skewDistance = this.distanceTraveled - this.getCurrentSpeed().minecraft() * perc;
+		double phase = (skewDistance % circumference)/circumference;
+		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
+		return (-1*phase);
+	}
+
+	//returns the phase of the locomotive wheel
 	private double getPhase(int spikes, float offsetDegrees) {
 		if (driverDiameter == 0) {
 			return 0;
@@ -192,17 +216,40 @@ public class LocomotiveSteam extends Locomotive {
 		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
 		return phase;
 	}
+
+	private double getPhaseFlipped(int spikes, float offsetDegrees) {
+		if (driverDiameter == 0) {
+			return 0;
+		}
+		double circumference = (driverDiameter * Math.PI);
+		double phase = (this.distanceTraveled % circumference)/circumference;
+		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
+		return (-1*phase);
+	}
 	
 	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
 	private List<ISound> sndCache = new ArrayList<ISound>();
 	private int sndCacheId = 0;
+	//sound for the whistle
 	private ISound whistle;
+	//list of chimes for the whistle (pitching)
 	private List<ISound> chimes = new ArrayList<ISound>();
+	//used for pitch of whistle
 	private float pullString = 0;
 	private float soundDampener = 0;
+	//sound files for idle and being at pressure
 	private ISound idle;
 	private ISound pressure;
 	private int tickMod = 0;
+	private boolean hasReversedDrivers;
+
+	private boolean reversedDriversCheck() {
+		if (this.hasReversedDrivers==null){
+			hasReversedDrivers=0;
+		}
+	}
+
+	//actual ingame usage method via tick update
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -216,6 +263,7 @@ public class LocomotiveSteam extends Locomotive {
 			// Particles and Sound
 			
 			if (ConfigSound.soundEnabled) {
+				//whistle resetting if the cache is empty
 				if (this.sndCache.size() == 0) {
 					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
 					whistle.setPitch(1);
@@ -235,7 +283,7 @@ public class LocomotiveSteam extends Locomotive {
 					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
 					pressure.setVolume(0.3f);
 				}
-				
+				//stops sound if the button isn't being pressed
 				if (this.getDataManager().get(HORN) < 1) {
 					pullString = 0;
 					soundDampener = 0;
@@ -244,8 +292,12 @@ public class LocomotiveSteam extends Locomotive {
 							chime.stop();
 						}
 					}
-				} else {
-					if (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge)) {
+				}
+				//plays sounds
+				else {
+					if (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge)) //makes sure there is steam to play for whistle
+						{
+
 						if (this.getDefinition().quill == null) {
 							if (!this.whistle.isPlaying()) {
 								this.whistle.play(getPositionVector());
@@ -260,6 +312,7 @@ public class LocomotiveSteam extends Locomotive {
 								if (soundDampener < 1) {
 									soundDampener += 0.1;
 								}
+								//fix of issue with sound for passengers not working correctly
 								if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
 									for (Entity pass : this.getPassengers()) {
 										if (!pass.getPersistentID().equals(this.getDataManager().get(HORN_PLAYER).get())) {
@@ -318,7 +371,8 @@ public class LocomotiveSteam extends Locomotive {
 						}
 					}
 				}
-				
+
+				//plays sound for idling
 				if (this.getBoilerTemperature() > this.ambientTemperature() + 5) {
 					if (!idle.isPlaying()) {
 						idle.play(getPositionVector());
@@ -333,7 +387,8 @@ public class LocomotiveSteam extends Locomotive {
 			double phase;
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
-			
+
+			//renders smoke and smoke color
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
@@ -434,14 +489,19 @@ public class LocomotiveSteam extends Locomotive {
 					default:
 						continue;
 					}
-					
+					if (hasReversedDrivers){
+						phaseReversed = this.getPhaseFlipped(2, phaseOffset);
+					}
 					phase = this.getPhase(2, phaseOffset);
 					double phaseSpike = Math.pow(phase, 4);
+					double phaseSpikeReversed = Math.pow(phaseReversed, 4);
 					
 					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
+						//next three lines create the puff of smoke due to the pistons
 						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+						//sets the initial force for the side motion of the cock valves
 						double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3 * gauge.scale();
 						Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
 						sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
