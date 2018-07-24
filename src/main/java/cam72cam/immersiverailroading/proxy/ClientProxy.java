@@ -145,11 +145,20 @@ public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
 
 	private static IRSoundManager manager;
-
+	
 	private static MagicEntity magical;
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
+	private static boolean shouldDampenSound = false;
+	private static float dampeningAmount = 0.5f;
+	
+	public static float getDampeningAmount() {
+		return dampeningAmount;
+	}
+	public static boolean dampenSound() {
+		return shouldDampenSound;
+	}
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
@@ -696,6 +705,15 @@ public class ClientProxy extends CommonProxy {
 		if (player != null) {
 			world = player.world;
 		}
+		shouldDampenSound = false;
+		if (player != null && player.isRiding() && player.getRidingEntity() instanceof EntityRidableRollingStock) {
+			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRidingEntity();
+			if(ridableStock.getDefinition().closedStock) {
+				shouldDampenSound = true;
+				dampeningAmount = ridableStock.getDefinition().dampeningAmount;
+			}
+		}
+		
 		
 		if (world == null && manager != null && manager.hasSounds()) {
 			ImmersiveRailroading.warn("Unloading IR sound system");

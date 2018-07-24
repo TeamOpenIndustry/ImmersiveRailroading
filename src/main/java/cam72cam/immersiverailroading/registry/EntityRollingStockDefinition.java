@@ -55,7 +55,8 @@ public abstract class EntityRollingStockDefinition {
 	private float bogeyRear;
 	private float couplerOffsetFront;
 	private float couplerOffsetRear;
-
+	
+	public float dampeningAmount;
 	public  double frontBounds;
 	public  double rearBounds;
 	private double heightBounds;
@@ -68,6 +69,7 @@ public abstract class EntityRollingStockDefinition {
 	protected double internal_inv_scale;
 	public Gauge recommended_gauge;
 	public Boolean shouldSit;
+	public Boolean closedStock;
 	public ResourceLocation wheel_sound;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
@@ -127,6 +129,18 @@ public abstract class EntityRollingStockDefinition {
 
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_model_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_model_scale);
+		
+		dampeningAmount = 0.5f;
+		if (data.has("sound_dampening_percentage")) {
+			dampeningAmount = data.get("sound_dampening_percentage").getAsFloat();
+		}
+		
+		closedStock = true;
+		
+		if (data.has("closed_stock")) {
+			closedStock = data.get("closed_stock").getAsBoolean();
+		}
+		System.out.println("Closed: " + closedStock);
 		
 		if (data.has("couplers")) {
 			couplerOffsetFront = (float) (data.get("couplers").getAsJsonObject().get("front_offset").getAsFloat() * internal_model_scale);
