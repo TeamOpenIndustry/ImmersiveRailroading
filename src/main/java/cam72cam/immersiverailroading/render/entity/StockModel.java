@@ -591,7 +591,7 @@ public class StockModel extends OBJRender {
 		return comp;
 	}
 
-	//majority of this method is the dravWalschaerts method but with negatives added
+	//majority of this method is the drawWalschaerts method but with negatives added
 	private void drawReversedWalschaerts(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
 		LocomotiveSteamDefinition def = stock.getDefinition();
 
