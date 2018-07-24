@@ -25,3 +25,6 @@ run
 *.skb
 
 *.jar
+gradle.properties
+resourcepacks/Superliners+More/.DS_Store
+gradle.properties
