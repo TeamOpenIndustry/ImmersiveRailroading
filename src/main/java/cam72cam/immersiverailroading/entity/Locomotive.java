@@ -87,6 +87,7 @@ public abstract class Locomotive extends FreightTank {
 		switch(key) {
 		case HORN:
 			setHorn(10, source.getPersistentID());
+			makeEntitiesFlee();
 			break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {

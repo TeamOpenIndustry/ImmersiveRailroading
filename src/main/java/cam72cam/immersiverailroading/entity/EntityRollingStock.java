@@ -9,6 +9,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.google.gson.JsonObject;
 
@@ -31,6 +33,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	protected String defID;
 	public Gauge gauge;
 	public String tag = "";
+	protected boolean shouldFlee = false;
+	private int fleeDuration = 10000;
 
 	public EntityRollingStock(World world, String defID) {
 		super(world);
@@ -230,5 +234,30 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	}
 
 	public void renderTick(float partialTicks) {
+	}
+	
+	public boolean shouldEntitiesFlee() {
+		return shouldFlee;
+	}
+	
+	public void setEntitiesFlee(boolean flee) {
+		shouldFlee = flee;
+	}
+	
+	public void makeEntitiesFlee() {
+		shouldFlee = true;
+		Timer timer = new Timer();
+		timer.schedule(new EntityFleeTask(this), fleeDuration);
+	}
+	
+	class EntityFleeTask extends TimerTask {
+		EntityRollingStock stock;
+		public EntityFleeTask(EntityRollingStock stockIn) {
+			stock = stockIn;
+		}
+		
+		public void run() {
+			stock.setEntitiesFlee(false);
+		}
 	}
 }
