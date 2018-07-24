@@ -150,14 +150,25 @@ public class ClientProxy extends CommonProxy {
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
-	private static boolean shouldDampenSound = false;
 	private static float dampeningAmount = 0.5f;
 	
 	public static float getDampeningAmount() {
 		return dampeningAmount;
 	}
 	public static boolean dampenSound() {
-		return shouldDampenSound;
+		EntityPlayerSP player = Minecraft.getMinecraft().player;
+		World world = null;
+		dampeningAmount = 1.0f;
+		if (player != null && player.isRiding() && player.getRidingEntity() instanceof EntityRidableRollingStock) {
+			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRidingEntity();
+			if(ridableStock.getDefinition().closedStock) {
+				dampeningAmount = ridableStock.getDefinition().dampeningAmount;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -669,7 +680,11 @@ public class ClientProxy extends CommonProxy {
 			}
 			
 			ISound snd = sndCache.get(sndCacheId);
-			// TODO Doppler update
+			EntityPlayerSP player = Minecraft.getMinecraft().player;
+			World world = null;
+			if (player != null) {
+				world = player.world;
+			}
 			EntityMoveableRollingStock stock = ((EntityMoveableRollingStock)event.getEntity());
 			float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
 			snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
@@ -704,14 +719,6 @@ public class ClientProxy extends CommonProxy {
 		World world = null;
 		if (player != null) {
 			world = player.world;
-		}
-		shouldDampenSound = false;
-		if (player != null && player.isRiding() && player.getRidingEntity() instanceof EntityRidableRollingStock) {
-			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRidingEntity();
-			if(ridableStock.getDefinition().closedStock) {
-				shouldDampenSound = true;
-				dampeningAmount = ridableStock.getDefinition().dampeningAmount;
-			}
 		}
 		
 		
