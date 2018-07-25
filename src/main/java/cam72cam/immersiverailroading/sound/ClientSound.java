@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound.AttenuationType;
@@ -82,9 +83,9 @@ public class ClientSound implements ISound {
 		Minecraft.getMinecraft().mcProfiler.startSection("irSound");
 		
 		SoundSystem snd = sndSystem.get();
-		
-		float vol = currentVolume * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
+		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
 		snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
+			
 		if (currentPos != null) {
 			snd.CommandQueue(new CommandObject(CommandObject.SET_POSITION, id, (float)currentPos.x, (float)currentPos.y, (float)currentPos.z));
 		}
