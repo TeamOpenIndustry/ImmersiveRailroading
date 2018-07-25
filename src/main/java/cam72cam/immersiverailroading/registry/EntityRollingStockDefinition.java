@@ -129,7 +129,7 @@ public abstract class EntityRollingStockDefinition {
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_model_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_model_scale);
 		
-		dampeningAmount = 0.5f;
+		dampeningAmount = 0.75f;
 		if (data.has("sound_dampening_percentage")) {
 			dampeningAmount = data.get("sound_dampening_percentage").getAsFloat();
 		}
