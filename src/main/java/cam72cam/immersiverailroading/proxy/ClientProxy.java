@@ -158,7 +158,6 @@ public class ClientProxy extends CommonProxy {
 	
 	public static boolean dampenSound() {
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
-		World world = null;
 		dampeningAmount = 1.0f;
 		if (player != null && player.isRiding() && player.getRidingEntity() instanceof EntityRidableRollingStock) {
 			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRidingEntity();
