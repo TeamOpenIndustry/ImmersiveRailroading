@@ -162,12 +162,7 @@ public class ClientProxy extends CommonProxy {
 		dampeningAmount = 1.0f;
 		if (player != null && player.isRiding() && player.getRidingEntity() instanceof EntityRidableRollingStock) {
 			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRidingEntity();
-			if(ridableStock.getDefinition().closedStock) {
-				dampeningAmount = ridableStock.getDefinition().dampeningAmount;
-				return true;
-			} else {
-				return false;
-			}
+			dampeningAmount = ridableStock.getDefinition().dampeningAmount;
 		}
 		return false;
 	}
