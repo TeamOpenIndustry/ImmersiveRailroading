@@ -150,20 +150,19 @@ public class ClientProxy extends CommonProxy {
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
-	private static float dampeningAmount = 0.5f;
+	private static float dampeningAmount = 1.0f;
 	
 	public static float getDampeningAmount() {
 		return dampeningAmount;
 	}
 	
-	public static boolean dampenSound() {
+	public static void dampenSound() {
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		dampeningAmount = 1.0f;
 		if (player != null && player.isRiding() && player.getRidingEntity() instanceof EntityRidableRollingStock) {
 			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRidingEntity();
 			dampeningAmount = ridableStock.getDefinition().dampeningAmount;
 		}
-		return false;
 	}
 
 	@Override
