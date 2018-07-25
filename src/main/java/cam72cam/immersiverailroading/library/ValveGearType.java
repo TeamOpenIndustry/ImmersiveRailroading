@@ -7,6 +7,5 @@ public enum ValveGearType {
 	SHAY,
 	CLIMAX,
 	T1,
-	K1,
 	HIDDEN
 }
