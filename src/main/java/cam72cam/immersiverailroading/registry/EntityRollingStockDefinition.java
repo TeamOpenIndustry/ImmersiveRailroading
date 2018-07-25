@@ -131,7 +131,9 @@ public abstract class EntityRollingStockDefinition {
 		
 		dampeningAmount = 0.75f;
 		if (data.has("sound_dampening_percentage")) {
-			dampeningAmount = data.get("sound_dampening_percentage").getAsFloat();
+			if (data.get("sound_dampening_percentage").getAsFloat() >= 0.0f && data.get("sound_dampening_percentage").getAsFloat() <= 1.0f) {
+				dampeningAmount = data.get("sound_dampening_percentage").getAsFloat();
+			}
 		}
 		
 		if (data.has("couplers")) {
