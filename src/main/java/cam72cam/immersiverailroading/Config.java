@@ -28,7 +28,7 @@ public class Config {
 		@Comment("Break blocks around the border of the tracks in creative")
 		public static boolean enableSideBlockClearing = true;
 
-		@Comment("Clear blocsk in creative mode when placing tracks")
+		@Comment("Clear blocks in creative mode when placing tracks")
 		public static boolean creativePlacementClearsBlocks = true;
 
 		@Comment("Requires solid blocks to be placed under the rails")
@@ -47,6 +47,9 @@ public class Config {
 
 		@Comment("All gauges require fuel")
 		public static boolean FuelRequired = true;
+		
+		@Comment("Mobs Flee Whistle")
+		public static boolean mobFlee = true;
 
 		@Comment("Slope Multiplier: Higher numbers increase slowdown, lower numbers decrease slowdown")
 		public static double slopeMultiplier = 1.0;
@@ -100,6 +103,9 @@ public class Config {
 		public static String[] villagerPayoutItems = new String[] {
 			Items.EMERALD.getRegistryName().toString()
 		};
+		
+		@Comment("Distance the mobs will hear whistle/horn and flee")
+		public static int mobFleeDistance = 50;
 		
 		@Comment("Fuels for diesel Locomotives")
 		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();

@@ -1,12 +1,14 @@
 package cam72cam.immersiverailroading.entity.ai;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-
-import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -60,7 +62,8 @@ public class EntityAIAvoidTrain<T extends Entity> extends EntityAIBase
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
-    public boolean shouldExecute()
+    @SuppressWarnings("unchecked")
+	public boolean shouldExecute()
     {
         List<T> list = this.entity.world.<T>getEntitiesWithinAABB(this.classToAvoid, this.entity.getEntityBoundingBox().grow((double)this.avoidDistance, 3.0D, (double)this.avoidDistance), Predicates.and(EntitySelectors.CAN_AI_TARGET, this.canBeSeenSelector, this.avoidTargetSelector));
         if (list.isEmpty())
@@ -69,7 +72,7 @@ public class EntityAIAvoidTrain<T extends Entity> extends EntityAIBase
         }
         else
         {
-            this.closestLivingEntity = list.get(0);
+        	this.closestLivingEntity = list.get(0);
             if(this.closestLivingEntity instanceof EntityRollingStock) {
             	EntityRollingStock stock = (EntityRollingStock) this.closestLivingEntity;
             	if(stock.shouldEntitiesFlee()) {
@@ -94,7 +97,6 @@ public class EntityAIAvoidTrain<T extends Entity> extends EntityAIBase
             } else {
             	return false;
             }
-            
         }
     }
 
@@ -103,8 +105,40 @@ public class EntityAIAvoidTrain<T extends Entity> extends EntityAIBase
      */
     public boolean shouldContinueExecuting()
     {
-    	System.out.println("================= HAS ENTITY =================");
-    	return !this.navigation.noPath();
+    	@SuppressWarnings("unchecked")
+		List<T> list = this.entity.world.<T>getEntitiesWithinAABB(this.classToAvoid, this.entity.getEntityBoundingBox().grow((double)this.avoidDistance, 3.0D, (double)this.avoidDistance), Predicates.and(EntitySelectors.CAN_AI_TARGET, this.canBeSeenSelector, this.avoidTargetSelector));
+        if (list.isEmpty())
+        {
+            return false;
+        }
+        else
+        {
+        	this.closestLivingEntity = list.get(0);
+            if(this.closestLivingEntity instanceof EntityRollingStock) {
+            	EntityRollingStock stock = (EntityRollingStock) this.closestLivingEntity;
+            	if(stock.shouldEntitiesFlee()) {
+	            	Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.entity, ConfigBalance.mobFleeDistance, 7, new Vec3d(this.closestLivingEntity.posX, this.closestLivingEntity.posY, this.closestLivingEntity.posZ));
+	
+	                if (vec3d == null)
+	                {
+	                    return false;
+	                }
+	                else if (this.closestLivingEntity.getDistanceSq(vec3d.x, vec3d.y, vec3d.z) < this.closestLivingEntity.getDistanceSq(this.entity))
+	                {
+	                    return false;
+	                }
+	                else
+	                {
+	                    this.path = this.navigation.getPathToXYZ(vec3d.x, vec3d.y, vec3d.z);
+	                    return this.path != null;
+	                }
+            	} else {
+            		return false;
+            	}
+            } else {
+            	return false;
+            }
+        }
     }
 
     /**

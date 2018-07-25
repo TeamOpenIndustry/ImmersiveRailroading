@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRBlocks;
@@ -22,12 +23,13 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
+import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.entity.ai.EntityAIAvoidTrain;
 import cam72cam.immersiverailroading.gui.CastingGUI;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
@@ -52,6 +54,15 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
+import cam72cam.immersiverailroading.render.StockRenderCache;
+import cam72cam.immersiverailroading.render.block.RailBaseModel;
+import cam72cam.immersiverailroading.render.entity.MagicEntity;
+import cam72cam.immersiverailroading.render.entity.MagicEntityRender;
+import cam72cam.immersiverailroading.render.entity.ParticleRender;
+import cam72cam.immersiverailroading.render.entity.RenderOverride;
+import cam72cam.immersiverailroading.render.entity.StockEntityRender;
+import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.render.item.PlateItemModel;
 import cam72cam.immersiverailroading.render.item.RailAugmentItemModel;
 import cam72cam.immersiverailroading.render.item.RailCastItemRender;
@@ -60,15 +71,6 @@ import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.item.StockItemModel;
 import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
-import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
-import cam72cam.immersiverailroading.render.StockRenderCache;
-import cam72cam.immersiverailroading.render.block.RailBaseModel;
-import cam72cam.immersiverailroading.render.entity.MagicEntityRender;
-import cam72cam.immersiverailroading.render.entity.MagicEntity;
-import cam72cam.immersiverailroading.render.entity.ParticleRender;
-import cam72cam.immersiverailroading.render.entity.RenderOverride;
-import cam72cam.immersiverailroading.render.entity.StockEntityRender;
-import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.tile.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.tile.TileRailPreviewRender;
@@ -98,8 +100,6 @@ import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIAvoidEntity;
-import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -484,22 +484,27 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
-		
-		
-		if(event.getEntity() instanceof EntityRollingStock) {
-			EntityRollingStock stock = (EntityRollingStock)event.getEntity();
-			String defID = stock.getDefinitionID();
-			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
-			if (def == null) {
-				String error = String.format("Missing definition %s, do you have all of the required resource packs?", defID);
-				ImmersiveRailroading.error(error);
-				event.setCanceled(true);
-				
-				if (!Minecraft.getMinecraft().isSingleplayer()) {
-					missingResources = error;
+		if(ConfigBalance.mobFlee) {
+			if(event.getEntity() instanceof EntityRollingStock) {
+				EntityRollingStock stock = (EntityRollingStock)event.getEntity();
+				String defID = stock.getDefinitionID();
+				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+				if (def == null) {
+					String error = String.format("Missing definition %s, do you have all of the required resource packs?", defID);
+					ImmersiveRailroading.error(error);
+					event.setCanceled(true);
+					
+					if (!Minecraft.getMinecraft().isSingleplayer()) {
+						missingResources = error;
+					}
 				}
 			}
 		}
+		if (event.getEntity() instanceof EntityCreature) {
+			//((EntityCreature) entity).tasks.addTask(0, new EntityAIAvoidTrain((EntityCreature)entity, EntityRollingStock.class, 100, 0.8, 0.8));
+			((EntityCreature)event.getEntity()).tasks.addTask(0, new EntityAIAvoidTrain<>((EntityCreature) event.getEntity(), EntityRollingStock.class, ConfigBalance.mobFleeDistance, 1, 1));
+		}
+		
 	}
 	
 	@SubscribeEvent
