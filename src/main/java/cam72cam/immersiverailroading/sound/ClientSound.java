@@ -28,7 +28,6 @@ public class ClientSound implements ISound {
 	private Vec3d velocity;
 	private float currentPitch = 1;
 	private float currentVolume = 1;
-	private float dampeningFactor = 0.6f;
 	private float baseSoundMultiplier;
 	private Gauge gauge;
 	private boolean disposable = false;
