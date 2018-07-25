@@ -84,16 +84,9 @@ public class ClientSound implements ISound {
 		Minecraft.getMinecraft().mcProfiler.startSection("irSound");
 		
 		SoundSystem snd = sndSystem.get();
-		if(ClientProxy.dampenSound()) {
-			float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
-			snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
+		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
+		snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
 			
-		} else {
-			float vol = currentVolume * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
-			snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
-			
-		}
-		
 		if (currentPos != null) {
 			snd.CommandQueue(new CommandObject(CommandObject.SET_POSITION, id, (float)currentPos.x, (float)currentPos.y, (float)currentPos.z));
 		}
