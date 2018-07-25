@@ -155,6 +155,7 @@ public class ClientProxy extends CommonProxy {
 	public static float getDampeningAmount() {
 		return dampeningAmount;
 	}
+	
 	public static boolean dampenSound() {
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		World world = null;
@@ -680,11 +681,6 @@ public class ClientProxy extends CommonProxy {
 			}
 			
 			ISound snd = sndCache.get(sndCacheId);
-			EntityPlayerSP player = Minecraft.getMinecraft().player;
-			World world = null;
-			if (player != null) {
-				world = player.world;
-			}
 			EntityMoveableRollingStock stock = ((EntityMoveableRollingStock)event.getEntity());
 			float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
 			snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
@@ -707,6 +703,8 @@ public class ClientProxy extends CommonProxy {
 		if (event.phase != Phase.START) {
 			return;
 		}
+		
+		dampenSound();
 		
 		if (missingResources != null) {
 			Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString(missingResources));
