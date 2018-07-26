@@ -134,7 +134,31 @@ public class StockModel extends OBJRender {
 			}
 			GlStateManager.popMatrix();
 		}
-		
+
+		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT", stock.gauge) != null) {
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(-def.getBogeyFront(stock.gauge), 0, 0);
+			GlStateManager.rotate(180 - stock.getFrontYaw(), 0, 1, 0);
+			GlStateManager.rotate(-(180 - stock.rotationYaw), 0, 1, 0);
+			GlStateManager.translate(def.getBogeyFront(stock.gauge), 0, 0);
+			drawComponent(def.getComponent(RenderComponentType.BOGEY_POS, "FRONT", stock.gauge));
+			List<RenderComponent> wheels = def.getComponents(RenderComponentType.BOGEY_POS_WHEEL_X, "FRONT", stock.gauge);
+			if (wheels != null) {
+				for (RenderComponent wheel : wheels) {
+					double circumference = wheel.height() * (float) Math.PI;
+					double relDist = distanceTraveled % circumference;
+					Vec3d wheelPos = wheel.center();
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
+					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+					drawComponent(wheel);
+					GlStateManager.popMatrix();
+				}
+			}
+			GlStateManager.popMatrix();
+		}
+
 		if (def.getComponent(RenderComponentType.BOGEY_POS, stock.gauge) != null) {
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(-def.getBogeyRear(stock.gauge), 0, 0);
@@ -243,8 +267,14 @@ public class StockModel extends OBJRender {
 				drawComponent(frontLocomotive);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center());
+				if(def.getFrontDriverReversed()) {
+					drawReversedWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center());
+					drawReversedWalschaerts(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center());
+				}
+				else {
+					drawWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center());
+					drawWalschaerts(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center());
+				}
 				GL11.glPopMatrix();
 			}
 			{
@@ -252,8 +282,14 @@ public class StockModel extends OBJRender {
 				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  center.height(), center.center(), wheel.center());
+				if(def.getRearDriverReversed()){
+					drawReversedWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center());
+					drawReversedWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  center.height(), center.center(), wheel.center());
+				}
+				else {
+					drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center());
+					drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center());
+				}
 			}
 			break;
 		case CLIMAX:
@@ -274,38 +310,6 @@ public class StockModel extends OBJRender {
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawStephenson(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
 				drawStephenson(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
-			}
-			break;
-			case K1:
-			{
-				GL11.glPushMatrix();
-
-				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE, stock.gauge);
-				Vec3d frontVec = frontLocomotive.center();
-				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
-				Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
-
-				GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
-				GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()) + 180, 0, 1, 0);
-				GlStateManager.translate(-frontVec.x, 0, 0);
-
-				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
-				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
-				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT, stock.gauge));
-				drawComponent(frontLocomotive);
-				drawDrivingWheels(stock, wheels);
-				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawReversedWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center());
-				drawReversedWalschaerts(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center());
-				GL11.glPopMatrix();
-			}
-			{
-				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, stock.gauge);
-				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
-				drawDrivingWheels(stock, wheels);
-				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  center.height(), center.center(), wheel.center());
 			}
 			break;
 			case T1:
