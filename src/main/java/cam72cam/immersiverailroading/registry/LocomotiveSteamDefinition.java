@@ -24,6 +24,9 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private ValveGearType valveGear;
 	private int numSlots;
 	private int width;
+	//below allows for changing which driver set is reversed
+	private boolean FrontDriverReversed;
+	private boolean RearDriverReversed;
 	
 	public Quilling quill;
 	public ResourceLocation whistle;
@@ -34,9 +37,15 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 		
-		// Handle null data
+		// Handles null data
 		if (tankCapacity == null) {
 			tankCapacity = FluidQuantity.ZERO;
+		}
+		if (FrontDriverReversed == null){
+			FrontDriverReversed = false;
+		}
+		if (RearDriverReversed == null){
+			RearDriverReversed = false;
 		}
 	}
 	
@@ -50,6 +59,8 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		JsonObject firebox = data.get("firebox").getAsJsonObject();
 		this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
 		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
+		FrontDriverReversed = data.get("front_drivers_reversed");
+		RearDriverReversed = data.get("rear_drivers_reversed");
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
@@ -118,6 +129,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
 			};
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
+			addComponentIfExists(RenderComponent.parse(RenderComponentType.REAR_LOCOMOTIVE, this, groups), true);
 			break;
 		case CLIMAX:
 			break;
@@ -211,4 +223,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public int getInventoryWidth(Gauge gauge) {
 		return Math.max(3, MathHelper.ceil(width * gauge.scale()));
 	}
+
+	public boolean getFrontDriverReversed(){
+		return FrontDriverReversed;
+	}
+	public boolean getRearDriverReversed(){
+		return RearDriverReversed;
+	}
+
 }
