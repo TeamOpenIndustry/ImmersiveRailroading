@@ -24,5 +24,4 @@ public class ItemDefinition {
 	public static EntityRollingStockDefinition get(ItemStack stack) {
 		return DefinitionManager.getDefinition(getID(stack));
 	}
-	
 }

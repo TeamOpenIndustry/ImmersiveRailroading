@@ -44,10 +44,11 @@ import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.villager.IRTrades;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -78,6 +79,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
@@ -141,10 +143,10 @@ public abstract class CommonProxy implements IGuiHandler {
     	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
     	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
     	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
+    	ForgeRegistries.VILLAGER_PROFESSIONS.getValue(new ResourceLocation("minecraft:nitwit")).getCareer(1).addTrade(1, new IRTrades());
     }
     
-
-	public void serverStarting(FMLServerStartingEvent event) {
+    public void serverStarting(FMLServerStartingEvent event) {
 		event.registerServerCommand(new IRCommand());
 	}
     
