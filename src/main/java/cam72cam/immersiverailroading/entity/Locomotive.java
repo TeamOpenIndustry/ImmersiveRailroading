@@ -258,7 +258,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 		// Wheel balance messing with friction
 		if (this.getCurrentSpeed().metric() != 0) {
-			double balance = 1 - 0.005 * Math.abs(this.getCurrentSpeed().metric());
+			double balance = 1 - 0.004 * Math.abs(this.getCurrentSpeed().metric());
 			slipMult *= balance;
 		}
 		return slipMult;
