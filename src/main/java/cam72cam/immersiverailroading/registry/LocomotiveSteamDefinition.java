@@ -25,8 +25,13 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int numSlots;
 	private int width;
 	//below allows for changing which driver set is reversed
-	private boolean FrontDriverReversed;
-	private boolean RearDriverReversed;
+	private boolean frontDriverReversed;
+	private boolean rearDriverReversed;
+
+	//not null if there are middle drivers, else should set as null
+	private boolean middleDriverReversed;
+	//allows for choosing where the cab is for an multi section locomotive
+	private int cabLocation
 	
 	public Quilling quill;
 	public ResourceLocation whistle;
@@ -47,6 +52,9 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		if (RearDriverReversed == null){
 			RearDriverReversed = false;
 		}
+		if (cabLocation == null){
+		    cabLocation = 1;
+        }
 	}
 	
 	@Override
@@ -59,8 +67,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		JsonObject firebox = data.get("firebox").getAsJsonObject();
 		this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
 		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
-		FrontDriverReversed = data.get("front_drivers_reversed");
-		RearDriverReversed = data.get("rear_drivers_reversed");
+		frontDriverReversed = data.get("front_drivers_reversed");
+		middleDriverReversed = data.get("middle_drivers_reversed");
+		rearDriverReversed = data.get("rear_drivers_reversed");
+		cabLocation = math.ceil(properties.get("cab_location")).getAsInt();
+
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
@@ -135,6 +146,17 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			break;
 		case SHAY:
 			break;
+            case THREE_BODY_WALSCHAERTS:
+                for (int i = 0; i < 10; i++) {
+                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
+                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_MIDDLE_X, this, groups, i), true);
+                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
+                };
+                addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
+                addComponentIfExists(RenderComponent.parse(RenderComponentType.MIDDLE_LOCOMOTIVE, this, groups), true);
+                addComponentIfExists(RenderComponent.parse(RenderComponentType.REAR_LOCOMOTIVE, this, groups), true);
+            break;
+
 		}
 		
 
@@ -150,6 +172,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FIREBOX, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.SMOKEBOX, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST_FRONT, this, groups), true);
+        addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST_MIDDLE, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST_REAR, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.PIPING, this, groups), true);
@@ -189,11 +212,19 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				RenderComponentType.REACH_ROD_SIDE,
 			};
 			
-			for (String side : sides) {
-				for (RenderComponentType name : components) {
-					addComponentIfExists(RenderComponent.parseSide(name, this, groups, side), true);
-				}
-			}
+
+            case THREE_BODY_WALSCHAERTS:
+                if (middleDriverReversed!=null);
+                sides.add("LEFT_MIDDLE");
+                sides.add("RIGHT_MIDDLE");
+
+
+                for (String side : sides) {
+                    for (RenderComponentType name : components) {
+                        addComponentIfExists(RenderComponent.parseSide(name, this, groups, side), true);
+                    }
+                }
+                break
 		case CLIMAX:
 			break;
 		case SHAY:
@@ -227,6 +258,9 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public boolean getFrontDriverReversed(){
 		return FrontDriverReversed;
 	}
+	public int getCabLocation(){
+	    return CabLocation
+    }
 	public boolean getRearDriverReversed(){
 		return RearDriverReversed;
 	}
