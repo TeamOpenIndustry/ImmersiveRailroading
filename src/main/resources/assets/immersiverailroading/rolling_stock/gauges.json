@@ -2,6 +2,7 @@
     "register": {
         "BRUNEL": 2.14,
         "STANDARD": 1.435,
+        "CAPE": 1.067,
         "NARROW": 0.9144,
         "MINECRAFT": 0.632,
         "MODEL": 0.2
