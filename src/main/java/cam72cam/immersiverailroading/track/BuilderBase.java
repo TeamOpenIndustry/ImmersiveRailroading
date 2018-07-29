@@ -63,7 +63,7 @@ public abstract class BuilderBase {
 			super(xIn, yIn, zIn);
 			this.yaw = yaw;
 			this.pitch = 0;
-			this.length = 1;
+			this.length = -1;
 			this.groups = Arrays.asList(groups);
 		}
 		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, String... groups) {
