@@ -141,7 +141,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	private final double pressDist = 0.05;
 	public List<StaticPassenger> staticPassengers = new ArrayList<StaticPassenger>();
 	
-	public void handleKeyPress(Entity source, KeyTypes key) {
+	public void handleKeyPress(Entity source, KeyTypes key, boolean sprinting) {
 		Vec3d movement = null;
 		switch (key) {
 		case PLAYER_FORWARD:
@@ -161,6 +161,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			return;
 		}
 		if (source.getRidingEntity() == this) {
+			if (sprinting) {
+				movement = movement.scale(3);
+			}
+			
 			movement = VecUtil.rotateYaw(movement, source.getRotationYawHead());
 			movement = VecUtil.rotateYaw(movement, 180-this.rotationYaw);
 			
