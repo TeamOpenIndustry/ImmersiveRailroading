@@ -83,7 +83,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	
 	@Override
-	public void handleKeyPress(Entity source, KeyTypes key) {
+	public void handleKeyPress(Entity source, KeyTypes key, boolean sprinting) {
 		switch(key) {
 		case HORN:
 			setHorn(10, source.getPersistentID());
@@ -126,7 +126,7 @@ public abstract class Locomotive extends FreightTank {
 			}
 			break;
 		default:
-			super.handleKeyPress(source, key);
+			super.handleKeyPress(source, key, sprinting);
 			break;
 		}
 	}

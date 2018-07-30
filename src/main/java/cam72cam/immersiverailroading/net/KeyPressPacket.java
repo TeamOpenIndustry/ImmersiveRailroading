@@ -22,17 +22,19 @@ public class KeyPressPacket implements IMessage {
 	private int keyBindingOrdinal;
 	private int sourceEntityID;
 	private int targetEntityID;
+	private boolean sprinting;
 	
 	public KeyPressPacket() {
 		// For Reflection
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public KeyPressPacket(KeyTypes binding, int dimension, int sourceEntityID, int targetEntityID) {
+	public KeyPressPacket(KeyTypes binding, int dimension, int sourceEntityID, int targetEntityID, boolean sprinting) {
 		this.dimension = dimension;
 		this.keyBindingOrdinal = binding.ordinal();
 		this.sourceEntityID = sourceEntityID;
 		this.targetEntityID = targetEntityID;
+		this.sprinting = sprinting;
 	}
 
 	@Override
@@ -41,6 +43,7 @@ public class KeyPressPacket implements IMessage {
 		this.keyBindingOrdinal = buf.readInt();
 		this.sourceEntityID = buf.readInt();
 		this.targetEntityID = buf.readInt();
+		this.sprinting = buf.readBoolean();
 	}
 
 	@Override
@@ -49,6 +52,7 @@ public class KeyPressPacket implements IMessage {
 		buf.writeInt(keyBindingOrdinal);
 		buf.writeInt(sourceEntityID);
 		buf.writeInt(targetEntityID);
+		buf.writeBoolean(sprinting);
 	}
 	
 	public static class Handler implements IMessageHandler<KeyPressPacket, IMessage> {
@@ -75,7 +79,7 @@ public class KeyPressPacket implements IMessage {
 				return;
 			}
 			
-			matches.get(0).handleKeyPress(source, KeyTypes.values()[message.keyBindingOrdinal]);
+			matches.get(0).handleKeyPress(source, KeyTypes.values()[message.keyBindingOrdinal], message.sprinting);
 		}
 	}
 }
