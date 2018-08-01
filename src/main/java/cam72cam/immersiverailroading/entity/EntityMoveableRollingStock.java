@@ -531,6 +531,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		Vec3d nextFront = front;
 		while (offset > 0) {
 			nextFront = sim.nextPosition(nextFront, pos.rotationYaw, pos.frontYaw, Math.min(0.1, offset));
+			if (sim.isOffTrack()) {
+				nextFront = nextFront.add(VecUtil.fromYaw(offset, pos.rotationYaw));
+				break;
+			}
 			offset -= 0.1;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
@@ -547,6 +551,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		Vec3d nextRear = rear;
 		while (offset > 0) {
 			nextRear = sim.nextPosition(nextRear, pos.rotationYaw+180, pos.rearYaw+180, Math.min(0.1, offset));
+			if (sim.isOffTrack()) {
+				nextRear = nextRear.add(VecUtil.fromYaw(offset, pos.rotationYaw+180));
+				break;
+			}
 			offset -= 0.1;
 		}
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
