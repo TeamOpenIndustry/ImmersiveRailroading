@@ -141,4 +141,8 @@ public class MovementSimulator {
 	public Vec3d rearBogeyPosition() {
 		return VecUtil.fromYawPitch(bogeyRearOffset, position.rotationYaw, position.rotationPitch).add(position.position);
 	}
+	
+	public boolean isOffTrack() {
+		return position.isOffTrack;
+	}
 }
