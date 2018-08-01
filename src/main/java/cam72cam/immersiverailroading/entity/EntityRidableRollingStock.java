@@ -112,6 +112,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		} else {
 			if (!this.world.isRemote) {
 				passengerPositions.put(player.getPersistentID(), new Vec3d(0, 0, 0));
+				sendToObserving(new PassengerPositionsPacket(this));
 				player.startRiding(this);
 			}
 
@@ -232,12 +233,16 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	@Override
 	public void removePassenger(Entity passenger) {
 		super.removePassenger(passenger);
+		
 		if (passengerPositions.containsKey(passenger.getPersistentID()) ) {
 			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
 			Vec3d delta = dismountPos(ppos);
-			
-			passengerPositions.remove(passenger.getPersistentID());
 			passenger.setPositionAndUpdate(delta.x, passenger.posY, delta.z);
+			
+			if (!world.isRemote) {
+				passengerPositions.remove(passenger.getPersistentID());
+				sendToObserving(new PassengerPositionsPacket(this));
+			}
 		}
 	}
 	
@@ -333,9 +338,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		off = off.addVector(0, -off.y, 0);
 		
 		passengerPositions.put(sp.uuid, off);
+		sendToObserving(new PassengerPositionsPacket(this));
 		entityliving.setDead();
 		
-		sendToObserving(new PassengerPositionsPacket(this));
 	}
 	
 	public EntityLiving removeStaticPasssenger(Vec3d pos, boolean isVillager) {
