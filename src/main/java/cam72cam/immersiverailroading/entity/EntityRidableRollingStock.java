@@ -139,6 +139,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();
+	public Map<Integer, Vec3d> dismounts = new HashMap<Integer, Vec3d>();
 	private final double pressDist = 0.05;
 	public List<StaticPassenger> staticPassengers = new ArrayList<StaticPassenger>();
 	
@@ -238,11 +239,24 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
 			Vec3d delta = dismountPos(ppos);
 			passenger.setPositionAndUpdate(delta.x, passenger.posY, delta.z);
-			
 			if (!world.isRemote) {
-				passengerPositions.remove(passenger.getPersistentID());
-				sendToObserving(new PassengerPositionsPacket(this));
+				dismounts.put(passenger.getEntityId(), new Vec3d(delta.x, passenger.posY, delta.z));
 			}
+		}
+	}
+	
+	public void onUpdate() {
+		super.onUpdate();
+
+		if (!world.isRemote) {
+			for (Integer id : dismounts.keySet()) {
+				Entity ent = world.getEntityByID(id);
+				if (ent != null) {
+					Vec3d pos = dismounts.get(id);
+					ent.setPosition(pos.x, pos.y, pos.z);
+				}
+			}
+			dismounts.clear();
 		}
 	}
 	
@@ -362,7 +376,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			sendToObserving(new PassengerPositionsPacket(this));
 			
 			if (passenger.isVillager) {
-				ppos = dismountPos(ppos);
+				ppos = dismountPos(ppos).addVector(0, 1, 0);
 
 				double distanceMoved = pos.distanceTo(new Vec3d(passenger.startPos));
 
