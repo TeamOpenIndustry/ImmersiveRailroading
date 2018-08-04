@@ -115,17 +115,19 @@ public class StockModel extends OBJRender {
 		//draw cargo
 		//called every tick
 		if (stock instanceof Freight) {
-			System.out.println("1");
 			Freight freight = (Freight) stock;
 			int fill = freight.getPercentCargoFull();
-			if (fill < 25) {
+			System.out.println(fill);
+			if (fill >= 1) {
 				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_25, stock.gauge));
-				System.out.println("2");
-			} else if (fill < 50) {
+			}
+			if (fill >= 25) {
 				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_50, stock.gauge));
-			} else if (fill < 75) {
+			}
+			if (fill >= 50) {
 				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_75, stock.gauge));
-			} else {
+			}
+			if (fill >= 75) {
 				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_100, stock.gauge));
 			}
 		}
