@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
@@ -215,15 +216,17 @@ public abstract class EntityRollingStockDefinition {
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_25, this, groups), true);
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_50, this, groups), true);
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_75, this, groups), true);
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_100, this, groups), true);
+		RenderComponent tmpRndComp = RenderComponent.parse(RenderComponentType.CARGO_FILL_25, this, groups);
+		System.out.println(tmpRndComp); //return something (Isnt null)
+		addComponentIfExists(tmpRndComp, false); //does not do anything -> renderComponents still doesnt contain CARGO_FILL_25
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_50, this, groups), false);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_75, this, groups), false);
+		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_100, this, groups), false);
 		
 		return groups;
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name, Gauge gauge) {
+	public RenderComponent getComponent(RenderComponentType name, Gauge gauge) { //return null for CARGO_FILL_25
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}
