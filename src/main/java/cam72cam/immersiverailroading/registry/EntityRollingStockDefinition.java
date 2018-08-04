@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
@@ -223,6 +224,9 @@ public abstract class EntityRollingStockDefinition {
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
+		for (int i = 100; i >= 1; i--) {
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.CARGO_FILL_X, this, groups, i), false);
+		}
 		
 		return groups;
 	}
