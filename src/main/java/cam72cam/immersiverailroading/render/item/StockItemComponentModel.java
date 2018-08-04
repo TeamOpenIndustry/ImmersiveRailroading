@@ -64,7 +64,7 @@ public class StockItemComponentModel implements IBakedModel {
 
 		for (RenderComponentType r : item.render) {
 			RenderComponent comp = def.getComponent(r, Gauge.from(Gauge.STANDARD));
-			if (comp == null) {
+			if (comp == null || r == RenderComponentType.CARGO_FILL_X) {
 				continue;
 			}
 			groups.addAll(comp.modelIDs);

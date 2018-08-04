@@ -5,6 +5,7 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
@@ -15,6 +16,7 @@ import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.MultiRenderComponent;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -109,6 +111,22 @@ public class StockModel extends OBJRender {
 		
 		drawComponent(def.getComponent(RenderComponentType.FRAME, stock.gauge));
 		drawComponent(def.getComponent(RenderComponentType.SHELL, stock.gauge));
+
+		//draw cargo
+		//called every tick
+		if (stock instanceof Freight) {
+			Freight freight = (Freight) stock;
+			int fill = freight.getPercentCargoFull();
+			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
+			if (cargoLoads != null) {
+				for (RenderComponent cargoLoad : cargoLoads) {
+					if (cargoLoad.id <= fill) {
+						drawComponent(cargoLoad);
+					}
+				}
+			}
+		}
+		
 		drawFrameWheels(stock);
 
 		if (def.getComponent(RenderComponentType.BOGEY_POS, "FRONT", stock.gauge) != null) {

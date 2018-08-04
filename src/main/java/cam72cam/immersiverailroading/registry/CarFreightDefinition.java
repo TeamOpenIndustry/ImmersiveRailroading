@@ -63,5 +63,5 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 	@Override
 	public boolean acceptsLivestock() {
 		return true;
-	}
+	}	
 }
