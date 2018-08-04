@@ -216,17 +216,14 @@ public abstract class EntityRollingStockDefinition {
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
-		RenderComponent tmpRndComp = RenderComponent.parse(RenderComponentType.CARGO_FILL_25, this, groups);
-		System.out.println(tmpRndComp); //return something (Isnt null)
-		addComponentIfExists(tmpRndComp, false); //does not do anything -> renderComponents still doesnt contain CARGO_FILL_25
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_50, this, groups), false);
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_75, this, groups), false);
-		addComponentIfExists(RenderComponent.parse(RenderComponentType.CARGO_FILL_100, this, groups), false);
+		for (int i = 100; i >= 1; i--) {
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.CARGO_FILL_X, this, groups, i), false);
+		}
 		
 		return groups;
 	}
 	
-	public RenderComponent getComponent(RenderComponentType name, Gauge gauge) { //return null for CARGO_FILL_25
+	public RenderComponent getComponent(RenderComponentType name, Gauge gauge) {
 		if (!renderComponents.containsKey(name)) {
 			return null;
 		}

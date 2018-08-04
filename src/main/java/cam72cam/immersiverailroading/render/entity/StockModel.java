@@ -117,18 +117,13 @@ public class StockModel extends OBJRender {
 		if (stock instanceof Freight) {
 			Freight freight = (Freight) stock;
 			int fill = freight.getPercentCargoFull();
-			System.out.println(fill);
-			if (fill >= 1) {
-				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_25, stock.gauge));
-			}
-			if (fill >= 25) {
-				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_50, stock.gauge));
-			}
-			if (fill >= 50) {
-				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_75, stock.gauge));
-			}
-			if (fill >= 75) {
-				drawComponent(def.getComponent(RenderComponentType.CARGO_FILL_100, stock.gauge));
+			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
+			if (cargoLoads != null) {
+				for (RenderComponent cargoLoad : cargoLoads) {
+					if (cargoLoad.id <= fill) {
+						drawComponent(cargoLoad);
+					}
+				}
 			}
 		}
 		
