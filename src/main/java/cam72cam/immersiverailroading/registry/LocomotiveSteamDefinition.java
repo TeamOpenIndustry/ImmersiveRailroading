@@ -211,20 +211,32 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				RenderComponentType.LIFTING_LINK_SIDE,
 				RenderComponentType.REACH_ROD_SIDE,
 			};
-			
+
+            for (String side : sides) {
+                for (RenderComponentType name : components) {
+                    addComponentIfExists(RenderComponent.parseSide(name, this, groups, side), true);
+                }
+            }
+            break;
 
             case THREE_BODY_WALSCHAERTS:
-                if (middleDriverReversed!=null);
-                sides.add("LEFT_MIDDLE");
-                sides.add("RIGHT_MIDDLE");
-
+                if (sides.size() == 0) {
+                    sides.add("LEFT_FRONT");
+                    sides.add("RIGHT_FRONT");
+                    sides.add("LEFT_REAR");
+                    sides.add("RIGHT_REAR");
+                }
+                if (middleDriverReversed!=null) {
+                    sides.add("LEFT_MIDDLE");
+                    sides.add("RIGHT_MIDDLE");
+                }
 
                 for (String side : sides) {
                     for (RenderComponentType name : components) {
                         addComponentIfExists(RenderComponent.parseSide(name, this, groups, side), true);
                     }
                 }
-                break
+                break;
 		case CLIMAX:
 			break;
 		case SHAY:

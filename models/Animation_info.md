@@ -25,22 +25,3 @@ See http://trumpetb.net/loco/wdiagram.html for details
   * {SIDE}_REVERSING_ARM (optional)
   * {SIDE}_LIFTING_LINK (optional)
   * {SIDE}_REACH_ROD (optional)
-
-K1 Mallet Walscharets:
-* {SIDE}={FRONT_LEFT,FRONT_RIGHT, REAR_LEFT,REAR_RIGHT}
-
-K1 Walscharets Components:
-See http://trumpetb.net/loco/wdiagram.html for details
-  * {SIDE}_REVERSE_SIDE_ROD (required)
-  * {SIDE}_REVERSE_MAIN_ROD (required)
-  * {SIDE}_REVERSE_PISTON_ROD (required)
-  * {SIDE}_REVERSE_UNION_LINK (optional)
-  * {SIDE}_REVERSE_COMBINATION_LEVER (optional)
-  * {SIDE}_REVERSE_VALVE_STEM (optional)
-  * {SIDE}_REVERSE_RADIUS_BAR (optional)
-  * {SIDE}_REVERSE_EXPANSION_LINK (optional)
-  * {SIDE}_REVERSE_ECCENTRIC_ROD (optional)
-  * {SIDE}_REVERSE_ECCENTRIC_CRANK (optional)
-  * {SIDE}_REVERSE_REVERSING_ARM (optional)
-  * {SIDE}_REVERSE_LIFTING_LINK (optional)
-  * {SIDE}_REVERSE_REACH_ROD (optional)
