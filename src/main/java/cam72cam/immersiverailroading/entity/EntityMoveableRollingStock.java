@@ -275,6 +275,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			} else {
 				this.tickSkew = 1;
 			}
+			
+			if (this.ticksExisted % 10 == 0) {
+				// Wipe this now and again to force a refresh
+				// Could also be implemented as a wipe from the track rail base (might be more efficient?)
+				lastRetarderPos = null;
+			}
 		}
 		
 		if (world.isRemote) {

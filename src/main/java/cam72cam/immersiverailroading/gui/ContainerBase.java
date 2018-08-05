@@ -1,17 +1,10 @@
 package cam72cam.immersiverailroading.gui;
 
-import java.util.function.Function;
-
-import javax.annotation.Nonnull;
-
-import cam72cam.immersiverailroading.util.BurnUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -73,15 +66,6 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
 			int row = slotID / horizSlots;
 			int col = slotID % horizSlots;
             this.addSlotToContainer(new SlotItemHandler(handler, slotID, x + paddingLeft + col * slotSize, y + row * slotSize));
-		}
-		return y + slotSize * (int) Math.ceil((double)slots / horizSlots);
-	}
-	
-	public int addFilteredSlotBlock(IItemHandler handler, int slots, int x, int y, int horizSlots, Function<ItemStack, Boolean> fn) {
-		for (int slotID = 0; slotID < slots; slotID++) {
-			int row = slotID / horizSlots;
-			int col = slotID % horizSlots;
-            this.addSlotToContainer(new FilteredSlot(handler, slotID, x + paddingLeft + col * slotSize, y + row * slotSize, fn));
 		}
 		return y + slotSize * (int) Math.ceil((double)slots / horizSlots);
 	}
@@ -163,42 +147,4 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
 
         return itemstack;
     }
-	
-	/*
-	@Override 
-	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
-		try {
-			return super.slotClick(slotId, dragType, clickTypeIn, player);
-		} catch (Exception ex) {
-			// This is a crappy hack
-			return ItemStack.EMPTY; 
-		}
-	}*/
-	
-	public static class FilteredSlot extends SlotItemHandler {
-		private Function<ItemStack, Boolean> fn;
-		
-		public static final Function<ItemStack, Boolean> FLUID_CONTAINER = (ItemStack stack) -> {
-			IFluidHandlerItem containerFluidHandler = FluidUtil.getFluidHandler(stack.copy());
-			return containerFluidHandler != null;
-		};
-		
-		public static final Function<ItemStack, Boolean> BURNABLE = (ItemStack stack) -> {
-			return BurnUtil.getBurnTime(stack) != 0;
-		};
-		
-		public static final Function<ItemStack, Boolean> NONE = (ItemStack stack) -> {
-			return false;
-		};
-
-		public FilteredSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition, Function<ItemStack, Boolean> acceptor) {
-			super(itemHandler, index, xPosition, yPosition);
-			this.fn = acceptor;
-		}
-		
-		@Override
-		public boolean isItemValid(@Nonnull ItemStack stack) {
-			return fn.apply(stack) && super.isItemValid(stack);
-		}
-	}
 }

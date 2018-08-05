@@ -55,7 +55,8 @@ public abstract class EntityRollingStockDefinition {
 	private float bogeyRear;
 	private float couplerOffsetFront;
 	private float couplerOffsetRear;
-
+	
+	public float dampeningAmount;
 	public  double frontBounds;
 	public  double rearBounds;
 	private double heightBounds;
@@ -127,6 +128,13 @@ public abstract class EntityRollingStockDefinition {
 
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_model_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_model_scale);
+		
+		dampeningAmount = 0.75f;
+		if (data.has("sound_dampening_percentage")) {
+			if (data.get("sound_dampening_percentage").getAsFloat() >= 0.0f && data.get("sound_dampening_percentage").getAsFloat() <= 1.0f) {
+				dampeningAmount = data.get("sound_dampening_percentage").getAsFloat();
+			}
+		}
 		
 		if (data.has("couplers")) {
 			couplerOffsetFront = (float) (data.get("couplers").getAsJsonObject().get("front_offset").getAsFloat() * internal_model_scale);
