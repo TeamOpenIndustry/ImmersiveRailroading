@@ -108,7 +108,7 @@ public class LocomotiveDiesel extends Locomotive {
 	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
 	 */
 	@Override
-	public void handleKeyPress(Entity source, KeyTypes key) {
+	public void handleKeyPress(Entity source, KeyTypes key, boolean sprinting) {
 		switch(key) {
 			case START_STOP_ENGINE:
 				if (turnOnOffDelay == 0) {
@@ -117,7 +117,7 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				break;
 			default:
-				super.handleKeyPress(source, key);
+				super.handleKeyPress(source, key, sprinting);
 		}
 	}
 	

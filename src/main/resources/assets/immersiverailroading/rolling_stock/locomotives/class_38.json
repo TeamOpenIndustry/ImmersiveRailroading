@@ -32,9 +32,15 @@
 		"front_offset": -0.08,
 		"rear_offset": -0.4
 	},
-		"sounds": {
-		"whistle": "sounds/steam/k4_sounds/whistle.ogg",
+    "sounds": {
 		"idle": "sounds/steam/k4_sounds/idle.ogg",
-		"chuff": "sounds/steam/k4_sounds/chuff.ogg"
+		"chuff": "sounds/steam/k4_sounds/chuff.ogg",
+		"quilling": [{
+			"pull_start": 0.25,
+			"pull_end": 0.55,
+			"pitch_start": 0.9,
+			"pitch_end": 1,
+			"sample": "sounds/steam/whistles/nswgr_5chime.ogg"
+		}]
 	}
 }

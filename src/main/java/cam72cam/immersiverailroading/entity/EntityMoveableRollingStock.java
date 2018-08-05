@@ -22,7 +22,6 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -357,7 +356,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 
 	    if (this.getCurrentSpeed().metric() > 1) {
-			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(EntityLiving.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
+			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(EntityLivingBase.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					// rolling stock collisions handled by looking at the front and
@@ -367,10 +366,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 				if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
 					// Don't apply bb to passengers
-					continue;
-				}
-	
-				if (! (entity instanceof EntityLivingBase)) {
 					continue;
 				}
 				
@@ -406,16 +401,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// Riding on top of cars
 			AxisAlignedBB bb = this.getCollisionBoundingBox();
 			bb = bb.offset(0, gauge.scale()*2, 0);
-			List<Entity> entitiesAbove = world.getEntitiesWithinAABB(EntityLiving.class, bb);
+			List<Entity> entitiesAbove = world.getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (Entity entity : entitiesAbove) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					continue;
 				}
 				if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
-					continue;
-				}
-				
-				if (! (entity instanceof EntityLivingBase)) {
 					continue;
 				}
 	
@@ -531,6 +522,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		Vec3d nextFront = front;
 		while (offset > 0) {
 			nextFront = sim.nextPosition(nextFront, pos.rotationYaw, pos.frontYaw, Math.min(0.1, offset));
+			if (sim.isOffTrack()) {
+				nextFront = nextFront.add(VecUtil.fromYaw(offset, pos.rotationYaw));
+				break;
+			}
 			offset -= 0.1;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
@@ -547,6 +542,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		Vec3d nextRear = rear;
 		while (offset > 0) {
 			nextRear = sim.nextPosition(nextRear, pos.rotationYaw+180, pos.rearYaw+180, Math.min(0.1, offset));
+			if (sim.isOffTrack()) {
+				nextRear = nextRear.add(VecUtil.fromYaw(offset, pos.rotationYaw+180));
+				break;
+			}
 			offset -= 0.1;
 		}
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
