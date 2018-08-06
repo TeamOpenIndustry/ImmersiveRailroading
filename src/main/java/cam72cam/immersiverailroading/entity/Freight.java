@@ -152,6 +152,10 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	public int getPercentCargoFull() {
 		return this.getDataManager().get(PERCENT_FULL);
 	}
+	
+	public int getCargoItemCount () {
+		return this.getDataManager().get(CARGO_ITEMS);
+	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
