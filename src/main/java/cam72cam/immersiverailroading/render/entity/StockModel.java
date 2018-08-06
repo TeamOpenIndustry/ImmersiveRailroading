@@ -120,10 +120,14 @@ public class StockModel extends OBJRender {
 			CarFreightDefinition freightDef = (CarFreightDefinition) def;
 			int fill = freight.getPercentCargoFull();
 			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
+			
+			//this sorts through all the cargoLoad objects
 			if (cargoLoads != null) {
 				for (RenderComponent cargoLoad : cargoLoads) {
 					if (cargoLoad.id <= fill) {
 						drawComponent(cargoLoad);
+						
+						//if the stock should only render the current cargo load only it will stop at the highest matching number
 						if (freightDef.shouldShowCurrentLoadOnly()) {
 							break;
 						}
