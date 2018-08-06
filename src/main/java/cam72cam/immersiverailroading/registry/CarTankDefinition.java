@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 
-public class CarTankDefinition extends EntityRollingStockDefinition {
+public class CarTankDefinition extends FreightDefinition {
 
 	private List<Fluid> fluidFilter; // null == no filter
 	private FluidQuantity capacity;

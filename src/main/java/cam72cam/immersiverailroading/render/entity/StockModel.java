@@ -5,7 +5,6 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
@@ -19,11 +18,9 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
-import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.registry.CarFreightDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
-import cam72cam.immersiverailroading.registry.TenderDefinition;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -102,9 +99,34 @@ public class StockModel extends OBJRender {
 			draw();
 		}
 		
+		drawCargo(stock);
+		
 		this.restoreTexture();
 		
 		tex.restore();
+	}
+	
+	public void drawCargo(EntityRollingStock stock) {
+		if (stock instanceof Freight) {
+			Freight freight = (Freight) stock;
+			FreightDefinition def = freight.getDefinition();
+			int fill = freight.getPercentCargoFull();
+			
+			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
+			if (cargoLoads != null) {
+				//this sorts through all the cargoLoad objects
+				for (RenderComponent cargoLoad : cargoLoads) {
+					if (cargoLoad.id <= fill || (cargoLoad.id == 1)) {
+						drawComponent(cargoLoad);
+						
+						//if the stock should only render the current cargo load only it will stop at the highest matching number
+						if (def.shouldShowCurrentLoadOnly()) {
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void drawStandardStock(EntityMoveableRollingStock stock) {
@@ -114,43 +136,6 @@ public class StockModel extends OBJRender {
 		
 		drawComponent(def.getComponent(RenderComponentType.FRAME, stock.gauge));
 		drawComponent(def.getComponent(RenderComponentType.SHELL, stock.gauge));
-
-		//draw cargo
-		//called every tick
-		if (stock instanceof Freight) {
-			Freight freight = (Freight) stock;
-			int fill = freight.getPercentCargoFull();
-			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
-			if (cargoLoads != null) {
-				if (stock instanceof Tender) {
-					TenderDefinition tendertDef = (TenderDefinition) def;
-					//this sorts through all the cargoLoad objects
-					for (RenderComponent cargoLoad : cargoLoads) {
-						if (cargoLoad.id <= fill || (cargoLoad.id == 1 && freight.getCargoItemCount() > 0)) {
-							drawComponent(cargoLoad);
-							
-							//if the stock should only render the current cargo load only it will stop at the highest matching number
-							if (tendertDef.shouldShowCurrentLoadOnly()) {
-								break;
-							}
-						}
-					}
-				} else {
-					CarFreightDefinition freightDef = (CarFreightDefinition) def;
-					//this sorts through all the cargoLoad objects
-					for (RenderComponent cargoLoad : cargoLoads) {
-						if (cargoLoad.id <= fill || (cargoLoad.id == 1 && freight.getCargoItemCount() > 0)) {
-							drawComponent(cargoLoad);
-							
-							//if the stock should only render the current cargo load only it will stop at the highest matching number
-							if (freightDef.shouldShowCurrentLoadOnly()) {
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
 		
 		drawFrameWheels(stock);
 
