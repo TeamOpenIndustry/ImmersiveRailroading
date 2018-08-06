@@ -19,6 +19,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.registry.CarFreightDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.OBJRender;
@@ -116,12 +117,16 @@ public class StockModel extends OBJRender {
 		//called every tick
 		if (stock instanceof Freight) {
 			Freight freight = (Freight) stock;
+			CarFreightDefinition freightDef = (CarFreightDefinition) def;
 			int fill = freight.getPercentCargoFull();
 			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
 			if (cargoLoads != null) {
 				for (RenderComponent cargoLoad : cargoLoads) {
 					if (cargoLoad.id <= fill) {
 						drawComponent(cargoLoad);
+						if (freightDef.shouldShowCurrentLoad()) {
+							break;
+						}
 					}
 				}
 			}
