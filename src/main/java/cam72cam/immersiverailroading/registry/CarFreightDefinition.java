@@ -18,6 +18,7 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 	private int numSlots;
 	private int width;
 	private List<String> validCargo;
+	private boolean showCurrentLoad;
 	
 	public CarFreightDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -37,6 +38,10 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 		this.validCargo = new ArrayList<String>();
 		for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
 			validCargo.add(el.getAsString());
+		}
+		this.showCurrentLoad = false;
+		if (freight.has("show_current_load")) {
+			this.showCurrentLoad = freight.get("show_current_load").getAsBoolean();
 		}
 	}
 	
@@ -58,6 +63,10 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 
 	public int getInventoryWidth(Gauge gauge) {
 		return MathHelper.ceil(width * gauge.scale());
+	}
+	
+	public boolean shouldShowCurrentLoad () {
+		return this.showCurrentLoad;
 	}
 	
 	@Override
