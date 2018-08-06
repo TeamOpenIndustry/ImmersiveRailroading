@@ -245,8 +245,8 @@ public class LocomotiveSteam extends Locomotive {
 	private boolean hasReversedDrivers;
 
 	private boolean reversedDriversCheck() {
-		if (this.hasReversedDrivers==null){
-			hasReversedDrivers=0;
+		if (this.hasReversedDrivers!=true){
+			hasReversedDrivers=false;
 		}
 	}
 

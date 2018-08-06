@@ -25,11 +25,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int numSlots;
 	private int width;
 	//below allows for changing which driver set is reversed
-	private boolean frontDriverReversed;
-	private boolean rearDriverReversed;
+	private boolean frontDriverReversed = false;
+	private boolean rearDriverReversed = false;
 
 	//not null if there are middle drivers, else should set as null
-	private boolean middleDriverReversed;
+	private boolean middleDriverReversed = false;
 	//allows for choosing where the cab is for an multi section locomotive
 	private int cabLocation;
 	
