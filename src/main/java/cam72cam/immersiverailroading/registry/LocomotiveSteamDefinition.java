@@ -31,7 +31,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	//not null if there are middle drivers, else should set as null
 	private boolean middleDriverReversed;
 	//allows for choosing where the cab is for an multi section locomotive
-	private int cabLocation
+	private int cabLocation;
 	
 	public Quilling quill;
 	public ResourceLocation whistle;
@@ -271,7 +271,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		return FrontDriverReversed;
 	}
 	public int getCabLocation(){
-	    return CabLocation
+	    return CabLocation;
     }
 	public boolean getRearDriverReversed(){
 		return RearDriverReversed;

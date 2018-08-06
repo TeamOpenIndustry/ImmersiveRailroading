@@ -326,7 +326,7 @@ public class StockModel extends OBJRender {
                 drawDrivingWheels(stock, wheels);
                 RenderComponent wheel = wheels.get(wheels.size() / 2);
 
-                drawWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center(), def.getFrontDriverReversed();
+                drawWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center(), def.getFrontDriverReversed());
                 drawWalschaerts(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center(), def.getFrontDriverReversed());
 
                 GL11.glPopMatrix();
