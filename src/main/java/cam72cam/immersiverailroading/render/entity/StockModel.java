@@ -124,7 +124,7 @@ public class StockModel extends OBJRender {
 				for (RenderComponent cargoLoad : cargoLoads) {
 					if (cargoLoad.id <= fill) {
 						drawComponent(cargoLoad);
-						if (freightDef.shouldShowCurrentLoad()) {
+						if (freightDef.shouldShowCurrentLoadOnly()) {
 							break;
 						}
 					}
