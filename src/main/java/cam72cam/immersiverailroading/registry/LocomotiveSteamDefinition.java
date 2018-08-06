@@ -46,10 +46,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		if (tankCapacity == null) {
 			tankCapacity = FluidQuantity.ZERO;
 		}
-		if (FrontDriverReversed == null){
+		if (FrontDriverReversed != true){
 			FrontDriverReversed = false;
 		}
-		if (RearDriverReversed == null){
+		if (RearDriverReversed != true){
 			RearDriverReversed = false;
 		}
 		if (cabLocation == null){
