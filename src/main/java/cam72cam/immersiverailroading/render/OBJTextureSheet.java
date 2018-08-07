@@ -214,6 +214,11 @@ public class OBJTextureSheet {
 			List<Face> quads = model.groups.get(groupName);
 			for (Face face : quads) {
 				String mtlName = face.mtl;
+				if (!model.materials.containsKey(mtlName)) {
+					ImmersiveRailroading.warn("Missing material %s", mtlName);
+					continue;
+				}
+				
 				if (model.materials.get(mtlName).texKd != null) {
 					String key = model.materials.get(mtlName).texKd.toString();
 					if (!mappings.containsKey(key)) {
