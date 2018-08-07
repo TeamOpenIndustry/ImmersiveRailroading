@@ -9,6 +9,7 @@ import java.util.Map;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -117,12 +118,16 @@ public class OBJRender {
 			float g = 0;
 			float b = 0;
 			float a = 0;
-			if (currentMTL.Kd != null) {
-				float mult = 1 - model.darken * 5;
-				r = Math.max(0, currentMTL.Kd.get(0) * mult);
-				g = Math.max(0, currentMTL.Kd.get(1) * mult);
-				b = Math.max(0, currentMTL.Kd.get(2) * mult);
-				a = currentMTL.Kd.get(3);
+			if (currentMTL != null) {
+				if (currentMTL.Kd != null) {
+					float mult = 1 - model.darken * 5;
+					r = Math.max(0, currentMTL.Kd.get(0) * mult);
+					g = Math.max(0, currentMTL.Kd.get(1) * mult);
+					b = Math.max(0, currentMTL.Kd.get(2) * mult);
+					a = currentMTL.Kd.get(3);
+				}
+			} else {
+				ImmersiveRailroading.warn("Missing group %s", face.mtl);
 			}
 			for (int[] point : face.points()) {
 				Vec3d v = model.vertices(point[0]);
