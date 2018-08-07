@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderCrossing;
+import cam72cam.immersiverailroading.track.BuilderRailroadCrossing;
 import cam72cam.immersiverailroading.track.BuilderSlope;
 import cam72cam.immersiverailroading.track.BuilderStraight;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
@@ -190,6 +191,8 @@ public class RailInfo {
 			return new BuilderSwitch(this, pos);
 		case TURNTABLE:
 			return new BuilderTurnTable(this, pos);
+		case RAILROAD_CROSSING:
+			return new BuilderRailroadCrossing(this, pos);
 		}
 		return null;
 	}

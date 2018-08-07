@@ -9,6 +9,7 @@ public enum TrackItems {
 	TURN,
 	SWITCH,
 	TURNTABLE,
+	RAILROAD_CROSSING,
 	;
 	
 	@Override
