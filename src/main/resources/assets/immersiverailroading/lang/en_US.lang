@@ -47,9 +47,9 @@ chat.immersiverailroading:build.invalid_block=Invalid block at x=%s y=%s z=%s
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
-gui.immersiverailroading:label.key_1=Right-click once to allow only you to enter/break the train
-gui.immersiverailroading:label.key_2=Right-click again to allow everyone to enter but not break this train
-gui.immersiverailroading:label.key_3=Right-click again to allow everyone to enter/break this train
+gui.immersiverailroading:label.key_1=By default everyone can enter/break the stock
+gui.immersiverailroading:label.key_2=Right-click once to allow everyone to enter but not break this train
+gui.immersiverailroading:label.key_3=Right-click again to allow only you to enter/break the train
 gui.immersiverailroading:selector.type=Type: %s
 gui.immersiverailroading:selector.gauge=Gauge: %s
 gui.immersiverailroading:selector.quarters=%s Degree Turn

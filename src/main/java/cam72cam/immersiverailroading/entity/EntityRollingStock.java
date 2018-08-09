@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -33,6 +34,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializer;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
@@ -40,28 +42,8 @@ import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
-	public static final DataSerializer<UUID> PLAYER_UUID = new DataSerializer<UUID>()
-    {
-        public void write(PacketBuffer buf, UUID playerId)
-        {
-            buf.writeUniqueId(playerId);
-        }
-        public UUID read(PacketBuffer buf) throws IOException
-        {
-            return buf.readUniqueId();
-        }
-        public DataParameter<UUID> createKey(int id)
-        {
-            return new DataParameter<UUID>(id, this);
-        }
-        public UUID copyValue(UUID playerId)
-        {
-            return playerId;
-        }
-    };
-	
 	private static DataParameter<Integer> LOCK_TYPE = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.VARINT);	//0=everyone can enter/break, 1=everyone can enter, 2=no one can enter/break
-	private static DataParameter<UUID> LOCK_OWNER = EntityDataManager.createKey(EntityRollingStock.class, PLAYER_UUID);
+	private static DataParameter<String> LOCK_OWNER = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.STRING);
 	
 	protected String defID;
 	public Gauge gauge;
@@ -78,6 +60,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.ignoreFrustumCheck = true;
 		
 		this.getDataManager().register(LOCK_TYPE, 0);
+		this.getDataManager().register(LOCK_OWNER, "");
 	}
 	
 	@Override
@@ -114,20 +97,26 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		this.getDataManager().set(LOCK_TYPE, value);
 	}
 	
-	public void switchLockType () {
+	public void switchLockType (EntityPlayer player) {
 		int lockType = getLockType();
 		lockType++;
 		if (lockType == 3) {
 			lockType = 0;
+			setLockOwner("");
+		} else {
+			setLockOwner(player.getUniqueID().toString());
 		}
 		setLockType(lockType);
 	}
 	
 	public UUID getLockOwner() {
-		return this.getDataManager().get(LOCK_OWNER);
+		if (this.getDataManager().get(LOCK_OWNER) == "") {
+			return null;
+		}
+		return UUID.fromString(this.getDataManager().get(LOCK_OWNER));
 	}
 	
-	public void setLockOwner(UUID playerId) {
+	public void setLockOwner(String playerId) {
 		this.getDataManager().set(LOCK_OWNER, playerId);
 	}
 	
@@ -139,6 +128,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 				world.removeEntity(this);
 			}
 		}
+	}
+	
+	public boolean playerHasOp (EntityPlayer player) {
+		return  FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayers().getEntry(player.getGameProfile()) != null;
 	}
 
 	/*
@@ -191,9 +184,9 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_LOCK_KEY) {
+		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_LOCK_KEY && (getLockType() == 0 || getLockOwner().equals(player.getUniqueID())) || playerHasOp(player)) {
 			System.out.println(getLockType());
-			switchLockType();
+			switchLockType(player);
 			System.out.println(getLockType());
 			return true;
 		} else {
@@ -229,7 +222,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		
 		if (damagesource.getTrueSource() instanceof EntityPlayer && !damagesource.isProjectile()) {
 			EntityPlayer player = (EntityPlayer) damagesource.getTrueSource();
-			if (player.isSneaking()) {
+			if (player.isSneaking() && (getLockType() == 0 || getLockOwner().equals(player.getUniqueID())) || playerHasOp(player)) {
 				if (!this.isDead) {
 					this.onDeath(StockDeathType.PLAYER);
 				}
