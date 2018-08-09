@@ -39,7 +39,7 @@ public class BuilderRailroadCrossing extends BuilderBase {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
-				positions.add(Pair.of(0.15f, Pair.of(posX, posZ)));
+				positions.add(Pair.of(0.18f * (float) gauge.scale(), Pair.of(posX, posZ)));
 				if (dist < 3 || dist > actualLength - 3) {
 					flexPositions.add(Pair.of(posX, posZ));
 				}
@@ -52,8 +52,8 @@ public class BuilderRailroadCrossing extends BuilderBase {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
-				if (!positions.contains(Pair.of(0.15f, Pair.of(posX, posZ)))) {
-					positions.add(Pair.of(0.08f, Pair.of(posX, posZ)));
+				if (!positions.contains(Pair.of(0.18f * (float) gauge.scale(), Pair.of(posX, posZ)))) {
+					positions.add(Pair.of(0.12f * (float) gauge.scale(), Pair.of(posX, posZ)));
 					if (dist < 3 || dist > actualLength - 3) {
 						flexPositions.add(Pair.of(posX, posZ));
 					}
@@ -67,8 +67,8 @@ public class BuilderRailroadCrossing extends BuilderBase {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
-				if (!positions.contains(Pair.of(0.15f, Pair.of(posX, posZ))) && !positions.contains(Pair.of(0.08f, Pair.of(posX, posZ)))) {
-					positions.add(Pair.of(0.02f, Pair.of(posX, posZ)));
+				if (!positions.contains(Pair.of(0.18f * (float) gauge.scale(), Pair.of(posX, posZ))) && !positions.contains(Pair.of(0.12f * (float) gauge.scale(), Pair.of(posX, posZ)))) {
+					positions.add(Pair.of(0.04f * (float) gauge.scale(), Pair.of(posX, posZ)));
 					if (dist < 3 || dist > actualLength - 3) {
 						flexPositions.add(Pair.of(posX, posZ));
 					}
@@ -79,7 +79,7 @@ public class BuilderRailroadCrossing extends BuilderBase {
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
 		tracks.add(main);
-		main.setHeight(0.15f);
+		main.setHeight(0.18f * (float) gauge.scale());
 		
 		for (Pair<Float, Pair<Integer, Integer>> pair : positions) {
 			Pair<Integer, Integer> posPair = pair.getRight();
