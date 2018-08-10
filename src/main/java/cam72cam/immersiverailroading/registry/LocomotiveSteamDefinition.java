@@ -30,8 +30,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 
 	//not null if there are middle drivers, else should set as null
 	private boolean middleDriverReversed = false;
+
+	private boolean middleDriversExist = false;
 	//allows for choosing where the cab is for an multi section locomotive
-	private int cabLocation;
+	private int cabLocation = 1;
 	
 	public Quilling quill;
 	public ResourceLocation whistle;
@@ -46,15 +48,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		if (tankCapacity == null) {
 			tankCapacity = FluidQuantity.ZERO;
 		}
-		if (FrontDriverReversed != true){
-			FrontDriverReversed = false;
+		if (frontDriverReversed != true){
+			frontDriverReversed = false;
 		}
-		if (RearDriverReversed != true){
-			RearDriverReversed = false;
+		if (rearDriverReversed != true){
+			rearDriverReversed = false;
 		}
-		if (cabLocation == null){
-		    cabLocation = 1;
-        }
 	}
 	
 	@Override
@@ -67,11 +66,21 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		JsonObject firebox = data.get("firebox").getAsJsonObject();
 		this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
 		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
-		frontDriverReversed = data.get("front_drivers_reversed");
-		middleDriverReversed = data.get("middle_drivers_reversed");
-		rearDriverReversed = data.get("rear_drivers_reversed");
-		cabLocation = math.ceil(properties.get("cab_location")).getAsInt();
-
+		if(data.has("front_drivers_reversed")) {
+			frontDriverReversed = data.get("front_drivers_reversed").getAsBoolean();
+		}
+		if(data.has("middle_drivers_reversed")) {
+			middleDriverReversed = data.get("middle_drivers_reversed").getAsBoolean();
+		}
+		if(data.has("middle_drivers_present")) {
+			middleDriversExist = data.get("middle_drivers_present").getAsBoolean();
+		}
+		if(data.has("rear_drivers_reversed")) {
+			rearDriverReversed = data.get("rear_drivers_reversed").getAsBoolean();
+		}
+		if(data.has("cab_location")) {
+			cabLocation = (int) Math.ceil(properties.get("cab_location").getAsInt());
+		}
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
@@ -133,30 +142,25 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
 			}
 			break;
-		case T1:
+			case T1:
+				case THREE_BODY_WALSCHAERTS: {
+					for (int i = 0; i < 10; i++) {
+						addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_MIDDLE_X, this, groups, i), true);
+					}
+					addComponentIfExists(RenderComponent.parse(RenderComponentType.MIDDLE_LOCOMOTIVE, this, groups), true);
+					addComponentIfExists(RenderComponent.parse(RenderComponentType.REAR_LOCOMOTIVE, this, groups), true);
+				}
 		case MALLET_WALSCHAERTS:
 			for (int i = 0; i < 10; i++) {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
-			};
+			}
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
-			addComponentIfExists(RenderComponent.parse(RenderComponentType.REAR_LOCOMOTIVE, this, groups), true);
 			break;
 		case CLIMAX:
 			break;
 		case SHAY:
 			break;
-            case THREE_BODY_WALSCHAERTS:
-                for (int i = 0; i < 10; i++) {
-                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
-                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_MIDDLE_X, this, groups, i), true);
-                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
-                };
-                addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
-                addComponentIfExists(RenderComponent.parse(RenderComponentType.MIDDLE_LOCOMOTIVE, this, groups), true);
-                addComponentIfExists(RenderComponent.parse(RenderComponentType.REAR_LOCOMOTIVE, this, groups), true);
-            break;
-
 		}
 		
 
@@ -194,7 +198,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				sides.add("RIGHT_REAR");
 			}
 			
-			RenderComponentType[] components = new RenderComponentType[] {
+			RenderComponentType[] componentlists = new RenderComponentType[] {
 				RenderComponentType.SIDE_ROD_SIDE,
 				RenderComponentType.MAIN_ROD_SIDE,
 				RenderComponentType.PISTON_ROD_SIDE,
@@ -209,11 +213,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				RenderComponentType.ECCENTRIC_CRANK_SIDE,
 				RenderComponentType.REVERSING_ARM_SIDE,
 				RenderComponentType.LIFTING_LINK_SIDE,
-				RenderComponentType.REACH_ROD_SIDE,
+				RenderComponentType.REACH_ROD_SIDE
 			};
 
             for (String side : sides) {
-                for (RenderComponentType name : components) {
+                for (RenderComponentType name : componentlists) {
                     addComponentIfExists(RenderComponent.parseSide(name, this, groups, side), true);
                 }
             }
@@ -226,10 +230,28 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
                     sides.add("LEFT_REAR");
                     sides.add("RIGHT_REAR");
                 }
-                if (middleDriverReversed!=null) {
+                if (middleDriverReversed) {
                     sides.add("LEFT_MIDDLE");
                     sides.add("RIGHT_MIDDLE");
                 }
+
+				RenderComponentType[] components = new RenderComponentType[] {
+						RenderComponentType.SIDE_ROD_SIDE,
+						RenderComponentType.MAIN_ROD_SIDE,
+						RenderComponentType.PISTON_ROD_SIDE,
+						RenderComponentType.CYLINDER_SIDE,
+
+						RenderComponentType.UNION_LINK_SIDE,
+						RenderComponentType.COMBINATION_LEVER_SIDE,
+						RenderComponentType.VALVE_STEM_SIDE,
+						RenderComponentType.RADIUS_BAR_SIDE,
+						RenderComponentType.EXPANSION_LINK_SIDE,
+						RenderComponentType.ECCENTRIC_ROD_SIDE,
+						RenderComponentType.ECCENTRIC_CRANK_SIDE,
+						RenderComponentType.REVERSING_ARM_SIDE,
+						RenderComponentType.LIFTING_LINK_SIDE,
+						RenderComponentType.REACH_ROD_SIDE
+				};
 
                 for (String side : sides) {
                     for (RenderComponentType name : components) {
@@ -268,13 +290,23 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	}
 
 	public boolean getFrontDriverReversed(){
-		return FrontDriverReversed;
+		return frontDriverReversed;
 	}
 	public int getCabLocation(){
-	    return CabLocation;
+	    return cabLocation;
     }
 	public boolean getRearDriverReversed(){
-		return RearDriverReversed;
+		return rearDriverReversed;
 	}
+
+	public boolean getMiddleDriverReversed(){
+		return middleDriverReversed;
+	}
+
+	public boolean hasMiddleDrivers(){
+		return middleDriversExist;
+	}
+
+
 
 }

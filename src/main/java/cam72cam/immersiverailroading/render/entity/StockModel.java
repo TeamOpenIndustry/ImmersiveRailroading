@@ -705,7 +705,7 @@ public class StockModel extends OBJRender {
 		// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
 		// Y: Center of the rod
 		// Z: does not really matter due to rotation axis
-		Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height()/2, drivingRod.center().y, drivingRod.max().z);
+		Vec3d drivingRodRotPoint = new Vec3d(drivingRod.min().x - drivingRod.height()/2, drivingRod.center().y, drivingRod.max().z);
 		// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
 		float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
 
@@ -718,11 +718,11 @@ public class StockModel extends OBJRender {
 			GL11.glTranslated(-connRodMovment.x, -connRodMovment.z, 0);
 
 			// Move to rot point center
-			GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y,-drivingRodRotPoint.z);
+			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y,drivingRodRotPoint.z);
 			// Rotate rod angle
 			GL11.glRotated(drivingRodAngle, 0, 0, 1);
 			// Move back from rot point center
-			GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
 
 			drawComponent(drivingRod);
 		}

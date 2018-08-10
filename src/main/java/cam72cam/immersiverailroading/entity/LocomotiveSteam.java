@@ -244,11 +244,6 @@ public class LocomotiveSteam extends Locomotive {
 	private int tickMod = 0;
 	private boolean hasReversedDrivers;
 
-	private boolean reversedDriversCheck() {
-		if (this.hasReversedDrivers!=true){
-			hasReversedDrivers=false;
-		}
-	}
 
 	//actual ingame usage method via tick update
 	@Override
@@ -386,6 +381,7 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			double phase;
+			double phaseReversed = 0;
 			
 			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
 
@@ -431,7 +427,8 @@ public class LocomotiveSteam extends Locomotive {
 					}
 				}
 			}
-			
+
+			//particle calculations for whistles
 			List<RenderComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE, gauge);
 			if (	whistles != null &&
 					(this.getDataManager().get(HORN) != 0 || whistle != null && whistle.isPlaying()) && 
@@ -456,6 +453,8 @@ public class LocomotiveSteam extends Locomotive {
 					world.spawnEntity(sp);
 				}
 			}
+
+			//
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
 			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
@@ -495,7 +494,10 @@ public class LocomotiveSteam extends Locomotive {
 					}
 					phase = this.getPhase(2, phaseOffset);
 					double phaseSpike = Math.pow(phase, 4);
-					double phaseSpikeReversed = Math.pow(phaseReversed, 4);
+					double phaseSpikeReversed;
+					if(hasReversedDrivers) {
+						phaseSpikeReversed = Math.pow(phaseReversed, 4);
+					}
 
 					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
 						//next three lines create the puff of smoke due to the pistons
@@ -559,6 +561,7 @@ public class LocomotiveSteam extends Locomotive {
 						pressure.play(getPositionVector());
 					}
 				}
+				//particles
 				if (ConfigGraphics.particlesEnabled) {
 					for (RenderComponent steam : steams) {
 						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
