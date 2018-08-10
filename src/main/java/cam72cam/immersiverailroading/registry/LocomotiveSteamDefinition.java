@@ -25,15 +25,15 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int numSlots;
 	private int width;
 	//below allows for changing which driver set is reversed
-	private boolean frontDriverReversed = false;
-	private boolean rearDriverReversed = false;
+	private boolean frontDriverReversed;
+	private boolean rearDriverReversed;
 
 	//not null if there are middle drivers, else should set as null
-	private boolean middleDriverReversed = false;
+	private boolean middleDriverReversed;
 
-	private boolean middleDriversExist = false;
+	private boolean middleDriversExist;
 	//allows for choosing where the cab is for an multi section locomotive
-	private int cabLocation = 1;
+	private int cabLocation;
 	
 	public Quilling quill;
 	public ResourceLocation whistle;
@@ -48,12 +48,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		if (tankCapacity == null) {
 			tankCapacity = FluidQuantity.ZERO;
 		}
-		if (frontDriverReversed != true){
-			frontDriverReversed = false;
-		}
-		if (rearDriverReversed != true){
-			rearDriverReversed = false;
-		}
+
 	}
 	
 	@Override
@@ -69,17 +64,32 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		if(data.has("front_drivers_reversed")) {
 			frontDriverReversed = data.get("front_drivers_reversed").getAsBoolean();
 		}
+		else{
+			frontDriverReversed=false;
+		}
 		if(data.has("middle_drivers_reversed")) {
 			middleDriverReversed = data.get("middle_drivers_reversed").getAsBoolean();
+		}
+		else{
+			middleDriverReversed=false;
 		}
 		if(data.has("middle_drivers_present")) {
 			middleDriversExist = data.get("middle_drivers_present").getAsBoolean();
 		}
+		else{
+			middleDriversExist=false;
+		}
 		if(data.has("rear_drivers_reversed")) {
 			rearDriverReversed = data.get("rear_drivers_reversed").getAsBoolean();
 		}
+		else{
+			rearDriverReversed=false;
+		}
 		if(data.has("cab_location")) {
 			cabLocation = (int) Math.ceil(properties.get("cab_location").getAsInt());
+		}
+		else{
+			cabLocation=1;
 		}
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
