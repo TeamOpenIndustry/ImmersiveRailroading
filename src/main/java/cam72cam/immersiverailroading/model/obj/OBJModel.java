@@ -68,7 +68,7 @@ public class OBJModel {
 				materialPaths.add(args[0]);
 				break;
 			case "usemtl":
-				currentMaterial = args[0];
+				currentMaterial = args[0].intern();
 				break;
 			case "o":
 			case "g":
