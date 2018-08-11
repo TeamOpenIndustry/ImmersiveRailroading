@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Face {
 	public String mtl;
-	public Vec2f offsetUV = new Vec2f(0, 0);
+	public Vec2f offsetUV = Vec2f.ZERO;
 	public Float depthCache;
 	private int pointStart;
 	private OBJModel model;

@@ -364,11 +364,11 @@ public abstract class EntityRollingStockDefinition {
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
 								path.moveTo(vert.x * ratio, vert.z * ratio);
+								first = false;
 							} else {
 								path.lineTo(vert.x * ratio, vert.z * ratio);
 							}
 							fheight += vert.y / face.points().length;
-							first = false;
 						}
 						Rectangle2D bounds = path.getBounds2D();
 						if (bounds.getWidth() * bounds.getHeight() < 1) {
