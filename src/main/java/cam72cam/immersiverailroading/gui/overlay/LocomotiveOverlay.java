@@ -137,4 +137,8 @@ public class LocomotiveOverlay extends Gui {
 			drawTexturedModalRect(bgPosX, bgPosY, 0, 0, 60, 85);
 		}
 	}
+	
+	public void addSpace(int space) {
+		currPosX += space;
+	}
 }
