@@ -134,7 +134,7 @@ public class LocomotiveOverlay extends Gui {
 		}
 		if(loco instanceof HandCar) {
 			mc.renderEngine.bindTexture(OVERLAY_HANDCAR_TEXTURE);
-			drawTexturedModalRect(bgPosX, bgPosY, 0, 0, 62, 85);
+			drawTexturedModalRect(bgPosX, bgPosY, 0, 0, 60, 85);
 		}
 	}
 }
