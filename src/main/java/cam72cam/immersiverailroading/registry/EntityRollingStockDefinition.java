@@ -57,6 +57,7 @@ public abstract class EntityRollingStockDefinition {
 	private float couplerOffsetRear;
 	
 	public float dampeningAmount;
+	private boolean scalePitch;
 	public  double frontBounds;
 	public  double rearBounds;
 	private double heightBounds;
@@ -94,6 +95,10 @@ public abstract class EntityRollingStockDefinition {
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
 		
 		initHeightMap();
+	}
+	
+	public boolean shouldScalePitch() {
+		return scalePitch;
 	}
 
 	public void parseJson(JsonObject data) throws Exception  {
@@ -134,6 +139,11 @@ public abstract class EntityRollingStockDefinition {
 			if (data.get("sound_dampening_percentage").getAsFloat() >= 0.0f && data.get("sound_dampening_percentage").getAsFloat() <= 1.0f) {
 				dampeningAmount = data.get("sound_dampening_percentage").getAsFloat();
 			}
+		}
+		
+		scalePitch = true;
+		if (data.has("scale_pitch")) {
+			scalePitch = data.get("scale_pitch").getAsBoolean();
 		}
 		
 		if (data.has("couplers")) {
