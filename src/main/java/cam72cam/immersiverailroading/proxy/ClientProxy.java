@@ -52,7 +52,6 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.render.item.PlateItemModel;
 import cam72cam.immersiverailroading.render.item.RailAugmentItemModel;
 import cam72cam.immersiverailroading.render.item.RailCastItemRender;
