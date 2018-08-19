@@ -52,6 +52,7 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.render.item.PlateItemModel;
 import cam72cam.immersiverailroading.render.item.RailAugmentItemModel;
 import cam72cam.immersiverailroading.render.item.RailCastItemRender;
@@ -151,6 +152,7 @@ public class ClientProxy extends CommonProxy {
 
 	private static String missingResources;
 	private static float dampeningAmount = 1.0f;
+	private static boolean scalePitch = true;
 	
 	public static float getDampeningAmount() {
 		return dampeningAmount;
@@ -164,7 +166,11 @@ public class ClientProxy extends CommonProxy {
 			dampeningAmount = ridableStock.getDefinition().dampeningAmount;
 		}
 	}
-
+	
+	public static boolean doPitchScale() {
+		return scalePitch;
+	}
+	
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
 		TileMultiblock te;
@@ -676,7 +682,13 @@ public class ClientProxy extends CommonProxy {
 			ISound snd = sndCache.get(sndCacheId);
 			EntityMoveableRollingStock stock = ((EntityMoveableRollingStock)event.getEntity());
 			float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
-			snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
+			if(stock.getDefinition().shouldScalePitch()) {
+				snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
+				scalePitch = true;
+			} else {
+				snd.setPitch((float) ((adjust + 0.7)));
+				scalePitch = false;
+			}
 			snd.setVolume(0.01f + adjust);
 			snd.play(event.getEntity().getPositionVector());
 	    	sndCacheId++;
