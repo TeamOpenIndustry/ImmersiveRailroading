@@ -709,23 +709,20 @@ public class LocomotiveSteam extends Locomotive {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
-			if (Config.ConfigDamage.explosionsEnabled && Config.ConfigDamage.explosionEnvDamageEnabled) {
-				for (int i = 0; i < 5; i++) {
-					world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
+			
+			if (Config.ConfigDamage.explosionsEnabled) {
+				if (Config.ConfigDamage.explosionEnvDamageEnabled) {
+					for (int i = 0; i < 5; i++) {
+						world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
+					}
+				} else {
+					for (int i = 0; i < 5; i++) {
+						Explosion explosion = new Explosion(this.world, this, this.posX, this.posY, this.posZ, boilerPressure/5, false, false);
+						explosion.doExplosionA();
+						explosion.doExplosionB(true);
+					}
 				}
 			}
-			
-			if (Config.ConfigDamage.explosionsEnabled && !Config.ConfigDamage.explosionEnvDamageEnabled) {
-				
-				System.out.println("Env Damage disabled");
-				
-				for (int i = 0; i < 5; i++) {
-					Explosion explosion = new Explosion(this.world, this, this.posX, this.posY, this.posZ, boilerPressure/5, false, false);
-					explosion.doExplosionA();
-					explosion.doExplosionB(true);
-				}
-			}
-			
 			world.removeEntity(this);
 		}
 	}
