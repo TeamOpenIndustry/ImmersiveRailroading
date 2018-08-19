@@ -30,6 +30,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
@@ -708,9 +709,18 @@ public class LocomotiveSteam extends Locomotive {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
+			
 			if (Config.ConfigDamage.explosionsEnabled) {
-				for (int i = 0; i < 5; i++) {
-					world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
+				if (Config.ConfigDamage.explosionEnvDamageEnabled) {
+					for (int i = 0; i < 5; i++) {
+						world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
+					}
+				} else {
+					for (int i = 0; i < 5; i++) {
+						Explosion explosion = new Explosion(this.world, this, this.posX, this.posY, this.posZ, boilerPressure/5, false, false);
+						explosion.doExplosionA();
+						explosion.doExplosionB(true);
+					}
 				}
 			}
 			world.removeEntity(this);
