@@ -104,6 +104,7 @@ public class Config {
 		@Comment("Fuels for diesel Locomotives")
 		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();
 		static {
+			
 			dieselFuels.clear();
 			// BC
 			dieselFuels.put("oil", 100);
