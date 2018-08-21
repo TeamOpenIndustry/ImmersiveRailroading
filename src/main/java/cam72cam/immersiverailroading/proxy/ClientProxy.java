@@ -151,7 +151,6 @@ public class ClientProxy extends CommonProxy {
 
 	private static String missingResources;
 	private static float dampeningAmount = 1.0f;
-	private static boolean scalePitch = true;
 	
 	public static float getDampeningAmount() {
 		return dampeningAmount;
@@ -164,10 +163,6 @@ public class ClientProxy extends CommonProxy {
 			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRidingEntity();
 			dampeningAmount = ridableStock.getDefinition().dampeningAmount;
 		}
-	}
-	
-	public static boolean doPitchScale() {
-		return scalePitch;
 	}
 	
 	@Override
@@ -683,10 +678,8 @@ public class ClientProxy extends CommonProxy {
 			float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
 			if(stock.getDefinition().shouldScalePitch()) {
 				snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
-				scalePitch = true;
 			} else {
 				snd.setPitch((float) ((adjust + 0.7)));
-				scalePitch = false;
 			}
 			snd.setVolume(0.01f + adjust);
 			snd.play(event.getEntity().getPositionVector());

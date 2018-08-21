@@ -16,4 +16,5 @@ public interface ISound {
 	void reload();
 	public void disposable();
 	public boolean isDisposable();
+	public ISound shouldScalePitch(boolean val);
 }
