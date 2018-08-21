@@ -22,6 +22,7 @@ public class ClientSound implements ISound {
 	private Supplier<SoundSystem> sndSystem;
 	private URL resource;
 	private boolean repeats;
+	private boolean scalePitch;
 	private ResourceLocation oggLocation;
 	private float attenuationDistance;
 	private Vec3d currentPos;
@@ -40,6 +41,12 @@ public class ClientSound implements ISound {
 		this.oggLocation = oggLocation;
 		this.attenuationDistance = attenuationDistance * (float)gauge.scale() * (float)ConfigSound.soundDistanceScale;
 		this.gauge = gauge;
+		this.scalePitch = true;
+	}
+	
+	public ClientSound(Supplier<SoundSystem> soundSystem, ResourceLocation oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance, Gauge gauge, boolean scalePitch) {
+		this(soundSystem, oggLocation, resource, baseSoundMultiplier, repeats, attenuationDistance, gauge);
+		this.scalePitch = scalePitch;
 	}
 	
 	public void init() {
@@ -83,7 +90,7 @@ public class ClientSound implements ISound {
 		Minecraft.getMinecraft().mcProfiler.startSection("irSound");
 		SoundSystem snd = sndSystem.get();
 		float rootedScale = (float)Math.sqrt(Math.sqrt(gauge.scale()));
-		if(!ClientProxy.doPitchScale()) {
+		if(!scalePitch) {
 			rootedScale = 1.0F;
 		}
 		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * rootedScale;
@@ -171,5 +178,10 @@ public class ClientSound implements ISound {
 	@Override
 	public boolean isDisposable() {
 		return disposable;
+	}
+	
+	public ISound shouldScalePitch(boolean val) {
+		scalePitch = val;
+		return this;
 	}
 }
