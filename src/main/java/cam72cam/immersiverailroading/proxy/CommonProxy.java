@@ -26,6 +26,7 @@ import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.fluids.IRFluids;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
@@ -38,15 +39,16 @@ import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.SteamGeneratorMultiblock;
 import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
@@ -120,9 +122,12 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
     	OreHelper.IR_RAIL_BED.add(Blocks.NETHER_BRICK);
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+    	
+    	IRFluids.registerFluids();
     }
     
     public void init(FMLInitializationEvent event) {
+    	
     	ImmersiveRailroading.net.registerMessage(MRSSyncPacket.Handler.class, MRSSyncPacket.class, 0, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(KeyPressPacket.Handler.class, KeyPressPacket.class, 1, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(PassengerPositionsPacket.Handler.class, PassengerPositionsPacket.class, 2, Side.CLIENT);
@@ -141,6 +146,8 @@ public abstract class CommonProxy implements IGuiHandler {
     	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
     	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
     	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
+    	MultiblockRegistry.register(SteamGeneratorMultiblock.NAME, new SteamGeneratorMultiblock());
+    	
     }
     
 
@@ -150,6 +157,7 @@ public abstract class CommonProxy implements IGuiHandler {
     
     public abstract World getWorld(int dimension);
     
+    
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
     {
@@ -157,6 +165,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		event.getRegistry().register(IRBlocks.BLOCK_RAIL);
 		event.getRegistry().register(IRBlocks.BLOCK_RAIL_PREVIEW);
 		event.getRegistry().register(IRBlocks.BLOCK_MULTIBLOCK);
+		event.getRegistry().register(IRBlocks.BLOCK_STEAM_FLUID);
     	GameRegistry.registerTileEntity(TileRailGag.class, BlockRailGag.NAME);
     	GameRegistry.registerTileEntity(TileRail.class, BlockRail.NAME);
     	GameRegistry.registerTileEntity(TileRailPreview.class, BlockRailPreview.NAME);

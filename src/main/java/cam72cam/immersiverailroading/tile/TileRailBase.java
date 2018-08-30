@@ -17,7 +17,9 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.fluids.IRFluids;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.CouplerAugmentMode;
 import cam72cam.immersiverailroading.library.LocoControlMode;
@@ -438,6 +440,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
 			case WATER_TROUGH:
+			case STEAM_LOADER:
+			case STEAM_UNLOADER:
 				return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
@@ -479,6 +483,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
 			case WATER_TROUGH:
+			case STEAM_LOADER:
+			case STEAM_UNLOADER:
 				if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
 					if (this.augmentTank == null) {
 						this.createAugmentTank();
@@ -494,6 +500,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					}
 					return (T) new ItemStackHandler(0);
 				}
+				
 			case DETECTOR:
 			case LOCO_CONTROL:
 			case SPEED_RETARDER:
@@ -533,6 +540,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 			};
 			break;
+		case STEAM_LOADER:
+		case STEAM_UNLOADER:
+			this.augmentTank = new FluidTank(IRFluids.FLUID_STEAM, 0, 1000);
 		default:
 			break;
 		}
@@ -696,6 +706,22 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 				
 				break;
+			case STEAM_LOADER:
+				if (this.augmentTank == null) {
+					this.createAugmentTank();
+				}
+				
+				stock = this.getStockNearBy(fluid_cap);
+				if(stock instanceof LocomotiveSteam) {
+					LocomotiveSteam loco = (LocomotiveSteam) this.getStockNearBy(fluid_cap);
+					
+					if(augmentTank.getFluidAmount() >= 100 && loco.getBoilerPressure() < loco.getDefinition().getMaxPSI(loco.gauge)) {
+						augmentTank.drain(100, true);
+						loco.setBoilerPressure(loco.getBoilerPressure() + 0.05f);
+					}
+				}
+				
+				
 			case WATER_TROUGH:
 				if (this.augmentTank == null) {
 					this.createAugmentTank();

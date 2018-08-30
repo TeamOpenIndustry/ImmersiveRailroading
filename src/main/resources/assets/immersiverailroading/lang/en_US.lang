@@ -7,6 +7,8 @@ item.immersiverailroading:item_augment.ITEM_LOADER.name=Item Loader
 item.immersiverailroading:item_augment.ITEM_UNLOADER.name=Item Unloader
 item.immersiverailroading:item_augment.FLUID_LOADER.name=Fluid Loader
 item.immersiverailroading:item_augment.FLUID_UNLOADER.name=Fluid Unloader
+item.immersiverailroading:item_augment.STEAM_LOADER.name=Steam Loader
+item.immersiverailroading:item_augment.STEAM_UNLOADER.name=Steam Unloader
 item.immersiverailroading:item_augment.DETECTOR.name=Detector
 item.immersiverailroading:item_augment.COUPLER.name=Coupler
 item.immersiverailroading:item_rail_part.name=Rail Segment
@@ -194,3 +196,5 @@ ir_keys.decrease_brake=Decrease Air Brake
 ir_keys.horn=Sound Horn
 ir_keys.dead_mans_switch=Deadman's Switch
 ir_keys.start_stop_engine=Start/Stop engine
+
+fluid.immersiverailroading:steam=Steam

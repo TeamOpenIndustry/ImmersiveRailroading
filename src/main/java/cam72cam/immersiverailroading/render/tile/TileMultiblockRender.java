@@ -9,12 +9,14 @@ import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.SteamGeneratorMultiblock;
 import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
 import cam72cam.immersiverailroading.render.multiblock.BoilerRollerRender;
 import cam72cam.immersiverailroading.render.multiblock.CastingRender;
 import cam72cam.immersiverailroading.render.multiblock.IMultiblockRender;
 import cam72cam.immersiverailroading.render.multiblock.PlateRollerRender;
 import cam72cam.immersiverailroading.render.multiblock.RailRollerRender;
+import cam72cam.immersiverailroading.render.multiblock.SteamGeneratorRender;
 import cam72cam.immersiverailroading.render.multiblock.SteamHammerRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -30,6 +32,7 @@ public class TileMultiblockRender extends TileEntitySpecialRenderer<TileMultiblo
 		renderers.put(RailRollerMultiblock.NAME, new RailRollerRender());
 		renderers.put(BoilerRollerMultiblock.NAME, new BoilerRollerRender());
 		renderers.put(CastingMultiblock.NAME, new CastingRender());
+		renderers.put(SteamGeneratorMultiblock.NAME, new SteamGeneratorRender());
 	}
 	
 	@Override

@@ -25,6 +25,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.FluidTankProperties;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -83,6 +89,34 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     		return val;
     	}
     };
+    
+    FluidTank tank = new FluidTank(10000);
+    
+    private IFluidHandler fluid = new IFluidHandler() {
+
+		@Override
+		public IFluidTankProperties[] getTankProperties() {
+			IFluidTankProperties[] fluidHandlerProperties = new IFluidTankProperties[]{
+				new FluidTankProperties(tank.getFluid(), 10000, true, true)	
+			};
+			return fluidHandlerProperties;
+		}
+		
+		@Override
+		public int fill(FluidStack resource, boolean doFill) {
+			return tank.fill(resource, doFill);
+		}
+		
+		@Override
+		public FluidStack drain(int maxDrain, boolean doDrain) {
+			return tank.drain(maxDrain, doDrain);
+		}
+		
+		@Override
+		public FluidStack drain(FluidStack resource, boolean doDrain) {
+			return tank.drain(resource, doDrain);
+		}
+	};
     
     @Override
 	public boolean isLoaded() {
@@ -286,6 +320,9 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	        if (capability == CapabilityEnergy.ENERGY) {
 	        	return this.getMultiblock().canRecievePower(offset);
 	        }
+	        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+	        	return this.getMultiblock().canHandleFluids(offset);
+	        }
 		}
         return super.hasCapability(capability, facing);
     }
@@ -329,7 +366,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 						}
 	        		});
 	        	}
+	        	
 	        }
+	        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+	        		return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(this.fluid);
+		        }
 	        if (capability == CapabilityEnergy.ENERGY) {
 	        	if (this.getMultiblock().canRecievePower(offset)) {
 	        		return CapabilityEnergy.ENERGY.cast(this.energy);
@@ -338,4 +379,5 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		}
         return super.getCapability(capability, facing);
     }
+	
 }

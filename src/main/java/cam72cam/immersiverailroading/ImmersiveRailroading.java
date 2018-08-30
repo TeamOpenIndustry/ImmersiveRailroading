@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -35,6 +36,10 @@ public class ImmersiveRailroading
 	
 	private ChunkManager chunker;
 	
+	static {
+		FluidRegistry.enableUniversalBucket();
+    }
+
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) throws IOException {
         logger = event.getModLog();

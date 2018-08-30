@@ -119,7 +119,7 @@ public class LocomotiveSteam extends Locomotive {
 	public float getBoilerPressure() {
 		return this.dataManager.get(BOILER_PRESSURE);
 	}
-	private void setBoilerPressure(float temp) {
+	public void setBoilerPressure(float temp) {
 		this.dataManager.set(BOILER_PRESSURE, temp);
 	}
 	
@@ -664,8 +664,8 @@ public class LocomotiveSteam extends Locomotive {
 		} else {
 			if (boilerPressure > 0) {
 				// Reduce pressure by needed temperature
-				boilerPressure = Math.max(0, boilerPressure - (100 - boilerTemperature));
-				boilerTemperature = 100;
+				//boilerPressure = Math.max(0, boilerPressure - (100 - boilerTemperature));
+				//boilerTemperature = 100;
 			}
 
 			this.getDataManager().set(PRESSURE_VALVE, false);
