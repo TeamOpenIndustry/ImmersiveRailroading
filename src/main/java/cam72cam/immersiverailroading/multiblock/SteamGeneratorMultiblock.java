@@ -38,7 +38,33 @@ public class SteamGeneratorMultiblock extends Multiblock{
 		for(int h = 0; h < 3; h++)
 			for(int l = 0; l < 3; l++)
 				for(int w = 0; w < 3; w++)
-					structure[h][l][w] = L_ENG();
+					if(l==0) {
+						if((w==0 || w==2) && (h==0 || h==2)) {
+							structure[h][l][w] = L_ENG();
+						} else {
+							structure[h][l][w] = S_SCAF();
+						}
+						
+					}
+					else if(l==1) {
+						if((w==0 || w==2) && (h==0 || h==2)) {
+							structure[h][l][w] = L_ENG();
+						} else if(w==1 && (h==0 || h==2)) {
+							structure[h][l][w] = H_ENG();
+						} else {
+							structure[h][l][w] = S_SCAF();
+						}
+					}
+					else if(l==2) {
+						if((w==0 || w==2) && (h==0 || h==2)) {
+							structure[h][l][w] = L_ENG();
+						} else if(w==1 && (h==0 || h==2)) {
+							structure[h][l][w] = H_ENG();
+						} else {
+							structure[h][l][w] = S_SCAF();
+						}
+					}
+					
 	}
 	
 	public SteamGeneratorMultiblock() {
