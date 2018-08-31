@@ -104,7 +104,8 @@ public class Config {
 			Items.EMERALD.getRegistryName().toString()
 		};
 		
-		@Comment("Fuels for diesel Locomotives")
+		@Comment("Fuels for diesel Locomotives" + 
+				"\nNote: Naphtha of Thermal Foundation is internally registered as 'refined oil'.")
 		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();
 		static {
 			dieselFuels.clear();
@@ -123,6 +124,10 @@ public class Config {
 			dieselFuels.put("biofuel", 170);
 			dieselFuels.put("ethanol", 170);
 			dieselFuels.put("gasoline", 100);
+			//Thermal Foundation
+			
+			dieselFuels.put("refined_fuel", 150);
+			dieselFuels.put("refined_oil", 100);
 			
 			// Other
 			dieselFuels.put("olive_oil", 40);
