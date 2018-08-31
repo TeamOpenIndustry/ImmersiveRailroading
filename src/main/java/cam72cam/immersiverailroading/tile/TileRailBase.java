@@ -720,8 +720,31 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 						loco.setBoilerPressure(loco.getBoilerPressure() + 0.05f);
 					}
 				}
+				break;
+			case STEAM_UNLOADER:
+				if (this.augmentTank == null) {
+					this.createAugmentTank();
+				}
+			
 				
-				
+				stock = this.getStockNearBy(fluid_cap);
+				if(stock instanceof LocomotiveSteam) {
+					LocomotiveSteam loco = (LocomotiveSteam) this.getStockNearBy(fluid_cap);
+					
+					for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
+						//System.out.println(neighbor.fill(new FluidStack(IRFluids.FLUID_STEAM, 50), false));
+						if(neighbor.fill(new FluidStack(IRFluids.FLUID_STEAM, 50), false) >= 50) {
+							neighbor.fill(augmentTank.drain(50, true), true);
+						}
+					}
+					//System.out.println(augmentTank.getFluidAmount());
+					if(loco.getBoilerPressure() > 0 && augmentTank.getFluidAmount() < 900 ) {
+						
+						augmentTank.fill(new FluidStack(IRFluids.FLUID_STEAM, 100), true);
+						loco.setBoilerPressure(loco.getBoilerPressure() - 0.05f);
+					}
+				}
+				break;
 			case WATER_TROUGH:
 				if (this.augmentTank == null) {
 					this.createAugmentTank();
