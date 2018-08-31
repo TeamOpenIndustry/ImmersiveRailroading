@@ -28,6 +28,7 @@ public class SteamGeneratorMultiblock extends Multiblock{
 	private static final BlockPos power = new BlockPos(1,2,1);
 	//private static final BlockPos water = new BlockPos(-1, 0, 1);
 	private static final BlockPos watercap = new BlockPos(0, 0, 1);
+	private static final BlockPos watercap2 = new BlockPos(2, 0, 1);
 	private static final BlockPos steamcap = new BlockPos(1, 0, 0);
 	private static final BlockPos output = new BlockPos(1, 0, -1);
 	
@@ -90,16 +91,21 @@ public class SteamGeneratorMultiblock extends Multiblock{
 		
 		@Override
 		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
-			IFluidHandler water = getTile(watercap).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+			
+			//Only for debugging
+			/*IFluidHandler water = getTile(watercap).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+			IFluidHandler water2 = getTile(watercap2).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
 			IFluidHandler steam = getTile(steamcap).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
 			
 			player.sendMessage(new TextComponentString("Steam: " + String.valueOf(10000 - steam.fill(new FluidStack(IRFluids.FLUID_STEAM, 10000), false)) + " / 10000"));
 			player.sendMessage(new TextComponentString("Water: " + String.valueOf(10000 - water.fill(new FluidStack(FluidRegistry.WATER, 10000), false)) + " / 10000"));
+			player.sendMessage(new TextComponentString("Water2: " + String.valueOf(10000 - water2.fill(new FluidStack(FluidRegistry.WATER, 10000), false)) + " / 10000"));
 			//player.sendMessage(new TextComponentString("WaterHandler: " + " / " + waterHandler.toString()));
 			player.sendMessage(new TextComponentString("Origin: " + origin));
 			player.sendMessage(new TextComponentString("Water: " + getPos(watercap)));
+			player.sendMessage(new TextComponentString("Water2: " + getPos(watercap2)));
 			player.sendMessage(new TextComponentString("Steam: " + getPos(steamcap)));
-			player.sendMessage(new TextComponentString("Power: " + getPos(power)));
+			player.sendMessage(new TextComponentString("Power: " + getPos(power)));*/
 			return  true;
 		}
 
@@ -127,11 +133,19 @@ public class SteamGeneratorMultiblock extends Multiblock{
 			
 			try {
 				IFluidHandler water = getTile(watercap).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+				IFluidHandler water2 = getTile(watercap2).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
 				IFluidHandler steam = getTile(steamcap).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
 				
 				int waterFilled = 10000 - water.fill(new FluidStack(FluidRegistry.WATER, 10000), false);
+				int water2Filled = 10000 - water2.fill(new FluidStack(FluidRegistry.WATER, 10000), false);
 				int steamFilled = 10000 - steam.fill(new FluidStack(IRFluids.FLUID_STEAM, 10000), false);
 				
+				//Transfer Water from Water2 FluidHandler to Main Water FluidHandler
+				if(waterFilled < 10000 && water2Filled > 10) {
+					water.fill(water2.drain(10, true), true);
+				}
+				
+				//Convert Water to Steam
 				if(steamFilled < 10000 && waterFilled >= 10 && hasPower()) {
 					IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 					energy.extractEnergy(100, false);
@@ -140,51 +154,13 @@ public class SteamGeneratorMultiblock extends Multiblock{
 					steam.fill(new FluidStack(IRFluids.FLUID_STEAM, 10), true);
 				}
 				
+				//Output Steam
 				BlockPos outputPos = origin.add(output);
 				IFluidHandler output = FluidUtil.getFluidHandler(world, outputPos, EnumFacing.SOUTH);
-				if(output != null && steamFilled <= 10 && output.fill(new FluidStack(IRFluids.FLUID_STEAM, 10), false) >= 10) {
+				if(output != null && steamFilled >= 10 && output.fill(new FluidStack(IRFluids.FLUID_STEAM, 10), false) >= 10) {
 					output.fill(steam.drain(10, true), true);
 				}
 				
-				/*//Input Water
-				//BlockPos inputPos = origin.add(3, 0, 1);
-				
-				IFluidHandler input = FluidUtil.getFluidHandler(world, getPos(water), EnumFacing.SOUTH);
-				
-				final FluidStack inputLiquid = input.drain(1, false);
-				
-				int filled = input.fill(new FluidStack(FluidRegistry.WATER, 1), false);
-				
-				if(input != null && filled >= 1) {
-					System.out.println("drained" + filled);
-					input.drain(inputLiquid, true);
-					//tankWater.fillrc(new FluidStack(FluidRegistry.WATER, 20), true);
-					///waterHandler.fill(new FluidStack(FluidRegistry.WATER, 20), true);
-				}
-				
-				//Transform Water to Steam
-				if(tankWater.getFluidAmount() >= 10 && tankSteam.getFluidAmount() < 16000 && hasPower()) {
-					
-					IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-					energy.extractEnergy(100, false);
-					tankWater.drain(new FluidStack(FluidRegistry.WATER, 10), true);
-					tankSteam.fill(new FluidStack(IRFluids.FLUID_STEAM, 5), true);
-				}
-				
-				//Output Steam
-				//BlockPos outputPos = getPos(output);
-				IFluidHandler output = FluidUtil.getFluidHandler(world, getPos(steam), EnumFacing.SOUTH);
-			
-				if(output != null && tankSteam.canDrain()) {
-				
-					int accepted = output.fill(tankSteam.getFluid(), false);
-				
-					if(accepted > 0){
-						output.fill(new FluidStack(tankSteam.getFluid().getFluid(), 5), true);
-						tankSteam.drain(5, true);
-					}
-			
-				}*/
 			} catch (Exception e) {
 				
 			}
@@ -212,7 +188,7 @@ public class SteamGeneratorMultiblock extends Multiblock{
 		
 		@Override
 		public boolean canHandleFluids(BlockPos offset) {
-			return offset.equals(watercap) || offset.equals(steamcap);
+			return offset.equals(watercap) || offset.equals(steamcap) || offset.equals(watercap2);
 		}
 		
 		public boolean hasPower() {
