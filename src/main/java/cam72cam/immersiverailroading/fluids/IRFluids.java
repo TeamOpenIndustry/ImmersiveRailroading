@@ -1,8 +1,6 @@
 package cam72cam.immersiverailroading.fluids;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 
 public class IRFluids {

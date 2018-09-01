@@ -8,18 +8,14 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.CapabilityItemHandler;
 
 public class SteamGeneratorMultiblock extends Multiblock{
 
@@ -140,6 +136,7 @@ public class SteamGeneratorMultiblock extends Multiblock{
 				int water2Filled = 10000 - water2.fill(new FluidStack(FluidRegistry.WATER, 10000), false);
 				int steamFilled = 10000 - steam.fill(new FluidStack(IRFluids.FLUID_STEAM, 10000), false);
 				
+				
 				//Transfer Water from Water2 FluidHandler to Main Water FluidHandler
 				if(waterFilled < 10000 && water2Filled > 10) {
 					water.fill(water2.drain(10, true), true);
@@ -159,6 +156,7 @@ public class SteamGeneratorMultiblock extends Multiblock{
 				IFluidHandler output = FluidUtil.getFluidHandler(world, outputPos, EnumFacing.SOUTH);
 				if(output != null && steamFilled >= 10 && output.fill(new FluidStack(IRFluids.FLUID_STEAM, 10), false) >= 10) {
 					output.fill(steam.drain(10, true), true);
+					
 				}
 				
 			} catch (Exception e) {
