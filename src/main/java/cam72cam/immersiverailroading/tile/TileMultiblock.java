@@ -156,9 +156,8 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		
 		nbt.setInteger("energy", energy.getEnergyStored());
 		
-		if(tank.getFluid() != null) {
-			tank.getFluid().writeToNBT(nbt.getCompoundTag("fluid"));
-		}
+		NBTTagCompound tankTag = tank.writeToNBT(new NBTTagCompound());
+		nbt.setTag("tank", tankTag);
 		
 		return nbt;
 	}
@@ -185,9 +184,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		energy.extractEnergy(energy.getEnergyStored(), false);
 		energy.receiveEnergy(nbt.getInteger("energy"), false);
 		
-		if(nbt.getCompoundTag("fluid") != null) {
-			tank.readFromNBT(nbt.getCompoundTag("fluid"));
-		}
+		tank.readFromNBT(nbt.getCompoundTag("tank"));
 		
 	}
 	
