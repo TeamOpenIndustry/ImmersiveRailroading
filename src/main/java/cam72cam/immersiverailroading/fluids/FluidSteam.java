@@ -16,6 +16,7 @@ public class FluidSteam extends Fluid {
        setDensity(-1000);
        setViscosity(200);
        setTemperature(750);
+       
    }
 
 }

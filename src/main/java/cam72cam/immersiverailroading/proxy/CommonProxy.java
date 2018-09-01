@@ -67,6 +67,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -123,7 +124,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	OreHelper.IR_RAIL_BED.add(Blocks.NETHER_BRICK);
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
     	
-    	IRFluids.registerFluids();
+        IRFluids.registerFluids();
     }
     
     public void init(FMLInitializationEvent event) {
@@ -157,6 +158,11 @@ public abstract class CommonProxy implements IGuiHandler {
     
     public abstract World getWorld(int dimension);
     
+    @SubscribeEvent
+    public static void onRegisterTexture(TextureStitchEvent event) {
+    	event.getMap().registerSprite(new ResourceLocation("immersiverailroading:blocks/fluid/steam_still"));
+    	event.getMap().registerSprite(new ResourceLocation("immersiverailroading:blocks/fluid/steam_flow"));
+    }
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)

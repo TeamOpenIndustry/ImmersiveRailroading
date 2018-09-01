@@ -6,16 +6,12 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 
 public class IRFluids {
-	public static FluidSteam FLUID_STEAM = (FluidSteam) new FluidSteam(new ResourceLocation(ImmersiveRailroading.MODID + "steam_still"), new ResourceLocation(ImmersiveRailroading.MODID + "steam_flow"));
+	public static FluidSteam FLUID_STEAM = (FluidSteam) new FluidSteam(
+			new ResourceLocation("immersiverailroading:blocks/fluid/steam_still"), 
+			new ResourceLocation("immersiverailroading:blocks/fluid/steam_flow"));
 
 	public static void registerFluids() {
-		
-		Fluid fluid = FLUID_STEAM;
-		
-		FluidRegistry.registerFluid(fluid);
-        {
-            FluidRegistry.addBucketForFluid(fluid);
-        }
-
+		FluidRegistry.registerFluid(FLUID_STEAM);
+        FluidRegistry.addBucketForFluid(FLUID_STEAM);
 	}
 }
