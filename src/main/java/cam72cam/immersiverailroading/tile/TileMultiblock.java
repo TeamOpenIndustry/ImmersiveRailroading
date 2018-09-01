@@ -104,6 +104,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		
 		@Override
 		public int fill(FluidStack resource, boolean doFill) {
+			//tank.getFluid().writeToNBT(getTileData().getCompoundTag("fluid"));
 			return tank.fill(resource, doFill);
 		}
 		
@@ -155,6 +156,10 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		
 		nbt.setInteger("energy", energy.getEnergyStored());
 		
+		if(tank.getFluid() != null) {
+			tank.getFluid().writeToNBT(nbt.getCompoundTag("fluid"));
+		}
+		
 		return nbt;
 	}
 	
@@ -179,6 +184,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		// Empty and then refill energy storage
 		energy.extractEnergy(energy.getEnergyStored(), false);
 		energy.receiveEnergy(nbt.getInteger("energy"), false);
+		
+		if(nbt.getCompoundTag("fluid") != null) {
+			tank.readFromNBT(nbt.getCompoundTag("fluid"));
+		}
+		
 	}
 	
 	@Override

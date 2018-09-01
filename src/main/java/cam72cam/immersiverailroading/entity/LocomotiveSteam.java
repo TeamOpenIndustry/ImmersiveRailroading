@@ -664,8 +664,11 @@ public class LocomotiveSteam extends Locomotive {
 		} else {
 			if (boilerPressure > 0) {
 				// Reduce pressure by needed temperature
-				//boilerPressure = Math.max(0, boilerPressure - (100 - boilerTemperature));
-				//boilerTemperature = 100;
+				if(Math.max(0, boilerPressure - (100 - boilerTemperature)) > 0) {
+					boilerPressure = boilerPressure - (100 - boilerTemperature);
+					boilerTemperature = 100;
+				}
+				
 			}
 
 			this.getDataManager().set(PRESSURE_VALVE, false);
