@@ -179,9 +179,4 @@ public class ClientSound implements ISound {
 	public boolean isDisposable() {
 		return disposable;
 	}
-	
-	public ISound shouldScalePitch(boolean val) {
-		scalePitch = val;
-		return this;
-	}
 }
