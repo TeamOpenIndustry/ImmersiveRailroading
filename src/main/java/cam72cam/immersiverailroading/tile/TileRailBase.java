@@ -541,6 +541,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			};
 			break;
 		case STEAM_LOADER:
+			this.augmentTank = new FluidTank(1000);
 		case STEAM_UNLOADER:
 			this.augmentTank = new FluidTank(IRFluids.FLUID_STEAM, 0, 1000);
 		default:
@@ -715,7 +716,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				if(stock instanceof LocomotiveSteam) {
 					LocomotiveSteam loco = (LocomotiveSteam) this.getStockNearBy(fluid_cap);
 					
-					if(augmentTank.getFluidAmount() >= 100 && loco.getBoilerPressure() < loco.getDefinition().getMaxPSI(loco.gauge)) {
+					boolean isSteam = false;
+					if(augmentTank.getFluid() != null) {
+						isSteam = augmentTank.getFluid().getUnlocalizedName().contains("steam") || augmentTank.getFluid().getLocalizedName().contains("steam");
+					}
+					if(augmentTank.getFluidAmount() >= 100 && loco.getBoilerPressure() < loco.getDefinition().getMaxPSI(loco.gauge) && isSteam) {
 						augmentTank.drain(100, true);
 						loco.setBoilerPressure(loco.getBoilerPressure() + 0.05f);
 					}
