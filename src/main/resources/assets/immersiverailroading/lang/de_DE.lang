@@ -7,6 +7,8 @@ item.immersiverailroading:item_augment.ITEM_LOADER.name=Gegenstands belader
 item.immersiverailroading:item_augment.ITEM_UNLOADER.name=Gegenstandsentlader
 item.immersiverailroading:item_augment.FLUID_LOADER.name=Flüssigkeits belader
 item.immersiverailroading:item_augment.FLUID_UNLOADER.name=Flüssigkeits entlader
+item.immersiverailroading:item_augment.STEAM_LOADER.name=Dampf belader
+item.immersiverailroading:item_augment.STEAM_UNLOADER.name=Dampf entlader
 item.immersiverailroading:item_augment.DETECTOR.name=Sensor
 item.immersiverailroading:item_augment.COUPLER.name=Koppler
 item.immersiverailroading:item_rail_part.name=Schienensegment
@@ -192,3 +194,5 @@ ir_keys.decrease_brake=Bremse reduzieren
 ir_keys.horn=Signalhorn
 ir_keys.dead_mans_switch=Totmannknopf
 ir_keys.start_stop_engine=Motor an-/ausschalten
+
+fluid.immersiverailroading:steam=Dampf
