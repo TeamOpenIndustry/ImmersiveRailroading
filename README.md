@@ -26,11 +26,12 @@
 
 <p align="center">
   <a href="#installation">Installation</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#download">Download</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#related">Related</a> •
-  <a href="#license">License</a>
+  <a href="#dependencies">Dependencies</a> •
+  <a href="#rolling-stock">Rolling stock</a> •
+  <a href="#bugs-and-suggestions">Bugs and Suggestions</a> •
+  <a href="#help">Help</a> •
+  <a href="#license">License</a> •
+  <a href="#links">Links</a>
 </p>
 
 ## Installation
