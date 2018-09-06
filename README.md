@@ -34,6 +34,8 @@
   <a href="#links">Links</a>
 </p>
 
+![screenshot](https://i.imgur.com/1gnRu0K.png)
+
 ## Installation
 You can download the latest version of Immersive Railroading on [Curseforge](https://minecraft.curseforge.com/projects/immersive-railroading/files).
 ### Dependencies
