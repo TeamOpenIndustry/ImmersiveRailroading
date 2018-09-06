@@ -307,13 +307,14 @@ public class StockModel extends OBJRender {
 		case SHAY:
 			break;
 			case THREE_BODY_WALSCHAERTS:
+
             {
                 GL11.glPushMatrix();
 
-                RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE, stock.gauge);
-                Vec3d frontVec = frontLocomotive.center();
-                PosRot frontPos = stock.predictRearBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
-                Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
+				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE, stock.gauge);
+				Vec3d frontVec = frontLocomotive.center();
+				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
+				Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
 
                 GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
                 GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()) + 180, 0, 1, 0);
@@ -342,12 +343,13 @@ public class StockModel extends OBJRender {
                 drawWalschaerts(stock, "RIGHT_MIDDLE", -45 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(),def.getMiddleDriverReversed());
 
             }
-
             {
-                RenderComponent rearLocomotive = def.getComponent(RenderComponentType.REAR_LOCOMOTIVE, stock.gauge);
-                Vec3d rearVec = rearLocomotive.center();
-                PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear(stock.gauge)));
-                Vec3d rearPosActual = VecUtil.rotateYaw(rearPos, 180 - stock.rotationYaw);
+				GL11.glPopMatrix();
+
+				RenderComponent rearLocomotive = def.getComponent(RenderComponentType.REAR_LOCOMOTIVE, stock.gauge);
+				Vec3d rearVec = rearLocomotive.center();
+				PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear(stock.gauge)));
+				Vec3d rearPosActual = VecUtil.rotateYaw(rearPos, 180 - stock.rotationYaw);
 
                 GlStateManager.translate(rearPosActual.x, rearPosActual.y, rearPosActual.z);
                 GlStateManager.rotate(-(180 - stock.rotationYaw + rearPos.getRotation()) + 180, 0, 1, 0);
@@ -359,10 +361,22 @@ public class StockModel extends OBJRender {
                 drawDrivingWheels(stock, wheels);
                 RenderComponent wheel = wheels.get(wheels.size() / 2);
 
-                drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(), def.getRearDriverReversed());
-                drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(), def.getRearDriverReversed());
+                drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, wheel.height()/*center.height()*/, center.center(), wheel.center(), def.getRearDriverReversed());
+                drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR, wheel.height()/*center.height()*/, center.center(), wheel.center(), def.getRearDriverReversed());
 
+				GL11.glPopMatrix();
             }
+
+			/*{
+				RenderComponent middleLocomotive = def.getComponent(RenderComponentType.MIDDLE_LOCOMOTIVE, stock.gauge);
+				Vec3d middleVec = middleLocomotive.center();
+				PosRot middlePos = stock.predictRearBogeyPosition((float)(middleVec.x));
+				Vec3d middlePosActual = VecUtil.rotateYaw(middlePos, 180 - stock.rotationYaw);
+
+				GlStateManager.translate(middlePosActual.x, middlePosActual.y, middlePosActual.z);
+				GlStateManager.rotate(-(180 - stock.rotationYaw + middlePos.getRotation()) + 180, 0, 1, 0);
+				GlStateManager.translate(-middleVec.x, 0, 0);
+			}*/
             break;
 		case HIDDEN:
 			{
@@ -513,7 +527,7 @@ public class StockModel extends OBJRender {
 	}
 	
 	// PISTON/MAIN/SIDE
-	private void drawStephenson(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
+	private void drawStephenson(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos, boolean reversedDrivers) {
 		LocomotiveSteamDefinition def = stock.getDefinition();
 		
 		double circumference = diameter * (float) Math.PI;
@@ -695,8 +709,8 @@ public class StockModel extends OBJRender {
 		{
 			// Move to origin
 			GL11.glTranslated(connRodRadius, 0, 0);
-			// Apply connection rod movement
-			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+			// Apply connection rod movement (added neg's to both)
+			GL11.glTranslated(-connRodMovment.x, -connRodMovment.z, 0);
 
 			drawComponent(connectingRod);
 		}
@@ -712,6 +726,20 @@ public class StockModel extends OBJRender {
 		// Draw driving rod
 		GL11.glPushMatrix();
 		{
+			GL11.glTranslated(-connRodRadius, 0, 0);
+			// Apply conn rod movement
+			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+
+			// Move to rot point center
+			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+			// Rotate rod angle
+			GL11.glRotated(drivingRodAngle, 0, 0, 1);
+			// Move back from rot point center
+			GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+
+			drawComponent(drivingRod);/*
+
+			test code, possible depication
 			// Move to conn rod center
 			GL11.glTranslated(-connRodRadius, 0, 0);
 			// Apply conn rod movement
@@ -724,7 +752,7 @@ public class StockModel extends OBJRender {
 			// Move back from rot point center
 			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
 
-			drawComponent(drivingRod);
+			drawComponent(drivingRod);*/
 		}
 		GL11.glPopMatrix();
 
