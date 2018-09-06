@@ -54,6 +54,8 @@ public abstract class EntityRollingStockDefinition {
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
 	private float bogeyRear;
+	private float middleSegFront;
+	private float middleSegRear;
 	private float couplerOffsetFront;
 	private float couplerOffsetRear;
 	
@@ -129,6 +131,11 @@ public abstract class EntityRollingStockDefinition {
 
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_model_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_model_scale);
+
+		if(data.has("segments")) {
+			middleSegFront = (float) (data.get("segments").getAsJsonObject().get("front").getAsFloat() * internal_model_scale);
+			middleSegRear = (float) (data.get("segments").getAsJsonObject().get("rear").getAsFloat() * internal_model_scale);
+		}
 		
 		dampeningAmount = 0.75f;
 		if (data.has("sound_dampening_percentage")) {
