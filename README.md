@@ -1,7 +1,6 @@
-# Immersive Railroading
 <h1 align="center">
     <br>
-        <a href=""><img src="https://media.forgecdn.net/avatars/120/268/636406655841781764.png" alt="Immersive Railroading" width="200"></a>
+        <a href=""><img src="https://media.forgecdn.net/avatars/120/268/636406655841781764.png" alt="Immersive Railroading" width="250"></a>
     <br>
     Immersive Railroading
     <br>
@@ -9,6 +8,30 @@
 <h4 align="center">
     Immersive Railroading is a Minecraft mod for 1.12.  It adds a new transport system (item and players) to the game.  It is based in real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
 </h4>
+
+<p align="center">
+  <a href="http://174.138.127.16/job/Immersive%20Railroading/">
+    <img src="https://img.shields.io/travis/com/ivandelabeldad/rackian-gateway.svg">
+  </a>
+  <a href="https://minecraft.net/en-us/">
+     <img src="https://img.shields.io/badge/minecraft-1.12.2-blue.svg">
+  </a>
+  <a href="https://files.minecraftforge.net/">
+     <img src="https://img.shields.io/badge/forge-14.23.1.2555-orange.svg">
+  </a>
+  <a href="https://discordapp.com/invite/CS2RTGq">
+    <img src="https://img.shields.io/discord/355731184157720578.svg">
+  </a>
+</p>
+
+<p align="center">
+  <a href="#installation">Installation</a> •
+  <a href="#how-to-use">How To Use</a> •
+  <a href="#download">Download</a> •
+  <a href="#credits">Credits</a> •
+  <a href="#related">Related</a> •
+  <a href="#license">License</a>
+</p>
 
 ## Installation
 You can download the latest version of Immersive Railroading on [Curseforge](https://minecraft.curseforge.com/projects/immersive-railroading/files).
