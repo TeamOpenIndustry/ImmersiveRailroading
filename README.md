@@ -2,21 +2,38 @@
 
 Immersive Railroading is a Minecraft mod for 1.12.  It adds a new transport system (item and players) to the game.  It is based in real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
 
-![demo gif](https://thumbs.gfycat.com/RepulsiveUnlawfulBluebottle-size_restricted.gif)
+## Installation
+You can download the latest version of Immersive Railroading on [Curseforge](https://minecraft.curseforge.com/projects/immersive-railroading/files).
+### Dependencies
+To get the mod to work you need to add the dependencies to your Mod Folder:
+ - [Track API](https://minecraft.curseforge.com/projects/track-api)
+ 
+We also recommend to add these mods for full functionality of Immersive Railroading:
+ - [Immersive Engineering](https://minecraft.curseforge.com/projects/immersive-engineering)
+ - [Open Computers](https://minecraft.curseforge.com/projects/opencomputers)
+ - [In-Game-Wiki Mod](https://minecraft.curseforge.com/projects/in-game-wiki-mod)
+  
+## Rolling stock
+The main mod contains only a few trains. If you want to add more trains to your game, you can do that with [Resource Packs](https://github.com/cam72cam/ImmersiveRailroading/wiki/Resource-packs-(outside-sources)) from our Modelers and Community.
+If you want to add your own train models as resource pack to the game, please make sure to check out the *#modeling* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq) and the pinned Messages in that Channel.
 
-## Alpha:
+## Bugs and Suggestions
+If you found a bug please open an Issue here on Github or report it in the *#bug-reports* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq).
+Please make sure to explain the bug as exactly as possible (and add screenshots if possible).
 
-I will be opening up a public (may become whitelisted) server on Sunday the 10th of September with Immersive Railroading and Immersive Engineering installed.  The default gamemode will be creative as the crafting system is still in the works.
+If you want to suggest a feature for the mod, you can do that with opening an Issue.
+If you want to suggest rolling stock, please do that in the *#suggestions* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq), not here on Github!
 
-Goals:
-* Feedback on implemented features
-* Bugtesting
-* Multiplayer interaction testing
-* Performance testing
+## Help
+If you need support you can ask in the *#help* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq). 
+Make sure to read *#faq* before asking your question.
 
-## Beta:
+## License
+Immersive Railroading is licensed under the *GNU LESSER GENERAL PUBLIC LICENSE*. See [LICENSE](https://github.com/cam72cam/ImmersiveRailroading/blob/master/LICENSE).
+The Models are licensed under the [MODEL_LICENSE](https://github.com/cam72cam/ImmersiveRailroading/blob/master/MODEL_LICENSE).
 
-Shooting for Saturday the 24th of September
-
-## Discord:
-https://discord.gg/CS2RTGq
+## Links
+ - Curseforge: https://minecraft.curseforge.com/projects/immersive-railroading
+ - Wiki: https://github.com/cam72cam/ImmersiveRailroading/wiki
+ - Discord: https://discord.gg/CS2RTGq
+ - Subreddit: https://www.reddit.com/r/ImmersiveRailroading
