@@ -14,7 +14,7 @@ public class SteamGeneratorRender implements IMultiblockRender{
 	
 	public SteamGeneratorRender() {
 		try {
-			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/steam_genertaor.obj"), 0.1f));
+			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/steam_generator.obj"), 0.1f));
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

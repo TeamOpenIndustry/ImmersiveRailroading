@@ -166,7 +166,7 @@ public class SteamGeneratorMultiblock extends Multiblock{
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return true;
+			return false;
 		}
 
 		@Override
