@@ -1,6 +1,6 @@
 <h1 align="center">
     <br>
-        <a href=""><img src="https://media.forgecdn.net/avatars/120/268/636406655841781764.png" alt="Immersive Railroading" width="250"></a>
+        <a href=""><img src="https://i.imgur.com/GibETo1.png" alt="Immersive Railroading" width="250"></a>
     <br>
     Immersive Railroading
     <br>
