@@ -460,7 +460,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		for (T stock : stocks) {
 			if (capability == null || stock.hasCapability(capability, null)) {
 				if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
-					return (T) world.getEntityByID(stock.getEntityId());
+					return stock;
 				}
 			}
 		}
@@ -554,7 +554,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				continue;
 			}
 			int orig_count = stack.getCount();
-			stack = ItemHandlerHelper.insertItem(dest, stack.copy(), false);
+			stack = ItemHandlerHelper.insertItem(dest, stack, false);
 			if (stack.getCount() != orig_count) {
 				source.extractItem(slot, orig_count - stack.getCount(), false);
 				numstacks --;
