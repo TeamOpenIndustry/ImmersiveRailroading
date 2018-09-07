@@ -28,12 +28,12 @@ public class FilteredStackHandler extends ItemStackHandler {
 	@Override
     public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
     	if (checkSlot(slot, stack)) {
-    		super.setStackInSlot(slot, stack);
+    		super.setStackInSlot(slot, stack.copy());
     	}
     }
     
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-    	return checkSlot(slot, stack) ? super.insertItem(slot, stack, simulate) : stack;
+    	return checkSlot(slot, stack) ? super.insertItem(slot, stack.copy(), simulate) : stack;
     }
 }
