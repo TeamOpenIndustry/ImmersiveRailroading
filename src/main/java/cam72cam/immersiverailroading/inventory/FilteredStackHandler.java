@@ -17,6 +17,9 @@ public class FilteredStackHandler extends ItemStackHandler {
 	}
     
     public boolean checkSlot(int slot, @Nonnull ItemStack stack) {
+    	if (stack.isEmpty()) {
+    		return true;
+    	}
     	SlotFilter chosen = defaultFilter;
     	if (filter.containsKey(slot)) {
     		chosen = filter.get(slot);
