@@ -231,4 +231,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 
 	public void renderTick(float partialTicks) {
 	}
+	
+	public Gauge soundGauge() {
+		return this.getDefinition().shouldScalePitch() ? gauge : Gauge.from(Gauge.STANDARD);
+	}
 }
