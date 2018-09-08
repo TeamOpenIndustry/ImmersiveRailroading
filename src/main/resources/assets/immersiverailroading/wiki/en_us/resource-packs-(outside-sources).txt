@@ -1,0 +1,72 @@
+Many users have made resource packs of rolling stock and engines. This list is (unfortuantly) incomplete, and comprised of those listed in the Discord "Resouce-Packs" channel. 
+
+[link{https://cdn.discordapp.com/attachments/416318597875367956/468970499763077146/American_Caboose_Pack_v1.0.zip#www}]America Cabooses - zip file[link{}]
+* Author: (Discord) TheGibster#7581
+* Warning: from Discord, so URL may not work
+* Contains: American cabooses
+
+[link{https://minecraft.curseforge.com/projects/american-passenger-pack-ir#www}]American Passenger Pack - IR[link{}]
+* Author: (Discord) Lachie1770#7396 [link{https://minecraft.curseforge.com/members/Lachie1770#www}]Lachie1770[link{}]
+* Contains: ATSF and Amtrack passenger and baggage cars
+
+[link{https://minecraft.curseforge.com/projects/amtrak-plus#www}]Amtrak+[link{}]
+* Description: "At last, modern North American passenger stock is realized in Minecraft. This pack aims to add modern standard-gauge stock"
+* Author: (Discord) DarkRaider#4347 [link{https://minecraft.curseforge.com/members/DarkRaider_km00700#www}]DarkRaider_km00700[link{}]
+* Containes: hi-rail truck 'locomotive', F59PHI (3 liveries), Superliner Passenger cars (multiple liveries)
+* Old name: Superliners + More
+
+
+[link{https://minecraft.curseforge.com/projects/cd-pack-for-ir#www}]CD Pack for IR[link{}]
+* Description:"This little resourcepack adds a variety of Czech passenger cars and locomotives"
+* Author: (Discord) Jake Steampson (Conductor)#7179 [SteampsonJake]https://minecraft.curseforge.com/members/SteampsonJake
+* Contains: (Diesel?) locomotives, Passenger cars
+
+[link{https://drive.google.com/drive/folders/12bt6lddLJ4ym64dxI-nGlYVR5NQ8Rj7x#www}]CL08 Resource Pack[link{}]
+* Contains: CL08 Diesel locomotive
+
+[link{https://minecraft.curseforge.com/projects/d-rgw-narrow-gauge-pack-ir#www}]D&RGW Narrow Gauge Pack - IR[link{}]
+* Author: (Discord) Thomas4peyton#0225 [link{https://minecraft.curseforge.com/members/Thomas4peyton#www}]Thomas4peyton[link{}]
+* Gauge: Narrow
+* Contains:  Steam locomotives, cars, and MOW equipment for the D&RGW. Aprox 1901-1951
+
+[link{https://drive.google.com/drive/folders/19S8vmwAk2lw7YPrAnuGkRZqFvV0QqeR2#www}]GWR Addon[link{}]
+* Author: (Discord) FriedrichLP#2220
+* Contains Passenger and Freight cars
+
+[link{https://minecraft.curseforge.com/projects/immersive-railroading-legacy#www}]Immersive Railroading Legacy[link{}]
+* Description: "With the advent of Immersive Railroading 1.0, a few of the older style models have been retired.  If you still wish to use them, I have uploaded this resource pack."
+* Author: (Discord) cam72cam#0558 [link{https://minecraft.curseforge.com/members/cam72cam#www}]cam72cam[link{}]
+* Guage: Standard
+* Contains: Diesel locomotive, Freight cars
+
+[link{https://minecraft.curseforge.com/projects/ir-heavy-industrial-resourcepack#www}]ir-heavy-industrial-resourcepack[link{}]
+* Description:Heavy freight engines and cars, misc other cars
+* author: (Discord) Hanidel#3822 [link{https://minecraft.curseforge.com/members/Angelimar#www}]Angelimar[link{}]
+* Gauge: standard, and Narrow
+* Contains: Steam and Diesel locomotive, Freight cars, minecart
+
+[link{https://minecraft.curseforge.com/projects/ir-live-steam-pack#www}]IR Live Steam Pack[link{}]
+* Description: Live steam "ridable" gauges
+* Author: (Discord) Digital Magic#2935  [link{https://minecraft.curseforge.com/members/DJZelex#www}]DJZelex[link{}]
+* Gauge: added by pack: 15 inch, 7.5 inch, and 3.5 inch
+* Containes: Steam locos and passenger cars
+
+[link{https://minecraft.curseforge.com/projects/ir-theme-park-pack#www}]IR Theme Park Pack [link{}]
+* Description: This resource pack aims to bring something a bit different to IR, trains that are intended for Theme Parks!
+* Author: (Discord) Digital Magic#2935  [link{https://minecraft.curseforge.com/members/DJZelex#www}]DJZelex[link{}]
+* Gauge: Minecraft
+* Contain: Chance Rides C.P. Huntington, C.P. Huntington riding cars
+
+[link{ https://minecraft.curseforge.com/projects/narrow-industrial-for-immersive-railroading#www}]Narrow Industrial[link{}]
+* Description: "Minecraft Gauge industrial trains for Immersive Railroading."
+* Author: (Discord) Dank_London#7770 [link{https://minecraft.curseforge.com/members/Dank_London#www}]Dank_London[link{}]
+* Gauge: Minecraft
+* Contains: British Steam Kerr Stuart Skylark and Wren, a flatcar with & w/o crates, a 4 plank wagon, and a brake van
+
+
+[link{https://minecraft.curseforge.com/projects/small-gauge-goodies-for-immersive-railroading#www}]Small Gauge Goodies for Immersive Railroading[link{}]
+* Author: (Discord) Rhea#4858 [link{https://minecraft.curseforge.com/members/Elretha#www}]Elretha[link{}]
+* Gauge:Minecraft
+* Contains Steam locomotive, Freight cars
+
+
