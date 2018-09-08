@@ -42,10 +42,6 @@ public class ClientSound implements ISound {
 		this.gauge = gauge;
 	}
 	
-	public ClientSound(Supplier<SoundSystem> soundSystem, ResourceLocation oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance, Gauge gauge, boolean scalePitch) {
-		this(soundSystem, oggLocation, resource, baseSoundMultiplier, repeats, attenuationDistance, gauge);
-	}
-	
 	public void init() {
         id = MathHelper.getRandomUUID(ThreadLocalRandom.current()).toString();
 		sndSystem.get().newSource(false, id, resource, oggLocation.toString(), repeats, 0f, 0f, 0f, AttenuationType.LINEAR.getTypeInt(), attenuationDistance);
