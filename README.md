@@ -10,18 +10,18 @@
 </h4>
 
 <p align="center">
-  <a href="http://174.138.127.16/job/Immersive%20Railroading/">
-    <img src="https://img.shields.io/travis/com/ivandelabeldad/rackian-gateway.svg">
+  <a href="https://minecraft.curseforge.com/projects/immersive-railroading">
+    <img src="http://cf.way2muchnoise.eu/full_immersive-railroading_downloads.svg">
   </a>
-  <a href="https://minecraft.net/en-us/">
-     <img src="https://img.shields.io/badge/minecraft-1.12.2-blue.svg">
+  <a href="">
+     <img src="http://cf.way2muchnoise.eu/versions/For%20MC_immersive-railroading_all.svg">
   </a>
-  <a href="https://files.minecraftforge.net/">
+  <!--<a href="https://files.minecraftforge.net/">
      <img src="https://img.shields.io/badge/forge-14.23.1.2555-orange.svg">
-  </a>
-  <a href="https://discordapp.com/invite/CS2RTGq">
+  </a>-->
+  <!--<a href="https://discordapp.com/invite/CS2RTGq">
     <img src="https://img.shields.io/discord/355731184157720578.svg">
-  </a>
+  </a>-->
 </p>
 
 <p align="center">
