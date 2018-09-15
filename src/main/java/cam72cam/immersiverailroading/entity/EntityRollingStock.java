@@ -19,6 +19,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemLockKey;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.LockType;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -42,7 +43,7 @@ import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
-	private static DataParameter<Integer> LOCK_TYPE = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.VARINT);	//0=everyone can enter/break, 1=everyone can enter, 2=no one can enter/break
+	private static DataParameter<String> LOCK_TYPE = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.STRING);	//0=everyone can enter/break, 1=everyone can enter, 2=no one can enter/break
 	private static DataParameter<String> LOCK_OWNER = EntityDataManager.createKey(EntityRollingStock.class, DataSerializers.STRING);
 	
 	protected String defID;
@@ -59,7 +60,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		super.entityCollisionReduction = 1F;
 		super.ignoreFrustumCheck = true;
 		
-		this.getDataManager().register(LOCK_TYPE, 0);
+		this.getDataManager().register(LOCK_TYPE, "UNLOCKED");
 		this.getDataManager().register(LOCK_OWNER, "");
 	}
 	
@@ -89,24 +90,12 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		return this.defID;
 	}
 	
-	public int getLockType () {
-		return this.getDataManager().get(LOCK_TYPE);
+	public LockType getLockType () {
+		return LockType.valueOf(this.getDataManager().get(LOCK_TYPE));
 	}
 	
-	public void setLockType (int value) {
-		this.getDataManager().set(LOCK_TYPE, value);
-	}
-	
-	public void switchLockType (EntityPlayer player) {
-		int lockType = getLockType();
-		lockType++;
-		if (lockType == 3) {
-			lockType = 0;
-			setLockOwner("");
-		} else {
-			setLockOwner(player.getUniqueID().toString());
-		}
-		setLockType(lockType);
+	public void setLockType (LockType type) {
+		this.getDataManager().set(LOCK_TYPE, type.toString());
 	}
 	
 	public UUID getLockOwner() {
@@ -133,6 +122,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	public boolean playerHasOp (EntityPlayer player) {
 		return  FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayers().getEntry(player.getGameProfile()) != null;
 	}
+	
+	public boolean hasPermission (EntityPlayer player) {
+		return getLockType() == LockType.UNLOCKED || getLockOwner().equals(player.getUniqueID()) || playerHasOp(player);
+	}
 
 	/*
 	 * 
@@ -154,24 +147,24 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		nbttagcompound.setString("defID", defID);
-		nbttagcompound.setDouble("gauge", gauge.value());
-		nbttagcompound.setString("tag", tag);
-		nbttagcompound.setInteger("lock_type", getLockType());
+	protected void writeEntityToNBT(NBTTagCompound nbt) {
+		nbt.setString("defID", defID);
+		nbt.setDouble("gauge", gauge.value());
+		nbt.setString("tag", tag);
+		nbt.setString("lock_type", getLockType().toString());
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		defID = nbttagcompound.getString("defID");
-		if (nbttagcompound.hasKey("gauge")) {
-			gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
+	protected void readEntityFromNBT(NBTTagCompound nbt) {
+		defID = nbt.getString("defID");
+		if (nbt.hasKey("gauge")) {
+			gauge = Gauge.from(nbt.getDouble("gauge"));
 		} else {
 			gauge = Gauge.from(Gauge.STANDARD);
 		}
 		
-		tag = nbttagcompound.getString("tag");
-		setLockType(nbttagcompound.getInteger("lock_type"));
+		tag = nbt.getString("tag");
+		setLockType(LockType.valueOf(nbt.getString("lock_type")));
 	}
 
 	@Override
@@ -184,10 +177,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_LOCK_KEY && (getLockType() == 0 || getLockOwner().equals(player.getUniqueID())) || playerHasOp(player)) {
-			System.out.println(getLockType());
-			switchLockType(player);
-			System.out.println(getLockType());
+		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_LOCK_KEY && hasPermission(player)) {
+			if (player.isSneaking()) {
+				
+			}
 			return true;
 		} else {
 			return false;
@@ -222,7 +215,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		
 		if (damagesource.getTrueSource() instanceof EntityPlayer && !damagesource.isProjectile()) {
 			EntityPlayer player = (EntityPlayer) damagesource.getTrueSource();
-			if (player.isSneaking() && (getLockType() == 0 || getLockOwner().equals(player.getUniqueID())) || playerHasOp(player)) {
+			if (player.isSneaking() && hasPermission(player)) {
 				if (!this.isDead) {
 					this.onDeath(StockDeathType.PLAYER);
 				}

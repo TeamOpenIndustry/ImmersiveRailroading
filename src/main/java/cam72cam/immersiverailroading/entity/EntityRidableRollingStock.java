@@ -9,6 +9,7 @@ import java.util.UUID;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.LockType;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -110,13 +111,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		} else if (player.isRiding() && player.getRidingEntity().getPersistentID() == this.getPersistentID()) {
 			return false;
 		} else {
-			if (!this.world.isRemote && (getLockType() != 2 || getLockOwner().equals(player.getUniqueID())) || playerHasOp(player)) {
+			if (!this.world.isRemote && (getLockType() != LockType.LOCKED || getLockOwner().equals(player.getUniqueID())) || playerHasOp(player)) {
 				passengerPositions.put(player.getPersistentID(), new Vec3d(0, 0, 0));
 				player.startRiding(this);
-				return true;
-			} else {
-				return false;
 			}
+			return true;
 		}
 	}
 	
