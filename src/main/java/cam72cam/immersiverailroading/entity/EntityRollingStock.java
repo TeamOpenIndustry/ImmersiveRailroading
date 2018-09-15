@@ -6,6 +6,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.server.FMLServerHandler;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -25,6 +26,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -109,6 +111,11 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		this.getDataManager().set(LOCK_OWNER, playerId);
 	}
 	
+	public void switchLockType (EntityPlayer player) {
+		setLockType(getLockType().next());
+		setLockOwner(EntityPlayer.getUUID(player.getGameProfile()).toString());
+	}
+	
 	@Override
 	public void onUpdate() {
 		if (!world.isRemote && this.ticksExisted % 5 == 0) {
@@ -124,7 +131,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	}
 	
 	public boolean hasPermission (EntityPlayer player) {
-		return getLockType() == LockType.UNLOCKED || getLockOwner().equals(player.getUniqueID()) || playerHasOp(player);
+		return getLockType() == LockType.UNLOCKED || (getLockOwner().equals(player.getUniqueID()) || getLockOwner() == null) || playerHasOp(player);
 	}
 
 	/*
@@ -152,6 +159,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		nbt.setDouble("gauge", gauge.value());
 		nbt.setString("tag", tag);
 		nbt.setString("lock_type", getLockType().toString());
+		nbt.setString("lock_owner", getLockOwner() != null ? getLockOwner().toString() : "");
 	}
 
 	@Override
@@ -165,6 +173,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		
 		tag = nbt.getString("tag");
 		setLockType(LockType.valueOf(nbt.getString("lock_type")));
+		setLockOwner(nbt.getString("lock_owner"));
 	}
 
 	@Override
@@ -178,13 +187,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_LOCK_KEY && hasPermission(player)) {
-			if (player.isSneaking()) {
-				
-			}
+			switchLockType(player);
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	@Override
