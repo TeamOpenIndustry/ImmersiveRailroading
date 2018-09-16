@@ -207,6 +207,10 @@ public class OBJTextureSheet {
 	}
 	
 	public OBJTextureSheet(OBJModel model) {
+		this(model, null);
+	}
+	
+	public OBJTextureSheet(OBJModel model, String texPrefix) {
 		this.model = model;
 		
 		mappings = new HashMap<String, SubTexture>();
@@ -223,7 +227,13 @@ public class OBJTextureSheet {
 					String key = model.materials.get(mtlName).texKd.toString();
 					if (!mappings.containsKey(key)) {
 						try {
-							mappings.put(key, new SubTexture(model.materials.get(mtlName).texKd));
+							ResourceLocation kd = model.materials.get(mtlName).texKd;
+							if (texPrefix != null) {
+								String[] sp = kd.toString().split("/");
+								String fname = sp[sp.length-1];
+								kd = new ResourceLocation(kd.toString().replaceAll(fname, texPrefix + "/" + fname));
+							}
+							mappings.put(key, new SubTexture(kd));
 						} catch (IOException e) {
 							e.printStackTrace();
 							continue;
@@ -246,10 +256,6 @@ public class OBJTextureSheet {
 						int g = (int) (Math.max(0, currentMTL.Kd.get(1) - model.darken) * 255);
 						int b = (int) (Math.max(0, currentMTL.Kd.get(2) - model.darken) * 255);
 						int a = (int) (currentMTL.Kd.get(3) * 255);
-						currentMTL.Kd.put(0, 1);
-						currentMTL.Kd.put(1, 1);
-						currentMTL.Kd.put(2, 1);
-						currentMTL.Kd.put(3, 1);
 						mappings.put(mtlName, new SubTexture(mtlName, r,g,b,a));
 					}
 				}

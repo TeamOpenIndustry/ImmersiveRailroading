@@ -19,7 +19,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
-	public List<String> materialPaths = new ArrayList<String>();
 	// LinkedHashMap is ordered
 	public Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
 	public double[] vertices;
