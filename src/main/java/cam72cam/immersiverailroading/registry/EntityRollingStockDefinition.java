@@ -37,12 +37,13 @@ public abstract class EntityRollingStockDefinition {
 	
 	public abstract EntityRollingStock instance(World world);
 	
-	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge) {
+	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge, String texture) {
 		EntityRollingStock stock = instance(world);
 		stock.setPosition(pos.x, pos.y, pos.z);
 		stock.prevRotationYaw = facing.getHorizontalAngle();
 		stock.rotationYaw = facing.getHorizontalAngle();
 		stock.gauge = gauge;
+		stock.texture = texture;
 		world.spawnEntity(stock);
 
 		return stock;
