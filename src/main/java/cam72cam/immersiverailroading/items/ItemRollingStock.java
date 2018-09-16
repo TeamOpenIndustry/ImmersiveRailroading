@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -67,7 +68,15 @@ public class ItemRollingStock extends BaseItemRollingStock {
     		ItemStack stack = new ItemStack(this);
     		ItemDefinition.setID(stack, defID);
 			overrideStackDisplayName(stack);
-            items.add(stack);
+            if (def.textureNames != null && def.textureNames.size() != 0) {
+            	for (String texture : def.textureNames) {
+	            	ItemStack textured = stack.copy();
+	            	ItemTextureVariant.set(textured, texture);
+	            	items.add(textured);
+            	}
+            } else {
+                items.add(stack);
+            }
     	}
     }
 	
@@ -91,6 +100,10 @@ public class ItemRollingStock extends BaseItemRollingStock {
         	tooltip.addAll(def.getTooltip(gauge));
         }
         tooltip.add(GuiText.GAUGE_TOOLTIP.toString(gauge));
+        String texture = ItemTextureVariant.get(stack);
+        if (def.textureNames != null && def.textureNames.size() != 0 && texture != null) {
+	        tooltip.add(GuiText.TEXTURE_TOOLTIP.toString(texture));
+        }
     }
 	
 	@Override
