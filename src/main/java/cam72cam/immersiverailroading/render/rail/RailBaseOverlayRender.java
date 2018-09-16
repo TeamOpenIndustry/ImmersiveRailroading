@@ -2,23 +2,22 @@ package cam72cam.immersiverailroading.render.rail;
 
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.track.BuilderBase.PosRot;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
+import net.minecraft.util.math.BlockPos;
 
 public class RailBaseOverlayRender {
 	
 	private static void doDraw(RailInfo info) {
-		GL11.glTranslated(-info.position.getX(), -info.position.getY(), -info.position.getZ());
-		
 		GL11.glColor4f(1, 0, 0, 1);
 		
 			
 		for (TrackBase base : info.getBuilder(info.position).getTracksForRender()) {
 			if (!base.canPlaceTrack() ) {
 				GL11.glPushMatrix();
-				PosRot pos = base.getPos();
+				BlockPos pos = base.getPos();
+				pos = pos.subtract(info.position);
 				GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ()+1);
 				GL11.glScaled(1, base.getHeight() + 0.2f, 1);
 

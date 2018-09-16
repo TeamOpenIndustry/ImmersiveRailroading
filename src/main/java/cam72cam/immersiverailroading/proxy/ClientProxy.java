@@ -577,9 +577,8 @@ public class ClientProxy extends CommonProxy {
 	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
 	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
 	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-	                GL11.glTranslated(-d0, -d1, -d2);
 	                
-	                GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
+	                GL11.glTranslated(pos.getX()-d0, pos.getY()-d1, pos.getZ()-d2);
 	                
 	                RailRenderUtil.render(info, true);
 
