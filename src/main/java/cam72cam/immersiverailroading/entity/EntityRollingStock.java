@@ -95,7 +95,6 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		tag = BufferUtil.readString(additionalData);
 		if (additionalData.readBoolean()) {
 			texture = BufferUtil.readString(additionalData);
-			System.out.println(texture);
 		}
 	}
 
