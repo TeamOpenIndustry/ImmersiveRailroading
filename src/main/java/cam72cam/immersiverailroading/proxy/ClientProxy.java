@@ -60,6 +60,7 @@ import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.item.StockItemModel;
 import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
+import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
@@ -324,6 +325,9 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
+		
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PAINT_BRUSH, 0,
+				new ModelResourceLocation(IRItems.ITEM_PAINT_BRUSH.getRegistryName(), ""));
 	}
 	
 	public static final class StockIcon extends TextureAtlasSprite
@@ -354,7 +358,7 @@ public class ClientProxy extends CommonProxy {
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
     				if (map[x][y] != null && map[x][y] != "") {
-    					int color = renderer.texture.samp(map[x][y]);
+    					int color = renderer.textures.get(OBJRender.DEFAULT_TEXTURE).samp(map[x][y]);
     					image.setRGB(x, this.getIconWidth() - (y + 1), color);
     				} else {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
