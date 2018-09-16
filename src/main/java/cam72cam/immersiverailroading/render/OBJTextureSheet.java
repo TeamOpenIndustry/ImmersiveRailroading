@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -52,9 +53,15 @@ public class OBJTextureSheet {
 		public final int sampPx;
 
 		
-		SubTexture(ResourceLocation tex) throws IOException {
-			InputStream input = ImmersiveRailroading.proxy.getResourceStream(tex);
+		SubTexture(ResourceLocation tex, ResourceLocation fallback) throws IOException {
+			InputStream input;
+			try {
+				input = ImmersiveRailroading.proxy.getResourceStream(tex);
+			} catch (FileNotFoundException ex) {
+				input = ImmersiveRailroading.proxy.getResourceStream(fallback);
+			}
 			image = TextureUtil.readBufferedImage(input);
+					
 			input.close();
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
@@ -233,7 +240,7 @@ public class OBJTextureSheet {
 								String fname = sp[sp.length-1];
 								kd = new ResourceLocation(kd.toString().replaceAll(fname, texPrefix + "/" + fname));
 							}
-							mappings.put(key, new SubTexture(kd));
+							mappings.put(key, new SubTexture(kd, model.materials.get(mtlName).texKd));
 						} catch (IOException e) {
 							e.printStackTrace();
 							continue;
