@@ -603,7 +603,7 @@ public class ClientProxy extends CommonProxy {
 	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
 	                GL11.glTranslated(-d0, -d1, -d2);
 	                
-	                GL11.glTranslated(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5);
+	                GL11.glTranslated(pos.getX()-d0+0.5, pos.getY()-d1+0.5, pos.getZ()-d2+0.5);
 	                
 	                if (Math.random() < 0.1) {
 	                }
