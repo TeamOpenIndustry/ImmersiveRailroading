@@ -40,8 +40,8 @@ public class Config {
 		@Comment("Drop snowballs when the train can't push a block out of the way")
 		public static boolean dropSnowBalls = false;
 		
-		@Comment("Trains get destroyed by explosions")
-		public static boolean trainExplosionDamage = true;
+		@Comment("Trains get destroyed by Mob explosions")
+		public static boolean trainMobExplosionDamage = true;
 	}
 
 	public static ConfigBalance balance;

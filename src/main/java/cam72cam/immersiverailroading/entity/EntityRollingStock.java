@@ -149,7 +149,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		}
 		
 		if (damagesource.isExplosion()) {
-			if (amount > 5 && !(Config.damage.trainExplosionDamage && damagesource.getTrueSource() instanceof EntityMob)) {
+			if (amount > 5 && (Config.damage.trainMobExplosionDamage || !(damagesource.getTrueSource() instanceof EntityMob))) {
 				if (!this.isDead) {
 					this.onDeath(amount > 20 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
 				}
