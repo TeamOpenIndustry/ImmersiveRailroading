@@ -122,7 +122,7 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
-		if (stock instanceof LocomotiveDiesel) {
+		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
 			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
 			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());
 		}
@@ -141,7 +141,9 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void setThrottle(float newThrottle) {
 		realSetThrottle(newThrottle);
-		this.mapTrain(this, true, false, this::setThrottleMap);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::setThrottleMap);
+		}
 	}
 	
 	@Override
