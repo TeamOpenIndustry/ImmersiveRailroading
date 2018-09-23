@@ -8,6 +8,6 @@ import net.minecraftforge.registries.IForgeRegistryModifiable;
 public class RecipeUtil {
 	public static void removeRecipe (IForgeRegistryModifiable<IRecipe> modRegistry, ResourceLocation recipe) {
 		modRegistry.remove(recipe);
-		ImmersiveRailroading.info("[%s] Removing Recipie: %s",ImmersiveRailroading.MODID, modRegistry.getValue(recipe));
+		ImmersiveRailroading.info("Removing Recipe: %s", recipe);
 	}
 }
