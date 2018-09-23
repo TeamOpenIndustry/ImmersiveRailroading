@@ -1,0 +1,20 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:item_rail"
+  },
+  "pattern": [
+    "d d",
+    "dpd",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "type": "forge:ore_dict",
+      "ore": "ingotIron"
+    },
+    "p": {
+      "item": "minecraft:paper"
+    }
+  }
+}

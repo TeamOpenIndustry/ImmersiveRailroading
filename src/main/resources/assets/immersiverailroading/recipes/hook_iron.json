@@ -1,0 +1,17 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:item_large_wrench"
+  },
+  "pattern": [
+    " d ",
+    "ddd",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "type": "forge:ore_dict",
+      "ore": "ingotIron"
+    }
+  }
+}
