@@ -252,6 +252,15 @@ public class StockModel extends OBJRender {
 				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
 			}
 			break;
+		case TRI_WALSCHAERTS:{
+			List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
+			drawDrivingWheels(stock, wheels);
+			RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+			RenderComponent wheel = wheels.get(wheels.size() / 2);
+			drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
+			drawWalschaerts(stock, "RIGHT", -120, wheel.height(), center.center(), wheel.center());
+			drawWalschaerts(stock, "CENTER", -240, wheel.height(), center.center(), wheel.center());
+		}
 		case MALLET_WALSCHAERTS:
 			{
 				GL11.glPushMatrix();
