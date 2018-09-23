@@ -155,7 +155,7 @@ public abstract class CommonProxy implements IGuiHandler {
     @SubscribeEvent
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
     	IForgeRegistryModifiable<IRecipe> modRegistry = (IForgeRegistryModifiable<IRecipe>) event.getRegistry();
-    	if (OreDictionary.doesOreNameExist("ingotSteel")) {
+    	if (!OreDictionary.doesOreNameExist("ingotSteel")) {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual"));
