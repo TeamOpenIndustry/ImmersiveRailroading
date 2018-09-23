@@ -55,16 +55,12 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.OreHelper;
-import cam72cam.immersiverailroading.util.RecipeUtil;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -72,7 +68,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -160,16 +155,16 @@ public abstract class CommonProxy implements IGuiHandler {
     @SubscribeEvent
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
     	IForgeRegistryModifiable<IRecipe> modRegistry = (IForgeRegistryModifiable<IRecipe>) event.getRegistry();
-    	if (!Loader.isModLoaded("immersiveengineering")) {
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:wrench"));
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:hook"));
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:manual"));
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:track blueprint"));
+    	if (OreDictionary.doesOreNameExist("ingotSteel")) {
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:hook"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:manual"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint"));
     	} else {
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:wrench_iron"));
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:hook_iron"));
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:manual_iron"));
-    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:track blueprint_iron"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench_iron"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:hook_iron"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:manual_iron"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint_iron"));
     	}
     }
     
