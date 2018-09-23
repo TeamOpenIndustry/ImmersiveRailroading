@@ -44,9 +44,9 @@ import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
@@ -55,11 +55,16 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.RecipeUtil;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -67,6 +72,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -81,6 +87,7 @@ import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.IForgeRegistryModifiable;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
@@ -149,6 +156,22 @@ public abstract class CommonProxy implements IGuiHandler {
 	}
     
     public abstract World getWorld(int dimension);
+    
+    @SubscribeEvent
+    public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
+    	IForgeRegistryModifiable<IRecipe> modRegistry = (IForgeRegistryModifiable<IRecipe>) event.getRegistry();
+    	if (!Loader.isModLoaded("immersiveengineering")) {
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:wrench"));
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:hook"));
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:manual"));
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:track blueprint"));
+    	} else {
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:wrench_iron"));
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:hook_iron"));
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:manual_iron"));
+    		RecipeUtil.removeRecipe(modRegistry, new ResourceLocation("immersiverailroading:track blueprint_iron"));
+    	}
+    }
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
