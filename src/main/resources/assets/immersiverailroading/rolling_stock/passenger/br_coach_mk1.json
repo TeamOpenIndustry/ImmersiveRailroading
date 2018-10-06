@@ -1,7 +1,7 @@
 {
 	"name": "BR Coach MK1",
-	"model": "immersiverailroading:models/rolling_stock/passenger/br_coach_mk1.obj",
-	"darken_model": "0.03",
+	"model": "immersiverailroading:models/rolling_stock/passenger/br_coach_mk1/br_coach_mk1.obj",
+	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 27433
 	},
@@ -12,8 +12,17 @@
 		"length": 9,
 		"width": 2
 	},
+	"freight": {
+		"slots": 12,
+		"width": 12,
+		"cargo": ["all"]
+	},
 	"trucks": {
-		"front": 7, 
-		"rear": -7
+		"front": 7.5, 
+		"rear": -7.5
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -0.08
 	}
 }
