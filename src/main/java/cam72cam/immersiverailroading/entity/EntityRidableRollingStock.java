@@ -199,6 +199,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 					connections between the "walkways" are calculated in separate method, or even separate class, where it checks connections via checking to see if the boundary using its coords line
 					with another's. store this info via an array for quick reading.
+					possible class called doorway, that stores that information (what is being connected, location of connection)
+					along with possible animation of door (to much memory being used? animation in code? animation in obj file?) need to talk with cam and fred
 					 */
 				}
 			}

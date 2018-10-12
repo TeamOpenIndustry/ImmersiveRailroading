@@ -333,7 +333,7 @@ public class StockModel extends OBJRender {
 
                 GL11.glPopMatrix();
             }
-            /*if (def.hasMiddleDrivers())  orginally thought could allow for drivers between the two sections(middle of locomotive)realized wouldn't work,
+            /*if (def.hasMiddleDrivers())  originally thought could allow for drivers between the two sections(middle of locomotive)realized wouldn't work,
             am keeping code for reference for eventual usage in Project N=X
             {
                 List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_MIDDLE_X, stock.gauge);
