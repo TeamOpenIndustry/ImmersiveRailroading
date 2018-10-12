@@ -306,6 +306,7 @@ public class StockModel extends OBJRender {
 			break;
 		case SHAY:
 			break;
+			//standing by for test model for both turn and reversed driver animation from Larky (K1 Garratt)
 			case THREE_BODY_WALSCHAERTS:
 
             {
@@ -332,7 +333,8 @@ public class StockModel extends OBJRender {
 
                 GL11.glPopMatrix();
             }
-            if (def.hasMiddleDrivers())
+            /*if (def.hasMiddleDrivers())  orginally thought could allow for drivers between the two sections(middle of locomotive)realized wouldn't work,
+            am keeping code for reference for eventual usage in Project N=X
             {
                 List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_MIDDLE_X, stock.gauge);
                 RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
@@ -342,7 +344,7 @@ public class StockModel extends OBJRender {
                 drawWalschaerts(stock, "LEFT_MIDDLE", 45 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(),def.getMiddleDriverReversed());
                 drawWalschaerts(stock, "RIGHT_MIDDLE", -45 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(),def.getMiddleDriverReversed());
 
-            }
+            }*/
             {
 				GL11.glPopMatrix();
 
@@ -390,8 +392,8 @@ public class StockModel extends OBJRender {
 				drawDrivingWheels(stock, wheels);
 				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawStephenson(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
-				drawStephenson(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
+				drawStephenson(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center(), def.getFrontDriverReversed());
+				drawStephenson(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center(), def.getFrontDriverReversed());
 			}
 			break;
 			case T1:
@@ -528,12 +530,165 @@ public class StockModel extends OBJRender {
 	
 	// PISTON/MAIN/SIDE
 	private void drawStephenson(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos, boolean reversedDrivers) {
+		if(reversedDrivers){
+			drawReversedWalschaerts(stock, side, wheelAngleOffset, diameter, wheelCenter, wheelPos);
+		}
+		else {
+			LocomotiveSteamDefinition def = stock.getDefinition();
+
+
+			double circumference = diameter * (float) Math.PI;
+			double relDist = distanceTraveled % circumference;
+			double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
+
+			RenderComponent connectingRod = requireComponent(def, RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
+			RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
+			RenderComponent pistonRod = requireComponent(def, RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
+
+
+			// Center of the connecting rod, may not line up with a wheel directly
+			Vec3d connRodPos = connectingRod.center();
+			// Wheel Center is the center of all wheels, may not line up with a wheel directly
+			// The difference between these centers is the radius of the connecting rod movement
+			double connRodRadius = connRodPos.x - wheelCenter.x;
+			// Find new connecting rod pos based on the connecting rod rod radius
+			Vec3d connRodMovment = VecUtil.fromYaw(connRodRadius, (float) wheelAngle);
+
+			// Draw Connecting Rod
+			GL11.glPushMatrix();
+			{
+				// Move to origin
+				GL11.glTranslated(-connRodRadius, 0, 0);
+				// Apply connection rod movement
+				GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+
+				drawComponent(connectingRod);
+			}
+			GL11.glPopMatrix();
+
+			// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
+			// Y: Center of the rod
+			// Z: does not really matter due to rotation axis
+			Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height() / 2, drivingRod.center().y, drivingRod.max().z);
+			// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
+			float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
+
+			// Draw driving rod
+			GL11.glPushMatrix();
+			{
+				// Move to conn rod center
+				GL11.glTranslated(-connRodRadius, 0, 0);
+				// Apply conn rod movement
+				GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+
+				// Move to rot point center
+				GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+				// Rotate rod angle
+				GL11.glRotated(drivingRodAngle, 0, 0, 1);
+				// Move back from rot point center
+				GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+
+				drawComponent(drivingRod);
+			}
+			GL11.glPopMatrix();
+
+			// Piston movement is rod movement offset by the rotation radius
+			// Not 100% accurate, missing the offset due to angled driving rod
+			double pistonDelta = connRodMovment.x - connRodRadius;
+
+			// Draw piston rod and cross head
+			GL11.glPushMatrix();
+			{
+				GL11.glTranslated(pistonDelta, 0, 0);
+				drawComponent(pistonRod);
+			}
+			GL11.glPopMatrix();
+		}
+	}
+
+	//beginning the animation of the pistons for shays
+	//will have to create second method for trucks due to animation of sliding U joint and drive axel for wheels. should be usable for shay, heisler, and climax
+	private void drawStephensonShay(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos, boolean reversedDrivers) {
+
+			LocomotiveSteamDefinition def = stock.getDefinition();
+
+
+			double circumference = diameter * (float) Math.PI;
+			double relDist = distanceTraveled % circumference;
+			double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
+
+			RenderComponent connectingRod = requireComponent(def, RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
+			RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
+			RenderComponent pistonRod = requireComponent(def, RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
+
+
+			// Center of the connecting rod, may not line up with a wheel directly
+			Vec3d connRodPos = connectingRod.center();
+			// Wheel Center is the center of all wheels, may not line up with a wheel directly
+			// The difference between these centers is the radius of the connecting rod movement
+			double connRodRadius = connRodPos.x - wheelCenter.x;
+			// Find new connecting rod pos based on the connecting rod rod radius
+			Vec3d connRodMovment = VecUtil.fromYaw(connRodRadius, (float) wheelAngle);
+
+			// Draw Connecting Rod
+			GL11.glPushMatrix();
+			{
+				// Move to origin
+				GL11.glTranslated(-connRodRadius, 0, 0);
+				// Apply connection rod movement
+				GL11.glRotated(0, connRodMovment.z, 0, 1);
+
+				drawComponent(connectingRod);
+			}
+			GL11.glPopMatrix();
+
+			// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
+			// Y: Center of the rod
+			// Z: does not really matter due to rotation axis
+			Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height() / 2, drivingRod.center().y, drivingRod.max().z);
+			// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
+			float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
+
+			// Draw driving rod
+			GL11.glPushMatrix();
+			{
+				// Move to conn rod center
+				GL11.glTranslated(-connRodRadius, 0, 0);
+				// Apply conn rod movement
+				GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+
+				// Move to rot point center
+				GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+				// Rotate rod angle
+				GL11.glRotated(drivingRodAngle, 0, 0, 1);
+				// Move back from rot point center
+				GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+
+				drawComponent(drivingRod);
+			}
+			GL11.glPopMatrix();
+
+			// Piston movement is rod movement offset by the rotation radius
+			// Not 100% accurate, missing the offset due to angled driving rod
+			double pistonDelta = connRodMovment.x - connRodRadius;
+
+			// Draw piston rod and cross head
+			GL11.glPushMatrix();
+			{
+				GL11.glTranslated(pistonDelta, 0, 0);
+				drawComponent(pistonRod);
+			}
+			GL11.glPopMatrix();
+	}
+
+	//copy of Stephenson code, with some negatives
+	private void drawReversedStephenson(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
 		LocomotiveSteamDefinition def = stock.getDefinition();
-		
+
 		double circumference = diameter * (float) Math.PI;
 		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
-		
+
 		RenderComponent connectingRod = requireComponent(def, RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
 		RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
 		RenderComponent pistonRod = requireComponent(def, RenderComponentType.PISTON_ROD_SIDE, side, stock.gauge);
@@ -544,9 +699,9 @@ public class StockModel extends OBJRender {
 		// Wheel Center is the center of all wheels, may not line up with a wheel directly
 		// The difference between these centers is the radius of the connecting rod movement
 		double connRodRadius = connRodPos.x - wheelCenter.x;
-		// Find new connecting rod pos based on the connecting rod rod radius 
+		// Find new connecting rod pos based on the connecting rod rod radius
 		Vec3d connRodMovment = VecUtil.fromYaw(connRodRadius, (float) wheelAngle);
-		
+
 		// Draw Connecting Rod
 		GL11.glPushMatrix();
 		{
@@ -554,18 +709,18 @@ public class StockModel extends OBJRender {
 			GL11.glTranslated(-connRodRadius, 0, 0);
 			// Apply connection rod movement
 			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
-			
+
 			drawComponent(connectingRod);
 		}
 		GL11.glPopMatrix();
-		
+
 		// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
 		// Y: Center of the rod
 		// Z: does not really matter due to rotation axis
 		Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height()/2, drivingRod.center().y, drivingRod.max().z);
 		// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
 		float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
-		
+
 		// Draw driving rod
 		GL11.glPushMatrix();
 		{
@@ -573,22 +728,22 @@ public class StockModel extends OBJRender {
 			GL11.glTranslated(-connRodRadius, 0, 0);
 			// Apply conn rod movement
 			GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
-			
+
 			// Move to rot point center
 			GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
 			// Rotate rod angle
 			GL11.glRotated(drivingRodAngle, 0, 0, 1);
 			// Move back from rot point center
 			GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
-			
+
 			drawComponent(drivingRod);
 		}
 		GL11.glPopMatrix();
-		
+
 		// Piston movement is rod movement offset by the rotation radius
 		// Not 100% accurate, missing the offset due to angled driving rod
 		double pistonDelta = connRodMovment.x - connRodRadius;
-		
+
 		// Draw piston rod and cross head
 		GL11.glPushMatrix();
 		{
@@ -596,6 +751,7 @@ public class StockModel extends OBJRender {
 			drawComponent(pistonRod);
 		}
 		GL11.glPopMatrix();
+
 	}
 	
 	private void drawT1(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {

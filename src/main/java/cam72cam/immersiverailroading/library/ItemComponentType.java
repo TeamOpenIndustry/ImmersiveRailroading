@@ -13,6 +13,7 @@ public enum ItemComponentType {
 	
 	// MALLET
 	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRONT_LOCOMOTIVE),
+	REAR_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.REAR_LOCOMOTIVE),
 	
 	// STANDARD
 	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS_WHEEL_X),

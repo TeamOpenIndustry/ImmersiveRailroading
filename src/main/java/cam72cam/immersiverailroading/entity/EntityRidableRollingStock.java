@@ -166,13 +166,16 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			if (sprinting) {
 				movement = movement.scale(3);
 			}
-			
+
 			movement = VecUtil.rotateYaw(movement, source.getRotationYawHead());
 			movement = VecUtil.rotateYaw(movement, 180-this.rotationYaw);
-			
+
+			//currently doesn't support new code variable wise, so hardcoded to not allow it at this time
+			if(true){
 			Vec3d pos = passengerPositions.get(source.getPersistentID()).add(movement);
 
-			
+
+
 			if (this instanceof EntityCoupleableRollingStock) {
 				if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
 					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT));
@@ -181,6 +184,22 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				if (this.getDefinition().isAtRear(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
 					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK));
 					return;
+				}
+			}}
+			else{
+				Vec3d pos = passengerPositions.get(source.getPersistentID()).add(movement);
+				for() {
+
+					/*writing out idea from here
+					read the new position of the player. if none of the "walkways" cover this area, which is checked by for loop, subtract that movement (possibly able to be checked via a 3-4 dimension
+					array which states which is walkable area's, which would remove the need to go through all the "walkway" components.
+
+					when encountering a "walkway" that is at an angle, read the speed, find the angle of the "walkway", and translate the player's position accordingly. Possible limitations
+					are that the slopes can only be on the x or y plane relative to the model.
+
+					connections between the "walkways" are calculated in separate method, or even separate class, where it checks connections via checking to see if the boundary using its coords line
+					with another's. store this info via an array for quick reading.
+					 */
 				}
 			}
 			

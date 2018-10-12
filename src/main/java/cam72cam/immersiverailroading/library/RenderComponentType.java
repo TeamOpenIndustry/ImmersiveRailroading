@@ -81,7 +81,10 @@ public enum RenderComponentType {
 	
 	// Cargo
 	CARGO_FILL_X("CARGO_FILL_#ID#"),
-	
+
+	//Custom Walkable Area
+	FLOOR_CAB_X("CAB_FLOOR_#ID#", false),
+
 	// REST
 	REMAINING(""),
 	;
