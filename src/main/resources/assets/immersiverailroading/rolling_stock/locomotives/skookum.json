@@ -11,7 +11,7 @@
 		"tractive_effort_lbf":  27430,
 		"max_speed_kmh": 51,
 		"valve_gear": "mallet_walschaerts",
-		"weight_kg": 36287
+		"weight_kg": 64410
 	},
 	"firebox": {
 		"slots": 10,
