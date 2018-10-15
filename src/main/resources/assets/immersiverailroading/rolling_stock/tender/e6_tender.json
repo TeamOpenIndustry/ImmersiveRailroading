@@ -3,7 +3,7 @@
 	"model": "immersiverailroading:models/rolling_stock/tender/e6_tender/e6_tender.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 33566
+		"weight_kg": 24494
 	},
 	"passenger": {
 		"slots": 2,
