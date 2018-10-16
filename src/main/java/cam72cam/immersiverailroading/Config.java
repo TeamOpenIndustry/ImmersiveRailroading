@@ -128,9 +128,12 @@ public class Config {
 			dieselFuels.put("ethanol", 170);
 			dieselFuels.put("gasoline", 100);
 			//Thermal Foundation
-			
 			dieselFuels.put("refined_fuel", 150);
 			dieselFuels.put("refined_oil", 100);
+			//PneumaticCraft
+			dieselFuels.put("lpg", 150);
+			dieselFuels.put("kerosene", 180);
+			dieselFuels.put("fuel", 180);
 			
 			// Other
 			dieselFuels.put("olive_oil", 40);
