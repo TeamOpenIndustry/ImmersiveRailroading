@@ -306,8 +306,57 @@ public class StockModel extends OBJRender {
 			break;
 		case SHAY:
 			break;
-			//standing by for test model for both turn and reversed driver animation from Larky (K1 Garratt)
-			case THREE_BODY_WALSCHAERTS:
+			case GARRETT_STEPHENSON:
+
+			{
+				GL11.glPushMatrix();
+
+				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE, stock.gauge);
+				Vec3d frontVec = frontLocomotive.center();
+				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
+				Vec3d frontPosActual = VecUtil.rotateYaw(frontPos, 180 - stock.rotationYaw);
+
+				GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
+				GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()) + 180, 0, 1, 0);
+				GlStateManager.translate(-frontVec.x, 0, 0);
+
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT, stock.gauge));
+				drawComponent(frontLocomotive);
+				drawDrivingWheels(stock, wheels);
+				RenderComponent wheel = wheels.get(wheels.size() / 2);
+
+				drawStephenson(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center(), def.getFrontDriverReversed());
+				drawStephenson(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center(), def.getFrontDriverReversed());
+
+				GL11.glPopMatrix();
+			}
+			{
+				GL11.glPopMatrix();
+
+				RenderComponent rearLocomotive = def.getComponent(RenderComponentType.REAR_LOCOMOTIVE, stock.gauge);
+				Vec3d rearVec = rearLocomotive.center();
+				PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear(stock.gauge)));
+				Vec3d rearPosActual = VecUtil.rotateYaw(rearPos, 180 - stock.rotationYaw);
+
+				GlStateManager.translate(rearPosActual.x, rearPosActual.y, rearPosActual.z);
+				GlStateManager.rotate(-(180 - stock.rotationYaw + rearPos.getRotation()) + 180, 0, 1, 0);
+				GlStateManager.translate(-rearVec.x, 0, 0);
+
+				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, stock.gauge);
+				RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				drawComponent(rearLocomotive);
+				drawDrivingWheels(stock, wheels);
+				RenderComponent wheel = wheels.get(wheels.size() / 2);
+
+				drawStephenson(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, wheel.height()/*center.height()*/, center.center(), wheel.center(), def.getRearDriverReversed());
+				drawStephenson(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR, wheel.height()/*center.height()*/, center.center(), wheel.center(), def.getRearDriverReversed());
+
+				GL11.glPopMatrix();
+			}
+			break;
+			case GARRETT_WALSCHAERTS:
 
             {
                 GL11.glPushMatrix();
