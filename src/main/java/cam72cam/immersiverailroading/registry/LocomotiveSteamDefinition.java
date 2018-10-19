@@ -145,32 +145,35 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		Set<String> groups = super.parseComponents();
 		
 		switch (this.valveGear) {
-		case STEPHENSON:
-		case WALSCHAERTS:
-		case HIDDEN:
-			for (int i = 0; i < 10; i++) {
-				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
-			}
-			break;
-			case T1:
-				case THREE_BODY_WALSCHAERTS: {
-					for (int i = 0; i < 10; i++) {
-						addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_MIDDLE_X, this, groups, i), true);
-					}
-					addComponentIfExists(RenderComponent.parse(RenderComponentType.MIDDLE_LOCOMOTIVE, this, groups), true);
-					addComponentIfExists(RenderComponent.parse(RenderComponentType.REAR_LOCOMOTIVE, this, groups), true);
+			case STEPHENSON:
+			case WALSCHAERTS:
+			case HIDDEN:
+				for (int i = 0; i < 10; i++) {
+					addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
 				}
-		case MALLET_WALSCHAERTS:
-			for (int i = 0; i < 10; i++) {
-				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
-				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
+				break;
+
+			case GARRETT_WALSCHAERTS:
+			case GARRETT_STEPHENSON: {
+				for (int i = 0; i < 10; i++) {
+					addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_MIDDLE_X, this, groups, i), true);
+				}
+				addComponentIfExists(RenderComponent.parse(RenderComponentType.MIDDLE_LOCOMOTIVE, this, groups), true);
+				addComponentIfExists(RenderComponent.parse(RenderComponentType.REAR_LOCOMOTIVE, this, groups), true);
 			}
-			addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
-			break;
-		case CLIMAX:
-			break;
-		case SHAY:
-			break;
+			case T1:
+			case MALLET_WALSCHAERTS:
+				for (int i = 0; i < 10; i++) {
+					addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
+					addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
+				}
+				addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
+				break;
+
+			case CLIMAX:
+				break;
+			case SHAY:
+				break;
 		}
 		
 
@@ -233,7 +236,8 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             }
             break;
 
-            case THREE_BODY_WALSCHAERTS:
+            case GARRETT_WALSCHAERTS:
+			case GARRETT_STEPHENSON:
                 if (sides.size() == 0) {
                     sides.add("LEFT_FRONT");
                     sides.add("RIGHT_FRONT");
