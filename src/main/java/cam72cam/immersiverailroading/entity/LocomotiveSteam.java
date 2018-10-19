@@ -624,9 +624,16 @@ public class LocomotiveSteam extends Locomotive {
 
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
-			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
+			if tender.getCoupled(CouplerType.BACK) instanceof WaterTender{
+				WaterTender watertender = (WaterTender)tender.getCoupled(CoupledType.BACK);
+				if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
+					FluidUtil.tryFluidTransfer(this.theTank, watertender.theTank, desiredDrain, true);
+				}
+			}
+			else if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
 				FluidUtil.tryFluidTransfer(this.theTank, tender.theTank, desiredDrain, true);
 			}
+
 			
 			if (this.ticksExisted % 20 == 0) {
 				// Top off stacks
