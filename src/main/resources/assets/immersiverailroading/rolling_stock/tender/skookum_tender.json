@@ -3,7 +3,7 @@
 	"model": "immersiverailroading:models/rolling_stock/tender/skookum_tender/skookum_tender.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 21890
+		"weight_kg": 14805
 	},
 	"passenger": {
 		"slots": 2,
@@ -13,11 +13,11 @@
 		"width": 1
 	},
 	"tank": {
-		"capacity_l":  20000
+		"capacity_l":  15000
 	},
 	"tender": {
-		"slots": 46,
-		"width": 16
+		"slots": 10,
+		"width": 5
 	},
 	"trucks": {
 		"front": 1.45, 
