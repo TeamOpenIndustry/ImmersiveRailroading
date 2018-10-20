@@ -52,18 +52,20 @@ public class ItemRollingStock extends BaseItemRollingStock {
     {
     	for (String defID : DefinitionManager.getDefinitionNames()) {
     		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
-    		if (def instanceof CarPassengerDefinition) {
-    			if (tab != ItemTabs.PASSENGER_TAB) {
-    				continue;
-    			}
-    		} else if (def instanceof LocomotiveDefinition) {
-    			if (tab != ItemTabs.LOCOMOTIVE_TAB) {
-    				continue;
-    			}
-    		} else {
-    			if (tab != ItemTabs.STOCK_TAB) {
-    				continue;
-    			}
+    		if (tab != CreativeTabs.SEARCH) {
+	    		if (def instanceof CarPassengerDefinition) {
+	    			if (tab != ItemTabs.PASSENGER_TAB) {
+	    				continue;
+	    			}
+	    		} else if (def instanceof LocomotiveDefinition) {
+	    			if (tab != ItemTabs.LOCOMOTIVE_TAB) {
+	    				continue;
+	    			}
+	    		} else {
+	    			if (tab != ItemTabs.STOCK_TAB) {
+	    				continue;
+	    			}
+	    		}
     		}
     		ItemStack stack = new ItemStack(this);
     		ItemDefinition.setID(stack, defID);
