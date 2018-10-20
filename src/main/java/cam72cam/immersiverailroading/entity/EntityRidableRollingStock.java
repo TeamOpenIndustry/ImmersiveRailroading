@@ -111,7 +111,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		} else if (player.isRiding() && player.getRidingEntity().getPersistentID() == this.getPersistentID()) {
 			return false;
 		} else {
-			if (!this.world.isRemote && (getLockType() != LockType.LOCKED || getLockOwner().equals(player.getUniqueID())) || playerHasOp(player)) {
+			if (!this.world.isRemote && canRide(player)) {
 				passengerPositions.put(player.getPersistentID(), new Vec3d(0, 0, 0));
 				player.startRiding(this);
 			}
@@ -168,11 +168,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 			
 			if (this instanceof EntityCoupleableRollingStock) {
-				if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
+				if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT) && canRide(source)) {
 					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT));
 					return;
 				}
-				if (this.getDefinition().isAtRear(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
+				if (this.getDefinition().isAtRear(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK) && canRide(source)) {
 					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK));
 					return;
 				}
