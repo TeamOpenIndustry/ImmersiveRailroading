@@ -9,13 +9,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.google.gson.JsonObject;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDeathType;
+import cam72cam.immersiverailroading.net.PaintSyncPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.BufferUtil;
@@ -33,6 +36,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	protected String defID;
 	public Gauge gauge;
 	public String tag = "";
+	public String texture;
 
 	public EntityRollingStock(World world, String defID) {
 		super(world);
@@ -91,6 +95,9 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		defID = BufferUtil.readString(additionalData);
 		gauge = Gauge.from(additionalData.readDouble());
 		tag = BufferUtil.readString(additionalData);
+		if (additionalData.readBoolean()) {
+			texture = BufferUtil.readString(additionalData);
+		}
 	}
 
 	@Override
@@ -98,6 +105,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		BufferUtil.writeString(buffer, defID);
 		buffer.writeDouble(gauge.value());
 		BufferUtil.writeString(buffer, tag);
+		buffer.writeBoolean(texture != null);
+		if (texture != null) {
+			BufferUtil.writeString(buffer, texture);
+		}
 	}
 
 	@Override
@@ -105,6 +116,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		nbttagcompound.setString("defID", defID);
 		nbttagcompound.setDouble("gauge", gauge.value());
 		nbttagcompound.setString("tag", tag);
+		
+		if (this.texture != null) {
+			nbttagcompound.setString("texture", texture);
+		}
 	}
 
 	@Override
@@ -117,6 +132,10 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		}
 		
 		tag = nbttagcompound.getString("tag");
+		
+		if (nbttagcompound.hasKey("texture")) {
+			texture = nbttagcompound.getString("texture");
+		}
 	}
 
 	@Override
@@ -129,6 +148,16 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_PAINT_BRUSH) {
+			List<String> texNames = this.getDefinition().textureNames;
+			if (texNames != null && texNames.size() != 1) {
+				int idx = texNames.indexOf(this.texture);
+				idx = (idx + 1) % (texNames.size());
+				this.texture = texNames.get(idx);
+				this.sendToObserving(new PaintSyncPacket(this));
+				return true;
+			}
+		}
 		return false;
 	}
 
