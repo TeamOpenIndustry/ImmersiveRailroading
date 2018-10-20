@@ -1,0 +1,26 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 16.10.2018 00:14:24
+
+newmtl Material__25
+	Ns 10.000000
+	Ni 1.500000
+	d 1.000000
+	Tr 0.000000
+	Tf 1.000000 1.000000 1.000000 
+	illum 2
+	Ka 0.588000 0.588000 0.588000
+	Kd 0.588000 0.588000 0.588000
+	Ks 0.000000 0.000000 0.000000
+	Ke 0.000000 0.000000 0.000000
+	map_Ka C:\Users\nhayd\Documents\3dsMax\export\pinstripeddriver.png
+	map_Kd C:\Users\nhayd\Documents\3dsMax\export\pinstripeddriver.png
+
+newmtl wire_177028149
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.694118 0.109804 0.584314
+	Kd 0.694118 0.109804 0.584314
+	Ks 0.350000 0.350000 0.350000
