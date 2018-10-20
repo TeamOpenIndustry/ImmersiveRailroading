@@ -44,6 +44,7 @@ chat.immersiverailroading:augment.set=Set Augment to act only upon %s
 chat.immersiverailroading:augment.reset=Set Augment to act upon any stock
 chat.immersiverailroading:misc.wood_planks=Wood Planks
 chat.immersiverailroading:build.invalid_block=Invalid block at x=%s y=%s z=%s
+chat.immersiverailroading:stock.change_lock=Changed lock to %s
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle

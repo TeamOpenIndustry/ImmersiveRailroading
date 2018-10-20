@@ -26,6 +26,7 @@ public enum ChatText {
 	RESET_AUGMENT_FILTER("augment.reset"),
 	WOOD_PLANKS("misc.wood_planks"),
 	INVALID_BLOCK("build.invalid_block"),
+	CHANGE_STOCK_LOCK("stock.change_lock"),
 	;
 	
 	private String value;
