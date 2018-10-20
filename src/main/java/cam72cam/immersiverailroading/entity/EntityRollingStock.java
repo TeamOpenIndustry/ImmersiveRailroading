@@ -14,6 +14,7 @@ import java.util.List;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDeathType;
@@ -23,6 +24,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -176,7 +178,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		}
 		
 		if (damagesource.isExplosion()) {
-			if (amount > 5) {
+			if (amount > 5 && (ConfigDamage.trainMobExplosionDamage || !(damagesource.getTrueSource() instanceof EntityMob))) {
 				if (!this.isDead) {
 					this.onDeath(amount > 20 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
 				}
