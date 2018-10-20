@@ -32,8 +32,8 @@ import net.minecraft.util.math.Vec3d;
 public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
 
-	public StockModel(OBJModel objModel) {
-		super(objModel);
+	public StockModel(OBJModel objModel, List<String> textureNames) {
+		super(objModel, textureNames);
 	}
 
 	private boolean isBuilt;
@@ -87,7 +87,7 @@ public class StockModel extends OBJRender {
 			this.distanceTraveled = 0;
 		}
 
-		this.bindTexture();
+		this.bindTexture(stock.texture);
 		
 		if (stock instanceof LocomotiveSteam) {
 			drawSteamLocomotive((LocomotiveSteam) stock);
