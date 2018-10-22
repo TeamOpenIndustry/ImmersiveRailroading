@@ -10,22 +10,23 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
 public class WaterTender extends CarTank {
-	
-	public Tender(World world) {
+
+	public WaterTender(World world) {
 		this(world, null);
 	}
 
-	public Tender(World world, String defID) {
+	public WaterTender(World world, String defID) {
 		super(world, defID);
 	}
-	
+
 	@Override
-	public TenderDefinition getDefinition() {
-		return super.getDefinition(TenderDefinition.class);
+	public WaterTenderDefinition getDefinition() {
+		return super.getDefinition(WaterTenderDefinition.class);
 	}
 
 	@Override
 	public List<Fluid> getFluidFilter() {
 		return LiquidUtil.getWater();
 	}
+}
 
