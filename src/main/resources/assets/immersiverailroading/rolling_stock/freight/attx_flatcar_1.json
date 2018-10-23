@@ -1,6 +1,6 @@
 {
 	"name": "ATTX Flatcar 1",
-	"model": "immersiverailroading:models/rolling_stock/freight/attx_flatcar_1.obj",
+	"model": "immersiverailroading:models/rolling_stock/freight/attx_flatcar_1/attx_flatcar_1.obj",
 	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 26000

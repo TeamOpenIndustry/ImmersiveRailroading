@@ -4,13 +4,13 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -19,6 +19,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	private int fuelEfficiency;
 	public ResourceLocation idle;
 	public ResourceLocation horn;
+	public boolean muliUnitCapable;
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -28,7 +29,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 			fuelCapacity = FluidQuantity.ZERO;
 		}
 	}
-	
+
 	@Override
 	protected Set<String> parseComponents() {
 		Set<String> groups = super.parseComponents();
@@ -58,6 +59,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		fuelCapacity = FluidQuantity.FromLiters((int)Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
 		fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
+		muliUnitCapable = properties.has("multi_unit_capable") ? properties.get("multi_unit_capable").getAsBoolean() : true;
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		

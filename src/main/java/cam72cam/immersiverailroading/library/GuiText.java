@@ -38,6 +38,7 @@ public enum GuiText {
 	TANK_CAPACITY_TOOLTIP("stock.tank_capacity"),
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
 	WEIGHT_TOOLTIP("stock.weight"),
+	TEXTURE_TOOLTIP("stock.texture"),
 	
 	NONE("none"),
 	;

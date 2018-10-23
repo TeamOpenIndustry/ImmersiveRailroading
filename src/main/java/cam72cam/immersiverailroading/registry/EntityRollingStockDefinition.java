@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -36,12 +37,13 @@ public abstract class EntityRollingStockDefinition {
 	
 	public abstract EntityRollingStock instance(World world);
 	
-	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge) {
+	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge, String texture) {
 		EntityRollingStock stock = instance(world);
 		stock.setPosition(pos.x, pos.y, pos.z);
 		stock.prevRotationYaw = facing.getHorizontalAngle();
 		stock.rotationYaw = facing.getHorizontalAngle();
 		stock.gauge = gauge;
+		stock.texture = texture;
 		world.spawnEntity(stock);
 
 		return stock;
@@ -50,6 +52,7 @@ public abstract class EntityRollingStockDefinition {
 	public final String defID;
 	private String name = "Unknown";
 	private OBJModel model;
+	public List<String> textureNames = null;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
 	private float bogeyRear;
@@ -121,7 +124,19 @@ public abstract class EntityRollingStockDefinition {
 		if (this.recommended_gauge != Gauge.from(Gauge.STANDARD)) {
 			this.internal_inv_scale = Gauge.STANDARD / recommended_gauge.value();
 		}
+		
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
+		if (data.has("tex_variants")) {
+			textureNames = new ArrayList<String>();
+			textureNames.add(null);
+			JsonElement variants = data.get("tex_variants");
+			for (JsonElement variant : variants.getAsJsonArray()) {
+				if (!variant.isJsonNull()) {
+					textureNames.add(variant.getAsString());
+				}
+			}
+		}
+		
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
 		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0).scale(internal_model_scale);
 		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_model_scale;
