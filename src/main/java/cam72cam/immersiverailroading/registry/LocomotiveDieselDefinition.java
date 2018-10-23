@@ -18,6 +18,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	private FluidQuantity fuelCapacity;
 	private int fuelEfficiency;
 	public ResourceLocation idle;
+	public ResourceLocation running;
 	public ResourceLocation horn;
 	public boolean muliUnitCapable;
 
@@ -67,6 +68,12 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 			idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
 		} else {
 			idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
+		}
+		
+		if (sounds != null && sounds.has("running")) {
+			running = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("running").getAsString());
+		} else {
+			running = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
 		}
 		
 		if (sounds != null && sounds.has("horn")) {
