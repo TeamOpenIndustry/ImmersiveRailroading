@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.registry.Quilling.Chime;
@@ -416,7 +417,11 @@ public class LocomotiveSteam extends Locomotive {
 						break;
 					case "RIGHT":
 						tickDelt = 2;
-						phaseOffset = -45+90;
+						phaseOffset = this.getDefinition().getValveGear() != ValveGearType.TRI_WALSCHAERTS ? -45+90 : 45+90-240;
+						break;
+					case "CENTER":
+						tickDelt = 2;
+						phaseOffset = 45+90-120;
 						break;
 					case "LEFT_FRONT":
 						tickDelt = 1;
@@ -445,7 +450,13 @@ public class LocomotiveSteam extends Locomotive {
 						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-						double accell = (piston.side.contains("RIGHT") ? 1 : -1) * 0.3 * gauge.scale();
+						double accell = 0.3 * gauge.scale();
+						if (piston.side.contains("LEFT")) {
+							accell = -accell;
+						}
+						if (piston.side.contains("CENTER") ) {
+							accell = 0;
+						}
 						Vec3d sideMotion = fakeMotion.add(VecUtil.fromYaw(accell, this.rotationYaw+90));
 						sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
 						world.spawnEntity(sp);
