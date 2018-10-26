@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -20,15 +21,15 @@ public class MovementTrack {
 	
 	public static ITrack findTrack(World world, Vec3d currentPosition, float trainYaw, double gauge) {
 		ITrack te = Util.getTileEntity(world, currentPosition, true);
-		if (te != null && te.getTrackGauge() == gauge) {
+		if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 			return te;
 		}
 		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(-1, trainYaw)), true);
-		if (te != null && te.getTrackGauge() == gauge) {
+		if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 			return te;
 		}
 		te = Util.getTileEntity(world, currentPosition.add(VecUtil.fromYaw(1, trainYaw)), true);
-		if (te != null && te.getTrackGauge() == gauge) {
+		if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 			return te;
 		}
 		return null;
@@ -179,11 +180,11 @@ public class MovementTrack {
 			// Update y position
 			TileRailBase directRail = directRailFromPosition(world, outPosition);
 			if (directRail != null) {
-				outPosition = new Vec3d(outPosition.x, directRail.getPos().getY() + directRail.getHeight(), outPosition.z);
+				outPosition = new Vec3d(outPosition.x, directRail.getPos().getY() + directRail.getHeight() + 0.35f, outPosition.z);
 				if (rail.getType() == TrackItems.SLOPE) {
 					Vec3d offset = outPosition.subtract(currentPosition).normalize();
-					float prevHeight = directRail.getPos().getY() + directRail.getHeight();
-					float nextHeight = directRail.getPos().getY() + directRail.getHeight();
+					float prevHeight = directRail.getPos().getY() + directRail.getHeight() + 0.35f;
+					float nextHeight = directRail.getPos().getY() + directRail.getHeight() + 0.35f;
 					float prevDist = 0;
 					float nextDist = 0;
 					
@@ -195,7 +196,7 @@ public class MovementTrack {
 						prev = directRailFromPosition(world, outPosition.subtract(offset).addVector(0, -1, 0));
 					}
 					if (prev != null) {
-						prevHeight = prev.getPos().getY() + prev.getHeight();
+						prevHeight = prev.getPos().getY() + prev.getHeight() + 0.35f;
 						prevDist = (float) new Vec3d(prev.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition); 
 					}
 					TileRailBase next = directRailFromPosition(world, outPosition.add(offset));
@@ -206,7 +207,7 @@ public class MovementTrack {
 						next = directRailFromPosition(world, outPosition.add(offset).addVector(0, -1, 0));
 					}
 					if (next != null) {
-						nextHeight = next.getPos().getY() + next.getHeight();
+						nextHeight = next.getPos().getY() + next.getHeight() + 0.35f;
 						nextDist = (float) new Vec3d(next.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition);
 					}
 					
