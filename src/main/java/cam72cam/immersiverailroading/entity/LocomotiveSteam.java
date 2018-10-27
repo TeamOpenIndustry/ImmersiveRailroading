@@ -342,7 +342,7 @@ public class LocomotiveSteam extends Locomotive {
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
 				for (RenderComponent smoke : smokes) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(smoke.center(), this.rotationYaw + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 					if (this.ticksExisted % 1 == 0 ) {
 						float darken = 0;
@@ -386,7 +386,7 @@ public class LocomotiveSteam extends Locomotive {
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
 				) {
 				for (RenderComponent whistle : whistles) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(whistle.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(whistle.center(), this.rotationYaw + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 					
 					float darken = 0;
@@ -447,7 +447,7 @@ public class LocomotiveSteam extends Locomotive {
 					double phaseSpike = Math.pow(phase, 4);
 					
 					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
-						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(piston.min(), this.rotationYaw + 180));
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 						double accell = 0.3 * gauge.scale();
@@ -514,7 +514,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 				if (ConfigGraphics.particlesEnabled) {
 					for (RenderComponent steam : steams) {
-						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(steam.center(), this.rotationYaw + 180));
 						particlePos = particlePos.subtract(fakeMotion);
 						EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, steam.width());
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
