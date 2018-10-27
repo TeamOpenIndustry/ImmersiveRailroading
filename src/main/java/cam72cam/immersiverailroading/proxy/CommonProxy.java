@@ -170,7 +170,8 @@ public abstract class CommonProxy implements IGuiHandler {
     	}
     }
     
-    @SubscribeEvent
+    @SuppressWarnings("deprecation")
+	@SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
     {
 		event.getRegistry().register(IRBlocks.BLOCK_RAIL_GAG);
