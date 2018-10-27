@@ -49,7 +49,7 @@ public class OBJRender {
 	public void bindTexture(String texName) {
 		if (hasTexture()) {
 			int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-			if (texName == null) {
+			if (texName == null || !this.textures.containsKey(texName)) {
 				texName = DEFAULT_TEXTURE;
 			}
 			if (currentTexture != this.textures.get(texName).textureID) {
