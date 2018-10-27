@@ -138,7 +138,7 @@ public abstract class EntityRollingStockDefinition {
 		}
 		
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
-		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0).scale(internal_model_scale);
+		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble()-0.35, 0).scale(internal_model_scale);
 		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_model_scale;
 		passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_model_scale;
 		maxPassengers = passenger.get("slots").getAsInt();
