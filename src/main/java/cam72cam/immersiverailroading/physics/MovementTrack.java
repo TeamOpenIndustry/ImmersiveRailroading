@@ -96,8 +96,8 @@ public class MovementTrack {
 
 			// Calculate the two possible next positions (forward on the curve
 			// or backward on the curve)
-			Vec3d newpos = rail.getCenter().addVector(Math.sin(posRelYaw + yawDelt) * radius, 0, -Math.cos(posRelYaw + yawDelt) * radius);
-			Vec3d newneg = rail.getCenter().addVector(Math.sin(posRelYaw - yawDelt) * radius, 0, -Math.cos(posRelYaw - yawDelt) * radius);
+			Vec3d newpos = rail.getCenter().addVector(Math.sin(posRelYaw + yawDelt) * radius, 0.35, -Math.cos(posRelYaw + yawDelt) * radius);
+			Vec3d newneg = rail.getCenter().addVector(Math.sin(posRelYaw - yawDelt) * radius, 0.35, -Math.cos(posRelYaw - yawDelt) * radius);
 
 			// Return whichever position is closest to the estimated next
 			// position
@@ -114,7 +114,7 @@ public class MovementTrack {
 			
 			currentPosition = currentPosition.add(delta);
 			
-			Vec3d center = new Vec3d(rail.getParentTile().getPos()).addVector(0.5, 1, 0.5);
+			Vec3d center = new Vec3d(rail.getParentTile().getPos()).addVector(0.5, 1.35, 0.5);
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			
