@@ -2,8 +2,7 @@
 	"name": "A1 Peppercorn Tender",
 	"model": "immersiverailroading:models/rolling_stock/tender/a1_tender/a1_peppercorn_tender.obj",
     "tex_variants":[
-        "dark_blue",
-        "grey"
+        "dark_blue"
     ],
 	"darken_model": "-0.05",
 	"properties": {
