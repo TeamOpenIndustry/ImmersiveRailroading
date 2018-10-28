@@ -187,4 +187,15 @@ public class ItemTrackBlueprint extends Item {
 	public static void setPreview(ItemStack stack, boolean value) {
 		stack.getTagCompound().setBoolean("isPreview", value);
 	}
+
+	public static boolean isGradeCrossing(ItemStack stack) {
+		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("isGradeCrossing")) { 
+			return stack.getTagCompound().getBoolean("isGradeCrossing");
+		} else {
+			return false;
+		}
+	}
+	public static void setGradeCrossing(ItemStack stack, boolean value) {
+		stack.getTagCompound().setBoolean("isGradeCrossing", value);
+	}
 }

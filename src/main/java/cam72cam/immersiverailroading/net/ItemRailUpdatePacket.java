@@ -31,6 +31,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	private ItemStack bedStack;
 	private ItemStack railBedFill;
 	private boolean isPreview;
+	private boolean isGradeCrossing;
 	private BlockPos tilePreviewPos;
 	
 	public ItemRailUpdatePacket() {
@@ -38,7 +39,7 @@ public class ItemRailUpdatePacket implements IMessage {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
 		this.slot = slot;
 		this.length = length;
 		this.quarters = quarters;
@@ -47,11 +48,12 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = bedStack;
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
+		this.isGradeCrossing = isGradeCrossing;
 		this.gauge = gauge;
 		this.direction = direction;
 	}
 
-	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview) {
+	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
 		this.tilePreviewPos = tilePreviewPos;
 		this.length = length;
 		this.quarters = quarters;
@@ -60,6 +62,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = bedStack;
 		this.railBedFill = railBedFill;
 		this.isPreview = isPreview;
+		this.isGradeCrossing = isGradeCrossing;
 		this.gauge = gauge;
 		this.direction = direction;
 	}
@@ -80,6 +83,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		this.bedStack = ByteBufUtils.readItemStack(buf);
 		this.railBedFill = ByteBufUtils.readItemStack(buf);
 		this.isPreview = buf.readBoolean();
+		this.isGradeCrossing = buf.readBoolean();
 	}
 
 	@Override
@@ -99,6 +103,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		ByteBufUtils.writeItemStack(buf, bedStack);
 		ByteBufUtils.writeItemStack(buf, railBedFill);
 		buf.writeBoolean(isPreview);
+		buf.writeBoolean(isGradeCrossing);
 	}
 	
 	public static class Handler implements IMessageHandler<ItemRailUpdatePacket, IMessage> {
@@ -130,6 +135,7 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemTrackBlueprint.setBed(stack, message.bedStack);
 			ItemTrackBlueprint.setBedFill(stack, message.railBedFill);
 			ItemTrackBlueprint.setPreview(stack, message.isPreview);
+			ItemTrackBlueprint.setGradeCrossing(stack, message.isGradeCrossing);
 			if (message.tilePreviewPos == null) {
 				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 			} else {
