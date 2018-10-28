@@ -27,7 +27,7 @@ public class RenderStaticRiders {
 			Entity ent = (Entity) pass.cache;
 			GL11.glPushMatrix();
 			{
-				GL11.glTranslated(pos.x, pos.y - 0.5, pos.z);
+				GL11.glTranslated(pos.x, pos.y - 0.5 + 0.35, pos.z);
 				GL11.glRotated(pass.rotation, 0, 1, 0);
 	            Minecraft.getMinecraft().getRenderManager().renderEntity(ent, 0, 0, 0, 0, 0, false);
 			}
