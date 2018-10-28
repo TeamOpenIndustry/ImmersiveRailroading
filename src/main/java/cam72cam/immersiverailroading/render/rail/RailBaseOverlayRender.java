@@ -19,7 +19,7 @@ public class RailBaseOverlayRender {
 				BlockPos pos = base.getPos();
 				pos = pos.subtract(info.position);
 				GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ()+1);
-				GL11.glScaled(1, base.getHeight() + 0.2f, 1);
+				GL11.glScaled(1, base.getBedHeight() + 0.2f, 1);
 
 				GL11.glBegin(GL11.GL_QUADS);
 				// front

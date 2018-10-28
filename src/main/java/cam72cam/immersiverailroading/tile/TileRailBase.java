@@ -65,7 +65,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	private BlockPos parent;
-	private float height = 0;
+	private float bedHeight = 0;
+	private float railHeight = 0;
 	private Augment augment; 
 	private String augmentFilterID;
 	private int snowLayers = 0;
@@ -89,12 +90,19 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		return !world.isRemote || hasTileData;
 	}
 
-	public void setHeight(float height) {
-		this.height = height;
+	public void setBedHeight(float height) {
+		this.bedHeight = height;
 	}
-	public float getHeight() {
-		return this.height;
+	public float getBedHeight() {
+		return this.bedHeight;
 	}
+	public void setRailHeight(float height) {
+		this.railHeight = height;
+	}
+	public float getRailHeight() {
+		return this.railHeight;
+	}
+	
 	public void setAugment(Augment augment) {
 		this.augment = augment;
 		setAugmentFilter(null);
@@ -138,7 +146,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		this.markDirty();
 	}
 	public float getFullHeight() {
-		return this.height + this.snowLayers / 8.0f;
+		return this.bedHeight + this.snowLayers / 8.0f;
 	}
 	
 	public boolean handleSnowTick() {
@@ -219,7 +227,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		
 		
-		height = nbt.getFloat("height");
+		railHeight = bedHeight = nbt.getFloat("height");
 		snowLayers = nbt.getInteger("snowLayers");
 		flexible = nbt.getBoolean("flexible");
 		if (nbt.hasKey("replaced")) {
@@ -258,11 +266,15 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (nbt.hasKey("couplerMode")) {
 			couplerMode = CouplerAugmentMode.values()[nbt.getInteger("couplerMode")];
 		}
+		if (nbt.hasKey("railHeight")) {
+			railHeight = nbt.getFloat("railHeight");
+		}
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		setNBTBlockPos(nbt, "parent", parent);
-		nbt.setFloat("height", height);
+		nbt.setFloat("height", bedHeight);
+		nbt.setFloat("railHeight", railHeight);
 		nbt.setInteger("snowLayers", snowLayers);
 		nbt.setBoolean("flexible", flexible);
 		if (replaced != null) {
