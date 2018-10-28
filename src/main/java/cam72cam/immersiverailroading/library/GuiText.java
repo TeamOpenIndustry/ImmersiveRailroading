@@ -12,6 +12,7 @@ public enum GuiText {
 	SELECTOR_POSITION("selector.position"),
 	SELECTOR_DIRECTION("selector.direction"),
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),
+	SELECTOR_GRADE_CROSSING("selector.grade_crossing"),
 	SELECTOR_GAUGE("selector.gauge"),
 	SELECTOR_PLATE_TYPE("selector.plate_type"),
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),

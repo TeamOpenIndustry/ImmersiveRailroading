@@ -8,8 +8,7 @@ public enum TrackItems {
 	SLOPE,
 	TURN,
 	SWITCH,
-	TURNTABLE,
-	RAILROAD_CROSSING,
+	TURNTABLE
 	;
 	
 	@Override

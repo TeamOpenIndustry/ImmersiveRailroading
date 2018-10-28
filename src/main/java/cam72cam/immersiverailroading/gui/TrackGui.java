@@ -35,6 +35,7 @@ public class TrackGui extends GuiScreen {
 	private GuiTextField lengthInput;
 	private GuiSlider quartersSlider;
 	private GuiCheckBox isPreviewCB;
+	private GuiCheckBox isGradeCrossingCB;
 	private GuiButton gaugeButton;
 
 	private int slot;
@@ -42,6 +43,7 @@ public class TrackGui extends GuiScreen {
 	private int quarters;
 	private Gauge gauge;
 	private boolean isPreview;
+	private boolean isGradeCrossing;
 	private TrackItems type;
 	private TrackPositionType posType;
 	private TrackDirection direction;
@@ -92,6 +94,7 @@ public class TrackGui extends GuiScreen {
 		posType = ItemTrackBlueprint.getPosType(stack);
 		direction = ItemTrackBlueprint.getDirection(stack);
 		isPreview = ItemTrackBlueprint.isPreview(stack);
+		isGradeCrossing = ItemTrackBlueprint.isGradeCrossing(stack);
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
 		oreDict.add(new ItemStack(Items.AIR));
@@ -204,6 +207,9 @@ public class TrackGui extends GuiScreen {
 		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview);
 		this.buttonList.add(isPreviewCB);
 		
+		isGradeCrossingCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing);
+		this.buttonList.add(isGradeCrossingCB);
+		
 		bedSelector.initGui();
 	}
 
@@ -235,6 +241,9 @@ public class TrackGui extends GuiScreen {
 		if (button == isPreviewCB) {
 			isPreview = isPreviewCB.isChecked();
 		}
+		if (button == isGradeCrossingCB) {
+			isGradeCrossing = isGradeCrossingCB.isChecked();
+		}
 	}
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
@@ -244,10 +253,10 @@ public class TrackGui extends GuiScreen {
         	if (!this.lengthInput.getText().isEmpty()) {
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing));
         		} else {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing));
         		}
         	}
 			this.mc.displayGuiScreen(null);
