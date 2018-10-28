@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.util.math.Vec3d;
 
 public class RailRenderUtil {
 	public static void render(RailInfo info, boolean renderOverlay) {
@@ -26,9 +27,9 @@ public class RailRenderUtil {
 			// Move to offset position
 			//GL11.glTranslated(-info.getBuilder().getRenderOffset().getX(), 0, -info.getBuilder().getRenderOffset().getZ());
 			GL11.glPushMatrix();
-
-			GL11.glTranslated(-info.position.getX(), -info.position.getY(), -info.position.getZ());
-			GL11.glTranslated(Math.floor(info.placementPosition.x), Math.floor(info.placementPosition.y), Math.floor(info.placementPosition.z));
+				
+			Vec3d renderPos = info.placementPosition.subtract(new Vec3d(info.position));
+			GL11.glTranslated(Math.floor(renderPos.x), Math.floor(renderPos.y), Math.floor(renderPos.z));
 		
 		
 			RailBaseRender.draw(info.clone());

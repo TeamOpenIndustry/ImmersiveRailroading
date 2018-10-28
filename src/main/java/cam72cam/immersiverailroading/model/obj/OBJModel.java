@@ -19,7 +19,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
-	public List<String> materialPaths = new ArrayList<String>();
 	// LinkedHashMap is ordered
 	public Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
 	public double[] vertices;
@@ -68,7 +67,7 @@ public class OBJModel {
 				materialPaths.add(args[0]);
 				break;
 			case "usemtl":
-				currentMaterial = args[0];
+				currentMaterial = args[0].intern();
 				break;
 			case "o":
 			case "g":

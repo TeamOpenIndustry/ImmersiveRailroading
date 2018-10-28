@@ -9,6 +9,7 @@ import java.util.Map;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -18,24 +19,42 @@ import net.minecraft.util.math.Vec3d;
 
 public class OBJRender {
 
+	public static final String DEFAULT_TEXTURE = "DEFAULT";
 	public OBJModel model;
-	public OBJTextureSheet texture;
+	public Map<String, OBJTextureSheet> textures = new HashMap<String, OBJTextureSheet>();
 	private int prevTexture = -1;
 
 	public OBJRender(OBJModel model) {
+		this(model, null);
+	}
+	
+	public OBJRender(OBJModel model, List<String> textureNames) {
 		this.model = model;
-		this.texture = new OBJTextureSheet(model);
+		this.textures.put(DEFAULT_TEXTURE, new OBJTextureSheet(model));
+		if (textureNames != null && textureNames.size() > 1) {
+			for (String name : textureNames) {
+				this.textures.put(name, new OBJTextureSheet(model, name));
+			}
+		}
 	}
 
 	public boolean hasTexture() {
-		return texture.mappings.size() != 0;
+		return true;
 	}
+	
 	public void bindTexture() {
+		bindTexture(null);
+	}
+	
+	public void bindTexture(String texName) {
 		if (hasTexture()) {
 			int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-			if (currentTexture != this.texture.textureID) {
+			if (texName == null || !this.textures.containsKey(texName)) {
+				texName = DEFAULT_TEXTURE;
+			}
+			if (currentTexture != this.textures.get(texName).textureID) {
 				prevTexture  = currentTexture;
-				GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.texture.textureID);
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textures.get(texName).textureID);
 			}
 		}
 	}
@@ -113,17 +132,29 @@ public class OBJRender {
 
 		for (Face face : quads) {
 			Material currentMTL = model.materials.get(face.mtl);
-			float r = 0;
-			float g = 0;
-			float b = 0;
-			float a = 0;
-			if (currentMTL.Kd != null) {
-				float mult = 1 - model.darken * 5;
-				r = Math.max(0, currentMTL.Kd.get(0) * mult);
-				g = Math.max(0, currentMTL.Kd.get(1) * mult);
-				b = Math.max(0, currentMTL.Kd.get(2) * mult);
-				a = currentMTL.Kd.get(3);
+			float r = 1;
+			float g = 1;
+			float b = 1;
+			float a = 1;
+			if (currentMTL != null) {
+				if (currentMTL.Kd != null) {
+					float mult = 1 - model.darken * 5;
+					
+					if (!this.hasTexture()) {
+						r = currentMTL.Kd.get(0);
+						g = currentMTL.Kd.get(1);
+						b = currentMTL.Kd.get(2);
+					}
+					
+					r = Math.max(0, r * mult);
+					g = Math.max(0, g * mult);
+					b = Math.max(0, b * mult);
+					a = currentMTL.Kd.get(3);
+				}
+			} else {
+				ImmersiveRailroading.warn("Missing group %s", face.mtl);
 			}
+			OBJTextureSheet texture = textures.get(DEFAULT_TEXTURE);
 			for (int[] point : face.points()) {
 				Vec3d v = model.vertices(point[0]);
 				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
@@ -185,7 +216,9 @@ public class OBJRender {
 
 	public void freeGL() {
 		if (this.hasTexture()) {
-			this.texture.freeGL();
+			for (OBJTextureSheet texture : textures.values()) {
+				texture.freeGL();
+			}
 		}
 		if (this.displayList != null) {
 			GL11.glDeleteLists(this.displayList, 1);

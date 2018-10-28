@@ -41,8 +41,7 @@ public class RailBuilderRender {
 		
 		OBJRender model = info.gauge.isModel() ? baseRailModel : baseRailModelModel;
 
-		GL11.glTranslated(-info.position.getX(), -info.position.getY(), -info.position.getZ());
-		GL11.glTranslated(info.placementPosition.x, info.placementPosition.y, info.placementPosition.z); 
+		GL11.glTranslated(info.placementPosition.x-info.position.getX(), info.placementPosition.y-info.position.getY(), info.placementPosition.z-info.position.getZ()); 
 
 		String renderID = RailRenderUtil.renderID(info);
 		Integer displayList = displayLists.get(renderID);

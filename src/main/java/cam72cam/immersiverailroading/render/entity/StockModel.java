@@ -5,7 +5,6 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
@@ -19,8 +18,8 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
-import cam72cam.immersiverailroading.registry.CarFreightDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -33,8 +32,8 @@ import net.minecraft.util.math.Vec3d;
 public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
 
-	public StockModel(OBJModel objModel) {
-		super(objModel);
+	public StockModel(OBJModel objModel, List<String> textureNames) {
+		super(objModel, textureNames);
 	}
 
 	private boolean isBuilt;
@@ -88,7 +87,7 @@ public class StockModel extends OBJRender {
 			this.distanceTraveled = 0;
 		}
 
-		this.bindTexture();
+		this.bindTexture(stock.texture);
 		
 		if (stock instanceof LocomotiveSteam) {
 			drawSteamLocomotive((LocomotiveSteam) stock);
@@ -100,9 +99,34 @@ public class StockModel extends OBJRender {
 			draw();
 		}
 		
+		drawCargo(stock);
+		
 		this.restoreTexture();
 		
 		tex.restore();
+	}
+	
+	public void drawCargo(EntityRollingStock stock) {
+		if (stock instanceof Freight) {
+			Freight freight = (Freight) stock;
+			FreightDefinition def = freight.getDefinition();
+			int fill = freight.getPercentCargoFull();
+			
+			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
+			if (cargoLoads != null) {
+				//this sorts through all the cargoLoad objects
+				for (RenderComponent cargoLoad : cargoLoads) {
+					if (cargoLoad.id <= fill || (cargoLoad.id == 1)) {
+						drawComponent(cargoLoad);
+						
+						//if the stock should only render the current cargo load only it will stop at the highest matching number
+						if (def.shouldShowCurrentLoadOnly()) {
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void drawStandardStock(EntityMoveableRollingStock stock) {
@@ -112,29 +136,6 @@ public class StockModel extends OBJRender {
 		
 		drawComponent(def.getComponent(RenderComponentType.FRAME, stock.gauge));
 		drawComponent(def.getComponent(RenderComponentType.SHELL, stock.gauge));
-
-		//draw cargo
-		//called every tick
-		if (stock instanceof Freight) {
-			Freight freight = (Freight) stock;
-			CarFreightDefinition freightDef = (CarFreightDefinition) def;
-			int fill = freight.getPercentCargoFull();
-			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
-			
-			//this sorts through all the cargoLoad objects
-			if (cargoLoads != null) {
-				for (RenderComponent cargoLoad : cargoLoads) {
-					if (cargoLoad.id <= fill) {
-						drawComponent(cargoLoad);
-						
-						//if the stock should only render the current cargo load only it will stop at the highest matching number
-						if (freightDef.shouldShowCurrentLoadOnly()) {
-							break;
-						}
-					}
-				}
-			}
-		}
 		
 		drawFrameWheels(stock);
 
@@ -251,6 +252,16 @@ public class StockModel extends OBJRender {
 				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
 			}
 			break;
+		case TRI_WALSCHAERTS:{
+			List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
+			drawDrivingWheels(stock, wheels);
+			RenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+			RenderComponent wheel = wheels.get(wheels.size() / 2);
+			drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
+			drawWalschaerts(stock, "RIGHT", -240, wheel.height(), center.center(), wheel.center());
+			drawWalschaerts(stock, "CENTER", -120, wheel.height(), wheels.get(0).center(), wheels.get(0).center());
+			break;
+		}
 		case MALLET_WALSCHAERTS:
 			{
 				GL11.glPushMatrix();

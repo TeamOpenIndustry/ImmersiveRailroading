@@ -241,6 +241,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			passenger.setPositionAndUpdate(delta.x, passenger.posY, delta.z);
 			if (!world.isRemote) {
 				dismounts.put(passenger.getEntityId(), new Vec3d(delta.x, passenger.posY, delta.z));
+				passengerPositions.remove(passenger.getPersistentID());
+				sendToObserving(new PassengerPositionsPacket(this));
 			}
 		}
 	}
@@ -261,14 +263,14 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 	
 	public Vec3d dismountPos(Vec3d ppos) {
+		Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
+		pos = pos.add(ppos);
+		pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+		pos = pos.add(this.getPositionVector());
+		
 		Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
 		
-		ppos = ppos.add(this.getDefinition().getPassengerCenter(gauge));
-		Vec3d offppos = VecUtil.rotateYaw(ppos, this.rotationYaw);
-		
-		delta = delta.addVector(offppos.x, offppos.y, 0);
-		delta = delta.add(this.getPositionVector());
-		return new Vec3d(delta.x, this.posY, delta.z);
+		return delta.add(pos);
 	}
 
 	public void handlePassengerPositions(Map<UUID, Vec3d> passengerPositions) {

@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -42,6 +43,7 @@ public class StockItemModel implements IBakedModel {
 	private double scale;
 	private String defID;
 	private ImmutableList<BakedQuad> iconQuads;
+	private String texture;
 
 	public StockItemModel() {
 	}
@@ -54,6 +56,7 @@ public class StockItemModel implements IBakedModel {
 			stack.setCount(0);
 		}
 		iconQuads = null;
+		texture = ItemTextureVariant.get(stack);
 	}
 	
 	@Override
@@ -85,7 +88,7 @@ public class StockItemModel implements IBakedModel {
 			GL11.glPushMatrix();
 			double scale = 0.2 * Math.sqrt(this.scale);
 			GL11.glScaled(scale, scale, scale);
-			model.bindTexture();
+			model.bindTexture(texture);
 			model.draw();
 			model.restoreTexture();
 			GL11.glPopMatrix();

@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.StockDeathType;
+import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.EntityLiving;
@@ -52,6 +53,15 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 
 	public abstract int getInventorySize();
+
+	public boolean showCurrentLoadOnly() {
+		return this.getDefinition().shouldShowCurrentLoadOnly();
+	}
+	
+	@Override
+	public FreightDefinition getDefinition() {
+		return this.getDefinition(FreightDefinition.class);
+	}
 
 	/*
 	 * 
