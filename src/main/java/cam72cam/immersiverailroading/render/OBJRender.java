@@ -31,7 +31,7 @@ public class OBJRender {
 	public OBJRender(OBJModel model, List<String> textureNames) {
 		this.model = model;
 		this.textures.put(DEFAULT_TEXTURE, new OBJTextureSheet(model));
-		if (textureNames != null) {
+		if (textureNames != null && textureNames.size() > 1) {
 			for (String name : textureNames) {
 				this.textures.put(name, new OBJTextureSheet(model, name));
 			}
