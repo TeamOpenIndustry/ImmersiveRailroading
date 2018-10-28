@@ -17,7 +17,7 @@ public class BuilderRailroadCrossing extends BuilderBase {
 	protected float angle;
 	public int mainX;
 	public int mainZ;
-	protected HashSet<Pair<Float, Pair<Integer, Integer>>> positions;
+	protected HashSet<Pair<Pair<Integer, Integer>, Float>> positions;
 
 	public BuilderRailroadCrossing(RailInfo info, BlockPos pos) {
 		super(info, pos);
@@ -26,52 +26,28 @@ public class BuilderRailroadCrossing extends BuilderBase {
 			info.quarter = -info.quarter; 
 		}
 		
-		positions = new HashSet<Pair<Float, Pair<Integer, Integer>>>();
+		positions = new HashSet<Pair<Pair<Integer, Integer>, Float>>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
 		angle = info.quarter/4f * 90;
 		
 		double actualLength = info.length;
+		double horiz = gauge.value() + 2f  * gauge.scale();
+		double clamp = 0.17 * gauge.scale();
 		
 		for (float dist = 0; dist < actualLength; dist += 0.25) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
+			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
-				positions.add(Pair.of(0.18f * (float) gauge.scale(), Pair.of(posX, posZ)));
+				double height = (1 - Math.abs((int)q)/horiz)/3 - 0.05;
+				height *= gauge.scale();
+				height = Math.min(height, clamp);
+				
+				positions.add(Pair.of(Pair.of(posX, posZ), (float)height));
 				if (dist < 3 || dist > actualLength - 3) {
 					flexPositions.add(Pair.of(posX, posZ));
-				}
-			}
-		}
-		
-		for (float dist = 0; dist < actualLength; dist += 0.25) {
-			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			for (double q = -gauge.value() - 1f; q <= gauge.value() + 1f; q+=0.1) {
-				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
-				int posX = (int)(gagPos.x+nextUp.x);
-				int posZ = (int)(gagPos.z+nextUp.z);
-				if (!positions.contains(Pair.of(0.18f * (float) gauge.scale(), Pair.of(posX, posZ)))) {
-					positions.add(Pair.of(0.12f * (float) gauge.scale(), Pair.of(posX, posZ)));
-					if (dist < 3 || dist > actualLength - 3) {
-						flexPositions.add(Pair.of(posX, posZ));
-					}
-				}
-			}
-		}
-		
-		for (float dist = 0; dist < actualLength; dist += 0.25) {
-			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			for (double q = -gauge.value() - 2f; q <= gauge.value() + 2f; q+=0.1) {
-				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
-				int posX = (int)(gagPos.x+nextUp.x);
-				int posZ = (int)(gagPos.z+nextUp.z);
-				if (!positions.contains(Pair.of(0.18f * (float) gauge.scale(), Pair.of(posX, posZ))) && !positions.contains(Pair.of(0.12f * (float) gauge.scale(), Pair.of(posX, posZ)))) {
-					positions.add(Pair.of(0.04f * (float) gauge.scale(), Pair.of(posX, posZ)));
-					if (dist < 3 || dist > actualLength - 3) {
-						flexPositions.add(Pair.of(posX, posZ));
-					}
 				}
 			}
 		}
@@ -79,10 +55,10 @@ public class BuilderRailroadCrossing extends BuilderBase {
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
 		tracks.add(main);
-		main.setHeight(0.18f * (float) gauge.scale());
+		main.setHeight((float)clamp);
 		
-		for (Pair<Float, Pair<Integer, Integer>> pair : positions) {
-			Pair<Integer, Integer> posPair = pair.getRight();
+		for (Pair<Pair<Integer, Integer>, Float> pair : positions) {
+			Pair<Integer, Integer> posPair = pair.getLeft();
 			if (posPair.getLeft() == mainX && posPair.getRight() == mainZ) {
 				// Skip parent block
 				continue;
@@ -91,7 +67,7 @@ public class BuilderRailroadCrossing extends BuilderBase {
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
 			}
-			tg.setHeight(pair.getLeft());
+			tg.setHeight(pair.getRight());
 			tracks.add(tg);
 		}
 	}
