@@ -152,7 +152,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 			List<String> texNames = this.getDefinition().textureNames;
 			if (texNames.size() > 1) {
 				int idx = texNames.indexOf(this.texture);
-				idx = (idx + 1) % (texNames.size());
+				idx = (idx + (player.isSneaking() ? -1 : 1) + texNames.size()) % (texNames.size());
 				this.texture = texNames.get(idx);
 				this.sendToObserving(new PaintSyncPacket(this));
 				return true;
