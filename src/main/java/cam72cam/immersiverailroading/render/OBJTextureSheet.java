@@ -297,7 +297,7 @@ public class OBJTextureSheet {
 				rowHeight = 0;
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
-			currentX += tex.getAbsoluteWidth() + 1; // I HAVE NO IDEA WHY +1 FIXES THIS!!!
+			currentX += tex.getAbsoluteWidth(); // I HAVE NO IDEA WHY +1 FIXES THIS!!!
 			this.sheetWidth = Math.max(this.sheetWidth, currentX);
 			this.sheetHeight = Math.max(this.sheetHeight, currentY + rowHeight); 
 		}
@@ -315,8 +315,8 @@ public class OBJTextureSheet {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		
         ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
-        ImmersiveRailroading.debug("Sheet Width: %s", sheetWidth);
-        ImmersiveRailroading.debug("Sheet Height: %s", sheetHeight);
+        if (sheetWidth > maxSize || sheetHeight > maxSize)
+        ImmersiveRailroading.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
 
 		for (SubTexture tex : texs) {
 			ImmersiveRailroading.debug("%s copies %s x %s", tex.tex, tex.copiesU(), tex.copiesV());
