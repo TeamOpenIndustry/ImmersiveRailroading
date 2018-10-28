@@ -391,6 +391,11 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 	}
+	
+	@SubscribeEvent
+	public static void afterTextureStitch(TextureStitchEvent.Post event) {
+		StockRenderCache.tryPrime();
+	}
 
 	@SubscribeEvent
 	public static void onModelBakeEvent(ModelBakeEvent event) {
@@ -727,8 +732,6 @@ public class ClientProxy extends CommonProxy {
 		}
 		
 		if (world != null) {
-			StockRenderCache.tryPrime();
-			
 			if (magical == null) {
 				magical = new MagicEntity(world);
 				world.spawnEntity(magical);
