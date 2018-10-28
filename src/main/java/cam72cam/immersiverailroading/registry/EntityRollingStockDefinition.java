@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.registry;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,6 +15,8 @@ import java.util.regex.Pattern;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -126,15 +130,31 @@ public abstract class EntityRollingStockDefinition {
 		}
 		
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
+		textureNames = new ArrayList<String>();
+		textureNames.add(null);
 		if (data.has("tex_variants")) {
-			textureNames = new ArrayList<String>();
-			textureNames.add(null);
 			JsonElement variants = data.get("tex_variants");
 			for (JsonElement variant : variants.getAsJsonArray()) {
 				if (!variant.isJsonNull()) {
 					textureNames.add(variant.getAsString());
 				}
 			}
+		}
+		
+		ResourceLocation alt_textures = new ResourceLocation(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
+		try {
+		List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
+			for (InputStream input : alts) {
+				JsonParser parser = new JsonParser();
+				JsonElement variants = parser.parse(new InputStreamReader(input)).getAsJsonArray();
+				for (JsonElement variant : variants.getAsJsonArray()) {
+					if (!variant.isJsonNull()) {
+						textureNames.add(variant.getAsString());
+					}
+				}
+			}
+		} catch (java.io.FileNotFoundException ex) {
+			//ignore
 		}
 		
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
