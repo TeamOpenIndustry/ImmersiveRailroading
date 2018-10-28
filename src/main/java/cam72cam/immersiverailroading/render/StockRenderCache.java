@@ -1,14 +1,16 @@
 package cam72cam.immersiverailroading.render;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.entity.StockModel;
+import net.minecraftforge.fml.common.ProgressManager;
+import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
 
 public class StockRenderCache {
 	private static Map<String, StockModel> render_cache = new HashMap<String, StockModel>();
@@ -28,8 +30,19 @@ public class StockRenderCache {
 		}
 		isCachePrimed = true;
 		
+		ProgressBar origBar = null;
+		Iterator<ProgressBar> itr = ProgressManager.barIterator();
+		while (itr.hasNext()) {
+			origBar = itr.next();
+		}
+		
+		//This is terrible, I am sorry
+		ProgressManager.pop(origBar);
+		
+		ProgressBar bar = ProgressManager.push("Uploading IR Textures", DefinitionManager.getDefinitionNames().size());
+		
 		for (String def : DefinitionManager.getDefinitionNames()) {
-			ImmersiveRailroading.info("Priming Render Cache: %s", def);;
+			bar.step(DefinitionManager.getDefinition(def).name());
 			StockModel renderer = getRender(def);
 			if (ConfigGraphics.enableItemRenderPriming) {
 				renderer.bindTexture();
@@ -38,6 +51,8 @@ public class StockRenderCache {
 				ClientProxy.renderCacheLimiter.reset();
 			}
 		}
+
+		ProgressManager.pop(bar);
 	}
 
 	public static StockModel getRender(String defID) {
