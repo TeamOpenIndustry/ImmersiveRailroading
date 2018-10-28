@@ -150,7 +150,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_PAINT_BRUSH) {
 			List<String> texNames = this.getDefinition().textureNames;
-			if (texNames != null && texNames.size() != 1) {
+			if (texNames.size() > 1) {
 				int idx = texNames.indexOf(this.texture);
 				idx = (idx + 1) % (texNames.size());
 				this.texture = texNames.get(idx);
