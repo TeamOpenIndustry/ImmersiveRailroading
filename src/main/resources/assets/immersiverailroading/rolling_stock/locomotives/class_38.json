@@ -38,7 +38,7 @@
 		"quilling": [{
 			"pull_start": 0.25,
 			"pull_end": 0.55,
-			"pitch_start": 0.9,
+			"pitch_start": 1,
 			"pitch_end": 1,
 			"sample": "sounds/steam/whistles/nswgr_5chime.ogg"
 		}]

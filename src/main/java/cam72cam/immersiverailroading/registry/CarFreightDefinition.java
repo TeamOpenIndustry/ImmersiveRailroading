@@ -13,12 +13,11 @@ import cam72cam.immersiverailroading.entity.CarFreight;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class CarFreightDefinition extends EntityRollingStockDefinition {
+public class CarFreightDefinition extends FreightDefinition {
 
 	private int numSlots;
 	private int width;
 	private List<String> validCargo;
-	private boolean showCurrentLoadOnly;
 	
 	public CarFreightDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -38,10 +37,6 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 		this.validCargo = new ArrayList<String>();
 		for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
 			validCargo.add(el.getAsString());
-		}
-		this.showCurrentLoadOnly = false;
-		if (freight.has("show_current_load_only")) {
-			this.showCurrentLoadOnly = freight.get("show_current_load_only").getAsBoolean();
 		}
 	}
 	
@@ -63,10 +58,6 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 
 	public int getInventoryWidth(Gauge gauge) {
 		return MathHelper.ceil(width * gauge.scale());
-	}
-	
-	public boolean shouldShowCurrentLoadOnly () {
-		return this.showCurrentLoadOnly;
 	}
 	
 	@Override

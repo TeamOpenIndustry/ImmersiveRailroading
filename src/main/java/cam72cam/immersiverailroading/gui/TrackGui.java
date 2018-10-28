@@ -142,7 +142,7 @@ public class TrackGui extends GuiScreen {
 	
 	@Override
 	public void setGuiSize(int w, int h) {
-		this.setGuiSize(w, h);
+		super.setGuiSize(w, h);
 		bedSelector.setGuiSize(w, h);
 		bedFillSelector.setGuiSize(w, h);
 	}

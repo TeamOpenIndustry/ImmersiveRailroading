@@ -122,7 +122,7 @@ public class BuilderSwitch extends BuilderBase {
 			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
 			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.facing.getHorizontalAngle() + 90 + 180);
 			gagPos = gagPos.add(info.placementPosition);
-			if (gagPos.distanceTo(position) < gauge.scale()/4) {
+			if (gagPos.distanceTo(position.addVector(0, -0.35 * gauge.scale(), 0)) < gauge.scale()/4) {
 				return true;
 			}
 		}

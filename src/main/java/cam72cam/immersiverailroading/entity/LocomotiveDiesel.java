@@ -122,7 +122,7 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
-		if (stock instanceof LocomotiveDiesel) {
+		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
 			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
 			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());
 		}
@@ -141,7 +141,9 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void setThrottle(float newThrottle) {
 		realSetThrottle(newThrottle);
-		this.mapTrain(this, true, false, this::setThrottleMap);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::setThrottleMap);
+		}
 	}
 	
 	@Override
@@ -165,8 +167,8 @@ public class LocomotiveDiesel extends Locomotive {
 		if (world.isRemote) {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
-					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, gauge);
-					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
+					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, this.soundGauge());
+					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
 				}
 				
 				if (isRunning()) {
@@ -216,7 +218,7 @@ public class LocomotiveDiesel extends Locomotive {
 			float throttle = Math.abs(this.getThrottle()) + 0.05f;
 			if (exhausts != null && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180)).addVector(0, 0.35 * gauge.scale(), 0);
+					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateYaw(exhaust.center(), this.rotationYaw + 180));
 					
 					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
 					

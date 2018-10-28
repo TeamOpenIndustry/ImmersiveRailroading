@@ -81,9 +81,9 @@ public class ClientSound implements ISound {
 		}
 		
 		Minecraft.getMinecraft().mcProfiler.startSection("irSound");
-		
 		SoundSystem snd = sndSystem.get();
-		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * (float)Math.sqrt(Math.sqrt(gauge.scale()));
+		float rootedScale = (float)Math.sqrt(Math.sqrt(gauge.scale()));
+		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * rootedScale;
 		snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
 			
 		if (currentPos != null) {
@@ -91,7 +91,7 @@ public class ClientSound implements ISound {
 		}
 		
 		if (currentPos == null || velocity == null) {
-			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, currentPitch / (float)Math.sqrt(Math.sqrt(gauge.scale()))));
+			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, currentPitch / rootedScale));
 		} else {
 			//Doppler shift
 			
@@ -111,8 +111,8 @@ public class ClientSound implements ISound {
 				appliedPitch *= 1 - (newDist-origDist) * dopplerScale;
 			}
 			
-			sndSystem.get().setPitch(id, appliedPitch / (float)Math.sqrt(Math.sqrt(gauge.scale())));
-			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, appliedPitch / (float)Math.sqrt(Math.sqrt(gauge.scale()))));
+			sndSystem.get().setPitch(id, appliedPitch / rootedScale);
+			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, appliedPitch / rootedScale));
 		}
 
 		Minecraft.getMinecraft().mcProfiler.endSection();

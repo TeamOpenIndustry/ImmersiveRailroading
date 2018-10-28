@@ -9,3 +9,5 @@ Next, place down at least 2 lengths of track end-to-end to have enough space to 
 Continuing on with the creation of an A1 Peppercorn, we don't need another machine until we get to the point of creating the engine's firebox and boiler, using the [link{immersiverailroading:boiler-roller}]Boiler Roller[link{}] and [link{immersiverailroading:plate-rolling-machine}]Plate Rolling Machine[link{}].
 
 A word of warning: Steam Engines require a constant water supply when fueled, and if they boil off 75% or more of their water, there is a chance that they will explode. As such, it's a good idea to remove any fuel from idle Steam Engines, or ensure they have a constant supply of water through a Loader and fluid piping.
+
+Locomotives and cars can be instantly removed and picked up by using sneak + click on them.

@@ -19,6 +19,9 @@ public class Config {
 		@Comment({ "Enable Boiler Explosions" })
 		public static boolean explosionsEnabled = true;
 
+		@Comment({ "Enable environmental damage of Boiler Explosions"})
+		public static boolean explosionEnvDamageEnabled = true;
+		
 		@Comment({ "km/h to damage 1 heart on collision" })
 		public static double entitySpeedDamage = 10;
 
@@ -36,6 +39,9 @@ public class Config {
 
 		@Comment("Drop snowballs when the train can't push a block out of the way")
 		public static boolean dropSnowBalls = false;
+		
+		@Comment("Trains get destroyed by Mob explosions")
+		public static boolean trainMobExplosionDamage = true;
 	}
 
 	public static ConfigBalance balance;
@@ -101,7 +107,8 @@ public class Config {
 			Items.EMERALD.getRegistryName().toString()
 		};
 		
-		@Comment("Fuels for diesel Locomotives")
+		@Comment("Fuels for diesel Locomotives" + 
+				"\nNote: Naphtha of Thermal Foundation is internally registered as 'refined oil'.")
 		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();
 		static {
 			dieselFuels.clear();
@@ -120,6 +127,13 @@ public class Config {
 			dieselFuels.put("biofuel", 170);
 			dieselFuels.put("ethanol", 170);
 			dieselFuels.put("gasoline", 100);
+			//Thermal Foundation
+			dieselFuels.put("refined_fuel", 150);
+			dieselFuels.put("refined_oil", 100);
+			//PneumaticCraft
+			dieselFuels.put("lpg", 150);
+			dieselFuels.put("kerosene", 180);
+			dieselFuels.put("fuel", 180);
 			
 			// Other
 			dieselFuels.put("olive_oil", 40);

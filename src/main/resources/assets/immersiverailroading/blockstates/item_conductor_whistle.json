@@ -7,12 +7,22 @@
 	"variants": {
 		"normal": [{
 			"transform": {
-				"firstperson": {
+				"firstperson_righthand": {
 				  	"scale": 0.1,
 				  	"translation": [0, 0.2, -0.5],
 					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
 				},
-				"thirdperson": {
+				"firstperson_lefthand": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0.5],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"thirdperson_righthand": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0.5],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"thirdperson_lefthand": {
 				  	"scale": 0.1,
 				  	"translation": [0, 0.2, -0.5],
 					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]

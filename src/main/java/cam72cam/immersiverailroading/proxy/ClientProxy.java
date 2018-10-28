@@ -60,6 +60,7 @@ import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.item.StockItemModel;
 import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
+import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
@@ -164,7 +165,7 @@ public class ClientProxy extends CommonProxy {
 			dampeningAmount = ridableStock.getDefinition().dampeningAmount;
 		}
 	}
-
+	
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
 		TileMultiblock te;
@@ -213,7 +214,7 @@ public class ClientProxy extends CommonProxy {
 	public void preInit(FMLPreInitializationEvent event) throws IOException {
 		super.preInit(event);
 		if (ConfigSound.overrideSoundChannels) {
-			SoundSystemConfig.setNumberNormalChannels(2000);
+			SoundSystemConfig.setNumberNormalChannels(Math.max(SoundSystemConfig.getNumberNormalChannels(), 300));
 		}
 		
 		if (Loader.isModLoaded("igwmod")) {
@@ -324,6 +325,9 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
+		
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PAINT_BRUSH, 0,
+				new ModelResourceLocation(IRItems.ITEM_PAINT_BRUSH.getRegistryName(), ""));
 	}
 	
 	public static final class StockIcon extends TextureAtlasSprite
@@ -354,7 +358,7 @@ public class ClientProxy extends CommonProxy {
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
     				if (map[x][y] != null && map[x][y] != "") {
-    					int color = renderer.texture.samp(map[x][y]);
+    					int color = renderer.textures.get(OBJRender.DEFAULT_TEXTURE).samp(map[x][y]);
     					image.setRGB(x, this.getIconWidth() - (y + 1), color);
     				} else {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
@@ -386,6 +390,11 @@ public class ClientProxy extends CommonProxy {
 				event.getMap().setTextureEntry(new StockIcon(def));
 			}
 		}
+	}
+	
+	@SubscribeEvent
+	public static void afterTextureStitch(TextureStitchEvent.Post event) {
+		StockRenderCache.tryPrime();
 	}
 
 	@SubscribeEvent
@@ -577,9 +586,8 @@ public class ClientProxy extends CommonProxy {
 	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
 	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
 	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-	                GL11.glTranslated(-d0, -d1, -d2);
 	                
-	                GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
+	                GL11.glTranslated(pos.getX()-d0, pos.getY()-d1, pos.getZ()-d2);
 	                
 	                RailRenderUtil.render(info, true);
 
@@ -604,7 +612,7 @@ public class ClientProxy extends CommonProxy {
 	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
 	                GL11.glTranslated(-d0, -d1, -d2);
 	                
-	                GL11.glTranslated(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5);
+	                GL11.glTranslated(pos.getX()-d0+0.5, pos.getY()-d1+0.5, pos.getZ()-d2+0.5);
 	                
 	                if (Math.random() < 0.1) {
 	                }
@@ -676,7 +684,11 @@ public class ClientProxy extends CommonProxy {
 			ISound snd = sndCache.get(sndCacheId);
 			EntityMoveableRollingStock stock = ((EntityMoveableRollingStock)event.getEntity());
 			float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
-			snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
+			if(stock.getDefinition().shouldScalePitch()) {
+				snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
+			} else {
+				snd.setPitch((float) ((adjust + 0.7)));
+			}
 			snd.setVolume(0.01f + adjust);
 			snd.play(event.getEntity().getPositionVector());
 	    	sndCacheId++;
@@ -720,8 +732,6 @@ public class ClientProxy extends CommonProxy {
 		}
 		
 		if (world != null) {
-			StockRenderCache.tryPrime();
-			
 			if (magical == null) {
 				magical = new MagicEntity(world);
 				world.spawnEntity(magical);

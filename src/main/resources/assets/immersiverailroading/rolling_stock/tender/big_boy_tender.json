@@ -3,7 +3,7 @@
 	"model": "immersiverailroading:models/rolling_stock/tender/centipede_tender.obj",
 	"darken_model": "0.03",
 	"properties": {
-		"weight_kg": 74389
+		"weight_kg": 77719
 	},
 	"passenger": {
 		"slots": 1,
@@ -13,11 +13,11 @@
 		"width": 1.5
 	},
 	"tank": {
-		"capacity_l":  100000
+		"capacity_l":  91000
 	},
 	"tender": {
-		"slots": 80,
-		"width": 20
+		"slots": 40,
+		"width": 8
 	},
 	"trucks": {
 		"front": 5, 

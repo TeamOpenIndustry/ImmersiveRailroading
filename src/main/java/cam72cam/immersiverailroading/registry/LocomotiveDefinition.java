@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.Speed;
 
-public abstract class LocomotiveDefinition extends EntityRollingStockDefinition  {
+public abstract class LocomotiveDefinition extends FreightDefinition  {
 	private String works;
 	private int power;
 	private int traction;
