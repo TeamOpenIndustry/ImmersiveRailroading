@@ -21,7 +21,8 @@ public abstract class TrackBase {
 	protected int rel_y;
 	protected int rel_z;
 	private EnumFacing rel_rotation;
-	private float height;
+	private float bedHeight;
+	private float railHeight;
 
 	protected Block block;
 
@@ -88,7 +89,8 @@ public abstract class TrackBase {
 		} else {
 			tr.setParent(builder.getParentPos());
 		}
-		tr.setHeight(getHeight());
+		tr.setRailHeight(getRailHeight());
+		tr.setBedHeight(getBedHeight());
 		return tr;
 	}
 	public IBlockState getBlockState() {
@@ -108,12 +110,22 @@ public abstract class TrackBase {
 	public PosRot getPos() {
 		return builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
 	}
-	
+
 	public void setHeight(float height) {
-		this.height = height;
+		setBedHeight(height);
+		setRailHeight(height);
 	}
-	public float getHeight() {
-		return height;
+	public void setBedHeight(float height) {
+		this.bedHeight = height;
+	}
+	public float getBedHeight() {
+		return bedHeight;
+	}
+	public void setRailHeight(float height) {
+		this.railHeight = height;
+	}
+	public float getRailHeight() {
+		return railHeight;
 	}
 	public Gauge getGauge() {
 		return builder.gauge;

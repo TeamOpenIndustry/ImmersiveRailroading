@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -31,19 +32,33 @@ public class BuilderStraight extends BuilderBase {
 		}
 		
 		positions = new HashSet<Pair<Integer, Integer>>();
+		HashMap<Pair<Integer, Integer>, Float> heights = new HashMap<Pair<Integer, Integer>, Float>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
 		angle = info.quarter/4f * 90;
 		
 		double actualLength = info.length;
+		double horiz = gauge.value();
+		if (info.gradeCrossing) {
+			horiz += 2f  * gauge.scale();
+		}
+		double clamp = 0.17 * gauge.scale();
 		
 		for (float dist = 0; dist < actualLength; dist += 0.25) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			for (double q = -gauge.value(); q <= gauge.value(); q+=0.1) {
+			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + angle);
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
+				double height = (1 - Math.abs((int)q)/horiz)/3 - 0.05;
+				height *= gauge.scale();
+				height = Math.min(height, clamp);
+				
 				positions.add(Pair.of(posX, posZ));
+				heights.put(Pair.of(posX, posZ), (float)height);
+				if (Math.abs(q) > gauge.scale()) {
+					flexPositions.add(Pair.of(posX, posZ));
+				}
 				if (dist < 3 || dist > actualLength - 3) {
 					flexPositions.add(Pair.of(posX, posZ));
 				}
@@ -64,6 +79,9 @@ public class BuilderStraight extends BuilderBase {
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		TrackRail main = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
 		tracks.add(main);
+		if (info.gradeCrossing) {
+			main.setBedHeight((float)clamp);
+		}
 		
 		for (Pair<Integer, Integer> pair : positions) {
 			if (pair.getLeft() == mainX && pair.getRight() == mainZ) {
@@ -73,6 +91,9 @@ public class BuilderStraight extends BuilderBase {
 			TrackBase tg = new TrackGag(this, pair.getLeft(), 0, pair.getRight());
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
+			}
+			if (info.gradeCrossing) {
+				tg.setBedHeight(heights.get(pair));
 			}
 			tracks.add(tg);
 		}
