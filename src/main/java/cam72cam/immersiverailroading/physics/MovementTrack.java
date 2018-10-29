@@ -192,11 +192,11 @@ public class MovementTrack {
 			// Update y position
 			TileRailBase directRail = directRailFromPosition(world, outPosition);
 			if (directRail != null) {
-				outPosition = new Vec3d(outPosition.x, directRail.getPos().getY() + directRail.getHeight(), outPosition.z);
+				outPosition = new Vec3d(outPosition.x, directRail.getPos().getY() + directRail.getRailHeight(), outPosition.z);
 				if (rail.getType() == TrackItems.SLOPE) {
 					Vec3d offset = outPosition.subtract(currentPosition).normalize();
-					float prevHeight = directRail.getPos().getY() + directRail.getHeight();
-					float nextHeight = directRail.getPos().getY() + directRail.getHeight();
+					float prevHeight = directRail.getPos().getY() + directRail.getRailHeight();
+					float nextHeight = directRail.getPos().getY() + directRail.getRailHeight();
 					float prevDist = 0;
 					float nextDist = 0;
 					
@@ -208,7 +208,7 @@ public class MovementTrack {
 						prev = directRailFromPosition(world, outPosition.subtract(offset).addVector(0, -1, 0));
 					}
 					if (prev != null) {
-						prevHeight = prev.getPos().getY() + prev.getHeight();
+						prevHeight = prev.getPos().getY() + prev.getRailHeight();
 						prevDist = (float) new Vec3d(prev.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition); 
 					}
 					TileRailBase next = directRailFromPosition(world, outPosition.add(offset));
@@ -219,7 +219,7 @@ public class MovementTrack {
 						next = directRailFromPosition(world, outPosition.add(offset).addVector(0, -1, 0));
 					}
 					if (next != null) {
-						nextHeight = next.getPos().getY() + next.getHeight();
+						nextHeight = next.getPos().getY() + next.getRailHeight();
 						nextDist = (float) new Vec3d(next.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition);
 					}
 					

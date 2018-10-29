@@ -79,6 +79,7 @@ public abstract class BlockRailBase extends Block {
 		//ItemRail.setPosType(stack, )
 		ItemTrackBlueprint.setBed(stack, parent.getRailBed());
 		//ItemRail.setPreview(stack, )
+		//ItemTrackBlueprint.setGradeCrossing(stack, parent.getRailBed());
 		
 		return stack;
 	}
@@ -131,7 +132,7 @@ public abstract class BlockRailBase extends Block {
     	if (te != null) {
 			if (te.getRenderRailBed() != null) {
 				state = state.withProperty(RAIL_BED, te.getRenderRailBed());
-				state = state.withProperty(HEIGHT, te.getHeight());
+				state = state.withProperty(HEIGHT, te.getBedHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
 				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
