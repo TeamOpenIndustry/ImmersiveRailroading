@@ -90,6 +90,7 @@ public abstract class BlockRailBase extends Block {
 		if (te != null) {
 			if (te instanceof TileRail) {
 				((TileRail) te).spawnDrops();
+				ImmersiveRailroading.proxy.getWorldData((World) world).removeElectrical(pos);
 			}
 			
 			breakParentIfExists(te);
@@ -275,6 +276,13 @@ public abstract class BlockRailBase extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		if (worldIn.isRemote) {
+			ImmersiveRailroading.warn("%s", ImmersiveRailroading.proxy.getWorldData(worldIn).isElectrical(pos));
+			for (BlockPos connection : ImmersiveRailroading.proxy.getWorldData(worldIn).iterateElecrified(TileRailBase.get(worldIn, pos).getParent())) {
+				ImmersiveRailroading.info("MAIN %s", connection);
+			}
+		}
+		
 		ItemStack stack = playerIn.getHeldItem(hand);
 		Block block = Block.getBlockFromItem(stack.getItem());
 		TileRailBase te = TileRailBase.get(worldIn, pos);

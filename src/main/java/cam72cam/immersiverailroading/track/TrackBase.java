@@ -27,6 +27,7 @@ public abstract class TrackBase {
 	protected Block block;
 
 	private boolean flexible = false;
+	private boolean electrical = false;
 
 	private BlockPos parent;
 
@@ -91,6 +92,7 @@ public abstract class TrackBase {
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());
+		
 		return tr;
 	}
 	public IBlockState getBlockState() {
@@ -132,11 +134,19 @@ public abstract class TrackBase {
 	}
 
 	public void setFlexible() {
-		this.flexible  = true;
+		this.flexible = true;
 	}
 
 	public boolean isFlexible() {
 		return this.flexible;
+	}
+	
+	public void setElectrical() {
+		this.electrical = true;
+	}
+
+	public boolean isElectrical() {
+		return this.electrical;
 	}
 
 	public void overrideParent(BlockPos blockPos) {

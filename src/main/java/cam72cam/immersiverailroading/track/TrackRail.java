@@ -4,6 +4,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -39,6 +40,8 @@ public class TrackRail extends TrackBase {
 		tileRail.setRailBed(builder.info.railBed);
 		tileRail.setDrops(builder.drops);
 		tileRail.setGauge(builder.gauge);
+
+		ImmersiveRailroading.proxy.getWorldData(builder.world).addElectrical(tileRail.getPos(), builder.getElectrical());
 		
 		return tileRail;
 	}

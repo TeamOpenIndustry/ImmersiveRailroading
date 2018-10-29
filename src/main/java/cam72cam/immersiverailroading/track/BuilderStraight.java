@@ -34,6 +34,7 @@ public class BuilderStraight extends BuilderBase {
 		positions = new HashSet<Pair<Integer, Integer>>();
 		HashMap<Pair<Integer, Integer>, Float> heights = new HashMap<Pair<Integer, Integer>, Float>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
+		HashSet<Pair<Integer, Integer>> electricalPositions = new HashSet<Pair<Integer, Integer>>();
 		
 		angle = info.quarter/4f * 90;
 		
@@ -61,6 +62,9 @@ public class BuilderStraight extends BuilderBase {
 				}
 				if (dist < 3 || dist > actualLength - 3) {
 					flexPositions.add(Pair.of(posX, posZ));
+				}
+				if (dist < 0.5 || dist > actualLength - 0.5) {
+					electricalPositions.add(Pair.of(posX, posZ));
 				}
 			}
 			if (endOfTrack) {
@@ -91,6 +95,9 @@ public class BuilderStraight extends BuilderBase {
 			TrackBase tg = new TrackGag(this, pair.getLeft(), 0, pair.getRight());
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
+			}
+			if (electricalPositions.contains(pair)) {
+				tg.setElectrical();
 			}
 			if (info.gradeCrossing) {
 				tg.setBedHeight(heights.get(pair));

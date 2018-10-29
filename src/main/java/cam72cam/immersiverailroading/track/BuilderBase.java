@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
@@ -267,5 +268,10 @@ public abstract class BuilderBase {
 				world.destroyBlock(track.getPos().down(), false);
 			}
 		}
+	}
+
+	public List<BlockPos> getElectrical() {
+		//Cache me?
+		return this.tracks.stream().filter((TrackBase base) -> base.isElectrical()).map((TrackBase base) -> (BlockPos)base.getPos()).collect(Collectors.toList());
 	}
 }

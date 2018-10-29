@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
@@ -69,6 +71,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -90,6 +93,7 @@ public abstract class CommonProxy implements IGuiHandler {
 	protected static List<Class<? extends EntityRollingStock>> entityClasses = new ArrayList<Class<? extends EntityRollingStock>>();
 	protected String configDir;
 	private static String cacheDir;
+	private static Map<Integer, IRWorldData> worldData = new HashMap<Integer, IRWorldData>();
     static {
     	entityClasses.add(LocomotiveSteam.class);
     	entityClasses.add(LocomotiveDiesel.class);
@@ -254,6 +258,44 @@ public abstract class CommonProxy implements IGuiHandler {
 			}
 		}
 	}
+
+    
+    @SubscribeEvent
+    public static void onWorldLoad(WorldEvent.Load event) {
+    	if (event.getWorld().isRemote) {
+    		return;
+    	}
+    	
+    	IRWorldData data = (IRWorldData)event.getWorld().loadData(IRWorldData.class, ImmersiveRailroading.MODID);
+    	if (data == null) {
+    		data = new IRWorldData(ImmersiveRailroading.MODID);
+    	}
+    	worldData.put(event.getWorld().provider.getDimension(),  data);
+    }
+    
+    @SubscribeEvent
+    public static void onWorldSave(WorldEvent.Save event) {
+    	if (event.getWorld().isRemote) {
+    		return;
+    	}
+    	
+    	if (worldData.get(event.getWorld().provider.getDimension()) != null) {
+    		event.getWorld().setData(ImmersiveRailroading.MODID, worldData.get(event.getWorld().provider.getDimension()));
+    	}
+    }
+    
+    @SubscribeEvent
+    public static void onWorldUnload(WorldEvent.Unload event) {
+    	if (event.getWorld().isRemote) {
+    		return;
+    	}
+    	
+    	worldData.remove(event.getWorld().provider.getDimension());
+    }
+    
+    public IRWorldData getWorldData(World world) {
+    	return worldData.get(world.provider.getDimension());
+    }
 	
 	public abstract int getTicks();
 
