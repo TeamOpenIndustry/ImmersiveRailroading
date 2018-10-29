@@ -167,14 +167,13 @@ public class OBJTextureSheet {
 					int offY = originY + this.realHeight * cV;
 					
 					if (offX + realWidth > this.sheetWidth) {
-						realWidth = this.sheetWidth - offX;
+						return;
+					}
+					if (offY + realHeight > this.sheetHeight) {
+						return;
 					}
 					
 					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-
-					if (offX + realWidth >= this.sheetWidth) {
-						return;
-					}
 				}
 			}
 			pixels = null;
@@ -297,7 +296,7 @@ public class OBJTextureSheet {
 				rowHeight = 0;
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
-			currentX += tex.getAbsoluteWidth(); // I HAVE NO IDEA WHY +1 FIXES THIS!!!
+			currentX += tex.getAbsoluteWidth();
 			this.sheetWidth = Math.max(this.sheetWidth, currentX);
 			this.sheetHeight = Math.max(this.sheetHeight, currentY + rowHeight); 
 		}
