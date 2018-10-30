@@ -10,8 +10,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.lwjgl.BufferUtils;
@@ -228,12 +230,19 @@ public class OBJTextureSheet {
 		}
 		
 		mappings = new HashMap<String, SubTexture>();
+		Set<String> missing = new HashSet<String>();
 		for (String groupName : model.groups.keySet()) {
 			List<Face> quads = model.groups.get(groupName);
 			for (Face face : quads) {
 				String mtlName = face.mtl;
+				if (missing.contains(mtlName)) {
+					// Already warned about it
+					continue;
+				}
+				
 				if (!model.materials.containsKey(mtlName)) {
 					ImmersiveRailroading.warn("Missing material %s", mtlName);
+					missing.add(mtlName);
 					continue;
 				}
 				
@@ -250,6 +259,7 @@ public class OBJTextureSheet {
 							mappings.put(key, new SubTexture(kd, model.materials.get(mtlName).texKd, scaleFn));
 						} catch (IOException e) {
 							e.printStackTrace();
+							missing.add(mtlName);
 							continue;
 						}
 					}
