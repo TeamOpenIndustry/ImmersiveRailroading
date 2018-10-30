@@ -132,15 +132,22 @@ public class OBJRender {
 
 		for (Face face : quads) {
 			Material currentMTL = model.materials.get(face.mtl);
-			float r = 1;
-			float g = 1;
-			float b = 1;
+			float r = 0;
+			float g = 0;
+			float b = 0;
 			float a = 1;
+			
+			OBJTextureSheet texture = textures.get(DEFAULT_TEXTURE);
+			
 			if (currentMTL != null) {
 				if (currentMTL.Kd != null) {
 					float mult = 1 - model.darken * 5;
 					
-					if (!this.hasTexture()) {
+					if (texture.isFlatMaterial(face.mtl)) {
+						r = 1;
+						g = 1;
+						b = 1;
+					} else {
 						r = currentMTL.Kd.get(0);
 						g = currentMTL.Kd.get(1);
 						b = currentMTL.Kd.get(2);
@@ -154,7 +161,7 @@ public class OBJRender {
 			} else {
 				ImmersiveRailroading.warn("Missing group %s", face.mtl);
 			}
-			OBJTextureSheet texture = textures.get(DEFAULT_TEXTURE);
+			
 			for (int[] point : face.points()) {
 				Vec3d v = model.vertices(point[0]);
 				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
