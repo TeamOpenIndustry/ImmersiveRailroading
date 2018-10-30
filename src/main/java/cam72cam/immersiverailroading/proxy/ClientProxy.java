@@ -480,16 +480,16 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public InputStream getResourceStream(ResourceLocation modelLoc) throws IOException {
-		return Minecraft.getMinecraft().getResourceManager().getResource(modelLoc).getInputStream();
-	}
-	
-	@Override
 	public List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException {
 		List<InputStream> res = new ArrayList<InputStream>();
-		for (IResource resource : Minecraft.getMinecraft().getResourceManager().getAllResources(modelLoc)) {
-			res.add(resource.getInputStream());
+		try {
+			for (IResource resource : Minecraft.getMinecraft().getResourceManager().getAllResources(modelLoc)) {
+				res.add(resource.getInputStream());
+			}
+		} catch (java.io.FileNotFoundException ex) {
+			// Ignore
 		}
+		res.addAll(getFileResourceStreams(modelLoc));
 		return res;
 	}
 	
