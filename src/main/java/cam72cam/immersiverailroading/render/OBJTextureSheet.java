@@ -376,4 +376,17 @@ public class OBJTextureSheet {
 		}
 		return 0;
 	}
+
+	public boolean isFlatMaterial(String mtlName) {
+		if (model.materials.containsKey(mtlName)) {
+			ResourceLocation kd = model.materials.get(mtlName).texKd;
+			if (kd != null) {
+				mtlName = kd.toString();
+			}
+		}
+		if (mappings.containsKey(mtlName)) {
+			return mappings.get(mtlName).isFlatMaterial;
+		}
+		return false;
+	}
 }
