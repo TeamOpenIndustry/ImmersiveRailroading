@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.lwjgl.opengl.GL11;
 
@@ -32,7 +33,7 @@ import net.minecraft.util.math.Vec3d;
 public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
 
-	public StockModel(OBJModel objModel, List<String> textureNames) {
+	public StockModel(OBJModel objModel, Collection<String> textureNames) {
 		super(objModel, textureNames);
 	}
 

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -56,7 +57,7 @@ public abstract class EntityRollingStockDefinition {
 	public final String defID;
 	private String name = "Unknown";
 	private OBJModel model;
-	public List<String> textureNames = null;
+	public Map<String, String> textureNames = null;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
 	private float bogeyRear;
@@ -130,14 +131,12 @@ public abstract class EntityRollingStockDefinition {
 		}
 		
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
-		textureNames = new ArrayList<String>();
-		textureNames.add(null);
+		textureNames = new HashMap<String, String>();
+		textureNames.put("Default", null);
 		if (data.has("tex_variants")) {
 			JsonElement variants = data.get("tex_variants");
-			for (JsonElement variant : variants.getAsJsonArray()) {
-				if (!variant.isJsonNull()) {
-					textureNames.add(variant.getAsString());
-				}
+			for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
+				textureNames.put(variant.getValue().getAsString(), variant.getKey());
 			}
 		}
 		
@@ -147,10 +146,8 @@ public abstract class EntityRollingStockDefinition {
 			for (InputStream input : alts) {
 				JsonParser parser = new JsonParser();
 				JsonElement variants = parser.parse(new InputStreamReader(input)).getAsJsonArray();
-				for (JsonElement variant : variants.getAsJsonArray()) {
-					if (!variant.isJsonNull()) {
-						textureNames.add(variant.getAsString());
-					}
+				for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
+					textureNames.put(variant.getValue().getAsString(), variant.getKey());
 				}
 			}
 		} catch (java.io.FileNotFoundException ex) {

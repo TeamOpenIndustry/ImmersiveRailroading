@@ -11,7 +11,7 @@ public class ItemTextureVariant {
 		}
 		if (texture != null) {
 			EntityRollingStockDefinition def = ItemDefinition.get(stack);
-			if (def != null && def.textureNames.contains(texture)) {
+			if (def != null && def.textureNames.containsKey(texture)) {
 				stack.getTagCompound().setString("texture_variant", texture);
 				return;
 			}
@@ -23,7 +23,7 @@ public class ItemTextureVariant {
 		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("texture_variant")) {
 			EntityRollingStockDefinition def = ItemDefinition.get(stack);
 			String texture = stack.getTagCompound().getString("texture_variant");
-			if (texture != null && def != null && def.textureNames.contains(texture)) {
+			if (texture != null && def != null && def.textureNames.containsKey(texture)) {
 				return texture;
 			}
 		}
