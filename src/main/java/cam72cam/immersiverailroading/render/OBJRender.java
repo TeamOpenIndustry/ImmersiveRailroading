@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class OBJRender {
 		this(model, null);
 	}
 	
-	public OBJRender(OBJModel model, List<String> textureNames) {
+	public OBJRender(OBJModel model, Collection<String> textureNames) {
 		this.model = model;
 		this.textures.put(DEFAULT_TEXTURE, new OBJTextureSheet(model));
 		if (textureNames != null && textureNames.size() > 1) {

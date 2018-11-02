@@ -71,7 +71,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
     		ItemDefinition.setID(stack, defID);
 			overrideStackDisplayName(stack);
             if (def.textureNames.size() > 1) {
-            	for (String texture : def.textureNames) {
+            	for (String texture : def.textureNames.keySet()) {
 	            	ItemStack textured = stack.copy();
 	            	ItemTextureVariant.set(textured, texture);
 	            	items.add(textured);
@@ -103,8 +103,8 @@ public class ItemRollingStock extends BaseItemRollingStock {
         }
         tooltip.add(GuiText.GAUGE_TOOLTIP.toString(gauge));
         String texture = ItemTextureVariant.get(stack);
-        if (def.textureNames.size() > 1 && texture != null) {
-	        tooltip.add(GuiText.TEXTURE_TOOLTIP.toString(texture));
+        if (texture != null && def.textureNames.containsKey(texture)) {
+	        tooltip.add(GuiText.TEXTURE_TOOLTIP.toString(def.textureNames.get(texture)));
         }
     }
 	
