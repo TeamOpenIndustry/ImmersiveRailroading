@@ -459,7 +459,7 @@ public abstract class EntityRollingStockDefinition {
 				}
 			}
 		}
-		float[] depthCache = new float[model.faceVerts.length/3];
+		float[] depthCache = new float[model.faceVerts.length/9];
 		for (int f : faces) {
 			float sum = 0;
 			for (int[] point : model.points(f)) {
