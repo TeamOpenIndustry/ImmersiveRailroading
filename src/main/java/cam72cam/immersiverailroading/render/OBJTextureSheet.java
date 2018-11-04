@@ -218,6 +218,10 @@ public class OBJTextureSheet {
 	public OBJTextureSheet(OBJModel model, String texPrefix) {
 		this.model = model;
 		
+
+		model.offsetU =  new byte[model.faceVerts.length / 3];
+		model.offsetV =  new byte[model.faceVerts.length / 3];
+		
 		Function<Integer, Integer> scaleFn = null;
 		if (ConfigGraphics.textureScale != 1) {
 			scaleFn = (Integer val) -> {

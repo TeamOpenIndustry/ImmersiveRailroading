@@ -1,13 +1,14 @@
 package cam72cam.immersiverailroading.model.obj;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -39,7 +40,7 @@ public class OBJModel {
 
 	public OBJModel(ResourceLocation modelLoc, float darken, double scale) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
-		Scanner reader = new Scanner(input);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		this.darken = darken;
 
 		String currentGroupName = "defaultName";
@@ -62,8 +63,8 @@ public class OBJModel {
 			}
 		}; 
 
-		while (reader.hasNextLine()) {
-			String line = reader.nextLine();
+		String line;
+		while ((line = reader.readLine()) != null) {
 			
 			if (line.startsWith("#")) {
 				continue;
@@ -147,8 +148,6 @@ public class OBJModel {
 		this.vertexTextures = ArrayUtils.toPrimitive(vertexTextures.toArray(new Float[0]));
 		this.faceVerts = ArrayUtils.toPrimitive(faceVerts.toArray(new Integer[0]));
 		this.faceMTLs = faceMTLs.toArray(new String[0]);
-		this.offsetU =  new byte[this.faceVerts.length / 3];
-		this.offsetV =  new byte[this.faceVerts.length / 3];
 
 		if (materialPaths.size() == 0) {
 			return;
@@ -159,9 +158,8 @@ public class OBJModel {
 			Material currentMTL = null;
 
 			input = ImmersiveRailroading.proxy.getResourceStream(RelativeResource.getRelative(modelLoc, materialPath));
-			reader = new Scanner(input);
-			while (reader.hasNextLine()) {
-				String line = reader.nextLine();
+			reader = new BufferedReader(new InputStreamReader(input));
+			while ((line = reader.readLine()) != null) {
 				if (line.startsWith("#")) {
 					continue;
 				}
