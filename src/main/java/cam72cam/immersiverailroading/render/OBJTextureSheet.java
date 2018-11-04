@@ -21,7 +21,6 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
@@ -232,9 +231,9 @@ public class OBJTextureSheet {
 		mappings = new HashMap<String, SubTexture>();
 		Set<String> missing = new HashSet<String>();
 		for (String groupName : model.groups.keySet()) {
-			List<Face> quads = model.groups.get(groupName);
-			for (Face face : quads) {
-				String mtlName = face.mtl;
+			int[] quads = model.groups.get(groupName);
+			for (int face : quads) {
+				String mtlName = model.faceMTLs[face];
 				if (missing.contains(mtlName)) {
 					// Already warned about it
 					continue;
@@ -264,14 +263,16 @@ public class OBJTextureSheet {
 						}
 					}
 					List<Vec2f> vts = new ArrayList<Vec2f>();
-					for (int[] point : face.points()) {
+					for (int[] point : model.points(face)) {
 						Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 						if (vt != null) {
 							vts.add(vt);
 						}
 					}
 					if (vts.size() != 0) {
-						face.offsetUV = mappings.get(key).extendSpace(vts);
+						Vec2f offset = mappings.get(key).extendSpace(vts);
+						model.offsetU[face] = (byte) offset.x;
+						model.offsetV[face] = (byte) offset.y;
 					}
 				} else if (model.materials.get(mtlName).Kd != null) {
 					if (!mappings.containsKey(mtlName)) {
@@ -343,6 +344,16 @@ public class OBJTextureSheet {
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
 			currentX += tex.getAbsoluteWidth();
 		}
+		
+		double sum = 0;
+		float max = 0;
+		for (int i = 0; i < model.offsetU.length; i ++) {
+			if (model.offsetU[i] != 0 || model.offsetV[i] != 0) {
+				sum += 1;
+				max = Math.max(max, Math.max(model.offsetU[i], model.offsetV[i]));
+			}
+		}
+		ImmersiveRailroading.warn("UV %s%%   %s", sum / model.offsetU.length*100, max);
 	}
 	
 	public float convertU(String mtlName, float u) {

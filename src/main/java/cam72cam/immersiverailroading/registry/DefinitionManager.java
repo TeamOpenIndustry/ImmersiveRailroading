@@ -128,7 +128,7 @@ public class DefinitionManager {
 				}
 			}
 			
-	        ProgressBar bar = ProgressManager.push("Generating Heightmaps", steps);
+	        ProgressBar bar = ProgressManager.push("Loading Models", steps);
 	        
 	        
 	        for (String defType : defTypes) {
@@ -155,7 +155,26 @@ public class DefinitionManager {
 		}
 
 		System.gc();
-		ImmersiveRailroading.warn("%s %s", Runtime.getRuntime().freeMemory() - mem, Runtime.getRuntime().freeMemory());
+		System.gc();
+		System.gc();
+		System.gc();
+		ImmersiveRailroading.warn("Load Took: %s %s", Runtime.getRuntime().freeMemory() - mem, Runtime.getRuntime().freeMemory());
+		
+		ProgressBar bar = ProgressManager.push("Loading Models", definitions.size());
+		
+		for (EntityRollingStockDefinition def : definitions.values()) {
+			bar.step(def.name());
+			def.initHeightMap();
+		}
+		
+		ProgressManager.pop(bar);
+		
+
+		System.gc();
+		System.gc();
+		System.gc();
+		System.gc();
+		ImmersiveRailroading.warn("Generate Took: %s %s", Runtime.getRuntime().freeMemory() - mem, Runtime.getRuntime().freeMemory());
 	}
 
 	private static JsonObject getJsonData(String defID) throws IOException {
