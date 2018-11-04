@@ -21,7 +21,6 @@ import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
@@ -178,6 +177,7 @@ public class OBJTextureSheet {
 					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 				}
 			}
+			
 			pixels = null;
 		}
 		public int copiesU() {
@@ -219,6 +219,10 @@ public class OBJTextureSheet {
 	public OBJTextureSheet(OBJModel model, String texPrefix) {
 		this.model = model;
 		
+
+		model.offsetU =  new byte[model.faceVerts.length / 9];
+		model.offsetV =  new byte[model.faceVerts.length / 9];
+		
 		Function<Integer, Integer> scaleFn = null;
 		if (ConfigGraphics.textureScale != 1) {
 			scaleFn = (Integer val) -> {
@@ -232,9 +236,9 @@ public class OBJTextureSheet {
 		mappings = new HashMap<String, SubTexture>();
 		Set<String> missing = new HashSet<String>();
 		for (String groupName : model.groups.keySet()) {
-			List<Face> quads = model.groups.get(groupName);
-			for (Face face : quads) {
-				String mtlName = face.mtl;
+			int[] quads = model.groups.get(groupName);
+			for (int face : quads) {
+				String mtlName = model.faceMTLs[face];
 				if (missing.contains(mtlName)) {
 					// Already warned about it
 					continue;
@@ -264,14 +268,16 @@ public class OBJTextureSheet {
 						}
 					}
 					List<Vec2f> vts = new ArrayList<Vec2f>();
-					for (int[] point : face.points()) {
+					for (int[] point : model.points(face)) {
 						Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 						if (vt != null) {
 							vts.add(vt);
 						}
 					}
 					if (vts.size() != 0) {
-						face.offsetUV = mappings.get(key).extendSpace(vts);
+						Vec2f offset = mappings.get(key).extendSpace(vts);
+						model.offsetU[face] = (byte) offset.x;
+						model.offsetV[face] = (byte) offset.y;
 					}
 				} else if (model.materials.get(mtlName).Kd != null) {
 					if (!mappings.containsKey(mtlName)) {
