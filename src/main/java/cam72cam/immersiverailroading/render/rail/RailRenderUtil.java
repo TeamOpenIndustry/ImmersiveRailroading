@@ -32,8 +32,8 @@ public class RailRenderUtil {
 			GL11.glTranslated(Math.floor(renderPos.x), Math.floor(renderPos.y), Math.floor(renderPos.z));
 		
 		
-			RailBaseRender.draw(info.clone());
-			RailBaseOverlayRender.draw(info.clone());
+			RailBaseRender.draw(info);
+			RailBaseOverlayRender.draw(info);
 			GL11.glPopMatrix();
 		}
 		
@@ -98,6 +98,9 @@ public class RailRenderUtil {
 
 	public static String renderID(RailInfo info) {
 		//TODO more attributes like railbed
-		return String.format("%s%s%s%s%s%s%s%s%s%s%s", info.facing, info.type, info.direction, info.length, info.quarter, info.quarters, info.switchState, info.railBed, info.gauge, info.tablePos, info.gradeCrossing);
+		if(info.renderIdCache == null) {
+			info.renderIdCache = String.format("%s%s%s%s%s%s%s%s%s%s%s", info.facing, info.type, info.direction, info.length, info.quarter, info.quarters, info.switchState, info.railBed, info.gauge, info.tablePos, info.gradeCrossing);
+		}
+		return info.renderIdCache;
 	}
 }
