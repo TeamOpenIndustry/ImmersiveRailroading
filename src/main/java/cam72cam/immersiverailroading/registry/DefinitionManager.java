@@ -83,9 +83,6 @@ public class DefinitionManager {
 	}
 
 	public static void initDefinitions() throws IOException {
-		System.gc();
-		long mem = Runtime.getRuntime().freeMemory();
-
 		initGauges();
 		
 		definitions = new LinkedHashMap<String, EntityRollingStockDefinition>();
@@ -153,14 +150,7 @@ public class DefinitionManager {
 			
 			ProgressManager.pop(bar);
 		}
-
-		System.gc();
-		System.gc();
-		System.gc();
-		System.gc();
-		ImmersiveRailroading.warn("Load Took: %s %s", Runtime.getRuntime().freeMemory() - mem, Runtime.getRuntime().freeMemory());
-		
-		ProgressBar bar = ProgressManager.push("Loading Models", definitions.size());
+		ProgressBar bar = ProgressManager.push("Generating Heightmap", definitions.size());
 		
 		for (EntityRollingStockDefinition def : definitions.values()) {
 			bar.step(def.name());
@@ -168,13 +158,6 @@ public class DefinitionManager {
 		}
 		
 		ProgressManager.pop(bar);
-		
-
-		System.gc();
-		System.gc();
-		System.gc();
-		System.gc();
-		ImmersiveRailroading.warn("Generate Took: %s %s", Runtime.getRuntime().freeMemory() - mem, Runtime.getRuntime().freeMemory());
 	}
 
 	private static JsonObject getJsonData(String defID) throws IOException {

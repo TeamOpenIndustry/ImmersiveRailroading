@@ -379,7 +379,7 @@ public abstract class EntityRollingStockDefinition {
 	}
 	
 	public void initHeightMap() {
-		ImmersiveRailroading.info("Generating model heightmap...");
+		ImmersiveRailroading.info("Generating heightmap %s", defID);
 		
 		double ratio = 8;
 		xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
