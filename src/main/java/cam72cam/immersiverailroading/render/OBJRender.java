@@ -19,7 +19,6 @@ import net.minecraft.util.math.Vec3d;
 
 public class OBJRender {
 
-	public static final String DEFAULT_TEXTURE = "DEFAULT";
 	public OBJModel model;
 	public Map<String, OBJTextureSheet> textures = new HashMap<String, OBJTextureSheet>();
 	private int prevTexture = -1;
@@ -30,11 +29,12 @@ public class OBJRender {
 	
 	public OBJRender(OBJModel model, Collection<String> textureNames) {
 		this.model = model;
-		this.textures.put(DEFAULT_TEXTURE, new OBJTextureSheet(model));
 		if (textureNames != null && textureNames.size() > 1) {
 			for (String name : textureNames) {
 				this.textures.put(name, new OBJTextureSheet(model, name));
 			}
+		} else {
+			this.textures.put(null, new OBJTextureSheet(model));
 		}
 	}
 
@@ -49,8 +49,8 @@ public class OBJRender {
 	public void bindTexture(String texName) {
 		if (hasTexture()) {
 			int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-			if (texName == null || !this.textures.containsKey(texName)) {
-				texName = DEFAULT_TEXTURE;
+			if (this.textures.get(texName) == null) {
+				texName = null; // Default
 			}
 			if (currentTexture != this.textures.get(texName).textureID) {
 				prevTexture  = currentTexture;
@@ -140,7 +140,7 @@ public class OBJRender {
 			float b = 0;
 			float a = 1;
 			
-			OBJTextureSheet texture = textures.get(DEFAULT_TEXTURE);
+			OBJTextureSheet texture = textures.get(null);
 			
 			if (currentMTL != null) {
 				if (currentMTL.Kd != null) {

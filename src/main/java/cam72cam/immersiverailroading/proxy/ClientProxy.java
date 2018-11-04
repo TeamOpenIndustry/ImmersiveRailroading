@@ -358,7 +358,7 @@ public class ClientProxy extends CommonProxy {
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
     				if (map[x][y] != null && map[x][y] != "") {
-    					int color = renderer.textures.get(OBJRender.DEFAULT_TEXTURE).samp(map[x][y]);
+    					int color = renderer.textures.get(null).samp(map[x][y]);
     					image.setRGB(x, this.getIconWidth() - (y + 1), color);
     				} else {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
