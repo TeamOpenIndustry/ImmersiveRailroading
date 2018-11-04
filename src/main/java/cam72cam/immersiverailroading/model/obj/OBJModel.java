@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.model.obj;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,7 +44,7 @@ public class OBJModel {
 
 		String currentGroupName = "defaultName";
 		List<Integer> currentGroup = new ArrayList<Integer>();
-		groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
+		groups.put(currentGroupName, new int[0]);
 		List<String> materialPaths = new ArrayList<String>();
 		String currentMaterial = null;
 		
@@ -72,56 +71,55 @@ public class OBJModel {
 			if (line.length() == 0) {
 				continue;
 			}
-			String[] parts = line.split(" ");
-			String cmd = parts[0];
-			String[] args = Arrays.copyOfRange(parts, 1, parts.length);
+			String[] args = line.split(" ");
+			String cmd = args[0];
 			switch (cmd) {
 			case "mtllib":
-				materialPaths.add(args[0]);
+				materialPaths.add(args[1]);
 				break;
 			case "usemtl":
-				currentMaterial = args[0].intern();
+				currentMaterial = args[1].intern();
 				break;
 			case "o":
 			case "g":
 				groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
-				currentGroupName = args[0].intern();
+				currentGroupName = args[1].intern();
 				currentGroup = new ArrayList<Integer>();
 				break;
 			case "v":
-				vertices.add(Float.parseFloat(args[0]) * (float)scale);
 				vertices.add(Float.parseFloat(args[1]) * (float)scale);
 				vertices.add(Float.parseFloat(args[2]) * (float)scale);
+				vertices.add(Float.parseFloat(args[3]) * (float)scale);
 				break;
 			case "vn":
-				vertexNormals.add(Float.parseFloat(args[0]));
 				vertexNormals.add(Float.parseFloat(args[1]));
 				vertexNormals.add(Float.parseFloat(args[2]));
+				vertexNormals.add(Float.parseFloat(args[3]));
 				break;
 			case "vt":
-				vertexTextures.add(Float.parseFloat(args[0]));
 				vertexTextures.add(Float.parseFloat(args[1]));
+				vertexTextures.add(Float.parseFloat(args[2]));
 				break;
 			case "f":
 				int idx;
-				if (args.length == 3) {
-					addFace.accept(args);
+				if (args.length == 4) {
+					addFace.accept(new String[] {args[1], args[2], args[3]});
 					idx = faceMTLs.size();
 					faceMTLs.add(currentMaterial);
 					currentGroup.add(idx);
-				} else if (args.length == 4) {
-					addFace.accept(new String[] {args[0], args[1], args[2]});
+				} else if (args.length == 5) {
+					addFace.accept(new String[] {args[1], args[2], args[3]});
 					idx = faceMTLs.size();
 					faceMTLs.add(currentMaterial);
 					currentGroup.add(idx);
 					
-					addFace.accept(new String[] {args[2], args[3], args[0]});
+					addFace.accept(new String[] {args[3], args[4], args[1]});
 					idx = faceMTLs.size();
 					faceMTLs.add(currentMaterial);
 					currentGroup.add(idx);
 				} else {
-					for (int i = 2; i < args.length; i++) {
-						addFace.accept(new String[] {args[0], args[i-1], args[i]});
+					for (int i = 2; i < args.length-1; i++) {
+						addFace.accept(new String[] {args[1], args[i], args[i+1]});
 						idx = faceMTLs.size();
 						faceMTLs.add(currentMaterial);
 						currentGroup.add(idx);
@@ -264,6 +262,7 @@ public class OBJModel {
 	private Map<Iterable<String>, Vec3d> mins = new HashMap<Iterable<String>, Vec3d>();
 	public Vec3d minOfGroup(Iterable<String> groupNames) {
 		if (!mins.containsKey(groupNames)) {
+			
 			Vec3d min = null;
 			for (String group : groupNames) {
 				int[] faces = groups.get(group);
