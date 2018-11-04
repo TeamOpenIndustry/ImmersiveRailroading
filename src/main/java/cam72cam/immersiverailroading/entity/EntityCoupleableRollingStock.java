@@ -382,7 +382,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	// This breaks with looped rolling stock
 	private boolean simulateMove(EntityCoupleableRollingStock parent, int tickOffset) {
 		if (this.positions.size() < tickOffset) {
-			ImmersiveRailroading.warn("MISSING START POS " + tickOffset);
+			ImmersiveRailroading.debug("MISSING START POS " + tickOffset);
 			return true;
 		}
 		
