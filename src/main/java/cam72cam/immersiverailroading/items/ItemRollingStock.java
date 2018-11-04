@@ -103,7 +103,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
         }
         tooltip.add(GuiText.GAUGE_TOOLTIP.toString(gauge));
         String texture = ItemTextureVariant.get(stack);
-        if (texture != null && def.textureNames.containsKey(texture)) {
+        if (texture != null && def.textureNames.get(texture) != null) {
 	        tooltip.add(GuiText.TEXTURE_TOOLTIP.toString(def.textureNames.get(texture)));
         }
     }

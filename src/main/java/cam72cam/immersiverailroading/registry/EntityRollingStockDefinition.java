@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -131,7 +132,7 @@ public abstract class EntityRollingStockDefinition {
 		}
 		
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
-		textureNames = new HashMap<String, String>();
+		textureNames = new LinkedHashMap<String, String>();
 		textureNames.put("Default", null);
 		if (data.has("tex_variants")) {
 			JsonElement variants = data.get("tex_variants");
@@ -142,7 +143,7 @@ public abstract class EntityRollingStockDefinition {
 		
 		ResourceLocation alt_textures = new ResourceLocation(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
 		try {
-		List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
+			List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
 			for (InputStream input : alts) {
 				JsonParser parser = new JsonParser();
 				JsonElement variants = parser.parse(new InputStreamReader(input)).getAsJsonArray();
