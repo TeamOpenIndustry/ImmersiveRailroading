@@ -177,6 +177,7 @@ public class OBJTextureSheet {
 					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 				}
 			}
+			
 			pixels = null;
 		}
 		public int copiesU() {
@@ -219,8 +220,8 @@ public class OBJTextureSheet {
 		this.model = model;
 		
 
-		model.offsetU =  new byte[model.faceVerts.length / 3];
-		model.offsetV =  new byte[model.faceVerts.length / 3];
+		model.offsetU =  new byte[model.faceVerts.length / 9];
+		model.offsetV =  new byte[model.faceVerts.length / 9];
 		
 		Function<Integer, Integer> scaleFn = null;
 		if (ConfigGraphics.textureScale != 1) {
@@ -348,16 +349,6 @@ public class OBJTextureSheet {
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
 			currentX += tex.getAbsoluteWidth();
 		}
-		
-		double sum = 0;
-		float max = 0;
-		for (int i = 0; i < model.offsetU.length; i ++) {
-			if (model.offsetU[i] != 0 || model.offsetV[i] != 0) {
-				sum += 1;
-				max = Math.max(max, Math.max(model.offsetU[i], model.offsetV[i]));
-			}
-		}
-		ImmersiveRailroading.warn("UV %s%%   %s", sum / model.offsetU.length*100, max);
 	}
 	
 	public float convertU(String mtlName, float u) {
