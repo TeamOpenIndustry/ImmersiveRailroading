@@ -28,7 +28,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -102,8 +101,6 @@ public abstract class EntityRollingStockDefinition {
 		parseJson(data);
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
-		
-		initHeightMap();
 	}
 	
 	public boolean shouldScalePitch() {
@@ -381,7 +378,7 @@ public abstract class EntityRollingStockDefinition {
 		}
 	}
 	
-	private void initHeightMap() {
+	public void initHeightMap() {
 		ImmersiveRailroading.info("Generating model heightmap...");
 		
 		double ratio = 8;
@@ -397,12 +394,12 @@ public abstract class EntityRollingStockDefinition {
 				}
 				double[][] heightMap = new double[xRes][zRes];
 				for (String group : rc.modelIDs) {
-					List<Face> faces = model.groups.get(group);
-					for (Face face : faces) {
+					int[] faces = model.groups.get(group);
+					for (int face : faces) {
 						Path2D path = new Path2D.Double();
 						double fheight = 0;
 						boolean first = true;
-						for (int[] point : face.points()) {
+						for (int[] point : model.points(face)) {
 							Vec3d vert = model.vertices(point[0]);
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
@@ -411,7 +408,7 @@ public abstract class EntityRollingStockDefinition {
 							} else {
 								path.lineTo(vert.x * ratio, vert.z * ratio);
 							}
-							fheight += vert.y / face.points().length;
+							fheight += vert.y / 3; // We know we are using tris
 						}
 						Rectangle2D bounds = path.getBounds2D();
 						if (bounds.getWidth() * bounds.getHeight() < 1) {
@@ -449,46 +446,41 @@ public abstract class EntityRollingStockDefinition {
 			xoff = (this.heightBounds - this.widthBounds) / 2;
 		}
 		
-		List<Face> faces = new ArrayList<Face>();
+		List<Integer> faces = new ArrayList<Integer>();
 		for (List<RenderComponent> rcl : this.renderComponents.values()) {
 			for (RenderComponent rc : rcl) {
 				if (!rc.type.collisionsEnabled) {
 					continue;
 				}
 				for (String group : rc.modelIDs) {
-					faces.addAll(model.groups.get(group));
+					for (int face : model.groups.get(group)) {
+						faces.add(face);
+					}
 				}
 			}
 		}
+		float[] depthCache = new float[model.faceVerts.length/3];
+		for (int f : faces) {
+			float sum = 0;
+			for (int[] point : model.points(f)) {
+				Vec3d pt = model.vertices(point[0]);
+				sum += pt.x;
+			}
+			depthCache[f] = sum / 3; //We know it's a tri
+		}
 		
-		faces.sort(new Comparator<Face>() {
+		faces.sort(new Comparator<Integer>() {
 			@Override
-			public int compare(Face o1, Face o2) {
-				if (o1.depthCache == null) {
-					double sum = 0;
-					for (int[] point : o1.points()) {
-						Vec3d pt = model.vertices(point[0]);
-						sum += pt.x;
-					}
-					o1.depthCache = (float) (sum / o1.points().length);
-				}
-				if (o2.depthCache == null) {
-					double sum = 0;
-					for (int[] point : o2.points()) {
-						Vec3d pt = model.vertices(point[0]);
-						sum += pt.x;
-					}
-					o2.depthCache = (float) (sum / o2.points().length);
-				}
-				return o1.depthCache.compareTo(o2.depthCache);
+			public int compare(Integer o1, Integer o2) {
+				return Float.compare(depthCache[o1], depthCache[o2]);
 			}
 		});
 		
-		for (Face face : faces) {
-			Material mtl = model.materials.get(face.mtl);
+		for (int f : faces) {
+			Material mtl = model.materials.get(model.faceMTLs[f]);
 			Path2D path = new Path2D.Double();
 			boolean first = true;
-			for (int[] point : face.points()) {
+			for (int[] point : model.points(f)) {
 				Vec3d vert = model.vertices(point[0]);
 				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {

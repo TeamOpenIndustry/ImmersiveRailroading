@@ -11,7 +11,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
@@ -115,7 +114,7 @@ public class OBJRender {
 	}
 
 	public void drawDirectGroups(Iterable<String> groupNames, double scale) {
-		List<Face> quads = new ArrayList<Face>();
+		List<Integer> quads = new ArrayList<Integer>();
 		boolean has_vn = true;
 
 		for (String group : groupNames) {
@@ -123,7 +122,9 @@ public class OBJRender {
 				//Skip particle emitters
 				continue;
 			}
-			quads.addAll(model.groups.get(group));
+			for (int face : model.groups.get(group)) {
+				quads.add(face);
+			}
 		}
 
 		FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(quads.size() * 3 * 3);
@@ -131,8 +132,9 @@ public class OBJRender {
 		FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(quads.size() * 3 * 4);
 		FloatBuffer texBuffer = BufferUtils.createFloatBuffer(quads.size() * 3 * 2);
 
-		for (Face face : quads) {
-			Material currentMTL = model.materials.get(face.mtl);
+		for (int face : quads) {
+			String mtlName = model.faceMTLs[face];
+			Material currentMTL = model.materials.get(mtlName);
 			float r = 0;
 			float g = 0;
 			float b = 0;
@@ -144,7 +146,7 @@ public class OBJRender {
 				if (currentMTL.Kd != null) {
 					float mult = 1 - model.darken * 5;
 					
-					if (texture.isFlatMaterial(face.mtl)) {
+					if (texture.isFlatMaterial(mtlName)) {
 						r = 1;
 						g = 1;
 						b = 1;
@@ -160,10 +162,10 @@ public class OBJRender {
 					a = currentMTL.Kd.get(3);
 				}
 			} else {
-				ImmersiveRailroading.warn("Missing group %s", face.mtl);
+				ImmersiveRailroading.warn("Missing group %s", mtlName);
 			}
 			
-			for (int[] point : face.points()) {
+			for (int[] point : model.points(face)) {
 				Vec3d v = model.vertices(point[0]);
 				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 				Vec3d vn = point[2] != -1 ? model.vertexNormals(point[2]) : null;
@@ -179,11 +181,11 @@ public class OBJRender {
 					has_vn = false;
 				}
 				if (vt != null) {
-					texBuffer.put(texture.convertU(face.mtl, vt.x - face.offsetUV.x));
-					texBuffer.put(texture.convertV(face.mtl, -(vt.y) - face.offsetUV.y));
+					texBuffer.put(texture.convertU(mtlName, vt.x - model.offsetU[face]));
+					texBuffer.put(texture.convertV(mtlName, -(vt.y) - model.offsetV[face]));
 				} else {
-					texBuffer.put(texture.convertU(face.mtl, 0));
-					texBuffer.put(texture.convertV(face.mtl, 0));
+					texBuffer.put(texture.convertU(mtlName, 0));
+					texBuffer.put(texture.convertV(mtlName, 0));
 				}
 				colorBuffer.put(r);
 				colorBuffer.put(g);
