@@ -49,13 +49,14 @@ public class RailBuilderRender {
 
 			if (!ClientProxy.renderCacheLimiter.canRender()) {
 				return;
-			}
+			}		
+			final RailInfo infoClone = info.clone();
 			
 			displayList = ClientProxy.renderCacheLimiter.newList(() -> {		
 			
-			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
+			for (VecYawPitch piece : infoClone.getBuilder().getRenderData()) {
 				GL11.glPushMatrix();
-				GL11.glRotatef(180-info.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
+				GL11.glRotatef(180-infoClone.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GL11.glTranslated(piece.x, piece.y, piece.z);
 				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
 				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
@@ -63,7 +64,7 @@ public class RailBuilderRender {
 				
 				if (piece.getGroups().size() != 0) {
 					if (piece.getLength() != -1) {
-						GL11.glScaled(piece.getLength() / info.gauge.scale(), 1, 1);
+						GL11.glScaled(piece.getLength() / infoClone.gauge.scale(), 1, 1);
 					}
 					
 					// TODO static
@@ -77,9 +78,9 @@ public class RailBuilderRender {
 					}
 
 					
-					model.drawDirectGroups(groups, info.gauge.scale());
+					model.drawDirectGroups(groups, infoClone.gauge.scale());
 				} else {
-					model.drawDirect(info.gauge.scale());
+					model.drawDirect(infoClone.gauge.scale());
 				}
 				GL11.glPopMatrix();
 			}
