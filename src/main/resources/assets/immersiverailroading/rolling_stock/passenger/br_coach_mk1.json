@@ -1,9 +1,9 @@
 {
 	"name": "BR Coach MK1",
 	"model": "immersiverailroading:models/rolling_stock/passenger/br_coach_mk1/br_coach_mk1.obj",
-    "tex_variants":[
-        "white_brown"
-    ],
+    "tex_variants":{
+        "White/Brown": "white_brown"
+    },
 	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 27433
