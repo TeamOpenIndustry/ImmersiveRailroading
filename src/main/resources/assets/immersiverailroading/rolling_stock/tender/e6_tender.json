@@ -24,7 +24,7 @@
 		"rear": -2.35
 	},
 	"couplers": {
-		"front_offset": 0,
+		"front_offset": -0.03,
 		"rear_offset": -0.08
 	}
 }
