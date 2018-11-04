@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -43,6 +44,7 @@ public class StockRenderCache {
 		
 		for (String def : DefinitionManager.getDefinitionNames()) {
 			bar.step(DefinitionManager.getDefinition(def).name());
+			ImmersiveRailroading.info(def);
 			StockModel renderer = getRender(def);
 			if (ConfigGraphics.enableItemRenderPriming) {
 				renderer.bindTexture();

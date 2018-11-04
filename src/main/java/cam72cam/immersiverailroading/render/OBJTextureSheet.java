@@ -106,8 +106,8 @@ public class OBJTextureSheet {
 		public Vec2f extendSpace(List<Vec2f> vts) {
 			float vminU = vts.get(0).x;
 			float vmaxU = vts.get(0).x;
-			float vminV = vts.get(0).y;
-			float vmaxV = vts.get(0).y;
+			float vminV = -vts.get(0).y;
+			float vmaxV = -vts.get(0).y;
 			
 			for (Vec2f vt : vts) {
 				float u = vt.x;
@@ -325,7 +325,7 @@ public class OBJTextureSheet {
 		
         ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
         if (sheetWidth > maxSize || sheetHeight > maxSize)
-        ImmersiveRailroading.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
+        	ImmersiveRailroading.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
 
 		for (SubTexture tex : texs) {
 			ImmersiveRailroading.debug("%s copies %s x %s", tex.tex, tex.copiesU(), tex.copiesV());
