@@ -70,7 +70,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
     		ItemStack stack = new ItemStack(this);
     		ItemDefinition.setID(stack, defID);
 			overrideStackDisplayName(stack);
-            if (def.textureNames.size() > 1) {
+            /*if (def.textureNames.size() > 1) {
             	for (String texture : def.textureNames.keySet()) {
 	            	ItemStack textured = stack.copy();
 	            	ItemTextureVariant.set(textured, texture);
@@ -78,7 +78,8 @@ public class ItemRollingStock extends BaseItemRollingStock {
             	}
             } else {
                 items.add(stack);
-            }
+            }*/
+			items.add(stack);
     	}
     }
 	
