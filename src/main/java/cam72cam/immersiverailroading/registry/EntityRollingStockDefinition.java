@@ -130,7 +130,7 @@ public abstract class EntityRollingStockDefinition {
 		
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
 		textureNames = new LinkedHashMap<String, String>();
-		textureNames.put("Default", null);
+		textureNames.put(null, "Default");
 		if (data.has("tex_variants")) {
 			JsonElement variants = data.get("tex_variants");
 			for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
