@@ -328,6 +328,9 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PAINT_BRUSH, 0,
 				new ModelResourceLocation(IRItems.ITEM_PAINT_BRUSH.getRegistryName(), ""));
+		
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_COMPONENTS_LIST, 0,
+				new ModelResourceLocation("minecraft:written_book", ""));
 	}
 	
 	public static final class StockIcon extends TextureAtlasSprite
