@@ -8,23 +8,26 @@ import net.minecraft.util.ResourceLocation;
 
 public class ComponentsListGUI extends GuiScreen{
 
-	private static ResourceLocation bookTexture;
+	private static ResourceLocation bookTexture = new ResourceLocation("immersiverailroading:gui/components_list.png");
 	
 	public ComponentsListGUI() {
-		bookTexture = new ResourceLocation(ImmersiveRailroading.MODID + ":gui/components_list.png");
+		
 	}
 	
 	@Override
 	public void initGui() {
-
+		System.out.println("initGUI");
 	}
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		super.drawScreen(mouseX, mouseY, partialTicks);
+		
+		System.out.println("drawScreen");
 		
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		mc.getTextureManager().bindTexture(bookTexture);
+		this.mc.getTextureManager().bindTexture(bookTexture);
+
+		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 	
 	@Override

@@ -29,6 +29,7 @@ import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.gui.CastingGUI;
+import cam72cam.immersiverailroading.gui.ComponentsListGUI;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
 import cam72cam.immersiverailroading.gui.PlateRollerGUI;
@@ -205,6 +206,8 @@ public class ClientProxy extends CommonProxy {
 				return null;
 			}
 			return new CastingGUI(te);
+		case COMPONENTS_LIST:
+			return new ComponentsListGUI();
 		default:
 			return null;
 		}
