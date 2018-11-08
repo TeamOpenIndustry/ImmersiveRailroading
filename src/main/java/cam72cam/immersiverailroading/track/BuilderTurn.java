@@ -45,8 +45,7 @@ public class BuilderTurn extends BuilderBase {
 
 		this.setParentPos(new BlockPos(mainX, 0, mainZ));
 		
-		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, info.length, info.quarter, info.placementPosition);
-		turnTrack.setDirection(info.direction);
+		TrackRail turnTrack = new TrackRail(this, mainX, 0, mainZ, EnumFacing.NORTH, TrackItems.TURN, info.length);
 		turnTrack.setTurnQuarters(info.quarters);
 		
 		tracks.add(turnTrack);
@@ -79,7 +78,7 @@ public class BuilderTurn extends BuilderBase {
 			float switchAngle = 0;
 			float switchOffset = 0;
 			if (info.switchState == SwitchState.STRAIGHT) {
-				if (info.direction == TrackDirection.LEFT) {
+				if (info.placementInfo.direction == TrackDirection.LEFT) {
 					if (angle > startAngle - 4*angleDelta) {
 						switchOffset = (4-counter) / 30f * -(float)gauge.scale();
 						switchAngle = angleDelta * info.length / 30;
@@ -100,13 +99,13 @@ public class BuilderTurn extends BuilderBase {
 		});
 		
 		if (info.switchState != SwitchState.NONE) {
-			double dir = info.direction == TrackDirection.LEFT ? -1 : 1;
+			double dir = info.placementInfo.direction == TrackDirection.LEFT ? -1 : 1;
 			dir = dir * info.gauge.scale();
 			double off = 0.2 * dir;
 			if (info.switchState == SwitchState.STRAIGHT) {
 				 off += 0.2 * dir;
 			}
-			float angle = info.quarter/4f * 90;
+			float angle = info.placementInfo.rotationQuarter/4f * 90;
 			Vec3d pos = VecUtil.rotateYaw(new Vec3d(off, 0.11 * info.gauge.scale(),  0), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 180, "RAIL_BASE"));
 		}
@@ -122,11 +121,11 @@ public class BuilderTurn extends BuilderBase {
 	public static Vec3d followCurve(RailInfo info, float delta, RailFunc fn) {
 		float radius = info.length;
 		
-		float startAngle = 90 - info.quarter/4f * 90;
+		float startAngle = 90 - info.placementInfo.rotationQuarter/4f * 90;
 		float endAngle = startAngle - info.quarters/4f * 90;
 		
-		if (info.direction == TrackDirection.RIGHT) {
-			startAngle = 180 + 90 + info.quarter/4f * 90;
+		if (info.placementInfo.direction == TrackDirection.RIGHT) {
+			startAngle = 180 + 90 + info.placementInfo.rotationQuarter/4f * 90;
 			endAngle = startAngle + info.quarters/4f * 90;
 		}
 		
@@ -134,13 +133,13 @@ public class BuilderTurn extends BuilderBase {
 		
 		float angleDelta = (90 / ((float)Math.PI * (radius)/2)) * (float)info.gauge.scale() * delta;
 		
-		if (info.direction == TrackDirection.RIGHT) {
+		if (info.placementInfo.direction == TrackDirection.RIGHT) {
 			float tmp = startAngle;
 			startAngle = endAngle;
 			endAngle = tmp;
 		}
 		float hack = (float) ((1-1/info.gauge.scale()) * angleDelta)/2;
-		if (info.direction == TrackDirection.LEFT) {
+		if (info.placementInfo.direction == TrackDirection.LEFT) {
 			startAngle -= hack;
 			endAngle += hack;
 		} else {

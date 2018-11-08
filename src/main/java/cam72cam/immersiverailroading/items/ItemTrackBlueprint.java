@@ -14,6 +14,8 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,14 +52,20 @@ public class ItemTrackBlueprint extends Item {
 	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		ItemStack stack = player.getHeldItem(hand);
+		
 		pos = pos.up();
 		
-		ItemStack stack = player.getHeldItem(hand);
+		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+			pos = pos.down();
+		}
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ);
+		
 		if (ItemTrackBlueprint.isPreview(stack)) {
 			world.setBlockState(pos, IRBlocks.BLOCK_RAIL_PREVIEW.getDefaultState());
 			TileRailPreview te = TileRailPreview.get(world, pos);
 			if (te != null) {
-				te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
+				te.setup(stack, placementInfo);
 			}
 			return EnumActionResult.SUCCESS;
 		}
@@ -65,7 +73,7 @@ public class ItemTrackBlueprint extends Item {
 			pos = pos.down();
 		}
 		
-		RailInfo info = new RailInfo(stack, player.world, player.getRotationYawHead(), pos, hitX, hitY, hitZ); 
+		RailInfo info = new RailInfo(stack, player.world, placementInfo, null); 
 		info.build(player, pos);
 		return EnumActionResult.SUCCESS;
     }

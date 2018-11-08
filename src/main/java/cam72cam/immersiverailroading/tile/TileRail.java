@@ -27,6 +27,7 @@ import cam72cam.immersiverailroading.track.BuilderTurn;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.track.TrackRail;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 
@@ -36,7 +37,6 @@ public class TileRail extends TileRailBase {
 		return te instanceof TileRail ? (TileRail) te : null;
 	}
 	
-	private EnumFacing facing;
 	private TrackItems type;
 	private ItemStack railBed;
 	
@@ -48,11 +48,10 @@ public class TileRail extends TileRailBase {
 	private double tablePos = 0;
 	
 	private int length;
-	private int rotationQuarter;
-	private TrackDirection direction = TrackDirection.NONE;
 	private int turnQuarters;
 	
-	private Vec3d placementPosition;
+	private PlacementInfo placementInfo;
+	private PlacementInfo customInfo;
 	
 	private List<ItemStack> drops;
 	
@@ -60,6 +59,10 @@ public class TileRail extends TileRailBase {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
+		int length = this.length;
+		if (type == TrackItems.CUSTOM && this.customInfo != null) {
+			length = (int) this.customInfo.placementPosition.distanceTo(this.placementInfo.placementPosition);
+		}
 		return new AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos);
 	}
 	
@@ -70,13 +73,10 @@ public class TileRail extends TileRailBase {
 	}
 
 	public EnumFacing getFacing() {
-		if (facing == EnumFacing.DOWN) {
+		if (placementInfo.facing == EnumFacing.DOWN) {
 			return EnumFacing.NORTH;
 		}
-		return facing;
-	}
-	public void setFacing(EnumFacing value) {
-		this.facing = value;
+		return placementInfo.facing;
 	}
 	
 	public TrackItems getType() {
@@ -112,7 +112,7 @@ public class TileRail extends TileRailBase {
 	public Vec3d getCenter() {
 		if (center == null) {
 			Vec3d off = BuilderTurn.followCurve(this.getRailRenderInfo(), 1, null);
-			off = VecUtil.rotateYaw(off, this.facing.getHorizontalAngle() + 90);
+			off = VecUtil.rotateYaw(off, placementInfo.facing.getHorizontalAngle() + 90);
 			center = new Vec3d(-off.x, 0, -off.z).add(this.getPlacementPosition());
 		}
 		return center;
@@ -122,18 +122,25 @@ public class TileRail extends TileRailBase {
 	}
 
 	public TrackDirection getDirection() {
-		return this.direction;
-	}
-	public void setDirection(TrackDirection dir) {
-		this.direction = dir;
+		return placementInfo.direction;
 	}
 	
 	
 	public Vec3d getPlacementPosition() {
-		return placementPosition.addVector(pos.getX(), pos.getY(), pos.getZ());
+		return placementInfo.placementPosition;
 	}
-	public void setPlacementPosition(Vec3d placementPosition) {
-		this.placementPosition = placementPosition.subtract(pos.getX(), pos.getY(), pos.getZ());
+	
+	public PlacementInfo getCustomInfo() {
+		return customInfo;
+	}
+	public void setCustomInfo(PlacementInfo customInfo) {
+		this.customInfo = customInfo;
+	}
+	public PlacementInfo getPlacementInfo() {
+		return placementInfo;
+	}
+	public void setPlacementInfo(PlacementInfo placementInfo) {
+		this.placementInfo = placementInfo;
 	}
 	
 	
@@ -151,10 +158,7 @@ public class TileRail extends TileRailBase {
 	}
 
 	public int getRotationQuarter() {
-		return this.rotationQuarter;
-	}
-	public void setRotationQuarter(int val) {
-		this.rotationQuarter = val;
+		return this.placementInfo.rotationQuarter;
 	}
 
 	public int getTurnQuarters() {
@@ -186,14 +190,12 @@ public class TileRail extends TileRailBase {
 			version = nbt.getInteger("version");
 		}
 		
-		facing = EnumFacing.getFront(nbt.getByte("facing"));
+		
 		type = TrackItems.valueOf(nbt.getString("type"));
 		
 		switchState = SwitchState.values()[nbt.getInteger("switchState")];
 		
 		length = nbt.getInteger("length");
-		rotationQuarter = nbt.getInteger("rotationQuarter");
-		direction = TrackDirection.values()[nbt.getInteger("direction")];
 		turnQuarters = nbt.getInteger("turnQuarters");
 		
 		this.drops = new ArrayList<ItemStack>();
@@ -216,32 +218,37 @@ public class TileRail extends TileRailBase {
 			setNBTVec3d(nbt, "placementPosition", getNBTVec3d(nbt, "placementPosition").subtract(pos.getX(), pos.getY(), pos.getZ()));
 		case 2:
 			nbt.setDouble("gauge", Gauge.STANDARD);
-		case 3:
-			// nothing yet...
 		}
 		
 		railBed = new ItemStack(nbt.getCompoundTag("railBed"));
-		placementPosition = getNBTVec3d(nbt, "placementPosition");
 		gauge = Gauge.from(nbt.getDouble("gauge"));
 		tablePos = nbt.getDouble("tablePos");
+		
+		if (nbt.hasKey("placementInfo")) {
+			placementInfo = new PlacementInfo(nbt.getCompoundTag("placementInfo"), pos);
+		} else {
+			//Legacy
+			placementInfo = new PlacementInfo(nbt, pos);
+		}
+		
+		if (nbt.hasKey("customInfo")) {
+			customInfo = new PlacementInfo(nbt.getCompoundTag("customInfo"), pos);
+		}
 	}
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		if (facing == null) {
+		if (placementInfo == null) {
 			// Something is wrong...
 			ImmersiveRailroading.error("INVALID TILE SAVE");
 			return super.writeToNBT(nbt);
 		}
-		nbt.setByte("facing", (byte) facing.getIndex());
 		nbt.setString("type", type.name());
 		
 		
 		nbt.setInteger("switchState", switchState.ordinal());
 		
 		nbt.setInteger("length", length);
-		nbt.setInteger("rotationQuarter", rotationQuarter);
-		nbt.setInteger("direction", direction.ordinal());
 		nbt.setInteger("turnQuarters", turnQuarters);
 		
 		if (drops != null && drops.size() != 0) {
@@ -254,10 +261,14 @@ public class TileRail extends TileRailBase {
 		}
 		
 		nbt.setTag("railBed", railBed.serializeNBT());
-		setNBTVec3d(nbt, "placementPosition", placementPosition);
+		nbt.setTag("placementInfo", placementInfo.toNBT(pos));
+		if (customInfo != null) {
+			nbt.setTag("customInfo", customInfo.toNBT(pos));
+		}
 		nbt.setDouble("gauge", gauge.value());
 		
 		nbt.setDouble("tablePos", tablePos);
+		
 		
 		return super.writeToNBT(nbt);
 	}
@@ -268,7 +279,7 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		if (info == null) {
-			info = new RailInfo(getPos(), getWorld(), getFacing().getOpposite(), getType(), getDirection(), getLength(), getRotationQuarter(), getTurnQuarters(), getGauge(), getPlacementPosition(), getRailBed(), ItemStack.EMPTY, null, 0, false);
+			info = new RailInfo(getWorld(), getPlacementInfo(), getCustomInfo(), getType(),getLength(), getTurnQuarters(), getGauge(), getRailBed(), ItemStack.EMPTY, null, 0, false);
 		}
 		// Changes moment to moment
 		if (info.switchState != switchState || info.tablePos != tablePos) {

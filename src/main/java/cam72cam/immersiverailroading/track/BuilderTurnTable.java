@@ -27,7 +27,7 @@ public class BuilderTurnTable extends BuilderBase {
 	public BuilderTurnTable(RailInfo info, BlockPos pos, boolean endOfTrack) {
 		super(info, pos);
 		
-		info.quarter = 0;
+		//info.quarter = 0;
 		
 		info.length = Math.min(info.length, (int)(30 * info.gauge.scale()));
 		
@@ -45,7 +45,7 @@ public class BuilderTurnTable extends BuilderBase {
 		}
 		
 		this.setParentPos(new BlockPos(offset.down()));
-		TrackRail main = new TrackRail(this, offset.getX(), offset.getY()-1, offset.getZ(), EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
+		TrackRail main = new TrackRail(this, offset.getX(), offset.getY()-1, offset.getZ(), EnumFacing.NORTH, info.type, info.length);
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
@@ -91,7 +91,7 @@ public class BuilderTurnTable extends BuilderBase {
 			data.add(new VecYawPitch(gagPos.x + offset.getX(), gagPos.y + offset.getY(), gagPos.z + offset.getZ(), -angle));
 		}
 		
-		float angle = 360/16.0f * (float)info.tablePos - info.facing.getHorizontalAngle();
+		float angle = 360/16.0f * (float)info.tablePos - info.placementInfo.facing.getHorizontalAngle();
 		data.add(new VecYawPitch(offset.getX(), offset.getY(), offset.getZ(), -angle, 0, info.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		return data;

@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.ItemTrackEndpoint;
 import net.minecraft.item.Item;
 
 public class IRItems {
@@ -27,4 +28,5 @@ public class IRItems {
 	public static ItemCastRail ITEM_CAST_RAIL = new ItemCastRail();
 	public static ItemConductorWhistle ITEM_CONDUCTOR_WHISTLE = new ItemConductorWhistle();
 	public static ItemPaintBrush ITEM_PAINT_BRUSH = new ItemPaintBrush(); 
+	public static ItemTrackEndpoint ITEM_TRACK_ENDPOINT = new ItemTrackEndpoint();
 }
