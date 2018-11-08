@@ -79,6 +79,7 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -571,7 +572,7 @@ public class ClientProxy extends CommonProxy {
 		        }
 		        
 		        pos = pos.up();
-		        RailInfo info = new RailInfo(stack, player.world, player.getRotationYawHead(), pos, hitX, hitY, hitZ);
+		        RailInfo info = new RailInfo(stack, player.world, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
 		        
 		        GL11.glPushMatrix();
 				{

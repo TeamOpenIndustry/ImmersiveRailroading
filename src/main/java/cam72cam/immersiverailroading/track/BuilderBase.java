@@ -44,7 +44,7 @@ public abstract class BuilderBase {
 	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;
-		rotation = info.facing;
+		rotation = info.placementInfo.facing;
 		world = info.world;
 		gauge = info.gauge;
 		parent_pos = pos;

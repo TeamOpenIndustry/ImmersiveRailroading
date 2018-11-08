@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 
 public class RailBuilderRender {
 	
@@ -41,7 +42,8 @@ public class RailBuilderRender {
 		
 		OBJRender model = info.gauge.isModel() ? baseRailModel : baseRailModelModel;
 
-		GL11.glTranslated(info.placementPosition.x-info.position.getX(), info.placementPosition.y-info.position.getY(), info.placementPosition.z-info.position.getZ()); 
+		Vec3d pos = info.placementInfo.placementPosition;
+		GL11.glTranslated(pos.x % 1, pos.y % 1, pos.z % 1); 
 
 		String renderID = RailRenderUtil.renderID(info);
 		Integer displayList = displayLists.get(renderID);
@@ -56,7 +58,7 @@ public class RailBuilderRender {
 			
 			for (VecYawPitch piece : infoClone.getBuilder().getRenderData()) {
 				GL11.glPushMatrix();
-				GL11.glRotatef(180-infoClone.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
+				GL11.glRotatef(180-infoClone.placementInfo.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GL11.glTranslated(piece.x, piece.y, piece.z);
 				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
 				GL11.glRotatef(piece.getPitch(), 1, 0, 0);

@@ -22,7 +22,7 @@ public class BuilderCrossing extends BuilderBase {
 		
 		this.setParentPos(new BlockPos(0, 0, 0));
 		
-		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3, info.quarter, info.placementPosition));
+		tracks.add(new TrackRail(this, 0, 0, 0, EnumFacing.NORTH, TrackItems.CROSSING, 3));
 		int blocks = 1;
 		for (int i = -blocks; i <=blocks; i ++) {
 			for (int j = -blocks; j <=blocks; j ++) {

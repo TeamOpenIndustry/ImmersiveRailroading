@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -40,7 +41,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
-		info = new RailInfo(stack, world, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f);
+		info = new RailInfo(stack, world, new PlacementInfo(stack, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
 		info.length = 10;
 	}
 
