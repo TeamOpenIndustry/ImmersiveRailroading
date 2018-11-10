@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -141,7 +139,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();
-	public Map<Integer, Pair<Integer, Vec3d>> dismounts = new HashMap<Integer, Pair<Integer, Vec3d>>();
+	public Map<Integer, Vec3d> dismounts = new HashMap<Integer, Vec3d>();
+	public Map<Integer, Vec3d> dismounts_second = new HashMap<Integer, Vec3d>();
 	private final double pressDist = 0.05;
 	public List<StaticPassenger> staticPassengers = new ArrayList<StaticPassenger>();
 	
@@ -242,7 +241,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			Vec3d delta = dismountPos(ppos);
 			passenger.setPositionAndUpdate(delta.x, passenger.posY, delta.z);
 			if (!world.isRemote) {
-				dismounts.put(passenger.getEntityId(), Pair.of(5, new Vec3d(delta.x, passenger.posY, delta.z)));
+				dismounts.put(passenger.getEntityId(), new Vec3d(delta.x, passenger.posY, delta.z));
 				passengerPositions.remove(passenger.getPersistentID());
 				sendToObserving(new PassengerPositionsPacket(this));
 			}
@@ -253,17 +252,19 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		super.onUpdate();
 
 		if (!world.isRemote) {
-			for (Integer id : dismounts.keySet()) {
+			Map<Integer, Vec3d> merged = new HashMap<Integer, Vec3d>();
+			merged.putAll(dismounts);
+			merged.putAll(dismounts_second);
+			for (Integer id : merged.keySet()) {
 				Entity ent = world.getEntityByID(id);
 				if (ent != null) {
-					Pair<Integer, Vec3d> dismount = dismounts.get(id);
-					Vec3d pos = dismount.getRight();
+					Vec3d pos = merged.get(id);
 					ent.setPosition(pos.x, pos.y, pos.z);
-					if (dismount.getLeft() > 0) {
-						dismounts.put(id, Pair.of(dismount.getLeft()-1, dismount.getRight()));
-					}
 				}
 			}
+			dismounts_second.clear();
+			dismounts_second.putAll(dismounts);
+			dismounts.clear();
 		}
 	}
 	
