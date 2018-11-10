@@ -140,7 +140,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();
 	public Map<Integer, Vec3d> dismounts = new HashMap<Integer, Vec3d>();
-	public Map<Integer, Vec3d> dismounts_second = new HashMap<Integer, Vec3d>();
 	private final double pressDist = 0.05;
 	public List<StaticPassenger> staticPassengers = new ArrayList<StaticPassenger>();
 	
@@ -252,18 +251,13 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		super.onUpdate();
 
 		if (!world.isRemote) {
-			Map<Integer, Vec3d> merged = new HashMap<Integer, Vec3d>();
-			merged.putAll(dismounts);
-			merged.putAll(dismounts_second);
-			for (Integer id : merged.keySet()) {
+			for (Integer id : dismounts.keySet()) {
 				Entity ent = world.getEntityByID(id);
 				if (ent != null) {
-					Vec3d pos = merged.get(id);
+					Vec3d pos = dismounts.get(id);
 					ent.setPosition(pos.x, pos.y, pos.z);
 				}
 			}
-			dismounts_second.clear();
-			dismounts_second.putAll(dismounts);
 			dismounts.clear();
 		}
 	}
