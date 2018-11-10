@@ -45,7 +45,6 @@ public class OBJModel {
 
 		String currentGroupName = "defaultName";
 		List<Integer> currentGroup = new ArrayList<Integer>();
-		groups.put(currentGroupName, new int[0]);
 		List<String> materialPaths = new ArrayList<String>();
 		String currentMaterial = null;
 		
@@ -83,7 +82,9 @@ public class OBJModel {
 				break;
 			case "o":
 			case "g":
-				groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
+				if(currentGroup.size() > 0) {
+					groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
+				}
 				currentGroupName = args[1].intern();
 				currentGroup = new ArrayList<Integer>();
 				break;
@@ -139,7 +140,9 @@ public class OBJModel {
 				break;
 			}
 		}
-		groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
+		if(currentGroup.size() > 0) {
+			groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
+		}
 		
 		reader.close(); // closes input
 		

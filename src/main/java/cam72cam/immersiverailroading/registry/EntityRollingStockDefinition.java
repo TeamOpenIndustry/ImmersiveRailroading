@@ -37,6 +37,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityRollingStockDefinition {
 	
@@ -616,5 +618,10 @@ public abstract class EntityRollingStockDefinition {
 	
 	public boolean acceptsLivestock() {
 		return false;
+	}
+
+	@SideOnly(Side.SERVER)
+	public void clearModel() {
+		this.model = null;
 	}
 }
