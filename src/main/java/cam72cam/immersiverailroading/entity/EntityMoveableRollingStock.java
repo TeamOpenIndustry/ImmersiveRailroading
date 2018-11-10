@@ -207,9 +207,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (newPositions.size() != 0) {
 			this.clearPositionCache();
 			double delta = newPositions.get(0).tickID - this.tickPosID;
-			tickSkew += delta / 200;
 			if (Math.abs(delta) > 10) {
 				this.tickPosID = newPositions.get(0).tickID;
+			} else {
+				tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
 			}
 		}
 		this.positions = newPositions;
