@@ -202,11 +202,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void handleTickPosPacket(List<TickPos> newPositions, double serverTPS) {
+		this.tickSkew = serverTPS / 20;
+		
 		if (newPositions.size() != 0) {
 			this.clearPositionCache();
-			this.tickPosID = newPositions.get(0).tickID;
+			double delta = newPositions.get(0).tickID - this.tickPosID;
+			tickSkew += delta / 200;
+			if (Math.abs(delta) > 10) {
+				this.tickPosID = newPositions.get(0).tickID;
+			}
 		}
-		this.tickSkew = serverTPS / 20;
 		this.positions = newPositions;
 	}
 	
