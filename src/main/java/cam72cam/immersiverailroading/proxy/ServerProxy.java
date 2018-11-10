@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -25,6 +26,15 @@ import net.minecraftforge.fml.server.FMLServerHandler;
 public class ServerProxy extends CommonProxy {
 	private static int tickCount = 0;
 
+	@Override
+	public void preInit(FMLPreInitializationEvent event) throws IOException {
+		super.preInit(event);
+		
+		for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
+			def.clearModel();
+		}
+	}
+	
 	@Override
 	public void init(FMLInitializationEvent event) {
 		super.init(event);
