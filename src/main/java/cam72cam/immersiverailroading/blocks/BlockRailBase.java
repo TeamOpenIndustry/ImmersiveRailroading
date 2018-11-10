@@ -276,10 +276,11 @@ public abstract class BlockRailBase extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		if (worldIn.isRemote) {
+		if (!worldIn.isRemote) {
 			ImmersiveRailroading.warn("%s", ImmersiveRailroading.proxy.getWorldData(worldIn).isElectrical(pos));
 			for (BlockPos connection : ImmersiveRailroading.proxy.getWorldData(worldIn).iterateElecrified(TileRailBase.get(worldIn, pos).getParent())) {
 				ImmersiveRailroading.info("MAIN %s", connection);
+				ImmersiveRailroading.info("LOADED %s", worldIn.isBlockLoaded(connection));
 			}
 		}
 		
