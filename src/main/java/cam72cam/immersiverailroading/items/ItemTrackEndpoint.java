@@ -38,7 +38,7 @@ public class ItemTrackEndpoint extends Item {
 			
 			BlockPos tepos = getPosition(held);
 			if (tepos != null) {
-				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+				if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
 					pos = pos.down();
 				}
 				TileRailPreview tr = TileRailPreview.get(world, tepos);
