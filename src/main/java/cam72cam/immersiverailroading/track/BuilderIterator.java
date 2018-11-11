@@ -71,10 +71,15 @@ public abstract class BuilderIterator extends BuilderBase {
 					height = Math.min(height, clamp);
 				}
 				
+				double relHeight = gagPos.y % 1;
+				if (gagPos.y < 0) {
+					relHeight += 1;
+				}
+				
 				positions.add(Pair.of(posX, posZ));
-				bedHeights.put(Pair.of(posX, posZ), (float)(height + Math.max(0, gagPos.y % 1 - 0.1)));
-				railHeights.put(Pair.of(posX, posZ), (float) gagPos.y % 1);
-				yOffset.put(Pair.of(posX, posZ), (int)Math.floor(gagPos.y));
+				bedHeights.put(Pair.of(posX, posZ), (float)(height + Math.max(0, relHeight - 0.1)));
+				railHeights.put(Pair.of(posX, posZ), (float) relHeight);
+				yOffset.put(Pair.of(posX, posZ), (int)(gagPos.y - relHeight));
 				if (Math.abs(q) > gauge.scale()) {
 					flexPositions.add(Pair.of(posX, posZ));
 				}
@@ -91,7 +96,7 @@ public abstract class BuilderIterator extends BuilderBase {
 			mainZ = (int) end.z;
 		}
 		
-		this.setParentPos(new BlockPos(mainX, 0, mainZ));
+		this.setParentPos(new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ));
 		TrackRail main = new TrackRail(this, mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ, EnumFacing.NORTH, info.type, info.length);
 		tracks.add(main);
 		main.setRailHeight(railHeights.get(Pair.of(mainX, mainZ)));
@@ -146,8 +151,13 @@ public abstract class BuilderIterator extends BuilderBase {
 				double dist = next.distanceTo(prev);
 				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
 			}
+			double y = cur.y;
 			
-			data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180-cur.yaw, pitch));
+			if (y < 0) {
+				//HACK
+				y += 1;
+			}
+			data.add(new VecYawPitch(cur.x, y, cur.z, 180-cur.yaw, pitch));
 		}
 		
 		return data;
