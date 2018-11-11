@@ -134,10 +134,16 @@ public abstract class BuilderIterator extends BuilderBase {
 				double ydelt = next.y - cur.y;
 				double dist = next.distanceTo(cur);
 				pitch = (float) -Math.toDegrees(Math.atan2(ydelt, dist));
-			} else {
+			} else if (i == 0) {
 				PosStep next = points.get(i+1);
 				double ydelt = next.y - cur.y;
 				double dist = next.distanceTo(cur);
+				pitch = (float) -Math.toDegrees(Math.atan2(ydelt, dist));
+			} else {
+				PosStep prev = points.get(i-1);
+				PosStep next = points.get(i+1);
+				double ydelt = next.y - prev.y;
+				double dist = next.distanceTo(prev);
 				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
 			}
 			

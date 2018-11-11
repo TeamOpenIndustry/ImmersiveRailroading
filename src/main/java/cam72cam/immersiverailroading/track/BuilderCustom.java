@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.track;
 
-import java.awt.geom.CubicCurve2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,16 +15,41 @@ public class BuilderCustom extends BuilderIterator {
 		super(info, pos);
 	}
 	
-	private void split(List<CubicCurve2D> results, CubicCurve2D iter, double stepSize) {
-		if (iter.getP1().distance(iter.getP2()) > stepSize) {
-			CubicCurve2D left = new CubicCurve2D.Double();
-			CubicCurve2D right = new CubicCurve2D.Double();
-			iter.subdivide(left, right);
-			split(results, left, stepSize);
-			split(results, right, stepSize);
-		} else {
-			results.add(iter);
+	private static Vec3d cubicAt(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double t) {
+		Vec3d pt = Vec3d.ZERO;
+		pt = pt.add(p1.		scale(1 * Math.pow(1-t, 3) * Math.pow(t, 0)));
+		pt = pt.add(ctrl1.	scale(3 * Math.pow(1-t, 2) * Math.pow(t, 1)));
+		pt = pt.add(ctrl2.	scale(3 * Math.pow(1-t, 1) * Math.pow(t, 2)));
+		pt = pt.add(p2.		scale(1 * Math.pow(1-t, 0) * Math.pow(t, 3)));
+		return pt;
+	}
+	
+	private static List<Vec3d> cubicSplit(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double stepSize) {
+		List<Vec3d> res = new ArrayList<Vec3d>();
+		res.add(p1);
+		double precision = 5;
+		
+		double t = 0;
+		while (t <= 1) {
+			for (double i = 1; i < precision; i++) {
+				Vec3d prev = res.get(res.size()-1);
+				
+				double delta = (Math.pow(10, -i)); 
+				
+				for (;t < 1 + delta; t+=delta) {
+					Vec3d pos = cubicAt(p1, ctrl1, ctrl2, p2, t);
+					if (pos.distanceTo(prev) > stepSize) {
+						// We passed it, just barely
+						t -= delta;
+						break;
+					}
+				}
+			}
+			if (t <= 1) {
+				res.add(cubicAt(p1, ctrl1, ctrl2, p2, t));
+			}
 		}
+		return res;
 	}
 	
 	private HashMap<Double, List<PosStep>> cache; 
@@ -49,7 +73,6 @@ public class BuilderCustom extends BuilderIterator {
 		List<PosStep> res = new ArrayList<PosStep>();
 		
 		double horizDist = nextPos.lengthVector();
-		double vertDist = 0;
 		float angle = info.placementInfo.rotationQuarter/4f * 90;
 		if(info.placementInfo.direction == TrackDirection.RIGHT) {
 			angle = -angle;
@@ -64,36 +87,24 @@ public class BuilderCustom extends BuilderIterator {
 			}
 			angle2 -= (info.placementInfo.facing.getHorizontalAngle() - info.customInfo.facing.getHorizontalAngle());
 			nextPos = VecUtil.rotateYaw(nextPos, 180 - (info.placementInfo.facing.getHorizontalAngle() - 90));
-			
-			vertDist = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
 		}
 		
 		Vec3d ctrl1 = VecUtil.fromYaw(horizDist/2, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(horizDist/2, angle2));
 		
-		CubicCurve2D c = new CubicCurve2D.Double();
-		c.setCurve(0, 0, ctrl1.x, ctrl1.z, ctrl2.x, ctrl2.z, nextPos.x, nextPos.z);
-		List<CubicCurve2D> curves = new ArrayList<CubicCurve2D>();
-		split(curves, c, stepSize);
-		
-		float slope = 0;
-		if (horizDist != 0) {
-			slope = (float) (vertDist / horizDist);
+		List<Vec3d> points = cubicSplit(Vec3d.ZERO, ctrl1, ctrl2, nextPos, stepSize);
+		for(int i = 0; i < points.size(); i++) {
+			Vec3d p1 = points.get(i);
+			float angleCurve;
+			if (i == points.size()-1) {
+				angleCurve = VecUtil.toYaw(points.get(i-1).subtract(p1));
+			} else if (i == 0) {
+				angleCurve = VecUtil.toYaw(points.get(i+1).subtract(p1));
+			} else {
+				angleCurve = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
+			}
+			res.add(new PosStep(p1, angleCurve));
 		}
-		
-		float height = slope;
-		float heightAccum = 0;
-		
-		for (CubicCurve2D i : curves) {
-			Vec3d p1 = new Vec3d(i.getP1().getX(), 0, i.getP1().getY());
-			Vec3d p1ctrl = new Vec3d(i.getCtrlP1().getX(), 0, i.getCtrlP1().getY());
-			Vec3d p2 = new Vec3d(i.getP2().getX(), 0, i.getP2().getY());
-			float angleCurve = VecUtil.toYaw(p1ctrl.subtract(p1));
-			
-			res.add(new PosStep(p1.x, heightAccum, p1.z, angleCurve));
-			heightAccum += p1.distanceTo(p2) * height;
-		}
-		//System.out.println(heightAccum);
 		
 		cache.put(stepSize, res);
 		return cache.get(stepSize);
