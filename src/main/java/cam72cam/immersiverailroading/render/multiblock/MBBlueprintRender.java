@@ -40,7 +40,7 @@ public class MBBlueprintRender {
 		for (BlockPos pos : bp.keySet()) {
 			
 			IBlockState state = bp.get(pos);
-			if (state.getBlock() == Blocks.AIR) {
+			if (state == null || state.getBlock() == Blocks.AIR) {
 				continue;
 			}
 			
