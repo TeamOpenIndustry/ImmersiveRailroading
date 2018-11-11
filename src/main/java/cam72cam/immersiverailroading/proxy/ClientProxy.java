@@ -610,12 +610,9 @@ public class ClientProxy extends CommonProxy {
 	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
 	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
 	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-	                GL11.glTranslated(-d0, -d1, -d2);
 	                
 	                GL11.glTranslated(pos.getX()-d0+0.5, pos.getY()-d1+0.5, pos.getZ()-d2+0.5);
 	                
-	                if (Math.random() < 0.1) {
-	                }
 	                GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
 	                
 	                GL11.glTranslated(-0.5, -0.5, -0.5);

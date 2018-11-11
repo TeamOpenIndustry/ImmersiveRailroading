@@ -109,7 +109,9 @@ public class RailInfo {
 		BuilderBase builder = getBuilder(pos);
 		
 		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks) {
-			builder.clearArea();
+			if (!world.isRemote) {
+				builder.clearArea();
+			}
 		}
 		
 
