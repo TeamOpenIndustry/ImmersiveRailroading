@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.track.BuilderCustom;
+import cam72cam.immersiverailroading.track.BuilderIterator;
 import cam72cam.immersiverailroading.track.BuilderIterator.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
@@ -143,28 +143,36 @@ public class MovementTrack {
 			} else {
 				return backward;
 			}
-		} else if (rail.getRailRenderInfo().getBuilder() instanceof BuilderCustom) {
-			List<PosStep> positions = ((BuilderCustom) rail.getRailRenderInfo().getBuilder()).getPath(0.5);
+		} else if (rail.getRailRenderInfo().getBuilder() instanceof BuilderIterator) {
+			List<PosStep> positions = ((BuilderIterator) rail.getRailRenderInfo().getBuilder()).getPath(0.5);
 			Vec3d center = rail.getPlacementPosition();
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
 			for (PosStep pos : positions) {
+				Vec3d rotPos = VecUtil.rotateYaw(pos, rail.getPlacementInfo().facing.getHorizontalAngle() - 90);
+				pos = new PosStep(rotPos, pos.yaw);
 				if (close.distanceTo(relative) > pos.distanceTo(relative)) {
 					close = pos;
 				}
 			}
-			Vec3d curveDelta = VecUtil.fromYaw(distanceMeters, close.yaw);
-			Vec3d forward = currentPosition.add(curveDelta);
-			Vec3d backward = currentPosition.subtract(curveDelta);
 			
 			Vec3d estimatedPosition = currentPosition.add(delta);
 			
-			float nextHeight = (float) (rail.getPos().getY() + close.y + heightOffset);
+			Vec3d closePos = center.add(close).addVector(0, heightOffset, 0);
+			double distToClose = closePos.distanceTo(estimatedPosition);
+			
+			Vec3d curveDelta = VecUtil.fromYaw(distToClose, close.yaw);
+			curveDelta = VecUtil.rotateYaw(curveDelta, rail.getPlacementInfo().facing.getHorizontalAngle() - 90);
+			
+			Vec3d forward = closePos.add(curveDelta);
+			Vec3d backward = closePos.subtract(curveDelta);
+			
+			
 			
 			if (forward.distanceTo(estimatedPosition) < backward.distanceTo(estimatedPosition)) {
-				return new Vec3d(forward.x, nextHeight, forward.z);//.normalize().scale(distanceMeters);
+				return forward;
 			} else {
-				return new Vec3d(backward.x, nextHeight, backward.z);//.normalize().scale(distanceMeters);
+				return backward;
 			}
 		} else {
 			// delta should be in the direction of rotationYaw instead of front or rear
