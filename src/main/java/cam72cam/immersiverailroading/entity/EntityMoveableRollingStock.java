@@ -64,6 +64,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		frontYaw = BufferUtil.readFloat(additionalData);
 		rearYaw = BufferUtil.readFloat(additionalData);
 		tickPosID = additionalData.readInt();
+		tickSkew = additionalData.readDouble();
 		
 		positions = new ArrayList<TickPos>();
 		
@@ -80,6 +81,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		BufferUtil.writeFloat(buffer, frontYaw);
 		BufferUtil.writeFloat(buffer, rearYaw);
 		buffer.writeInt((int)tickPosID);
+		double tickTime = ConfigDebug.serverTickCompensation ? 20 : CommonProxy.getServerTPS(world, positions.size());
+		buffer.writeDouble(tickTime/20);
 		
 		buffer.writeInt(positions.size());
 		for (TickPos pos : positions ) {
@@ -202,11 +205,17 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void handleTickPosPacket(List<TickPos> newPositions, double serverTPS) {
+		this.tickSkew = serverTPS / 20;
+		
 		if (newPositions.size() != 0) {
 			this.clearPositionCache();
-			this.tickPosID = newPositions.get(0).tickID;
+			double delta = newPositions.get(0).tickID - this.tickPosID;
+			if (Math.abs(delta) > 10) {
+				this.tickPosID = newPositions.get(0).tickID;
+			} else {
+				tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
+			}
 		}
-		this.tickSkew = serverTPS / 20;
 		this.positions = newPositions;
 	}
 	

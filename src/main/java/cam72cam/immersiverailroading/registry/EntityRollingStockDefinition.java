@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -26,7 +28,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -36,6 +37,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityRollingStockDefinition {
 	
@@ -56,7 +59,7 @@ public abstract class EntityRollingStockDefinition {
 	public final String defID;
 	private String name = "Unknown";
 	private OBJModel model;
-	public List<String> textureNames = null;
+	public Map<String, String> textureNames = null;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
 	private float bogeyRear;
@@ -100,8 +103,6 @@ public abstract class EntityRollingStockDefinition {
 		parseJson(data);
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
-		
-		initHeightMap();
 	}
 	
 	public boolean shouldScalePitch() {
@@ -130,27 +131,23 @@ public abstract class EntityRollingStockDefinition {
 		}
 		
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
-		textureNames = new ArrayList<String>();
-		textureNames.add(null);
+		textureNames = new LinkedHashMap<String, String>();
+		textureNames.put(null, "Default");
 		if (data.has("tex_variants")) {
 			JsonElement variants = data.get("tex_variants");
-			for (JsonElement variant : variants.getAsJsonArray()) {
-				if (!variant.isJsonNull()) {
-					textureNames.add(variant.getAsString());
-				}
+			for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
+				textureNames.put(variant.getValue().getAsString(), variant.getKey());
 			}
 		}
 		
 		ResourceLocation alt_textures = new ResourceLocation(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
 		try {
-		List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
+			List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
 			for (InputStream input : alts) {
 				JsonParser parser = new JsonParser();
 				JsonElement variants = parser.parse(new InputStreamReader(input)).getAsJsonArray();
-				for (JsonElement variant : variants.getAsJsonArray()) {
-					if (!variant.isJsonNull()) {
-						textureNames.add(variant.getAsString());
-					}
+				for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
+					textureNames.put(variant.getValue().getAsString(), variant.getKey());
 				}
 			}
 		} catch (java.io.FileNotFoundException ex) {
@@ -383,8 +380,8 @@ public abstract class EntityRollingStockDefinition {
 		}
 	}
 	
-	private void initHeightMap() {
-		ImmersiveRailroading.info("Generating model heightmap...");
+	public void initHeightMap() {
+		ImmersiveRailroading.info("Generating heightmap %s", defID);
 		
 		double ratio = 8;
 		xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
@@ -399,12 +396,12 @@ public abstract class EntityRollingStockDefinition {
 				}
 				double[][] heightMap = new double[xRes][zRes];
 				for (String group : rc.modelIDs) {
-					List<Face> faces = model.groups.get(group);
-					for (Face face : faces) {
+					int[] faces = model.groups.get(group);
+					for (int face : faces) {
 						Path2D path = new Path2D.Double();
 						double fheight = 0;
 						boolean first = true;
-						for (int[] point : face.points()) {
+						for (int[] point : model.points(face)) {
 							Vec3d vert = model.vertices(point[0]);
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
@@ -413,7 +410,7 @@ public abstract class EntityRollingStockDefinition {
 							} else {
 								path.lineTo(vert.x * ratio, vert.z * ratio);
 							}
-							fheight += vert.y / face.points().length;
+							fheight += vert.y / 3; // We know we are using tris
 						}
 						Rectangle2D bounds = path.getBounds2D();
 						if (bounds.getWidth() * bounds.getHeight() < 1) {
@@ -451,46 +448,41 @@ public abstract class EntityRollingStockDefinition {
 			xoff = (this.heightBounds - this.widthBounds) / 2;
 		}
 		
-		List<Face> faces = new ArrayList<Face>();
+		List<Integer> faces = new ArrayList<Integer>();
 		for (List<RenderComponent> rcl : this.renderComponents.values()) {
 			for (RenderComponent rc : rcl) {
 				if (!rc.type.collisionsEnabled) {
 					continue;
 				}
 				for (String group : rc.modelIDs) {
-					faces.addAll(model.groups.get(group));
+					for (int face : model.groups.get(group)) {
+						faces.add(face);
+					}
 				}
 			}
 		}
+		float[] depthCache = new float[model.faceVerts.length/9];
+		for (int f : faces) {
+			float sum = 0;
+			for (int[] point : model.points(f)) {
+				Vec3d pt = model.vertices(point[0]);
+				sum += pt.x;
+			}
+			depthCache[f] = sum / 3; //We know it's a tri
+		}
 		
-		faces.sort(new Comparator<Face>() {
+		faces.sort(new Comparator<Integer>() {
 			@Override
-			public int compare(Face o1, Face o2) {
-				if (o1.depthCache == null) {
-					double sum = 0;
-					for (int[] point : o1.points()) {
-						Vec3d pt = model.vertices(point[0]);
-						sum += pt.x;
-					}
-					o1.depthCache = (float) (sum / o1.points().length);
-				}
-				if (o2.depthCache == null) {
-					double sum = 0;
-					for (int[] point : o2.points()) {
-						Vec3d pt = model.vertices(point[0]);
-						sum += pt.x;
-					}
-					o2.depthCache = (float) (sum / o2.points().length);
-				}
-				return o1.depthCache.compareTo(o2.depthCache);
+			public int compare(Integer o1, Integer o2) {
+				return Float.compare(depthCache[o1], depthCache[o2]);
 			}
 		});
 		
-		for (Face face : faces) {
-			Material mtl = model.materials.get(face.mtl);
+		for (int f : faces) {
+			Material mtl = model.materials.get(model.faceMTLs[f]);
 			Path2D path = new Path2D.Double();
 			boolean first = true;
-			for (int[] point : face.points()) {
+			for (int[] point : model.points(f)) {
 				Vec3d vert = model.vertices(point[0]);
 				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {
@@ -626,5 +618,10 @@ public abstract class EntityRollingStockDefinition {
 	
 	public boolean acceptsLivestock() {
 		return false;
+	}
+
+	@SideOnly(Side.SERVER)
+	public void clearModel() {
+		this.model = null;
 	}
 }

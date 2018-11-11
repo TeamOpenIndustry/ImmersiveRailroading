@@ -60,7 +60,6 @@ import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
 import cam72cam.immersiverailroading.render.item.StockItemModel;
 import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
-import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
@@ -358,7 +357,7 @@ public class ClientProxy extends CommonProxy {
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
     				if (map[x][y] != null && map[x][y] != "") {
-    					int color = renderer.textures.get(OBJRender.DEFAULT_TEXTURE).samp(map[x][y]);
+    					int color = renderer.textures.get(null).samp(map[x][y]);
     					image.setRGB(x, this.getIconWidth() - (y + 1), color);
     				} else {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
@@ -480,16 +479,16 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public InputStream getResourceStream(ResourceLocation modelLoc) throws IOException {
-		return Minecraft.getMinecraft().getResourceManager().getResource(modelLoc).getInputStream();
-	}
-	
-	@Override
 	public List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException {
 		List<InputStream> res = new ArrayList<InputStream>();
-		for (IResource resource : Minecraft.getMinecraft().getResourceManager().getAllResources(modelLoc)) {
-			res.add(resource.getInputStream());
+		try {
+			for (IResource resource : Minecraft.getMinecraft().getResourceManager().getAllResources(modelLoc)) {
+				res.add(resource.getInputStream());
+			}
+		} catch (java.io.FileNotFoundException ex) {
+			// Ignore
 		}
+		res.addAll(getFileResourceStreams(modelLoc));
 		return res;
 	}
 	
@@ -610,12 +609,9 @@ public class ClientProxy extends CommonProxy {
 	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
 	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
 	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-	                GL11.glTranslated(-d0, -d1, -d2);
 	                
 	                GL11.glTranslated(pos.getX()-d0+0.5, pos.getY()-d1+0.5, pos.getZ()-d2+0.5);
 	                
-	                if (Math.random() < 0.1) {
-	                }
 	                GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
 	                
 	                GL11.glTranslated(-0.5, -0.5, -0.5);

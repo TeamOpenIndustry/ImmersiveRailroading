@@ -1,18 +1,7 @@
 # Blender MTL File: 'ATTX Flatcar 1.blend'
-# Material Count: 9
+# Material Count: 8
 
 newmtl CouplerF_GM2~04
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.009290 0.009290 0.009290
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd coupler.png
-
-newmtl CouplerF_GM2~04_flatcar_ttx
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.009290 0.009290 0.009290
@@ -76,9 +65,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd trucks_n_stuff.png
+map_Kd spring.png
 
-newmtl spring_spring.png
+newmtl spring_trucks_n_stuff
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -87,7 +76,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd spring.png
+map_Kd trucks_n_stuff.png
 
 newmtl wheel
 Ns 96.078431

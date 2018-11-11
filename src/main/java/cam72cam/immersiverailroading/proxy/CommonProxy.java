@@ -1,12 +1,18 @@
 package cam72cam.immersiverailroading.proxy;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import org.apache.commons.io.IOUtils;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
@@ -299,8 +305,58 @@ public abstract class CommonProxy implements IGuiHandler {
 	
 	public abstract int getTicks();
 
-	public abstract InputStream getResourceStream(ResourceLocation modelLoc) throws IOException;
+
 	public abstract List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException;
+
+	public InputStream getResourceStream(ResourceLocation location) throws IOException {
+		InputStream chosen = null;
+		for (InputStream strm : getResourceStreamAll(location)) {
+			if (chosen == null) {
+				chosen = strm;
+			} else {
+				strm.close();
+			}
+		}
+		if (chosen == null) {
+			throw new java.io.FileNotFoundException(location.toString());
+		}
+		return chosen;
+	}
+
+    
+    protected String pathString(ResourceLocation location, boolean startingSlash) {
+    	return (startingSlash ? "/" : "") + "assets/" + location.getResourceDomain() + "/" + location.getResourcePath();
+    }
+    
+    protected List<InputStream> getFileResourceStreams(ResourceLocation location) throws IOException {
+    	List<InputStream> streams = new ArrayList<InputStream>();
+    	File folder = new File(this.configDir);
+    	if (folder.exists()) {
+    		if (folder.isDirectory()) {
+	    		File[] files = folder.listFiles(new FilenameFilter() {
+				    @Override
+				    public boolean accept(File dir, String name) {
+				        return name.endsWith(".zip");
+				    }
+				});
+	    		for (File file : files) {
+	    			ZipFile resourcePack = new ZipFile(file);
+	    			ZipEntry entry = resourcePack.getEntry(pathString(location, false));
+	    			if (entry != null) {
+	    				// Copy the input stream so we can close the resource pack
+	    				InputStream stream = resourcePack.getInputStream(entry);
+	    				streams.add(new ByteArrayInputStream(IOUtils.toByteArray(stream)));
+	    			}
+	    			resourcePack.close();
+	    		}
+    		} else {
+    			ImmersiveRailroading.error("Expecting " + this.configDir + " to be a directory");
+    		}
+    	} else {
+			folder.mkdirs();
+    	}
+		return streams;
+    }
 	
 	public ISound newSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
 		return null;

@@ -11,13 +11,14 @@ import net.minecraft.util.math.Vec3d;
 
 public class RenderComponent {
 	public final RenderComponentType type;
-	public final EntityRollingStockDefinition def;
 	public final int id;
 	public final String side;
 	public final Set<String> modelIDs;
 	public final String pos;
 	public final double scale;
 	private boolean wooden;
+	public final Vec3d min;
+	public final Vec3d max;
 	
 	public static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups) {
 		return parse(name, def, groups, -1, "", "");
@@ -40,58 +41,50 @@ public class RenderComponent {
 	}
 	
 	private static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups, int id, String side, String pos) {
-		RenderComponent comp = new RenderComponent(name, def, id, side, pos);
+		Set<String> modelIDs = new HashSet<String>();
 		
 		String idStr = id != -1 ? "" + id : "";
 		
-		comp.wooden = true;
+		boolean wooden = true;
 		
 		for (String group : groups) {
 			if (Pattern.matches(name.regex.replace("#SIDE#", side).replaceAll("#ID#", idStr).replaceAll("#POS#", pos), group)) {
-				comp.modelIDs.add(group);
+				modelIDs.add(group);
 				if (!group.contains("WOOD")) {
-					comp.wooden = false;
+					wooden = false;
 				}
 			}
 		}
-		if (comp.modelIDs.size() == 0) {
+		if (modelIDs.size() == 0) {
 			return null;
 		}
-		groups.removeAll(comp.modelIDs);
 		
-		return comp;
-	} 
 
-	private RenderComponent(RenderComponentType name, EntityRollingStockDefinition def, int wheel, String side, String pos) {
-		this.modelIDs = new HashSet<String>();
-		this.type = name;
-		this.def = def;
-		this.id = wheel;
-		this.side = side;
-		this.pos = pos;
-		this.scale = 1;
-	}
-	
-	protected RenderComponent(EntityRollingStockDefinition def) {
-		this(null, def, 0, null, null);
+		Vec3d min = def.getModel().minOfGroup(modelIDs);
+		Vec3d max = def.getModel().maxOfGroup(modelIDs);
+		
+		groups.removeAll(modelIDs);
+		
+		return new RenderComponent(modelIDs, name, id, side, pos, 1, wooden, min, max);
 	}
 
-	private RenderComponent(Set<String> modelIDs, RenderComponentType type, EntityRollingStockDefinition def, int id, String side, String pos, double scale, boolean wooden) {
+	private RenderComponent(Set<String> modelIDs, RenderComponentType type, int id, String side, String pos, double scale, boolean wooden, Vec3d min, Vec3d max) {
 		this.modelIDs = modelIDs;
 		this.type = type;
-		this.def = def;
 		this.id = id;
 		this.side = side;
 		this.pos = pos;
 		this.scale = scale;
 		this.wooden = wooden;
+		this.min = min;
+		this.max = max;
 	}
 
 	public Vec3d min() {
-		return def.getModel().minOfGroup(modelIDs).scale(scale);
+		return min.scale(scale);
 	}
 	public Vec3d max() {
-		return def.getModel().maxOfGroup(modelIDs).scale(scale);
+		return max.scale(scale);
 	}
 	public Vec3d center() {
 		Vec3d min = min();
@@ -120,7 +113,7 @@ public class RenderComponent {
 	}
 
 	public RenderComponent scale(Gauge gauge) {
-		return new RenderComponent(modelIDs, type, def, id, side, pos, gauge.scale(), wooden);
+		return new RenderComponent(modelIDs, type, id, side, pos, gauge.scale(), wooden, min, max);
 	}
 	
 	@Override

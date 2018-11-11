@@ -171,12 +171,15 @@ public class RenderOverride {
 	        	        int j = i % 65536;
 	        	        int k = i / 65536;
 	        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-	        			info = info.clone();
 	        			GL11.glTranslated(relPos.x, relPos.y, relPos.z);	
-	        			if (info.type == TrackItems.SWITCH) {
+	        			boolean switched = info.type == TrackItems.SWITCH; 
+	        			if (switched ) {
 	        				info.type = TrackItems.STRAIGHT;
 	        			}
 		        		RailBuilderRender.renderRailBuilder(info);
+		        		if (switched) {
+		        			info.type = TrackItems.SWITCH;
+		        		}
 	        		}
 	        		GL11.glPopMatrix();
 	        	}	

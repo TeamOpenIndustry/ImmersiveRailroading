@@ -46,6 +46,7 @@ public class RailInfo {
 	// Used for tile rendering only
 	public SwitchState switchState = SwitchState.NONE;
 	public double tablePos = 0;
+	public String renderIdCache; 
 	
 	
 	public RailInfo(BlockPos position, World world, EnumFacing facing, TrackItems type, TrackDirection direction, int length, int quarter, int quarters, Gauge gauge, Vec3d placementPosition, ItemStack railBed, ItemStack railBedFill, SwitchState switchState, double tablePos, boolean gradeCrossing) {
@@ -209,7 +210,9 @@ public class RailInfo {
 		BuilderBase builder = getBuilder(pos);
 		
 		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks) {
-			builder.clearArea();
+			if (!world.isRemote) {
+				builder.clearArea();
+			}
 		}
 		
 
