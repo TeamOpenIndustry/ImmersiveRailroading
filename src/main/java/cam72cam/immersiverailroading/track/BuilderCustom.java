@@ -55,14 +55,15 @@ public class BuilderCustom extends BuilderIterator {
 			angle = -angle;
 		}
 		
-		float angle2 = angle+90;
+		float angle2 = angle-90;
 		
 		if (info.customInfo != null) {
 			angle2 = info.customInfo.rotationQuarter/4f * 90;
 			if(info.customInfo.direction == TrackDirection.RIGHT) {
 				angle2 = -angle2;
 			}
-			angle2 += info.customInfo.facing.getHorizontalAngle() - info.placementInfo.facing.getHorizontalAngle();
+			angle2 -= (info.placementInfo.facing.getHorizontalAngle() - info.customInfo.facing.getHorizontalAngle());
+			nextPos = VecUtil.rotateYaw(nextPos, 180 - (info.placementInfo.facing.getHorizontalAngle() - 90));
 			
 			vertDist = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
 		}
@@ -92,7 +93,7 @@ public class BuilderCustom extends BuilderIterator {
 			res.add(new PosStep(p1.x, heightAccum, p1.z, angleCurve));
 			heightAccum += p1.distanceTo(p2) * height;
 		}
-		System.out.println(heightAccum);
+		//System.out.println(heightAccum);
 		
 		cache.put(stepSize, res);
 		return cache.get(stepSize);

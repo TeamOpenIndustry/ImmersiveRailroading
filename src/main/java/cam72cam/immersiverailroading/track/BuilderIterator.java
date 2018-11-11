@@ -20,7 +20,7 @@ public abstract class BuilderIterator extends BuilderBase {
 		this(info, pos, false);
 	}
 	
-	public class PosStep extends Vec3d {
+	public static class PosStep extends Vec3d {
 		public final float yaw;
 
 		public PosStep(double xIn, double yIn, double zIn, float yaw) {
