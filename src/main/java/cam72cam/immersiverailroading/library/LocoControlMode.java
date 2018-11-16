@@ -7,6 +7,7 @@ public enum LocoControlMode {
 	THROTTLE_REVERSE,
 	BRAKE,
 	HORN,
+	BELL,
 	COMPUTER,
 	;
 	

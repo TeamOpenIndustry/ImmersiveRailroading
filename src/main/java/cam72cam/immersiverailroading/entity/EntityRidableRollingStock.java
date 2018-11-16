@@ -146,21 +146,21 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	public void handleKeyPress(Entity source, KeyTypes key, boolean sprinting) {
 		Vec3d movement = null;
 		switch (key) {
-		case PLAYER_FORWARD:
-			movement = new Vec3d(pressDist, 0, 0);
-			break;
-		case PLAYER_BACKWARD:
-			movement = new Vec3d(-pressDist, 0, 0);
-			break;
-		case PLAYER_LEFT:
-			movement = new Vec3d(0, 0, -pressDist);
-			break;
-		case PLAYER_RIGHT:
-			movement = new Vec3d(0, 0, pressDist);
-			break;
-		default:
-			//ignore key
-			return;
+			case PLAYER_FORWARD:
+				movement = new Vec3d(pressDist, 0, 0);
+				break;
+			case PLAYER_BACKWARD:
+				movement = new Vec3d(-pressDist, 0, 0);
+				break;
+			case PLAYER_LEFT:
+				movement = new Vec3d(0, 0, -pressDist);
+				break;
+			case PLAYER_RIGHT:
+				movement = new Vec3d(0, 0, pressDist);
+				break;
+			default:
+				//ignore key
+				return;
 		}
 		if (source.getRidingEntity() == this) {
 			if (sprinting) {
@@ -168,27 +168,25 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
 
 			movement = VecUtil.rotateYaw(movement, source.getRotationYawHead());
-			movement = VecUtil.rotateYaw(movement, 180-this.rotationYaw);
+			movement = VecUtil.rotateYaw(movement, 180 - this.rotationYaw);
 
 			//currently doesn't support new code variable wise, so hardcoded to not allow it at this time
-			if(true){
-			Vec3d pos = passengerPositions.get(source.getPersistentID()).add(movement);
-
-
-
-			if (this instanceof EntityCoupleableRollingStock) {
-				if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
-					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT));
-					return;
-				}
-				if (this.getDefinition().isAtRear(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
-					source.startRiding(((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK));
-					return;
-				}
-			}}
-			else{
+			if (true) {
 				Vec3d pos = passengerPositions.get(source.getPersistentID()).add(movement);
-				for() {
+
+
+				if (this instanceof EntityCoupleableRollingStock) {
+					if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock) this).isCoupled(CouplerType.FRONT)) {
+						source.startRiding(((EntityCoupleableRollingStock) this).getCoupled(CouplerType.FRONT));
+						return;
+					}
+					if (this.getDefinition().isAtRear(gauge, pos) && ((EntityCoupleableRollingStock) this).isCoupled(CouplerType.BACK)) {
+						source.startRiding(((EntityCoupleableRollingStock) this).getCoupled(CouplerType.BACK));
+						return;
+					}
+				} else {
+					//Vec3d pos = passengerPositions.get(source.getPersistentID()).add(movement);
+					//for() {
 
 					/*writing out idea from here
 					read the new position of the player. if none of the "walkways" cover this area, which is checked by for loop, subtract that movement (possibly able to be checked via a 3-4 dimension
@@ -203,14 +201,19 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 					along with possible animation of door (to much memory being used? animation in code? animation in obj file?) need to talk with cam and fred
 					 */
 				}
+				pos = this.getDefinition().correctPassengerBounds(gauge, pos);
+
+				passengerPositions.put(source.getPersistentID(), pos);
+				sendToObserving(new PassengerPositionsPacket(this));
 			}
-			
-			pos = this.getDefinition().correctPassengerBounds(gauge, pos);
-			
-			passengerPositions.put(source.getPersistentID(), pos);
-			sendToObserving(new PassengerPositionsPacket(this));
+
+			//pos = this.getDefinition().correctPassengerBounds(gauge, pos);
+
+			//passengerPositions.put(source.getPersistentID(), pos);
+			//sendToObserving(new PassengerPositionsPacket(this));
 		}
 	}
+
 	
 	@Override
 	protected void addPassenger(Entity passenger) {
