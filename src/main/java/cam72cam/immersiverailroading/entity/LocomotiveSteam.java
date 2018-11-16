@@ -238,6 +238,8 @@ public class LocomotiveSteam extends Locomotive {
 	//used for pitch of whistle
 	private float pullString = 0;
 	private float soundDampener = 0;
+	//sound files for bell sound
+	private ISound bell;
 	//sound files for idle and being at pressure
 	private ISound idle;
 	private ISound pressure;
@@ -276,8 +278,20 @@ public class LocomotiveSteam extends Locomotive {
 					
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40, gauge);
 					idle.setVolume(0.1f);
+					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 40, gauge);
+					idle.setVolume(0.1f);
 					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
 					pressure.setVolume(0.3f);
+				}
+				//stops sound if the button isn't being pressed
+				if (this.getDataManager().get(BELL) != 0) {
+					if (!bell.isPlaying()) {
+						bell.play(getPositionVector());
+					}
+				} else {
+					if (bell.isPlaying()) {
+						bell.stop();
+					}
 				}
 				//stops sound if the button isn't being pressed
 				if (this.getDataManager().get(HORN) < 1) {
@@ -289,6 +303,7 @@ public class LocomotiveSteam extends Locomotive {
 						}
 					}
 				}
+
 				//plays sounds
 				else {
 					if (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge)) //makes sure there is steam to play for whistle
@@ -367,7 +382,6 @@ public class LocomotiveSteam extends Locomotive {
 						}
 					}
 				}
-
 				//plays sound for idling
 				if (this.getBoilerTemperature() > this.ambientTemperature() + 5) {
 					if (!idle.isPlaying()) {
@@ -624,8 +638,8 @@ public class LocomotiveSteam extends Locomotive {
 
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
-			if tender.getCoupled(CouplerType.BACK) instanceof WaterTender{
-				WaterTender watertender = (WaterTender)tender.getCoupled(CoupledType.BACK);
+			if (tender.getCoupled(CouplerType.BACK) instanceof WaterTender){
+				WaterTender watertender = (WaterTender)tender.getCoupled(CouplerType.BACK);
 				if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
 					FluidUtil.tryFluidTransfer(this.theTank, watertender.theTank, desiredDrain, true);
 				}

@@ -24,7 +24,9 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> THROTTLE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	protected static DataParameter<Integer> HORN = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
+	protected static DataParameter<Integer> BELL = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
 	protected static DataParameter<Optional<UUID>> HORN_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+	protected static DataParameter<Optional<UUID>> BELL_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 	
 
 	private static final float throttleNotch = 0.04f;
@@ -41,6 +43,8 @@ public abstract class Locomotive extends FreightTank {
 		this.getDataManager().register(AIR_BRAKE, 0f);
 		this.getDataManager().register(HORN, 0);
 		this.getDataManager().register(HORN_PLAYER, Optional.absent());
+		this.getDataManager().register(BELL, 0);
+		this.getDataManager().register(BELL_PLAYER, Optional.absent());
 
 		this.entityCollisionReduction = 0.99F;
 	}
@@ -88,6 +92,9 @@ public abstract class Locomotive extends FreightTank {
 		case HORN:
 			setHorn(10, source.getPersistentID());
 			break;
+			case BELL:
+				setBell(10, source.getPersistentID());
+				break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {
 				setThrottle(getThrottle() + throttleNotch);
@@ -231,6 +238,17 @@ public abstract class Locomotive extends FreightTank {
 		}
 		if (currentPlayer == null || currentPlayer == uuid) {
 			this.getDataManager().set(HORN, val);
+		}
+	}
+
+	public void setBell(int val, UUID uuid) {
+		UUID currentPlayer = this.getDataManager().get(BELL_PLAYER).isPresent() ? this.getDataManager().get(BELL_PLAYER).get() : null;
+		if (currentPlayer == null && uuid != null) {
+			currentPlayer = uuid;
+			this.getDataManager().set(BELL_PLAYER, Optional.of(uuid));
+		}
+		if (currentPlayer == null || currentPlayer == uuid) {
+			this.getDataManager().set(BELL, val);
 		}
 	}
 	

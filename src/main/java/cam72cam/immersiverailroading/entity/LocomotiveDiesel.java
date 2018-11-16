@@ -28,6 +28,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	private ISound horn;
 	private ISound idle;
+	private ISound bell;
 	private float soundThrottle;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
@@ -165,8 +166,9 @@ public class LocomotiveDiesel extends Locomotive {
 		if (world.isRemote) {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
-					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, gauge);
+					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, true, 100, gauge);
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
+					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 80, gauge);
 				}
 				
 				if (isRunning()) {
@@ -182,6 +184,10 @@ public class LocomotiveDiesel extends Locomotive {
 				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
 					horn.play(getPositionVector());
 				}
+
+				if (this.getDataManager().get(BELL) != 0 && !bell.isPlaying() && isRunning()) {
+					bell.play(getPositionVector());
+				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
 				if (this.soundThrottle > absThrottle) {
@@ -194,6 +200,12 @@ public class LocomotiveDiesel extends Locomotive {
 					horn.setPosition(getPositionVector());
 					horn.setVelocity(getVelocity());
 					horn.update();
+				}
+
+				if (bell.isPlaying()) {
+					bell.setPosition(getPositionVector());
+					bell.setVelocity(getVelocity());
+					bell.update();
 				}
 				
 				if (idle.isPlaying()) {

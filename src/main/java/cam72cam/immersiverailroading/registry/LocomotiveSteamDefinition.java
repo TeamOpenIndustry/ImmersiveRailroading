@@ -37,6 +37,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	
 	public Quilling quill;
 	public ResourceLocation whistle;
+	public ResourceLocation bell;
 	public ResourceLocation idle;
 	public ResourceLocation chuff;
 	public ResourceLocation pressure;
@@ -95,6 +96,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
 		whistle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
+		bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
 		idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
 		chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
 		pressure = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
@@ -107,7 +109,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 				whistle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
 				whistleSet = true;
 			}
-			
+
+			if (sounds.has("bell")) {
+				idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
+			}
+
 			if (sounds.has("idle")) {
 				idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
 			}
