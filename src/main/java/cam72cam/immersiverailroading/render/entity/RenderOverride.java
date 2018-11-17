@@ -164,6 +164,8 @@ public class RenderOverride {
 	        			// Still loading...
 	        			continue;
 	        		}
+
+	        		relPos = relPos.subtract(new Vec3d(info.getBuilder().getParentPos()));
 	        		
 	        		GL11.glPushMatrix();
 	        		{
