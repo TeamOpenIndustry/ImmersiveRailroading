@@ -75,16 +75,19 @@ public abstract class BuilderIterator extends BuilderBase {
 				if (gagPos.y < 0) {
 					relHeight += 1;
 				}
-				
-				positions.add(Pair.of(posX, posZ));
-				bedHeights.put(Pair.of(posX, posZ), (float)(height + Math.max(0, relHeight - 0.1)));
-				railHeights.put(Pair.of(posX, posZ), (float) relHeight);
-				yOffset.put(Pair.of(posX, posZ), (int)(gagPos.y - relHeight));
+
+				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
+				if (!positions.contains(gag)) {
+					positions.add(gag);
+                    bedHeights.put(gag, (float)(height + Math.max(0, relHeight - 0.1)));
+                    railHeights.put(gag, (float) relHeight);
+					yOffset.put(gag, (int) (gagPos.y - relHeight));
+				}
 				if (Math.abs(q) > gauge.scale()) {
-					flexPositions.add(Pair.of(posX, posZ));
+					flexPositions.add(gag);
 				}
 				if (gagPos.distanceTo(start) < 3 || gagPos.distanceTo(start) > info.length - 3) {
-					flexPositions.add(Pair.of(posX, posZ));
+					flexPositions.add(gag);
 				}
 			}
 		}
@@ -151,13 +154,7 @@ public abstract class BuilderIterator extends BuilderBase {
 				double dist = next.distanceTo(prev);
 				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
 			}
-			double y = cur.y;
-			
-			if (y < 0) {
-				//HACK
-				y += 1;
-			}
-			data.add(new VecYawPitch(cur.x, y, cur.z, 180-cur.yaw, pitch));
+			data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180-cur.yaw, pitch));
 		}
 		
 		return data;
