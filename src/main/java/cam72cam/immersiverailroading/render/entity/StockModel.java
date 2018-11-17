@@ -117,7 +117,7 @@ public class StockModel extends OBJRender {
 			if (cargoLoads != null) {
 				//this sorts through all the cargoLoad objects
 				for (RenderComponent cargoLoad : cargoLoads) {
-					if (cargoLoad.id <= fill || (cargoLoad.id == 1)) {
+					if (cargoLoad.id <= fill) {
 						drawComponent(cargoLoad);
 						
 						//if the stock should only render the current cargo load only it will stop at the highest matching number
