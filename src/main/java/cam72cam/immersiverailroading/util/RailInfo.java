@@ -11,14 +11,8 @@ import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.track.BuilderBase;
-import cam72cam.immersiverailroading.track.BuilderCrossing;
-import cam72cam.immersiverailroading.track.BuilderCustom;
-import cam72cam.immersiverailroading.track.BuilderSlope;
-import cam72cam.immersiverailroading.track.BuilderStraight;
-import cam72cam.immersiverailroading.track.BuilderSwitch;
-import cam72cam.immersiverailroading.track.BuilderTurn;
-import cam72cam.immersiverailroading.track.BuilderTurnTable;
+import cam72cam.immersiverailroading.track.*;
+import cam72cam.immersiverailroading.track.BuilderCubicCurve;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -92,7 +86,7 @@ public class RailInfo {
 		case TURNTABLE:
 			return new BuilderTurnTable(this, pos);
 		case CUSTOM:
-			return new BuilderCustom(this, pos);
+			return new BuilderCubicCurve(this, pos);
 		}
 		return null;
 	}

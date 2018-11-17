@@ -10,8 +10,8 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public class BuilderCustom extends BuilderIterator {
-	public BuilderCustom(RailInfo info, BlockPos pos) {
+public class BuilderCubicCurve extends BuilderIterator {
+	public BuilderCubicCurve(RailInfo info, BlockPos pos) {
 		super(info, pos);
 	}
 	
