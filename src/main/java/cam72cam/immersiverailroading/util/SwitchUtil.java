@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
@@ -40,9 +41,21 @@ public class SwitchUtil {
 				return SwitchState.TURN;
 			}
 		}
-		
+
+		Vec3d redstoneOrigin = rail.getPlacementPosition();
+		if(rail.getRotationQuarter() % 2 == 1) { // 1 and 3 need an offset to work
+			EnumFacing NormalizedFacing = rail.getFacing();
+
+			if(rail.getDirection() == TrackDirection.RIGHT) {
+				NormalizedFacing = NormalizedFacing.rotateY();
+			}
+
+			if(NormalizedFacing == EnumFacing.WEST || NormalizedFacing == EnumFacing.NORTH) redstoneOrigin = redstoneOrigin.addVector(-1,0,0);
+			else redstoneOrigin = redstoneOrigin.addVector(1,0,0);
+		}
+
 		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(rail.getPlacementPosition()).offset(facing, MathHelper.ceil(rail.getGauge().scale()))) > 0) {
+			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(redstoneOrigin).offset(facing, MathHelper.ceil(rail.getGauge().scale()))) > 0) {
 				return SwitchState.TURN;
 			}
 		}
