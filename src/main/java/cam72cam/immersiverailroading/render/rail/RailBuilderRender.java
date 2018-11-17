@@ -43,7 +43,7 @@ public class RailBuilderRender {
 		OBJRender model = info.gauge.isModel() ? baseRailModel : baseRailModelModel;
 
 		Vec3d pos = info.placementInfo.placementPosition;
-		GL11.glTranslated(pos.x % 1, pos.y % 1, pos.z % 1); 
+		GL11.glTranslated(pos.x % 1, pos.y % 1, pos.z % 1);
 
 		String renderID = RailRenderUtil.renderID(info);
 		Integer displayList = displayLists.get(renderID);

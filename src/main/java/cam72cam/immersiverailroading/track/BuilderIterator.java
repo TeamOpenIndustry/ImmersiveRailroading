@@ -50,15 +50,9 @@ public abstract class BuilderIterator extends BuilderBase {
 		}
 		double clamp = 0.17 * gauge.scale();
 		
-		Vec3d start = null;
-		Vec3d end = null;
+		List<PosStep> path = getPath(0.25);
 		
-		for (PosStep cur : getPath(0.25)) {
-			if (start == null) {
-				start = cur;
-			}
-			end = cur;
-			
+		for (PosStep cur : path) {
 			Vec3d gagPos = cur;
 			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
@@ -86,17 +80,17 @@ public abstract class BuilderIterator extends BuilderBase {
 				if (Math.abs(q) > gauge.scale()) {
 					flexPositions.add(gag);
 				}
-				if (gagPos.distanceTo(start) < 3 || gagPos.distanceTo(start) > info.length - 3) {
+				if (gagPos.distanceTo(path.get(0)) < 3 || gagPos.distanceTo(path.get(0)) > info.length - 3) {
 					flexPositions.add(gag);
 				}
 			}
 		}
 		
-		int mainX = (int) start.x;
-		int mainZ = (int) start.z;
+		int mainX = (int) path.get(path.size()/2).x;
+		int mainZ = (int) path.get(path.size()/2).z;
 		if (endOfTrack) {
-			mainX = (int) end.x;
-			mainZ = (int) end.z;
+			mainX = (int) path.get(path.size()-1).x;
+			mainZ = (int) path.get(path.size()-1).z;
 		}
 		
 		this.setParentPos(new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ));
