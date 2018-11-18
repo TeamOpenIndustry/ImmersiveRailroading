@@ -45,7 +45,7 @@ public class BuilderTurnTable extends BuilderBase {
 		}
 		
 		this.setParentPos(new BlockPos(offset.down()));
-		TrackRail main = new TrackRail(this, offset.getX(), offset.getY()-1, offset.getZ(), EnumFacing.NORTH, info.type, info.length);
+		TrackRail main = new TrackRail(this, offset.getX(), offset.getY()-1, offset.getZ(), info.type, info.length);
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {

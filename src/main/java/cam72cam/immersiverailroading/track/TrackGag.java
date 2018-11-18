@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.tile.TileRailGag;
 
 public class TrackGag extends TrackBase {
 	public TrackGag(BuilderBase builder, int rel_x, int rel_y, int rel_z) {
-		super(builder, rel_x, rel_y, rel_z, IRBlocks.BLOCK_RAIL_GAG, EnumFacing.NORTH);
+		super(builder, rel_x, rel_y, rel_z, IRBlocks.BLOCK_RAIL_GAG);
 	}
 
 	@Override

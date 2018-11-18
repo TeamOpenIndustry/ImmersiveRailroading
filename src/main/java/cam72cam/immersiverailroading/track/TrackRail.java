@@ -11,8 +11,8 @@ public class TrackRail extends TrackBase {
 	private TrackItems type;
 	private int length;
 
-	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackItems type, int length) {
-		super(builder, rel_x, rel_y, rel_z, IRBlocks.BLOCK_RAIL, rel_rotation);
+	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, TrackItems type, int length) {
+		super(builder, rel_x, rel_y, rel_z, IRBlocks.BLOCK_RAIL);
 		this.type = type;
 		this.length = length;
 	}

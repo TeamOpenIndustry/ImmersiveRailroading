@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -30,8 +31,6 @@ public abstract class BuilderBase {
 	int z;
 	public EnumFacing rotation;
 	
-	private int[] translation;
-
 	public RailInfo info;
 
 	private BlockPos parent_pos;
@@ -89,11 +88,7 @@ public abstract class BuilderBase {
 	}
 	
 	public abstract List<VecYawPitch> getRenderData();
-	
-	public void setRelativeTranslate(int x, int y, int z) {
-		translation = new int[]{x, y, z};
-	}	
-	
+
 	public class PosRot extends BlockPos{
 		private EnumFacing rot;
 		
@@ -107,85 +102,12 @@ public abstract class BuilderBase {
 		}
 	}
 	
-	public PosRot convertRelativeCenterPositions(int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation) {
-		if (rel_x >= 1) {
-			switch(rotation) {
-			case SOUTH:
-				rel_x += 0;
-				rel_z += 0;
-				break;
-			case WEST:
-				rel_x += 0;
-				rel_z -= 1;
-				break;
-			case NORTH:
-				rel_x -= 1;
-				rel_z -= 1;
-				break;
-			case EAST:
-				rel_x -= 1;
-				rel_z -= 0;
-				break;
-			}
-		} else {
-			switch(rotation) {
-			case EAST:
-				rel_x += 0;
-				rel_z += 0;
-				break;
-			case NORTH:
-				rel_x += 0;
-				rel_z -= 1;
-				break;
-			case WEST:
-				rel_x += 1;
-				rel_z -= 1;
-				break;
-			case SOUTH:
-				rel_x += 1;
-				rel_z += 0;
-				break;
-			}
-		}
-		return convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
-	}
-
-	public PosRot convertRelativePositions(int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation) {
-		if (translation != null) {
-			rel_x += translation[0];
-			rel_y += translation[1];
-			rel_z += translation[2];
-		}
-		
-		EnumFacing newrot = EnumFacing.fromAngle(rel_rotation.getHorizontalAngle() + rotation.getHorizontalAngle());
-		
-		switch (rotation) {
-		case SOUTH:
-			// 270*
-			return new PosRot(new BlockPos(x + rel_x, y + rel_y, z + rel_z), newrot);
-		case WEST:
-			// 180*
-			return new PosRot(new BlockPos(x - rel_z, y + rel_y, z + rel_x), newrot);
-		case NORTH:
-			//  90*
-			return new PosRot(new BlockPos(x - rel_x, y + rel_y, z - rel_z), newrot);
-		case EAST:
-			//   0*
-			return new PosRot(new BlockPos(x + rel_z, y + rel_y, z - rel_x), newrot);
-		}
-		return null;
+	public PosRot convertRelativePositions(int rel_x, int rel_y, int rel_z) {
+		BlockPos rel = new BlockPos(rel_x, rel_y, rel_z);
+		BlockPos pos = new BlockPos(x, y, z);
+		return new PosRot(pos.add(BlockUtil.rotateYaw(rel, rotation.getOpposite())), rotation);
 	}
 	
-	public int getX() {
-		return x;
-	}
-	public int getY() {
-		return y;
-	}
-	public int getZ() {
-		return z;
-	}
-
 	public boolean canBuild() {
 		for(TrackBase track : tracks) {
 			if (!track.canPlaceTrack()) {
@@ -196,6 +118,7 @@ public abstract class BuilderBase {
 	}
 	
 	public void build() {
+		System.out.println(rotation);
 		if (!canBuild()) {
 			return ;
 		}
@@ -208,13 +131,9 @@ public abstract class BuilderBase {
 		return this.tracks;
 	}
 
-	public BlockPos getPos() {
-		return new BlockPos(x, y, z);
-	}
-
 	
 	public void setParentPos(BlockPos pos) {
-		parent_pos = convertRelativePositions(pos.getX(), pos.getY(), pos.getZ(), this.rotation);
+		parent_pos = convertRelativePositions(pos.getX(), pos.getY(), pos.getZ());
 	}
 	public BlockPos getParentPos() {
 		return parent_pos;
