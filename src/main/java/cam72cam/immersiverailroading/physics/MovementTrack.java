@@ -1,28 +1,21 @@
 package cam72cam.immersiverailroading.physics;
 
-import java.util.List;
-
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderIterator;
 import cam72cam.immersiverailroading.track.BuilderIterator.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import trackapi.lib.ITrack;
 import trackapi.lib.Util;
 
+import java.util.List;
+
 public class MovementTrack {
 
-	private static TileRailBase directRailFromPosition(World world, Vec3d position) {
-		return TileRailBase.get(world, new BlockPos((int) Math.floor(position.x), (int) Math.floor(position.y), (int) Math.floor(position.z)));
-	}
-	
 	public static ITrack findTrack(World world, Vec3d currentPosition, float trainYaw, double gauge) {
 		Vec3d[] positions = new Vec3d[] {
 				currentPosition,
@@ -87,13 +80,13 @@ public class MovementTrack {
 		}
 
 		double distance = delta.lengthVector();
-		double heightOffset = 0.35 * rail.getGauge().scale();
+		double heightOffset = 0.35 * rail.info.settings.gauge.scale();
 
-		if (rail.getType() == TrackItems.CROSSING) {
+		if (rail.info.settings.type == TrackItems.CROSSING) {
 			delta = VecUtil.fromYaw(distance, EnumFacing.fromAngle(trainYaw).getHorizontalAngle());
 			return currentPosition.add(delta);
-		} else if (rail.getType() == TrackItems.TURNTABLE) {
-			double tablePos = rail.getParentTile().getTablePos();
+		} else if (rail.info.settings.type == TrackItems.TURNTABLE) {
+			double tablePos = rail.getParentTile().info.tablePos;
 			
 			currentPosition = currentPosition.add(delta);
 			
@@ -111,13 +104,13 @@ public class MovementTrack {
 			} else {
 				return backward;
 			}
-		} else if (rail.getRailRenderInfo().getBuilder() instanceof BuilderIterator) {
-			List<PosStep> positions = ((BuilderIterator) rail.getRailRenderInfo().getBuilder()).getPath(0.5);
-			Vec3d center = rail.getPlacementPosition();
+		} else if (rail.info.getBuilder() instanceof BuilderIterator) {
+			List<PosStep> positions = ((BuilderIterator) rail.info.getBuilder()).getPath(0.5);
+			Vec3d center = rail.info.placementInfo.placementPosition;
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
 			for (PosStep pos : positions) {
-				Vec3d rotPos = VecUtil.rotateYaw(pos, rail.getPlacementInfo().facing.getHorizontalAngle() - 90);
+				Vec3d rotPos = VecUtil.rotateYaw(pos, rail.info.placementInfo.facing.getHorizontalAngle() - 90);
 				pos = new PosStep(rotPos, pos.yaw);
 				if (close.distanceTo(relative) > pos.distanceTo(relative)) {
 					close = pos;
@@ -130,7 +123,7 @@ public class MovementTrack {
 			double distToClose = closePos.distanceTo(estimatedPosition);
 			
 			Vec3d curveDelta = VecUtil.fromYaw(distToClose, close.yaw);
-			curveDelta = VecUtil.rotateYaw(curveDelta, rail.getPlacementInfo().facing.getHorizontalAngle() - 90);
+			curveDelta = VecUtil.rotateYaw(curveDelta, rail.info.placementInfo.facing.getHorizontalAngle() - 90);
 			
 			Vec3d forward = closePos.add(curveDelta);
 			Vec3d backward = closePos.subtract(curveDelta);
@@ -142,102 +135,7 @@ public class MovementTrack {
 			} else {
 				return backward;
 			}
-		} else {
-			// delta should be in the direction of rotationYaw instead of front or rear
-			// since large changes can occur if the train is way off center
-			delta = VecUtil.fromYaw(distance, trainYaw);
-			/*
-			// Check that we are not moving in the wrong axis along a track
-			if (EnumFacing.fromAngle(trainYaw).getAxis() != rail.getFacing().getAxis() && rail.getType() != TrackItems.CROSSING) {
-				if (!world.isRemote) {
-					System.out.println("Wrong track direction");
-					startPos.setDead();
-					return position;
-				}
-			}*/
-			float angle = rail.getRotationQuarter()/4f * 90 + rail.getFacing().getHorizontalAngle();
-			
-			// |>----O-----|
-			// |--->-O-----|
-			// |-----O->---|
-			// |-----O---->|
-			// |<----O-----|
-			// |---<-O-----|
-			// |-----O-<---|
-			// |-----O----<|
-			
-			// Reset to previous height;
-			currentPosition = currentPosition.addVector(0, -heightOffset, 0);
-			
-			Vec3d center = rail.getPlacementPosition();
-			double toCenter = center.distanceTo(currentPosition);
-			
-			Vec3d possiblePositive = center.add(VecUtil.fromYaw(toCenter, angle));
-			Vec3d possibleNegative = center.add(VecUtil.fromYaw(-toCenter, angle));
-			
-			double angularDistance = 0; 
-			if (possiblePositive.distanceTo(currentPosition) < possibleNegative.distanceTo(currentPosition)) {
-				angularDistance = toCenter;
-			} else {
-				angularDistance = -toCenter;
-			}
-			
-			possiblePositive = center.add(VecUtil.fromYaw(angularDistance + distance, angle));
-			possibleNegative = center.add(VecUtil.fromYaw(angularDistance - distance, angle));
-			
-			Vec3d outPosition;
-			if (possiblePositive.distanceTo(currentPosition.add(delta)) < possibleNegative.distanceTo(currentPosition.add(delta))) {
-				outPosition = possiblePositive;
-			} else {
-				outPosition = possibleNegative;
-			}
-
-			// Update y position
-			TileRailBase directRail = directRailFromPosition(world, outPosition);
-			if (directRail != null) {
-				outPosition = new Vec3d(outPosition.x, directRail.getPos().getY() + directRail.getRailHeight(), outPosition.z);
-				if (rail.getType() == TrackItems.SLOPE) {
-					Vec3d offset = outPosition.subtract(currentPosition).normalize();
-					float prevHeight = directRail.getPos().getY() + directRail.getRailHeight();
-					float nextHeight = directRail.getPos().getY() + directRail.getRailHeight();
-					float prevDist = 0;
-					float nextDist = 0;
-					
-					TileRailBase prev = directRailFromPosition(world, outPosition.subtract(offset));
-					if (prev == null) {
-						prev = directRailFromPosition(world, outPosition.subtract(offset).addVector(0, 1, 0));
-					}
-					if (prev == null) {
-						prev = directRailFromPosition(world, outPosition.subtract(offset).addVector(0, -1, 0));
-					}
-					if (prev != null) {
-						prevHeight = prev.getPos().getY() + prev.getRailHeight();
-						prevDist = (float) new Vec3d(prev.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition); 
-					}
-					TileRailBase next = directRailFromPosition(world, outPosition.add(offset));
-					if (next == null ) {
-						next = directRailFromPosition(world, outPosition.add(offset).addVector(0, 1, 0));
-					}
-					if (next == null ) {
-						next = directRailFromPosition(world, outPosition.add(offset).addVector(0, -1, 0));
-					}
-					if (next != null) {
-						nextHeight = next.getPos().getY() + next.getRailHeight();
-						nextDist = (float) new Vec3d(next.getPos()).addVector(0.5, 0, 0.5).distanceTo(outPosition);
-					}
-					
-					if (prevDist + nextDist != 0) {
-						float height = (prevHeight * nextDist + nextHeight * prevDist) / (nextDist + prevDist); 
-						
-						outPosition = new Vec3d(outPosition.x, height, outPosition.z);
-					}
-				}
-			} else {
-				outPosition = new Vec3d(outPosition.x, currentPosition.y, outPosition.z);
-			}
-
-			
-			return outPosition.addVector(0, heightOffset, 0);
 		}
+		return currentPosition.add(delta);
 	}
 }

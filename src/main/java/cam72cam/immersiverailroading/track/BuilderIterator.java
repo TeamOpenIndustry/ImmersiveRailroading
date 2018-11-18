@@ -44,11 +44,11 @@ public abstract class BuilderIterator extends BuilderBase {
 		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<Pair<Integer, Integer>, Integer>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
-		double horiz = info.gauge.value();
-		if (info.gradeCrossing) {
-			horiz += 2f * info.gauge.scale();
+		double horiz = info.settings.gauge.value();
+		if (info.settings.isGradeCrossing) {
+			horiz += 2f * info.settings.gauge.scale();
 		}
-		double clamp = 0.17 * info.gauge.scale();
+		double clamp = 0.17 * info.settings.gauge.scale();
 		
 		List<PosStep> path = getPath(0.25);
 		PosStep start = path.get(0);
@@ -67,9 +67,9 @@ public abstract class BuilderIterator extends BuilderBase {
 				int posX = (int)(gagPos.x+nextUp.x);
 				int posZ = (int)(gagPos.z+nextUp.z);
 				double height = 0;
-				if (info.gradeCrossing) {
+				if (info.settings.isGradeCrossing) {
 					height = (1 - Math.abs((int)q)/horiz)/3 - 0.05;
-					height *= info.gauge.scale();
+					height *= info.settings.gauge.scale();
 					height = Math.min(height, clamp);
 				}
 				
@@ -85,7 +85,7 @@ public abstract class BuilderIterator extends BuilderBase {
                     railHeights.put(gag, (float) relHeight);
 					yOffset.put(gag, (int) (gagPos.y - relHeight));
 				}
-				if (isFlex || Math.abs(q) > info.gauge.value()) {
+				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
 				}
 			}
@@ -126,7 +126,7 @@ public abstract class BuilderIterator extends BuilderBase {
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
-		List<PosStep> points = getPath(info.gauge.scale());
+		List<PosStep> points = getPath(info.settings.gauge.scale());
 		
 		for (int i = 0; i < points.size(); i++) {
 			PosStep cur = points.get(i);

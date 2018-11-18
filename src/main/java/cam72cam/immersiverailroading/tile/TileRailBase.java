@@ -181,7 +181,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (railBedCache == null) {
 			TileRail pt = this.getParentTile();
 			if (pt != null) {
-				railBedCache = pt.getRailBed();
+				railBedCache = pt.info.settings.railBed;
 			}
 		}
 		return railBedCache;
@@ -413,7 +413,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public double getTrackGauge() {
 		TileRail parent = this.getParentTile();
 		if (parent != null) {
-			return parent.getGauge().value();
+			return parent.info.settings.gauge.value();
 		}
 		return 0;
 	}

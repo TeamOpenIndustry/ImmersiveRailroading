@@ -29,7 +29,7 @@ public class BuilderStraight extends BuilderIterator {
 			angle = -angle;
 		}
 		
-		for (float dist = 0; dist < info.length; dist += stepSize) {
+		for (float dist = 0; dist < info.settings.length; dist += stepSize) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
 			res.add(new PosStep(gagPos, angle));
 		}

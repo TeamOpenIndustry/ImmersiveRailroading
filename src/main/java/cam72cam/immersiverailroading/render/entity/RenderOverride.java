@@ -156,9 +156,9 @@ public class RenderOverride {
         		if (!((TileRail) te).isLoaded()) {
         			continue;
         		}
-	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(((TileRail) te).getPlacementPosition())) {
+	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(te.getPos()))) {
 
-	        		RailInfo info = ((TileRail) te).getRailRenderInfo();
+	        		RailInfo info = ((TileRail) te).info;
 	        		if (info == null) {
 	        			// Still loading...
 	        			continue;
@@ -170,18 +170,15 @@ public class RenderOverride {
 	        	        int j = i % 65536;
 	        	        int k = i / 65536;
 	        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-	        			boolean switched = info.type == TrackItems.SWITCH;
-	        			if (switched ) {
-	        				info.type = TrackItems.STRAIGHT;
+	        			if (info.settings.type == TrackItems.SWITCH) {
+	        				//TODO render switch and don't render turn
+	        				info = info.withType(TrackItems.STRAIGHT);
 	        			}
 
 						Vec3d pos = info.placementInfo.placementPosition.subtract(cameraPos);
 						GL11.glTranslated(pos.x, pos.y, pos.z);
 
 		        		RailBuilderRender.renderRailBuilder(info);
-		        		if (switched) {
-		        			info.type = TrackItems.SWITCH;
-		        		}
 	        		}
 	        		GL11.glPopMatrix();
 	        	}	

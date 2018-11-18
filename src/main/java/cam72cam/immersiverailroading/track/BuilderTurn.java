@@ -24,14 +24,14 @@ public class BuilderTurn extends BuilderIterator {
 
     @Override
     public List<PosStep> getPath(double stepSize) {
-        float radius = info.length;
+        float radius = info.settings.length;
 
         float startAngle = -info.placementInfo.rotationQuarter / 4f * 90;
-        float endAngle = startAngle + Math.max(1, info.quarters)/ 4f * 90;
+        float endAngle = startAngle + Math.max(1, info.settings.quarters)/ 4f * 90;
 
         if (info.placementInfo.direction == TrackDirection.RIGHT) { // actually left
             startAngle = 180 + 90 + info.placementInfo.rotationQuarter/4f * 90;
-            endAngle = startAngle + Math.max(1, info.quarters)/4f * 90;
+            endAngle = startAngle + Math.max(1, info.settings.quarters)/4f * 90;
         }
 
         // Hack the radius
