@@ -45,7 +45,7 @@ public class BuilderTurnTable extends BuilderBase {
 		}
 		
 		this.setParentPos(new BlockPos(offset.down()));
-		TrackRail main = new TrackRail(this, offset.getX(), offset.getY()-1, offset.getZ(), info.type, info.length);
+		TrackRail main = new TrackRail(this, offset.down());
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
@@ -56,7 +56,7 @@ public class BuilderTurnTable extends BuilderBase {
 			}
 			
 			if (!(pair.getLeft() == 0 && pair.getRight() == 0)) {
-				TrackGag tgu = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY()-1, pair.getRight() + offset.getZ());
+				TrackGag tgu = new TrackGag(this, new BlockPos(pair.getLeft() + offset.getX(), offset.getY()-1, pair.getRight() + offset.getZ()));
 				if (toCenter > info.length-0.5) {
 					tgu.setHeight(1);
 					tgu.setFlexible();
@@ -64,7 +64,7 @@ public class BuilderTurnTable extends BuilderBase {
 				tracks.add(tgu);
 			}
 			
-			TrackBase tg = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY(), pair.getRight() + offset.getZ());
+			TrackBase tg = new TrackGag(this, new BlockPos(pair.getLeft() + offset.getX(), offset.getY(), pair.getRight() + offset.getZ()));
 			tg.setHeight(0.000001f);
 			tg.solidNotRequired = true;
 			if (toCenter > info.length-0.5) {
@@ -113,7 +113,7 @@ public class BuilderTurnTable extends BuilderBase {
 	public int costFill() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
-			if (track.rel_y == 1) {
+			if (track.rel.getY() == 1) {
 				continue;
 			}
 			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {

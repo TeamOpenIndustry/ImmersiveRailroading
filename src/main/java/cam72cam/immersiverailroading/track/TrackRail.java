@@ -5,30 +5,26 @@ import net.minecraft.util.EnumFacing;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
+import net.minecraft.util.math.BlockPos;
 
 public class TrackRail extends TrackBase {
 
-	private TrackItems type;
-	private int length;
-
-	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, TrackItems type, int length) {
-		super(builder, rel_x, rel_y, rel_z, IRBlocks.BLOCK_RAIL);
-		this.type = type;
-		this.length = length;
+	public TrackRail(BuilderBase builder, BlockPos rel) {
+		super(builder, rel, IRBlocks.BLOCK_RAIL);
 	}
-	
+
 	@Override
 	public TileEntity placeTrack() {
 		TileRail tileRail = (TileRail) super.placeTrack();
 		
-		tileRail.setType(type);
-		tileRail.setLength(this.length);
+		tileRail.setType(builder.info.type);
+		tileRail.setLength(builder.info.length);
 		tileRail.setTurnQuarters(builder.info.quarters);
 		tileRail.setRailBed(builder.info.railBed);
-		tileRail.setDrops(builder.drops);
-		tileRail.setGauge(builder.gauge);
+		tileRail.setGauge(builder.info.gauge);
 		tileRail.setPlacementInfo(builder.info.placementInfo);
 		tileRail.setCustomInfo(builder.info.customInfo);
+		tileRail.setDrops(builder.drops);
 		tileRail.markDirty();
 		
 		return tileRail;
