@@ -89,39 +89,7 @@ public class MovementTrack {
 		double distance = delta.lengthVector();
 		double heightOffset = 0.35 * rail.getGauge().scale();
 
-		if (rail.getType().isTurn()) {
-			// Relative position to the curve center
-			Vec3d posDelta = rail.getCenter().subtractReverse(currentPosition);
-			// Calculate the angle (rad) for the current position is
-			double posRelYaw = MathHelper.atan2(posDelta.x, -posDelta.z);
-			// Hack the radius
-			double radius = rail.getRadius() - 1;
-			// Calculate the angle delta in rad (radians are awesome)
-			double yawDelt = distance / radius;
-
-			// Calculate the original next position (won't be accurate, but we
-			// use it as an estimate)
-			Vec3d nextPos = currentPosition.add(delta);
-
-//			for (int i = 0; i < 90; i++) {
-//				Vec3d check = rail.getCenter().addVector(Math.sin(posRelYaw + Math.toRadians(i)) * radius, 0,
-//						-Math.cos(posRelYaw + Math.toRadians(i)) * radius);
-//				world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, check.x, check.y, check.z, 0, 0, 0);
-//			}
-
-			// Calculate the two possible next positions (forward on the curve
-			// or backward on the curve)
-			Vec3d newpos = rail.getCenter().addVector(Math.sin(posRelYaw + yawDelt) * radius, heightOffset, -Math.cos(posRelYaw + yawDelt) * radius);
-			Vec3d newneg = rail.getCenter().addVector(Math.sin(posRelYaw - yawDelt) * radius, heightOffset, -Math.cos(posRelYaw - yawDelt) * radius);
-
-			// Return whichever position is closest to the estimated next
-			// position
-			if (newpos.subtract(nextPos).lengthVector() < newneg.subtract(nextPos).lengthVector()) {
-				return newpos;
-			} else {
-				return newneg;
-			}
-		} else if (rail.getType() == TrackItems.CROSSING) {
+		if (rail.getType() == TrackItems.CROSSING) {
 			delta = VecUtil.fromYaw(distance, EnumFacing.fromAngle(trainYaw).getHorizontalAngle());
 			return currentPosition.add(delta);
 		} else if (rail.getType() == TrackItems.TURNTABLE) {
