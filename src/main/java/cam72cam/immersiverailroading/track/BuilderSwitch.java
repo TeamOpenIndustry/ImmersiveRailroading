@@ -116,11 +116,11 @@ public class BuilderSwitch extends BuilderBase {
 	}
 
 	public boolean isOnStraight(Vec3d position) {
-		for (float dist = 0; dist < info.length; dist += gauge.scale()/8) {
+		for (float dist = 0; dist < info.length; dist += info.gauge.scale()/8) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
 			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.placementInfo.facing.getHorizontalAngle() + 90 + 180);
 			gagPos = gagPos.add(info.placementInfo.placementPosition);
-			if (gagPos.distanceTo(position.addVector(0, -0.35 * gauge.scale(), 0)) < gauge.scale()/4) {
+			if (gagPos.distanceTo(position.addVector(0, -0.35 * info.gauge.scale(), 0)) < info.gauge.scale()/4) {
 				return true;
 			}
 		}

@@ -114,9 +114,6 @@ public abstract class TrackBase {
 	public float getRailHeight() {
 		return railHeight;
 	}
-	public Gauge getGauge() {
-		return builder.gauge;
-	}
 
 	public void setFlexible() {
 		this.flexible  = true;

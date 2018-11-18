@@ -46,7 +46,7 @@ public class BuilderCrossing extends BuilderBase {
 		Vec3d pos = VecUtil.rotateYaw(new Vec3d(0, 0, 0), angle-90);
 		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
-		for (double i = -trackOffset; i < info.length - trackOffset; i+=gauge.scale()) {
+		for (double i = -trackOffset; i < info.length - trackOffset; i+=info.gauge.scale()) {
 			pos = VecUtil.rotateYaw(new Vec3d(0, 0, i-0.25), angle-90);
 			data.add(new VecYawPitch(pos.x, pos.y, pos.z-1, -angle, "RAIL_BASE"));
 		}
@@ -54,7 +54,7 @@ public class BuilderCrossing extends BuilderBase {
 		
 		pos = VecUtil.rotateYaw(new Vec3d(0, 0, 0), angle-90);
 		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.length, "RAIL_RIGHT", "RAIL_LEFT"));
-		for (double i = -trackOffset; i < info.length - trackOffset; i+=gauge.scale()) {
+		for (double i = -trackOffset; i < info.length - trackOffset; i+=info.gauge.scale()) {
 			pos = VecUtil.rotateYaw(new Vec3d(0, 0, i-0.25), angle-90);
 			data.add(new VecYawPitch(pos.x-1, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}
