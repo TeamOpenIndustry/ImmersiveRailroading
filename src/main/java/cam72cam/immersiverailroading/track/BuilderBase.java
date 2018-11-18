@@ -26,13 +26,11 @@ public abstract class BuilderBase {
 	protected ArrayList<TrackBase> tracks = new ArrayList<TrackBase>();
 	
 	public World world;
-	int x;
-	int y;
-	int z;
 	public EnumFacing rotation;
 	
 	public RailInfo info;
 
+	private BlockPos pos;
 	private BlockPos parent_pos;
 
 	public boolean overrideFlexible = false;
@@ -46,10 +44,8 @@ public abstract class BuilderBase {
 		rotation = info.placementInfo.facing;
 		world = info.world;
 		gauge = info.gauge;
+		this.pos = pos;
 		parent_pos = pos;
-		this.x = pos.getX();
-		this.y = pos.getY();
-		this.z = pos.getZ();
 	}
 
 	public class VecYawPitch extends Vec3d {
@@ -102,9 +98,7 @@ public abstract class BuilderBase {
 		}
 	}
 	
-	public PosRot convertRelativePositions(int rel_x, int rel_y, int rel_z) {
-		BlockPos rel = new BlockPos(rel_x, rel_y, rel_z);
-		BlockPos pos = new BlockPos(x, y, z);
+	public PosRot convertRelativePositions(BlockPos rel) {
 		return new PosRot(pos.add(BlockUtil.rotateYaw(rel, rotation.getOpposite())), rotation);
 	}
 	
@@ -118,7 +112,6 @@ public abstract class BuilderBase {
 	}
 	
 	public void build() {
-		System.out.println(rotation);
 		if (!canBuild()) {
 			return ;
 		}
@@ -133,7 +126,7 @@ public abstract class BuilderBase {
 
 	
 	public void setParentPos(BlockPos pos) {
-		parent_pos = convertRelativePositions(pos.getX(), pos.getY(), pos.getZ());
+		parent_pos = convertRelativePositions(pos);
 	}
 	public BlockPos getParentPos() {
 		return parent_pos;

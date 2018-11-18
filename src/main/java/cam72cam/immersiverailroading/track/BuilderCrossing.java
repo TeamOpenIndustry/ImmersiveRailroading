@@ -20,16 +20,16 @@ public class BuilderCrossing extends BuilderBase {
 		
 		info.length = 3;
 		
-		this.setParentPos(new BlockPos(0, 0, 0));
+		this.setParentPos(BlockPos.ORIGIN);
 		
-		tracks.add(new TrackRail(this, 0, 0, 0, TrackItems.CROSSING, 3));
+		tracks.add(new TrackRail(this, BlockPos.ORIGIN));
 		int blocks = 1;
 		for (int i = -blocks; i <=blocks; i ++) {
 			for (int j = -blocks; j <=blocks; j ++) {
 				if (i == 0 && j == 0) {
 					continue;
 				}
-				tracks.add(new TrackGag(this, i, 0, j));
+				tracks.add(new TrackGag(this, new BlockPos(i, 0, j)));
 			}
 		}
 	}

@@ -17,9 +17,7 @@ import net.minecraft.util.math.BlockPos;
 public abstract class TrackBase {
 	public BuilderBase builder;
 
-	protected int rel_x;
-	protected int rel_y;
-	protected int rel_z;
+	protected BlockPos rel;
 	private float bedHeight;
 	private float railHeight;
 
@@ -31,11 +29,9 @@ public abstract class TrackBase {
 
 	public boolean solidNotRequired;
 
-	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block) {
+	public TrackBase(BuilderBase builder, BlockPos rel, Block block) {
 		this.builder = builder;
-		this.rel_x = rel_x;
-		this.rel_y = rel_y;
-		this.rel_z = rel_z;
+		this.rel = rel;
 		this.block = block;
 	}
 
@@ -99,7 +95,7 @@ public abstract class TrackBase {
 	}
 
 	public PosRot getPos() {
-		return builder.convertRelativePositions(rel_x, rel_y, rel_z);
+		return builder.convertRelativePositions(rel);
 	}
 
 	public void setHeight(float height) {

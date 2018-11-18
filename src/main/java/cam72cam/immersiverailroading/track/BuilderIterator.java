@@ -95,8 +95,9 @@ public abstract class BuilderIterator extends BuilderBase {
 			}
 		}
 
-		this.setParentPos(new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ));
-		TrackRail main = new TrackRail(this, mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ, info.type, info.length);
+		BlockPos mainPos = new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
+		this.setParentPos(mainPos);
+		TrackRail main = new TrackRail(this, mainPos	);
 		tracks.add(main);
 		main.setRailHeight(railHeights.get(Pair.of(mainX, mainZ)));
 		main.setBedHeight(bedHeights.get(Pair.of(mainX, mainZ)));
@@ -106,7 +107,7 @@ public abstract class BuilderIterator extends BuilderBase {
 				// Skip parent block
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, pair.getLeft(), yOffset.get(pair), pair.getRight());
+			TrackBase tg = new TrackGag(this, new BlockPos(pair.getLeft(), yOffset.get(pair), pair.getRight()));
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
 			}
