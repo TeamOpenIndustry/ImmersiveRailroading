@@ -10,7 +10,6 @@ public class TrackRail extends TrackBase {
 
 	private TrackItems type;
 	private int length;
-	private int turnQuarters;
 
 	public TrackRail(BuilderBase builder, int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation, TrackItems type, int length) {
 		super(builder, rel_x, rel_y, rel_z, IRBlocks.BLOCK_RAIL, rel_rotation);
@@ -24,7 +23,7 @@ public class TrackRail extends TrackBase {
 		
 		tileRail.setType(type);
 		tileRail.setLength(this.length);
-		tileRail.setTurnQuarters(turnQuarters);
+		tileRail.setTurnQuarters(builder.info.quarters);
 		tileRail.setRailBed(builder.info.railBed);
 		tileRail.setDrops(builder.drops);
 		tileRail.setGauge(builder.gauge);
@@ -33,9 +32,5 @@ public class TrackRail extends TrackBase {
 		tileRail.markDirty();
 		
 		return tileRail;
-	}
-
-	public void setTurnQuarters(int quarters) {
-		this.turnQuarters = quarters;
 	}
 }

@@ -109,14 +109,6 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
-	public Vec3d getCenter() {
-		if (center == null) {
-			Vec3d off = BuilderTurn.followCurve(this.getRailRenderInfo(), 1, null);
-			off = VecUtil.rotateYaw(off, placementInfo.facing.getHorizontalAngle() + 90);
-			center = new Vec3d(-off.x, 0, -off.z).add(this.getPlacementPosition());
-		}
-		return center;
-	}
 	public double getRadius() {
 		return length;
 	}

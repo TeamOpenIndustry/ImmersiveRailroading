@@ -89,8 +89,8 @@ public abstract class BuilderIterator extends BuilderBase {
 		int mainX = (int) path.get(path.size()/2).x;
 		int mainZ = (int) path.get(path.size()/2).z;
 		if (endOfTrack) {
-			mainX = (int) path.get(path.size()-1).x;
-			mainZ = (int) path.get(path.size()-1).z;
+			mainX = (int) path.get(path.size()-2).x;
+			mainZ = (int) path.get(path.size()-2).z;
 		}
 		
 		this.setParentPos(new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ));
