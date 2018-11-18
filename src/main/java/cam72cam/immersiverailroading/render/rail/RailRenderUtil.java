@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -23,27 +24,16 @@ public class RailRenderUtil {
 			// Bind block textures to current context
 			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 			
-			// Move to offset position
-			//GL11.glTranslated(-info.getBuilder().getRenderOffset().getX(), 0, -info.getBuilder().getRenderOffset().getZ());
 			GL11.glPushMatrix();
-				
-			//TODO???? Vec3d renderPos = info.placementInfo.placementPosition.subtract(new Vec3d(info.placementInfo.position));
-			//GL11.glTranslated(Math.floor(renderPos.x), Math.floor(renderPos.y), Math.floor(renderPos.z));
-		
-		
+			Vec3d pos = info.placementInfo.placementPosition;
+			GL11.glTranslated(- pos.x%1, - pos.y%1, - pos.z%1);
 			RailBaseRender.draw(info);
 			RailBaseOverlayRender.draw(info);
 			GL11.glPopMatrix();
 		}
 		
 		Minecraft.getMinecraft().mcProfiler.startSection("rail");
-		
-		GL11.glPushMatrix();
-		{
-			RailBuilderRender.renderRailBuilder(info);
-		}
-		GL11.glPopMatrix();
-		
+        RailBuilderRender.renderRailBuilder(info);
 		Minecraft.getMinecraft().mcProfiler.endSection();
 		
 		light.restore();

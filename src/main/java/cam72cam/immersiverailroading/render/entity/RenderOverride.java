@@ -144,8 +144,8 @@ public class RenderOverride {
 
         ICamera camera = getCamera(partialTicks);
         Vec3d cameraPos = getCameraPos(partialTicks);
-        
-        
+
+
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 	
         OBJRender model = RailBuilderRender.getModel(Gauge.from(Gauge.STANDARD)); 
@@ -157,27 +157,27 @@ public class RenderOverride {
         			continue;
         		}
 	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(((TileRail) te).getPlacementPosition())) {
-	        		Vec3d relPos = new Vec3d(te.getPos()).subtract(cameraPos);
-	        		
+
 	        		RailInfo info = ((TileRail) te).getRailRenderInfo();
 	        		if (info == null) {
 	        			// Still loading...
 	        			continue;
 	        		}
 
-	        		relPos = relPos.subtract(new Vec3d(info.getBuilder().getParentPos()));
-	        		
 	        		GL11.glPushMatrix();
 	        		{
 	        	        int i = te.getWorld().getCombinedLight(te.getPos(), 0);
 	        	        int j = i % 65536;
 	        	        int k = i / 65536;
 	        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-	        			GL11.glTranslated(relPos.x, relPos.y, relPos.z);	
-	        			boolean switched = info.type == TrackItems.SWITCH; 
+	        			boolean switched = info.type == TrackItems.SWITCH;
 	        			if (switched ) {
 	        				info.type = TrackItems.STRAIGHT;
 	        			}
+
+						Vec3d pos = info.placementInfo.placementPosition.subtract(cameraPos);
+						GL11.glTranslated(pos.x, pos.y, pos.z);
+
 		        		RailBuilderRender.renderRailBuilder(info);
 		        		if (switched) {
 		        			info.type = TrackItems.SWITCH;
