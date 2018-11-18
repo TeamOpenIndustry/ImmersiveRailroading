@@ -20,7 +20,6 @@ public abstract class TrackBase {
 	protected int rel_x;
 	protected int rel_y;
 	protected int rel_z;
-	private EnumFacing rel_rotation;
 	private float bedHeight;
 	private float railHeight;
 
@@ -32,12 +31,11 @@ public abstract class TrackBase {
 
 	public boolean solidNotRequired;
 
-	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block, EnumFacing rel_rotation) {
+	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block) {
 		this.builder = builder;
 		this.rel_x = rel_x;
 		this.rel_y = rel_y;
 		this.rel_z = rel_z;
-		this.rel_rotation = rel_rotation;
 		this.block = block;
 	}
 
@@ -100,15 +98,8 @@ public abstract class TrackBase {
 		return getPos().getRotation();
 	}
 
-	public void moveTo(TrackBase trackBase) {
-		rel_x = trackBase.rel_x;
-		rel_y = trackBase.rel_y;
-		rel_z = trackBase.rel_z;
-	}
-
-	
 	public PosRot getPos() {
-		return builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
+		return builder.convertRelativePositions(rel_x, rel_y, rel_z);
 	}
 
 	public void setHeight(float height) {

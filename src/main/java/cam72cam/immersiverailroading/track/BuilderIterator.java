@@ -96,7 +96,7 @@ public abstract class BuilderIterator extends BuilderBase {
 		}
 
 		this.setParentPos(new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ));
-		TrackRail main = new TrackRail(this, mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ, EnumFacing.NORTH, info.type, info.length);
+		TrackRail main = new TrackRail(this, mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ, info.type, info.length);
 		tracks.add(main);
 		main.setRailHeight(railHeights.get(Pair.of(mainX, mainZ)));
 		main.setBedHeight(bedHeights.get(Pair.of(mainX, mainZ)));
