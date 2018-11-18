@@ -11,9 +11,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class BuilderStraight extends BuilderIterator {
 	protected float angle;
-	public int mainX;
-	public int mainZ;
-	
+
 	public BuilderStraight(RailInfo info, BlockPos pos) {
 		this(info, pos, false);
 	}
