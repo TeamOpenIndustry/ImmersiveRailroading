@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.track;
 
 import java.util.List;
 
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -19,14 +20,12 @@ public class BuilderSwitch extends BuilderBase {
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		RailInfo turnInfo = info.clone();
+		RailInfo turnInfo = info.withType(TrackItems.TURN);
 		RailInfo straightInfo = info.clone();
-		turnInfo.type = TrackItems.TURN;
 
 		{
-			turnInfo.length += 1;
-			turnBuilder = new BuilderTurn(turnInfo.clone(), pos);
-			straightBuilder = new BuilderStraight(straightInfo.clone(), pos, true);
+			turnBuilder = new BuilderTurn(turnInfo, pos);
+			straightBuilder = new BuilderStraight(straightInfo, pos, true);
 			
 			double maxOverlap = 0;
 			
@@ -37,7 +36,7 @@ public class BuilderSwitch extends BuilderBase {
 			}
 			
 			maxOverlap *= 1.2;
-			straightInfo.length = (int) Math.ceil(maxOverlap) + 3;
+			straightInfo = straightInfo.withLength((int) Math.ceil(maxOverlap) + 3);
 		}
 		
 
@@ -116,11 +115,11 @@ public class BuilderSwitch extends BuilderBase {
 	}
 
 	public boolean isOnStraight(Vec3d position) {
-		for (float dist = 0; dist < info.length; dist += info.gauge.scale()/8) {
+		for (float dist = 0; dist < info.settings.length; dist += info.settings.gauge.scale()/8) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
 			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.placementInfo.facing.getHorizontalAngle() + 90 + 180);
 			gagPos = gagPos.add(info.placementInfo.placementPosition);
-			if (gagPos.distanceTo(position.addVector(0, -0.35 * info.gauge.scale(), 0)) < info.gauge.scale()/4) {
+			if (gagPos.distanceTo(position.addVector(0, -0.35 * info.settings.gauge.scale(), 0)) < info.settings.gauge.scale()/4) {
 				return true;
 			}
 		}

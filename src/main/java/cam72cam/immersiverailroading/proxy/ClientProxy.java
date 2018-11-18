@@ -572,7 +572,7 @@ public class ClientProxy extends CommonProxy {
 		        }
 		        
 		        pos = pos.up();
-		        RailInfo info = new RailInfo(stack, player.world, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
+		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
 		        
 		        GL11.glPushMatrix();
 				{

@@ -41,8 +41,8 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
-		info = new RailInfo(stack, world, new PlacementInfo(stack, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
-		info.length = 10;
+		info = new RailInfo(world, stack, new PlacementInfo(stack, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
+		info = info.withLength(10);
 	}
 
 	@Override
@@ -53,8 +53,8 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		
 		GL11.glPushMatrix();
 
-		if (info.type == TrackItems.TURN || info.type == TrackItems.SWITCH) {
-			GL11.glTranslated(0, 0, -0.1 * info.quarters);
+		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
+			GL11.glTranslated(0, 0, -0.1 * info.settings.quarters);
 		}
 		
 		GL11.glRotated(-90, 0, 1, 0);
@@ -62,11 +62,11 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		
 		
 			
-		double scale = 0.95/info.length;
-		if (info.type == TrackItems.CROSSING) {
+		double scale = 0.95/info.settings.length;
+		if (info.settings.type == TrackItems.CROSSING) {
 			scale = 0.95 / 3;
 		}
-		if (info.type == TrackItems.TURNTABLE) {
+		if (info.settings.type == TrackItems.TURNTABLE) {
 			scale *= 0.25;
 		}
 		GL11.glScaled(scale, -scale*2, scale);

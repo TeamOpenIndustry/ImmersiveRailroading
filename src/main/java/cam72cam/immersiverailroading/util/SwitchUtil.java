@@ -26,15 +26,15 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 		
-		if (rail.getType() != TrackItems.TURN) {
+		if (rail.info.settings.type != TrackItems.TURN) {
 			return SwitchState.NONE;
 		}
-		if (parent.getType() != TrackItems.SWITCH) {
+		if (parent.info.settings.type != TrackItems.SWITCH) {
 			return SwitchState.NONE;
 		}
 		
-		if (position != null && parent.getRailRenderInfo() != null) {
-			BuilderSwitch switchBuilder = (BuilderSwitch)parent.getRailRenderInfo().getBuilder();
+		if (position != null && parent.info != null) {
+			BuilderSwitch switchBuilder = (BuilderSwitch)parent.info.getBuilder();
 			
 			if (!switchBuilder.isOnStraight(position)) {
 				return SwitchState.TURN;
@@ -42,7 +42,7 @@ public class SwitchUtil {
 		}
 		
 		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(rail.getPlacementPosition()).offset(facing, MathHelper.ceil(rail.getGauge().scale()))) > 0) {
+			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(rail.info.placementInfo.placementPosition).offset(facing, MathHelper.ceil(rail.info.settings.gauge.scale()))) > 0) {
 				return SwitchState.TURN;
 			}
 		}

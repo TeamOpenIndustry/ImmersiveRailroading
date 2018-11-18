@@ -64,9 +64,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 			return cache.get(stepSize);
 		}
 		
-		Vec3d nextPos = VecUtil.fromYaw(info.length, 45);
-		
-		if (info.customInfo != null) {
+		Vec3d nextPos = VecUtil.fromYaw(info.settings.length, 45);
+
+		if (info.customInfo != null && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			nextPos = info.customInfo.placementPosition.subtract(info.placementInfo.placementPosition); 
 		}
 		
@@ -91,7 +91,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		
 		Vec3d ctrl1 = VecUtil.fromYaw(horizDist/2, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(horizDist/2, angle2));
-		
+
 		List<Vec3d> points = cubicSplit(Vec3d.ZERO, ctrl1, ctrl2, nextPos, stepSize);
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p1 = points.get(i);

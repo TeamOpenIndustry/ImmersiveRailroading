@@ -89,7 +89,7 @@ public class TileRailPreview extends SyncdTileEntity {
 	
 	public RailInfo getRailRenderInfo() {
 		if (hasTileData || !world.isRemote) {
-			RailInfo info = new RailInfo(item, world, placementInfo, customInfo);
+			RailInfo info = new RailInfo(world, item, placementInfo, customInfo);
 			return info;
 		}
 		return null;

@@ -84,15 +84,4 @@ public class RailRenderUtil {
 			ex.printStackTrace();
 		}
 	}
-
-	public static String renderID(RailInfo info) {
-		//TODO more attributes like railbed
-		if(info.renderIdCache == null) {
-			info.renderIdCache = String.format("%s%s%s%s%s%s%s%s%s%s%s", info.placementInfo.facing, info.type, info.placementInfo.direction, info.length, info.placementInfo.rotationQuarter, info.quarters, info.switchState, info.railBed, info.gauge, info.tablePos, info.gradeCrossing);
-			if (info.customInfo != null) {
-				info.renderIdCache += String.format("%s%s%s%s", info.customInfo.facing, info.customInfo.direction, info.customInfo.rotationQuarter, info.customInfo.placementPosition);
-			}
-		}
-		return info.renderIdCache;
-	}
 }

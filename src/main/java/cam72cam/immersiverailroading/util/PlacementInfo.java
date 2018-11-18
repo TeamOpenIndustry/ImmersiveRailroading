@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import net.minecraft.item.ItemStack;
@@ -21,10 +22,10 @@ public class PlacementInfo {
 		this.direction = direction;
 		this.facing = facing;
 	}
-	
+
 	public PlacementInfo(ItemStack stack, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
-		TrackPositionType posType = ItemTrackBlueprint.getPosType(stack);
-		TrackDirection direction = ItemTrackBlueprint.getDirection(stack);
+		RailSettings settings = ItemTrackBlueprint.settings(stack);
+		TrackDirection direction = settings.direction;
 		int quarter = 0;
 		
 		yawHead = yawHead % 360 + 360;
@@ -60,7 +61,7 @@ public class PlacementInfo {
 			facing = EnumFacing.fromAngle(yawHead - 45);
 		}
 		
-		switch(posType) {
+		switch(settings.posType) {
 		case FIXED:
 			hitX = 0.5f;
 			hitZ = 0.5f;

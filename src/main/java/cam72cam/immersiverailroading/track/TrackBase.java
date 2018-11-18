@@ -38,45 +38,45 @@ public abstract class TrackBase {
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		PosRot pos = getPos();
-		IBlockState down = builder.world.getBlockState(pos.down());
-		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.world.isAirBlock(pos.down())) || 
-				(BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.railBedFill.getItem() != Items.AIR) ||
-				solidNotRequired || BlockUtil.isIRRail(builder.world, pos);
-		return BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) && downOK;
+		IBlockState down = builder.info.world.getBlockState(pos.down());
+		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.info.world.isAirBlock(pos.down())) ||
+				(BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
+				solidNotRequired || BlockUtil.isIRRail(builder.info.world, pos);
+		return BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) && downOK;
 	}
 
 	public TileEntity placeTrack() {
 		PosRot pos = getPos();
 
-		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
-			builder.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.railBedFill));
+		if (builder.info.settings.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
+			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill));
 		}
 		
 		NBTTagCompound replaced = null;
 		
-		IBlockState state = builder.world.getBlockState(pos);
+		IBlockState state = builder.info.world.getBlockState(pos);
 		Block removed = state.getBlock();
 		TileRailBase te = null;
 		if (removed != null) {
 			if (removed instanceof BlockRailBase) {
-				te = TileRailBase.get(builder.world, pos);
+				te = TileRailBase.get(builder.info.world, pos);
 				if (te != null) {					
 					replaced = te.serializeNBT();
 				}
 			} else {				
-				removed.dropBlockAsItem(builder.world, pos, state, 0);
+				removed.dropBlockAsItem(builder.info.world, pos, state, 0);
 			}
 		}
 		
 		if (te != null) {
 			te.setWillBeReplaced(true);
 		}
-		builder.world.setBlockState(pos, getBlockState(), 3);
+		builder.info.world.setBlockState(pos, getBlockState(), 3);
 		if (te != null) {
 			te.setWillBeReplaced(false);
 		}
 		
-		TileRailBase tr = TileRailBase.get(builder.world, pos);
+		TileRailBase tr = TileRailBase.get(builder.info.world, pos);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);

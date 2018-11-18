@@ -14,7 +14,7 @@ public class BuilderSlope extends BuilderStraight {
 	public List<PosStep> getPath(double stepSize) {
 		List<PosStep> res = new ArrayList<PosStep>();
 		
-		float slope = (1.0F/(info.length));
+		float slope = (1.0F/(info.settings.length));
 		
 		float height = slope/2;
 		
