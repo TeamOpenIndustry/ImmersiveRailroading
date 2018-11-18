@@ -73,8 +73,13 @@ public class TrackBlueprintItemModel implements IBakedModel {
 
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 		GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
-		
-		RailBaseRender.draw(info);
+
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(-0.5, -0.5, -0.5);
+			RailBaseRender.draw(info);
+		}
+		GL11.glPopMatrix();
 		RailBuilderRender.renderRailBuilder(info);
 		
 		lighting.restore();

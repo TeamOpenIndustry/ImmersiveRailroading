@@ -94,7 +94,7 @@ public class RailInfo {
 	private BuilderBase builder;
 	public BuilderBase getBuilder() {
 		if (builder == null) {
-			builder = getBuilder(new BlockPos(0,0,0));
+			builder = getBuilder(BlockPos.ORIGIN);
 		}
 		return builder;
 	}

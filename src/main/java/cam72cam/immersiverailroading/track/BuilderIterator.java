@@ -51,9 +51,17 @@ public abstract class BuilderIterator extends BuilderBase {
 		double clamp = 0.17 * gauge.scale();
 		
 		List<PosStep> path = getPath(0.25);
-		
+		PosStep start = path.get(0);
+		PosStep end = path.get(path.size()-1);
+
+		int mainX = (int) path.get(path.size()/2).x;
+		int mainZ = (int) path.get(path.size()/2).z;
+
 		for (PosStep cur : path) {
 			Vec3d gagPos = cur;
+
+			boolean isFlex = gagPos.distanceTo(start) < 3 || gagPos.distanceTo(end) < 3;
+
 			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
 				int posX = (int)(gagPos.x+nextUp.x);
@@ -77,22 +85,16 @@ public abstract class BuilderIterator extends BuilderBase {
                     railHeights.put(gag, (float) relHeight);
 					yOffset.put(gag, (int) (gagPos.y - relHeight));
 				}
-				if (Math.abs(q) > gauge.scale()) {
-					flexPositions.add(gag);
-				}
-				if (gagPos.distanceTo(path.get(0)) < 3 || gagPos.distanceTo(path.get(0)) > info.length - 3) {
+				if (isFlex || Math.abs(q) > gauge.value()) {
 					flexPositions.add(gag);
 				}
 			}
+			if (!isFlex && endOfTrack) {
+				mainX = (int) gagPos.x;
+				mainZ = (int) gagPos.z;
+			}
 		}
-		
-		int mainX = (int) path.get(path.size()/2).x;
-		int mainZ = (int) path.get(path.size()/2).z;
-		if (endOfTrack) {
-			mainX = (int) path.get(path.size()-2).x;
-			mainZ = (int) path.get(path.size()-2).z;
-		}
-		
+
 		this.setParentPos(new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ));
 		TrackRail main = new TrackRail(this, mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ, EnumFacing.NORTH, info.type, info.length);
 		tracks.add(main);

@@ -586,9 +586,10 @@ public class ClientProxy extends CommonProxy {
 	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
 	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
 	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-	                
-	                GL11.glTranslated(pos.getX()-d0, pos.getY()-d1, pos.getZ()-d2);
-	                
+
+					Vec3d placementPosition = info.placementInfo.placementPosition;
+	                GL11.glTranslated(placementPosition.x-d0, placementPosition.y-d1, placementPosition.z-d2);
+
 	                RailRenderUtil.render(info, true);
 
 					blend.restore();
