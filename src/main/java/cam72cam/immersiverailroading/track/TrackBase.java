@@ -140,6 +140,6 @@ public abstract class TrackBase {
 	}
 
 	public void overrideParent(BlockPos blockPos) {
-		this.parent = builder.convertRelativePositions(blockPos.getX(), blockPos.getY(), blockPos.getZ(), rel_rotation);
+		this.parent = blockPos;
 	}
 }

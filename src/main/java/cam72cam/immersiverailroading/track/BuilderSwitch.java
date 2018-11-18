@@ -19,8 +19,6 @@ public class BuilderSwitch extends BuilderBase {
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		//info.quarter = 0;
-		
 		RailInfo turnInfo = info.clone();
 		RailInfo straightInfo = info.clone();
 		turnInfo.type = TrackItems.TURN;
@@ -39,7 +37,7 @@ public class BuilderSwitch extends BuilderBase {
 			}
 			
 			maxOverlap *= 1.2;
-			straightInfo.length = (int) Math.ceil(maxOverlap) + 1;
+			straightInfo.length = (int) Math.ceil(maxOverlap) + 3;
 		}
 		
 
@@ -50,7 +48,7 @@ public class BuilderSwitch extends BuilderBase {
 		
 		for(TrackBase turn : turnBuilder.tracks) {
 			if (turn instanceof TrackRail) {
-				turn.overrideParent(new BlockPos(straightBuilder.mainX, 0, straightBuilder.mainZ));
+				turn.overrideParent(straightBuilder.getParentPos());
 			}
 		}
 		for (TrackBase straight : straightBuilder.tracks) {
