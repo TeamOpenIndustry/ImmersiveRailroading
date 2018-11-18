@@ -124,7 +124,7 @@ public class RailInfo {
 				int fill = 0;
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (playerStack.getItem() == IRItems.ITEM_RAIL && ItemGauge.get(playerStack) == builder.gauge) {
+					if (playerStack.getItem() == IRItems.ITEM_RAIL && ItemGauge.get(playerStack) == builder.info.gauge) {
 						rails += playerStack.getCount();
 					}
 					if (OreHelper.IR_TIE.matches(playerStack, false)) {
@@ -171,7 +171,7 @@ public class RailInfo {
 				List<ItemStack> drops = new ArrayList<ItemStack>();
 				
 				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (playerStack.getItem() == IRItems.ITEM_RAIL && ItemGauge.get(playerStack) == builder.gauge) {
+					if (playerStack.getItem() == IRItems.ITEM_RAIL && ItemGauge.get(playerStack) == builder.info.gauge) {
 						if (rails > playerStack.getCount()) {
 							rails -= playerStack.getCount();
 							ItemStack copy = playerStack.copy();

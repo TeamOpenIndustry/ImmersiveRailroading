@@ -37,13 +37,8 @@ public abstract class BuilderBase {
 
 	public List<ItemStack> drops;
 
-	public Gauge gauge;
-	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;
-		rotation = info.placementInfo.facing;
-		world = info.world;
-		gauge = info.gauge;
 		this.pos = pos;
 		parent_pos = pos;
 	}
@@ -161,12 +156,12 @@ public abstract class BuilderBase {
 
 	public void clearArea() {
 		for (TrackBase track : tracks) {
-			for (int i = 0; i < 6 * gauge.scale(); i++) {
+			for (int i = 0; i < 6 * info.gauge.scale(); i++) {
 				BlockPos main = track.getPos().up(i);
 				if (!BlockUtil.isRail(world, main)) {
 					world.destroyBlock(main, false);
 				}
-				if (gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.type != TrackItems.SLOPE && info.type != TrackItems.TURNTABLE) {
+				if (info.gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.type != TrackItems.SLOPE && info.type != TrackItems.TURNTABLE) {
 					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
 						BlockPos pos = main.offset(facing);
 						if (!BlockUtil.isRail(world, pos)) {
