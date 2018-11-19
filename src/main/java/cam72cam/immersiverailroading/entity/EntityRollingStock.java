@@ -1,11 +1,5 @@
 package cam72cam.immersiverailroading.entity;
 
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,11 +7,13 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 
-import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDeathType;
+import cam72cam.immersiverailroading.library.TrainBreakMode;
 import cam72cam.immersiverailroading.net.PaintSyncPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -30,6 +26,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.server.FMLServerHandler;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
@@ -189,7 +192,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		
 		if (damagesource.getTrueSource() instanceof EntityPlayer && !damagesource.isProjectile()) {
 			EntityPlayer player = (EntityPlayer) damagesource.getTrueSource();
-			if (player.isSneaking()) {
+			if (player.isSneaking() && (ConfigBalance.trainBreakMode == TrainBreakMode.TRUE || (ConfigBalance.trainBreakMode == TrainBreakMode.ONLY_OP && FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayers().getEntry(player.getGameProfile()) != null))) {
 				if (!this.isDead) {
 					this.onDeath(StockDeathType.PLAYER);
 				}
@@ -200,7 +203,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		
 		return false;
 	}
-	
+
 	@Override
 	public <T extends Entity> Collection<T> getRecursivePassengersByType(Class<T> entityClass) {
 		try {
