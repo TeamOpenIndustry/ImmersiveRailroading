@@ -1,12 +1,8 @@
 package cam72cam.immersiverailroading.tile;
 
-import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -22,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.track.TrackRail;
@@ -31,6 +26,7 @@ import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 
 public class TileRail extends TileRailBase {
+
 	public static TileRail get(IBlockAccess world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileRail ? (TileRail) te : null;
@@ -38,6 +34,7 @@ public class TileRail extends TileRailBase {
 
 	public RailInfo info;
 	private List<ItemStack> drops;
+	private boolean hackSwitch;
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -77,6 +74,15 @@ public class TileRail extends TileRailBase {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 
+		this.drops = new ArrayList<ItemStack>();
+		if (nbt.hasKey("drops")) {
+			NBTTagCompound dropNBT = nbt.getCompoundTag("drops");
+			int count = dropNBT.getInteger("count");
+			for (int i = 0; i < count; i++) {
+				drops.add(new ItemStack(dropNBT.getCompoundTag("drop_" + i)));
+			}
+		}
+
 		if (nbt.hasKey("info")) {
 			info = new RailInfo(world, pos, nbt.getCompoundTag("info"));
 		} else {
@@ -89,19 +95,8 @@ public class TileRail extends TileRailBase {
 			ItemStack railBed = new ItemStack(nbt.getCompoundTag("railBed"));
 			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
 
-			PlacementInfo placementInfo;
-			PlacementInfo customInfo = null;
-
-			if (nbt.hasKey("placementInfo")) {
-				placementInfo = new PlacementInfo(nbt.getCompoundTag("placementInfo"), pos);
-			} else {
-				//Legacy
-				placementInfo = new PlacementInfo(nbt, pos);
-			}
-
-			if (nbt.hasKey("customInfo")) {
-				customInfo = new PlacementInfo(nbt.getCompoundTag("customInfo"), pos);
-			}
+            PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
+            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
 			double tablePos = nbt.getDouble("tablePos");
@@ -115,15 +110,31 @@ public class TileRail extends TileRailBase {
             }
 
             RailSettings settings = new RailSettings(gauge, type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
-			this.info = new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
+			this.info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
+			Vec3d offset = new Vec3d(info.getBuilder().getParentPos());
 
-			this.drops = new ArrayList<ItemStack>();
-			if (nbt.hasKey("drops")) {
-				NBTTagCompound dropNBT = nbt.getCompoundTag("drops");
-				int count = dropNBT.getInteger("count");
-				for (int i = 0; i < count; i++) {
-					drops.add(new ItemStack(dropNBT.getCompoundTag("drop_" + i)));
+			if (settings.type == TrackItems.TURN) {
+				if (!getParent().equals(pos)) {
+					// Is part of a switch
+					hackSwitch = true;
+					if (placementInfo.direction == TrackDirection.LEFT) {
+						offset = offset.addVector(0.5, 0, 0.5);
+					} else {
+						offset = offset.subtract(0.5, 0, 0.5);
+					}
+				} else {
+					if (placementInfo.direction == TrackDirection.LEFT) {
+						offset = offset.subtract(0.5, 0, 0.5);
+					} else {
+						offset = offset.addVector(0.5, 0, 0.5);
+					}
 				}
+			} else {
+                offset = offset.addVector(0.5, 0, 0.5);
+			}
+			placementInfo = new PlacementInfo(placementInfo.placementPosition.add(offset), placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
+			this.info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
+			if (type == TrackItems.STRAIGHT) {
 			}
 		}
 	}
@@ -140,6 +151,22 @@ public class TileRail extends TileRailBase {
 			nbt.setTag("drops", dropNBT);
 		}
 		return super.writeToNBT(nbt);
+	}
+
+	public void update() {
+		if (hackSwitch) {
+			TileRail parent = getParentTile();
+			if (parent != null) {
+				PlacementInfo placementInfo = parent.info.placementInfo;
+				Vec3d offset = new Vec3d(parent.info.getBuilder().getParentPos());
+				offset = offset.normalize().scale(-parent.info.settings.length);
+				System.out.println(offset);
+				placementInfo = new PlacementInfo(placementInfo.placementPosition.add(offset), placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
+				parent.info = new RailInfo(world, parent.info.settings, placementInfo, null, parent.info.switchState, parent.info.tablePos);
+				parent.markDirty();
+				hackSwitch = false;
+			}
+		}
 	}
 
 	public void setDrops(List<ItemStack> drops) {
