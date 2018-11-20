@@ -52,7 +52,7 @@ public class RailSettings {
         nbt.setInteger("length", length);
         nbt.setInteger("quarters", quarters);
         nbt.setInteger("pos_type", posType.ordinal());
-        nbt.setInteger("direction", posType.ordinal());
+        nbt.setInteger("direction", direction.ordinal());
         nbt.setTag("bedItem", railBed.serializeNBT());
         nbt.setTag("bedFill", railBedFill.serializeNBT());
         nbt.setBoolean("isPreview", isPreview);

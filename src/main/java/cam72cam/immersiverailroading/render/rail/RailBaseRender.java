@@ -36,7 +36,6 @@ public class RailBaseRender {
 		if (info.settings.railBed.getItem() == Items.AIR) {
 			return null;
 		}
-		info = info.clone();
 		IBlockState gravelState = BlockUtil.itemToBlockState(info.settings.railBed);
 		
 		// Create render targets
