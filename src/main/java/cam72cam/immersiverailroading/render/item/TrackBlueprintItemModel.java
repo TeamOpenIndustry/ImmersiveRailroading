@@ -76,12 +76,12 @@ public class TrackBlueprintItemModel implements IBakedModel {
 
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(-0.5, -0.5, -0.5);
+			GL11.glTranslated(-0.5, 0, -0.5);
 			RailBaseRender.draw(info);
 		}
 		GL11.glPopMatrix();
-		RailBuilderRender.renderRailBuilder(info);
-		
+        RailBuilderRender.renderRailBuilder(info);
+
 		lighting.restore();
 		cull.restore();
 		
