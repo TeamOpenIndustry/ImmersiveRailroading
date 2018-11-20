@@ -39,6 +39,9 @@ public class TileRail extends TileRailBase {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
+		if (info == null) {
+			return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+		}
 		int length = info.settings.length;
 		if (info.settings.type == TrackItems.CUSTOM && info.customInfo != null) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
@@ -96,7 +99,7 @@ public class TileRail extends TileRailBase {
 			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
 
             PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
-            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing);
+            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
 			double tablePos = nbt.getDouble("tablePos");
@@ -104,11 +107,6 @@ public class TileRail extends TileRailBase {
 			/*
 			MIGRATION HACKS
 			 */
-			if (type == TrackItems.TURN && !this.getParent().equals(pos)) {
-			    // HACK RADIUS for turn tables
-				length ++;
-            }
-
             RailSettings settings = new RailSettings(gauge, type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
 			this.info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
 			Vec3d offset = new Vec3d(info.getBuilder().getParentPos());
@@ -118,21 +116,21 @@ public class TileRail extends TileRailBase {
 					// Is part of a switch
 					hackSwitch = true;
 					if (placementInfo.direction == TrackDirection.LEFT) {
-						offset = offset.addVector(0.5, 0, 0.5);
+						offset = offset.subtract(-0.5, 0, 1.5);
 					} else {
-						offset = offset.subtract(0.5, 0, 0.5);
+						offset = offset.addVector(0.5, 0, 0.5);
 					}
 				} else {
 					if (placementInfo.direction == TrackDirection.LEFT) {
-						offset = offset.subtract(0.5, 0, 0.5);
-					} else {
 						offset = offset.addVector(0.5, 0, 0.5);
+					} else {
+						offset = offset.subtract(0.5, 0, 0.5);
 					}
 				}
 			} else {
-                offset = offset.addVector(0.5, 0, 0.5);
+                offset = offset.subtract(0.5, 0, 0.5);
 			}
-			placementInfo = new PlacementInfo(placementInfo.placementPosition.add(offset), placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
+			placementInfo = new PlacementInfo(placementInfo.placementPosition.subtract(offset), placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing);
 			this.info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
 			if (type == TrackItems.STRAIGHT) {
 			}
