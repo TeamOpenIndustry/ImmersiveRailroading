@@ -54,19 +54,21 @@ public class RailInfo {
 				this.settings.quarters,
 				this.settings.railBed,
 				this.settings.gauge,
-				this.settings.isGradeCrossing,
 				this.switchState,
 				this.tablePos,
 				this.placementInfo.facing,
 				this.placementInfo.direction,
 				this.placementInfo.rotationQuarter,
-				this.placementInfo.placementPosition,
 				this.customInfo.facing,
 				this.customInfo.direction,
 				this.customInfo.rotationQuarter,
-				this.customInfo.placementPosition,
 		};
-		uniqueID = Arrays.toString(props);
+		String id = Arrays.toString(props);
+		if (settings.type == TrackItems.CUSTOM) {
+			id += placementInfo.placementPosition;
+			id += customInfo.placementPosition;
+		}
+		uniqueID = id;
 	}
 
 	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
