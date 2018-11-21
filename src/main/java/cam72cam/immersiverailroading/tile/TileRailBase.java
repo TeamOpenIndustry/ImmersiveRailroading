@@ -160,8 +160,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 	public BlockPos getParent() {
 		if (parent == null) {
-			ImmersiveRailroading.warn("Invalid block without parent");
 			if (ticksExisted > 1 && !world.isRemote) {
+				ImmersiveRailroading.warn("Invalid block without parent");
 				// Might be null during init
 				world.setBlockToAir(pos);
 			}
@@ -237,19 +237,20 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (nbt.hasKey("augment")) {
 			augment = Augment.values()[nbt.getInteger("augment")];
 		}
-		
+
+		parent = BlockPos.fromLong(nbt.getLong("parent"));
+
 		switch(version) {
 		case 0:
 			//NOP
 		case 1:
-			setNBTBlockPos(nbt, "parent", getNBTBlockPos(nbt, "parent").subtract(pos));
+			parent = parent.subtract(pos);
 		case 2:
 			// Nothing in base
 		case 3:
 			// Nothing yet ...
 		}
-		parent = getNBTBlockPos(nbt, "parent");
-		
+
 		if (nbt.hasKey("augmentTank")) {
 			createAugmentTank();
 			augmentTank.readFromNBT(nbt.getCompoundTag("augmentTank"));			
@@ -272,7 +273,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		setNBTBlockPos(nbt, "parent", parent);
+		nbt.setLong("parent", parent.toLong());
 		nbt.setFloat("height", bedHeight);
 		nbt.setFloat("railHeight", railHeight);
 		nbt.setInteger("snowLayers", snowLayers);
@@ -300,32 +301,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		return super.writeToNBT(nbt);
 	}
 	
-	protected final static void setNBTBlockPos(NBTTagCompound nbt, String key, BlockPos value) {
-		if (value != null) {
-			nbt.setLong(key, value.toLong());
-		}
-	}
-	protected final static void setNBTVec3d(NBTTagCompound nbt, String key, Vec3d value) {
-		if (value != null) {
-			nbt.setDouble(key + "X", value.x);
-			nbt.setDouble(key + "Y", value.y);
-			nbt.setDouble(key + "Z", value.z);
-		}
-	}
-	
-	protected final static BlockPos getNBTBlockPos(NBTTagCompound nbt, String key) {
-		return nbt.hasKey(key) ? BlockPos.fromLong(nbt.getLong(key)) : null;
-	}
-	protected final static Vec3d getNBTVec3d(NBTTagCompound nbt, String key) {
-		if (!nbt.hasKey(key + "X") || !nbt.hasKey(key + "Y") || !nbt.hasKey(key + "Z")) {
-			return null;
-		}
-		return new Vec3d(nbt.getDouble(key + "X"),nbt.getDouble(key + "Y"),nbt.getDouble(key + "Z"));
-	}
-	
-	public Vec3d getCenterOfRail() {
-		return new Vec3d(this.getPos()).addVector(0.5, 0, 0.5);
-	}
 	public TileRail getParentTile() {
 		if (this.getParent() == null) {
 			return null;
@@ -341,10 +316,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	public NBTTagCompound getReplaced() {
 		return replaced;
-	}
-	
-	public void setSkipNextRefresh() {
-		this.skipNextRefresh = true;
 	}
 	
 	@Override
