@@ -33,16 +33,29 @@ public class RailSettings {
     }
 
     public RailSettings(NBTTagCompound nbt) {
-        gauge = Gauge.from(nbt.getDouble("gauge"));
-        type = TrackItems.values()[nbt.getInteger("type")];
-        length = Math.max(1, nbt.getInteger("length"));
-        quarters = nbt.hasKey("quarters") ? nbt.getInteger("quarters") : 4;
-        posType = TrackPositionType.values()[nbt.getInteger("pos_type")];
-        direction = TrackDirection.values()[nbt.getInteger("direction")];
-        railBed = new ItemStack(nbt.getCompoundTag("bedItem"));
-        railBedFill = new ItemStack(nbt.getCompoundTag("bedFill"));
-        isPreview = nbt.getBoolean("isPreview");
-        isGradeCrossing = nbt.getBoolean("isGradeCrossing");
+        if (nbt.hasKey("gauge")) {
+            gauge = Gauge.from(nbt.getDouble("gauge"));
+            type = TrackItems.values()[nbt.getInteger("type")];
+            length = nbt.getInteger("length");
+            quarters = nbt.hasKey("quarters") ? nbt.getInteger("quarters") : 4;
+            posType = TrackPositionType.values()[nbt.getInteger("pos_type")];
+            direction = TrackDirection.values()[nbt.getInteger("direction")];
+            railBed = new ItemStack(nbt.getCompoundTag("bedItem"));
+            railBedFill = new ItemStack(nbt.getCompoundTag("bedFill"));
+            isPreview = nbt.getBoolean("isPreview");
+            isGradeCrossing = nbt.getBoolean("isGradeCrossing");
+        } else {
+            gauge = Gauge.from(Gauge.STANDARD);
+            type = TrackItems.STRAIGHT;
+            length = 10;
+            quarters = 4;
+            posType = TrackPositionType.FIXED;
+            direction = TrackDirection.NONE;
+            railBed = ItemStack.EMPTY;
+            railBedFill = ItemStack.EMPTY;
+            isPreview = false;
+            isGradeCrossing = false;
+        }
     }
 
     public NBTTagCompound toNBT() {
