@@ -391,14 +391,18 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
-		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
+		TileRail tile;
+		TileRail self = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 		
-		if (tile == null) {
+		if (self == null) {
 			return currentPosition;
 		}
-		
-		if (SwitchUtil.getSwitchState(tile, currentPosition) == SwitchState.STRAIGHT) {
-			tile = tile.getParentTile();
+
+		SwitchState state = SwitchUtil.getSwitchState(self, currentPosition);
+		if (state == SwitchState.STRAIGHT) {
+			tile = self.getParentTile();
+		} else {
+			tile = self;
 		}
 
 		if (tile == null) {
@@ -407,8 +411,17 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		
 		double distanceMeters = motion.lengthVector();
 		float rotationYaw = VecUtil.toYaw(motion);
-		
-		return MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+
+		Vec3d nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+
+		if (state != SwitchState.NONE && nextPos.distanceTo(currentPosition) > distanceMeters * 2) {
+			tile = self.getParentTile();
+			if (tile != null) {
+				nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+			}
+		}
+
+		return nextPos;
 	}
 	
 	/*

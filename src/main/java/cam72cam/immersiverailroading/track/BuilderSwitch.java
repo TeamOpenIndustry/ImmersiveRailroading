@@ -1,16 +1,14 @@
 package cam72cam.immersiverailroading.track;
 
-import java.util.List;
-
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import org.apache.commons.lang3.tuple.Pair;
-
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
 
 public class BuilderSwitch extends BuilderBase {
 
@@ -119,7 +117,7 @@ public class BuilderSwitch extends BuilderBase {
 			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
 			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.placementInfo.facing.getHorizontalAngle() + 90 + 180);
 			gagPos = gagPos.add(info.placementInfo.placementPosition);
-			if (gagPos.distanceTo(position.addVector(0, -0.35 * info.settings.gauge.scale(), 0)) < info.settings.gauge.scale()/4) {
+			if (gagPos.distanceTo(position.addVector(0, -(position.y % 1), 0)) < info.settings.gauge.scale()/2) {
 				return true;
 			}
 		}
