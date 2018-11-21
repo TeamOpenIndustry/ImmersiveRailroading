@@ -165,6 +165,12 @@ public abstract class Locomotive extends FreightTank {
 			} else if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
 				this.getDataManager().set(HORN_PLAYER, Optional.absent());
 			}
+
+			if (this.getDataManager().get(BELL) > 0) {
+				this.getDataManager().set(BELL, this.getDataManager().get(BELL)-1);
+			} else if (this.getDataManager().get(BELL_PLAYER).isPresent()) {
+				this.getDataManager().set(BELL_PLAYER, Optional.absent());
+			}
 		}
 		
 		simulateWheelSlip();

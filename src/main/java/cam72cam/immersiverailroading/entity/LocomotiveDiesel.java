@@ -184,11 +184,21 @@ public class LocomotiveDiesel extends Locomotive {
 				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
 					horn.play(getPositionVector());
 				}
+				else{
+					if(this.getDataManager().get(HORN) == 0 || !isRunning()) {
+						horn.stop();
+					}
+				}
 
 				if (this.getDataManager().get(BELL) != 0 && !bell.isPlaying() && isRunning()) {
 					bell.play(getPositionVector());
 				}
-				
+				else{
+					if (this.getDataManager().get(BELL) == 1 || !isRunning()) {
+						bell.stop();
+					}
+				}
+
 				float absThrottle = Math.abs(this.getThrottle());
 				if (this.soundThrottle > absThrottle) {
 					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
@@ -298,6 +308,9 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 		if (horn != null) {
 			horn.stop();
+		}
+		if(bell != null){
+			bell.stop();
 		}
 	}
 

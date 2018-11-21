@@ -283,13 +283,13 @@ public class LocomotiveSteam extends Locomotive {
 					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
 					pressure.setVolume(0.3f);
 				}
-				//stops sound if the button isn't being pressed
-				if (this.getDataManager().get(BELL) != 0) {
+				//plays sound if the button is being pressed
+				if (this.getDataManager().get(BELL) > 1) {
 					if (!bell.isPlaying()) {
 						bell.play(getPositionVector());
 					}
 				} else {
-					if (bell.isPlaying()) {
+					if (this.getDataManager().get(BELL) < 1) {
 						bell.stop();
 					}
 				}
