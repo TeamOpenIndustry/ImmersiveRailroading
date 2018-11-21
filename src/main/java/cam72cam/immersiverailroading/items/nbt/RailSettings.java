@@ -35,7 +35,7 @@ public class RailSettings {
     public RailSettings(NBTTagCompound nbt) {
         gauge = Gauge.from(nbt.getDouble("gauge"));
         type = TrackItems.values()[nbt.getInteger("type")];
-        length = nbt.getInteger("length");
+        length = Math.max(1, nbt.getInteger("length"));
         quarters = nbt.hasKey("quarters") ? nbt.getInteger("quarters") : 4;
         posType = TrackPositionType.values()[nbt.getInteger("pos_type")];
         direction = TrackDirection.values()[nbt.getInteger("direction")];
