@@ -147,7 +147,7 @@ public abstract class BuilderIterator extends BuilderBase {
 				PosStep next = points.get(i+1);
 				double ydelt = next.y - cur.y;
 				double dist = next.distanceTo(cur);
-				pitch = (float) -Math.toDegrees(Math.atan2(ydelt, dist));
+				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
 				angle = 180 - Math.abs(Math.abs(cur.yaw - next.yaw) - 180);
 				angle *= 2;
 			} else {
