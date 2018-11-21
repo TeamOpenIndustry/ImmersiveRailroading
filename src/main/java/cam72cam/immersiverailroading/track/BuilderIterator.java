@@ -159,8 +159,8 @@ public abstract class BuilderIterator extends BuilderBase {
 				angle = 180 - Math.abs(Math.abs(prev.yaw - next.yaw) - 180);
 			}
 			if (angle != 0) {
-				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, 1 - angle / 180, "RAIL_LEFT"));
-				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, 1 + angle / 150, "RAIL_RIGHT"));
+				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 - angle / 180) * (float)info.settings.gauge.scale(), "RAIL_LEFT"));
+				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 + angle / 150) * (float)info.settings.gauge.scale(), "RAIL_RIGHT"));
 				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, "RAIL_BASE"));
 			} else {
 				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch));
