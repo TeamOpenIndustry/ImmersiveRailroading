@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -123,6 +124,17 @@ public abstract class BuilderIterator extends BuilderBase {
 		return this.tracks;
 	}
 
+	private static float delta(float a, float b) {
+		float angle = (float) Math.toDegrees(Math.toRadians(a) - Math.toRadians(b));
+		if (angle > 180) {
+			angle -= 360;
+		}
+		if (angle<-180) {
+			angle += 360;
+		}
+		return angle;
+	}
+
 	@Override
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
@@ -141,15 +153,14 @@ public abstract class BuilderIterator extends BuilderBase {
 				double ydelt = next.y - cur.y;
 				double dist = next.distanceTo(cur);
 				pitch = (float) -Math.toDegrees(Math.atan2(ydelt, dist));
-				angle = ((cur.yaw + 360) % 90) - ((next.yaw + 360) % 90);
-				angle = 180 - Math.abs(Math.abs(cur.yaw - next.yaw) - 180);
+				angle = delta(next.yaw, cur.yaw);
 				angle *= 2;
 			} else if (i == 0) {
 				PosStep next = points.get(i+1);
 				double ydelt = next.y - cur.y;
 				double dist = next.distanceTo(cur);
 				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
-				angle = 180 - Math.abs(Math.abs(cur.yaw - next.yaw) - 180);
+				angle = delta(cur.yaw, next.yaw);
 				angle *= 2;
 			} else {
 				PosStep prev = points.get(i-1);
@@ -157,11 +168,11 @@ public abstract class BuilderIterator extends BuilderBase {
 				double ydelt = next.y - prev.y;
 				double dist = next.distanceTo(prev);
 				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
-				angle = 180 - Math.abs(Math.abs(prev.yaw - next.yaw) - 180);
+				angle = delta(prev.yaw, next.yaw);
 			}
 			if (angle != 0) {
-				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 - angle / 180) * (float)info.settings.gauge.scale(), "RAIL_LEFT"));
-				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 + angle / 150) * (float)info.settings.gauge.scale(), "RAIL_RIGHT"));
+                data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 - angle / 180) * (float) info.settings.gauge.scale(), "RAIL_LEFT"));
+                data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 + angle / 150) * (float) info.settings.gauge.scale(), "RAIL_RIGHT"));
 				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, "RAIL_BASE"));
 			} else {
 				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch));
