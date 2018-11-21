@@ -61,12 +61,12 @@ public class BuilderTurn extends BuilderIterator {
         for (float i = startAngle; i < (endAngle+startAngle)/2 + stepSize/radius; i += stepSize/radius) {
             Vec3d point = new Vec3d(Math.sin(i) * radius, 0,Math.cos(i) * radius);
             point = point.subtract(center);
-            res.add(new PosStep(point, 90 - (float) Math.toDegrees(i)));
+            res.add(new PosStep(point, 90 - (float) Math.toDegrees(i) + 180));
         }
         for (float i = endAngle; i >= (endAngle+startAngle)/2; i -= stepSize/radius) {
             Vec3d point = new Vec3d(Math.sin(i) * radius, 0,Math.cos(i) * radius);
             point = point.subtract(center);
-            resReverse.add(new PosStep(point, 90 - (float) Math.toDegrees(i)));
+            resReverse.add(new PosStep(point, 90 - (float) Math.toDegrees(i)+180));
         }
         Collections.reverse(resReverse);
         res.addAll(resReverse);

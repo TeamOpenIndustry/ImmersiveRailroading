@@ -58,12 +58,12 @@ public class RailBuilderRender {
 				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
 				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
 				GL11.glRotatef(-90, 0, 1, 0);
-				
+
+				if (piece.getLength() != -1) {
+					GL11.glScaled(piece.getLength() / info.settings.gauge.scale(), 1, 1);
+				}
+
 				if (piece.getGroups().size() != 0) {
-					if (piece.getLength() != -1) {
-						GL11.glScaled(piece.getLength() / info.settings.gauge.scale(), 1, 1);
-					}
-					
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
 					for (String baseGroup : piece.getGroups()) {
