@@ -26,7 +26,7 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 		
-		if (rail.info.settings.type != TrackItems.TURN) {
+		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM) {
 			return SwitchState.NONE;
 		}
 		if (parent.info.settings.type != TrackItems.SWITCH) {

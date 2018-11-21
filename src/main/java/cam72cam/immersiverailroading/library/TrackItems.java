@@ -16,8 +16,4 @@ public enum TrackItems {
 	public String toString() {
 	    return TextUtil.translate("track.immersiverailroading:class." + super.toString().toLowerCase()); 
 	}
-
-	public boolean isTurn() {
-		return this == TURN;
-	}
 }
