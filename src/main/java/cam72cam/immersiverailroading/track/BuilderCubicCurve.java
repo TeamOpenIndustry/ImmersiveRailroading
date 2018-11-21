@@ -97,9 +97,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 			Vec3d p1 = points.get(i);
 			float angleCurve;
 			if (i == points.size()-1) {
-				angleCurve = VecUtil.toYaw(points.get(i-1).subtract(p1));
+				angleCurve = (angle2 + VecUtil.toYaw(points.get(i-1).subtract(p1))) / 2;
 			} else if (i == 0) {
-				angleCurve = VecUtil.toYaw(points.get(i+1).subtract(p1));
+				angleCurve = angle;
 			} else {
 				angleCurve = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
