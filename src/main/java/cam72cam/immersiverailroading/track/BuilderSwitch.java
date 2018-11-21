@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
-public class BuilderSwitch extends BuilderBase {
+public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 
 	private BuilderIterator turnBuilder;
 	private BuilderStraight straightBuilder;
@@ -121,5 +121,10 @@ public class BuilderSwitch extends BuilderBase {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public List<PosStep> getPath(double stepSize) {
+		return straightBuilder.getPath(stepSize);
 	}
 }

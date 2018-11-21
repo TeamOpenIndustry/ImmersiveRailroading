@@ -5,35 +5,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public abstract class BuilderIterator extends BuilderBase {
+public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
 	protected HashSet<Pair<Integer, Integer>> positions;
 	
 	public BuilderIterator(RailInfo info, BlockPos pos) {
 		this(info, pos, false);
 	}
-	
-	public static class PosStep extends Vec3d {
-		public final float yaw;
 
-		public PosStep(double xIn, double yIn, double zIn, float yaw) {
-			super(xIn, yIn, zIn);
-			this.yaw = yaw;
-		}
-
-		public PosStep(Vec3d orig, float angle) {
-			this(orig.x, orig.y, orig.z, angle);
-		}
-	}
-	
 	public abstract List<PosStep> getPath(double stepSize);
 
 	public BuilderIterator(RailInfo info, BlockPos pos, boolean endOfTrack) {

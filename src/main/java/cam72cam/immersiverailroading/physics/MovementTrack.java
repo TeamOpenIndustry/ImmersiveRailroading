@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.physics;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.track.BuilderIterator;
-import cam72cam.immersiverailroading.track.BuilderIterator.PosStep;
+import cam72cam.immersiverailroading.track.PosStep;
+import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
@@ -104,8 +104,8 @@ public class MovementTrack {
 			} else {
 				return backward;
 			}
-		} else if (rail.info.getBuilder() instanceof BuilderIterator) {
-			List<PosStep> positions = ((BuilderIterator) rail.info.getBuilder()).getPath(0.5);
+		} else if (rail.info.getBuilder() instanceof IIterableTrack) {
+			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder()).getPath(0.5);
 			Vec3d center = rail.info.placementInfo.placementPosition;
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
