@@ -12,12 +12,14 @@ public class RailBaseOverlayRender {
 	private static void doDraw(RailInfo info) {
 		GL11.glColor4f(1, 0, 0, 1);
 		info = info.clone();
-			
-		for (TrackBase base : info.getBuilder(info.position).getTracksForRender()) {
+
+		BlockPos placePos = new BlockPos(info.placementInfo.placementPosition);
+
+		for (TrackBase base : info.getBuilder(placePos).getTracksForRender()) {
 			if (!base.canPlaceTrack() ) {
 				GL11.glPushMatrix();
 				BlockPos pos = base.getPos();
-				pos = pos.subtract(info.position);
+				pos = pos.subtract(placePos);
 				GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ()+1);
 				GL11.glScaled(1, base.getBedHeight() + 0.2f, 1);
 

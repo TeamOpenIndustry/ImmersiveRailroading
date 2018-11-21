@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 
 public class RailBuilderRender {
 	
@@ -39,34 +40,30 @@ public class RailBuilderRender {
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void renderRailBuilder(RailInfo info) {
 		
-		OBJRender model = info.gauge.isModel() ? baseRailModel : baseRailModelModel;
+		OBJRender model = info.settings.gauge.isModel() ? baseRailModel : baseRailModelModel;
 
-		GL11.glTranslated(info.placementPosition.x-info.position.getX(), info.placementPosition.y-info.position.getY(), info.placementPosition.z-info.position.getZ()); 
-
-		String renderID = RailRenderUtil.renderID(info);
-		Integer displayList = displayLists.get(renderID);
+		Integer displayList = displayLists.get(info.uniqueID);
 		if (displayList == null) {
 
 			if (!ClientProxy.renderCacheLimiter.canRender()) {
 				return;
 			}		
-			final RailInfo infoClone = info.clone();
-			
+
 			displayList = ClientProxy.renderCacheLimiter.newList(() -> {		
 			
-			for (VecYawPitch piece : infoClone.getBuilder().getRenderData()) {
+			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				GL11.glPushMatrix();
-				GL11.glRotatef(180-infoClone.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
+				GL11.glRotatef(180-info.placementInfo.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
 				GL11.glTranslated(piece.x, piece.y, piece.z);
 				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
 				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
 				GL11.glRotatef(-90, 0, 1, 0);
-				
+
+				if (piece.getLength() != -1) {
+					GL11.glScaled(piece.getLength() / info.settings.gauge.scale(), 1, 1);
+				}
+
 				if (piece.getGroups().size() != 0) {
-					if (piece.getLength() != -1) {
-						GL11.glScaled(piece.getLength() / infoClone.gauge.scale(), 1, 1);
-					}
-					
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
 					for (String baseGroup : piece.getGroups()) {
@@ -78,15 +75,15 @@ public class RailBuilderRender {
 					}
 
 					
-					model.drawDirectGroups(groups, infoClone.gauge.scale());
+					model.drawDirectGroups(groups, info.settings.gauge.scale());
 				} else {
-					model.drawDirect(infoClone.gauge.scale());
+					model.drawDirect(info.settings.gauge.scale());
 				}
 				GL11.glPopMatrix();
 			}
 
 			});
-			displayLists.put(renderID, displayList);
+			displayLists.put(info.uniqueID, displayList);
 		}
 		
 		model.bindTexture();
