@@ -98,42 +98,21 @@ public class TileRail extends TileRailBase {
 			ItemStack railBed = new ItemStack(nbt.getCompoundTag("railBed"));
 			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
 
+			NBTTagCompound newPositionFormat = new NBTTagCompound();
+			newPositionFormat.setDouble("x", nbt.getDouble("placementPositionX"));
+			newPositionFormat.setDouble("y", nbt.getDouble("placementPositionY"));
+			newPositionFormat.setDouble("z", nbt.getDouble("placementPositionZ"));
+			nbt.setTag("placementPosition", newPositionFormat);
+
             PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
+            System.out.println(placementInfo.toNBT());
             placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			/*
-			MIGRATION HACKS
-			 */
             RailSettings settings = new RailSettings(gauge, type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
-			this.info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
-			Vec3d offset = new Vec3d(info.getBuilder().getParentPos());
-
-			if (settings.type == TrackItems.TURN) {
-				if (!getParent().equals(pos)) {
-					// Is part of a switch
-					hackSwitch = true;
-					if (placementInfo.direction == TrackDirection.LEFT) {
-						offset = offset.subtract(-0.5, 0, 1.5);
-					} else {
-						offset = offset.addVector(0.5, 0, 0.5);
-					}
-				} else {
-					if (placementInfo.direction == TrackDirection.LEFT) {
-						offset = offset.addVector(0.5, 0, 0.5);
-					} else {
-						offset = offset.subtract(0.5, 0, 0.5);
-					}
-				}
-			} else {
-                offset = offset.subtract(0.5, 0, 0.5);
-			}
-			placementInfo = new PlacementInfo(placementInfo.placementPosition.subtract(offset), placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing);
-			this.info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
-			if (type == TrackItems.STRAIGHT) {
-			}
+			info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
 		}
 	}
 
@@ -149,22 +128,6 @@ public class TileRail extends TileRailBase {
 			nbt.setTag("drops", dropNBT);
 		}
 		return super.writeToNBT(nbt);
-	}
-
-	public void update() {
-		if (hackSwitch) {
-			TileRail parent = getParentTile();
-			if (parent != null) {
-				PlacementInfo placementInfo = parent.info.placementInfo;
-				Vec3d offset = new Vec3d(parent.info.getBuilder().getParentPos());
-				offset = offset.normalize().scale(-parent.info.settings.length);
-				System.out.println(offset);
-				placementInfo = new PlacementInfo(placementInfo.placementPosition.add(offset), placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
-				parent.info = new RailInfo(world, parent.info.settings, placementInfo, null, parent.info.switchState, parent.info.tablePos);
-				parent.markDirty();
-				hackSwitch = false;
-			}
-		}
 	}
 
 	public void setDrops(List<ItemStack> drops) {
