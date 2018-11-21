@@ -414,10 +414,13 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 		Vec3d nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 
-		if (state != SwitchState.NONE && nextPos.distanceTo(currentPosition) > distanceMeters * 2) {
+		if (state != SwitchState.NONE && nextPos.distanceTo(currentPosition) > Math.abs(distanceMeters) * 2) {
 			tile = self.getParentTile();
 			if (tile != null) {
-				nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+				Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+				if (potential.distanceTo(currentPosition) < nextPos.distanceTo(currentPosition)) {
+					nextPos = potential;
+				}
 			}
 		}
 
