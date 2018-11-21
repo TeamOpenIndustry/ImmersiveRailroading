@@ -12,17 +12,17 @@ import java.util.List;
 
 public class BuilderSwitch extends BuilderBase {
 
-	private BuilderTurn turnBuilder;
+	private BuilderIterator turnBuilder;
 	private BuilderStraight straightBuilder;
 
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		RailInfo turnInfo = info.withType(TrackItems.TURN);
+		RailInfo turnInfo = info.withType(info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
 		RailInfo straightInfo = info.clone();
 
 		{
-			turnBuilder = new BuilderTurn(turnInfo, pos);
+			turnBuilder = (BuilderIterator) turnInfo.getBuilder(pos);
 			straightBuilder = new BuilderStraight(straightInfo, pos, true);
 			
 			double maxOverlap = 0;
@@ -38,7 +38,6 @@ public class BuilderSwitch extends BuilderBase {
 		}
 		
 
-		turnBuilder = new BuilderTurn(turnInfo, pos);
 		straightBuilder = new BuilderStraight(straightInfo, pos, true);
 		
 		turnBuilder.overrideFlexible = true;

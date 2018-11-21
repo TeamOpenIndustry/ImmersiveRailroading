@@ -64,7 +64,7 @@ public class RailInfo {
 				this.customInfo.rotationQuarter,
 		};
 		String id = Arrays.toString(props);
-		if (settings.type == TrackItems.CUSTOM) {
+		if (!placementInfo.placementPosition.equals(customInfo.placementPosition)) {
 			id += placementInfo.placementPosition;
 			id += customInfo.placementPosition;
 		}
