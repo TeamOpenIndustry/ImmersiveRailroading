@@ -54,8 +54,8 @@ public abstract class BuilderIterator extends BuilderBase {
 		PosStep start = path.get(0);
 		PosStep end = path.get(path.size()-1);
 
-		int mainX = (int) path.get(path.size()/2).x;
-		int mainZ = (int) path.get(path.size()/2).z;
+		int mainX = (int) Math.round(path.get(path.size()/2).x);
+		int mainZ = (int) Math.round(path.get(path.size()/2).z);
 
 		for (PosStep cur : path) {
 			Vec3d gagPos = cur;
@@ -64,8 +64,8 @@ public abstract class BuilderIterator extends BuilderBase {
 
 			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
-				int posX = (int)(gagPos.x+nextUp.x);
-				int posZ = (int)(gagPos.z+nextUp.z);
+				int posX = (int)Math.round((gagPos.x+nextUp.x));
+				int posZ = (int)Math.round((gagPos.z+nextUp.z));
 				double height = 0;
 				if (info.settings.isGradeCrossing) {
 					height = (1 - Math.abs((int)q)/horiz)/3 - 0.05;
@@ -90,8 +90,8 @@ public abstract class BuilderIterator extends BuilderBase {
 				}
 			}
 			if (!isFlex && endOfTrack) {
-				mainX = (int) gagPos.x;
-				mainZ = (int) gagPos.z;
+				mainX = (int) Math.round(gagPos.x);
+				mainZ = (int) Math.round(gagPos.z);
 			}
 		}
 
