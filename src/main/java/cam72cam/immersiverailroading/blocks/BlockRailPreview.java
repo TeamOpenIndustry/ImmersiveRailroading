@@ -41,7 +41,7 @@ public class BlockRailPreview extends Block {
 			TileRailPreview tr = TileRailPreview.get(world, pos);
 			if (tr != null) {
 				world.setBlockToAir(pos);
-				tr.getRailRenderInfo().build(entityPlayer, pos);
+				tr.getRailRenderInfo().build(entityPlayer);
 				return true;
 			}
 		}
