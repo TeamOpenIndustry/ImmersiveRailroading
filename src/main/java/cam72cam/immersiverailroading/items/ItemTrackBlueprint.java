@@ -63,6 +63,9 @@ public class ItemTrackBlueprint extends Item {
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ);
 		
 		if (settings(stack).isPreview) {
+			if (!BlockUtil.canBeReplaced(world, pos, false)) {
+				pos = pos.up();
+			}
 			world.setBlockState(pos, IRBlocks.BLOCK_RAIL_PREVIEW.getDefaultState());
 			TileRailPreview te = TileRailPreview.get(world, pos);
 			if (te != null) {
@@ -70,12 +73,9 @@ public class ItemTrackBlueprint extends Item {
 			}
 			return EnumActionResult.SUCCESS;
 		}
-		if (player.getEntityWorld().getBlockState(pos.down()).getBlock() instanceof BlockRailBase) {
-			pos = pos.down();
-		}
-		
+
 		RailInfo info = new RailInfo(player.world, stack, placementInfo, null);
-		info.build(player, pos);
+		info.build(player);
 		return EnumActionResult.SUCCESS;
     }
 
