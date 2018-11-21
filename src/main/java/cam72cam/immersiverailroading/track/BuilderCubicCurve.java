@@ -97,9 +97,6 @@ public class BuilderCubicCurve extends BuilderIterator {
 			Vec3d p1 = points.get(i);
 			float angleCurve;
 			if (i == points.size()-1) {
-				if(info.customInfo.direction == TrackDirection.RIGHT) {
-					angle2 = -angle2;
-				}
 				angleCurve = angle2+180;
 			} else if (i == 0) {
 				angleCurve = angle;
