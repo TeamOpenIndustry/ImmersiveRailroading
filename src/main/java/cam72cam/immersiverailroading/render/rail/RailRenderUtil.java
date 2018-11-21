@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
@@ -26,7 +27,8 @@ public class RailRenderUtil {
 			
 			GL11.glPushMatrix();
 			Vec3d pos = info.placementInfo.placementPosition;
-			GL11.glTranslated(- pos.x%1, - pos.y%1, - pos.z%1 - 1);
+			pos = pos.subtract(new Vec3d(new BlockPos(pos)));
+			GL11.glTranslated(- pos.x, - pos.y, - pos.z);
 			RailBaseRender.draw(info);
 			RailBaseOverlayRender.draw(info);
 			GL11.glPopMatrix();
