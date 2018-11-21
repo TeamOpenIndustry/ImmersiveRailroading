@@ -72,13 +72,13 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		if (sounds != null && sounds.has("horn")) {
 			horn = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("horn").getAsString());
 		} else {
-			horn = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/hornsus.ogg");
+			horn = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
 		}
 
 		if (sounds != null && sounds.has("bell")) {
-			horn = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
+			bell = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
 		} else {
-			horn = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
+			bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 		}
 	}
 

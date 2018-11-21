@@ -234,7 +234,7 @@ public class ClientProxy extends CommonProxy {
 		keys.put(KeyTypes.AIR_BRAKE_ZERO, new KeyBinding("ir_keys.zero_brake", Keyboard.KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.AIR_BRAKE_DOWN, new KeyBinding("ir_keys.decrease_brake", Keyboard.KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.HORN, new KeyBinding("ir_keys.horn", Keyboard.KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.HORN, new KeyBinding("ir_keys.bell", Keyboard.KEY_NUMPAD3, "key.categories." + ImmersiveRailroading.MODID));
+		keys.put(KeyTypes.BELL, new KeyBinding("ir_keys.bell", Keyboard.KEY_NUMPAD3, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.DEAD_MANS_SWITCH, new KeyBinding("ir_keys.dead_mans_switch", Keyboard.KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.START_STOP_ENGINE, new KeyBinding("ir_keys.start_stop_engine", Keyboard.KEY_ADD, "key.categories." + ImmersiveRailroading.MODID));
 		
