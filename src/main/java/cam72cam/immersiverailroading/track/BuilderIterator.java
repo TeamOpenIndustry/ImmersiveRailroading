@@ -56,11 +56,12 @@ public abstract class BuilderIterator extends BuilderBase {
 
 		int mainX = (int) Math.round(path.get(path.size()/2).x);
 		int mainZ = (int) Math.round(path.get(path.size()/2).z);
+		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale()/2));
 
 		for (PosStep cur : path) {
 			Vec3d gagPos = cur;
 
-			boolean isFlex = gagPos.distanceTo(start) < 3 || gagPos.distanceTo(end) < 3;
+			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
 
 			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
