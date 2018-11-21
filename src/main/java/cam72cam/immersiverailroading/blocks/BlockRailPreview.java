@@ -65,7 +65,7 @@ public class BlockRailPreview extends Block {
 			}
 			return false;
 		} else {
-			if (playerIn.getHeldItem(hand).getItem() == IRItems.ITEM_TRACK_ENDPOINT) {
+			if (playerIn.getHeldItem(hand).getItem() == IRItems.ITEM_GOLDEN_SPIKE) {
 				return false;
 			}
 			playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL_PREVIEW.ordinal(), worldIn, pos.getX(), pos.getY(), pos.getZ());

@@ -6,22 +6,20 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.*;
 //TODO buildcraft.api.tools.IToolWrench
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ItemTrackEndpoint extends Item {
-	public static final String NAME = "item_track_endpoint";
+public class ItemGoldenSpike extends Item {
+	public static final String NAME = "item_golden_spike";
 	
-	public ItemTrackEndpoint() {
+	public ItemGoldenSpike() {
 		super();
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
@@ -32,7 +30,7 @@ public class ItemTrackEndpoint extends Item {
 		ItemStack held = player.getHeldItem(hand);
 		if (world.getBlockState(pos).getBlock() == IRBlocks.BLOCK_RAIL_PREVIEW) {
 			setPosition(held, pos);
-			System.out.println("Linked");
+			world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f, false);
 		} else {
 			pos = pos.up();
 			
