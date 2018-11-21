@@ -1,12 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -16,7 +11,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 //TODO @cam72cam use BlockPos and Vec3i
 
@@ -24,33 +22,19 @@ import net.minecraft.world.World;
 public abstract class BuilderBase {
 	protected ArrayList<TrackBase> tracks = new ArrayList<TrackBase>();
 	
-	public World world;
-	int x;
-	int y;
-	int z;
-	public EnumFacing rotation;
-	
-	private int[] translation;
-
 	public RailInfo info;
 
+	private BlockPos pos;
 	private BlockPos parent_pos;
 
 	public boolean overrideFlexible = false;
 
 	public List<ItemStack> drops;
 
-	public Gauge gauge;
-	
 	public BuilderBase(RailInfo info, BlockPos pos) {
 		this.info = info;
-		rotation = info.facing;
-		world = info.world;
-		gauge = info.gauge;
+		this.pos = pos;
 		parent_pos = pos;
-		this.x = pos.getX();
-		this.y = pos.getY();
-		this.z = pos.getZ();
 	}
 
 	public class VecYawPitch extends Vec3d {
@@ -89,11 +73,7 @@ public abstract class BuilderBase {
 	}
 	
 	public abstract List<VecYawPitch> getRenderData();
-	
-	public void setRelativeTranslate(int x, int y, int z) {
-		translation = new int[]{x, y, z};
-	}	
-	
+
 	public class PosRot extends BlockPos{
 		private EnumFacing rot;
 		
@@ -107,85 +87,10 @@ public abstract class BuilderBase {
 		}
 	}
 	
-	public PosRot convertRelativeCenterPositions(int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation) {
-		if (rel_x >= 1) {
-			switch(rotation) {
-			case SOUTH:
-				rel_x += 0;
-				rel_z += 0;
-				break;
-			case WEST:
-				rel_x += 0;
-				rel_z -= 1;
-				break;
-			case NORTH:
-				rel_x -= 1;
-				rel_z -= 1;
-				break;
-			case EAST:
-				rel_x -= 1;
-				rel_z -= 0;
-				break;
-			}
-		} else {
-			switch(rotation) {
-			case EAST:
-				rel_x += 0;
-				rel_z += 0;
-				break;
-			case NORTH:
-				rel_x += 0;
-				rel_z -= 1;
-				break;
-			case WEST:
-				rel_x += 1;
-				rel_z -= 1;
-				break;
-			case SOUTH:
-				rel_x += 1;
-				rel_z += 0;
-				break;
-			}
-		}
-		return convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
-	}
-
-	public PosRot convertRelativePositions(int rel_x, int rel_y, int rel_z, EnumFacing rel_rotation) {
-		if (translation != null) {
-			rel_x += translation[0];
-			rel_y += translation[1];
-			rel_z += translation[2];
-		}
-		
-		EnumFacing newrot = EnumFacing.fromAngle(rel_rotation.getHorizontalAngle() + rotation.getHorizontalAngle());
-		
-		switch (rotation) {
-		case SOUTH:
-			// 270*
-			return new PosRot(new BlockPos(x + rel_x, y + rel_y, z + rel_z), newrot);
-		case WEST:
-			// 180*
-			return new PosRot(new BlockPos(x - rel_z, y + rel_y, z + rel_x), newrot);
-		case NORTH:
-			//  90*
-			return new PosRot(new BlockPos(x - rel_x, y + rel_y, z - rel_z), newrot);
-		case EAST:
-			//   0*
-			return new PosRot(new BlockPos(x + rel_z, y + rel_y, z - rel_x), newrot);
-		}
-		return null;
+	public PosRot convertRelativePositions(BlockPos rel) {
+		return new PosRot(pos.add(BlockUtil.rotateYaw(rel, info.placementInfo.facing.getOpposite())), info.placementInfo.facing);
 	}
 	
-	public int getX() {
-		return x;
-	}
-	public int getY() {
-		return y;
-	}
-	public int getZ() {
-		return z;
-	}
-
 	public boolean canBuild() {
 		for(TrackBase track : tracks) {
 			if (!track.canPlaceTrack()) {
@@ -208,13 +113,9 @@ public abstract class BuilderBase {
 		return this.tracks;
 	}
 
-	public BlockPos getPos() {
-		return new BlockPos(x, y, z);
-	}
-
 	
 	public void setParentPos(BlockPos pos) {
-		parent_pos = convertRelativePositions(pos.getX(), pos.getY(), pos.getZ(), this.rotation);
+		parent_pos = convertRelativePositions(pos);
 	}
 	public BlockPos getParentPos() {
 		return parent_pos;
@@ -236,11 +137,11 @@ public abstract class BuilderBase {
 	public int costFill() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
-			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
+			if (BlockUtil.canBeReplaced(info.world, track.getPos().down(), false)) {
 				fillCount += 1;
 			}
 		}
-		return MathHelper.ceil(this.info.railBedFill.getItem() != Items.AIR ? fillCount : 0);
+		return MathHelper.ceil(this.info.settings.railBedFill.getItem() != Items.AIR ? fillCount : 0);
 	}
 
 	public void setDrops(List<ItemStack> drops) {
@@ -249,22 +150,22 @@ public abstract class BuilderBase {
 
 	public void clearArea() {
 		for (TrackBase track : tracks) {
-			for (int i = 0; i < 6 * gauge.scale(); i++) {
+			for (int i = 0; i < 6 * info.settings.gauge.scale(); i++) {
 				BlockPos main = track.getPos().up(i);
-				if (!BlockUtil.isRail(world, main)) {
-					world.destroyBlock(main, false);
+				if (!BlockUtil.isRail(info.world, main)) {
+					info.world.destroyBlock(main, false);
 				}
-				if (gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.type != TrackItems.SLOPE && info.type != TrackItems.TURNTABLE) {
+				if (info.settings.gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.settings.type != TrackItems.SLOPE && info.settings.type != TrackItems.TURNTABLE) {
 					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
 						BlockPos pos = main.offset(facing);
-						if (!BlockUtil.isRail(world, pos)) {
-							world.destroyBlock(pos, false);
+						if (!BlockUtil.isRail(info.world, pos)) {
+							info.world.destroyBlock(pos, false);
 						}
 					}
 				}
 			}
-			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
-				world.destroyBlock(track.getPos().down(), false);
+			if (BlockUtil.canBeReplaced(info.world, track.getPos().down(), false)) {
+				info.world.destroyBlock(track.getPos().down(), false);
 			}
 		}
 	}
