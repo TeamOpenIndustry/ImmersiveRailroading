@@ -4,16 +4,18 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
-import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.immersiverailroading.render.VBA;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class RailBuilderRender {
 	
@@ -37,19 +39,19 @@ public class RailBuilderRender {
 		return gauge.isModel() ? baseRailModel : baseRailModelModel;
 	}
 
-	private static DisplayListCache displayLists = new DisplayListCache();
+	private static Map<String, VBA> vbaMap = new HashMap<String, VBA>();
 	public static void renderRailBuilder(RailInfo info) {
 		
 		OBJRender model = info.settings.gauge.isModel() ? baseRailModel : baseRailModelModel;
 
-		Integer displayList = displayLists.get(info.uniqueID);
-		if (displayList == null) {
+		VBA vba = vbaMap.get(info.uniqueID);
+		if (vba == null) {
 
 			if (!ClientProxy.renderCacheLimiter.canRender()) {
 				return;
 			}		
 
-			displayList = ClientProxy.renderCacheLimiter.newList(() -> {		
+            List<VBA> vbas = new ArrayList<VBA>();
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				Matrix4 m = new Matrix4();
@@ -77,19 +79,19 @@ public class RailBuilderRender {
 					}
 
 					
-					model.drawDirectGroups(groups, 1, m);
+					vbas.add(model.createVBA(groups, 1, m));
 				} else {
-					model.drawDirectGroups(model.model.groups.keySet(), 1, m);
+					vbas.add(model.createVBA(model.model.groups.keySet(), 1, m));
 				}
 			}
 
-			});
-			displayLists.put(info.uniqueID, displayList);
+			vba = new VBA(vbas);
+			vbaMap.put(info.uniqueID, vba);
 		}
 		
 		model.bindTexture();
 		Minecraft.getMinecraft().mcProfiler.startSection("dl");
-		GL11.glCallList(displayList);
+		vba.draw();
 		Minecraft.getMinecraft().mcProfiler.endSection();;
 		model.restoreTexture();
 	}
