@@ -79,9 +79,9 @@ public class RailBuilderRender {
 					}
 
 					
-					vbas.add(model.createVBA(groups, 1, m));
+					vbas.add(model.createVBA(groups, m));
 				} else {
-					vbas.add(model.createVBA(model.model.groups.keySet(), 1, m));
+					vbas.add(model.createVBA(model.model.groups.keySet(), m));
 				}
 			}
 

@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 import util.Matrix4;
@@ -16,6 +15,8 @@ public class OBJRender {
 	public OBJModel model;
 	public Map<String, OBJTextureSheet> textures = new HashMap<String, OBJTextureSheet>();
 	private int prevTexture = -1;
+	private VBA vba;
+	Map<Iterable<String>, VBA> vbas = new HashMap<Iterable<String>, VBA>();
 
 	public OBJRender(OBJModel model) {
 		this(model, null);
@@ -61,62 +62,29 @@ public class OBJRender {
 		}
 	}
 
-	private Integer displayList = null;
-
 	public void draw() {
-		if (displayList == null) {
-			if (!ClientProxy.renderCacheLimiter.canRender()) {
-				return;
-			}
-			
-			displayList = ClientProxy.renderCacheLimiter.newList(() -> drawDirect());
+		createVBA().draw();
+	}
+	public void drawGroups(Iterable<String> groups) {
+		createVBA(groups).draw();
+	}
+
+	public VBA createVBA() {
+		if (vba == null) {
+			vba = createVBA(model.groups.keySet(), new Matrix4());
 		}
-		GL11.glCallList(displayList);
+		return vba;
 	}
 
-	public void drawDirect() {
-		drawDirectGroups(model.groups.keySet());
-	}
-	public void drawDirect(double scale) {
-		drawDirectGroups(model.groups.keySet(), scale);
-	}
-
-	public Map<Double, Map<Iterable<String>, Integer>> displayLists = new HashMap<Double, Map<Iterable<String>, Integer>>();
-
-	public void drawGroups(Iterable<String> groupNames, double scale) {
-		if (!displayLists.containsKey(scale)) {
-			displayLists.put(scale, new HashMap<Iterable<String>, Integer>());
+	public VBA createVBA(Iterable<String> groups) {
+		if (!vbas.containsKey(groups)) {
+			vbas.put(groups, createVBA(groups, new Matrix4()));
 		}
-		
-		if (!displayLists.get(scale).containsKey(groupNames)) {
-			if (!ClientProxy.renderCacheLimiter.canRender()) {
-				return;
-			}
-			
-			int groupsDisplayList = GL11.glGenLists(1);
-			groupsDisplayList = ClientProxy.renderCacheLimiter.newList(() -> drawDirectGroups(groupNames, scale));
-			displayLists.get(scale).put(groupNames, groupsDisplayList);
-		}
-		GL11.glCallList(displayLists.get(scale).get(groupNames));
-	}
-	public void drawGroups(Iterable<String> groupNames) {
-		drawGroups(groupNames, 1);
+		return vbas.get(groups);
 	}
 
-	public void drawDirectGroups(Iterable<String> groupNames) {
-		drawDirectGroups(groupNames, 1.0);
-	}
-
-	public void drawDirectGroups(Iterable<String> groupNames, double scale) {
-		drawDirectGroups(groupNames, scale, new Matrix4());
-	}
-
-	public void drawDirectGroups(Iterable<String> groupNames, double scale, Matrix4 m) {
-		createVBA(groupNames, scale, m).draw();
-	}
-    public VBA createVBA(Iterable<String> groupNames, double scale, Matrix4 m) {
+    public VBA createVBA(Iterable<String> groupNames, Matrix4 m) {
 		List<Integer> tris = new ArrayList<Integer>();
-		boolean has_vn = true;
 
 		for (String group : groupNames) {
 			if (group.contains("EXHAUST_") || group.contains("CHIMNEY_") || group.contains("PRESSURE_VALVE_") || group.contains("CHIMINEY_")) {
@@ -168,7 +136,6 @@ public class OBJRender {
 				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 				Vec3d vn = point[2] != -1 ? model.vertexNormals(point[2]) : null;
 
-				v = v.scale(scale);
 				v = m.apply(v);
 
 				if (vt != null) {
@@ -194,13 +161,10 @@ public class OBJRender {
 				texture.freeGL();
 			}
 		}
-		if (this.displayList != null) {
-			GL11.glDeleteLists(this.displayList, 1);
-		}
-		for (Map<Iterable<String>, Integer> list : this.displayLists.values()) {
-			for (Integer dl : list.values()) {
-				GL11.glDeleteLists(dl, 1);
-			}
+		vba.free();
+		for (VBA v : vbas.values()) {
+			v.free();
 		}
 	}
+
 }
