@@ -1,8 +1,5 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import java.util.ArrayList;
-import org.lwjgl.opengl.GL11;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -13,7 +10,10 @@ import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
+import org.lwjgl.opengl.GL11;
+import util.Matrix4;
+
+import java.util.ArrayList;
 
 public class RailBuilderRender {
 	
@@ -52,16 +52,18 @@ public class RailBuilderRender {
 			displayList = ClientProxy.renderCacheLimiter.newList(() -> {		
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
-				GL11.glPushMatrix();
-				GL11.glRotatef(180-info.placementInfo.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
-				GL11.glTranslated(piece.x, piece.y, piece.z);
-				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
-				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
-				GL11.glRotatef(-90, 0, 1, 0);
+				Matrix4 m = new Matrix4();
+				m.rotate(Math.toRadians(180-info.placementInfo.facing.getOpposite().getHorizontalAngle()), 0, 1, 0);
+				m.translate(piece.x, piece.y, piece.z);
+				m.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
+				m.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
+				m.rotate(Math.toRadians(-90), 0, 1, 0);
 
 				if (piece.getLength() != -1) {
-					GL11.glScaled(piece.getLength() / info.settings.gauge.scale(), 1, 1);
+					m.scale(piece.getLength() / info.settings.gauge.scale(), 1, 1);
 				}
+				double scale = info.settings.gauge.scale();
+				m.scale(scale, scale, scale);
 
 				if (piece.getGroups().size() != 0) {
 					// TODO static
@@ -75,11 +77,10 @@ public class RailBuilderRender {
 					}
 
 					
-					model.drawDirectGroups(groups, info.settings.gauge.scale());
+					model.drawDirectGroups(groups, 1, m);
 				} else {
-					model.drawDirect(info.settings.gauge.scale());
+					model.drawDirectGroups(model.model.groups.keySet(), 1, m);
 				}
-				GL11.glPopMatrix();
 			}
 
 			});
