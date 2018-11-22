@@ -112,6 +112,9 @@ public class OBJRender {
 	}
 
 	public void drawDirectGroups(Iterable<String> groupNames, double scale, Matrix4 m) {
+		createVBA(groupNames, scale, m).draw();
+	}
+    public VBA createVBA(Iterable<String> groupNames, double scale, Matrix4 m) {
 		List<Integer> tris = new ArrayList<Integer>();
 		boolean has_vn = true;
 
@@ -182,7 +185,7 @@ public class OBJRender {
 				vba.addPoint(v, vn, vt, r, g, b, a);
 			}
 		}
-		vba.draw();
+		return vba;
 	}
 
 	public void freeGL() {
