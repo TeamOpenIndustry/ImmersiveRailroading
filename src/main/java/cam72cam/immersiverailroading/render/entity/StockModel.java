@@ -63,7 +63,7 @@ public class StockModel extends OBJRender {
 				availComponents.remove(component.type);
 			}
 			Minecraft.getMinecraft().mcProfiler.startSection("render");
-			drawGroups(component.modelIDs, component.scale);
+			drawGroups(component.modelIDs);
 			Minecraft.getMinecraft().mcProfiler.endSection();
 		}
 	}
