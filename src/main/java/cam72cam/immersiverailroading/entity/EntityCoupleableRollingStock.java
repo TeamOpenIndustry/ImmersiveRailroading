@@ -135,6 +135,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		frontCouplerEngaged = nbttagcompound.getBoolean("frontCouplerEngaged");
 
 		if (nbttagcompound.hasKey("CoupledBack")) {
+			coupledBack = UUID.fromString(nbttagcompound.getString("CoupledBack"));
 			if (nbttagcompound.getTag("lastKnownRear").getId() == 10) {
 				// Legacy
 				// TODO remove 2.0
