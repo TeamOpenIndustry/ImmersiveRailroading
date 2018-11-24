@@ -19,27 +19,11 @@ public class BuilderTurn extends BuilderCubicCurve {
         float angle = info.placementInfo.rotationQuarter / 4f * 90;
 
         Matrix4 mat = new Matrix4();
+        mat.rotate(Math.toRadians(angle-90), 0, 1, 0);
         if (info.placementInfo.direction == TrackDirection.LEFT) {
-            mat.rotate(Math.toRadians(90 - angle + 180), 0, 1, 0);
-            mat.translate(radius, 0, radius);
-            mat.rotate(Math.toRadians(90), 0, 1, 0);
-        } else {
-            mat.rotate(Math.toRadians(angle-90), 0, 1, 0);
+            mat.scale(1, 1, -1);
         }
-        CubicCurve curve = new CubicCurve(radius).apply(mat);
-        switch(info.settings.quarters) {
-            case 1:
-                curve = curve.truncate(0.5).truncate(0.5);
-                break;
-            case 2:
-                curve = curve.truncate(0.5);
-                break;
-            case 3:
-                curve = curve.truncate(0.75);
-                break;
-            case 4:
-                break;
-        }
+        CubicCurve curve = CubicCurve.circle(radius, info.settings.quarters/4f*90).apply(mat);
         return getPath(curve, stepSize);
     }
 }

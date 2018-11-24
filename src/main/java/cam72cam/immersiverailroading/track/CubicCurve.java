@@ -10,10 +10,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class CubicCurve {
-    private final Vec3d p1;
-    private final Vec3d ctrl1;
-    private final Vec3d ctrl2;
-    private final Vec3d p2;
+    public final Vec3d p1;
+    public final Vec3d ctrl1;
+    public final Vec3d ctrl2;
+    public final Vec3d p2;
 
     //http://spencermortensen.com/articles/bezier-circle/
     public final static double c = 0.55191502449;
@@ -25,13 +25,17 @@ public class CubicCurve {
         this.p2 = p2;
     }
 
-    public CubicCurve(int radius) {
-        this(
-            new Vec3d(0, 0, radius - radius),
-            new Vec3d(c * radius, 0, radius - radius),
-            new Vec3d(radius, 0, c * radius - radius),
-            new Vec3d(radius, 0, 0 - radius)
-        );
+    public static CubicCurve circle(int radius, float degrees) {
+        float cRadScale = degrees / 90;
+        Vec3d p1 = new Vec3d(0, 0, radius);
+        Vec3d ctrl1 = new Vec3d(cRadScale * c * radius, 0, radius);
+        Vec3d ctrl2 = new Vec3d(radius, 0, cRadScale * c * radius);
+        Vec3d p2 = new Vec3d(radius, 0, 0);
+
+        Matrix4 quart = new Matrix4();
+        quart.rotate(Math.toRadians(-90+degrees), 0, 1, 0);
+
+        return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2)).apply(new Matrix4().translate(0, 0, -radius));
     }
 
     public CubicCurve apply(Matrix4 mat) {
