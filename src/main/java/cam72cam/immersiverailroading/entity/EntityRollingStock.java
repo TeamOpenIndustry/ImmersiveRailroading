@@ -13,7 +13,6 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDeathType;
-import cam72cam.immersiverailroading.library.TrainBreakMode;
 import cam72cam.immersiverailroading.net.PaintSyncPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -32,7 +31,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.fml.server.FMLServerHandler;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
 	
@@ -192,7 +190,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 		
 		if (damagesource.getTrueSource() instanceof EntityPlayer && !damagesource.isProjectile()) {
 			EntityPlayer player = (EntityPlayer) damagesource.getTrueSource();
-			if (player.isSneaking() && (ConfigBalance.trainBreakMode == TrainBreakMode.TRUE || (ConfigBalance.trainBreakMode == TrainBreakMode.ONLY_OP && FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayers().getEntry(player.getGameProfile()) != null))) {
+			if (player.isSneaking() && (ConfigBalance.trainBreakMode == true || FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getOppedPlayers().getEntry(player.getGameProfile()) != null)) {
 				if (!this.isDead) {
 					this.onDeath(StockDeathType.PLAYER);
 				}

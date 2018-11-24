@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.TrainBreakMode;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -56,7 +55,7 @@ public class Config {
 		public static boolean FuelRequired = true;
 		
 		@Comment("Can players break trains")
-		public static TrainBreakMode trainBreakMode = TrainBreakMode.TRUE;
+		public static boolean trainBreakMode = true;
 
 		@Comment("Slope Multiplier: Higher numbers increase slowdown, lower numbers decrease slowdown")
 		public static double slopeMultiplier = 1.0;
