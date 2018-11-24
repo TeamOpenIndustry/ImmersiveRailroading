@@ -14,8 +14,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 	public BuilderCubicCurve(RailInfo info, BlockPos pos) {
 		super(info, pos);
 	}
+	public BuilderCubicCurve(RailInfo info, BlockPos pos, boolean endOfTrack) {	super(info, pos, endOfTrack); }
 
-	private HashMap<Double, List<PosStep>> cache; 
+	private HashMap<Double, List<PosStep>> cache;
 
 	@Override
 	public List<PosStep> getPath(double stepSize) {
