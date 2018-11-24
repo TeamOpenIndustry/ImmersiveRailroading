@@ -24,6 +24,11 @@ public class BuilderTurn extends BuilderCubicCurve {
             mat.scale(1, 1, -1);
         }
         CubicCurve curve = CubicCurve.circle(radius, info.settings.quarters/4f*90).apply(mat);
+
+        double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
+        if (height != 0) {
+            curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.addVector(0, height, 0), curve.p2.addVector(0, height, 0));
+        }
         return getPath(curve, stepSize);
     }
 }
