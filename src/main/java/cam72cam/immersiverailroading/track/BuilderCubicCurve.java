@@ -58,7 +58,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 		List<PosStep> res = new ArrayList<PosStep>();
 
-		List<Vec3d> points = curve.toSplitList(stepSize);
+		List<Vec3d> points = curve.toList(stepSize);
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			float angleCurve;

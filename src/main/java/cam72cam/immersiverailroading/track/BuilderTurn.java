@@ -26,6 +26,20 @@ public class BuilderTurn extends BuilderCubicCurve {
         } else {
             mat.rotate(Math.toRadians(angle-90), 0, 1, 0);
         }
-        return getPath(new CubicCurve(radius).apply(mat), stepSize);
+        CubicCurve curve = new CubicCurve(radius).apply(mat);
+        switch(info.settings.quarters) {
+            case 1:
+                curve = curve.truncate(0.5).truncate(0.5);
+                break;
+            case 2:
+                curve = curve.truncate(0.5);
+                break;
+            case 3:
+                curve = curve.truncate(0.75);
+                break;
+            case 4:
+                break;
+        }
+        return getPath(curve, stepSize);
     }
 }

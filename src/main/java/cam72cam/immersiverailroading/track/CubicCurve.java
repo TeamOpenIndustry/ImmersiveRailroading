@@ -78,11 +78,13 @@ public class CubicCurve {
 
     public List<Vec3d> toList(double stepSize) {
         List<Vec3d> res = new ArrayList<>();
+        List<Vec3d> resRev = new ArrayList<>();
         res.add(p1);
+        resRev.add(p2);
         double precision = 5;
 
         double t = 0;
-        while (t <= 1) {
+        while (t <= 0.5) {
             for (double i = 1; i < precision; i++) {
                 Vec3d prev = res.get(res.size()-1);
 
@@ -99,25 +101,32 @@ public class CubicCurve {
             }
             res.add(position(t));
         }
-        return res;
-    }
 
-    public List<Vec3d> toSplitList(double stepSize) {
-        List<Vec3d> list = this.truncate(0.5).toList(stepSize);
-        List<Vec3d> rev = this.reverse().truncate(0.5).toList(stepSize);
-        Collections.reverse(rev);
-        if (list.size() > 3 && rev.size() > 3) {
-            Vec3d listEnd = list.get(list.size() - 3);
-            Vec3d revEnd = rev.get(2);
-            if (rev.get(0).distanceTo(listEnd) < list.get(list.size() - 1).distanceTo(listEnd)) {
-                rev.remove(0);
+        double lt = t;
+        t = 1;
+
+        while (t > lt) {
+            for (double i = 1; i < precision; i++) {
+                Vec3d prev = resRev.get(resRev.size()-1);
+
+                double delta = (Math.pow(10, -i));
+
+                for (;t > lt - delta; t-=delta) {
+                    Vec3d pos = position(t);
+                    if (pos.distanceTo(prev) > stepSize) {
+                        // We passed it, just barely
+                        t += delta;
+                        break;
+                    }
+                }
             }
-            if (rev.get(0).distanceTo(revEnd) > list.get(list.size() - 1).distanceTo(revEnd)) {
-                list.remove(list.size() - 1);
+            if (t > lt) {
+                resRev.add(position(t));
             }
         }
-        list.addAll(rev);
-        return list;
+        Collections.reverse(resRev);
+        res.addAll(resRev);
+        return res;
     }
 
     public float angleStop() {
