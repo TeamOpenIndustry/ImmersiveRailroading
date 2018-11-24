@@ -1,16 +1,14 @@
 package cam72cam.immersiverailroading.track;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import util.Matrix4;
 
-public class BuilderStraight extends BuilderIterator {
+import java.util.List;
+
+public class BuilderStraight extends BuilderCubicCurve {
 	protected float angle;
 
 	public BuilderStraight(RailInfo info, BlockPos pos) {
@@ -23,24 +21,19 @@ public class BuilderStraight extends BuilderIterator {
 
 	@Override
 	public List<PosStep> getPath(double stepSize) {
-		List<PosStep> res = new ArrayList<PosStep>();
-		List<PosStep> resRev = new ArrayList<PosStep>();
-
+		double length = info.settings.length;
 		float angle = info.placementInfo.rotationQuarter/4f * 90;
 		if(info.placementInfo.direction == TrackDirection.RIGHT) {
 			angle = -angle;
 		}
-		
-		for (float dist = 0; dist < info.settings.length/2 + stepSize; dist += stepSize) {
-			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			res.add(new PosStep(gagPos, angle));
-		}
-		for (float dist = info.settings.length-1; dist > info.settings.length/2; dist -= stepSize) {
-			Vec3d gagPos = VecUtil.fromYaw(dist, angle);
-			resRev.add(new PosStep(gagPos, angle));
-		}
-		Collections.reverse(resRev);
-		res.addAll(resRev);
-		return res;
+
+		CubicCurve curve = new CubicCurve(
+				Vec3d.ZERO,
+				new Vec3d(0.25, 0,0),
+				new Vec3d(0.75, 0, 0),
+				new Vec3d(1, 0,0)
+		);
+		curve = curve.apply(new Matrix4().scale(length-1, length-1, length-1).rotate(Math.toRadians(180 + 90-angle), 0, 1, 0));
+		return getPath(curve, stepSize);
 	}
 }
