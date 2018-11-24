@@ -72,4 +72,19 @@ public class RailSettings {
         nbt.setBoolean("isGradeCrossing", isGradeCrossing);
         return nbt;
     }
+
+    public RailSettings withLength(int length) {
+       return new RailSettings(
+				gauge,
+				type,
+				length,
+				quarters,
+				posType,
+				direction,
+				railBed,
+				railBedFill,
+				isPreview,
+				isGradeCrossing
+		) ;
+    }
 }
