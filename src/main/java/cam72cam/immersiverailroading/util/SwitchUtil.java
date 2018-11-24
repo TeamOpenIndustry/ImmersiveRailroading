@@ -27,26 +27,26 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 		
-		if (rail.getType() != TrackItems.TURN) {
+		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM) {
 			return SwitchState.NONE;
 		}
-		if (parent.getType() != TrackItems.SWITCH) {
+		if (parent.info.settings.type != TrackItems.SWITCH) {
 			return SwitchState.NONE;
 		}
 		
-		if (position != null && parent.getRailRenderInfo() != null) {
-			BuilderSwitch switchBuilder = (BuilderSwitch)parent.getRailRenderInfo().getBuilder();
+		if (position != null && parent.info != null) {
+			BuilderSwitch switchBuilder = (BuilderSwitch)parent.info.getBuilder();
 			
 			if (!switchBuilder.isOnStraight(position)) {
 				return SwitchState.TURN;
 			}
 		}
 
-		Vec3d redstoneOrigin = rail.getPlacementPosition();
-		if(rail.getRotationQuarter() % 2 == 1) { // 1 and 3 need an offset to work
-			EnumFacing NormalizedFacing = rail.getFacing();
+		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
+		if(rail.info.placementInfo.rotationQuarter % 2 == 1) { // 1 and 3 need an offset to work
+			EnumFacing NormalizedFacing = rail.info.placementInfo.facing;
 
-			if(rail.getDirection() == TrackDirection.RIGHT) {
+			if(rail.info.placementInfo.direction == TrackDirection.RIGHT) {
 				NormalizedFacing = NormalizedFacing.rotateY();
 			}
 
@@ -55,7 +55,7 @@ public class SwitchUtil {
 		}
 
 		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(redstoneOrigin).offset(facing, MathHelper.ceil(rail.getGauge().scale()))) > 0) {
+			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(redstoneOrigin).offset(facing, MathHelper.ceil(rail.info.settings.gauge.scale()))) > 0) {
 				return SwitchState.TURN;
 			}
 		}

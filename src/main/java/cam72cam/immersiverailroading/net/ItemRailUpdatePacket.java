@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -22,88 +23,43 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemRailUpdatePacket implements IMessage {
 	private int slot;
-	private int length;
-	private int quarters;
-	private TrackItems type;
-	private double gauge;
-	private TrackPositionType posType;
-	public TrackDirection direction;
-	private ItemStack bedStack;
-	private ItemStack railBedFill;
-	private boolean isPreview;
-	private boolean isGradeCrossing;
 	private BlockPos tilePreviewPos;
+	private RailSettings settings;
 	
 	public ItemRailUpdatePacket() {
 		// For Reflection
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public ItemRailUpdatePacket(int slot, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
+	public ItemRailUpdatePacket(int slot, RailSettings settings) {
 		this.slot = slot;
-		this.length = length;
-		this.quarters = quarters;
-		this.type = type;
-		this.posType = posType;
-		this.bedStack = bedStack;
-		this.railBedFill = railBedFill;
-		this.isPreview = isPreview;
-		this.isGradeCrossing = isGradeCrossing;
-		this.gauge = gauge;
-		this.direction = direction;
+		this.settings = settings;
 	}
 
-	public ItemRailUpdatePacket(BlockPos tilePreviewPos, int length, int quarters, TrackItems type, double gauge, TrackPositionType posType, TrackDirection direction, ItemStack bedStack, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
+	public ItemRailUpdatePacket(BlockPos tilePreviewPos, RailSettings settings) {
 		this.tilePreviewPos = tilePreviewPos;
-		this.length = length;
-		this.quarters = quarters;
-		this.type = type;
-		this.posType = posType;
-		this.bedStack = bedStack;
-		this.railBedFill = railBedFill;
-		this.isPreview = isPreview;
-		this.isGradeCrossing = isGradeCrossing;
-		this.gauge = gauge;
-		this.direction = direction;
+		this.settings = settings;
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		this.length = buf.readInt();
 		if (buf.readBoolean()) {
 			this.slot = buf.readInt();
 		} else {
-			this.tilePreviewPos = new BlockPos(BufferUtil.readVec3i(buf));
+			this.tilePreviewPos = BlockPos.fromLong(buf.readLong());
 		}
-		this.quarters = buf.readInt();
-		this.type = TrackItems.values()[buf.readInt()];
-		this.gauge = buf.readDouble();
-		this.posType = TrackPositionType.values()[buf.readInt()];
-		this.direction = TrackDirection.values()[buf.readInt()];
-		this.bedStack = ByteBufUtils.readItemStack(buf);
-		this.railBedFill = ByteBufUtils.readItemStack(buf);
-		this.isPreview = buf.readBoolean();
-		this.isGradeCrossing = buf.readBoolean();
+		this.settings = new RailSettings(ByteBufUtils.readTag(buf));
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeInt(length);
 		buf.writeBoolean(tilePreviewPos == null);
 		if (tilePreviewPos == null) {
 			buf.writeInt(slot);
 		} else {
-			BufferUtil.writeVec3i(buf, tilePreviewPos);
+			buf.writeLong(tilePreviewPos.toLong());
 		}
-		buf.writeInt(quarters);
-		buf.writeInt(type.ordinal());
-		buf.writeDouble(gauge);
-		buf.writeInt(posType.ordinal());
-		buf.writeInt(direction.ordinal());
-		ByteBufUtils.writeItemStack(buf, bedStack);
-		ByteBufUtils.writeItemStack(buf, railBedFill);
-		buf.writeBoolean(isPreview);
-		buf.writeBoolean(isGradeCrossing);
+		ByteBufUtils.writeTag(buf, settings.toNBT());
 	}
 	
 	public static class Handler implements IMessageHandler<ItemRailUpdatePacket, IMessage> {
@@ -126,16 +82,7 @@ public class ItemRailUpdatePacket implements IMessage {
 				}
 				stack = te.getItem();
 			}
-			ItemTrackBlueprint.setType(stack, message.type);
-			ItemGauge.set(stack, Gauge.from(message.gauge));
-			ItemTrackBlueprint.setLength(stack, message.length);
-			ItemTrackBlueprint.setQuarters(stack, message.quarters);
-			ItemTrackBlueprint.setPosType(stack, message.posType);
-			ItemTrackBlueprint.setDirection(stack, message.direction);
-			ItemTrackBlueprint.setBed(stack, message.bedStack);
-			ItemTrackBlueprint.setBedFill(stack, message.railBedFill);
-			ItemTrackBlueprint.setPreview(stack, message.isPreview);
-			ItemTrackBlueprint.setGradeCrossing(stack, message.isGradeCrossing);
+			ItemTrackBlueprint.settings(stack, message.settings);
 			if (message.tilePreviewPos == null) {
 				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 			} else {

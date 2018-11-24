@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
@@ -19,23 +20,15 @@ import net.minecraft.util.math.Vec3d;
 public class BuilderTurnTable extends BuilderBase {
 	protected HashSet<Pair<Integer, Integer>> positions;
 	private BlockPos offset;
-	
-	public BuilderTurnTable(RailInfo info, BlockPos pos) {
-		this(info, pos, false);
-	}
 
-	public BuilderTurnTable(RailInfo info, BlockPos pos, boolean endOfTrack) {
-		super(info, pos);
-		
-		info.quarter = 0;
-		
-		info.length = Math.min(info.length, (int)(30 * info.gauge.scale()));
-		
+	public BuilderTurnTable(RailInfo info, BlockPos pos) {
+		super(info.withLength(Math.min(info.settings.length, (int)(30 * info.settings.gauge.scale()))), pos);
+
 		positions = new HashSet<Pair<Integer, Integer>>();
 		
-		offset = new BlockPos(0, 1, info.length);
+		offset = new BlockPos(0, 1, info.settings.length);
 		
-		double radius = info.length;
+		double radius = info.settings.length;
 		
 		for (double irad = 1; irad <= radius + 1; irad++) {
 			for (double angle = 0; angle < 360; angle+=0.5) {
@@ -45,32 +38,32 @@ public class BuilderTurnTable extends BuilderBase {
 		}
 		
 		this.setParentPos(new BlockPos(offset.down()));
-		TrackRail main = new TrackRail(this, offset.getX(), offset.getY()-1, offset.getZ(), EnumFacing.NORTH, info.type, info.length, info.quarter, info.placementPosition);
+		TrackRail main = new TrackRail(this, offset.down());
 		tracks.add(main);
 		
 		for (Pair<Integer, Integer> pair : positions) {
 			double toCenter = new Vec3d(pair.getLeft(), 0, pair.getRight()).lengthVector();
 			
-			if (toCenter > info.length + 0.5) {
+			if (toCenter > info.settings.length + 0.5) {
 				continue;
 			}
 			
 			if (!(pair.getLeft() == 0 && pair.getRight() == 0)) {
-				TrackGag tgu = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY()-1, pair.getRight() + offset.getZ());
-				if (toCenter > info.length-0.5) {
+				TrackGag tgu = new TrackGag(this, new BlockPos(pair.getLeft() + offset.getX(), offset.getY()-1, pair.getRight() + offset.getZ()));
+				if (toCenter > info.settings.length-0.5) {
 					tgu.setHeight(1);
 					tgu.setFlexible();
 				}
 				tracks.add(tgu);
 			}
 			
-			TrackBase tg = new TrackGag(this, pair.getLeft() + offset.getX(), offset.getY(), pair.getRight() + offset.getZ());
+			TrackBase tg = new TrackGag(this, new BlockPos(pair.getLeft() + offset.getX(), offset.getY(), pair.getRight() + offset.getZ()));
 			tg.setHeight(0.000001f);
 			tg.solidNotRequired = true;
-			if (toCenter > info.length-0.5) {
+			if (toCenter > info.settings.length-0.5) {
 				tg.setHeight(0);
 			}
-			if (toCenter > info.length-1.5) {
+			if (toCenter > info.settings.length-1.5) {
 				tg.setFlexible();
 			}
 			tracks.add(tg);
@@ -87,22 +80,22 @@ public class BuilderTurnTable extends BuilderBase {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
 		for (float angle = 0; angle < 360; angle +=22.5) {
-			Vec3d gagPos = VecUtil.rotateYaw(new Vec3d(0, 0, info.length), angle-90);
+			Vec3d gagPos = VecUtil.rotateYaw(new Vec3d(0, 0, info.settings.length), angle-90);
 			data.add(new VecYawPitch(gagPos.x + offset.getX(), gagPos.y + offset.getY(), gagPos.z + offset.getZ(), -angle));
 		}
 		
-		float angle = 360/16.0f * (float)info.tablePos - info.facing.getHorizontalAngle();
-		data.add(new VecYawPitch(offset.getX(), offset.getY(), offset.getZ(), -angle, 0, info.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
+		float angle = 360/16.0f * (float)info.tablePos - info.placementInfo.facing.getHorizontalAngle();
+		data.add(new VecYawPitch(offset.getX(), offset.getY(), offset.getZ(), -angle, 0, info.settings.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		return data;
 	}
 	
 	public int costTies() {
-		return MathHelper.ceil((this.info.length + 8) * ConfigBalance.TieCostMultiplier);
+		return MathHelper.ceil((this.info.settings.length + 8) * ConfigBalance.TieCostMultiplier);
 	}
 	
 	public int costRails() {
-		return MathHelper.ceil((this.info.length + 8)*2/3 * ConfigBalance.RailCostMultiplier);
+		return MathHelper.ceil((this.info.settings.length + 8)*2/3 * ConfigBalance.RailCostMultiplier);
 	}
 	
 	public int costBed() {
@@ -113,13 +106,13 @@ public class BuilderTurnTable extends BuilderBase {
 	public int costFill() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
-			if (track.rel_y == 1) {
+			if (track.rel.getY() == 1) {
 				continue;
 			}
-			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
+			if (BlockUtil.canBeReplaced(info.world, track.getPos().down(), false)) {
 				fillCount += 1;
 			}
 		}
-		return MathHelper.ceil(this.info.railBedFill.getItem() != Items.AIR ? fillCount : 0);
+		return MathHelper.ceil(this.info.settings.railBedFill.getItem() != Items.AIR ? fillCount : 0);
 	}
 }
