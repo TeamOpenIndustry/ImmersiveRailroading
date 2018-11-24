@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
@@ -50,6 +52,25 @@ public class TileRailPreview extends SyncdTileEntity {
 
 	public void setCustomInfo(PlacementInfo info) {
 		this.customInfo = info;
+		if (customInfo != null) {
+			RailSettings settings = ItemTrackBlueprint.settings(item);
+			double lx = Math.abs(customInfo.placementPosition.x - placementInfo.placementPosition.x);
+			double lz = Math.abs(customInfo.placementPosition.z - placementInfo.placementPosition.z);
+			double length;
+			switch (settings.type) {
+				case TURN:
+					length = (lx + lz )/2+1;
+					length *= 4d/settings.quarters;
+					settings = settings.withLength((int) Math.round(length));
+					break;
+				case STRAIGHT:
+				case SLOPE:
+					length = Math.max(lx, lz) + 1;
+					settings = settings.withLength((int) Math.round(length));
+			}
+
+			ItemTrackBlueprint.settings(item, settings);
+		}
 		this.markDirty();
 	}
 	

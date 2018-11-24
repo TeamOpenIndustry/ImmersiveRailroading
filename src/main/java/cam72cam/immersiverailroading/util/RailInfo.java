@@ -102,18 +102,7 @@ public class RailInfo {
 	}
 
 	public RailInfo withLength(int length) {
-		RailSettings settings = new RailSettings(
-				this.settings.gauge,
-				this.settings.type,
-				length,
-				this.settings.quarters,
-				this.settings.posType,
-				this.settings.direction,
-				this.settings.railBed,
-				this.settings.railBedFill,
-				this.settings.isPreview,
-				this.settings.isGradeCrossing
-		);
+		RailSettings settings = this.settings.withLength(length);
 		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
 	}
 
