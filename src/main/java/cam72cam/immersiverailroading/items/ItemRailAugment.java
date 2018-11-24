@@ -64,7 +64,7 @@ public class ItemRailAugment extends Item {
 						break;
 						*/
 					case SPEED_RETARDER:
-						switch(parent.getType()) {
+						switch(parent.info.settings.type) {
 						case SWITCH:
 						case TURN:
 							return EnumActionResult.FAIL; 

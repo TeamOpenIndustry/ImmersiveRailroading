@@ -1,8 +1,5 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import java.util.ArrayList;
-import org.lwjgl.opengl.GL11;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -13,6 +10,10 @@ import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
+import util.Matrix4;
+
+import java.util.ArrayList;
 
 public class RailBuilderRender {
 	
@@ -39,34 +40,32 @@ public class RailBuilderRender {
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void renderRailBuilder(RailInfo info) {
 		
-		OBJRender model = info.gauge.isModel() ? baseRailModel : baseRailModelModel;
+		OBJRender model = info.settings.gauge.isModel() ? baseRailModel : baseRailModelModel;
 
-		GL11.glTranslated(info.placementPosition.x-info.position.getX(), info.placementPosition.y-info.position.getY(), info.placementPosition.z-info.position.getZ()); 
-
-		String renderID = RailRenderUtil.renderID(info);
-		Integer displayList = displayLists.get(renderID);
+		Integer displayList = displayLists.get(info.uniqueID);
 		if (displayList == null) {
 
 			if (!ClientProxy.renderCacheLimiter.canRender()) {
 				return;
 			}		
-			final RailInfo infoClone = info.clone();
-			
+
 			displayList = ClientProxy.renderCacheLimiter.newList(() -> {		
 			
-			for (VecYawPitch piece : infoClone.getBuilder().getRenderData()) {
-				GL11.glPushMatrix();
-				GL11.glRotatef(180-infoClone.facing.getOpposite().getHorizontalAngle(), 0, 1, 0);
-				GL11.glTranslated(piece.x, piece.y, piece.z);
-				GL11.glRotatef(piece.getYaw(), 0, 1, 0);
-				GL11.glRotatef(piece.getPitch(), 1, 0, 0);
-				GL11.glRotatef(-90, 0, 1, 0);
-				
+			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
+				Matrix4 m = new Matrix4();
+				m.rotate(Math.toRadians(180-info.placementInfo.facing.getOpposite().getHorizontalAngle()), 0, 1, 0);
+				m.translate(piece.x, piece.y, piece.z);
+				m.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
+				m.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
+				m.rotate(Math.toRadians(-90), 0, 1, 0);
+
+				if (piece.getLength() != -1) {
+					m.scale(piece.getLength() / info.settings.gauge.scale(), 1, 1);
+				}
+				double scale = info.settings.gauge.scale();
+				m.scale(scale, scale, scale);
+
 				if (piece.getGroups().size() != 0) {
-					if (piece.getLength() != -1) {
-						GL11.glScaled(piece.getLength() / infoClone.gauge.scale(), 1, 1);
-					}
-					
 					// TODO static
 					ArrayList<String> groups = new ArrayList<String>();
 					for (String baseGroup : piece.getGroups()) {
@@ -78,15 +77,14 @@ public class RailBuilderRender {
 					}
 
 					
-					model.drawDirectGroups(groups, infoClone.gauge.scale());
+					model.drawDirectGroups(groups, 1, m);
 				} else {
-					model.drawDirect(infoClone.gauge.scale());
+					model.drawDirectGroups(model.model.groups.keySet(), 1, m);
 				}
-				GL11.glPopMatrix();
 			}
 
 			});
-			displayLists.put(renderID, displayList);
+			displayLists.put(info.uniqueID, displayList);
 		}
 		
 		model.bindTexture();

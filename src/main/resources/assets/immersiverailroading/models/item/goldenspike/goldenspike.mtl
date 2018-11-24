@@ -1,0 +1,12 @@
+# Blender MTL File: 'goldenspike.obj'
+# Material Count: 1
+
+newmtl goldspike
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.375749 0.229448 0.018329
+Ks 0.891753 0.426280 0.042007
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2

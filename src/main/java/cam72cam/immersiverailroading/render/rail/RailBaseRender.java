@@ -33,11 +33,10 @@ public class RailBaseRender {
 			blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 		}
 		
-		if (info.railBed.getItem() == Items.AIR) {
+		if (info.settings.railBed.getItem() == Items.AIR) {
 			return null;
 		}
-		info = info.clone();
-		IBlockState gravelState = BlockUtil.itemToBlockState(info.railBed);
+		IBlockState gravelState = BlockUtil.itemToBlockState(info.settings.railBed);
 		
 		// Create render targets
 		BufferBuilder worldRenderer = new BufferBuilder(2048);
@@ -51,11 +50,11 @@ public class RailBaseRender {
 			
 			// This is evil but really fast :D
 			for (TrackBase base : info.getBuilder().getTracksForRender()) {
-				String key = gravelState.toString() + base.getBedHeight() + ":"  + info.gauge.scale();
+				String key = gravelState.toString() + base.getBedHeight() + ":"  + info.settings.gauge.scale();
 				IBakedModel model = scaled.get(key);
 				if (model == null) {
 					IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
-					model = new BakedScaledModel(gravelModel, base.getBedHeight() + 0.1f * (float)info.gauge.scale());
+					model = new BakedScaledModel(gravelModel, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale());
 					scaled.put(key, model);
 				}
 				blockRenderer.getBlockModelRenderer().renderModel(info.world, model, gravelState, base.getPos(), worldRenderer, false);
@@ -72,15 +71,14 @@ public class RailBaseRender {
 
 	private static DisplayListCache displayLists = new DisplayListCache();
 	public static void draw(RailInfo info) {
-		String id = RailRenderUtil.renderID(info);
-		Integer displayList = displayLists.get(id);
+		Integer displayList = displayLists.get(info.uniqueID);
 		if (displayList == null) {
 			if (!ClientProxy.renderCacheLimiter.canRender()) {
 				return;
 			}
 			
 			displayList = ClientProxy.renderCacheLimiter.newList(() ->drawSync(info));
-			displayLists.put(id, displayList);
+			displayLists.put(info.uniqueID, displayList);
 		}
 		GL11.glCallList(displayList);
 	}

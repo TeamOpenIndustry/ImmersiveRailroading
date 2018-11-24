@@ -17,10 +17,7 @@ import net.minecraft.util.math.BlockPos;
 public abstract class TrackBase {
 	public BuilderBase builder;
 
-	protected int rel_x;
-	protected int rel_y;
-	protected int rel_z;
-	private EnumFacing rel_rotation;
+	protected BlockPos rel;
 	private float bedHeight;
 	private float railHeight;
 
@@ -32,57 +29,54 @@ public abstract class TrackBase {
 
 	public boolean solidNotRequired;
 
-	public TrackBase(BuilderBase builder, int rel_x, int rel_y, int rel_z, Block block, EnumFacing rel_rotation) {
+	public TrackBase(BuilderBase builder, BlockPos rel, Block block) {
 		this.builder = builder;
-		this.rel_x = rel_x;
-		this.rel_y = rel_y;
-		this.rel_z = rel_z;
-		this.rel_rotation = rel_rotation;
+		this.rel = rel;
 		this.block = block;
 	}
 
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		PosRot pos = getPos();
-		IBlockState down = builder.world.getBlockState(pos.down());
-		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.world.isAirBlock(pos.down())) || 
-				(BlockUtil.canBeReplaced(builder.world, pos.down(), false) && builder.info.railBedFill.getItem() != Items.AIR) ||
-				solidNotRequired || BlockUtil.isIRRail(builder.world, pos);
-		return BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) && downOK;
+		IBlockState down = builder.info.world.getBlockState(pos.down());
+		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.info.world.isAirBlock(pos.down())) ||
+				(BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
+				solidNotRequired || BlockUtil.isIRRail(builder.info.world, pos);
+		return BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) && downOK;
 	}
 
 	public TileEntity placeTrack() {
 		PosRot pos = getPos();
 
-		if (builder.info.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
-			builder.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.railBedFill));
+		if (builder.info.settings.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
+			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill));
 		}
 		
 		NBTTagCompound replaced = null;
 		
-		IBlockState state = builder.world.getBlockState(pos);
+		IBlockState state = builder.info.world.getBlockState(pos);
 		Block removed = state.getBlock();
 		TileRailBase te = null;
 		if (removed != null) {
 			if (removed instanceof BlockRailBase) {
-				te = TileRailBase.get(builder.world, pos);
+				te = TileRailBase.get(builder.info.world, pos);
 				if (te != null) {					
 					replaced = te.serializeNBT();
 				}
 			} else {				
-				removed.dropBlockAsItem(builder.world, pos, state, 0);
+				removed.dropBlockAsItem(builder.info.world, pos, state, 0);
 			}
 		}
 		
 		if (te != null) {
 			te.setWillBeReplaced(true);
 		}
-		builder.world.setBlockState(pos, getBlockState(), 3);
+		builder.info.world.setBlockState(pos, getBlockState(), 3);
 		if (te != null) {
 			te.setWillBeReplaced(false);
 		}
 		
-		TileRailBase tr = TileRailBase.get(builder.world, pos);
+		TileRailBase tr = TileRailBase.get(builder.info.world, pos);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);
@@ -100,15 +94,8 @@ public abstract class TrackBase {
 		return getPos().getRotation();
 	}
 
-	public void moveTo(TrackBase trackBase) {
-		rel_x = trackBase.rel_x;
-		rel_y = trackBase.rel_y;
-		rel_z = trackBase.rel_z;
-	}
-
-	
 	public PosRot getPos() {
-		return builder.convertRelativePositions(rel_x, rel_y, rel_z, rel_rotation);
+		return builder.convertRelativePositions(rel);
 	}
 
 	public void setHeight(float height) {
@@ -127,9 +114,6 @@ public abstract class TrackBase {
 	public float getRailHeight() {
 		return railHeight;
 	}
-	public Gauge getGauge() {
-		return builder.gauge;
-	}
 
 	public void setFlexible() {
 		this.flexible  = true;
@@ -140,6 +124,6 @@ public abstract class TrackBase {
 	}
 
 	public void overrideParent(BlockPos blockPos) {
-		this.parent = builder.convertRelativePositions(blockPos.getX(), blockPos.getY(), blockPos.getZ(), rel_rotation);
+		this.parent = blockPos;
 	}
 }

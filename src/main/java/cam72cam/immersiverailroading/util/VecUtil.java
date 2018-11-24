@@ -26,11 +26,6 @@ public class VecUtil {
 		return fromYaw(pos.x, rotationYaw).add(fromYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
 	}
 
-	public static BlockPos rotateYaw(BlockPos pos, float rotationYaw) {
-		// Might need to do some fancier rounding here
-		return new BlockPos(rotateYaw(new Vec3d(pos), rotationYaw));
-	}
-
 	public static Vec3d fromYawPitch(float distance, float rotationYaw, float rotationPitch) {
 		return fromYaw(distance, rotationYaw).addVector(0, Math.tan(Math.toRadians(rotationPitch)) * distance, 0);
 	}

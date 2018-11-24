@@ -8,12 +8,15 @@ import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,152 +53,55 @@ public class ItemTrackBlueprint extends Item {
 	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		ItemStack stack = player.getHeldItem(hand);
+		
 		pos = pos.up();
 		
-		ItemStack stack = player.getHeldItem(hand);
-		if (ItemTrackBlueprint.isPreview(stack)) {
+		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+			pos = pos.down();
+		}
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ);
+		
+		if (settings(stack).isPreview) {
+			if (!BlockUtil.canBeReplaced(world, pos, false)) {
+				pos = pos.up();
+			}
 			world.setBlockState(pos, IRBlocks.BLOCK_RAIL_PREVIEW.getDefaultState());
 			TileRailPreview te = TileRailPreview.get(world, pos);
 			if (te != null) {
-				te.init(stack, player.getRotationYawHead(), hitX, hitY, hitZ);
+				te.setup(stack, placementInfo);
 			}
 			return EnumActionResult.SUCCESS;
 		}
-		if (player.getEntityWorld().getBlockState(pos.down()).getBlock() instanceof BlockRailBase) {
-			pos = pos.down();
-		}
-		
-		RailInfo info = new RailInfo(stack, player.world, player.getRotationYawHead(), pos, hitX, hitY, hitZ); 
-		info.build(player, pos);
+
+		RailInfo info = new RailInfo(player.world, stack, placementInfo, null);
+		info.build(player);
 		return EnumActionResult.SUCCESS;
     }
 
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(GuiText.TRACK_TYPE.toString(getType(stack)));
-        tooltip.add(GuiText.TRACK_GAUGE.toString(ItemGauge.get(stack)));
-        tooltip.add(GuiText.TRACK_LENGTH.toString(getLength(stack)));
-        tooltip.add(GuiText.TRACK_POSITION.toString(getPosType(stack)));
-        tooltip.add(GuiText.TRACK_DIRECTION.toString(getDirection(stack)));
-        tooltip.add(GuiText.TRACK_RAIL_BED.toString(getBed(stack).getDisplayName()));
-        tooltip.add(GuiText.TRACK_RAIL_BED_FILL.toString(getBedFill(stack).getDisplayName()));
-        tooltip.add((isPreview(stack) ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString());
-        tooltip.add(GuiText.TRACK_QUARTERS.toString(getQuarters(stack) * 90.0/4 ));
+        RailSettings settings = settings(stack);
+        tooltip.add(GuiText.TRACK_TYPE.toString(settings.type));
+        tooltip.add(GuiText.TRACK_GAUGE.toString(settings.gauge));
+        tooltip.add(GuiText.TRACK_LENGTH.toString(settings.length));
+        tooltip.add(GuiText.TRACK_POSITION.toString(settings.posType));
+        tooltip.add(GuiText.TRACK_DIRECTION.toString(settings.direction));
+        tooltip.add(GuiText.TRACK_RAIL_BED.toString(settings.railBed.getDisplayName()));
+        tooltip.add(GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName()));
+        tooltip.add((settings.isPreview ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString());
+        tooltip.add(GuiText.TRACK_QUARTERS.toString(settings.quarters * 90.0/4 ));
 	}
 
-	public static void setType(ItemStack stack, TrackItems type) {
-		if (stack.getTagCompound() == null) {
+	public static void settings(ItemStack stack, RailSettings settings) {
+		stack.setTagCompound(settings.toNBT());
+	}
+	
+	public static RailSettings settings(ItemStack stack) {
+		if (stack.getTagCompound() == null){
 			stack.setTagCompound(new NBTTagCompound());
 		}
-		stack.getTagCompound().setInteger("type", type.ordinal());
-	}
-	
-	public static TrackItems getType(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return TrackItems.values()[stack.getTagCompound().getInteger("type")];
-		}
-		return TrackItems.STRAIGHT;
-	}
-	
-	public static void setLength(ItemStack stack, int length) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger("length", length);
-	}
-	
-	public static int getLength(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return stack.getTagCompound().getInteger("length");
-		}
-		return 10;
-	}
-	
-	public static void setQuarters(ItemStack stack, int quarters) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger("quarters", quarters);
-	}
-	
-	public static int getQuarters(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return stack.getTagCompound().getInteger("quarters");
-		}
-		return 4;
-	}
-	
-	public static void setPosType(ItemStack stack, TrackPositionType posType) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger("pos_type", posType.ordinal());
-	}
-	
-	public static TrackPositionType getPosType(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return TrackPositionType.values()[stack.getTagCompound().getInteger("pos_type")];
-		}
-		return TrackPositionType.FIXED;
-	}
-	
-	public static void setDirection(ItemStack stack, TrackDirection posType) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger("direction", posType.ordinal());
-	}
-	
-	public static TrackDirection getDirection(ItemStack stack) {
-		if (stack.getTagCompound() != null){
-			return TrackDirection.values()[stack.getTagCompound().getInteger("direction")];
-		}
-		return TrackDirection.NONE;
-	}
-
-	public static ItemStack getBed(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("bedItem")) { 
-			return new ItemStack(stack.getTagCompound().getCompoundTag("bedItem"));
-		} else {
-			return ItemStack.EMPTY;
-		}
-	}
-	
-	public static void setBed(ItemStack stack, ItemStack base) {
-		stack.getTagCompound().setTag("bedItem", base.serializeNBT());
-	}
-
-	public static ItemStack getBedFill(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("bedFill")) { 
-			return new ItemStack(stack.getTagCompound().getCompoundTag("bedFill"));
-		} else {
-			return ItemStack.EMPTY;
-		}
-	}
-	public static void setBedFill(ItemStack stack, ItemStack base) {
-		stack.getTagCompound().setTag("bedFill", base.serializeNBT());
-	}
-
-	public static boolean isPreview(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("isPreview")) { 
-			return stack.getTagCompound().getBoolean("isPreview");
-		} else {
-			return false;
-		}
-	}
-	public static void setPreview(ItemStack stack, boolean value) {
-		stack.getTagCompound().setBoolean("isPreview", value);
-	}
-
-	public static boolean isGradeCrossing(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("isGradeCrossing")) { 
-			return stack.getTagCompound().getBoolean("isGradeCrossing");
-		} else {
-			return false;
-		}
-	}
-	public static void setGradeCrossing(ItemStack stack, boolean value) {
-		stack.getTagCompound().setBoolean("isGradeCrossing", value);
+		return new RailSettings(stack.getTagCompound());
 	}
 }

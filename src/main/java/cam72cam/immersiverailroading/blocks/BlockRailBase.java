@@ -72,15 +72,7 @@ public abstract class BlockRailBase extends Block {
 		if (parent == null || !parent.isLoaded()) {
 			return stack;
 		}
-		ItemGauge.set(stack, parent.getGauge());
-		ItemTrackBlueprint.setType(stack, parent.getType());
-		ItemTrackBlueprint.setLength(stack, parent.getLength());
-		ItemTrackBlueprint.setQuarters(stack, parent.getTurnQuarters());
-		//ItemRail.setPosType(stack, )
-		ItemTrackBlueprint.setBed(stack, parent.getRailBed());
-		//ItemRail.setPreview(stack, )
-		//ItemTrackBlueprint.setGradeCrossing(stack, parent.getRailBed());
-		
+		ItemTrackBlueprint.settings(stack, parent.info.settings);
 		return stack;
 	}
 	
@@ -139,14 +131,14 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
 				TileRail parent = te.getParentTile();
 				if (parent != null) {
-					if (parent.getFacing().getAxis() == Axis.X) {
+					if (parent.info.placementInfo.facing.getAxis() == Axis.X) {
 						if (parent.getPos().getZ() == te.getPos().getZ()) {
-							state = state.withProperty(FACING, te.getParentTile().getFacing());
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing);
 						}
 					}
-					if (parent.getFacing().getAxis() == Axis.Z) {
+					if (parent.info.placementInfo.facing.getAxis() == Axis.Z) {
 						if (parent.getPos().getX() == te.getPos().getX()) {
-							state = state.withProperty(FACING, te.getParentTile().getFacing());
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing);
 						}
 					}
 				}

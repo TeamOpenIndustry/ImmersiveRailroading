@@ -1,34 +1,29 @@
 package cam72cam.immersiverailroading.track;
 
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.tuple.Pair;
 
-public class BuilderSwitch extends BuilderBase {
+import java.util.List;
 
-	private BuilderTurn turnBuilder;
+public class BuilderSwitch extends BuilderBase implements IIterableTrack {
+
+	private BuilderIterator turnBuilder;
 	private BuilderStraight straightBuilder;
 
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
 		
-		//info.quarter = 0;
-		
-		RailInfo turnInfo = info.clone();
+		RailInfo turnInfo = info.withType(info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
 		RailInfo straightInfo = info.clone();
-		turnInfo.type = TrackItems.TURN;
 
 		{
-			turnInfo.length += 1;
-			turnBuilder = new BuilderTurn(turnInfo.clone(), pos);
-			straightBuilder = new BuilderStraight(straightInfo.clone(), pos, true);
+			turnBuilder = (BuilderIterator) turnInfo.getBuilder(pos);
+			straightBuilder = new BuilderStraight(straightInfo, pos, true);
 			
 			double maxOverlap = 0;
 			
@@ -39,18 +34,17 @@ public class BuilderSwitch extends BuilderBase {
 			}
 			
 			maxOverlap *= 1.2;
-			straightInfo.length = (int) Math.ceil(maxOverlap) + 1;
+			straightInfo = straightInfo.withLength((int) Math.ceil(maxOverlap) + 3);
 		}
 		
 
-		turnBuilder = new BuilderTurn(turnInfo, pos);
 		straightBuilder = new BuilderStraight(straightInfo, pos, true);
 		
 		turnBuilder.overrideFlexible = true;
 		
 		for(TrackBase turn : turnBuilder.tracks) {
 			if (turn instanceof TrackRail) {
-				turn.overrideParent(new BlockPos(straightBuilder.mainX, 0, straightBuilder.mainZ));
+				turn.overrideParent(straightBuilder.getParentPos());
 			}
 		}
 		for (TrackBase straight : straightBuilder.tracks) {
@@ -118,14 +112,19 @@ public class BuilderSwitch extends BuilderBase {
 	}
 
 	public boolean isOnStraight(Vec3d position) {
-		for (float dist = 0; dist < info.length; dist += gauge.scale()/8) {
+		for (float dist = 0; dist < info.settings.length; dist += info.settings.gauge.scale()/8) {
 			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
-			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.facing.getHorizontalAngle() + 90 + 180);
-			gagPos = gagPos.add(info.placementPosition);
-			if (gagPos.distanceTo(position.addVector(0, -0.35 * gauge.scale(), 0)) < gauge.scale()/4) {
+			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.placementInfo.facing.getHorizontalAngle() + 90 + 180);
+			gagPos = gagPos.add(info.placementInfo.placementPosition);
+			if (gagPos.distanceTo(position.addVector(0, -(position.y % 1), 0)) < info.settings.gauge.scale()/2) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public List<PosStep> getPath(double stepSize) {
+		return straightBuilder.getPath(stepSize);
 	}
 }
