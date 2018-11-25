@@ -113,8 +113,8 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 
 	public boolean isOnStraight(Vec3d position) {
 		for (float dist = 0; dist < info.settings.length; dist += info.settings.gauge.scale()/8) {
-			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
-			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.placementInfo.facing.getHorizontalAngle() + 90 + 180);
+			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.info.placementInfo.yaw);
+			gagPos = gagPos.rotateYaw(straightBuilder.info.placementInfo.facing().getHorizontalAngle() + 180);
 			gagPos = gagPos.add(info.placementInfo.placementPosition);
 			if (gagPos.distanceTo(position.addVector(0, -(position.y % 1), 0)) < info.settings.gauge.scale()/2) {
 				return true;

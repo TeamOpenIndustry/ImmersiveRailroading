@@ -14,10 +14,8 @@ public class BuilderTurn extends BuilderCubicCurve {
     public CubicCurve getCurve() {
         int radius = info.settings.length - 1;
 
-        float angle = info.placementInfo.rotationQuarter / 4f * 90;
-
         Matrix4 mat = new Matrix4();
-        mat.rotate(Math.toRadians(angle-90), 0, 1, 0);
+        mat.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
         if (info.placementInfo.direction == TrackDirection.LEFT) {
             mat.scale(1, 1, -1);
         }

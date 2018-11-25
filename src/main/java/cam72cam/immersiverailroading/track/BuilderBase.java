@@ -72,21 +72,8 @@ public abstract class BuilderBase {
 	
 	public abstract List<VecYawPitch> getRenderData();
 
-	public class PosRot extends BlockPos{
-		private EnumFacing rot;
-		
-		public EnumFacing getRotation() {
-			return rot;
-		}
-
-		public PosRot(BlockPos pos, EnumFacing rot) {
-			super(pos);
-			this.rot = rot;
-		}
-	}
-	
-	public PosRot convertRelativePositions(BlockPos rel) {
-		return new PosRot(pos.add(BlockUtil.rotateYaw(rel, info.placementInfo.facing.getOpposite())), info.placementInfo.facing);
+	public BlockPos convertRelativePositions(BlockPos rel) {
+		return pos.add(rel);
 	}
 	
 	public boolean canBuild() {
