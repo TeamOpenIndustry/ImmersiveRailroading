@@ -23,8 +23,7 @@ public class PlacementInfo {
 	}
 	
 	public PlacementInfo(ItemStack stack, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
-		yawHead = (yawHead + 360) % 360;
-		yawHead = - yawHead;
+		yawHead = ((- yawHead % 360) + 360) % 360;
 
 		RailSettings settings = ItemTrackBlueprint.settings(stack);
 		TrackDirection direction = settings.direction;
@@ -89,7 +88,7 @@ public class PlacementInfo {
 		
 		this.placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		this.direction = direction;
-		this.yaw = ((int)((yawHead - 90/8f) * 4)) / 90 * 90 / 4f;
+		this.yaw = ((int)((yawHead + 90/8f) * 4)) / 90 * 90 / 4f;
 		this.magnitude = 0;
 	}
 
