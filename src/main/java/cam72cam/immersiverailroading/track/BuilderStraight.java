@@ -6,8 +6,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import util.Matrix4;
 
-import java.util.List;
-
 public class BuilderStraight extends BuilderCubicCurve {
 	protected float angle;
 
@@ -20,7 +18,7 @@ public class BuilderStraight extends BuilderCubicCurve {
 	}
 
 	@Override
-	public List<PosStep> getPath(double stepSize) {
+	public CubicCurve getCurve() {
 		double length = info.settings.length;
 		float angle = info.placementInfo.rotationQuarter/4f * 90;
 		if(info.placementInfo.direction == TrackDirection.RIGHT) {
@@ -33,7 +31,6 @@ public class BuilderStraight extends BuilderCubicCurve {
 				new Vec3d(0.75, 0, 0),
 				new Vec3d(1, 0,0)
 		);
-		curve = curve.apply(new Matrix4().scale(length-1, length-1, length-1).rotate(Math.toRadians(180 + 90-angle), 0, 1, 0));
-		return getPath(curve, stepSize);
+		return curve.apply(new Matrix4().scale(length-1, length-1, length-1).rotate(Math.toRadians(180 + 90-angle), 0, 1, 0));
 	}
 }

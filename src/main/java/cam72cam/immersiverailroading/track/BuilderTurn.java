@@ -5,15 +5,13 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.math.BlockPos;
 import util.Matrix4;
 
-import java.util.List;
-
 public class BuilderTurn extends BuilderCubicCurve {
     public BuilderTurn(RailInfo info, BlockPos pos) {
         super(info, pos);
     }
 
     @Override
-    public List<PosStep> getPath(double stepSize) {
+    public CubicCurve getCurve() {
         int radius = info.settings.length - 1;
 
         float angle = info.placementInfo.rotationQuarter / 4f * 90;
@@ -29,6 +27,6 @@ public class BuilderTurn extends BuilderCubicCurve {
         if (height != 0) {
             curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.addVector(0, height, 0), curve.p2.addVector(0, height, 0));
         }
-        return getPath(curve, stepSize);
+        return curve;
     }
 }
