@@ -12,14 +12,15 @@ import net.minecraft.util.math.Vec3d;
 
 public class BuilderCubicCurve extends BuilderIterator {
 	public BuilderCubicCurve(RailInfo info, BlockPos pos) {
-		super(info, pos);
+		this(info, pos, false);
 	}
-	public BuilderCubicCurve(RailInfo info, BlockPos pos, boolean endOfTrack) {	super(info, pos, endOfTrack); }
+	public BuilderCubicCurve(RailInfo info, BlockPos pos, boolean endOfTrack) {
+		super(info, pos, endOfTrack);
+	}
 
 	private HashMap<Double, List<PosStep>> cache;
 
-	@Override
-	public List<PosStep> getPath(double stepSize) {
+	public CubicCurve getCurve() {
 		Vec3d nextPos = VecUtil.fromYaw(info.settings.length, 45);
 
 		if (info.customInfo != null && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
@@ -45,10 +46,11 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 		Vec3d ctrl1 = VecUtil.fromYaw(horizDist / 2, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(horizDist / 2, angle2));
-		return getPath(new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos), stepSize);
+		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos);
 	}
 
-    public List<PosStep> getPath(CubicCurve curve, double stepSize) {
+	@Override
+    public List<PosStep> getPath(double stepSize) {
 		if (cache == null) {
 			cache = new HashMap<Double, List<PosStep>>();
 		}
@@ -58,6 +60,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		}
 
 		List<PosStep> res = new ArrayList<PosStep>();
+		CubicCurve curve = getCurve();
 
 		List<Vec3d> points = curve.toList(stepSize);
 		for(int i = 0; i < points.size(); i++) {
