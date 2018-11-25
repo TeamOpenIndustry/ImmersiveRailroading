@@ -33,8 +33,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 				if (pos.equals(BlockPos.ORIGIN)) {
 					delta = delta.subtract(new Vec3d(new BlockPos(info.placementInfo.placementPosition)));
 				}
-				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart());
-				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180);
+				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), (float) subCurve.p1.distanceTo(subCurve.ctrl1));
+				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180, (float) subCurve.p2.distanceTo(subCurve.ctrl2));
 				RailInfo subInfo = new RailInfo(info.world, info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, 0);
 				BlockPos sPos = new BlockPos(startPos.placementPosition);
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, sPos);
@@ -59,17 +59,25 @@ public class BuilderCubicCurve extends BuilderIterator {
 			nextPos = info.customInfo.placementPosition.subtract(info.placementInfo.placementPosition);
 		}
 
-		double horizDist = nextPos.lengthVector();
+		double magnitude1 = nextPos.lengthVector()/2;
+		double magnitude2 = nextPos.lengthVector()/2;
 		float angle = info.placementInfo.yaw;
+		if (info.placementInfo.magnitude != 0) {
+			magnitude1 = info.placementInfo.magnitude;
+		}
 
 		float angle2 = angle - 90;
 
 		if (info.customInfo != null) {
 			angle2 = info.customInfo.yaw;
+			if (info.customInfo.magnitude != 0) {
+				magnitude2 = info.customInfo.magnitude;
+			}
 		}
 
-		Vec3d ctrl1 = VecUtil.fromYaw(horizDist / 2, angle);
-		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(horizDist / 2, angle2));
+		Vec3d ctrl1 = VecUtil.fromYaw(magnitude1, angle);
+		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(magnitude2, angle2));
+
 		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos);
 	}
 
@@ -183,7 +191,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			return super.getTracksForRender();
 		} else {
-			return subBuilders.stream().map(BuilderCubicCurve::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
+			return subBuilders.subList(0, Math.min(subBuilders.size(), 3)).stream().map(BuilderCubicCurve::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
 		}
 	}
 
@@ -193,7 +201,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			return super.getRenderData();
 		} else {
 			List<VecYawPitch> data = new ArrayList<>();
-			for (BuilderCubicCurve curve : subBuilders) {
+			for (BuilderCubicCurve curve : subBuilders.subList(0, Math.min(subBuilders.size(), 3))) {
 				Vec3d offset = new Vec3d(curve.pos.subtract(pos));
 				for (VecYawPitch rd : curve.getRenderData()) {
 					rd = new VecYawPitch(rd.x + offset.x, rd.y + offset.y, rd.z + offset.z, rd.yaw, rd.pitch, rd.length);
