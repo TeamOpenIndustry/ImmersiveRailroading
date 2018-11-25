@@ -87,4 +87,19 @@ public class RailSettings {
 				isGradeCrossing
 		) ;
     }
+
+    public RailSettings withType(TrackItems type) {
+        return new RailSettings(
+                gauge,
+                type,
+                length,
+                quarters,
+                posType,
+                direction,
+                railBed,
+                railBedFill,
+                isPreview,
+                isGradeCrossing
+        );
+    }
 }
