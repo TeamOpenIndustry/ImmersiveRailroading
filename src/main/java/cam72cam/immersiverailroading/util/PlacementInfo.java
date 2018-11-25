@@ -1,27 +1,25 @@
 package cam72cam.immersiverailroading.util;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackPositionType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-import javax.sound.midi.Track;
-
 public class PlacementInfo {
 	public final Vec3d placementPosition; // relative
 	public final TrackDirection direction;
 	public final float yaw;
+	public final float magnitude;
 
-	public PlacementInfo(Vec3d placementPosition, TrackDirection direction, float yaw) {
+	public PlacementInfo(Vec3d placementPosition, TrackDirection direction, float yaw, float magnitude) {
 		this.placementPosition = placementPosition;
 		this.direction = direction;
 		this.yaw = yaw;
+		this.magnitude = magnitude;
 	}
 	
 	public PlacementInfo(ItemStack stack, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
@@ -92,6 +90,7 @@ public class PlacementInfo {
 		this.placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		this.direction = direction;
 		this.yaw = ((int)((yawHead - 90/8f) * 4)) / 90 * 90 / 4f;
+		this.magnitude = 0;
 	}
 
 	public PlacementInfo(NBTTagCompound nbt) {
@@ -108,6 +107,7 @@ public class PlacementInfo {
 			EnumFacing facing = EnumFacing.getFront(nbt.getByte("facing"));
 			this.yaw = 90-(facing.getHorizontalAngle() + rotationQuarter/4f*90);
 		}
+		this.magnitude = nbt.getFloat("magnitude");
 	}
 	
 	public NBTTagCompound toNBT() {
@@ -119,6 +119,7 @@ public class PlacementInfo {
 		nbt.setTag("placementPosition", NBTUtil.vec3dToNBT(placementPosition.subtract(offset.getX(), offset.getY(), offset.getZ())));
 		nbt.setFloat("yaw", yaw);
 		nbt.setInteger("direction", direction.ordinal());
+		nbt.setFloat("magnitude", magnitude);
 		return nbt;
 	}
 
