@@ -28,7 +28,7 @@ public class PlacementInfo {
 		RailSettings settings = ItemTrackBlueprint.settings(stack);
 		TrackDirection direction = settings.direction;
 		if (direction == TrackDirection.NONE) {
-			direction = (yawHead % 90 < 45) ? TrackDirection.LEFT : TrackDirection.RIGHT;
+			direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
 		}
 
 		int quarter = rotationQuarter();
@@ -104,7 +104,7 @@ public class PlacementInfo {
 		} else {
 			int rotationQuarter = nbt.getInteger("rotationQuarter");
 			EnumFacing facing = EnumFacing.getFront(nbt.getByte("facing"));
-			this.yaw = 90-(facing.getHorizontalAngle() + rotationQuarter/4f*90);
+			this.yaw = 180-(facing.getHorizontalAngle() + rotationQuarter/4f*90);
 		}
 		this.magnitude = nbt.getFloat("magnitude");
 	}
