@@ -140,4 +140,15 @@ public class CubicCurve {
     public float angleStart() {
         return VecUtil.toYaw(p1.subtract(ctrl1)) + 180;
     }
+
+    public List<CubicCurve> subsplit(int maxSize) {
+        List<CubicCurve> res = new ArrayList<>();
+        if (p1.distanceTo(p2) <= maxSize) {
+            res.add(this);
+        } else {
+            res.addAll(this.truncate(0.5).subsplit(maxSize));
+            res.addAll(this.reverse().truncate(0.5).reverse().subsplit(maxSize));
+        }
+        return res;
+    }
 }

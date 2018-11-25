@@ -107,18 +107,7 @@ public class RailInfo {
 	}
 
 	public RailInfo withType(TrackItems type) {
-		RailSettings settings = new RailSettings(
-				this.settings.gauge,
-				type,
-				this.settings.length,
-				this.settings.quarters,
-				this.settings.posType,
-				this.settings.direction,
-				this.settings.railBed,
-				this.settings.railBedFill,
-				this.settings.isPreview,
-				this.settings.isGradeCrossing
-		);
+		RailSettings settings = this.settings.withType(type);
 		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
 	}
 

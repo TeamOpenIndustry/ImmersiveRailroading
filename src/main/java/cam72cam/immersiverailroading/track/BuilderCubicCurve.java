@@ -3,19 +3,49 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
+import jdk.nashorn.internal.ir.Block;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class BuilderCubicCurve extends BuilderIterator {
+	private List<BuilderCubicCurve> subBuilders;
+
 	public BuilderCubicCurve(RailInfo info, BlockPos pos) {
 		this(info, pos, false);
 	}
 	public BuilderCubicCurve(RailInfo info, BlockPos pos, boolean endOfTrack) {
 		super(info, pos, endOfTrack);
+		CubicCurve curve = getCurve();
+		List<CubicCurve> subCurves = curve.subsplit(100);
+		if (subCurves.size() > 1) {
+			subBuilders = new ArrayList<>();
+			for (CubicCurve subCurve : subCurves) {
+				Vec3d delta = pos.equals(BlockPos.ORIGIN) ? new Vec3d(0.5, 0.5, 0.5) : info.placementInfo.placementPosition;
+				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), 0, TrackDirection.NONE, EnumFacing.fromAngle(subCurve.angleStart()));
+				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), 0, TrackDirection.NONE, EnumFacing.fromAngle(subCurve.angleStop()+180));
+				RailInfo subInfo = new RailInfo(info.world, info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, 0);
+				BlockPos sPos = new BlockPos(startPos.placementPosition);
+				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, sPos);
+				if (subBuilders.size() != 0) {
+					for (TrackBase track : subBuilder.tracks) {
+						if (track instanceof TrackRail) {
+							track.overrideParent(subBuilders.get(0).getParentPos());
+						}
+					}
+				}
+				subBuilders.add(subBuilder);
+			}
+		}
 	}
 
 	private HashMap<Double, List<PosStep>> cache;
@@ -52,14 +82,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 	@Override
     public List<PosStep> getPath(double stepSize) {
 		if (cache == null) {
-			cache = new HashMap<Double, List<PosStep>>();
+			cache = new HashMap<>();
 		}
 
 		if (cache.containsKey(stepSize)) {
 			return cache.get(stepSize);
 		}
 
-		List<PosStep> res = new ArrayList<PosStep>();
+		List<PosStep> res = new ArrayList<>();
 		CubicCurve curve = getCurve();
 
 		List<Vec3d> points = curve.toList(stepSize);
@@ -77,5 +107,106 @@ public class BuilderCubicCurve extends BuilderIterator {
 		}
 		cache.put(stepSize, res);
 		return cache.get(stepSize);
+	}
+
+	/* OVERRIDES */
+
+	@Override
+	public int costTies() {
+		if (subBuilders == null) {
+			return super.costTies();
+		} else {
+			return subBuilders.stream().mapToInt((BuilderCubicCurve::costTies)).sum();
+		}
+	}
+
+	@Override
+	public int costRails() {
+		if (subBuilders == null) {
+			return super.costRails();
+		} else {
+			return subBuilders.stream().mapToInt((BuilderCubicCurve::costRails)).sum();
+		}
+	}
+
+	@Override
+	public int costBed() {
+		if (subBuilders == null) {
+			return super.costBed();
+		} else {
+			return subBuilders.stream().mapToInt((BuilderCubicCurve::costBed)).sum();
+		}
+	}
+
+	@Override
+	public int costFill() {
+		if (subBuilders == null) {
+			return super.costFill();
+		} else {
+			return subBuilders.stream().mapToInt((BuilderCubicCurve::costFill)).sum();
+		}
+	}
+
+	@Override
+	public void setDrops(List<ItemStack> drops) {
+		if (subBuilders == null) {
+			super.setDrops(drops);
+		} else {
+			subBuilders.get(0).setDrops(drops);
+		}
+	}
+
+
+	@Override
+	public boolean canBuild() {
+		if (subBuilders == null) {
+			return super.canBuild();
+		} else {
+			return subBuilders.stream().allMatch(BuilderCubicCurve::canBuild);
+		}
+	}
+
+	@Override
+	public void build() {
+		if (subBuilders == null) {
+			super.build();
+		} else {
+			subBuilders.stream().forEach(BuilderCubicCurve::build);
+		}
+	}
+
+	@Override
+	public void clearArea() {
+		if (subBuilders == null) {
+			super.clearArea();
+		} else {
+			subBuilders.stream().forEach(BuilderCubicCurve::clearArea);
+		}
+	}
+
+	@Override
+	public List<TrackBase> getTracksForRender() {
+		if (subBuilders == null) {
+			return super.getTracksForRender();
+		} else {
+			return subBuilders.stream().map(BuilderCubicCurve::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
+		}
+	}
+
+	@Override
+	public List<VecYawPitch> getRenderData() {
+		if (subBuilders == null) {
+			return super.getRenderData();
+		} else {
+			List<VecYawPitch> data = new ArrayList<>();
+			for (BuilderCubicCurve curve : subBuilders) {
+				Vec3d offset = new Vec3d(curve.pos.subtract(pos));
+				for (VecYawPitch rd : curve.getRenderData()) {
+					rd = new VecYawPitch(rd.x + offset.x, rd.y + offset.y, rd.z + offset.z, rd.yaw, rd.pitch, rd.length);
+					data.add(rd);
+				}
+			}
+			return data;
+		}
 	}
 }
