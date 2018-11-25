@@ -16,6 +16,7 @@ import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import net.minecraft.util.math.Vec3d;
+import util.Matrix4;
 
 public class OBJRender {
 
@@ -114,6 +115,9 @@ public class OBJRender {
 	}
 
 	public void drawDirectGroups(Iterable<String> groupNames, double scale) {
+		drawDirectGroups(groupNames, scale, new Matrix4());
+	}
+	public void drawDirectGroups(Iterable<String> groupNames, double scale, Matrix4 m) {
 		List<Integer> quads = new ArrayList<Integer>();
 		boolean has_vn = true;
 
@@ -169,6 +173,8 @@ public class OBJRender {
 				Vec3d v = model.vertices(point[0]);
 				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 				Vec3d vn = point[2] != -1 ? model.vertexNormals(point[2]) : null;
+
+				v = m.apply(v);
 				
 				vertexBuffer.put((float) (v.x * scale));
 				vertexBuffer.put((float) (v.y * scale));

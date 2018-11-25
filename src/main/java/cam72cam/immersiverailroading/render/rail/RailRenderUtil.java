@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -13,7 +15,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.util.math.Vec3d;
 
 public class RailRenderUtil {
 	public static void render(RailInfo info, boolean renderOverlay) {
@@ -24,27 +25,17 @@ public class RailRenderUtil {
 			// Bind block textures to current context
 			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 			
-			// Move to offset position
-			//GL11.glTranslated(-info.getBuilder().getRenderOffset().getX(), 0, -info.getBuilder().getRenderOffset().getZ());
 			GL11.glPushMatrix();
-				
-			Vec3d renderPos = info.placementPosition.subtract(new Vec3d(info.position));
-			GL11.glTranslated(Math.floor(renderPos.x), Math.floor(renderPos.y), Math.floor(renderPos.z));
-		
-		
+			Vec3d pos = info.placementInfo.placementPosition;
+			pos = pos.subtract(new Vec3d(new BlockPos(pos)));
+			GL11.glTranslated(- pos.x, - pos.y, - pos.z);
 			RailBaseRender.draw(info);
 			RailBaseOverlayRender.draw(info);
 			GL11.glPopMatrix();
 		}
 		
 		Minecraft.getMinecraft().mcProfiler.startSection("rail");
-		
-		GL11.glPushMatrix();
-		{
-			RailBuilderRender.renderRailBuilder(info);
-		}
-		GL11.glPopMatrix();
-		
+        RailBuilderRender.renderRailBuilder(info);
 		Minecraft.getMinecraft().mcProfiler.endSection();
 		
 		light.restore();
@@ -94,13 +85,5 @@ public class RailRenderUtil {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-	}
-
-	public static String renderID(RailInfo info) {
-		//TODO more attributes like railbed
-		if(info.renderIdCache == null) {
-			info.renderIdCache = String.format("%s%s%s%s%s%s%s%s%s%s%s", info.facing, info.type, info.direction, info.length, info.quarter, info.quarters, info.switchState, info.railBed, info.gauge, info.tablePos, info.gradeCrossing);
-		}
-		return info.renderIdCache;
 	}
 }

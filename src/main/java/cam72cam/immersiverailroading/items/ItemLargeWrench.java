@@ -54,7 +54,7 @@ public class ItemLargeWrench extends ItemTool {
 				}
 				TileRail parent = te.getParentTile();
 				if (!world.isRemote) {
-					if (parent != null && parent.getType() == TrackItems.TURNTABLE) {
+					if (parent != null && parent.info.settings.type == TrackItems.TURNTABLE) {
 						parent.nextTablePos(player.isSneaking());
 					}
 				}

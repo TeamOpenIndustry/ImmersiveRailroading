@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.tile;
 
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
@@ -35,8 +36,10 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 		GL11.glPushMatrix();
 		{
 			// Move to specified position
-			GL11.glTranslated(x, y, z);
-			
+			Vec3d placementPosition = info.placementInfo.placementPosition;
+			placementPosition = placementPosition.subtract(new Vec3d(te.getPos())).addVector(x, y, z);
+			GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
+
 			RailRenderUtil.render(info, true);
 		}
 		GL11.glPopMatrix();
