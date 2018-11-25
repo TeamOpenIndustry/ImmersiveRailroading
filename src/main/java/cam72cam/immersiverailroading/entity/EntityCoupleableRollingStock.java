@@ -11,6 +11,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.nbt.NBTBase;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Predicate;
@@ -102,14 +103,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (coupledFront != null) {
 			nbttagcompound.setString("CoupledFront", coupledFront.toString());
 			if (lastKnownFront != null) {
-				nbttagcompound.setTag("lastKnownFront", NBTUtil.blockPosToNBT(lastKnownFront));
+				nbttagcompound.setLong("lastKnownFront", lastKnownFront.toLong());
 			}
 		}
 		nbttagcompound.setBoolean("frontCouplerEngaged", frontCouplerEngaged);
 		if (coupledBack != null) {
 			nbttagcompound.setString("CoupledBack", coupledBack.toString());
 			if (lastKnownRear != null) {
-				nbttagcompound.setTag("lastKnownRear", NBTUtil.blockPosToNBT(lastKnownRear));
+				nbttagcompound.setLong("lastKnownRear", lastKnownRear.toLong());
 			}
 		}
 		nbttagcompound.setBoolean("backCouplerEngaged", backCouplerEngaged);
@@ -121,15 +122,27 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (nbttagcompound.hasKey("CoupledFront")) {
 			coupledFront = UUID.fromString(nbttagcompound.getString("CoupledFront"));
 			if (nbttagcompound.hasKey("lastKnownFront")) {
-				lastKnownFront = NBTUtil.nbtToBlockPos(nbttagcompound.getCompoundTag("lastKnownFront"));
+				if (nbttagcompound.getTag("lastKnownFront").getId() == 10) {
+					// Legacy
+					// TODO remove 2.0
+					NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownFront");
+					lastKnownFront = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
+				} else {
+					lastKnownFront = BlockPos.fromLong(nbttagcompound.getLong("lastKnownFront"));
+				}
 			}
 		}
 		frontCouplerEngaged = nbttagcompound.getBoolean("frontCouplerEngaged");
 
 		if (nbttagcompound.hasKey("CoupledBack")) {
 			coupledBack = UUID.fromString(nbttagcompound.getString("CoupledBack"));
-			if (nbttagcompound.hasKey("lastKnownRear")) {
-				lastKnownRear = NBTUtil.nbtToBlockPos(nbttagcompound.getCompoundTag("lastKnownRear"));
+			if (nbttagcompound.getTag("lastKnownRear").getId() == 10) {
+				// Legacy
+				// TODO remove 2.0
+				NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownRear");
+				lastKnownRear = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
+			} else {
+				lastKnownRear = BlockPos.fromLong(nbttagcompound.getLong("lastKnownRear"));
 			}
 		}
 		backCouplerEngaged = nbttagcompound.getBoolean("backCouplerEngaged");

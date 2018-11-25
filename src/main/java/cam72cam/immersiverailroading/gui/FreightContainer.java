@@ -4,7 +4,9 @@ import cam72cam.immersiverailroading.entity.CarFreight;
 import net.minecraft.inventory.IInventory;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import invtweaks.api.container.ChestContainer;
 
+@ChestContainer
 public class FreightContainer extends ContainerBase {
 	
 	private CarFreight freight;

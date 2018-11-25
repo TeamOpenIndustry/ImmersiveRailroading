@@ -8,15 +8,12 @@ public enum TrackItems {
 	SLOPE,
 	TURN,
 	SWITCH,
-	TURNTABLE
+	TURNTABLE,
+	CUSTOM,
 	;
 	
 	@Override
 	public String toString() {
 	    return TextUtil.translate("track.immersiverailroading:class." + super.toString().toLowerCase()); 
-	}
-
-	public boolean isTurn() {
-		return this == TURN;
 	}
 }

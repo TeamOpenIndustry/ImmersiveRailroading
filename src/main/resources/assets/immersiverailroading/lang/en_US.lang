@@ -101,6 +101,7 @@ track.immersiverailroading:class.slope=Slope
 track.immersiverailroading:class.turn=Turn
 track.immersiverailroading:class.turntable=Turn Table
 track.immersiverailroading:class.switch=Switch
+track.immersiverailroading:class.custom=Custom Curve
 
 track.immersiverailroading:position.fixed=Fixed
 track.immersiverailroading:position.pixels=Pixels

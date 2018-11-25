@@ -40,10 +40,10 @@ public class MovementSimulator {
 			TileRailBase rearBase = TileRailBase.get(world, new BlockPos(rear));
 			isTurnTable = frontBase != null &&
 					frontBase.getParentTile() != null &&
-					frontBase.getParentTile().getType() == TrackItems.TURNTABLE;
+					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
 			isTurnTable = rearBase != null &&
 					rearBase.getParentTile() != null &&
-					rearBase.getParentTile().getType() == TrackItems.TURNTABLE;
+					rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
 			
 			position.speed = Speed.ZERO;
 			

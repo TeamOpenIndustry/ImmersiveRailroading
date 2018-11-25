@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -40,8 +41,8 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
-		info = new RailInfo(stack, world, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f);
-		info.length = 10;
+		info = new RailInfo(world, stack, new PlacementInfo(stack, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
+		info = info.withLength(10);
 	}
 
 	@Override
@@ -52,8 +53,8 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		
 		GL11.glPushMatrix();
 
-		if (info.type == TrackItems.TURN || info.type == TrackItems.SWITCH) {
-			GL11.glTranslated(0, 0, -0.1 * info.quarters);
+		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
+			GL11.glTranslated(0, 0, -0.1 * info.settings.quarters);
 		}
 		
 		GL11.glRotated(-90, 0, 1, 0);
@@ -61,21 +62,26 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		
 		
 			
-		double scale = 0.95/info.length;
-		if (info.type == TrackItems.CROSSING) {
+		double scale = 0.95/info.settings.length;
+		if (info.settings.type == TrackItems.CROSSING) {
 			scale = 0.95 / 3;
 		}
-		if (info.type == TrackItems.TURNTABLE) {
+		if (info.settings.type == TrackItems.TURNTABLE) {
 			scale *= 0.25;
 		}
 		GL11.glScaled(scale, -scale*2, scale);
 
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 		GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
-		
-		RailBaseRender.draw(info);
-		RailBuilderRender.renderRailBuilder(info);
-		
+
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(-0.5, 0, -0.5);
+			RailBaseRender.draw(info);
+		}
+		GL11.glPopMatrix();
+        RailBuilderRender.renderRailBuilder(info);
+
 		lighting.restore();
 		cull.restore();
 		
