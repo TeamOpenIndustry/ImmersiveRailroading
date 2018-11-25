@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.util.math.BlockPos;
@@ -15,8 +16,9 @@ public class BuilderTurn extends BuilderCubicCurve {
         int radius = info.settings.length - 1;
 
         Matrix4 mat = new Matrix4();
-        mat.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
-        if (info.placementInfo.direction == TrackDirection.LEFT) {
+        mat.rotate(Math.toRadians(info.placementInfo.yaw-90), 0, 1, 0);
+        ImmersiveRailroading.info("%s - %s", info.placementInfo.yaw, info.placementInfo.direction);
+        if (info.placementInfo.direction == TrackDirection.RIGHT) {
             mat.scale(1, 1, -1);
         }
         CubicCurve curve = CubicCurve.circle(radius, info.settings.quarters/4f*90).apply(mat);
