@@ -17,8 +17,7 @@ public class BuilderTurn extends BuilderCubicCurve {
 
         Matrix4 mat = new Matrix4();
         mat.rotate(Math.toRadians(info.placementInfo.yaw-90), 0, 1, 0);
-        ImmersiveRailroading.info("%s - %s", info.placementInfo.yaw, info.placementInfo.direction);
-        if (info.placementInfo.direction == TrackDirection.RIGHT) {
+        if (info.placementInfo.direction == TrackDirection.LEFT) {
             mat.scale(1, 1, -1);
         }
         CubicCurve curve = CubicCurve.circle(radius, info.settings.quarters/4f*90).apply(mat);
