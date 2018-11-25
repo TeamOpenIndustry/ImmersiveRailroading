@@ -1,12 +1,12 @@
 {
   "type": "forge:ore_shaped",
   "result": {
-    "item": "immersiverailroading:item_hook"
+    "item": "immersiverailroading:item_large_wrench"
   },
   "pattern": [
-    "dd ",
-    "d  ",
-    "d  "
+    " d ",
+    "ddd",
+    "d d"
   ],
   "key": {
     "d": {
