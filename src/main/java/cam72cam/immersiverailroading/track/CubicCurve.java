@@ -33,7 +33,7 @@ public class CubicCurve {
         Vec3d p2 = new Vec3d(radius, 0, 0);
 
         Matrix4 quart = new Matrix4();
-        quart.rotate(Math.toRadians(-90+degrees), 0, 1, 0);
+        quart.rotate(Math.toRadians(degrees), 0, 1, 0);
 
         return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2)).apply(new Matrix4().translate(0, 0, -radius));
     }

@@ -56,12 +56,10 @@ public class RailInfo {
 				this.settings.gauge,
 				this.switchState,
 				this.tablePos,
-				this.placementInfo.facing,
+				this.placementInfo.yaw,
 				this.placementInfo.direction,
-				this.placementInfo.rotationQuarter,
-				this.customInfo.facing,
+				this.customInfo.yaw,
 				this.customInfo.direction,
-				this.customInfo.rotationQuarter,
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition)) {

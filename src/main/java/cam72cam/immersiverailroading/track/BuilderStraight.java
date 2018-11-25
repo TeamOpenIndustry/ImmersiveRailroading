@@ -1,14 +1,11 @@
 package cam72cam.immersiverailroading.track;
 
-import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import util.Matrix4;
 
 public class BuilderStraight extends BuilderCubicCurve {
-	protected float angle;
-
 	public BuilderStraight(RailInfo info, BlockPos pos) {
 		this(info, pos, false);
 	}
@@ -19,18 +16,13 @@ public class BuilderStraight extends BuilderCubicCurve {
 
 	@Override
 	public CubicCurve getCurve() {
-		double length = info.settings.length;
-		float angle = info.placementInfo.rotationQuarter/4f * 90;
-		if(info.placementInfo.direction == TrackDirection.RIGHT) {
-			angle = -angle;
-		}
-
+		double length = info.settings.length - 1;
 		CubicCurve curve = new CubicCurve(
 				Vec3d.ZERO,
-				new Vec3d(0.25, 0,0),
-				new Vec3d(0.75, 0, 0),
-				new Vec3d(1, 0,0)
+				VecUtil.fromYaw(length*0.25, info.placementInfo.yaw),
+                VecUtil.fromYaw(length*0.75, info.placementInfo.yaw),
+                VecUtil.fromYaw(length, info.placementInfo.yaw)
 		);
-		return curve.apply(new Matrix4().scale(length-1, length-1, length-1).rotate(Math.toRadians(180 + 90-angle), 0, 1, 0));
+		return curve;
 	}
 }

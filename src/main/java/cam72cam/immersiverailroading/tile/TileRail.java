@@ -105,7 +105,7 @@ public class TileRail extends TileRailBase {
 			nbt.setTag("placementPosition", newPositionFormat);
 
             PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
-            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
+            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
 			double tablePos = nbt.getDouble("tablePos");

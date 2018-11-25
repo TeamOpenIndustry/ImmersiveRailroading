@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -30,9 +29,12 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subCurves.size() > 1) {
 			subBuilders = new ArrayList<>();
 			for (CubicCurve subCurve : subCurves) {
-				Vec3d delta = pos.equals(BlockPos.ORIGIN) ? new Vec3d(0.5, 0.5, 0.5) : info.placementInfo.placementPosition;
-				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), 0, TrackDirection.NONE, EnumFacing.fromAngle(subCurve.angleStart()));
-				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), 0, TrackDirection.NONE, EnumFacing.fromAngle(subCurve.angleStop()+180));
+				Vec3d delta = info.placementInfo.placementPosition;
+				if (pos.equals(BlockPos.ORIGIN)) {
+					delta = delta.subtract(new Vec3d(new BlockPos(info.placementInfo.placementPosition)));
+				}
+				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart());
+				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180);
 				RailInfo subInfo = new RailInfo(info.world, info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, 0);
 				BlockPos sPos = new BlockPos(startPos.placementPosition);
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, sPos);
@@ -58,20 +60,12 @@ public class BuilderCubicCurve extends BuilderIterator {
 		}
 
 		double horizDist = nextPos.lengthVector();
-		float angle = info.placementInfo.rotationQuarter / 4f * 90;
-		if (info.placementInfo.direction == TrackDirection.RIGHT) {
-			angle = -angle;
-		}
+		float angle = info.placementInfo.yaw;
 
 		float angle2 = angle - 90;
 
 		if (info.customInfo != null) {
-			angle2 = info.customInfo.rotationQuarter / 4f * 90;
-			if (info.customInfo.direction == TrackDirection.RIGHT) {
-				angle2 = -angle2;
-			}
-			angle2 -= (info.placementInfo.facing.getHorizontalAngle() - info.customInfo.facing.getHorizontalAngle());
-			nextPos = VecUtil.rotateYaw(nextPos, 180 - (info.placementInfo.facing.getHorizontalAngle() - 90));
+			angle2 = info.customInfo.yaw;
 		}
 
 		Vec3d ctrl1 = VecUtil.fromYaw(horizDist / 2, angle);

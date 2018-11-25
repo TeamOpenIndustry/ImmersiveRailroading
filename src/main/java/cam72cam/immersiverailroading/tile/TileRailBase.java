@@ -410,7 +410,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		
 		double distanceMeters = motion.lengthVector();
-		float rotationYaw = VecUtil.toYaw(motion);
+		float rotationYaw = VecUtil.toWrongYaw(motion);
 
 		Vec3d nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 

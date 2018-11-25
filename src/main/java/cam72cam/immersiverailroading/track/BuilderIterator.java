@@ -137,14 +137,14 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				PosStep next = points.get(i-1);
 				double ydelt = next.y - cur.y;
 				double dist = next.distanceTo(cur);
-				pitch = (float) -Math.toDegrees(Math.atan2(ydelt, dist));
+				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
 				angle = delta(next.yaw, cur.yaw);
 				angle *= 2;
 			} else if (i == 0) {
 				PosStep next = points.get(i+1);
 				double ydelt = next.y - cur.y;
 				double dist = next.distanceTo(cur);
-				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
+				pitch = (float) -Math.toDegrees(Math.atan2(ydelt, dist));
 				angle = delta(cur.yaw, next.yaw);
 				angle *= 2;
 			} else {
@@ -152,15 +152,15 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				PosStep next = points.get(i+1);
 				double ydelt = next.y - prev.y;
 				double dist = next.distanceTo(prev);
-				pitch = (float) Math.toDegrees(Math.atan2(ydelt, dist));
+				pitch = (float) -Math.toDegrees(Math.atan2(ydelt, dist));
 				angle = delta(prev.yaw, next.yaw);
 			}
 			if (angle != 0) {
-                data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 - angle / 180) * (float) info.settings.gauge.scale(), "RAIL_LEFT"));
-                data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, (1 + angle / 150) * (float) info.settings.gauge.scale(), "RAIL_RIGHT"));
-				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch, "RAIL_BASE"));
+                data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, (1 - angle / 180) * (float) info.settings.gauge.scale(), "RAIL_LEFT"));
+                data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, (1 + angle / 150) * (float) info.settings.gauge.scale(), "RAIL_RIGHT"));
+				data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, "RAIL_BASE"));
 			} else {
-				data.add(new VecYawPitch(cur.x, cur.y, cur.z, 180 - cur.yaw, pitch));
+				data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch));
 			}
 		}
 		

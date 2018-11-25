@@ -41,7 +41,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
-		info = new RailInfo(world, stack, new PlacementInfo(stack, 360-10, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
+		info = new RailInfo(world, stack, new PlacementInfo(stack, 0, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
 		info = info.withLength(10);
 	}
 
@@ -57,7 +57,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 			GL11.glTranslated(0, 0, -0.1 * info.settings.quarters);
 		}
 		
-		GL11.glRotated(-90, 0, 1, 0);
+		GL11.glRotated(-90, 1, 0, 0);
 		GL11.glRotated(-90, 1, 0, 0);
 		
 		

@@ -2,16 +2,13 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.track.BuilderBase.PosRot;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Items;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
 public abstract class TrackBase {
@@ -37,7 +34,7 @@ public abstract class TrackBase {
 
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
-		PosRot pos = getPos();
+		BlockPos pos = getPos();
 		IBlockState down = builder.info.world.getBlockState(pos.down());
 		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.info.world.isAirBlock(pos.down())) ||
 				(BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
@@ -46,7 +43,7 @@ public abstract class TrackBase {
 	}
 
 	public TileEntity placeTrack() {
-		PosRot pos = getPos();
+		BlockPos pos = getPos();
 
 		if (builder.info.settings.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
 			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill));
@@ -90,11 +87,8 @@ public abstract class TrackBase {
 	public IBlockState getBlockState() {
 		return block.getDefaultState();
 	}
-	public EnumFacing getFacing() {
-		return getPos().getRotation();
-	}
 
-	public PosRot getPos() {
+	public BlockPos getPos() {
 		return builder.convertRelativePositions(rel);
 	}
 
