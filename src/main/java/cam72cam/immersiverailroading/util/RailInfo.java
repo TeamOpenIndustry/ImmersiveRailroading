@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import akka.util.Switch;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
@@ -12,7 +9,6 @@ import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.*;
 import cam72cam.immersiverailroading.track.BuilderCubicCurve;
@@ -22,7 +18,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.StringUtils;
 
 public class RailInfo {
 	public final World world;
@@ -109,7 +104,15 @@ public class RailInfo {
 		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
 	}
 
+	private Map<BlockPos, BuilderBase> builders = new HashMap<>();
 	public BuilderBase getBuilder(BlockPos pos) {
+		if (builders.containsKey(pos)) {
+			return builders.get(pos);
+		}
+		builders.put(pos, constructBuilder(pos));
+		return builders.get(pos);
+	}
+	private BuilderBase constructBuilder(BlockPos pos) {
 		switch (settings.type) {
 		case STRAIGHT:
 			return new BuilderStraight(this, pos);
@@ -129,12 +132,8 @@ public class RailInfo {
 		return null;
 	}
 
-	private BuilderBase builder;
 	public BuilderBase getBuilder() {
-		if (builder == null) {
-			builder = getBuilder(BlockPos.ORIGIN);
-		}
-		return builder;
+		return getBuilder(BlockPos.ORIGIN);
 	}
 
 	public boolean build(EntityPlayer player) {

@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -76,7 +77,12 @@ public class ServerProxy extends CommonProxy {
 		
 		return res;
 	}
-	
+
+	@Override
+	public void addPreview(int dimension, TileRailPreview preview) {
+		// NOP, never used
+	}
+
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
 		if(event.getEntity() instanceof EntityRollingStock) {

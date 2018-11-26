@@ -3,12 +3,11 @@ package cam72cam.immersiverailroading.proxy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.render.ExpireableList;
+import net.minecraft.nbt.NBTTagCompound;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
@@ -144,6 +143,7 @@ import paulscode.sound.SoundSystemConfig;
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
+	private static Map<Integer, ExpireableList<BlockPos, TileRailPreview>> previews = new HashMap<>();
 
 	private static IRSoundManager manager;
 	
@@ -771,7 +771,38 @@ public class ClientProxy extends CommonProxy {
 	public int getRenderDistance() {
 		return Minecraft.getMinecraft().gameSettings.renderDistanceChunks;
 	}
-	
+
+	@Override
+	public void addPreview(int dimension, TileRailPreview preview) {
+		if (!previews.containsKey(dimension)) {
+			previews.put(dimension, new ExpireableList<BlockPos, TileRailPreview>() {
+				@Override
+				public int lifespan() {
+					return 2;
+				}
+				@Override
+				public boolean sliding() {
+					return false;
+				}
+			});
+		}
+		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(dimension);
+		TileRailPreview curr = pvs.get(preview.getPos());
+		if (curr != null) {
+			if (curr.writeToNBT(new NBTTagCompound()).equals(preview.writeToNBT(new NBTTagCompound()))) {
+				preview = curr;
+			}
+		}
+		previews.get(dimension).put(preview.getPos(), preview);
+	}
+	public Collection<TileRailPreview> getPreviews() {
+		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(Minecraft.getMinecraft().player.dimension);
+		if (pvs != null) {
+			return pvs.values();
+		}
+		return null;
+	}
+
 	@SubscribeEvent
 	public static void configChanged(OnConfigChangedEvent event) {
 		if (event.getModID().equals(ImmersiveRailroading.MODID)) {

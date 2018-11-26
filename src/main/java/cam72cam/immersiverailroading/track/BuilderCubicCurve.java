@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class BuilderCubicCurve extends BuilderIterator {
-	private List<BuilderCubicCurve> subBuilders;
+	public List<BuilderCubicCurve> subBuilders;
 
 	public BuilderCubicCurve(RailInfo info, BlockPos pos) {
 		this(info, pos, false);

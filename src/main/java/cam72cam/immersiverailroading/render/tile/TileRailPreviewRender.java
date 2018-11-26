@@ -44,7 +44,9 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 			placementPosition = placementPosition.subtract(new Vec3d(te.getPos())).addVector(x, y, z);
 			GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
 
-			RailRenderUtil.render(info, true);
+			if (!te.isMulti()) {
+				RailRenderUtil.render(info, true);
+			}
 
 			GL11.glTranslated(0, 0.5, 0);
 			Minecraft.getMinecraft().getRenderItem().renderItem(new ItemStack(IRItems.ITEM_GOLDEN_SPIKE), ItemCameraTransforms.TransformType.GROUND);
