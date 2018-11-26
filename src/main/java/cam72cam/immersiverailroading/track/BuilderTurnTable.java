@@ -22,15 +22,16 @@ public class BuilderTurnTable extends BuilderBase {
 	public BuilderTurnTable(RailInfo info, BlockPos pos) {
 		super(info.withLength(Math.min(info.settings.length, (int)(30 * info.settings.gauge.scale()))), pos);
 
-		positions = new HashSet<Pair<Integer, Integer>>();
+		positions = new HashSet<>();
 		
 		offset = new BlockPos(0, 1, info.settings.length);
+		offset = BlockUtil.rotateYaw(offset, info.placementInfo.facing());
 		
 		double radius = info.settings.length;
 		
 		for (double irad = 1; irad <= radius + 1; irad++) {
 			for (double angle = 0; angle < 360; angle+=0.5) {
-				Vec3d gagPos = VecUtil.fromWrongYaw(irad, (float) angle);
+				Vec3d gagPos = VecUtil.fromYaw(irad, (float) angle);
 				positions.add(Pair.of((int)gagPos.x, (int)gagPos.z));
 			}
 		}
