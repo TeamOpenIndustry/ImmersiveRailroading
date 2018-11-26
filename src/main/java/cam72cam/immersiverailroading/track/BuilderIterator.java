@@ -132,10 +132,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		double scale = info.settings.gauge.scale();
 		List<PosStep> points = getPath(scale);
 
-		boolean switchActive = info.switchState == SwitchState.TURN;
+		boolean switchStraight = info.switchState != SwitchState.TURN;
 		int switchSize = 0;
 		TrackDirection guessDirection = info.placementInfo.direction;
-		if (switchActive) {
+		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				PosStep cur = points.get(i);
 				Vec3d flatPos = VecUtil.rotateYaw(cur, info.placementInfo.yaw);
@@ -150,7 +150,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		for (int i = 0; i < points.size(); i++) {
 			PosStep cur = points.get(i);
 			PosStep switchPos = cur;
-			if (switchActive) {
+			if (switchStraight ) {
 				double switchOffset = 1 - (i / (double)switchSize);
 				if (switchOffset > 0) {
 					Vec3d offset = VecUtil.fromYaw(0.2, cur.yaw + 90 + info.placementInfo.direction.toYaw());
