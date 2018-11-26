@@ -86,9 +86,13 @@ public abstract class BuilderBase {
 	}
 	
 	public void build() {
+		/*
+		Assume we have already tested.
+		There are a few edge cases which break with overlapping split builders
 		if (!canBuild()) {
 			return ;
 		}
+		*/
 		for(TrackBase track : tracks) {
 			track.placeTrack().markDirty();
 		}
