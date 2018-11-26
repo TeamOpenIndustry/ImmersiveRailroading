@@ -442,7 +442,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
 					continue;
 				}
-				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+				pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 				pos = pos.add(this.getPositionVector());
 				BlockPos bp = new BlockPos(pos);
 				
@@ -521,10 +521,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false);
 	}
 	
-	public PosRot predictFrontBogeyPosition(float offset) {		
+	public PosRot predictFrontBogeyPosition(float offset) {
 		return predictFrontBogeyPosition(getCurrentTickPosOrFake(), offset);
 	}
-	public PosRot predictFrontBogeyPosition(TickPos pos, float offset) {		
+	public PosRot predictFrontBogeyPosition(TickPos pos, float offset) {
 		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
 		
 		Vec3d front = sim.frontBogeyPosition();
@@ -532,16 +532,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		while (offset > 0) {
 			nextFront = sim.nextPosition(nextFront, pos.rotationYaw, pos.frontYaw, Math.min(0.1, offset));
 			if (sim.isOffTrack()) {
-				nextFront = nextFront.add(VecUtil.fromYaw(offset, pos.rotationYaw));
+				nextFront = nextFront.add(VecUtil.fromWrongYaw(offset, pos.rotationYaw));
 				break;
 			}
 			offset -= 0.1;
 		}
 		Vec3d frontDelta = front.subtractReverse(nextFront);
-		return new PosRot(nextFront.subtractReverse(pos.position), VecUtil.toYaw(frontDelta));
+		return new PosRot(nextFront.subtractReverse(pos.position), VecUtil.toWrongYaw(frontDelta));
 	}
 	
-	public PosRot predictRearBogeyPosition(float offset) {		
+	public PosRot predictRearBogeyPosition(float offset) {
 		return predictRearBogeyPosition(getCurrentTickPosOrFake(), offset);
 	}
 	public PosRot predictRearBogeyPosition(TickPos pos, float offset) {
@@ -552,13 +552,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		while (offset > 0) {
 			nextRear = sim.nextPosition(nextRear, pos.rotationYaw+180, pos.rearYaw+180, Math.min(0.1, offset));
 			if (sim.isOffTrack()) {
-				nextRear = nextRear.add(VecUtil.fromYaw(offset, pos.rotationYaw+180));
+				nextRear = nextRear.add(VecUtil.fromWrongYaw(offset, pos.rotationYaw+180));
 				break;
 			}
 			offset -= 0.1;
 		}
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
-		return new PosRot(nextRear.subtractReverse(pos.position), VecUtil.toYaw(rearDelta));
+		return new PosRot(nextRear.subtractReverse(pos.position), VecUtil.toWrongYaw(rearDelta));
 	}
 
 	private BlockPos lastRetarderPos = null;
@@ -574,7 +574,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			if (pos.y != 0) {
 				continue;
 			}
-			pos = VecUtil.rotateYaw(pos, latest.rotationYaw);
+			pos = VecUtil.rotateWrongYaw(pos, latest.rotationYaw);
 			pos = pos.add(latest.position);
 			BlockPos bp = new BlockPos(pos);
 			

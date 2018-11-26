@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -112,9 +111,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	}
 
 	public boolean isOnStraight(Vec3d position) {
-		for (float dist = 0; dist < info.settings.length; dist += info.settings.gauge.scale()/8) {
-			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
-			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.placementInfo.facing.getHorizontalAngle() + 90 + 180);
+		for (Vec3d gagPos : straightBuilder.getPath(info.settings.gauge.scale()/8)) {
 			gagPos = gagPos.add(info.placementInfo.placementPosition);
 			if (gagPos.distanceTo(position.addVector(0, -(position.y % 1), 0)) < info.settings.gauge.scale()/2) {
 				return true;

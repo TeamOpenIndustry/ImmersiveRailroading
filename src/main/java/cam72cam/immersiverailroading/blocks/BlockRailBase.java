@@ -131,14 +131,14 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
 				TileRail parent = te.getParentTile();
 				if (parent != null) {
-					if (parent.info.placementInfo.facing.getAxis() == Axis.X) {
+					if (parent.info.placementInfo.facing().getAxis() == Axis.X) {
 						if (parent.getPos().getZ() == te.getPos().getZ()) {
-							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing);
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing());
 						}
 					}
-					if (parent.info.placementInfo.facing.getAxis() == Axis.Z) {
+					if (parent.info.placementInfo.facing().getAxis() == Axis.Z) {
 						if (parent.getPos().getX() == te.getPos().getX()) {
-							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing);
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing());
 						}
 					}
 				}

@@ -1,12 +1,16 @@
 package cam72cam.immersiverailroading.render.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderCubicCurve;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.Predicate;
@@ -31,9 +35,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
 
 public class RenderOverride {
-	
+
 	private static Vec3d getCameraPos(float partialTicks) {
         Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
         double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * partialTicks;
@@ -184,9 +190,42 @@ public class RenderOverride {
 	        	}	
         	}
         }
+		blend.restore();
+
+        ClientProxy proxy = (ClientProxy) ImmersiveRailroading.proxy;
+		Collection<TileRailPreview> previews = proxy.getPreviews();
+		if (previews != null) {
+			Minecraft.getMinecraft().mcProfiler.startSection("tile_rail_preview");
+			blend = new GLBoolTracker(GL11.GL_BLEND, true);
+			GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
+			if (GLContext.getCapabilities().OpenGL14) {
+				GL14.glBlendColor(1, 1, 1, 0.7f);
+			}
+			for (TileRailPreview preview : previews) {
+				if (!preview.hasWorld()) {
+					preview.setWorld(Minecraft.getMinecraft().player.world);
+				}
+				for (BuilderCubicCurve builder : ((BuilderCubicCurve) preview.getRailRenderInfo().getBuilder(preview.getPos())).subBuilders) {
+					RailInfo info = builder.info;
+					Vec3d placementPosition = info.placementInfo.placementPosition;
+
+					if (isInRenderDistance(placementPosition)) {
+						placementPosition = placementPosition.subtract(cameraPos);
+                        GL11.glPushMatrix();
+                        {
+                            GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
+
+                            RailRenderUtil.render(info, true);
+                        }
+                        GL11.glPopMatrix();
+					}
+				}
+			}
+			blend.restore();
+			Minecraft.getMinecraft().mcProfiler.endSection();
+		}
         model.restoreTexture();
         
-        blend.restore();
         Minecraft.getMinecraft().mcProfiler.endSection();;
 	}
 }
