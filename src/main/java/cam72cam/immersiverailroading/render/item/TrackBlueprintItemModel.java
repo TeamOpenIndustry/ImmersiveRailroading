@@ -41,7 +41,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
-		info = new RailInfo(world, stack, new PlacementInfo(stack, 0, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
+		info = new RailInfo(world, stack, new PlacementInfo(stack, 1, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
 		info = info.withLength(10);
 	}
 
@@ -58,7 +58,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		}
 		
 		GL11.glRotated(-90, 1, 0, 0);
-		GL11.glRotated(-90, 1, 0, 0);
+		GL11.glRotated(-90, 0, 0, 1);
 		
 		
 			
@@ -69,7 +69,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (info.settings.type == TrackItems.TURNTABLE) {
 			scale *= 0.25;
 		}
-		GL11.glScaled(scale, -scale*2, scale);
+		GL11.glScaled(-scale, -scale*2, scale);
 
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 		GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
