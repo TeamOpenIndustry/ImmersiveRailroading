@@ -128,7 +128,7 @@ public class PlacementInfo {
 	}
 
 	public EnumFacing facing() {
-		return EnumFacing.fromAngle(direction == TrackDirection.RIGHT ? yaw + 45 : yaw - 45);
+		return EnumFacing.fromAngle(180-yaw);
 	}
 
 	public int rotationQuarter() {

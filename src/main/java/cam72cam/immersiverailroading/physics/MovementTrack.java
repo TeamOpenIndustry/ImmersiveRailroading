@@ -94,7 +94,7 @@ public class MovementTrack {
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			
-			float angle = 360/16.0f * (float)tablePos;
+			float angle = 360/16.0f * (float)tablePos + rail.info.placementInfo.facing().getHorizontalAngle();
 			
 			Vec3d forward = center.add(VecUtil.fromWrongYaw(fromCenter, angle));
 			Vec3d backward = center.add(VecUtil.fromWrongYaw(fromCenter, angle + 180));
