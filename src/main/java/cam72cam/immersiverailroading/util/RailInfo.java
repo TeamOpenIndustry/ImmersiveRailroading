@@ -104,7 +104,7 @@ public class RailInfo {
 		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
 	}
 
-	private Map<BlockPos, BuilderBase> builders = new HashMap<>();
+	public Map<BlockPos, BuilderBase> builders = new HashMap<>();
 	public BuilderBase getBuilder(BlockPos pos) {
 		if (builders.containsKey(pos)) {
 			return builders.get(pos);

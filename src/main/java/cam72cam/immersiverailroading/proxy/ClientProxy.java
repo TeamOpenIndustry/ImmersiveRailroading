@@ -144,6 +144,7 @@ import paulscode.sound.SoundSystemConfig;
 public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
 	private static Map<Integer, ExpireableList<BlockPos, TileRailPreview>> previews = new HashMap<>();
+	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
 
 	private static IRSoundManager manager;
 	
@@ -576,7 +577,14 @@ public class ClientProxy extends CommonProxy {
 		        
 		        pos = pos.up();
 		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
-		        
+		        String key = info.uniqueID + pos.toLong();
+				RailInfo cached = infoCache.get(key);
+		        if (cached != null) {
+					info = cached;
+				} else {
+		        	infoCache.put(key, info);
+				}
+
 		        GL11.glPushMatrix();
 				{
 					GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);

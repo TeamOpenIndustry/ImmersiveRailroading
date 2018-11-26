@@ -11,7 +11,6 @@ public class RailBaseOverlayRender {
 	
 	private static void doDraw(RailInfo info) {
 		GL11.glColor4f(1, 0, 0, 1);
-		info = info.clone();
 
 		BlockPos placePos = new BlockPos(info.placementInfo.placementPosition);
 

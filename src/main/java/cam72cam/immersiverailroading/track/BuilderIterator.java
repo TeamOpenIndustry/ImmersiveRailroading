@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -126,11 +128,40 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 	@Override
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
-		
-		List<PosStep> points = getPath(info.settings.gauge.scale());
-		
+
+		double scale = info.settings.gauge.scale();
+		List<PosStep> points = getPath(scale);
+
+		boolean switchActive = info.switchState == SwitchState.TURN;
+		int switchSize = 0;
+		TrackDirection guessDirection = info.placementInfo.direction;
+		if (switchActive) {
+			for (int i = 0; i < points.size(); i++) {
+				PosStep cur = points.get(i);
+				Vec3d flatPos = VecUtil.rotateYaw(cur, info.placementInfo.yaw);
+				if (Math.abs(flatPos.z) >= 0.5 * scale) {
+					switchSize = i;
+					guessDirection = cur.yaw - info.placementInfo.yaw > 0 ? TrackDirection.RIGHT : TrackDirection.LEFT;
+					break;
+				}
+			}
+		}
+
 		for (int i = 0; i < points.size(); i++) {
 			PosStep cur = points.get(i);
+			PosStep switchPos = cur;
+			if (switchActive) {
+				double switchOffset = 1 - (i / (double)switchSize);
+				if (switchOffset > 0) {
+					Vec3d offset = VecUtil.fromYaw(0.2, cur.yaw + 90 + info.placementInfo.direction.toYaw());
+					offset = offset.scale(switchOffset * scale);
+					float offsetAngle = (float) (switchSize / 3.14 * scale); // Close enough for now
+					if (guessDirection == TrackDirection.RIGHT)  {
+						offsetAngle = -offsetAngle;
+					}
+					switchPos = new PosStep(cur.add(offset), cur.yaw + offsetAngle);
+				}
+			}
 			
 			float pitch = 0;
 			float angle = 0;
@@ -159,8 +190,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				angle = delta(prev.yaw, next.yaw);
 			}
 			if (angle != 0) {
-                data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, (1 - angle / 180) * (float) info.settings.gauge.scale(), "RAIL_LEFT"));
-                data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, (1 + angle / 150) * (float) info.settings.gauge.scale(), "RAIL_RIGHT"));
+				if (guessDirection == TrackDirection.RIGHT) {
+					data.add(new VecYawPitch(switchPos.x, switchPos.y, switchPos.z, switchPos.yaw, pitch, (1 - angle / 180) * (float) info.settings.gauge.scale(), "RAIL_LEFT"));
+					data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, (1 + angle / 180) * (float) info.settings.gauge.scale(), "RAIL_RIGHT"));
+				} else {
+					data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, (1 - angle / 180) * (float) info.settings.gauge.scale(), "RAIL_LEFT"));
+					data.add(new VecYawPitch(switchPos.x, switchPos.y, switchPos.z, switchPos.yaw, pitch, (1 + angle / 180) * (float) info.settings.gauge.scale(), "RAIL_RIGHT"));
+				}
 				data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch, "RAIL_BASE"));
 			} else {
 				data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, pitch));
