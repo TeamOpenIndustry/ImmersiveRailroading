@@ -104,7 +104,12 @@ public class PlacementInfo {
 		} else {
 			int rotationQuarter = nbt.getInteger("rotationQuarter");
 			EnumFacing facing = EnumFacing.getFront(nbt.getByte("facing"));
-			this.yaw = 180-(facing.getHorizontalAngle() + rotationQuarter/4f*90);
+			float facingAngle = 180 - facing.getHorizontalAngle();
+			float rotAngle = rotationQuarter/4f*90;
+			if (direction != TrackDirection.RIGHT) {
+				rotAngle = -rotAngle;
+			}
+			this.yaw = facingAngle + rotAngle;
 		}
 		this.magnitude = nbt.getFloat("magnitude");
 	}
