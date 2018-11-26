@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
@@ -12,7 +11,6 @@ import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.init.Items;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -24,9 +22,10 @@ public class BuilderTurnTable extends BuilderBase {
 	public BuilderTurnTable(RailInfo info, BlockPos pos) {
 		super(info.withLength(Math.min(info.settings.length, (int)(30 * info.settings.gauge.scale()))), pos);
 
-		positions = new HashSet<Pair<Integer, Integer>>();
+		positions = new HashSet<>();
 		
 		offset = new BlockPos(0, 1, info.settings.length);
+		offset = BlockUtil.rotateYaw(offset, info.placementInfo.facing());
 		
 		double radius = info.settings.length;
 		
@@ -80,11 +79,11 @@ public class BuilderTurnTable extends BuilderBase {
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 		
 		for (float angle = 0; angle < 360; angle +=22.5) {
-			Vec3d gagPos = VecUtil.rotateYaw(new Vec3d(0, 0, info.settings.length), angle-90);
+			Vec3d gagPos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, info.settings.length), angle-90);
 			data.add(new VecYawPitch(gagPos.x + offset.getX(), gagPos.y + offset.getY(), gagPos.z + offset.getZ(), -angle));
 		}
 		
-		float angle = 360/16.0f * (float)info.tablePos - info.placementInfo.facing.getHorizontalAngle();
+		float angle = 360/16.0f * (float)info.tablePos - info.placementInfo.facing().getHorizontalAngle();
 		data.add(new VecYawPitch(offset.getX(), offset.getY(), offset.getZ(), -angle, 0, info.settings.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		return data;

@@ -59,12 +59,12 @@ public class RealBB extends AxisAlignedBB {
 	}
 
 	private static double[] constructorParams(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
-		Vec3d frontPos = VecUtil.fromYaw(front, yaw);
-		Vec3d rearPos = VecUtil.fromYaw(rear, yaw);
+		Vec3d frontPos = VecUtil.fromWrongYaw(front, yaw);
+		Vec3d rearPos = VecUtil.fromWrongYaw(rear, yaw);
 
 		// width
-		Vec3d offsetRight = VecUtil.fromYaw(width / 2, yaw + 90);
-		Vec3d offsetLeft = VecUtil.fromYaw(width / 2, yaw - 90);
+		Vec3d offsetRight = VecUtil.fromWrongYaw(width / 2, yaw + 90);
+		Vec3d offsetLeft = VecUtil.fromWrongYaw(width / 2, yaw - 90);
 		AxisAlignedBB rightBox = newBB(frontPos.add(offsetRight), rearPos.add(offsetRight));
 		AxisAlignedBB leftBox = newBB(frontPos.add(offsetLeft), rearPos.add(offsetLeft));
 

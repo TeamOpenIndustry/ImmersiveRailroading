@@ -1,5 +1,8 @@
 package cam72cam.immersiverailroading.render.tile;
 
+import cam72cam.immersiverailroading.IRItems;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
@@ -27,6 +30,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 			// Still loading...
 			return;
 		}
+
 		Minecraft.getMinecraft().mcProfiler.startSection("tile_rail");
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
 		GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
@@ -40,7 +44,12 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 			placementPosition = placementPosition.subtract(new Vec3d(te.getPos())).addVector(x, y, z);
 			GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
 
-			RailRenderUtil.render(info, true);
+			if (!te.isMulti()) {
+				RailRenderUtil.render(info, true);
+			}
+
+			GL11.glTranslated(0, 0.5, 0);
+			Minecraft.getMinecraft().getRenderItem().renderItem(new ItemStack(IRItems.ITEM_GOLDEN_SPIKE), ItemCameraTransforms.TransformType.GROUND);
 		}
 		GL11.glPopMatrix();
 		blend.restore();
