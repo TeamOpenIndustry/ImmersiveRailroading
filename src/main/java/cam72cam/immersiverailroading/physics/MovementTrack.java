@@ -110,8 +110,6 @@ public class MovementTrack {
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
 			for (PosStep pos : positions) {
-				Vec3d rotPos = VecUtil.rotateWrongYaw(pos, rail.info.placementInfo.facing().getHorizontalAngle() - 90);
-				pos = new PosStep(rotPos, pos.yaw);
 				if (close.distanceTo(relative) > pos.distanceTo(relative)) {
 					close = pos;
 				}
@@ -122,9 +120,8 @@ public class MovementTrack {
 			Vec3d closePos = center.add(close).addVector(0, heightOffset, 0);
 			double distToClose = closePos.distanceTo(estimatedPosition);
 			
-			Vec3d curveDelta = VecUtil.fromWrongYaw(distToClose, close.yaw);
-			curveDelta = VecUtil.rotateWrongYaw(curveDelta, rail.info.placementInfo.facing().getHorizontalAngle() - 90);
-			
+			Vec3d curveDelta = VecUtil.fromYaw(distToClose, close.yaw);
+
 			Vec3d forward = closePos.add(curveDelta);
 			Vec3d backward = closePos.subtract(curveDelta);
 			
