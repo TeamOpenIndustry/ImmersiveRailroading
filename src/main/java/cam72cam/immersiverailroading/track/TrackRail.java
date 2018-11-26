@@ -19,8 +19,7 @@ public class TrackRail extends TrackBase {
 
 		tileRail.info = builder.info;
 		tileRail.setDrops(builder.drops);
-		tileRail.markDirty();
-		
+
 		return tileRail;
 	}
 }
