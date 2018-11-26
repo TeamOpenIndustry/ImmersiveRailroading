@@ -1,18 +1,27 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.net.PreviewRenderPacket;
+import cam72cam.immersiverailroading.proxy.ChunkManager;
+import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderCubicCurve;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TileRailPreview extends SyncdTileEntity {
+public class TileRailPreview extends SyncdTileEntity implements ITickable {
+	private int ticksAlive;
+	private RailInfo info;
+
 	public static TileRailPreview get(IBlockAccess world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileRailPreview ? (TileRailPreview) te : null;
@@ -96,6 +105,7 @@ public class TileRailPreview extends SyncdTileEntity {
 		if (nbt.hasKey("customInfo")) {
 			customInfo = new PlacementInfo(nbt.getCompoundTag("customInfo"));
 		}
+		info = new RailInfo(world, item, placementInfo, customInfo);
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -109,10 +119,38 @@ public class TileRailPreview extends SyncdTileEntity {
 	}
 	
 	public RailInfo getRailRenderInfo() {
-		if (hasTileData || !world.isRemote) {
-			RailInfo info = new RailInfo(world, item, placementInfo, customInfo);
-			return info;
+		if (hasWorld() && info.world == null) {
+			info = new RailInfo(world, item, placementInfo, customInfo);
 		}
-		return null;
+		return info;
+	}
+
+	public void markDirty() {
+		super.markDirty();
+        info = new RailInfo(world, item, placementInfo, customInfo);
+        if (isMulti()) {
+			ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
+		}
+	}
+
+	public boolean isMulti() {
+		BuilderBase builder = info.getBuilder();
+		if (builder instanceof BuilderCubicCurve) {
+			BuilderCubicCurve bcc = (BuilderCubicCurve) builder;
+			return bcc.subBuilders != null;
+		}
+		return false;
+	}
+
+	@Override
+	public void update() {
+		if (!world.isRemote && isMulti()) {
+			ChunkManager.flagEntityPos(world, pos);
+
+			if (this.ticksAlive % 20 == 0) {
+				ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
+			}
+			this.ticksAlive ++;
+		}
 	}
 }
