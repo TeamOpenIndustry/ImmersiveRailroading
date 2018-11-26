@@ -44,6 +44,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 							track.overrideParent(subBuilders.get(0).getParentPos());
 						}
 					}
+				} else {
+					tracks = subBuilder.tracks;
 				}
 				subBuilders.add(subBuilder);
 			}
