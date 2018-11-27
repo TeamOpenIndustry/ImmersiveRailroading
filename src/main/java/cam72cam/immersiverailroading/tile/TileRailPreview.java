@@ -7,6 +7,8 @@ import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderCubicCurve;
+import cam72cam.immersiverailroading.track.BuilderSwitch;
+import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
@@ -134,10 +136,8 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 	}
 
 	public boolean isMulti() {
-		BuilderBase builder = info.getBuilder();
-		if (builder instanceof BuilderCubicCurve) {
-			BuilderCubicCurve bcc = (BuilderCubicCurve) builder;
-			return bcc.subBuilders != null;
+		if (info.getBuilder() instanceof IIterableTrack) {
+			return ((IIterableTrack)info.getBuilder()).getSubBuilders() != null;
 		}
 		return false;
 	}

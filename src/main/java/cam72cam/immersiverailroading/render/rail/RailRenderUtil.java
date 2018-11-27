@@ -29,9 +29,12 @@ public class RailRenderUtil {
 			Vec3d pos = info.placementInfo.placementPosition;
 			pos = pos.subtract(new Vec3d(new BlockPos(pos)));
 			GL11.glTranslated(- pos.x, - pos.y, - pos.z);
+			Minecraft.getMinecraft().mcProfiler.startSection("base");
 			RailBaseRender.draw(info);
+			Minecraft.getMinecraft().mcProfiler.endStartSection("overlay");
 			RailBaseOverlayRender.draw(info);
 			GL11.glPopMatrix();
+			Minecraft.getMinecraft().mcProfiler.endSection();
 		}
 		
 		Minecraft.getMinecraft().mcProfiler.startSection("rail");

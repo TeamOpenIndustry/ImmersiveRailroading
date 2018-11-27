@@ -8,7 +8,9 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderCubicCurve;
+import cam72cam.immersiverailroading.track.IIterableTrack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
@@ -205,7 +207,7 @@ public class RenderOverride {
 				if (!preview.hasWorld()) {
 					preview.setWorld(Minecraft.getMinecraft().player.world);
 				}
-				for (BuilderCubicCurve builder : ((BuilderCubicCurve) preview.getRailRenderInfo().getBuilder(preview.getPos())).subBuilders) {
+				for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getPos())).getSubBuilders()) {
 					RailInfo info = builder.info;
 					Vec3d placementPosition = info.placementInfo.placementPosition;
 
