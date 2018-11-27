@@ -7,12 +7,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 
 	private BuilderIterator turnBuilder;
 	private BuilderStraight straightBuilder;
+	private final BuilderStraight straightBuilderReal;
 
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
@@ -38,6 +40,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		
 
 		straightBuilder = new BuilderStraight(straightInfo, pos, true);
+		straightBuilderReal = new BuilderStraight(straightInfo.withType(TrackItems.STRAIGHT), pos, true);
 		
 		turnBuilder.overrideFlexible = true;
 		
@@ -52,7 +55,30 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 			}
 		}
 	}
-	
+
+	@Override
+	public List<BuilderBase> getSubBuilders() {
+		List<BuilderBase> subTurns = turnBuilder.getSubBuilders();
+		List<BuilderBase> subStraights = straightBuilderReal.getSubBuilders();
+
+		if (subTurns == null && subStraights == null) {
+			return null;
+		}
+
+		List<BuilderBase> res = new ArrayList<>();
+		if (subTurns == null) {
+			res.add(turnBuilder);
+		} else {
+			res.addAll(subTurns);
+		}
+		if (subStraights == null) {
+			res.add(straightBuilderReal);
+		} else {
+			res.addAll(subStraights);
+		}
+		return res;
+	}
+
 	@Override
 	public int costTies() {
 		return straightBuilder.costTies() + turnBuilder.costTies();

@@ -17,11 +17,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class BuilderCubicCurve extends BuilderIterator {
-	public List<BuilderCubicCurve> subBuilders;
+	private List<BuilderBase> subBuilders;
 
 	public BuilderCubicCurve(RailInfo info, BlockPos pos) {
 		this(info, pos, false);
 	}
+
+	@Override
+	public List<BuilderBase> getSubBuilders() {
+		return subBuilders;
+	}
+
 	public BuilderCubicCurve(RailInfo info, BlockPos pos, boolean endOfTrack) {
 		super(info, pos, endOfTrack);
 		CubicCurve curve = getCurve();
@@ -96,6 +102,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 		List<PosStep> res = new ArrayList<>();
 		CubicCurve curve = getCurve();
 
+		// HACK for super long curves
+		// Skip the super long calculation since it'll be overridden anyways
+		curve = curve.subsplit(200).get(0);
+
 		List<Vec3d> points = curve.toList(stepSize);
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
@@ -120,7 +130,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			return super.costTies();
 		} else {
-			return subBuilders.stream().mapToInt((BuilderCubicCurve::costTies)).sum();
+			return subBuilders.stream().mapToInt((BuilderBase::costTies)).sum();
 		}
 	}
 
@@ -129,7 +139,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			return super.costRails();
 		} else {
-			return subBuilders.stream().mapToInt((BuilderCubicCurve::costRails)).sum();
+			return subBuilders.stream().mapToInt((BuilderBase::costRails)).sum();
 		}
 	}
 
@@ -138,7 +148,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			return super.costBed();
 		} else {
-			return subBuilders.stream().mapToInt((BuilderCubicCurve::costBed)).sum();
+			return subBuilders.stream().mapToInt((BuilderBase::costBed)).sum();
 		}
 	}
 
@@ -147,7 +157,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			return super.costFill();
 		} else {
-			return subBuilders.stream().mapToInt((BuilderCubicCurve::costFill)).sum();
+			return subBuilders.stream().mapToInt((BuilderBase::costFill)).sum();
 		}
 	}
 
@@ -166,7 +176,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			return super.canBuild();
 		} else {
-			return subBuilders.stream().allMatch(BuilderCubicCurve::canBuild);
+			return subBuilders.stream().allMatch(BuilderBase::canBuild);
 		}
 	}
 
@@ -175,7 +185,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			super.build();
 		} else {
-			subBuilders.stream().forEach(BuilderCubicCurve::build);
+			subBuilders.stream().forEach(BuilderBase::build);
 		}
 	}
 
@@ -184,7 +194,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			super.clearArea();
 		} else {
-			subBuilders.stream().forEach(BuilderCubicCurve::clearArea);
+			subBuilders.stream().forEach(BuilderBase::clearArea);
 		}
 	}
 
@@ -193,7 +203,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			return super.getTracksForRender();
 		} else {
-			return subBuilders.subList(0, Math.min(subBuilders.size(), 3)).stream().map(BuilderCubicCurve::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
+			return subBuilders.subList(0, Math.min(subBuilders.size(), 3)).stream().map(BuilderBase::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
 		}
 	}
 
@@ -203,7 +213,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			return super.getRenderData();
 		} else {
 			List<VecYawPitch> data = new ArrayList<>();
-			for (BuilderCubicCurve curve : subBuilders.subList(0, Math.min(subBuilders.size(), 3))) {
+			for (BuilderBase curve : subBuilders.subList(0, Math.min(subBuilders.size(), 3))) {
 				Vec3d offset = new Vec3d(curve.pos.subtract(pos));
 				for (VecYawPitch rd : curve.getRenderData()) {
 					rd = new VecYawPitch(rd.x + offset.x, rd.y + offset.y, rd.z + offset.z, rd.yaw, rd.pitch, rd.length);

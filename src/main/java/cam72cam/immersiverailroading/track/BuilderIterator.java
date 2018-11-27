@@ -132,7 +132,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		double scale = info.settings.gauge.scale();
 		List<PosStep> points = getPath(scale);
 
-		boolean switchStraight = info.switchState != SwitchState.TURN;
+		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
 		int switchSize = 0;
 		TrackDirection guessDirection = info.placementInfo.direction;
 		if (switchStraight ) {

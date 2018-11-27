@@ -31,7 +31,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 			return;
 		}
 
-		Minecraft.getMinecraft().mcProfiler.startSection("tile_rail");
+		Minecraft.getMinecraft().mcProfiler.startSection("tile_rail_preview");
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
 		GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
 		if (GLContext.getCapabilities().OpenGL14) {
