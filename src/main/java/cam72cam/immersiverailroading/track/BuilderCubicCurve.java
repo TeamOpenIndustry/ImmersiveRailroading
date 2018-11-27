@@ -61,9 +61,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 	private HashMap<Double, List<PosStep>> cache;
 
 	public CubicCurve getCurve() {
-		Vec3d nextPos = VecUtil.fromYaw(info.settings.length, 45);
+		Vec3d nextPos = VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45);
 
-		if (info.customInfo != null && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
+		boolean isDefault = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition);
+		if (!isDefault) {
 			nextPos = info.customInfo.placementPosition.subtract(info.placementInfo.placementPosition);
 		}
 
@@ -74,9 +75,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 			magnitude1 = info.placementInfo.magnitude;
 		}
 
-		float angle2 = angle - 90;
+		float angle2 = angle + 180;
 
-		if (info.customInfo != null) {
+		if (!isDefault) {
 			angle2 = info.customInfo.yaw;
 			if (info.customInfo.magnitude != 0) {
 				magnitude2 = info.customInfo.magnitude;
