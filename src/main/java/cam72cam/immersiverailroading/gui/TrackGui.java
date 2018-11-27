@@ -67,7 +67,7 @@ public class TrackGui extends GuiScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			return val > 0 && val <= 10000;
+			return val > 0 && val <= 1000;
 		}
 	};
 	private BlockPos tilePreviewPos;
