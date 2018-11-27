@@ -43,7 +43,7 @@ public class TileRail extends TileRailBase {
 			return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 		}
 		int length = info.settings.length;
-		if (info.settings.type == TrackItems.CUSTOM && info.customInfo != null) {
+		if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 		}
 		return new AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos);
