@@ -32,7 +32,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<Pair<Integer, Integer>, Integer>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
-		double horiz = info.settings.gauge.value();
+		double horiz = info.settings.gauge.value()/2;
 		if (info.settings.isGradeCrossing) {
 			horiz += 2f * info.settings.gauge.scale();
 		}
