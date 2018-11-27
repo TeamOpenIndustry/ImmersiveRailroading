@@ -223,11 +223,14 @@ public class RenderOverride {
 					}
 				}
 			}
+			if (GLContext.getCapabilities().OpenGL14) {
+				GL14.glBlendColor(1, 1, 1, 1f);
+			}
 			blend.restore();
 			Minecraft.getMinecraft().mcProfiler.endSection();
 		}
         model.restoreTexture();
-        
+
         Minecraft.getMinecraft().mcProfiler.endSection();;
 	}
 }
