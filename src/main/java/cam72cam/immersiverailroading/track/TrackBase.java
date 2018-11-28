@@ -32,14 +32,25 @@ public abstract class TrackBase {
 		this.block = block;
 	}
 
+	public boolean isDownSolid() {
+		BlockPos pos = getPos();
+		return
+            // Config to bypass solid block requirement
+            !Config.ConfigDamage.requireSolidBlocks ||
+            // Turn table override
+            solidNotRequired ||
+            // Valid block beneath
+            builder.info.world.getBlockState(pos.down()).isTopSolid() ||
+            // Block below is replaceable and we will replace it with something
+            (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
+            // Block below is an IR Rail
+            BlockUtil.isIRRail(builder.info.world, pos.down());
+	}
+
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		BlockPos pos = getPos();
-		IBlockState down = builder.info.world.getBlockState(pos.down());
-		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.info.world.isAirBlock(pos.down())) ||
-				(BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
-				solidNotRequired || BlockUtil.isIRRail(builder.info.world, pos);
-		return BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) && downOK;
+		return isDownSolid() && BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible);
 	}
 
 	public TileEntity placeTrack() {
@@ -48,7 +59,8 @@ public abstract class TrackBase {
 		if (builder.info.settings.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
 			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill));
 		}
-		
+
+
 		NBTTagCompound replaced = null;
 		
 		IBlockState state = builder.info.world.getBlockState(pos);
@@ -57,10 +69,10 @@ public abstract class TrackBase {
 		if (removed != null) {
 			if (removed instanceof BlockRailBase) {
 				te = TileRailBase.get(builder.info.world, pos);
-				if (te != null) {					
+				if (te != null) {
 					replaced = te.serializeNBT();
 				}
-			} else {				
+			} else {
 				removed.dropBlockAsItem(builder.info.world, pos, state, 0);
 			}
 		}
