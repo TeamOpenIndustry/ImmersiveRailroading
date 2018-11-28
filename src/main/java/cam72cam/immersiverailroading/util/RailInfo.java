@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.track.*;
 import cam72cam.immersiverailroading.track.BuilderCubicCurve;
 import net.minecraft.entity.player.EntityPlayer;
@@ -57,7 +58,7 @@ public class RailInfo {
 				this.customInfo.direction,
 		};
 		String id = Arrays.toString(props);
-		if (!placementInfo.placementPosition.equals(customInfo.placementPosition)) {
+		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
 			id += placementInfo.placementPosition;
 			id += customInfo.placementPosition;
 		}
