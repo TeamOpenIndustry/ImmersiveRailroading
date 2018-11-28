@@ -143,37 +143,25 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
-	private List<TrackBase> trackCheckCache;
 	public double percentFloating() {
-		if (trackCheckCache == null) {
-			if (info == null) {
-				return 0;
-			}
-			trackCheckCache = info.getBuilder().getTracksForRender();
+		int floating = 0;
+		int total = 0;
+
+		if (info.world == null) {
+			return 0;
 		}
-		
-		double floating = 0;
-		
-		BlockPos offset = null;
-		for (TrackBase track : trackCheckCache) {
-			if (track instanceof TrackRail) {
-				offset = this.getPos().subtract(new BlockPos(track.getPos().getX(), 0, track.getPos().getZ()));
-				break;
-			}
-		}
-		
-		for (TrackBase track : trackCheckCache) {
-			BlockPos tpos = track.getPos().down().add(offset);
+
+		for (TrackBase track : info.getBuilder(pos).getTracksForRender()) {
+			BlockPos tpos = track.getPos();
+			total++;
+
 			if (!world.isBlockLoaded(tpos)) {
 				return 0;
 			}
-			boolean isOnRealBlock = world.isSideSolid(tpos, EnumFacing.UP, false) ||
-					!Config.ConfigDamage.requireSolidBlocks && !world.isAirBlock(tpos) ||
-					BlockUtil.isIRRail(world, tpos);
-			if (!isOnRealBlock) {
-				floating += 1.0 / trackCheckCache.size();
+			if (!track.isDownSolid()) {
+				floating++;
 			}
 		}
-		return floating;
+		return floating / (double)total;
 	}
 }
