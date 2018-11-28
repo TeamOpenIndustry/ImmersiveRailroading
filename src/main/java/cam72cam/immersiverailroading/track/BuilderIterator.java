@@ -152,14 +152,16 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			PosStep switchPos = cur;
 			if (switchStraight ) {
 				double switchOffset = 1 - (i / (double)switchSize);
+				double switchOffsetNext = 1 - ((i+1) / (double)switchSize);
 				if (switchOffset > 0) {
-					Vec3d offset = VecUtil.fromYaw(0.2, cur.yaw + 90 + info.placementInfo.direction.toYaw());
-					offset = offset.scale(switchOffset * scale);
-					float offsetAngle = (float) (switchSize / 3.14 * scale); // Close enough for now
+					double dist = 0.2 * switchOffset * scale;
+					double distNext = 0.2 * switchOffsetNext * scale;
+					Vec3d offset = VecUtil.fromYaw(dist, cur.yaw + 90 + info.placementInfo.direction.toYaw());
+					double offsetAngle = Math.toDegrees((dist - distNext) / scale);
 					if (guessDirection == TrackDirection.RIGHT)  {
 						offsetAngle = -offsetAngle;
 					}
-					switchPos = new PosStep(cur.add(offset), cur.yaw + offsetAngle);
+					switchPos = new PosStep(cur.add(offset), cur.yaw + (float)offsetAngle);
 				}
 			}
 			
