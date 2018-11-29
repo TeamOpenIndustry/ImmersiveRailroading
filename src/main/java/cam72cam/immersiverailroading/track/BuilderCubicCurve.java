@@ -59,7 +59,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 	private HashMap<Double, List<PosStep>> cache;
 
 	public CubicCurve getCurve() {
-		Vec3d nextPos = VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45);
+		Vec3d nextPos = new Vec3d(new BlockPos(VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45)));
 
 		boolean isDefault = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition);
 		if (!isDefault) {
