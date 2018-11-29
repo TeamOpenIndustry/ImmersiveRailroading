@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -58,7 +59,9 @@ public class ItemTrackBlueprint extends Item {
 		pos = pos.up();
 		
 		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			pos = pos.down();
+			if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+				pos = pos.down();
+			}
 		}
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ);
 		
