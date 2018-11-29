@@ -123,7 +123,6 @@ public class MovementTrack {
 
 			Vec3d curveDelta = VecUtil.fromYaw(distToClose, close.yaw);
 			curveDelta = VecUtil.rotatePitch(curveDelta, -close.pitch);
-			System.out.println(close.pitch);
 
 			Vec3d forward = closePos.add(curveDelta);
 			Vec3d backward = closePos.subtract(curveDelta);
