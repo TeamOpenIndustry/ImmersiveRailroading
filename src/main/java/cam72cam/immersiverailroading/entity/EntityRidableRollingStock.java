@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import util.Matrix4;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock {
 	public EntityRidableRollingStock(World world, String defID) {
@@ -215,7 +216,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	public void updatePassenger(Entity passenger) {
 		if (this.isPassenger(passenger) && passengerPositions.containsKey(passenger.getPersistentID())) {
 			Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
-			pos = pos.add(passengerPositions.get(passenger.getPersistentID()));
+			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
+			pos = pos.add(ppos);
+			pos = new Matrix4().rotate(Math.toRadians(rotationPitch), 0, 0 , 1).apply(pos);
 			pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 			pos = pos.add(this.getPositionVector());
 			if (passenger instanceof EntityPlayer && shouldRiderSit()) {
@@ -275,20 +278,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	public void handlePassengerPositions(Map<UUID, Vec3d> passengerPositions) {
 		this.passengerPositions = passengerPositions;
-		for (UUID id : passengerPositions.keySet()) {
-			for (Entity ent : world.loadedEntityList) {
-				if (ent.getPersistentID().equals(id)) {
-					Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
-					pos = pos.add(passengerPositions.get(id));
-					pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
-					pos = pos.add(this.getPositionVector());
-					if (ent instanceof EntityPlayer && shouldRiderSit()) {
-						pos = pos.subtract(0, 0.75, 0);
-					}
-					ent.setPosition(pos.x, pos.y, pos.z);
-					break;
-				}
-			}
+		for (Entity passenger : this.getPassengers()) {
+			this.updatePassenger(passenger);
 		}
 	}
 	
