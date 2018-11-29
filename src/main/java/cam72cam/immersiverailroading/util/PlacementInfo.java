@@ -13,13 +13,13 @@ public class PlacementInfo {
 	public final Vec3d placementPosition; // relative
 	public final TrackDirection direction;
 	public final float yaw;
-	public final float magnitude;
+	public final Vec3d control;
 
-	public PlacementInfo(Vec3d placementPosition, TrackDirection direction, float yaw, float magnitude) {
+	public PlacementInfo(Vec3d placementPosition, TrackDirection direction, float yaw, Vec3d control) {
 		this.placementPosition = placementPosition;
 		this.direction = direction;
 		this.yaw = yaw;
-		this.magnitude = magnitude;
+		this.control = control;
 	}
 	
 	public PlacementInfo(ItemStack stack, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
@@ -89,7 +89,7 @@ public class PlacementInfo {
 		
 		this.placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		this.direction = direction;
-		this.magnitude = 0;
+		this.control = null;
 	}
 
 	public PlacementInfo(NBTTagCompound nbt) {
@@ -111,7 +111,14 @@ public class PlacementInfo {
 			}
 			this.yaw = facingAngle + rotAngle;
 		}
-		this.magnitude = nbt.getFloat("magnitude");
+		if (nbt.hasKey("magnitude")) {
+			// TODO: LEGACY REMOVE in 1.6
+			this.control = placementPosition.add(VecUtil.fromYaw(nbt.getDouble("magnitude"), yaw));
+		} else if (nbt.hasKey("control")) {
+			this.control = NBTUtil.nbtToVec3d(nbt.getCompoundTag("control")).addVector(offset.getX(), offset.getY(), offset.getZ());
+		} else {
+			this.control = null;
+		}
 	}
 	
 	public NBTTagCompound toNBT() {
@@ -123,7 +130,9 @@ public class PlacementInfo {
 		nbt.setTag("placementPosition", NBTUtil.vec3dToNBT(placementPosition.subtract(offset.getX(), offset.getY(), offset.getZ())));
 		nbt.setFloat("yaw", yaw);
 		nbt.setInteger("direction", direction.ordinal());
-		nbt.setFloat("magnitude", magnitude);
+		if (control != null) {
+			nbt.setTag("control", NBTUtil.vec3dToNBT(control.subtract(offset.getX(), offset.getY(), offset.getZ())));
+		}
 		return nbt;
 	}
 

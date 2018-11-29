@@ -6,13 +6,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import cam72cam.immersiverailroading.library.SwitchState;
-import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -39,8 +37,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 				if (pos.equals(BlockPos.ORIGIN)) {
 					delta = delta.subtract(new Vec3d(new BlockPos(info.placementInfo.placementPosition)));
 				}
-				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), (float) subCurve.p1.distanceTo(subCurve.ctrl1));
-				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180, (float) subCurve.p2.distanceTo(subCurve.ctrl2));
+				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), subCurve.ctrl1.add(delta));
+				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180, subCurve.ctrl2.add(delta));
 				RailInfo subInfo = new RailInfo(info.world, info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, 0);
 				BlockPos sPos = new BlockPos(startPos.placementPosition);
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, sPos);
@@ -68,24 +66,24 @@ public class BuilderCubicCurve extends BuilderIterator {
 			nextPos = info.customInfo.placementPosition.subtract(info.placementInfo.placementPosition);
 		}
 
-		double magnitude1 = nextPos.lengthVector()/2;
-		double magnitude2 = nextPos.lengthVector()/2;
+		double ctrlGuess = nextPos.lengthVector()/2;
 		float angle = info.placementInfo.yaw;
-		if (info.placementInfo.magnitude != 0) {
-			magnitude1 = info.placementInfo.magnitude;
-		}
 
 		float angle2 = angle + 180;
 
 		if (!isDefault) {
 			angle2 = info.customInfo.yaw;
-			if (info.customInfo.magnitude != 0) {
-				magnitude2 = info.customInfo.magnitude;
-			}
 		}
 
-		Vec3d ctrl1 = VecUtil.fromYaw(magnitude1, angle);
-		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(magnitude2, angle2));
+		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
+		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
+
+		if (info.placementInfo.control != null) {
+			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition);
+		}
+		if (info.customInfo.control != null && !isDefault) {
+            ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition);
+		}
 
 		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos);
 	}
