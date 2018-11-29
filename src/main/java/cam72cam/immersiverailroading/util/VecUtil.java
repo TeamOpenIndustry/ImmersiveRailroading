@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.util;
 
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import util.Matrix4;
 
 public class VecUtil {
 	private VecUtil() {
@@ -16,7 +17,11 @@ public class VecUtil {
 		return (yaw + 360f) % 360f;
 	}
 	public static Vec3d rotateYaw(Vec3d pos, float rotationYaw) {
-		return fromYaw(pos.x, rotationYaw).add(fromYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
+		//return fromYaw(pos.x, rotationYaw).add(fromYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
+		return new Matrix4().rotate(Math.toRadians(rotationYaw), 0, 1, 0).apply(pos);
+	}
+	public static Vec3d rotatePitch(Vec3d pos, float rotationPitch) {
+		return new Matrix4().rotate(Math.toRadians(rotationPitch), 0, 0, 1).apply(pos);
 	}
 
 	public static Vec3d fromWrongYaw(double distance, float yaw)  {
