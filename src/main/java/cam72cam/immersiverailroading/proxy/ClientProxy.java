@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.function.Function;
 
 import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.nbt.NBTTagCompound;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -560,6 +562,7 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onRenderMouseover(DrawBlockHighlightEvent event) {
 		EntityPlayer player = event.getPlayer();
+		World world = player.world;
 		ItemStack stack = event.getPlayer().getHeldItemMainhand();
 		BlockPos pos = event.getTarget().getBlockPos();
 		
@@ -570,12 +573,15 @@ public class ClientProxy extends CommonProxy {
 		        float hitX = (float)(vec.x - pos.getX());
 		        float hitY = (float)(vec.y - pos.getY());
 		        float hitZ = (float)(vec.z - pos.getZ());
-		        
-		        if (player.getEntityWorld().getBlockState(pos).getBlock() instanceof BlockRailBase) {
-		        	pos = pos.down();
-		        }
-		        
-		        pos = pos.up();
+
+				pos = pos.up();
+
+				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+						pos = pos.down();
+					}
+				}
+
 		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
 		        String key = info.uniqueID + pos.toLong();
 				RailInfo cached = infoCache.get(key);

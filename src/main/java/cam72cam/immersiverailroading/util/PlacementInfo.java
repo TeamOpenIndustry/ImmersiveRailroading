@@ -86,7 +86,7 @@ public class PlacementInfo {
 			}
 			break;
 		}
-		
+
 		this.placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		this.direction = direction;
 		this.control = null;
