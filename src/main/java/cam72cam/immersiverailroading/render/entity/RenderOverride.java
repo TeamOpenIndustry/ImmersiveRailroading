@@ -196,7 +196,7 @@ public class RenderOverride {
 
         ClientProxy proxy = (ClientProxy) ImmersiveRailroading.proxy;
 		Collection<TileRailPreview> previews = proxy.getPreviews();
-		if (previews != null) {
+		if (previews != null && previews.size() > 0) {
 			Minecraft.getMinecraft().mcProfiler.startSection("tile_rail_preview");
 			blend = new GLBoolTracker(GL11.GL_BLEND, true);
 			GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
@@ -223,6 +223,7 @@ public class RenderOverride {
 					}
 				}
 			}
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			if (GLContext.getCapabilities().OpenGL14) {
 				GL14.glBlendColor(1, 1, 1, 1f);
 			}
