@@ -43,12 +43,15 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 			Vec3d placementPosition = info.placementInfo.placementPosition;
 			placementPosition = placementPosition.subtract(new Vec3d(te.getPos())).addVector(x, y, z);
 			GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
-
 			if (!te.isMulti()) {
 				RailRenderUtil.render(info, true);
 			}
-
-			GL11.glTranslated(0, 0.5, 0);
+		}
+		GL11.glPopMatrix();
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(x, y, z);
+			GL11.glTranslated(0.5, 0.5, 0.5);
 			Minecraft.getMinecraft().getRenderItem().renderItem(new ItemStack(IRItems.ITEM_GOLDEN_SPIKE), ItemCameraTransforms.TransformType.GROUND);
 		}
 		GL11.glPopMatrix();
