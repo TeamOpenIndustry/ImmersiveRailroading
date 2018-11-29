@@ -11,6 +11,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import trackapi.lib.ITrack;
 import trackapi.lib.Util;
+import util.Matrix4;
 
 import java.util.List;
 
@@ -119,14 +120,16 @@ public class MovementTrack {
 			
 			Vec3d closePos = center.add(close).addVector(0, heightOffset, 0);
 			double distToClose = closePos.distanceTo(estimatedPosition);
-			
+
 			Vec3d curveDelta = VecUtil.fromYaw(distToClose, close.yaw);
+			curveDelta = VecUtil.rotatePitch(curveDelta, -close.pitch);
+			System.out.println(close.pitch);
 
 			Vec3d forward = closePos.add(curveDelta);
 			Vec3d backward = closePos.subtract(curveDelta);
-			
-			
-			
+
+
+
 			if (forward.distanceTo(estimatedPosition) < backward.distanceTo(estimatedPosition)) {
 				return forward;
 			} else {

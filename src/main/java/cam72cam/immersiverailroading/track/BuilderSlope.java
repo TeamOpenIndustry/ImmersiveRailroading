@@ -19,7 +19,7 @@ public class BuilderSlope extends BuilderStraight {
 		float startHeight = slope/2;
 
 		for (PosStep cur : super.getPath(stepSize)) {
-			res.add(new PosStep(cur.x, cur.y + startHeight + slope * cur.distanceTo(Vec3d.ZERO), cur.z, cur.yaw));
+			res.add(new PosStep(cur.x, cur.y + startHeight + slope * cur.distanceTo(Vec3d.ZERO), cur.z, cur.yaw, (float)-Math.toDegrees(Math.atan(slope))));
 		}
 		
 		return res;

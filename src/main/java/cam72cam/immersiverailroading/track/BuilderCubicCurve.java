@@ -108,15 +108,23 @@ public class BuilderCubicCurve extends BuilderIterator {
 		List<Vec3d> points = curve.toList(stepSize);
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
-			float angleCurve;
+			float yaw;
+			float pitch;
 			if (i == points.size()-1) {
-				angleCurve = curve.angleStop();
+				Vec3d next = points.get(i-1);
+				pitch = (float) Math.toDegrees(Math.atan2(next.y - p.y, next.distanceTo(p)));
+                yaw = curve.angleStop();
 			} else if (i == 0) {
-				angleCurve = curve.angleStart();
+				Vec3d next = points.get(i+1);
+				pitch = (float) -Math.toDegrees(Math.atan2(next.y - p.y, next.distanceTo(p)));
+				yaw = curve.angleStart();
 			} else {
-				angleCurve = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
+				Vec3d prev = points.get(i-1);
+				Vec3d next = points.get(i+1);
+				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
+				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
-			res.add(new PosStep(p, angleCurve));
+			res.add(new PosStep(p, yaw, pitch));
 		}
 		cache.put(stepSize, res);
 		return cache.get(stepSize);

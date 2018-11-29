@@ -218,7 +218,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
 			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
 			pos = pos.add(ppos);
-			pos = new Matrix4().rotate(Math.toRadians(rotationPitch), 0, 0 , 1).apply(pos);
+			pos = VecUtil.rotatePitch(pos, rotationPitch);
 			pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 			pos = pos.add(this.getPositionVector());
 			if (passenger instanceof EntityPlayer && shouldRiderSit()) {
