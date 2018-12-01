@@ -84,6 +84,10 @@ public class CubicCurve {
         List<Vec3d> res = new ArrayList<>();
         List<Vec3d> resRev = new ArrayList<>();
         res.add(p1);
+        if (p1.equals(p2)) {
+            return res;
+        }
+
         resRev.add(p2);
         double precision = 5;
 

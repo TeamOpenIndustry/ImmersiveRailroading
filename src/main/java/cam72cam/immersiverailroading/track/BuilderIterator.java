@@ -172,9 +172,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 			}
 			
-			float angle = 0;
+			float angle;
 			if (points.size() == 1) {
-				//NOP
+				angle = 0;
 			} else if (i+1 == points.size()) {
 				PosStep next = points.get(i-1);
 				angle = delta(next.yaw, cur.yaw);
