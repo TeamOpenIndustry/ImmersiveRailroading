@@ -110,7 +110,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 			Vec3d p = points.get(i);
 			float yaw;
 			float pitch;
-			if (i == points.size()-1) {
+			if (points.size() == 1) {
+				yaw = info.placementInfo.yaw;
+				pitch = 0;
+			} else if (i == points.size()-1) {
 				Vec3d next = points.get(i-1);
 				pitch = (float) Math.toDegrees(Math.atan2(next.y - p.y, next.distanceTo(p)));
                 yaw = curve.angleStop();
