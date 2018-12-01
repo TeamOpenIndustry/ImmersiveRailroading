@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,6 +34,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
 		
 		double horiz = info.settings.gauge.scale();
+		if (Config.ConfigDebug.oldNarrowWidth && info.settings.gauge.value() < 1) {
+			horiz = horiz/2;
+		}
 		if (info.settings.isGradeCrossing) {
 			horiz += 2f * info.settings.gauge.scale();
 		}
