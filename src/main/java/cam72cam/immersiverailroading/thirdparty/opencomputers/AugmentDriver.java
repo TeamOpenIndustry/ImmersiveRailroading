@@ -236,6 +236,44 @@ public class AugmentDriver implements DriverBlock {
 				}
 				info.put("direction", dir.toString());
 				
+				for (EntityCoupleableRollingStock car : stock.getTrain()) {
+					if (car instanceof Locomotive) {
+
+						EntityRollingStockDefinition def = car.getDefinition();
+
+						info.put("LOCO_"+locomotiveCount+"_id", def.defID);
+						info.put("LOCO_"+locomotiveCount+"_name", def.name());
+						info.put("LOCO_"+locomotiveCount+"_tag", car.tag);
+						EnumFacing dir2 = EnumFacing.fromAngle(car.rotationYaw);
+						if (car.getCurrentSpeed().metric() < 0) {
+							dir2 = dir2.getOpposite();
+						}
+						info.put("LOCO_"+locomotiveCount+"_direction", dir2.toString());
+
+						info.put("LOCO_"+locomotiveCount+"_passengers", car.getPassengers().size() + stock.staticPassengers.size());
+						info.put("LOCO_"+locomotiveCount+"_speed", car.getCurrentSpeed().metric());
+						info.put("LOCO_"+locomotiveCount+"_weight", car.getWeight());
+						LocomotiveDefinition locoDef = ((Locomotive) car).getDefinition();
+						info.put("LOCO_"+locomotiveCount+"_horsepower", locoDef.getHorsePower(car.gauge));
+						info.put("LOCO_"+locomotiveCount+"_traction", locoDef.getStartingTractionNewtons(car.gauge));
+						info.put("LOCO_"+locomotiveCount+"_max_speed", locoDef.getMaxSpeed(car.gauge).metric());
+
+						Locomotive loco = (Locomotive) car;
+						info.put("LOCO_"+locomotiveCount+"_brake", loco.getAirBrake());
+						info.put("LOCO_"+locomotiveCount+"_throttle", loco.getThrottle());
+
+						if (car instanceof LocomotiveSteam) {
+							LocomotiveSteam steam = (LocomotiveSteam) car;
+							info.put("LOCO_"+locomotiveCount+"_pressure", steam.getBoilerPressure());
+							info.put("LOCO_"+locomotiveCount+"_temperature", steam.getBoilerTemperature());
+						}
+						if (car instanceof LocomotiveDiesel) {
+							info.put("LOCO_"+locomotiveCount+"_temperature", ((LocomotiveDiesel) car).getEngineTemperature());
+						}
+						locomotiveCount++;
+					}
+                }
+				
 				return new Object[] { info };
 			}
 			return null;
