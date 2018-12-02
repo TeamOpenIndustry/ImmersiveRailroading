@@ -143,14 +143,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
 		int switchSize = 0;
-		TrackDirection guessDirection = info.placementInfo.direction;
+		TrackDirection direction = info.placementInfo.direction;
 		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				PosStep cur = points.get(i);
 				Vec3d flatPos = VecUtil.rotateYaw(cur, info.placementInfo.yaw);
 				if (Math.abs(flatPos.z) >= 0.5 * scale) {
 					switchSize = i;
-					guessDirection = cur.yaw - info.placementInfo.yaw > 0 ? TrackDirection.RIGHT : TrackDirection.LEFT;
 					break;
 				}
 			}
@@ -165,7 +164,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					double dist = 0.2 * switchOffset * scale;
 					Vec3d offset = VecUtil.fromYaw(dist, cur.yaw + 90 + info.placementInfo.direction.toYaw());
 					double offsetAngle = Math.toDegrees(0.2/switchSize); // This line took a whole page of scribbled math
-					if (guessDirection == TrackDirection.RIGHT)  {
+					if (direction == TrackDirection.RIGHT)  {
 						offsetAngle = -offsetAngle;
 					}
 					switchPos = new PosStep(cur.add(offset), cur.yaw + (float)offsetAngle, cur.pitch);
@@ -189,7 +188,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				angle = delta(prev.yaw, next.yaw);
 			}
 			if (angle != 0) {
-				if (guessDirection == TrackDirection.RIGHT) {
+				if (direction == TrackDirection.RIGHT) {
 					data.add(new VecYawPitch(switchPos.x, switchPos.y, switchPos.z, switchPos.yaw, switchPos.pitch, (1 - angle / 180) * (float) info.settings.gauge.scale(), "RAIL_LEFT"));
 					data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, (1 + angle / 180) * (float) info.settings.gauge.scale(), "RAIL_RIGHT"));
 				} else {
