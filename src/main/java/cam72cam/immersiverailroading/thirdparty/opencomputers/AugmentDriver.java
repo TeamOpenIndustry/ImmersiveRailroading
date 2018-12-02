@@ -212,7 +212,9 @@ public class AugmentDriver implements DriverBlock {
 				info.put("weight", stock.getWeight());
 
 				if (stock instanceof Locomotive) {
-					info.put("locomotive", loco_info((Locomotive) stock));
+					for (Map.Entry<String, Object> entry : loco_info((Locomotive) stock).entrySet()) {
+						info.put(entry.getKey(), entry.getValue());
+					}
 				}
 
 				FluidStack fluid = getFluid();
@@ -243,6 +245,7 @@ public class AugmentDriver implements DriverBlock {
 			EntityCoupleableRollingStock stock = te.getStockNearBy(EntityCoupleableRollingStock.class, null);
 			if (stock != null) {
 				int locomotives=1;
+				int traction=0;
 				PhysicsAccummulator acc = new PhysicsAccummulator(stock.getCurrentTickPosAndPrune());
 				stock.mapTrain(stock, true, true, acc::accumulate);
 				Map<String, Object> info = new HashMap<String, Object>();
@@ -259,10 +262,13 @@ public class AugmentDriver implements DriverBlock {
 				
 				for (EntityCoupleableRollingStock car : stock.getTrain()) {
 					if (car instanceof Locomotive) {
+						LocomotiveDefinition locoDef = ((Locomotive)car).getDefinition();
+						traction+=locoDef.getStartingTractionNewtons(car.gauge);
 						info.put("locomotive_" + locomotives, loco_info((Locomotive) car));
 						locomotives++;
 					}
 				}
+				info.put("totoal_traction_N", traction);
 				
 				return new Object[] { info };
 			}
