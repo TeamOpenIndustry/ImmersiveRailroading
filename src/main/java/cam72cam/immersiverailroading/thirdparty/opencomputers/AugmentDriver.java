@@ -153,6 +153,42 @@ public class AugmentDriver implements DriverBlock {
 			}
 			return null;
 		}
+		
+		public Map<String, Object> loco_info(Locomotive car) {
+			TileRailBase te = TileRailBase.get(world, pos);
+			EntityMoveableRollingStock stock = te.getStockNearBy(null);
+			Map<String, Object> info = new HashMap<String, Object>();
+			EntityRollingStockDefinition def = car.getDefinition();
+
+			info.put("id", def.defID);
+			info.put("name", def.name());
+			info.put("tag", car.tag);
+			EnumFacing dir = EnumFacing.fromAngle(car.rotationYaw);
+			if (car.getCurrentSpeed().metric() < 0) {
+				dir = dir.getOpposite();
+			}
+			info.put("direction", dir.toString());
+
+			info.put("passengers", car.getPassengers().size() + stock.staticPassengers.size());
+			info.put("speed", car.getCurrentSpeed().metric());
+			info.put("weight", car.getWeight());
+			LocomotiveDefinition locoDef = car.getDefinition();
+			info.put("horsepower", locoDef.getHorsePower(car.gauge));
+			info.put("traction", locoDef.getStartingTractionNewtons(car.gauge));
+			info.put("max_speed", locoDef.getMaxSpeed(car.gauge).metric());
+			info.put("brake", car.getAirBrake());
+			info.put("throttle", car.getThrottle());
+
+			if (car instanceof LocomotiveSteam) {
+				LocomotiveSteam steam = (LocomotiveSteam) car;
+				info.put("pressure", steam.getBoilerPressure());
+				info.put("temperature", steam.getBoilerTemperature());
+			}
+			if (car instanceof LocomotiveDiesel) {
+				info.put("temperature", ((LocomotiveDiesel) car).getEngineTemperature());
+			}
+			return info;
+		}
 
 		@Callback(doc = "function():table -- returns an info dump about the current car")
 		public Object[] info(Context context, Arguments arguments) {
@@ -176,23 +212,7 @@ public class AugmentDriver implements DriverBlock {
 				info.put("weight", stock.getWeight());
 
 				if (stock instanceof Locomotive) {
-					LocomotiveDefinition locoDef = ((Locomotive) stock).getDefinition();
-					info.put("horsepower", locoDef.getHorsePower(stock.gauge));
-					info.put("traction", locoDef.getStartingTractionNewtons(stock.gauge));
-					info.put("max_speed", locoDef.getMaxSpeed(stock.gauge).metric());
-
-					Locomotive loco = (Locomotive) stock;
-					info.put("brake", loco.getAirBrake());
-					info.put("throttle", loco.getThrottle());
-
-					if (stock instanceof LocomotiveSteam) {
-						LocomotiveSteam steam = (LocomotiveSteam) stock;
-						info.put("pressure", steam.getBoilerPressure());
-						info.put("temperature", steam.getBoilerTemperature());
-					}
-					if (stock instanceof LocomotiveDiesel) {
-						info.put("temperature", ((LocomotiveDiesel)stock).getEngineTemperature());
-					}
+					info.put("locomotive", loco_info((Locomotive) stock));
 				}
 
 				FluidStack fluid = getFluid();
@@ -222,6 +242,7 @@ public class AugmentDriver implements DriverBlock {
 			TileRailBase te = TileRailBase.get(world, pos);
 			EntityCoupleableRollingStock stock = te.getStockNearBy(EntityCoupleableRollingStock.class, null);
 			if (stock != null) {
+				int locomotives=1;
 				PhysicsAccummulator acc = new PhysicsAccummulator(stock.getCurrentTickPosAndPrune());
 				stock.mapTrain(stock, true, true, acc::accumulate);
 				Map<String, Object> info = new HashMap<String, Object>();
@@ -235,6 +256,13 @@ public class AugmentDriver implements DriverBlock {
 					dir = dir.getOpposite();
 				}
 				info.put("direction", dir.toString());
+				
+				for (EntityCoupleableRollingStock car : stock.getTrain()) {
+					if (car instanceof Locomotive) {
+						info.put("locomotive_" + locomotives, loco_info((Locomotive) car));
+						locomotives++;
+					}
+				}
 				
 				return new Object[] { info };
 			}
