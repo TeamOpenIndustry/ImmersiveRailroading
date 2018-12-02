@@ -620,9 +620,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			
 			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
 				double floating = ((TileRail)this).percentFloating();
-				if (floating != 0) {
-					System.out.println("FLOATING " + floating);
-				}
 				if (floating > ConfigBalance.trackFloatingPercent) {
 					if (BlockRailBase.tryBreakRail(world, pos)) {
 						getWorld().destroyBlock(pos, true);
