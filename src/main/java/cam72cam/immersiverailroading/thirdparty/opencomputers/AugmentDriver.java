@@ -152,10 +152,9 @@ public class AugmentDriver implements DriverBlock {
 			return null;
 		}
 		
-		public Map<String, Object> loco_info(Locomotive car) {
+		public void loco_info(Locomotive car, Map<String, Object> info) {
 			TileRailBase te = TileRailBase.get(world, pos);
 			EntityMoveableRollingStock stock = te.getStockNearBy(null);
-			Map<String, Object> info = new HashMap<String, Object>();
 			EntityRollingStockDefinition def = car.getDefinition();
 
 			info.put("id", def.defID);
@@ -185,7 +184,6 @@ public class AugmentDriver implements DriverBlock {
 			if (car instanceof LocomotiveDiesel) {
 				info.put("temperature", ((LocomotiveDiesel) car).getEngineTemperature());
 			}
-			return info;
 		}
 
 		@Callback(doc = "function():table -- returns an info dump about the current car")
@@ -210,9 +208,7 @@ public class AugmentDriver implements DriverBlock {
 				info.put("weight", stock.getWeight());
 
 				if (stock instanceof Locomotive) {
-					for (Map.Entry<String, Object> entry : loco_info((Locomotive) stock).entrySet()) {
-						info.put(entry.getKey(), entry.getValue());
-					}
+					loco_info((Locomotive)stock, info);
 				}
 
 				FluidStack fluid = getFluid();
@@ -262,7 +258,9 @@ public class AugmentDriver implements DriverBlock {
 					if (car instanceof Locomotive) {
 						LocomotiveDefinition locoDef = ((Locomotive)car).getDefinition();
 						traction+=locoDef.getStartingTractionNewtons(car.gauge);
-						locos.add(loco_info((Locomotive) car));
+						Map<String, Object> sub_info = new HashMap<String, Object>();
+						loco_info((Locomotive) car, sub_info);
+						locos.add(sub_info);
 					}
 				}
 				info.put("locomotives", locos);
