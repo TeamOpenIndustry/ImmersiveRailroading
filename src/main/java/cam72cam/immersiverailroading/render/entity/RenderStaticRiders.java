@@ -22,7 +22,7 @@ public class RenderStaticRiders {
 				continue;
 			}
 			pos = pos.add(stock.getDefinition().getPassengerCenter(stock.gauge));
-			pos = VecUtil.rotateYaw(pos, stock.rotationYaw);
+			pos = VecUtil.rotateWrongYaw(pos, stock.rotationYaw);
 			//TileEntityMobSpawnerRenderer
 			Entity ent = (Entity) pass.cache;
 			GL11.glPushMatrix();

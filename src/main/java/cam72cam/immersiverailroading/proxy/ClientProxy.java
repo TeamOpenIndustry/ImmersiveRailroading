@@ -3,12 +3,13 @@ package cam72cam.immersiverailroading.proxy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.nbt.NBTTagCompound;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
@@ -144,6 +145,8 @@ import paulscode.sound.SoundSystemConfig;
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
+	private static Map<Integer, ExpireableList<BlockPos, TileRailPreview>> previews = new HashMap<>();
+	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
 
 	private static IRSoundManager manager;
 	
@@ -559,6 +562,7 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onRenderMouseover(DrawBlockHighlightEvent event) {
 		EntityPlayer player = event.getPlayer();
+		World world = player.world;
 		ItemStack stack = event.getPlayer().getHeldItemMainhand();
 		BlockPos pos = event.getTarget().getBlockPos();
 		
@@ -569,14 +573,24 @@ public class ClientProxy extends CommonProxy {
 		        float hitX = (float)(vec.x - pos.getX());
 		        float hitY = (float)(vec.y - pos.getY());
 		        float hitZ = (float)(vec.z - pos.getZ());
-		        
-		        if (player.getEntityWorld().getBlockState(pos).getBlock() instanceof BlockRailBase) {
-		        	pos = pos.down();
-		        }
-		        
-		        pos = pos.up();
+
+				pos = pos.up();
+
+				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+						pos = pos.down();
+					}
+				}
+
 		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
-		        
+		        String key = info.uniqueID + pos.toLong();
+				RailInfo cached = infoCache.get(key);
+		        if (cached != null) {
+					info = cached;
+				} else {
+		        	infoCache.put(key, info);
+				}
+
 		        GL11.glPushMatrix();
 				{
 					GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
@@ -771,7 +785,38 @@ public class ClientProxy extends CommonProxy {
 	public int getRenderDistance() {
 		return Minecraft.getMinecraft().gameSettings.renderDistanceChunks;
 	}
-	
+
+	@Override
+	public void addPreview(int dimension, TileRailPreview preview) {
+		if (!previews.containsKey(dimension)) {
+			previews.put(dimension, new ExpireableList<BlockPos, TileRailPreview>() {
+				@Override
+				public int lifespan() {
+					return 2;
+				}
+				@Override
+				public boolean sliding() {
+					return false;
+				}
+			});
+		}
+		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(dimension);
+		TileRailPreview curr = pvs.get(preview.getPos());
+		if (curr != null) {
+			if (curr.writeToNBT(new NBTTagCompound()).equals(preview.writeToNBT(new NBTTagCompound()))) {
+				preview = curr;
+			}
+		}
+		previews.get(dimension).put(preview.getPos(), preview);
+	}
+	public Collection<TileRailPreview> getPreviews() {
+		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(Minecraft.getMinecraft().player.dimension);
+		if (pvs != null) {
+			return pvs.values();
+		}
+		return null;
+	}
+
 	@SubscribeEvent
 	public static void configChanged(OnConfigChangedEvent event) {
 		if (event.getModID().equals(ImmersiveRailroading.MODID)) {

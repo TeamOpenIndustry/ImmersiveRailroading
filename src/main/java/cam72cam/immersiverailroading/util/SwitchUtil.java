@@ -43,8 +43,8 @@ public class SwitchUtil {
 		}
 
 		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
-		if(rail.info.placementInfo.rotationQuarter % 2 == 1) { // 1 and 3 need an offset to work
-			EnumFacing NormalizedFacing = rail.info.placementInfo.facing;
+		if(rail.info.placementInfo.rotationQuarter() % 2 == 1) { // 1 and 3 need an offset to work
+			EnumFacing NormalizedFacing = rail.info.placementInfo.facing();
 
 			if(rail.info.placementInfo.direction == TrackDirection.RIGHT) {
 				NormalizedFacing = NormalizedFacing.rotateY();

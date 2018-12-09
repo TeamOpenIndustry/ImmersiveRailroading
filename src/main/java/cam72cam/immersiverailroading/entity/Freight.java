@@ -82,7 +82,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 				ItemStack itemstack = cargoItems.getStackInSlot(slot);
 				if (itemstack.getCount() != 0) {
-					Vec3d pos = this.getPositionVector().add(VecUtil.fromYaw(4, this.rotationYaw+90));
+					Vec3d pos = this.getPositionVector().add(VecUtil.fromWrongYaw(4, this.rotationYaw+90));
 					world.spawnEntity(new EntityItem(this.world, pos.x, pos.y, pos.z, itemstack.copy()));
 					itemstack.setCount(0);
 				}
