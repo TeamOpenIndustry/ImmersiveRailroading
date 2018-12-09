@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -37,7 +38,9 @@ public class ItemGoldenSpike extends Item {
 			BlockPos tepos = getPosition(held);
 			if (tepos != null) {
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					pos = pos.down();
+					if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+						pos = pos.down();
+					}
 				}
 				TileRailPreview tr = TileRailPreview.get(world, tepos);
 				if (tr != null) {

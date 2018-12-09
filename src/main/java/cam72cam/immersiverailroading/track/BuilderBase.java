@@ -24,7 +24,7 @@ public abstract class BuilderBase {
 	
 	public RailInfo info;
 
-	private BlockPos pos;
+	public final BlockPos pos;
 	private BlockPos parent_pos;
 
 	public boolean overrideFlexible = false;
@@ -38,24 +38,22 @@ public abstract class BuilderBase {
 	}
 
 	public class VecYawPitch extends Vec3d {
-		private float yaw;
-		private float pitch;
-		private float length;
-		private List<String> groups;
+		public final float yaw;
+		public final float pitch;
+		public final float length;
+		public final List<String> groups;
 		
 		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, String... groups) {
-			super(xIn, yIn, zIn);
-			this.yaw = yaw;
-			this.pitch = 0;
-			this.length = -1;
-			this.groups = Arrays.asList(groups);
+			this(xIn, yIn, zIn, yaw, 0, groups);
 		}
 		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, String... groups) {
-			this(xIn, yIn, zIn, yaw, groups);
-			this.pitch = pitch;
+			this(xIn, yIn, zIn, yaw, pitch, -1, groups);
 		}
 		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, float length, String... groups) {
-			this(xIn, yIn, zIn, yaw, pitch, groups);
+			super(xIn, yIn, zIn);
+			this.yaw = yaw;
+			this.groups = Arrays.asList(groups);
+			this.pitch = pitch;
 			this.length = length;
 		}
 		public float getYaw() {
@@ -74,21 +72,8 @@ public abstract class BuilderBase {
 	
 	public abstract List<VecYawPitch> getRenderData();
 
-	public class PosRot extends BlockPos{
-		private EnumFacing rot;
-		
-		public EnumFacing getRotation() {
-			return rot;
-		}
-
-		public PosRot(BlockPos pos, EnumFacing rot) {
-			super(pos);
-			this.rot = rot;
-		}
-	}
-	
-	public PosRot convertRelativePositions(BlockPos rel) {
-		return new PosRot(pos.add(BlockUtil.rotateYaw(rel, info.placementInfo.facing.getOpposite())), info.placementInfo.facing);
+	public BlockPos convertRelativePositions(BlockPos rel) {
+		return pos.add(rel);
 	}
 	
 	public boolean canBuild() {
@@ -101,11 +86,15 @@ public abstract class BuilderBase {
 	}
 	
 	public void build() {
+		/*
+		Assume we have already tested.
+		There are a few edge cases which break with overlapping split builders
 		if (!canBuild()) {
 			return ;
 		}
+		*/
 		for(TrackBase track : tracks) {
-			track.placeTrack().markDirty();;
+			track.placeTrack().markDirty();
 		}
 	}
 	

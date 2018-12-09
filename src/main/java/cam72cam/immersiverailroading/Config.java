@@ -193,7 +193,9 @@ public class Config {
 		@Comment({"DEV ONLY: How much to artifically lag the server (per world)"})
 		public static int lagServer = 0;
 
-	}
+		@Comment({"Old Narrow track placement (single width instead of 3)"})
+        public static boolean oldNarrowWidth = false;
+    }
 
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!ConfigBalance.FuelRequired || (!ConfigBalance.ModelFuelRequired && gauge.isModel()));

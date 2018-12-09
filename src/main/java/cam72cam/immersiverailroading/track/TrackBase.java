@@ -2,16 +2,13 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.track.BuilderBase.PosRot;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Items;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
 public abstract class TrackBase {
@@ -35,23 +32,35 @@ public abstract class TrackBase {
 		this.block = block;
 	}
 
+	public boolean isDownSolid() {
+		BlockPos pos = getPos();
+		return
+            // Config to bypass solid block requirement
+            !Config.ConfigDamage.requireSolidBlocks ||
+            // Turn table override
+            solidNotRequired ||
+            // Valid block beneath
+            builder.info.world.getBlockState(pos.down()).isTopSolid() ||
+            // Block below is replaceable and we will replace it with something
+            (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
+            // Block below is an IR Rail
+            BlockUtil.isIRRail(builder.info.world, pos.down());
+	}
+
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
-		PosRot pos = getPos();
-		IBlockState down = builder.info.world.getBlockState(pos.down());
-		boolean downOK = (down.isTopSolid() || !Config.ConfigDamage.requireSolidBlocks && !builder.info.world.isAirBlock(pos.down())) ||
-				(BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
-				solidNotRequired || BlockUtil.isIRRail(builder.info.world, pos);
-		return BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) && downOK;
+		BlockPos pos = getPos();
+		return isDownSolid() && BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible);
 	}
 
 	public TileEntity placeTrack() {
-		PosRot pos = getPos();
+		BlockPos pos = getPos();
 
 		if (builder.info.settings.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
 			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill));
 		}
-		
+
+
 		NBTTagCompound replaced = null;
 		
 		IBlockState state = builder.info.world.getBlockState(pos);
@@ -60,10 +69,10 @@ public abstract class TrackBase {
 		if (removed != null) {
 			if (removed instanceof BlockRailBase) {
 				te = TileRailBase.get(builder.info.world, pos);
-				if (te != null) {					
+				if (te != null) {
 					replaced = te.serializeNBT();
 				}
-			} else {				
+			} else {
 				removed.dropBlockAsItem(builder.info.world, pos, state, 0);
 			}
 		}
@@ -90,11 +99,8 @@ public abstract class TrackBase {
 	public IBlockState getBlockState() {
 		return block.getDefaultState();
 	}
-	public EnumFacing getFacing() {
-		return getPos().getRotation();
-	}
 
-	public PosRot getPos() {
+	public BlockPos getPos() {
 		return builder.convertRelativePositions(rel);
 	}
 
