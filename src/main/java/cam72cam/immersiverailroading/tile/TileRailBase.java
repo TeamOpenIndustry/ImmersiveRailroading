@@ -410,7 +410,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		
 		double distanceMeters = motion.lengthVector();
-		float rotationYaw = VecUtil.toYaw(motion);
+		float rotationYaw = VecUtil.toWrongYaw(motion);
 
 		Vec3d nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 
@@ -618,7 +618,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				return;
 			}
 			
-			if (this instanceof TileRail) {
+			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
 				double floating = ((TileRail)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
 					if (BlockRailBase.tryBreakRail(world, pos)) {

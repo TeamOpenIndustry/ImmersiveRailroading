@@ -11,7 +11,6 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.nbt.NBTBase;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Predicate;
@@ -26,7 +25,6 @@ import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.BufferUtil;
-import cam72cam.immersiverailroading.util.NBTUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
@@ -269,7 +267,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	private Vec3d guessCouplerPosition(CouplerType coupler) {
-		return this.getPositionVector().add(VecUtil.fromYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.rotationYaw));
+		return this.getPositionVector().add(VecUtil.fromWrongYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.rotationYaw));
 	}
 
 	public void tickPosRemainingCheck() {
@@ -454,8 +452,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		double distance = myOffset.distanceTo(otherOffset);
 
 		// Figure out which direction to move the next stock
-		Vec3d nextPosForward = myOffset.add(VecUtil.fromYaw(distance, currentPos.rotationYaw));
-		Vec3d nextPosReverse = myOffset.add(VecUtil.fromYaw(-distance, currentPos.rotationYaw));
+		Vec3d nextPosForward = myOffset.add(VecUtil.fromWrongYaw(distance, currentPos.rotationYaw));
+		Vec3d nextPosReverse = myOffset.add(VecUtil.fromWrongYaw(-distance, currentPos.rotationYaw));
 
 		if (otherOffset.distanceTo(nextPosForward) > otherOffset.distanceTo(nextPosReverse)) {
 			// Moving in reverse

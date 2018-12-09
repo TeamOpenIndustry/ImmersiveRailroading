@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import util.Matrix4;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock {
 	public EntityRidableRollingStock(World world, String defID) {
@@ -167,8 +168,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				movement = movement.scale(3);
 			}
 			
-			movement = VecUtil.rotateYaw(movement, source.getRotationYawHead());
-			movement = VecUtil.rotateYaw(movement, 180-this.rotationYaw);
+			movement = VecUtil.rotateWrongYaw(movement, source.getRotationYawHead());
+			movement = VecUtil.rotateWrongYaw(movement, 180-this.rotationYaw);
 			
 			Vec3d pos = passengerPositions.get(source.getPersistentID()).add(movement);
 
@@ -198,9 +199,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		
 		if (!world.isRemote) {
 			Vec3d center = this.getDefinition().getPassengerCenter(gauge);
-			center = VecUtil.rotateYaw(center, this.rotationYaw);
+			center = VecUtil.rotateWrongYaw(center, this.rotationYaw);
 			center = center.add(this.getPositionVector());
-			Vec3d off = VecUtil.rotateYaw(center.subtract(ppos), -this.rotationYaw);
+			Vec3d off = VecUtil.rotateWrongYaw(center.subtract(ppos), -this.rotationYaw);
 			
 			off = this.getDefinition().correctPassengerBounds(gauge, off);
 			off = off.addVector(0, -off.y, 0);
@@ -215,8 +216,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	public void updatePassenger(Entity passenger) {
 		if (this.isPassenger(passenger) && passengerPositions.containsKey(passenger.getPersistentID())) {
 			Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
-			pos = pos.add(passengerPositions.get(passenger.getPersistentID()));
-			pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
+			pos = pos.add(ppos);
+			pos = VecUtil.rotatePitch(pos, rotationPitch);
+			pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 			pos = pos.add(this.getPositionVector());
 			if (passenger instanceof EntityPlayer && shouldRiderSit()) {
 				pos = pos.subtract(0, 0.75, 0);
@@ -265,30 +268,18 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	public Vec3d dismountPos(Vec3d ppos) {
 		Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
 		pos = pos.add(ppos);
-		pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+		pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 		pos = pos.add(this.getPositionVector());
 		
-		Vec3d delta = VecUtil.fromYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
+		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
 		
 		return delta.add(pos);
 	}
 
 	public void handlePassengerPositions(Map<UUID, Vec3d> passengerPositions) {
 		this.passengerPositions = passengerPositions;
-		for (UUID id : passengerPositions.keySet()) {
-			for (Entity ent : world.loadedEntityList) {
-				if (ent.getPersistentID().equals(id)) {
-					Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
-					pos = pos.add(passengerPositions.get(id));
-					pos = VecUtil.rotateYaw(pos, this.rotationYaw);
-					pos = pos.add(this.getPositionVector());
-					if (ent instanceof EntityPlayer && shouldRiderSit()) {
-						pos = pos.subtract(0, 0.75, 0);
-					}
-					ent.setPosition(pos.x, pos.y, pos.z);
-					break;
-				}
-			}
+		for (Entity passenger : this.getPassengers()) {
+			this.updatePassenger(passenger);
 		}
 	}
 	
@@ -343,9 +334,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		staticPassengers.add(sp);
 		
 		Vec3d center = this.getDefinition().getPassengerCenter(gauge);
-		center = VecUtil.rotateYaw(center, this.rotationYaw);
+		center = VecUtil.rotateWrongYaw(center, this.rotationYaw);
 		center = center.add(this.getPositionVector());
-		Vec3d off = VecUtil.rotateYaw(center.subtract(pos), -this.rotationYaw);
+		Vec3d off = VecUtil.rotateWrongYaw(center.subtract(pos), -this.rotationYaw);
 		
 		off = this.getDefinition().correctPassengerBounds(gauge, off);
 		int wiggle = sp.isVillager ? 10 : 2;

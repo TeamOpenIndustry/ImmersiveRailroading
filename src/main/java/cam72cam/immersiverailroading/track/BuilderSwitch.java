@@ -2,18 +2,19 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 
 	private BuilderIterator turnBuilder;
 	private BuilderStraight straightBuilder;
+	private final BuilderStraight straightBuilderReal;
 
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
 		super(info, pos);
@@ -39,6 +40,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		
 
 		straightBuilder = new BuilderStraight(straightInfo, pos, true);
+		straightBuilderReal = new BuilderStraight(straightInfo.withType(TrackItems.STRAIGHT), pos, true);
 		
 		turnBuilder.overrideFlexible = true;
 		
@@ -53,7 +55,30 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 			}
 		}
 	}
-	
+
+	@Override
+	public List<BuilderBase> getSubBuilders() {
+		List<BuilderBase> subTurns = turnBuilder.getSubBuilders();
+		List<BuilderBase> subStraights = straightBuilderReal.getSubBuilders();
+
+		if (subTurns == null && subStraights == null) {
+			return null;
+		}
+
+		List<BuilderBase> res = new ArrayList<>();
+		if (subTurns == null) {
+			res.add(turnBuilder);
+		} else {
+			res.addAll(subTurns);
+		}
+		if (subStraights == null) {
+			res.add(straightBuilderReal);
+		} else {
+			res.addAll(subStraights);
+		}
+		return res;
+	}
+
 	@Override
 	public int costTies() {
 		return straightBuilder.costTies() + turnBuilder.costTies();
@@ -112,9 +137,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	}
 
 	public boolean isOnStraight(Vec3d position) {
-		for (float dist = 0; dist < info.settings.length; dist += info.settings.gauge.scale()/8) {
-			Vec3d gagPos = VecUtil.fromYaw(dist, straightBuilder.angle);
-			gagPos = VecUtil.rotateYaw(gagPos, straightBuilder.info.placementInfo.facing.getHorizontalAngle() + 90 + 180);
+		for (Vec3d gagPos : straightBuilder.getPath(info.settings.gauge.scale()/8)) {
 			gagPos = gagPos.add(info.placementInfo.placementPosition);
 			if (gagPos.distanceTo(position.addVector(0, -(position.y % 1), 0)) < info.settings.gauge.scale()/2) {
 				return true;
