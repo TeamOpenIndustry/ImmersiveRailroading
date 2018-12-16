@@ -48,6 +48,7 @@ public class DefinitionManager {
 		});
 
 		jsonLoaders.put("tender", (String defID, JsonObject data) -> new TenderDefinition(defID, data));
+		jsonLoaders.put("water_tender", (String defID, JsonObject data) -> new WaterTenderDefinition(defID, data));
 		jsonLoaders.put("passenger", (String defID, JsonObject data) -> new CarPassengerDefinition(defID, data));
 		jsonLoaders.put("freight", (String defID, JsonObject data) -> new CarFreightDefinition(defID, data));
 		jsonLoaders.put("tank", (String defID, JsonObject data) -> new CarTankDefinition(defID, data));

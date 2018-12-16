@@ -26,6 +26,7 @@ import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.entity.WaterTender;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
@@ -93,6 +94,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	entityClasses.add(CarPassenger.class);
     	entityClasses.add(CarFreight.class);
     	entityClasses.add(CarTank.class);
+    	entityClasses.add(WaterTender.class);
     	entityClasses.add(Tender.class);
     	entityClasses.add(HandCar.class);
     }
@@ -248,6 +250,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		case FREIGHT:
 	    	return new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorX));
 		case TANK:
+			case WATERTENDER:
 		case DIESEL_LOCOMOTIVE:
 	    	return new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorX));
 		case TENDER:

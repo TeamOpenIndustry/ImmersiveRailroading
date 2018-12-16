@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.entity.WaterTender;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import net.minecraft.util.math.MathHelper;
