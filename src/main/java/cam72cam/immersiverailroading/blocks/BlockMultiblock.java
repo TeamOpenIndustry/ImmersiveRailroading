@@ -18,7 +18,6 @@ public class BlockMultiblock extends Block {
 
 	public static final String NAME = "multiblock";
 
-
 	public BlockMultiblock() {
 		super(Material.IRON);
 		setHardness(2.0F);
