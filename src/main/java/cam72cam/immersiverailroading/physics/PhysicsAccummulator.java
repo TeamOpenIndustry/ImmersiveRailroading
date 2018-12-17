@@ -20,8 +20,6 @@ public class PhysicsAccummulator {
 	public double wheelAdhesionNewtons = 0;
 	public int count = 0;
 	private TickPos pos;
-
-	private static int debugTick = 0;
 	
 	public PhysicsAccummulator(TickPos pos) {
 		this.pos = pos;
@@ -90,31 +88,11 @@ public class PhysicsAccummulator {
 		// since they are normally not applied at both the same time and same direction, just ignore for simplicity
 		double newMCVelocity = currentMCVelocity + deltaAccellTractiveMCVelocity + deltaAccellGradeMCVelocity;
 
-		if(debugTick > 38) {
-			System.out.printf("New velocity before decell in meter/tick is %f\n", newMCVelocity);
-		}
-
 		// friction and brakes are limited to stopping
 		// Apply in the reverse direction of current travel
 		double deltaDecell = -1 * Math.copySign(Math.min(deltaAccellRollingResistanceMCVelocity +  deltaAccellBrakeMCVelocity, Math.abs(newMCVelocity)), newMCVelocity);
 		
 		newMCVelocity = newMCVelocity + deltaDecell;
-
-		if(debugTick > 38) {
-			debugTick = 0;
-			System.out.printf("tractive force = %f\n", tractiveEffortNewtons);
-			System.out.printf("adhesive force = %f\n", wheelAdhesionNewtons);
-			System.out.printf("grade force = %f\n", gradeForceNewtons);
-			System.out.printf("brake Acceleration = %f\n", deltaAccellBrakeMCVelocity);
-			System.out.printf("Tractive Acceleration = %f\n", deltaAccellTractiveMCVelocity);
-			System.out.printf("resistive Acceleration = %f\n", deltaAccellRollingResistanceMCVelocity);
-			System.out.printf("grade Acceleration = %f\n", deltaAccellGradeMCVelocity);
-			System.out.printf("New velocity in meter/tick is %f\n", newMCVelocity);
-			System.out.println();
-		}
-		else {
-			debugTick++;
-		}
 
 		if (Math.abs(newMCVelocity) < 0.0001) {
 			newMCVelocity = 0;
