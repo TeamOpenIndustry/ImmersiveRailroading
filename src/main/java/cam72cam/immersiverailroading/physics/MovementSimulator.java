@@ -35,7 +35,8 @@ public class MovementSimulator {
 		
 		if (Math.abs(moveDistance) < 0.001) {
 			boolean isTurnTable = false;
-			
+
+			//This looks really strange, as the sections involving frontBase appear to do nothing, should be looked at
 			TileRailBase frontBase = TileRailBase.get(world, new BlockPos(front));
 			TileRailBase rearBase = TileRailBase.get(world, new BlockPos(rear));
 			isTurnTable = frontBase != null &&
