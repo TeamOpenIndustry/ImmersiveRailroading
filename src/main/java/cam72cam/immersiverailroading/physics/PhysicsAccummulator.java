@@ -18,6 +18,7 @@ public class PhysicsAccummulator {
 	public double gradeForceNewtons = 0;
 	public double massToMoveKg = 0;
 	public double wheelAdhesionNewtons = 0;
+	public static double MIN_SPEED = .00001;
 	public int count = 0;
 	private TickPos pos;
 	
@@ -88,13 +89,14 @@ public class PhysicsAccummulator {
 		// since they are normally not applied at both the same time and same direction, just ignore for simplicity
 		double newMCVelocity = currentMCVelocity + deltaAccellTractiveMCVelocity + deltaAccellGradeMCVelocity;
 
+
 		// friction and brakes are limited to stopping
 		// Apply in the reverse direction of current travel
 		double deltaDecell = -1 * Math.copySign(Math.min(deltaAccellRollingResistanceMCVelocity +  deltaAccellBrakeMCVelocity, Math.abs(newMCVelocity)), newMCVelocity);
 		
 		newMCVelocity = newMCVelocity + deltaDecell;
 
-		if (Math.abs(newMCVelocity) < 0.0001) {
+		if (Math.abs(newMCVelocity) < PhysicsAccummulator.MIN_SPEED) {
 			newMCVelocity = 0;
 		}
 		
