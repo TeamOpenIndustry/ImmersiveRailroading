@@ -1,12 +1,9 @@
 package cam72cam.immersiverailroading.blocks;
 
-import javax.annotation.Nonnull;
-
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -41,6 +38,8 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.common.property.PropertyFloat;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nonnull;
 
 public abstract class BlockRailBase extends Block {
 	
@@ -271,6 +270,11 @@ public abstract class BlockRailBase extends Block {
 		Block block = Block.getBlockFromItem(stack.getItem());
 		TileRailBase te = TileRailBase.get(worldIn, pos);
 		if (te != null) {
+			if (stack.getItem() == IRItems.ITEM_SWITCH_HAMMER) {
+				if (!worldIn.isRemote) {
+					te.toggleSwitchForced();
+				}
+			}
 			if (block == Blocks.REDSTONE_TORCH) {
 				String next = te.nextAugmentRedstoneMode();
 				if (next != null) {

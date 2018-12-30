@@ -65,7 +65,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
 	compile files(
-		'ImmersiveEngineering-0.12-74-deobf.jar'
+		'ImmersiveEngineering-0.12-74.jar'
 	)
 
 	compile files(
