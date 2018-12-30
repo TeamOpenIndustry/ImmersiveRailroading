@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiText;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -27,6 +28,6 @@ public class ItemSwitchHammer extends Item {
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
 	{
 		super.addInformation(stack, worldIn, tooltip, flagIn);
-		tooltip.add("Right-Click a switch to force it to diverge\nRight-click again to un-force\nRedstone is ignored when forced!!");
+		tooltip.add(GuiText.SWITCH_HAMMER_TOOLTIP.toString());
 	}
 }
