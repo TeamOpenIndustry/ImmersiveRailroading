@@ -161,11 +161,13 @@ public abstract class CommonProxy implements IGuiHandler {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint"));
+	      modRegistry.remove(new ResourceLocation("immersiverailroading:switch hammer"));
     	} else {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint_iron"));
+	      modRegistry.remove(new ResourceLocation("immersiverailroading:switch hammer_iron"));
     	}
     }
     
@@ -199,6 +201,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE);
     	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH);
     	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE);
+	    event.getRegistry().register(IRItems.ITEM_SWITCH_HAMMER);
     }
     
     @SubscribeEvent
