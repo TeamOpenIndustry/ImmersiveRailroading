@@ -792,21 +792,20 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 
 	public void toggleSwitchForced() {
-		TileRailBase teParent = TileRailBase.get(this.world, this.parent);
-		if (teParent instanceof TileRail) {
-			TileRail teRailParent = (TileRail) teParent;
-			if (teRailParent.info.settings.type == TrackItems.SWITCH) {
-				teRailParent.info = new RailInfo(world, teRailParent.info.settings, teRailParent.info.placementInfo, teRailParent.info.customInfo, teRailParent.info.switchState, !teRailParent.info.switchForced, teRailParent.info.tablePos);
+		TileRail teParent = this.getParentTile().getParentTile();
+		if (teParent != null) {
+			if (teParent.info.settings.type == TrackItems.SWITCH) {
+				teParent.info = new RailInfo(world, teParent.info.settings, teParent.info.placementInfo, teParent.info.customInfo, teParent.info.switchState, !teParent.info.switchForced, teParent.info.tablePos);
+				this.markDirty();
 			}
 		}
 	}
 
 	public boolean isSwitchForced() {
-		TileRailBase teParent = TileRailBase.get(this.world, this.parent);
-		if (teParent instanceof TileRail) {
-			TileRail teRailParent = (TileRail) teParent;
-			if (teRailParent.info.settings.type == TrackItems.SWITCH) {
-				return teRailParent.info.switchForced;
+		TileRail teParent = this.getParentTile().getParentTile();
+		if (teParent != null) {
+			if (teParent.info.settings.type == TrackItems.SWITCH) {
+				return teParent.info.switchForced;
 			}
 		}
 		return false;
