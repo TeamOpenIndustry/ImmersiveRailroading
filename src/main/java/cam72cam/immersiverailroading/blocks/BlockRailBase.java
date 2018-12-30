@@ -271,9 +271,9 @@ public abstract class BlockRailBase extends Block {
 		TileRailBase te = TileRailBase.get(worldIn, pos);
 		if (te != null) {
 			if (stack.getItem() == IRItems.ITEM_SWITCH_HAMMER) {
-				//if (!worldIn.isRemote) {
+				if (!worldIn.isRemote) {
 					te.toggleSwitchForced();
-				//}
+				}
 			}
 			if (block == Blocks.REDSTONE_TORCH) {
 				String next = te.nextAugmentRedstoneMode();
