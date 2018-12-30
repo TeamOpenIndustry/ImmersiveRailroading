@@ -1,34 +1,15 @@
 package cam72cam.immersiverailroading.tile;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.Freight;
-import cam72cam.immersiverailroading.entity.FreightTank;
-import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.library.CouplerAugmentMode;
-import cam72cam.immersiverailroading.library.LocoControlMode;
-import cam72cam.immersiverailroading.library.StockDetectorMode;
-import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.ParticleUtil;
-import cam72cam.immersiverailroading.util.RedstoneUtil;
-import cam72cam.immersiverailroading.util.SwitchUtil;
-import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.immersiverailroading.util.*;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -56,7 +37,11 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
+import org.apache.commons.lang3.ArrayUtils;
 import trackapi.lib.ITrack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
@@ -84,7 +69,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
-	
+
+
 	@Override
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -803,5 +789,26 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return 0;
 		}
 		return (int) ((speed * speed) / 200);
+	}
+
+	public void toggleSwitchForced() {
+		TileRailBase teParent = TileRailBase.get(this.world, this.parent);
+		if (teParent instanceof TileRail) {
+			TileRail teRailParent = (TileRail) teParent;
+			if (teRailParent.info.settings.type == TrackItems.SWITCH) {
+				teRailParent.info = new RailInfo(world, teRailParent.info.settings, teRailParent.info.placementInfo, teRailParent.info.customInfo, teRailParent.info.switchState, !teRailParent.info.switchForced, teRailParent.info.tablePos);
+			}
+		}
+	}
+
+	public boolean isSwitchForced() {
+		TileRailBase teParent = TileRailBase.get(this.world, this.parent);
+		if (teParent instanceof TileRail) {
+			TileRail teRailParent = (TileRail) teParent;
+			if (teRailParent.info.settings.type == TrackItems.SWITCH) {
+				return teRailParent.info.switchForced;
+			}
+		}
+		return false;
 	}
 }
