@@ -33,7 +33,11 @@ public class SwitchUtil {
 		if (parent.info.settings.type != TrackItems.SWITCH) {
 			return SwitchState.NONE;
 		}
-		
+
+		if (parent.info.switchForced) {
+			return SwitchState.TURN;
+		}
+
 		if (position != null && parent.info != null) {
 			BuilderSwitch switchBuilder = (BuilderSwitch)parent.info.getBuilder();
 			
