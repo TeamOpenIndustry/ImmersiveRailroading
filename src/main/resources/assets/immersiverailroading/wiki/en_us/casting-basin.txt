@@ -9,7 +9,6 @@ It is built from:
 * 126 x Sand
 *  86 x Blast Brick
 *  63 x Steel Scaffolding
-*   1 x Block of Steel
 
 [image{200, 195, 0.537109375, immersiverailroading:wiki/images/bpyyuxc.png}]
 
