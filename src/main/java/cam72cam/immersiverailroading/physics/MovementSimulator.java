@@ -41,7 +41,7 @@ public class MovementSimulator {
 			isTurnTable = frontBase != null &&
 					frontBase.getParentTile() != null &&
 					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
-			isTurnTable = rearBase != null &&
+			isTurnTable = isTurnTable || rearBase != null &&
 					rearBase.getParentTile() != null &&
 					rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
 			
@@ -112,7 +112,7 @@ public class MovementSimulator {
 		position.position = position.position.add(deltaCenter);
 		if (world.isAirBlock(new BlockPos(position.position))) {
 			// Fall
-			position.position = position.position.addVector(0, -0.1, 0);
+			//position.position = position.position.addVector(0, -0.1, 0);
 		}
 		
 		return position;
