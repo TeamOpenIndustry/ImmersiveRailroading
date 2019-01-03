@@ -15,6 +15,7 @@ item.immersiverailroading:item_cast_rail.name=Rail Casting
 item.immersiverailroading:item_manual.name=Immersive Railroading Manual
 item.immersiverailroading:item_rail.name=Track Blueprint
 item.immersiverailroading:item_conductor_whistle.name=Conductor's Whistle
+item.immersiverailroading:item_remote_card.name=Train Radio-control Card
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -44,6 +45,10 @@ chat.immersiverailroading:augment.set=Set Augment to act only upon %s
 chat.immersiverailroading:augment.reset=Set Augment to act upon any stock
 chat.immersiverailroading:misc.wood_planks=Wood Planks
 chat.immersiverailroading:build.invalid_block=Invalid block at x=%s y=%s z=%s
+chat.immersiverailroading:radio.link=Card linked to locomotive
+chat.immersiverailroading:radio.relink=Card linked to new locomotive
+chat.immersiverailroading:radio.unlink=Card unlinked from its locomotive
+chat.immersiverailroading:radio.nolink=Card has no linked locomotive
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
