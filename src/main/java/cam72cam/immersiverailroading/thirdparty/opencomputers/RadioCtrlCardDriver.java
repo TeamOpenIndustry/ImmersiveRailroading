@@ -21,7 +21,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 
 	@Override
 	public boolean worksWith(ItemStack stack) {
-		if (stack != null && stack.getItem() == IRItems.ITEM_REMOTE_CARD) {
+		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
 			return true;
 		}
 		return false;
