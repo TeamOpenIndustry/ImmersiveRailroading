@@ -120,9 +120,10 @@ public class RadioCtrlCardDriver implements DriverItem {
 		}
 
 		@Callback(doc = "function():araray -- returns the UUID of the bound loco")
-		public Object[] isWork(Context context, Arguments args) {
-			if (linkedLoco == null)
+		public Object[] getLinkUUID(Context context, Arguments args) {
+			if (linkedLoco == null) {
 				return new Object[] { null };
+			}
 			return new Object[] { linkedLoco.getUniqueID() };
 		}
 	}
