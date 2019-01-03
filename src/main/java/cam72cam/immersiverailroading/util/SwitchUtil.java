@@ -42,8 +42,8 @@ public class SwitchUtil {
 			}
 		}
 
-		if (parent.info.switchForced) {
-			return SwitchState.TURN;
+		if (parent.info.switchForced != SwitchState.NONE) {
+			return parent.info.switchForced;
 		}
 
 		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
