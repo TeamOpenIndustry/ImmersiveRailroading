@@ -272,7 +272,7 @@ public abstract class BlockRailBase extends Block {
 		if (te != null) {
 			if (stack.getItem() == IRItems.ITEM_SWITCH_HAMMER) {
 				if (!worldIn.isRemote) {
-					te.toggleSwitchForced();
+					te.cycleSwitchForced();
 				}
 			}
 			if (block == Blocks.REDSTONE_TORCH) {
