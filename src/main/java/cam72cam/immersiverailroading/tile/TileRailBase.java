@@ -791,11 +791,12 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		return (int) ((speed * speed) / 200);
 	}
 
-	public void toggleSwitchForced() {
+	public void cycleSwitchForced() {
 		TileRail teParent = this.getParentTile().getParentTile();
 		if (teParent != null) {
 			if (teParent.info.settings.type == TrackItems.SWITCH) {
-				teParent.info = new RailInfo(world, teParent.info.settings, teParent.info.placementInfo, teParent.info.customInfo, teParent.info.switchState, !teParent.info.switchForced, teParent.info.tablePos);
+				SwitchState newState = SwitchState.values()[(teParent.info.switchForced.ordinal() + 1) % SwitchState.values().length];
+				teParent.info = new RailInfo(world, teParent.info.settings, teParent.info.placementInfo, teParent.info.customInfo, teParent.info.switchState, newState, teParent.info.tablePos);
 				this.markDirty();
 			}
 		}
@@ -805,7 +806,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		TileRail teParent = this.getParentTile().getParentTile();
 		if (teParent != null) {
 			if (teParent.info.settings.type == TrackItems.SWITCH) {
-				return teParent.info.switchForced;
+				return teParent.info.switchForced != SwitchState.NONE;
 			}
 		}
 		return false;
