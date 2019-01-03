@@ -30,6 +30,7 @@ public enum ChatText {
 	RADIO_RELINK("radio.relink"),
 	RADIO_UNLINK("radio.unlink"),
 	RADIO_NOLINK("radio.nolink"),
+	RADIO_CANT_LINK("radio.cant_link"),
 	;
 	
 	private String value;
