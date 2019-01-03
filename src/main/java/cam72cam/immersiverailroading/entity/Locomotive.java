@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.common.base.Optional;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -16,6 +17,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -131,6 +133,36 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
+	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_REMOTE_CARD) {
+			NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
+			
+			if(cardNBT == null) player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
+
+			if (player.isSneaking()) {
+				if (!cardNBT.hasKey("linked_uuid")) {
+					player.sendMessage(ChatText.RADIO_NOLINK.getMessage());
+					
+				} else {
+					cardNBT.removeTag("linked_uuid");
+					player.sendMessage(ChatText.RADIO_UNLINK.getMessage());
+				}
+				
+			} else {
+				if (!cardNBT.hasKey("linked_uuid")) {
+					cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+					player.sendMessage(ChatText.RADIO_LINK.getMessage());
+					
+				} else {
+					cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+					player.sendMessage(ChatText.RADIO_RELINK.getMessage());
+					}
+				}
+			return true;
+			}
+		return super.processInitialInteract(player, hand);
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
