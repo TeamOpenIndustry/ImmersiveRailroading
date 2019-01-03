@@ -135,25 +135,30 @@ public abstract class Locomotive extends FreightTank {
 
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
-			NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
-			if(cardNBT == null) { 
-				player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
+			if(this.gauge.isModel() || this.hasRadio) {
+				NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
+				if(cardNBT == null) { 
+					player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
+				}
+				if (player.isSneaking()) {
+					if (!cardNBT.hasKey("linked_uuid")) {
+						player.sendMessage(ChatText.RADIO_NOLINK.getMessage());
+					} else {
+						cardNBT.removeTag("linked_uuid");
+						player.sendMessage(ChatText.RADIO_UNLINK.getMessage());
+					}
+				} else {
+					if (!cardNBT.hasKey("linked_uuid")) {
+						cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+						player.sendMessage(ChatText.RADIO_LINK.getMessage());
+					} else {
+						cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+						player.sendMessage(ChatText.RADIO_RELINK.getMessage());
+					}
+				}
 			}
-			if (player.isSneaking()) {
-				if (!cardNBT.hasKey("linked_uuid")) {
-					player.sendMessage(ChatText.RADIO_NOLINK.getMessage());
-				} else {
-					cardNBT.removeTag("linked_uuid");
-					player.sendMessage(ChatText.RADIO_UNLINK.getMessage());
-				}
-			} else {
-				if (!cardNBT.hasKey("linked_uuid")) {
-					cardNBT.setString("linked_uuid",this.getPersistentID().toString());
-					player.sendMessage(ChatText.RADIO_LINK.getMessage());
-				} else {
-					cardNBT.setString("linked_uuid",this.getPersistentID().toString());
-					player.sendMessage(ChatText.RADIO_RELINK.getMessage());
-				}
+			else {
+				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getName()));;
 			}
 			return true;
 		}
