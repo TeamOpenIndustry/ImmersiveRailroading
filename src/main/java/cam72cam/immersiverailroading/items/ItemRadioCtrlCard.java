@@ -26,11 +26,10 @@ public class ItemRadioCtrlCard extends Item {
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
-    {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-        if(stack.getTagCompound() == null);
-        else if(!stack.getTagCompound().hasKey("linked_uuid")) tooltip.add("Not linked to any locomotive");
-        else tooltip.add("Linked to: " + stack.getTagCompound().getString("linked_uuid"));
-    }
+    	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        	super.addInformation(stack, worldIn, tooltip, flagIn);
+        	if(stack.getTagCompound() == null);
+        	else if(!stack.getTagCompound().hasKey("linked_uuid")) tooltip.add("Not linked to any locomotive");
+        	else tooltip.add("Linked to: " + stack.getTagCompound().getString("linked_uuid"));
+	}
 }
