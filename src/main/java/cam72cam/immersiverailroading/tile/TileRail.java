@@ -50,8 +50,8 @@ public class TileRail extends TileRailBase {
 	}
 
 	public void setSwitchState(SwitchState state) {
-		if (state != info.switchState) {
-			info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, (this.isSwitchForced() ? SwitchState.TURN : state), this.isSwitchForced(), info.tablePos);
+		if (state != info.switchState && info.switchForced == SwitchState.NONE) {
+			info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, state, info.switchForced, info.tablePos);
 			this.markDirty();
 		}
 	}
@@ -102,10 +102,10 @@ public class TileRail extends TileRailBase {
             placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
-			boolean switchForced = nbt.getBoolean("switchForced");
+			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-            RailSettings settings = new RailSettings(gauge, type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
+				RailSettings settings = new RailSettings(gauge, type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
 			info = new RailInfo(world, settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}

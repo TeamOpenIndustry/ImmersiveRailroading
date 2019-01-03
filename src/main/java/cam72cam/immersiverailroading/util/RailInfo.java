@@ -27,12 +27,12 @@ public class RailInfo {
 
 	// Used for tile rendering only
 	public final SwitchState switchState;
-	public final boolean switchForced;
+	public final SwitchState switchForced;
 	public final double tablePos;
 	public final String uniqueID;
 
 
-	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, boolean switchForced, double tablePos) {
+	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 		}
@@ -67,7 +67,7 @@ public class RailInfo {
 	}
 
 	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, false, 0);
+		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
 	public RailInfo(World world, BlockPos pos, NBTTagCompound nbt) {
@@ -77,7 +77,7 @@ public class RailInfo {
 				new PlacementInfo(nbt.getCompoundTag("placement"), pos),
 				new PlacementInfo(nbt.getCompoundTag("custom"), pos),
 				SwitchState.values()[nbt.getInteger("switchState")],
-				nbt.getBoolean("switchForced"),
+				SwitchState.values()[nbt.getInteger("switchForced")],
 				nbt.getDouble("tablePos")
 		);
 	}
@@ -88,7 +88,7 @@ public class RailInfo {
 		nbt.setTag("placement", placementInfo.toNBT(pos));
 		nbt.setTag("custom", customInfo.toNBT(pos));
 		nbt.setInteger("switchState", switchState.ordinal());
-		nbt.setBoolean("switchForced", switchForced);
+		nbt.setInteger("switchForced", switchForced.ordinal());
 		nbt.setDouble("tablePos", tablePos);
 		return nbt;
 	}
