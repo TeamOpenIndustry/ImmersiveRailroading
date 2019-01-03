@@ -31,7 +31,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 	public ManagedEnvironment createEnvironment(ItemStack stack, EnvironmentHost host) {
 		World hostWorld = host.world();
 		
-		if (stack != null && stack.getItem() == IRItems.ITEM_REMOTE_CARD) {
+		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
 				for (Object e : hostWorld.loadedEntityList) {
 					if (e instanceof Locomotive) {
 						Locomotive train = (Locomotive) e;
