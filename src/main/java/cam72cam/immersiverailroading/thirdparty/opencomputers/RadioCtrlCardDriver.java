@@ -30,13 +30,11 @@ public class RadioCtrlCardDriver implements DriverItem {
 	@Override
 	public ManagedEnvironment createEnvironment(ItemStack stack, EnvironmentHost host) {
 		World hostWorld = host.world();
-
 		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
 			for (Object e : hostWorld.loadedEntityList) {
 				if (e instanceof Locomotive) {
 					Locomotive train = (Locomotive) e;
-					if (train.getPersistentID()
-							.equals(UUID.fromString(stack.getTagCompound().getString("linked_uuid")))) {
+					if (train.getPersistentID().equals(UUID.fromString(stack.getTagCompound().getString("linked_uuid")))) {
 						return new RadioCtrlCardManager(train);
 					}
 				}
@@ -66,8 +64,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 
 		public RadioCtrlCardManager(Locomotive loco) {
 			linkedLoco = loco;
-			setNode(Network.newNode(this, Visibility.Network).withComponent("ir_remote_control", Visibility.Network)
-					.create());
+			setNode(Network.newNode(this, Visibility.Network).withComponent("ir_remote_control", Visibility.Network).create());
 		}
 
 		@Override
@@ -126,7 +123,6 @@ public class RadioCtrlCardDriver implements DriverItem {
 		public Object[] isWork(Context context, Arguments args) {
 			if (linkedLoco == null)
 				return new Object[] { null };
-
 			return new Object[] { linkedLoco.getUniqueID() };
 		}
 	}
