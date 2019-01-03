@@ -30,16 +30,17 @@ public class RadioCtrlCardDriver implements DriverItem {
 	@Override
 	public ManagedEnvironment createEnvironment(ItemStack stack, EnvironmentHost host) {
 		World hostWorld = host.world();
-		
+
 		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
-				for (Object e : hostWorld.loadedEntityList) {
-					if (e instanceof Locomotive) {
-						Locomotive train = (Locomotive) e;
-						if (train.getPersistentID().equals(UUID.fromString(stack.getTagCompound().getString("linked_uuid")))) {
-							return new RadioCtrlCardManager(train);
-						}
+			for (Object e : hostWorld.loadedEntityList) {
+				if (e instanceof Locomotive) {
+					Locomotive train = (Locomotive) e;
+					if (train.getPersistentID()
+							.equals(UUID.fromString(stack.getTagCompound().getString("linked_uuid")))) {
+						return new RadioCtrlCardManager(train);
 					}
 				}
+			}
 		}
 		return null;
 	}
@@ -116,8 +117,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 		@Callback(doc = "function():array -- returns the XYZ position of the locomotive")
 		public Object[] getPos(Context context, Arguments args) {
 			if (linkedLoco != null) {
-				return new Object[] { linkedLoco.posX, linkedLoco.posY,
-						linkedLoco.posZ };
+				return new Object[] { linkedLoco.posX, linkedLoco.posY, linkedLoco.posZ };
 			}
 			return null;
 		}
@@ -126,7 +126,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 		public Object[] isWork(Context context, Arguments args) {
 			if (linkedLoco == null)
 				return new Object[] { null };
-			
+
 			return new Object[] { linkedLoco.getUniqueID() };
 		}
 	}
