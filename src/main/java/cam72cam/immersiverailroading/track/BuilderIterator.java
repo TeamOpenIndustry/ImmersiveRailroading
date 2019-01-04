@@ -147,7 +147,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				PosStep cur = points.get(i);
-				Vec3d flatPos = VecUtil.rotateYaw(cur, info.placementInfo.yaw);
+				Vec3d flatPos = VecUtil.rotateYaw(cur, -info.placementInfo.yaw);
 				if (Math.abs(flatPos.z) >= 0.5 * scale) {
 					switchSize = i;
 					break;
