@@ -1,0 +1,29 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:item_radio_control_card"
+  },
+  "pattern": [
+    "   ",
+    " w ",
+    "tbd"
+  ],
+  "key": {
+    "b": {
+      "item": "oc:materialCard"
+	  "data": "0"
+    }
+	"t": {
+      "item": "oc:materialTransistor"
+	  "data": "0"
+    }
+	"d": {
+      "item": "oc:datacard1"
+	  "data": "0"
+    }
+	"w": {
+      "item": "oc:wlanCard1"
+	  "data": "0"
+    }
+  }
+}
