@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemRadioCtrlCard extends Item {
-	public static final String NAME = "item_remote_card";
+	public static final String NAME = "item_radio_control_card";
 	
 	public ItemRadioCtrlCard() {
 		super();
