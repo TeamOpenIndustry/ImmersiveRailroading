@@ -480,6 +480,9 @@ public abstract class EntityRollingStockDefinition {
 		
 		for (int f : faces) {
 			Material mtl = model.materials.get(model.faceMTLs[f]);
+			if (mtl == null) {
+				continue;
+			}
 			Path2D path = new Path2D.Double();
 			boolean first = true;
 			for (int[] point : model.points(f)) {
