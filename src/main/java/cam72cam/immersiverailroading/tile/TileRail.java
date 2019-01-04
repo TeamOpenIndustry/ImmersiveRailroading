@@ -50,7 +50,7 @@ public class TileRail extends TileRailBase {
 	}
 
 	public void setSwitchState(SwitchState state) {
-		if (state != info.switchState && info.switchForced == SwitchState.NONE) {
+		if (state != info.switchState) {
 			info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, state, info.switchForced, info.tablePos);
 			this.markDirty();
 		}
