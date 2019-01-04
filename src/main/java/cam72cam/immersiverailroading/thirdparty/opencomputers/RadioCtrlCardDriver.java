@@ -62,7 +62,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 	}
 
 	public class RadioCtrlCardManager extends AbstractManagedEnvironment {
-		protected double[] cardPosition;
+		protected double[] cardPosition = {0,0,0};
 		protected Locomotive linkedLoco;
 		protected ComponentConnector node;
 
