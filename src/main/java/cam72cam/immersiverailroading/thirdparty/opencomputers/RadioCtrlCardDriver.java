@@ -37,7 +37,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 				if (e instanceof Locomotive) {
 					Locomotive train = (Locomotive) e;
 					if (train.getPersistentID().equals(UUID.fromString(stack.getTagCompound().getString("linked_uuid")))) {
-						return new RadioCtrlCardManager(train);
+						return new RadioCtrlCardManager(train, host.xPosition(), host.yPosition(), host.zPosition());
 					}
 				}
 			}
