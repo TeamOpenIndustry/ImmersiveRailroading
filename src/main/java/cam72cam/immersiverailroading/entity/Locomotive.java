@@ -140,6 +140,7 @@ public abstract class Locomotive extends FreightTank {
 				NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
 				if(cardNBT == null) { 
 					player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
+					cardNBT = player.getHeldItem(hand).getTagCompound();
 				}
 				if (player.isSneaking()) {
 					if (!cardNBT.hasKey("linked_uuid")) {
