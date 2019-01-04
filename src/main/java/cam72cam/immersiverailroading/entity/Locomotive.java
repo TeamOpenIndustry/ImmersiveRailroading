@@ -136,7 +136,7 @@ public abstract class Locomotive extends FreightTank {
 
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
-			if(this.gauge.isModel() || this.canRadio) {
+			if(this.gauge.isModel() || this.canRadio || !Config.ConfigBalance.RadioEquipmentRequired) {
 				NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
 				if(cardNBT == null) { 
 					player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
