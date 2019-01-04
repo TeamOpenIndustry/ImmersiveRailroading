@@ -49,7 +49,7 @@ chat.immersiverailroading:radio.link=Card linked to locomotive
 chat.immersiverailroading:radio.relink=Card linked to new locomotive
 chat.immersiverailroading:radio.unlink=Card unlinked from its locomotive
 chat.immersiverailroading:radio.nolink=Card has no linked locomotive
-chat.immersiverailroading:radio.cant_link=Locomotive %s does not have radio capability
+chat.immersiverailroading:radio.cant_link=Locomotive %s does not have radio control equipment
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
