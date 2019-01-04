@@ -672,7 +672,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
 			if (couplerFrontPosition == null) {
-				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
+				couplerFrontPosition = predictRearBogeyPosition(pos, (float) -(this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerFrontPosition;
 		} else {
