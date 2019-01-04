@@ -98,6 +98,10 @@ public class TileRail extends TileRailBase {
 			ItemStack railBed = new ItemStack(nbt.getCompoundTag("railBed"));
 			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
 
+			if (type == TrackItems.SWITCH) {
+				quarters = 4;
+			}
+
 			NBTTagCompound newPositionFormat = new NBTTagCompound();
 			newPositionFormat.setDouble("x", nbt.getDouble("placementPositionX"));
 			newPositionFormat.setDouble("y", nbt.getDouble("placementPositionY"));
