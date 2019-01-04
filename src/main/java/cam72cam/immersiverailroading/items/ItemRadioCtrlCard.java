@@ -20,8 +20,8 @@ public class ItemRadioCtrlCard extends Item {
 		super();
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
-    	this.maxStackSize = 1;
+        	this.setCreativeTab(ItemTabs.MAIN_TAB);
+    		this.maxStackSize = 1;
 	}
 	
 	@Override
