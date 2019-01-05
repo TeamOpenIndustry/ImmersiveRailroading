@@ -174,7 +174,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	public boolean isFlexible() {
-		return this.flexible;
+		return this.flexible || !(this instanceof TileRail);
 	}
 	
 	public ItemStack getRenderRailBed() {
@@ -418,7 +418,15 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			tile = self.getParentTile();
 			if (tile != null) {
 				Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
-				if (potential.distanceTo(currentPosition) < nextPos.distanceTo(currentPosition)) {
+				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
+					nextPos = potential;
+				}
+			}
+		} else if (this.getParentReplaced() != null) {
+			TileRail replacedParent = TileRail.get(world, getParentReplaced());
+			if (replacedParent != null) {
+				Vec3d potential = replacedParent.getNextPosition(currentPosition, motion);
+				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
 					nextPos = potential;
 				}
 			}

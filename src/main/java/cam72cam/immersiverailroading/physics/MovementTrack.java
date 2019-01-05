@@ -3,10 +3,12 @@ package cam72cam.immersiverailroading.physics;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import trackapi.lib.ITrack;
@@ -36,6 +38,11 @@ public class MovementTrack {
 				ITrack te = Util.getTileEntity(world, pos.addVector(0, height + 0.35, 0), true);
 				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 					return te;
+				}
+				// HACK for cross gauge
+				TileRailBase rail = TileRailBase.get(world, new BlockPos(pos.addVector(0, height + 0.35, 0)));
+				if (rail != null && rail.getParentReplaced() != null) {
+					return rail;
 				}
 			}
 		}

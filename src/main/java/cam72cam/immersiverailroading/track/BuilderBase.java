@@ -27,7 +27,7 @@ public abstract class BuilderBase {
 	public final BlockPos pos;
 	private BlockPos parent_pos;
 
-	public boolean overrideFlexible = false;
+	public boolean overrideFlexible = true;
 
 	public List<ItemStack> drops;
 
