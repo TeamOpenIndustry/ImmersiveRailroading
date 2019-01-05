@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import javax.annotation.Nonnull;
 
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
@@ -97,7 +98,9 @@ public abstract class BlockRailBase extends Block {
 				if (te.getParentTile() != null) {
 					te.getParentTile().spawnDrops();
 				}
-				te.getWorld().setBlockToAir(parent);
+				if (tryBreakRail(te.getWorld(), te.getPos())) {
+					te.getWorld().setBlockToAir(parent);
+				}
 			}
 		}
 	}
@@ -220,12 +223,12 @@ public abstract class BlockRailBase extends Block {
 				switchTile.setSwitchState(state);
 			}
 		}
-		if (tileEntity.getParentReplaced() != null) {
-			TileRailBase replacedParent = TileRailBase.get(tileEntity.getWorld(), tileEntity.getParentReplaced());
-			if (replacedParent != null) {
-				this.onNeighborChange(world, replacedParent.getPos(), neighbor);
-			}
-		}
+        if (tileEntity.getParentReplaced() != null && tileEntity instanceof TileRailGag) {
+            TileRailBase replacedParent = TileRailBase.get(tileEntity.getWorld(), tileEntity.getParentReplaced());
+            if (replacedParent != null && replacedParent.getParentTile() != tileEntity.getParentTile()) {
+                this.onNeighborChange(world, replacedParent.getPos(), neighbor);
+            }
+        }
 	}
 
 	@Override
