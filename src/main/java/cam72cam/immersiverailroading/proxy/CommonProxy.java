@@ -133,7 +133,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(SoundPacket.Handler.class, SoundPacket.class, 10, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(PaintSyncPacket.Handler.class, PaintSyncPacket.class, 11, Side.CLIENT);
-		ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
+	ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
@@ -166,6 +166,9 @@ public abstract class CommonProxy implements IGuiHandler {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint_iron"));
+    	}
+	if (!OreDictionary.doesOreNameExist("oc:materialCard")) {
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:radio_card"));
     	}
     }
     
