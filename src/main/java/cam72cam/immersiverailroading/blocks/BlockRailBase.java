@@ -127,7 +127,7 @@ public abstract class BlockRailBase extends Block {
 				state = state.withProperty(RAIL_BED, te.getRenderRailBed());
 				state = state.withProperty(HEIGHT, te.getBedHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
-				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
+				state = state.withProperty(GAUGE, (float)te.getRenderGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
 				TileRail parent = te.getParentTile();
