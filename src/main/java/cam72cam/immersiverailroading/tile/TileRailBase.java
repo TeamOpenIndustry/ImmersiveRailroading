@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.library.*;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config;
@@ -18,11 +19,6 @@ import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.library.CouplerAugmentMode;
-import cam72cam.immersiverailroading.library.LocoControlMode;
-import cam72cam.immersiverailroading.library.StockDetectorMode;
-import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.ParticleUtil;
@@ -443,9 +439,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		} else if (this.getParentReplaced() != null) {
 			TileRail replacedParent = TileRail.get(world, getParentReplaced());
 			if (replacedParent != null) {
-				Vec3d potential = replacedParent.getNextPosition(currentPosition, motion);
-				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
-					nextPos = potential;
+				if (!replacedParent.getParentTile().getPos().equals(tile.getParentTile().getPos())) {
+					Vec3d potential = replacedParent.getNextPosition(currentPosition, motion);
+					if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
+						nextPos = potential;
+					}
 				}
 			}
 		}
