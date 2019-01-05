@@ -201,9 +201,19 @@ public abstract class BlockRailBase extends Block {
 			}
 		}
 		if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
-			SwitchState state = SwitchUtil.getSwitchState(tileEntity.getParentTile());
+			TileRail switchTile = tileEntity.getParentTile();
+			if (tileEntity instanceof TileRail) {
+				switchTile = (TileRail) tileEntity;
+			}
+			SwitchState state = SwitchUtil.getSwitchState(switchTile);
 			if (state != SwitchState.NONE) {
-				tileEntity.getParentTile().setSwitchState(state);
+				switchTile.setSwitchState(state);
+			}
+		}
+		if (tileEntity.getParentReplaced() != null) {
+			TileRailBase replacedParent = TileRailBase.get(tileEntity.getWorld(), tileEntity.getParentReplaced());
+			if (replacedParent != null) {
+				this.onNeighborChange(world, replacedParent.getPos(), neighbor);
 			}
 		}
 	}
