@@ -804,4 +804,14 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		return (int) ((speed * speed) / 200);
 	}
+
+	public BlockPos getParentReplaced() {
+		if (this.replaced == null) {
+			return null;
+		}
+		if (!this.replaced.hasKey("parent")) {
+			return null;
+		}
+		return BlockPos.fromLong(this.replaced.getLong("parent")).add(pos);
+	}
 }

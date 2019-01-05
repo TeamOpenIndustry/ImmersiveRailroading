@@ -51,7 +51,7 @@ public class SwitchUtil {
 			for (int z = -scale; z <= scale; z++) {
 				BlockPos gagPos = new BlockPos(redstoneOrigin.add(new Vec3d(x, 0, z)));
 				TileRailBase gagRail = TileRailBase.get(rail.getWorld(), gagPos);
-				if (gagRail != null && rail.getPos().equals(gagRail.getParent())) {
+				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
 					if (rail.getWorld().isBlockIndirectlyGettingPowered(gagPos) > 0) {
 						return SwitchState.TURN;
 					}
