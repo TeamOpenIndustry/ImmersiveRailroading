@@ -40,7 +40,7 @@ public class ImmersiveRailroading
         logger = event.getModLog();
         instance = this;
         
-        World.MAX_ENTITY_RADIUS = 32;
+        World.MAX_ENTITY_RADIUS = Math.max(World.MAX_ENTITY_RADIUS, 32);
         
     	proxy.preInit(event);
     }
