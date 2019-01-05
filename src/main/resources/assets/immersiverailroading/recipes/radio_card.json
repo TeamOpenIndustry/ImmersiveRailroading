@@ -4,26 +4,26 @@
     "item": "immersiverailroading:item_radio_control_card"
   },
   "pattern": [
-    "   ",
-    " w ",
-    "tbd"
+    " a ",
+    "tbt",
+    " d "
   ],
   "key": {
-    "b": {
-      "item": "oc:materialCard",
-      "data": "0"
+	"t": {
+	  "type": "forge:ore_dict",
+      "ore": "oc:materialTransistor"
     },
-    "t": {
-      "item": "oc:materialTransistor",
-      "data": "0"
+	"d": {
+	  "type": "forge:ore_dict",
+      "ore": "oc:dataCard1"
     },
-    "d": {
-      "item": "oc:datacard1",
-      "data": "0"
+	"a": {
+	  "item": "minecraft:iron_bars",
+      "data": 0
     },
-    "w": {
-      "item": "oc:wlanCard1",
-      "data": "0"
+	"b": {
+	  "item": "minecraft:iron_ingot",
+      "data": 0
     }
   }
-}
+} 
