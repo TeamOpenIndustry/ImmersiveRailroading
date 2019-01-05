@@ -94,7 +94,25 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		this.bedHeight = height;
 	}
 	public float getBedHeight() {
+		if (this.replaced != null && this.replaced.hasKey("height")) {
+			float replacedHeight = this.replaced.getFloat("height");
+			return Math.min(this.bedHeight, replacedHeight);
+		}
 		return this.bedHeight;
+	}
+	public double getRenderGauge() {
+		double gauge = 0;
+		TileRail parent = this.getParentTile();
+		if (parent != null) {
+			gauge = parent.info.settings.gauge.value();
+		}
+		if (this.getParentReplaced() != null) {
+			parent = TileRail.get(world, this.getParentReplaced());
+            if (parent != null) {
+                gauge = Math.min(gauge, parent.info.settings.gauge.value());
+            }
+		}
+		return gauge;
 	}
 	public void setRailHeight(float height) {
 		this.railHeight = height;
