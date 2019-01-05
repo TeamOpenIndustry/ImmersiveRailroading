@@ -402,7 +402,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		return 0;
 	}
-	
+
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		TileRail tile;
@@ -436,14 +436,30 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					nextPos = potential;
 				}
 			}
-		} else if (this.getParentReplaced() != null) {
-			TileRail replacedParent = TileRail.get(world, getParentReplaced());
-			if (replacedParent != null) {
-				if (!replacedParent.getParentTile().getPos().equals(tile.getParentTile().getPos())) {
-					Vec3d potential = replacedParent.getNextPosition(currentPosition, motion);
-					if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
-						nextPos = potential;
+		}
+
+		if (new BlockPos(currentPosition).equals(this.getPos())) {
+			// Can look at our parents
+			// Prevents infinite looping between cross overlapping track (I think...)
+
+			TileRailBase target = this;
+			while(target != null) {
+				TileRail parent = target.getParentTile();
+				if (parent != null) {
+					boolean isSameTrack = parent.getParentTile().getPos().equals(tile.getParentTile().getPos());;
+					if (!isSameTrack) {
+						Vec3d potential = parent.getNextPosition(currentPosition, motion);
+						if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
+							nextPos = potential;
+						}
 					}
+				}
+				NBTTagCompound data = target.getReplaced();
+				target = null;
+				if (data != null) {
+					target = new TileRailBase();
+					target.readFromNBT(data);
+					target.setWorld(world);
 				}
 			}
 		}
