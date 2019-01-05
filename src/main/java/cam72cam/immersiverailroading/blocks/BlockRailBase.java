@@ -98,9 +98,9 @@ public abstract class BlockRailBase extends Block {
 				if (te.getParentTile() != null) {
 					te.getParentTile().spawnDrops();
 				}
-				if (tryBreakRail(te.getWorld(), te.getPos())) {
-					te.getWorld().setBlockToAir(parent);
-				}
+				//if (tryBreakRail(te.getWorld(), te.getPos())) {
+                te.getWorld().setBlockToAir(parent);
+				//}
 			}
 		}
 	}
