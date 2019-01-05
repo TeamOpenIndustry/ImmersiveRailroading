@@ -25,6 +25,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
@@ -160,13 +161,22 @@ public abstract class BlockRailBase extends Block {
 					// new object here is important
 					TileRailGag newGag = new TileRailGag();
 					newGag.readFromNBT(rail.getReplaced());
-					
-					// Only do replacement if parent still exists
-					if (newGag.getParent() != null && TileRailBase.get(world, newGag.getParent()) != null) {
-						rail.getWorld().setTileEntity(pos, newGag);
-						newGag.markDirty();
-						breakParentIfExists(rail);
-						return false;
+					while(true) {
+						// Only do replacement if parent still exists
+						if (newGag.getParent() != null && TileRailBase.get(world, newGag.getParent()) != null) {
+							rail.getWorld().setTileEntity(pos, newGag);
+							newGag.markDirty();
+							breakParentIfExists(rail);
+							return false;
+						}
+
+						NBTTagCompound data = newGag.getReplaced();
+						if (data == null) {
+							break;
+						}
+
+						newGag = new TileRailGag();
+						newGag.readFromNBT(data);
 					}
 				}
 			}
