@@ -445,8 +445,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			TileRailBase target = this;
 			while(target != null) {
 				TileRail parent = target.getParentTile();
-				if (parent != null) {
-					boolean isSameTrack = parent.getParentTile().getPos().equals(tile.getParentTile().getPos());;
+				if (parent != null && parent.getParentTile() != null && tile.getParentTile() != null) {
+					boolean isSameTrack = parent.getParentTile().getPos().equals(tile.getParentTile().getPos());
 					if (!isSameTrack) {
 						Vec3d potential = parent.getNextPosition(currentPosition, motion);
 						if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
