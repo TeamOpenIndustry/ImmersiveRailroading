@@ -1,0 +1,15 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "builtin/generated"
+	},
+	"variants": {
+		"normal": [{
+			"__comment": "Get Forge to inject the default rotations and scales for an item in a player's hand, on the ground, etc.",
+			"textures": {
+				"layer0": "immersiverailroading:items/radio_card"
+			},
+			"transform": "forge:default-item"
+		}]
+	}
+}
