@@ -3,10 +3,12 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -27,7 +29,7 @@ public abstract class BuilderBase {
 	public final BlockPos pos;
 	private BlockPos parent_pos;
 
-	public boolean overrideFlexible = false;
+	public boolean overrideFlexible = true;
 
 	public List<ItemStack> drops;
 
@@ -94,7 +96,13 @@ public abstract class BuilderBase {
 		}
 		*/
 		for(TrackBase track : tracks) {
-			track.placeTrack().markDirty();
+			if (!track.isOverTileRail()) {
+				track.placeTrack(true).markDirty();
+			} else {
+				TileRail rail = TileRail.get(info.world, track.getPos());
+				rail.setReplaced(track.placeTrack(false).serializeNBT());
+				rail.markDirty();
+			}
 		}
 	}
 	
