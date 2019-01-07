@@ -160,6 +160,15 @@ public class Config {
 			}
 			return items;
 		}
+		
+		@Comment("Only select Locomotives with suitable equipment can be radio-controlled")
+		public static boolean RadioEquipmentRequired = true;
+		
+		@Comment("Range of radio-control, positive integer")
+		public static int RadioRange = 500;
+		
+		@Comment("Energy cost (RF) per radio transmission per metre")
+		public static int RadioCostPerMetre = 0;
 	}
 
 	public static ConfigDebug debug;
