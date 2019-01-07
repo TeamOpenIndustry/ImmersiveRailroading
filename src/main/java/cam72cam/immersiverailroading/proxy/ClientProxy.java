@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.nbt.NBTTagCompound;
@@ -347,7 +348,7 @@ public class ClientProxy extends CommonProxy {
         {
             super(new ResourceLocation(ImmersiveRailroading.MODID, def.defID).toString());
             this.def = def;
-            this.width = this.height = 64;
+            this.width = this.height = ConfigGraphics.iconCacheSize;
         }
 
         @Override
@@ -361,19 +362,23 @@ public class ClientProxy extends CommonProxy {
         {
             BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
             
-            String[][] map = def.getIcon(this.getIconWidth());
+            EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
 
             StockModel renderer = StockRenderCache.getRender(def.defID);
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
-    				if (map[x][y] != null && map[x][y] != "") {
-    					int color = renderer.textures.get(null).samp(map[x][y]);
+    				if (map[x][y] != null) {
+						EntityRollingStockDefinition.IconPart pt = map[x][y];
+    					int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
     					image.setRGB(x, this.getIconWidth() - (y + 1), color);
     				} else {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
     				}
     			}
     		}
+    		for (OBJTextureSheet tex : renderer.textures.values()) {
+    			tex.freePx();
+			}
             
             int[][] pixels = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
             pixels[0] = new int[image.getWidth() * image.getHeight()];
