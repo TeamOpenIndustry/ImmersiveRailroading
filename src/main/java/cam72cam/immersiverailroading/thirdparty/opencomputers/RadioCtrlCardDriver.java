@@ -71,7 +71,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 			cardPosition[1] = y;
 			cardPosition[2] = z;
 			linkedLoco = loco;
-			node = Network.newNode(this, Visibility.Network).withComponent("ir_remote_control", Visibility.Network).create();
+			node = Network.newNode(this, Visibility.Network).withComponent("ir_remote_control", Visibility.Network).withConnector().create();
 			setNode(node);
 		}
 
