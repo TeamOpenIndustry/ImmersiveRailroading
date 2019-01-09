@@ -41,7 +41,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition  {
 		power = (int)Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
 		traction = (int)Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
 		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
-		hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
+		if(properties.has("radio_equipped")) {
+			hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
+		}
 	}
 	
 	@Override
