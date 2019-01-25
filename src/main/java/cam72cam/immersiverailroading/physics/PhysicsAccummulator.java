@@ -18,6 +18,7 @@ public class PhysicsAccummulator {
 	public double gradeForceNewtons = 0;
 	public double massToMoveKg = 0;
 	public double brakeAdhesionNewtons = 0;
+	public double totalBlockCollisionMultiplier = 0;
 	public int count = 0;
 	private TickPos pos;
 	
@@ -44,6 +45,9 @@ public class PhysicsAccummulator {
 		double grade = -Math.tan(Math.toRadians(pos.rotationPitch % 90)) * Config.ConfigBalance.slopeMultiplier;
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
+		
+		totalBlockCollisionMultiplier += movable.getBlockCollisionMultiplier();
+		movable.resetBlockCollisionMultiplier();
 		
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
@@ -85,6 +89,15 @@ public class PhysicsAccummulator {
 
 		if (Math.abs(newMCVelocity) < 0.001) {
 			newMCVelocity = 0;
+		}
+		
+		// This calculation should be thoroughly reviewed, I am not confident of my number game
+		if(totalBlockCollisionMultiplier > 0) {
+			if (newMCVelocity > totalBlockCollisionMultiplier) {
+				newMCVelocity -= Math.copySign(Math.max(newMCVelocity, totalBlockCollisionMultiplier), newMCVelocity);
+			} else {
+				newMCVelocity /= 2;
+			}
 		}
 		
 		return Speed.fromMinecraft(newMCVelocity);

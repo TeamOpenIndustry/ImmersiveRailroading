@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
@@ -49,6 +50,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
+	private double blockCollisionMultiplier = 0;
 
 	private float sndRand;
 
@@ -459,8 +461,25 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						}
 						bbb = bbb.offset(bp);
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
-							if (!BlockUtil.isIRRail(world, bp.up())) {
-								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));										
+							if (!BlockUtil.isIRRail(world, bp.up()) && ConfigDamage.TrainsBreakBlocks && state.getBlockHardness(world, bp) >= 0) {
+								double collisionSpeed = this.getCurrentSpeed().metric();
+								if (Math.abs(collisionSpeed) > state.getBlockHardness(world, bp)*10) {
+									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
+								}
+								if (Math.abs(collisionSpeed) > 15) {
+									if (!this.isDead) {
+										this.onDeath(collisionSpeed > 30 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
+									}
+									world.removeEntity(this);
+									return;
+								}
+								double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(this.getPositionVector())) - Math.copySign(this.rotationYaw, this.getCurrentSpeed().metric());
+								angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
+								if (angleVelocityToBlock < 45) {
+									blockCollisionMultiplier += state.getBlockHardness(world, bp);
+								} else if (angleVelocityToBlock > 135) {
+									blockCollisionMultiplier -= state.getBlockHardness(world, bp);
+								}
 							}
 						}
 					} else {
@@ -586,6 +605,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	public Vec3d getVelocity() {
 		return new Vec3d(this.motionX, this.motionY, this.motionZ);
+	}
+	
+	public void resetBlockCollisionMultiplier() {
+		blockCollisionMultiplier = 0;
+	}
+	
+	public double getBlockCollisionMultiplier() {
+		return blockCollisionMultiplier;
 	}
 	
 	@Override
