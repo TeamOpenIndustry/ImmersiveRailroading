@@ -46,7 +46,7 @@ public class PhysicsAccummulator {
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
-		blockCollisionForceNewtons += movable.getBlockCollisionHardness()*10_000;
+		blockCollisionForceNewtons += movable.getBlockCollisionHardness()*36_000;
 		movable.resetBlockCollisionHardness();
 		
 		if (stock instanceof Locomotive) {
@@ -94,7 +94,7 @@ public class PhysicsAccummulator {
 		}
 		
 		// This calculation should be thoroughly reviewed, I am not confident of my number game
-		if(blockCollisionForceNewtons != 0 && Math.abs(newMCVelocity) > 0.05 && (Math.signum(blockCollisionForceNewtons) == Math.signum(newMCVelocity))) {
+		if(blockCollisionForceNewtons != 0 && Math.abs(newMCVelocity) > 0.5 && (Math.signum(blockCollisionForceNewtons) == Math.signum(newMCVelocity))) {
 			newMCVelocity -= Math.abs(deltaAccellBlockCollisionMCVelocity) > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity;
 		}
 		

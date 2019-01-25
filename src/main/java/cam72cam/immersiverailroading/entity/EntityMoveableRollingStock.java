@@ -462,13 +462,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						bbb = bbb.offset(bp);
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
 							if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
-								double collisionSpeed = this.getCurrentSpeed().metric();
-								if (ConfigDamage.TrainsBreakBlocks && Math.abs(collisionSpeed) > state.getBlockHardness(world, bp)*10) {
+								double collisionSpeed = Math.abs(this.getCurrentSpeed().metric());
+								if (ConfigDamage.TrainsBreakBlocks && collisionSpeed*0.28 > state.getBlockHardness(world, bp)*10) {
 									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 								}
-								if (Config.ConfigDamage.explosionsEnabled && Math.abs(collisionSpeed) > 15) {
+								if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
 									if (!this.isDead) {
-										this.onDeath(collisionSpeed > 30 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
+										this.onDeath(collisionSpeed > 100 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
 									}
 									world.removeEntity(this);
 									return;
