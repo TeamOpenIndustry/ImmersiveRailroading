@@ -50,7 +50,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private double blockCollisionMultiplier = 0;
+	private double blockCollisionHardness = 0;
 
 	private float sndRand;
 
@@ -461,12 +461,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						}
 						bbb = bbb.offset(bp);
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
-							if (!BlockUtil.isIRRail(world, bp.up()) && ConfigDamage.TrainsBreakBlocks && state.getBlockHardness(world, bp) >= 0) {
+							if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
 								double collisionSpeed = this.getCurrentSpeed().metric();
-								if (Math.abs(collisionSpeed) > state.getBlockHardness(world, bp)*10) {
+								if (ConfigDamage.TrainsBreakBlocks && Math.abs(collisionSpeed) > state.getBlockHardness(world, bp)*10) {
 									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 								}
-								if (Math.abs(collisionSpeed) > 15) {
+								if (Config.ConfigDamage.explosionsEnabled && Math.abs(collisionSpeed) > 15) {
 									if (!this.isDead) {
 										this.onDeath(collisionSpeed > 30 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
 									}
@@ -476,9 +476,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 								double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(this.getPositionVector())) - Math.copySign(this.rotationYaw, this.getCurrentSpeed().metric());
 								angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
 								if (angleVelocityToBlock < 45) {
-									blockCollisionMultiplier += state.getBlockHardness(world, bp);
+									blockCollisionHardness += state.getBlockHardness(world, bp);
 								} else if (angleVelocityToBlock > 135) {
-									blockCollisionMultiplier -= state.getBlockHardness(world, bp);
+									blockCollisionHardness -= state.getBlockHardness(world, bp);
 								}
 							}
 						}
@@ -607,12 +607,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return new Vec3d(this.motionX, this.motionY, this.motionZ);
 	}
 	
-	public void resetBlockCollisionMultiplier() {
-		blockCollisionMultiplier = 0;
+	public void resetBlockCollisionHardness() {
+		blockCollisionHardness = 0;
 	}
 	
-	public double getBlockCollisionMultiplier() {
-		return blockCollisionMultiplier;
+	public double getBlockCollisionHardness() {
+		return blockCollisionHardness;
 	}
 	
 	@Override
