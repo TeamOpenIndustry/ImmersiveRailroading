@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
@@ -156,6 +157,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 				this.texture = texNames.get(idx);
 				this.sendToObserving(new PaintSyncPacket(this));
 				return true;
+			} else {
+				player.sendMessage(new TextComponentString("This stock has no livery variants"));
 			}
 		}
 		return false;
