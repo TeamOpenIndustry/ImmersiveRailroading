@@ -47,10 +47,8 @@ public class PhysicsAccummulator {
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
-		for (Float blockHardness : movable.getBlockCollisionHardness().values()) {
-			// Would a config value here have any use?
-			blockCollisionForceNewtons += blockHardness*36_000;
-		}
+		// Would a config value here have practical use? A coefficient of crashing?
+		blockCollisionForceNewtons += movable.getBlockCollisionHardness()*36_000;
 		
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;

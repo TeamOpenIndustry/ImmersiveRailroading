@@ -52,7 +52,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private HashMap<Vec3d, Float> blockCollisionHardness = new HashMap<Vec3d, Float>();
+	private double blockCollisionHardness = 0;
 
 	private float sndRand;
 
@@ -463,27 +463,28 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							continue;
 						}
 						bbb = bbb.offset(bp);
+						float blockCollisionInFront = 0.0f;
+						double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(this.getPositionVector())) - Math.copySign(this.rotationYaw, this.getCurrentSpeed().metric());
+						angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
+						
+						if (Math.abs(angleVelocityToBlock) < 45) {
+							blockCollisionInFront = 1.0f;
+						} else if (Math.abs(angleVelocityToBlock) > 135) {
+							blockCollisionInFront = -1.0f;
+						} else {
+							continue;	// We won't be doing anything in this case so just skip the intersect check   
+						}
+						
+						double collisionSpeed = Math.abs(this.getCurrentSpeed().metric());
+						float blockHardness = state.getBlockHardness(world, bp);
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
 							if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
-								double collisionSpeed = Math.abs(this.getCurrentSpeed().metric());
-								float blockHardness = state.getBlockHardness(world, bp);
-								double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(this.getPositionVector())) - Math.copySign(this.rotationYaw, this.getCurrentSpeed().metric());
-								angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
 								//ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
 								if (ConfigDamage.TrainsBreakBlocks && collisionSpeed*0.28 > blockHardness*2.0) {
-									if (Math.abs(angleVelocityToBlock) < 45) {
-										blockCollisionHardness.put(pos, blockHardness);
-										world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
-									} else if (Math.abs(angleVelocityToBlock) > 135) {
-										blockCollisionHardness.put(pos, -blockHardness);
-										world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
-									}
-								} else {
-									if (Math.abs(angleVelocityToBlock) < 45) {
-										blockCollisionHardness.put(pos, (float) collisionSpeed);
-									} else if (Math.abs(angleVelocityToBlock) > 135) {
-										blockCollisionHardness.put(pos, (float) -collisionSpeed);
-									}
+									blockCollisionHardness += blockCollisionInFront * blockHardness;
+									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
+								} else {									
+									blockCollisionHardness += blockCollisionInFront * collisionSpeed;
 								}
 								if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
 									if (!this.isDead) {
@@ -620,10 +621,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void resetBlockCollisionHardness() {
-		blockCollisionHardness.clear();
+		blockCollisionHardness = 0;
 	}
 	
-	public HashMap<Vec3d, Float> getBlockCollisionHardness() {
+	public double getBlockCollisionHardness() {
 		return blockCollisionHardness;
 	}
 	
