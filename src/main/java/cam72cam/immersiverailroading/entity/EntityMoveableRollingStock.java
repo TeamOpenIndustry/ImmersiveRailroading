@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
@@ -50,7 +51,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private double blockCollisionHardness = 0;
+	private HashMap<Vec3d, Float> blockCollisionHardness = new HashMap<Vec3d, Float>();
 
 	private float sndRand;
 
@@ -439,6 +440,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
+			this.resetBlockCollisionHardness();
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				/*if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
@@ -475,10 +477,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 								}
 								double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(this.getPositionVector())) - Math.copySign(this.rotationYaw, this.getCurrentSpeed().metric());
 								angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
-								if (angleVelocityToBlock < 45) {
-									blockCollisionHardness += state.getBlockHardness(world, bp);
-								} else if (angleVelocityToBlock > 135) {
-									blockCollisionHardness -= state.getBlockHardness(world, bp);
+								//ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
+								if (Math.abs(angleVelocityToBlock) < 45) {
+									blockCollisionHardness.put(pos, state.getBlockHardness(world, bp));
+								} else if (Math.abs(angleVelocityToBlock) > 135) {
+									blockCollisionHardness.put(pos, -state.getBlockHardness(world, bp));
 								}
 							}
 						}
@@ -608,10 +611,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void resetBlockCollisionHardness() {
-		blockCollisionHardness = 0;
+		blockCollisionHardness.clear();
 	}
 	
-	public double getBlockCollisionHardness() {
+	public HashMap<Vec3d, Float> getBlockCollisionHardness() {
 		return blockCollisionHardness;
 	}
 	

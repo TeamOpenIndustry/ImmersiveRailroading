@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
@@ -46,8 +47,10 @@ public class PhysicsAccummulator {
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
-		blockCollisionForceNewtons += movable.getBlockCollisionHardness()*36_000;
-		movable.resetBlockCollisionHardness();
+		for (Float blockHardness : movable.getBlockCollisionHardness().values()) {
+			// Would a config value here have any use?
+			blockCollisionForceNewtons += blockHardness*36_000;
+		}
 		
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
@@ -93,8 +96,8 @@ public class PhysicsAccummulator {
 			newMCVelocity = 0;
 		}
 		
-		// This calculation should be thoroughly reviewed, I am not confident of my number game
-		if(blockCollisionForceNewtons != 0 && Math.abs(newMCVelocity) > 0.5 && (Math.signum(blockCollisionForceNewtons) == Math.signum(newMCVelocity))) {
+		//if (blockCollisionForceNewtons != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s, speed: %s\n", blockCollisionForceNewtons, Speed.fromMinecraft(newMCVelocity).metric());
+		if(blockCollisionForceNewtons != 0 && Math.abs(Speed.fromMinecraft(newMCVelocity).metric()) > 0.5 && (Math.signum(blockCollisionForceNewtons) == Math.signum(newMCVelocity))) {
 			newMCVelocity -= Math.abs(deltaAccellBlockCollisionMCVelocity) > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity;
 		}
 		
