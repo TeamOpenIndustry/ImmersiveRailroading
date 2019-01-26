@@ -473,10 +473,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 								if (ConfigDamage.TrainsBreakBlocks && collisionSpeed*0.28 > blockHardness*2.0) {
 									if (Math.abs(angleVelocityToBlock) < 45) {
 										blockCollisionHardness.put(pos, blockHardness);
+										world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 									} else if (Math.abs(angleVelocityToBlock) > 135) {
 										blockCollisionHardness.put(pos, -blockHardness);
+										world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 									}
-									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 								} else {
 									if (Math.abs(angleVelocityToBlock) < 45) {
 										blockCollisionHardness.put(pos, (float) collisionSpeed);
