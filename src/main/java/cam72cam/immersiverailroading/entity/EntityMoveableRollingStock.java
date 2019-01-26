@@ -441,9 +441,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
-				if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
+				/*if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
 					continue;
-				}
+				}*/
 				pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 				pos = pos.add(this.getPositionVector());
 				BlockPos bp = new BlockPos(pos);
