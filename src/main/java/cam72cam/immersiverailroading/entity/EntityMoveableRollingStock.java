@@ -38,6 +38,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import scala.Int;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock {
 
@@ -465,23 +466,30 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
 							if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
 								double collisionSpeed = Math.abs(this.getCurrentSpeed().metric());
-								if (ConfigDamage.TrainsBreakBlocks && collisionSpeed*0.28 > state.getBlockHardness(world, bp)*10) {
-									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
-								}
-								if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
-									if (!this.isDead) {
-										this.onDeath(collisionSpeed > 100 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
-									}
-									world.removeEntity(this);
-									return;
-								}
+								float blockHardness = state.getBlockHardness(world, bp);
 								double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(this.getPositionVector())) - Math.copySign(this.rotationYaw, this.getCurrentSpeed().metric());
 								angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
 								//ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
-								if (Math.abs(angleVelocityToBlock) < 45) {
-									blockCollisionHardness.put(pos, state.getBlockHardness(world, bp));
-								} else if (Math.abs(angleVelocityToBlock) > 135) {
-									blockCollisionHardness.put(pos, -state.getBlockHardness(world, bp));
+								if (ConfigDamage.TrainsBreakBlocks && collisionSpeed*0.28 > blockHardness*2.0) {
+									if (Math.abs(angleVelocityToBlock) < 45) {
+										blockCollisionHardness.put(pos, blockHardness);
+									} else if (Math.abs(angleVelocityToBlock) > 135) {
+										blockCollisionHardness.put(pos, -blockHardness);
+									}
+									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
+								} else {
+									if (Math.abs(angleVelocityToBlock) < 45) {
+										blockCollisionHardness.put(pos, (float) collisionSpeed);
+									} else if (Math.abs(angleVelocityToBlock) > 135) {
+										blockCollisionHardness.put(pos, (float) -collisionSpeed);
+									}
+								}
+								if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
+									if (!this.isDead) {
+										this.onDeath(collisionSpeed > 80 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
+									}
+									world.removeEntity(this);
+									return;
 								}
 							}
 						}
