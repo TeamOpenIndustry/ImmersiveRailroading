@@ -19,7 +19,7 @@ public class PhysicsAccummulator {
 	public double gradeForceNewtons = 0;
 	public double massToMoveKg = 0;
 	public double brakeAdhesionNewtons = 0;
-	public double blockCollisionForceNewtons = 0;
+	public double[] blockCollisionForceNewtons = {0,0,0};
 	public int count = 0;
 	private TickPos pos;
 	
@@ -48,7 +48,8 @@ public class PhysicsAccummulator {
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
 		// Would a config value here have practical use? A coefficient of crashing?
-		blockCollisionForceNewtons += movable.getBlockCollisionHardness()*36_000;
+		blockCollisionForceNewtons[0] += movable.getBlockCollisionHardness()[0]*36_000;
+		blockCollisionForceNewtons[2] += movable.getBlockCollisionHardness()[2]*36_000;
 		
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
@@ -77,8 +78,8 @@ public class PhysicsAccummulator {
 		double currentMCVelocity = pos.speed.minecraft();
 		double deltaAccellTractiveMCVelocity = Speed.fromMetric(tractiveAccell).minecraft();
 		
-		double blockCollisionAccell = blockCollisionForceNewtons / massToMoveKg;
-		double deltaAccellBlockCollisionMCVelocity = Speed.fromMetric(blockCollisionAccell).minecraft();
+		double[] blockCollisionAccell = {blockCollisionForceNewtons[0] / massToMoveKg, 0, blockCollisionForceNewtons[2] / massToMoveKg};
+		double[] deltaAccellBlockCollisionMCVelocity = {Speed.fromMetric(blockCollisionAccell[0]).minecraft(), 0, Speed.fromMetric(blockCollisionAccell[2]).minecraft()};
 		
 		double deltaAccellGradeMCVelocity = Speed.fromMetric(gradeAccell).minecraft();
 		
@@ -94,9 +95,12 @@ public class PhysicsAccummulator {
 			newMCVelocity = 0;
 		}
 		
-		//if (blockCollisionForceNewtons != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s, speed: %s\n", blockCollisionForceNewtons, Speed.fromMinecraft(newMCVelocity).metric());
-		if(blockCollisionForceNewtons != 0 && Math.abs(Speed.fromMinecraft(newMCVelocity).metric()) > 0.5 && (Math.signum(blockCollisionForceNewtons) == Math.signum(newMCVelocity))) {
-			newMCVelocity -= Math.abs(deltaAccellBlockCollisionMCVelocity) > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity;
+		//if (blockCollisionForceNewtons[0] != 0.0 || blockCollisionForceNewtons[2] != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s;%s, speed: %s\n", blockCollisionForceNewtons[0], blockCollisionForceNewtons[1], Speed.fromMinecraft(newMCVelocity).metric());
+		if (Speed.fromMinecraft(newMCVelocity).metric() > 0.5 && blockCollisionForceNewtons[2] != 0) {
+			newMCVelocity -= Math.abs(deltaAccellBlockCollisionMCVelocity[2]) > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity[2];
+		}
+		else if(Speed.fromMinecraft(newMCVelocity).metric() < -0.5 && blockCollisionForceNewtons[0] != 0) {
+			newMCVelocity -= Math.abs(deltaAccellBlockCollisionMCVelocity[0]) > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity[0];
 		}
 		
 		return Speed.fromMinecraft(newMCVelocity);

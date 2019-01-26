@@ -52,7 +52,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private double blockCollisionHardness = 0;
+	private double[] blockCollisionHardness = {0,0,0};	// 0 is reverse direction, 2 is forward direction. 1 is unused
 
 	private float sndRand;
 
@@ -463,14 +463,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							continue;
 						}
 						bbb = bbb.offset(bp);
-						float blockCollisionInFront = 0.0f;
+						int blockCollisionInFront = 0;
 						double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(this.getPositionVector())) - Math.copySign(this.rotationYaw, this.getCurrentSpeed().metric());
 						angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
 						
 						if (Math.abs(angleVelocityToBlock) < 45) {
-							blockCollisionInFront = 1.0f;
+							blockCollisionInFront = 1;
 						} else if (Math.abs(angleVelocityToBlock) > 135) {
-							blockCollisionInFront = -1.0f;
+							blockCollisionInFront = -1;
 						} else {
 							continue;	// We won't be doing anything in this case so just skip the intersect check   
 						}
@@ -481,10 +481,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
 								//ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
 								if (ConfigDamage.TrainsBreakBlocks && collisionSpeed*0.28 > blockHardness*2.0) {
-									blockCollisionHardness += blockCollisionInFront * blockHardness;
+									blockCollisionHardness[blockCollisionInFront+1] += blockCollisionInFront * blockHardness;
 									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 								} else {									
-									blockCollisionHardness += blockCollisionInFront * collisionSpeed;
+									blockCollisionHardness[blockCollisionInFront+1] += blockCollisionInFront * collisionSpeed;
 								}
 								if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
 									if (!this.isDead) {
@@ -621,10 +621,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void resetBlockCollisionHardness() {
-		blockCollisionHardness = 0;
+		blockCollisionHardness[0] = 0;
+		blockCollisionHardness[2] = 0;
 	}
 	
-	public double getBlockCollisionHardness() {
+	public double[] getBlockCollisionHardness() {
 		return blockCollisionHardness;
 	}
 	
