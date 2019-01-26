@@ -31,6 +31,7 @@ public enum ChatText {
 	RADIO_UNLINK("radio.unlink"),
 	RADIO_NOLINK("radio.nolink"),
 	RADIO_CANT_LINK("radio.cant_link"),
+	BRUSH_NO_VARIANTS("brush.no.variants"),
 	;
 	
 	private String value;

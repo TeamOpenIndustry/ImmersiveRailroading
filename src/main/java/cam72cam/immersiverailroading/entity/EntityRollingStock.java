@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.PaintSyncPacket;
@@ -29,7 +30,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
@@ -158,7 +158,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 				this.sendToObserving(new PaintSyncPacket(this));
 				return true;
 			} else {
-				player.sendMessage(new TextComponentString("This stock has no livery variants"));
+				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
 			}
 		}
 		return false;
