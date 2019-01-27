@@ -1,16 +1,51 @@
 package cam72cam.immersiverailroading.proxy;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import cam72cam.immersiverailroading.net.*;
+import org.apache.commons.io.IOUtils;
+
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.*;
-import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.*;
+import cam72cam.immersiverailroading.blocks.BlockMultiblock;
+import cam72cam.immersiverailroading.blocks.BlockRail;
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.blocks.BlockRailGag;
+import cam72cam.immersiverailroading.blocks.BlockRailPreview;
+import cam72cam.immersiverailroading.entity.CarFreight;
+import cam72cam.immersiverailroading.entity.CarPassenger;
+import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.FreightTank;
+import cam72cam.immersiverailroading.entity.HandCar;
+import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
+import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.gui.FreightContainer;
+import cam72cam.immersiverailroading.gui.SteamHammerContainer;
+import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
+import cam72cam.immersiverailroading.gui.TankContainer;
+import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.multiblock.*;
-import cam72cam.immersiverailroading.net.*;
+import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
+import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
@@ -47,13 +82,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
-import org.apache.commons.io.IOUtils;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
@@ -133,13 +161,11 @@ public abstract class CommonProxy implements IGuiHandler {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint"));
-	      modRegistry.remove(new ResourceLocation("immersiverailroading:switch hammer"));
     	} else {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint_iron"));
-	      modRegistry.remove(new ResourceLocation("immersiverailroading:switch hammer_iron"));
     	}
 	if (!OreDictionary.doesOreNameExist("oc:materialCard")) {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:radio_card"));
@@ -176,8 +202,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE);
     	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH);
     	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE);
-      event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD);
-    	event.getRegistry().register(IRItems.ITEM_SWITCH_HAMMER);
+	event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD);
     }
     
     @SubscribeEvent

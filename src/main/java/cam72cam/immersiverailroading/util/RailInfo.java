@@ -1,23 +1,24 @@
 package cam72cam.immersiverailroading.util;
 
+import java.util.*;
+
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.track.*;
+import cam72cam.immersiverailroading.track.BuilderCubicCurve;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.*;
 
 public class RailInfo {
 	public final World world;
@@ -27,12 +28,11 @@ public class RailInfo {
 
 	// Used for tile rendering only
 	public final SwitchState switchState;
-	public final boolean switchForced;
 	public final double tablePos;
 	public final String uniqueID;
 
 
-	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, boolean switchForced, double tablePos) {
+	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, double tablePos) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 		}
@@ -42,7 +42,6 @@ public class RailInfo {
 		this.placementInfo = placementInfo;
 		this.customInfo = customInfo;
 		this.switchState = switchState;
-		this.switchForced = switchForced;
 		this.tablePos = tablePos;
 
 		Object[] props = new Object [] {
@@ -67,7 +66,7 @@ public class RailInfo {
 	}
 
 	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, false, 0);
+		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, 0);
 	}
 
 	public RailInfo(World world, BlockPos pos, NBTTagCompound nbt) {
@@ -77,7 +76,6 @@ public class RailInfo {
 				new PlacementInfo(nbt.getCompoundTag("placement"), pos),
 				new PlacementInfo(nbt.getCompoundTag("custom"), pos),
 				SwitchState.values()[nbt.getInteger("switchState")],
-				nbt.getBoolean("switchForced"),
 				nbt.getDouble("tablePos")
 		);
 	}
@@ -88,24 +86,23 @@ public class RailInfo {
 		nbt.setTag("placement", placementInfo.toNBT(pos));
 		nbt.setTag("custom", customInfo.toNBT(pos));
 		nbt.setInteger("switchState", switchState.ordinal());
-		nbt.setBoolean("switchForced", switchForced);
 		nbt.setDouble("tablePos", tablePos);
 		return nbt;
 	}
 
 	@Override
 	public RailInfo clone() {
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
 	}
 
 	public RailInfo withLength(int length) {
 		RailSettings settings = this.settings.withLength(length);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
 	}
 
 	public RailInfo withType(TrackItems type) {
 		RailSettings settings = this.settings.withType(type);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
 	}
 
 	public Map<BlockPos, BuilderBase> builders = new HashMap<>();

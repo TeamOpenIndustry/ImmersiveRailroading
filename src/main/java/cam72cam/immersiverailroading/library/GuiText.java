@@ -40,8 +40,7 @@ public enum GuiText {
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
 	WEIGHT_TOOLTIP("stock.weight"),
 	TEXTURE_TOOLTIP("stock.texture"),
-
-	SWITCH_HAMMER_TOOLTIP("item.switch_hammer"),
+	
 	NONE("none"),
 	;
 	

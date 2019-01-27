@@ -1,5 +1,21 @@
 package cam72cam.immersiverailroading.proxy;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.function.Function;
+
+import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.OBJTextureSheet;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.nbt.NBTTagCompound;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
+
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRBlocks;
@@ -38,14 +54,23 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.immersiverailroading.render.OBJTextureSheet;
+import cam72cam.immersiverailroading.render.item.PlateItemModel;
+import cam72cam.immersiverailroading.render.item.RailAugmentItemModel;
+import cam72cam.immersiverailroading.render.item.RailCastItemRender;
+import cam72cam.immersiverailroading.render.item.RailItemRender;
+import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
+import cam72cam.immersiverailroading.render.item.StockItemModel;
+import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
+import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
-import cam72cam.immersiverailroading.render.entity.*;
-import cam72cam.immersiverailroading.render.item.*;
-import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
+import cam72cam.immersiverailroading.render.entity.MagicEntityRender;
+import cam72cam.immersiverailroading.render.entity.MagicEntity;
+import cam72cam.immersiverailroading.render.entity.ParticleRender;
+import cam72cam.immersiverailroading.render.entity.RenderOverride;
+import cam72cam.immersiverailroading.render.entity.StockEntityRender;
+import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.tile.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.tile.TileRailPreviewRender;
@@ -54,9 +79,7 @@ import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -79,15 +102,20 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
@@ -113,17 +141,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
 import paulscode.sound.SoundSystemConfig;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.function.Function;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -317,10 +335,9 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE, 0,
 				new ModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.getRegistryName(), ""));
+		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD, 0,
 				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName(), ""));
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_HAMMER, 0,
-				new ModelResourceLocation("minecraft:stick", ""));
 	}
 	
 	public static final class StockIcon extends TextureAtlasSprite
