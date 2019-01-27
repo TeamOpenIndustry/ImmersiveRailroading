@@ -175,6 +175,7 @@ immersiverailroading:detector_mode.speed=Обнаружение скорости
 immersiverailroading:detector_mode.passengers=Обнаружение числа пассажиров
 immersiverailroading:detector_mode.cargo=Обнаружение грузового полного процента
 immersiverailroading:detector_mode.liquid=Обнаружение жидкого полного процента
+immersiverailroading:detector_mode.computer=Компьютер
 immersiverailroading:loco_control_mode.throttle_forward=Дроссель вперед
 immersiverailroading:loco_control_mode.throttle_reverse=Реверс дросселя
 immersiverailroading:loco_control_mode.brake=Тормоз

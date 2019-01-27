@@ -15,6 +15,8 @@ item.immersiverailroading:item_cast_rail.name=Rail Casting
 item.immersiverailroading:item_manual.name=Immersive Railroading Manual
 item.immersiverailroading:item_rail.name=Track Blueprint
 item.immersiverailroading:item_conductor_whistle.name=Conductor's Whistle
+item.immersiverailroading:item_golden_spike.name=Golden Spike
+item.immersiverailroading:item_radio_control_card.name=Train Radio-control Card
 item.immersiverailroading:item_switch_hammer.name=Switch Lever
 
 tile.immersiverailroading:block_rail.name=Rail
@@ -45,6 +47,11 @@ chat.immersiverailroading:augment.set=Set Augment to act only upon %s
 chat.immersiverailroading:augment.reset=Set Augment to act upon any stock
 chat.immersiverailroading:misc.wood_planks=Wood Planks
 chat.immersiverailroading:build.invalid_block=Invalid block at x=%s y=%s z=%s
+chat.immersiverailroading:radio.link=Card linked to locomotive
+chat.immersiverailroading:radio.relink=Card linked to new locomotive
+chat.immersiverailroading:radio.unlink=Card unlinked from its locomotive
+chat.immersiverailroading:radio.nolink=Card has no linked locomotive
+chat.immersiverailroading:radio.cant_link=Locomotive %s does not have radio control equipment
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
@@ -183,6 +190,7 @@ immersiverailroading:detector_mode.speed=Detecting Speed
 immersiverailroading:detector_mode.passengers=Detecting Number of Passengers
 immersiverailroading:detector_mode.cargo=Detecting Cargo Percentage Full
 immersiverailroading:detector_mode.liquid=Detecting Liquid Percentage Full
+immersiverailroading:detector_mode.computer=Computer
 immersiverailroading:loco_control_mode.throttle_forward=Throttle Forward
 immersiverailroading:loco_control_mode.throttle_reverse=Throttle Reverse
 immersiverailroading:loco_control_mode.brake=Brake

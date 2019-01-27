@@ -5,8 +5,13 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Freight;
+import cam72cam.immersiverailroading.entity.FreightTank;
+import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
@@ -80,7 +85,25 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		this.bedHeight = height;
 	}
 	public float getBedHeight() {
+		if (this.replaced != null && this.replaced.hasKey("height")) {
+			float replacedHeight = this.replaced.getFloat("height");
+			return Math.min(this.bedHeight, replacedHeight);
+		}
 		return this.bedHeight;
+	}
+	public double getRenderGauge() {
+		double gauge = 0;
+		TileRail parent = this.getParentTile();
+		if (parent != null) {
+			gauge = parent.info.settings.gauge.value();
+		}
+		if (this.getParentReplaced() != null) {
+			parent = TileRail.get(world, this.getParentReplaced());
+            if (parent != null) {
+                gauge = Math.min(gauge, parent.info.settings.gauge.value());
+            }
+		}
+		return gauge;
 	}
 	public void setRailHeight(float height) {
 		this.railHeight = height;
@@ -160,7 +183,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	public boolean isFlexible() {
-		return this.flexible;
+		return this.flexible || !(this instanceof TileRail);
 	}
 	
 	public ItemStack getRenderRailBed() {
@@ -374,7 +397,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		return 0;
 	}
-	
+
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		TileRail tile;
@@ -404,8 +427,34 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			tile = self.getParentTile();
 			if (tile != null) {
 				Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
-				if (potential.distanceTo(currentPosition) < nextPos.distanceTo(currentPosition)) {
+				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
 					nextPos = potential;
+				}
+			}
+		}
+
+		if (new BlockPos(currentPosition).equals(this.getPos())) {
+			// Can look at our parents
+			// Prevents infinite looping between cross overlapping track (I think...)
+
+			TileRailBase target = this;
+			while(target != null) {
+				TileRail parent = target.getParentTile();
+				if (parent != null && parent.getParentTile() != null && tile.getParentTile() != null) {
+					boolean isSameTrack = parent.getParentTile().getPos().equals(tile.getParentTile().getPos());
+					if (!isSameTrack) {
+						Vec3d potential = parent.getNextPosition(currentPosition, motion);
+						if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
+							nextPos = potential;
+						}
+					}
+				}
+				NBTTagCompound data = target.getReplaced();
+				target = null;
+				if (data != null) {
+					target = new TileRailBase();
+					target.readFromNBT(data);
+					target.setWorld(world);
 				}
 			}
 		}
@@ -790,6 +839,16 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		return (int) ((speed * speed) / 200);
 	}
+
+	public BlockPos getParentReplaced() {
+		if (this.replaced == null) {
+			return null;
+		}
+		if (!this.replaced.hasKey("parent")) {
+			return null;
+		}
+		return BlockPos.fromLong(this.replaced.getLong("parent")).add(pos);
+  }
 
 	public void toggleSwitchForced() {
 		TileRail teParent = this.getParentTile().getParentTile();

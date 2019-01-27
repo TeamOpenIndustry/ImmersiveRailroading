@@ -328,6 +328,9 @@ public class AugmentDriver implements DriverBlock {
 		}
 		
 		private float normalize(double val) {
+			if (Double.isNaN(val)) {
+				return 0;
+			}
 			if (val > 1) {
 				return 1;
 			}
