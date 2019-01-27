@@ -317,10 +317,12 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE, 0,
 				new ModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.getRegistryName(), ""));
+
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD, 0,
 				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName(), ""));
+
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_HAMMER, 0,
-				new ModelResourceLocation("minecraft:stick", ""));
+				new ModelResourceLocation(IRItems.ITEM_SWITCH_HAMMER.getRegistryName(), ""));
 	}
 	
 	public static final class StockIcon extends TextureAtlasSprite
