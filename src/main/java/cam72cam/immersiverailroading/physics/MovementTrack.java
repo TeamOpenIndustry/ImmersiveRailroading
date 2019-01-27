@@ -3,15 +3,16 @@ package cam72cam.immersiverailroading.physics;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.track.PosStep;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import trackapi.lib.ITrack;
 import trackapi.lib.Util;
-import util.Matrix4;
 
 import java.util.List;
 
@@ -37,6 +38,11 @@ public class MovementTrack {
 				ITrack te = Util.getTileEntity(world, pos.addVector(0, height + 0.35, 0), true);
 				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 					return te;
+				}
+				// HACK for cross gauge
+				TileRailBase rail = TileRailBase.get(world, new BlockPos(pos.addVector(0, height + 0.35, 0)));
+				if (rail != null && rail.getParentReplaced() != null) {
+					return rail;
 				}
 			}
 		}
@@ -106,7 +112,7 @@ public class MovementTrack {
 				return backward;
 			}
 		} else if (rail.info.getBuilder() instanceof IIterableTrack) {
-			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder()).getPath(0.5);
+			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder()).getPath(0.25);
 			Vec3d center = rail.info.placementInfo.placementPosition;
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
@@ -121,8 +127,9 @@ public class MovementTrack {
 			Vec3d closePos = center.add(close).addVector(0, heightOffset, 0);
 			double distToClose = closePos.distanceTo(estimatedPosition);
 
-			Vec3d curveDelta = VecUtil.fromYaw(distToClose, close.yaw);
+			Vec3d curveDelta = new Vec3d(distToClose, 0, 0);
 			curveDelta = VecUtil.rotatePitch(curveDelta, -close.pitch);
+			curveDelta = VecUtil.rotateYaw(curveDelta, close.yaw);
 
 			Vec3d forward = closePos.add(curveDelta);
 			Vec3d backward = closePos.subtract(curveDelta);
