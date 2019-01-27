@@ -12,8 +12,8 @@ public class TrackGag extends TrackBase {
 	}
 
 	@Override
-	public TileEntity placeTrack() {
-		TileRailGag tileGag = (TileRailGag) super.placeTrack();
+	public TileEntity placeTrack(boolean actuallyPlace) {
+		TileRailGag tileGag = (TileRailGag) super.placeTrack(actuallyPlace);
 		
 		tileGag.setFlexible(isFlexible());
 		

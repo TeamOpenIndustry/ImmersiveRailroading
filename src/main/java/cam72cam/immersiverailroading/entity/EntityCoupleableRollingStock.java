@@ -261,7 +261,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				CouplerType otherCoupler = potential.getRight();
 				this.setCoupledUUID(coupler, stock.getPersistentID());
 				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
-				this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
+				if (stock.isCouplerEngaged(otherCoupler) && this.isCouplerEngaged(coupler)) {
+					this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
+				}
 			}
 		}
 	}
@@ -672,7 +674,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
 			if (couplerFrontPosition == null) {
-				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
+				couplerFrontPosition = predictRearBogeyPosition(pos, (float) -(this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerFrontPosition;
 		} else {

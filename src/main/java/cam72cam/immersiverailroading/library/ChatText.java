@@ -26,6 +26,11 @@ public enum ChatText {
 	RESET_AUGMENT_FILTER("augment.reset"),
 	WOOD_PLANKS("misc.wood_planks"),
 	INVALID_BLOCK("build.invalid_block"),
+	RADIO_LINK("radio.link"),
+	RADIO_RELINK("radio.relink"),
+	RADIO_UNLINK("radio.unlink"),
+	RADIO_NOLINK("radio.nolink"),
+	RADIO_CANT_LINK("radio.cant_link"),
 	;
 	
 	private String value;

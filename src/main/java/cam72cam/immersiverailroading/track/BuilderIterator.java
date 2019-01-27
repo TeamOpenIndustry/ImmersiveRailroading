@@ -48,10 +48,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		PosStep end = path.get(path.size()-1);
 
 		Vec3d placeOff = new Vec3d(
-				Math.abs(info.placementInfo.placementPosition.z%1)-0.5,
+				Math.abs(info.placementInfo.placementPosition.x%1)-0.5,
 				0,
                 Math.abs(info.placementInfo.placementPosition.z%1)-0.5
-		);
+		).scale(-1);
 		int mainX = (int) Math.round(path.get(path.size()/2).x+placeOff.x);
 		int mainZ = (int) Math.round(path.get(path.size()/2).z+placeOff.z);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale()/2));
@@ -147,7 +147,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				PosStep cur = points.get(i);
-				Vec3d flatPos = VecUtil.rotateYaw(cur, info.placementInfo.yaw);
+				Vec3d flatPos = VecUtil.rotateYaw(cur, -info.placementInfo.yaw);
 				if (Math.abs(flatPos.z) >= 0.5 * scale) {
 					switchSize = i;
 					break;
