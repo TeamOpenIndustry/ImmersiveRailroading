@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemSwitchHammer extends Item {
-	public static final String NAME = "item_switch_hammer";
+	public static final String NAME = "item_switch_key";
 
 	public ItemSwitchHammer() {
 		super();
