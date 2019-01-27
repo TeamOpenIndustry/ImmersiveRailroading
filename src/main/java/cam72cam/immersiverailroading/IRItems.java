@@ -19,4 +19,5 @@ public class IRItems {
 	public static ItemPaintBrush ITEM_PAINT_BRUSH = new ItemPaintBrush(); 
 	public static ItemGoldenSpike ITEM_GOLDEN_SPIKE = new ItemGoldenSpike();
 	public static ItemRadioCtrlCard ITEM_RADIO_CONTROL_CARD = new ItemRadioCtrlCard();
+	public static ItemSwitchHammer ITEM_SWITCH_HAMMER = new ItemSwitchHammer();
 }
