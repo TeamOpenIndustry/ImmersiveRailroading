@@ -17,7 +17,7 @@ item.immersiverailroading:item_rail.name=Track Blueprint
 item.immersiverailroading:item_conductor_whistle.name=Conductor's Whistle
 item.immersiverailroading:item_golden_spike.name=Golden Spike
 item.immersiverailroading:item_radio_control_card.name=Train Radio-control Card
-item.immersiverailroading:item_switch_hammer.name=Switch Lever
+item.immersiverailroading:item_switch_hammer.name=Switch Key
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
