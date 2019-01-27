@@ -268,14 +268,23 @@ public class StockModel extends OBJRender {
 				GL11.glPushMatrix();
 				
 				RenderComponent frontLocomotive = def.getComponent(RenderComponentType.FRONT_LOCOMOTIVE, stock.gauge);
-				Vec3d frontVec = frontLocomotive.center();
-				PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
-				Vec3d frontPosActual = VecUtil.rotateWrongYaw(frontPos, 180 - stock.rotationYaw);
-				
-				GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
-				GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation()) + 180, 0, 1, 0);
-				GlStateManager.translate(-frontVec.x, 0, 0);
-				
+
+                Vec3d frontVec = frontLocomotive.center();
+                Vec3d frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
+                Vec3d frontNext = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge) - 0.5));
+                float frontWheelYaw = VecUtil.toYaw(frontPos.subtract(frontNext));
+                float frontYaw = VecUtil.toYaw(frontPos)+stock.rotationYaw+180;
+				float frontPitch = -VecUtil.toPitch(VecUtil.rotateYaw(frontPos, stock.rotationYaw+180))+90 +stock.rotationPitch;
+
+                GL11.glRotated(frontYaw, 0, 1, 0);
+                GL11.glRotated(frontPitch, 0, 0, 1);
+
+                if (frontPos.distanceTo(frontNext) > 0.1) {
+					GL11.glTranslated(frontVec.x, frontVec.y, frontVec.z);
+					GL11.glRotated(frontWheelYaw + stock.rotationYaw - frontYaw + 180, 0, 1, 0);
+					GL11.glTranslated(-frontVec.x, -frontVec.y, -frontVec.z);
+				}
+
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
 				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT, stock.gauge));
@@ -390,60 +399,81 @@ public class StockModel extends OBJRender {
 		List<RenderComponent> rearBogeyWheels = def.getComponents(RenderComponentType.BOGEY_REAR_WHEEL_X, stock.gauge);
 
 		if (frontBogey != null) {
-
 			Vec3d frontVec = frontBogey.center();
-			PosRot frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
+			Vec3d frontPos = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge)));
+			Vec3d frontNext = stock.predictFrontBogeyPosition((float) (-frontVec.x - def.getBogeyFront(stock.gauge) - 0.5));
+			float frontWheelYaw = VecUtil.toYaw(frontPos.subtract(frontNext));
+			float frontYaw = VecUtil.toYaw(frontPos)+stock.rotationYaw+180;
+			float frontPitch = -VecUtil.toPitch(VecUtil.rotateYaw(frontPos, stock.rotationYaw+180))+90 +stock.rotationPitch;
 
-			GlStateManager.pushMatrix();
+			GL11.glPushMatrix();
+			{
+				GL11.glRotated(frontYaw, 0, 1, 0);
+				GL11.glRotated(frontPitch, 0, 0, 1);
 
-			Vec3d frontPosActual = VecUtil.rotateWrongYaw(frontPos, 180 - stock.rotationYaw);
-			GlStateManager.translate(frontPosActual.x, frontPosActual.y, frontPosActual.z);
+				if (frontPos.distanceTo(frontNext) > 0.1) {
+					GL11.glTranslated(frontVec.x, frontVec.y, frontVec.z);
+					GL11.glRotated(frontWheelYaw + stock.rotationYaw - frontYaw + 180, 0, 1, 0);
+					GL11.glTranslated(-frontVec.x, -frontVec.y, -frontVec.z);
+				}
 
-			GlStateManager.rotate(-(180 - stock.rotationYaw + frontPos.getRotation())+180, 0, 1, 0);
-			GlStateManager.translate(-frontVec.x, 0, 0);
-			drawComponent(frontBogey);
-			if (frontBogeyWheels != null) {
-				for (RenderComponent wheel : frontBogeyWheels) {
-					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = distanceTraveled % circumference;
-					Vec3d wheelPos = wheel.center();
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
-					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
-					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
-					drawComponent(wheel);
-					GlStateManager.popMatrix();
+				drawComponent(frontBogey);
+				if (frontBogeyWheels != null) {
+					for (RenderComponent wheel : frontBogeyWheels) {
+						double circumference = wheel.height() * (float) Math.PI;
+						double relDist = distanceTraveled % circumference;
+						Vec3d wheelPos = wheel.center();
+						GL11.glPushMatrix();
+						{
+							GL11.glTranslated(wheelPos.x, wheelPos.y, wheelPos.z);
+							GL11.glRotatef((float) (360 * relDist / circumference), 0, 0, 1);
+							GL11.glTranslated(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+							drawComponent(wheel);
+						}
+						GL11.glPopMatrix();
+					}
 				}
 			}
-			GlStateManager.popMatrix();
+			GL11.glPopMatrix();
 		}
 		if (rearBogey != null)
 		{
 			Vec3d rearVec = rearBogey.center();
-			PosRot rearPos = stock.predictRearBogeyPosition((float) (rearVec.x + def.getBogeyRear(stock.gauge)));
-			
-			GlStateManager.pushMatrix();
+			Vec3d rearPos = stock.predictRearBogeyPosition((float) (-rearVec.x - def.getBogeyRear(stock.gauge)));
+			Vec3d rearNext = stock.predictRearBogeyPosition((float) (-rearVec.x - def.getBogeyRear(stock.gauge) - 0.5));
+			float rearWheelYaw = VecUtil.toYaw(rearPos.subtract(rearNext));
+			float rearYaw = VecUtil.toYaw(rearPos)+stock.rotationYaw;
+			float rearPitch = VecUtil.toPitch(VecUtil.rotateYaw(rearPos, stock.rotationYaw+180))-90 +stock.rotationPitch;
 
-			Vec3d rearPosActual = VecUtil.rotateWrongYaw(rearPos, 180 - stock.rotationYaw);
-			GlStateManager.translate(rearPosActual.x, rearPosActual.y, rearPosActual.z);
+			GL11.glPushMatrix();
+			{
+				GL11.glRotated(rearYaw, 0, 1, 0);
+				GL11.glRotated(rearPitch, 0, 0, 1);
 
-			GlStateManager.rotate(-(180 - stock.rotationYaw + rearPos.getRotation()), 0, 1, 0);
-			GlStateManager.translate(-rearVec.x, 0, 0);
-			drawComponent(rearBogey);
-			if (rearBogeyWheels != null) {
-				for (RenderComponent wheel : rearBogeyWheels) {
-					double circumference = wheel.height() * (float) Math.PI;
-					double relDist = distanceTraveled % circumference;
-					Vec3d wheelPos = wheel.center();
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(wheelPos.x, wheelPos.y, wheelPos.z);
-					GlStateManager.rotate((float) (360 * relDist / circumference), 0, 0, 1);
-					GlStateManager.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
-					drawComponent(wheel);
-					GlStateManager.popMatrix();
+				if (rearPos.distanceTo(rearNext) > 0.1) {
+					GL11.glTranslated(rearVec.x, rearVec.y, rearVec.z);
+					GL11.glRotated(rearWheelYaw + stock.rotationYaw - rearYaw + 180, 0, 1, 0);
+					GL11.glTranslated(-rearVec.x, -rearVec.y, -rearVec.z);
+				}
+
+				drawComponent(rearBogey);
+				if (rearBogeyWheels != null) {
+					for (RenderComponent wheel : rearBogeyWheels) {
+						double circumference = wheel.height() * (float) Math.PI;
+						double relDist = distanceTraveled % circumference;
+						Vec3d wheelPos = wheel.center();
+						GL11.glPushMatrix();
+						{
+							GL11.glTranslated(wheelPos.x, wheelPos.y, wheelPos.z);
+							GL11.glRotatef((float) (360 * relDist / circumference), 0, 0, 1);
+							GL11.glTranslated(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+							drawComponent(wheel);
+						}
+						GL11.glPopMatrix();
+					}
 				}
 			}
-			GlStateManager.popMatrix();
+			GL11.glPopMatrix();
 		}
 	}
 	

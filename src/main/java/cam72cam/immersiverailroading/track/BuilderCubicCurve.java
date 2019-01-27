@@ -29,7 +29,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 	public BuilderCubicCurve(RailInfo info, BlockPos pos, boolean endOfTrack) {
 		super(info, pos, endOfTrack);
 		CubicCurve curve = getCurve();
-		List<CubicCurve> subCurves = curve.subsplit(100);
+		List<CubicCurve> subCurves = curve.subsplit((int) (101 * 2 * 3.1415f / 4));
 		if (subCurves.size() > 1) {
 			subBuilders = new ArrayList<>();
 			for (CubicCurve subCurve : subCurves) {
