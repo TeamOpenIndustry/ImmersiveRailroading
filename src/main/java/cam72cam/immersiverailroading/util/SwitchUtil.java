@@ -32,13 +32,17 @@ public class SwitchUtil {
 		if (parent.info.settings.type != TrackItems.SWITCH) {
 			return SwitchState.NONE;
 		}
-		
+
 		if (position != null && parent.info != null) {
 			BuilderSwitch switchBuilder = (BuilderSwitch)parent.info.getBuilder();
 			
 			if (!switchBuilder.isOnStraight(position)) {
 				return SwitchState.TURN;
 			}
+		}
+
+		if (parent.info.switchForced) {
+			return SwitchState.TURN;
 		}
 
 		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;

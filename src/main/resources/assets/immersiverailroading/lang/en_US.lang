@@ -17,6 +17,7 @@ item.immersiverailroading:item_rail.name=Track Blueprint
 item.immersiverailroading:item_conductor_whistle.name=Conductor's Whistle
 item.immersiverailroading:item_golden_spike.name=Golden Spike
 item.immersiverailroading:item_radio_control_card.name=Train Radio-control Card
+item.immersiverailroading:item_switch_hammer.name=Switch Lever
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -67,6 +68,8 @@ gui.immersiverailroading:selector.plate_type=Plate Type: %s
 gui.immersiverailroading:selector.plate_boiler=Plate Boiler: %s
 gui.immersiverailroading:selector.cast_single=Single Casting
 gui.immersiverailroading:selector.cast_repeat=Repeat Casting
+
+gui.immersiverailroading:item.switch_hammer=Right-Click a switch to force it to diverge. Right-click again to un-force. Redstone is ignored when forced!!
 gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
