@@ -16,6 +16,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition  {
 	private int power;
 	private int traction;
 	private Speed maxSpeed;
+	private boolean hasRadioEquipment;
 	
 	public LocomotiveDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -40,6 +41,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition  {
 		power = (int)Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
 		traction = (int)Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
 		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
+		if(properties.has("radio_equipped")) {
+			hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
+		}
 	}
 	
 	@Override
@@ -81,5 +85,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition  {
 	
 	public double getBrakePower() {
 		return 1;
+	}
+	
+	public boolean getRadioCapability() {
+		return this.hasRadioEquipment;
 	}
 }

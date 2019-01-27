@@ -2,7 +2,9 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -47,14 +49,33 @@ public abstract class TrackBase {
             BlockUtil.isIRRail(builder.info.world, pos.down());
 	}
 
+	public boolean isOverTileRail() {
+		return TileRail.get(builder.info.world, getPos()) != null && this instanceof TrackGag;
+	}
+
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		BlockPos pos = getPos();
-		return isDownSolid() && BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible);
+
+		return isDownSolid() && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
-	public TileEntity placeTrack() {
+	public TileEntity placeTrack(boolean actuallyPlace) {
 		BlockPos pos = getPos();
+
+		if (!actuallyPlace) {
+			TileRailGag tr = new TileRailGag();
+			tr.setPos(pos);
+			tr.setWorld(builder.info.world);
+			if (parent != null) {
+				tr.setParent(parent);
+			} else {
+				tr.setParent(builder.getParentPos());
+			}
+			tr.setRailHeight(getRailHeight());
+			tr.setBedHeight(getBedHeight());
+			return tr;
+		}
 
 		if (builder.info.settings.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
 			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill));
@@ -77,14 +98,14 @@ public abstract class TrackBase {
 			}
 		}
 		
-		if (te != null) {
-			te.setWillBeReplaced(true);
-		}
-		builder.info.world.setBlockState(pos, getBlockState(), 3);
-		if (te != null) {
-			te.setWillBeReplaced(false);
-		}
-		
+        if (te != null) {
+            te.setWillBeReplaced(true);
+        }
+        builder.info.world.setBlockState(pos, getBlockState(), 3);
+        if (te != null) {
+            te.setWillBeReplaced(false);
+        }
+
 		TileRailBase tr = TileRailBase.get(builder.info.world, pos);
 		tr.setReplaced(replaced);
 		if (parent != null) {
