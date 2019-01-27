@@ -1,0 +1,43 @@
+{
+	"forge_marker": 1,
+	"defaults":
+	{
+		"model": "immersiverailroading:switch_key/switch_key.obj"
+	},
+	"variants": {
+		"normal": [{
+			"transform": {
+				"firstperson_righthand": {
+				  	"scale": 0.5,
+				  	"translation": [0, 0, 0],
+					"rotation": [{"y": 0}, {"z": 60}]
+				},
+				"firstperson_lefthand": {
+					"scale": 0.5,
+					"translation": [0, 0, 0],
+					"rotation": [{"y": 0}, {"z": 60}]
+				},
+				"thirdperson_righthand": {
+				  	"scale": 0.5,
+				  	"translation": [0, 0, 0],
+					"rotation": {"y": 90}
+				},
+				"thirdperson_lefthand": {
+				  	"scale": 0.5,
+				  	"translation": [0, 0, 0],
+					"rotation": {"y": 90}
+				},
+				"gui": {
+				  	"scale": 0.5,
+					"translation": [0, -0.25, 0]
+				},
+				"ground": {
+				  	"scale": 0.5,
+				  	"translation": [0, 0, 0]
+				},
+				"fixed": {
+				}
+			}
+		}]
+	}
+}
