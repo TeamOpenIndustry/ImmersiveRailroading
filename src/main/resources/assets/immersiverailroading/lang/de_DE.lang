@@ -174,6 +174,7 @@ immersiverailroading:detector_mode.speed=Geschwindigkeit erkennen
 immersiverailroading:detector_mode.passengers=Anzahl an Passagieren erkennen
 immersiverailroading:detector_mode.cargo=Volle Güterwagen erkennen
 immersiverailroading:detector_mode.liquid=Volle Tankwagen erkennen
+immersiverailroading:detector_mode.computer=Computer
 immersiverailroading:loco_control_mode.throttle_forward=Vorwärts
 immersiverailroading:loco_control_mode.throttle_reverse=Rückwärts
 immersiverailroading:loco_control_mode.brake=Bremse

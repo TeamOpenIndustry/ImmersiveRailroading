@@ -1,8 +1,32 @@
 package cam72cam.immersiverailroading.proxy;
 
-import cam72cam.immersiverailroading.*;
-import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.*;
+import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.entity.CarFreight;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.FreightTank;
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
+import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.gui.CastingGUI;
+import cam72cam.immersiverailroading.gui.FreightContainer;
+import cam72cam.immersiverailroading.gui.FreightContainerGui;
+import cam72cam.immersiverailroading.gui.PlateRollerGUI;
+import cam72cam.immersiverailroading.gui.SteamHammerContainer;
+import cam72cam.immersiverailroading.gui.SteamHammerContainerGui;
+import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
+import cam72cam.immersiverailroading.gui.SteamLocomotiveContainerGui;
+import cam72cam.immersiverailroading.gui.TankContainer;
+import cam72cam.immersiverailroading.gui.TankContainerGui;
+import cam72cam.immersiverailroading.gui.TenderContainer;
+import cam72cam.immersiverailroading.gui.TenderContainerGui;
+import cam72cam.immersiverailroading.gui.TrackGui;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
@@ -15,6 +39,7 @@ import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
@@ -292,7 +317,8 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE, 0,
 				new ModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.getRegistryName(), ""));
-
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD, 0,
+				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName(), ""));
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_HAMMER, 0,
 				new ModelResourceLocation("minecraft:stick", ""));
 	}
@@ -305,7 +331,7 @@ public class ClientProxy extends CommonProxy {
         {
             super(new ResourceLocation(ImmersiveRailroading.MODID, def.defID).toString());
             this.def = def;
-            this.width = this.height = 64;
+            this.width = this.height = ConfigGraphics.iconCacheSize;
         }
 
         @Override
@@ -319,19 +345,23 @@ public class ClientProxy extends CommonProxy {
         {
             BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
             
-            String[][] map = def.getIcon(this.getIconWidth());
+            EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
 
             StockModel renderer = StockRenderCache.getRender(def.defID);
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
-    				if (map[x][y] != null && map[x][y] != "") {
-    					int color = renderer.textures.get(null).samp(map[x][y]);
+    				if (map[x][y] != null) {
+						EntityRollingStockDefinition.IconPart pt = map[x][y];
+    					int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
     					image.setRGB(x, this.getIconWidth() - (y + 1), color);
     				} else {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
     				}
     			}
     		}
+    		for (OBJTextureSheet tex : renderer.textures.values()) {
+    			tex.freePx();
+			}
             
             int[][] pixels = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
             pixels[0] = new int[image.getWidth() * image.getHeight()];
