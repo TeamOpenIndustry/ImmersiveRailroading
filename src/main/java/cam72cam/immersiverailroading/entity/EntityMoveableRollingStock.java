@@ -477,22 +477,28 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						
 						double collisionSpeed = Math.abs(this.getCurrentSpeed().metric());
 						float blockHardness = state.getBlockHardness(world, bp);
-						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
-							if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
-								//ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
-								if (ConfigDamage.TrainsBreakBlocks && collisionSpeed*0.28 > blockHardness*2.0) {
-									blockCollisionHardness[blockCollisionInFront+1] += blockCollisionInFront * blockHardness;
-									world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
-								} else {									
-									blockCollisionHardness[blockCollisionInFront+1] += blockCollisionInFront * collisionSpeed;
+						
+						//Final check to avoid doing intersect
+						if (pos.lengthVector() > this.getDefinition().getLength(gauge) / 2) {
+							if (!bb.intersects(bbb)) {	// This is slow, do it as little as possible
+								continue;
+							}
+						}
+						if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
+							// ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f",
+							// angleVelocityToBlock, this.getCurrentSpeed().metric());
+							if (ConfigDamage.TrainsBreakBlocks && collisionSpeed * 0.28 > blockHardness * 2.0) {
+								blockCollisionHardness[blockCollisionInFront + 1] += blockCollisionInFront * blockHardness;
+								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
+							} else {
+								blockCollisionHardness[blockCollisionInFront + 1] += blockCollisionInFront * collisionSpeed;
+							}
+							if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
+								if (!this.isDead) {
+									this.onDeath(collisionSpeed > 80 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
 								}
-								if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
-									if (!this.isDead) {
-										this.onDeath(collisionSpeed > 80 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
-									}
-									world.removeEntity(this);
-									return;
-								}
+								world.removeEntity(this);
+								return;
 							}
 						}
 					} else {
