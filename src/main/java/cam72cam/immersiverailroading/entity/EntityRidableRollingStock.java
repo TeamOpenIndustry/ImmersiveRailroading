@@ -7,19 +7,23 @@ import java.util.Map;
 import java.util.UUID;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -241,9 +245,28 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (passengerPositions.containsKey(passenger.getPersistentID()) ) {
 			Vec3d ppos = passengerPositions.get(passenger.getPersistentID());
 			Vec3d delta = dismountPos(ppos);
-			passenger.setPositionAndUpdate(delta.x, passenger.posY, delta.z);
+			delta = new Vec3d(delta.x, passenger.posY, delta.z);
+			
+			if (passenger instanceof EntityPlayer && !passenger.isDead) {
+				BlockPos dlp = new BlockPos(delta);
+				BlockPos dhp = new BlockPos(delta.add(new Vec3d(0, 1, 0)));
+				if (!world.isBlockLoaded(dhp) || !world.isBlockLoaded(dlp)) {
+					return;
+				}
+				IBlockState dhstate = world.getBlockState(dhp);
+				IBlockState dlstate = world.getBlockState(dlp);
+				if (dhstate.getBlock() != Blocks.AIR || dlstate.getBlock() != Blocks.AIR) {
+					passenger.sendMessage(ChatText.DISMOUNT_FAIL.getMessage());
+					passenger.startRiding(this, true); // Should I override dismountRidingEntity for this instead?					
+					return;
+				}
+				delta = new Vec3d(dlp.getX() + 0.5, dlp.getY(), dlp.getZ() + 0.5);
+				//ImmersiveRailroading.info("Dismounting at x: %s, y: %s, z: %s", delta.x, delta.y, delta.z);
+			}
+			
+			passenger.setPositionAndUpdate(delta.x, delta.y, delta.z);
 			if (!world.isRemote) {
-				dismounts.put(passenger.getEntityId(), new Vec3d(delta.x, passenger.posY, delta.z));
+				dismounts.put(passenger.getEntityId(), new Vec3d(delta.x, delta.y, delta.z));
 				passengerPositions.remove(passenger.getPersistentID());
 				sendToObserving(new PassengerPositionsPacket(this));
 			}
@@ -271,7 +294,15 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 		pos = pos.add(this.getPositionVector());
 		
-		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
+		Vec3d delta;
+		//ImmersiveRailroading.info("Dismounting from x: %s, y: %s, z: %s", ppos.x, ppos.y, ppos.z);
+		/* double stockSpeed = Math.sqrt(Math.pow(this.motionX, 2) + Math.pow(this.motionY, 2) + Math.pow(this.motionZ, 2));
+		 * if(stockSpeed < 2 && Math.abs(ppos.z) < this.getDefinition().getPassengerCompartmentWidth(gauge)/8 && Math.abs(ppos.x + this.getDefinition().getPassengerCenter(gauge).x) > 0.3*this.getDefinition().getLength(gauge)) {
+			delta = VecUtil.fromWrongYaw(this.getDefinition().getLength(gauge)/2, this.rotationYaw + (ppos.x > 0 ? 0 : 180));
+		}
+		else*/ {
+			delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
+		}
 		
 		return delta.add(pos);
 	}
