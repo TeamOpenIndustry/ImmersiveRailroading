@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
@@ -52,7 +53,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private double[] blockCollisionHardness = {0,0,0};	// 0 is reverse direction, 2 is forward direction. 1 is unused
+	private HashMap<BlockPos, Float> blockCollisionHardness = new HashMap<BlockPos, Float>();	// 0 is reverse direction, 2 is forward direction. 1 is unused
 
 	private float sndRand;
 
@@ -441,8 +442,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
-			this.resetBlockCollisionHardness();
 			
+			ImmersiveRailroading.info("Colli");
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				/*if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
 					continue;
@@ -472,7 +473,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						} else if (Math.abs(angleVelocityToBlock) > 135) {
 							blockCollisionInFront = -1;
 						} else {
-							continue;	// We won't be doing anything in this case so just skip the intersect check   
+							continue;	// We won't be doing anything in this case
 						}
 						
 						double collisionSpeed = Math.abs(this.getCurrentSpeed().metric());
@@ -488,10 +489,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							// ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f",
 							// angleVelocityToBlock, this.getCurrentSpeed().metric());
 							if (ConfigDamage.TrainsBreakBlocks && collisionSpeed * 0.28 > blockHardness * 2.0) {
-								blockCollisionHardness[blockCollisionInFront + 1] += blockCollisionInFront * blockHardness;
+								blockCollisionHardness.put(bp, blockCollisionInFront * blockHardness);
 								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 							} else {
-								blockCollisionHardness[blockCollisionInFront + 1] += blockCollisionInFront * collisionSpeed;
+								blockCollisionHardness.put(bp, (float)(blockCollisionInFront * collisionSpeed * this.getWeight()));
 							}
 							if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
 								if (!this.isDead) {
@@ -627,11 +628,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void resetBlockCollisionHardness() {
-		blockCollisionHardness[0] = 0;
-		blockCollisionHardness[2] = 0;
+		blockCollisionHardness.clear();
 	}
 	
-	public double[] getBlockCollisionHardness() {
+	public HashMap<BlockPos, Float> getBlockCollisionHardness() {
 		return blockCollisionHardness;
 	}
 	

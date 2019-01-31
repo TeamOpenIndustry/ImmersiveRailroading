@@ -48,8 +48,15 @@ public class PhysicsAccummulator {
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
 		// Would a config value here have practical use? A coefficient of crashing?
-		blockCollisionForceNewtons[0] += movable.getBlockCollisionHardness()[0]*36_000;
-		blockCollisionForceNewtons[2] += movable.getBlockCollisionHardness()[2]*36_000;
+		for(double hardness : movable.getBlockCollisionHardness().values()) {
+			if(hardness < 0) {
+				blockCollisionForceNewtons[0] += hardness*36_000;
+			}
+			else if(hardness > 0){
+				blockCollisionForceNewtons[2] += hardness*36_000;
+			}
+		}
+		movable.resetBlockCollisionHardness();
 		
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
@@ -95,7 +102,7 @@ public class PhysicsAccummulator {
 			newMCVelocity = 0;
 		}
 		
-		//if (blockCollisionForceNewtons[0] != 0.0 || blockCollisionForceNewtons[2] != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s;%s, speed: %s\n", blockCollisionForceNewtons[0], blockCollisionForceNewtons[1], Speed.fromMinecraft(newMCVelocity).metric());
+		if (blockCollisionForceNewtons[0] != 0.0 || blockCollisionForceNewtons[2] != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s;%s, speed: %s\n", blockCollisionForceNewtons[0], blockCollisionForceNewtons[2], Speed.fromMinecraft(newMCVelocity).metric());
 		if (Speed.fromMinecraft(newMCVelocity).metric() > 0.5 && blockCollisionForceNewtons[2] != 0) {
 			newMCVelocity -= Math.abs(deltaAccellBlockCollisionMCVelocity[2]) > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity[2];
 		}
