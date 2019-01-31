@@ -333,14 +333,27 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if ((dhstate.getCollisionBoundingBox(world, dhp) == null || BlockUtil.isIRRail(world, dhp)) && (dlstate.getCollisionBoundingBox(world, dlp) == null || BlockUtil.isIRRail(world, dlp))) {
 			if(!passenger.getEntityBoundingBox().offset(delta.subtract(passenger.getPositionVector())).intersects(this.getCollisionBoundingBox())) {
 				ImmersiveRailroading.info("Successful dismount at %s %s %s",  delta.x, delta.y, delta.z);
-				delta = new Vec3d(delta.x, delta.y, delta.z);
 				return delta;
 			}
-			ImmersiveRailroading.info("Train obstructing dismount at %s %s %s",  delta.x, delta.y, delta.z);
+			ImmersiveRailroading.info("Train obstructing dismount at %s %s %s, attempting to revert to default dismount point",  delta.x, delta.y, delta.z);
 		} else {
-			ImmersiveRailroading.info("Block obstructing dismount at %s %s %s.", delta.x, delta.y, delta.z);
+			ImmersiveRailroading.info("Block obstructing dismount at %s %s %s, attempting to revert to default dismount point", delta.x, delta.y, delta.z);
 		}
 		
+		delta = this.getPositionVector().add(new Vec3d(0, this.getDefinition().getHeight(gauge), 0));
+		dlp = new BlockPos(delta);
+		dhp = new BlockPos(delta.add(new Vec3d(0, 1, 0)));
+		if (!world.isBlockLoaded(dhp) || !world.isBlockLoaded(dlp)) {
+			return new Vec3d(0,-1,0);
+		}
+		dhstate = world.getBlockState(dhp);
+		dlstate = world.getBlockState(dlp);
+		if (dhstate.getCollisionBoundingBox(world, dhp) == null && dlstate.getCollisionBoundingBox(world, dlp) == null) {
+			ImmersiveRailroading.info("Default position at %s %s %s clear, dismounting.", delta.x, delta.y, delta.z);
+			return delta;
+		}
+		
+		ImmersiveRailroading.info("Default position at %s %s %s obstructed. Dismount failed.", delta.x, delta.y, delta.z);
 		return new Vec3d(0,-1,0);
 	}
 
