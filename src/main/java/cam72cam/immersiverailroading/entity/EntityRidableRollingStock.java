@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
@@ -144,6 +145,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	public Map<UUID, Vec3d> passengerPositions = new HashMap<UUID, Vec3d>();
+	public Map<UUID, Vec3d> passengerDismountAttempts = new HashMap<UUID, Vec3d>();
 	public Map<Integer, Vec3d> dismounts = new HashMap<Integer, Vec3d>();
 	private final double pressDist = 0.05;
 	public List<StaticPassenger> staticPassengers = new ArrayList<StaticPassenger>();
@@ -247,21 +249,19 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			Vec3d delta = dismountPos(ppos);
 			delta = new Vec3d(delta.x, passenger.posY, delta.z);
 			
-			if (passenger instanceof EntityPlayer && !passenger.isDead) {
-				BlockPos dlp = new BlockPos(delta);
-				BlockPos dhp = new BlockPos(delta.add(new Vec3d(0, 1, 0)));
-				if (!world.isBlockLoaded(dhp) || !world.isBlockLoaded(dlp)) {
+			if (passenger instanceof EntityPlayer && !passenger.isDead && !this.isDead) {
+				if(!ppos.equals(passengerDismountAttempts.get(passenger.getPersistentID()))) {
+					delta = dismountFreePos(ppos, passenger);
+					if (delta.y == -1) {
+						passengerDismountAttempts.put(passenger.getPersistentID(), ppos);
+						passenger.sendMessage(ChatText.DISMOUNT_FAIL.getMessage());
+						passenger.startRiding(this, true); // Should I override dismountRidingEntity for this instead?
+						return;
+					}
+				} else {
+					passenger.startRiding(this, true); // Should I override dismountRidingEntity for this instead?
 					return;
 				}
-				IBlockState dhstate = world.getBlockState(dhp);
-				IBlockState dlstate = world.getBlockState(dlp);
-				if (dhstate.getBlock() != Blocks.AIR || dlstate.getBlock() != Blocks.AIR) {
-					passenger.sendMessage(ChatText.DISMOUNT_FAIL.getMessage());
-					passenger.startRiding(this, true); // Should I override dismountRidingEntity for this instead?					
-					return;
-				}
-				delta = new Vec3d(dlp.getX() + 0.5, dlp.getY(), dlp.getZ() + 0.5);
-				//ImmersiveRailroading.info("Dismounting at x: %s, y: %s, z: %s", delta.x, delta.y, delta.z);
 			}
 			
 			passenger.setPositionAndUpdate(delta.x, delta.y, delta.z);
@@ -294,17 +294,54 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 		pos = pos.add(this.getPositionVector());
 		
-		Vec3d delta;
-		//ImmersiveRailroading.info("Dismounting from x: %s, y: %s, z: %s", ppos.x, ppos.y, ppos.z);
-		/* double stockSpeed = Math.sqrt(Math.pow(this.motionX, 2) + Math.pow(this.motionY, 2) + Math.pow(this.motionZ, 2));
-		 * if(stockSpeed < 2 && Math.abs(ppos.z) < this.getDefinition().getPassengerCompartmentWidth(gauge)/8 && Math.abs(ppos.x + this.getDefinition().getPassengerCenter(gauge).x) > 0.3*this.getDefinition().getLength(gauge)) {
-			delta = VecUtil.fromWrongYaw(this.getDefinition().getLength(gauge)/2, this.rotationYaw + (ppos.x > 0 ? 0 : 180));
-		}
-		else*/ {
-			delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
-		}
+		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
 		
 		return delta.add(pos);
+	}
+	
+	public Vec3d dismountFreePos(Vec3d ppos, Entity passenger) {
+		float dismountAngle = ppos.z > 0 ? 90 : -90;
+		ppos = new Vec3d(ppos.x, ppos.y, 0);
+		Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
+		pos = pos.add(ppos);
+		pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
+		pos = pos.add(this.getPositionVector());
+		
+		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getWidth(gauge) / 2 + 0.5 * (1/gauge.scale()), this.rotationYaw + dismountAngle);
+		delta = delta.add(pos);
+		delta = new Vec3d(delta.x, passenger.posY, delta.z);
+		ImmersiveRailroading.info("Attempting to dismount near %f %f %f", delta.x, delta.y, delta.z);
+		BlockPos dlp = new BlockPos(delta);
+		BlockPos dhp = new BlockPos(delta.add(new Vec3d(0, 1, 0)));
+		if (!world.isBlockLoaded(dhp) || !world.isBlockLoaded(dlp)) {
+			return new Vec3d(0,-1,0);
+		}
+		IBlockState dhstate = world.getBlockState(dhp);
+		IBlockState dlstate = world.getBlockState(dlp);
+
+		if (delta.x - Math.floor(delta.x) > 0.7) {
+			delta = new Vec3d(Math.floor(delta.x) + 0.7, delta.y, delta.z);
+		} else if (delta.x - Math.floor(delta.x) < 0.3) {
+			delta = new Vec3d(Math.floor(delta.x) + 0.3, delta.y, delta.z);
+		}
+		if (delta.z - Math.floor(delta.z) > 0.7) {
+			delta = new Vec3d(delta.x, delta.y, Math.floor(delta.z) + 0.7);
+		} else if (delta.z - Math.floor(delta.z) < 0.3) {
+			delta = new Vec3d(delta.x, delta.y, Math.floor(delta.z) + 0.3);
+		}
+		
+		if ((dhstate.getCollisionBoundingBox(world, dhp) == null || BlockUtil.isIRRail(world, dhp)) && (dlstate.getCollisionBoundingBox(world, dlp) == null || BlockUtil.isIRRail(world, dlp))) {
+			if(!passenger.getEntityBoundingBox().offset(delta.subtract(passenger.getPositionVector())).intersects(this.getCollisionBoundingBox())) {
+				ImmersiveRailroading.info("Successful dismount at %s %s %s",  delta.x, delta.y, delta.z);
+				delta = new Vec3d(delta.x, delta.y, delta.z);
+				return delta;
+			}
+			ImmersiveRailroading.info("Train obstructing dismount at %s %s %s",  delta.x, delta.y, delta.z);
+		} else {
+			ImmersiveRailroading.info("Block obstructing dismount at %s %s %s.", delta.x, delta.y, delta.z);
+		}
+		
+		return new Vec3d(0,-1,0);
 	}
 
 	public void handlePassengerPositions(Map<UUID, Vec3d> passengerPositions) {

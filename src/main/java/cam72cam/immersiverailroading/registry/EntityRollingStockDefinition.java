@@ -627,6 +627,10 @@ public abstract class EntityRollingStockDefinition {
 		return (int)Math.ceil(gauge.scale() * this.weight);
 	}
 
+	public double getWidth(Gauge gauge) {
+		return gauge.scale() * this.widthBounds;
+	}
+	
 	public double getHeight(Gauge gauge) {
 		return gauge.scale() * this.heightBounds;
 	}
