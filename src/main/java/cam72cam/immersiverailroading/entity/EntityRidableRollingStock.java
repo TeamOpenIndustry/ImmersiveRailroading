@@ -251,10 +251,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			
 			if (passenger instanceof EntityPlayer && !passenger.isDead && !this.isDead) {
 				if(!ppos.equals(passengerDismountAttempts.get(passenger.getPersistentID()))) {
-					delta = dismountFreePos(ppos, passenger);
+					delta = dismountFreePos(ppos, (EntityPlayer)passenger);
 					if (delta.y == -1) {
 						passengerDismountAttempts.put(passenger.getPersistentID(), ppos);
-						passenger.sendMessage(ChatText.DISMOUNT_FAIL.getMessage());
 						passenger.startRiding(this, true); // Should I override dismountRidingEntity for this instead?
 						return;
 					}
@@ -299,7 +298,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return delta.add(pos);
 	}
 	
-	public Vec3d dismountFreePos(Vec3d ppos, Entity passenger) {
+	public Vec3d dismountFreePos(Vec3d ppos, EntityPlayer passenger) {
 		float dismountAngle = ppos.z > 0 ? 90 : -90;
 		ppos = new Vec3d(ppos.x, ppos.y, 0);
 		Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
@@ -332,12 +331,15 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		
 		if ((dhstate.getCollisionBoundingBox(world, dhp) == null || BlockUtil.isIRRail(world, dhp)) && (dlstate.getCollisionBoundingBox(world, dlp) == null || BlockUtil.isIRRail(world, dlp))) {
 			if(!passenger.getEntityBoundingBox().offset(delta.subtract(passenger.getPositionVector())).intersects(this.getCollisionBoundingBox())) {
-				ImmersiveRailroading.info("Successful dismount at %s %s %s",  delta.x, delta.y, delta.z);
+				//ImmersiveRailroading.info("Successful dismount at %s %s %s",  delta.x, delta.y, delta.z);
 				return delta;
 			}
-			ImmersiveRailroading.info("Train obstructing dismount at %s %s %s, attempting to revert to default dismount point",  delta.x, delta.y, delta.z);
+			//ImmersiveRailroading.warn("Train obstructing dismount at %s %s %s, attempting to revert to default dismount point",  delta.x, delta.y, delta.z);
+			passenger.sendMessage(ChatText.DISMOUNT_DEFAULT.getMessage());
+			ImmersiveRailroading.warn("This is not intended to happen! Please contact the devs with the relavant train: %s", this.getDefinition().name());
 		} else {
-			ImmersiveRailroading.info("Block obstructing dismount at %s %s %s, attempting to revert to default dismount point", delta.x, delta.y, delta.z);
+			//ImmersiveRailroading.info("Block obstructing dismount at %s %s %s, attempting to revert to default dismount point", delta.x, delta.y, delta.z);
+			passenger.sendMessage(ChatText.DISMOUNT_DEFAULT.getMessage());
 		}
 		
 		delta = this.getPositionVector().add(new Vec3d(0, this.getDefinition().getHeight(gauge), 0));
@@ -349,11 +351,12 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		dhstate = world.getBlockState(dhp);
 		dlstate = world.getBlockState(dlp);
 		if (dhstate.getCollisionBoundingBox(world, dhp) == null && dlstate.getCollisionBoundingBox(world, dlp) == null) {
-			ImmersiveRailroading.info("Default position at %s %s %s clear, dismounting.", delta.x, delta.y, delta.z);
+			//ImmersiveRailroading.info("Default position at %s %s %s clear, dismounting.", delta.x, delta.y, delta.z);
 			return delta;
 		}
 		
-		ImmersiveRailroading.info("Default position at %s %s %s obstructed. Dismount failed.", delta.x, delta.y, delta.z);
+		//ImmersiveRailroading.info("Default position at %s %s %s obstructed. Dismount failed.", delta.x, delta.y, delta.z);
+		passenger.sendMessage(ChatText.DISMOUNT_FAIL_DEFAULT.getMessage());
 		return new Vec3d(0,-1,0);
 	}
 
