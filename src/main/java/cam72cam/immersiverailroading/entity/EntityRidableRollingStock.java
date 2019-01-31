@@ -335,11 +335,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				return delta;
 			}
 			//ImmersiveRailroading.warn("Train obstructing dismount at %s %s %s, attempting to revert to default dismount point",  delta.x, delta.y, delta.z);
-			passenger.sendMessage(ChatText.DISMOUNT_DEFAULT.getMessage());
 			ImmersiveRailroading.warn("This is not intended to happen! Please contact the devs with the relavant train: %s", this.getDefinition().name());
 		} else {
 			//ImmersiveRailroading.info("Block obstructing dismount at %s %s %s, attempting to revert to default dismount point", delta.x, delta.y, delta.z);
-			passenger.sendMessage(ChatText.DISMOUNT_DEFAULT.getMessage());
 		}
 		
 		delta = this.getPositionVector().add(new Vec3d(0, this.getDefinition().getHeight(gauge), 0));
