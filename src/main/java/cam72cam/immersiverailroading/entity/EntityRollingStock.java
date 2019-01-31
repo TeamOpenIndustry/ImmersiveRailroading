@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.PaintSyncPacket;
@@ -156,6 +157,8 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 				this.texture = texNames.get(idx);
 				this.sendToObserving(new PaintSyncPacket(this));
 				return true;
+			} else {
+				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
 			}
 		}
 		return false;
