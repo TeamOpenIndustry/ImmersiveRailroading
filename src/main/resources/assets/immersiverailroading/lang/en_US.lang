@@ -91,7 +91,7 @@ gui.immersiverailroading:stock.tank_capacity=Capacity:       %s Buckets
 gui.immersiverailroading:stock.freight_capacity=Capacity:       %s Stacks
 gui.immersiverailroading:stock.weight=Weight:          %s Kg
 gui.immersiverailroading:stock.modeler=Modeler:        %s
-gui.immersiverailroading:stock.pack=Pack:           %s
+gui.immersiverailroading:stock.pack=Pack:            %s
 
 immersiverailroading:gauge.brunel=Brunel
 immersiverailroading:gauge.standard=Standard
