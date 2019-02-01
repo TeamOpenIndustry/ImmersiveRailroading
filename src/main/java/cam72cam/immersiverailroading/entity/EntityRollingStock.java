@@ -53,7 +53,7 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 	public String getName() {
 		return this.getDefinition().name();
 	}
-
+	
 	public EntityRollingStockDefinition getDefinition() {
 		return this.getDefinition(EntityRollingStockDefinition.class);
 	}
