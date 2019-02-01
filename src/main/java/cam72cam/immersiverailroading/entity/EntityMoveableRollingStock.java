@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
@@ -39,7 +38,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.Int;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock {
 
@@ -53,7 +51,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private HashMap<BlockPos, Float> blockCollisionHardness = new HashMap<BlockPos, Float>();	// 0 is reverse direction, 2 is forward direction. 1 is unused
+	private HashMap<BlockPos, Float> blockCollisionHardness = new HashMap<BlockPos, Float>();	//Float negative for aft-collision reaction, positive for fore-collision reaction
 
 	private float sndRand;
 
