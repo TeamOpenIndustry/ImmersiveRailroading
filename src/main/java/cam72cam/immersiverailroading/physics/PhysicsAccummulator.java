@@ -102,7 +102,7 @@ public class PhysicsAccummulator {
 			newMCVelocity = 0;
 		}
 		
-		if (blockCollisionForceNewtons[0] != 0.0 || blockCollisionForceNewtons[2] != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s;%s, speed: %s\n", blockCollisionForceNewtons[0], blockCollisionForceNewtons[2], Speed.fromMinecraft(newMCVelocity).metric());
+		if (blockCollisionForceNewtons[0] != 0.0 || blockCollisionForceNewtons[2] != 0.0)ImmersiveRailroading.debug("blockCollisionForceNewtons : %s;%s, speed: %s\n", blockCollisionForceNewtons[0], blockCollisionForceNewtons[2], Speed.fromMinecraft(newMCVelocity).metric());
 		if (Speed.fromMinecraft(newMCVelocity).metric() > 0.5 && blockCollisionForceNewtons[2] != 0) {
 			newMCVelocity -= Math.abs(deltaAccellBlockCollisionMCVelocity[2]) > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity[2];
 		}

@@ -443,7 +443,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
 			
-			ImmersiveRailroading.info("Colli");
+			boolean isCollided = false;
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				/*if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
 					continue;
@@ -486,8 +486,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							}
 						}
 						if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
-							// ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f",
-							// angleVelocityToBlock, this.getCurrentSpeed().metric());
+							// ImmersiveRailroading.debug("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
+							if (!isCollided) {
+								isCollided = true;
+							}
 							if (ConfigDamage.TrainsBreakBlocks && collisionSpeed * 0.28 > blockHardness * 2.0) {
 								blockCollisionHardness.put(bp, blockCollisionInFront * blockHardness);
 								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
@@ -510,6 +512,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						}
 					}
 				}
+			}
+			
+			if(this.currentSpeed.metric() > 1 && isCollided && this instanceof EntityCoupleableRollingStock) {
+				EntityCoupleableRollingStock stock = (EntityCoupleableRollingStock)this;
+				stock.triggerResimulate();
 			}
 		}
 	}
