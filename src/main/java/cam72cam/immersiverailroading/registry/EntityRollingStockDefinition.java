@@ -59,6 +59,8 @@ public abstract class EntityRollingStockDefinition {
 
 	public final String defID;
 	private String name = "Unknown";
+	private String modelerName = "N/A";
+	private String packName = "N/A";
 	private OBJModel model;
 	public Map<String, String> textureNames = null;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
@@ -112,6 +114,12 @@ public abstract class EntityRollingStockDefinition {
 
 	public void parseJson(JsonObject data) throws Exception  {
 		name = data.get("name").getAsString();
+		if (data.has("modeler")) {
+			this.modelerName = data.get("modeler").getAsString();
+		}
+		if (data.has("pack")) {
+			this.packName = data.get("pack").getAsString();
+		}
 		float darken = 0;
 		if (data.has("darken_model")) {
 			darken = data.get("darken_model").getAsFloat();
@@ -605,10 +613,12 @@ public abstract class EntityRollingStockDefinition {
 		String transStr = TextUtil.translate(localStr);
 		return localStr != transStr ? transStr : name;
 	}
-
+	
 	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = new ArrayList<String>();
 		tips.add(GuiText.WEIGHT_TOOLTIP.toString(this.getWeight(gauge)));
+		tips.add(GuiText.MODELER_TOOLTIP.toString(modelerName));
+		tips.add(GuiText.PACK_TOOLTIP.toString(packName));
 		return tips;
 	}
 
