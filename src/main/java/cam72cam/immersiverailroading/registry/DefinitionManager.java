@@ -41,6 +41,8 @@ public class DefinitionManager {
 					return new LocomotiveSteamDefinition(defID, data);
 			case "diesel":
 				return new LocomotiveDieselDefinition(defID, data);
+			case "cabcar":
+				return new LocomotiveCabcarDefinition(defID, data);
 			default:
 				ImmersiveRailroading.warn("Invalid era %s in %s", era, defID);
 				return null;

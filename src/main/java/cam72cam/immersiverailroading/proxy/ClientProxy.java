@@ -181,6 +181,9 @@ public class ClientProxy extends CommonProxy {
 		case DIESEL_LOCOMOTIVE:
 			return new TankContainerGui((FreightTank) world.getEntityByID(entityIDorPosX),
 					new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorPosX)));
+		case CABCAR_LOCOMOTIVE:
+			return new TankContainerGui((FreightTank) world.getEntityByID(entityIDorPosX),
+					new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorPosX)));
 		case TENDER:
 			return new TenderContainerGui((Tender) world.getEntityByID(entityIDorPosX),
 					new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityIDorPosX)));
