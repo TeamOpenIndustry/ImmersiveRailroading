@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
@@ -11,6 +12,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstance;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import net.minecraft.client.gui.GuiButton;
@@ -44,6 +46,11 @@ public class CastingGUI extends GuiScreen {
         	
         	if (item != null) {
         		currentItem = item;
+				EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null) {
+					gauge = def.recommended_gauge;
+					gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+				}
         		updatePickerButton();
     			sendItemPacket();
         	}
@@ -125,7 +132,18 @@ public class CastingGUI extends GuiScreen {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == gaugeButton) {
-			gauge = gauge.next();
+			if(!currentItem.isEmpty()) {
+				Gauge designGauge; 
+				EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null) {
+					designGauge = def.recommended_gauge;
+					do {
+						gauge = gauge.next();
+					} while (gauge != Gauge.from(designGauge.value()) && !gauge.isModel());
+				} else {
+					gauge = gauge.next();
+				}
+			}
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
 			sendItemPacket();
 		}
