@@ -111,11 +111,10 @@ public class LocomotiveCabcar extends LocomotiveDiesel {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
 					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, this.soundGauge());
-					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
 				}
 				
-				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
-					horn.play(getPositionVector());
+				if (this.idle == null) {
+					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
 				}
 				
 				if (isRunning()) {
@@ -128,11 +127,124 @@ public class LocomotiveCabcar extends LocomotiveDiesel {
 					}
 				}
 				
+				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
+					horn.play(getPositionVector());
+				}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
 				if (horn.isPlaying()) {
 					horn.setPosition(getPositionVector());
 					horn.setVelocity(getVelocity());
 					horn.update();
 				}
+				
 				if (idle.isPlaying()) {
 					idle.setPosition(getPositionVector());
 					idle.setVelocity(getVelocity());

@@ -44,6 +44,12 @@ public class LocomotiveCabcarDefinition extends LocomotiveDieselDefinition {
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
+		if (sounds != null && sounds.has("idle")) {
+			idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
+		} else {
+			idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
+		}
+		
 		if (sounds != null && sounds.has("horn")) {
 			horn = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("horn").getAsString());
 		} else {
