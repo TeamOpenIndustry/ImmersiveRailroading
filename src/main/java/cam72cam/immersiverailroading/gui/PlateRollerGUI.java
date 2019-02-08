@@ -44,6 +44,11 @@ public class PlateRollerGUI extends GuiScreen {
         	if (item != null) {
         		String defID = ItemDefinition.getID(item);
         		ItemDefinition.setID(currentItem, defID);
+        		EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null) {
+					gauge = def.recommended_gauge;
+					gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+				}
         		updatePickerButton();
 	        	sendPacket();
         	}
@@ -81,7 +86,18 @@ public class PlateRollerGUI extends GuiScreen {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == gaugeButton) {
-			gauge = gauge.next();
+			if(!currentItem.isEmpty()) {
+				Gauge designGauge; 
+				EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null && plate == PlateType.BOILER) {
+					designGauge = def.recommended_gauge;
+					do {
+						gauge = gauge.next();
+					} while (gauge != Gauge.from(designGauge.value()) && !gauge.isModel());
+				} else {
+					gauge = gauge.next();
+				}
+			}
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
 			sendPacket();
 		}
