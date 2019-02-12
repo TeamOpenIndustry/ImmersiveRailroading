@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
@@ -139,7 +141,7 @@ public class CastingGUI extends GuiScreen {
 					designGauge = def.recommended_gauge;
 					do {
 						gauge = gauge.next();
-					} while (gauge != Gauge.from(designGauge.value()) && !gauge.isModel());
+					} while (ConfigBalance.DesignGaugeLock && gauge != Gauge.from(designGauge.value()) && !gauge.isModel());
 				} else {
 					gauge = gauge.next();
 				}
