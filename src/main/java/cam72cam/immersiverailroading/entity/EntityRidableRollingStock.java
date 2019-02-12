@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -304,11 +305,58 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		pos = pos.add(ppos);
 		pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 		pos = pos.add(this.getPositionVector());
+		Vec3d delta;
+		List<Vec3d> possibleDismount = new ArrayList<Vec3d>();
+
+		for (float i = 0.5f; i < 3; i += 1) {
+			delta = VecUtil.fromWrongYaw(this.getDefinition().getWidth(gauge) / 2 + i * (1 / gauge.scale()), this.rotationYaw + dismountAngle);
+			delta = delta.add(pos);
+			delta = new Vec3d(delta.x, passenger.posY, delta.z);
+			// ImmersiveRailroading.info("Attempting to dismount near %f %f %f", delta.x, delta.y, delta.z);
+			BlockPos dlp = new BlockPos(delta);
+			BlockPos dhp = new BlockPos(delta.add(new Vec3d(0, 1, 0)));
+			if (!world.isBlockLoaded(dhp) || !world.isBlockLoaded(dlp)) {
+				return new Vec3d(0, -1, 0);
+			}
+			IBlockState dhstate = world.getBlockState(dhp);
+			IBlockState dlstate = world.getBlockState(dlp);
+
+			if (delta.x - Math.floor(delta.x) > 0.7) {
+				delta = new Vec3d(Math.floor(delta.x) + 0.7, delta.y, delta.z);
+			} else if (delta.x - Math.floor(delta.x) < 0.3) {
+				delta = new Vec3d(Math.floor(delta.x) + 0.3, delta.y, delta.z);
+			}
+			if (delta.z - Math.floor(delta.z) > 0.7) {
+				delta = new Vec3d(delta.x, delta.y, Math.floor(delta.z) + 0.7);
+			} else if (delta.z - Math.floor(delta.z) < 0.3) {
+				delta = new Vec3d(delta.x, delta.y, Math.floor(delta.z) + 0.3);
+			}
+
+			if ((dhstate.getCollisionBoundingBox(world, dhp) == null || BlockUtil.isIRRail(world, dhp)) && (dlstate.getCollisionBoundingBox(world, dlp) == null || BlockUtil.isIRRail(world, dlp))) {
+				if (!passenger.getEntityBoundingBox().offset(delta.subtract(passenger.getPositionVector())).intersects(this.getCollisionBoundingBox())) {
+					// ImmersiveRailroading.info("Possible dismount at %s %s %s", delta.x, delta.y, delta.z);
+					possibleDismount.add(delta);
+				}
+				// ImmersiveRailroading.warn("Train obstructing dismount at %s %s %s", delta.x, delta.y, delta.z);
+				ImmersiveRailroading.warn("This is not intended to happen! Please contact the devs with the relavant train: %s", this.getDefinition().name());
+			} else {
+				// ImmersiveRailroading.info("Block obstructing dismount at %s %s %s", delta.x, delta.y, delta.z);
+				break;
+			}
+		}
+		if(!possibleDismount.isEmpty()) {
+			// ImmersiveRailroading.info("Successful dismount at %s %s %s", delta.x, delta.y, delta.z);
+			return possibleDismount.get(possibleDismount.size() - 1);
+		}
 		
-		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getWidth(gauge) / 2 + 0.5 * (1/gauge.scale()), this.rotationYaw + dismountAngle);
-		delta = delta.add(pos);
-		delta = new Vec3d(delta.x, passenger.posY, delta.z);
-		ImmersiveRailroading.info("Attempting to dismount near %f %f %f", delta.x, delta.y, delta.z);
+		// ImmersiveRailroading.info("All dismounts obstructed, attempting to revert to default dismount point", delta.x, delta.y, delta.z);
+		if (this instanceof EntityMoveableRollingStock) {
+			if(((EntityMoveableRollingStock)this).getCurrentSpeed().metric() / ConfigDamage.entitySpeedDamage > 1) {
+				passenger.sendMessage(ChatText.DISMOUNT_FAIL_DEFAULT.getMessage());
+				return new Vec3d(0,-1,0);
+			} 
+		}
+		delta = this.getPositionVector().add(new Vec3d(0, this.getDefinition().getHeight(gauge), 0));
 		BlockPos dlp = new BlockPos(delta);
 		BlockPos dhp = new BlockPos(delta.add(new Vec3d(0, 1, 0)));
 		if (!world.isBlockLoaded(dhp) || !world.isBlockLoaded(dlp)) {
@@ -316,37 +364,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 		IBlockState dhstate = world.getBlockState(dhp);
 		IBlockState dlstate = world.getBlockState(dlp);
-
-		if (delta.x - Math.floor(delta.x) > 0.7) {
-			delta = new Vec3d(Math.floor(delta.x) + 0.7, delta.y, delta.z);
-		} else if (delta.x - Math.floor(delta.x) < 0.3) {
-			delta = new Vec3d(Math.floor(delta.x) + 0.3, delta.y, delta.z);
-		}
-		if (delta.z - Math.floor(delta.z) > 0.7) {
-			delta = new Vec3d(delta.x, delta.y, Math.floor(delta.z) + 0.7);
-		} else if (delta.z - Math.floor(delta.z) < 0.3) {
-			delta = new Vec3d(delta.x, delta.y, Math.floor(delta.z) + 0.3);
-		}
-		
-		if ((dhstate.getCollisionBoundingBox(world, dhp) == null || BlockUtil.isIRRail(world, dhp)) && (dlstate.getCollisionBoundingBox(world, dlp) == null || BlockUtil.isIRRail(world, dlp))) {
-			if(!passenger.getEntityBoundingBox().offset(delta.subtract(passenger.getPositionVector())).intersects(this.getCollisionBoundingBox())) {
-				//ImmersiveRailroading.info("Successful dismount at %s %s %s",  delta.x, delta.y, delta.z);
-				return delta;
-			}
-			//ImmersiveRailroading.warn("Train obstructing dismount at %s %s %s, attempting to revert to default dismount point",  delta.x, delta.y, delta.z);
-			ImmersiveRailroading.warn("This is not intended to happen! Please contact the devs with the relavant train: %s", this.getDefinition().name());
-		} else {
-			//ImmersiveRailroading.info("Block obstructing dismount at %s %s %s, attempting to revert to default dismount point", delta.x, delta.y, delta.z);
-		}
-		
-		delta = this.getPositionVector().add(new Vec3d(0, this.getDefinition().getHeight(gauge), 0));
-		dlp = new BlockPos(delta);
-		dhp = new BlockPos(delta.add(new Vec3d(0, 1, 0)));
-		if (!world.isBlockLoaded(dhp) || !world.isBlockLoaded(dlp)) {
-			return new Vec3d(0,-1,0);
-		}
-		dhstate = world.getBlockState(dhp);
-		dlstate = world.getBlockState(dlp);
 		if (dhstate.getCollisionBoundingBox(world, dhp) == null && dlstate.getCollisionBoundingBox(world, dlp) == null) {
 			//ImmersiveRailroading.info("Default position at %s %s %s clear, dismounting.", delta.x, delta.y, delta.z);
 			return delta;

@@ -31,8 +31,8 @@ public enum ChatText {
 	RADIO_UNLINK("radio.unlink"),
 	RADIO_NOLINK("radio.nolink"),
 	RADIO_CANT_LINK("radio.cant_link"),
-	DISMOUNT_FAIL("dismount.fail"),
-	DISMOUNT_FAIL_DEFAULT("dismount.fail_default")
+	DISMOUNT_FAIL_DEFAULT("dismount.fail_default"),
+	DISMOUNT_FAIL_SPEED("dismount.fail_speed")
 	;
 	
 	private String value;
