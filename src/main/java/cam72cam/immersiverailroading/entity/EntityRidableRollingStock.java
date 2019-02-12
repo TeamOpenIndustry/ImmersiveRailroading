@@ -352,7 +352,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		// ImmersiveRailroading.info("All dismounts obstructed, attempting to revert to default dismount point", delta.x, delta.y, delta.z);
 		if (this instanceof EntityMoveableRollingStock) {
 			if(((EntityMoveableRollingStock)this).getCurrentSpeed().metric() / ConfigDamage.entitySpeedDamage > 1) {
-				passenger.sendMessage(ChatText.DISMOUNT_FAIL_DEFAULT.getMessage());
+				passenger.sendMessage(ChatText.DISMOUNT_FAIL_SPEED.getMessage());
 				return new Vec3d(0,-1,0);
 			} 
 		}
