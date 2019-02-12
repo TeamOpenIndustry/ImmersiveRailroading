@@ -169,6 +169,9 @@ public class Config {
 		
 		@Comment("Energy cost (RF) per radio transmission per metre")
 		public static int RadioCostPerMetre = 0;
+		
+		@Comment("Prevent stock from being built outside the recommended and model gauges")
+		public static boolean DesignGaugeLock = true;
 	}
 
 	public static ConfigDebug debug;

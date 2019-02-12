@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
@@ -93,7 +94,7 @@ public class PlateRollerGUI extends GuiScreen {
 					designGauge = def.recommended_gauge;
 					do {
 						gauge = gauge.next();
-					} while (gauge != Gauge.from(designGauge.value()) && !gauge.isModel());
+					} while (ConfigBalance.DesignGaugeLock && gauge != Gauge.from(designGauge.value()) && !gauge.isModel());
 				} else {
 					gauge = gauge.next();
 				}
