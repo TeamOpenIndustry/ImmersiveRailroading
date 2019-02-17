@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 
 public abstract class FreightDefinition extends EntityRollingStockDefinition {
 
-	private boolean showCurrentLoadOnly;
+	private boolean showCurrentLoadOnly = false;
 
 	public FreightDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
