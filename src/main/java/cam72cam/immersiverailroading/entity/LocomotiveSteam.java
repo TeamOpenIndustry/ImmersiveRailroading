@@ -204,6 +204,7 @@ public class LocomotiveSteam extends Locomotive {
 	private float soundDampener = 0;
 	private ISound idle;
 	private ISound pressure;
+	private ISound bell;
 	private int tickMod = 0;
 	@Override
 	public void onUpdate() {
@@ -220,6 +221,7 @@ public class LocomotiveSteam extends Locomotive {
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
 					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, gauge);
+					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, gauge);
 					whistle.setPitch(1);
 					
 					if (this.getDefinition().quill != null) {
@@ -236,6 +238,13 @@ public class LocomotiveSteam extends Locomotive {
 					idle.setVolume(0.1f);
 					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, gauge);
 					pressure.setVolume(0.3f);
+				}
+
+				if (this.getDataManager().get(BELL) != 0 && !bell.isPlaying()) {
+					bell.play(getPositionVector());
+				}
+				else if(this.getDataManager().get(BELL) == 0 && bell.isPlaying()){
+					bell.stop();
 				}
 				
 				if (this.getDataManager().get(HORN) < 1) {
@@ -393,7 +402,7 @@ public class LocomotiveSteam extends Locomotive {
 					int lifespan = (int) (40 * (1 + smokeMod * gauge.scale()));
 					float verticalSpeed = 0.8f;
 					double size = 0.3 * (0.8 + smokeMod);
-					
+
 					particlePos = particlePos.subtract(fakeMotion);
 					
 					EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan, darken, thickness, size);
