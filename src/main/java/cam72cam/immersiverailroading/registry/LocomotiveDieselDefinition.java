@@ -19,6 +19,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	private int fuelEfficiency;
 	public ResourceLocation idle;
 	public ResourceLocation horn;
+	public ResourceLocation bell;
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -71,6 +72,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 			horn = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("horn").getAsString());
 		} else {
 			horn = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
+		}
+		if (sounds != null && sounds.has("bell")) {
+			bell = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
+		} else {
+			bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 		}
 	}
 
