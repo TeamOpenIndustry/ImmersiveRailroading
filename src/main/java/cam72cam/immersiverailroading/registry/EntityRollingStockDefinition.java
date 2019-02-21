@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import cam72cam.immersiverailroading.model.obj.Vec2f;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -58,6 +59,8 @@ public abstract class EntityRollingStockDefinition {
 
 	public final String defID;
 	private String name = "Unknown";
+	private String modelerName = "N/A";
+	private String packName = "N/A";
 	private OBJModel model;
 	public Map<String, String> textureNames = null;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
@@ -111,6 +114,12 @@ public abstract class EntityRollingStockDefinition {
 
 	public void parseJson(JsonObject data) throws Exception  {
 		name = data.get("name").getAsString();
+		if (data.has("modeler")) {
+			this.modelerName = data.get("modeler").getAsString();
+		}
+		if (data.has("pack")) {
+			this.packName = data.get("pack").getAsString();
+		}
 		float darken = 0;
 		if (data.has("darken_model")) {
 			darken = data.get("darken_model").getAsFloat();
@@ -434,12 +443,23 @@ public abstract class EntityRollingStockDefinition {
 			}
 		}
 	}
+
+	public class IconPart {
+		public final String mtl;
+		public final float u;
+		public final float v;
+		public IconPart(String mtl, float u, float v) {
+			this.mtl = mtl;
+			this.u = u;
+			this.v = v;
+		}
+	}
 	
-	public String[][] getIcon(int i) {
+	public IconPart[][] getIcon(int i) {
 		
 		ImmersiveRailroading.info("Generating model icon map %s...", this.defID);
 		
-		String[][] map = new String[i][i];
+		IconPart[][] map = new IconPart[i][i];
 		
 		// Distance per pixel
 		double nx = Math.max(this.heightBounds, this.widthBounds) / map.length;
@@ -480,15 +500,25 @@ public abstract class EntityRollingStockDefinition {
 		
 		for (int f : faces) {
 			Material mtl = model.materials.get(model.faceMTLs[f]);
+			if (mtl == null || mtl.name == "") {
+				continue;
+			}
 			Path2D path = new Path2D.Double();
 			boolean first = true;
+			float vu = 0;
+			float vv = 0;
 			for (int[] point : model.points(f)) {
+				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : Vec2f.ZERO;
+				vu += vt.x/3;
+				vv += vt.y/3;
+
+
 				Vec3d vert = model.vertices(point[0]);
 				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {
-					path.moveTo(vert.z / nx, vert.y / nx);
+					path.moveTo(vert.z / nx + xoff / nx, vert.y / nx);
 				} else {
-					path.lineTo(vert.z / nx, vert.y / nx);
+					path.lineTo(vert.z / nx + xoff / nx, vert.y / nx);
 				}
 				first = false;
 			}
@@ -496,15 +526,20 @@ public abstract class EntityRollingStockDefinition {
 			if (bounds.getWidth() * bounds.getHeight() < 1) {
 				continue;
 			}
-			for (int z = 0; z < map.length; z++) {
-				for (int y = 0; y < map[z].length; y++) {
+
+			int minZ = (int)Math.max(0, bounds.getMinX()-2);
+			int maxZ = (int)Math.min(bounds.getMaxX()+2, i);
+			int minY = (int)Math.max(0, bounds.getMinY()-2);
+			int maxY = (int)Math.min(bounds.getMaxY()+2, i);
+			for (int z = minZ; z < maxZ; z++) {
+				for (int y = minY; y < maxY; y++) {
 					if (map[z][y] != null) {
 						continue;
 					}
-					double relZ = z - xoff / nx;
-					double relY = y ;
+					double relZ = z;
+					double relY = y;
 					if (bounds.contains(relZ, relY) && path.contains(relZ, relY)) {
-						map[z][y] = mtl.name;
+						map[z][y] = new IconPart(mtl.name, vu, vv);
 					}
 				}
 			}
@@ -578,10 +613,12 @@ public abstract class EntityRollingStockDefinition {
 		String transStr = TextUtil.translate(localStr);
 		return localStr != transStr ? transStr : name;
 	}
-
+	
 	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = new ArrayList<String>();
 		tips.add(GuiText.WEIGHT_TOOLTIP.toString(this.getWeight(gauge)));
+		tips.add(GuiText.MODELER_TOOLTIP.toString(modelerName));
+		tips.add(GuiText.PACK_TOOLTIP.toString(packName));
 		return tips;
 	}
 

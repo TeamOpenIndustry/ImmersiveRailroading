@@ -160,6 +160,15 @@ public class Config {
 			}
 			return items;
 		}
+		
+		@Comment("Only select Locomotives with suitable equipment can be radio-controlled")
+		public static boolean RadioEquipmentRequired = true;
+		
+		@Comment("Range of radio-control, positive integer")
+		public static int RadioRange = 500;
+		
+		@Comment("Energy cost (RF) per radio transmission per metre")
+		public static int RadioCostPerMetre = 0;
 	}
 
 	public static ConfigDebug debug;
@@ -193,7 +202,9 @@ public class Config {
 		@Comment({"DEV ONLY: How much to artifically lag the server (per world)"})
 		public static int lagServer = 0;
 
-	}
+		@Comment({"Old Narrow track placement (single width instead of 3)"})
+        public static boolean oldNarrowWidth = false;
+    }
 
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!ConfigBalance.FuelRequired || (!ConfigBalance.ModelFuelRequired && gauge.isModel()));

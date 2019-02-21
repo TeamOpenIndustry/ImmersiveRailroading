@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import cam72cam.immersiverailroading.net.*;
 import org.apache.commons.io.IOUtils;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
@@ -45,15 +46,6 @@ import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
 import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
-import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
-import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
-import cam72cam.immersiverailroading.net.KeyPressPacket;
-import cam72cam.immersiverailroading.net.MRSSyncPacket;
-import cam72cam.immersiverailroading.net.MousePressPacket;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
-import cam72cam.immersiverailroading.net.PassengerPositionsPacket;
-import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.immersiverailroading.net.PaintSyncPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
@@ -141,6 +133,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(SoundPacket.Handler.class, SoundPacket.class, 10, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(PaintSyncPacket.Handler.class, PaintSyncPacket.class, 11, Side.CLIENT);
+	ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
@@ -206,6 +199,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE);
     	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH);
     	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE);
+	event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD);
     }
     
     @SubscribeEvent
@@ -364,4 +358,6 @@ public abstract class CommonProxy implements IGuiHandler {
 		double ttms = ttus * 1.0E-6D;
 		return Math.min(1000.0 / ttms, 20);
 	}
+
+    public abstract void addPreview(int dimension, TileRailPreview preview);
 }

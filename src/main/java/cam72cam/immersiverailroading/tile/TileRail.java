@@ -43,7 +43,7 @@ public class TileRail extends TileRailBase {
 			return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 		}
 		int length = info.settings.length;
-		if (info.settings.type == TrackItems.CUSTOM && info.customInfo != null) {
+		if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 		}
 		return new AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos);
@@ -98,6 +98,10 @@ public class TileRail extends TileRailBase {
 			ItemStack railBed = new ItemStack(nbt.getCompoundTag("railBed"));
 			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
 
+			if (type == TrackItems.SWITCH) {
+				quarters = 4;
+			}
+
 			NBTTagCompound newPositionFormat = new NBTTagCompound();
 			newPositionFormat.setDouble("x", nbt.getDouble("placementPositionX"));
 			newPositionFormat.setDouble("y", nbt.getDouble("placementPositionY"));
@@ -105,7 +109,7 @@ public class TileRail extends TileRailBase {
 			nbt.setTag("placementPosition", newPositionFormat);
 
             PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
-            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.rotationQuarter, placementInfo.direction, placementInfo.facing.getOpposite());
+            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
 			double tablePos = nbt.getDouble("tablePos");
@@ -143,37 +147,33 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
-	private List<TrackBase> trackCheckCache;
 	public double percentFloating() {
-		if (trackCheckCache == null) {
-			if (info == null) {
-				return 0;
-			}
-			trackCheckCache = info.getBuilder().getTracksForRender();
+		int floating = 0;
+		int total = 0;
+
+		if (info.world == null) {
+			return 0;
 		}
-		
-		double floating = 0;
-		
-		BlockPos offset = null;
-		for (TrackBase track : trackCheckCache) {
-			if (track instanceof TrackRail) {
-				offset = this.getPos().subtract(new BlockPos(track.getPos().getX(), 0, track.getPos().getZ()));
-				break;
-			}
-		}
-		
-		for (TrackBase track : trackCheckCache) {
-			BlockPos tpos = track.getPos().down().add(offset);
+
+		for (TrackBase track : info.getBuilder(pos).getTracksForRender()) {
+			BlockPos tpos = track.getPos();
+			total++;
+
 			if (!world.isBlockLoaded(tpos)) {
 				return 0;
 			}
-			boolean isOnRealBlock = world.isSideSolid(tpos, EnumFacing.UP, false) ||
-					!Config.ConfigDamage.requireSolidBlocks && !world.isAirBlock(tpos) ||
-					BlockUtil.isIRRail(world, tpos);
-			if (!isOnRealBlock) {
-				floating += 1.0 / trackCheckCache.size();
+			if (!track.isDownSolid()) {
+				floating++;
 			}
 		}
-		return floating;
+		return floating / (double)total;
+	}
+
+	@Override
+	public double getTrackGauge() {
+		if (info == null) {
+			return 0;
+		}
+		return info.settings.gauge.value();
 	}
 }

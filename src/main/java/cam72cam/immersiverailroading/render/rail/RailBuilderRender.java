@@ -55,7 +55,7 @@ public class RailBuilderRender {
 			
 			for (VecYawPitch piece : info.getBuilder().getRenderData()) {
 				Matrix4 m = new Matrix4();
-				m.rotate(Math.toRadians(180-info.placementInfo.facing.getOpposite().getHorizontalAngle()), 0, 1, 0);
+				//m.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
 				m.translate(piece.x, piece.y, piece.z);
 				m.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
 				m.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
