@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
@@ -51,7 +50,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private HashMap<BlockPos, Float> blockCollisionHardness = new HashMap<BlockPos, Float>();	//Float negative for aft-collision reaction, positive for fore-collision reaction
+	private float[] blockCollisionHardness = {0.0f, 0.0f};	//[0] aft reaction, [1] fore reaction
 
 	private float sndRand;
 
@@ -440,8 +439,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
+			float[] newBlockCollisionHardness = {0f,0f};
 			
-			boolean isCollided = false;
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				/*if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
 					continue;
@@ -469,7 +468,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						if (Math.abs(angleVelocityToBlock) < 45) {
 							blockCollisionInFront = 1;
 						} else if (Math.abs(angleVelocityToBlock) > 135) {
-							blockCollisionInFront = -1;
+							blockCollisionInFront = 0;
 						} else {
 							continue;	// We won't be doing anything in this case
 						}
@@ -484,15 +483,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							}
 						}
 						if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
-							// ImmersiveRailroading.debug("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
-							if (!isCollided) {
-								isCollided = true;
-							}
+							// ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
 							if (ConfigDamage.TrainsBreakBlocks && collisionSpeed * 0.28 > blockHardness * 2.0) {
-								blockCollisionHardness.put(bp, blockCollisionInFront * blockHardness);
+								newBlockCollisionHardness[blockCollisionInFront] += blockHardness;
 								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 							} else {
-								blockCollisionHardness.put(bp, (float)(blockCollisionInFront * collisionSpeed * this.getWeight()));
+								//Intended to stop the train, definitely would not do this on a large consist
+								newBlockCollisionHardness[blockCollisionInFront] += collisionSpeed * this.getWeight();
 							}
 							if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
 								if (!this.isDead) {
@@ -511,9 +508,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 					}
 				}
 			}
-			
-			if(this.currentSpeed.metric() > 1 && isCollided && this instanceof EntityCoupleableRollingStock) {
-				EntityCoupleableRollingStock stock = (EntityCoupleableRollingStock)this;
+			if ((blockCollisionHardness[0] != newBlockCollisionHardness[0] || blockCollisionHardness[1] != newBlockCollisionHardness[1]) && 
+					this instanceof EntityCoupleableRollingStock) {
+				blockCollisionHardness[0] = newBlockCollisionHardness[0];
+				blockCollisionHardness[1] = newBlockCollisionHardness[1];
+				EntityCoupleableRollingStock stock = (EntityCoupleableRollingStock) this;
 				stock.triggerResimulate();
 			}
 		}
@@ -632,12 +631,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return new Vec3d(this.motionX, this.motionY, this.motionZ);
 	}
 	
-	public void resetBlockCollisionHardness() {
-		blockCollisionHardness.clear();
-	}
-	
-	public HashMap<BlockPos, Float> getBlockCollisionHardness() {
-		return blockCollisionHardness;
+	public float getBlockCollisionHardness(int i) {
+		return blockCollisionHardness[i];
 	}
 	
 	@Override
