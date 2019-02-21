@@ -10,8 +10,11 @@ import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +69,17 @@ public class RailBuilderRender {
 				}
 				double scale = info.settings.gauge.scale();
 				m.scale(scale, scale, scale);
+				m.transpose();
+				FloatBuffer fbm = BufferUtils.createFloatBuffer(16);
+				fbm.put(new float [] {
+ 				 	(float)m.m00, (float)m.m01, (float)m.m02, (float)m.m03,
+                    (float)m.m10, (float)m.m11, (float)m.m12, (float)m.m13,
+                    (float)m.m20, (float)m.m21, (float)m.m22, (float)m.m23,
+                    (float)m.m30, (float)m.m31, (float)m.m32, (float)m.m33
+                });
+				fbm.flip();
+				GL11.glMultMatrix(fbm);
+
 
 				if (piece.getGroups().size() != 0) {
 					// TODO static
@@ -79,9 +93,9 @@ public class RailBuilderRender {
 					}
 
 					
-					vbas.add(model.createVBA(groups, m));
+					vbas.add(model.createVBA(groups));
 				} else {
-					vbas.add(model.createVBA(model.model.groups.keySet(), m));
+					vbas.add(model.createVBA(model.model.groups.keySet()));
 				}
 			}
 
