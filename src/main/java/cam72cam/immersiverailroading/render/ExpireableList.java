@@ -1,14 +1,14 @@
 package cam72cam.immersiverailroading.render;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ExpireableList<K,V> {
 	
 	public int lifespan() {
 		return 10;
+	}
+	public boolean sliding() {
+		return true;
 	}
 	
 	public void onRemove(K key, V value) {
@@ -41,7 +41,9 @@ public class ExpireableList<K,V> {
 			
 			
 			if (map.containsKey(key)) {
-				mapUsage.put(key, timeS());
+				if (sliding()) {
+					mapUsage.put(key, timeS());
+				}
 				return map.get(key);
 			}
 			return null;
@@ -52,6 +54,26 @@ public class ExpireableList<K,V> {
 		synchronized(this) {
 			mapUsage.put(key, timeS());
 			map.put(key, displayList);
+		}
+	}
+
+	public Collection<V> values() {
+		synchronized(this) {
+			if (lastTime + lifespan() < timeS()) {
+				// clear unused
+				Set<K> ks = new HashSet<K>();
+				ks.addAll(map.keySet());
+				for (K dk : ks) {
+					if (mapUsage.get(dk) + lifespan() < timeS()) {
+						onRemove(dk, map.get(dk));
+						map.remove(dk);
+						mapUsage.remove(dk);
+					}
+				}
+				lastTime = timeS();
+			}
+
+			return map.values();
 		}
 	}
 }

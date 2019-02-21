@@ -1,0 +1,29 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:item_radio_control_card"
+  },
+  "pattern": [
+    " a ",
+    "tbt",
+    " d "
+  ],
+  "key": {
+	"t": {
+	  "type": "forge:ore_dict",
+      "ore": "oc:materialTransistor"
+    },
+	"d": {
+	  "type": "forge:ore_dict",
+      "ore": "oc:dataCard1"
+    },
+	"a": {
+	  "item": "minecraft:iron_bars",
+      "data": 0
+    },
+	"b": {
+	  "item": "minecraft:iron_ingot",
+      "data": 0
+    }
+  }
+} 

@@ -40,4 +40,6 @@ public class ConfigGraphics {
 	@Comment({ "What unit to use for speedometer. (kmh, mph or ms)" })
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
 
+	@Comment({"Size of icon cache images (larger = slower)"})
+    public static int iconCacheSize = 128;
 }

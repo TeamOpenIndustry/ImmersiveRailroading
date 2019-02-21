@@ -67,7 +67,7 @@ public class TrackGui extends GuiScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			return val > 0 && val <= 100;
+			return val > 0 && val <= 1000;
 		}
 	};
 	private BlockPos tilePreviewPos;
@@ -174,7 +174,7 @@ public class TrackGui extends GuiScreen {
 
 		this.lengthInput = new GuiTextField(buttonID++, this.fontRenderer, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, 200, 20);
 		this.lengthInput.setText("" + length);
-		this.lengthInput.setMaxStringLength(3);
+		this.lengthInput.setMaxStringLength(5);
 		this.lengthInput.setValidator(this.integerFilter);
 		this.lengthInput.setFocused(true);
 
