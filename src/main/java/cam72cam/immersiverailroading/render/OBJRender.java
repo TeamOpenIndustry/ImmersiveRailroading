@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
@@ -66,7 +67,7 @@ public class OBJRender {
 		createVBA().draw();
 	}
 	public void drawGroups(Iterable<String> groups) {
-		createVBA(groups).draw();
+		createVBA().draw(groups);
 	}
 
 	public VBA createVBA() {
@@ -85,18 +86,20 @@ public class OBJRender {
 
     public VBA createVBA(Iterable<String> groupNames, Matrix4 m) {
 		List<Integer> tris = new ArrayList<Integer>();
+		Map<String, Pair<Integer, Integer>> groupIdx = new LinkedHashMap<>();
 
 		for (String group : groupNames) {
 			if (group.contains("EXHAUST_") || group.contains("CHIMNEY_") || group.contains("PRESSURE_VALVE_") || group.contains("CHIMINEY_")) {
 				//Skip particle emitters
 				continue;
 			}
+			groupIdx.put(group, Pair.of(tris.size(), model.groups.get(group).length));
 			for (int face : model.groups.get(group)) {
 				tris.add(face);
 			}
 		}
 
-		VBA vba = new VBA(tris.size());
+		VBA vba = new VBA(tris.size(), groupIdx);
 
 		for (int face : tris) {
 			String mtlName = model.faceMTLs[face];

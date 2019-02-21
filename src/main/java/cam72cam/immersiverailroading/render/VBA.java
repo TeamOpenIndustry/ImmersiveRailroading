@@ -1,17 +1,19 @@
 package cam72cam.immersiverailroading.render;
 
 import cam72cam.immersiverailroading.model.obj.Vec2f;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 
 import java.nio.FloatBuffer;
 import java.util.List;
+import java.util.Map;
 
 public class VBA {
+    private Map<String, Pair<Integer, Integer>> groupIdx;
     private boolean isVBO;
     private int size;
     private FloatBuffer vertexBuffer;
@@ -23,7 +25,8 @@ public class VBA {
     private int vtbo = -1;
     private int vcbo = -1;
     private boolean has_vn = true;
-    private int displayList = -1;
+    private static int allocated = 0;
+    private static int verts = 0;
 
     public VBA(int size) {
         this.size = size;
@@ -32,12 +35,17 @@ public class VBA {
         colorBuffer = BufferUtils.createFloatBuffer(size * 3 * 4);
         texBuffer = BufferUtils.createFloatBuffer(size * 3 * 2);
         isVBO = OpenGlHelper.useVbo();
+
+        allocated += 1;
+        verts += size;
+        System.out.println("ALLOC " + allocated + ":" + verts);
     }
     public VBA(List<VBA> subVBAs) {
         for (VBA vba : subVBAs) {
             size += vba.size;
             has_vn &= vba.has_vn;
         }
+
         vertexBuffer = BufferUtils.createFloatBuffer(size * 3 * 3);
         normalBuffer = BufferUtils.createFloatBuffer(size * 3 * 3);
         colorBuffer = BufferUtils.createFloatBuffer(size * 3 * 4);
@@ -54,7 +62,17 @@ public class VBA {
             texBuffer.put(vba.texBuffer);
         }
         isVBO = OpenGlHelper.useVbo();
+
+        allocated += 1;
+        verts += size;
+        System.out.println("ALLOC " + allocated + ":" + verts);
     }
+
+    public VBA(int size, Map<String, Pair<Integer, Integer>> groupIdx) {
+        this(size);
+        this.groupIdx = groupIdx;
+    }
+
     public void addPoint(Vec3d v, Vec3d vn, Vec2f vt, float r, float g, float b, float a) {
         vertexBuffer.put((float) (v.x));
         vertexBuffer.put((float) (v.y));
@@ -75,12 +93,19 @@ public class VBA {
     }
     public void draw() {
         if (isVBO) {
-            drawVBO();
+            drawVBO(null);
         } else {
-            drawVBA();
+            drawVBA(null);
         }
     }
-    private void drawVBO() {
+    public void draw(Iterable<String> groups) {
+        if (isVBO) {
+            drawVBO(groups);
+        } else {
+            drawVBA(groups);
+        }
+    }
+    private void drawVBO(Iterable<String> groups) {
         int prev = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
 
         if (vbo == -1) {
@@ -130,7 +155,14 @@ public class VBA {
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
         GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);
-        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, size * 3);
+        if (groups == null) {
+            GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, size * 3);
+        } else {
+            for (String group : groups) {
+                Pair<Integer, Integer> info = groupIdx.get(group);
+                GL11.glDrawArrays(GL11.GL_TRIANGLES, info.getKey() * 3, info.getValue() * 3);
+            }
+        }
 
         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
         GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
@@ -141,20 +173,9 @@ public class VBA {
 
         // Reset draw color (IMPORTANT)
         GL11.glColor4f(1, 1, 1, 1);
-
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, prev);
     }
-    private void drawVBA() {
-        if (displayList == -1) {
-            if (!ClientProxy.renderCacheLimiter.canRender()) {
-                return;
-            }
-
-            displayList = ClientProxy.renderCacheLimiter.newList(() -> drawDirect());
-        }
-        GL11.glCallList(displayList);
-    }
-    public void drawDirect() {
+    private void drawVBA(Iterable<String> groups) {
         GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
@@ -172,7 +193,14 @@ public class VBA {
             GL11.glNormalPointer(3 << 2, normalBuffer);
         }
         GL11.glVertexPointer(3, 3 << 2, vertexBuffer);
-        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, size * 3);
+        if (groups == null) {
+            GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, size * 3);
+        } else {
+            for (String group : groups) {
+                Pair<Integer, Integer> info = groupIdx.get(group);
+                GL11.glDrawArrays(GL11.GL_TRIANGLES, info.getKey() * 3, info.getValue() * 3);
+            }
+        }
 
         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
         GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
@@ -186,6 +214,20 @@ public class VBA {
     }
 
     public void free() {
-        //TODO
+        vertexBuffer = null;
+        normalBuffer = null;
+        texBuffer = null;
+        colorBuffer = null;
+
+        if (isVBO) {
+            GL15.glDeleteBuffers(vbo);
+            GL15.glDeleteBuffers(vnbo);
+            GL15.glDeleteBuffers(vtbo);
+            GL15.glDeleteBuffers(vcbo);
+        }
+
+        allocated -= 1;
+        verts -= size;
+        System.out.println("DEALLOC " + allocated + ":" + verts);
     }
 }
