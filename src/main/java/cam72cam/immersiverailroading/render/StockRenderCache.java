@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
 
 public class StockRenderCache {
 	private static Map<String, StockModel> render_cache = new HashMap<String, StockModel>();
-	private static boolean isCachePrimed = true;
+	private static boolean isCachePrimed = false;
 
 	public static void clearRenderCache() {
 		for (StockModel model : render_cache.values()) {

@@ -17,7 +17,6 @@ public class OBJRender {
 	public Map<String, OBJTextureSheet> textures = new HashMap<String, OBJTextureSheet>();
 	private int prevTexture = -1;
 	private VBA vba;
-	Map<Iterable<String>, VBA> vbas = new HashMap<Iterable<String>, VBA>();
 
 	public OBJRender(OBJModel model) {
 		this(model, null);
@@ -70,25 +69,15 @@ public class OBJRender {
 		createVBA().draw(groups);
 	}
 
-	public VBA createVBA() {
-		if (vba == null) {
-			vba = createVBA(model.groups.keySet(), new Matrix4());
+    public VBA createVBA() {
+		if (vba != null) {
+			return vba;
 		}
-		return vba;
-	}
 
-	public VBA createVBA(Iterable<String> groups) {
-		if (!vbas.containsKey(groups)) {
-			vbas.put(groups, createVBA(groups, new Matrix4()));
-		}
-		return vbas.get(groups);
-	}
-
-    public VBA createVBA(Iterable<String> groupNames, Matrix4 m) {
 		List<Integer> tris = new ArrayList<Integer>();
 		Map<String, Pair<Integer, Integer>> groupIdx = new LinkedHashMap<>();
 
-		for (String group : groupNames) {
+		for (String group : model.groups.keySet()) {
 			if (group.contains("EXHAUST_") || group.contains("CHIMNEY_") || group.contains("PRESSURE_VALVE_") || group.contains("CHIMINEY_")) {
 				//Skip particle emitters
 				continue;
@@ -99,7 +88,7 @@ public class OBJRender {
 			}
 		}
 
-		VBA vba = new VBA(tris.size(), groupIdx);
+		vba = new VBA(tris.size(), groupIdx);
 
 		for (int face : tris) {
 			String mtlName = model.faceMTLs[face];
@@ -139,8 +128,6 @@ public class OBJRender {
 				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 				Vec3d vn = point[2] != -1 ? model.vertexNormals(point[2]) : null;
 
-				v = m.apply(v);
-
 				if (vt != null) {
 					vt = new Vec2f(
                         texture.convertU(mtlName, vt.x - model.offsetU[face]),
@@ -155,6 +142,14 @@ public class OBJRender {
 				vba.addPoint(v, vn, vt, r, g, b, a);
 			}
 		}
+
+		model.vertexNormals = null;
+		model.vertexTextures = null;
+		model.offsetU = null;
+		model.offsetV = null;
+		model.faceMTLs = null;
+		model.vertices = null;
+
 		return vba;
 	}
 
@@ -165,9 +160,6 @@ public class OBJRender {
 			}
 		}
 		vba.free();
-		for (VBA v : vbas.values()) {
-			v.free();
-		}
 	}
 
 }

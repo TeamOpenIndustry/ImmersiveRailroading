@@ -21,7 +21,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class RailItemRender implements IBakedModel {
 	private static OBJRender baseRailModel;
-	private static VBA left;
+	private static List<String> left;
 
 	static {
 		try {
@@ -33,7 +33,7 @@ public class RailItemRender implements IBakedModel {
 					groups.add(groupName);
 				}
 			}
-			left = baseRailModel.createVBA(groups);
+			left = groups;
 		} catch (Exception e) {
 			ImmersiveRailroading.catching(e);
 		}
@@ -46,7 +46,7 @@ public class RailItemRender implements IBakedModel {
 		{
 			GL11.glTranslated(0, 0.2, 0.55);
 			baseRailModel.bindTexture();
-			left.draw();
+			baseRailModel.drawGroups(left);
 			baseRailModel.restoreTexture();
 		}
 		GL11.glPopMatrix();

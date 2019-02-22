@@ -40,33 +40,6 @@ public class VBA {
         verts += size;
         System.out.println("ALLOC " + allocated + ":" + verts);
     }
-    public VBA(List<VBA> subVBAs) {
-        for (VBA vba : subVBAs) {
-            size += vba.size;
-            has_vn &= vba.has_vn;
-        }
-
-        vertexBuffer = BufferUtils.createFloatBuffer(size * 3 * 3);
-        normalBuffer = BufferUtils.createFloatBuffer(size * 3 * 3);
-        colorBuffer = BufferUtils.createFloatBuffer(size * 3 * 4);
-        texBuffer = BufferUtils.createFloatBuffer(size * 3 * 2);
-
-        for (VBA vba : subVBAs) {
-            vba.vertexBuffer.flip();
-            vba.normalBuffer.flip();
-            vba.colorBuffer.flip();
-            vba.texBuffer.flip();
-            vertexBuffer.put(vba.vertexBuffer);
-            normalBuffer.put(vba.normalBuffer);
-            colorBuffer.put(vba.colorBuffer);
-            texBuffer.put(vba.texBuffer);
-        }
-        isVBO = OpenGlHelper.useVbo();
-
-        allocated += 1;
-        verts += size;
-        System.out.println("ALLOC " + allocated + ":" + verts);
-    }
 
     public VBA(int size, Map<String, Pair<Integer, Integer>> groupIdx) {
         this(size);
