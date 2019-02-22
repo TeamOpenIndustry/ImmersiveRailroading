@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBTextureCompression;
 import org.lwjgl.opengl.GL11;
@@ -342,6 +343,13 @@ public class OBJTextureSheet {
 		// GL_BGRA_EXT = 32993
 		// GL_UNSIGNED_INT_8_8_8_8_REV = 33639
 		// ARBTextureCompression.GL_TEXTURE_COMPRESSED_ARB
+		// Internal Mojang/Forge magic...
+		synchronized (net.minecraftforge.fml.client.SplashProgress.class)
+		{
+			TextureUtil.deleteTexture(textureID);
+			GlStateManager.bindTexture(textureID);
+		}
+		// Use compressed ARB
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, ARBTextureCompression.GL_COMPRESSED_RGBA_ARB, sheetWidth, sheetHeight, 0, 32993, 33639, (ByteBuffer)null);
 
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
