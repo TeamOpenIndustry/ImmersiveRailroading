@@ -20,6 +20,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	public ResourceLocation idle;
 	public ResourceLocation horn;
 	public ResourceLocation bell;
+	private boolean hornSus = true;
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -59,7 +60,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		JsonObject properties = data.get("properties").getAsJsonObject();
 		fuelCapacity = FluidQuantity.FromLiters((int)Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
 		fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
-		
+		if (properties.has("horn_sustained")){
+			hornSus = properties.get("horn_sustained").getAsBoolean();
+		}
+
+
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
 		if (sounds != null && sounds.has("idle")) {
@@ -78,6 +83,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		} else {
 			bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 		}
+	}
+
+	//checks to see if horn is sustained, on by default
+	public boolean getHornSus(){
+		return hornSus;
 	}
 
 	@Override

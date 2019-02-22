@@ -159,6 +159,8 @@ public class LocomotiveDiesel extends Locomotive {
 		return 0;
 	}
 
+
+
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -166,7 +168,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (world.isRemote) {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
-					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, true, 100, gauge);
+					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, this.getDefinition().getHornSus(), 100, gauge);
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, gauge);
 					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 80, gauge);
 
@@ -184,7 +186,7 @@ public class LocomotiveDiesel extends Locomotive {
 				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
 					horn.play(getPositionVector());
 				}
-				else if(this.getDataManager().get(HORN) == 0 && horn.isPlaying()){
+				else if(this.getDataManager().get(HORN) == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
 					horn.stop();
 				}
 
