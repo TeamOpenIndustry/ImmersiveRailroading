@@ -15,9 +15,6 @@ public class VBO extends VBA {
     public VBO(int size) {
         super(size);
     }
-    public VBO(List<VBA> subVBAs) {
-        super(subVBAs);
-    }
     /*
     public void draw() {
         int prev = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
