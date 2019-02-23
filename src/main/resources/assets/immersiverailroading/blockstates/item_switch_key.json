@@ -6,37 +6,34 @@
 	},
 	"variants": {
 		"normal": [{
-            "textures": {
-                "layer0": "immersiverailroading:items/switch_key"
-            },
 			"transform": {
 				"firstperson_righthand": {
-				  	"scale": 0.25,
-				  	"translation": [0, 0, 0],
-					"rotation": [{"x":  0}, {"y": 180}, {"z": -90}]
+					"scale": 1,
+					"translation": [-0.5, 0.3, 0.5],
+					"rotation": [{"y": -90}, {"z": 60}]
 				},
 				"firstperson_lefthand": {
-					"scale": 0.25,
-					"translation": [0, 0, 0],
-					"rotation": [{"x": 0}, {"y": 180}, {"z": -90}]
+					"scale": 1,
+					"translation": [-0.5, -0.3, 0],
+					"rotation": [{"y": -90}, {"z": 60}]
 				},
 				"thirdperson_righthand": {
-				  	"scale": 0.25,
-				  	"translation": [0, 0, 0],
-					"rotation": [{"x":  90}, {"y": 0}]
+					"scale": 1,
+					"translation": [-0.5, 0, 0.5],
+					"rotation": {"y": -90}
 				},
 				"thirdperson_lefthand": {
-				  	"scale": 0.25,
-				  	"translation": [0, 0, 0],
-					"rotation": [{"x":  90}, {"y": 0}]
+					"scale": 1,
+					"translation": [-0.5, 0, -0.5],
+					"rotation": {"y": -90}
 				},
 				"gui": {
-				  	"scale": 0.3,
-					"translation": [0.25, -0.25, 0]
+					"scale": 1.2,
+					"translation": [0.6, 0, 0]
 				},
 				"ground": {
-				  	"scale": 0.5,
-				  	"translation": [0, 0, 0]
+					"scale": 1,
+					"translation": [0.5, 0.5, 0.5]
 				},
 				"fixed": {
 				}

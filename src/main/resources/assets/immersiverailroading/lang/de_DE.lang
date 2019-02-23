@@ -43,6 +43,7 @@ chat.immersiverailroading:augment.set=Erweitung reagiert nun nur noch auf %s
 chat.immersiverailroading:augment.reset=Erweiterung reagiert nun auf alle Fahrzeuge
 chat.immersiverailroading:misc.wood_planks=Holzbretter
 chat.immersiverailroading:build.invalid_block=Ungültiger Block bei x=%s y=%s z=%s
+chat.immersiverailroading:brush.no.variants=
 
 gui.immersiverailroading:label.brake=Bremse
 gui.immersiverailroading:label.throttle=Gas
