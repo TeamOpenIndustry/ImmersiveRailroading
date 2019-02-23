@@ -25,8 +25,6 @@ public class VBA {
     private int vtbo = -1;
     private int vcbo = -1;
     private boolean has_vn = true;
-    private static int allocated = 0;
-    private static int verts = 0;
 
     public VBA(int size) {
         this.size = size;
@@ -35,10 +33,6 @@ public class VBA {
         colorBuffer = BufferUtils.createFloatBuffer(size * 3 * 4);
         texBuffer = BufferUtils.createFloatBuffer(size * 3 * 2);
         isVBO = OpenGlHelper.useVbo();
-
-        allocated += 1;
-        verts += size;
-        System.out.println("ALLOC " + allocated + ":" + verts);
     }
 
     public VBA(int size, Map<String, Pair<Integer, Integer>> groupIdx) {
@@ -198,9 +192,5 @@ public class VBA {
             GL15.glDeleteBuffers(vtbo);
             GL15.glDeleteBuffers(vcbo);
         }
-
-        allocated -= 1;
-        verts -= size;
-        System.out.println("DEALLOC " + allocated + ":" + verts);
     }
 }
