@@ -1,7 +1,7 @@
 {
   "type": "forge:ore_shaped",
   "result": {
-    "item": "immersiverailroading:item_switch_hammer"
+    "item": "immersiverailroading:item_switch_key"
   },
   "pattern": [
     "  d",
