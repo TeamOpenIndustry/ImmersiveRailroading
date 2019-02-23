@@ -66,6 +66,7 @@ public class ItemPickerGUI extends GuiScreen {
 		int stacksX = this.width * 7/8 / 32;
 		
 		this.buttonList.clear();
+		this.buttonCoordList.clear();
 		startX += Math.max(0, (stacksX - items.size())/2) * 32;
 		int i;
 		for (i = 0; i < items.size(); i++) {
