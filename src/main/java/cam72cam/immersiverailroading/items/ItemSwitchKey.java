@@ -13,10 +13,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemSwitchHammer extends Item {
+public class ItemSwitchKey extends Item {
 	public static final String NAME = "item_switch_key";
 
-	public ItemSwitchHammer() {
+	public ItemSwitchKey() {
 		super();
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
