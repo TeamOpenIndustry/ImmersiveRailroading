@@ -119,15 +119,19 @@ public class StockModel extends OBJRender {
 			List<RenderComponent> cargoLoads = def.getComponents(RenderComponentType.CARGO_FILL_X, stock.gauge);
 			if (cargoLoads != null) {
 				//this sorts through all the cargoLoad objects
+				RenderComponent currentLoad;
 				for (RenderComponent cargoLoad : cargoLoads) {
-					if (cargoLoad.id <= fill) {
-						drawComponent(cargoLoad);
-						
-						//if the stock should only render the current cargo load only it will stop at the highest matching number
+					if (cargoLoad.id <= fill) {						
 						if (def.shouldShowCurrentLoadOnly()) {
-							break;
+							currentLoad = cargoLoad;
+						} else {
+							drawComponent(cargoLoad);
 						}
 					}
+				}
+				//if the stock should only render the current cargo load it will render the last valid load
+				if (def.shouldShowCurrentLoadOnly()) {
+					drawComponent(currentLoad);
 				}
 			}
 		}
