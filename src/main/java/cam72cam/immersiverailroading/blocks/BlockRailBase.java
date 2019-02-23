@@ -295,9 +295,8 @@ public abstract class BlockRailBase extends Block {
 		if (te != null) {
 			if (stack.getItem() == IRItems.ITEM_SWITCH_KEY) {
 				if (!worldIn.isRemote) {
-					te.cycleSwitchForced();
-					SwitchState switchState = te.getParentTile().getParentTile().info.switchForced;
-					playerIn.sendMessage(switchState.equals(SwitchState.NONE) ? new TextComponentString(ChatText.SWITCH_UNLOCKED.toString()) : ChatText.SWITCH_LOCKED.getMessage(switchState.toString()));
+					SwitchState switchForced = te.cycleSwitchForced();
+					playerIn.sendMessage(switchForced.equals(SwitchState.NONE) ? new TextComponentString(ChatText.SWITCH_UNLOCKED.toString()) : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
 				}
 			}
 			if (block == Blocks.REDSTONE_TORCH) {

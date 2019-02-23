@@ -851,23 +851,31 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		return BlockPos.fromLong(this.replaced.getLong("parent")).add(pos);
 	}
 
-	public void cycleSwitchForced() {
+	public SwitchState cycleSwitchForced() {
 		TileRail teParent = this.getParentTile().getParentTile();
+		SwitchState newForcedState = teParent.info.switchForced;
 		if (teParent != null) {
 			if (teParent.info.settings.type == TrackItems.SWITCH) {
-				SwitchState newForcedState = SwitchState.values()[(teParent.info.switchForced.ordinal() + 1) % SwitchState.values().length];
+				newForcedState = SwitchState.values()[(teParent.info.switchForced.ordinal() + 1) % SwitchState.values().length];
 				SwitchState newSwitchState = (newForcedState.equals(SwitchState.NONE) ? ( SwitchUtil.isRailPowered(teParent) ? SwitchState.TURN : SwitchState.STRAIGHT ) : newForcedState);
 				teParent.info = new RailInfo(world, teParent.info.settings, teParent.info.placementInfo, teParent.info.customInfo, newSwitchState, newForcedState, teParent.info.tablePos);
 				this.markDirty();
 			}
 		}
+		return newForcedState;
 	}
 
 	public boolean isSwitchForced() {
-		TileRail teParent = this.getParentTile().getParentTile();
-		if (teParent != null) {
-			if (teParent.info.settings.type == TrackItems.SWITCH) {
-				return teParent.info.switchForced != SwitchState.NONE;
+		TileRail tileSwitch;
+		if (this instanceof TileRail && ((TileRail) this).info.settings.type.equals(TrackItems.SWITCH)) {
+			tileSwitch = (TileRail) this;
+		} else {
+			tileSwitch = this.getParentTile().getParentTile();
+		}
+
+		if (tileSwitch != null) {
+			if (tileSwitch.info.settings.type == TrackItems.SWITCH) {
+				return tileSwitch.info.switchForced != SwitchState.NONE;
 			}
 		}
 		return false;
