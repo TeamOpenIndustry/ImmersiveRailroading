@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
@@ -321,8 +320,8 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD, 0,
 				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName(), ""));
 
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_HAMMER, 0,
-				new ModelResourceLocation(IRItems.ITEM_SWITCH_HAMMER.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_KEY, 0,
+				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName(), ""));
 	}
 	
 	public static final class StockIcon extends TextureAtlasSprite
