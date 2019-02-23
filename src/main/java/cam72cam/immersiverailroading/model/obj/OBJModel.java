@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import cam72cam.immersiverailroading.util.VecUtil;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -33,7 +34,10 @@ public class OBJModel {
 	public Map<String, Material> materials = new HashMap<String, Material>();
 	//public Map<Integer, String> mtlLookup = new HashMap<Integer, String>();
 	public float darken;
-	
+
+	private Map<String, Vec3d> mins = new HashMap<>();
+	private Map<String, Vec3d> maxs = new HashMap<>();
+
 	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
 		this(modelLoc, darken, 1);
 	}
@@ -243,6 +247,37 @@ public class OBJModel {
 			}
 			reader.close(); // closes input
 		}
+
+		for (String group : groups()) {
+			Vec3d min = null;
+			int[] faces = groups.get(group);
+			for (int face : faces) {
+				for (int[] point : points(face)) {
+					Vec3d v = vertices(point[0]);
+					if (min == null) {
+						min = v;
+					} else {
+						min = VecUtil.min(min, v);
+					}
+				}
+			}
+			mins.put(group, min);
+		}
+		for (String group : groups()) {
+			Vec3d max = null;
+			int[] faces = groups.get(group);
+			for (int face : faces) {
+				for (int[] point : points(face)) {
+					Vec3d v = vertices(point[0]);
+					if (max == null) {
+						max = v;
+					} else {
+						max = VecUtil.max(max, v);
+					}
+				}
+			}
+			maxs.put(group, max);
+		}
 	}
 	
 	private static int[] parsePoint(String point) {
@@ -260,72 +295,29 @@ public class OBJModel {
 		return groups.keySet();
 	}
 	
-	private Map<Iterable<String>, Vec3d> mins = new HashMap<Iterable<String>, Vec3d>();
 	public Vec3d minOfGroup(Iterable<String> groupNames) {
-		if (!mins.containsKey(groupNames)) {
-			
-			Vec3d min = null;
-			for (String group : groupNames) {
-				int[] faces = groups.get(group);
-				for (int face : faces) {
-					for (int[] point : points(face)) {
-						Vec3d v = vertices(point[0]);
-						if (min == null) {
-							min = new Vec3d(v.x, v.y, v.z);
-						} else {
-							if (min.x > v.x) {
-								min = new Vec3d(v.x, min.y, min.z);
-							}
-							if (min.y > v.y) {
-								min = new Vec3d(min.x, v.y, min.z);
-							}
-							if (min.z > v.z) {
-								min = new Vec3d(min.x, min.y, v.z);
-							}
-						}
-					}
-				}
-			}
+		Vec3d min = null;
+		for (String group : groupNames) {
+			Vec3d gmin = mins.get(group);
 			if (min == null) {
-				ImmersiveRailroading.error("EMPTY " + groupNames);
-				min = new Vec3d(0, 0, 0);
+				min = gmin;
+			} else {
+				min = VecUtil.min(min, gmin);
 			}
-			mins.put(groupNames, min);
 		}
-		return mins.get(groupNames);
+		return min;
 	}
-	private Map<Iterable<String>, Vec3d> maxs = new HashMap<Iterable<String>, Vec3d>();
 	public Vec3d maxOfGroup(Iterable<String> groupNames) {
-		if (!maxs.containsKey(groupNames)) {
-			Vec3d max = null;
-			for (String group : groupNames) {
-				int[] faces = groups.get(group);
-				for (int face : faces) {
-					for (int[] point : points(face)) {
-						Vec3d v = vertices(point[0]);
-						if (max == null) {
-							max = new Vec3d(v.x, v.y, v.z);
-						} else {
-							if (max.x < v.x) {
-								max = new Vec3d(v.x, max.y, max.z);
-							}
-							if (max.y < v.y) {
-								max = new Vec3d(max.x, v.y, max.z);
-							}
-							if (max.z < v.z) {
-								max = new Vec3d(max.x, max.y, v.z);
-							}
-						}
-					}
-				}
-			}
+		Vec3d max = null;
+		for (String group : groupNames) {
+			Vec3d gmax = maxs.get(group);
 			if (max == null) {
-				ImmersiveRailroading.error("EMPTY " + groupNames);
-				max = new Vec3d(0, 0, 0);
+				max = gmax;
+			} else {
+				max = VecUtil.max(max, gmax);
 			}
-			maxs.put(groupNames, max);
 		}
-		return maxs.get(groupNames);
+		return max;
 	}
 
 	public Vec3d centerOfGroups(Iterable<String> groupNames) {

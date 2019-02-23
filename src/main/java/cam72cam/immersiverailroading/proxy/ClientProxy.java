@@ -133,7 +133,7 @@ public class ClientProxy extends CommonProxy {
 
 	private static IRSoundManager manager;
 	
-	private static MagicEntity magical;
+	public static MagicEntity magical;
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
