@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.blocks;
 
-import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
@@ -293,7 +292,7 @@ public abstract class BlockRailBase extends Block {
 		Block block = Block.getBlockFromItem(stack.getItem());
 		TileRailBase te = TileRailBase.get(worldIn, pos);
 		if (te != null) {
-			if (stack.getItem() == IRItems.ITEM_SWITCH_HAMMER) {
+			if (stack.getItem() == IRItems.ITEM_SWITCH_KEY) {
 				if (!worldIn.isRemote) {
 					te.cycleSwitchForced();
 				}
