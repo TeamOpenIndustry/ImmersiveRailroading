@@ -22,7 +22,6 @@ Many users have made resource packs of rolling stock and engines. This list is (
 * Contains: (Diesel?) locomotives, Passenger cars
 
 [link{https://drive.google.com/drive/folders/12bt6lddLJ4ym64dxI-nGlYVR5NQ8Rj7x#www}]CL08 Resource Pack[link{}]
-* Merged into Heavy Industrial
 * Contains: CL08 Diesel locomotive
 
 [link{https://minecraft.curseforge.com/projects/d-rgw-narrow-gauge-pack-ir#www}]D&RGW Narrow Gauge Pack - IR[link{}]
@@ -32,7 +31,6 @@ Many users have made resource packs of rolling stock and engines. This list is (
 
 [link{https://drive.google.com/drive/folders/19S8vmwAk2lw7YPrAnuGkRZqFvV0QqeR2#www}]GWR Addon[link{}]
 * Author: (Discord) FriedrichLP#2220
-* Gauge: Standard
 * Contains Passenger and Freight cars
 
 [link{https://minecraft.curseforge.com/projects/immersive-railroading-legacy#www}]Immersive Railroading Legacy[link{}]
@@ -44,7 +42,7 @@ Many users have made resource packs of rolling stock and engines. This list is (
 [link{https://minecraft.curseforge.com/projects/ir-heavy-industrial-resourcepack#www}]ir-heavy-industrial-resourcepack[link{}]
 * Description:Heavy freight engines and cars, misc other cars
 * author: (Discord) Hanidel#3822 [link{https://minecraft.curseforge.com/members/Angelimar#www}]Angelimar[link{}]
-* Gauge: Standard, and Narrow
+* Gauge: standard, and Narrow
 * Contains: Steam and Diesel locomotive, Freight cars, minecart
 
 [link{https://minecraft.curseforge.com/projects/ir-live-steam-pack#www}]IR Live Steam Pack[link{}]
@@ -68,15 +66,7 @@ Many users have made resource packs of rolling stock and engines. This list is (
 
 [link{https://minecraft.curseforge.com/projects/small-gauge-goodies-for-immersive-railroading#www}]Small Gauge Goodies for Immersive Railroading[link{}]
 * Author: (Discord) Rhea#4858 [link{https://minecraft.curseforge.com/members/Elretha#www}]Elretha[link{}]
-* Gauge: Minecraft
+* Gauge:Minecraft
 * Contains Steam locomotive, Freight cars
-
-[link{https://minecraft.curseforge.com/projects/santa-fe-railroad-pack-ir#www}]Sante Fe Railroad Pack - IR[link{}]
-* Author: (Discord) Lachie1770#7396 [link{https://minecraft.curseforge.com/members/Lachie1770#www}][link{}]
-* Gauge: Standard
-* Contains:
-	* Locos: NSW F Set, NSW S Set
-    * Freight (baggage): Budd Baggage car - Amtrak Phase 1, Budd Baggage car - Santa Fe, Budd Baggage car - Vault-tec
-    * Passenger: Budd Daycoach - Amtrak Phase 1, Budd Daycoach - Santa Fe, Budd Daycoach - Vault-tec, Budd Daycoach - Union Pacific, Budd Daycoach - Southern Pacific Daylight, Budd Daycoach - New York Central, NSW F Set trailer car, NSW S Set trailer car
 
 
