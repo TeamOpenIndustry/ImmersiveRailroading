@@ -41,7 +41,7 @@ public class SwitchUtil {
 			}
 		}
 
-		if (parent.info.switchForced != SwitchState.NONE) {
+		if (parent.isSwitchForced()) {
 			return parent.info.switchForced;
 		}
 
