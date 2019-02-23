@@ -141,9 +141,6 @@ public abstract class CommonProxy implements IGuiHandler {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:switch key_iron"));
     	}
-	if (!OreDictionary.doesOreNameExist("oc:materialCard")) {
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:radio_card"));
-    	}
     }
     
     @SuppressWarnings("deprecation")
