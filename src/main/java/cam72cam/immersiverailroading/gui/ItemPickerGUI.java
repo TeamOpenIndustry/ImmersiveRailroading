@@ -76,7 +76,7 @@ public class ItemPickerGUI extends GuiScreen {
 		}
 		arrayHeight = 32*(i % stacksX);
 		if (arrayHeight > this.height || true) {
-			this.scrollBar = new GuiScrollBar(i++, this.width - 20 , 4, 20, this.height-8 , "", 0.0, 1.0, 0.0, null);
+			this.scrollBar = new GuiScrollBar(i++, this.width - 30 , 4, 20, this.height-8 , "", 0.0, 1.0, 0.0, null);
 			this.buttonList.add(this.scrollBar);
 		}
 	}
