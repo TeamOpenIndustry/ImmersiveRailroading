@@ -171,7 +171,7 @@ public class Config {
 		public static int RadioCostPerMetre = 0;
 		
 		@Comment("Prevent stock from being built outside the recommended and model gauges")
-		public static boolean DesignGaugeLock = true;
+		public static boolean DesignGaugeLock = false;
 	}
 
 	public static ConfigDebug debug;
