@@ -25,8 +25,6 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	protected static DataParameter<Integer> HORN = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
 	protected static DataParameter<Optional<UUID>> HORN_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
-	protected static DataParameter<Integer> BELL = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	protected static DataParameter<Optional<UUID>> BELL_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 
 
 	private static final float throttleNotch = 0.04f;

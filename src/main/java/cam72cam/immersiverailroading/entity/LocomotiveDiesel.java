@@ -204,7 +204,7 @@ public class LocomotiveDiesel extends Locomotive {
 					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 				}
 	
-				if (this.getDataManager().get(HORN) < 1) {
+				if (horn.isPlaying()) {
 					horn.setPosition(getPositionVector());
 					horn.setVelocity(getVelocity());
 					horn.update();
