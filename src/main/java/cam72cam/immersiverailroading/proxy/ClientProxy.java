@@ -1,31 +1,8 @@
 package cam72cam.immersiverailroading.proxy;
 
-import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.CarFreight;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.FreightTank;
-import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
-import cam72cam.immersiverailroading.entity.LocomotiveSteam;
-import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.gui.CastingGUI;
-import cam72cam.immersiverailroading.gui.FreightContainer;
-import cam72cam.immersiverailroading.gui.FreightContainerGui;
-import cam72cam.immersiverailroading.gui.PlateRollerGUI;
-import cam72cam.immersiverailroading.gui.SteamHammerContainer;
-import cam72cam.immersiverailroading.gui.SteamHammerContainerGui;
-import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
-import cam72cam.immersiverailroading.gui.SteamLocomotiveContainerGui;
-import cam72cam.immersiverailroading.gui.TankContainer;
-import cam72cam.immersiverailroading.gui.TankContainerGui;
-import cam72cam.immersiverailroading.gui.TenderContainer;
-import cam72cam.immersiverailroading.gui.TenderContainerGui;
-import cam72cam.immersiverailroading.gui.TrackGui;
+import cam72cam.immersiverailroading.*;
+import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
@@ -68,6 +45,7 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -84,7 +62,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
@@ -232,6 +212,9 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.START_STOP_ENGINE));
 		
 		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
+
+		BlockColors blockColors = Minecraft.getMinecraft().getBlockColors();
+		blockColors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> worldIn != null && pos != null ? BiomeColorHelper.getGrassColorAtPos(worldIn, pos) : ColorizerGrass.getGrassColor(0.5D, 1.0D), IRBlocks.BLOCK_RAIL, IRBlocks.BLOCK_RAIL_GAG);
 	}
 	
 	@Override
