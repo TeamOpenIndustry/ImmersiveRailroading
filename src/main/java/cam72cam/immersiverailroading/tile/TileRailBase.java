@@ -852,32 +852,52 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 
 	public SwitchState cycleSwitchForced() {
-		TileRail teParent = this.getParentTile().getParentTile();
-		SwitchState newForcedState = teParent.info.switchForced;
-		if (teParent != null) {
-			if (teParent.info.settings.type == TrackItems.SWITCH) {
-				newForcedState = SwitchState.values()[(teParent.info.switchForced.ordinal() + 1) % SwitchState.values().length];
-				SwitchState newSwitchState = (newForcedState.equals(SwitchState.NONE) ? ( SwitchUtil.isRailPowered(teParent) ? SwitchState.TURN : SwitchState.STRAIGHT ) : newForcedState);
-				teParent.info = new RailInfo(world, teParent.info.settings, teParent.info.placementInfo, teParent.info.customInfo, newSwitchState, newForcedState, teParent.info.tablePos);
-				this.markDirty();
-			}
+		TileRail tileSwitch = this.findSwitchParent();
+		SwitchState newForcedState = SwitchState.NONE;
+
+		if (tileSwitch != null) {
+			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
+			SwitchState newSwitchState = ( newForcedState.equals(SwitchState.NONE) ? ( SwitchUtil.isRailPowered(tileSwitch) ? SwitchState.TURN : SwitchState.STRAIGHT ) : newForcedState );
+			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, newSwitchState, newForcedState, tileSwitch.info.tablePos);
+			this.markDirty();
 		}
+
 		return newForcedState;
 	}
 
 	public boolean isSwitchForced() {
-		TileRail tileSwitch;
-		if (this instanceof TileRail && ((TileRail) this).info.settings.type.equals(TrackItems.SWITCH)) {
-			tileSwitch = (TileRail) this;
+		TileRail tileSwitch = this.findSwitchParent();
+		if (tileSwitch != null) {
+			return tileSwitch.info.switchForced != SwitchState.NONE;
 		} else {
-			tileSwitch = this.getParentTile().getParentTile();
+			return false;
+		}
+	}
+
+	/** Finds a parent of this whose type is TrackItems.SWITCH. Returns null if one doesn't exist
+	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 */
+	public TileRail findSwitchParent() {
+		return _findSwitchParent(this);
+	}
+
+	private TileRail _findSwitchParent(TileRailBase cur) {
+		if (cur == null) {
+			return null;
 		}
 
-		if (tileSwitch != null) {
-			if (tileSwitch.info.settings.type == TrackItems.SWITCH) {
-				return tileSwitch.info.switchForced != SwitchState.NONE;
+		if (cur instanceof TileRail) {
+			TileRail curTR = (TileRail) cur;
+			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
+				return curTR;
 			}
 		}
-		return false;
+
+		// Prevent infinite recursion
+		if (cur.getPos().equals(cur.getParentTile().getPos())) {
+			return null;
+		}
+
+		return _findSwitchParent(cur.getParentTile());
 	}
 }
