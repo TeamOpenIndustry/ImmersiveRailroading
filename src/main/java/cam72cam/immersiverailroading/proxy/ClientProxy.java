@@ -10,12 +10,9 @@ import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ColorizerGrass;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.biome.BiomeColorHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -27,7 +24,6 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
@@ -185,6 +181,9 @@ public class ClientProxy extends CommonProxy {
 					new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorPosX)));
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
+			return new TankContainerGui((FreightTank) world.getEntityByID(entityIDorPosX),
+					new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorPosX)));
+		case CABCAR_LOCOMOTIVE:
 			return new TankContainerGui((FreightTank) world.getEntityByID(entityIDorPosX),
 					new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorPosX)));
 		case TENDER:

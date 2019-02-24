@@ -323,6 +323,8 @@ public abstract class CommonProxy implements IGuiHandler {
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
 	    	return new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorX));
+		case CABCAR_LOCOMOTIVE:
+	    	return new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorX));
 		case TENDER:
 			return new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityIDorX));
 		case STEAM_LOCOMOTIVE:
