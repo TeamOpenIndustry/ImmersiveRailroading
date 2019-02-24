@@ -55,7 +55,41 @@ public class ItemTrackBlueprint extends Item {
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		ItemStack stack = player.getHeldItem(hand);
-		
+
+		if (!world.isRemote && hand == EnumHand.OFF_HAND) {
+			RailSettings info = settings(stack);
+			ItemStack blockinfo = world.getBlockState(pos).getBlock().getItem(world, pos, world.getBlockState(pos));
+			if (player.isSneaking()) {
+				info = new RailSettings(
+                    info.gauge,
+                    info.type,
+                    info.length,
+                    info.quarters,
+                    info.posType,
+                    info.direction,
+                    info.railBed,
+                    blockinfo,
+                    info.isPreview,
+                    info.isGradeCrossing
+                );
+			} else {
+				info = new RailSettings(
+                    info.gauge,
+                    info.type,
+                    info.length,
+                    info.quarters,
+                    info.posType,
+                    info.direction,
+                    blockinfo,
+                    info.railBedFill,
+                    info.isPreview,
+                    info.isGradeCrossing
+				);
+			}
+			settings(stack, info);
+			return EnumActionResult.SUCCESS;
+		}
+
 		pos = pos.up();
 		
 		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
