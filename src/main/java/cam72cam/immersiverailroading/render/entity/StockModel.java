@@ -377,7 +377,7 @@ public class StockModel extends OBJRender {
 			double circumference = wheel.height() * (float) Math.PI;
 			double relDist = distanceTraveled % circumference;
 			double wheelAngle = 360 * relDist / circumference;
-			if (wheel.side.contains("REAR")) {
+			if (wheel.type == RenderComponentType.WHEEL_DRIVER_REAR_X) {
 				//MALLET HACK
 				wheelAngle += MALLET_ANGLE_REAR;
 			}
