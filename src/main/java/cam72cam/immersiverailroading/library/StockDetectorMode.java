@@ -8,6 +8,7 @@ public enum StockDetectorMode {
 	PASSENGERS,
 	CARGO,
 	LIQUID,
+	COMPUTER,
 	;
 	
 	@Override

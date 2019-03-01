@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.registry.CarFreightDefinition;
 import net.minecraft.world.World;
 
 public class CarFreight extends Freight {
+
 	public CarFreight(World world) {
 		this(world, null);
 	}
@@ -25,6 +26,6 @@ public class CarFreight extends Freight {
 	public int getInventoryWidth() {
 		return this.getDefinition().getInventoryWidth(gauge);
 	}
-	
+
 	//TODO filter inventory
 }

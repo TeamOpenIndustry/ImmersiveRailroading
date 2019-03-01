@@ -3,6 +3,9 @@
 	"name": "GE C44-9CW",
 	"works": "General Electric",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/ge_c44_9cw/ge_c44_9cw.obj",
+	"tex_variants":{
+        "CSX": "csx"
+    },
 	"darken_model": "-0.05",
 	"properties": {
 		"fuel_efficiency_%": 85,
