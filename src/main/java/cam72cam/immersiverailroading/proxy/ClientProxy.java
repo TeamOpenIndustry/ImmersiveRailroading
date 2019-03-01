@@ -7,9 +7,16 @@ import java.util.*;
 import java.util.function.Function;
 
 import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.ColorizerGrass;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.biome.BiomeColorHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
@@ -150,7 +157,7 @@ public class ClientProxy extends CommonProxy {
 
 	private static IRSoundManager manager;
 	
-	private static MagicEntity magical;
+	public static MagicEntity magical;
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
@@ -250,6 +257,9 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.START_STOP_ENGINE));
 		
 		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
+
+		BlockColors blockColors = Minecraft.getMinecraft().getBlockColors();
+		blockColors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> worldIn != null && pos != null ? BiomeColorHelper.getGrassColorAtPos(worldIn, pos) : ColorizerGrass.getGrassColor(0.5D, 1.0D), IRBlocks.BLOCK_RAIL, IRBlocks.BLOCK_RAIL_GAG);
 	}
 	
 	@Override
@@ -334,6 +344,9 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE, 0,
 				new ModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.getRegistryName(), ""));
+		
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD, 0,
+				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName(), ""));
 	}
 	
 	public static final class StockIcon extends TextureAtlasSprite
@@ -344,7 +357,7 @@ public class ClientProxy extends CommonProxy {
         {
             super(new ResourceLocation(ImmersiveRailroading.MODID, def.defID).toString());
             this.def = def;
-            this.width = this.height = 64;
+            this.width = this.height = ConfigGraphics.iconCacheSize;
         }
 
         @Override
@@ -358,19 +371,23 @@ public class ClientProxy extends CommonProxy {
         {
             BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
             
-            String[][] map = def.getIcon(this.getIconWidth());
+            EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
 
             StockModel renderer = StockRenderCache.getRender(def.defID);
     		for (int x = 0; x < this.getIconWidth(); x++) {
     			for (int y = 0; y < this.getIconHeight(); y++) {
-    				if (map[x][y] != null && map[x][y] != "") {
-    					int color = renderer.textures.get(null).samp(map[x][y]);
+    				if (map[x][y] != null) {
+						EntityRollingStockDefinition.IconPart pt = map[x][y];
+    					int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
     					image.setRGB(x, this.getIconWidth() - (y + 1), color);
     				} else {
     					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
     				}
     			}
     		}
+    		for (OBJTextureSheet tex : renderer.textures.values()) {
+    			tex.freePx();
+			}
             
             int[][] pixels = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
             pixels[0] = new int[image.getWidth() * image.getHeight()];

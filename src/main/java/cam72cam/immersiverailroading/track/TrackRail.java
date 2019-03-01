@@ -14,8 +14,8 @@ public class TrackRail extends TrackBase {
 	}
 
 	@Override
-	public TileEntity placeTrack() {
-		TileRail tileRail = (TileRail) super.placeTrack();
+	public TileEntity placeTrack(boolean actuallyPlace) {
+		TileRail tileRail = (TileRail) super.placeTrack(actuallyPlace);
 
 		tileRail.info = builder.info;
 		tileRail.setDrops(builder.drops);

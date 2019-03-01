@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ARBTextureCompression;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
@@ -34,7 +36,7 @@ public class OBJTextureSheet {
 	private int sheetHeight = 0;
 	public final int textureID;
 	private OBJModel model;
-	
+
 	private  class SubTexture {
 		public int realWidth;
 		private int realHeight;
@@ -50,8 +52,6 @@ public class OBJTextureSheet {
 
 		private boolean isFlatMaterial;
 		private int[] pixels;
-		
-		public final int sampPx;
 
 		
 		SubTexture(ResourceLocation tex, ResourceLocation fallback, Function<Integer, Integer> scale) throws IOException {
@@ -66,19 +66,34 @@ public class OBJTextureSheet {
 			
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
-			
+
 			if (scale != null) {
 				image = convertToBufferedImage(image.getScaledInstance(scale.apply(realWidth), scale.apply(realHeight), BufferedImage.SCALE_FAST));
 				realWidth = image.getWidth();
 				realHeight = image.getHeight();
 			}
-					
+
+			if (realWidth < 8 || realHeight < 8) {
+				image = convertToBufferedImage(image.getScaledInstance(8, 8, BufferedImage.SCALE_FAST));
+				realWidth = image.getWidth();
+				realHeight = image.getHeight();
+			}
+
+			int nw = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realWidth - 1));
+			int nh = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realHeight - 1));
+
+			if (realWidth != nw || realHeight != nh) {
+				System.out.println("RESIZE " + realWidth + " " + realHeight);
+				image = convertToBufferedImage(image.getScaledInstance(nw, nh, BufferedImage.SCALE_FAST));
+				realWidth = image.getWidth();
+				realHeight = image.getHeight();
+			}
+
 			this.tex = tex;
 			isFlatMaterial = false;
 
 			pixels = new int[realWidth * realHeight];
 			image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
-	        sampPx = pixels[0];
 		}
 		SubTexture(String name, int r, int g, int b, int a) {
 			BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
@@ -98,8 +113,6 @@ public class OBJTextureSheet {
 			
 			pixels = new int[realWidth * realHeight];
 			image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
-	        
-	        sampPx = pixels[0];
 		}
 		
 		public Vec2f extendSpace(List<Vec2f> vts) {
@@ -177,8 +190,10 @@ public class OBJTextureSheet {
 					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 				}
 			}
-			
-			pixels = null;
+
+			if (!ConfigGraphics.enableIconCache) {
+				pixels = null;
+			}
 		}
 		public int copiesU() {
 			return maxU - minU;
@@ -324,11 +339,22 @@ public class OBJTextureSheet {
 		currentY = 0;
 		rowHeight = 0;
 
-		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
-		
+		//TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
+		// GL_BGRA_EXT = 32993
+		// GL_UNSIGNED_INT_8_8_8_8_REV = 33639
+		// ARBTextureCompression.GL_TEXTURE_COMPRESSED_ARB
+		// Internal Mojang/Forge magic...
+		synchronized (net.minecraftforge.fml.client.SplashProgress.class)
+		{
+			TextureUtil.deleteTexture(textureID);
+			GlStateManager.bindTexture(textureID);
+		}
+		// Use compressed ARB
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, ARBTextureCompression.GL_COMPRESSED_RGBA_ARB, sheetWidth, sheetHeight, 0, 32993, 33639, (ByteBuffer)null);
+
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-		
+
         ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
         if (sheetWidth > maxSize || sheetHeight > maxSize)
         	ImmersiveRailroading.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
@@ -350,7 +376,7 @@ public class OBJTextureSheet {
 			currentX += tex.getAbsoluteWidth();
 		}
 	}
-	
+
 	public float convertU(String mtlName, float u) {
 		if (model.materials.containsKey(mtlName)) {
 			ResourceLocation kd = model.materials.get(mtlName).texKd;
@@ -380,7 +406,7 @@ public class OBJTextureSheet {
 		GL11.glDeleteTextures(textureID);
 	}
 
-	public int samp(String mtlName) {
+	public int samp(String mtlName, float u, float v) {
 		if (model.materials.containsKey(mtlName)) {
 			ResourceLocation kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
@@ -388,7 +414,14 @@ public class OBJTextureSheet {
 			}
 		}
 		if (mappings.containsKey(mtlName)) {
-			return mappings.get(mtlName).sampPx;
+			SubTexture mapping = mappings.get(mtlName);
+			u = ((u % 1) + 1) % 1;
+			v = ((v % 1) + 1) % 1;
+			u = u * mapping.realWidth;
+			v = mapping.realHeight - v * mapping.realHeight;
+			v = (int)v;
+			u = (int)u;
+			return mapping.pixels[(int) (Math.min(v * mapping.realWidth + u, mapping.pixels.length-1))];
 		}
 		return 0;
 	}
@@ -404,5 +437,11 @@ public class OBJTextureSheet {
 			return mappings.get(mtlName).isFlatMaterial;
 		}
 		return false;
+	}
+
+	public void freePx() {
+		for (SubTexture tex : mappings.values()) {
+			tex.pixels = null;
+		}
 	}
 }
