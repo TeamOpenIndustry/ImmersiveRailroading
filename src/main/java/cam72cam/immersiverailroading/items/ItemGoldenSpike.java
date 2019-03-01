@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
@@ -26,6 +27,34 @@ public class ItemGoldenSpike extends Item {
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
 	}
+
+	@Override
+	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack)
+	{
+		//should this have a world.isRemote or something? New to using this behavior
+		if(!entityLiving.getEntityWorld().isRemote && entityLiving instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) entityLiving;
+			if(player.isSneaking()) {
+				decrementGrade(player.getHeldItemMainhand());
+
+				//should we return true here?
+			}
+		}
+
+
+		//default response
+		return false;
+	}
+
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
+		if(!worldIn.isRemote && handIn == EnumHand.MAIN_HAND) {
+			if(playerIn.isSneaking()) {
+				incrementGrade(playerIn.getHeldItem(handIn));
+			}
+		}
+		return super.onItemRightClick(worldIn, playerIn, handIn);
+	}
 	
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		ItemStack held = player.getHeldItem(hand);
@@ -44,7 +73,7 @@ public class ItemGoldenSpike extends Item {
 				}
 				TileRailPreview tr = TileRailPreview.get(world, tepos);
 				if (tr != null) {
-					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getRotationYawHead(), pos, hitX, hitY, hitZ));
+					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getRotationYawHead(), pos, hitX, hitY, hitZ, getGrade(held)));
 				}
 			}
 		}
@@ -65,5 +94,52 @@ public class ItemGoldenSpike extends Item {
 			stack.setTagCompound(new NBTTagCompound());
 		}
 		stack.getTagCompound().setTag("pos", NBTUtil.createPosTag(pos));
+	}
+
+	private static void incrementGrade(ItemStack stack) {
+		//I don't know if this null protection is necessary
+		if(stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		NBTTagCompound mainTag = stack.getTagCompound();
+		if(mainTag.hasKey("grade")) {
+			mainTag.setInteger("grade", mainTag.getInteger("grade") + 1);
+		}
+		else {
+			mainTag.setInteger("grade", 1);
+		}
+
+		System.out.println("Adjust spikePos up, now: " + mainTag.getInteger("grade"));
+	}
+
+	private static void decrementGrade(ItemStack stack) {
+		//I don't know if this null protection is necessary
+		if(stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		NBTTagCompound mainTag = stack.getTagCompound();
+		if(mainTag.hasKey("grade")) {
+			mainTag.setInteger("grade", mainTag.getInteger("grade") - 1);
+		}
+		else {
+			mainTag.setInteger("grade", -1);
+		}
+
+		System.out.println("Adjust spikePos down, now: " + mainTag.getInteger("grade"));
+	}
+
+	private int getGrade(ItemStack stack) {
+		//I don't know if this null protection is necessary
+		if(stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+
+		NBTTagCompound mainTag = stack.getTagCompound();
+		if(mainTag.hasKey("grade")) {
+			return mainTag.getInteger("grade");
+		}
+		else {
+			return 0;
+		}
 	}
 }

@@ -20,6 +20,7 @@ import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -43,15 +44,36 @@ public class ItemTrackBlueprint extends Item {
 		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
         this.setCreativeTab(ItemTabs.MAIN_TAB);
 	}
-	
+
+	@Override
+	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack)
+	{
+		//should this have a world.isRemote or something? New to using this behavior
+		if(!entityLiving.getEntityWorld().isRemote && entityLiving instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) entityLiving;
+			if(player.isSneaking()) {
+				decrementGrade(player.getHeldItemMainhand());
+
+				//should we return true here?
+			}
+		}
+
+
+		//default response
+		return false;
+	}
+
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if (worldIn.isRemote && handIn == EnumHand.MAIN_HAND) {
-            playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
+		if (worldIn.isRemote && handIn == EnumHand.MAIN_HAND && !playerIn.isSneaking()) {
+		    playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
         }
+		else if(!worldIn.isRemote && handIn == EnumHand.MAIN_HAND && playerIn.isSneaking()) {
+			incrementGrade(playerIn.getHeldItem(handIn));
+		}
         return super.onItemRightClick(worldIn, playerIn, handIn);
 	}
-	
+
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		ItemStack stack = player.getHeldItem(hand);
@@ -91,14 +113,14 @@ public class ItemTrackBlueprint extends Item {
 		}
 
 		pos = pos.up();
-		
+
 		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
 			if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
 				pos = pos.down();
 			}
 		}
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ);
-		
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ, getGrade(stack));
+
 		if (settings(stack).isPreview) {
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
 				pos = pos.up();
@@ -132,13 +154,65 @@ public class ItemTrackBlueprint extends Item {
 	}
 
 	public static void settings(ItemStack stack, RailSettings settings) {
-		stack.setTagCompound(settings.toNBT());
-	}
-	
-	public static RailSettings settings(ItemStack stack) {
-		if (stack.getTagCompound() == null){
+		//I don't know if this null protection is necessary
+		if(stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
-		return new RailSettings(stack.getTagCompound());
+
+		stack.getTagCompound().setTag("settings", settings.toNBT());
+	}
+
+	public static RailSettings settings(ItemStack stack) {
+		NBTTagCompound settingsTag = stack.getOrCreateSubCompound("settings");
+		return new RailSettings(settingsTag);
+	}
+
+	private static void incrementGrade(ItemStack stack) {
+		//I don't know if this null protection is necessary
+		if(stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+
+		NBTTagCompound mainTag = stack.getTagCompound();
+		if(mainTag.hasKey("grade")) {
+			mainTag.setInteger("grade", mainTag.getInteger("grade") + 1);
+		}
+		else {
+			mainTag.setInteger("grade", 1);
+		}
+
+		System.out.println("Adjust bluePrintPos up, now: " + mainTag.getInteger("grade"));
+	}
+
+	private static void decrementGrade(ItemStack stack) {
+		//I don't know if this null protection is necessary
+		if(stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+
+		NBTTagCompound mainTag = stack.getTagCompound();
+		if(mainTag.hasKey("grade")) {
+			mainTag.setInteger("grade", mainTag.getInteger("grade") - 1);
+		}
+		else {
+			mainTag.setInteger("grade", -1);
+		}
+
+		System.out.println("Adjust bluePrintPos down, now: " + mainTag.getInteger("grade"));
+	}
+
+	private int getGrade(ItemStack stack) {
+		//I don't know if this null protection is necessary
+		if(stack.getTagCompound() == null) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+
+		NBTTagCompound mainTag = stack.getTagCompound();
+		if(mainTag.hasKey("grade")) {
+			return mainTag.getInteger("grade");
+		}
+		else {
+			return 0;
+		}
 	}
 }

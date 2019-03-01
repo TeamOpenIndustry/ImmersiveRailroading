@@ -14,15 +14,23 @@ public class PlacementInfo {
 	public final TrackDirection direction;
 	public final float yaw;
 	public final Vec3d control;
+	public final int grade;
 
 	public PlacementInfo(Vec3d placementPosition, TrackDirection direction, float yaw, Vec3d control) {
 		this.placementPosition = placementPosition;
 		this.direction = direction;
 		this.yaw = yaw;
 		this.control = control;
+		this.grade = 0;
 	}
-	
+
 	public PlacementInfo(ItemStack stack, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
+		//usage of this constructor might mean grade is getting lost somewhere
+		//TODO: investigate
+		this(stack, yawHead, pos, hitX, hitY, hitZ, 0);
+	}
+
+	public PlacementInfo(ItemStack stack, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ, int grade) {
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		this.yaw = ((int)((yawHead + 90/8f) * 4)) / 90 * 90 / 4f;
 
@@ -90,6 +98,7 @@ public class PlacementInfo {
 		this.placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
 		this.direction = direction;
 		this.control = null;
+		this.grade = grade;
 	}
 
 	public PlacementInfo(NBTTagCompound nbt) {
@@ -97,6 +106,7 @@ public class PlacementInfo {
 	}
 	
 	public PlacementInfo(NBTTagCompound nbt, BlockPos offset) {
+		this.grade = nbt.getInteger("grade");
 		this.placementPosition = NBTUtil.nbtToVec3d(nbt.getCompoundTag("placementPosition")).addVector(offset.getX(), offset.getY(), offset.getZ());
 		this.direction = TrackDirection.values()[nbt.getInteger("direction")];
 		if (nbt.hasKey("yaw")) {
@@ -133,6 +143,7 @@ public class PlacementInfo {
 		if (control != null) {
 			nbt.setTag("control", NBTUtil.vec3dToNBT(control.subtract(offset.getX(), offset.getY(), offset.getZ())));
 		}
+		nbt.setInteger("grade", grade);
 		return nbt;
 	}
 
