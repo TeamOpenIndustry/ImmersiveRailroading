@@ -103,13 +103,13 @@ public class ItemGoldenSpike extends Item {
 		}
 		NBTTagCompound mainTag = stack.getTagCompound();
 		if(mainTag.hasKey("grade")) {
-			mainTag.setInteger("grade", mainTag.getInteger("grade") + 1);
+			mainTag.setFloat("grade", mainTag.getFloat("grade") + 1);
 		}
 		else {
-			mainTag.setInteger("grade", 1);
+			mainTag.setFloat("grade", 1);
 		}
 
-		System.out.println("Adjust spikePos up, now: " + mainTag.getInteger("grade"));
+		System.out.println("Adjust spikePos up, now: " + mainTag.getFloat("grade"));
 	}
 
 	private static void decrementGrade(ItemStack stack) {
@@ -119,16 +119,16 @@ public class ItemGoldenSpike extends Item {
 		}
 		NBTTagCompound mainTag = stack.getTagCompound();
 		if(mainTag.hasKey("grade")) {
-			mainTag.setInteger("grade", mainTag.getInteger("grade") - 1);
+			mainTag.setFloat("grade", mainTag.getFloat("grade") - 1);
 		}
 		else {
-			mainTag.setInteger("grade", -1);
+			mainTag.setFloat("grade", -1);
 		}
 
-		System.out.println("Adjust spikePos down, now: " + mainTag.getInteger("grade"));
+		System.out.println("Adjust spikePos down, now: " + mainTag.getFloat("grade"));
 	}
 
-	private int getGrade(ItemStack stack) {
+	private float getGrade(ItemStack stack) {
 		//I don't know if this null protection is necessary
 		if(stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
@@ -136,7 +136,7 @@ public class ItemGoldenSpike extends Item {
 
 		NBTTagCompound mainTag = stack.getTagCompound();
 		if(mainTag.hasKey("grade")) {
-			return mainTag.getInteger("grade");
+			return mainTag.getFloat("grade");
 		}
 		else {
 			return 0;
