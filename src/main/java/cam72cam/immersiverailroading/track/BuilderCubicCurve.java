@@ -82,10 +82,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 				angle2, -MathUtil.gradeToDegrees(info.customInfo.grade)));
 
 
-		System.out.println("Ctrl 1: " + ctrl1.toString());
-		System.out.println("Ctrl 2: " + ctrl2.toString());
-		System.out.println("NextPos: " + nextPos.toString());
-		System.out.println();
+		//System.out.println("Ctrl 1: " + ctrl1.toString());
+		//System.out.println("Ctrl 2: " + ctrl2.toString());
+		//System.out.println("NextPos: " + nextPos.toString());
+		//System.out.println();
 
 		if (info.placementInfo.control != null) {
 			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition);
