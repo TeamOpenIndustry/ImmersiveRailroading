@@ -112,8 +112,6 @@ public class ItemGoldenSpike extends Item {
 
 		mainTag.setFloat("grade", newGrade);
 		displayGrade(player, newGrade);
-
-		System.out.println("Adjust spikePos up, now: " + mainTag.getFloat("grade"));
 	}
 	private static void decrementGrade(EntityPlayer player, ItemStack stack) {
 		//I don't know if this null protection is necessary
@@ -130,8 +128,6 @@ public class ItemGoldenSpike extends Item {
 
 		mainTag.setFloat("grade", newGrade);
 		displayGrade(player, newGrade);
-
-		System.out.println("Adjust spikePos down, now: " + mainTag.getFloat("grade"));
 	}
 
 	private float getGrade(ItemStack stack) {
