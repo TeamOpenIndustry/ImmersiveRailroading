@@ -16,6 +16,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.*;
 //TODO buildcraft.api.tools.IToolWrench
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 public class ItemGoldenSpike extends Item {
@@ -35,7 +36,7 @@ public class ItemGoldenSpike extends Item {
 		if(!entityLiving.getEntityWorld().isRemote && entityLiving instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) entityLiving;
 			if(player.isSneaking()) {
-				decrementGrade(player.getHeldItemMainhand());
+				decrementGrade(player, player.getHeldItemMainhand());
 
 				//should we return true here?
 			}
@@ -50,7 +51,7 @@ public class ItemGoldenSpike extends Item {
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
 		if(!worldIn.isRemote && handIn == EnumHand.MAIN_HAND) {
 			if(playerIn.isSneaking()) {
-				incrementGrade(playerIn.getHeldItem(handIn));
+				incrementGrade(playerIn, playerIn.getHeldItem(handIn));
 			}
 		}
 		return super.onItemRightClick(worldIn, playerIn, handIn);
@@ -96,34 +97,39 @@ public class ItemGoldenSpike extends Item {
 		stack.getTagCompound().setTag("pos", NBTUtil.createPosTag(pos));
 	}
 
-	private static void incrementGrade(ItemStack stack) {
+	private static void incrementGrade(EntityPlayer player, ItemStack stack) {
 		//I don't know if this null protection is necessary
 		if(stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
+
 		NBTTagCompound mainTag = stack.getTagCompound();
+		float newGrade = ItemTrackBlueprint.gradeChangeDelta;
+
 		if(mainTag.hasKey("grade")) {
-			mainTag.setFloat("grade", mainTag.getFloat("grade") + 1);
+			newGrade = mainTag.getFloat("grade") + ItemTrackBlueprint.gradeChangeDelta;
 		}
-		else {
-			mainTag.setFloat("grade", 1);
-		}
+
+		mainTag.setFloat("grade", newGrade);
+		displayGrade(player, newGrade);
 
 		System.out.println("Adjust spikePos up, now: " + mainTag.getFloat("grade"));
 	}
-
-	private static void decrementGrade(ItemStack stack) {
+	private static void decrementGrade(EntityPlayer player, ItemStack stack) {
 		//I don't know if this null protection is necessary
 		if(stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
+
 		NBTTagCompound mainTag = stack.getTagCompound();
+		float newGrade = -ItemTrackBlueprint.gradeChangeDelta;
+
 		if(mainTag.hasKey("grade")) {
-			mainTag.setFloat("grade", mainTag.getFloat("grade") - 1);
+			newGrade = mainTag.getFloat("grade") - ItemTrackBlueprint.gradeChangeDelta;
 		}
-		else {
-			mainTag.setFloat("grade", -1);
-		}
+
+		mainTag.setFloat("grade", newGrade);
+		displayGrade(player, newGrade);
 
 		System.out.println("Adjust spikePos down, now: " + mainTag.getFloat("grade"));
 	}
@@ -141,5 +147,9 @@ public class ItemGoldenSpike extends Item {
 		else {
 			return 0;
 		}
+	}
+
+	private static void displayGrade(EntityPlayer player, float grade) {
+		player.sendStatusMessage(new TextComponentString("Grade now: " + grade), true);
 	}
 }

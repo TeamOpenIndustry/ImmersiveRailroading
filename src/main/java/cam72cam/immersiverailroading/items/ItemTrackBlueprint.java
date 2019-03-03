@@ -31,6 +31,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 import net.minecraftforge.fml.common.Optional;
@@ -38,6 +39,7 @@ import net.minecraftforge.fml.common.Optional;
 @Optional.Interface(iface = "mezz.jei.api.ingredients.ISlowRenderItem", modid = "jei")
 public class ItemTrackBlueprint extends Item {
 	public static final String NAME = "item_rail";
+	public static final float gradeChangeDelta = 0.25f;
 
 	public ItemTrackBlueprint() {
 		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
@@ -52,7 +54,7 @@ public class ItemTrackBlueprint extends Item {
 		if(!entityLiving.getEntityWorld().isRemote && entityLiving instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) entityLiving;
 			if(player.isSneaking()) {
-				decrementGrade(player.getHeldItemMainhand());
+				decrementGrade(player, player.getHeldItemMainhand());
 
 				//should we return true here?
 			}
@@ -66,10 +68,10 @@ public class ItemTrackBlueprint extends Item {
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
 		if (worldIn.isRemote && handIn == EnumHand.MAIN_HAND && !playerIn.isSneaking()) {
-		    playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
-        }
+			playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
+		}
 		else if(!worldIn.isRemote && handIn == EnumHand.MAIN_HAND && playerIn.isSneaking()) {
-			incrementGrade(playerIn.getHeldItem(handIn));
+			incrementGrade(playerIn, playerIn.getHeldItem(handIn));
 		}
         return super.onItemRightClick(worldIn, playerIn, handIn);
 	}
@@ -167,41 +169,41 @@ public class ItemTrackBlueprint extends Item {
 		return new RailSettings(settingsTag);
 	}
 
-	private static void incrementGrade(ItemStack stack) {
+	private static void incrementGrade(EntityPlayer player, ItemStack stack) {
 		//I don't know if this null protection is necessary
 		if(stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
 
 		NBTTagCompound mainTag = stack.getTagCompound();
+		float newGrade = gradeChangeDelta;
+
 		if(mainTag.hasKey("grade")) {
-			mainTag.setFloat("grade", mainTag.getFloat("grade") + 1);
-		}
-		else {
-			mainTag.setFloat("grade", 1);
+			newGrade = mainTag.getFloat("grade") + gradeChangeDelta;
 		}
 
-		System.out.println("Adjust bluePrintPos up, now: " + mainTag.getFloat("grade"));
+		mainTag.setFloat("grade", newGrade);
+		displayGrade(player, newGrade);
 	}
 
-	private static void decrementGrade(ItemStack stack) {
+	private static void decrementGrade(EntityPlayer player, ItemStack stack) {
 		//I don't know if this null protection is necessary
 		if(stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
 
 		NBTTagCompound mainTag = stack.getTagCompound();
+		float newGrade = -gradeChangeDelta;
+
 		if(mainTag.hasKey("grade")) {
-			mainTag.setFloat("grade", mainTag.getFloat("grade") - 1);
-		}
-		else {
-			mainTag.setFloat("grade", -1);
+			newGrade = mainTag.getFloat("grade") - gradeChangeDelta;
 		}
 
-		System.out.println("Adjust bluePrintPos down, now: " + mainTag.getFloat("grade"));
+		mainTag.setFloat("grade", newGrade);
+		displayGrade(player, newGrade);
 	}
 
-	private float getGrade(ItemStack stack) {
+	private static float getGrade(ItemStack stack) {
 		//I don't know if this null protection is necessary
 		if(stack.getTagCompound() == null) {
 			stack.setTagCompound(new NBTTagCompound());
@@ -214,5 +216,9 @@ public class ItemTrackBlueprint extends Item {
 		else {
 			return 0;
 		}
+	}
+
+	private static void displayGrade(EntityPlayer player, float grade) {
+		player.sendStatusMessage(new TextComponentString("Grade now: " + grade), true);
 	}
 }
