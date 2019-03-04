@@ -83,9 +83,6 @@ public class DefinitionManager {
 	}
 
 	public static void initDefinitions() throws IOException {
-		System.gc();
-		long mem = Runtime.getRuntime().freeMemory();
-
 		initGauges();
 		
 		definitions = new LinkedHashMap<String, EntityRollingStockDefinition>();
@@ -128,7 +125,7 @@ public class DefinitionManager {
 				}
 			}
 			
-	        ProgressBar bar = ProgressManager.push("Generating Heightmaps", steps);
+	        ProgressBar bar = ProgressManager.push("Loading Models", steps);
 	        
 	        
 	        for (String defType : defTypes) {
@@ -153,9 +150,14 @@ public class DefinitionManager {
 			
 			ProgressManager.pop(bar);
 		}
-
-		System.gc();
-		ImmersiveRailroading.warn("%s %s", Runtime.getRuntime().freeMemory() - mem, Runtime.getRuntime().freeMemory());
+		ProgressBar bar = ProgressManager.push("Generating Heightmap", definitions.size());
+		
+		for (EntityRollingStockDefinition def : definitions.values()) {
+			bar.step(def.name());
+			def.initHeightMap();
+		}
+		
+		ProgressManager.pop(bar);
 	}
 
 	private static JsonObject getJsonData(String defID) throws IOException {

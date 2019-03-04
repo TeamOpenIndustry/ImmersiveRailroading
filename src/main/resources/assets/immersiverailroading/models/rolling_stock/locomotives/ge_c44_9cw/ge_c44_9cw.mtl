@@ -1,5 +1,5 @@
-# Blender MTL File: 'GE C44-9CW Bake.blend'
-# Material Count: 8
+# Blender MTL File: 'GE C44-9CW Primer.blend'
+# Material Count: 13
 
 newmtl None
 Ns 0
@@ -9,6 +9,39 @@ Ks 0.8 0.8 0.8
 d 1
 illum 2
 
+newmtl cab_stand
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd cab_stand.png
+
+newmtl dash9
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd dash9.png
+
+newmtl dash9_dash9.png
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd dash9.png
+
 newmtl fan01
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
@@ -17,10 +50,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd fan01.png
 
-newmtl glass
+newmtl gauge_air_emd
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -28,10 +61,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd glass.png
+illum 0
+map_Kd gauge_air_emd.png
 
-newmtl metal
+newmtl gauge_amp_alco
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -40,9 +73,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd metal.png
+map_Kd gauge_amp_alco.png
 
-newmtl metal_vent.png
+newmtl gauge_amp_emd
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -51,9 +84,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd vent.png
+map_Kd gauge_amp_emd.png
 
-newmtl rod01
+newmtl glassconstant
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -61,8 +94,30 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd rod01.png
+illum 0
+map_Kd glassconstant.png
+
+newmtl glassconstant_NONE
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd glassconstant.png
+
+newmtl glassconstant_glassconstant.png.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd glassconstant.png
 
 newmtl vent
 Ns 96.078431
@@ -72,7 +127,7 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd vent.png
 
 newmtl vent2
@@ -83,5 +138,5 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd vent2.png

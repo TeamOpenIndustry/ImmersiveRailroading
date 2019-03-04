@@ -92,4 +92,8 @@ public class BlockUtil {
 			return Rotation.NONE;
 		}
 	}
+	public static BlockPos rotateYaw(BlockPos pos, EnumFacing rotation) {
+        return pos.rotate(rotFromFacing(rotation));
+	}
+
 }

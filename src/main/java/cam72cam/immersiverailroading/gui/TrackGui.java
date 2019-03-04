@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui;
 import java.io.IOException;
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -35,6 +36,7 @@ public class TrackGui extends GuiScreen {
 	private GuiTextField lengthInput;
 	private GuiSlider quartersSlider;
 	private GuiCheckBox isPreviewCB;
+	private GuiCheckBox isGradeCrossingCB;
 	private GuiButton gaugeButton;
 
 	private int slot;
@@ -42,6 +44,7 @@ public class TrackGui extends GuiScreen {
 	private int quarters;
 	private Gauge gauge;
 	private boolean isPreview;
+	private boolean isGradeCrossing;
 	private TrackItems type;
 	private TrackPositionType posType;
 	private TrackDirection direction;
@@ -64,7 +67,7 @@ public class TrackGui extends GuiScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			return val > 0 && val <= 100;
+			return val > 0 && val <= 1000;
 		}
 	};
 	private BlockPos tilePreviewPos;
@@ -85,13 +88,15 @@ public class TrackGui extends GuiScreen {
 
 	private void init(ItemStack stack) {
 		stack = stack.copy();
-		length = ItemTrackBlueprint.getLength(stack);
-		quarters = ItemTrackBlueprint.getQuarters(stack);
-		type = ItemTrackBlueprint.getType(stack);
-		gauge = ItemGauge.get(stack);
-		posType = ItemTrackBlueprint.getPosType(stack);
-		direction = ItemTrackBlueprint.getDirection(stack);
-		isPreview = ItemTrackBlueprint.isPreview(stack);
+		RailSettings settings = ItemTrackBlueprint.settings(stack);
+		length = settings.length;
+		quarters = settings.quarters;
+		type = settings.type;
+		gauge = settings.gauge;
+		posType = settings.posType;
+		direction = settings.direction;
+		isPreview = settings.isPreview;
+		isGradeCrossing = settings.isGradeCrossing;
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 		
 		oreDict.add(new ItemStack(Items.AIR));
@@ -107,12 +112,12 @@ public class TrackGui extends GuiScreen {
 			bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
 			this.mc.displayGuiScreen(this);
 		});
-		bedSelector.choosenItem = ItemTrackBlueprint.getBed(stack);
+		bedSelector.choosenItem = settings.railBed;
 		bedFillSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
 			bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
 			this.mc.displayGuiScreen(this);
 		});
-		bedFillSelector.choosenItem = ItemTrackBlueprint.getBedFill(stack);
+		bedFillSelector.choosenItem = settings.railBedFill;
 	}
 
 	@Override
@@ -142,7 +147,7 @@ public class TrackGui extends GuiScreen {
 	
 	@Override
 	public void setGuiSize(int w, int h) {
-		this.setGuiSize(w, h);
+		super.setGuiSize(w, h);
 		bedSelector.setGuiSize(w, h);
 		bedFillSelector.setGuiSize(w, h);
 	}
@@ -169,7 +174,7 @@ public class TrackGui extends GuiScreen {
 
 		this.lengthInput = new GuiTextField(buttonID++, this.fontRenderer, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, 200, 20);
 		this.lengthInput.setText("" + length);
-		this.lengthInput.setMaxStringLength(3);
+		this.lengthInput.setMaxStringLength(5);
 		this.lengthInput.setValidator(this.integerFilter);
 		this.lengthInput.setFocused(true);
 
@@ -204,6 +209,9 @@ public class TrackGui extends GuiScreen {
 		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview);
 		this.buttonList.add(isPreviewCB);
 		
+		isGradeCrossingCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing);
+		this.buttonList.add(isGradeCrossingCB);
+		
 		bedSelector.initGui();
 	}
 
@@ -235,6 +243,9 @@ public class TrackGui extends GuiScreen {
 		if (button == isPreviewCB) {
 			isPreview = isPreviewCB.isChecked();
 		}
+		if (button == isGradeCrossingCB) {
+			isGradeCrossing = isGradeCrossingCB.isChecked();
+		}
 	}
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
@@ -242,12 +253,13 @@ public class TrackGui extends GuiScreen {
         // Enter or ESC
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
         	if (!this.lengthInput.getText().isEmpty()) {
+				RailSettings settings = new RailSettings(gauge, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing);
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+    						new ItemRailUpdatePacket(tilePreviewPos, settings));
         		} else {
 				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(), type, gauge.value(), posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview));
+						new ItemRailUpdatePacket(slot, settings));
         		}
         	}
 			this.mc.displayGuiScreen(null);

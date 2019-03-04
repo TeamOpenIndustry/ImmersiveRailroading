@@ -12,6 +12,7 @@ public enum GuiText {
 	SELECTOR_POSITION("selector.position"),
 	SELECTOR_DIRECTION("selector.direction"),
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),
+	SELECTOR_GRADE_CROSSING("selector.grade_crossing"),
 	SELECTOR_GAUGE("selector.gauge"),
 	SELECTOR_PLATE_TYPE("selector.plate_type"),
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),
@@ -38,6 +39,9 @@ public enum GuiText {
 	TANK_CAPACITY_TOOLTIP("stock.tank_capacity"),
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
 	WEIGHT_TOOLTIP("stock.weight"),
+	TEXTURE_TOOLTIP("stock.texture"),
+	MODELER_TOOLTIP("stock.modeler"),
+	PACK_TOOLTIP("stock.pack"),
 	
 	NONE("none"),
 	;

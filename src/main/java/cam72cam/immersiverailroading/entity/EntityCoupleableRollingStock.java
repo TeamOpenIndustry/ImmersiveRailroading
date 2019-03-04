@@ -25,7 +25,6 @@ import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.BufferUtil;
-import cam72cam.immersiverailroading.util.NBTUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
@@ -102,14 +101,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (coupledFront != null) {
 			nbttagcompound.setString("CoupledFront", coupledFront.toString());
 			if (lastKnownFront != null) {
-				nbttagcompound.setTag("lastKnownFront", NBTUtil.blockPosToNBT(lastKnownFront));
+				nbttagcompound.setLong("lastKnownFront", lastKnownFront.toLong());
 			}
 		}
 		nbttagcompound.setBoolean("frontCouplerEngaged", frontCouplerEngaged);
 		if (coupledBack != null) {
 			nbttagcompound.setString("CoupledBack", coupledBack.toString());
 			if (lastKnownRear != null) {
-				nbttagcompound.setTag("lastKnownRear", NBTUtil.blockPosToNBT(lastKnownRear));
+				nbttagcompound.setLong("lastKnownRear", lastKnownRear.toLong());
 			}
 		}
 		nbttagcompound.setBoolean("backCouplerEngaged", backCouplerEngaged);
@@ -121,7 +120,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (nbttagcompound.hasKey("CoupledFront")) {
 			coupledFront = UUID.fromString(nbttagcompound.getString("CoupledFront"));
 			if (nbttagcompound.hasKey("lastKnownFront")) {
-				lastKnownFront = NBTUtil.nbtToBlockPos(nbttagcompound.getCompoundTag("lastKnownFront"));
+				if (nbttagcompound.getTag("lastKnownFront").getId() == 10) {
+					// Legacy
+					// TODO remove 2.0
+					NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownFront");
+					lastKnownFront = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
+				} else {
+					lastKnownFront = BlockPos.fromLong(nbttagcompound.getLong("lastKnownFront"));
+				}
 			}
 		}
 		frontCouplerEngaged = nbttagcompound.getBoolean("frontCouplerEngaged");
@@ -129,7 +135,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (nbttagcompound.hasKey("CoupledBack")) {
 			coupledBack = UUID.fromString(nbttagcompound.getString("CoupledBack"));
 			if (nbttagcompound.hasKey("lastKnownRear")) {
-				lastKnownRear = NBTUtil.nbtToBlockPos(nbttagcompound.getCompoundTag("lastKnownRear"));
+				if (nbttagcompound.getTag("lastKnownRear").getId() == 10) {
+					// Legacy
+					// TODO remove 2.0
+					NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownRear");
+					lastKnownRear = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
+				} else {
+					lastKnownRear = BlockPos.fromLong(nbttagcompound.getLong("lastKnownRear"));
+				}
 			}
 		}
 		backCouplerEngaged = nbttagcompound.getBoolean("backCouplerEngaged");
@@ -250,13 +263,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				CouplerType otherCoupler = potential.getRight();
 				this.setCoupledUUID(coupler, stock.getPersistentID());
 				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
-				this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
+				if (stock.isCouplerEngaged(otherCoupler) && this.isCouplerEngaged(coupler)) {
+					this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
+				}
 			}
 		}
 	}
 	
 	private Vec3d guessCouplerPosition(CouplerType coupler) {
-		return this.getPositionVector().add(VecUtil.fromYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.rotationYaw));
+		return this.getPositionVector().add(VecUtil.fromWrongYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.rotationYaw));
 	}
 
 	public void tickPosRemainingCheck() {
@@ -382,7 +397,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	// This breaks with looped rolling stock
 	private boolean simulateMove(EntityCoupleableRollingStock parent, int tickOffset) {
 		if (this.positions.size() < tickOffset) {
-			ImmersiveRailroading.warn("MISSING START POS " + tickOffset);
+			ImmersiveRailroading.debug("MISSING START POS " + tickOffset);
 			return true;
 		}
 		
@@ -441,8 +456,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		double distance = myOffset.distanceTo(otherOffset);
 
 		// Figure out which direction to move the next stock
-		Vec3d nextPosForward = myOffset.add(VecUtil.fromYaw(distance, currentPos.rotationYaw));
-		Vec3d nextPosReverse = myOffset.add(VecUtil.fromYaw(-distance, currentPos.rotationYaw));
+		Vec3d nextPosForward = myOffset.add(VecUtil.fromWrongYaw(distance, currentPos.rotationYaw));
+		Vec3d nextPosReverse = myOffset.add(VecUtil.fromWrongYaw(-distance, currentPos.rotationYaw));
 
 		if (otherOffset.distanceTo(nextPosForward) > otherOffset.distanceTo(nextPosReverse)) {
 			// Moving in reverse
@@ -661,7 +676,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
 			if (couplerFrontPosition == null) {
-				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
+				couplerFrontPosition = predictRearBogeyPosition(pos, (float) -(this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerFrontPosition;
 		} else {

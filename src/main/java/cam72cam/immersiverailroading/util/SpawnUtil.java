@@ -5,6 +5,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
@@ -46,7 +47,8 @@ public class SpawnUtil {
 		
 		if (!tp.isOffTrack) {
 			if (!worldIn.isRemote) {
-				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead), gauge);
+				String texture = ItemTextureVariant.get(player.getHeldItem(hand));
+				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead), gauge, texture);
 				
 				if (stock instanceof EntityBuildableRollingStock) {
 					((EntityBuildableRollingStock)stock).setComponents(list);

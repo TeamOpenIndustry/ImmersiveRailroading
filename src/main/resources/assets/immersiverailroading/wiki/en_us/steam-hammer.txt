@@ -2,4 +2,9 @@
 
 The Steam Hammer is used to process some parts before they are placed onto a Frame. It is the smallest machine in Immersive Railroading, requiring a mere 5 blocks in width, 1 in depth, and 6 in height.
 
+It is built from:
+*  3 x Heavy Engineering Block
+*  1 x Piston
+* 10 x Light Engineering Block
+
 Operating the Steam Hammer requires power, which is input through the top block. To operate the hammer, right-click the central block to open the GUI. Place the item that should be processed in the left slot, and after a few moments it will move to the right slot, which means it is now ready for use.

@@ -35,6 +35,7 @@ public enum ItemComponentType {
 	FUEL_TANK(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FUEL_TANK),
 	ALTERNATOR(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ALTERNATOR),
 	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ENGINE_BLOCK),
+	CRANKSHAFT(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.CRANKSHAFT),
 	PISTON(AssemblyStep.SHELL, CraftingType.CASTING_HAMMER, RenderComponentType.PISTON_X),
 	FAN(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FAN_X),
 	DRIVE_SHAFT(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.DRIVE_SHAFT_X),
