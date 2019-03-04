@@ -8,6 +8,8 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.render.rail.RailBaseRender;
+import cam72cam.immersiverailroading.util.MathUtil;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -32,6 +34,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<Pair<Integer, Integer>, Float>();
 		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<Pair<Integer, Integer>, Integer>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
+
+		//use to guarantee all slopes look the same no matter what order the points get processed in
+		HashMap<Pair<Integer, Integer>, Float> minTracker = new HashMap<>();
+
 		
 		double horiz = info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && info.settings.gauge.value() < 1) {
@@ -41,7 +47,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			horiz += 2f * info.settings.gauge.scale();
 		}
 		double clamp = 0.17 * info.settings.gauge.scale();
-		float heightOffset = (float) ((info.placementInfo.placementPosition.y) % 1);
+		float heightOffset = (float) MathUtil.trueModulus(info.placementInfo.placementPosition.y, 1);
 
 		List<PosStep> path = getPath(0.25);
 		PosStep start = path.get(0);
@@ -65,6 +71,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
+				//TODO: check if this is the cause of rail bed shift, possible rounding of negative floats
 				int posX = (int)Math.round(gagPos.x+nextUp.x+placeOff.x);
 				int posZ = (int)Math.round(gagPos.z+nextUp.z+placeOff.z);
 				double height = 0;
@@ -74,17 +81,35 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					height = Math.min(height, clamp);
 				}
 
-				double relHeight = gagPos.y % 1;
-				if (gagPos.y < 0) {
-					relHeight += 1;
-				}
+				double relHeight = MathUtil.trueModulus(gagPos.y, 1);
 
 				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
+				float bedScaleFactor = RailBaseRender.bedScaleFactor(info.settings.gauge);
 				if (!positions.contains(gag)) {
 					positions.add(gag);
-                    bedHeights.put(gag, (float)(height + Math.max(0, relHeight - 0.1)));
+					minTracker.put(gag, (float) gagPos.y);
+                    bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
                     railHeights.put(gag, (float) relHeight);
-					yOffset.put(gag, (int) (gagPos.y - relHeight));
+                    //add buffer space equal to the amount of extra room given to the rail base
+					//prevents full blocks of rail base
+					yOffset.put(gag,  (int) Math.floor(gagPos.y + bedScaleFactor));
+				}
+
+				//smooth slope rendering help
+				//force start and end points to be highest priority for reference
+				//so that start and end of tracks always line up
+				else if(cur == start || cur == end) {
+					minTracker.put(gag, -999999f);
+					bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
+					railHeights.put(gag, (float) relHeight);
+					yOffset.put(gag,  (int) Math.floor(gagPos.y + bedScaleFactor));
+				}
+				//otherwise prioritize point with lowest y so that it's fairly close to the same on all curves
+				else if(gagPos.y < minTracker.get(gag)) {
+					minTracker.put(gag, (float) gagPos.y);
+					bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
+					railHeights.put(gag, (float) relHeight);
+					yOffset.put(gag,  (int) Math.floor(gagPos.y + bedScaleFactor));
 				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
@@ -108,6 +133,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				// Skip parent block
 				continue;
 			}
+
 			TrackBase tg = new TrackGag(this, new BlockPos(pair.getLeft(), yOffset.get(pair), pair.getRight()));
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
@@ -116,6 +142,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			tg.setBedHeight(bedHeights.get(pair));
 			tracks.add(tg);
 		}
+	}
+
+	private float getBedHeight(float height, float relHeight, float bedScaleFactor) {
+		return height + relHeight + bedScaleFactor > 1 ? height + relHeight - 1 : height + relHeight;
 	}
 	
 	@Override

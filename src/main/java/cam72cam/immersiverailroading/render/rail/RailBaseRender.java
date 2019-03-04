@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.proxy.ClientProxy;
@@ -55,7 +56,7 @@ public class RailBaseRender {
 				IBakedModel model = scaled.get(key);
 				if (model == null) {
 					IBakedModel gravelModel = blockRenderer.getBlockModelShapes().getModelForState(gravelState);
-					model = new BakedScaledModel(gravelModel, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale());
+					model = new BakedScaledModel(gravelModel, base.getBedHeight() + bedScaleFactor(info.settings.gauge));
 					scaled.put(key, model);
 				}
 				blockRenderer.getBlockModelRenderer().renderModel(info.world, model, gravelState, base.getPos(), worldRenderer, false);
@@ -64,6 +65,10 @@ public class RailBaseRender {
 			worldRenderer.finishDrawing();
 		}
 		return worldRenderer;
+	}
+
+	public static float bedScaleFactor(Gauge gauge) {
+		return 0.1f * (float) gauge.scale();
 	}
 	
 	private static synchronized void drawSync(RailInfo info) {
