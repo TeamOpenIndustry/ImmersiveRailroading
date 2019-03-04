@@ -1,16 +1,18 @@
 package cam72cam.immersiverailroading.model.obj;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
+import java.util.function.Consumer;
 
+import cam72cam.immersiverailroading.util.VecUtil;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -19,40 +21,53 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
-	public List<String> materialPaths = new ArrayList<String>();
 	// LinkedHashMap is ordered
-	public Map<String, List<Face>> groups = new LinkedHashMap<String, List<Face>>();
-	public double[] vertices;
-	public double[] vertexNormals;
+	public Map<String, int[]> groups = new LinkedHashMap<String, int[]>();
+	public float[] vertices;
+	public float[] vertexNormals;
 	public float[] vertexTextures;
-	public int[] faces;
+	public int[] faceVerts;
+	public String[] faceMTLs;
+	public byte[] offsetU;
+	public byte[] offsetV;
 
 	public Map<String, Material> materials = new HashMap<String, Material>();
 	//public Map<Integer, String> mtlLookup = new HashMap<Integer, String>();
 	public float darken;
-	
+
+	private Map<String, Vec3d> mins = new HashMap<>();
+	private Map<String, Vec3d> maxs = new HashMap<>();
+
 	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
 		this(modelLoc, darken, 1);
 	}
 
 	public OBJModel(ResourceLocation modelLoc, float darken, double scale) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
-		Scanner reader = new Scanner(input);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		this.darken = darken;
 
 		String currentGroupName = "defaultName";
-		List<Face> currentGroup = new ArrayList<Face>();
-		groups.put(currentGroupName, currentGroup);
+		List<Integer> currentGroup = new ArrayList<Integer>();
 		List<String> materialPaths = new ArrayList<String>();
 		String currentMaterial = null;
 		
-		List<Integer> faces = new ArrayList<Integer>();
-		List<Double> vertices = new ArrayList<Double>();
-		List<Double> vertexNormals = new ArrayList<Double>();
+		List<Integer> faceVerts = new ArrayList<Integer>();
+		List<String> faceMTLs = new ArrayList<String>();
+		List<Float> vertices = new ArrayList<Float>();
+		List<Float> vertexNormals = new ArrayList<Float>();
 		List<Float> vertexTextures = new ArrayList<Float>();
+		
+		Consumer<String[]> addFace = (String[] args) -> {
+			for(int i = 0; i < args.length; i++) {
+				for(int j : parsePoint(args[i])) {
+					faceVerts.add(j);
+				}
+			}
+		}; 
 
-		while (reader.hasNextLine()) {
-			String line = reader.nextLine();
+		String line;
+		while ((line = reader.readLine()) != null) {
 			
 			if (line.startsWith("#")) {
 				continue;
@@ -60,38 +75,62 @@ public class OBJModel {
 			if (line.length() == 0) {
 				continue;
 			}
-			String[] parts = line.split(" ");
-			String cmd = parts[0];
-			String[] args = Arrays.copyOfRange(parts, 1, parts.length);
+			String[] args = line.split(" ");
+			String cmd = args[0];
 			switch (cmd) {
 			case "mtllib":
-				materialPaths.add(args[0]);
+				materialPaths.add(args[1]);
 				break;
 			case "usemtl":
-				currentMaterial = args[0];
+				currentMaterial = args[1].intern();
 				break;
 			case "o":
 			case "g":
-				groups.put(currentGroupName, currentGroup);
-				currentGroupName = args[0];
-				currentGroup = new ArrayList<Face>();
+				if(currentGroup.size() > 0) {
+					groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
+				}
+				currentGroupName = args[1].intern();
+				currentGroup = new ArrayList<Integer>();
 				break;
 			case "v":
-				vertices.add(Double.parseDouble(args[0]) * scale);
-				vertices.add(Double.parseDouble(args[1]) * scale);
-				vertices.add(Double.parseDouble(args[2]) * scale);
+				vertices.add(Float.parseFloat(args[1]) * (float)scale);
+				vertices.add(Float.parseFloat(args[2]) * (float)scale);
+				vertices.add(Float.parseFloat(args[3]) * (float)scale);
 				break;
 			case "vn":
-				vertexNormals.add(Double.parseDouble(args[0]));
-				vertexNormals.add(Double.parseDouble(args[1]));
-				vertexNormals.add(Double.parseDouble(args[2]));
+				vertexNormals.add(Float.parseFloat(args[1]));
+				vertexNormals.add(Float.parseFloat(args[2]));
+				vertexNormals.add(Float.parseFloat(args[3]));
 				break;
 			case "vt":
-				vertexTextures.add(Float.parseFloat(args[0]));
 				vertexTextures.add(Float.parseFloat(args[1]));
+				vertexTextures.add(Float.parseFloat(args[2]));
 				break;
 			case "f":
-				currentGroup.addAll(Face.parse(this, args, currentMaterial, faces));
+				int idx;
+				if (args.length == 4) {
+					addFace.accept(new String[] {args[1], args[2], args[3]});
+					idx = faceMTLs.size();
+					faceMTLs.add(currentMaterial);
+					currentGroup.add(idx);
+				} else if (args.length == 5) {
+					addFace.accept(new String[] {args[1], args[2], args[3]});
+					idx = faceMTLs.size();
+					faceMTLs.add(currentMaterial);
+					currentGroup.add(idx);
+					
+					addFace.accept(new String[] {args[3], args[4], args[1]});
+					idx = faceMTLs.size();
+					faceMTLs.add(currentMaterial);
+					currentGroup.add(idx);
+				} else {
+					for (int i = 2; i < args.length-1; i++) {
+						addFace.accept(new String[] {args[1], args[i], args[i+1]});
+						idx = faceMTLs.size();
+						faceMTLs.add(currentMaterial);
+						currentGroup.add(idx);
+					}
+				}
 				break;
 			case "s":
 				//Ignore
@@ -105,14 +144,17 @@ public class OBJModel {
 				break;
 			}
 		}
-		groups.put(currentGroupName, currentGroup);
+		if(currentGroup.size() > 0) {
+			groups.put(currentGroupName, ArrayUtils.toPrimitive(currentGroup.toArray(new Integer[0])));
+		}
 		
 		reader.close(); // closes input
 		
-		this.vertices = ArrayUtils.toPrimitive(vertices.toArray(new Double[0]));
-		this.vertexNormals = ArrayUtils.toPrimitive(vertexNormals.toArray(new Double[0]));
+		this.vertices = ArrayUtils.toPrimitive(vertices.toArray(new Float[0]));
+		this.vertexNormals = ArrayUtils.toPrimitive(vertexNormals.toArray(new Float[0]));
 		this.vertexTextures = ArrayUtils.toPrimitive(vertexTextures.toArray(new Float[0]));
-		this.faces = ArrayUtils.toPrimitive(faces.toArray(new Integer[0]));
+		this.faceVerts = ArrayUtils.toPrimitive(faceVerts.toArray(new Integer[0]));
+		this.faceMTLs = faceMTLs.toArray(new String[0]);
 
 		if (materialPaths.size() == 0) {
 			return;
@@ -123,9 +165,8 @@ public class OBJModel {
 			Material currentMTL = null;
 
 			input = ImmersiveRailroading.proxy.getResourceStream(RelativeResource.getRelative(modelLoc, materialPath));
-			reader = new Scanner(input);
-			while (reader.hasNextLine()) {
-				String line = reader.nextLine();
+			reader = new BufferedReader(new InputStreamReader(input));
+			while ((line = reader.readLine()) != null) {
 				if (line.startsWith("#")) {
 					continue;
 				}
@@ -206,77 +247,77 @@ public class OBJModel {
 			}
 			reader.close(); // closes input
 		}
+
+		for (String group : groups()) {
+			Vec3d min = null;
+			int[] faces = groups.get(group);
+			for (int face : faces) {
+				for (int[] point : points(face)) {
+					Vec3d v = vertices(point[0]);
+					if (min == null) {
+						min = v;
+					} else {
+						min = VecUtil.min(min, v);
+					}
+				}
+			}
+			mins.put(group, min);
+		}
+		for (String group : groups()) {
+			Vec3d max = null;
+			int[] faces = groups.get(group);
+			for (int face : faces) {
+				for (int[] point : points(face)) {
+					Vec3d v = vertices(point[0]);
+					if (max == null) {
+						max = v;
+					} else {
+						max = VecUtil.max(max, v);
+					}
+				}
+			}
+			maxs.put(group, max);
+		}
+	}
+	
+	private static int[] parsePoint(String point) {
+		String[] sp = point.split("/");
+		int[] ret = new int[] {-1, -1, -1};
+		for (int i = 0; i < sp.length; i++) {
+			if (!sp[i].equals("")) {
+				ret[i] = Integer.parseInt(sp[i])-1;
+			}
+		}
+		return ret;
 	}
 	
 	public Set<String> groups() {
 		return groups.keySet();
 	}
 	
-	private Map<Iterable<String>, Vec3d> mins = new HashMap<Iterable<String>, Vec3d>();
 	public Vec3d minOfGroup(Iterable<String> groupNames) {
-		if (!mins.containsKey(groupNames)) {
-			Vec3d min = null;
-			for (String group : groupNames) {
-				List<Face> faces = groups.get(group);
-				for (Face face : faces) {
-					for (int[] point : face.points()) {
-						Vec3d v = vertices(point[0]);
-						if (min == null) {
-							min = new Vec3d(v.x, v.y, v.z);
-						} else {
-							if (min.x > v.x) {
-								min = new Vec3d(v.x, min.y, min.z);
-							}
-							if (min.y > v.y) {
-								min = new Vec3d(min.x, v.y, min.z);
-							}
-							if (min.z > v.z) {
-								min = new Vec3d(min.x, min.y, v.z);
-							}
-						}
-					}
-				}
-			}
+		Vec3d min = null;
+		for (String group : groupNames) {
+			Vec3d gmin = mins.get(group);
 			if (min == null) {
-				ImmersiveRailroading.error("EMPTY " + groupNames);
-				min = new Vec3d(0, 0, 0);
+				min = gmin;
+			} else {
+				min = VecUtil.min(min, gmin);
 			}
-			mins.put(groupNames, min);
 		}
-		return mins.get(groupNames);
+		return min;
 	}
-	private Map<Iterable<String>, Vec3d> maxs = new HashMap<Iterable<String>, Vec3d>();
 	public Vec3d maxOfGroup(Iterable<String> groupNames) {
-		if (!maxs.containsKey(groupNames)) {
-			Vec3d max = null;
-			for (String group : groupNames) {
-				List<Face> faces = groups.get(group);
-				for (Face face : faces) {
-					for (int[] point : face.points()) {
-						Vec3d v = vertices(point[0]);
-						if (max == null) {
-							max = new Vec3d(v.x, v.y, v.z);
-						} else {
-							if (max.x < v.x) {
-								max = new Vec3d(v.x, max.y, max.z);
-							}
-							if (max.y < v.y) {
-								max = new Vec3d(max.x, v.y, max.z);
-							}
-							if (max.z < v.z) {
-								max = new Vec3d(max.x, max.y, v.z);
-							}
-						}
-					}
-				}
-			}
+		Vec3d max = null;
+		for (String group : groupNames) {
+			Vec3d gmax = maxs.get(group);
 			if (max == null) {
-				ImmersiveRailroading.error("EMPTY " + groupNames);
-				max = new Vec3d(0, 0, 0);
+				max = gmax;
+			} else {
+				max = VecUtil.max(max, gmax);
 			}
-			maxs.put(groupNames, max);
 		}
-		return maxs.get(groupNames);
+		return max;
 	}
 
 	public Vec3d centerOfGroups(Iterable<String> groupNames) {
@@ -309,5 +350,17 @@ public class OBJModel {
 	}
 	public Vec2f vertexTextures(int i) {
 		return new Vec2f(vertexTextures[i*2+0], vertexTextures[i*2+1]);
+	}
+	
+	public int[][] points(int pointStart) {
+		int[][] points = new int[3][];
+		for (int i = 0; i < 3; i ++) {
+			points[i] = new int[] {
+				faceVerts[pointStart*9 + i*3 + 0],
+				faceVerts[pointStart*9 + i*3 + 1],
+				faceVerts[pointStart*9 + i*3 + 2],
+			};
+		}
+		return points;
 	}
 }

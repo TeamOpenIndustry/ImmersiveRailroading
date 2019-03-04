@@ -35,6 +35,13 @@
 	"sounds": {
 		"whistle": "sounds/steam/k4_sounds/whistle.ogg",
 		"idle": "sounds/steam/k4_sounds/idle.ogg",
-		"chuff": "sounds/steam/k4_sounds/chuff.ogg"
+		"chuff": "sounds/steam/k4_sounds/chuff.ogg",
+		"quilling": [{
+			"pull_start": 0.25,
+			"pull_end": 0.55,
+			"pitch_start": 0.9,
+			"pitch_end": 1.2,
+			"sample": "sounds/steam/whistles/sk_1chime.ogg"
+		}]
 	}
 }

@@ -2,16 +2,24 @@ package cam72cam.immersiverailroading.registry;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import cam72cam.immersiverailroading.model.obj.Vec2f;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -21,7 +29,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.model.obj.Face;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -31,17 +38,20 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityRollingStockDefinition {
 	
 	public abstract EntityRollingStock instance(World world);
 	
-	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge) {
+	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge, String texture) {
 		EntityRollingStock stock = instance(world);
 		stock.setPosition(pos.x, pos.y, pos.z);
 		stock.prevRotationYaw = facing.getHorizontalAngle();
 		stock.rotationYaw = facing.getHorizontalAngle();
 		stock.gauge = gauge;
+		stock.texture = texture;
 		world.spawnEntity(stock);
 
 		return stock;
@@ -49,13 +59,18 @@ public abstract class EntityRollingStockDefinition {
 
 	public final String defID;
 	private String name = "Unknown";
+	private String modelerName = "N/A";
+	private String packName = "N/A";
 	private OBJModel model;
+	public Map<String, String> textureNames = null;
 	private Vec3d passengerCenter = new Vec3d(0, 0, 0);
 	private float bogeyFront;
 	private float bogeyRear;
 	private float couplerOffsetFront;
 	private float couplerOffsetRear;
-
+	
+	public float dampeningAmount;
+	private boolean scalePitch;
 	public  double frontBounds;
 	public  double rearBounds;
 	private double heightBounds;
@@ -91,12 +106,20 @@ public abstract class EntityRollingStockDefinition {
 		parseJson(data);
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
-		
-		initHeightMap();
+	}
+	
+	public boolean shouldScalePitch() {
+		return scalePitch;
 	}
 
 	public void parseJson(JsonObject data) throws Exception  {
 		name = data.get("name").getAsString();
+		if (data.has("modeler")) {
+			this.modelerName = data.get("modeler").getAsString();
+		}
+		if (data.has("pack")) {
+			this.packName = data.get("pack").getAsString();
+		}
 		float darken = 0;
 		if (data.has("darken_model")) {
 			darken = data.get("darken_model").getAsFloat();
@@ -115,9 +138,33 @@ public abstract class EntityRollingStockDefinition {
 		if (this.recommended_gauge != Gauge.from(Gauge.STANDARD)) {
 			this.internal_inv_scale = Gauge.STANDARD / recommended_gauge.value();
 		}
+		
 		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
+		textureNames = new LinkedHashMap<String, String>();
+		textureNames.put(null, "Default");
+		if (data.has("tex_variants")) {
+			JsonElement variants = data.get("tex_variants");
+			for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
+				textureNames.put(variant.getValue().getAsString(), variant.getKey());
+			}
+		}
+		
+		ResourceLocation alt_textures = new ResourceLocation(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
+		try {
+			List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
+			for (InputStream input : alts) {
+				JsonParser parser = new JsonParser();
+				JsonElement variants = parser.parse(new InputStreamReader(input)).getAsJsonArray();
+				for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
+					textureNames.put(variant.getValue().getAsString(), variant.getKey());
+				}
+			}
+		} catch (java.io.FileNotFoundException ex) {
+			//ignore
+		}
+		
 		JsonObject passenger = data.get("passenger").getAsJsonObject();
-		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble(), 0).scale(internal_model_scale);
+		passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble()-0.35, 0).scale(internal_model_scale);
 		passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_model_scale;
 		passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_model_scale;
 		maxPassengers = passenger.get("slots").getAsInt();
@@ -127,6 +174,18 @@ public abstract class EntityRollingStockDefinition {
 
 		bogeyFront = (float) (data.get("trucks").getAsJsonObject().get("front").getAsFloat() * internal_model_scale);
 		bogeyRear = (float) (data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * internal_model_scale);
+		
+		dampeningAmount = 0.75f;
+		if (data.has("sound_dampening_percentage")) {
+			if (data.get("sound_dampening_percentage").getAsFloat() >= 0.0f && data.get("sound_dampening_percentage").getAsFloat() <= 1.0f) {
+				dampeningAmount = data.get("sound_dampening_percentage").getAsFloat();
+			}
+		}
+		
+		scalePitch = true;
+		if (data.has("scale_pitch")) {
+			scalePitch = data.get("scale_pitch").getAsBoolean();
+		}
 		
 		if (data.has("couplers")) {
 			couplerOffsetFront = (float) (data.get("couplers").getAsJsonObject().get("front_offset").getAsFloat() * internal_model_scale);
@@ -215,6 +274,9 @@ public abstract class EntityRollingStockDefinition {
 		
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
+		for (int i = 100; i >= 1; i--) {
+			addComponentIfExists(RenderComponent.parseID(RenderComponentType.CARGO_FILL_X, this, groups, i), false);
+		}
 		
 		return groups;
 	}
@@ -327,8 +389,8 @@ public abstract class EntityRollingStockDefinition {
 		}
 	}
 	
-	private void initHeightMap() {
-		ImmersiveRailroading.info("Generating model heightmap...");
+	public void initHeightMap() {
+		ImmersiveRailroading.info("Generating heightmap %s", defID);
 		
 		double ratio = 8;
 		xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
@@ -343,21 +405,21 @@ public abstract class EntityRollingStockDefinition {
 				}
 				double[][] heightMap = new double[xRes][zRes];
 				for (String group : rc.modelIDs) {
-					List<Face> faces = model.groups.get(group);
-					for (Face face : faces) {
+					int[] faces = model.groups.get(group);
+					for (int face : faces) {
 						Path2D path = new Path2D.Double();
 						double fheight = 0;
 						boolean first = true;
-						for (int[] point : face.points()) {
+						for (int[] point : model.points(face)) {
 							Vec3d vert = model.vertices(point[0]);
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
 								path.moveTo(vert.x * ratio, vert.z * ratio);
+								first = false;
 							} else {
 								path.lineTo(vert.x * ratio, vert.z * ratio);
 							}
-							fheight += vert.y / face.points().length;
-							first = false;
+							fheight += vert.y / 3; // We know we are using tris
 						}
 						Rectangle2D bounds = path.getBounds2D();
 						if (bounds.getWidth() * bounds.getHeight() < 1) {
@@ -381,12 +443,23 @@ public abstract class EntityRollingStockDefinition {
 			}
 		}
 	}
+
+	public class IconPart {
+		public final String mtl;
+		public final float u;
+		public final float v;
+		public IconPart(String mtl, float u, float v) {
+			this.mtl = mtl;
+			this.u = u;
+			this.v = v;
+		}
+	}
 	
-	public String[][] getIcon(int i) {
+	public IconPart[][] getIcon(int i) {
 		
 		ImmersiveRailroading.info("Generating model icon map %s...", this.defID);
 		
-		String[][] map = new String[i][i];
+		IconPart[][] map = new IconPart[i][i];
 		
 		// Distance per pixel
 		double nx = Math.max(this.heightBounds, this.widthBounds) / map.length;
@@ -395,52 +468,57 @@ public abstract class EntityRollingStockDefinition {
 			xoff = (this.heightBounds - this.widthBounds) / 2;
 		}
 		
-		List<Face> faces = new ArrayList<Face>();
+		List<Integer> faces = new ArrayList<Integer>();
 		for (List<RenderComponent> rcl : this.renderComponents.values()) {
 			for (RenderComponent rc : rcl) {
 				if (!rc.type.collisionsEnabled) {
 					continue;
 				}
 				for (String group : rc.modelIDs) {
-					faces.addAll(model.groups.get(group));
+					for (int face : model.groups.get(group)) {
+						faces.add(face);
+					}
 				}
 			}
 		}
+		float[] depthCache = new float[model.faceVerts.length/9];
+		for (int f : faces) {
+			float sum = 0;
+			for (int[] point : model.points(f)) {
+				Vec3d pt = model.vertices(point[0]);
+				sum += pt.x;
+			}
+			depthCache[f] = sum / 3; //We know it's a tri
+		}
 		
-		faces.sort(new Comparator<Face>() {
+		faces.sort(new Comparator<Integer>() {
 			@Override
-			public int compare(Face o1, Face o2) {
-				if (o1.depthCache == null) {
-					double sum = 0;
-					for (int[] point : o1.points()) {
-						Vec3d pt = model.vertices(point[0]);
-						sum += pt.x;
-					}
-					o1.depthCache = (float) (sum / o1.points().length);
-				}
-				if (o2.depthCache == null) {
-					double sum = 0;
-					for (int[] point : o2.points()) {
-						Vec3d pt = model.vertices(point[0]);
-						sum += pt.x;
-					}
-					o2.depthCache = (float) (sum / o2.points().length);
-				}
-				return o1.depthCache.compareTo(o2.depthCache);
+			public int compare(Integer o1, Integer o2) {
+				return Float.compare(depthCache[o1], depthCache[o2]);
 			}
 		});
 		
-		for (Face face : faces) {
-			Material mtl = model.materials.get(face.mtl);
+		for (int f : faces) {
+			Material mtl = model.materials.get(model.faceMTLs[f]);
+			if (mtl == null || mtl.name == "") {
+				continue;
+			}
 			Path2D path = new Path2D.Double();
 			boolean first = true;
-			for (int[] point : face.points()) {
+			float vu = 0;
+			float vv = 0;
+			for (int[] point : model.points(f)) {
+				Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : Vec2f.ZERO;
+				vu += vt.x/3;
+				vv += vt.y/3;
+
+
 				Vec3d vert = model.vertices(point[0]);
 				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {
-					path.moveTo(vert.z / nx, vert.y / nx);
+					path.moveTo(vert.z / nx + xoff / nx, vert.y / nx);
 				} else {
-					path.lineTo(vert.z / nx, vert.y / nx);
+					path.lineTo(vert.z / nx + xoff / nx, vert.y / nx);
 				}
 				first = false;
 			}
@@ -448,15 +526,20 @@ public abstract class EntityRollingStockDefinition {
 			if (bounds.getWidth() * bounds.getHeight() < 1) {
 				continue;
 			}
-			for (int z = 0; z < map.length; z++) {
-				for (int y = 0; y < map[z].length; y++) {
+
+			int minZ = (int)Math.max(0, bounds.getMinX()-2);
+			int maxZ = (int)Math.min(bounds.getMaxX()+2, i);
+			int minY = (int)Math.max(0, bounds.getMinY()-2);
+			int maxY = (int)Math.min(bounds.getMaxY()+2, i);
+			for (int z = minZ; z < maxZ; z++) {
+				for (int y = minY; y < maxY; y++) {
 					if (map[z][y] != null) {
 						continue;
 					}
-					double relZ = z - xoff / nx;
-					double relY = y ;
+					double relZ = z;
+					double relY = y;
 					if (bounds.contains(relZ, relY) && path.contains(relZ, relY)) {
-						map[z][y] = mtl.name;
+						map[z][y] = new IconPart(mtl.name, vu, vv);
 					}
 				}
 			}
@@ -530,10 +613,12 @@ public abstract class EntityRollingStockDefinition {
 		String transStr = TextUtil.translate(localStr);
 		return localStr != transStr ? transStr : name;
 	}
-
+	
 	public List<String> getTooltip(Gauge gauge) {
 		List<String> tips = new ArrayList<String>();
 		tips.add(GuiText.WEIGHT_TOOLTIP.toString(this.getWeight(gauge)));
+		tips.add(GuiText.MODELER_TOOLTIP.toString(modelerName));
+		tips.add(GuiText.PACK_TOOLTIP.toString(packName));
 		return tips;
 	}
 
@@ -570,5 +655,10 @@ public abstract class EntityRollingStockDefinition {
 	
 	public boolean acceptsLivestock() {
 		return false;
+	}
+
+	@SideOnly(Side.SERVER)
+	public void clearModel() {
+		this.model = null;
 	}
 }

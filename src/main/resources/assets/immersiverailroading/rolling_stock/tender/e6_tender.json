@@ -3,7 +3,7 @@
 	"model": "immersiverailroading:models/rolling_stock/tender/e6_tender/e6_tender.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 62000
+		"weight_kg": 24494
 	},
 	"passenger": {
 		"slots": 2,
@@ -16,15 +16,15 @@
 		"capacity_l":  26000
 	},
 	"tender": {
-		"slots": 48,
-		"width": 12
+		"slots": 18,
+		"width": 9
 	},
 	"trucks": {
 		"front": 2.35, 
 		"rear": -2.35
 	},
 	"couplers": {
-		"front_offset": 0,
+		"front_offset": -0.03,
 		"rear_offset": -0.08
 	}
 }

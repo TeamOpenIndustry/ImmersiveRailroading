@@ -40,10 +40,10 @@ public class MovementSimulator {
 			TileRailBase rearBase = TileRailBase.get(world, new BlockPos(rear));
 			isTurnTable = frontBase != null &&
 					frontBase.getParentTile() != null &&
-					frontBase.getParentTile().getType() == TrackItems.TURNTABLE;
-			isTurnTable = rearBase != null &&
+					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
+			isTurnTable = isTurnTable || rearBase != null &&
 					rearBase.getParentTile() != null &&
-					rearBase.getParentTile().getType() == TrackItems.TURNTABLE;
+					rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
 			
 			position.speed = Speed.ZERO;
 			
@@ -83,8 +83,8 @@ public class MovementSimulator {
 		Vec3d frontDelta = front.subtractReverse(nextFront);
 		Vec3d rearDelta = rear.subtractReverse(nextRear);
 		if (position.speed != Speed.ZERO) {
-			position.frontYaw = VecUtil.toYaw(frontDelta);
-			position.rearYaw = VecUtil.toYaw(rearDelta);
+			position.frontYaw = VecUtil.toWrongYaw(frontDelta);
+			position.rearYaw = VecUtil.toWrongYaw(rearDelta);
 		}
 
 		Vec3d currCenter = VecUtil.between(front, rear);
@@ -92,7 +92,7 @@ public class MovementSimulator {
 		Vec3d deltaCenter = currCenter.subtractReverse(nextCenter);
 
 		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
-		position.rotationYaw = VecUtil.toYaw(bogeySkew);
+		position.rotationYaw = VecUtil.toWrongYaw(bogeySkew);
 		position.rotationPitch = (float) Math.toDegrees(MathHelper.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
 
 		if (isReverse) {
@@ -112,7 +112,7 @@ public class MovementSimulator {
 		position.position = position.position.add(deltaCenter);
 		if (world.isAirBlock(new BlockPos(position.position))) {
 			// Fall
-			position.position = position.position.addVector(0, -0.1, 0);
+			//position.position = position.position.addVector(0, -0.1, 0);
 		}
 		
 		return position;
@@ -126,7 +126,7 @@ public class MovementSimulator {
 			return currentPosition;
 		}
 		// Not using bogey yaw here, is that OK?
-		Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromYaw(distance, rotationYaw));
+		Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, rotationYaw));
 		if (result == null) {
 			position.isOffTrack = true;
 			return currentPosition;
@@ -135,10 +135,14 @@ public class MovementSimulator {
 	}
 
 	public Vec3d frontBogeyPosition() {
-		return VecUtil.fromYawPitch(bogeyFrontOffset, position.rotationYaw, position.rotationPitch).add(position.position);
+		return VecUtil.fromWrongYawPitch(bogeyFrontOffset, position.rotationYaw, position.rotationPitch).add(position.position);
 	}
 
 	public Vec3d rearBogeyPosition() {
-		return VecUtil.fromYawPitch(bogeyRearOffset, position.rotationYaw, position.rotationPitch).add(position.position);
+		return VecUtil.fromWrongYawPitch(bogeyRearOffset, position.rotationYaw, position.rotationPitch).add(position.position);
+	}
+	
+	public boolean isOffTrack() {
+		return position.isOffTrack;
 	}
 }

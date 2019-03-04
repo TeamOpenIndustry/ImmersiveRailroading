@@ -38,6 +38,10 @@ public class IGWMod {
 				pageEntries.add("augment-item");
 				pageEntries.add("augment-fluid");
 				pageEntries.add("augment-speed-retarder");
+				skipLine();
+				addSectionHeader("Info");
+				pageEntries.add("rolling-stock-performance");
+				pageEntries.add("resource-packs-outside-sources");
 
 			}
 

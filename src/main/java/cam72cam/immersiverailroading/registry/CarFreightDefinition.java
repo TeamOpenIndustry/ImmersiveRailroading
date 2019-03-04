@@ -13,7 +13,7 @@ import cam72cam.immersiverailroading.entity.CarFreight;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class CarFreightDefinition extends EntityRollingStockDefinition {
+public class CarFreightDefinition extends FreightDefinition {
 
 	private int numSlots;
 	private int width;
@@ -63,5 +63,5 @@ public class CarFreightDefinition extends EntityRollingStockDefinition {
 	@Override
 	public boolean acceptsLivestock() {
 		return true;
-	}
+	}	
 }
