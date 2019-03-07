@@ -85,32 +85,25 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
 				float bedScaleFactor = RailBaseRender.bedScaleFactor(info.settings.gauge);
-				if (!positions.contains(gag)) {
+				//if we haven't done this position yet add it
+				//else prioritize the start and end points so they always line up with other track
+				//else prioritize lowest y for consistency
+				if (!positions.contains(gag) || gagPos.y < minTracker.get(gag) || cur == start || cur == end) {
 					positions.add(gag);
-					minTracker.put(gag, (float) gagPos.y);
-                    bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
-                    railHeights.put(gag, (float) relHeight);
-                    //add buffer space equal to the amount of extra room given to the rail base
+					//ensure end positions aren't overwritten
+					if(cur == start || cur == end) {
+						minTracker.put(gag, -999999f);
+					}
+					else {
+						minTracker.put(gag, (float) gagPos.y);
+					}
+					bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
+					railHeights.put(gag, (float) relHeight);
+					//add buffer space equal to the amount of extra room given to the rail base
 					//prevents full blocks of rail base
 					yOffset.put(gag,  (int) Math.floor(gagPos.y + bedScaleFactor));
 				}
 
-				//smooth slope rendering help
-				//force start and end points to be highest priority for reference
-				//so that start and end of tracks always line up
-				else if(cur == start || cur == end) {
-					minTracker.put(gag, -999999f);
-					bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
-					railHeights.put(gag, (float) relHeight);
-					yOffset.put(gag,  (int) Math.floor(gagPos.y + bedScaleFactor));
-				}
-				//otherwise prioritize point with lowest y so that it's fairly close to the same on all curves
-				else if(gagPos.y < minTracker.get(gag)) {
-					minTracker.put(gag, (float) gagPos.y);
-					bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
-					railHeights.put(gag, (float) relHeight);
-					yOffset.put(gag,  (int) Math.floor(gagPos.y + bedScaleFactor));
-				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
 				}
