@@ -44,7 +44,7 @@ public class PhysicsAccummulator {
 		if (blockCollisionHardness[i] < 0) {
 			blockCollisionForceNewtons[i] = -1;
 		} else if (blockCollisionForceNewtons[i] >= 0) {
-			blockCollisionForceNewtons[i] += blockCollisionHardness[i] * 18_000;
+			blockCollisionForceNewtons[i] += blockCollisionHardness[i] * 6_000;
 		}
 		}
 		

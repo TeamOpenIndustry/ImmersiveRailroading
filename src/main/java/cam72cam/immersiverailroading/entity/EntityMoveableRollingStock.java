@@ -57,8 +57,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	/**
 	 * Please validate the BlockPos before putting into destructionQueue!
 	 */
-	private Map<BlockPos, Integer> destructionQueue = new HashMap<BlockPos, Integer>();
-	private List<Integer> destructionTicks = new ArrayList<Integer>();
+	private Map<BlockPos, Integer[]> destructionQueue = new HashMap<BlockPos, Integer[]>();
+	private Map<Integer, Integer> destructionTicks = new HashMap<Integer, Integer>();
 
 	private float sndRand;
 
@@ -447,8 +447,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 	    
 	    if (this.ticksExisted % 5 == 0) {
-			destructionQueue.entrySet().removeIf(blockPos -> !this.destructionTicks.contains(blockPos.getValue()));
-			destructionTicks.removeIf(destroyTick -> destroyTick > this.tickPosID);
+			destructionQueue.entrySet().removeIf ( 
+				blockPos -> !this.destructionTicks.containsKey(blockPos.getValue()[0]) || this.destructionTicks.get(blockPos.getValue()[0]) != (blockPos.getValue()[1]) 
+			);
+			destructionTicks.entrySet().removeIf( destroyTick -> destroyTick.getKey() > this.tickPosID );
 	    	breakBlocksInQueue();
 	    }
 	}
@@ -504,7 +506,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			Vec3d simOffset = simPos.position.subtract(new Vec3d(this.getPosition()));
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale()).offset(simOffset);
 			float[] blockCollisionHardness = {0f, 0f};
-			Map<BlockPos, Integer> destructionQueueBuffer = new HashMap<BlockPos, Integer>();
+			Map<BlockPos, Integer[]> destructionQueueBuffer = new HashMap<BlockPos, Integer[]>();
 
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				pos = VecUtil.rotateWrongYaw(pos, simPos.rotationYaw);
@@ -548,7 +550,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
 							//ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, collisionSpeed);
 							if (blockCollisionHardness[blockCollisionInFront] >= 0) blockCollisionHardness[blockCollisionInFront] += blockHardness;
-							if (!destructionQueue.containsKey(bp)) destructionQueueBuffer.put(bp, simPos.tickID);
+							if (!destructionQueue.containsKey(bp)) destructionQueueBuffer.put(bp, new Integer[] {simPos.tickID, blockCollisionInFront});
 							
 							if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
 								if (!this.isDead) {
@@ -583,18 +585,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		double collisionVelocity = physics.getVelocity().minecraft();
 		int direction = collisionVelocity > 0 ? 1 : 0;
 		double collisionForce = physics.blockCollisionForceNewtons[direction];
-		ImmersiveRailroading.info("Solid velocity: %s", collisionVelocity);
+		//ImmersiveRailroading.info("Solid velocity: %s", collisionVelocity);
 		if (collisionVelocity == 0) return Speed.fromMinecraft(collisionVelocity);
 		if (physics.blockCollisionForceNewtons[0] != 0.0 || physics.blockCollisionForceNewtons[1] != 0.0) {
 			//ImmersiveRailroading.info("blockCollisionForceNewtons : %s,%s", physics.blockCollisionForceNewtons[0], physics.blockCollisionForceNewtons[1]);
 		}
-		
 		if (!ConfigDamage.TrainsBreakBlocks || collisionForce < 0 || Math.abs(collisionVelocity) * physics.massToMoveKg < collisionForce) {
 			//ImmersiveRailroading.info("Stopped velocity: 0\n");
 			return Speed.ZERO;
 		}
-		
-		if (!destructionTicks.contains(simPos.tickID) && collisionForce != 0) destructionTicks.add(simPos.tickID);
+		if (!destructionTicks.containsKey(simPos.tickID) && collisionForce != 0) destructionTicks.put(simPos.tickID, direction);
 		double blockCollisionAccell = physics.blockCollisionForceNewtons[direction] / physics.massToMoveKg;
 		if (collisionForce != 0) {
 			collisionVelocity -= blockCollisionAccell > Math.abs(collisionVelocity) ? collisionVelocity : Math.copySign(blockCollisionAccell, collisionVelocity);
@@ -607,7 +607,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		Iterator<BlockPos> iter = destructionQueue.keySet().iterator();
 		while (iter.hasNext()){
 			BlockPos bp = iter.next();
-			if (!world.isBlockLoaded(bp) || this.tickPosID < destructionQueue.get(bp)) continue;
+			if (!world.isBlockLoaded(bp) || this.tickPosID < destructionQueue.get(bp)[0]) continue;
 			IBlockState state = world.getBlockState(bp);
 			world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
 			iter.remove();
