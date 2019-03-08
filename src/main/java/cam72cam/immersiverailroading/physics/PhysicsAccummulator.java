@@ -19,7 +19,7 @@ public class PhysicsAccummulator {
 	public double gradeForceNewtons = 0;
 	public double massToMoveKg = 0;
 	public double brakeAdhesionNewtons = 0;
-	public double[] blockCollisionForceNewtons = {0,0};
+	public double[] blockCollisionForceNewtons = {0f, 0f};
 	public int count = 0;
 	private TickPos pos;
 	
@@ -38,7 +38,15 @@ public class PhysicsAccummulator {
 		
 		EntityMoveableRollingStock movable = ((EntityMoveableRollingStock)stock);
 		
-		movable.predictCollisionHardness(pos);
+		//Would a config value here be more intuitive than with the block collision? Modifying force might be more tangible than hardness
+		float[] blockCollisionHardness = movable.predictCollisionHardness(pos);
+		for (int i = 0; i < 1; i++) {
+		if (blockCollisionHardness[i] < 0) {
+			blockCollisionForceNewtons[i] = -1;
+		} else if (blockCollisionForceNewtons[i] >= 0) {
+			blockCollisionForceNewtons[i] += blockCollisionHardness[i] * 18_000;
+		}
+		}
 		
 		// SHOULD THIS HAVE DIRECTION MULT?
 		double stockMassLb = 2.20462 * stock.getWeight();
@@ -48,10 +56,6 @@ public class PhysicsAccummulator {
 		double grade = -Math.tan(Math.toRadians(pos.rotationPitch % 90)) * Config.ConfigBalance.slopeMultiplier;
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
-		
-		//Would a config value here be more intuitive than with the block collision? Modifying force might be more tangible than hardness
-		blockCollisionForceNewtons[0] = movable.getBlockCollisionHardness(0)*36_000;
-		blockCollisionForceNewtons[1] = movable.getBlockCollisionHardness(1)*36_000;
 		
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;

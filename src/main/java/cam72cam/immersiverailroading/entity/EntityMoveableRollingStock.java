@@ -2,9 +2,9 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigSound;
@@ -41,7 +41,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.Int;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock {
 
@@ -55,8 +54,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	private AxisAlignedBB boundingBox;
 	private double[][] heightMapCache;
 	private double tickSkew = 1;
-	private float[] blockCollisionHardness = {0.0f, 0.0f};	//[0] aft reaction, [1] fore reaction
+	/**
+	 * Please validate the BlockPos before putting into destructionQueue!
+	 */
 	private Map<BlockPos, Integer> destructionQueue = new HashMap<BlockPos, Integer>();
+	private List<Integer> destructionTicks = new ArrayList<Integer>();
 
 	private float sndRand;
 
@@ -444,7 +446,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 	    }
 	    
-	    if (this.ticksExisted % 5 == 0) breakBlocksInQueue();
+	    if (this.ticksExisted % 5 == 0) {
+			destructionQueue.entrySet().removeIf(blockPos -> !this.destructionTicks.contains(blockPos.getValue()));
+			destructionTicks.removeIf(destroyTick -> destroyTick > this.tickPosID);
+	    	breakBlocksInQueue();
+	    }
 	}
 
 	protected void clearPositionCache() {
@@ -494,11 +500,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	// Checks for collisions with blocks and evaluates hardness
-	public void predictCollisionHardness(TickPos simPos) {
-		if (Math.abs(simPos.speed.metric()) > 0) {
+	public float[] predictCollisionHardness(TickPos simPos) {
 			Vec3d simOffset = simPos.position.subtract(new Vec3d(this.getPosition()));
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale()).offset(simOffset);
-			float[] newBlockCollisionHardness = { 0f, 0f };
+			float[] blockCollisionHardness = {0f, 0f};
+			Map<BlockPos, Integer> destructionQueueBuffer = new HashMap<BlockPos, Integer>();
 
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
 				pos = VecUtil.rotateWrongYaw(pos, simPos.rotationYaw);
@@ -517,8 +523,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							continue;
 						}
 						bbb = bbb.offset(bp);
+						// The correct direction is the reverse..., does yaw change according to velocity? Please explain if possible. 
 						int blockCollisionInFront = 0;
-						double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(simPos.position)) - Math.copySign(simPos.rotationYaw, simPos.speed.metric());
+						double angleVelocityToBlock = VecUtil.toYaw(pos.subtract(simPos.position)) - simPos.rotationYaw + 180;
 						angleVelocityToBlock = (angleVelocityToBlock + 180) % 360 - 180;
 
 						if (Math.abs(angleVelocityToBlock) < 45) {
@@ -526,10 +533,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						} else if (Math.abs(angleVelocityToBlock) > 135) {
 							blockCollisionInFront = 0;
 						} else {
-							continue; // We won't be doing anything with blocks beside this, yet
+							continue; // Only check blocks that our velocity brings us into
 						}
 
-						double collisionSpeed = Math.abs(simPos.speed.minecraft());
+						double collisionSpeed = Math.abs(simPos.speed.metric());
 						float blockHardness = state.getBlockHardness(world, bp);
 
 						// Final check to avoid doing intersect
@@ -539,20 +546,22 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							}
 						}
 						if (!BlockUtil.isIRRail(world, bp.up()) && state.getBlockHardness(world, bp) >= 0) {
-							// ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, this.getCurrentSpeed().metric());
-							newBlockCollisionHardness[blockCollisionInFront] += blockHardness;
-							destructionQueue.put(bp, simPos.tickID);
-							if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 15) {
+							//ImmersiveRailroading.info("Colliding block at %s degrees, speed is %f", angleVelocityToBlock, collisionSpeed);
+							if (blockCollisionHardness[blockCollisionInFront] >= 0) blockCollisionHardness[blockCollisionInFront] += blockHardness;
+							if (!destructionQueue.containsKey(bp)) destructionQueueBuffer.put(bp, simPos.tickID);
+							
+							if (Config.ConfigDamage.explosionsEnabled && collisionSpeed > 60) {
 								if (!this.isDead) {
-									this.onDeath(collisionSpeed > 30 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
+									this.onDeath(collisionSpeed > 80 ? StockDeathType.CATACYSM : StockDeathType.EXPLOSION);
 								}
 								world.removeEntity(this);
-								return;
+								float[] empty = {0f,0f};
+								return empty;
 							}
 						} else if (state.getBlockHardness(world, bp) < 0) { // This should absolutely stop the entire consist.
+							//ImmersiveRailroading.info("Unmovable block at %s degrees, velocity is %f", angleVelocityToBlock, simPos.speed.metric());
 							blockCollisionHardness[blockCollisionInFront] = -1;
-							destructionQueue.clear();
-							return;
+							return blockCollisionHardness;
 						}
 					} else {
 						TileRailBase te = TileRailBase.get(world, bp);
@@ -563,47 +572,45 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 					}
 				}
 			}
-			blockCollisionHardness[0] = newBlockCollisionHardness[0];
-			blockCollisionHardness[1] = newBlockCollisionHardness[1];
-			// stock.triggerResimulate();
-		}
-		return;
+			if (simPos.speed.metric() != 0) destructionQueue.putAll(destructionQueueBuffer);
+			return blockCollisionHardness;
 	}
 	
+	/**
+	 * 
+	 */
 	public Speed solidMovement(PhysicsAccummulator physics, TickPos simPos) {
-		double collisionSpeed = physics.getVelocity().minecraft();
-		double collisionForce = physics.blockCollisionForceNewtons[ collisionSpeed > 0 ? 1 : 0 ];
-		//if (blockCollisionForceNewtons[0] != 0.0 || blockCollisionForceNewtons[1] != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s;%s, speed: %s\n", blockCollisionForceNewtons[0], blockCollisionForceNewtons[1], Speed.fromMinecraft(newMCVelocity).metric());
-		
-		if (!ConfigDamage.TrainsBreakBlocks || collisionSpeed * physics.massToMoveKg <= collisionForce || collisionForce < 0) {
-			destructionQueue.clear();
-			return Speed.fromMinecraft(0);
+		double collisionVelocity = physics.getVelocity().minecraft();
+		int direction = collisionVelocity > 0 ? 1 : 0;
+		double collisionForce = physics.blockCollisionForceNewtons[direction];
+		ImmersiveRailroading.info("Solid velocity: %s", collisionVelocity);
+		if (collisionVelocity == 0) return Speed.fromMinecraft(collisionVelocity);
+		if (physics.blockCollisionForceNewtons[0] != 0.0 || physics.blockCollisionForceNewtons[1] != 0.0) {
+			//ImmersiveRailroading.info("blockCollisionForceNewtons : %s,%s", physics.blockCollisionForceNewtons[0], physics.blockCollisionForceNewtons[1]);
 		}
 		
-		double[] blockCollisionAccell = {physics.blockCollisionForceNewtons[0] / physics.massToMoveKg, 0, physics.blockCollisionForceNewtons[1] / physics.massToMoveKg};
-		double[] deltaAccellBlockCollisionMCVelocity = {Speed.fromMetric(blockCollisionAccell[0]).minecraft(), 0, Speed.fromMetric(blockCollisionAccell[1]).minecraft()};
-		if (collisionSpeed > 0 && physics.blockCollisionForceNewtons[1] != 0) {
-			collisionSpeed -= deltaAccellBlockCollisionMCVelocity[1] > Math.abs(collisionSpeed) ? collisionSpeed : deltaAccellBlockCollisionMCVelocity[1];
+		if (!ConfigDamage.TrainsBreakBlocks || collisionForce < 0 || Math.abs(collisionVelocity) * physics.massToMoveKg < collisionForce) {
+			//ImmersiveRailroading.info("Stopped velocity: 0\n");
+			return Speed.ZERO;
 		}
-		else if(collisionSpeed < 0 && physics.blockCollisionForceNewtons[0] != 0) {
-			collisionSpeed -= deltaAccellBlockCollisionMCVelocity[0] > Math.abs(collisionSpeed) ? collisionSpeed : -deltaAccellBlockCollisionMCVelocity[0];
+		
+		if (!destructionTicks.contains(simPos.tickID) && collisionForce != 0) destructionTicks.add(simPos.tickID);
+		double blockCollisionAccell = physics.blockCollisionForceNewtons[direction] / physics.massToMoveKg;
+		if (collisionForce != 0) {
+			collisionVelocity -= blockCollisionAccell > Math.abs(collisionVelocity) ? collisionVelocity : Math.copySign(blockCollisionAccell, collisionVelocity);
 		}
-		return Speed.fromMinecraft(collisionSpeed);
+		//ImmersiveRailroading.info("Final velocity: %s\n", collisionVelocity);
+		return Speed.fromMinecraft(collisionVelocity);
 	}
 	
 	public void breakBlocksInQueue() {
-		for( Entry<BlockPos, Integer> entry : destructionQueue.entrySet() ) {
-			BlockPos bp = entry.getKey();
-			if (!world.isBlockLoaded(bp)) {
-				continue;
-			}
-			if (this.tickPosID < entry.getValue()) {
-				continue;
-			}
+		Iterator<BlockPos> iter = destructionQueue.keySet().iterator();
+		while (iter.hasNext()){
+			BlockPos bp = iter.next();
+			if (!world.isBlockLoaded(bp) || this.tickPosID < destructionQueue.get(bp)) continue;
 			IBlockState state = world.getBlockState(bp);
-			if (state.getBlock() != Blocks.AIR && !BlockUtil.isIRRail(world, bp)) {
-				world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
-			}
+			world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));
+			iter.remove();
 		}
 	}
 	
@@ -672,14 +679,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	public Vec3d getVelocity() {
 		return new Vec3d(this.motionX, this.motionY, this.motionZ);
-	}
-	
-	public float getBlockCollisionHardness(int i) {
-		return blockCollisionHardness[i];
-	}
-	
-	public void setBlockCollisionHardness(int i, float value) {
-		blockCollisionHardness[i] = value;
 	}
 	
 	@Override
