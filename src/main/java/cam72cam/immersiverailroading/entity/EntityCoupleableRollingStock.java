@@ -15,20 +15,27 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Predicate;
 
+import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -338,7 +345,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private Speed getMovement(TickPos currentPos, boolean followStock) {
 		PhysicsAccummulator acc = new PhysicsAccummulator(currentPos);
 		this.mapTrain(this, true, followStock, acc::accumulate);
-		return acc.getVelocity();
+		return this.solidMovement(acc, currentPos);
 	}
 
 	private Speed getMovement(TickPos currentPos, Collection<DirectionalStock> train) {
@@ -346,7 +353,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		for (DirectionalStock stock : train) {
 			acc.accumulate(stock.stock, stock.direction);
 		}
-		return acc.getVelocity();
+		return this.solidMovement(acc, currentPos);
 	}
 	
 

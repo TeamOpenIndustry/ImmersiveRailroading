@@ -38,6 +38,8 @@ public class PhysicsAccummulator {
 		
 		EntityMoveableRollingStock movable = ((EntityMoveableRollingStock)stock);
 		
+		movable.predictCollisionHardness(pos);
+		
 		// SHOULD THIS HAVE DIRECTION MULT?
 		double stockMassLb = 2.20462 * stock.getWeight();
 		rollingResistanceNewtons += 0.0015 * stockMassLb * 4.44822f;
@@ -78,9 +80,6 @@ public class PhysicsAccummulator {
 		double currentMCVelocity = pos.speed.minecraft();
 		double deltaAccellTractiveMCVelocity = Speed.fromMetric(tractiveAccell).minecraft();
 		
-		double[] blockCollisionAccell = {blockCollisionForceNewtons[0] / massToMoveKg, 0, blockCollisionForceNewtons[1] / massToMoveKg};
-		double[] deltaAccellBlockCollisionMCVelocity = {Speed.fromMetric(blockCollisionAccell[0]).minecraft(), 0, Speed.fromMetric(blockCollisionAccell[1]).minecraft()};
-		
 		double deltaAccellGradeMCVelocity = Speed.fromMetric(gradeAccell).minecraft();
 		
 		double deltaAccellRollingResistanceMCVelocity = Speed.fromMetric(resistanceAccell).minecraft();
@@ -93,15 +92,6 @@ public class PhysicsAccummulator {
 
 		if (Math.abs(newMCVelocity) < 0.001) {
 			newMCVelocity = 0;
-		}
-		
-		//if (blockCollisionForceNewtons[0] != 0.0 || blockCollisionForceNewtons[1] != 0.0)ImmersiveRailroading.info("blockCollisionForceNewtons : %s;%s, speed: %s\n", blockCollisionForceNewtons[0], blockCollisionForceNewtons[1], Speed.fromMinecraft(newMCVelocity).metric());
-		
-		if (newMCVelocity > 0 && blockCollisionForceNewtons[1] != 0) {
-			newMCVelocity -= deltaAccellBlockCollisionMCVelocity[1] > Math.abs(newMCVelocity) ? newMCVelocity : deltaAccellBlockCollisionMCVelocity[1];
-		}
-		else if(newMCVelocity < 0 && blockCollisionForceNewtons[0] != 0) {
-			newMCVelocity -= deltaAccellBlockCollisionMCVelocity[0] > Math.abs(newMCVelocity) ? newMCVelocity : -deltaAccellBlockCollisionMCVelocity[0];
 		}
 		
 		return Speed.fromMinecraft(newMCVelocity);
