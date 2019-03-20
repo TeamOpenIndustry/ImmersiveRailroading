@@ -19,6 +19,8 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.entity.CarArtillery;
+import cam72cam.immersiverailroading.registry.CarArtilleryDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
@@ -28,6 +30,7 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
 
 public class StockModel extends OBJRender {
@@ -97,6 +100,8 @@ public class StockModel extends OBJRender {
 			drawSteamLocomotive((LocomotiveSteam) stock);
 		} else if (stock instanceof LocomotiveDiesel) {
 			drawDieselLocomotive((LocomotiveDiesel)stock);
+		} else if (stock instanceof CarArtillery) {
+			drawArtillery((CarArtillery)stock);
 		} else if (stock instanceof EntityMoveableRollingStock) {
 			drawStandardStock((EntityMoveableRollingStock) stock);
 		} else {
@@ -214,6 +219,53 @@ public class StockModel extends OBJRender {
 		}
 	}
 
+	private void drawArtillery(CarArtillery stock) {
+		drawStandardStock(stock);
+		CarArtilleryDefinition def = stock.getDefinition();
+		
+		switch (def.projectileType) {
+		case ROCKET:
+			break;
+		case GUN:
+			drawGunArtillery(stock);
+			break;
+		}
+	}
+	
+	private void drawGunArtillery(CarArtillery stock) {
+		EntityRollingStockDefinition def = stock.getDefinition();
+		
+		drawStandardStock(stock);
+		
+		RenderComponent barrel = def.getComponent(RenderComponentType.GUN_BARREL, stock.gauge);
+		RenderComponent breech = def.getComponent(RenderComponentType.GUN_BREECH, stock.gauge);
+		RenderComponent turret = def.getComponent(RenderComponentType.GUN_TURRET, stock.gauge);
+		Vec3d pivotX = def.getComponent(RenderComponentType.GUN_PIVOT_X, stock.gauge).center();
+		Vec3d pivotY = new Vec3d(0, 0, 0);
+		if(turret != null) pivotY = def.getComponent(RenderComponentType.GUN_PIVOT_Y, stock.gauge).center();
+		Rotations rot = stock.getTurretOrient();
+		GL11.glPushMatrix();
+		{
+			GL11.glTranslated(pivotX.x, pivotX.y, pivotX.z);
+			GL11.glRotated(rot.getX(), 0, 0, 1);
+			if (turret == null) GL11.glRotated(-rot.getY(), 0, 1, 0);
+			GL11.glTranslated(-pivotX.x, -pivotX.y, -pivotX.z);
+			drawComponent(breech);
+			GL11.glTranslated(-stock.recoilStroke, 0, 0);
+			drawComponent(barrel);
+		}
+		GL11.glPopMatrix();
+		
+		GL11.glPushMatrix();
+		if (turret != null) {
+			GL11.glTranslated(pivotY.x, pivotY.y, pivotY.z);
+			GL11.glRotated(-rot.getY(), 0, 1, 0);
+			GL11.glTranslated(-pivotY.x, -pivotY.y, -pivotY.z);
+			drawComponent(turret);
+		}
+		GL11.glPopMatrix();
+	}
+	
 	private void drawDieselLocomotive(EntityMoveableRollingStock stock) {
 		EntityRollingStockDefinition def = stock.getDefinition();
 		

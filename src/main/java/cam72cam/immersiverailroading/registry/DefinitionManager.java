@@ -52,6 +52,7 @@ public class DefinitionManager {
 		jsonLoaders.put("freight", (String defID, JsonObject data) -> new CarFreightDefinition(defID, data));
 		jsonLoaders.put("tank", (String defID, JsonObject data) -> new CarTankDefinition(defID, data));
 		jsonLoaders.put("hand_car", (String defID, JsonObject data) -> new HandCarDefinition(defID, data));
+		jsonLoaders.put("artillery", (String defID, JsonObject data) -> new CarArtilleryDefinition(defID, data));
 	}
 	
 	private static void initGauges() throws IOException {

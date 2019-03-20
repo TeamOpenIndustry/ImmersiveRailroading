@@ -74,6 +74,14 @@ public enum ItemComponentType {
 	LIFTING_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.LIFTING_LINK_SIDE),
 	REACH_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.REACH_ROD_SIDE),
 	
+	GUN_TURRET(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.GUN_TURRET),
+	GUN_BREECH(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.GUN_BREECH),
+	GUN_BARREL(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.GUN_BARREL),
+	
+	MISSILE_X(AssemblyStep.SHELL, CraftingType.CASTING),
+	MISSILE_LAUNCHER(AssemblyStep.SHELL, CraftingType.CASTING),
+	
+	
 	// LEGACY, how do we depricate this??
 	WALCHERTS_LINKAGE(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, 
 			RenderComponentType.UNION_LINK_SIDE,
