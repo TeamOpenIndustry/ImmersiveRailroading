@@ -26,6 +26,7 @@ import cam72cam.immersiverailroading.entity.CarArtillery;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.entity.EntityArtilleryStrike;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
@@ -211,6 +212,7 @@ public abstract class CommonProxy implements IGuiHandler {
         	lastEntityID ++;
         	EntityRegistry.registerModEntity(new ResourceLocation(ImmersiveRailroading.MODID, type.getSimpleName()), type, type.getSimpleName(), lastEntityID, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE, 20, false);	
     	}
+    	EntityRegistry.registerModEntity(new ResourceLocation(ImmersiveRailroading.MODID, EntityArtilleryStrike.class.getSimpleName()), EntityArtilleryStrike.class, EntityArtilleryStrike.class.getSimpleName(), ++lastEntityID, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE, 20, true);
     }
 	
 	@SubscribeEvent

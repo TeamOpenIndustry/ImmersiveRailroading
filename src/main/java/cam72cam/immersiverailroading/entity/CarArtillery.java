@@ -1,21 +1,21 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.UUID;
+import javax.vecmath.Matrix3d;
 
-import com.google.common.base.Optional;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.registry.CarArtilleryDefinition;
-import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
@@ -24,18 +24,19 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
 public class CarArtillery extends CarFreight {
 
+	private static DataParameter<Float> RECOIL_FORCE = EntityDataManager.createKey(CarArtillery.class, DataSerializers.FLOAT);
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(CarArtillery.class, DataSerializers.FLOAT);
 	private static DataParameter<BlockPos> POINT_OF_AIM = EntityDataManager.createKey(CarArtillery.class, DataSerializers.BLOCK_POS);
 	private static DataParameter<Float> RELOAD_TIME = EntityDataManager.createKey(CarArtillery.class, DataSerializers.FLOAT);
 	private static DataParameter<Rotations> TURRET_ORIENT = EntityDataManager.createKey(CarArtillery.class, DataSerializers.ROTATIONS);
-	protected static DataParameter<Optional<UUID>> SFX_PLAYER = EntityDataManager.createKey(CarArtillery.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+	//protected static DataParameter<Optional<UUID>> SFX_PLAYER = EntityDataManager.createKey(CarArtillery.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 	
-	private Rotations orientTarget;
+	private Rotations orientTarget = new Rotations(0, 0, 0);
 	public float recoilStroke = 0;
 	private static final float airBrakeNotch = 0.04f;
 	
@@ -46,48 +47,57 @@ public class CarArtillery extends CarFreight {
 	public CarArtillery(World world, String defID) {
 		super(world, defID);
 		
+		this.getDataManager().register(RECOIL_FORCE, 0f);
 		this.getDataManager().register(AIR_BRAKE, 0f);
 		this.getDataManager().register(POINT_OF_AIM, BlockPos.ORIGIN);
 		this.getDataManager().register(RELOAD_TIME, 0f);
 		this.getDataManager().register(TURRET_ORIENT, new Rotations(0, 0, 0));
-		this.getDataManager().register(SFX_PLAYER, Optional.absent());
+		//this.getDataManager().register(SFX_PLAYER, Optional.absent());
 
 		this.entityCollisionReduction = 0.99F;
 	}
 
 	public void fire() {
-		if (world.isRemote) recoilStroke += 5;
+		Vec3d shotInfo = getDefinition().getProjectileInfo();
+		dataManager.set(RECOIL_FORCE, (float)(shotInfo.x * shotInfo.z));
 		
-		Vec3d muzzle = getDefinition().getComponent(RenderComponentType.GUN_BARREL, this.gauge).max();
-		Vec3d projectile = getDefinition().getProjectile();
+		Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
+		Vec3d muzzle = muzzlePosition();
+		muzzle = VecUtil.rotateWrongYaw(muzzle, this.rotationYaw + 180);
 		if (Config.ConfigDamage.explosionsEnabled) {
-				Explosion explosion = new Explosion(this.world, this, this.posX + muzzle.x, this.posY + muzzle.y, this.posZ + muzzle.z, 10f, false, false);
-				ImmersiveRailroading.info("Muzzle at %f %f %f", explosion.getPosition().x, explosion.getPosition().y, explosion.getPosition().z);
-				explosion.doExplosionA();
-				explosion.doExplosionB(true);
+				world.createExplosion(this, this.posX + muzzle.x, this.posY + muzzle.y, this.posZ + muzzle.z, 3f, false);
 		}
 		
-		dataManager.set(RELOAD_TIME, this.ticksExisted + 20f);
+		double dispersion = this.getDefinition().getAccuracy() * (new Vec3d(getAimPoint()).subtract(this.getPositionVector()).lengthVector() / this.getDefinition().getRange());
+		Vec3d hitCoord = new Vec3d(getAimPoint().getX() + dispersion * (this.rand.nextDouble() - 0.5), 255, getAimPoint().getZ() + dispersion * (this.rand.nextDouble() - 0.5));
+		int ticksInFlight = (int)Math.floor((2 * shotInfo.z * Math.sin(Math.toRadians(curOrientVec.x))) / 9.81) * 20;
+		ImmersiveRailroading.info("Firing at %f,%f", hitCoord.x, hitCoord.z);
+		ChunkManager.flagEntityPos(world, new BlockPos(hitCoord));
+		world.spawnEntity(new EntityArtilleryStrike(this.world, hitCoord, (float)shotInfo.x, (float)shotInfo.z, (float)shotInfo.y, ticksInFlight));
+		dataManager.set(RELOAD_TIME, this.ticksExisted + 60f);
+		triggerResimulate();
 	}
 	
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setLong("target", getAimPoint().toLong());
 		nbttagcompound.setFloat("brake", getAirBrake());
 		nbttagcompound.setFloat("reload", this.getReloadTime());
 		nbttagcompound.setTag("turret", this.getTurretOrient().writeToNBT());
+		nbttagcompound.setLong("targetPoint", getAimPoint().toLong());
+		nbttagcompound.setTag("targetRot", this.orientTarget.writeToNBT());
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		super.readEntityFromNBT(nbttagcompound);
-		dataManager.set(POINT_OF_AIM, BlockPos.fromLong(nbttagcompound.getLong("target")));
 		setAirBrake(nbttagcompound.getFloat("brake"));
-		dataManager.set(RELOAD_TIME, nbttagcompound.getFloat("reload"));
+		//dataManager.set(RELOAD_TIME, nbttagcompound.getFloat("reload"));
 		NBTTagList nbttaglist = nbttagcompound.getTagList("turret", 5);
 		dataManager.set(TURRET_ORIENT, nbttaglist.hasNoTags() ? new Rotations(0,0,0) : new Rotations(nbttaglist));
-		orientTarget = dataManager.get(TURRET_ORIENT);
+		dataManager.set(POINT_OF_AIM, BlockPos.fromLong(nbttagcompound.getLong("targetPoint")));
+		NBTTagList nbttaglist2 = nbttagcompound.getTagList("targetRot", 5);
+		orientTarget = nbttaglist2.hasNoTags() ? new Rotations(0,0,0) : new Rotations(nbttaglist2);
 	}
 	
 	@Override
@@ -128,24 +138,34 @@ public class CarArtillery extends CarFreight {
 		super.onUpdate();
 		
 		if (!world.isRemote) {
+			if (this.ticksExisted % 20 == 0) {
+				Vec3d muzzle = muzzlePosition();
+				muzzle = VecUtil.rotateWrongYaw(muzzle, this.rotationYaw + 180);
+				ImmersiveRailroading.info("My sides %s", muzzle.toString());
+			}
 			if (orientTarget != null) {
 				Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
 				Vec3d targOrientVec = new Vec3d(orientTarget.getX(), orientTarget.getY(), orientTarget.getZ());
 				Vec3d turningVec = targOrientVec.subtract(curOrientVec);
 				if (turningVec.lengthSquared() > 1) {
 					Rotations newOrient = new Rotations( 
-							(float)(curOrientVec.x + Math.min(Math.abs(turningVec.x), 0.05) * Math.signum(turningVec.x)), 
-							(float)(curOrientVec.y + Math.min(Math.abs(turningVec.y), 0.05) * Math.signum(turningVec.y)), 
-							(float)(curOrientVec.z + Math.min(Math.abs(turningVec.z), 0.05) * Math.signum(turningVec.z)));
-					// ImmersiveRailroading.info("Turning %f, %f, %f", turningVec.x, turningVec.y, turningVec.z);
+							(float)(curOrientVec.x + Math.min(Math.abs(turningVec.x), this.getDefinition().getRotSpeed(0)) * Math.signum(turningVec.x)), 
+							(float)(curOrientVec.y + Math.min(Math.abs(turningVec.y), this.getDefinition().getRotSpeed(1)) * Math.signum(turningVec.y)), 
+							(float)(curOrientVec.z)
+					);
 					dataManager.set(TURRET_ORIENT, newOrient);
 				}
 			}
 		} else {
-			if (recoilStroke > 0.05) {
-				ImmersiveRailroading.info("recoilling %f", recoilStroke);
-				recoilStroke -= 0.05;
-			}
+			if (dataManager.get(RECOIL_FORCE) != 0 && recoilStroke == 0) recoilStroke = this.getDefinition().getRecoilLength();
+			if (recoilStroke > 0) {
+				Vec3d shotInfo = getDefinition().getProjectileInfo();
+				// Fudged value
+				recoilStroke -= 15/shotInfo.x;
+			} 
+			if (recoilStroke < 0) {
+				recoilStroke = 0;
+			}	
 		}
 	}
 	
@@ -169,9 +189,16 @@ public class CarArtillery extends CarFreight {
 		}
 	}
 	
+	public float getApplyRecoilForce() {
+		float a = -dataManager.get(RECOIL_FORCE);
+		dataManager.set(RECOIL_FORCE, 0f);
+		return a;
+	}
+	
 	public float getReloadTime() {
 		return dataManager.get(RELOAD_TIME);
 	}
+	/**Returns rotation as (Pitch, Yaw, Roll [Not used]) **/
 	public Rotations getTurretOrient() {
 		return dataManager.get(TURRET_ORIENT);
 	}
@@ -193,13 +220,13 @@ public class CarArtillery extends CarFreight {
 	
 	public Rotations angleToTarget(BlockPos target) {
 		CarArtilleryDefinition def = this.getDefinition();
-		Vec3d projectileInfo = def.getProjectile();
+		Vec3d projectileInfo = def.getProjectileInfo();
 		Vec3d targPos = new Vec3d(target);
 		Vec3d pos = this.getPositionVector();
 		double targetDistance = targPos.subtract(pos).lengthVector();
 		if (targetDistance > def.getRange()) return null;
 		
-		float yawToTarget = VecUtil.toWrongYaw(targPos.subtract(pos)) - this.rotationYaw + 180;
+		float yawToTarget = VecUtil.toWrongYaw(targPos.subtract(pos)) - this.rotationYaw;
 		yawToTarget = (yawToTarget + 180) % 360 - 180;
 		ImmersiveRailroading.info("Yawing, %f", yawToTarget);
 		if (Math.abs(yawToTarget) > (def.orientLimit.getY()/2)) {
@@ -211,11 +238,55 @@ public class CarArtillery extends CarFreight {
 		float pitchToTarget2 = 90 - pitchToTarget;
 		ImmersiveRailroading.info("Pitching, %f", pitchToTarget);
 		if (pitchToTarget < def.orientLimit.getX() && pitchToTarget > 45) {
-			return new Rotations(pitchToTarget, yawToTarget, 0f);
+			return new Rotations(pitchToTarget - this.rotationPitch, yawToTarget, 0f);
 		}
 		else if (pitchToTarget2 < def.orientLimit.getX() && pitchToTarget2 > 45) {
-			return new Rotations(pitchToTarget2, yawToTarget, 0f);
+			return new Rotations(pitchToTarget2 - this.rotationPitch, yawToTarget, 0f);
 		}
 		return null;
+	}
+	
+	public Vec3d muzzlePosition() {
+		CarArtilleryDefinition def = this.getDefinition(); 
+		RenderComponent barrel = def.getComponent(RenderComponentType.GUN_BARREL, this.gauge);
+		RenderComponent turret = def.getComponent(RenderComponentType.GUN_TURRET, this.gauge);
+		Vec3d pivotX = def.getComponent(RenderComponentType.GUN_PIVOT_X, this.gauge).center();
+		Vec3d pivotY = new Vec3d(0, 0, 0);
+		if(turret != null) pivotY = def.getComponent(RenderComponentType.GUN_PIVOT_Y, this.gauge).center();
+		util.Matrix4 matrix = new util.Matrix4();
+		
+		Vec3d rot = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
+		if (turret == null) {
+			matrix.rotate(Math.toRadians(-rot.y), 0, 1, 0);
+		} else {
+			matrix.translate(pivotY.x, pivotY.y, pivotY.z);
+			matrix.rotate(Math.toRadians(-rot.y), 0, 1, 0);
+			matrix.translate(-pivotY.x, -pivotY.y, -pivotY.z);
+		}
+		matrix.translate(pivotX.x, pivotX.y, pivotX.z);
+		matrix.rotate(Math.toRadians(-rot.x), 0, 0, 1);
+		matrix.translate(-pivotX.x, -pivotX.y, -pivotX.z);
+		matrix.translate(-barrel.length()/2, 0, 0);
+		return matrix.apply(barrel.center());
+	}
+	
+	public double slipCoefficient() {
+		double slipMult = 1.0;
+		World world = getEntityWorld();
+		if (world.isRaining() && world.canSeeSky(getPosition())) {
+			Biome biome = world.getBiome(getPosition());
+			if (biome.canRain()) {
+				slipMult = 0.6;
+			}
+			if (biome.isSnowyBiome()) {
+				slipMult = 0.4;
+			}
+		}
+		// Wheel balance messing with friction
+		if (this.getCurrentSpeed().metric() != 0) {
+			double balance = 1 - 0.004 * Math.abs(this.getCurrentSpeed().metric());
+			slipMult *= balance;
+		}
+		return slipMult;
 	}
 }

@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.entity.CarArtillery;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
@@ -50,6 +51,11 @@ public class PhysicsAccummulator {
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
 			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient();
 			brakeAdhesionNewtons += loco.getDefinition().getStartingTractionNewtons(stock.gauge); 
+		} else if (stock instanceof CarArtillery) {
+			CarArtillery art = (CarArtillery) stock;
+			tractiveEffortNewtons += art.getApplyRecoilForce() * (direction ? 1 : -1);
+			airBrake += Math.min(1, Math.pow(art.getAirBrake(), 2)) * art.slipCoefficient();
+			brakeAdhesionNewtons += stock.getWeight() * 0.25 * 0.25 * 4.44822f; 
 		} else {
 			// Air brake only applies 1/4th
 			// 0.25 = steel wheel on steel rail	

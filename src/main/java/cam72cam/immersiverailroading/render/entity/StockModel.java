@@ -246,24 +246,32 @@ public class StockModel extends OBJRender {
 		Rotations rot = stock.getTurretOrient();
 		GL11.glPushMatrix();
 		{
+			if (turret == null) { 
+				GL11.glRotated(-rot.getY(), 0, 1, 0); 
+			} else {
+				GL11.glTranslated(pivotY.x, pivotY.y, pivotY.z);
+				GL11.glRotated(-rot.getY(), 0, 1, 0);
+				GL11.glTranslated(-pivotY.x, -pivotY.y, -pivotY.z);
+			}
 			GL11.glTranslated(pivotX.x, pivotX.y, pivotX.z);
-			GL11.glRotated(rot.getX(), 0, 0, 1);
-			if (turret == null) GL11.glRotated(-rot.getY(), 0, 1, 0);
+			GL11.glRotated(-rot.getX(), 0, 0, 1);
 			GL11.glTranslated(-pivotX.x, -pivotX.y, -pivotX.z);
 			drawComponent(breech);
-			GL11.glTranslated(-stock.recoilStroke, 0, 0);
+			GL11.glTranslated(stock.recoilStroke, 0, 0);
 			drawComponent(barrel);
 		}
 		GL11.glPopMatrix();
 		
-		GL11.glPushMatrix();
 		if (turret != null) {
+			GL11.glPushMatrix();
+			
 			GL11.glTranslated(pivotY.x, pivotY.y, pivotY.z);
 			GL11.glRotated(-rot.getY(), 0, 1, 0);
 			GL11.glTranslated(-pivotY.x, -pivotY.y, -pivotY.z);
 			drawComponent(turret);
+			
+			GL11.glPopMatrix();
 		}
-		GL11.glPopMatrix();
 	}
 	
 	private void drawDieselLocomotive(EntityMoveableRollingStock stock) {

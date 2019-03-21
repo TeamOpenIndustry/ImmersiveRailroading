@@ -29,6 +29,10 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 	private float muzzleVelocity;
 	private float projectileMass;
 	private float projectileExplosive;
+	private float recoilLength;
+	private float accuracy;
+	private float[] rotSpeed = {0,0};
+	
 	public Rotations orientLimit;
 	public ARTILLERYTYPE projectileType;
 	
@@ -44,14 +48,21 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 		muzzleVelocity = artillery.get("velocity").getAsFloat();
 		projectileMass = artillery.get("mass").getAsFloat();
 		projectileExplosive = artillery.get("explosive").getAsFloat();
+		accuracy = artillery.get("dispersion_at_max_range").getAsFloat();
+		
 		orientLimit = new Rotations(artillery.get("elevation").getAsInt(), artillery.get("traverse").getAsInt(), 0);
+		rotSpeed[0] = artillery.get("elevation_speed").getAsFloat();
+		rotSpeed[1] = artillery.get("traverse_speed").getAsFloat();
+		
 		String typeOfProjectile = artillery.get("type").getAsString();
 		switch(typeOfProjectile) {
 		case "missile":
 			projectileType = ARTILLERYTYPE.ROCKET;
+			
 			break;
 		case "gun":
 			projectileType = ARTILLERYTYPE.GUN;
+			recoilLength = artillery.get("recoil_stroke").getAsFloat();
 			break;
 		default:
 			ImmersiveRailroading.warn("Invalid projectile type %s in %s", typeOfProjectile, defID);
@@ -60,7 +71,7 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 	}
 	
 	/** Returns a packaged Vec3d(projectileMass, projectileExplosive, muzzleVelocity) **/
-	public Vec3d getProjectile() {
+	public Vec3d getProjectileInfo() {
 		return new Vec3d(projectileMass, projectileExplosive, muzzleVelocity);
 	}
 	
@@ -75,6 +86,18 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 		return tips;
 	}
 	
+	public float getRecoilLength() {
+		return recoilLength;
+	}
+	
+	public float getAccuracy() {
+		return accuracy;
+	}
+	
+	public float getRotSpeed(int i) {
+		return rotSpeed[i];
+	}
+
 	@Override
 	public EntityRollingStock instance(World world) {
 		return new CarArtillery(world, defID);
