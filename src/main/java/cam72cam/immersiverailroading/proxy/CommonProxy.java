@@ -137,6 +137,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(SoundPacket.Handler.class, SoundPacket.class, 10, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(PaintSyncPacket.Handler.class, PaintSyncPacket.class, 11, Side.CLIENT);
 	ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
+		ImmersiveRailroading.net.registerMessage(CarArtilleryUpdatePacket.Handler.class, CarArtilleryUpdatePacket.class, 13, Side.SERVER);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
@@ -322,6 +323,8 @@ public abstract class CommonProxy implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int entityIDorX, int y, int z) {
     	switch(GuiTypes.values()[ID]) {
+    	case ARTILLERY:
+	    	return new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorX));
 		case FREIGHT:
 	    	return new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorX));
 		case TANK:

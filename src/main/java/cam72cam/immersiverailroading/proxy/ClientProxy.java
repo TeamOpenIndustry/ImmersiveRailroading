@@ -28,6 +28,7 @@ import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.entity.CarArtillery;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
@@ -36,6 +37,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.gui.ArtilleryGUI;
 import cam72cam.immersiverailroading.gui.CastingGUI;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
@@ -180,6 +182,9 @@ public class ClientProxy extends CommonProxy {
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityIDorPosX, int posY, int posZ) {
 		TileMultiblock te;
 		switch (GuiTypes.values()[ID]) {
+		case ARTILLERY:
+			return new ArtilleryGUI((CarArtillery) world.getEntityByID(entityIDorPosX),
+					new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorPosX)));
 		case FREIGHT:
 			return new FreightContainerGui((CarFreight) world.getEntityByID(entityIDorPosX),
 					new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorPosX)));

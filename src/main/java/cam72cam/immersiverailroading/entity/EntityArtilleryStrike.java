@@ -76,7 +76,7 @@ public class EntityArtilleryStrike extends Entity {
 		ChunkManager.flagEntityPos(this.world, this.getPosition());
 		
 		if (impactTimeTicks <= -1) {
-			if (this.ticksExisted % 20 == 0) ImmersiveRailroading.info("Incoming strike at %f,%f ; T%d", this.getPositionVector().x, this.getPositionVector().z, -impactTimeTicks);
+			//if (this.ticksExisted % 20 == 0) ImmersiveRailroading.info("Incoming strike at %f,%f ; T%d", this.getPositionVector().x, this.getPositionVector().z, -impactTimeTicks);
 			this.motionY -= 0.05000000074505806D;
 	        this.setPosition(this.posX, this.posY, this.posZ);
 	        this.doBlockCollisions();
@@ -189,13 +189,13 @@ public class EntityArtilleryStrike extends Entity {
 	            this.doBlockCollisions();
 	        }
 		} else {
-			if (this.ticksExisted % 20 == 0) ImmersiveRailroading.info("Strike in flight to %f,%f ; T%d", this.getPositionVector().x, this.getPositionVector().z, -impactTimeTicks);
+			//if (this.ticksExisted % 20 == 0) ImmersiveRailroading.info("Strike in flight to %f,%f ; T%d", this.getPositionVector().x, this.getPositionVector().z, -impactTimeTicks);
 		}
 	}
 	
 	protected void impact(BlockPos pos) {
 		Vec3d posVec = new Vec3d(pos);
-		ImmersiveRailroading.info("Impact at %f,%f,%f ; T%d", posVec.x, posVec.y, posVec.z, -impactTimeTicks);
+		//ImmersiveRailroading.info("Impact at %f,%f,%f ; T%d", posVec.x, posVec.y, posVec.z, -impactTimeTicks);
 		if (this.projectileExplosive > 0) {
 			world.createExplosion(this, posVec.x, posVec.y, posVec.z,
 					Config.ConfigDamage.explosionsEnabled ? projectileExplosive : 0f, 

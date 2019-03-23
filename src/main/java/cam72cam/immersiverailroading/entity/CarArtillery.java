@@ -1,14 +1,13 @@
 package cam72cam.immersiverailroading.entity;
 
-import javax.vecmath.Matrix3d;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Matrix;
-
-import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.inventory.SlotFilter;
+import cam72cam.immersiverailroading.items.nbt.ItemComponent;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
@@ -16,11 +15,15 @@ import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.registry.CarArtilleryDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
@@ -57,7 +60,31 @@ public class CarArtillery extends CarFreight {
 		this.entityCollisionReduction = 0.99F;
 	}
 
-	public void fire() {
+	public void attemptFire() {
+		if (getReloadTime() > ticksExisted) return;
+		Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
+		Vec3d targOrientVec = new Vec3d(orientTarget.getX(), orientTarget.getY(), orientTarget.getZ());
+		Vec3d turningVec = targOrientVec.subtract(curOrientVec);
+		int chargeSlot = -1, projectileSlot = -1;
+		for (int i = 0; i < this.cargoItems.getSlots(); i++) {
+			ItemStack itemStack = this.cargoItems.getStackInSlot(i);
+			if (itemStack.getItem() == IRItems.ITEM_ROLLING_STOCK_COMPONENT && 
+				ItemComponent.getComponentType(itemStack) == ItemComponentType.GUN_PROJECTILE && 
+				ItemDefinition.getID(itemStack).equals(this.defID)) {
+				projectileSlot = i;
+			}
+			if (itemStack.getItem().equals(Items.GUNPOWDER)) {
+				chargeSlot = i;
+			}
+			if (projectileSlot != -1 && chargeSlot != -1) break;
+		}
+		if (projectileSlot == -1 || chargeSlot == -1) return;
+		if (aim(this.getAimPoint()) && turningVec.lengthSquared() <= 2) fire();
+		this.cargoItems.getStackInSlot(chargeSlot).shrink(this.getDefinition().getChargeAmount());
+		this.cargoItems.getStackInSlot(projectileSlot).shrink(1);
+	}
+	
+	private void fire() {
 		Vec3d shotInfo = getDefinition().getProjectileInfo();
 		dataManager.set(RECOIL_FORCE, (float)(shotInfo.x * shotInfo.z));
 		
@@ -74,7 +101,7 @@ public class CarArtillery extends CarFreight {
 		ImmersiveRailroading.info("Firing at %f,%f", hitCoord.x, hitCoord.z);
 		ChunkManager.flagEntityPos(world, new BlockPos(hitCoord));
 		world.spawnEntity(new EntityArtilleryStrike(this.world, hitCoord, (float)shotInfo.x, (float)shotInfo.z, (float)shotInfo.y, ticksInFlight));
-		dataManager.set(RELOAD_TIME, this.ticksExisted + 60f);
+		dataManager.set(RELOAD_TIME, this.ticksExisted + (20 * this.getDefinition().getReloadTime()));
 		triggerResimulate();
 	}
 	
@@ -125,7 +152,7 @@ public class CarArtillery extends CarFreight {
 			Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
 			Vec3d targOrientVec = new Vec3d(orientTarget.getX(), orientTarget.getY(), orientTarget.getZ());
 			Vec3d turningVec = targOrientVec.subtract(curOrientVec);
-			if (turningVec.lengthSquared() <= 2) fire();
+			if (aim(this.getAimPoint()) && turningVec.lengthSquared() <= 2) attemptFire();
 			break;
 		default:
 			super.handleKeyPress(source, key, sprinting);
@@ -138,19 +165,14 @@ public class CarArtillery extends CarFreight {
 		super.onUpdate();
 		
 		if (!world.isRemote) {
-			if (this.ticksExisted % 20 == 0) {
-				Vec3d muzzle = muzzlePosition();
-				muzzle = VecUtil.rotateWrongYaw(muzzle, this.rotationYaw + 180);
-				ImmersiveRailroading.info("My sides %s", muzzle.toString());
-			}
 			if (orientTarget != null) {
 				Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
 				Vec3d targOrientVec = new Vec3d(orientTarget.getX(), orientTarget.getY(), orientTarget.getZ());
 				Vec3d turningVec = targOrientVec.subtract(curOrientVec);
 				if (turningVec.lengthSquared() > 1) {
 					Rotations newOrient = new Rotations( 
-							(float)(curOrientVec.x + Math.min(Math.abs(turningVec.x), this.getDefinition().getRotSpeed(0)) * Math.signum(turningVec.x)), 
-							(float)(curOrientVec.y + Math.min(Math.abs(turningVec.y), this.getDefinition().getRotSpeed(1)) * Math.signum(turningVec.y)), 
+							(float)(curOrientVec.x + Math.min(Math.abs(turningVec.x), this.getDefinition().orientSpeed.getX()/20) * Math.signum(turningVec.x)), 
+							(float)(curOrientVec.y + Math.min(Math.abs(turningVec.y), this.getDefinition().orientSpeed.getY()/20) * Math.signum(turningVec.y)), 
 							(float)(curOrientVec.z)
 					);
 					dataManager.set(TURRET_ORIENT, newOrient);
@@ -175,8 +197,31 @@ public class CarArtillery extends CarFreight {
 	}
 	
 	@Override
+	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		if (player.getHeldItemMainhand().getItem() == Items.LEAD && this.isBuilt()) {
+			this.attemptFire();
+			return true;
+		}
+		if (player.getHeldItemMainhand().getItem() == IRItems.ITEM_ROLLING_STOCK_COMPONENT && 
+			ItemComponent.getComponentType(player.getHeldItem(hand)) == ItemComponentType.GUN_PROJECTILE && 
+			ItemDefinition.getID(player.getHeldItem(hand)).equals(this.defID)) {
+			return false;
+		}
+		
+		return super.processInitialInteract(player, hand);
+	}
+	
+	@Override
 	public GuiTypes guiType() {
-		return GuiTypes.FREIGHT;
+		return GuiTypes.ARTILLERY;
+	}
+	
+	@Override
+	protected void initContainerFilter() {
+		cargoItems.filter.clear();
+		this.cargoItems.filter.put(getInventorySize(), SlotFilter.ANY);
+		this.cargoItems.filter.put(getInventorySize()-1, SlotFilter.GUNPOWDER);
+		this.cargoItems.defaultFilter = SlotFilter.ANY;
 	}
 	
 	public float getAirBrake() {
@@ -205,16 +250,18 @@ public class CarArtillery extends CarFreight {
 	public BlockPos getAimPoint() {
 		return dataManager.get(POINT_OF_AIM);
 	}
-	public void aim(BlockPos target) {
+	public Boolean aim(BlockPos target) {
 		Rotations set = angleToTarget(target);
 		ImmersiveRailroading.info("Firing solution for %d, %d", target.getX(), target.getY());
 		if (set != null) {
 			ImmersiveRailroading.info("Laying gun");
 			orientTarget = set;
 			dataManager.set(POINT_OF_AIM, target);
+			return true;
 		}
 		else {
 			ImmersiveRailroading.info("Out of line");
+			return false;
 		}
 	}
 	

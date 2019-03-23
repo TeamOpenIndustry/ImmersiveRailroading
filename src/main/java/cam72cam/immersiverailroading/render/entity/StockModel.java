@@ -229,6 +229,8 @@ public class StockModel extends OBJRender {
 		case GUN:
 			drawGunArtillery(stock);
 			break;
+		default:
+			break;
 		}
 	}
 	

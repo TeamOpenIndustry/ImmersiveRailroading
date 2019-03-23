@@ -1,22 +1,16 @@
 package cam72cam.immersiverailroading.registry;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarArtillery;
-import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -29,10 +23,13 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 	private float muzzleVelocity;
 	private float projectileMass;
 	private float projectileExplosive;
-	private float recoilLength;
+	private int chargeAmount;
 	private float accuracy;
-	private float[] rotSpeed = {0,0};
+	private float reloadTime;
+	private float recoilLength;
 	
+	
+	public Rotations orientSpeed;
 	public Rotations orientLimit;
 	public ARTILLERYTYPE projectileType;
 	
@@ -50,9 +47,10 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 		projectileExplosive = artillery.get("explosive").getAsFloat();
 		accuracy = artillery.get("dispersion_at_max_range").getAsFloat();
 		
+		reloadTime = artillery.get("reload_time").getAsFloat();
+		
 		orientLimit = new Rotations(artillery.get("elevation").getAsInt(), artillery.get("traverse").getAsInt(), 0);
-		rotSpeed[0] = artillery.get("elevation_speed").getAsFloat();
-		rotSpeed[1] = artillery.get("traverse_speed").getAsFloat();
+		orientSpeed = new Rotations(artillery.get("elevation_speed").getAsFloat(), artillery.get("traverse_speed").getAsFloat(), 0);
 		
 		String typeOfProjectile = artillery.get("type").getAsString();
 		switch(typeOfProjectile) {
@@ -66,8 +64,18 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 			break;
 		default:
 			ImmersiveRailroading.warn("Invalid projectile type %s in %s", typeOfProjectile, defID);
-			
+			throw new NullPointerException("Invalid projectile type");
 		}
+		
+		// Fudged values
+		chargeAmount = (int) Math.floor(Math.min(64, Math.max(1, (0.5 * projectileMass * Math.pow(muzzleVelocity,2))/800_000)));
+	}
+	
+	@Override
+	public List<String> getTooltip(Gauge gauge) {
+		List<String> tips = super.getTooltip(gauge);
+		//tips.add(GuiText.FREIGHT_CAPACITY_TOOLTIP.toString(this.getInventorySize(gauge)));
+		return tips;
 	}
 	
 	/** Returns a packaged Vec3d(projectileMass, projectileExplosive, muzzleVelocity) **/
@@ -79,23 +87,20 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 		return range;
 	}
 	
-	@Override
-	public List<String> getTooltip(Gauge gauge) {
-		List<String> tips = super.getTooltip(gauge);
-		tips.add(GuiText.FREIGHT_CAPACITY_TOOLTIP.toString(this.getInventorySize(gauge)));
-		return tips;
-	}
-	
-	public float getRecoilLength() {
-		return recoilLength;
-	}
-	
 	public float getAccuracy() {
 		return accuracy;
 	}
 	
-	public float getRotSpeed(int i) {
-		return rotSpeed[i];
+	public float getReloadTime() {
+		return reloadTime;
+	}
+
+	public float getRecoilLength() {
+		return recoilLength;
+	}
+
+	public int getChargeAmount() {
+		return chargeAmount;
 	}
 
 	@Override
@@ -118,11 +123,14 @@ public class CarArtilleryDefinition extends CarFreightDefinition {
 			};
 			break;
 		case GUN:
+			addComponentIfExists(RenderComponent.parse(RenderComponentType.GUN_PROJECTILE, this, groups), true);
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.GUN_TURRET, this, groups), true);
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.GUN_BREECH, this, groups), true);
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.GUN_BARREL, this, groups), true);
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.GUN_PIVOT_X, this, groups), false);
 			addComponentIfExists(RenderComponent.parse(RenderComponentType.GUN_PIVOT_Y, this, groups), false);
+			break;
+		default:
 			break;
 		}
 		return groups;

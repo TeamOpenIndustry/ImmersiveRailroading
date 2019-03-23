@@ -65,6 +65,7 @@ public enum RenderComponentType {
 	REACH_ROD_SIDE("REACH_ROD_#SIDE#"),
 	
 	// Gun Artillery
+	GUN_PROJECTILE("GUN_PROJECTILE"),
 	GUN_TURRET("GUN_TURRET"),
 	GUN_BREECH("GUN_BREECH"),
 	GUN_BARREL("GUN_BARREL"),
