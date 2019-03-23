@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -27,6 +28,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -60,8 +63,8 @@ public class CarArtillery extends CarFreight {
 		this.entityCollisionReduction = 0.99F;
 	}
 
-	public void attemptFire() {
-		if (getReloadTime() > ticksExisted) return;
+	public FIRINGERROR attemptFire() {
+		if (getReloadTime() > ticksExisted) return FIRINGERROR.RELOAD;
 		Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
 		Vec3d targOrientVec = new Vec3d(orientTarget.getX(), orientTarget.getY(), orientTarget.getZ());
 		Vec3d turningVec = targOrientVec.subtract(curOrientVec);
@@ -78,10 +81,14 @@ public class CarArtillery extends CarFreight {
 			}
 			if (projectileSlot != -1 && chargeSlot != -1) break;
 		}
-		if (projectileSlot == -1 || chargeSlot == -1) return;
-		if (aim(this.getAimPoint()) && turningVec.lengthSquared() <= 2) fire();
-		this.cargoItems.getStackInSlot(chargeSlot).shrink(this.getDefinition().getChargeAmount());
-		this.cargoItems.getStackInSlot(projectileSlot).shrink(1);
+		if (projectileSlot == -1 || chargeSlot == -1) return FIRINGERROR.AMMO;
+		FIRINGERROR error = aim(this.getAimPoint());
+		if (error.none() && turningVec.lengthSquared() <= 2) {
+			fire();
+			this.cargoItems.getStackInSlot(chargeSlot).shrink(this.getDefinition().getChargeAmount());
+			this.cargoItems.getStackInSlot(projectileSlot).shrink(1);
+		}
+		return error;
 	}
 	
 	private void fire() {
@@ -144,15 +151,12 @@ public class CarArtillery extends CarFreight {
 			}
 			break;
 		case HORN:
-			aim(BlockPos.ORIGIN);
-			ImmersiveRailroading.info("Taking aim");
+			//aim(BlockPos.ORIGIN);
+			//ImmersiveRailroading.info("Taking aim");
 			break;
 		case DEAD_MANS_SWITCH:
-			if (getReloadTime() > ticksExisted) break;
-			Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
-			Vec3d targOrientVec = new Vec3d(orientTarget.getX(), orientTarget.getY(), orientTarget.getZ());
-			Vec3d turningVec = targOrientVec.subtract(curOrientVec);
-			if (aim(this.getAimPoint()) && turningVec.lengthSquared() <= 2) attemptFire();
+			FIRINGERROR error = attemptFire();
+			if (!error.none() && source instanceof EntityPlayer) source.sendMessage(error.chat());
 			break;
 		default:
 			super.handleKeyPress(source, key, sprinting);
@@ -170,7 +174,7 @@ public class CarArtillery extends CarFreight {
 				Vec3d targOrientVec = new Vec3d(orientTarget.getX(), orientTarget.getY(), orientTarget.getZ());
 				Vec3d turningVec = targOrientVec.subtract(curOrientVec);
 				if (turningVec.lengthSquared() > 1) {
-					Rotations newOrient = new Rotations( 
+					Rotations newOrient = new Rotations(
 							(float)(curOrientVec.x + Math.min(Math.abs(turningVec.x), this.getDefinition().orientSpeed.getX()/20) * Math.signum(turningVec.x)), 
 							(float)(curOrientVec.y + Math.min(Math.abs(turningVec.y), this.getDefinition().orientSpeed.getY()/20) * Math.signum(turningVec.y)), 
 							(float)(curOrientVec.z)
@@ -199,7 +203,8 @@ public class CarArtillery extends CarFreight {
 	@Override
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if (player.getHeldItemMainhand().getItem() == Items.LEAD && this.isBuilt()) {
-			this.attemptFire();
+			FIRINGERROR error = attemptFire();
+			if (!error.none()) player.sendMessage(error.chat());
 			return true;
 		}
 		if (player.getHeldItemMainhand().getItem() == IRItems.ITEM_ROLLING_STOCK_COMPONENT && 
@@ -250,18 +255,58 @@ public class CarArtillery extends CarFreight {
 	public BlockPos getAimPoint() {
 		return dataManager.get(POINT_OF_AIM);
 	}
-	public Boolean aim(BlockPos target) {
+	
+	public void resetTurret() {
+		orientTarget = new Rotations(0, 0, 0);
+		dataManager.set(POINT_OF_AIM, BlockPos.ORIGIN);
+	}
+	
+	public enum FIRINGERROR {
+		NONE(null),
+		YAW(new Rotations(0,-1,0)),
+		FAR(new Rotations(0,-2,0)),
+		SHORT(new Rotations(0,-3,0)),
+		AMMO(null),
+		RELOAD(null);
+		
+		public final Rotations value;
+		FIRINGERROR(Rotations rot) {
+			this.value = rot;
+		}
+		
+		public Boolean none() {
+			if (this == NONE)return true;
+			return false;
+		}
+		
+		public ITextComponent chat() {
+			switch(this) {
+			case YAW:
+				return ChatText.ARTILLERY_OFF_YAW.getMessage();
+			case FAR:
+				return ChatText.ARTILLERY_TOO_FAR.getMessage();
+			case SHORT:
+				return ChatText.ARTILLERY_TOO_SHORT.getMessage();
+			case AMMO:
+				return ChatText.ARTILLERY_NO_AMMO.getMessage();
+			case RELOAD:
+				return ChatText.ARTILLERY_RELOADING.getMessage();
+			default:
+				return null;
+			}
+		}
+	}
+	public FIRINGERROR aim(BlockPos target) {
 		Rotations set = angleToTarget(target);
-		ImmersiveRailroading.info("Firing solution for %d, %d", target.getX(), target.getY());
-		if (set != null) {
-			ImmersiveRailroading.info("Laying gun");
+		ImmersiveRailroading.info("Calculating solution for %d, %d", target.getX(), target.getZ());
+		if (set.equals(FIRINGERROR.YAW.value)) return FIRINGERROR.YAW;
+		else if (set.equals(FIRINGERROR.FAR.value)) return FIRINGERROR.FAR;
+		else if (set.equals(FIRINGERROR.SHORT.value)) return FIRINGERROR.SHORT;
+		else {
+			ImmersiveRailroading.info("Solution found, Laying gun");
 			orientTarget = set;
 			dataManager.set(POINT_OF_AIM, target);
-			return true;
-		}
-		else {
-			ImmersiveRailroading.info("Out of line");
-			return false;
+			return FIRINGERROR.NONE;
 		}
 	}
 	
@@ -271,13 +316,13 @@ public class CarArtillery extends CarFreight {
 		Vec3d targPos = new Vec3d(target);
 		Vec3d pos = this.getPositionVector();
 		double targetDistance = targPos.subtract(pos).lengthVector();
-		if (targetDistance > def.getRange()) return null;
+		if (targetDistance > def.getRange()) return FIRINGERROR.FAR.value;
 		
 		float yawToTarget = VecUtil.toWrongYaw(targPos.subtract(pos)) - this.rotationYaw;
 		yawToTarget = (yawToTarget + 180) % 360 - 180;
 		ImmersiveRailroading.info("Yawing, %f", yawToTarget);
 		if (Math.abs(yawToTarget) > (def.orientLimit.getY()/2)) {
-			return null;
+			return FIRINGERROR.YAW.value;
 		}
 
 		// theta = [90deg -] 1/2 * arcsin((g * d) / v^2)
@@ -290,7 +335,7 @@ public class CarArtillery extends CarFreight {
 		else if (pitchToTarget2 < def.orientLimit.getX() && pitchToTarget2 > 45) {
 			return new Rotations(pitchToTarget2 - this.rotationPitch, yawToTarget, 0f);
 		}
-		return null;
+		return FIRINGERROR.SHORT.value;
 	}
 	
 	public Vec3d muzzlePosition() {

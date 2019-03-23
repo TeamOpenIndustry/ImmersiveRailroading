@@ -32,6 +32,11 @@ public enum ChatText {
 	RADIO_NOLINK("radio.nolink"),
 	RADIO_CANT_LINK("radio.cant_link"),
 	BRUSH_NO_VARIANTS("brush.no.variants"),
+	ARTILLERY_OFF_YAW("artillery.aim.off_yaw"),
+	ARTILLERY_TOO_FAR("artillery.aim.too_far"),
+	ARTILLERY_TOO_SHORT("artillery.aim.too_short"),
+	ARTILLERY_NO_AMMO("artillery.no_ammo"),
+	ARTILLERY_RELOADING("artillery.reloading")
 	;
 	
 	private String value;

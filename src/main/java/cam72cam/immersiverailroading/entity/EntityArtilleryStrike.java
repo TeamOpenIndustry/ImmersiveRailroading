@@ -194,6 +194,7 @@ public class EntityArtilleryStrike extends Entity {
 	}
 	
 	protected void impact(BlockPos pos) {
+		if (pos == null) return;
 		Vec3d posVec = new Vec3d(pos);
 		//ImmersiveRailroading.info("Impact at %f,%f,%f ; T%d", posVec.x, posVec.y, posVec.z, -impactTimeTicks);
 		if (this.projectileExplosive > 0) {

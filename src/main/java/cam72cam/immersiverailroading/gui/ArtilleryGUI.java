@@ -30,6 +30,7 @@ public class ArtilleryGUI extends ContainerGuiBase {
 	
 	private GuiButton aimButton;
 	private GuiButton fireButton;
+	private GuiButton resetButton;
 	private GuiTextField targetXInput;
 	private GuiTextField targetZInput;
 	
@@ -47,13 +48,16 @@ public class ArtilleryGUI extends ContainerGuiBase {
 			if (StringUtils.isNullOrEmpty(inputString)) {
 				return true;
 			}
+			if (inputString == "-") {
+				return true;
+			}
 			int val;
 			try {
 				val = Integer.parseInt(inputString);
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			return val > Int.MinValue() && val < Int.MaxValue();
+			return true;
 		}
 	};
 	
@@ -73,10 +77,14 @@ public class ArtilleryGUI extends ContainerGuiBase {
 		super.initGui();
 		int buttonID = -1;
 
+		resetButton = new GuiButton(++buttonID, this.width / 2 - 100, this.height / 8 - 24 + (buttonID/2) * 22, 200, 20, "Reset");
+		this.buttonList.add(resetButton);
+		++buttonID;
+		
 		fireButton = new GuiButton(++buttonID, this.width / 2 - 100, this.height / 8 - 24 + (buttonID/2) * 22, 100, 20,"Fire");
 		this.buttonList.add(fireButton);
 		
-		aimButton = new GuiButton(++buttonID, this.width / 2 + 50, this.height / 8 - 24 + (buttonID/2) * 22, 100, 20, "Aim");
+		aimButton = new GuiButton(++buttonID, this.width / 2 + 0, this.height / 8 - 24 + (buttonID/2) * 22, 100, 20, "Aim");
 		this.buttonList.add(aimButton);
 		
 		this.targetXInput = new GuiTextField(++buttonID, this.fontRenderer, this.width / 2 - 100, this.height / 8 - 24 + (buttonID/2) * 22, 100, 20);
@@ -85,7 +93,7 @@ public class ArtilleryGUI extends ContainerGuiBase {
 		this.targetXInput.setValidator(this.integerFilter);
 		this.targetXInput.setFocused(false);
 		
-		this.targetZInput = new GuiTextField(++buttonID, this.fontRenderer, this.width / 2 + 50, this.height / 8 - 24 + (buttonID/2) * 22, 100, 20);
+		this.targetZInput = new GuiTextField(++buttonID, this.fontRenderer, this.width / 2 + 0, this.height / 8 - 24 + (buttonID/2) * 22, 100, 20);
 		this.targetZInput.setText("" + targetPos.getZ());
 		this.targetZInput.setMaxStringLength(16);
 		this.targetZInput.setValidator(this.integerFilter);
@@ -111,7 +119,10 @@ public class ArtilleryGUI extends ContainerGuiBase {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == fireButton) {
-			ImmersiveRailroading.net.sendToServer(new CarArtilleryUpdatePacket(stock));
+			ImmersiveRailroading.net.sendToServer(new CarArtilleryUpdatePacket(stock, 2));
+		}
+		else if (button == resetButton) {
+			ImmersiveRailroading.net.sendToServer(new CarArtilleryUpdatePacket(stock, 3));
 		}
 		else if (button == aimButton) {
 			ImmersiveRailroading.net.sendToServer(new CarArtilleryUpdatePacket(stock, new BlockPos(Integer.parseInt(targetXInput.getText()), 63, Integer.parseInt(targetZInput.getText()))));

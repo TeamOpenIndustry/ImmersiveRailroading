@@ -10,8 +10,11 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarArtillery;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.CarArtillery.FIRINGERROR;
+import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -39,16 +42,19 @@ public class CarArtilleryUpdatePacket implements IMessage {
 	public CarArtilleryUpdatePacket(CarArtillery stock, BlockPos target) {
 		this.dimension = stock.dimension;
 		this.entityID = stock.getEntityId();
-		this.order = 2;
+		this.order = 1;
 		this.targetPos = target;
 	}
 	
-	/** Message artillery to fire at current target**/
+	/** Message artillery to:
+	 *  Fire = 2,
+	 *  Reset orientation = 3		
+	 **/
 	@SideOnly(Side.CLIENT)
-	public CarArtilleryUpdatePacket(CarArtillery stock) {
+	public CarArtilleryUpdatePacket(CarArtillery stock, int order) {
 		this.dimension = stock.dimension;
 		this.entityID = stock.getEntityId();
-		this.order = 1;
+		this.order = order;
 	}
 
 	@Override
@@ -89,9 +95,13 @@ public class CarArtilleryUpdatePacket implements IMessage {
 			}
 
 			if (message.order == 1) {
-				matches.get(0).attemptFire();
+				FIRINGERROR error = matches.get(0).aim(message.targetPos);
+				if (!error.none()) ctx.getServerHandler().player.sendMessage(error.chat());
 			} else if (message.order == 2) {
-				matches.get(0).aim(message.targetPos);
+				FIRINGERROR error = matches.get(0).attemptFire();
+				if (!error.none()) ctx.getServerHandler().player.sendMessage(error.chat());
+			} else if (message.order == 3) {
+				matches.get(0).resetTurret();
 			}
 		}
 	}
