@@ -102,7 +102,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (parent != null) {
 			gauge = parent.info.settings.gauge.value();
 		}
-		if (this.getParentReplaced() != null) {
+		if (this.getParentReplaced() != null && world != null) {
 			parent = TileRail.get(world, this.getParentReplaced());
             if (parent != null) {
                 gauge = Math.min(gauge, parent.info.settings.gauge.value());

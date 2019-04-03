@@ -134,13 +134,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		if (nbttagcompound.hasKey("CoupledBack")) {
 			coupledBack = UUID.fromString(nbttagcompound.getString("CoupledBack"));
-			if (nbttagcompound.getTag("lastKnownRear").getId() == 10) {
-				// Legacy
-				// TODO remove 2.0
-				NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownRear");
-				lastKnownRear = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
-			} else {
-				lastKnownRear = BlockPos.fromLong(nbttagcompound.getLong("lastKnownRear"));
+			if (nbttagcompound.hasKey("lastKnownRear")) {
+				if (nbttagcompound.getTag("lastKnownRear").getId() == 10) {
+					// Legacy
+					// TODO remove 2.0
+					NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownRear");
+					lastKnownRear = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
+				} else {
+					lastKnownRear = BlockPos.fromLong(nbttagcompound.getLong("lastKnownRear"));
+				}
 			}
 		}
 		backCouplerEngaged = nbttagcompound.getBoolean("backCouplerEngaged");
