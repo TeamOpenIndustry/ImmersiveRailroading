@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ARBTextureCompression;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
@@ -64,13 +66,29 @@ public class OBJTextureSheet {
 			
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
-			
+
 			if (scale != null) {
 				image = convertToBufferedImage(image.getScaledInstance(scale.apply(realWidth), scale.apply(realHeight), BufferedImage.SCALE_FAST));
 				realWidth = image.getWidth();
 				realHeight = image.getHeight();
 			}
-					
+
+			if (realWidth < 8 || realHeight < 8) {
+				image = convertToBufferedImage(image.getScaledInstance(8, 8, BufferedImage.SCALE_FAST));
+				realWidth = image.getWidth();
+				realHeight = image.getHeight();
+			}
+
+			int nw = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realWidth - 1));
+			int nh = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realHeight - 1));
+
+			if (realWidth != nw || realHeight != nh) {
+				System.out.println("RESIZE " + realWidth + " " + realHeight);
+				image = convertToBufferedImage(image.getScaledInstance(nw, nh, BufferedImage.SCALE_FAST));
+				realWidth = image.getWidth();
+				realHeight = image.getHeight();
+			}
+
 			this.tex = tex;
 			isFlatMaterial = false;
 
@@ -321,11 +339,22 @@ public class OBJTextureSheet {
 		currentY = 0;
 		rowHeight = 0;
 
-		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
-		
+		//TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
+		// GL_BGRA_EXT = 32993
+		// GL_UNSIGNED_INT_8_8_8_8_REV = 33639
+		// ARBTextureCompression.GL_TEXTURE_COMPRESSED_ARB
+		// Internal Mojang/Forge magic...
+		synchronized (net.minecraftforge.fml.client.SplashProgress.class)
+		{
+			TextureUtil.deleteTexture(textureID);
+			GlStateManager.bindTexture(textureID);
+		}
+		// Use compressed ARB
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, ARBTextureCompression.GL_COMPRESSED_RGBA_ARB, sheetWidth, sheetHeight, 0, 32993, 33639, (ByteBuffer)null);
+
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-		
+
         ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
         if (sheetWidth > maxSize || sheetHeight > maxSize)
         	ImmersiveRailroading.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
@@ -347,7 +376,7 @@ public class OBJTextureSheet {
 			currentX += tex.getAbsoluteWidth();
 		}
 	}
-	
+
 	public float convertU(String mtlName, float u) {
 		if (model.materials.containsKey(mtlName)) {
 			ResourceLocation kd = model.materials.get(mtlName).texKd;

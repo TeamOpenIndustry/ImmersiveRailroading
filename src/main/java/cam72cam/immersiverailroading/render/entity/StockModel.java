@@ -63,7 +63,10 @@ public class StockModel extends OBJRender {
 				availComponents.remove(component.type);
 			}
 			Minecraft.getMinecraft().mcProfiler.startSection("render");
-			drawGroups(component.modelIDs, component.scale);
+			GL11.glPushMatrix();
+			GL11.glScaled(component.scale, component.scale, component.scale);
+			drawGroups(component.modelIDs);
+			GL11.glPopMatrix();
 			Minecraft.getMinecraft().mcProfiler.endSection();
 		}
 	}
@@ -119,8 +122,7 @@ public class StockModel extends OBJRender {
 				for (RenderComponent cargoLoad : cargoLoads) {
 					if (cargoLoad.id <= fill) {
 						drawComponent(cargoLoad);
-						
-						//if the stock should only render the current cargo load only it will stop at the highest matching number
+						//if the stock should only render the current cargo load it'll stop at the highest matching load
 						if (def.shouldShowCurrentLoadOnly()) {
 							break;
 						}
@@ -375,7 +377,7 @@ public class StockModel extends OBJRender {
 			double circumference = wheel.height() * (float) Math.PI;
 			double relDist = distanceTraveled % circumference;
 			double wheelAngle = 360 * relDist / circumference;
-			if (wheel.side.contains("REAR")) {
+			if (wheel.type == RenderComponentType.WHEEL_DRIVER_REAR_X) {
 				//MALLET HACK
 				wheelAngle += MALLET_ANGLE_REAR;
 			}
