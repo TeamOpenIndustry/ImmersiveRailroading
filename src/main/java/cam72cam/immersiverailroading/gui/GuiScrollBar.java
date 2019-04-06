@@ -22,8 +22,7 @@ public class GuiScrollBar extends GuiSlider {
             }
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexturedModalRect(this.x, this.y + (int)(this.sliderValue * (float)(this.height - 8)), 0, 66, 20, 4);
-            this.drawTexturedModalRect(this.x, this.y + (int)(this.sliderValue * (float)(this.height - 8)) + 4, 196, 66, 20, 4);
+            this.drawTexturedModalRect(this.x, this.y + (int)(this.sliderValue * (float)(this.height - 8)), 0, 66, 20, 20);
         }
     }
 	
