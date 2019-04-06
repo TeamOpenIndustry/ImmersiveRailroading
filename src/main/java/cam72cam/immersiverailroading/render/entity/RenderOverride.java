@@ -42,7 +42,7 @@ import org.lwjgl.opengl.GLContext;
 
 public class RenderOverride {
 
-	private static Vec3d getCameraPos(float partialTicks) {
+	public static Vec3d getCameraPos(float partialTicks) {
         Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
         double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * partialTicks;
         double d1 = playerrRender.lastTickPosY + (playerrRender.posY - playerrRender.lastTickPosY) * partialTicks;
