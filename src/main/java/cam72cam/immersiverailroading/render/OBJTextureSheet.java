@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.util.GPUInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBTextureCompression;
@@ -375,6 +376,7 @@ public class OBJTextureSheet {
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
 			currentX += tex.getAbsoluteWidth();
 		}
+		ImmersiveRailroading.info(GPUInfo.debug());
 	}
 
 	public float convertU(String mtlName, float u) {
