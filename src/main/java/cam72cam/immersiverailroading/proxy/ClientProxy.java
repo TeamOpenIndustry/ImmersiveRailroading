@@ -9,7 +9,7 @@ import java.util.function.Function;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.IBlockColor;
@@ -86,9 +86,6 @@ import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiDisconnected;
@@ -660,7 +657,21 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 	}
-	
+
+	@SubscribeEvent
+	public static void onDebugRender(RenderGameOverlayEvent.Text event) {
+		if (Minecraft.getMinecraft().gameSettings.showDebugInfo && GPUInfo.hasGPUInfo()) {
+			int i;
+			for (i = 0; i < event.getRight().size(); i++) {
+				if (event.getRight().get(i).startsWith("Display: ")) {
+					i++;
+					break;
+				}
+			}
+			event.getRight().add(i, GPUInfo.debug());
+		}
+	}
+
 	@SubscribeEvent
 	public static void onSoundLoad(SoundLoadEvent event) {
 		if (manager == null) {
