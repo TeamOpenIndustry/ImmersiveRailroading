@@ -600,7 +600,7 @@ public class ClientProxy extends CommonProxy {
 				}
 
 		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
-		        String key = info.uniqueID + pos.toLong();
+		        String key = info.uniqueID + info.placementInfo.placementPosition;
 				RailInfo cached = infoCache.get(key);
 		        if (cached != null) {
 					info = cached;
@@ -617,12 +617,9 @@ public class ClientProxy extends CommonProxy {
 						GL14.glBlendColor(1, 1, 1, 0.5f);
 					}
 					
-	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
-	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
-	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-
-					Vec3d placementPosition = info.placementInfo.placementPosition;
-	                GL11.glTranslated(placementPosition.x-d0, placementPosition.y-d1, placementPosition.z-d2);
+					Vec3d cameraPos = RenderOverride.getCameraPos(event.getPartialTicks());
+					Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
+					GL11.glTranslated(offPos.x, offPos.y, offPos.z);
 
 	                RailRenderUtil.render(info, true);
 
