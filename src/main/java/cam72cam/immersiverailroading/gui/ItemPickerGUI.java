@@ -18,8 +18,7 @@ public class ItemPickerGUI extends GuiScreen {
 	public ItemStack choosenItem;
 	private Consumer<ItemStack> onExit;
 	private GuiScrollBar scrollBar; 
-	private int arrayHeight = 0;
-	
+
 	public ItemPickerGUI(NonNullList<ItemStack> items, Consumer<ItemStack> onExit) {
 		this.items = items;
 		this.onExit = onExit;
@@ -42,7 +41,7 @@ public class ItemPickerGUI extends GuiScreen {
 		for (GuiButton button: this.buttonList) {
 			if(button instanceof GuiScrollBar) continue;
 			if (scrollBar != null) {
-				button.y = buttonCoordList.get(button.id).getY() - (int)Math.floor(scrollBar.getValue()*arrayHeight);
+				button.y = buttonCoordList.get(button.id).getY() - (int)Math.floor(scrollBar.getValue()*32);
 			}
 			if (((ItemButton)button).isMouseOver(mouseX, mouseY)) {
 				this.renderToolTip(((ItemButton)button).stack, mouseX, mouseY);
@@ -64,6 +63,7 @@ public class ItemPickerGUI extends GuiScreen {
 		int startY = this.height / 8;
 		
 		int stacksX = this.width * 7/8 / 32;
+		int stacksY = this.height * 7/8 / 32;
 		
 		this.buttonList.clear();
 		this.buttonCoordList.clear();
@@ -75,9 +75,9 @@ public class ItemPickerGUI extends GuiScreen {
 			this.buttonList.add(new ItemButton(i, items.get(i), startX + col * 32, startY + row * 32));
 			this.buttonCoordList.add(new Vec3i(startX + col * 32, startY + row * 32, 0));
 		}
-		arrayHeight = 32*(i % stacksX);
-		if (arrayHeight > this.height || true) {
-			this.scrollBar = new GuiScrollBar(i++, this.width - 30 , 4, 20, this.height-8 , "", 0.0, 1.0, 0.0, null);
+		int rows = i/stacksX+2;
+		if (stacksY < rows) {
+			this.scrollBar = new GuiScrollBar(i++, this.width - 30 , 4, 20, this.height-8 , "", 0.0, rows - stacksY, 0.0, null);
 			this.buttonList.add(this.scrollBar);
 		}
 	}
