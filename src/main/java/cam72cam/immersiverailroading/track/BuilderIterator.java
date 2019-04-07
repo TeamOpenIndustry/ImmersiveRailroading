@@ -53,8 +53,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				0,
                 Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
 		);
-		int mainX = (int) Math.round(path.get(path.size()/2).x+placeOff.x);
-		int mainZ = (int) Math.round(path.get(path.size()/2).z+placeOff.z);
+		int mainX = (int) Math.floor(path.get(path.size()/2).x+placeOff.x);
+		int mainZ = (int) Math.floor(path.get(path.size()/2).z+placeOff.z);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale()/2));
 
 		for (PosStep cur : path) {
@@ -92,8 +92,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 			}
 			if (!isFlex && endOfTrack) {
-				mainX = (int) Math.round(gagPos.x+placeOff.x);
-				mainZ = (int) Math.round(gagPos.z+placeOff.z);
+				mainX = (int) Math.floor(gagPos.x+placeOff.x);
+				mainZ = (int) Math.floor(gagPos.z+placeOff.z);
 			}
 		}
 
