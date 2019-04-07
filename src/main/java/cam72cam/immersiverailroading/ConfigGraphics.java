@@ -42,7 +42,4 @@ public class ConfigGraphics {
 
 	@Comment({"Size of icon cache images (larger = slower)"})
     public static int iconCacheSize = 128;
-
-	@Comment({"Attempt to compress textures when uploading to the GPU (lossy, large memory savings)"})
-	public static boolean useTextureCompression = false;
 }
