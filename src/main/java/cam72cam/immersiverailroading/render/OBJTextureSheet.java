@@ -363,7 +363,7 @@ public class OBJTextureSheet {
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
 			currentX += tex.getAbsoluteWidth();
 		}
-		ImmersiveRailroading.info(GPUInfo.debug());
+		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
 	}
 
 	public float convertU(String mtlName, float u) {

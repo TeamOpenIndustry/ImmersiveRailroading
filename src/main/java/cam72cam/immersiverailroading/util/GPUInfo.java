@@ -31,6 +31,6 @@ public class GPUInfo {
         int total = GPUInfo.memTotalMB();
         int used = total - free;
         int pct = (used*100 / total*100)/100;
-        return String.format("GPU Memory: %s %s/%sMB", pct, used, total);
+        return String.format("GPU Memory: %d%% %d/%dMB", pct, used, total);
     }
 }
