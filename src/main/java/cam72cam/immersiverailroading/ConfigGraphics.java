@@ -32,7 +32,7 @@ public class ConfigGraphics {
 	public static int limitGraphicsLoadMS = 3;
 
 	@Comment({ "Scale the textures to reduce GPU memory usage (1 == normal, 1.5 == low, 2 == super low" })
-	public static double textureScale = 1;
+	public static double textureScale = 2;
 
 	@Comment({ "Self explanitory" })
 	public static boolean trainsOnTheBrain = true;
@@ -42,4 +42,7 @@ public class ConfigGraphics {
 
 	@Comment({"Size of icon cache images (larger = slower)"})
     public static int iconCacheSize = 128;
+
+	@Comment({"Attempt to compress textures when uploading to the GPU (lossy, large memory savings)"})
+	public static boolean useTextureCompression = false;
 }
