@@ -72,7 +72,6 @@ public class ItemRailUpdatePacket implements IMessage {
 		private void handle(ItemRailUpdatePacket message, MessageContext ctx) {
 			ItemStack stack;
 			TileRailPreview te = null;
-			System.out.println(message.settings);
 			if (message.tilePreviewPos == null) {
 				stack = ctx.getServerHandler().player.inventory.getStackInSlot(message.slot);
 			} else {
