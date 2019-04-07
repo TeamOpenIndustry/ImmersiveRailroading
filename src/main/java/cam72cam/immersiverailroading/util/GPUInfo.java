@@ -21,7 +21,7 @@ public class GPUInfo {
     public static int memTotalMB() {
         ContextCapabilities capabilities = GLContext.getCapabilities();
         if (capabilities.GL_NVX_gpu_memory_info) {
-            return GL11.glGetInteger(NVXGpuMemoryInfo.GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX)/1024;
+            return GL11.glGetInteger(NVXGpuMemoryInfo.GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX)/1024;
         }
         return 1024;
     }
