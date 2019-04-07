@@ -859,6 +859,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
 			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
 			tileSwitch.markDirty();
+			this.markDirty();
+			this.getParentTile().markDirty();
 		}
 
 		return newForcedState;
