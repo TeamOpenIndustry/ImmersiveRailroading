@@ -50,6 +50,7 @@ public class RailInfo {
 				this.settings.quarters,
 				this.settings.railBed,
 				this.settings.gauge,
+				this.settings.track,
 				this.switchState,
 				this.tablePos,
 				this.placementInfo.yaw,

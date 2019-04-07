@@ -2,10 +2,13 @@ package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
@@ -20,30 +23,14 @@ import java.util.ArrayList;
 
 public class RailBuilderRender {
 
-    private static OBJRender baseRailModel;
-    private static OBJRender baseRailModelModel;
-
-    static {
-        try {
-            baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"), 0.05f));
-        } catch (Exception e) {
-            ImmersiveRailroading.catching(e);
-        }
-        try {
-            baseRailModelModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m_model.obj"), 0.05f));
-        } catch (Exception e) {
-            ImmersiveRailroading.catching(e);
-        }
-    }
-
-    public static OBJRender getModel(Gauge gauge) {
-        return gauge.isModel() ? baseRailModel : baseRailModelModel;
-    }
-
     private static DisplayListCache displayLists = new DisplayListCache();
     public static void renderRailBuilder(RailInfo info) {
 
-        OBJRender model = info.settings.gauge.isModel() ? baseRailModel : baseRailModelModel;
+        TrackModel model = DefinitionManager.getTrack(info.settings.track, info.settings.gauge.value());
+        if (model == null) {
+            return;
+        }
+        OBJRender trackRenderer = StockRenderCache.getTrackRenderer(model);
 
         Integer displayList = displayLists.get(info.uniqueID);
         if (displayList == null) {
@@ -85,7 +72,7 @@ public class RailBuilderRender {
                         // TODO static
                         ArrayList<String> groups = new ArrayList<String>();
                         for (String baseGroup : piece.getGroups()) {
-                            for (String groupName : model.model.groups())  {
+                            for (String groupName : trackRenderer.model.groups())  {
                                 if (groupName.contains(baseGroup)) {
                                     groups.add(groupName);
                                 }
@@ -93,9 +80,9 @@ public class RailBuilderRender {
                         }
 
 
-                        model.drawGroups(groups);
+                        trackRenderer.drawGroups(groups);
                     } else {
-                        model.draw();
+                        trackRenderer.draw();
                     }
                     try {
                         m.invert();
@@ -120,10 +107,10 @@ public class RailBuilderRender {
             displayLists.put(info.uniqueID, displayList);
         }
 
-        model.bindTexture();
+        trackRenderer.bindTexture();
         Minecraft.getMinecraft().mcProfiler.startSection("dl");
         GL11.glCallList(displayList);
         Minecraft.getMinecraft().mcProfiler.endSection();;
-        model.restoreTexture();
+        trackRenderer.restoreTexture();
     }
 }

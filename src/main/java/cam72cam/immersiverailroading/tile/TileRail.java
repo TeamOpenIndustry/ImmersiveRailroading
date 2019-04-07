@@ -114,7 +114,7 @@ public class TileRail extends TileRailBase {
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
 			double tablePos = nbt.getDouble("tablePos");
 
-            RailSettings settings = new RailSettings(gauge, type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
+            RailSettings settings = new RailSettings(gauge, "default", type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
 			info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
 		}
 	}
