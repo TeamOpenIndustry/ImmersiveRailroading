@@ -3,7 +3,7 @@
 	"name": "Iron Duke",
 	"works": "Great Western Railway",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/iron_duke/iron_duke.obj",
-	"darken_model": "0.03",
+	"darken_model": "-0.05",
 	"model_gauge_m": 2.17,
 	"properties": {
 		"max_psi": 100,

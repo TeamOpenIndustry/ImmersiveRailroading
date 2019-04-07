@@ -44,7 +44,7 @@ public class RailItemRender implements IBakedModel {
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(0, 0.2, 0.55);
+			GL11.glTranslated(0.5, 0.2, 0.55);
 			baseRailModel.bindTexture();
 			baseRailModel.drawGroups(left);
 			baseRailModel.restoreTexture();
