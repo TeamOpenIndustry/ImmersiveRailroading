@@ -1,0 +1,17 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:item_switch_key"
+  },
+  "pattern": [
+    "  d",
+    "  d",
+    " dd"
+  ],
+  "key": {
+    "d": {
+      "type": "forge:ore_dict",
+      "ore": "ingotSteel"
+    }
+  }
+}

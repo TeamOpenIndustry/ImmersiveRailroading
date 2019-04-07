@@ -1,11 +1,5 @@
 package cam72cam.immersiverailroading.tile;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cam72cam.immersiverailroading.library.*;
-import org.apache.commons.lang3.ArrayUtils;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
@@ -19,12 +13,9 @@ import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.ParticleUtil;
-import cam72cam.immersiverailroading.util.RedstoneUtil;
-import cam72cam.immersiverailroading.util.SwitchUtil;
-import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.immersiverailroading.util.*;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -52,7 +43,11 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
+import org.apache.commons.lang3.ArrayUtils;
 import trackapi.lib.ITrack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
@@ -80,7 +75,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
-	
+
+
 	@Override
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -853,5 +849,60 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return null;
 		}
 		return BlockPos.fromLong(this.replaced.getLong("parent")).add(pos);
+	}
+
+	public SwitchState cycleSwitchForced() {
+		TileRail tileSwitch = this.findSwitchParent();
+		SwitchState newForcedState = SwitchState.NONE;
+
+		if (tileSwitch != null) {
+			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
+			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
+			tileSwitch.markDirty();
+			this.markDirty();
+			this.getParentTile().markDirty();
+		}
+
+		return newForcedState;
+	}
+
+	public boolean isSwitchForced() {
+		TileRail tileSwitch = this.findSwitchParent();
+		if (tileSwitch != null) {
+			return tileSwitch.info.switchForced != SwitchState.NONE;
+		} else {
+			return false;
+		}
+	}
+
+	/** Finds a parent of <code>this</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
+	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 */
+	public TileRail findSwitchParent() {
+		return findSwitchParent(this);
+	}
+
+	/** Finds a parent of <code>cur</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
+	 * @param cur TileRailBase whose parents are to be traversed
+	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 */
+	public TileRail findSwitchParent(TileRailBase cur) {
+		if (cur == null) {
+			return null;
+		}
+
+		if (cur instanceof TileRail) {
+			TileRail curTR = (TileRail) cur;
+			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
+				return curTR;
+			}
+		}
+
+		// Prevent infinite recursion
+		if (cur.getPos().equals(cur.getParentTile().getPos())) {
+			return null;
+		}
+
+		return findSwitchParent(cur.getParentTile());
 	}
 }
