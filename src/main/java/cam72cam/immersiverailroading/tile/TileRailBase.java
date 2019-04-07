@@ -857,8 +857,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 		if (tileSwitch != null) {
 			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
-			SwitchState newSwitchState = ( newForcedState.equals(SwitchState.NONE) ? ( SwitchUtil.isRailPowered(tileSwitch) ? SwitchState.TURN : SwitchState.STRAIGHT ) : newForcedState );
-			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, newSwitchState, newForcedState, tileSwitch.info.tablePos);
+			//SwitchState newSwitchState = ( newForcedState.equals(SwitchState.NONE) ? ( SwitchUtil.isRailPowered(tileSwitch) ? SwitchState.TURN : SwitchState.STRAIGHT ) : newForcedState );
+			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
 			this.markDirty();
 		}
 
@@ -874,14 +874,18 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 	}
 
-	/** Finds a parent of this whose type is TrackItems.SWITCH. Returns null if one doesn't exist
+	/** Finds a parent of <code>this</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
 	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
 	public TileRail findSwitchParent() {
-		return _findSwitchParent(this);
+		return findSwitchParent(this);
 	}
 
-	private TileRail _findSwitchParent(TileRailBase cur) {
+	/** Finds a parent of <code>cur</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
+	 * @param cur TileRailBase whose parents are to be traversed
+	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 */
+	public TileRail findSwitchParent(TileRailBase cur) {
 		if (cur == null) {
 			return null;
 		}
@@ -898,6 +902,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return null;
 		}
 
-		return _findSwitchParent(cur.getParentTile());
+		return findSwitchParent(cur.getParentTile());
 	}
 }
