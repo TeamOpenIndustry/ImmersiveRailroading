@@ -32,7 +32,7 @@ public class SwitchUtil {
 		if (parent.info.settings.type != TrackItems.SWITCH) {
 			return SwitchState.NONE;
 		}
-		
+
 		if (position != null && parent.info != null) {
 			BuilderSwitch switchBuilder = (BuilderSwitch)parent.info.getBuilder();
 			
@@ -41,6 +41,18 @@ public class SwitchUtil {
 			}
 		}
 
+		if (parent.isSwitchForced()) {
+			return parent.info.switchForced;
+		}
+
+		if (isRailPowered(rail)) {
+			return SwitchState.TURN;
+		}
+
+		return SwitchState.STRAIGHT;
+	}
+
+	public static boolean isRailPowered(TileRail rail) {
 		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
 		double horiz = rail.info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
@@ -53,11 +65,11 @@ public class SwitchUtil {
 				TileRailBase gagRail = TileRailBase.get(rail.getWorld(), gagPos);
 				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
 					if (rail.getWorld().isBlockIndirectlyGettingPowered(gagPos) > 0) {
-						return SwitchState.TURN;
+						return true;
 					}
 				}
 			}
 		}
-		return SwitchState.STRAIGHT;
+		return false;
 	}
 }
