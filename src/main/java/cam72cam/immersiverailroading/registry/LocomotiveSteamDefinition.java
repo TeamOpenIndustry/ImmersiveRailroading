@@ -113,6 +113,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			}
 			break;
 		case T1:
+		case GARRAT:
 		case MALLET_WALSCHAERTS:
 			for (int i = 0; i < 10; i++) {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
@@ -154,6 +155,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			sides.add("RIGHT");
 			sides.add("LEFT");
 		case T1:
+        case GARRAT:
 		case MALLET_WALSCHAERTS:
 			if (sides.size() == 0) {
 				sides.add("LEFT_FRONT");

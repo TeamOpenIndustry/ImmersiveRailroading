@@ -1,6 +1,9 @@
 {
 	"name": "A5 Slope Tender",
 	"model": "immersiverailroading:models/rolling_stock/tender/a5_tender/a5_tender.obj",
+	"tex_variants": {
+		"CNJ": "cnj"
+	},
 	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 26000
