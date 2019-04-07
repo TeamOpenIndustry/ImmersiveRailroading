@@ -60,8 +60,7 @@ public class RailInfo {
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
-			id += placementInfo.placementPosition;
-			id += customInfo.placementPosition;
+			id += placementInfo.placementPosition.subtract(customInfo.placementPosition);
 		}
 		uniqueID = id;
 	}
