@@ -11,6 +11,8 @@ import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.track.*;
 import cam72cam.immersiverailroading.track.BuilderCubicCurve;
 import net.minecraft.entity.player.EntityPlayer;
@@ -276,6 +278,25 @@ public class RailInfo {
 			}
 		}
 		return false;
+	}
+
+	public TrackModel getTrackModel() {
+		return DefinitionManager.getTrack(settings.track, settings.gauge.value());
+	}
+
+	private double trackHeight = -1;
+	public double getTrackHeight() {
+		if (trackHeight == -1) {
+			TrackModel model = getTrackModel();
+			ArrayList<String> groups = new ArrayList<>();
+			for (String group : model.groups()) {
+				if (group.contains("RAIL")) {
+					groups.add(group);
+				}
+			}
+			trackHeight = model.maxOfGroup(groups).y;
+		}
+		return trackHeight;
 	}
 
 }
