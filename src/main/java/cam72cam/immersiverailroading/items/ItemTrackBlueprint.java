@@ -62,6 +62,7 @@ public class ItemTrackBlueprint extends Item {
 			if (player.isSneaking()) {
 				info = new RailSettings(
                     info.gauge,
+                    info.track,
                     info.type,
                     info.length,
                     info.quarters,
@@ -75,6 +76,7 @@ public class ItemTrackBlueprint extends Item {
 			} else {
 				info = new RailSettings(
                     info.gauge,
+                    info.track,
                     info.type,
                     info.length,
                     info.quarters,

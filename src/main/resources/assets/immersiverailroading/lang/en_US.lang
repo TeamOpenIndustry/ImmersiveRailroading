@@ -60,6 +60,7 @@ gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
 gui.immersiverailroading:selector.type=Type: %s
 gui.immersiverailroading:selector.gauge=Gauge: %s
+gui.immersiverailroading:selector.track=Track Style: %s
 gui.immersiverailroading:selector.quarters=%s Degree Turn
 gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
