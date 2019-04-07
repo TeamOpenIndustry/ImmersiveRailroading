@@ -294,17 +294,13 @@ public abstract class BlockRailBase extends Block {
 		Block block = Block.getBlockFromItem(stack.getItem());
 		TileRailBase te = TileRailBase.get(worldIn, pos);
 		if (te != null) {
-			TileRail tileSwitch = te.findSwitchParent();
-			if (stack.getItem() == IRItems.ITEM_SWITCH_KEY && tileSwitch != null) {
-				if (!worldIn.isRemote) {
-					//TODO Remove Debug code
-//					System.out.println("switchState = " + tileSwitch.info.switchState);
-//					System.out.println("switchForced = " + tileSwitch.info.switchForced);
+			if (stack.getItem() == IRItems.ITEM_SWITCH_KEY) {
+				TileRail tileSwitch = te.findSwitchParent();
+				if (tileSwitch != null) {
 					SwitchState switchForced = te.cycleSwitchForced();
-//					System.out.println("switchForced = " + switchForced);
-//					System.out.println("switchForced = " + tileSwitch.info.switchForced);
-//					System.out.println("switchState = " + tileSwitch.info.switchState);
-					playerIn.sendMessage(switchForced.equals(SwitchState.NONE) ? new TextComponentString(ChatText.SWITCH_UNLOCKED.toString()) : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
+					if (!worldIn.isRemote) {
+						playerIn.sendMessage(switchForced.equals(SwitchState.NONE) ? new TextComponentString(ChatText.SWITCH_UNLOCKED.toString()) : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
+					}
 				}
 			}
 			if (block == Blocks.REDSTONE_TORCH) {
