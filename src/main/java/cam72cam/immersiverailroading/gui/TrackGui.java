@@ -271,7 +271,6 @@ public class TrackGui extends GuiScreen {
         // Enter or ESC
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
         	if (!this.lengthInput.getText().isEmpty()) {
-        		System.out.println("GUI" + track);
 				RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing);
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
