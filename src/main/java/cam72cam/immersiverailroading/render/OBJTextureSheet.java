@@ -1,34 +1,27 @@
 package cam72cam.immersiverailroading.render;
 
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-
-import net.minecraft.client.renderer.GlStateManager;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBTextureCompression;
-import org.lwjgl.opengl.GL11;
-
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
+import cam72cam.immersiverailroading.util.GPUInfo;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.List;
+import java.util.function.Function;
 
 public class OBJTextureSheet {
 	public Map<String, SubTexture> mappings;
@@ -38,6 +31,8 @@ public class OBJTextureSheet {
 	private OBJModel model;
 
 	private  class SubTexture {
+		private BufferedImage image;
+		private Function<Integer, Integer> scale;
 		public int realWidth;
 		private int realHeight;
 		private int sheetWidth;
@@ -67,33 +62,14 @@ public class OBJTextureSheet {
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
 
-			if (scale != null) {
-				image = convertToBufferedImage(image.getScaledInstance(scale.apply(realWidth), scale.apply(realHeight), BufferedImage.SCALE_FAST));
-				realWidth = image.getWidth();
-				realHeight = image.getHeight();
-			}
-
-			if (realWidth < 8 || realHeight < 8) {
-				image = convertToBufferedImage(image.getScaledInstance(8, 8, BufferedImage.SCALE_FAST));
-				realWidth = image.getWidth();
-				realHeight = image.getHeight();
-			}
-
-			int nw = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realWidth - 1));
-			int nh = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realHeight - 1));
-
-			if (realWidth != nw || realHeight != nh) {
-				System.out.println("RESIZE " + realWidth + " " + realHeight);
-				image = convertToBufferedImage(image.getScaledInstance(nw, nh, BufferedImage.SCALE_FAST));
-				realWidth = image.getWidth();
-				realHeight = image.getHeight();
-			}
+			this.scale = scale;
 
 			this.tex = tex;
 			isFlatMaterial = false;
 
 			pixels = new int[realWidth * realHeight];
 			image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
+			this.image = image;
 		}
 		SubTexture(String name, int r, int g, int b, int a) {
 			BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
@@ -154,6 +130,25 @@ public class OBJTextureSheet {
 		    g.drawImage(image, 0, 0, null);
 		    g.dispose();
 		    return newImage;
+		}
+
+		public void resize() {
+			if (image == null) {
+				return;
+			}
+
+			if (scale != null && realWidth * copiesU() * realHeight * copiesV() > 512 * 512) {
+				realWidth = scale.apply(realWidth);
+				realHeight = scale.apply(realHeight);
+			}
+			if (realHeight != image.getHeight() || realWidth != image.getWidth()) {
+				image = convertToBufferedImage(image.getScaledInstance(realWidth, realHeight, BufferedImage.SCALE_FAST));
+				pixels = new int[realWidth * realHeight];
+				image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
+			}
+
+			image = null;
+			scale = null;
 		}
 		
 		public void upload(int textureID, int originX, int originY, int sheetWidth, int sheetHeight) {
@@ -321,6 +316,8 @@ public class OBJTextureSheet {
 		Collections.sort(texs, (SubTexture a, SubTexture b) -> { return b.size().compareTo(a.size()); });
 		
 		for (SubTexture tex : texs) {
+			tex.resize();
+
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;
@@ -339,21 +336,12 @@ public class OBJTextureSheet {
 		currentY = 0;
 		rowHeight = 0;
 
-		//TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
-		// GL_BGRA_EXT = 32993
-		// GL_UNSIGNED_INT_8_8_8_8_REV = 33639
-		// ARBTextureCompression.GL_TEXTURE_COMPRESSED_ARB
-		// Internal Mojang/Forge magic...
-		synchronized (net.minecraftforge.fml.client.SplashProgress.class)
-		{
-			TextureUtil.deleteTexture(textureID);
-			GlStateManager.bindTexture(textureID);
-		}
-		// Use compressed ARB
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, ARBTextureCompression.GL_COMPRESSED_RGBA_ARB, sheetWidth, sheetHeight, 0, 32993, 33639, (ByteBuffer)null);
+		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
 
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 
         ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
         if (sheetWidth > maxSize || sheetHeight > maxSize)
@@ -375,6 +363,7 @@ public class OBJTextureSheet {
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
 			currentX += tex.getAbsoluteWidth();
 		}
+		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
 	}
 
 	public float convertU(String mtlName, float u) {

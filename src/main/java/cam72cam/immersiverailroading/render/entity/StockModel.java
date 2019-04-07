@@ -3,12 +3,13 @@ package cam72cam.immersiverailroading.render.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import cam72cam.immersiverailroading.library.ValveGearType;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.PosRot;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
@@ -251,8 +252,8 @@ public class StockModel extends OBJRender {
 				drawDrivingWheels(stock, wheels);
 				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
+				drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center(), false);
+				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center(), false);
 			}
 			break;
 		case TRI_WALSCHAERTS:{
@@ -260,12 +261,13 @@ public class StockModel extends OBJRender {
 			drawDrivingWheels(stock, wheels);
 			MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 			RenderComponent wheel = wheels.get(wheels.size() / 2);
-			drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
-			drawWalschaerts(stock, "RIGHT", -240, wheel.height(), center.center(), wheel.center());
-			drawWalschaerts(stock, "CENTER", -120, wheel.height(), wheels.get(0).center(), wheels.get(0).center());
+			drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center(), false);
+			drawWalschaerts(stock, "RIGHT", -240, wheel.height(), center.center(), wheel.center(), false);
+			drawWalschaerts(stock, "CENTER", -120, wheel.height(), wheels.get(0).center(), wheels.get(0).center(), false);
 			break;
 		}
 		case MALLET_WALSCHAERTS:
+        case GARRAT:
 			{
 				GL11.glPushMatrix();
 				
@@ -293,8 +295,9 @@ public class StockModel extends OBJRender {
 				drawComponent(frontLocomotive);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center());
+				boolean reverse = def.getValveGear() == ValveGearType.GARRAT;
+				drawWalschaerts(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center(), reverse);
+				drawWalschaerts(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center(), reverse);
 				GL11.glPopMatrix();
 			}
 			{
@@ -302,8 +305,8 @@ public class StockModel extends OBJRender {
 				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center());
-				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  center.height(), center.center(), wheel.center());
+				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(), false);
+				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR,  center.height(), center.center(), wheel.center(), false);
 			}
 			break;
 		case CLIMAX:
@@ -377,7 +380,7 @@ public class StockModel extends OBJRender {
 			double circumference = wheel.height() * (float) Math.PI;
 			double relDist = distanceTraveled % circumference;
 			double wheelAngle = 360 * relDist / circumference;
-			if (wheel.side.contains("REAR")) {
+			if (wheel.type == RenderComponentType.WHEEL_DRIVER_REAR_X) {
 				//MALLET HACK
 				wheelAngle += MALLET_ANGLE_REAR;
 			}
@@ -630,12 +633,15 @@ public class StockModel extends OBJRender {
 		return comp;
 	}
 	
-	private void drawWalschaerts(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos) {
+	private void drawWalschaerts(LocomotiveSteam stock, String side, int wheelAngleOffset, double diameter, Vec3d wheelCenter, Vec3d wheelPos, boolean reverse) {
 		LocomotiveSteamDefinition def = stock.getDefinition();
 		
 		double circumference = diameter * (float) Math.PI;
 		double relDist = distanceTraveled % circumference;
 		double wheelAngle = 360 * relDist / circumference + wheelAngleOffset;
+		if (reverse) {
+			wheelAngle -= 90;
+		}
 		
 		RenderComponent connectingRod = requireComponent(def, RenderComponentType.SIDE_ROD_SIDE, side, stock.gauge);
 		RenderComponent drivingRod = requireComponent(def, RenderComponentType.MAIN_ROD_SIDE, side, stock.gauge);
@@ -670,9 +676,9 @@ public class StockModel extends OBJRender {
 		// X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
 		// Y: Center of the rod
 		// Z: does not really matter due to rotation axis
-		Vec3d drivingRodRotPoint = new Vec3d(drivingRod.max().x - drivingRod.height()/2, drivingRod.center().y, drivingRod.max().z);
+		Vec3d drivingRodRotPoint = new Vec3d((reverse ? drivingRod.min() : drivingRod.max()).x - drivingRod.height()/2, drivingRod.center().y, (reverse ? drivingRod.min() : drivingRod.max()).z);
 		// Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
-		float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2(connRodMovment.z, drivingRod.length() - drivingRod.height()));
+		float drivingRodAngle = (float) Math.toDegrees(MathHelper.atan2((reverse ? -connRodMovment.z : connRodMovment.z), drivingRod.length() - drivingRod.height()));
 		
 		// Draw driving rod
 		GL11.glPushMatrix();
@@ -706,8 +712,12 @@ public class StockModel extends OBJRender {
 		}
 		GL11.glPopMatrix();
 
-		Vec3d returnCrankRotPoint = returnCrank.max().addVector(-returnCrank.height()/2, -returnCrank.height()/2, 0);
-		Vec3d wheelRotationOffset = VecUtil.fromWrongYaw(returnCrankRotPoint.x - wheelPos.x, (float) wheelAngle);
+		Vec3d returnCrankRotPoint = reverse ?
+				returnCrank.min().addVector(returnCrank.height()/2, returnCrank.height()/2, 0) :
+				returnCrank.max().addVector(-returnCrank.height()/2, -returnCrank.height()/2, 0);
+		Vec3d wheelRotationOffset = reverse ?
+				VecUtil.fromWrongYaw(returnCrankRotPoint.x - wheelPos.x, (float) wheelAngle) :
+				VecUtil.fromWrongYaw(returnCrankRotPoint.x - wheelPos.x, (float) wheelAngle);
 		Vec3d returnCrankOriginOffset = wheelPos.addVector(wheelRotationOffset.x, wheelRotationOffset.z, 0);
 		double returnCrankAngle = wheelAngle + 90 + 30;
 		GL11.glPushMatrix();
@@ -726,19 +736,25 @@ public class StockModel extends OBJRender {
 		// We use rod radius and crank radius since it can be a funny shape 
 		double returnCrankLength = -(returnCrank.length() - returnCrank.height()/2 - returnCrankRod.height()/2);
 		// Rotation offset around the return crank point
-		Vec3d returnCrankRotationOffset = VecUtil.fromWrongYaw(returnCrankLength, (float) returnCrankAngle-90);
+		Vec3d returnCrankRotationOffset = VecUtil.fromWrongYaw(returnCrankLength, (float) returnCrankAngle + (reverse ? 90 : -90));
 		// Combine wheel->crankpoint offset and the crankpoint->crankrod offset 
 		Vec3d returnCrankRodOriginOffset = returnCrankOriginOffset.addVector(returnCrankRotationOffset.x, returnCrankRotationOffset.z, 0);
 		// Point about which the return crank rotates
-		Vec3d returnCrankRodRotPoint = returnCrankRod.max().addVector(-returnCrankRod.height()/2, -returnCrankRod.height()/2, 0);
+		Vec3d returnCrankRodRotPoint = reverse ?
+				returnCrankRod.min().addVector(returnCrankRod.height()/2, returnCrankRod.height()/2, 0) :
+				returnCrankRod.max().addVector(-returnCrankRod.height()/2, -returnCrankRod.height()/2, 0);
 		// Length between return crank rod centers
 		double returnCrankRodLength = returnCrankRod.length() - returnCrankRod.height()/2; 
 		// Height that the return crank rod should shoot for
 		double slottedLinkLowest = slottedLink.min().y + slottedLink.width()/2;
 		// Fudge
-		double returnCrankRodFudge = Math.abs(slottedLink.center().x - (returnCrankRodOriginOffset.x - returnCrankRodLength))/3;
+		double returnCrankRodFudge = reverse ?
+				Math.abs(slottedLink.center().x - (returnCrankRodOriginOffset.x + returnCrankRodLength))/3 :
+                Math.abs(slottedLink.center().x - (returnCrankRodOriginOffset.x - returnCrankRodLength))/3;
+		float returnCrankRodRot = reverse ?
+				-VecUtil.toWrongYaw(new Vec3d(slottedLinkLowest - returnCrankRodOriginOffset.y + returnCrankRodFudge, 0, returnCrankRodLength)) :
+				VecUtil.toWrongYaw(new Vec3d(slottedLinkLowest - returnCrankRodOriginOffset.y + returnCrankRodFudge, 0, returnCrankRodLength));
 		// Angle the return crank rod should be at to hit the slotted link
-		float returnCrankRodRot = VecUtil.toWrongYaw(new Vec3d(slottedLinkLowest - returnCrankRodOriginOffset.y + returnCrankRodFudge, 0, returnCrankRodLength));
 		GL11.glPushMatrix();
 		{
 			// Move to crank rod offset from origin
@@ -752,7 +768,7 @@ public class StockModel extends OBJRender {
 		}
 		GL11.glPopMatrix();
 		
-		Vec3d returnCrankRodRotationOffset = VecUtil.fromWrongYaw(returnCrankRodLength, returnCrankRodRot+90);
+		Vec3d returnCrankRodRotationOffset = VecUtil.fromWrongYaw(returnCrankRodLength, returnCrankRodRot+(reverse ? -90 : 90));
 		Vec3d returnCrankRodFarPoint = returnCrankRodOriginOffset.addVector(returnCrankRodRotationOffset.x, returnCrankRodRotationOffset.z, 0);
 		// Slotted link rotation point
 		Vec3d slottedLinkRotPoint = slottedLink.center();
@@ -783,11 +799,13 @@ public class StockModel extends OBJRender {
 		
 		double radiusBarSliding = Math.sin(Math.toRadians(-slottedLinkRot)) * (throttleSlotPos);
 		
-		Vec3d radiusBarClose = radiusBar.max();
-		throttleSlotPos += slottedLinkRotPoint.y - radiusBarClose.y;
+		Vec3d radiusBarClose = reverse ? radiusBar.min() : radiusBar.max();
+		throttleSlotPos += slottedLinkRotPoint.y - radiusBar.max().y;
 		
-		float raidiusBarAngle = VecUtil.toWrongYaw(new Vec3d(radiusBar.length(), 0, throttleSlotPos))+90;
-		
+		float raidiusBarAngle = reverse ?
+				-(VecUtil.toWrongYaw(new Vec3d(radiusBar.length(), 0, throttleSlotPos))+90) :
+                VecUtil.toWrongYaw(new Vec3d(radiusBar.length(), 0, throttleSlotPos))+90;
+
 		GL11.glPushMatrix();
 		{
 			GL11.glTranslated(0, throttleSlotPos, 0);
@@ -801,7 +819,7 @@ public class StockModel extends OBJRender {
 		}
 		GL11.glPopMatrix();
 		
-		Vec3d radiusBarFar = radiusBar.min();
+		Vec3d radiusBarFar = reverse ? radiusBar.max() : radiusBar.min();
 		//radiusBarSliding != correct TODO angle offset
 		Vec3d radiusBarFarPoint = radiusBarFar.addVector(radiusBarSliding + combinationLever.width()/2, 0, 0);
 		

@@ -48,6 +48,17 @@ public class Gauge {
 		return gauges.get(0);
 	}	
 	
+	public Gauge next(List<Gauge> valid) {
+		if (valid == null) return this;
+		for (Gauge g : gauges) {
+			if ((valid.contains(g) || g.isModel()) && g.gauge != gauge) {
+				return g;
+			}
+		}
+		return this;
+	}	
+	
+	
 	
 	private static List<Gauge> gauges = new ArrayList<Gauge>();
 	
