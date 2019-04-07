@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.net.*;
 import org.apache.commons.io.IOUtils;
 
@@ -110,7 +111,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	new File(cacheDir).mkdirs();
     	
     	DefinitionManager.initDefinitions();
-    	;
+    	Config.init();
     	OreHelper.IR_RAIL_BED.add(Blocks.BRICK_BLOCK);
     	OreHelper.IR_RAIL_BED.add(Blocks.COBBLESTONE);
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
