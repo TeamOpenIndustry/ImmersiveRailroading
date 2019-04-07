@@ -52,6 +52,7 @@ public class RailInfo {
 				this.settings.railBed,
 				this.settings.gauge,
 				this.switchState,
+				this.switchForced,
 				this.tablePos,
 				this.placementInfo.yaw,
 				this.placementInfo.direction,
