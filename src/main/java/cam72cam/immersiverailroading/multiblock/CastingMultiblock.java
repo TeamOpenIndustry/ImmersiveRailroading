@@ -306,7 +306,11 @@ public class CastingMultiblock extends Multiblock {
 			if (craftTe == null) {
 				return false;
 			}
-			return craftTe.getCraftProgress() > 0;
+			TileMultiblock fluidTe = getTile(fluid);
+			if (fluidTe == null) {
+				return false;
+			}
+			return craftTe.getCraftProgress() > 0 && fluidTe.getCraftProgress() > 0;
 		}
 
 		public double getSteelLevel() {
