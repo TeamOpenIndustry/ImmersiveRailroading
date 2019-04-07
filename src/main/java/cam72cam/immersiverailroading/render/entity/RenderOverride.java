@@ -156,8 +156,6 @@ public class RenderOverride {
 
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 	
-        OBJRender model = RailBuilderRender.getModel(Gauge.from(Gauge.STANDARD)); 
-        model.bindTexture();
         List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
         for (TileEntity te : entities) {
         	if (te instanceof TileRail) {
@@ -230,7 +228,6 @@ public class RenderOverride {
 			blend.restore();
 			Minecraft.getMinecraft().mcProfiler.endSection();
 		}
-        model.restoreTexture();
 
         Minecraft.getMinecraft().mcProfiler.endSection();;
 	}
