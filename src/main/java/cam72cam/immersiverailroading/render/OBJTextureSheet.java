@@ -1,39 +1,27 @@
 package cam72cam.immersiverailroading.render;
 
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-
-import cam72cam.immersiverailroading.util.GPUInfo;
-import net.minecraft.client.renderer.GlStateManager;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBTextureCompression;
-import org.lwjgl.opengl.GL11;
-
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
+import cam72cam.immersiverailroading.util.GPUInfo;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import static org.lwjgl.opengl.EXTTextureCompressionLATC.GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT;
-import static org.lwjgl.opengl.GL42.GL_COMPRESSED_RGBA_BPTC_UNORM;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.List;
+import java.util.function.Function;
 
 public class OBJTextureSheet {
 	public Map<String, SubTexture> mappings;
@@ -75,23 +63,6 @@ public class OBJTextureSheet {
 			realHeight = image.getHeight();
 
 			this.scale = scale;
-
-			if (ConfigGraphics.useTextureCompression) {
-				if (realWidth < 8 || realHeight < 8) {
-					image = convertToBufferedImage(image.getScaledInstance(8, 8, BufferedImage.SCALE_FAST));
-					realWidth = image.getWidth();
-					realHeight = image.getHeight();
-				}
-
-				int nw = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realWidth - 1));
-				int nh = (int) Math.pow(2, Integer.SIZE - Integer.numberOfLeadingZeros(realHeight - 1));
-
-				if (realWidth != nw || realHeight != nh) {
-					image = convertToBufferedImage(image.getScaledInstance(nw, nh, BufferedImage.SCALE_FAST));
-					realWidth = image.getWidth();
-					realHeight = image.getHeight();
-				}
-			}
 
 			this.tex = tex;
 			isFlatMaterial = false;
@@ -162,13 +133,20 @@ public class OBJTextureSheet {
 		}
 
 		public void resize() {
+			if (image == null) {
+				return;
+			}
+
 			if (scale != null && realWidth * copiesU() * realHeight * copiesV() > 512 * 512) {
-				image = convertToBufferedImage(image.getScaledInstance(scale.apply(realWidth), scale.apply(realHeight), BufferedImage.SCALE_FAST));
-				realWidth = image.getWidth();
-				realHeight = image.getHeight();
+				realWidth = scale.apply(realWidth);
+				realHeight = scale.apply(realHeight);
+			}
+			if (realHeight != image.getHeight() || realWidth != image.getWidth()) {
+				image = convertToBufferedImage(image.getScaledInstance(realWidth, realHeight, BufferedImage.SCALE_FAST));
 				pixels = new int[realWidth * realHeight];
 				image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
 			}
+
 			image = null;
 			scale = null;
 		}
@@ -358,24 +336,7 @@ public class OBJTextureSheet {
 		currentY = 0;
 		rowHeight = 0;
 
-		//TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
-		// GL_BGRA_EXT = 32993
-		// GL_UNSIGNED_INT_8_8_8_8_REV = 33639
-		// ARBTextureCompression.GL_TEXTURE_COMPRESSED_ARB
-		//GL_COMPRESSED_RGBA_BPTC_UNORM
-		// Internal Mojang/Forge magic...
-		synchronized (net.minecraftforge.fml.client.SplashProgress.class)
-		{
-			TextureUtil.deleteTexture(textureID);
-			GlStateManager.bindTexture(textureID);
-		}
-		// Use compressed ARB
-		//GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-		if (ConfigGraphics.useTextureCompression && sheetWidth > 1024 && sheetHeight > 1024) {
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, ARBTextureCompression.GL_TEXTURE_COMPRESSED_ARB, sheetWidth, sheetHeight, 0, 32993, 33639, (ByteBuffer) null);
-		} else {
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, 6408, sheetWidth, sheetHeight, 0, 32993, 33639, (ByteBuffer) null);
-		}
+		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
 
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
