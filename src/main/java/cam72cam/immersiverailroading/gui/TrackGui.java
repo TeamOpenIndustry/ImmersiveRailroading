@@ -177,6 +177,9 @@ public class TrackGui extends GuiScreen {
 	public void initGui() {
 		int buttonID = 0;
 
+		trackButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
+		this.buttonList.add(trackButton);
+
 		typeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22-1, GuiText.SELECTOR_TYPE.toString(type));
 		this.buttonList.add(typeButton);
 
@@ -214,12 +217,9 @@ public class TrackGui extends GuiScreen {
 		gaugeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_GAUGE.toString(gauge));
 		this.buttonList.add(gaugeButton);
 
-		trackButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_GAUGE.toString(DefinitionManager.getTrack(track).name));
-		this.buttonList.add(trackButton);
-
 		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview);
 		this.buttonList.add(isPreviewCB);
-		
+
 		isGradeCrossingCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing);
 		this.buttonList.add(isGradeCrossingCB);
 		
@@ -242,7 +242,7 @@ public class TrackGui extends GuiScreen {
 			int idx = defs.indexOf(track);
 			idx = (idx + 1) % defs.size();
 			track = defs.get(idx);
-			trackButton.displayString = GuiText.SELECTOR_GAUGE.toString(DefinitionManager.getTrack(track).name);
+			trackButton.displayString = GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name);
 		}
 		if (button == posTypeButton) {
 			posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];

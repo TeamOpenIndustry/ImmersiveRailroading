@@ -14,6 +14,7 @@ public enum GuiText {
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),
 	SELECTOR_GRADE_CROSSING("selector.grade_crossing"),
 	SELECTOR_GAUGE("selector.gauge"),
+	SELECTOR_TRACK("selector.track"),
 	SELECTOR_PLATE_TYPE("selector.plate_type"),
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),
 	SELECTOR_CAST_SINGLE("selector.cast_single"),
@@ -45,7 +46,7 @@ public enum GuiText {
 	
 	NONE("none"),
 	;
-	
+
 	private String value;
 	GuiText(String value) {
 		this.value = value;
