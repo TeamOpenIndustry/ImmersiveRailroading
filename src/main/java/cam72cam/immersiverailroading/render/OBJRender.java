@@ -159,7 +159,9 @@ public class OBJRender {
 				texture.freeGL();
 			}
 		}
-		vba.free();
+		if (vba != null) {
+			vba.free();
+		}
 	}
 
 }

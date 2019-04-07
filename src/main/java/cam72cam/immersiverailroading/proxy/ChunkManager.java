@@ -87,6 +87,14 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 	}
 
 	public static void handleWorldTick(World world) {
+		Ticket ticket;
+		try {
+			ticket = ticketForWorld(world);
+		} catch (Exception ex) {
+			ImmersiveRailroading.error("Something broke inside ticketForWorld!");
+			return;
+		}
+
 		int dim = world.provider.getDimension();
 		Set<ChunkPos> keys = CHUNK_MAP.keySet();
 		
@@ -111,9 +119,7 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 		for (ChunkPos pos : unload) {
 			CHUNK_MAP.remove(pos);
 		}
-		
-		Ticket ticket = ticketForWorld(world);
-		
+
 		for (net.minecraft.util.math.ChunkPos chunk : ticket.getChunkList()) {
 			boolean shouldChunkLoad = false;
 			

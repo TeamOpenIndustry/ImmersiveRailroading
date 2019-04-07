@@ -306,7 +306,8 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_KEY, 0,
 				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName(), ""));
 	}
-	
+
+	private static final Map<String, BufferedImage> cachedIcons = new HashMap<>();
 	public static final class StockIcon extends TextureAtlasSprite
     {
         private EntityRollingStockDefinition def;
@@ -327,22 +328,28 @@ public class ClientProxy extends CommonProxy {
         @Override
         public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
         {
-            BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-            
-            EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
+			StockModel renderer = StockRenderCache.getRender(def.defID);
 
-            StockModel renderer = StockRenderCache.getRender(def.defID);
-    		for (int x = 0; x < this.getIconWidth(); x++) {
-    			for (int y = 0; y < this.getIconHeight(); y++) {
-    				if (map[x][y] != null) {
-						EntityRollingStockDefinition.IconPart pt = map[x][y];
-    					int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
-    					image.setRGB(x, this.getIconWidth() - (y + 1), color);
-    				} else {
-    					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
-    				}
-    			}
-    		}
+            BufferedImage image;
+            if (!cachedIcons.containsKey(def.defID)) {
+            	image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+
+                EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
+
+                for (int x = 0; x < this.getIconWidth(); x++) {
+                    for (int y = 0; y < this.getIconHeight(); y++) {
+                        if (map[x][y] != null) {
+                            EntityRollingStockDefinition.IconPart pt = map[x][y];
+                            int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
+                            image.setRGB(x, this.getIconWidth() - (y + 1), color);
+                        } else {
+                            image.setRGB(x, this.getIconWidth() - (y + 1), 0);
+                        }
+                    }
+                }
+                cachedIcons.put(def.defID, image);
+			}
+			image = cachedIcons.get(def.defID);
     		for (OBJTextureSheet tex : renderer.textures.values()) {
     			tex.freePx();
 			}
@@ -558,7 +565,7 @@ public class ClientProxy extends CommonProxy {
 				}
 
 		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
-		        String key = info.uniqueID + pos.toLong();
+		        String key = info.uniqueID + info.placementInfo.placementPosition;
 				RailInfo cached = infoCache.get(key);
 		        if (cached != null) {
 					info = cached;
@@ -575,12 +582,9 @@ public class ClientProxy extends CommonProxy {
 						GL14.glBlendColor(1, 1, 1, 0.5f);
 					}
 					
-	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
-	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
-	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-
-					Vec3d placementPosition = info.placementInfo.placementPosition;
-	                GL11.glTranslated(placementPosition.x-d0, placementPosition.y-d1, placementPosition.z-d2);
+					Vec3d cameraPos = RenderOverride.getCameraPos(event.getPartialTicks());
+					Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
+					GL11.glTranslated(offPos.x, offPos.y, offPos.z);
 
 	                RailRenderUtil.render(info, true);
 

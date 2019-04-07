@@ -40,7 +40,7 @@ public class RailBaseModel implements IBakedModel {
 				double liquid = railState.getValue(BlockRailBase.LIQUID);
 				EnumFacing facing = railState.getValue(BlockRailBase.FACING);
 				Gauge gauge = Gauge.from(gauged);
-				
+
 				if (augment != null) {
 					height = height + 0.1f * (float)gauge.scale() * 1.25f;
 
@@ -77,7 +77,7 @@ public class RailBaseModel implements IBakedModel {
 				height = height + 0.1f * (float)gauge.scale();
 				
 				if (snow != 0) {
-					state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snow);
+					state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snow + (int)(height * 8));
 					IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
 					return model.getQuads(state, side, rand);
 				} else if (bed.getItem() != Items.AIR && tileHeight != 0.000001f) {
