@@ -7,9 +7,12 @@ import com.google.common.base.Optional;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.immersiverailroading.sound.ISound;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,7 +30,7 @@ public abstract class Locomotive extends FreightTank {
 	protected static DataParameter<Optional<UUID>> HORN_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 	protected static DataParameter<Integer> BELL = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
 
-
+	public ISound bell;
 
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
@@ -166,6 +169,14 @@ public abstract class Locomotive extends FreightTank {
 			}
 			if (this.getDataManager().get(BELL) > 0) {
 				this.getDataManager().set(BELL, this.getDataManager().get(BELL)-1);
+			}
+			if (ConfigSound.soundEnabled) {
+				if (this.getDataManager().get(BELL) != 0 && !bell.isPlaying()) {
+					bell.play(getPositionVector());
+				}
+				else if(this.getDataManager().get(BELL) == 0 && bell.isPlaying()){
+					bell.stop();
+				}
 			}
 		}
 		
