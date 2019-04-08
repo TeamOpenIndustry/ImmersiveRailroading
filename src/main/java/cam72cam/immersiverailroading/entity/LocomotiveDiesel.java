@@ -169,9 +169,9 @@ public class LocomotiveDiesel extends Locomotive {
 		if (world.isRemote) {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
-                    bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge);
+                    bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, this.getDefinition().getHornSus(), 100, this.soundGauge());
-					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, this.soundGauge);
+					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
 
 
 				}

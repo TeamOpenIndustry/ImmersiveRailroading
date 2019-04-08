@@ -222,8 +222,8 @@ public class LocomotiveSteam extends Locomotive {
 			
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
-					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, this.soundGauge);
-					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge);
+					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
+					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 					whistle.setPitch(1);
 					
 					if (this.getDefinition().quill != null) {
