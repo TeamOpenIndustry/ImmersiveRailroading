@@ -1,12 +1,12 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class SwitchUtil {
@@ -26,24 +26,36 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 		
-		if (rail.getType() != TrackItems.TURN) {
+		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM) {
 			return SwitchState.NONE;
 		}
-		if (parent.getType() != TrackItems.SWITCH) {
+		if (parent.info.settings.type != TrackItems.SWITCH) {
 			return SwitchState.NONE;
 		}
 		
-		if (position != null && parent.getRailRenderInfo() != null) {
-			BuilderSwitch switchBuilder = (BuilderSwitch)parent.getRailRenderInfo().getBuilder();
+		if (position != null && parent.info != null) {
+			BuilderSwitch switchBuilder = (BuilderSwitch)parent.info.getBuilder();
 			
 			if (!switchBuilder.isOnStraight(position)) {
 				return SwitchState.TURN;
 			}
 		}
-		
-		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-			if (rail.getWorld().isBlockIndirectlyGettingPowered(new BlockPos(rail.getPlacementPosition()).offset(facing, MathHelper.ceil(rail.getGauge().scale()))) > 0) {
-				return SwitchState.TURN;
+
+		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
+		double horiz = rail.info.settings.gauge.scale() * 1.1;
+		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
+			horiz = horiz/2;
+		}
+		int scale = (int)Math.round(horiz);
+		for (int x = -scale; x <= scale; x++) {
+			for (int z = -scale; z <= scale; z++) {
+				BlockPos gagPos = new BlockPos(redstoneOrigin.add(new Vec3d(x, 0, z)));
+				TileRailBase gagRail = TileRailBase.get(rail.getWorld(), gagPos);
+				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
+					if (rail.getWorld().isBlockIndirectlyGettingPowered(gagPos) > 0) {
+						return SwitchState.TURN;
+					}
+				}
 			}
 		}
 		return SwitchState.STRAIGHT;

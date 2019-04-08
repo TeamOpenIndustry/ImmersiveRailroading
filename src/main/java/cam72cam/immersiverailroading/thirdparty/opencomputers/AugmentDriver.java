@@ -1,8 +1,6 @@
 package cam72cam.immersiverailroading.thirdparty.opencomputers;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
@@ -153,6 +151,40 @@ public class AugmentDriver implements DriverBlock {
 			}
 			return null;
 		}
+		
+		public void loco_info(Locomotive car, Map<String, Object> info) {
+			TileRailBase te = TileRailBase.get(world, pos);
+			EntityMoveableRollingStock stock = te.getStockNearBy(null);
+			EntityRollingStockDefinition def = car.getDefinition();
+
+			info.put("id", def.defID);
+			info.put("name", def.name());
+			info.put("tag", car.tag);
+			EnumFacing dir = EnumFacing.fromAngle(car.rotationYaw);
+			if (car.getCurrentSpeed().metric() < 0) {
+				dir = dir.getOpposite();
+			}
+			info.put("direction", dir.toString());
+
+			info.put("passengers", car.getPassengers().size() + stock.staticPassengers.size());
+			info.put("speed", car.getCurrentSpeed().metric());
+			info.put("weight", car.getWeight());
+			LocomotiveDefinition locoDef = car.getDefinition();
+			info.put("horsepower", locoDef.getHorsePower(car.gauge));
+			info.put("traction", locoDef.getStartingTractionNewtons(car.gauge));
+			info.put("max_speed", locoDef.getMaxSpeed(car.gauge).metric());
+			info.put("brake", car.getAirBrake());
+			info.put("throttle", car.getThrottle());
+
+			if (car instanceof LocomotiveSteam) {
+				LocomotiveSteam steam = (LocomotiveSteam) car;
+				info.put("pressure", steam.getBoilerPressure());
+				info.put("temperature", steam.getBoilerTemperature());
+			}
+			if (car instanceof LocomotiveDiesel) {
+				info.put("temperature", ((LocomotiveDiesel) car).getEngineTemperature());
+			}
+		}
 
 		@Callback(doc = "function():table -- returns an info dump about the current car")
 		public Object[] info(Context context, Arguments arguments) {
@@ -176,23 +208,7 @@ public class AugmentDriver implements DriverBlock {
 				info.put("weight", stock.getWeight());
 
 				if (stock instanceof Locomotive) {
-					LocomotiveDefinition locoDef = ((Locomotive) stock).getDefinition();
-					info.put("horsepower", locoDef.getHorsePower(stock.gauge));
-					info.put("traction", locoDef.getStartingTractionNewtons(stock.gauge));
-					info.put("max_speed", locoDef.getMaxSpeed(stock.gauge).metric());
-
-					Locomotive loco = (Locomotive) stock;
-					info.put("brake", loco.getAirBrake());
-					info.put("throttle", loco.getThrottle());
-
-					if (stock instanceof LocomotiveSteam) {
-						LocomotiveSteam steam = (LocomotiveSteam) stock;
-						info.put("pressure", steam.getBoilerPressure());
-						info.put("temperature", steam.getBoilerTemperature());
-					}
-					if (stock instanceof LocomotiveDiesel) {
-						info.put("temperature", ((LocomotiveDiesel)stock).getEngineTemperature());
-					}
+					loco_info((Locomotive)stock, info);
 				}
 
 				FluidStack fluid = getFluid();
@@ -222,9 +238,11 @@ public class AugmentDriver implements DriverBlock {
 			TileRailBase te = TileRailBase.get(world, pos);
 			EntityCoupleableRollingStock stock = te.getStockNearBy(EntityCoupleableRollingStock.class, null);
 			if (stock != null) {
+				int traction=0;
 				PhysicsAccummulator acc = new PhysicsAccummulator(stock.getCurrentTickPosAndPrune());
 				stock.mapTrain(stock, true, true, acc::accumulate);
 				Map<String, Object> info = new HashMap<String, Object>();
+				List<Object> locos = new ArrayList<Object>();
 				
 				info.put("cars", acc.count);
 				info.put("tractive_effort_N", acc.tractiveEffortNewtons);
@@ -235,6 +253,18 @@ public class AugmentDriver implements DriverBlock {
 					dir = dir.getOpposite();
 				}
 				info.put("direction", dir.toString());
+				
+				for (EntityCoupleableRollingStock car : stock.getTrain()) {
+					if (car instanceof Locomotive) {
+						LocomotiveDefinition locoDef = ((Locomotive)car).getDefinition();
+						traction+=locoDef.getStartingTractionNewtons(car.gauge);
+						Map<String, Object> sub_info = new HashMap<String, Object>();
+						loco_info((Locomotive) car, sub_info);
+						locos.add(sub_info);
+					}
+				}
+				info.put("locomotives", locos);
+				info.put("totoal_traction_N", traction);
 				
 				return new Object[] { info };
 			}
@@ -298,6 +328,9 @@ public class AugmentDriver implements DriverBlock {
 		}
 		
 		private float normalize(double val) {
+			if (Double.isNaN(val)) {
+				return 0;
+			}
 			if (val > 1) {
 				return 1;
 			}

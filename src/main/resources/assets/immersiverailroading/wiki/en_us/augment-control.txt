@@ -1,6 +1,6 @@
 The Locomotive Control Augment is used to set the throttle or brake of locomotives overhead.  Right click on a track segment to apply the augment.  It can be filtered by right clicking on the augment with a locomotive item.
 
-Right clicking on the augment will switch it between a few modes:
+Right clicking on the augment with a redstone torch will switch it between a few modes:
 * Throttle Forward: Sets the throttle forward proportional to the redstone signal
 * Throttle Reverse: Sets the throttle reverse proportional to the redstone signal
 * Brake: Sets the brake proportional to the redstone signal

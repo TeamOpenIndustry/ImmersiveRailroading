@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 public class TenderDefinition extends CarTankDefinition {
 	private int numSlots;
 	private int width;
+	private boolean showCurrentLoadOnly;
 
 	public TenderDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -26,6 +27,10 @@ public class TenderDefinition extends CarTankDefinition {
 		JsonObject tender = data.get("tender").getAsJsonObject();
 		this.numSlots = (int)Math.ceil(tender.get("slots").getAsInt() * internal_inv_scale);
 		this.width = (int)Math.ceil(tender.get("width").getAsInt() * internal_inv_scale);
+		this.showCurrentLoadOnly = false;
+		if (tender.has("show_current_load_only")) {
+			this.showCurrentLoadOnly = tender.get("show_current_load_only").getAsBoolean();
+		}
 	}
 	
 	@Override
@@ -46,5 +51,9 @@ public class TenderDefinition extends CarTankDefinition {
 
 	public int getInventoryWidth(Gauge gauge) {
 		return MathHelper.ceil(width * gauge.scale());
+	}
+	
+	public boolean shouldShowCurrentLoadOnly () {
+		return this.showCurrentLoadOnly;
 	}
 }

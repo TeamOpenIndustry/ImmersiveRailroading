@@ -3,7 +3,7 @@
 	"model": 	"immersiverailroading:models/rolling_stock/tender/rodgers_460_tender/rodgers_460_tender.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 45000
+		"weight_kg": 20000
 	},
 	"passenger": {
 		"slots": 2,
@@ -13,11 +13,11 @@
 		"width": 2.2
 	},
 	"tank": {
-		"capacity_l":  22000
+		"capacity_l":  23000
 	},
 	"tender": {
-		"slots": 34,
-		"width": 12
+		"slots": 14,
+		"width": 7
 	},
 	"trucks": {
 		"front": 1.9, 

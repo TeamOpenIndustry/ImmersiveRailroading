@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.StockDeathType;
+import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.EntityLiving;
@@ -53,6 +54,15 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 
 	public abstract int getInventorySize();
 
+	public boolean showCurrentLoadOnly() {
+		return this.getDefinition().shouldShowCurrentLoadOnly();
+	}
+	
+	@Override
+	public FreightDefinition getDefinition() {
+		return this.getDefinition(FreightDefinition.class);
+	}
+
 	/*
 	 * 
 	 * EntityRollingStock Overrides
@@ -72,7 +82,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 				ItemStack itemstack = cargoItems.getStackInSlot(slot);
 				if (itemstack.getCount() != 0) {
-					Vec3d pos = this.getPositionVector().add(VecUtil.fromYaw(4, this.rotationYaw+90));
+					Vec3d pos = this.getPositionVector().add(VecUtil.fromWrongYaw(4, this.rotationYaw+90));
 					world.spawnEntity(new EntityItem(this.world, pos.x, pos.y, pos.z, itemstack.copy()));
 					itemstack.setCount(0);
 				}

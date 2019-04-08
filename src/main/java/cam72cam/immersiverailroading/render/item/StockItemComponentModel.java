@@ -54,7 +54,7 @@ public class StockItemComponentModel implements IBakedModel {
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		
 		if (def == null) {
-			ImmersiveRailroading.error("Item missing definition!");
+			ImmersiveRailroading.error("Item %s missing definition!", stack);
 			stack.setCount(0);
 			return;
 		}
@@ -64,7 +64,7 @@ public class StockItemComponentModel implements IBakedModel {
 
 		for (RenderComponentType r : item.render) {
 			RenderComponent comp = def.getComponent(r, Gauge.from(Gauge.STANDARD));
-			if (comp == null) {
+			if (comp == null || r == RenderComponentType.CARGO_FILL_X) {
 				continue;
 			}
 			groups.addAll(comp.modelIDs);

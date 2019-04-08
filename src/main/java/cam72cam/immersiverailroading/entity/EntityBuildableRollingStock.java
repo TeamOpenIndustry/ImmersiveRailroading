@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
+import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
 import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.StockDeathType;
@@ -405,6 +406,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK, 1, 0);
 			ItemDefinition.setID(item, defID);
 			ItemGauge.set(item, gauge);
+			ItemTextureVariant.set(item, texture);
 			world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
 		} else {
 			for (ItemComponentType component : this.builtItems) {

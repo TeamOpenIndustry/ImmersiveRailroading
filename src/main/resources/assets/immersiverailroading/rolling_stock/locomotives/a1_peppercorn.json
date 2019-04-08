@@ -2,15 +2,18 @@
 	"era": "steam",
 	"name": "A1 Peppercorn",
 	"works": "A1 Steam Locomotive Trust",
-	"model": "immersiverailroading:models/rolling_stock/locomotives/a1_peppercorn.obj",
-	"darken_model": "0.03",
+	"model": "immersiverailroading:models/rolling_stock/locomotives/a1_peppercorn/a1_peppercorn.obj",
+	"tex_variants": {
+		"Dark Blue": "dark_blue"
+	},
+	"darken_model": "-0.05",
 	"properties": {
 		"max_psi": 250,
 		"water_capacity_l": 27000, 
 		"horsepower": 2700,
 		"tractive_effort_lbf": 37400,
 		"max_speed_kmh": 160,
-		"valve_gear": "walschaerts",
+		"valve_gear": "tri_walschaerts",
 		"weight_kg": 106888
 	},
 	"firebox": {
@@ -30,7 +33,7 @@
 	},
 	"couplers": {
 		"front_offset": 0,
-		"rear_offset": -0.4
+		"rear_offset": -0.7
 	},
 	"sounds": {
 		"whistle": "sounds/steam/a1_peppercorn/whistle.ogg",

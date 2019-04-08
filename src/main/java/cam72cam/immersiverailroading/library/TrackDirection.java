@@ -11,4 +11,16 @@ public enum TrackDirection {
 	public String toString() {
 	    return TextUtil.translate("track.immersiverailroading:direction." + super.toString().toLowerCase()); 
 	}
+
+	public float toYaw() {
+		switch (this) {
+			case LEFT:
+				return 180;
+			case RIGHT:
+				return 0;
+			case NONE:
+			default:
+				return 0;
+		}
+	}
 }

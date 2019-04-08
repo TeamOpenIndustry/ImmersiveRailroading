@@ -43,8 +43,8 @@ This setting determines how the track should be locked to the rail bed.
 * Fixed: Locks the track directly to the rail bed, no flexibility at all
 * Pixels: Allows free placement of the track (rounded to the nearest 16th of a block)
 * Pixels Locked: Allows free placement of the track forward and backward, but locks side to side motion
-* Pixels: Allows free placement of the track
-* Pixels Locked: Allows free placement of the track forward and backward, but locks side to side motion
+* Smooth: Allows free placement of the track
+* Smooth Locked: Allows free placement of the track forward and backward, but locks side to side motion
 
 [prefix{n}] Gauge:[prefix{}]
 

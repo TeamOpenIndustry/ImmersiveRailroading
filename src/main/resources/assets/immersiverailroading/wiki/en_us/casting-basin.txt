@@ -3,8 +3,14 @@
 The Basin creates different parts for rolling stock, specifically wheels and frames, as well as the Rail Cast for use with the [link{immersiverailroading:track-roller}]Track Roller[link{}]. The Gauge selector changes between gauges.
 
 [prefix{l}] Construction[prefix{}]
+It is built from:
+* 114 x Stone Bricks
+*  15 x Heavy Engineering Block
+* 126 x Sand
+*  86 x Blast Brick
+*  63 x Steel Scaffolding
 
-[image{200, 117, 0.537109375, immersiverailroading:wiki/images/bpyyuxc.png}]
+[image{200, 195, 0.537109375, immersiverailroading:wiki/images/bpyyuxc.png}]
 
 Power is input through the top of the machine, on the color-coded yellow/orange block.
 
