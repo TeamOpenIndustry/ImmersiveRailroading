@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import javax.annotation.Nonnull;
 
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
@@ -25,6 +26,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
@@ -72,14 +75,7 @@ public abstract class BlockRailBase extends Block {
 		if (parent == null || !parent.isLoaded()) {
 			return stack;
 		}
-		ItemGauge.set(stack, parent.getGauge());
-		ItemTrackBlueprint.setType(stack, parent.getType());
-		ItemTrackBlueprint.setLength(stack, parent.getLength());
-		ItemTrackBlueprint.setQuarters(stack, parent.getTurnQuarters());
-		//ItemRail.setPosType(stack, )
-		ItemTrackBlueprint.setBed(stack, parent.getRailBed());
-		//ItemRail.setPreview(stack, )
-		
+		ItemTrackBlueprint.settings(stack, parent.info.settings);
 		return stack;
 	}
 	
@@ -103,7 +99,9 @@ public abstract class BlockRailBase extends Block {
 				if (te.getParentTile() != null) {
 					te.getParentTile().spawnDrops();
 				}
-				te.getWorld().setBlockToAir(parent);
+				//if (tryBreakRail(te.getWorld(), te.getPos())) {
+                te.getWorld().setBlockToAir(parent);
+				//}
 			}
 		}
 	}
@@ -131,21 +129,21 @@ public abstract class BlockRailBase extends Block {
     	if (te != null) {
 			if (te.getRenderRailBed() != null) {
 				state = state.withProperty(RAIL_BED, te.getRenderRailBed());
-				state = state.withProperty(HEIGHT, te.getHeight());
+				state = state.withProperty(HEIGHT, te.getBedHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
-				state = state.withProperty(GAUGE, (float)te.getTrackGauge());
+				state = state.withProperty(GAUGE, (float)te.getRenderGauge());
 				state = state.withProperty(AUGMENT, te.getAugment());
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
 				TileRail parent = te.getParentTile();
 				if (parent != null) {
-					if (parent.getFacing().getAxis() == Axis.X) {
+					if (parent.info.placementInfo.facing().getAxis() == Axis.X) {
 						if (parent.getPos().getZ() == te.getPos().getZ()) {
-							state = state.withProperty(FACING, te.getParentTile().getFacing());
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing());
 						}
 					}
-					if (parent.getFacing().getAxis() == Axis.Z) {
+					if (parent.info.placementInfo.facing().getAxis() == Axis.Z) {
 						if (parent.getPos().getX() == te.getPos().getX()) {
-							state = state.withProperty(FACING, te.getParentTile().getFacing());
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing());
 						}
 					}
 				}
@@ -167,13 +165,22 @@ public abstract class BlockRailBase extends Block {
 					// new object here is important
 					TileRailGag newGag = new TileRailGag();
 					newGag.readFromNBT(rail.getReplaced());
-					
-					// Only do replacement if parent still exists
-					if (newGag.getParent() != null && TileRailBase.get(world, newGag.getParent()) != null) {
-						rail.getWorld().setTileEntity(pos, newGag);
-						newGag.markDirty();
-						breakParentIfExists(rail);
-						return false;
+					while(true) {
+						// Only do replacement if parent still exists
+						if (newGag.getParent() != null && TileRailBase.get(world, newGag.getParent()) != null) {
+							rail.getWorld().setTileEntity(pos, newGag);
+							newGag.markDirty();
+							breakParentIfExists(rail);
+							return false;
+						}
+
+						NBTTagCompound data = newGag.getReplaced();
+						if (data == null) {
+							break;
+						}
+
+						newGag = new TileRailGag();
+						newGag.readFromNBT(data);
 					}
 				}
 			}
@@ -208,11 +215,21 @@ public abstract class BlockRailBase extends Block {
 			}
 		}
 		if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
-			SwitchState state = SwitchUtil.getSwitchState(tileEntity.getParentTile());
+			TileRail switchTile = tileEntity.getParentTile();
+			if (tileEntity instanceof TileRail) {
+				switchTile = (TileRail) tileEntity;
+			}
+			SwitchState state = SwitchUtil.getSwitchState(switchTile);
 			if (state != SwitchState.NONE) {
-				tileEntity.getParentTile().setSwitchState(state);
+				switchTile.setSwitchState(state);
 			}
 		}
+        if (tileEntity.getParentReplaced() != null && tileEntity instanceof TileRailGag) {
+            TileRailBase replacedParent = TileRailBase.get(tileEntity.getWorld(), tileEntity.getParentReplaced());
+            if (replacedParent != null && replacedParent.getParentTile() != tileEntity.getParentTile()) {
+                this.onNeighborChange(world, replacedParent.getPos(), neighbor);
+            }
+        }
 	}
 
 	@Override
@@ -334,4 +351,9 @@ public abstract class BlockRailBase extends Block {
     {
         return true;
     }
+
+	@SideOnly(Side.CLIENT)
+	public BlockRenderLayer getBlockLayer() {
+		return BlockRenderLayer.CUTOUT_MIPPED;
+	}
 }

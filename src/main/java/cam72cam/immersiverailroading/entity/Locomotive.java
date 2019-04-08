@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.common.base.Optional;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.ConfigSound;
@@ -19,6 +20,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -37,8 +39,8 @@ public abstract class Locomotive extends FreightTank {
 	
 	private boolean deadMansSwitch;
 	private int deadManChangeTimeout;
-
-
+	
+	
 	public Locomotive(World world, String defID) {
 		super(world, defID);
 
@@ -89,7 +91,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	
 	@Override
-	public void handleKeyPress(Entity source, KeyTypes key) {
+	public void handleKeyPress(Entity source, KeyTypes key, boolean sprinting) {
 		switch(key) {
 		case HORN:
 			setHorn(10, source.getPersistentID());
@@ -135,11 +137,44 @@ public abstract class Locomotive extends FreightTank {
 			}
 			break;
 		default:
-			super.handleKeyPress(source, key);
+			super.handleKeyPress(source, key, sprinting);
 			break;
 		}
 	}
 
+	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
+			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
+				NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
+				if(cardNBT == null) { 
+					player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
+					cardNBT = player.getHeldItem(hand).getTagCompound();
+				}
+				if (player.isSneaking()) {
+					if (!cardNBT.hasKey("linked_uuid")) {
+						player.sendMessage(ChatText.RADIO_NOLINK.getMessage());
+					} else {
+						cardNBT.removeTag("linked_uuid");
+						player.sendMessage(ChatText.RADIO_UNLINK.getMessage());
+					}
+				} else {
+					if (!cardNBT.hasKey("linked_uuid")) {
+						cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+						player.sendMessage(ChatText.RADIO_LINK.getMessage());
+					} else {
+						cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+						player.sendMessage(ChatText.RADIO_RELINK.getMessage());
+					}
+				}
+			}
+			else {
+				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getName()));;
+			}
+			return true;
+		}
+		return super.processInitialInteract(player, hand);
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -283,7 +318,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 		// Wheel balance messing with friction
 		if (this.getCurrentSpeed().metric() != 0) {
-			double balance = 1 - 0.005 * Math.abs(this.getCurrentSpeed().metric());
+			double balance = 1 - 0.004 * Math.abs(this.getCurrentSpeed().metric());
 			slipMult *= balance;
 		}
 		return slipMult;
@@ -294,4 +329,5 @@ public abstract class Locomotive extends FreightTank {
 		//https://www.reddit.com/r/Minecraft/comments/3eh7yu/the_rl_temperature_of_minecraft_biomes_revealed/ctex050/
 		return (13.6484805403f*mctemp)+7.0879687222f;
 	}
+	
 }

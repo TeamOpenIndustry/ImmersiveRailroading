@@ -1,12 +1,18 @@
 package cam72cam.immersiverailroading.render.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderCubicCurve;
+import cam72cam.immersiverailroading.track.IIterableTrack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.Predicate;
@@ -31,9 +37,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
 
 public class RenderOverride {
-	
+
 	private static Vec3d getCameraPos(float partialTicks) {
         Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
         double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * partialTicks;
@@ -144,51 +152,86 @@ public class RenderOverride {
 
         ICamera camera = getCamera(partialTicks);
         Vec3d cameraPos = getCameraPos(partialTicks);
-        
-        GL11.glPushMatrix();
-        {
-	        GL11.glTranslated(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-			GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
-		
-	        OBJRender model = RailBuilderRender.getModel(Gauge.from(Gauge.STANDARD)); 
-	        model.bindTexture();
-	        List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
-	        for (TileEntity te : entities) {
-	        	if (te instanceof TileRail) {
-	        		if (!((TileRail) te).isLoaded()) {
+
+
+		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
+	
+        OBJRender model = RailBuilderRender.getModel(Gauge.from(Gauge.STANDARD)); 
+        model.bindTexture();
+        List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
+        for (TileEntity te : entities) {
+        	if (te instanceof TileRail) {
+        		if (!((TileRail) te).isLoaded()) {
+        			continue;
+        		}
+	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(te.getPos()))) {
+
+	        		RailInfo info = ((TileRail) te).info;
+	        		if (info == null) {
+	        			// Still loading...
 	        			continue;
 	        		}
-		        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(((TileRail) te).getPlacementPosition())) {
-		        		Vec3d relPos = new Vec3d(te.getPos());
-		        		
-		        		RailInfo info = ((TileRail) te).getRailRenderInfo();
-		        		if (info == null) {
-		        			// Still loading...
-		        			continue;
-		        		}
-		        		
-		        		GL11.glPushMatrix();
-		        		{
-		        	        int i = te.getWorld().getCombinedLight(te.getPos(), 0);
-		        	        int j = i % 65536;
-		        	        int k = i / 65536;
-		        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
-		        			info = info.clone();
-		        			GL11.glTranslated(relPos.x, relPos.y, relPos.z);	
-		        			if (info.type == TrackItems.SWITCH) {
-		        				info.type = TrackItems.STRAIGHT;
-		        			}
-			        		RailBuilderRender.renderRailBuilder(info);
-		        		}
-		        		GL11.glPopMatrix();
-		        	}	
-	        	}
-	        }
-	        model.restoreTexture();
-	        
-	        blend.restore();
+
+	        		GL11.glPushMatrix();
+	        		{
+	        	        int i = te.getWorld().getCombinedLight(te.getPos(), 0);
+	        	        int j = i % 65536;
+	        	        int k = i / 65536;
+	        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+	        			if (info.settings.type == TrackItems.SWITCH) {
+	        				//TODO render switch and don't render turn
+	        				info = info.withType(TrackItems.STRAIGHT);
+	        			}
+
+						Vec3d pos = info.placementInfo.placementPosition.subtract(cameraPos);
+						GL11.glTranslated(pos.x, pos.y, pos.z);
+
+		        		RailBuilderRender.renderRailBuilder(info);
+	        		}
+	        		GL11.glPopMatrix();
+	        	}	
+        	}
         }
-        GL11.glPopMatrix();
+		blend.restore();
+
+        ClientProxy proxy = (ClientProxy) ImmersiveRailroading.proxy;
+		Collection<TileRailPreview> previews = proxy.getPreviews();
+		if (previews != null && previews.size() > 0) {
+			Minecraft.getMinecraft().mcProfiler.startSection("tile_rail_preview");
+			blend = new GLBoolTracker(GL11.GL_BLEND, true);
+			GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
+			if (GLContext.getCapabilities().OpenGL14) {
+				GL14.glBlendColor(1, 1, 1, 0.7f);
+			}
+			for (TileRailPreview preview : previews) {
+				if (!preview.hasWorld()) {
+					preview.setWorld(Minecraft.getMinecraft().player.world);
+				}
+				for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getPos())).getSubBuilders()) {
+					RailInfo info = builder.info;
+					Vec3d placementPosition = info.placementInfo.placementPosition;
+
+					if (isInRenderDistance(placementPosition)) {
+						placementPosition = placementPosition.subtract(cameraPos);
+                        GL11.glPushMatrix();
+                        {
+                            GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
+
+                            RailRenderUtil.render(info, true);
+                        }
+                        GL11.glPopMatrix();
+					}
+				}
+			}
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			if (GLContext.getCapabilities().OpenGL14) {
+				GL14.glBlendColor(1, 1, 1, 1f);
+			}
+			blend.restore();
+			Minecraft.getMinecraft().mcProfiler.endSection();
+		}
+        model.restoreTexture();
+
         Minecraft.getMinecraft().mcProfiler.endSection();;
 	}
 }

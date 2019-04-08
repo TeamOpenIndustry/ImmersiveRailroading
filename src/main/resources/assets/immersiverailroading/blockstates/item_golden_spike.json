@@ -1,0 +1,47 @@
+{
+	"forge_marker": 1,
+	"defaults":
+	{
+		"model": "immersiverailroading:goldenspike/goldenspike.obj"
+	},
+	"variants": {
+		"normal": [{
+			"transform": {
+				"firstperson_righthand": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"firstperson_lefthand": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"thirdperson_righthand": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"thirdperson_lefthand": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0.2, -0],
+					"rotation": [{"x": 200}, {"y": 0}, {"z": 180}]
+				},
+				"gui": {
+				  	"scale": 0.125,
+					"translation": [0, 0, 0],
+					"rotation": {"y": -90}
+				},
+				"ground": {
+				  	"scale": 0.1,
+				  	"translation": [0, 0, 0],
+					"rotation": {"y": -90}
+				},
+				"fixed": {
+				  	"scale": 0.1,
+					"rotation": {"y": -90}
+				}
+			}
+		}]
+	}
+}

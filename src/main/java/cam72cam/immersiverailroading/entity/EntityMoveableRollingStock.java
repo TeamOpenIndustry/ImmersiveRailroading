@@ -22,7 +22,6 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -65,6 +64,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		frontYaw = BufferUtil.readFloat(additionalData);
 		rearYaw = BufferUtil.readFloat(additionalData);
 		tickPosID = additionalData.readInt();
+		tickSkew = additionalData.readDouble();
 		
 		positions = new ArrayList<TickPos>();
 		
@@ -81,6 +81,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		BufferUtil.writeFloat(buffer, frontYaw);
 		BufferUtil.writeFloat(buffer, rearYaw);
 		buffer.writeInt((int)tickPosID);
+		double tickTime = ConfigDebug.serverTickCompensation ? 20 : CommonProxy.getServerTPS(world, positions.size());
+		buffer.writeDouble(tickTime/20);
 		
 		buffer.writeInt(positions.size());
 		for (TickPos pos : positions ) {
@@ -203,11 +205,17 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void handleTickPosPacket(List<TickPos> newPositions, double serverTPS) {
+		this.tickSkew = serverTPS / 20;
+		
 		if (newPositions.size() != 0) {
 			this.clearPositionCache();
-			this.tickPosID = newPositions.get(0).tickID;
+			double delta = newPositions.get(0).tickID - this.tickPosID;
+			if (Math.abs(delta) > 10) {
+				this.tickPosID = newPositions.get(0).tickID;
+			} else {
+				tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
+			}
 		}
-		this.tickSkew = serverTPS / 20;
 		this.positions = newPositions;
 	}
 	
@@ -357,7 +365,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 
 	    if (this.getCurrentSpeed().metric() > 1) {
-			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(EntityLiving.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
+			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(EntityLivingBase.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					// rolling stock collisions handled by looking at the front and
@@ -367,10 +375,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 				if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
 					// Don't apply bb to passengers
-					continue;
-				}
-	
-				if (! (entity instanceof EntityLivingBase)) {
 					continue;
 				}
 				
@@ -406,16 +410,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			// Riding on top of cars
 			AxisAlignedBB bb = this.getCollisionBoundingBox();
 			bb = bb.offset(0, gauge.scale()*2, 0);
-			List<Entity> entitiesAbove = world.getEntitiesWithinAABB(EntityLiving.class, bb);
+			List<Entity> entitiesAbove = world.getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (Entity entity : entitiesAbove) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					continue;
 				}
 				if (entity.getRidingEntity() instanceof EntityMoveableRollingStock) {
-					continue;
-				}
-				
-				if (! (entity instanceof EntityLivingBase)) {
 					continue;
 				}
 	
@@ -442,7 +442,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				if (pos.lengthVector() < this.getDefinition().getLength(gauge) / 2) {
 					continue;
 				}
-				pos = VecUtil.rotateYaw(pos, this.rotationYaw);
+				pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 				pos = pos.add(this.getPositionVector());
 				BlockPos bp = new BlockPos(pos);
 				
@@ -521,36 +521,22 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false);
 	}
 	
-	public PosRot predictFrontBogeyPosition(float offset) {		
+	public Vec3d predictFrontBogeyPosition(float offset) {
 		return predictFrontBogeyPosition(getCurrentTickPosOrFake(), offset);
 	}
-	public PosRot predictFrontBogeyPosition(TickPos pos, float offset) {		
+	public Vec3d predictFrontBogeyPosition(TickPos pos, float offset) {
 		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
-		
-		Vec3d front = sim.frontBogeyPosition();
-		Vec3d nextFront = front;
-		while (offset > 0) {
-			nextFront = sim.nextPosition(nextFront, pos.rotationYaw, pos.frontYaw, Math.min(0.1, offset));
-			offset -= 0.1;
-		}
-		Vec3d frontDelta = front.subtractReverse(nextFront);
-		return new PosRot(nextFront.subtractReverse(pos.position), VecUtil.toYaw(frontDelta));
+		Vec3d nextFront = sim.nextPosition(sim.frontBogeyPosition(), pos.rotationYaw, pos.frontYaw, offset);
+		return new PosRot(pos.position.subtract(nextFront), VecUtil.toYaw(pos.position.subtract(nextFront)));
 	}
 	
-	public PosRot predictRearBogeyPosition(float offset) {		
+	public PosRot predictRearBogeyPosition(float offset) {
 		return predictRearBogeyPosition(getCurrentTickPosOrFake(), offset);
 	}
 	public PosRot predictRearBogeyPosition(TickPos pos, float offset) {
-		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
-		
-		Vec3d rear = sim.rearBogeyPosition();
-		Vec3d nextRear = rear;
-		while (offset > 0) {
-			nextRear = sim.nextPosition(nextRear, pos.rotationYaw+180, pos.rearYaw+180, Math.min(0.1, offset));
-			offset -= 0.1;
-		}
-		Vec3d rearDelta = rear.subtractReverse(nextRear);
-		return new PosRot(nextRear.subtractReverse(pos.position), VecUtil.toYaw(rearDelta));
+		MovementSimulator sim = new MovementSimulator(world, pos, this.getDefinition().getBogeyRear(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
+		Vec3d nextRear = sim.nextPosition(sim.rearBogeyPosition(), pos.rotationYaw, pos.rearYaw, offset);
+		return new PosRot(pos.position.subtract(nextRear), VecUtil.toYaw(pos.position.subtract(nextRear)));
 	}
 
 	private BlockPos lastRetarderPos = null;
@@ -566,7 +552,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			if (pos.y != 0) {
 				continue;
 			}
-			pos = VecUtil.rotateYaw(pos, latest.rotationYaw);
+			pos = VecUtil.rotateWrongYaw(pos, latest.rotationYaw);
 			pos = pos.add(latest.position);
 			BlockPos bp = new BlockPos(pos);
 			

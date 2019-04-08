@@ -81,8 +81,8 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 		overrideStackDisplayName(stack);
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
-        if (requiresHammering(stack)) {
-        	tooltip.add("§c" + GuiText.RAW_CAST_TOOLTIP.toString() + "§f");
+        if (requiresHammering(stack)) {        	
+        	tooltip.add(TextFormatting.RED + GuiText.RAW_CAST_TOOLTIP.toString() + TextFormatting.RESET);
         }
     }
 	

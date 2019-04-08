@@ -7,9 +7,9 @@
 	"properties": {
 		"max_psi": 185,
 		"water_capacity_l": 13000, 
-		"horsepower": 3800,
-		"tractive_effort_lbf": 28450,
-		"max_speed_kmh": 120,
+		"horsepower": 2010,
+		"tractive_effort_lbf": 30190,
+		"max_speed_kmh": 48,
 		"valve_gear": "walschaerts",
 		"weight_kg": 59760
 	},
@@ -31,5 +31,16 @@
 	"couplers": {
 		"front_offset": -0.08,
 		"rear_offset": -1
+	},
+		"sounds": {
+			"quilling": [
+			{
+				"pull_start": 0.25,
+				"pull_end": 0.55,
+				"pitch_start": 0.9,
+				"pitch_end": 1,
+				"sample": "sounds/steam/whistles/prr_1chime_low.ogg"
+			}
+		]
 	}
 }
