@@ -28,7 +28,6 @@ public class TileRail extends TileRailBase {
 
 	public RailInfo info;
 	private List<ItemStack> drops;
-	private boolean hackSwitch;
 
 	@Override
 	@SideOnly(Side.CLIENT)

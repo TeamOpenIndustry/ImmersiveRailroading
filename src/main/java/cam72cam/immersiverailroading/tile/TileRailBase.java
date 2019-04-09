@@ -401,65 +401,49 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
-		TileRail tile;
-		TileRail self = this instanceof TileRail ? (TileRail) this : this.getParentTile();
-		
-		if (self == null) {
-			return currentPosition;
-		}
-
-		SwitchState state = SwitchUtil.getSwitchState(self, currentPosition);
-		if (state == SwitchState.STRAIGHT) {
-			tile = self.getParentTile();
-		} else {
-			tile = self;
-		}
-
-		if (tile == null) {
-			return currentPosition;
-		}
-		
 		double distanceMeters = motion.lengthVector();
 		float rotationYaw = VecUtil.toWrongYaw(motion);
+		Vec3d nextPos = currentPosition;
 
-		Vec3d nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+		TileRailBase self = this;
+		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 
-		if (state != SwitchState.NONE && nextPos.distanceTo(currentPosition) > Math.abs(distanceMeters) * 2) {
-			tile = self.getParentTile();
-			if (tile != null) {
-				Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
-				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
+		while(tile != null) {
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+
+			if (state == SwitchState.STRAIGHT) {
+				tile = tile.getParentTile();
+			}
+
+
+			Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+			if (state == SwitchState.TURN) {
+				float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
+				double diff = MathUtil.trueModulus(other - rotationYaw, 360);
+				diff = Math.min(360-diff, diff);
+				if (diff < 30) {
+					nextPos = potential;
+					break;
+				}
+			} else {
+				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion)) ||
+						currentPosition == nextPos) {
 					nextPos = potential;
 				}
 			}
-		}
 
-		if (new BlockPos(currentPosition).equals(this.getPos())) {
-			// Can look at our parents
-			// Prevents infinite looping between cross overlapping track (I think...)
-
-			TileRailBase target = this;
-			while(target != null) {
-				TileRail parent = target.getParentTile();
-				if (parent != null && parent.getParentTile() != null && tile.getParentTile() != null) {
-					boolean isSameTrack = parent.getParentTile().getPos().equals(tile.getParentTile().getPos());
-					if (!isSameTrack) {
-						Vec3d potential = parent.getNextPosition(currentPosition, motion);
-						if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion))) {
-							nextPos = potential;
-						}
-					}
-				}
-				NBTTagCompound data = target.getReplaced();
-				target = null;
-				if (data != null) {
-					target = new TileRailBase();
-					target.readFromNBT(data);
-					target.setWorld(world);
+			tile = null;
+			BlockPos currentParent = self.getParentTile().getParent();
+			for (NBTTagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
+				self = new TileRailBase();
+				self.readFromNBT(data);
+				self.setWorld(world);
+				if (!currentParent.equals(self.getParent())) {
+					tile = self.getParentTile();
+					break;
 				}
 			}
 		}
-
 		return nextPos;
 	}
 	

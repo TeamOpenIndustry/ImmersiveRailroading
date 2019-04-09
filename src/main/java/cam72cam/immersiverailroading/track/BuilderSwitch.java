@@ -1,8 +1,10 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,6 +16,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 
 	private BuilderIterator turnBuilder;
 	private BuilderStraight straightBuilder;
+	private BuilderStraight realStraightBuilder;
 	private final BuilderStraight straightBuilderReal;
 
 	public BuilderSwitch(RailInfo info, BlockPos pos) {
@@ -25,6 +28,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		{
 			turnBuilder = (BuilderIterator) turnInfo.getBuilder(pos);
 			straightBuilder = new BuilderStraight(straightInfo, pos, true);
+			realStraightBuilder = new BuilderStraight(straightInfo, pos, true);
 			
 			double maxOverlap = 0;
 			
@@ -136,18 +140,8 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		return data;
 	}
 
-	public boolean isOnStraight(Vec3d position) {
-		for (Vec3d gagPos : straightBuilder.getPath(info.settings.gauge.scale()/8)) {
-			gagPos = gagPos.add(info.placementInfo.placementPosition);
-			if (gagPos.distanceTo(position.addVector(0, -(position.y % 1), 0)) < info.settings.gauge.scale()/2) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	@Override
 	public List<PosStep> getPath(double stepSize) {
-		return straightBuilder.getPath(stepSize);
+		return realStraightBuilder.getPath(stepSize);
 	}
 }

@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
+import cam72cam.immersiverailroading.track.IIterableTrack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -34,10 +35,16 @@ public class SwitchUtil {
 		}
 
 		if (position != null && parent.info != null) {
-			BuilderSwitch switchBuilder = (BuilderSwitch)parent.info.getBuilder();
-			
-			if (!switchBuilder.isOnStraight(position)) {
-				return SwitchState.TURN;
+			IIterableTrack switchBuilder = (IIterableTrack) parent.info.getBuilder();
+			IIterableTrack turnBuilder = (IIterableTrack) rail.info.getBuilder();
+			boolean isOnStraight = switchBuilder.isOnTrack(parent.info, position);
+			boolean isOnTurn = turnBuilder.isOnTrack(rail.info, position);
+
+			if (isOnStraight && !isOnTurn) {
+				return SwitchState.STRAIGHT;
+			}
+			if (!isOnStraight && isOnTurn) {
+				return SwitchState.NONE;
 			}
 		}
 
