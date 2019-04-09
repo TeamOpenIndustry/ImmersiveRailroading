@@ -225,7 +225,7 @@ public abstract class BlockRailBase extends Block {
 		}
         if (tileEntity.getParentReplaced() != null && tileEntity instanceof TileRailGag) {
             TileRailBase replacedParent = TileRailBase.get(tileEntity.getWorld(), tileEntity.getParentReplaced());
-            if (replacedParent != null && replacedParent.getParentTile() != tileEntity.getParentTile()) {
+            if (replacedParent != null) {
                 this.onNeighborChange(world, replacedParent.getPos(), neighbor);
             }
         }
