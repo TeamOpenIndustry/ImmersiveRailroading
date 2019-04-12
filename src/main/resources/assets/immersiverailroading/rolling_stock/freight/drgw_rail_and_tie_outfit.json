@@ -1,5 +1,7 @@
 {
+	"name": "D&RGW Rail & Tie Car",
 	"modeler": "Thomas4Peyton",
+	"pack": "Base Mod",
 	"works": "Denver & Rio Grande Western",
 	"model": "immersiverailroading:models/rolling_stock/freight/drgw_rail_and_tie_outfit/drgw_rail_and_tie_outfit.obj",
 	"tex_variants": {"D&RGW": "drgw", "D&RGW #06051": "drgw_06051"},
