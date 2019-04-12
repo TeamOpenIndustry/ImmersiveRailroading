@@ -1,6 +1,7 @@
 {
 	"name": "1000 Series Gondola",
 	"modeler": "Thomas4Peyton",
+	"pack": "Base Mod",
 	"works": "American Car & Foundry Co.",
 	"model": "immersiverailroading:models/rolling_stock/freight/drgw_1000class_gondola/drgw_1000class_gondola.obj",
 	"tex_variants": {"D&RGW Flying Grande": "flying_grande", "D&RGW Moffat Herald": "moffat_herald"},
