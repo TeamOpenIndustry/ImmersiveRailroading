@@ -123,7 +123,7 @@ public abstract class BuilderBase {
 	}
 	
 	public int costRails() {
-		return MathHelper.ceil(this.tracks.size()*2/3 * ConfigBalance.RailCostMultiplier);
+		return MathHelper.ceil(this.tracks.size()*2/3 * ConfigBalance.RailCostMultiplier / 2);
 	}
 	
 	public int costBed() {
