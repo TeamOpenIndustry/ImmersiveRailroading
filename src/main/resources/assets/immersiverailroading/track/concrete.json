@@ -1,0 +1,6 @@
+{
+  "name": "Concrete Ties",
+  "models": {
+    ">0.2": "immersiverailroading:models/track/concrete/concrete_track.obj"
+  }
+}
