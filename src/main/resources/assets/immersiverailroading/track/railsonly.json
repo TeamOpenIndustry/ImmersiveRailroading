@@ -1,0 +1,6 @@
+{
+  "name": "Rails Only",
+  "models": {
+    ">0.2": "immersiverailroading:models/track/railsonly/railsonly.obj"
+  }
+}
