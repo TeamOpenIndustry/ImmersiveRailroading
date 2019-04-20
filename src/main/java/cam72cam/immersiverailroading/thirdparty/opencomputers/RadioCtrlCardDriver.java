@@ -143,6 +143,13 @@ public class RadioCtrlCardDriver implements DriverItem {
 			}
 			return null;
 		}
+		@Callback(doc = "function() -- sets the locomotive bell")
+		public Object[] bell(Context context, Arguments arguments) throws Exception {
+			if (radioDrain()) {
+				linkedLoco.setBell(arguments.optInteger(0, 40));
+			}
+			return null;
+		}
 
 		@Callback(doc = "function():array -- returns the XYZ position of the locomotive")
 		public Object[] getPos(Context context, Arguments args) {

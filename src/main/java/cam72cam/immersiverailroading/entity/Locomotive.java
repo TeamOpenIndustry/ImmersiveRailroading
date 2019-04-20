@@ -39,8 +39,9 @@ public abstract class Locomotive extends FreightTank {
 	
 	private boolean deadMansSwitch;
 	private int deadManChangeTimeout;
-	
-	
+
+	private int bellKeyTimeout;
+
 	public Locomotive(World world, String defID) {
 		super(world, defID);
 
@@ -80,6 +81,7 @@ public abstract class Locomotive extends FreightTank {
 		nbttagcompound.setFloat("throttle", getThrottle());
 		nbttagcompound.setFloat("brake", getAirBrake());
 		nbttagcompound.setBoolean("deadMansSwitch", deadMansSwitch);
+		nbttagcompound.setInteger("bell", getBell());
 	}
 
 	@Override
@@ -88,6 +90,7 @@ public abstract class Locomotive extends FreightTank {
 		setThrottle(nbttagcompound.getFloat("throttle"));
 		setAirBrake(nbttagcompound.getFloat("brake"));
 		deadMansSwitch = nbttagcompound.getBoolean("deadMansSwitch");
+		setBell(nbttagcompound.getInteger("bell"));
 	}
 	
 	@Override
@@ -96,9 +99,20 @@ public abstract class Locomotive extends FreightTank {
 		case HORN:
 			setHorn(10, source.getPersistentID());
 			break;
-			case BELL:
-				setBell(10, source.getPersistentID());
-				break;
+        case BELL:
+            if (this.getDefinition().toggleBell) {
+            	if (bellKeyTimeout == 0) {
+					if (getBell() != 0) {
+						setBell(0);
+					} else {
+						setBell(10);
+					}
+					bellKeyTimeout = 10;
+				}
+            } else {
+                setBell(10);
+            }
+            break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {
 				setThrottle(getThrottle() + throttleNotch);
@@ -183,6 +197,9 @@ public abstract class Locomotive extends FreightTank {
 			if (deadManChangeTimeout > 0) {
 				deadManChangeTimeout -= 1;
 			}
+			if (bellKeyTimeout > 0) {
+				bellKeyTimeout--;
+			}
 			
 			if (deadMansSwitch && !this.getCurrentSpeed().isZero()) {
 				boolean hasDriver = false;
@@ -202,14 +219,14 @@ public abstract class Locomotive extends FreightTank {
 			} else if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
 				this.getDataManager().set(HORN_PLAYER, Optional.absent());
 			}
-			if (this.getDataManager().get(BELL) > 0) {
-				this.getDataManager().set(BELL, this.getDataManager().get(BELL)-1);
+			if (getBell() > 0 && !this.getDefinition().toggleBell) {
+				setBell(getBell()-1);
 			}
 		} else {
 			if (ConfigSound.soundEnabled && bell != null) {
-				if (this.getDataManager().get(BELL) != 0 && !bell.isPlaying()) {
+				if (getBell() != 0 && !bell.isPlaying()) {
 					bell.play(getPositionVector());
-				} else if (this.getDataManager().get(BELL) == 0 && bell.isPlaying()) {
+				} else if (getBell() == 0 && bell.isPlaying()) {
 					bell.stop();
 				}
 			}
@@ -289,11 +306,6 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	public void setBell(int val, UUID uuid) {
-			this.getDataManager().set(BELL, val);
-
-	}
-	
 	public float getAirBrake() {
 		return dataManager.get(AIR_BRAKE);
 	}
@@ -303,7 +315,15 @@ public abstract class Locomotive extends FreightTank {
 			triggerResimulate();
 		}
 	}
-	
+	public int getBell() {
+		return dataManager.get(BELL);
+	}
+	public void setBell(int newBell) {
+		if (this.getBell() != newBell) {
+			dataManager.set(BELL, newBell);
+		}
+	}
+
 	public double slipCoefficient() {
 		double slipMult = 1.0;
 		World world = getEntityWorld();

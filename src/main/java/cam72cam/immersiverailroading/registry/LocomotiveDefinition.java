@@ -12,12 +12,13 @@ import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.Speed;
 
 public abstract class LocomotiveDefinition extends FreightDefinition  {
-	private String works;
+    private String works;
 	private int power;
 	private int traction;
 	private Speed maxSpeed;
 	private boolean hasRadioEquipment;
-	
+	public boolean toggleBell;
+
 	public LocomotiveDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
 		
@@ -43,6 +44,10 @@ public abstract class LocomotiveDefinition extends FreightDefinition  {
 		maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
 		if(properties.has("radio_equipped")) {
 			hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
+		}
+		toggleBell = true;
+		if (properties.has("toggle_bell")) {
+			toggleBell = properties.get("toggle_bell").getAsBoolean();
 		}
 	}
 	
