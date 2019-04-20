@@ -205,16 +205,16 @@ public abstract class Locomotive extends FreightTank {
 			if (this.getDataManager().get(BELL) > 0) {
 				this.getDataManager().set(BELL, this.getDataManager().get(BELL)-1);
 			}
-			if (ConfigSound.soundEnabled) {
+		} else {
+			if (ConfigSound.soundEnabled && bell != null) {
 				if (this.getDataManager().get(BELL) != 0 && !bell.isPlaying()) {
 					bell.play(getPositionVector());
-				}
-				else if(this.getDataManager().get(BELL) == 0 && bell.isPlaying()){
+				} else if (this.getDataManager().get(BELL) == 0 && bell.isPlaying()) {
 					bell.stop();
 				}
 			}
 		}
-		
+
 		simulateWheelSlip();
 	}
 	
