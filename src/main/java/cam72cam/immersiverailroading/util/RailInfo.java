@@ -292,13 +292,7 @@ public class RailInfo {
 	public double getTrackHeight() {
 		if (trackHeight == -1) {
 			TrackModel model = getTrackModel();
-			ArrayList<String> groups = new ArrayList<>();
-			for (String group : model.groups()) {
-				if (group.contains("RAIL")) {
-					groups.add(group);
-				}
-			}
-			trackHeight = model.maxOfGroup(groups).y;
+			trackHeight = model.getHeight();
 		}
 		return trackHeight;
 	}
