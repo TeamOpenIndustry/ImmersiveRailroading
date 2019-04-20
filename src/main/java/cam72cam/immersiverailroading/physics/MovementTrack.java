@@ -34,6 +34,8 @@ public class MovementTrack {
 			-0.25,
 			0.5,
 			-0.5,
+			0.75,
+			-0.75
 		};
 		
 		for (Vec3d pos : positions) {
