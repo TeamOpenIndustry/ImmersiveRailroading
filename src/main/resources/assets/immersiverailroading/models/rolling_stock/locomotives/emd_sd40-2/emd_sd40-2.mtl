@@ -1,5 +1,5 @@
 # Blender MTL File: 'EMD SD40-2.blend'
-# Material Count: 9
+# Material Count: 8
 
 newmtl cab_stand_
 Ns 96.078431
@@ -66,17 +66,6 @@ Ni 1.000000
 d 1.000000
 illum 0
 map_Kd glassconstant.png
-
-newmtl glassconstant_sd40-2.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 0
-map_Kd sd40-2.png
 
 newmtl sd40-2
 Ns 96.078431
