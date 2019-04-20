@@ -186,7 +186,7 @@ public class OBJTextureSheet {
 				}
 			}
 
-			if (!ConfigGraphics.enableIconCache) {
+			if (!ConfigGraphics.enableFlatIcons) {
 				pixels = null;
 			}
 		}
@@ -234,12 +234,12 @@ public class OBJTextureSheet {
 		model.offsetV =  new byte[model.faceVerts.length / 9];
 		
 		Function<Integer, Integer> scaleFn = null;
-		if (ConfigGraphics.textureScale != 1) {
+		if (ConfigGraphics.scaleTexture != 1) {
 			scaleFn = (Integer val) -> {
 				if (val == 1) {
 					return 1;
 				}
-				return (int)Math.ceil(val/ConfigGraphics.textureScale);
+				return (int)Math.ceil(val/ConfigGraphics.scaleTexture);
 			};
 		}
 		

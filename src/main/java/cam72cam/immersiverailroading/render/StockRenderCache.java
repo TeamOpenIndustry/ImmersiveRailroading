@@ -53,12 +53,10 @@ public class StockRenderCache {
 			bar.step(DefinitionManager.getDefinition(def).name());
 			ImmersiveRailroading.info(def);
 			StockModel renderer = getRender(def);
-			if (ConfigGraphics.enableItemRenderPriming) {
-				renderer.bindTexture();
-				renderer.draw();
-				renderer.restoreTexture();
-				ClientProxy.renderCacheLimiter.reset();
-			}
+            renderer.bindTexture();
+            renderer.draw();
+            renderer.restoreTexture();
+            ClientProxy.renderCacheLimiter.reset();
 		}
 
 		ProgressManager.pop(bar);

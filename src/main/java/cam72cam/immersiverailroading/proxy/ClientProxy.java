@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.*;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ColorizerGrass;
@@ -344,7 +343,7 @@ public class ClientProxy extends CommonProxy {
         {
             super(new ResourceLocation(ImmersiveRailroading.MODID, def.defID).toString());
             this.def = def;
-            this.width = this.height = ConfigGraphics.iconCacheSize;
+            this.width = this.height = ConfigGraphics.flatIconSize;
         }
 
         @Override
@@ -400,7 +399,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onTextureStich(TextureStitchEvent.Pre event) {
-		if (ConfigGraphics.enableIconCache) {
+		if (ConfigGraphics.enableFlatIcons) {
 			for (String defID : DefinitionManager.getDefinitionNames()) {
 				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 				event.getMap().setTextureEntry(new StockIcon(def));
