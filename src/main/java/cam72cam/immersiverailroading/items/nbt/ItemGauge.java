@@ -12,9 +12,13 @@ public class ItemGauge {
 		}
 		stack.getTagCompound().setDouble("gauge", gauge.value());
 	}
+
+	public static boolean has(ItemStack stack) {
+		return stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge");
+	}
 	
 	public static Gauge get(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("gauge")){
+		if (has(stack)){
 			return Gauge.from(stack.getTagCompound().getDouble("gauge"));
 		}
 		
