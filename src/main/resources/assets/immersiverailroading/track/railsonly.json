@@ -1,6 +1,7 @@
 {
   "name": "Rails Only",
   "models": {
-    ">0.2": "immersiverailroading:models/track/railsonly/railsonly.obj"
+    ">0.2": "immersiverailroading:models/track/railsonly/railsonly.obj",
+    ">0": "immersiverailroading:models/track/railsonly/railsonly_model.obj"
   }
 }
