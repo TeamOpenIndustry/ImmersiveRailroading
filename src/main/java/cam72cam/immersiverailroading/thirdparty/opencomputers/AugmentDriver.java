@@ -359,6 +359,15 @@ public class AugmentDriver implements DriverBlock {
 			}
 			return null;
 		}
+		@Callback(doc = "function() -- sets the locomotive bell")
+		public Object[] bell(Context context, Arguments arguments) throws Exception {
+			TileRailBase te = TileRailBase.get(world, pos);
+			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
+			if (stock != null) {
+				stock.setBell(arguments.optInteger(0, 40));
+			}
+			return null;
+		}
 
 		@Callback(doc = "function():string -- returns the current augment type")
 		public Object[] getAugmentType(Context context, Arguments args) {
