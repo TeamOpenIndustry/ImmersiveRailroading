@@ -432,6 +432,12 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 			}
 
+			if (self.getParentTile() == null) {
+				// Still loading
+				ImmersiveRailroading.warn("Unloaded parent at %s", self.getParent());
+				break;
+			}
+
 			tile = null;
 			BlockPos currentParent = self.getParentTile().getParent();
 			for (NBTTagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
