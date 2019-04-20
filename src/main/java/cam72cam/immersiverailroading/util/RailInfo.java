@@ -212,7 +212,7 @@ public class RailInfo {
 
 		if (builder.canBuild()) {
 			if (!world.isRemote) {
-				if (false && player.isCreative()) {
+				if (player.isCreative()) {
 					builder.build();
 					return true;
 				}
