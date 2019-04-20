@@ -154,7 +154,7 @@ public abstract class EntityRollingStockDefinition {
 			List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
 			for (InputStream input : alts) {
 				JsonParser parser = new JsonParser();
-				JsonElement variants = parser.parse(new InputStreamReader(input)).getAsJsonArray();
+				JsonElement variants = parser.parse(new InputStreamReader(input));
 				for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
 					textureNames.put(variant.getValue().getAsString(), variant.getKey());
 				}
