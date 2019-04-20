@@ -4,10 +4,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.tile.SyncdTileEntity;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -213,22 +210,27 @@ public abstract class BlockRailBase extends Block {
 				tileEntity.getWorld().setBlockToAir(pos.up());
 			}
 		}
-		if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
-			TileRail switchTile = tileEntity.getParentTile();
-			if (tileEntity instanceof TileRail) {
-				switchTile = (TileRail) tileEntity;
+
+        NBTTagCompound data = tileEntity.getReplaced();
+		while (true) {
+			if (tileEntity.getParentTile() != null && tileEntity.getParentTile().getParentTile() != null) {
+				TileRail switchTile = tileEntity.getParentTile();
+				if (tileEntity instanceof TileRail) {
+					switchTile = (TileRail) tileEntity;
+				}
+                SwitchState state = SwitchUtil.getSwitchState(switchTile);
+                if (state != SwitchState.NONE) {
+                    switchTile.setSwitchState(state);
+                }
 			}
-			SwitchState state = SwitchUtil.getSwitchState(switchTile);
-			if (state != SwitchState.NONE) {
-				switchTile.setSwitchState(state);
+			if (data == null) {
+				break;
 			}
+            tileEntity = new TileRailBase();
+            tileEntity.readFromNBT(data);
+            tileEntity.setWorld(syncd.getWorld());
+            data = tileEntity.getReplaced();
 		}
-        if (tileEntity.getParentReplaced() != null && tileEntity instanceof TileRailGag) {
-            TileRailBase replacedParent = TileRailBase.get(tileEntity.getWorld(), tileEntity.getParentReplaced());
-            if (replacedParent != null) {
-                this.onNeighborChange(world, replacedParent.getPos(), neighbor);
-            }
-        }
 	}
 
 	@Override
