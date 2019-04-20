@@ -31,6 +31,8 @@ public class LocomotiveDiesel extends Locomotive {
 	private float soundThrottle;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
+	private float hornVolume = 0;
+	private static float hornStep = 0.25f;
 	
 	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.FLOAT);
 	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
@@ -184,12 +186,26 @@ public class LocomotiveDiesel extends Locomotive {
 						idle.stop();
 					}
 				}
-				
+
 				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
+					if (this.getDefinition().getHornSus()) {
+						hornVolume = 0.25f;
+						horn.setVolume(hornVolume);
+					}
 					horn.play(getPositionVector());
 				}
 				else if(this.getDataManager().get(HORN) == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
-					horn.stop();
+					if (hornVolume > 0) {
+						hornVolume -= 0.25;
+						horn.setVolume(hornVolume);
+					} else {
+						horn.stop();
+					}
+				}
+
+				if (this.getDefinition().getHornSus() && this.getDataManager().get(HORN) != 0 && hornVolume < 1) {
+					hornVolume += 0.25;
+					horn.setVolume(hornVolume);
 				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
