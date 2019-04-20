@@ -8,9 +8,12 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.immersiverailroading.sound.ISound;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,7 +30,9 @@ public abstract class Locomotive extends FreightTank {
 	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
 	protected static DataParameter<Integer> HORN = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
 	protected static DataParameter<Optional<UUID>> HORN_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
-	
+	protected static DataParameter<Integer> BELL = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
+
+	public ISound bell;
 
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
@@ -42,6 +47,7 @@ public abstract class Locomotive extends FreightTank {
 		this.getDataManager().register(THROTTLE, 0f);
 		this.getDataManager().register(AIR_BRAKE, 0f);
 		this.getDataManager().register(HORN, 0);
+		this.getDataManager().register(BELL, 0);
 		this.getDataManager().register(HORN_PLAYER, Optional.absent());
 
 		this.entityCollisionReduction = 0.99F;
@@ -90,6 +96,9 @@ public abstract class Locomotive extends FreightTank {
 		case HORN:
 			setHorn(10, source.getPersistentID());
 			break;
+			case BELL:
+				setBell(10, source.getPersistentID());
+				break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {
 				setThrottle(getThrottle() + throttleNotch);
@@ -193,6 +202,17 @@ public abstract class Locomotive extends FreightTank {
 			} else if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
 				this.getDataManager().set(HORN_PLAYER, Optional.absent());
 			}
+			if (this.getDataManager().get(BELL) > 0) {
+				this.getDataManager().set(BELL, this.getDataManager().get(BELL)-1);
+			}
+			if (ConfigSound.soundEnabled) {
+				if (this.getDataManager().get(BELL) != 0 && !bell.isPlaying()) {
+					bell.play(getPositionVector());
+				}
+				else if(this.getDataManager().get(BELL) == 0 && bell.isPlaying()){
+					bell.stop();
+				}
+			}
 		}
 		
 		simulateWheelSlip();
@@ -267,6 +287,11 @@ public abstract class Locomotive extends FreightTank {
 		if (currentPlayer == null || currentPlayer == uuid) {
 			this.getDataManager().set(HORN, val);
 		}
+	}
+
+	public void setBell(int val, UUID uuid) {
+			this.getDataManager().set(BELL, val);
+
 	}
 	
 	public float getAirBrake() {
