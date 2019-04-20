@@ -72,7 +72,7 @@ public class StockItemModel implements IBakedModel {
 		 */
 		
 		
-		if (ConfigGraphics.enableIconCache) {
+		if (ConfigGraphics.enableFlatIcons) {
 			if (iconQuads.get(defID) != null) {
 				return iconQuads.get(defID).asList();
 			}
@@ -139,7 +139,7 @@ public class StockItemModel implements IBakedModel {
 	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		
-		if (ConfigGraphics.enableIconCache && this.defID != null) {
+		if (ConfigGraphics.enableFlatIcons && this.defID != null) {
 			if (iconQuads.get(defID) == null) {
 				// Might need to wipe iconQuads when a new texturesheet is loaded
 				TextureMap map = Minecraft.getMinecraft().getTextureMapBlocks();
