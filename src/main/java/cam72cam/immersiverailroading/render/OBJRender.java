@@ -78,7 +78,7 @@ public class OBJRender {
 		Map<String, Pair<Integer, Integer>> groupIdx = new LinkedHashMap<>();
 
 		for (String group : model.groups.keySet()) {
-			if (group.contains("EXHAUST_") || group.contains("CHIMNEY_") || group.contains("PRESSURE_VALVE_") || group.contains("CHIMINEY_")) {
+			if (group.matches(".*EXHAUST_\\d.*") || group.matches(".*CHIMNEY_\\d.*") || group.matches(".*PRESSURE_VALVE_\\d.*") || group.matches(".*CHIMINEY_\\d.*")) {
 				//Skip particle emitters
 				continue;
 			}
