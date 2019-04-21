@@ -4,6 +4,7 @@ The Steam Hammer is used to process some parts before they are placed onto a Fra
 
 It is built from:
 *  3 x Heavy Engineering Block
+*  1 x Block of Steel
 *  1 x Piston
 * 10 x Light Engineering Block
 

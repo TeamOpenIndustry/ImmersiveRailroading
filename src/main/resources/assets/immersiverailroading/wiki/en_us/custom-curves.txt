@@ -1,0 +1,13 @@
+[prefix{l}] Custom Curves (also known as Flex Track)[prefix{}]
+The Track blueprint has a track type, released in IR version 1.5.0: the Custom Curve! Custom Curves allow placing flexible curves up to 1000 blocks in length, as well as grade changes(yes, custom curves allow curved slopes).
+
+To create one, simply place down some track in blueprint mode(make sure the track type is set to "custom curve"), and right click the block with the new Golden Spike item. Next, right-click the Golden Spike on the block where you'd like the track to end, but be sure to face the direction you want the track to approach from. The in-world preview should update accordingly. When you're ready to place the actual track, shift-left-click the blueprint block like any other blueprint.
+
+Here's an instructional GIF:
+[link{https://giant.gfycat.com/ShinyCompetentBarnowl.webm#www}]https://giant.gfycat.com/ShinyCompetentBarnowl.webm[link{}]
+
+[prefix{l}] Other Track Types[prefix{}]
+Many other track types have Golden Spike functionality now too. This includes Straight(allows the length to be set outside of the GUI), Slopes(same as straight), and Switches(the diverging track segment acts like a custom curve). 
+
+For a detailed walkthrough of Golden Spike usage, check out Cam's 1.5.0 release video:
+[link{https://www.youtube.com/watch?v=dbg2fjBU2p4#www}]https://www.youtube.com/watch?v=dbg2fjBU2p4[link{}]
