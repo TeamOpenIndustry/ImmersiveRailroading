@@ -163,24 +163,6 @@ public class LocomotiveSteam extends Locomotive {
 		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
 	}
 	
-	@Override
-	protected double getAppliedTractiveEffort(Speed speed) {
-		double locoEfficiency = 0.7f; //TODO config
-		double reverser = 0;
-		if (this.getCurrentSpeed().metric() == 0 && (this.getReverser() < -0.9 || this.getReverser() > 0.9)) {
-			reverser = 0.2;
-		}
-		if (this.getCurrentSpeed().metric() != 0.0 && this.getReverser() != 0.0) {
-			reverser = Math.abs(0.8 - this.getReverser());
-			reverser = this.getReverser() > 0.0 ? reverser : -reverser;
-		}
-		
-		double outputHorsepower = Math.abs(Math.pow(getThrottle() * reverser, 3) * getAvailableHP());
-		
-		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
-		return tractiveEffortNewtons;
-	}
-	
 	
 	@Override
 	public void onDissassemble() {
