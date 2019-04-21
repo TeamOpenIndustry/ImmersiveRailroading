@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Material;
@@ -137,7 +138,7 @@ public class OBJTextureSheet {
 				return;
 			}
 
-			if (scale != null && realWidth * copiesU() * realHeight * copiesV() > 512 * 512) {
+			if (scale != null && realWidth * copiesU() * realHeight * copiesV() > ConfigGraphics.scaleTextureCutoff * ConfigGraphics.scaleTextureCutoff) {
 				realWidth = scale.apply(realWidth);
 				realHeight = scale.apply(realHeight);
 			}
