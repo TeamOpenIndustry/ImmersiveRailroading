@@ -68,8 +68,10 @@ public class SyncdTileEntity extends TileEntity {
 	@Override
 	public NBTTagCompound getUpdateTag() {
 		NBTTagCompound tag = super.getUpdateTag();
-		this.writeToNBT(tag);
-		this.writeUpdateNBT(tag);
+		if (this.isLoaded()) {
+			this.writeToNBT(tag);
+			this.writeUpdateNBT(tag);
+		}
 		return tag;
 	}
 	
