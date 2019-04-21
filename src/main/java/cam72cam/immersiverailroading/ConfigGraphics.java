@@ -31,6 +31,9 @@ public class ConfigGraphics {
 	@Comment({ "Scale the textures to reduce GPU memory usage (1 == highest, 1.5 == medium, 2 == low" })
 	public static double scaleTexture = 1.5;
 
+	@Comment({"Point at which textures start being scaled.  Any textures larger than this will have scaleTexture applied"})
+	public static int scaleTextureCutoff=2048;
+
 	@Comment({ "Self explanitory" })
 	public static boolean trainsOnTheBrain = true;
 	
