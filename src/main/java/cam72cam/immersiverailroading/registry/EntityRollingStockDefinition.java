@@ -254,7 +254,7 @@ public abstract class EntityRollingStockDefinition {
 		Set<String> groups = new HashSet<String>();
 		groups.addAll(model.groups());
 		
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			if (unifiedBogies()) {
 				addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "FRONT", i), true);
 				addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "REAR", i), true);
