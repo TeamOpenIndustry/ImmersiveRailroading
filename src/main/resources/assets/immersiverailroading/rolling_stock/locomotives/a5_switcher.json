@@ -3,9 +3,6 @@
 	"name": "A5 Switcher",
 	"works": "PRR Juniata Shops",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/a5_switcher/a5_switcher.obj",
-	"tex_variants": {
-		"CNJ": "cnj"
-	},
 	"darken_model": "-0.05",
 	"properties": {
 		"max_psi": 185,
