@@ -14,7 +14,9 @@ With the blueprint in hand, right-click in midair to change its settings. Right-
 
 [prefix{n}] Type:[prefix{}]
 
-This setting determines what shape your track will take.  Current options are Straight, Crossing, Slope, Turn, and Switch.
+This setting determines what shape your track will take. Current options are Straight, Slope, Turn, Switch, Crossing, Turntable, and Custom Curve.
+
+NOTE: The Crossing and Turn types are obsolete as of version 1.5.0. Tracks can now cross other tracks of any gauge and at any angle. The new Custom Curve type, which is far less finicky, more flexible, and much easier to use, has rendered Turn completely useless. Crossing and Turn remain in the mod purely for backwards compatibility. See [link{Custom-Curves#www}]Custom Curves[link{}] for more info on them.
 
 [prefix{n}] Length:[prefix{}]
 
@@ -28,13 +30,13 @@ This setting shows up only for Turn and Switch types.  It determines how large/l
 
 This setting determines what visual rail bed should be placed between the rail ties.  This option is useful for debugging when you want to see where the track blocks will actually be placed.  Entries are pulled from the railBed ore dictionary and can be added to.
 
-[image{200, 727, 0.537109375, immersiverailroading:wiki/images/zu2vdhp.png}]
+[image{200, 831, 0.537109375, immersiverailroading:wiki/images/zu2vdhp.png}]
 
 [prefix{n}] Rail Bed Fill:[prefix{}]
 
 This setting is useful for building bridges.  It auto-places blocks from your inventory under the rail bed as it builds the tracks.  It uses the same railBed ore dictionary.
 
-[image{200, 938, 0.537109375, immersiverailroading:wiki/images/zerk2jt.png}]
+[image{200, 1042, 0.537109375, immersiverailroading:wiki/images/zerk2jt.png}]
 
 [prefix{n}] Position:[prefix{}]
 
@@ -49,6 +51,10 @@ This setting determines how the track should be locked to the rail bed.
 [prefix{n}] Gauge:[prefix{}]
 
 This setting determines what gauge the track should be built at
+
+[prefix{n}] Grade Crossing:[prefix{}]
+
+Extends the railbed out to the sides, to have the appearance of a level crossing; such as those used at intersections of roads and railroads tracks in real life.
 
 [prefix{n}] Place Blueprint:[prefix{}]
 
