@@ -1,0 +1,66 @@
+# Blender MTL File: 'D&RGW 1500 Series Gondola_retextured.blend'
+# Material Count: 6
+
+newmtl Coupler
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd 1000_gondola_texture.png
+
+newmtl Gondola_Texture
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.900000 0.900000 0.900000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd 1000_gondola_texture.png
+map_d 1000_gondola_texture.png
+
+newmtl Gondola_Texture_NONE
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.900000 0.900000 0.900000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd 1000_gondola_texture.png
+map_d 1000_gondola_texture.png
+
+newmtl None
+Ns 0
+Ka 0.000000 0.000000 0.000000
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2
+map_Kd 1000_gondola_texture.png
+
+newmtl Side_Planks.006
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.075699 0.030113 0.023556
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl Walls
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.064009 0.038942 0.023999
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
