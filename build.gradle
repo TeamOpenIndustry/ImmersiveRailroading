@@ -3,9 +3,9 @@ buildscript {
         jcenter()
         maven { url = "http://files.minecraftforge.net/maven" }
     }
-    dependencies {
+	dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-    }
+	}
 }
 
 repositories {
@@ -14,6 +14,7 @@ repositories {
 		url = "http://maven.k-4u.nl/"
 	}
     maven { url = "http://maven.cil.li/" }
+	maven { url = "https://cc.crzd.me/maven/" }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -75,6 +76,7 @@ dependencies {
 	compile "igwmod:IGW-Mod-1.12.2:1.4.4-15:userdev"
 	compile "li.cil.oc:OpenComputers:MC1.12.2-1.7.+:api"
 	runtime "li.cil.oc:OpenComputers:MC1.12.2-1.7.+"
+	compile "dan200.computercraft:ComputerCraft:1.80pr1-build3"
 }
 
 processResources {

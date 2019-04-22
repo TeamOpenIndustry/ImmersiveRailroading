@@ -4,6 +4,7 @@ import java.util.*;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.thirdparty.CommonAPI;
 import li.cil.oc.api.Network;
 import li.cil.oc.api.driver.DriverItem;
 import li.cil.oc.api.driver.item.Slot;
@@ -14,6 +15,7 @@ import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.prefab.AbstractManagedEnvironment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import li.cil.oc.api.network.ComponentConnector;
 import li.cil.oc.api.network.EnvironmentHost;
@@ -62,15 +64,13 @@ public class RadioCtrlCardDriver implements DriverItem {
 	}
 
 	public class RadioCtrlCardManager extends AbstractManagedEnvironment {
-		protected double[] cardPosition = {0,0,0};
-		protected Locomotive linkedLoco;
+		protected Vec3d cardPosition;
+		protected CommonAPI api;
 		protected ComponentConnector node;
 
 		public RadioCtrlCardManager(Locomotive loco, double x, double y, double z) {
-			cardPosition[0] = x;
-			cardPosition[1] = y;
-			cardPosition[2] = z;
-			linkedLoco = loco;
+			cardPosition = new Vec3d(x, y, z);
+			api = new CommonAPI(loco);
 			node = Network.newNode(this, Visibility.Network).withComponent("ir_remote_control", Visibility.Network).withConnector().create();
 			setNode(node);
 		}
@@ -86,39 +86,19 @@ public class RadioCtrlCardDriver implements DriverItem {
 		}
 
 		@Callback(doc = "function(double) -- sets the locomotive throttle")
-		public Object[] setThrottle(Context context, Arguments arguments) throws Exception {
+		public Object[] setThrottle(Context context, Arguments arguments) {
 			if (radioDrain()) {
-				linkedLoco.setThrottle(normalize(arguments.checkDouble(0)));
+				api.setThrottle(arguments.checkDouble(0));
 			}
 			return null;
 		}
 
-		private float normalize(double val) {
-			if (Double.isNaN(val)) {
-				return 0;
-			}
-			if (val > 1) {
-				return 1;
-			}
-			if (val < -1) {
-				return -1;
-			}
-			return (float) val;
-		}
-		
-		private boolean radioDrain() 
+		private boolean radioDrain()
 		{
-			if(linkedLoco == null) {
+			if(api == null) {
 				return false;
 			}
-			double distance = 0;
-			double[] currentLocoPosition  = {linkedLoco.posX, linkedLoco.posY, linkedLoco.posZ};
-			double[] relativeDistanceVector = {0,0,0};
-			for(int i = 0; i <= 2; i++) {
-				relativeDistanceVector[i] = currentLocoPosition[i] - cardPosition[i];
-				distance += (relativeDistanceVector[i] * relativeDistanceVector[i]);
-			}
-			distance = Math.sqrt( distance );
+			double distance = api.getPosition().distanceTo(cardPosition);
 			if( distance > Config.ConfigBalance.RadioRange) {
 				return false;
 			}
@@ -129,24 +109,24 @@ public class RadioCtrlCardDriver implements DriverItem {
 		}
 
 		@Callback(doc = "function(double) -- sets the locomotive brake")
-		public Object[] setBrake(Context context, Arguments arguments) throws Exception {
+		public Object[] setBrake(Context context, Arguments arguments) {
 			if (radioDrain()) {
-				linkedLoco.setAirBrake(normalize(arguments.checkDouble(0)));
+				api.setAirBrake(arguments.checkDouble(0));
 			}
 			return null;
 		}
 
 		@Callback(doc = "function() -- fires the locomotive horn")
-		public Object[] horn(Context context, Arguments arguments) throws Exception {
+		public Object[] horn(Context context, Arguments arguments) {
 			if (radioDrain()) {
-				linkedLoco.setHorn(arguments.optInteger(0, 40), null);
+				api.setHorn(arguments.optInteger(0, 40));
 			}
 			return null;
 		}
 		@Callback(doc = "function() -- sets the locomotive bell")
-		public Object[] bell(Context context, Arguments arguments) throws Exception {
+		public Object[] bell(Context context, Arguments arguments) {
 			if (radioDrain()) {
-				linkedLoco.setBell(arguments.optInteger(0, 40));
+				api.setBell(arguments.optInteger(0, 40));
 			}
 			return null;
 		}
@@ -154,7 +134,8 @@ public class RadioCtrlCardDriver implements DriverItem {
 		@Callback(doc = "function():array -- returns the XYZ position of the locomotive")
 		public Object[] getPos(Context context, Arguments args) {
 			if (radioDrain()) {
-				return new Object[] { linkedLoco.posX, linkedLoco.posY, linkedLoco.posZ };
+				Vec3d pos = api.getPosition();
+				return new Object[] { pos.x, pos.y, pos.z };
 			}
 			return null;
 		}
@@ -162,7 +143,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 		@Callback(doc = "function():araray -- returns the UUID of the bound loco")
 		public Object[] getLinkUUID(Context context, Arguments args) {
 			if (radioDrain()) {
-				return new Object[] { linkedLoco.getUniqueID() };
+				return new Object[] { api.getUniqueID() };
 			}
 			return new Object[] { null };
 		}
