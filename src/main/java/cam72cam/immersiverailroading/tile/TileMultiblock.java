@@ -8,15 +8,16 @@ import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import javax.annotation.Nonnull;
 
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.Player;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -170,12 +171,12 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     }
 	
 	public BlockPos getOrigin() {
-		return pos.subtract(offset.rotate(rotation));
+		return pos.subtract(new Vec3i(offset.rotate(rotation))).internal;
 	}
 	
 	public MultiblockInstance getMultiblock() {
 		if (this.mb == null && this.isLoaded()) {
-			this.mb = MultiblockRegistry.get(name).instance(world, getOrigin(), rotation);
+			this.mb = MultiblockRegistry.get(name).instance(world.internal, getOrigin(), rotation);
 		}
 		return this.mb;
 	}
@@ -201,8 +202,8 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		}
 	}
 
-	public boolean onBlockActivated(EntityPlayer player, EnumHand hand) {
-		return getMultiblock().onBlockActivated(player, hand, offset);
+	public boolean onBlockActivated(Player player, Hand hand) {
+		return getMultiblock().onBlockActivated(player.internal, hand.internal, offset);
 	}
 	
 	/*
@@ -213,11 +214,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		for (int slot = 0; slot < container.getSlots(); slot ++) {
 			ItemStack item = container.extractItem(slot, Integer.MAX_VALUE, false);
 			if (!item.isEmpty()) {
-				world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), item));
+				world.internal.spawnEntity(new EntityItem(world.internal, pos.x, pos.y, pos.z, item));
 			}
 		}
-		world.removeTileEntity(pos);
-		world.setBlockState(pos, replaced, 3);
+		world.internal.removeTileEntity(pos.internal);
+		world.internal.setBlockState(pos.internal, replaced, 3);
 	}
 
 	public boolean isRender() {
@@ -247,7 +248,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 	
 	public void setCraftMode(CraftingMachineMode mode) {
-		if (!world.isRemote) {
+		if (world.isServer) {
 			if (craftMode != mode) {
 				craftMode = mode;
 				this.markDirty();
@@ -262,7 +263,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 
 	public void setCraftItem(ItemStack selected) {
-		if (!world.isRemote) {
+		if (world.isServer) {
 			if (craftItem == null || selected == null || !ItemStack.areItemStacksEqualUsingNBTShareTag(selected, craftItem)) {
 				this.craftItem = selected.copy();
 				this.craftProgress = 0;

@@ -380,7 +380,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				
 				if (entity instanceof EntityPlayer) {
 					if (entity.ticksExisted < 20 * 5) {
-						// Give the player a chance to get out of the way
+						// Give the internal a chance to get out of the way
 						continue;
 					}
 				}

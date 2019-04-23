@@ -68,7 +68,7 @@ public class SteamLocomotiveContainerGui extends ContainerGuiBase {
 	    			int zOff = (int) ((slotSize-offset*2-1)*(1-perc));
 	    			
 	    			drawRect(xPos+offset, yPos+offset + zOff, xPos + slotSize-offset, yPos + slotSize-offset, 0x77c64306);
-	    			TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite("minecraft:blocks/fire_layer_1");
+	    			TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite("minecraft:block/fire_layer_1");
 	    			drawSprite(sprite, 0xFFFFFFFF, xPos + offset, yPos + offset + zOff, slotSize-offset*2, slotSize-offset*2 - zOff, 1);
 	    		}
 	    	}

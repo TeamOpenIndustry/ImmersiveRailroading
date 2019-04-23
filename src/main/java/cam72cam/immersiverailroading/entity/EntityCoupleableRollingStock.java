@@ -199,8 +199,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (world.isRemote) {
 			// Only couple server side
 			
-			//ParticleUtil.spawnParticle(world, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
-			//ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
+			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
+			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
 			
 			return;
 		}
@@ -322,7 +322,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				}
 				TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + i);
 				if (pos.speed.metric() != 0) {
-					ChunkManager.flagEntityPos(this.world, new BlockPos(pos.position));
+					ChunkManager.flagEntityPos(this.internal, new BlockPos(pos.position));
 				}
 				positions.add(pos);
 			}*/
@@ -898,7 +898,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	public EntityCoupleableRollingStock findByUUID(UUID uuid) {
 		// May want to cache this if it happens a lot
-		//List<EntityCoupleableRollingStock> elist = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().grow(ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+		//List<EntityCoupleableRollingStock> elist = internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().grow(ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
 		//for (Object e : elist) {
 		for (Object e : world.loadedEntityList) {
 			if (e instanceof EntityCoupleableRollingStock) {

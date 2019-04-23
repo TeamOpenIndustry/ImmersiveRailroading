@@ -5,9 +5,6 @@ import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
-import cam72cam.immersiverailroading.track.BuilderBase;
-import cam72cam.immersiverailroading.track.BuilderCubicCurve;
-import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -107,7 +104,7 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 		if (nbt.hasKey("customInfo")) {
 			customInfo = new PlacementInfo(nbt.getCompoundTag("customInfo"));
 		}
-		info = new RailInfo(world, item, placementInfo, customInfo);
+		info = new RailInfo(world.internal, item, placementInfo, customInfo);
 	}
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -122,14 +119,14 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 	
 	public RailInfo getRailRenderInfo() {
 		if (hasWorld() && info.world == null) {
-			info = new RailInfo(world, item, placementInfo, customInfo);
+			info = new RailInfo(world.internal, item, placementInfo, customInfo);
 		}
 		return info;
 	}
 
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(world, item, placementInfo, customInfo);
+        info = new RailInfo(world.internal, item, placementInfo, customInfo);
         if (isMulti()) {
 			ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
 		}
@@ -144,8 +141,8 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 
 	@Override
 	public void update() {
-		if (!world.isRemote && isMulti()) {
-			ChunkManager.flagEntityPos(world, pos);
+		if (world.isServer && isMulti()) {
+			ChunkManager.flagEntityPos(world.internal, pos.internal);
 
 			if (this.ticksAlive % 20 == 0) {
 				ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));

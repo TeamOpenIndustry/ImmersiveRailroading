@@ -3,22 +3,18 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.Freight;
-import cam72cam.immersiverailroading.entity.FreightTank;
-import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
-import net.minecraft.block.BlockSnow;
+import cam72cam.mod.TagCompound;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.tile.IRedstoneProvider;
+import cam72cam.mod.util.Facing;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -49,7 +45,7 @@ import trackapi.lib.ITrack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
+public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable, IRedstoneProvider {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
 		SyncdTileEntity te = SyncdTileEntity.get(world, pos, EnumCreateEntityType.IMMEDIATE);
 		return te instanceof TileRailBase ? (TileRailBase)te : null;
@@ -79,7 +75,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 	@Override
 	public boolean isLoaded() {
-		return !world.isRemote || hasTileData;
+		return world.isServer || hasTileData;
 	}
 
 	public void setBedHeight(float height) {
@@ -99,7 +95,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			gauge = parent.info.settings.gauge.value();
 		}
 		if (this.getParentReplaced() != null && world != null) {
-			parent = TileRail.get(world, this.getParentReplaced());
+			parent = TileRail.get(world.internal, this.getParentReplaced());
             if (parent != null) {
                 gauge = Math.min(gauge, parent.info.settings.gauge.value());
             }
@@ -168,19 +164,19 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		return !ConfigDebug.deepSnow;
 	}
 
-	public BlockPos getParent() {
+	public Vec3i getParent() {
 		if (parent == null) {
-			if (ticksExisted > 1 && !world.isRemote) {
+			if (ticksExisted > 1 && world.isServer) {
 				ImmersiveRailroading.warn("Invalid block without parent");
 				// Might be null during init
-				world.setBlockToAir(pos);
+				world.setToAir(pos);
 			}
 			return null;
 		}
-		return parent.add(pos);
+		return new Vec3i(parent.add(pos.internal));
 	}
 	public void setParent(BlockPos pos) {
-		this.parent = pos.subtract(this.pos);
+		this.parent = pos.subtract(this.pos.internal);
 	}
 	
 	public boolean isFlexible() {
@@ -214,13 +210,13 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				// We lost water, do spray
 				// TODO, this fires during rebalance which is not correct
 				for (int i = 0; i < delta/10; i ++) {
-					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-						ParticleUtil.spawnParticle(world, EnumParticleTypes.WATER_SPLASH, new Vec3d(pos.offset(facing)).addVector(0.5, 0.5, 0.5));
+					for (Facing facing : Facing.values()) {
+						ParticleUtil.spawnParticle(world.internal, EnumParticleTypes.WATER_SPLASH, new Vec3d(pos.offset(facing).internal).addVector(0.5, 0.5, 0.5));
 					}
 				}
-				if (clientSoundTimeout < world.getWorldTime()) {
-					world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_BUCKET_FILL, SoundCategory.BLOCKS, 1, 1, false);
-					clientSoundTimeout = world.getWorldTime() + 10;
+				if (clientSoundTimeout < world.getTime()) {
+					world.internal.playSound(pos.x, pos.y, pos.z, SoundEvents.ITEM_BUCKET_FILL, SoundCategory.BLOCKS, 1, 1, false);
+					clientSoundTimeout = world.getTime() + 10;
 				}
 			}
 			clientLastTankAmount = this.augmentTank.getFluidAmount();
@@ -254,7 +250,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		case 0:
 			//NOP
 		case 1:
-			parent = parent.subtract(pos);
+			parent = parent.subtract(pos.internal);
 		case 2:
 			// Nothing in base
 		case 3:
@@ -315,7 +311,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (this.getParent() == null) {
 			return null;
 		}
-		TileRail te = TileRail.get(world, this.getParent());
+		TileRail te = TileRail.get(world.internal, this.getParent().internal);
 		if (te == null || !te.isLoaded()) {
 			return null;
 		}
@@ -324,8 +320,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public void setReplaced(NBTTagCompound replaced) {
 		this.replaced = replaced;
 	}
-	public NBTTagCompound getReplaced() {
-		return replaced;
+	public TagCompound getReplaced() {
+		return new TagCompound(replaced);
 	}
 	
 	@Override
@@ -353,31 +349,30 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			this.setSnowLayers(1);
 			int snowDown = snow -1;
 			for (int i = 1; i <= 3; i ++) {
-				EnumFacing[] horiz = EnumFacing.HORIZONTALS.clone();
+				Facing[] horiz = Facing.values().clone();
 				if (Math.random() > 0.5) {
 					// Split between sides of the track
 					ArrayUtils.reverse(horiz);
 				}
-				for (EnumFacing facing : horiz) {
-					BlockPos ph = world.getPrecipitationHeight(pos.offset(facing, i));
+				for (Facing facing : horiz) {
+					Vec3i ph = world.getPrecipitationHeight(pos.offset(facing, i));
 					for (int j = 0; j < 3; j ++) {
-						IBlockState state = world.getBlockState(ph);
-						if (world.isAirBlock(ph) && !BlockUtil.isRail(world, ph.down())) {
-							world.setBlockState(ph, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, snowDown));
+						if (world.isAir(ph) && !BlockUtil.isRail(world.internal, ph.down().internal)) {
+							world.setSnowLevel(ph, snowDown);
 							return;
 						}
-						if (world.getBlockState(ph).getBlock() == Blocks.SNOW) {
+						if (world.isSnowBlock(ph)) {
 							ph = ph.up();
 							continue;
 						}
-						if (world.getBlockState(ph).getBlock() == Blocks.SNOW_LAYER) {
-							Integer currSnow = state.getValue(BlockSnow.LAYERS);
+						int currSnow = world.getSnowLevel(ph);
+						if (currSnow != 0) {
 							if (currSnow == 8) {
 								ph = ph.up();
 								continue;
 							}
 							int toAdd = Math.min(8 - currSnow, snowDown);
-							world.setBlockState(ph, state.withProperty(BlockSnow.LAYERS, currSnow + toAdd));
+							world.setSnowLevel(ph, currSnow + toAdd);
 							snowDown -= toAdd;
 							if (snowDown <= 0) {
 								return;
@@ -416,7 +411,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			}
 
 
-			Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+			Vec3d potential = MovementTrack.nextPosition(world.internal, currentPosition, tile, rotationYaw, distanceMeters);
 			if (state == SwitchState.TURN) {
 				float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 				double diff = MathUtil.trueModulus(other - rotationYaw, 360);
@@ -439,10 +434,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			}
 
 			tile = null;
-			BlockPos currentParent = self.getParentTile().getParent();
-			for (NBTTagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
+			Vec3i currentParent = self.getParentTile().getParent();
+			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
 				self = new TileRailBase();
-				self.readFromNBT(data);
+				self.readFromNBT(data.internal);
 				self.setWorld(world);
 				if (!currentParent.equals(self.getParent())) {
 					tile = self.getParentTile();
@@ -480,8 +475,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type, Capability<?> capability){
-		AxisAlignedBB bb = new AxisAlignedBB(this.pos.south().west(), this.pos.up(3).east().north());
-		List<T> stocks = this.world.getEntitiesWithinAABB(type, bb);
+		AxisAlignedBB bb = new AxisAlignedBB(this.pos.south().west().internal, this.pos.up(3).east().north().internal);
+		List<T> stocks = this.world.internal.getEntitiesWithinAABB(type, bb);
 		for (T stock : stocks) {
 			if (capability == null || stock.hasCapability(capability, null)) {
 				if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
@@ -532,8 +527,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	private void balanceTanks() {
-		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-			TileRailBase neighbor = TileRailBase.get(world, pos.offset(facing));
+		for (Facing facing : Facing.values()) {
+			TileRailBase neighbor = TileRailBase.get(world.internal, pos.offset(facing).internal);
 			if (neighbor != null && neighbor.augmentTank != null) {
 				if (neighbor.augmentTank.getFluidAmount() + 1 < augmentTank.getFluidAmount()) {
 					transferAllFluid(augmentTank, neighbor.augmentTank, (augmentTank.getFluidAmount() - neighbor.augmentTank.getFluidAmount())/2);
@@ -593,17 +588,17 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private <T> List<T> getCapsNearby(Capability<T> cap) {
 		List<T> found = new ArrayList<T>();
 		
-		for (EnumFacing facing : EnumFacing.values()) {
-			BlockPos npos = pos.offset(facing);
-			if (world.isAirBlock(npos) || BlockUtil.isIRRail(world, npos)) {
+		for (Facing facing : Facing.values()) {
+			Vec3i npos = pos.offset(facing);
+			if (world.isAir(npos) || BlockUtil.isIRRail(world.internal, npos.internal)) {
 				continue;
 			}
-			TileEntity nte = world.getTileEntity(npos);
+			TileEntity nte = world.getTileEntity(npos, TileEntity.class);
 			if (nte == null) {
 				continue;
 			}
-			if (nte.hasCapability(cap, facing.getOpposite())) {
-				found.add(nte.getCapability(cap, facing.getOpposite()));
+			if (nte.hasCapability(cap, facing.getOpposite().internal)) {
+				found.add(nte.getCapability(cap, facing.getOpposite().internal));
 			}
 		}
 		
@@ -612,7 +607,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 	@Override
 	public void update() {
-		if (this.world.isRemote) {
+		if (this.world.isClient) {
 			return;
 		}
 		
@@ -638,8 +633,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 			if (this.getParentTile() == null) {
 				// Fire update event
-				if (BlockRailBase.tryBreakRail(world, pos)) {
-					getWorld().destroyBlock(pos, true);
+				if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(world, pos, null)) {
+					world.breakBlock(pos);
 				}
 				return;
 			}
@@ -647,8 +642,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
 				double floating = ((TileRail)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
-					if (BlockRailBase.tryBreakRail(world, pos)) {
-						getWorld().destroyBlock(pos, true);
+					if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(world, pos, null)) {
+						world.breakBlock(pos);
 					}
 					return;
 				}
@@ -735,7 +730,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case LOCO_CONTROL:
 				Locomotive loco = this.getStockNearBy(Locomotive.class, null);
 				if (loco != null) {
-					int power = RedstoneUtil.getPower(world, pos);
+					int power = RedstoneUtil.getPower(world.internal, pos.internal);
 					
 					switch(controlMode) {
 					case THROTTLE_FORWARD:
@@ -791,7 +786,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				break;
 			case COUPLER:
 				stock = this.getStockNearBy(null);
-				int power = RedstoneUtil.getPower(world, pos);
+				int power = RedstoneUtil.getPower(world.internal, pos.internal);
 				if (stock != null && stock instanceof EntityCoupleableRollingStock && power > 0) {
 					EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock)stock;
 					switch (couplerMode) {
@@ -817,7 +812,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	public int getRedstoneLevel() {
-		return this.redstoneLevel;
+		return getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
 	}
 	
 	public double getTankLevel() {
@@ -838,7 +833,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (!this.replaced.hasKey("parent")) {
 			return null;
 		}
-		return BlockPos.fromLong(this.replaced.getLong("parent")).add(pos);
+		return BlockPos.fromLong(this.replaced.getLong("parent")).add(pos.internal);
 	}
 
 	public SwitchState cycleSwitchForced() {
@@ -847,7 +842,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 
 		if (tileSwitch != null) {
 			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
-			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
+			tileSwitch.info = new RailInfo(world.internal, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
 			tileSwitch.markDirty();
 			this.markDirty();
 			this.getParentTile().markDirty();

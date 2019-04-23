@@ -1,9 +1,9 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.mod.tile.TileEntity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -13,7 +13,7 @@ public class SyncdTileEntity extends TileEntity {
 	public boolean hasTileData;
 	
 	public static SyncdTileEntity get(IBlockAccess world, BlockPos pos, EnumCreateEntityType type) {
-		TileEntity te;
+		net.minecraft.tileentity.TileEntity te;
 		if (world instanceof World) {
 			te = ((World)world).getChunkFromBlockCoords(pos).getTileEntity(pos, type);
 		} else {
@@ -27,15 +27,15 @@ public class SyncdTileEntity extends TileEntity {
 	}
 	
 	public boolean isLoaded() {
-		return this.hasWorld() && (!world.isRemote || hasTileData);
+		return this.hasWorld() && (world.isServer || hasTileData);
 	}
 
 	@Override
 	public void markDirty() {
 		super.markDirty();
-		if (!world.isRemote) {
-			world.notifyBlockUpdate(getPos(), world.getBlockState(getPos()), world.getBlockState(getPos()), 1 + 2 + 8);
-			world.notifyNeighborsOfStateChange(pos, this.getBlockType(), true);
+		if (world.isServer) {
+			world.internal.notifyBlockUpdate(getPos(), world.internal.getBlockState(getPos()), world.internal.getBlockState(getPos()), 1 + 2 + 8);
+			world.internal.notifyNeighborsOfStateChange(pos.internal, this.getBlockType(), true);
 		}
 	}
 	
@@ -60,7 +60,7 @@ public class SyncdTileEntity extends TileEntity {
 		this.readUpdateNBT(pkt.getNbtCompound());
 		super.onDataPacket(net, pkt);
 		if (updateRerender()) {
-			world.markBlockRangeForRenderUpdate(getPos(), getPos());
+			world.internal.markBlockRangeForRenderUpdate(getPos(), getPos());
 		}
 		hasTileData = true;
 	}
@@ -85,7 +85,7 @@ public class SyncdTileEntity extends TileEntity {
 		this.readUpdateNBT(tag);
 		super.handleUpdateTag(tag);
 		if (updateRerender()) {
-			world.markBlockRangeForRenderUpdate(getPos(), getPos());
+			world.internal.markBlockRangeForRenderUpdate(getPos(), getPos());
 		}
 		hasTileData = true;
 	}
