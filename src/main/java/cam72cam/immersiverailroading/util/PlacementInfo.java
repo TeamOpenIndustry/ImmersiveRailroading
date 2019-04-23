@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -120,7 +121,11 @@ public class PlacementInfo {
 			this.control = null;
 		}
 	}
-	
+
+	public PlacementInfo(ItemStack item, float rotationYawHead, Vec3i pos, cam72cam.mod.math.Vec3d hit) {
+		this(item, rotationYawHead, pos.internal, (float)hit.x, (float)hit.y, (float)hit.z);
+	}
+
 	public NBTTagCompound toNBT() {
 		return toNBT(BlockPos.ORIGIN);
 	}

@@ -70,7 +70,7 @@ public class RailBaseRender {
 		try {
 			RailRenderUtil.draw(getBaseBuffer(info));
 		} catch (Exception ex) {
-			//This can happen with invalid pick blocks
+			//This can happen with invalid pick block
 			ImmersiveRailroading.catching(ex);
 		}
 	}

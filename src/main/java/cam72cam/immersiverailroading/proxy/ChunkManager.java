@@ -22,7 +22,7 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 	 * CHUNK_MAP is a TLRU like structure keeping track of chunks in use from
 	 * server entities point of view.
 	 * 
-	 * This is used in world tick to force/unforce chunks
+	 * This is used in internal tick to force/unforce chunks
 	 */
 	
 	private static final Map<Integer, Ticket> TICKETS = new HashMap<Integer, Ticket>();

@@ -57,16 +57,16 @@ public class Config {
 		@Comment({ "km/h to damage 1 heart on collision" })
 		public static double entitySpeedDamage = 10;
 
-		@Comment("Trains should break blocks")
+		@Comment("Trains should break block")
 		public static boolean TrainsBreakBlocks = true;
 
-		@Comment("Break blocks around the border of the tracks in creative")
+		@Comment("Break block around the border of the tracks in creative")
 		public static boolean enableSideBlockClearing = true;
 
 		@Comment("Clear blocsk in creative mode when placing tracks")
 		public static boolean creativePlacementClearsBlocks = true;
 
-		@Comment("Requires solid blocks to be placed under the rails")
+		@Comment("Requires solid block to be placed under the rails")
 		public static boolean requireSolidBlocks = true;
 
 		@Comment("Drop snowballs when the train can't push a block out of the way")
@@ -110,7 +110,7 @@ public class Config {
 		@Comment("Cost to place down rail bed")
 		public static double BedCostMultiplier = 0.25;
 
-		@Comment("If more than X% of the tracks are above non solid blocks, break the track")
+		@Comment("If more than X% of the tracks are above non solid block, break the track")
 		public static double trackFloatingPercent = 0.05;
 		
 		@Comment("Diesel Fuel Efficiency")
@@ -119,10 +119,10 @@ public class Config {
 		@Comment("Steam Fuel Efficiency")
 		public static int locoSteamFuelEfficiency = 100;
 
-		@Comment("How fast the steam locomotive should heat up.  1 is real world (slow), 72 is scaled to minecraft time")
+		@Comment("How fast the steam locomotive should heat up.  1 is real internal (slow), 72 is scaled to minecraft time")
 		public static int locoHeatTimeScale = 72;
 		
-		@Comment("How fast the diesel locomotive should heat up. 1 is real world (slow), 72 is scaled to minecraft time")
+		@Comment("How fast the diesel locomotive should heat up. 1 is real internal (slow), 72 is scaled to minecraft time")
 		public static int dieselLocoHeatTimeScale = 72;
 
 		@Comment("How much water the locomotive should use")
@@ -206,7 +206,7 @@ public class Config {
 		@Comment({"Time between open computers poll ticks for augments"})
 		public static int ocPollDelayTicks = 1;
 		
-		@Comment({"DEV ONLY: How much to artifically lag the server (per world)"})
+		@Comment({"DEV ONLY: How much to artifically lag the server (per internal)"})
 		public static int lagServer = 0;
 
 		@Comment({"Old Narrow track placement (single width instead of 3)"})

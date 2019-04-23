@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -39,7 +40,7 @@ public class TileRail extends TileRailBase {
 		if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 		}
-		return new AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos);
+		return new AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos.internal);
 	}
 	
 	@Override
@@ -60,7 +61,7 @@ public class TileRail extends TileRailBase {
 		info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
 		this.markDirty();
 		
-		List<EntityCoupleableRollingStock> ents = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, new AxisAlignedBB(-info.settings.length, 0, -info.settings.length, info.settings.length, 5, info.settings.length).offset(this.getPos()));
+		List<EntityCoupleableRollingStock> ents = world.internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, new AxisAlignedBB(-info.settings.length, 0, -info.settings.length, info.settings.length, 5, info.settings.length).offset(this.getPos()));
 		for(EntityCoupleableRollingStock stock : ents) {
 			stock.triggerResimulate();
 		}
@@ -80,7 +81,7 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (nbt.hasKey("info")) {
-			info = new RailInfo(world, pos, nbt.getCompoundTag("info"));
+			info = new RailInfo(world.internal, pos.internal, nbt.getCompoundTag("info"));
 		} else {
 			// LEGACY
 			// TODO REMOVE 2.0
@@ -101,7 +102,7 @@ public class TileRail extends TileRailBase {
 			newPositionFormat.setDouble("z", nbt.getDouble("placementPositionZ"));
 			nbt.setTag("placementPosition", newPositionFormat);
 
-            PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
+            PlacementInfo placementInfo = new PlacementInfo(nbt, pos.internal);
             placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
@@ -109,13 +110,13 @@ public class TileRail extends TileRailBase {
 			double tablePos = nbt.getDouble("tablePos");
 
 			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
-			info = new RailInfo(world, settings, placementInfo, null, switchState, switchForced, tablePos);
+			info = new RailInfo(world.internal, settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt.setTag("info", info.toNBT(pos));
+		nbt.setTag("info", info.toNBT(pos.internal));
 		if (drops != null && drops.size() != 0) {
 			NBTTagCompound dropNBT = new NBTTagCompound();
 			dropNBT.setInteger("count", drops.size());
@@ -131,10 +132,10 @@ public class TileRail extends TileRailBase {
 		this.drops = drops;
 	}
 	public void spawnDrops() {
-		if (!world.isRemote) {
+		if (world.isServer) {
 			if (drops != null && drops.size() != 0) {
 				for(ItemStack drop : drops) {
-					world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), drop));
+					world.internal.spawnEntity(new EntityItem(world.internal, pos.x, pos.y, pos.z, drop));
 				}
 				drops = new ArrayList<ItemStack>();
 			}
@@ -149,8 +150,8 @@ public class TileRail extends TileRailBase {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(pos).getTracksForRender()) {
-			BlockPos tpos = track.getPos();
+		for (TrackBase track : info.getBuilder(pos.internal).getTracksForRender()) {
+			Vec3i tpos = new Vec3i(track.getPos());
 			total++;
 
 			if (!world.isBlockLoaded(tpos)) {

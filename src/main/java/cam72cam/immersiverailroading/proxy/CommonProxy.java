@@ -11,6 +11,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import cam72cam.immersiverailroading.net.*;
+import cam72cam.mod.Player;
+import cam72cam.mod.block.IBreakCancelable;
+import cam72cam.mod.math.Vec3i;
 import org.apache.commons.io.IOUtils;
 
 import cam72cam.immersiverailroading.Config;
@@ -180,10 +183,10 @@ public abstract class CommonProxy implements IGuiHandler {
 		event.getRegistry().register(IRBlocks.BLOCK_RAIL);
 		event.getRegistry().register(IRBlocks.BLOCK_RAIL_PREVIEW);
 		event.getRegistry().register(IRBlocks.BLOCK_MULTIBLOCK);
-    	GameRegistry.registerTileEntity(TileRailGag.class, BlockRailGag.NAME);
-    	GameRegistry.registerTileEntity(TileRail.class, BlockRail.NAME);
-    	GameRegistry.registerTileEntity(TileRailPreview.class, BlockRailPreview.NAME);
-    	GameRegistry.registerTileEntity(TileMultiblock.class, BlockMultiblock.NAME);
+    	GameRegistry.registerTileEntity(TileRailGag.class, IRBlocks.BLOCK_RAIL_GAG.getName());
+    	GameRegistry.registerTileEntity(TileRail.class, IRBlocks.BLOCK_RAIL.getName());
+    	GameRegistry.registerTileEntity(TileRailPreview.class, IRBlocks.BLOCK_RAIL_PREVIEW.getName());
+    	GameRegistry.registerTileEntity(TileMultiblock.class, IRBlocks.BLOCK_MULTIBLOCK.getName());
     }
     
     @SubscribeEvent
@@ -217,10 +220,13 @@ public abstract class CommonProxy implements IGuiHandler {
 	
 	@SubscribeEvent
 	public static void onBlockBreakEvent(BreakEvent event) {
-		if (!BlockRailBase.tryBreakRail(event.getWorld(), event.getPos())) {
-			event.setCanceled(true);
-		} else if (BlockRailPreview.tryBreakPreview(event.getWorld(), event.getPos(), event.getPlayer())) {
-			event.setCanceled(true);
+		Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
+		if (block instanceof IBreakCancelable) {
+			IBreakCancelable cancelable = (IBreakCancelable) block;
+			if (!cancelable.tryBreak(new cam72cam.mod.World(event.getWorld()), new Vec3i(event.getPos()), new Player(event.getPlayer()))) {
+				event.setCanceled(true);
+				//TODO updateListeners?
+			}
 		}
 	}
 	

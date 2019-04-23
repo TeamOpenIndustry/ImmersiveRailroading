@@ -537,7 +537,7 @@ public class ClientProxy extends CommonProxy {
 		 * 
 		 * For large entities this breaks in awesome ways, like walking past the center of a rail car
 		 * 
-		 * To fix this we render the entity the player is riding by hand at the end of the render loop
+		 * To fix this we render the entity the internal is riding by hand at the end of the render loop
 		 * This is a bad hack but it works
 		 * 
 		 */
