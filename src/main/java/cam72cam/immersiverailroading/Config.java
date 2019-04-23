@@ -48,6 +48,9 @@ public class Config {
 
 	public static class ConfigBalance {
 		
+		@Comment("Use advanced controls for locomotives (e.g. a reverser)")
+		public static boolean AdvancedControls = true;
+		
 		@Comment("Models require fuel")
 		public static boolean ModelFuelRequired = true;
 

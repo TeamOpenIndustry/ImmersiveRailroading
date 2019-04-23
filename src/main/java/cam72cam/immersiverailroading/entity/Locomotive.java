@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.common.base.Optional;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -117,7 +118,7 @@ public abstract class Locomotive extends FreightTank {
 			setThrottle(0f);
 			break;
 		case THROTTLE_DOWN:
-			if (getThrottle() > 0) {
+			if (getThrottle() > (ConfigBalance.AdvancedControls ? 0 : -1)) {
 				setThrottle(getThrottle() - throttleNotch);
 			}
 			break;
@@ -167,7 +168,7 @@ public abstract class Locomotive extends FreightTank {
 
 	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
-			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
+			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !ConfigBalance.RadioEquipmentRequired) {
 				NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
 				if(cardNBT == null) { 
 					player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
@@ -260,11 +261,11 @@ public abstract class Locomotive extends FreightTank {
 	
 	private void simulateWheelSlip() {
 		double tractiveEffortNewtons = getAppliedTractiveEffort(getCurrentSpeed());
-		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
+		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * ConfigBalance.tractionMultiplier;
 		staticTractiveEffort *= 1.5; // Fudge factor
 		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
 		if (adhesionFactor > 1) {
-			this.distanceTraveled += Math.copySign(Math.min((adhesionFactor-1)/10, 1), getThrottle() * getReverser());
+			this.distanceTraveled += Math.copySign(Math.min((adhesionFactor - 1) / 10, 1), getThrottle() * (ConfigBalance.AdvancedControls ? getReverser() : 1));
 		}
 	}
 	
@@ -274,7 +275,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 		
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
-		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
+		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * ConfigBalance.tractionMultiplier;
 		staticTractiveEffort *= 1.5; // Fudge factor
 		
 		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
@@ -290,7 +291,7 @@ public abstract class Locomotive extends FreightTank {
 			tractiveEffortNewtons = 0;
 		}
 		
-		return Math.copySign(tractiveEffortNewtons, getThrottle() * getReverser());
+		return Math.copySign(tractiveEffortNewtons, getThrottle() * (ConfigBalance.AdvancedControls ? getReverser() : 1));
 	}
 
 	/*

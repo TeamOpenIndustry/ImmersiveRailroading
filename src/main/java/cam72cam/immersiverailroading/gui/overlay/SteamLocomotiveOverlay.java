@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.GuiText;
 import net.minecraft.entity.Entity;
@@ -32,8 +33,10 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake() * 10, 0, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle() * 10, 0, 10);
 		
-		addSpace(6);
-		drawScalar(GuiText.valueOf("LABEL_REVERSER").toString(), loco.getReverser() * 10, -10, 10);
+		if (Config.ConfigBalance.AdvancedControls) {
+			addSpace(6);
+			drawScalar(GuiText.valueOf("LABEL_REVERSER").toString(), loco.getReverser() * 10, -10, 10);
+		}
 		
 		drawSpeedDisplay(loco, 20);
 	}
