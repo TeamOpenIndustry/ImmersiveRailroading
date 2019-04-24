@@ -47,13 +47,13 @@ public class StockItemModel implements IBakedModel {
 	}
 	
 	public StockItemModel(ItemStack stack) {
-		scale = ItemGauge.get(stack).scale();
-		defID = ItemDefinition.getID(stack);
+		scale = ItemGauge.get(new cam72cam.mod.item.ItemStack(stack)).scale();
+		defID = ItemDefinition.getID(new cam72cam.mod.item.ItemStack(stack));
 		model = StockRenderCache.getRender(defID);
 		if (model == null) {
 			stack.setCount(0);
 		}
-		texture = ItemTextureVariant.get(stack);
+		texture = ItemTextureVariant.get(new cam72cam.mod.item.ItemStack(stack));
 	}
 	
 	@Override

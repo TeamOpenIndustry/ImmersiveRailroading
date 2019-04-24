@@ -9,68 +9,64 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.net.SoundPacket;
+import cam72cam.mod.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-public class ItemConductorWhistle extends Item {
-	public static final String NAME = "item_conductor_whistle";
+public class ItemConductorWhistle extends ItemBase {
 	private static HashMap<UUID, Integer> cooldown = new HashMap<UUID, Integer>();
 	
 	public ItemConductorWhistle() {
-		super();
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_conductor_whistle", 1, ItemTabs.MAIN_TAB);
 	}
 	
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-		if (!world.isRemote) {
-			if (cooldown.containsKey(player.getPersistentID())) {
-				int newtime = cooldown.get(player.getPersistentID());
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
+		if (world.isServer) {
+			if (cooldown.containsKey(player.getUUID())) {
+				int newtime = cooldown.get(player.getUUID());
 				if (newtime < ImmersiveRailroading.proxy.getTicks()) {
-					cooldown.remove(player.getPersistentID());
+					cooldown.remove(player.getUUID());
 				} else {
-					return super.onItemRightClick(world, player, hand);
+					return ClickResult.PASS;
 				}
 			}
 			
-			cooldown.put(player.getPersistentID(), ImmersiveRailroading.proxy.getTicks() + 40);
+			cooldown.put(player.getUUID(), ImmersiveRailroading.proxy.getTicks() + 40);
 			
 			SoundPacket packet = new SoundPacket(
-					new ResourceLocation(ImmersiveRailroading.MODID, "sounds/conductor_whistle.ogg").toString(),
-					player.getPositionVector(), Vec3d.ZERO,
+					ImmersiveRailroading.MODID + ":sounds/conductor_whistle.ogg",
+					player.getPosition().internal, Vec3d.ZERO.internal,
 					0.7f, (float) (Math.random() / 4 + 0.75), 
 					(int) (Config.ConfigBalance.villagerConductorDistance * 1.2f), 
 					Gauge.from(Gauge.STANDARD)
 			);
-			ImmersiveRailroading.net.sendToAllAround(packet, new TargetPoint(player.dimension, player.posX, player.posY, player.posZ, Config.ConfigBalance.villagerConductorDistance * 1.2f));
+			ImmersiveRailroading.net.sendToAllAround(packet, new NetworkRegistry.TargetPoint(player.internal.dimension, player.internal.posX, player.internal.posY, player.internal.posZ, Config.ConfigBalance.villagerConductorDistance * 1.2f));
 			
-			AxisAlignedBB bb = player.getEntityBoundingBox().grow(Config.ConfigBalance.villagerConductorDistance, 4, Config.ConfigBalance.villagerConductorDistance);
-			List<EntityCoupleableRollingStock> carsNearby = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, bb);
+			AxisAlignedBB bb = player.internal.getEntityBoundingBox().grow(Config.ConfigBalance.villagerConductorDistance, 4, Config.ConfigBalance.villagerConductorDistance);
+			List<EntityCoupleableRollingStock> carsNearby = world.internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, bb);
 			EntityCoupleableRollingStock closestToPlayer = null;
 			for (EntityCoupleableRollingStock car : carsNearby) {
 				if (closestToPlayer == null) {
 					closestToPlayer = car;
 					continue;
 				}
-				if (closestToPlayer.getPositionVector().distanceTo(player.getPositionVector()) > car.getPositionVector().distanceTo(player.getPositionVector())) {
+				if (closestToPlayer.getPositionVector().distanceTo(player.getPosition().internal) > car.getPositionVector().distanceTo(player.getPosition().internal)) {
 					closestToPlayer = car;
 				}
 			}
 			
 			if (closestToPlayer != null) {
-				if (!player.isSneaking()) {
-					List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, bb);
+				if (!player.isCrouching()) {
+					List<EntityVillager> villagers = world.internal.getEntitiesWithinAABB(EntityVillager.class, bb);
 					for (EntityVillager villager : villagers) {
 						EntityCoupleableRollingStock closest = null;
 						for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
@@ -86,8 +82,8 @@ public class ItemConductorWhistle extends Item {
 					}
 				} else {
 					for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
-						if (car.getPositionVector().distanceTo(player.getPositionVector()) < Config.ConfigBalance.villagerConductorDistance) {
-							while (car.removeStaticPasssenger(player.getPositionVector(), true) != null) {
+						if (car.getPositionVector().distanceTo(player.getPosition().internal) < Config.ConfigBalance.villagerConductorDistance) {
+							while (car.removeStaticPasssenger(player.getPosition().internal, true) != null) {
 								//Unmounts all riding ents
 							}
 						}
@@ -96,6 +92,6 @@ public class ItemConductorWhistle extends Item {
 			}
 		}
 		
-		return super.onItemRightClick(world, player, hand);
+		return ClickResult.PASS;
 	}
 }

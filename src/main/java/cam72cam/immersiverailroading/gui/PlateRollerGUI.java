@@ -15,9 +15,9 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.mod.item.ItemStack;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.item.ItemStack;
 
 public class PlateRollerGUI extends GuiScreen {
 	private GuiButton gaugeButton;
@@ -34,7 +34,7 @@ public class PlateRollerGUI extends GuiScreen {
 	
 	public PlateRollerGUI(TileMultiblock te) {
 		this.tile = te;
-		currentItem = te.getCraftItem();
+		currentItem = new ItemStack(te.getCraftItem());
 		if (currentItem == null || currentItem.isEmpty()) {
 			currentItem = new ItemStack(IRItems.ITEM_PLATE, 1);
 		}
@@ -133,7 +133,7 @@ public class PlateRollerGUI extends GuiScreen {
 			break;
     	}
 		currentItem.setCount(Math.max(1, (int) Math.floor(currentItem.getCount()/gauge.scale())));
-		tile.setCraftItem(currentItem);
+		tile.setCraftItem(currentItem.internal);
     }
 	
 	@Override

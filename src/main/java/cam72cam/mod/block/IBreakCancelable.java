@@ -1,6 +1,6 @@
 package cam72cam.mod.block;
 
-import cam72cam.mod.Player;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.World;
 import cam72cam.mod.math.Vec3i;
 

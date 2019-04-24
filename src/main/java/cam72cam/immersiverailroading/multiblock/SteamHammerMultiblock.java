@@ -132,7 +132,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (!input.isEmpty() && ItemRawCast.get(input) && output.isEmpty()) {
+				if (!input.isEmpty() && ItemRawCast.get(new cam72cam.mod.item.ItemStack(input)) && output.isEmpty()) {
 					te.setCraftProgress(100);
 				}
 			}
@@ -141,7 +141,7 @@ public class SteamHammerMultiblock extends Multiblock {
 				// Stop crafting
 				ItemStack out = input.copy();
 				out.setCount(1);
-				ItemRawCast.set(out, false);
+				ItemRawCast.set(new cam72cam.mod.item.ItemStack(out), false);
 				container.setStackInSlot(1, out);
 				input.shrink(1);
 				container.setStackInSlot(0, input);;
@@ -151,7 +151,7 @@ public class SteamHammerMultiblock extends Multiblock {
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return slot == 0 && ItemRawCast.get(stack);
+			return slot == 0 && ItemRawCast.get(new cam72cam.mod.item.ItemStack(stack));
 		}
 
 		@Override

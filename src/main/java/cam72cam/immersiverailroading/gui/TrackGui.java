@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.mod.item.ItemStack;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -26,7 +27,6 @@ import net.minecraft.init.Items;
 import net.minecraftforge.fml.client.config.GuiCheckBox;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraftforge.oredict.OreDictionary;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.BlockPos;
@@ -77,7 +77,7 @@ public class TrackGui extends GuiScreen {
 
 	public TrackGui() {
 		slot = Minecraft.getMinecraft().player.inventory.currentItem;
-		ItemStack stack = Minecraft.getMinecraft().player.getHeldItemMainhand();
+		ItemStack stack = new ItemStack(Minecraft.getMinecraft().player.getHeldItemMainhand());
 		init(stack);
 	}
 
@@ -85,7 +85,7 @@ public class TrackGui extends GuiScreen {
 		this.tilePreviewPos = new BlockPos(posX, posY, posZ);
 		TileRailPreview te = TileRailPreview.get(world, tilePreviewPos);
 		if (te != null) {
-			init(te.getItem());
+			init(new ItemStack(te.getItem()));
 		}
 	}
 
@@ -107,13 +107,14 @@ public class TrackGui extends GuiScreen {
 		//	track = DefinitionManager.getTrackIDs().stream().findFirst().get();
 		//}
 		
-		oreDict.add(new ItemStack(Items.AIR));
+		oreDict.add(new ItemStack(Items.AIR, 1));
 		
-		for (ItemStack ore : OreHelper.IR_RAIL_BED.getOres()) {
+		for (net.minecraft.item.ItemStack ore : OreHelper.IR_RAIL_BED.getOres()) {
 			if (ore.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
-				ore.getItem().getSubItems(ore.getItem().getCreativeTab(), oreDict);
+				NonNullList<net.minecraft.item.ItemStack> temp = NonNullList.create();
+				ore.getItem().getSubItems(ore.getItem().getCreativeTab(), temp);
 			} else {
-				oreDict.add(ore);
+				oreDict.add(new ItemStack(ore));
 			}
 		}
 		bedSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
@@ -161,13 +162,13 @@ public class TrackGui extends GuiScreen {
 	}
 	
 	public String getBedstackName() {
-		if (bedSelector.choosenItem.getItem() != Items.AIR) {
+		if (bedSelector.choosenItem.item != Items.AIR) {
 			return bedSelector.choosenItem.getDisplayName();
 		}
 		return GuiText.NONE.toString();
 	}
 	public String getBedFillName() {
-		if (bedFillSelector.choosenItem.getItem() != Items.AIR) {
+		if (bedFillSelector.choosenItem.item != Items.AIR) {
 			return bedFillSelector.choosenItem.getDisplayName();
 		}
 		return GuiText.NONE.toString();

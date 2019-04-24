@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
+import cam72cam.mod.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -7,7 +8,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.ItemStack;
 
 public class ItemButton extends GuiButton {
 
@@ -23,7 +23,7 @@ public class ItemButton extends GuiButton {
 		Gui.drawRect(x, y, x+32, y+32, 0xFFFFFFFF);
 		RenderHelper.enableStandardItemLighting();
 
-        FontRenderer font = stack.getItem().getFontRenderer(stack);
+        FontRenderer font = stack.item.getFontRenderer(stack.internal);
         if (font == null) {
         	font = mc.fontRenderer;
         }
@@ -32,8 +32,8 @@ public class ItemButton extends GuiButton {
         {
         	GL11.glTranslated(x, y, 0);
         	GL11.glScaled(2, 2, 1);
-	        mc.getRenderItem().renderItemAndEffectIntoGUI(stack, 0, 0);
-			mc.getRenderItem().renderItemOverlays(font, stack, 0, 0);
+	        mc.getRenderItem().renderItemAndEffectIntoGUI(stack.internal, 0, 0);
+			mc.getRenderItem().renderItemOverlays(font, stack.internal, 0, 0);
         }
         GL11.glPopMatrix();
 	}

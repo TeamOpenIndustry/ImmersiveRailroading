@@ -12,8 +12,8 @@ import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.mod.item.ItemStack;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
 public class CraftPicker extends GuiScreen {
@@ -26,13 +26,13 @@ public class CraftPicker extends GuiScreen {
 		this.onChoose = onChoose;
 		this.items = NonNullList.create();
 		
-        IRItems.ITEM_ROLLING_STOCK_COMPONENT.getSubItems(ItemTabs.COMPONENT_TAB, items);
+        items.addAll(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getItemVariants(ItemTabs.COMPONENT_TAB));
         
         NonNullList<ItemStack> stock = NonNullList.create();
 
-        IRItems.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.LOCOMOTIVE_TAB, stock);
-        IRItems.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.PASSENGER_TAB, stock);
-        IRItems.ITEM_ROLLING_STOCK.getSubItems(ItemTabs.STOCK_TAB, stock);
+        items.addAll(IRItems.ITEM_ROLLING_STOCK.getItemVariants(ItemTabs.LOCOMOTIVE_TAB));
+        items.addAll(IRItems.ITEM_ROLLING_STOCK.getItemVariants(ItemTabs.PASSENGER_TAB));
+        items.addAll(IRItems.ITEM_ROLLING_STOCK.getItemVariants(ItemTabs.STOCK_TAB));
 
 		List<ItemStack> toRemove = new ArrayList<ItemStack>();
 		for (ItemStack item : items) {
@@ -72,13 +72,13 @@ public class CraftPicker extends GuiScreen {
 		
 		if (craftType == CraftingType.CASTING) {
         	stock.add(new ItemStack(IRItems.ITEM_CAST_RAIL, 1));
-        	stock.add(OreHelper.IR_STEEL_INGOT.getOres().get(0));
-        	stock.add(OreHelper.IR_STEEL_BLOCK.getOres().get(0));
-	        IRItems.ITEM_AUGMENT.getSubItems(ItemTabs.MAIN_TAB, stock);
+        	stock.add(new ItemStack(OreHelper.IR_STEEL_INGOT.getOres().get(0)));
+        	stock.add(new ItemStack(OreHelper.IR_STEEL_BLOCK.getOres().get(0)));
+	        stock.addAll(IRItems.ITEM_AUGMENT.getItemVariants(ItemTabs.MAIN_TAB));
 		}
 		
 		itemSelector = new ItemPickerGUI(NonNullList.create(), this::onItemExit);
-		if (current != null && current.getItem() == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+		if (current != null && current.item == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
 			itemSelector.choosenItem = current;
 		}
 	}
@@ -88,10 +88,10 @@ public class CraftPicker extends GuiScreen {
 			return false;
 		}
 		
-    	if (stock.getItem() != IRItems.ITEM_ROLLING_STOCK) {
+    	if (stock.item != IRItems.ITEM_ROLLING_STOCK) {
     		return false;
     	}
-    	if (item.getItem() != IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+    	if (item.item != IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
     		return false;
     	}
     	return ItemDefinition.getID(item).equals(ItemDefinition.getID(stock));

@@ -27,7 +27,7 @@ public class PlacementInfo {
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		this.yaw = ((int)((yawHead + 90/8f) * 4)) / 90 * 90 / 4f;
 
-		RailSettings settings = ItemTrackBlueprint.settings(stack);
+		RailSettings settings = ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(stack));
 		TrackDirection direction = settings.direction;
 		if (direction == TrackDirection.NONE) {
 			direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;

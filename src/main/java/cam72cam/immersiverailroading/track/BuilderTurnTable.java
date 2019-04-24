@@ -112,6 +112,6 @@ public class BuilderTurnTable extends BuilderBase {
 				fillCount += 1;
 			}
 		}
-		return MathHelper.ceil(this.info.settings.railBedFill.getItem() != Items.AIR ? fillCount : 0);
+		return MathHelper.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
 	}
 }

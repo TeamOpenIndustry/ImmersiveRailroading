@@ -2,14 +2,9 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BufferUtil;
+import cam72cam.mod.util.TagCompound;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -48,7 +43,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		} else {
 			this.tilePreviewPos = BlockPos.fromLong(buf.readLong());
 		}
-		this.settings = new RailSettings(ByteBufUtils.readTag(buf));
+		this.settings = new RailSettings(new TagCompound(ByteBufUtils.readTag(buf)));
 	}
 
 	@Override
@@ -59,7 +54,7 @@ public class ItemRailUpdatePacket implements IMessage {
 		} else {
 			buf.writeLong(tilePreviewPos.toLong());
 		}
-		ByteBufUtils.writeTag(buf, settings.toNBT());
+		ByteBufUtils.writeTag(buf, settings.toNBT().internal);
 	}
 	
 	public static class Handler implements IMessageHandler<ItemRailUpdatePacket, IMessage> {
@@ -82,7 +77,7 @@ public class ItemRailUpdatePacket implements IMessage {
 				}
 				stack = te.getItem();
 			}
-			ItemTrackBlueprint.settings(stack, message.settings);
+			ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(stack), message.settings);
 			if (message.tilePreviewPos == null) {
 				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
 			} else {

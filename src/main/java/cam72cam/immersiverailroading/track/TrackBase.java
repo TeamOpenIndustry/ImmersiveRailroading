@@ -44,7 +44,7 @@ public abstract class TrackBase {
             // Valid block beneath
             builder.info.world.getBlockState(pos.down()).isTopSolid() ||
             // Block below is replaceable and we will replace it with something
-            (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && builder.info.settings.railBedFill.getItem() != Items.AIR) ||
+            (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && !builder.info.settings.railBedFill.isEmpty()) ||
             // Block below is an IR Rail
             BlockUtil.isIRRail(builder.info.world, pos.down());
 	}
@@ -77,8 +77,8 @@ public abstract class TrackBase {
 			return tr;
 		}
 
-		if (builder.info.settings.railBedFill.getItem() != Items.AIR && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
-			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill));
+		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
+			builder.info.world.setBlockState(pos.down(), BlockUtil.itemToBlockState(builder.info.settings.railBedFill.internal));
 		}
 
 

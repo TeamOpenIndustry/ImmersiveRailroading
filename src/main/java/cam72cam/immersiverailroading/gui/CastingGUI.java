@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.Config;
@@ -22,7 +23,6 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidRegistry;
 
@@ -43,7 +43,7 @@ public class CastingGUI extends GuiScreen {
 	
 	public CastingGUI(TileMultiblock te) {
 		this.tile = te;
-		currentItem = ((CastingInstance) te.getMultiblock()).getCraftItem();
+		currentItem = new ItemStack(((CastingInstance) te.getMultiblock()).getCraftItem());
 		
 		gauge = ItemGauge.get(currentItem);
 		picker = new CraftPicker(currentItem, CraftingType.CASTING, (ItemStack item) -> {
@@ -116,7 +116,7 @@ public class CastingGUI extends GuiScreen {
 
 		double fluidPercent = ((CastingInstance) tile.getMultiblock()).getSteelLevel();
 		int progress = this.tile.getCraftProgress();
-		float cost = ItemCastingCost.getCastCost(currentItem);
+		float cost = ItemCastingCost.getCastCost(currentItem.internal);
 		if(cost == ItemCastingCost.BAD_CAST_COST) {
 			cost = 0;
 		}
@@ -173,7 +173,7 @@ public class CastingGUI extends GuiScreen {
 		ItemGauge.set(currentItem, gauge);
 		currentItem.setCount(1);
 		ItemRawCast.set(currentItem, true);
-		tile.setCraftItem(currentItem);
+		tile.setCraftItem(currentItem.internal);
     }
 	
 	@Override

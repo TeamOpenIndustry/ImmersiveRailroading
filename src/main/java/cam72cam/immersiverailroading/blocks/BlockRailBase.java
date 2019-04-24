@@ -15,10 +15,13 @@ import cam72cam.mod.block.BlockEntityBase;
 import cam72cam.mod.block.BlockSettings;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.block.Material;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
+import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -111,7 +114,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
 		if (parent == null) {
 			return stack;
 		}
-		ItemTrackBlueprint.settings(stack.internal, parent.info.settings);
+		ItemTrackBlueprint.settings(stack, parent.info.settings);
 		return stack;
 	}
 

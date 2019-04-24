@@ -1,6 +1,8 @@
 package cam72cam.mod.block;
 
 import cam72cam.mod.*;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.tile.IRedstoneProvider;

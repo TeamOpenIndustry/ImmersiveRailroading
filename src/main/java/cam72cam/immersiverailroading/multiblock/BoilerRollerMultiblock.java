@@ -86,7 +86,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
 					
 					craftTe.getContainer().setStackInSlot(1, ItemStack.EMPTY);
-				} else if (held.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(held) == PlateType.BOILER) {
+				} else if (held.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(new cam72cam.mod.item.ItemStack(held)) == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
 					if (craftTe == null) {
 						return false;
@@ -148,13 +148,13 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			float progress = craftTe.getCraftProgress();
 			
-			ItemStack input = craftTe.getContainer().getStackInSlot(0);
-			ItemStack output = craftTe.getContainer().getStackInSlot(1);
+			cam72cam.mod.item.ItemStack input = new cam72cam.mod.item.ItemStack(craftTe.getContainer().getStackInSlot(0));
+			cam72cam.mod.item.ItemStack output = new cam72cam.mod.item.ItemStack(craftTe.getContainer().getStackInSlot(1));
 			
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
+				if (input.item == IRItems.ITEM_PLATE && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
 					progress = 100;
 					craftTe.setCraftProgress(100);
 				}
@@ -162,13 +162,13 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
+				cam72cam.mod.item.ItemStack out = new cam72cam.mod.item.ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
 				ItemGauge.set(out, ItemGauge.get(input));
 				ItemDefinition.setID(out, ItemDefinition.getID(input));
 				ItemComponent.setComponentType(out, ItemComponentType.BOILER_SEGMENT);
-				craftTe.getContainer().setStackInSlot(1, out);
+				craftTe.getContainer().setStackInSlot(1, out.internal);
 				input.shrink(1);
-				craftTe.getContainer().setStackInSlot(0, input);;
+				craftTe.getContainer().setStackInSlot(0, input.internal);
 			}
 		}
 

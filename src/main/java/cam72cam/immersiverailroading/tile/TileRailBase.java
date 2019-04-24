@@ -10,7 +10,7 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
-import cam72cam.mod.TagCompound;
+import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.tile.IRedstoneProvider;
 import cam72cam.mod.util.Facing;
@@ -187,7 +187,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable, 
 		if (railBedCache == null) {
 			TileRail pt = this.getParentTile();
 			if (pt != null) {
-				railBedCache = pt.info.settings.railBed;
+				railBedCache = pt.info.settings.railBed.internal;
 			}
 		}
 		return railBedCache;

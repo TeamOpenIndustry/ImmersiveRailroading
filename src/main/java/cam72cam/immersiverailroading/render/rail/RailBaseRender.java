@@ -34,10 +34,10 @@ public class RailBaseRender {
 			blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 		}
 		
-		if (info.settings.railBed.getItem() == Items.AIR) {
+		if (info.settings.railBed.isEmpty()) {
 			return null;
 		}
-		IBlockState gravelState = BlockUtil.itemToBlockState(info.settings.railBed);
+		IBlockState gravelState = BlockUtil.itemToBlockState(info.settings.railBed.internal);
 		
 		// Create render targets
 		BufferBuilder worldRenderer = new BufferBuilder(2048);

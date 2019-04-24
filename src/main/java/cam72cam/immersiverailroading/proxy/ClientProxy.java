@@ -643,7 +643,7 @@ public class ClientProxy extends CommonProxy {
 	                
 	                GL11.glTranslated(-0.5, -0.5, -0.5);
 	                
-	                MBBlueprintRender.draw(player.getEntityWorld(), ItemMultiblockType.get(stack));
+	                MBBlueprintRender.draw(player.getEntityWorld(), ItemMultiblockType.get(new cam72cam.mod.item.ItemStack(stack)));
 
 					blend.restore();
 				}

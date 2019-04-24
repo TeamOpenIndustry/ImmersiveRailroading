@@ -6,8 +6,8 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.mod.ItemStack;
-import cam72cam.mod.Player;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.World;
 import cam72cam.mod.block.BlockEntityBase;
 import cam72cam.mod.block.BlockSettings;
@@ -17,8 +17,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
 
 public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implements IBreakCancelable {
 	public BlockRailPreview() {
