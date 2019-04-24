@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -36,8 +37,8 @@ public class MovementSimulator {
 		if (Math.abs(moveDistance) < 0.001) {
 			boolean isTurnTable = false;
 			
-			TileRailBase frontBase = TileRailBase.get(world, new BlockPos(front));
-			TileRailBase rearBase = TileRailBase.get(world, new BlockPos(rear));
+			TileRailBase frontBase = new cam72cam.mod.World(world).getTileEntity(new Vec3i(new BlockPos(front)), TileRailBase.class);
+			TileRailBase rearBase = new cam72cam.mod.World(world).getTileEntity(new Vec3i(new BlockPos(rear)), TileRailBase.class);
 			isTurnTable = frontBase != null &&
 					frontBase.getParentTile() != null &&
 					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;

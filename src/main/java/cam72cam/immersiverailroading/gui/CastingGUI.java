@@ -173,7 +173,7 @@ public class CastingGUI extends GuiScreen {
 		ItemGauge.set(currentItem, gauge);
 		currentItem.setCount(1);
 		ItemRawCast.set(currentItem, true);
-		tile.setCraftItem(currentItem.internal);
+		tile.setCraftItem(currentItem);
     }
 	
 	@Override

@@ -233,10 +233,10 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
     public IBlockState getExtendedState(IBlockState origState, IBlockAccess internal, BlockPos pos)
     {
     	IExtendedBlockState state = (IExtendedBlockState)origState;
-    	TileRailBase te = TileRailBase.get(internal, pos);
+    	TileRailBase te = new World((net.minecraft.world.World) internal).getTileEntity(new Vec3i(pos), TileRailBase.class);
     	if (te != null) {
 			if (te.getRenderRailBed() != null) {
-				state = state.withProperty(RAIL_BED, te.getRenderRailBed());
+				state = state.withProperty(RAIL_BED, te.getRenderRailBed().internal);
 				state = state.withProperty(HEIGHT, te.getBedHeight());
 				state = state.withProperty(SNOW, (float)te.getSnowLayers());
 				state = state.withProperty(GAUGE, (float)te.getRenderGauge());

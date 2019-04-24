@@ -21,6 +21,14 @@ public class Vec3i {
         this(new BlockPos(x, y, z));
     }
 
+    public Vec3i(long serialized) {
+        this(BlockPos.fromLong(serialized));
+    }
+
+    public Vec3i(Vec3d pos) {
+        this(new BlockPos(pos.internal));
+    }
+
     public Vec3i offset(Facing facing, int offset) {
         return new Vec3i(internal.offset(facing.internal, offset));
     }
@@ -71,5 +79,13 @@ public class Vec3i {
     }
     public Vec3i subtract(Vec3i other) {
         return new Vec3i(internal.subtract(other.internal));
+    }
+
+    public long toLong() {
+        return internal.toLong();
+    }
+
+    public Vec3i rotate(Rotation rotation) {
+        return new Vec3i(internal.rotate(rotation.internal));
     }
 }

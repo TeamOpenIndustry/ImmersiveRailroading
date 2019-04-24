@@ -1,4 +1,6 @@
 package cam72cam.mod.tile;
 
-public class TickableTileEntity {
+import net.minecraft.util.ITickable;
+
+public abstract class TickableTileEntity extends SyncedTileEntity implements ITickable {
 }

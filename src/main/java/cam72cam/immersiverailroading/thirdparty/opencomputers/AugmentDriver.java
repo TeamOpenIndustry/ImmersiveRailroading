@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.thirdparty.CommonAPI;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.mod.math.Vec3i;
 import li.cil.oc.api.Network;
 import li.cil.oc.api.driver.DriverBlock;
 import li.cil.oc.api.driver.NamedBlock;
@@ -26,7 +27,7 @@ public class AugmentDriver implements DriverBlock {
 
 	@Override
 	public ManagedEnvironment createEnvironment(World world, BlockPos pos, EnumFacing facing) {
-		TileRailBase te = TileRailBase.get(world, pos);
+		TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
 		if (te == null) {
 			return null;
 		}
@@ -49,8 +50,8 @@ public class AugmentDriver implements DriverBlock {
 
 	@Override
 	public boolean worksWith(World world, BlockPos pos, EnumFacing facing) {
-		TileRailBase te = TileRailBase.get(world, pos);
-		
+		TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
+
 		if (te == null) {
 			return false;
 		}
@@ -92,13 +93,13 @@ public class AugmentDriver implements DriverBlock {
 	    public void update() {
 			Node node = this.node();
 			if (this.ticksAlive == 0) {
-				TileRailBase te = TileRailBase.get(world, pos);
+				TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
 				EntityRollingStock nearby = te.getStockNearBy(typeFilter, null);
 				wasOverhead = nearby != null ? nearby.getPersistentID() : null;
 			}
 			
 			if (node != null && this.ticksAlive % Math.max(Config.ConfigDebug.ocPollDelayTicks, 1) == 0) {
-				TileRailBase te = TileRailBase.get(world, pos);
+				TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
 				EntityRollingStock nearby = te.getStockNearBy(typeFilter, null);
 				UUID isOverhead = nearby != null ? nearby.getPersistentID() : null;
 				if (isOverhead != wasOverhead) {
@@ -171,7 +172,8 @@ public class AugmentDriver implements DriverBlock {
 
 		@Callback(doc = "function():string -- returns the current augment type")
 		public Object[] getAugmentType(Context context, Arguments args) {
-			Augment augment = TileRailBase.get(world, pos).getAugment();
+			TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
+			Augment augment = te.getAugment();
 			if (augment != null) {
 				return new Object[] { augment.toString() };
 			}
@@ -232,7 +234,8 @@ public class AugmentDriver implements DriverBlock {
 
 		@Callback(doc = "function():string -- returns the current augment type")
 		public Object[] getAugmentType(Context context, Arguments args) {
-			Augment augment = TileRailBase.get(world, pos).getAugment();
+			TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
+			Augment augment = te.getAugment();
 			if (augment != null) {
 				return new Object[] { augment.toString() };
 			}

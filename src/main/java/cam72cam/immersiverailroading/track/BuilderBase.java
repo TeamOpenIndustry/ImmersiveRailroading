@@ -6,6 +6,9 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.World;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.TagCompound;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -99,8 +102,10 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
-				TileRail rail = TileRail.get(info.world, track.getPos());
-				rail.setReplaced(track.placeTrack(false).serializeNBT());
+				TileRail rail = new World(info.world).getTileEntity(new Vec3i(track.getPos()), TileRail.class);
+				TagCompound data = new TagCompound();
+				track.placeTrack(false).save(data);
+				rail.setReplaced(data);
 				rail.markDirty();
 			}
 		}

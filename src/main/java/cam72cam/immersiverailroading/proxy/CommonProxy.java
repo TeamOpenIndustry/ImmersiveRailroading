@@ -333,7 +333,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		case STEAM_LOCOMOTIVE:
 			return new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityIDorX));
 		case STEAM_HAMMER:
-			TileMultiblock te = TileMultiblock.get(world, new BlockPos(entityIDorX, y, z));
+			TileMultiblock te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(entityIDorX, y, z), TileMultiblock.class);
 			if (te == null) {
 				return null;
 			}

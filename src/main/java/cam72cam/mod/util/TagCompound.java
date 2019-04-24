@@ -1,7 +1,6 @@
 package cam72cam.mod.util;
 
 import cam72cam.mod.math.Vec3i;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class TagCompound {
@@ -30,6 +29,20 @@ public class TagCompound {
     }
     public void setInteger(String key, int value) {
         internal.setInteger(key, value);
+    }
+
+    public long getLong(String key) {
+        return internal.getLong(key);
+    }
+    public void setLong(String key, long value) {
+        internal.setLong(key, value);
+    }
+
+    public float getFloat(String key) {
+        return internal.getFloat(key);
+    }
+    public void setFloat(String key, float value) {
+        internal.setFloat(key, value);
     }
 
     public double getDouble(String key) {

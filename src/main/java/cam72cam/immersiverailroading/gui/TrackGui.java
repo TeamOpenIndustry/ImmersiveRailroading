@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -83,9 +84,9 @@ public class TrackGui extends GuiScreen {
 
 	public TrackGui(World world, int posX, int posY, int posZ) {
 		this.tilePreviewPos = new BlockPos(posX, posY, posZ);
-		TileRailPreview te = TileRailPreview.get(world, tilePreviewPos);
+		TileRailPreview te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(tilePreviewPos), TileRailPreview.class);
 		if (te != null) {
-			init(new ItemStack(te.getItem()));
+			init(te.getItem());
 		}
 	}
 

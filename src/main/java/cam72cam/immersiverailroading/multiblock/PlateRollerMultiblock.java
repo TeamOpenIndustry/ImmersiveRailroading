@@ -189,7 +189,7 @@ public class PlateRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				outputTe.getContainer().setStackInSlot(0, craftingTe.getCraftItem().copy());
+				outputTe.getContainer().setStackInSlot(0, craftingTe.getCraftItem().copy().internal);
 			}
 		}
 

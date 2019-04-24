@@ -41,7 +41,7 @@ public class ItemGoldenSpike extends ItemBase {
 				}
 				TileRailPreview tr = world.getTileEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
-					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), pos, hit));
+					tr.setCustomInfo(new PlacementInfo(tr.getItem().internal, player.getYawHead(), pos, hit));
 				}
 			}
 		}

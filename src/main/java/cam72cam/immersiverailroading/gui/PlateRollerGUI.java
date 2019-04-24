@@ -34,7 +34,7 @@ public class PlateRollerGUI extends GuiScreen {
 	
 	public PlateRollerGUI(TileMultiblock te) {
 		this.tile = te;
-		currentItem = new ItemStack(te.getCraftItem());
+		currentItem = te.getCraftItem();
 		if (currentItem == null || currentItem.isEmpty()) {
 			currentItem = new ItemStack(IRItems.ITEM_PLATE, 1);
 		}
@@ -133,7 +133,7 @@ public class PlateRollerGUI extends GuiScreen {
 			break;
     	}
 		currentItem.setCount(Math.max(1, (int) Math.floor(currentItem.getCount()/gauge.scale())));
-		tile.setCraftItem(currentItem.internal);
+		tile.setCraftItem(currentItem);
     }
 	
 	@Override

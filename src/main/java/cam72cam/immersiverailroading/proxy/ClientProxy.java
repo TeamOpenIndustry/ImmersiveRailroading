@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.*;
 
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ColorizerGrass;
@@ -180,19 +181,19 @@ public class ClientProxy extends CommonProxy {
 		case RAIL_PREVIEW:
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		case STEAM_HAMMER:
-			te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
+			te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
 			if (te == null || !te.isLoaded()) {
 				return null;
 			}
 			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, te));
 		case PLATE_ROLLER:
-			te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
+			te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
 			if (te == null || !te.isLoaded()) {
 				return null;
 			}
 			return new PlateRollerGUI(te);
 		case CASTING:
-			te = TileMultiblock.get(world, new BlockPos(entityIDorPosX, posY, posZ));
+			te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
 			if (te == null || !te.isLoaded()) {
 				return null;
 			}
@@ -588,7 +589,7 @@ public class ClientProxy extends CommonProxy {
 				pos = pos.up();
 
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos).down(), TileRailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}

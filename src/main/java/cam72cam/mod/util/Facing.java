@@ -1,5 +1,6 @@
 package cam72cam.mod.util;
 
+import cam72cam.mod.math.Rotation;
 import net.minecraft.util.EnumFacing;
 
 public enum Facing {
@@ -53,5 +54,13 @@ public enum Facing {
             default:
                 return null;
         }
+    }
+
+    public Facing rotate(Rotation rot) {
+        return Facing.from(rot.internal.rotate(this.internal));
+    }
+
+    public float getHorizontalAngle() {
+        return internal.getHorizontalAngle();
     }
 }
