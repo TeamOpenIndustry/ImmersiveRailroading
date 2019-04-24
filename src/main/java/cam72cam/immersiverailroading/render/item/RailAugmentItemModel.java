@@ -30,7 +30,7 @@ public class RailAugmentItemModel implements IBakedModel {
 	}
 	
 	public RailAugmentItemModel(ItemStack stack, World world) {
-		Augment augment = ItemAugmentType.get(stack);
+		Augment augment = ItemAugmentType.get(new cam72cam.mod.item.ItemStack(stack));
 		if (augment != null) {
 			color = augment.tempColor();
 		}

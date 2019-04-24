@@ -1,10 +1,12 @@
 package cam72cam.mod;
 
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.tile.TileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.Chunk;
 
@@ -79,5 +81,13 @@ public class World {
 
     public void breakBlock(Vec3i pos) {
         internal.destroyBlock(pos.internal, true);
+    }
+
+    public void dropItem(ItemStack stack, Vec3i pos) {
+        internal.spawnEntity(new EntityItem(internal, pos.x, pos.y, pos.z, stack.internal));
+    }
+
+    public void setBlock(Vec3i pos, Block block) {
+        internal.setBlockState(pos.internal, block.getDefaultState());
     }
 }

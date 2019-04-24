@@ -61,7 +61,7 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 	public void setCustomInfo(PlacementInfo info) {
 		this.customInfo = info;
 		if (customInfo != null) {
-			RailSettings settings = ItemTrackBlueprint.settings(item);
+			RailSettings settings = ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(item));
 			double lx = Math.abs(customInfo.placementPosition.x - placementInfo.placementPosition.x);
 			double lz = Math.abs(customInfo.placementPosition.z - placementInfo.placementPosition.z);
 			double length;
@@ -77,7 +77,7 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 					settings = settings.withLength((int) Math.round(length));
 			}
 
-			ItemTrackBlueprint.settings(item, settings);
+			ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(item), settings);
 		}
 		this.markDirty();
 	}

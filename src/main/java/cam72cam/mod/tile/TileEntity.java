@@ -1,6 +1,6 @@
 package cam72cam.mod.tile;
 
-import cam72cam.mod.TagCompound;
+import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.World;
 

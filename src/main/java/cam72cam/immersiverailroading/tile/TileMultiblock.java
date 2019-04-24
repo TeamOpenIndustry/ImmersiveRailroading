@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.Player;
+import cam72cam.mod.entity.Player;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;

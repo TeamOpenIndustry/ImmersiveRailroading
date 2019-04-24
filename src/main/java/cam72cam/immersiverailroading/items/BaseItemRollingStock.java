@@ -7,37 +7,34 @@ import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.World;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.CreativeTab;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Hand;
 
-public abstract class BaseItemRollingStock extends Item {
-	
-	protected void overrideStackDisplayName(ItemStack stack) {
-		EntityRollingStockDefinition def = ItemDefinition.get(stack);
-		if (def != null) {
-			stack.setStackDisplayName(TextFormatting.RESET + def.name());
-		}
+public class BaseItemRollingStock extends ItemBase {
+
+	public BaseItemRollingStock(String modID, String name, int stackSize, CreativeTab ... tabs) {
+		super(modID, name, stackSize, tabs);
 	}
-	
+
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		overrideStackDisplayName(stack);
-		return super.getUnlocalizedName(stack);
+	public String getCustomName(ItemStack stack) {
+		EntityRollingStockDefinition def = ItemDefinition.get(stack);
+        return def == null ? null : def.name();
 	}
-	
-	public static EnumActionResult tryPlaceStock(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, List<ItemComponentType> parts) {
+
+	public static ClickResult tryPlaceStock(Player player, World worldIn, Vec3i pos, Hand hand, List<ItemComponentType> parts) {
 		ItemStack stack = player.getHeldItem(hand);
 		
 		EntityRollingStockDefinition def = ItemDefinition.get(stack);
 		if (def == null) {
 			player.sendMessage(ChatText.STOCK_INVALID.getMessage());
-			return EnumActionResult.FAIL;
+			return ClickResult.REJECTED;
 		}
 		
 		if (parts == null) {

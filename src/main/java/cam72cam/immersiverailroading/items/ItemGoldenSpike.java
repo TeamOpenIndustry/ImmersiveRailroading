@@ -6,64 +6,57 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
-import net.minecraft.entity.player.EntityPlayer;
+import cam72cam.mod.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.*;
-//TODO buildcraft.api.tools.IToolWrench
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.util.SoundCategory;
 
-public class ItemGoldenSpike extends Item {
-	public static final String NAME = "item_golden_spike";
-	
+public class ItemGoldenSpike extends ItemBase {
 	public ItemGoldenSpike() {
-		super();
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_golden_spike", 1, ItemTabs.MAIN_TAB);
 	}
-	
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+
+	@Override
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack held = player.getHeldItem(hand);
-		if (world.getBlockState(pos).getBlock() == IRBlocks.BLOCK_RAIL_PREVIEW) {
+		if (world.getBlock(pos) == IRBlocks.BLOCK_RAIL_PREVIEW) {
 			setPosition(held, pos);
-			world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f, false);
+			world.internal.playSound(pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f, false);
 		} else {
 			pos = pos.up();
 			
-			BlockPos tepos = getPosition(held);
+			Vec3i tepos = getPosition(held);
 			if (tepos != null) {
-				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+				if (BlockUtil.canBeReplaced(world.internal, pos.down().internal, true)) {
+					if (!BlockUtil.isIRRail(world.internal, pos.down().internal) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}
-				TileRailPreview tr = TileRailPreview.get(world, tepos);
+				TileRailPreview tr = world.getTileEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
-					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getRotationYawHead(), pos, hitX, hitY, hitZ));
+					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), pos, hit));
 				}
 			}
 		}
-		//TODO
-		return EnumActionResult.SUCCESS;
+		return ClickResult.PASS;
 	}
 
-	public static BlockPos getPosition(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("pos")) { 
-			return NBTUtil.getPosFromTag(stack.getTagCompound().getCompoundTag("pos"));
+	public static Vec3i getPosition(ItemStack stack) {
+		if (stack.getTagCompound().hasKey("pos")) {
+			return stack.getTagCompound().getVec3i("pos");
 		} else {
 			return null;
 		}
 	}
 	
-	public static void setPosition(ItemStack stack, BlockPos pos) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setTag("pos", NBTUtil.createPosTag(pos));
+	public static void setPosition(ItemStack stack, Vec3i pos) {
+		stack.getTagCompound().setVec3i("pos", pos);
 	}
 }

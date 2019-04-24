@@ -17,6 +17,10 @@ public class Vec3i {
         this.z = pos.getZ();
     }
 
+    public Vec3i(int x, int y, int z) {
+        this(new BlockPos(x, y, z));
+    }
+
     public Vec3i offset(Facing facing, int offset) {
         return new Vec3i(internal.offset(facing.internal, offset));
     }

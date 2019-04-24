@@ -2,10 +2,11 @@ package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.*;
 import cam72cam.mod.block.BlockEntityBase;
 import cam72cam.mod.block.BlockSettings;
 import cam72cam.mod.block.Material;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;

@@ -15,22 +15,22 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumActionResult;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.World;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Hand;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import trackapi.lib.ITrack;
 import trackapi.lib.Util;
 
 public class SpawnUtil {
-	public static EnumActionResult placeStock(EntityPlayer player, EnumHand hand, World worldIn, BlockPos pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
-		ITrack initte = Util.getTileEntity(worldIn, new Vec3d(pos.add(0, 0.7, 0)), true);
+	public static ClickResult placeStock(Player player, Hand hand, World worldIn, Vec3i pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
+		ITrack initte = Util.getTileEntity(worldIn.internal, new Vec3d(pos).add(0, 0.7, 0).internal, true);
 		if (initte == null) {
-			return EnumActionResult.FAIL;
+			return ClickResult.REJECTED;
 		}
 		double trackGauge = initte.getTrackGauge();
 		Gauge gauge = Gauge.from(trackGauge);
@@ -38,17 +38,17 @@ public class SpawnUtil {
 		
 		if (!player.isCreative() && gauge != ItemGauge.get(player.getHeldItem(hand))) {
 			player.sendMessage(ChatText.STOCK_WRONG_GAUGE.getMessage());
-			return EnumActionResult.FAIL;
+			return ClickResult.REJECTED;
 		}
 		
 		double offset = def.getCouplerPosition(CouplerType.BACK, gauge) - ConfigDebug.couplerRange;
-		float yaw = player.rotationYawHead;
-		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos.add(0, 0.7, 0)).addVector(0.5, 0, 0.5), yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge.value()).nextPosition(offset);
+		float yaw = player.getYawHead();
+		TickPos tp = new MovementSimulator(worldIn.internal, new TickPos(0, Speed.ZERO, new Vec3d(pos).add(0, 0.7, 0).add(0.5, 0, 0.5).internal, yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge.value()).nextPosition(offset);
 		
 		if (!tp.isOffTrack) {
-			if (!worldIn.isRemote) {
+			if (worldIn.isServer) {
 				String texture = ItemTextureVariant.get(player.getHeldItem(hand));
-				EntityRollingStock stock = def.spawn(worldIn, tp.position, EnumFacing.fromAngle(player.rotationYawHead), gauge, texture);
+				EntityRollingStock stock = def.spawn(worldIn.internal, tp.position, EnumFacing.fromAngle(player.getYawHead()), gauge, texture);
 				
 				if (stock instanceof EntityBuildableRollingStock) {
 					((EntityBuildableRollingStock)stock).setComponents(list);
@@ -66,8 +66,8 @@ public class SpawnUtil {
 				stack.setCount(stack.getCount()-1);
 				player.setHeldItem(hand, stack);
 			}
-			return EnumActionResult.SUCCESS;
+			return ClickResult.ACCEPTED;
 		}
-		return EnumActionResult.FAIL;
+		return ClickResult.REJECTED;
 	}
 }

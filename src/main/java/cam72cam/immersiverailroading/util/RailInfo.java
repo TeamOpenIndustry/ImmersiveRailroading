@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.track.*;
+import cam72cam.mod.util.TagCompound;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -69,13 +70,13 @@ public class RailInfo {
 	}
 
 	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+		this(world, ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(settings)), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
 	public RailInfo(World world, BlockPos pos, NBTTagCompound nbt) {
 		this(
 				world,
-				new RailSettings(nbt.getCompoundTag("settings")),
+				new RailSettings(new TagCompound(nbt.getCompoundTag("settings"))),
 				new PlacementInfo(nbt.getCompoundTag("placement"), pos),
 				new PlacementInfo(nbt.getCompoundTag("custom"), pos),
 				SwitchState.values()[nbt.getInteger("switchState")],
@@ -86,7 +87,7 @@ public class RailInfo {
 
 	public NBTTagCompound toNBT(BlockPos pos) {
 		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setTag("settings", settings.toNBT());
+		nbt.setTag("settings", settings.toNBT().internal);
 		nbt.setTag("placement", placementInfo.toNBT(pos));
 		nbt.setTag("custom", customInfo.toNBT(pos));
 		nbt.setInteger("switchState", switchState.ordinal());
@@ -159,8 +160,9 @@ public class RailInfo {
 
 		private boolean checkMaterials(EntityPlayer player) {
 			int found = 0;
-			for (ItemStack stack : player.inventory.mainInventory) {
-				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+			for (ItemStack stacktmp : player.inventory.mainInventory) {
+				cam72cam.mod.item.ItemStack stack = new cam72cam.mod.item.ItemStack(stacktmp);
+				if (material.apply(stack.internal) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					found += stack.getCount();
 				}
 			}
@@ -179,16 +181,17 @@ public class RailInfo {
 		private List<ItemStack> useMaterials(EntityPlayer player) {
 			List<ItemStack> drops = new ArrayList<>();
 			int required = this.count;
-			for (ItemStack stack : player.inventory.mainInventory) {
-				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+			for (ItemStack stacktmp : player.inventory.mainInventory) {
+				cam72cam.mod.item.ItemStack stack = new cam72cam.mod.item.ItemStack(stacktmp);
+				if (material.apply(stack.internal) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					if (required > stack.getCount()) {
 						required -= stack.getCount();
-						ItemStack copy = stack.copy();
+						ItemStack copy = stack.internal.copy();
 						copy.setCount(stack.getCount());
 						drops.add(copy);
 						stack.setCount(0);
 					} else if (required != 0) {
-						ItemStack copy = stack.copy();
+						ItemStack copy = stack.internal.copy();
 						copy.setCount(required);
 						drops.add(copy);
 						stack.setCount(stack.getCount() - required);
@@ -223,11 +226,11 @@ public class RailInfo {
 
 				List<MaterialManager> materials = new ArrayList<>();
 
-				if (settings.railBed.getItem() != Items.AIR) {
-					materials.add(new MaterialManager(builder.costBed(), settings.railBed::isItemEqual, settings.railBed));
+				if (settings.railBed.item != Items.AIR) {
+					materials.add(new MaterialManager(builder.costBed(), settings.railBed.internal::isItemEqual, settings.railBed.internal));
 				}
-				if (settings.railBedFill.getItem() != Items.AIR) {
-					materials.add(new MaterialManager(builder.costFill(), settings.railBedFill::isItemEqual, settings.railBedFill));
+				if (settings.railBedFill.item != Items.AIR) {
+					materials.add(new MaterialManager(builder.costFill(), settings.railBedFill.internal::isItemEqual, settings.railBedFill.internal));
 				}
 
 				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);

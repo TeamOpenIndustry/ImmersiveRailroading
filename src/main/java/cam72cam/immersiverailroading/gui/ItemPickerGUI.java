@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 
+import cam72cam.mod.item.ItemStack;
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.Vec3i;
 
@@ -44,7 +44,7 @@ public class ItemPickerGUI extends GuiScreen {
 				button.y = buttonCoordList.get(button.id).getY() - (int)Math.floor(scrollBar.getValue()*32);
 			}
 			if (((ItemButton)button).isMouseOver(mouseX, mouseY)) {
-				this.renderToolTip(((ItemButton)button).stack, mouseX, mouseY);
+				this.renderToolTip(((ItemButton)button).stack.internal, mouseX, mouseY);
 			}
 		}
 	}
