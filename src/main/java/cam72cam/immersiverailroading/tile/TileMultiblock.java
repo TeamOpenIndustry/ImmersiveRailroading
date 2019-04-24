@@ -8,21 +8,19 @@ import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import javax.annotation.Nonnull;
 
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.tile.TickableTileEntity;
+import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Rotation;
+import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
@@ -32,15 +30,10 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class TileMultiblock extends SyncdTileEntity implements ITickable {
-	
-	public static TileMultiblock get(IBlockAccess world, BlockPos pos) {
-		TileEntity te = world.getTileEntity(pos);
-		return te instanceof TileMultiblock ? (TileMultiblock) te : null;
-	}
+public class TileMultiblock extends TickableTileEntity {
 	
 	private IBlockState replaced;
-	private BlockPos offset;
+	private Vec3i offset;
 	private Rotation rotation;
 	private String name;
 	private CraftingMachineMode craftMode = CraftingMachineMode.STOPPED;
@@ -59,7 +52,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 		@Override
 		public int getSlotLimit(int slot) {
 			if (isLoaded()) {
-				return Math.min(super.getSlotLimit(slot), getMultiblock().getSlotLimit(offset, slot));
+				return Math.min(super.getSlotLimit(slot), getMultiblock().getSlotLimit(offset.internal, slot));
 			}
 			return 0;
 		}
@@ -90,52 +83,49 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     	return super.isLoaded() && this.name != null;
     }
 	
-	public void configure(String name, Rotation rot, BlockPos offset, IBlockState replaced) {
+	public void configure(String name, Rotation rot, Vec3i offset, IBlockState replaced) {
 		this.name = name;
 		this.rotation = rot;
 		this.offset = offset;
 		this.replaced = replaced;
 		
-		container.setSize(this.getMultiblock().getInvSize(offset));
+		container.setSize(this.getMultiblock().getInvSize(offset.internal));
 		
 		markDirty();
 	}
 
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt = super.writeToNBT(nbt);
-		
-		if (name == null) {
+	public void save(TagCompound nbt) {
+		if (name != null) {
 			// Probably in some weird block break path
-			return nbt;
+
+            nbt.setString("name", name);
+            nbt.setInteger("rotation", rotation.ordinal());
+            nbt.setVec3i("offset", offset);
+            nbt.set("replaced", new TagCompound(NBTUtil.writeBlockState(new NBTTagCompound(), replaced)));
+
+            nbt.set("inventory", new TagCompound(container.serializeNBT()));
+            nbt.set("craftItem", craftItem.toTag());
+            nbt.setInteger("craftProgress", craftProgress);
+            nbt.setInteger("craftMode", craftMode.ordinal());
+
+            nbt.setInteger("energy", energy.getEnergyStored());
 		}
 
-		nbt.setString("name", name);
-		nbt.setInteger("rotation", rotation.ordinal());
-		nbt.setTag("offset", NBTUtil.createPosTag(offset));
-		nbt.setTag("replaced", NBTUtil.writeBlockState(new NBTTagCompound(), replaced));
-		
-		nbt.setTag("inventory", container.serializeNBT());
-		nbt.setTag("craftItem", craftItem.serializeNBT());
-		nbt.setInteger("craftProgress", craftProgress);
-		nbt.setInteger("craftMode", craftMode.ordinal());
-		
-		nbt.setInteger("energy", energy.getEnergyStored());
-		
-		return nbt;
+		super.save(nbt);
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		
+	public void load(TagCompound nbt) {
+		super.load(nbt);
+
 		name = nbt.getString("name");
 		rotation = Rotation.values()[nbt.getInteger("rotation")];
-		offset = NBTUtil.getPosFromTag(nbt.getCompoundTag("offset"));
-		replaced = NBTUtil.readBlockState(nbt.getCompoundTag("replaced"));
+		offset = nbt.getVec3i("offset");
+		replaced = NBTUtil.readBlockState(nbt.get("replaced").internal);
 		
-		container.deserializeNBT(nbt.getCompoundTag("inventory"));
-		craftItem = new ItemStack(nbt.getCompoundTag("craftItem"));
+		container.deserializeNBT(nbt.get("inventory").internal);
+		craftItem = new ItemStack(nbt.get("craftItem"));
 		craftProgress = nbt.getInteger("craftProgress");
 		
 		craftMode = CraftingMachineMode.STOPPED;
@@ -161,7 +151,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 			return;
 		}
 		this.ticks += 1;
-		this.getMultiblock().tick(offset);
+		this.getMultiblock().tick(offset.internal);
 	}
 
     @SideOnly(Side.CLIENT)
@@ -170,13 +160,13 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     	return INFINITE_EXTENT_AABB;
     }
 	
-	public BlockPos getOrigin() {
-		return pos.subtract(new Vec3i(offset.rotate(rotation))).internal;
+	public Vec3i getOrigin() {
+		return pos.subtract(offset.rotate(rotation));
 	}
 	
 	public MultiblockInstance getMultiblock() {
 		if (this.mb == null && this.isLoaded()) {
-			this.mb = MultiblockRegistry.get(name).instance(world.internal, getOrigin(), rotation);
+			this.mb = MultiblockRegistry.get(name).instance(world.internal, getOrigin().internal, rotation.internal);
 		}
 		return this.mb;
 	}
@@ -203,7 +193,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 
 	public boolean onBlockActivated(Player player, Hand hand) {
-		return getMultiblock().onBlockActivated(player.internal, hand.internal, offset);
+		return getMultiblock().onBlockActivated(player.internal, hand.internal, offset.internal);
 	}
 	
 	/*
@@ -212,9 +202,9 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	
 	public void onBreak() {
 		for (int slot = 0; slot < container.getSlots(); slot ++) {
-			ItemStack item = container.extractItem(slot, Integer.MAX_VALUE, false);
+			net.minecraft.item.ItemStack item = container.extractItem(slot, Integer.MAX_VALUE, false);
 			if (!item.isEmpty()) {
-				world.internal.spawnEntity(new EntityItem(world.internal, pos.x, pos.y, pos.z, item));
+				world.dropItem(new ItemStack(item), pos);
 			}
 		}
 		world.internal.removeTileEntity(pos.internal);
@@ -222,11 +212,11 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 	}
 
 	public boolean isRender() {
-		return getMultiblock().isRender(offset);
+		return getMultiblock().isRender(offset.internal);
 	}
 
 	public double getRotation() {
-		return 180 - rotation.rotate(EnumFacing.EAST).getHorizontalAngle();
+		return 180 - Facing.EAST.rotate(rotation).getHorizontalAngle();
 	}
 	
 	/*
@@ -254,7 +244,7 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 				this.markDirty();
 			}
 		} else {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), craftItem, mode));
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), craftItem.internal, mode));
 		}
 	}
 	
@@ -264,13 +254,13 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 
 	public void setCraftItem(ItemStack selected) {
 		if (world.isServer) {
-			if (craftItem == null || selected == null || !ItemStack.areItemStacksEqualUsingNBTShareTag(selected, craftItem)) {
+			if (craftItem == null || selected == null || !net.minecraft.item.ItemStack.areItemStacksEqualUsingNBTShareTag(selected.internal, craftItem.internal)) {
 				this.craftItem = selected.copy();
 				this.craftProgress = 0;
 				this.markDirty();
 			}
 		} else {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), selected, craftMode));
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), selected.internal, craftMode));
 		}
 	}
 	
@@ -282,10 +272,10 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
 		if (this.isLoaded()) {
 	        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-	            return this.getMultiblock().getInvSize(offset) != 0;
+	            return this.getMultiblock().getInvSize(offset.internal) != 0;
 	        }
 	        if (capability == CapabilityEnergy.ENERGY) {
-	        	return this.getMultiblock().canRecievePower(offset);
+	        	return this.getMultiblock().canRecievePower(offset.internal);
 	        }
 		}
         return super.hasCapability(capability, facing);
@@ -295,29 +285,29 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
     public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if (this.isLoaded()) {
 	        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-	        	if (this.getMultiblock().getInvSize(offset) != 0) {
+	        	if (this.getMultiblock().getInvSize(offset.internal) != 0) {
 	        		return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new IItemHandlerModifiable()  {
 						@Override
 						public int getSlots() {
 							return container.getSlots();
 						}
 						@Override
-						public ItemStack getStackInSlot(int slot) {
+						public net.minecraft.item.ItemStack getStackInSlot(int slot) {
 							return container.getStackInSlot(slot);
 						}
 						@Override
-	        	        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-	        	        	if (getMultiblock().canInsertItem(offset, slot, stack)) {
+	        	        public net.minecraft.item.ItemStack insertItem(int slot, @Nonnull net.minecraft.item.ItemStack stack, boolean simulate) {
+	        	        	if (getMultiblock().canInsertItem(offset.internal, slot, stack)) {
 	        	        		return container.insertItem(slot, stack, simulate);
 	        	        	}
 	        	        	return stack;
 	        	        }
 	        	        @Override
-	        	        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-	        	        	if (getMultiblock().isOutputSlot(offset, slot)) {
+	        	        public net.minecraft.item.ItemStack extractItem(int slot, int amount, boolean simulate) {
+	        	        	if (getMultiblock().isOutputSlot(offset.internal, slot)) {
 	        	        		return container.extractItem(slot, amount, simulate);
 	        	        	}
-	        	        	return ItemStack.EMPTY;
+	        	        	return ItemStack.EMPTY.internal;
 	        	        }
 						@Override
 						public int getSlotLimit(int slot) {
@@ -325,14 +315,14 @@ public class TileMultiblock extends SyncdTileEntity implements ITickable {
 						}
 						
 						@Override
-						public void setStackInSlot(int slot, ItemStack stack) {
+						public void setStackInSlot(int slot, net.minecraft.item.ItemStack stack) {
 							container.setStackInSlot(slot, stack);
 						}
 	        		});
 	        	}
 	        }
 	        if (capability == CapabilityEnergy.ENERGY) {
-	        	if (this.getMultiblock().canRecievePower(offset)) {
+	        	if (this.getMultiblock().canRecievePower(offset.internal)) {
 	        		return CapabilityEnergy.ENERGY.cast(this.energy);
 	        	}
 	        }

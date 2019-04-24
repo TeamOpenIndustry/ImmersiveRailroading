@@ -4,9 +4,11 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.mod.World;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -68,18 +70,18 @@ public class ItemRailUpdatePacket implements IMessage {
 			ItemStack stack;
 			TileRailPreview te = null;
 			if (message.tilePreviewPos == null) {
-				stack = ctx.getServerHandler().player.inventory.getStackInSlot(message.slot);
+				stack = new ItemStack(ctx.getServerHandler().player.inventory.getStackInSlot(message.slot));
 			} else {
-				te = TileRailPreview.get(ctx.getServerHandler().player.world, message.tilePreviewPos);
+				te = new World(ctx.getServerHandler().player.world).getTileEntity(new Vec3i(message.tilePreviewPos), TileRailPreview.class);
 				if (te == null) {
 					ImmersiveRailroading.warn("Got invalid item rail update packet at %s", message.tilePreviewPos);
 					return;
 				}
 				stack = te.getItem();
 			}
-			ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(stack), message.settings);
+			ItemTrackBlueprint.settings(stack, message.settings);
 			if (message.tilePreviewPos == null) {
-				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack);
+				ctx.getServerHandler().player.inventory.setInventorySlotContents(message.slot, stack.internal);
 			} else {
 				te.setItem(stack);
 			}

@@ -19,6 +19,7 @@ import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.RedstoneUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.math.Vec3i;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -464,7 +465,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							}
 						}
 					} else {
-						TileRailBase te = TileRailBase.get(world, bp);
+						TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(bp), TileRailBase.class);
 						if (te != null) {
 							te.cleanSnow();
 							continue;

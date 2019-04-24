@@ -4,6 +4,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BufferUtil;
+import cam72cam.mod.World;
+import cam72cam.mod.math.Vec3i;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -50,12 +52,12 @@ public class MultiblockSelectCraftPacket implements IMessage {
 		}
 
 		private void handle(MultiblockSelectCraftPacket message, MessageContext ctx) {
-			TileMultiblock tile = TileMultiblock.get(ctx.getServerHandler().player.world, message.tilePreviewPos);
+			TileMultiblock tile = new World(ctx.getServerHandler().player.world).getTileEntity(new Vec3i(message.tilePreviewPos), TileMultiblock.class);
 			if (tile == null) {
 				ImmersiveRailroading.warn("Got invalid craft update packet at %s", message.tilePreviewPos);
 				return;
 			}
-			tile.setCraftItem(message.selected);
+			tile.setCraftItem(new cam72cam.mod.item.ItemStack(message.selected));
 			tile.setCraftMode(message.mode);
 		}
 	}

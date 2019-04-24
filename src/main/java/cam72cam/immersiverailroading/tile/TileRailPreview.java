@@ -8,23 +8,15 @@ import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.tile.TickableTileEntity;
+import cam72cam.mod.util.TagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TileRailPreview extends SyncdTileEntity implements ITickable {
+public class TileRailPreview extends TickableTileEntity {
 	private int ticksAlive;
 	private RailInfo info;
-
-	public static TileRailPreview get(IBlockAccess world, BlockPos pos) {
-		TileEntity te = world.getTileEntity(pos);
-		return te instanceof TileRailPreview ? (TileRailPreview) te : null;
-	}
 
 	private ItemStack item;
 	private PlacementInfo placementInfo;
@@ -61,7 +53,7 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 	public void setCustomInfo(PlacementInfo info) {
 		this.customInfo = info;
 		if (customInfo != null) {
-			RailSettings settings = ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(item));
+			RailSettings settings = ItemTrackBlueprint.settings(item);
 			double lx = Math.abs(customInfo.placementPosition.x - placementInfo.placementPosition.x);
 			double lz = Math.abs(customInfo.placementPosition.z - placementInfo.placementPosition.z);
 			double length;
@@ -77,7 +69,7 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 					settings = settings.withLength((int) Math.round(length));
 			}
 
-			ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(item), settings);
+			ItemTrackBlueprint.settings(item, settings);
 		}
 		this.markDirty();
 	}
@@ -88,10 +80,10 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
+	public void load(TagCompound nbt) {
+		super.load(nbt);
 		
-		item = new ItemStack(nbt.getCompoundTag("item"));
+		item = new ItemStack(nbt.get("item"));
 		//TODO nbt legacy
 		/*
 		yawHead = nbt.getFloat("yawHead");
@@ -100,33 +92,33 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 		hitZ = nbt.getFloat("hitZ");
 		 */
 		
-		placementInfo = new PlacementInfo(nbt.getCompoundTag("placementInfo"));
+		placementInfo = new PlacementInfo(nbt.get("placementInfo").internal);
 		if (nbt.hasKey("customInfo")) {
-			customInfo = new PlacementInfo(nbt.getCompoundTag("customInfo"));
+			customInfo = new PlacementInfo(nbt.get("customInfo").internal);
 		}
-		info = new RailInfo(world.internal, item, placementInfo, customInfo);
+		info = new RailInfo(world.internal, item.internal, placementInfo, customInfo);
 	}
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt.setTag("item", item.serializeNBT());
-		nbt.setTag("placementInfo", placementInfo.toNBT());
+	public void save(TagCompound nbt) {
+		nbt.set("item", item.toTag());
+		nbt.set("placementInfo", new TagCompound(placementInfo.toNBT()));
 		if (customInfo != null) {
-			nbt.setTag("customInfo", customInfo.toNBT());
+			nbt.set("customInfo", new TagCompound(customInfo.toNBT()));
 		}
-		
-		return super.writeToNBT(nbt);
+
+		super.save(nbt);
 	}
 	
 	public RailInfo getRailRenderInfo() {
 		if (hasWorld() && info.world == null) {
-			info = new RailInfo(world.internal, item, placementInfo, customInfo);
+			info = new RailInfo(world.internal, item.internal, placementInfo, customInfo);
 		}
 		return info;
 	}
 
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(world.internal, item, placementInfo, customInfo);
+        info = new RailInfo(world.internal, item.internal, placementInfo, customInfo);
         if (isMulti()) {
 			ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
 		}

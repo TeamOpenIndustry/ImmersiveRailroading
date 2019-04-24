@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -24,7 +25,7 @@ public class CommonAPI {
     }
 
     public static CommonAPI create(World world, BlockPos pos, Class<? extends EntityRollingStock> stockClass) {
-        TileRailBase te = TileRailBase.get(world, pos);
+        TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
         if (te != null) {
             EntityRollingStock stock = te.getStockNearBy(stockClass, null);
             if (stock != null) {

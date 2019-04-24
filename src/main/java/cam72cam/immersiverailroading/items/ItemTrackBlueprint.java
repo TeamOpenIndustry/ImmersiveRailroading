@@ -90,7 +90,7 @@ public class ItemTrackBlueprint extends ItemBase {
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getTileEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				te.setup(stack.internal, placementInfo);
+				te.setup(stack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}

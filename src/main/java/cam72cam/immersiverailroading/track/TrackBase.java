@@ -6,6 +6,9 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.World;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Items;
@@ -50,7 +53,7 @@ public abstract class TrackBase {
 	}
 
 	public boolean isOverTileRail() {
-		return TileRail.get(builder.info.world, getPos()) != null && this instanceof TrackGag;
+		return new World(builder.info.world).getTileEntity(new Vec3i(getPos()), TileRail.class) != null && this instanceof TrackGag;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -60,7 +63,7 @@ public abstract class TrackBase {
 		return isDownSolid() && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
-	public TileEntity placeTrack(boolean actuallyPlace) {
+	public TileRailBase placeTrack(boolean actuallyPlace) {
 		BlockPos pos = getPos();
 
 		if (!actuallyPlace) {
@@ -68,9 +71,9 @@ public abstract class TrackBase {
 			tr.setPos(pos);
 			tr.setWorld(builder.info.world);
 			if (parent != null) {
-				tr.setParent(parent);
+				tr.setParent(new Vec3i(parent));
 			} else {
-				tr.setParent(builder.getParentPos());
+				tr.setParent(new Vec3i(builder.getParentPos()));
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
@@ -82,16 +85,17 @@ public abstract class TrackBase {
 		}
 
 
-		NBTTagCompound replaced = null;
+		TagCompound replaced = null;
 		
 		IBlockState state = builder.info.world.getBlockState(pos);
 		Block removed = state.getBlock();
 		TileRailBase te = null;
 		if (removed != null) {
 			if (removed instanceof BlockRailBase) {
-				te = TileRailBase.get(builder.info.world, pos);
+				te = new World(builder.info.world).getTileEntity(new Vec3i(pos), TileRailBase.class);
 				if (te != null) {
-					replaced = te.serializeNBT();
+					replaced = new TagCompound();
+					te.save(replaced);
 				}
 			} else {
 				removed.dropBlockAsItem(builder.info.world, pos, state, 0);
@@ -106,12 +110,12 @@ public abstract class TrackBase {
             te.setWillBeReplaced(false);
         }
 
-		TileRailBase tr = TileRailBase.get(builder.info.world, pos);
+		TileRailBase tr = new World(builder.info.world).getTileEntity(new Vec3i(pos), TileRailBase.class);
 		tr.setReplaced(replaced);
 		if (parent != null) {
-			tr.setParent(parent);
+			tr.setParent(new Vec3i(parent));
 		} else {
-			tr.setParent(builder.getParentPos());
+			tr.setParent(new Vec3i(builder.getParentPos()));
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());

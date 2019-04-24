@@ -230,7 +230,7 @@ public class CastingMultiblock extends Multiblock {
 					return;
 				}
 				
-				ItemStack item = craftTe.getCraftItem();
+				ItemStack item = craftTe.getCraftItem().internal;
 				if (item == null || item.isEmpty()) {
 					return;
 				}
@@ -325,7 +325,7 @@ public class CastingMultiblock extends Multiblock {
 			if (craftingTe == null) {
 				return ItemStack.EMPTY;
 			}
-			return craftingTe.getCraftItem();
+			return craftingTe.getCraftItem().internal;
 		}
 	}
 }

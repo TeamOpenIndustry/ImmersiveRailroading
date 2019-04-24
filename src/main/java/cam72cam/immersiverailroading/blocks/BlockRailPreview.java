@@ -45,7 +45,7 @@ public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implement
                         pos = pos.down();
                     }
                 }
-                te.setPlacementInfo(new PlacementInfo(te.getItem(), player.internal.rotationYawHead, pos, hit));
+                te.setPlacementInfo(new PlacementInfo(te.getItem().internal, player.internal.rotationYawHead, pos, hit));
 			}
 			return false;
 		} else {
@@ -59,7 +59,7 @@ public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implement
 
 	@Override
 	public ItemStack onPick(TileRailPreview entity) {
-		return new ItemStack(entity.getItem());
+		return entity.getItem();
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implement
 
 	public boolean tryBreak(World world, Vec3i pos, Player entityPlayer) {
 		if (entityPlayer.isCrouching()) {
-			TileRailPreview tr = TileRailPreview.get(world.internal, pos.internal);
+			TileRailPreview tr = world.getTileEntity(pos, TileRailPreview.class);
 			if (tr != null) {
 				//internal.setBlockToAir(pos);
 				tr.getRailRenderInfo().build(entityPlayer.internal);

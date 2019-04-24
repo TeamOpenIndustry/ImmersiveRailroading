@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
@@ -54,7 +55,7 @@ public class BlockUtil {
 			return true;
 		}
 		if (allowFlex && block instanceof BlockRailBase) {
-			TileRailBase te = TileRailBase.get(world, pos);
+			TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
 			return te != null && te.isFlexible();
 		}
 		return false;

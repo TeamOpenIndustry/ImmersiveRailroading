@@ -6,14 +6,9 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import cam72cam.mod.util.TagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -22,11 +17,6 @@ import java.util.List;
 
 public class TileRail extends TileRailBase {
 
-	public static TileRail get(IBlockAccess world, BlockPos pos) {
-		TileEntity te = world.getTileEntity(pos);
-		return te instanceof TileRail ? (TileRail) te : null;
-	}
-
 	public RailInfo info;
 	private List<ItemStack> drops;
 
@@ -34,13 +24,13 @@ public class TileRail extends TileRailBase {
 	@SideOnly(Side.CLIENT)
 	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
 		if (info == null) {
-			return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+			return new net.minecraft.util.math.AxisAlignedBB(0, 0, 0, 0, 0, 0);
 		}
 		int length = info.settings.length;
 		if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 		}
-		return new AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos.internal);
+		return new net.minecraft.util.math.AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos.internal);
 	}
 	
 	@Override
@@ -61,27 +51,27 @@ public class TileRail extends TileRailBase {
 		info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
 		this.markDirty();
 		
-		List<EntityCoupleableRollingStock> ents = world.internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, new AxisAlignedBB(-info.settings.length, 0, -info.settings.length, info.settings.length, 5, info.settings.length).offset(this.getPos()));
+		List<EntityCoupleableRollingStock> ents = world.internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, new net.minecraft.util.math.AxisAlignedBB(-info.settings.length, 0, -info.settings.length, info.settings.length, 5, info.settings.length).offset(this.getPos()));
 		for(EntityCoupleableRollingStock stock : ents) {
 			stock.triggerResimulate();
 		}
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
+	public void load(TagCompound nbt) {
+		super.load(nbt);
 
-		this.drops = new ArrayList<ItemStack>();
+		this.drops = new ArrayList<>();
 		if (nbt.hasKey("drops")) {
-			NBTTagCompound dropNBT = nbt.getCompoundTag("drops");
+			TagCompound dropNBT = nbt.get("drops");
 			int count = dropNBT.getInteger("count");
 			for (int i = 0; i < count; i++) {
-				drops.add(new ItemStack(dropNBT.getCompoundTag("drop_" + i)));
+				drops.add(new ItemStack(dropNBT.get("drop_" + i)));
 			}
 		}
 
 		if (nbt.hasKey("info")) {
-			info = new RailInfo(world.internal, pos.internal, nbt.getCompoundTag("info"));
+			info = new RailInfo(world.internal, pos.internal, nbt.get("info").internal);
 		} else {
 			// LEGACY
 			// TODO REMOVE 2.0
@@ -89,43 +79,43 @@ public class TileRail extends TileRailBase {
 			TrackItems type = TrackItems.valueOf(nbt.getString("type"));
 			int length = nbt.getInteger("length");
 			int quarters = nbt.getInteger("turnQuarters");
-			ItemStack railBed = new ItemStack(nbt.getCompoundTag("railBed"));
+			ItemStack railBed = new ItemStack(nbt.get("railBed"));
 			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
 
 			if (type == TrackItems.SWITCH) {
 				quarters = 4;
 			}
 
-			NBTTagCompound newPositionFormat = new NBTTagCompound();
+			TagCompound newPositionFormat = new TagCompound();
 			newPositionFormat.setDouble("x", nbt.getDouble("placementPositionX"));
 			newPositionFormat.setDouble("y", nbt.getDouble("placementPositionY"));
 			newPositionFormat.setDouble("z", nbt.getDouble("placementPositionZ"));
-			nbt.setTag("placementPosition", newPositionFormat);
+			nbt.set("placementPosition", newPositionFormat);
 
-            PlacementInfo placementInfo = new PlacementInfo(nbt, pos.internal);
+            PlacementInfo placementInfo = new PlacementInfo(nbt.internal, pos.internal);
             placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, new cam72cam.mod.item.ItemStack(railBed), cam72cam.mod.item.ItemStack.EMPTY, false, false);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false);
 			info = new RailInfo(world.internal, settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}
 
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt.setTag("info", info.toNBT(pos.internal));
+	public void save(TagCompound nbt) {
+		nbt.set("info", new TagCompound(info.toNBT(pos.internal)));
 		if (drops != null && drops.size() != 0) {
-			NBTTagCompound dropNBT = new NBTTagCompound();
+			TagCompound dropNBT = new TagCompound();
 			dropNBT.setInteger("count", drops.size());
 			for (int i = 0; i < drops.size(); i++) {
-				dropNBT.setTag("drop_" + i, drops.get(i).serializeNBT());
+				dropNBT.set("drop_" + i, drops.get(i).toTag());
 			}
-			nbt.setTag("drops", dropNBT);
+			nbt.set("drops", dropNBT);
 		}
-		return super.writeToNBT(nbt);
+		super.save(nbt);
 	}
 
 	public void setDrops(List<ItemStack> drops) {
@@ -135,9 +125,9 @@ public class TileRail extends TileRailBase {
 		if (world.isServer) {
 			if (drops != null && drops.size() != 0) {
 				for(ItemStack drop : drops) {
-					world.internal.spawnEntity(new EntityItem(world.internal, pos.x, pos.y, pos.z, drop));
+					world.dropItem(drop, pos);
 				}
-				drops = new ArrayList<ItemStack>();
+				drops = new ArrayList<>();
 			}
 		}
 	}
