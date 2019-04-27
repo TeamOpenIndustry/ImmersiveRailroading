@@ -11,9 +11,12 @@ import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.*;
 
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Hand;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.biome.BiomeColorHelper;
 import org.lwjgl.input.Keyboard;
@@ -447,21 +450,21 @@ public class ClientProxy extends CommonProxy {
 		for (KeyTypes key : keys.keySet()) {
 			KeyBinding binding = keys.get(key);
 			if (binding.isKeyDown()) {
-				ImmersiveRailroading.net.sendToServer(new KeyPressPacket(key, riding.getEntityWorld().provider.getDimension(), player.getEntityId(), riding.getEntityId(), player.isSprinting()));
+				ImmersiveRailroading.net.sendToServer(new KeyPressPacket(key, new Player(player), riding));
 			}
 		}
 		
 		if (player.movementInput.leftKeyDown) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_LEFT, riding.getEntityWorld().provider.getDimension(), player.getEntityId(), riding.getEntityId(), player.isSprinting()));
+			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_LEFT, new Player(player), riding));
 		}
 		if (player.movementInput.rightKeyDown) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_RIGHT, riding.getEntityWorld().provider.getDimension(), player.getEntityId(), riding.getEntityId(), player.isSprinting()));
+			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_RIGHT, new Player(player), riding));
 		}
 		if (player.movementInput.forwardKeyDown) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_FORWARD, riding.getEntityWorld().provider.getDimension(), player.getEntityId(), riding.getEntityId(), player.isSprinting()));
+			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_FORWARD, new Player(player), riding));
 		}
 		if (player.movementInput.backKeyDown) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_BACKWARD, riding.getEntityWorld().provider.getDimension(), player.getEntityId(), riding.getEntityId(), player.isSprinting()));
+			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_BACKWARD, new Player(player), riding));
 		}
 	}
 	
@@ -480,17 +483,17 @@ public class ClientProxy extends CommonProxy {
 				return;
 			}
 			
-			int button = attackID == event.getButton() ? 0 : 1;
+			Hand button = attackID == event.getButton() ? Hand.SECONDARY : Hand.PRIMARY;
 			
 			Entity entity = Minecraft.getMinecraft().objectMouseOver.entityHit;
 			if (entity != null && entity instanceof EntityRidableRollingStock) {
-				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, entity.world.provider.getDimension(), entity.getEntityId()));
+				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, new cam72cam.mod.entity.Entity(entity)));
 				event.setCanceled(true);
 				return;
 			}
 			Entity riding = Minecraft.getMinecraft().player.getRidingEntity();
 			if (riding != null && riding instanceof EntityRidableRollingStock) {
-				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, riding.world.provider.getDimension(), riding.getEntityId()));
+				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, new cam72cam.mod.entity.Entity(riding)));
 				event.setCanceled(true);
 				return;
 			}
@@ -588,13 +591,13 @@ public class ClientProxy extends CommonProxy {
 
 				pos = pos.up();
 
-				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos).down(), TileRailBase.class).getRailHeight() < 0.5) {
+				if (BlockUtil.canBeReplaced(new cam72cam.mod.World(world), new Vec3i(pos).down(), true)) {
+					if (!BlockUtil.isIRRail(new cam72cam.mod.World(world), new Vec3i(pos).down()) || new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos).down(), TileRailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}
 
-		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
+		        RailInfo info = new RailInfo(new cam72cam.mod.World(player.world), new cam72cam.mod.item.ItemStack(stack), new PlacementInfo(new cam72cam.mod.item.ItemStack(stack), player.getRotationYawHead(), new cam72cam.mod.math.Vec3i(pos), new cam72cam.mod.math.Vec3d(hitX, hitY, hitZ)), null);
 		        String key = info.uniqueID + info.placementInfo.placementPosition;
 				RailInfo cached = infoCache.get(key);
 		        if (cached != null) {
@@ -613,7 +616,7 @@ public class ClientProxy extends CommonProxy {
 					}
 					
 					Vec3d cameraPos = RenderOverride.getCameraPos(event.getPartialTicks());
-					Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
+					Vec3d offPos = info.placementInfo.placementPosition.subtract(new cam72cam.mod.math.Vec3d(cameraPos)).internal;
 					GL11.glTranslated(offPos.x, offPos.y, offPos.z);
 
 	                RailRenderUtil.render(info, true);

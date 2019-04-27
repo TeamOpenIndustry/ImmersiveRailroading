@@ -13,6 +13,7 @@ import java.util.zip.ZipFile;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.block.IBreakCancelable;
+import cam72cam.mod.entity.RidableEntity;
 import cam72cam.mod.math.Vec3i;
 import org.apache.commons.io.IOUtils;
 
@@ -57,11 +58,9 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
@@ -112,20 +111,20 @@ public abstract class CommonProxy implements IGuiHandler {
     	Config.init();
     	OreHelper.IR_RAIL_BED.add(Blocks.BRICK_BLOCK);
     	OreHelper.IR_RAIL_BED.add(Blocks.COBBLESTONE);
-    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
     	OreHelper.IR_RAIL_BED.add(Blocks.DIRT);
     	OreHelper.IR_RAIL_BED.add(Blocks.GRAVEL);
-    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
-    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.LOG, 1, OreDictionary.WILDCARD_VALUE));
-    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.LOG, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
     	OreHelper.IR_RAIL_BED.add(Blocks.NETHER_BRICK);
-    	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
     }
     
     public void init(FMLInitializationEvent event) {
     	ImmersiveRailroading.net.registerMessage(MRSSyncPacket.Handler.class, MRSSyncPacket.class, 0, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(KeyPressPacket.Handler.class, KeyPressPacket.class, 1, Side.SERVER);
-    	ImmersiveRailroading.net.registerMessage(PassengerPositionsPacket.Handler.class, PassengerPositionsPacket.class, 2, Side.CLIENT);
+    	ImmersiveRailroading.net.registerMessage(RidableEntity.PassengerPositionsPacket.Handler.class, RidableEntity.PassengerPositionsPacket.class, 2, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(MousePressPacket.Handler.class, MousePressPacket.class, 6, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(ItemRailUpdatePacket.Handler.class, ItemRailUpdatePacket.class, 7, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(BuildableStockSyncPacket.Handler.class, BuildableStockSyncPacket.class, 8, Side.CLIENT);
@@ -236,7 +235,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		if (!event.world.isRemote) {
 			ChunkManager.handleWorldTick(event.world);
 			WorldServer world = event.world.getMinecraftServer().getWorld(event.world.provider.getDimension());
-			// We do this here as to let all the entities do their tick first.  Otherwise some might be one tick ahead
+			// We do this here as to let all the entities do their onTick first.  Otherwise some might be one onTick ahead
 			// if we did this in the onUpdate method
 			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.IS_ALIVE);
 			

@@ -347,7 +347,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 				for (Facing facing : horiz) {
 					Vec3i ph = world.getPrecipitationHeight(pos.offset(facing, i));
 					for (int j = 0; j < 3; j ++) {
-						if (world.isAir(ph) && !BlockUtil.isRail(world.internal, ph.down().internal)) {
+						if (world.isAir(ph) && !BlockUtil.isRail(world, ph.down())) {
 							world.setSnowLevel(ph, snowDown);
 							return;
 						}
@@ -394,7 +394,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 
 		while(tile != null) {
-			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition.internal);
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
 
 			if (state == SwitchState.STRAIGHT) {
 				tile = tile.getParentTile();
@@ -580,7 +580,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		
 		for (Facing facing : Facing.values()) {
 			Vec3i npos = pos.offset(facing);
-			if (world.isAir(npos) || BlockUtil.isIRRail(world.internal, npos.internal)) {
+			if (world.isAir(npos) || BlockUtil.isIRRail(world, npos)) {
 				continue;
 			}
 			TileEntity nte = world.getTileEntity(npos, TileEntity.class);
@@ -720,7 +720,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 			case LOCO_CONTROL:
 				Locomotive loco = this.getStockNearBy(Locomotive.class, null);
 				if (loco != null) {
-					int power = RedstoneUtil.getPower(world.internal, pos.internal);
+					int power = world.getRedstone(pos);
 					
 					switch(controlMode) {
 					case THROTTLE_FORWARD:
@@ -776,7 +776,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 				break;
 			case COUPLER:
 				stock = this.getStockNearBy(null);
-				int power = RedstoneUtil.getPower(world.internal, pos.internal);
+				int power = world.getRedstone(pos);
 				if (stock != null && stock instanceof EntityCoupleableRollingStock && power > 0) {
 					EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock)stock;
 					switch (couplerMode) {
@@ -832,7 +832,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 
 		if (tileSwitch != null) {
 			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
-			tileSwitch.info = new RailInfo(world.internal, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
+			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
 			tileSwitch.markDirty();
 			this.markDirty();
 			this.getParentTile().markDirty();

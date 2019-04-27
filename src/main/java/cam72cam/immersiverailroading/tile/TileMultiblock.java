@@ -147,7 +147,7 @@ public class TileMultiblock extends TickableTileEntity {
 	@Override
 	public void update() {
 		if (offset == null) {
-			// Not formed yet.  World may tick before configure is called 
+			// Not formed yet.  World may onTick before configure is called
 			return;
 		}
 		this.ticks += 1;

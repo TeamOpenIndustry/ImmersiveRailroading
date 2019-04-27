@@ -29,4 +29,7 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
         super.world = world.internal;
         this.world = world;
     }
+    public void setPos(Vec3i pos) {
+        super.setPos(pos.internal);
+    }
 }

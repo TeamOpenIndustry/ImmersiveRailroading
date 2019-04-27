@@ -1,42 +1,25 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.Config.ConfigDamage;
-import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.BufferUtil;
-import cam72cam.immersiverailroading.util.RedstoneUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.DamageSource;
+import cam72cam.mod.util.TagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock {
 
@@ -55,64 +38,32 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 	private ISound wheel_sound;
 
-	public EntityMoveableRollingStock(World world, String defID) {
-		super(world, defID);
+	public EntityMoveableRollingStock(net.minecraft.world.World world){
+		super(world);
 	}
 
 	@Override
-	public void readSpawnData(ByteBuf additionalData) {
-		super.readSpawnData(additionalData);
-		frontYaw = BufferUtil.readFloat(additionalData);
-		rearYaw = BufferUtil.readFloat(additionalData);
-		tickPosID = additionalData.readInt();
-		tickSkew = additionalData.readDouble();
-		
-		positions = new ArrayList<TickPos>();
-		
-		for (int numPositions =additionalData.readInt(); numPositions > 0; numPositions --) {
-			TickPos pos = new TickPos();
-			pos.read(additionalData);
-			positions.add(pos);
-		}
-	}
-
-	@Override
-	public void writeSpawnData(ByteBuf buffer) {
-		super.writeSpawnData(buffer);
-		BufferUtil.writeFloat(buffer, frontYaw);
-		BufferUtil.writeFloat(buffer, rearYaw);
-		buffer.writeInt((int)tickPosID);
-		double tickTime = ConfigDebug.serverTickCompensation ? 20 : CommonProxy.getServerTPS(world, positions.size());
-		buffer.writeDouble(tickTime/20);
-		
-		buffer.writeInt(positions.size());
-		for (TickPos pos : positions ) {
-			pos.write(buffer);
-		}
-	}
-
-	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeEntityToNBT(nbttagcompound);
+	public void save(TagCompound tag) {
+		super.save(tag);
 		if (frontYaw != null) {
-			nbttagcompound.setFloat("frontYaw", frontYaw);
+			tag.setFloat("frontYaw", frontYaw);
 		}
 		if (rearYaw != null) {
-			nbttagcompound.setFloat("rearYaw", rearYaw);
+			tag.setFloat("rearYaw", rearYaw);
 		}
-		nbttagcompound.setFloat("distanceTraveled", distanceTraveled);
+		tag.setFloat("distanceTraveled", distanceTraveled);
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readEntityFromNBT(nbttagcompound);
-		if (nbttagcompound.hasKey("frontYaw")) {
-			frontYaw = nbttagcompound.getFloat("frontYaw");
+	protected void load(TagCompound tag) {
+		super.load(tag);
+		if (tag.hasKey("frontYaw")) {
+			frontYaw = tag.getFloat("frontYaw");
 		}
-		if (nbttagcompound.hasKey("rearYaw")) {
-			rearYaw = nbttagcompound.getFloat("rearYaw");
+		if (tag.hasKey("rearYaw")) {
+			rearYaw = tag.getFloat("rearYaw");
 		}
-		distanceTraveled = nbttagcompound.getFloat("distanceTraveled");
+		distanceTraveled = tag.getFloat("distanceTraveled");
 		
 		if (frontYaw == null) {
 			frontYaw = rotationYaw;
@@ -124,12 +75,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	public void initPositions() {
-		this.positions = new ArrayList<TickPos>();
-		this.positions.add(new TickPos((int)this.tickPosID, this.getCurrentSpeed(), this.getPositionVector(), this.rotationYaw, this.rotationYaw, this.rotationYaw, this.rotationPitch, false));
+		this.positions = new ArrayList<>();
+		this.positions.add(new TickPos((int)this.tickPosID, this.getCurrentSpeed(), self.getPosition(), this.rotationYaw, this.rotationYaw, this.rotationYaw, this.rotationPitch, false));
 	}
 
 	public void initPositions(TickPos tp) {
-		this.positions = new ArrayList<TickPos>();
+		this.positions = new ArrayList<>();
 		this.positions.add(tp);
 	}
 
@@ -193,7 +144,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		if (currentSpeed == null) {
 			//Fallback
 			// does not work for curves
-			float speed = MathHelper.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
+			float speed = (float) Math.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
 			if (Float.isNaN(speed)) {
 				speed = 0;
 			}
@@ -251,13 +202,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	private double skewScalar(double curr, double next) {
-		if (world.isRemote) {
+		if (world.isClient) {
 			return curr + (next - curr) * this.getTickSkew();
 		}
 		return next;
 	}
 	private float skewScalar(float curr, float next) {
-		if (world.isRemote) {
+		if (world.isClient) {
 			return curr + (next - curr) * this.getTickSkew();
 		}
 		return next;
@@ -274,11 +225,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void onTick() {
+		super.onTick();
 		
 
-		if (!world.isRemote) {
+		if (world.isServer) {
 			if (ConfigDebug.serverTickCompensation) {
 				this.tickSkew = 20 / CommonProxy.getServerTPS(getEntityWorld(), 1);
 			} else {
@@ -292,7 +243,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 		}
 		
-		if (world.isRemote) {
+		if (world.isClient) {
 			if (ConfigSound.soundEnabled) {
 				if (this.wheel_sound == null) {
 					wheel_sound = ImmersiveRailroading.proxy.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
@@ -301,13 +252,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				
 				if (Math.abs(this.getCurrentSpeed().metric()) > 5) {
 					if (!wheel_sound.isPlaying()) {
-						wheel_sound.play(this.getPositionVector());
+						wheel_sound.play(self.getPosition());
 					}
 					float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
 					wheel_sound.setPitch(adjust + 0.7f + this.sndRand);
 					wheel_sound.setVolume(adjust);
 					
-					wheel_sound.setPosition(getPositionVector());
+					wheel_sound.setPosition(self.getPosition());
 					wheel_sound.setVelocity(getVelocity());
 					wheel_sound.update();
 				} else {
@@ -320,7 +271,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		
 		this.tickPosID += this.getTickSkew();
 		
-		// Apply position tick
+		// Apply position onTick
 		TickPos currentPos = getCurrentTickPosAndPrune();
 		if (currentPos == null) {
 			// Not loaded yet or not moving
@@ -342,7 +293,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    this.posY = skewScalar(this.posY, currentPos.position.y);
 	    this.posZ = skewScalar(this.posZ, currentPos.position.z);
 
-	    if (world.isRemote) {
+	    if (world.isClient) {
 	    	this.prevRotationYaw = fixAngleInterp(this.prevRotationYaw, currentPos.rotationYaw);
 	    	this.rotationYaw = fixAngleInterp(this.rotationYaw, currentPos.rotationYaw);
 	    	this.frontYaw = fixAngleInterp(this.frontYaw == null ? this.rotationYaw : this.frontYaw, currentPos.frontYaw);
@@ -366,6 +317,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 
 	    if (this.getCurrentSpeed().metric() > 1) {
+	    	/* TODO
 			List<Entity> entitiesWithin = world.getEntitiesWithinAABB(EntityLivingBase.class, this.getCollisionBoundingBox().offset(0, -0.5, 0));
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
@@ -436,7 +388,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				entity.motionZ = this.motionZ;
 			}
 	    }
-		if (!world.isRemote && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
+		if (world.isServer && this.ticksExisted % 5 == 0 && ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
 			AxisAlignedBB bb = this.getCollisionBoundingBox().grow(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale());
 			
 			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
@@ -445,7 +397,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				}
 				pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
 				pos = pos.add(this.getPositionVector());
-				BlockPos bp = new BlockPos(pos);
+				Vec3i bp = new Vec3i(pos);
 				
 				if (!world.isBlockLoaded(bp)) {
 					continue;
@@ -453,14 +405,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				
 				IBlockState state = world.getBlockState(bp);
 				if (state.getBlock() != Blocks.AIR) {
-					if (!BlockUtil.isIRRail(world, bp)) {
+					if (!BlockUtil.isIRRail(new cam72cam.mod.World(world), new Vec3i(bp))) {
 						AxisAlignedBB bbb = state.getCollisionBoundingBox(world, bp);
 						if (bbb == null) {
 							continue;
 						}
 						bbb = bbb.offset(bp);
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
-							if (!BlockUtil.isIRRail(world, bp.up())) {
+							if (!BlockUtil.isIRRail(new cam72cam.mod.World(world), new Vec3i(bp.up()))) {
 								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));										
 							}
 						}
@@ -473,6 +425,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 					}
 				}
 			}
+	    */
 		}
 	}
 
@@ -519,7 +472,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 
 	protected TickPos getCurrentTickPosOrFake() {
-		return new TickPos(0, Speed.fromMetric(0), this.getPositionVector(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false);
+		return new TickPos(0, Speed.fromMetric(0), self.getPosition(), this.getFrontYaw(), this.getRearYaw(), this.rotationYaw, this.rotationPitch, false);
 	}
 	
 	public Vec3d predictFrontBogeyPosition(float offset) {
@@ -540,10 +493,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 		return new PosRot(pos.position.subtract(nextRear), VecUtil.toYaw(pos.position.subtract(nextRear)));
 	}
 
-	private BlockPos lastRetarderPos = null;
+	private Vec3i lastRetarderPos = null;
 	private int lastRetarderValue = 0;
 	public int getSpeedRetarderSlowdown(TickPos latest) {
-		if (new BlockPos(latest.position).equals(lastRetarderPos)) {
+		if (new Vec3i(latest.position).equals(lastRetarderPos)) {
 			return lastRetarderValue;
 		}
 		
@@ -555,18 +508,17 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 			}
 			pos = VecUtil.rotateWrongYaw(pos, latest.rotationYaw);
 			pos = pos.add(latest.position);
-			BlockPos bp = new BlockPos(pos);
+			Vec3i bp = new Vec3i(pos);
 			
 			if (!world.isBlockLoaded(bp)) {
 				continue;
 			}
 			
 			try {
-				TileEntity potentialTE = world.getChunkFromBlockCoords(bp).getTileEntity(bp, EnumCreateEntityType.CHECK);
-				if (potentialTE != null && potentialTE instanceof TileRailBase) {
-					TileRailBase te = (TileRailBase)potentialTE;
+				TileRailBase te = world.getTileEntity(bp, TileRailBase.class, false);
+				if (te != null) {
 					if (te.getAugment() == Augment.SPEED_RETARDER) {
-						max = Math.max(max, RedstoneUtil.getPower(world, bp));
+						max = Math.max(max, world.getRedstone(bp));
 						over += 1;
 					}
 				}
@@ -576,7 +528,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				ImmersiveRailroading.catching(ex);
 			}
 		}
-		lastRetarderPos = new BlockPos(latest.position);
+		lastRetarderPos = new Vec3i(latest.position);
 		lastRetarderValue = over * max; 
 		return lastRetarderValue;
 	}
@@ -590,8 +542,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	}
 	
 	@Override
-	public void setDead() {
-		super.setDead();
+    public void onRemoved() {
 		if (this.wheel_sound != null) {
 			wheel_sound.stop();
 		}

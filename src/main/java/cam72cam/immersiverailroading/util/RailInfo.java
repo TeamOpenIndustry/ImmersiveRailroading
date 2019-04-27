@@ -9,13 +9,11 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.track.*;
+import cam72cam.mod.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import java.util.*;
 import java.util.function.Function;
@@ -70,26 +68,26 @@ public class RailInfo {
 	}
 
 	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(world, ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(settings)), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
-	public RailInfo(World world, BlockPos pos, NBTTagCompound nbt) {
+	public RailInfo(World world, Vec3i pos, TagCompound nbt) {
 		this(
 				world,
-				new RailSettings(new TagCompound(nbt.getCompoundTag("settings"))),
-				new PlacementInfo(nbt.getCompoundTag("placement"), pos),
-				new PlacementInfo(nbt.getCompoundTag("custom"), pos),
+				new RailSettings(nbt.get("settings")),
+				new PlacementInfo(nbt.get("placement"), pos),
+				new PlacementInfo(nbt.get("custom"), pos),
 				SwitchState.values()[nbt.getInteger("switchState")],
 				SwitchState.values()[nbt.getInteger("switchForced")],
 				nbt.getDouble("tablePos")
 		);
 	}
 
-	public NBTTagCompound toNBT(BlockPos pos) {
-		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setTag("settings", settings.toNBT().internal);
-		nbt.setTag("placement", placementInfo.toNBT(pos));
-		nbt.setTag("custom", customInfo.toNBT(pos));
+	public TagCompound toNBT(Vec3i pos) {
+		TagCompound nbt = new TagCompound();
+		nbt.set("settings", settings.toNBT());
+		nbt.set("placement", placementInfo.toNBT(pos));
+		nbt.set("custom", customInfo.toNBT(pos));
 		nbt.setInteger("switchState", switchState.ordinal());
 		nbt.setInteger("switchForced", switchForced.ordinal());
 		nbt.setDouble("tablePos", tablePos);
@@ -111,15 +109,15 @@ public class RailInfo {
 		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
 	}
 
-	public Map<BlockPos, BuilderBase> builders = new HashMap<>();
-	public BuilderBase getBuilder(BlockPos pos) {
+	public Map<Vec3i, BuilderBase> builders = new HashMap<>();
+	public BuilderBase getBuilder(Vec3i pos) {
 		if (builders.containsKey(pos)) {
 			return builders.get(pos);
 		}
 		builders.put(pos, constructBuilder(pos));
 		return builders.get(pos);
 	}
-	private BuilderBase constructBuilder(BlockPos pos) {
+	private BuilderBase constructBuilder(Vec3i pos) {
 		switch (settings.type) {
 		case STRAIGHT:
 			return new BuilderStraight(this, pos);
@@ -140,7 +138,7 @@ public class RailInfo {
 	}
 
 	public BuilderBase getBuilder() {
-		return getBuilder(BlockPos.ORIGIN);
+		return getBuilder(Vec3i.ZERO);
 	}
 
 	private class MaterialManager {
@@ -158,11 +156,11 @@ public class RailInfo {
 			this(count, material, examples.toArray(new ItemStack[0]));
 		}
 
-		private boolean checkMaterials(EntityPlayer player) {
+		private boolean checkMaterials(Player player) {
 			int found = 0;
-			for (ItemStack stacktmp : player.inventory.mainInventory) {
-				cam72cam.mod.item.ItemStack stack = new cam72cam.mod.item.ItemStack(stacktmp);
-				if (material.apply(stack.internal) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+			for (net.minecraft.item.ItemStack stacka : player.internal.inventory.mainInventory) {
+				ItemStack stack = new ItemStack(stacka);
+				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					found += stack.getCount();
 				}
 			}
@@ -178,20 +176,20 @@ public class RailInfo {
 			return true;
 		}
 
-		private List<ItemStack> useMaterials(EntityPlayer player) {
+		private List<ItemStack> useMaterials(Player player) {
 			List<ItemStack> drops = new ArrayList<>();
 			int required = this.count;
-			for (ItemStack stacktmp : player.inventory.mainInventory) {
-				cam72cam.mod.item.ItemStack stack = new cam72cam.mod.item.ItemStack(stacktmp);
-				if (material.apply(stack.internal) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+			for (net.minecraft.item.ItemStack stacka : player.internal.inventory.mainInventory) {
+				ItemStack stack = new ItemStack(stacka);
+				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					if (required > stack.getCount()) {
 						required -= stack.getCount();
-						ItemStack copy = stack.internal.copy();
+						ItemStack copy = stack.copy();
 						copy.setCount(stack.getCount());
 						drops.add(copy);
 						stack.setCount(0);
 					} else if (required != 0) {
-						ItemStack copy = stack.internal.copy();
+						ItemStack copy = stack.copy();
 						copy.setCount(required);
 						drops.add(copy);
 						stack.setCount(stack.getCount() - required);
@@ -203,18 +201,18 @@ public class RailInfo {
 		}
 	}
 
-	public boolean build(EntityPlayer player) {
-		BuilderBase builder = getBuilder(new BlockPos(placementInfo.placementPosition));
+	public boolean build(Player player) {
+		BuilderBase builder = getBuilder(new Vec3i(placementInfo.placementPosition));
 
 		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks) {
-			if (!world.isRemote) {
+			if (world.isServer) {
 				builder.clearArea();
 			}
 		}
 
 
 		if (builder.canBuild()) {
-			if (!world.isRemote) {
+			if (world.isServer) {
 				if (player.isCreative()) {
 					builder.build();
 					return true;
@@ -226,11 +224,11 @@ public class RailInfo {
 
 				List<MaterialManager> materials = new ArrayList<>();
 
-				if (settings.railBed.item != Items.AIR) {
-					materials.add(new MaterialManager(builder.costBed(), settings.railBed.internal::isItemEqual, settings.railBed.internal));
+				if (!settings.railBed.isEmpty()) {
+					materials.add(new MaterialManager(builder.costBed(), settings.railBed::equals, settings.railBed));
 				}
-				if (settings.railBedFill.item != Items.AIR) {
-					materials.add(new MaterialManager(builder.costFill(), settings.railBedFill.internal::isItemEqual, settings.railBedFill.internal));
+				if (settings.railBedFill.isEmpty()) {
+					materials.add(new MaterialManager(builder.costFill(), settings.railBedFill::equals, settings.railBedFill));
 				}
 
 				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);

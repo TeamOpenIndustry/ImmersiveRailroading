@@ -182,7 +182,7 @@ public class Config {
 
 	public static class ConfigDebug {
 		
-		@Comment({ "Speed up IR stock server tick stepping to compensate for tps lag" })
+		@Comment({ "Speed up IR stock server onTick stepping to compensate for tps lag" })
 		public static boolean serverTickCompensation = true;
 
 		@Comment({ "Range between couplers to try coupling" })

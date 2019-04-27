@@ -24,11 +24,20 @@ public class Vec3d {
     public Vec3d add(double x, double y, double z) {
         return new Vec3d(internal.addVector(x, y, z));
     }
+    public Vec3d add(Vec3i offset) {
+        return new Vec3d(internal.addVector(offset.x, offset.y, offset.z));
+    }
     public Vec3d add(Vec3d other) {
         return new Vec3d(internal.add(other.internal));
     }
     public Vec3d subtract(Vec3d other) {
         return new Vec3d(internal.subtract(other.internal));
+    }
+    public Vec3d subtract(Vec3i offset) {
+        return new Vec3d(internal.subtract(offset.x, offset.y, offset.z));
+    }
+    public Vec3d subtract(double x, double y, double z) {
+        return new Vec3d(internal.subtract(x, y, z));
     }
 
     public double length() {
@@ -37,5 +46,13 @@ public class Vec3d {
 
     public double distanceTo(Vec3d other) {
         return internal.distanceTo(other.internal);
+    }
+
+    public Vec3d scale(double scale) {
+        return new Vec3d(internal.scale(scale));
+    }
+
+    public Vec3d normalize() {
+        return new Vec3d(internal.normalize());
     }
 }

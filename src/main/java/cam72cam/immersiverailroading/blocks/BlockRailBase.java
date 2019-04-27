@@ -19,6 +19,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
@@ -244,14 +245,14 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
 				state = state.withProperty(LIQUID, (float)te.getTankLevel());
 				TileRail parent = te.getParentTile();
 				if (parent != null) {
-					if (parent.info.placementInfo.facing().getAxis() == EnumFacing.Axis.X) {
+					if (parent.info.placementInfo.facing().getAxis() == Axis.X) {
 						if (parent.getPos().getZ() == te.getPos().getZ()) {
-							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing());
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing().internal);
 						}
 					}
-					if (parent.info.placementInfo.facing().getAxis() == EnumFacing.Axis.Z) {
+					if (parent.info.placementInfo.facing().getAxis() == Axis.Z) {
 						if (parent.getPos().getX() == te.getPos().getX()) {
-							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing());
+							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing().internal);
 						}
 					}
 				}

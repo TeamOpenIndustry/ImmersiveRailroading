@@ -1,11 +1,16 @@
 package cam72cam.mod;
 
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.tile.TileEntity;
+import cam72cam.mod.util.Facing;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.Chunk;
@@ -26,7 +31,7 @@ public class World {
     }
     public <T extends net.minecraft.tileentity.TileEntity> T getTileEntity(Vec3i pos, Class<T> cls, boolean create) {
         net.minecraft.tileentity.TileEntity ent = internal.getChunkFromBlockCoords(pos.internal).getTileEntity(pos.internal, create ? Chunk.EnumCreateEntityType.IMMEDIATE : Chunk.EnumCreateEntityType.CHECK);
-        if (ent.getClass().isInstance(cls)) {
+        if (ent != null && ent.getClass().isInstance(cls)) {
             return (T) ent;
         }
         return null;
@@ -84,10 +89,32 @@ public class World {
     }
 
     public void dropItem(ItemStack stack, Vec3i pos) {
+        dropItem(stack, new Vec3d(pos));
+    }
+    public void dropItem(ItemStack stack, Vec3d pos) {
         internal.spawnEntity(new EntityItem(internal, pos.x, pos.y, pos.z, stack.internal));
     }
 
     public void setBlock(Vec3i pos, Block block) {
         internal.setBlockState(pos.internal, block.getDefaultState());
+    }
+    public void setBlock(Vec3i pos, ItemStack item) {
+        internal.setBlockState(pos.internal, BlockUtil.itemToBlockState(item.internal));
+    }
+
+    public boolean isTopSolid(Vec3i pos) {
+        return internal.getBlockState(pos.internal).isTopSolid();
+    }
+
+    public int getRedstone(Vec3i pos) {
+        int power = 0;
+        for (Facing facing : Facing.values()) {
+            power = Math.max(power, internal.getRedstonePower(pos.offset(facing).internal, facing.internal));
+        }
+        return power;
+    }
+
+    public void removeEntity(Entity entity) {
+        internal.removeEntity(entity);
     }
 }

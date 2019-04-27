@@ -4,6 +4,7 @@ import cam72cam.mod.util.Facing;
 import net.minecraft.util.math.BlockPos;
 
 public class Vec3i {
+    public static final Vec3i ZERO = new Vec3i(BlockPos.ORIGIN);
     public final BlockPos internal;
     public final int x;
     public final int y;

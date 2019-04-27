@@ -5,7 +5,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.math.BlockPos;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.util.math.Vec3d;
 
 public class BuilderCrossing extends BuilderBase {
@@ -13,19 +13,19 @@ public class BuilderCrossing extends BuilderBase {
 	 * This is terrible
 	 */
 
-	public BuilderCrossing(RailInfo info, BlockPos pos) {
+	public BuilderCrossing(RailInfo info, Vec3i pos) {
 		super(info.withLength(3), pos);
 
-		this.setParentPos(BlockPos.ORIGIN);
+		this.setParentPos(Vec3i.ZERO);
 		
-		tracks.add(new TrackRail(this, BlockPos.ORIGIN));
+		tracks.add(new TrackRail(this, Vec3i.ZERO));
 		int blocks = 1;
 		for (int i = -blocks; i <=blocks; i ++) {
 			for (int j = -blocks; j <=blocks; j ++) {
 				if (i == 0 && j == 0) {
 					continue;
 				}
-				tracks.add(new TrackGag(this, new BlockPos(i, 0, j)));
+				tracks.add(new TrackGag(this, new Vec3i(i, 0, j)));
 			}
 		}
 	}

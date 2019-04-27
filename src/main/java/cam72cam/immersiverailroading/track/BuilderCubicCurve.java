@@ -5,9 +5,9 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class BuilderCubicCurve extends BuilderIterator {
 	private List<BuilderBase> subBuilders;
 
-	public BuilderCubicCurve(RailInfo info, BlockPos pos) {
+	public BuilderCubicCurve(RailInfo info, Vec3i pos) {
 		this(info, pos, false);
 	}
 
@@ -26,7 +26,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		return subBuilders;
 	}
 
-	public BuilderCubicCurve(RailInfo info, BlockPos pos, boolean endOfTrack) {
+	public BuilderCubicCurve(RailInfo info, Vec3i pos, boolean endOfTrack) {
 		super(info, pos, endOfTrack);
 		CubicCurve curve = getCurve();
 		List<CubicCurve> subCurves = curve.subsplit((int) (101 * 2 * 3.1415f / 4));
@@ -34,13 +34,13 @@ public class BuilderCubicCurve extends BuilderIterator {
 			subBuilders = new ArrayList<>();
 			for (CubicCurve subCurve : subCurves) {
 				Vec3d delta = info.placementInfo.placementPosition;
-				if (pos.equals(BlockPos.ORIGIN)) {
-					delta = delta.subtract(new Vec3d(new BlockPos(info.placementInfo.placementPosition)));
+				if (pos.equals(Vec3i.ZERO)) {
+					delta = delta.subtract(new Vec3d(new Vec3i(info.placementInfo.placementPosition)));
 				}
-				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), subCurve.ctrl1.add(delta));
-				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180, subCurve.ctrl2.add(delta));
+				PlacementInfo startPos = new PlacementInfo(new Vec3d(subCurve.p1.add(delta.internal)), info.placementInfo.direction, subCurve.angleStart(), new Vec3d(subCurve.ctrl1.add(delta.internal)));
+				PlacementInfo endPos   = new PlacementInfo(new Vec3d(subCurve.p2.add(delta.internal)), info.placementInfo.direction, subCurve.angleStop()+180, new Vec3d(subCurve.ctrl2.add(delta.internal)));
 				RailInfo subInfo = new RailInfo(info.world, info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
-				BlockPos sPos = new BlockPos(startPos.placementPosition);
+				Vec3i sPos = new Vec3i(startPos.placementPosition);
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, sPos);
 				if (subBuilders.size() != 0) {
 					for (TrackBase track : subBuilder.tracks) {
@@ -59,14 +59,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 	private HashMap<Double, List<PosStep>> cache;
 
 	public CubicCurve getCurve() {
-		Vec3d nextPos = new Vec3d(new BlockPos(VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45)));
+		Vec3d nextPos = new Vec3d(new Vec3i(new Vec3d(VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45))));
 
 		boolean isDefault = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition);
 		if (!isDefault) {
 			nextPos = info.customInfo.placementPosition.subtract(info.placementInfo.placementPosition);
 		}
 
-		double ctrlGuess = nextPos.lengthVector()/2;
+		double ctrlGuess = nextPos.length()/2;
 		float angle = info.placementInfo.yaw;
 
 		float angle2 = angle + 180;
@@ -75,17 +75,17 @@ public class BuilderCubicCurve extends BuilderIterator {
 			angle2 = info.customInfo.yaw;
 		}
 
-		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
-		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
+		net.minecraft.util.math.Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
+		net.minecraft.util.math.Vec3d ctrl2 = nextPos.internal.add(VecUtil.fromYaw(ctrlGuess, angle2));
 
 		if (info.placementInfo.control != null) {
-			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition);
+			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition).internal;
 		}
 		if (info.customInfo.control != null && !isDefault) {
-            ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition);
+            ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition).internal;
 		}
 
-		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos);
+		return new CubicCurve(Vec3d.ZERO.internal, ctrl1, ctrl2, nextPos.internal);
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		// Skip the super long calculation since it'll be overridden anyways
 		curve = curve.subsplit(200).get(0);
 
-		List<Vec3d> points = curve.toList(stepSize);
+		List<Vec3d> points = curve.toList(stepSize).stream().map(Vec3d::new).collect(Collectors.toList());
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			float yaw;
@@ -125,7 +125,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				Vec3d prev = points.get(i-1);
 				Vec3d next = points.get(i+1);
 				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
-				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
+				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)).internal);
 			}
 			res.add(new PosStep(p, yaw, pitch));
 		}

@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.util.math.BlockPos;
+import cam72cam.mod.math.Vec3i;
 import org.lwjgl.opengl.GL11;
 
 public class RailBaseOverlayRender {
@@ -22,15 +22,15 @@ public class RailBaseOverlayRender {
 	private static void doDraw(RailInfo info) {
 		GL11.glColor4f(1, 0, 0, 1);
 
-		BlockPos placePos = new BlockPos(info.placementInfo.placementPosition);
+		Vec3i placePos = new Vec3i(info.placementInfo.placementPosition);
 
 		for (TrackBase base : info.getBuilder(placePos).getTracksForRender()) {
 			boolean canPlace = base.canPlaceTrack();
 			if (! canPlace) {
 				GL11.glPushMatrix();
-				BlockPos pos = base.getPos();
+				Vec3i pos = base.getPos();
 				pos = pos.subtract(placePos);
-				GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ()+1);
+				GL11.glTranslated(pos.x, pos.y, pos.z+1);
 				GL11.glScaled(1, base.getBedHeight() + 0.2f, 1);
 
 				GL11.glBegin(GL11.GL_QUADS);
@@ -72,7 +72,7 @@ public class RailBaseOverlayRender {
 	}
 
 	public static void draw(RailInfo info) {
-		String key = info.uniqueID + new BlockPos(info.placementInfo.placementPosition);
+		String key = info.uniqueID + new Vec3i(info.placementInfo.placementPosition);
 		Integer displayList = cache.get(key);
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);

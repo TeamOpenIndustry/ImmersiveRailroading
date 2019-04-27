@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
@@ -22,7 +22,7 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 	 * CHUNK_MAP is a TLRU like structure keeping track of chunks in use from
 	 * server entities point of view.
 	 * 
-	 * This is used in internal tick to force/unforce chunks
+	 * This is used in internal onTick to force/unforce chunks
 	 */
 	
 	private static final Map<Integer, Ticket> TICKETS = new HashMap<Integer, Ticket>();
@@ -63,12 +63,12 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 		return TICKETS.get(dim);
 	}
 
-	public static void flagEntityPos(World world, BlockPos inPos) {
-		if (world.isRemote) {
+	public static void flagEntityPos(cam72cam.mod.World world, Vec3i inPos) {
+		if (world.isClient) {
 			return;
 		}
 		
-		ChunkPos pos = new ChunkPos(world, inPos);
+		ChunkPos pos = new ChunkPos(world.internal, inPos.internal);
 		
 		int currTicks = 0;
 		
@@ -81,11 +81,7 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 		CHUNK_MAP.put(pos, Math.max(100, Math.min(10, currTicks)));
 	}
 	
-	/* Call once per tick */
-	public static void flagEntityPos(Entity entity) {
-		flagEntityPos(entity.getEntityWorld(), entity.getPosition());
-	}
-
+	/* Call once per onTick */
 	public static void handleWorldTick(World world) {
 		Ticket ticket;
 		try {

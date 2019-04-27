@@ -4,18 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
+import cam72cam.mod.entity.Entity;
 import net.minecraftforge.fluids.Fluid;
 
 public class HandCar extends Locomotive {
 	
-	public HandCar(World world) {
-		super(world, null);
-	}
-	public HandCar(World world, String defID) {
-		super(world, defID);
+	public HandCar(net.minecraft.world.World world) {
+		super(world);
 	}
 
 	@Override
@@ -40,7 +35,7 @@ public class HandCar extends Locomotive {
 	public void onUpdate() {
 		super.onUpdate();
 		
-		if (world.isRemote) {
+		if (world.isClient) {
 			return;
 		}
 		

@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import cam72cam.immersiverailroading.model.obj.Vec2f;
+import cam72cam.mod.math.Vec3d;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -36,7 +37,6 @@ import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.TextUtil;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -50,8 +50,7 @@ public abstract class EntityRollingStockDefinition {
 		stock.setPosition(pos.x, pos.y, pos.z);
 		stock.prevRotationYaw = facing.getHorizontalAngle();
 		stock.rotationYaw = facing.getHorizontalAngle();
-		stock.gauge = gauge;
-		stock.texture = texture;
+		stock.setup(defID, gauge, texture);
 		world.spawnEntity(stock);
 
 		return stock;
@@ -411,7 +410,7 @@ public abstract class EntityRollingStockDefinition {
 						double fheight = 0;
 						boolean first = true;
 						for (int[] point : model.points(face)) {
-							Vec3d vert = model.vertices(point[0]);
+							net.minecraft.util.math.Vec3d vert = model.vertices(point[0]);
 							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
 								path.moveTo(vert.x * ratio, vert.z * ratio);
@@ -485,7 +484,7 @@ public abstract class EntityRollingStockDefinition {
 		for (int f : faces) {
 			float sum = 0;
 			for (int[] point : model.points(f)) {
-				Vec3d pt = model.vertices(point[0]);
+				net.minecraft.util.math.Vec3d pt = model.vertices(point[0]);
 				sum += pt.x;
 			}
 			depthCache[f] = sum / 3; //We know it's a tri
@@ -513,7 +512,7 @@ public abstract class EntityRollingStockDefinition {
 				vv += vt.y/3;
 
 
-				Vec3d vert = model.vertices(point[0]);
+				net.minecraft.util.math.Vec3d vert = model.vertices(point[0]);
 				vert = vert.addVector(0, 0, this.widthBounds/2);
 				if (first) {
 					path.moveTo(vert.z / nx + xoff / nx, vert.y / nx);

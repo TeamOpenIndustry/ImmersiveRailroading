@@ -9,23 +9,23 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.MathUtil;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
 	protected HashSet<Pair<Integer, Integer>> positions;
 	
-	public BuilderIterator(RailInfo info, BlockPos pos) {
+	public BuilderIterator(RailInfo info, Vec3i pos) {
 		this(info, pos, false);
 	}
 
 	public abstract List<PosStep> getPath(double stepSize);
 
-	public BuilderIterator(RailInfo info, BlockPos pos, boolean endOfTrack) {
+	public BuilderIterator(RailInfo info, Vec3i pos, boolean endOfTrack) {
 		super(info, pos);
 		
 		positions = new HashSet<Pair<Integer, Integer>>();
@@ -62,10 +62,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
 
-			gagPos = gagPos.addVector(0, heightOffset, 0);
+			gagPos = gagPos.add(0, heightOffset, 0);
 
 			for (double q = -horiz; q <= horiz; q+=0.1) {
-				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
+				Vec3d nextUp = new Vec3d(VecUtil.fromYaw(q, 90 + cur.yaw));
 				int posX = (int)Math.floor(gagPos.x+nextUp.x+placeOff.x);
 				int posZ = (int)Math.floor(gagPos.z+nextUp.z+placeOff.z);
 				double height = 0;
@@ -97,7 +97,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 		}
 
-		BlockPos mainPos = new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
+		Vec3i mainPos = new Vec3i(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
 		this.setParentPos(mainPos);
 		TrackRail main = new TrackRail(this, mainPos	);
 		tracks.add(main);
@@ -109,7 +109,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				// Skip parent block
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, new BlockPos(pair.getLeft(), yOffset.get(pair), pair.getRight()));
+			TrackBase tg = new TrackGag(this, new Vec3i(pair.getLeft(), yOffset.get(pair), pair.getRight()));
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
 			}
@@ -148,7 +148,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				PosStep cur = points.get(i);
-				Vec3d flatPos = VecUtil.rotateYaw(cur, -info.placementInfo.yaw);
+				Vec3d flatPos = new Vec3d(VecUtil.rotateYaw(cur.internal, -info.placementInfo.yaw));
 				if (Math.abs(flatPos.z) >= 0.5 * scale) {
 					switchSize = i;
 					break;
@@ -163,7 +163,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				double switchOffset = 1 - (i / (double)switchSize);
 				if (switchOffset > 0) {
 					double dist = 0.2 * switchOffset * scale;
-					Vec3d offset = VecUtil.fromYaw(dist, cur.yaw + 90 + info.placementInfo.direction.toYaw());
+					Vec3d offset = new Vec3d(VecUtil.fromYaw(dist, cur.yaw + 90 + info.placementInfo.direction.toYaw()));
 					double offsetAngle = Math.toDegrees(0.2/switchSize); // This line took a whole page of scribbled math
 					if (direction == TrackDirection.RIGHT)  {
 						offsetAngle = -offsetAngle;

@@ -1,12 +1,10 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -19,7 +17,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	private BuilderStraight realStraightBuilder;
 	private final BuilderStraight straightBuilderReal;
 
-	public BuilderSwitch(RailInfo info, BlockPos pos) {
+	public BuilderSwitch(RailInfo info, Vec3i pos) {
 		super(info, pos);
 		
 		RailInfo turnInfo = info.withType(info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
@@ -35,7 +33,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 			straightBuilder.positions.retainAll(turnBuilder.positions);
 			
 			for (Pair<Integer, Integer> straight : straightBuilder.positions) {
-				maxOverlap = Math.max(maxOverlap, new Vec3d(straight.getKey(), 0, straight.getValue()).lengthVector());
+				maxOverlap = Math.max(maxOverlap, new Vec3d(straight.getKey(), 0, straight.getValue()).length());
 			}
 			
 			maxOverlap *= 1.2;

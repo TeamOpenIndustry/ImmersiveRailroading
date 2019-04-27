@@ -76,15 +76,15 @@ public class ItemTrackBlueprint extends ItemBase {
 
 		pos = pos.up();
 		
-		if (BlockUtil.canBeReplaced(world.internal, pos.down().internal, true)) {
-			if (!BlockUtil.isIRRail(world.internal, pos.down().internal) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+			if (!BlockUtil.isIRRail(world, pos.down()) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
 				pos = pos.down();
 			}
 		}
-		PlacementInfo placementInfo = new PlacementInfo(stack.internal, player.getYawHead(), pos, hit);
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), pos, hit);
 		
 		if (settings(stack).isPreview) {
-			if (!BlockUtil.canBeReplaced(world.internal, pos.internal, false)) {
+			if (!BlockUtil.canBeReplaced(world, pos, false)) {
 				pos = pos.up();
 			}
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
@@ -95,8 +95,8 @@ public class ItemTrackBlueprint extends ItemBase {
 			return ClickResult.ACCEPTED;
 		}
 
-		RailInfo info = new RailInfo(world.internal, stack.internal, placementInfo, null);
-		info.build(player.internal);
+		RailInfo info = new RailInfo(world, stack, placementInfo, null);
+		info.build(player);
 		return ClickResult.ACCEPTED;
     }
 

@@ -110,12 +110,12 @@ public class TrackGui extends GuiScreen {
 		
 		oreDict.add(new ItemStack(Items.AIR, 1));
 		
-		for (net.minecraft.item.ItemStack ore : OreHelper.IR_RAIL_BED.getOres()) {
-			if (ore.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
+		for (ItemStack ore : OreHelper.IR_RAIL_BED.getOres()) {
+			if (ore.internal.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
 				NonNullList<net.minecraft.item.ItemStack> temp = NonNullList.create();
-				ore.getItem().getSubItems(ore.getItem().getCreativeTab(), temp);
+				ore.internal.getItem().getSubItems(ore.internal.getItem().getCreativeTab(), temp);
 			} else {
-				oreDict.add(new ItemStack(ore));
+				oreDict.add(ore);
 			}
 		}
 		bedSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {

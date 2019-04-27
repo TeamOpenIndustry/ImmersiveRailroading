@@ -26,7 +26,7 @@ public class RailRenderUtil {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 			
 			GL11.glPushMatrix();
-			Vec3d pos = info.placementInfo.placementPosition;
+			Vec3d pos = info.placementInfo.placementPosition.internal;
 			pos = pos.subtract(new Vec3d(new BlockPos(pos)));
 			GL11.glTranslated(- pos.x, - pos.y, - pos.z);
 			Minecraft.getMinecraft().mcProfiler.startSection("base");
