@@ -58,7 +58,7 @@ public class RailBaseRender {
 					model = new BakedScaledModel(gravelModel, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale());
 					scaled.put(key, model);
 				}
-				blockRenderer.getBlockModelRenderer().renderModel(info.world, model, gravelState, base.getPos(), worldRenderer, false);
+				blockRenderer.getBlockModelRenderer().renderModel(info.world.internal, model, gravelState, base.getPos().internal, worldRenderer, false);
 			}
 		} finally {
 			worldRenderer.finishDrawing();

@@ -14,6 +14,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
@@ -77,7 +78,7 @@ public class ItemManual extends ItemBase {
 			if (facing == Facing.UP) {
 				realPos = realPos.up();
 			}
-			MultiblockRegistry.get(current).place(world.internal, player.internal, realPos.internal, BlockUtil.rotFromFacing(EnumFacing.fromAngle(player.getYawHead()+180)));
+			MultiblockRegistry.get(current).place(world.internal, player.internal, realPos.internal, Rotation.from(Facing.fromAngle(player.getYawHead()+180)).internal);
 		}
 		return ClickResult.ACCEPTED;
 	}

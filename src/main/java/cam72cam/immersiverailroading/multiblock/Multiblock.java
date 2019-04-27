@@ -102,7 +102,7 @@ public abstract class Multiblock {
 			BlockPos compPos = origin.add(offset.rotate(rot));
 			if (!component.valid(world, compPos)) {
 				if (!world.isAirBlock(compPos)) {
-					if (BlockUtil.canBeReplaced(world, compPos, false)) {
+					if (BlockUtil.canBeReplaced(new cam72cam.mod.World(world), new Vec3i(compPos), false)) {
 						world.destroyBlock(compPos, true);
 					} else {
 						player.sendMessage(ChatText.INVALID_BLOCK.getMessage(compPos.getX(), compPos.getY(), compPos.getZ()));

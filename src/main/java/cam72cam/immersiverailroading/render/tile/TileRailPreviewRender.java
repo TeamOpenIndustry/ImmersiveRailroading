@@ -40,7 +40,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 		GL11.glPushMatrix();
 		{
 			// Move to specified position
-			Vec3d placementPosition = info.placementInfo.placementPosition;
+			Vec3d placementPosition = info.placementInfo.placementPosition.internal;
 			placementPosition = placementPosition.subtract(new Vec3d(te.getPos())).addVector(x, y, z);
 			GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
 			if (!te.isMulti()) {

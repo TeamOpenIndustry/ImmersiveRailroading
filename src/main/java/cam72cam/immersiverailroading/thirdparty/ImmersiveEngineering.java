@@ -4,7 +4,7 @@ import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import cam72cam.immersiverailroading.util.OreHelper;
-import net.minecraft.item.ItemStack;
+import cam72cam.mod.item.ItemStack;
 
 public class ImmersiveEngineering {
 

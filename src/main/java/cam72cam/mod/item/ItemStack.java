@@ -1,6 +1,7 @@
 package cam72cam.mod.item;
 
 import cam72cam.mod.util.TagCompound;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 
 public class ItemStack {
@@ -20,6 +21,22 @@ public class ItemStack {
 
     public ItemStack(TagCompound bedItem) {
         this(new net.minecraft.item.ItemStack(bedItem.internal));
+    }
+
+    public ItemStack(Item item, int count, int meta) {
+        this(new net.minecraft.item.ItemStack(item, count, meta));
+    }
+
+    public ItemStack(Block block) {
+        this(new net.minecraft.item.ItemStack(block));
+    }
+
+    public ItemStack(Block block, int count, int meta) {
+        this(new net.minecraft.item.ItemStack(block, count, meta));
+    }
+
+    public ItemStack(Item item) {
+        this(new net.minecraft.item.ItemStack(item));
     }
 
     public TagCompound getTagCompound() {
@@ -57,5 +74,9 @@ public class ItemStack {
 
     public void shrink(int i) {
         internal.shrink(i);
+    }
+
+    public boolean equals(ItemStack other) {
+        return internal.isItemEqual(other.internal);
     }
 }

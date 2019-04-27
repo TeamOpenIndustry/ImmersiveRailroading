@@ -4,14 +4,14 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.mod.item.ItemStack;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TrackDefinition {
     public final String trackID;
@@ -47,7 +47,7 @@ public class TrackDefinition {
                 if (oreName.equals("irTie")) {
                     examples.addAll(OreHelper.IR_TIE.getOres());
                 }
-                examples.addAll(OreDictionary.getOres(oreName));
+                examples.addAll(OreDictionary.getOres(oreName).stream().map(ItemStack::new).collect(Collectors.toList()));
             } else {
                 examples.add(new ItemStack(Item.getByNameOrId(this.item), 1, meta));
             }
@@ -64,9 +64,9 @@ public class TrackDefinition {
                 if (oreName.equals("irTie")) {
                     return OreHelper.IR_TIE.matches(stack, false);
                 }
-                return OreHelper.oreDictionaryContainsMatch(false, OreDictionary.getOres(oreName), stack);
+                return OreHelper.oreDictionaryContainsMatch(false, OreDictionary.getOres(oreName).stream().map(ItemStack::new).collect(Collectors.toList()), stack);
             }
-            return stack.getItem() == Item.getByNameOrId(item) && stack.getMetadata() == meta;
+            return stack.item == Item.getByNameOrId(item) && stack.internal.getMetadata() == meta;
         }
     }
 

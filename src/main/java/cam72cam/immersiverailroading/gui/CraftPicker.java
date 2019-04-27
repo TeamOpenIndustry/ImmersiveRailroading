@@ -72,8 +72,8 @@ public class CraftPicker extends GuiScreen {
 		
 		if (craftType == CraftingType.CASTING) {
         	stock.add(new ItemStack(IRItems.ITEM_CAST_RAIL, 1));
-        	stock.add(new ItemStack(OreHelper.IR_STEEL_INGOT.getOres().get(0)));
-        	stock.add(new ItemStack(OreHelper.IR_STEEL_BLOCK.getOres().get(0)));
+        	stock.add(OreHelper.IR_STEEL_INGOT.example());
+        	stock.add(OreHelper.IR_STEEL_BLOCK.example());
 	        stock.addAll(IRItems.ITEM_AUGMENT.getItemVariants(ItemTabs.MAIN_TAB));
 		}
 		

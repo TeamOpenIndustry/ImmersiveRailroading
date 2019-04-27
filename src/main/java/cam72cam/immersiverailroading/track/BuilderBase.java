@@ -7,21 +7,17 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.World;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//TODO @cam72cam use BlockPos and Vec3i
+//TODO @cam72cam use Vec3i and Vec3i
 
 @SuppressWarnings("incomplete-switch")
 public abstract class BuilderBase {
@@ -29,14 +25,14 @@ public abstract class BuilderBase {
 	
 	public RailInfo info;
 
-	public final BlockPos pos;
-	private BlockPos parent_pos;
+	public final Vec3i pos;
+	private Vec3i parent_pos;
 
 	public boolean overrideFlexible = true;
 
 	public List<ItemStack> drops;
 
-	public BuilderBase(RailInfo info, BlockPos pos) {
+	public BuilderBase(RailInfo info, Vec3i pos) {
 		this.info = info;
 		this.pos = pos;
 		parent_pos = pos;
@@ -77,7 +73,7 @@ public abstract class BuilderBase {
 	
 	public abstract List<VecYawPitch> getRenderData();
 
-	public BlockPos convertRelativePositions(BlockPos rel) {
+	public Vec3i convertRelativePositions(Vec3i rel) {
 		return pos.add(rel);
 	}
 	
@@ -102,7 +98,7 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
-				TileRail rail = new World(info.world).getTileEntity(new Vec3i(track.getPos()), TileRail.class);
+				TileRail rail = info.world.getTileEntity(track.getPos(), TileRail.class);
 				TagCompound data = new TagCompound();
 				track.placeTrack(false).save(data);
 				rail.setReplaced(data);
@@ -116,24 +112,24 @@ public abstract class BuilderBase {
 	}
 
 	
-	public void setParentPos(BlockPos pos) {
+	public void setParentPos(Vec3i pos) {
 		parent_pos = convertRelativePositions(pos);
 	}
-	public BlockPos getParentPos() {
+	public Vec3i getParentPos() {
 		return parent_pos;
 	}
 	
 	public int costTies() {
-		return MathHelper.ceil(this.tracks.size()/3 * ConfigBalance.TieCostMultiplier);
+		return (int) Math.ceil(this.tracks.size()/3 * ConfigBalance.TieCostMultiplier);
 	}
 	
 	public int costRails() {
-		return MathHelper.ceil(this.tracks.size()*2/3 * ConfigBalance.RailCostMultiplier / 2);
+		return (int) Math.ceil(this.tracks.size()*2/3 * ConfigBalance.RailCostMultiplier / 2);
 	}
 	
 	public int costBed() {
 		//TODO more accurate
-		return MathHelper.ceil(this.tracks.size() * 0.1 * ConfigBalance.BedCostMultiplier);
+		return (int) Math.ceil(this.tracks.size() * 0.1 * ConfigBalance.BedCostMultiplier);
 	}
 
 	public int costFill() {
@@ -143,7 +139,7 @@ public abstract class BuilderBase {
 				fillCount += 1;
 			}
 		}
-		return MathHelper.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
+		return (int) Math.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
 	}
 
 	public void setDrops(List<ItemStack> drops) {
@@ -153,21 +149,21 @@ public abstract class BuilderBase {
 	public void clearArea() {
 		for (TrackBase track : tracks) {
 			for (int i = 0; i < 6 * info.settings.gauge.scale(); i++) {
-				BlockPos main = track.getPos().up(i);
+				Vec3i main = track.getPos().up(i);
 				if (!BlockUtil.isRail(info.world, main)) {
-					info.world.destroyBlock(main, false);
+					info.world.setToAir(main);
 				}
 				if (info.settings.gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.settings.type != TrackItems.SLOPE && info.settings.type != TrackItems.TURNTABLE) {
-					for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-						BlockPos pos = main.offset(facing);
+					for (Facing facing : Facing.HORIZONTALS) {
+						Vec3i pos = main.offset(facing);
 						if (!BlockUtil.isRail(info.world, pos)) {
-							info.world.destroyBlock(pos, false);
+							info.world.setToAir(pos);
 						}
 					}
 				}
 			}
 			if (BlockUtil.canBeReplaced(info.world, track.getPos().down(), false)) {
-				info.world.destroyBlock(track.getPos().down(), false);
+				info.world.setToAir(track.getPos().down());
 			}
 		}
 	}

@@ -18,6 +18,10 @@ public enum Facing {
         this.internal = internal;
     }
 
+    public static final Facing[] HORIZONTALS = {
+            NORTH, SOUTH, EAST, WEST
+    };
+
     public static Facing from(EnumFacing facing) {
         switch (facing) {
             case DOWN:
@@ -35,6 +39,10 @@ public enum Facing {
             default:
                 return null;
         }
+    }
+
+    public static Facing fromAngle(float v) {
+        return from(EnumFacing.fromAngle(v));
     }
 
     public Facing getOpposite() {
@@ -62,5 +70,9 @@ public enum Facing {
 
     public float getHorizontalAngle() {
         return internal.getHorizontalAngle();
+    }
+
+    public Axis getAxis() {
+        return Axis.from(internal.getAxis());
     }
 }

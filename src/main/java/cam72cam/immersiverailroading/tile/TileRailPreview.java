@@ -92,18 +92,18 @@ public class TileRailPreview extends TickableTileEntity {
 		hitZ = nbt.getFloat("hitZ");
 		 */
 		
-		placementInfo = new PlacementInfo(nbt.get("placementInfo").internal);
+		placementInfo = new PlacementInfo(nbt.get("placementInfo"));
 		if (nbt.hasKey("customInfo")) {
-			customInfo = new PlacementInfo(nbt.get("customInfo").internal);
+			customInfo = new PlacementInfo(nbt.get("customInfo"));
 		}
-		info = new RailInfo(world.internal, item.internal, placementInfo, customInfo);
+		info = new RailInfo(world, item, placementInfo, customInfo);
 	}
 	@Override
 	public void save(TagCompound nbt) {
 		nbt.set("item", item.toTag());
-		nbt.set("placementInfo", new TagCompound(placementInfo.toNBT()));
+		nbt.set("placementInfo", placementInfo.toNBT());
 		if (customInfo != null) {
-			nbt.set("customInfo", new TagCompound(customInfo.toNBT()));
+			nbt.set("customInfo", customInfo.toNBT());
 		}
 
 		super.save(nbt);
@@ -111,14 +111,14 @@ public class TileRailPreview extends TickableTileEntity {
 	
 	public RailInfo getRailRenderInfo() {
 		if (hasWorld() && info.world == null) {
-			info = new RailInfo(world.internal, item.internal, placementInfo, customInfo);
+			info = new RailInfo(world, item, placementInfo, customInfo);
 		}
 		return info;
 	}
 
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(world.internal, item.internal, placementInfo, customInfo);
+        info = new RailInfo(world, item, placementInfo, customInfo);
         if (isMulti()) {
 			ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
 		}

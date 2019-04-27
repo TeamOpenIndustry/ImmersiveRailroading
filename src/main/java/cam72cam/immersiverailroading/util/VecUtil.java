@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.mod.math.Vec3d;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import util.Matrix4;
 
 public class VecUtil {
@@ -18,10 +18,10 @@ public class VecUtil {
 	}
 	public static Vec3d rotateYaw(Vec3d pos, float rotationYaw) {
 		//return fromYaw(pos.x, rotationYaw).add(fromYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
-		return new Matrix4().rotate(Math.toRadians(rotationYaw-90), 0, 1, 0).apply(pos);
+		return new Vec3d(new Matrix4().rotate(Math.toRadians(rotationYaw-90), 0, 1, 0).apply(pos.internal));
 	}
 	public static Vec3d rotatePitch(Vec3d pos, float rotationPitch) {
-		return new Matrix4().rotate(Math.toRadians(rotationPitch), 0, 0, 1).apply(pos);
+		return new Vec3d(new Matrix4().rotate(Math.toRadians(rotationPitch), 0, 0, 1).apply(pos.internal));
 	}
 
 	public static Vec3d fromWrongYaw(double distance, float yaw)  {
@@ -38,11 +38,11 @@ public class VecUtil {
 	}
 
 	public static Vec3d rotateWrongYaw(Vec3d pos, float rotationYaw) {
-		return fromWrongYaw(pos.x, rotationYaw).add(fromWrongYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
+		return fromWrongYaw(pos.x, rotationYaw).add(fromWrongYaw(pos.z, rotationYaw + 90).add(0, pos.y, 0));
 	}
 
 	public static Vec3d fromWrongYawPitch(float distance, float rotationYaw, float rotationPitch) {
-		return fromWrongYaw(distance, rotationYaw).addVector(0, Math.tan(Math.toRadians(rotationPitch)) * distance, 0);
+		return fromWrongYaw(distance, rotationYaw).add(0, Math.tan(Math.toRadians(rotationPitch)) * distance, 0);
 	}
 	
 	public static Vec3d between(Vec3d front, Vec3d rear) {

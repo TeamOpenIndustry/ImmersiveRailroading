@@ -181,7 +181,7 @@ public class RenderOverride {
 	        				info = info.withType(TrackItems.STRAIGHT);
 	        			}
 
-						Vec3d pos = info.placementInfo.placementPosition.subtract(cameraPos);
+						Vec3d pos = info.placementInfo.placementPosition.internal.subtract(cameraPos);
 						GL11.glTranslated(pos.x, pos.y, pos.z);
 
 		        		RailBuilderRender.renderRailBuilder(info);
@@ -205,9 +205,9 @@ public class RenderOverride {
 				if (!preview.hasWorld()) {
 					preview.setWorld(Minecraft.getMinecraft().player.world);
 				}
-				for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getPos())).getSubBuilders()) {
+				for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.pos)).getSubBuilders()) {
 					RailInfo info = builder.info;
-					Vec3d placementPosition = info.placementInfo.placementPosition;
+					Vec3d placementPosition = info.placementInfo.placementPosition.internal;
 
 					if (isInRenderDistance(placementPosition)) {
 						placementPosition = placementPosition.subtract(cameraPos);

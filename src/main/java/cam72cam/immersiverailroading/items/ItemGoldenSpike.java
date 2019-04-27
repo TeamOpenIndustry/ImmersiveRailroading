@@ -34,14 +34,14 @@ public class ItemGoldenSpike extends ItemBase {
 			
 			Vec3i tepos = getPosition(held);
 			if (tepos != null) {
-				if (BlockUtil.canBeReplaced(world.internal, pos.down().internal, true)) {
-					if (!BlockUtil.isIRRail(world.internal, pos.down().internal) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}
 				TileRailPreview tr = world.getTileEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
-					tr.setCustomInfo(new PlacementInfo(tr.getItem().internal, player.getYawHead(), pos, hit));
+					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), pos, hit));
 				}
 			}
 		}

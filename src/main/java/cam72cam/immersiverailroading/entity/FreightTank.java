@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import cam72cam.mod.util.TagCompound;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
@@ -19,7 +20,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -36,14 +36,14 @@ public abstract class FreightTank extends Freight {
 		
 		@Override
 		public void onContentsChanged() {
-			if (!world.isRemote) {
+			if (world.isServer) {
 				FreightTank.this.onTankContentsChanged();
 			}
 		}
 	};;
 
-	public FreightTank(World world, String defID) {
-		super(world, defID);
+	public FreightTank(net.minecraft.world.World world) {
+		super(world);
 		
 		dataManager.register(FLUID_AMOUNT, 0);
 		dataManager.register(FLUID_TYPE, "EMPTY");
@@ -131,7 +131,7 @@ public abstract class FreightTank extends Freight {
 	}
 
 	protected void onTankContentsChanged() {
-		if (world.isRemote) {
+		if (world.isClient) {
 			return;
 		}
 		
@@ -158,27 +158,27 @@ public abstract class FreightTank extends Freight {
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setTag("tank", this.theTank.writeToNBT(new NBTTagCompound()));
+	public void save(TagCompound nbttagcompound) {
+		super.load(nbttagcompound);
+		nbttagcompound.set("tank", new TagCompound(this.theTank.writeToNBT(new NBTTagCompound())));
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readEntityFromNBT(nbttagcompound);
-		this.theTank.readFromNBT(nbttagcompound.getCompoundTag("tank"));
+	public void load(TagCompound nbttagcompound) {
+		super.load(nbttagcompound);
+		this.theTank.readFromNBT(nbttagcompound.get("tank").internal);
 		onTankContentsChanged();
 	}
 	
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void onTick() {
+		super.onTick();
 		checkInvent();
 	}
 
 	protected void checkInvent() {
 
-		if (world.isRemote) {
+		if (world.isClient) {
 			return;
 		}
 		
@@ -272,7 +272,7 @@ public abstract class FreightTank extends Freight {
 	@Override
 	protected void onInventoryChanged() {
 		super.onInventoryChanged();
-		if (!world.isRemote) {
+		if (world.isServer) {
 			for(ISyncableSlots container : listners) {
 				container.syncSlots();;
 			}

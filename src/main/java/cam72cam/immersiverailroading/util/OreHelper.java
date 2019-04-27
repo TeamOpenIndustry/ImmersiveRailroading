@@ -1,13 +1,16 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.mod.item.ItemStack;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class OreHelper {
 	public static class OreAbstract {
@@ -27,8 +30,8 @@ public class OreHelper {
 			this.fallback = fallback;
 		}
 		
-		public NonNullList<ItemStack> getOres() {
-			NonNullList<ItemStack> ores = OreDictionary.getOres(name);
+		public List<ItemStack> getOres() {
+			List<ItemStack> ores = OreDictionary.getOres(name).stream().map(ItemStack::new).collect(Collectors.toList());
 			// Someone added stuff to the IR dict
 			if (ores.size() != 0) {
 				return ores;
@@ -36,7 +39,7 @@ public class OreHelper {
 			
 			// Fallback/merge
 			if (def != null) {
-				ores = OreDictionary.getOres(def);
+				ores = OreDictionary.getOres(def).stream().map(ItemStack::new).collect(Collectors.toList());
 				if (ores.size() != 0) {
 					return ores;
 				}
@@ -50,7 +53,7 @@ public class OreHelper {
 		}
 		
 		public void add(ItemStack stack) {
-			OreDictionary.registerOre(name, stack);
+			OreDictionary.registerOre(name, stack.internal);
 		}
 
 		public void add(Block block) {
@@ -81,10 +84,10 @@ public class OreHelper {
 	public static final OreAbstract IR_RAIL_BED = new OreAbstract("railBed", new ItemStack(Blocks.GRAVEL));
 
 	
-	public static boolean oreDictionaryContainsMatch(boolean strict, NonNullList<ItemStack> ores, ItemStack playerStack) {
+	public static boolean oreDictionaryContainsMatch(boolean strict, List<ItemStack> ores, ItemStack playerStack) {
         for (ItemStack target : ores)
         {
-            if (OreDictionary.itemMatches(target, playerStack, strict))
+            if (OreDictionary.itemMatches(target.internal, playerStack.internal, strict))
             {
                 return true;
             }

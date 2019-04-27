@@ -3,7 +3,10 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.mod.World;
+import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
@@ -13,27 +16,22 @@ import net.minecraft.block.BlockSnow;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import trackapi.lib.Util;
 
 public class BlockUtil {
-	public static boolean canBeReplaced(World world, BlockPos pos, boolean allowFlex) {
+	public static boolean canBeReplaced(World world, Vec3i pos, boolean allowFlex) {
 		
-		if (world.isAirBlock(pos)) {
+		if (world.isAir(pos)) {
 			return true;
 		}
 		
-		Block block = world.getBlockState(pos).getBlock();
+		Block block = world.getBlock(pos);
 		
 		if (block == null) {
 			return true;
 		}
-		if (block.isReplaceable(world, pos)) {
+		if (block.isReplaceable(world.internal, pos.internal)) {
 			return true;
 		}
 		if (block instanceof IGrowable && !(block instanceof BlockGrass)) {
@@ -55,7 +53,7 @@ public class BlockUtil {
 			return true;
 		}
 		if (allowFlex && block instanceof BlockRailBase) {
-			TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
+			TileRailBase te = world.getTileEntity(pos, TileRailBase.class);
 			return te != null && te.isFlexible();
 		}
 		return false;
@@ -71,30 +69,16 @@ public class BlockUtil {
 		return gravelState;
 	}
 	
-	public static boolean isIRRail(World world, BlockPos pos) {
-		return world.getBlockState(pos).getBlock() instanceof BlockRailBase;
+	public static boolean isIRRail(World world, Vec3i pos) {
+		return world.getBlock(pos) instanceof BlockRailBase;
 	}
 	
-	public static boolean isRail(World world, BlockPos pos) {
-		return Util.getTileEntity(world, new Vec3d(pos), true) != null;
+	public static boolean isRail(World world, Vec3i pos) {
+		return Util.getTileEntity(world.internal, new net.minecraft.util.math.Vec3d(pos.internal), true) != null;
 	}
 	
-	public static Rotation rotFromFacing(EnumFacing facing) {
-		switch (facing) {
-		case NORTH:
-			return Rotation.NONE;
-		case EAST:
-			return Rotation.CLOCKWISE_90;
-		case SOUTH:
-			return Rotation.CLOCKWISE_180;
-		case WEST:
-			return Rotation.COUNTERCLOCKWISE_90;
-		default:
-			return Rotation.NONE;
-		}
-	}
-	public static BlockPos rotateYaw(BlockPos pos, EnumFacing rotation) {
-        return pos.rotate(rotFromFacing(rotation));
+	public static Vec3i rotateYaw(Vec3i pos, Facing rotation) {
+        return pos.rotate(Rotation.from(rotation));
 	}
 
 }

@@ -3,12 +3,11 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.TagCompound;
 
 public class PlacementInfo {
 	public final Vec3d placementPosition; // relative
@@ -23,17 +22,20 @@ public class PlacementInfo {
 		this.control = control;
 	}
 	
-	public PlacementInfo(ItemStack stack, float yawHead, BlockPos pos, float hitX, float hitY, float hitZ) {
+	public PlacementInfo(ItemStack stack, float yawHead, Vec3i pos, Vec3d hit) {
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		this.yaw = ((int)((yawHead + 90/8f) * 4)) / 90 * 90 / 4f;
 
-		RailSettings settings = ItemTrackBlueprint.settings(new cam72cam.mod.item.ItemStack(stack));
+		RailSettings settings = ItemTrackBlueprint.settings(stack);
 		TrackDirection direction = settings.direction;
 		if (direction == TrackDirection.NONE) {
 			direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
 		}
 
 		int quarter = rotationQuarter();
+
+		double hitX = hit.x;
+		double hitZ = hit.z;
 
 		switch(settings.posType) {
 		case FIXED:
@@ -88,23 +90,23 @@ public class PlacementInfo {
 			break;
 		}
 
-		this.placementPosition = new Vec3d(pos).addVector(hitX, 0, hitZ);
+		this.placementPosition = new Vec3d(pos).add(hitX, 0, hitZ);
 		this.direction = direction;
 		this.control = null;
 	}
 
-	public PlacementInfo(NBTTagCompound nbt) {
-		this(nbt, BlockPos.ORIGIN);
+	public PlacementInfo(TagCompound nbt) {
+		this(nbt, Vec3i.ZERO);
 	}
 	
-	public PlacementInfo(NBTTagCompound nbt, BlockPos offset) {
-		this.placementPosition = NBTUtil.nbtToVec3d(nbt.getCompoundTag("placementPosition")).addVector(offset.getX(), offset.getY(), offset.getZ());
+	public PlacementInfo(TagCompound nbt, Vec3i offset) {
+		this.placementPosition = nbt.getVec3d("placementPosition").add(offset);
 		this.direction = TrackDirection.values()[nbt.getInteger("direction")];
 		if (nbt.hasKey("yaw")) {
 			this.yaw = nbt.getFloat("yaw");
 		} else {
 			int rotationQuarter = nbt.getInteger("rotationQuarter");
-			EnumFacing facing = EnumFacing.getFront(nbt.getByte("facing"));
+			Facing facing = Facing.from(net.minecraft.util.EnumFacing.getFront(nbt.getByte("facing")));
 			float facingAngle = 180 - facing.getHorizontalAngle();
 			float rotAngle = rotationQuarter/4f*90;
 			if (direction != TrackDirection.RIGHT) {
@@ -114,35 +116,31 @@ public class PlacementInfo {
 		}
 		if (nbt.hasKey("magnitude")) {
 			// TODO: LEGACY REMOVE in 1.6
-			this.control = placementPosition.add(VecUtil.fromYaw(nbt.getDouble("magnitude"), yaw));
+			this.control = placementPosition.add(new Vec3d(VecUtil.fromYaw(nbt.getDouble("magnitude"), yaw)));
 		} else if (nbt.hasKey("control")) {
-			this.control = NBTUtil.nbtToVec3d(nbt.getCompoundTag("control")).addVector(offset.getX(), offset.getY(), offset.getZ());
+			this.control = nbt.getVec3d("control").add(offset);
 		} else {
 			this.control = null;
 		}
 	}
 
-	public PlacementInfo(ItemStack item, float rotationYawHead, Vec3i pos, cam72cam.mod.math.Vec3d hit) {
-		this(item, rotationYawHead, pos.internal, (float)hit.x, (float)hit.y, (float)hit.z);
-	}
-
-	public NBTTagCompound toNBT() {
-		return toNBT(BlockPos.ORIGIN);
+	public TagCompound toNBT() {
+		return toNBT(Vec3i.ZERO);
 	}
 	
-	public NBTTagCompound toNBT(BlockPos offset) {
-		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setTag("placementPosition", NBTUtil.vec3dToNBT(placementPosition.subtract(offset.getX(), offset.getY(), offset.getZ())));
+	public TagCompound toNBT(Vec3i offset) {
+		TagCompound nbt = new TagCompound();
+		nbt.setVec3d("placementPosition", placementPosition.subtract(offset));
 		nbt.setFloat("yaw", yaw);
 		nbt.setInteger("direction", direction.ordinal());
 		if (control != null) {
-			nbt.setTag("control", NBTUtil.vec3dToNBT(control.subtract(offset.getX(), offset.getY(), offset.getZ())));
+			nbt.setVec3d("control", control.subtract(offset));
 		}
 		return nbt;
 	}
 
-	public EnumFacing facing() {
-		return EnumFacing.fromAngle(180-yaw);
+	public Facing facing() {
+		return Facing.fromAngle(180-yaw);
 	}
 
 	public int rotationQuarter() {

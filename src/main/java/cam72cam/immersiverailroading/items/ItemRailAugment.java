@@ -30,7 +30,7 @@ public class ItemRailAugment extends ItemBase {
 	
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
-		if (BlockUtil.isIRRail(world.internal, pos.internal)) {
+		if (BlockUtil.isIRRail(world, pos)) {
 			TileRailBase te = world.getTileEntity(pos, TileRailBase.class);
 			if (te != null) {
 				ItemStack stack = player.getHeldItem(hand);

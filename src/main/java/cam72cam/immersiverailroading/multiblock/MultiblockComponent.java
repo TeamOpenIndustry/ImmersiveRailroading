@@ -30,16 +30,16 @@ public class MultiblockComponent {
 	
 	@SuppressWarnings("deprecation")
 	public MultiblockComponent(OreAbstract name) {
-		ItemStack stack = name.example();
+		ItemStack stack = name.example().internal;
 		this.name = stack.getDisplayName();
 		this.def = Block.getBlockFromItem(stack.getItem()).getStateFromMeta(stack.getMetadata());
 		this.blockCheck = (IBlockState target) -> {
 			Block block = target.getBlock();
 			Item item = Item.getItemFromBlock(block);
 			int meta = block.getMetaFromState(target);
-			return name.matches(new ItemStack(item, 1, meta), false);
+			return name.matches(new cam72cam.mod.item.ItemStack(item, 1, meta), false);
 		};
-		this.itemCheck = (ItemStack tstack) -> name.matches(tstack, false);
+		this.itemCheck = (ItemStack tstack) -> name.matches(new cam72cam.mod.item.ItemStack(tstack), false);
 	}
 	
 	public MultiblockComponent(Block block) {

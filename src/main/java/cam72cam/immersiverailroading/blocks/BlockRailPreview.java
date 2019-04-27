@@ -40,12 +40,12 @@ public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implement
 			Vec3i pos = te.pos;
 			World world = te.world;
 			if (world.isServer) {
-                if (BlockUtil.canBeReplaced(world.internal, pos.down().internal, true)) {
-                    if (!BlockUtil.isIRRail(world.internal, pos.down().internal) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+                if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
                         pos = pos.down();
                     }
                 }
-                te.setPlacementInfo(new PlacementInfo(te.getItem().internal, player.internal.rotationYawHead, pos, hit));
+                te.setPlacementInfo(new PlacementInfo(te.getItem(), player.getYawHead(), pos, hit));
 			}
 			return false;
 		} else {
@@ -74,7 +74,7 @@ public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implement
 			TileRailPreview tr = world.getTileEntity(pos, TileRailPreview.class);
 			if (tr != null) {
 				//internal.setBlockToAir(pos);
-				tr.getRailRenderInfo().build(entityPlayer.internal);
+				tr.getRailRenderInfo().build(entityPlayer);
 				return true;
 			}
 		}

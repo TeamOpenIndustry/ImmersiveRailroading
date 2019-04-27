@@ -6,6 +6,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
@@ -26,7 +28,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import util.Matrix4;
@@ -41,7 +42,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
-		info = new RailInfo(world, stack, new PlacementInfo(stack, 1, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
+		info = new RailInfo(new cam72cam.mod.World(world), new cam72cam.mod.item.ItemStack(stack), new PlacementInfo(new cam72cam.mod.item.ItemStack(stack), 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5)), null);
 		info = info.withLength(10);
 	}
 

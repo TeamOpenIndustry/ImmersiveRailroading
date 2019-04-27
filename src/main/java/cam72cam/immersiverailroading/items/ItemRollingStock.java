@@ -90,7 +90,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
-		if (BlockUtil.isIRRail(world.internal, pos.internal)) {
+		if (BlockUtil.isIRRail(world, pos)) {
 			TileRailBase te = world.getTileEntity(pos, TileRailBase.class);
 			if (te.getAugment() != null) {
 				switch(te.getAugment()) {

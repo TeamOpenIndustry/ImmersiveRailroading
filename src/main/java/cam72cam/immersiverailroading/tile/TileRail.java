@@ -71,7 +71,7 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (nbt.hasKey("info")) {
-			info = new RailInfo(world.internal, pos.internal, nbt.get("info").internal);
+			info = new RailInfo(world, pos, nbt.get("info"));
 		} else {
 			// LEGACY
 			// TODO REMOVE 2.0
@@ -92,7 +92,7 @@ public class TileRail extends TileRailBase {
 			newPositionFormat.setDouble("z", nbt.getDouble("placementPositionZ"));
 			nbt.set("placementPosition", newPositionFormat);
 
-            PlacementInfo placementInfo = new PlacementInfo(nbt.internal, pos.internal);
+            PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
             placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
@@ -100,13 +100,13 @@ public class TileRail extends TileRailBase {
 			double tablePos = nbt.getDouble("tablePos");
 
 			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false);
-			info = new RailInfo(world.internal, settings, placementInfo, null, switchState, switchForced, tablePos);
+			info = new RailInfo(world, settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}
 
 	@Override
 	public void save(TagCompound nbt) {
-		nbt.set("info", new TagCompound(info.toNBT(pos.internal)));
+		nbt.set("info", info.toNBT(pos));
 		if (drops != null && drops.size() != 0) {
 			TagCompound dropNBT = new TagCompound();
 			dropNBT.setInteger("count", drops.size());
@@ -140,8 +140,8 @@ public class TileRail extends TileRailBase {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(pos.internal).getTracksForRender()) {
-			Vec3i tpos = new Vec3i(track.getPos());
+		for (TrackBase track : info.getBuilder(pos).getTracksForRender()) {
+			Vec3i tpos = track.getPos();
 			total++;
 
 			if (!world.isBlockLoaded(tpos)) {
