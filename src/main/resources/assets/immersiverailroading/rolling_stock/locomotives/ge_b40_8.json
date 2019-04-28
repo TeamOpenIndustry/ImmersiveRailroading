@@ -10,7 +10,8 @@
 		"horsepower": 4000,
 		"tractive_effort_lbf": 68500,
 		"max_speed_kmh": 120,
-		"weight_kg": 127005
+		"weight_kg": 127005,
+		"horn_sustained": true
 	},
 	"passenger": {
 		"slots": 3,
