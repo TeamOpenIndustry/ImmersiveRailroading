@@ -225,9 +225,16 @@ public abstract class Locomotive extends FreightTank {
 		} else {
 			if (ConfigSound.soundEnabled && bell != null) {
 				if (getBell() != 0 && !bell.isPlaying()) {
+					bell.setVolume(0.8f);
 					bell.play(getPositionVector());
 				} else if (getBell() == 0 && bell.isPlaying()) {
 					bell.stop();
+				}
+
+				if (bell.isPlaying()) {
+					bell.setPosition(getPositionVector());
+					bell.setVelocity(getVelocity());
+					bell.update();
 				}
 			}
 		}
