@@ -121,7 +121,7 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 	}
 	
 	public RailInfo getRailRenderInfo() {
-		if (hasWorld() && info.world == null) {
+		if (hasWorld() && (info == null || info.world == null)) {
 			info = new RailInfo(world, item, placementInfo, customInfo);
 		}
 		return info;
