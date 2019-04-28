@@ -20,9 +20,9 @@
 	"passenger": {
 		"slots": 3,
 		"center_x": -12,
-		"center_y": 2.4,
+		"center_y": 2.5,
 		"length": 1,
-		"width": 2.65
+		"width": 2.8
 	},
 	"trucks": {
 		"front": -2.29, 
