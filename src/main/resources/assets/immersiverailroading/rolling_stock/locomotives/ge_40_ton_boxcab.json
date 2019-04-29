@@ -11,7 +11,8 @@
 		"horsepower": 300,
 		"tractive_effort_lbf": 21000,
 		"max_speed_kmh": 60,
-		"weight_kg": 35834
+		"weight_kg": 35834,
+		"horn_sustained": true
 	},
 	"passenger": {
 		"slots": 2,
