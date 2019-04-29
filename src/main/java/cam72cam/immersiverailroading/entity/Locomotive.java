@@ -225,9 +225,16 @@ public abstract class Locomotive extends FreightTank {
 		} else {
 			if (ConfigSound.soundEnabled && bell != null) {
 				if (getBell() != 0 && !bell.isPlaying()) {
+					bell.setVolume(0.8f);
 					bell.play(getPositionVector());
 				} else if (getBell() == 0 && bell.isPlaying()) {
 					bell.stop();
+				}
+
+				if (bell.isPlaying()) {
+					bell.setPosition(getPositionVector());
+					bell.setVelocity(getVelocity());
+					bell.update();
 				}
 			}
 		}
@@ -349,5 +356,14 @@ public abstract class Locomotive extends FreightTank {
 		//https://www.reddit.com/r/Minecraft/comments/3eh7yu/the_rl_temperature_of_minecraft_biomes_revealed/ctex050/
 		return (13.6484805403f*mctemp)+7.0879687222f;
 	}
-	
+
+	@Override
+	public void setDead() {
+		super.setDead();
+		if (this.bell != null) {
+			bell.stop();
+		}
+	}
+
+
 }

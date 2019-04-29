@@ -149,7 +149,7 @@ public class TileRail extends TileRailBase {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(pos).getTracksForRender()) {
+		for (TrackBase track : info.getBuilder(new BlockPos(info.placementInfo.placementPosition)).getTracksForRender()) {
 			BlockPos tpos = track.getPos();
 			total++;
 
