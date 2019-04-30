@@ -1,20 +1,20 @@
 package cam72cam.immersiverailroading.sound;
 
-import java.net.URL;
-import java.util.function.Supplier;
-
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.Identifier;
 import io.netty.util.internal.ThreadLocalRandom;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound.AttenuationType;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import paulscode.sound.CommandObject;
 import paulscode.sound.SoundSystem;
+
+import java.net.URL;
+import java.util.function.Supplier;
 
 public class ClientSound implements ISound {
 	private final static float dopplerScale = 0.05f;
@@ -22,7 +22,7 @@ public class ClientSound implements ISound {
 	private Supplier<SoundSystem> sndSystem;
 	private URL resource;
 	private boolean repeats;
-	private ResourceLocation oggLocation;
+	private Identifier oggLocation;
 	private float attenuationDistance;
 	private Vec3d currentPos;
 	private Vec3d velocity;
@@ -32,7 +32,7 @@ public class ClientSound implements ISound {
 	private Gauge gauge;
 	private boolean disposable = false;
 
-	public ClientSound(Supplier<SoundSystem> soundSystem, ResourceLocation oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance, Gauge gauge) {
+	public ClientSound(Supplier<SoundSystem> soundSystem, Identifier oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance, Gauge gauge) {
 		this.sndSystem = soundSystem;
 		this.resource = resource;
 		this.baseSoundMultiplier = baseSoundMultiplier;
@@ -52,9 +52,9 @@ public class ClientSound implements ISound {
 		this.setPosition(pos);
 		update();
 		
-		if (repeats || currentPos == null || Minecraft.getMinecraft().player == null) {
+		if (repeats || currentPos == null || MinecraftClient.getPlayer() == null) {
 			sndSystem.get().play(id);
-		} else if (Minecraft.getMinecraft().player.getPositionVector().distanceTo(currentPos) < this.attenuationDistance * 1.1) {
+		} else if (MinecraftClient.getPlayer().getPosition().distanceTo(currentPos) < this.attenuationDistance * 1.1) {
 			sndSystem.get().play(id);
 		}
 	}
@@ -79,8 +79,8 @@ public class ClientSound implements ISound {
 		if (id == null) {
 			init();
 		}
-		
-		Minecraft.getMinecraft().mcProfiler.startSection("irSound");
+
+		MinecraftClient.startProfiler("irSound");
 		SoundSystem snd = sndSystem.get();
 		float rootedScale = (float)Math.sqrt(Math.sqrt(gauge.scale()));
 		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * rootedScale;
@@ -95,14 +95,14 @@ public class ClientSound implements ISound {
 		} else {
 			//Doppler shift
 			
-			EntityPlayerSP player = Minecraft.getMinecraft().player;
-			Vec3d ppos = player.getPositionVector();
-			Vec3d nextPpos = ppos.addVector(player.motionX, player.motionY, player.motionZ);
+			Player player = MinecraftClient.getPlayer();
+			Vec3d ppos = player.getPosition();
+			Vec3d nextPpos = ppos.add(player.getVelocity());
 			
 			Vec3d nextPos = this.currentPos.add(velocity);
 			
-			double origDist = ppos.subtract(currentPos).lengthVector();
-			double newDist = nextPpos.subtract(nextPos).lengthVector();
+			double origDist = ppos.subtract(currentPos).length();
+			double newDist = nextPpos.subtract(nextPos).length();
 			
 			float appliedPitch = currentPitch;
 			if (origDist > newDist) {
@@ -115,7 +115,7 @@ public class ClientSound implements ISound {
 			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, appliedPitch / rootedScale));
 		}
 
-		Minecraft.getMinecraft().mcProfiler.endSection();
+		MinecraftClient.endProfiler();
 		
 		snd.interruptCommandThread();
 	}

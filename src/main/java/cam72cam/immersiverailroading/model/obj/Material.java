@@ -1,13 +1,13 @@
 package cam72cam.immersiverailroading.model.obj;
 
-import java.nio.FloatBuffer;
+import cam72cam.mod.util.Identifier;
 
-import net.minecraft.util.ResourceLocation;
+import java.nio.FloatBuffer;
 
 public class Material {
 	public String name;
 	
-	public ResourceLocation texKd;
+	public Identifier texKd;
 	
 	public FloatBuffer Ka;
 	public FloatBuffer Kd;

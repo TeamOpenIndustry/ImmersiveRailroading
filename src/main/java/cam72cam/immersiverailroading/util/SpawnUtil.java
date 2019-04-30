@@ -43,7 +43,7 @@ public class SpawnUtil {
 		
 		double offset = def.getCouplerPosition(CouplerType.BACK, gauge) - ConfigDebug.couplerRange;
 		float yaw = player.getYawHead();
-		TickPos tp = new MovementSimulator(worldIn.internal, new TickPos(0, Speed.ZERO, new Vec3d(pos).add(0, 0.7, 0).add(0.5, 0, 0.5).internal, yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge.value()).nextPosition(offset);
+		TickPos tp = new MovementSimulator(worldIn, new TickPos(0, Speed.ZERO, new Vec3d(pos).add(0, 0.7, 0).add(0.5, 0, 0.5), yaw, yaw, yaw, 0, false), def.getBogeyFront(gauge), def.getBogeyRear(gauge), gauge.value()).nextPosition(offset);
 		
 		if (!tp.isOffTrack) {
 			if (worldIn.isServer) {

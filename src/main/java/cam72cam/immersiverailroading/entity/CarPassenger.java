@@ -1,7 +1,9 @@
 package cam72cam.immersiverailroading.entity;
 
+import cam72cam.mod.entity.ModdedEntity;
+
 public class CarPassenger extends EntityCoupleableRollingStock {
-	public CarPassenger(net.minecraft.world.World world) {
-		super(world);
+	public CarPassenger(ModdedEntity entity) {
+		super(entity);
 	}
 }

@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
-import net.minecraft.util.ResourceLocation;
+import cam72cam.mod.util.Identifier;
 
 public class SoundPacket extends Packet {
 	public SoundPacket(String soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, Gauge gauge) {
@@ -27,7 +27,7 @@ public class SoundPacket extends Packet {
 		float pitch = data.getFloat("pitch");
 		int distance = data.getInteger("distance");
 		Gauge gauge = Gauge.from(data.getDouble("gauge"));
-		ISound snd = ImmersiveRailroading.proxy.newSound(new ResourceLocation(soundfile), false, distance, gauge);
+		ISound snd = ImmersiveRailroading.proxy.newSound(new Identifier(soundfile), false, distance, gauge);
 		snd.setVelocity(motion);
 		snd.setVolume(volume);
 		snd.setPitch(pitch);

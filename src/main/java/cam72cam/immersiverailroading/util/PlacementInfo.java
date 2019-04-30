@@ -116,7 +116,7 @@ public class PlacementInfo {
 		}
 		if (nbt.hasKey("magnitude")) {
 			// TODO: LEGACY REMOVE in 1.6
-			this.control = placementPosition.add(new Vec3d(VecUtil.fromYaw(nbt.getDouble("magnitude"), yaw)));
+			this.control = placementPosition.add(VecUtil.fromYaw(nbt.getDouble("magnitude"), yaw));
 		} else if (nbt.hasKey("control")) {
 			this.control = nbt.getVec3d("control").add(offset);
 		} else {

@@ -2,7 +2,13 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.UUID;
 
-import com.google.common.base.Optional;
+import cam72cam.mod.World;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ModdedEntity;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.util.TagCompound;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
@@ -11,26 +17,16 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.sound.ISound;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.EnumHand;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 
 public abstract class Locomotive extends FreightTank {
 
-	private static DataParameter<Float> THROTTLE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	private static DataParameter<Float> AIR_BRAKE = EntityDataManager.createKey(Locomotive.class, DataSerializers.FLOAT);
-	protected static DataParameter<Integer> HORN = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
-	protected static DataParameter<Optional<UUID>> HORN_PLAYER = EntityDataManager.createKey(Locomotive.class, DataSerializers.OPTIONAL_UNIQUE_ID);
-	protected static DataParameter<Integer> BELL = EntityDataManager.createKey(Locomotive.class, DataSerializers.VARINT);
+	protected final static String THROTTLE = "THROTTLE";
+	protected final static String AIR_BRAKE = "AIR_BRAKE";
+	protected final static String HORN = "HORN";
+	protected final static String HORN_PLAYER = "HORN_PLAYER";
+	protected final static String BELL = "BELL";
 
 	public ISound bell;
 
@@ -42,16 +38,14 @@ public abstract class Locomotive extends FreightTank {
 
 	private int bellKeyTimeout;
 
-	public Locomotive(World world, String defID) {
-		super(world, defID);
+	public Locomotive(ModdedEntity entity) {
+		super(entity);
 
-		this.getDataManager().register(THROTTLE, 0f);
-		this.getDataManager().register(AIR_BRAKE, 0f);
-		this.getDataManager().register(HORN, 0);
-		this.getDataManager().register(BELL, 0);
-		this.getDataManager().register(HORN_PLAYER, Optional.absent());
-
-		this.entityCollisionReduction = 0.99F;
+		sync.setFloat(THROTTLE, 0f);
+		sync.setFloat(AIR_BRAKE, 0f);
+		sync.setInteger(HORN, 0);
+		sync.setInteger(BELL, 0);
+		sync.setUUID(HORN_PLAYER, null);
 	}
 	
 	/*
@@ -76,28 +70,27 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setFloat("throttle", getThrottle());
-		nbttagcompound.setFloat("brake", getAirBrake());
-		nbttagcompound.setBoolean("deadMansSwitch", deadMansSwitch);
-		nbttagcompound.setInteger("bell", getBell());
+	public void save(TagCompound data) {
+		super.save(data);
+		data.setFloat("throttle", getThrottle());
+		data.setFloat("brake", getAirBrake());
+		data.setBoolean("deadMansSwitch", deadMansSwitch);
+		data.setInteger("bell", getBell());
 	}
 
-	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readEntityFromNBT(nbttagcompound);
-		setThrottle(nbttagcompound.getFloat("throttle"));
-		setAirBrake(nbttagcompound.getFloat("brake"));
-		deadMansSwitch = nbttagcompound.getBoolean("deadMansSwitch");
-		setBell(nbttagcompound.getInteger("bell"));
+	public void load(TagCompound data) {
+		super.load(data);
+		setThrottle(data.getFloat("throttle"));
+		setAirBrake(data.getFloat("brake"));
+		deadMansSwitch = data.getBoolean("deadMansSwitch");
+		setBell(data.getInteger("bell"));
 	}
 	
 	@Override
-	public void handleKeyPress(Entity source, KeyTypes key, boolean sprinting) {
+	public void handleKeyPress(Player source, KeyTypes key, boolean sprinting) {
 		switch(key) {
 		case HORN:
-			setHorn(10, source.getPersistentID());
+			setHorn(10, source.getUUID());
 			break;
         case BELL:
             if (this.getDefinition().toggleBell) {
@@ -156,44 +149,44 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
+    public ClickResult onClick(Player player, Hand hand) {
+		if (player.getHeldItem(hand).item == IRItems.ITEM_RADIO_CONTROL_CARD) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
-				NBTTagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
+				TagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
 				if(cardNBT == null) { 
-					player.getHeldItem(hand).setTagCompound(new NBTTagCompound());
+					player.getHeldItem(hand).setTagCompound(new TagCompound());
 					cardNBT = player.getHeldItem(hand).getTagCompound();
 				}
-				if (player.isSneaking()) {
+				if (player.isCrouching()) {
 					if (!cardNBT.hasKey("linked_uuid")) {
 						player.sendMessage(ChatText.RADIO_NOLINK.getMessage());
 					} else {
-						cardNBT.removeTag("linked_uuid");
+						cardNBT.remove("linked_uuid");
 						player.sendMessage(ChatText.RADIO_UNLINK.getMessage());
 					}
 				} else {
 					if (!cardNBT.hasKey("linked_uuid")) {
-						cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+						cardNBT.setString("linked_uuid",this.getUUID().toString());
 						player.sendMessage(ChatText.RADIO_LINK.getMessage());
 					} else {
-						cardNBT.setString("linked_uuid",this.getPersistentID().toString());
+						cardNBT.setString("linked_uuid",this.getUUID().toString());
 						player.sendMessage(ChatText.RADIO_RELINK.getMessage());
 					}
 				}
 			}
 			else {
-				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getName()));;
+				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getDefinition().name()));;
 			}
-			return true;
+			return ClickResult.ACCEPTED;
 		}
-		return super.processInitialInteract(player, hand);
+		return super.onClick(player, hand);
 	}
 	
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void onTick() {
+		super.onTick();
 		
-		if (!world.isRemote) {
+		if (getWorld().isServer) {
 			if (deadManChangeTimeout > 0) {
 				deadManChangeTimeout -= 1;
 			}
@@ -204,7 +197,7 @@ public abstract class Locomotive extends FreightTank {
 			if (deadMansSwitch && !this.getCurrentSpeed().isZero()) {
 				boolean hasDriver = false;
 				for (Entity entity : this.getPassengers()) {
-					if (entity instanceof EntityPlayer) {
+					if (entity.isPlayer()) {
 						hasDriver = true;
 						break;
 					}
@@ -214,10 +207,12 @@ public abstract class Locomotive extends FreightTank {
 					this.setAirBrake(1);
 				}
 			}
-			if (this.getDataManager().get(HORN) > 0) {
-				this.getDataManager().set(HORN, this.getDataManager().get(HORN)-1);
-			} else if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
-				this.getDataManager().set(HORN_PLAYER, Optional.absent());
+			if (sync.getInteger(HORN) > 0) {
+				sync.setInteger(HORN, sync.getInteger(HORN)-1);
+				sync.send();
+			} else if (sync.get(HORN_PLAYER) != null) {
+				sync.set(HORN_PLAYER, null);
+				sync.send();
 			}
 			if (getBell() > 0 && !this.getDefinition().toggleBell) {
 				setBell(getBell()-1);
@@ -225,7 +220,7 @@ public abstract class Locomotive extends FreightTank {
 		} else {
 			if (ConfigSound.soundEnabled && bell != null) {
 				if (getBell() != 0 && !bell.isPlaying()) {
-					bell.play(getPositionVector());
+					bell.play(getPosition());
 				} else if (getBell() == 0 && bell.isPlaying()) {
 					bell.stop();
 				}
@@ -286,53 +281,56 @@ public abstract class Locomotive extends FreightTank {
 	 */
 	
 	public float getThrottle() {
-		return dataManager.get(THROTTLE);
+		return sync.getFloat(THROTTLE);
 	}
 	public void setThrottle(float newThrottle) {
 		if (this.getThrottle() != newThrottle) {
-			dataManager.set(THROTTLE, newThrottle);
+			sync.setFloat(THROTTLE, newThrottle);
+			sync.send();
 			triggerResimulate();
 		}
 	}
 	
 	public void setHorn(int val, UUID uuid) {
-		UUID currentPlayer = this.getDataManager().get(HORN_PLAYER).isPresent() ? this.getDataManager().get(HORN_PLAYER).get() : null;
+		UUID currentPlayer = sync.getUUID(HORN_PLAYER);
 		if (currentPlayer == null && uuid != null) {
 			currentPlayer = uuid;
-			this.getDataManager().set(HORN_PLAYER, Optional.of(uuid));
+			sync.setUUID(HORN_PLAYER, uuid);
 		}
 		if (currentPlayer == null || currentPlayer == uuid) {
-			this.getDataManager().set(HORN, val);
+			sync.setInteger(HORN, val);
 		}
+		sync.send();
 	}
 
 	public float getAirBrake() {
-		return dataManager.get(AIR_BRAKE);
+		return sync.getFloat(AIR_BRAKE);
 	}
 	public void setAirBrake(float newAirBrake) {
 		if (this.getAirBrake() != newAirBrake) {
-			dataManager.set(AIR_BRAKE, newAirBrake);
+			sync.setFloat(AIR_BRAKE, newAirBrake);
+			sync.send();
 			triggerResimulate();
 		}
 	}
 	public int getBell() {
-		return dataManager.get(BELL);
+		return sync.getInteger(BELL);
 	}
 	public void setBell(int newBell) {
 		if (this.getBell() != newBell) {
-			dataManager.set(BELL, newBell);
+			sync.setInteger(BELL, newBell);
+			sync.send();
 		}
 	}
 
 	public double slipCoefficient() {
 		double slipMult = 1.0;
-		World world = getEntityWorld();
-		if (world.isRaining() && world.canSeeSky(getPosition())) {
-			Biome biome = world.getBiome(getPosition());
-			if (biome.canRain()) {
+		World world = getWorld();
+		if (world.isPrecipitating() && world.canSeeSky(getBlockPosition())) {
+			if (world.isRaining(getBlockPosition())) {
 				slipMult = 0.6;
 			}
-			if (biome.isSnowyBiome()) {
+			if (world.isSnowing(getBlockPosition())) {
 				slipMult = 0.4;
 			}
 		}
@@ -345,9 +343,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	
 	public float ambientTemperature() {
-		float mctemp = world.getBiome(this.getPosition()).getTemperature(getPosition());
-		//https://www.reddit.com/r/Minecraft/comments/3eh7yu/the_rl_temperature_of_minecraft_biomes_revealed/ctex050/
-		return (13.6484805403f*mctemp)+7.0879687222f;
+		return getWorld().getTemperature(getBlockPosition());
 	}
 	
 }

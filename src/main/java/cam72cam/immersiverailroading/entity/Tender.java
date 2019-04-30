@@ -6,19 +6,15 @@ import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
 import cam72cam.immersiverailroading.util.LiquidUtil;
-import net.minecraft.world.World;
+import cam72cam.mod.entity.ModdedEntity;
 import net.minecraftforge.fluids.*;
 
 public class Tender extends CarTank {
 	
-	public Tender(World world) {
-		this(world, null);
+	public Tender(ModdedEntity entity) {
+		super(entity);
 	}
 
-	public Tender(World world, String defID) {
-		super(world, defID);
-	}
-	
 	@Override
 	public TenderDefinition getDefinition() {
 		return super.getDefinition(TenderDefinition.class);

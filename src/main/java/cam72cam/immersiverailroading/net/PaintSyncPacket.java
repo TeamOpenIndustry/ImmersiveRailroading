@@ -9,7 +9,7 @@ import cam72cam.mod.net.Packet;
 public class PaintSyncPacket extends Packet {
 	public PaintSyncPacket(EntityRollingStock mrs) {
 		data.setString("texture", mrs.texture);
-		data.setEntity("target", mrs.self);
+		data.setEntity("target", mrs);
 	}
 	@Override
 	public void handle() {

@@ -387,7 +387,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		double distanceMeters = motion.length();
-		float rotationYaw = VecUtil.toWrongYaw(motion.internal);
+		float rotationYaw = VecUtil.toWrongYaw(motion);
 		Vec3d nextPos = currentPosition;
 
 		TileRailBase self = this;
@@ -401,9 +401,9 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 			}
 
 
-			Vec3d potential = new Vec3d(MovementTrack.nextPosition(world.internal, currentPosition.internal, tile, rotationYaw, distanceMeters));
+			Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 			if (state == SwitchState.TURN) {
-				float other = VecUtil.toWrongYaw(potential.subtract(currentPosition).internal);
+				float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 				double diff = MathUtil.trueModulus(other - rotationYaw, 360);
 				diff = Math.min(360-diff, diff);
 				if (diff < 30) {
@@ -605,7 +605,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		
 		if (Config.ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
 			if ((int)(Math.random() * Config.ConfigDebug.snowMeltRate * 10) == 0) {
-				if (!world.isRaining()) {
+				if (!world.isPrecipitating()) {
 					this.setSnowLayers(this.snowLayers -= 1);
 				}
 			}
@@ -754,7 +754,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 					newRedstone = stock != null ? (int)Math.floor(Math.abs(stock.getCurrentSpeed().metric())/10) : 0;
 					break;
 				case PASSENGERS:
-					newRedstone = stock != null ? Math.min(15, stock.getPassengers().size() + stock.staticPassengers.size()) : 0;
+					newRedstone = stock != null ? Math.min(15, stock.getPassengerCount()) : 0;
 					break;
 				case CARGO:
 					if (stock != null && stock instanceof Freight) {

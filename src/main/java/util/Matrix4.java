@@ -1,7 +1,7 @@
 package util;
 
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.Facing;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
@@ -81,7 +81,7 @@ public class Matrix4
 		m33 = mat.m33;
 	}
 
-	public Matrix4(EnumFacing facing)
+	public Matrix4(Facing facing)
 	{
 		this();
 		setIdentity();
@@ -406,7 +406,7 @@ public class Matrix4
 	}
 	public Vec3d apply(Vec3d vec)
 	{
-		return mult3x3(vec).addVector(m03, m13, m23);
+		return mult3x3(vec).add(m03, m13, m23);
 	}
 
 	private org.lwjgl.util.vector.Vector3f mult3x3(org.lwjgl.util.vector.Vector3f vec)

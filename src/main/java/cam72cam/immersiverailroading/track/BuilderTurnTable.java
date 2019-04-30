@@ -29,7 +29,7 @@ public class BuilderTurnTable extends BuilderBase {
 		
 		for (double irad = 1; irad <= radius + 1; irad++) {
 			for (double angle = 0; angle < 360; angle+=0.5) {
-				Vec3d gagPos = new Vec3d(VecUtil.fromYaw(irad, (float) angle));
+				Vec3d gagPos = VecUtil.fromYaw(irad, (float) angle);
 				positions.add(Pair.of((int)gagPos.x, (int)gagPos.z));
 			}
 		}
@@ -74,10 +74,10 @@ public class BuilderTurnTable extends BuilderBase {
 
 	@Override
 	public List<VecYawPitch> getRenderData() {
-		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
+		List<VecYawPitch> data = new ArrayList<>();
 		
 		for (float angle = 0; angle < 360; angle +=22.5) {
-			net.minecraft.util.math.Vec3d gagPos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, info.settings.length).internal, angle-90);
+			Vec3d gagPos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, info.settings.length), angle-90);
 			data.add(new VecYawPitch(gagPos.x + offset.x, gagPos.y + offset.y, gagPos.z + offset.z, -angle));
 		}
 		

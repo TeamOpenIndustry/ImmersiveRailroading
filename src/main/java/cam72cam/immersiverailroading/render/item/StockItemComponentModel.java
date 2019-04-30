@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 
+import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
@@ -31,7 +32,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import util.Matrix4;

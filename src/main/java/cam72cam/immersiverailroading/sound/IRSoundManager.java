@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import cam72cam.mod.util.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -76,13 +77,13 @@ public class IRSoundManager {
 		}
 	}
 	
-	public ISound createSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
+	public ISound createSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
         SoundSystem sndSystem = this.soundSystem.get();
 		if (sndSystem == null) {
 			return null;
 		}
 		
-		ClientSound snd = new ClientSound(this.soundSystem, oggLocation, getURLForSoundResource.apply(oggLocation), lastSoundLevel, repeats, attenuationDistance, gauge);
+		ClientSound snd = new ClientSound(this.soundSystem, oggLocation, getURLForSoundResource.apply(oggLocation.internal), lastSoundLevel, repeats, attenuationDistance, gauge);
 		this.sounds.add(snd);
         
         return snd;

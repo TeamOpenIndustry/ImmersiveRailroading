@@ -1,15 +1,14 @@
 package cam72cam.immersiverailroading.render;
 
 import cam72cam.immersiverailroading.model.obj.Vec2f;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 
 import java.nio.FloatBuffer;
-import java.util.List;
 import java.util.Map;
 
 public class VBA {
@@ -32,7 +31,7 @@ public class VBA {
         normalBuffer = BufferUtils.createFloatBuffer(size * 3 * 3);
         colorBuffer = BufferUtils.createFloatBuffer(size * 3 * 4);
         texBuffer = BufferUtils.createFloatBuffer(size * 3 * 2);
-        isVBO = OpenGlHelper.useVbo();
+        isVBO = MinecraftClient.useVBO();
     }
 
     public VBA(int size, Map<String, Pair<Integer, Integer>> groupIdx) {

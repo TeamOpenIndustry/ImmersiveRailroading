@@ -244,7 +244,7 @@ public class TileMultiblock extends TickableTileEntity {
 				this.markDirty();
 			}
 		} else {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), craftItem.internal, mode));
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(pos, craftItem, mode));
 		}
 	}
 	
@@ -260,7 +260,7 @@ public class TileMultiblock extends TickableTileEntity {
 				this.markDirty();
 			}
 		} else {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(getPos(), selected.internal, craftMode));
+			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(pos, selected, craftMode));
 		}
 	}
 	

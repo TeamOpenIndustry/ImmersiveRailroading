@@ -14,7 +14,7 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import net.minecraft.util.ResourceLocation;
+import cam72cam.mod.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -26,11 +26,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	private int width;
 	
 	public Quilling quill;
-	public ResourceLocation whistle;
-	public ResourceLocation idle;
-	public ResourceLocation chuff;
-	public ResourceLocation pressure;
-	public ResourceLocation bell;
+	public Identifier whistle;
+	public Identifier idle;
+	public Identifier chuff;
+	public Identifier pressure;
+	public Identifier bell;
 	
 	public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -55,35 +55,35 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
 		//sets default sounds
-		whistle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
-		idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
-		chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
-		pressure = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
-		bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
+		whistle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
+		idle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
+		chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
+		pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
+		bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
 
 		boolean whistleSet = false;
 		
 		//overrides original sounds with added sounds
 		if (sounds != null) {
 			if (sounds.has("whistle")) {
-				whistle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
+				whistle = new Identifier(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
 				whistleSet = true;
 			}
 			
 			if (sounds.has("idle")) {
-				idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
+				idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
 			}
 			
 			if (sounds.has("chuff")) {
-				chuff = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString());
+				chuff = new Identifier(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString());
 			}
 			
 			if (sounds.has("pressure")) {
-				pressure = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString());
+				pressure = new Identifier(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString());
 			}
 
 			if (sounds.has("bell")) {
-				bell = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
+				bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
 			}
 			
 			if (sounds.has("quilling")) {
@@ -92,7 +92,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			}
 		}
 		if (!whistleSet) {
-			quill = new Quilling(new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
+			quill = new Quilling(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
 		}
 	}
 

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import java.util.ArrayList;
 
+import cam72cam.mod.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -9,7 +10,6 @@ import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock.SteamHamme
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
-import net.minecraft.util.ResourceLocation;
 
 public class SteamHammerRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -18,9 +18,9 @@ public class SteamHammerRender implements IMultiblockRender {
 
 	public SteamHammerRender() {
 		try {
-			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f));
-			this.hammer = new ArrayList<String>();
-			this.rest = new ArrayList<String>();
+			this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f));
+			this.hammer = new ArrayList<>();
+			this.rest = new ArrayList<>();
 			for (String group : renderer.model.groups()) {
 				if (group.contains("Hammer")) {
 					hammer.add(group);

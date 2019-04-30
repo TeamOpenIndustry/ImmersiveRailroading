@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -10,7 +11,6 @@ import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstanc
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
-import net.minecraft.util.ResourceLocation;
 
 public class CastingRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -20,10 +20,10 @@ public class CastingRender implements IMultiblockRender {
 
 	public CastingRender() {
 		try {
-			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/casting_machine.obj"), 0.1f));
-			flowing_steel = new ArrayList<String>();
-			steel_level = new ArrayList<String>();
-			rest = new ArrayList<String>();
+			this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/casting_machine.obj"), 0.1f));
+			flowing_steel = new ArrayList<>();
+			steel_level = new ArrayList<>();
+			rest = new ArrayList<>();
 			for (String name : renderer.model.groups.keySet()) {
 				if (name.contains("FLOWING_STEEL")) {
 					flowing_steel.add(name);
@@ -59,7 +59,7 @@ public class CastingRender implements IMultiblockRender {
 			renderer.drawGroups(steel_level);
 			GL11.glPopMatrix();
 		}
-		renderer.drawGroups(rest);;
+		renderer.drawGroups(rest);
 		GL11.glPopMatrix();
 		
 		this.renderer.restoreTexture();

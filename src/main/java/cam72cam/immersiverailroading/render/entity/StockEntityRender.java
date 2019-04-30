@@ -27,8 +27,6 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 	public void doRender(EntityRollingStock stock, double x, double y, double z, float entityYaw, float partialTicks) {
 		Minecraft.getMinecraft().mcProfiler.startSection("ir_stock");
 		
-		stock.renderTick(partialTicks);
-		
 		String def = stock.getDefinitionID();
 		
 		StockModel model = StockRenderCache.getRender(def);
@@ -44,7 +42,7 @@ public class StockEntityRender extends Render<EntityRollingStock> {
 			GL11.glPushMatrix();
 			{
 				GL11.glRotatef(180 - entityYaw, 0, 1, 0);
-				GL11.glRotatef(stock.rotationPitch, 1, 0, 0);
+				GL11.glRotatef(stock.getRotationPitch(), 1, 0, 0);
 				GL11.glRotatef(-90, 0, 1, 0);
 				model.draw(stock, partialTicks);
 			}

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.util.TagCompound;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -16,9 +17,6 @@ import cam72cam.immersiverailroading.util.FluidQuantity;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.*;
@@ -26,8 +24,9 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 public abstract class FreightTank extends Freight {
-	private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.createKey(FreightTank.class, DataSerializers.VARINT);
-	private static final DataParameter<String> FLUID_TYPE = EntityDataManager.createKey(FreightTank.class, DataSerializers.STRING);
+	private static final String FLUID_AMOUNT = "FLUID_AMOUNT";
+	private static final String FLUID_TYPE = "FLUID_TYPE";
+
 	protected final FluidTank theTank = new FluidTank(null, 0) {
 		@Override
 		public boolean canFillFluidType(FluidStack fluid) {
@@ -36,17 +35,17 @@ public abstract class FreightTank extends Freight {
 		
 		@Override
 		public void onContentsChanged() {
-			if (world.isServer) {
+			if (getWorld().isServer) {
 				FreightTank.this.onTankContentsChanged();
 			}
 		}
 	};;
 
-	public FreightTank(net.minecraft.world.World world) {
-		super(world);
+	public FreightTank(ModdedEntity entity) {
+		super(entity);
 		
-		dataManager.register(FLUID_AMOUNT, 0);
-		dataManager.register(FLUID_TYPE, "EMPTY");
+		sync.setInteger(FLUID_AMOUNT, 0);
+		sync.setString(FLUID_TYPE, "EMPTY");
 	}
 
 	/*
@@ -89,11 +88,11 @@ public abstract class FreightTank extends Freight {
 	}
 	
 	public int getLiquidAmount() {
-		return this.dataManager.get(FLUID_AMOUNT);
+		return sync.getInteger(FLUID_AMOUNT);
 	}
 	
 	public Fluid getLiquid() {
-		String type = this.dataManager.get(FLUID_TYPE);
+		String type = sync.getString(FLUID_TYPE);
 		if (type.equals("EMPTY")) {
 			return null;
 		}
@@ -131,16 +130,17 @@ public abstract class FreightTank extends Freight {
 	}
 
 	protected void onTankContentsChanged() {
-		if (world.isClient) {
+		if (getWorld().isClient) {
 			return;
 		}
 		
-		this.dataManager.set(FLUID_AMOUNT, theTank.getFluidAmount());
+		sync.setInteger(FLUID_AMOUNT, theTank.getFluidAmount());
 		if (theTank.getFluid() == null) {
-			this.dataManager.set(FLUID_TYPE, "EMPTY");
+			sync.setString(FLUID_TYPE, "EMPTY");
 		} else {
-			this.dataManager.set(FLUID_TYPE, FluidRegistry.getFluidName(theTank.getFluid()));
+			sync.setString(FLUID_TYPE, FluidRegistry.getFluidName(theTank.getFluid()));
 		}
+		sync.send();
 	}
 	
 	public int getServerLiquidAmount() {
@@ -158,15 +158,15 @@ public abstract class FreightTank extends Freight {
 	}
 
 	@Override
-	public void save(TagCompound nbttagcompound) {
-		super.load(nbttagcompound);
-		nbttagcompound.set("tank", new TagCompound(this.theTank.writeToNBT(new NBTTagCompound())));
+	public void save(TagCompound data) {
+		super.load(data);
+		data.set("tank", new TagCompound(this.theTank.writeToNBT(new NBTTagCompound())));
 	}
 
 	@Override
-	public void load(TagCompound nbttagcompound) {
-		super.load(nbttagcompound);
-		this.theTank.readFromNBT(nbttagcompound.get("tank").internal);
+	public void load(TagCompound data) {
+		super.load(data);
+		this.theTank.readFromNBT(data.get("tank").internal);
 		onTankContentsChanged();
 	}
 	
@@ -178,7 +178,7 @@ public abstract class FreightTank extends Freight {
 
 	protected void checkInvent() {
 
-		if (world.isClient) {
+		if (getWorld().isClient) {
 			return;
 		}
 		
@@ -272,7 +272,7 @@ public abstract class FreightTank extends Freight {
 	@Override
 	protected void onInventoryChanged() {
 		super.onInventoryChanged();
-		if (world.isServer) {
+		if (getWorld().isServer) {
 			for(ISyncableSlots container : listners) {
 				container.syncSlots();;
 			}

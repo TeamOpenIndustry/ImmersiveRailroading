@@ -1,16 +1,16 @@
 package cam72cam.immersiverailroading.render.entity;
 
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.render.GLSLShader;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
 
 public class ParticleRender extends Render<EntitySmokeParticle> {
 
@@ -62,7 +62,7 @@ public class ParticleRender extends Render<EntitySmokeParticle> {
 			GL11.glTranslated(particle.motionX * partialTicks, particle.motionY * partialTicks, particle.motionZ * partialTicks);
 			
 			// Rotate to look at internal
-			Vec3d offsetForRot = Minecraft.getMinecraft().player.getPositionEyes(partialTicks).subtract(particle.getPositionVector());
+			Vec3d offsetForRot = MinecraftClient.getPlayer().getPositionEyes(partialTicks).subtract(new Vec3d(particle.getPositionVector()));
 			GL11.glRotated(180 - VecUtil.toWrongYaw(offsetForRot), 0, 1, 0);
 			GL11.glRotated(180 - VecUtil.toPitch(offsetForRot)+90, 1, 0, 0);
 

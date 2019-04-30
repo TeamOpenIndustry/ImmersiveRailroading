@@ -1,49 +1,41 @@
 package cam72cam.immersiverailroading.render.entity;
 
-import java.util.*;
-
-import javax.annotation.Nullable;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.track.BuilderBase;
-import cam72cam.immersiverailroading.track.BuilderCubicCurve;
-import cam72cam.immersiverailroading.track.IIterableTrack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.base.Predicate;
-
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.World;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.math.Vec3d;
+import com.google.common.base.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
+
+import java.util.*;
 
 public class RenderOverride {
 
 	public static Vec3d getCameraPos(float partialTicks) {
-        Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
+        net.minecraft.entity.Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
         double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * partialTicks;
         double d1 = playerrRender.lastTickPosY + (playerrRender.posY - playerrRender.lastTickPosY) * partialTicks;
         double d2 = playerrRender.lastTickPosZ + (playerrRender.posZ - playerrRender.lastTickPosZ) * partialTicks;
@@ -59,17 +51,12 @@ public class RenderOverride {
 	
 	private static boolean isInRenderDistance(Vec3d pos) {
 		// max rail length is 100, 50 is center
-		return Minecraft.getMinecraft().player.getPositionVector().distanceTo(pos) < ((Minecraft.getMinecraft().gameSettings.renderDistanceChunks+1) * 16 + 50);
+		return MinecraftClient.getPlayer().getPosition().distanceTo(pos) < ((Minecraft.getMinecraft().gameSettings.renderDistanceChunks+1) * 16 + 50);
 	}
 	
-	private static final Predicate<Entity> IN_RENDER_DISTANCE = new Predicate<Entity>()
-    {
-        public boolean apply(@Nullable Entity p_apply_1_)
-        {
-            return isInRenderDistance(p_apply_1_.getPositionVector());
-        }
-    };
-	
+	private static final Predicate<Entity> IN_RENDER_DISTANCE = p_apply_1_ -> isInRenderDistance(p_apply_1_.getPosition());
+	private static final Predicate<net.minecraft.entity.Entity> _IN_RENDER_DISTANCE = p_apply_1_ -> isInRenderDistance(new Vec3d(p_apply_1_.getPositionVector()));
+
 	public static void renderStock(float partialTicks) {
         int pass = MinecraftForgeClient.getRenderPass();
         if (pass != 0 && ConfigGraphics.useShaderFriendlyRender) {
@@ -80,11 +67,11 @@ public class RenderOverride {
 
         ICamera camera = getCamera(partialTicks);
         
-        World world = Minecraft.getMinecraft().player.getEntityWorld();
-        List<EntityRollingStock> entities = world.getEntities(EntityRollingStock.class, IN_RENDER_DISTANCE);
+        World world = MinecraftClient.getPlayer().getWorld();
+        List<EntityRollingStock> entities = world.getEntities(EntityRollingStock.class);
         for (EntityRollingStock entity : entities) {
-        	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox())) {
-        		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity, partialTicks, true);
+        	if (camera.isBoundingBoxInFrustum(entity.internal.getRenderBoundingBox())) {
+        		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity.internal, partialTicks, true);
         	}
         }
 
@@ -103,11 +90,11 @@ public class RenderOverride {
         ICamera camera = getCamera(partialTicks);
         Vec3d ep = getCameraPos(partialTicks);
         
-        World world = Minecraft.getMinecraft().player.getEntityWorld();
-        List<EntitySmokeParticle> smokeEnts = world.getEntities(EntitySmokeParticle.class, IN_RENDER_DISTANCE);
+        World world = MinecraftClient.getPlayer().getWorld();
+        List<EntitySmokeParticle> smokeEnts = world.internal.getEntities(EntitySmokeParticle.class, _IN_RENDER_DISTANCE);
         Comparator<EntitySmokeParticle> compare = (EntitySmokeParticle e1, EntitySmokeParticle e2) -> {
-        	Double p1 = e1.getPositionVector().squareDistanceTo(ep);
-        	Double p2 = e1.getPositionVector().squareDistanceTo(ep);
+        	Double p1 = e1.getPositionVector().squareDistanceTo(ep.internal);
+        	Double p2 = e1.getPositionVector().squareDistanceTo(ep.internal);
         	return p1.compareTo(p2);
         };
         Minecraft.getMinecraft().mcProfiler.startSection("ent_sort");
@@ -162,7 +149,7 @@ public class RenderOverride {
         		if (!((TileRail) te).isLoaded()) {
         			continue;
         		}
-	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(te.getPos()))) {
+	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((TileRail) te).pos))) {
 
 	        		RailInfo info = ((TileRail) te).info;
 	        		if (info == null) {
@@ -181,7 +168,7 @@ public class RenderOverride {
 	        				info = info.withType(TrackItems.STRAIGHT);
 	        			}
 
-						Vec3d pos = info.placementInfo.placementPosition.internal.subtract(cameraPos);
+						Vec3d pos = info.placementInfo.placementPosition.subtract(cameraPos);
 						GL11.glTranslated(pos.x, pos.y, pos.z);
 
 		        		RailBuilderRender.renderRailBuilder(info);
@@ -207,7 +194,7 @@ public class RenderOverride {
 				}
 				for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.pos)).getSubBuilders()) {
 					RailInfo info = builder.info;
-					Vec3d placementPosition = info.placementInfo.placementPosition.internal;
+					Vec3d placementPosition = info.placementInfo.placementPosition;
 
 					if (isInRenderDistance(placementPosition)) {
 						placementPosition = placementPosition.subtract(cameraPos);

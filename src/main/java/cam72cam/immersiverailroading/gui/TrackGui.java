@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.mod.World;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import com.google.common.base.Predicate;
@@ -30,8 +31,6 @@ import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.StringUtils;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class TrackGui extends GuiScreen {
 	private GuiButton typeButton;
@@ -74,7 +73,7 @@ public class TrackGui extends GuiScreen {
 			return val > 0 && val <= 1000;
 		}
 	};
-	private BlockPos tilePreviewPos;
+	private Vec3i tilePreviewPos;
 
 	public TrackGui() {
 		slot = Minecraft.getMinecraft().player.inventory.currentItem;
@@ -83,8 +82,8 @@ public class TrackGui extends GuiScreen {
 	}
 
 	public TrackGui(World world, int posX, int posY, int posZ) {
-		this.tilePreviewPos = new BlockPos(posX, posY, posZ);
-		TileRailPreview te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(tilePreviewPos), TileRailPreview.class);
+		this.tilePreviewPos = new Vec3i(posX, posY, posZ);
+		TileRailPreview te = world.getTileEntity(tilePreviewPos, TileRailPreview.class);
 		if (te != null) {
 			init(te.getItem());
 		}

@@ -11,15 +11,15 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import net.minecraft.util.ResourceLocation;
+import cam72cam.mod.util.Identifier;
 import net.minecraft.world.World;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	private FluidQuantity fuelCapacity;
 	private int fuelEfficiency;
-	public ResourceLocation idle;
-	public ResourceLocation horn;
-	public ResourceLocation bell;
+	public Identifier idle;
+	public Identifier horn;
+	public Identifier bell;
 	private boolean hornSus = true;
 	public boolean muliUnitCapable;
 
@@ -69,20 +69,20 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
 		if (sounds != null && sounds.has("idle")) {
-			idle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
+			idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString());
 		} else {
-			idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
+			idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
 		}
 		
 		if (sounds != null && sounds.has("horn")) {
-			horn = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("horn").getAsString());
+			horn = new Identifier(ImmersiveRailroading.MODID, sounds.get("horn").getAsString());
 		} else {
-			horn = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
+			horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
 		}
 		if (sounds != null && sounds.has("bell")) {
-			bell = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
+			bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
 		} else {
-			bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
+			bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 		}
 	}
 

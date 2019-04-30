@@ -7,6 +7,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.mod.World;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -50,15 +51,10 @@ public class IRCommand extends CommandBase {
 		}
 		
 		if (args[0].equals("debug")) {
-			List<EntityRollingStock> ents = sender.getEntityWorld().getEntities(EntityRollingStock.class, EntitySelectors.IS_ALIVE);
-			ents.sort(new Comparator<EntityRollingStock>() {
-				@Override
-				public int compare(EntityRollingStock a, EntityRollingStock b) {
-					return a.getPersistentID().toString().compareTo(b.getPersistentID().toString());
-				}
-			});
+			List<EntityRollingStock> ents = World.get(sender.getEntityWorld()).getEntities(EntityRollingStock.class);
+			ents.sort(Comparator.comparing(a -> a.getUUID().toString()));
 			for (EntityRollingStock ent : ents) {
-				sender.sendMessage(new TextComponentString(String.format("%s : %s - %s : %s", ent.getPersistentID(), ent.getEntityId(), ent.getDefinitionID(), ent.getPosition())));
+				sender.sendMessage(new TextComponentString(String.format("%s : %s - %s : %s", ent.getUUID(), ent.internal.getEntityId(), ent.getDefinitionID(), ent.getPosition())));
 			}
 			return;
 		}

@@ -5,22 +5,24 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ModdedEntity;
+import cam72cam.mod.entity.Player;
 import net.minecraftforge.fluids.Fluid;
 
 public class HandCar extends Locomotive {
 	
-	public HandCar(net.minecraft.world.World world) {
-		super(world);
+	public HandCar(ModdedEntity entity) {
+		super(entity);
 	}
 
 	@Override
 	protected int getAvailableHP() {
 		int passengers = 0;
 		for (Entity passenger : this.getPassengers()) {
-			if (passenger instanceof EntityPlayer) {
-				EntityPlayer player = (EntityPlayer) passenger;
+			if (passenger.isPlayer()) {
+				Player player = passenger.asPlayer();
 				if (!player.isCreative()) {
-					if (player.getFoodStats().getFoodLevel() > 0) {
+					if (player.getFoodLevel() > 0) {
 						passengers++;
 					}
 				} else {
@@ -32,20 +34,20 @@ public class HandCar extends Locomotive {
 	}
 	
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void onTick() {
+		super.onTick();
 		
-		if (world.isClient) {
+		if (getWorld().isClient) {
 			return;
 		}
 		
-		if (this.getThrottle() != 0 && this.ticksExisted % (int)(200 * (1.1-Math.abs(this.getThrottle()))) == 0) {
+		if (this.getThrottle() != 0 && this.getTickCount() % (int)(200 * (1.1-Math.abs(this.getThrottle()))) == 0) {
 			for (Entity passenger : this.getPassengers()) {
-				if (passenger instanceof EntityPlayer) {
-					EntityPlayer player = (EntityPlayer) passenger;
+				if (passenger.isPlayer()) {
+					Player player = passenger.asPlayer();
 					if (!player.isCreative()) {
-						if (player.getFoodStats().getFoodLevel() > 0) {
-							player.getFoodStats().setFoodLevel(player.getFoodStats().getFoodLevel() - 1);
+						if (player.getFoodLevel() > 0) {
+							player.setFoodLevel(player.getFoodLevel() - 1);
 						}
 					}
 				}
@@ -60,6 +62,6 @@ public class HandCar extends Locomotive {
 
 	@Override
 	public List<Fluid> getFluidFilter() {
-		return new ArrayList<Fluid>();
+		return new ArrayList<>();
 	}
 }
