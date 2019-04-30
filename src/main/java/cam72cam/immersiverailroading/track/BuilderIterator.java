@@ -28,11 +28,11 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 	public BuilderIterator(RailInfo info, Vec3i pos, boolean endOfTrack) {
 		super(info, pos);
 		
-		positions = new HashSet<Pair<Integer, Integer>>();
-		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<Pair<Integer, Integer>, Float>();
-		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<Pair<Integer, Integer>, Float>();
-		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<Pair<Integer, Integer>, Integer>();
-		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
+		positions = new HashSet<>();
+		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<>();
+		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<>();
+		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<>();
+		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<>();
 		
 		double horiz = info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && info.settings.gauge.value() < 1) {
@@ -65,7 +65,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			gagPos = gagPos.add(0, heightOffset, 0);
 
 			for (double q = -horiz; q <= horiz; q+=0.1) {
-				Vec3d nextUp = new Vec3d(VecUtil.fromYaw(q, 90 + cur.yaw));
+				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
 				int posX = (int)Math.floor(gagPos.x+nextUp.x+placeOff.x);
 				int posZ = (int)Math.floor(gagPos.z+nextUp.z+placeOff.z);
 				double height = 0;
@@ -148,7 +148,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				PosStep cur = points.get(i);
-				Vec3d flatPos = new Vec3d(VecUtil.rotateYaw(cur.internal, -info.placementInfo.yaw));
+				Vec3d flatPos = VecUtil.rotateYaw(cur, -info.placementInfo.yaw);
 				if (Math.abs(flatPos.z) >= 0.5 * scale) {
 					switchSize = i;
 					break;
@@ -163,7 +163,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				double switchOffset = 1 - (i / (double)switchSize);
 				if (switchOffset > 0) {
 					double dist = 0.2 * switchOffset * scale;
-					Vec3d offset = new Vec3d(VecUtil.fromYaw(dist, cur.yaw + 90 + info.placementInfo.direction.toYaw()));
+					Vec3d offset = VecUtil.fromYaw(dist, cur.yaw + 90 + info.placementInfo.direction.toYaw());
 					double offsetAngle = Math.toDegrees(0.2/switchSize); // This line took a whole page of scribbled math
 					if (direction == TrackDirection.RIGHT)  {
 						offsetAngle = -offsetAngle;

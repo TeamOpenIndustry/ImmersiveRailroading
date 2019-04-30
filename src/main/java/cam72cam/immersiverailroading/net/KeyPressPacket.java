@@ -10,7 +10,7 @@ public class KeyPressPacket extends Packet {
 	public KeyPressPacket(KeyTypes key, Player player, EntityRidableRollingStock riding) {
 		super();
 		data.setEnum("key", key);
-		data.setEntity("riding", riding.self);
+		data.setEntity("riding", riding);
 		data.setBoolean("sprinting", player.internal.isSprinting());
 	}
 

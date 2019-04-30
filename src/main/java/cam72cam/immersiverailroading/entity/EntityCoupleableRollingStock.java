@@ -9,8 +9,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
+import cam72cam.immersiverailroading.util.RealBB;
+import cam72cam.mod.World;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
@@ -19,8 +20,6 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRItems;
@@ -69,8 +68,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private boolean backCouplerEngaged = true;
 	private Vec3d couplerRearPosition = null;
 
-	public EntityCoupleableRollingStock(net.minecraft.world.World world) {
-		super(world);
+	public EntityCoupleableRollingStock(ModdedEntity entity) {
+		super(entity);
 	}
 
 	/*
@@ -80,38 +79,38 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 */
 
 	@Override
-	public void save(TagCompound nbttagcompound) {
-		super.save(nbttagcompound);
+	public void save(TagCompound data) {
+		super.save(data);
 		if (coupledFront != null) {
-			nbttagcompound.setString("CoupledFront", coupledFront.toString());
+			data.setString("CoupledFront", coupledFront.toString());
 			if (lastKnownFront != null) {
-				nbttagcompound.setLong("lastKnownFront", lastKnownFront.toLong());
+				data.setLong("lastKnownFront", lastKnownFront.toLong());
 			}
 		}
-		nbttagcompound.setBoolean("frontCouplerEngaged", frontCouplerEngaged);
+		data.setBoolean("frontCouplerEngaged", frontCouplerEngaged);
 		if (coupledBack != null) {
-			nbttagcompound.setString("CoupledBack", coupledBack.toString());
+			data.setString("CoupledBack", coupledBack.toString());
 			if (lastKnownRear != null) {
-				nbttagcompound.setLong("lastKnownRear", lastKnownRear.toLong());
+				data.setLong("lastKnownRear", lastKnownRear.toLong());
 			}
 		}
-		nbttagcompound.setBoolean("backCouplerEngaged", backCouplerEngaged);
+		data.setBoolean("backCouplerEngaged", backCouplerEngaged);
 	}
 
 	@Override
-	public void load(TagCompound nbttagcompound) {
-		super.load(nbttagcompound);
-		if (nbttagcompound.hasKey("CoupledFront")) {
-			coupledFront = UUID.fromString(nbttagcompound.getString("CoupledFront"));
-            lastKnownFront = nbttagcompound.getVec3i("lastKnownFront");
+	public void load(TagCompound data) {
+		super.load(data);
+		if (data.hasKey("CoupledFront")) {
+			coupledFront = UUID.fromString(data.getString("CoupledFront"));
+            lastKnownFront = data.getVec3i("lastKnownFront");
 		}
-		frontCouplerEngaged = nbttagcompound.getBoolean("frontCouplerEngaged");
+		frontCouplerEngaged = data.getBoolean("frontCouplerEngaged");
 
-		if (nbttagcompound.hasKey("CoupledBack")) {
-			coupledBack = UUID.fromString(nbttagcompound.getString("CoupledBack"));
-            lastKnownRear = nbttagcompound.getVec3i("lastKnownRear");
+		if (data.hasKey("CoupledBack")) {
+			coupledBack = UUID.fromString(data.getString("CoupledBack"));
+            lastKnownRear = data.getVec3i("lastKnownRear");
 		}
-		backCouplerEngaged = nbttagcompound.getBoolean("backCouplerEngaged");
+		backCouplerEngaged = data.getBoolean("backCouplerEngaged");
 	}
 
 	/*
@@ -140,9 +139,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					player.sendMessage(ChatText.COUPLER_STATUS_COUPLED.getMessage(
 							coupler,
 							coupled.getDefinition().name(),
-							coupled.getPosition().getX(),
-							coupled.getPosition().getY(),
-							coupled.getPosition().getZ()
+							coupled.getPosition().x,
+							coupled.getPosition().y,
+							coupled.getPosition().z
 					));
 				} else {
 					if (this.isCouplerEngaged(coupler)) {
@@ -160,7 +159,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@Override
 	public void onTick() {
 		super.onTick();
-		
+
+		World world = getWorld();
 
 		if (world.isClient) {
 			// Only couple server side
@@ -172,14 +172,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 		
 		if (this.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
-			ChunkManager.flagEntityPos(this.world, self.getBlockPosition());
-			ChunkManager.flagEntityPos(this.world, new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
-			ChunkManager.flagEntityPos(this.world, new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
+			ChunkManager.flagEntityPos(world, getBlockPosition());
+			ChunkManager.flagEntityPos(world, new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
+			ChunkManager.flagEntityPos(world, new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
 			if (this.lastKnownFront != null) {
-				ChunkManager.flagEntityPos(this.world, this.lastKnownFront);
+				ChunkManager.flagEntityPos(world, this.lastKnownFront);
 			}
 			if (this.lastKnownRear != null) {
-				ChunkManager.flagEntityPos(this.world, this.lastKnownRear);
+				ChunkManager.flagEntityPos(world, this.lastKnownRear);
 			}
 		}
 		
@@ -189,22 +189,22 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
 			if (coupled == null) {
-				if (this.ticksExisted > 20) {
+				if (this.getTickCount() > 20) {
 					ImmersiveRailroading.warn("Coupled entity was not loaded after 20 ticks, decoupling");
 					this.decouple(coupler);
 				}
 				continue;
 			}
-			if (coupled.isDead) {
+			if (coupled.isDead()) {
 				ImmersiveRailroading.warn("Removing Dead Stock");
 				this.decouple(coupler);
 				continue;
 			}
 			
 			if (coupler == CouplerType.FRONT) {
-				lastKnownFront = coupled.self.getBlockPosition();
+				lastKnownFront = coupled.getBlockPosition();
 			} else {
-				lastKnownRear = coupled.self.getBlockPosition();
+				lastKnownRear = coupled.getBlockPosition();
 			}
 			
 			if (!this.isCouplerEngaged(coupler)) {
@@ -227,8 +227,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				
 				EntityCoupleableRollingStock stock = potential.getLeft();
 				CouplerType otherCoupler = potential.getRight();
-				this.setCoupledUUID(coupler, stock.getPersistentID());
-				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
+				this.setCoupledUUID(coupler, stock.getUUID());
+				stock.setCoupledUUID(otherCoupler, this.getUUID());
 				if (stock.isCouplerEngaged(otherCoupler) && this.isCouplerEngaged(coupler)) {
 					this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
 				}
@@ -237,7 +237,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	private Vec3d guessCouplerPosition(CouplerType coupler) {
-		return self.getPosition().add(VecUtil.fromWrongYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.rotationYaw));
+		return getPosition().add(VecUtil.fromWrongYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.getRotationYaw()));
 	}
 
 	public void tickPosRemainingCheck() {
@@ -260,7 +260,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			*/
 			
-			if (resimulate && this.ticksExisted % 5 != 0) {
+			if (resimulate && this.getTickCount() % 5 != 0) {
 				// Resimulate every 5 ticks, this will cut down on packet storms
 				return;
 			}
@@ -345,7 +345,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			positions.add(pos);
 			
 			for (DirectionalStock stock : train) {
-				if (stock.stock.getUniqueID().equals(this.getUniqueID())) {
+				if (stock.stock.getUUID().equals(this.getUUID())) {
 					//Skip self
 					continue;
 				}
@@ -393,7 +393,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			return onTrack;
 		}
 		
-		if ((!this.isCouplerEngaged(coupler) || !parent.isCouplerEngaged(otherCoupler)) && this.ticksExisted > 5 && parent.ticksExisted > 5) {
+		if ((!this.isCouplerEngaged(coupler) || !parent.isCouplerEngaged(otherCoupler)) && this.getTickCount() > 5 && parent.getTickCount() > 5) {
 			if (parent.positions.size() >= 2) {
 				// Push only, no pull
 				double prevDist = currentPos.position.distanceTo(parent.positions.get(tickOffset-1).position);
@@ -413,8 +413,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		Vec3d otherOffset = parent.getCouplerPositionTo(otherCoupler, parentPos, currentPos);
 		
 		if (otherOffset == null) {
-			if (world.isServer) {
-				ImmersiveRailroading.warn(String.format("Broken Coupling %s => %s", this.getPersistentID(), parent.getPersistentID()));
+			if (getWorld().isServer) {
+				ImmersiveRailroading.warn(String.format("Broken Coupling %s => %s", this.getUUID(), parent.getUUID()));
 			}
 			return onTrack;
 		}
@@ -438,9 +438,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 		
 		if (nextPos.speed.metric() != 0) {
-			ChunkManager.flagEntityPos(this.world, new Vec3i(nextPos.position));
+			ChunkManager.flagEntityPos(getWorld(), new Vec3i(nextPos.position));
 			for (CouplerType toChunk : CouplerType.values()) {
-				ChunkManager.flagEntityPos(this.world, new Vec3i(this.getCouplerPosition(toChunk, nextPos)));
+				ChunkManager.flagEntityPos(getWorld(), new Vec3i(this.getCouplerPosition(toChunk, nextPos)));
 			}
 		}
 
@@ -530,7 +530,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			return null;
 		}
 		for (CouplerType coupler : CouplerType.values()) {
-			if (stock.getUniqueID().equals(this.getCoupledUUID(coupler))) {
+			if (stock.getUUID().equals(this.getCoupledUUID(coupler))) {
 				return coupler;
 			}
 		}
@@ -590,9 +590,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public void decouple(EntityCoupleableRollingStock stock) {
-		if (stock.getPersistentID().equals(this.getCoupledUUID(CouplerType.FRONT))) {
+		if (stock.getUUID().equals(this.getCoupledUUID(CouplerType.FRONT))) {
 			decouple(CouplerType.FRONT);
-		} else if (stock.getPersistentID().equals(this.getCoupledUUID(CouplerType.BACK))) {
+		} else if (stock.getUUID().equals(this.getCoupledUUID(CouplerType.BACK))) {
 			decouple(CouplerType.BACK);
 		}
 	}
@@ -600,7 +600,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public void decouple(CouplerType coupler) {
 		EntityCoupleableRollingStock coupled = getCoupled(coupler);
 		
-		ImmersiveRailroading.info(this.getPersistentID() + " decouple " + coupler);
+		ImmersiveRailroading.info(this.getUUID() + " decouple " + coupler);
 
 		// Break the coupling
 		this.setCoupledUUID(coupler, null);
@@ -656,16 +656,16 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public Pair<EntityCoupleableRollingStock, CouplerType> potentialCouplings(CouplerType coupler) {
 		List<EntityCoupleableRollingStock> train = this.getTrain();
 		
-		List<EntityCoupleableRollingStock> nearBy = world.internal.getEntities(EntityCoupleableRollingStock.class, entity -> {
+		List<EntityCoupleableRollingStock> nearBy = getWorld().getEntities(entity -> {
 			if (entity == null) {
 				return false;
 			}
 
-			if (entity.isDead) {
+			if (entity.isDead()) {
 				return false;
 			}
 
-			if (entity.getDistance(EntityCoupleableRollingStock.this) > 64) {
+			if (entity.getPosition().subtract(this.getPosition()).length() > 64) {
 				return false;
 			}
 
@@ -674,13 +674,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 
 			for (EntityCoupleableRollingStock stock : train) {
-				if (stock.getUniqueID().equals(entity.getUniqueID())) {
+				if (stock.getUUID().equals(entity.getUUID())) {
 					return false;
 				}
 			}
 
 			return true;
-		});
+		}, EntityCoupleableRollingStock.class);
 		
 		Pair<EntityCoupleableRollingStock, CouplerType> bestMatch = null;
 		double bestDistance = 100;
@@ -701,8 +701,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			Vec3d stockFrontPos = stock.getCouplerPosition(CouplerType.FRONT);
 			Vec3d stockBackPos = stock.getCouplerPosition(CouplerType.BACK);
 			
-			double couplerDistFront = self.getPosition().distanceTo(stockFrontPos);
-			double couplerDistRear = self.getPosition().distanceTo(stockBackPos);
+			double couplerDistFront = getPosition().distanceTo(stockFrontPos);
+			double couplerDistRear = getPosition().distanceTo(stockBackPos);
 			
 			// See above diagram (3).  OtherCoupler closet to my center is the one we want to couple to.
 			CouplerType otherCoupler = couplerDistFront < couplerDistRear ? CouplerType.FRONT : CouplerType.BACK;
@@ -714,10 +714,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			Vec3d stockCouplerPos = otherCoupler == CouplerType.FRONT ? stockFrontPos : stockBackPos;
 			
 			double myCouplerToOtherCoupler = myCouplerPos.distanceTo(stockCouplerPos);
-			double myCenterToMyCoupler = self.getPosition().distanceTo(myCouplerPos);
-			double myCenterToOtherCoupler = self.getPosition().distanceTo(stockCouplerPos);
-			double myCouplerToOtherCenter = myCouplerPos.distanceTo(stock.self.getPosition());
-			double myOppositeCouplerToOtherCenter = myOppositeCouplerPos.distanceTo(stock.self.getPosition());
+			double myCenterToMyCoupler = getPosition().distanceTo(myCouplerPos);
+			double myCenterToOtherCoupler = getPosition().distanceTo(stockCouplerPos);
+			double myCouplerToOtherCenter = myCouplerPos.distanceTo(stock.getPosition());
+			double myOppositeCouplerToOtherCenter = myOppositeCouplerPos.distanceTo(stock.getPosition());
 
 			if (myCouplerToOtherCoupler > bestDistance) {
 				// Current best match is closer, should be a small edge case when stock is almost entirely overlapping
@@ -732,8 +732,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				}
 			} else {
 				// diagram 2 or diagram 3
-				AxisAlignedBB myBB = this.getCollisionBoundingBox().contract(0, 0, 0.25); // Prevent overlap on other rails
-				if (!myBB.contains(stockCouplerPos.internal)) {
+				RealBB myBB = this.getCollision().contract(new Vec3d(0, 0, 0.25)); // Prevent overlap on other rails
+				if (!myBB.contains(stockCouplerPos)) {
 					continue;
 				}
 			}
@@ -744,7 +744,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			
 			// findByUUID seems to work around a memcpy issue where refs are not updated
-			stock = this.findByUUID(stock.getUniqueID());
+			stock = this.findByUUID(stock.getUUID());
 			if (stock == null) {
 				//this should not happen...
 				continue;
@@ -841,14 +841,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		
 		DirectionalStock start = new DirectionalStock(null, this, true);
-		trainMap.add(start.stock.getPersistentID());
+		trainMap.add(start.stock.getUUID());
 		trainList.add(start);
 		
 		for (int i = 0; i < 2; i ++) {
 			// Will fire for both front and back
 			
 			for (DirectionalStock current = next.apply(start); current != null; current = next.apply(current)) {
-				trainMap.add(current.stock.getPersistentID());
+				trainMap.add(current.stock.getUUID());
 				trainList.add(current);
 			}
 		}
@@ -858,18 +858,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public EntityCoupleableRollingStock findByUUID(UUID uuid) {
-		// May want to cache this if it happens a lot
-		//List<EntityCoupleableRollingStock> elist = internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, this.getCollisionBoundingBox().grow(ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
-		//for (Object e : elist) {
-		for (Object e : world.internal.loadedEntityList) {
-			if (e instanceof EntityCoupleableRollingStock) {
-				EntityCoupleableRollingStock train = (EntityCoupleableRollingStock) e;
-				if (train.getPersistentID().equals(uuid)) {
-					return train;
-				}
-			}
-		}
-		return null;
+		return getWorld().getEntity(uuid, EntityCoupleableRollingStock.class);
 	}
 	
 	@Override

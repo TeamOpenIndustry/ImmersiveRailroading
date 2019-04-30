@@ -5,8 +5,8 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import net.minecraft.util.math.Vec3d;
 
 public class BuilderCrossing extends BuilderBase {
 	/*
@@ -38,7 +38,7 @@ public class BuilderCrossing extends BuilderBase {
 
 		double trackOffset = (1-info.settings.gauge.scale())/4;
 		
-		Vec3d pos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, 0), angle-90);
+		Vec3d pos = VecUtil.rotateWrongYaw(Vec3d.ZERO, angle-90);
 		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.settings.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		for (double i = -trackOffset; i < info.settings.length - trackOffset; i+=info.settings.gauge.scale()) {

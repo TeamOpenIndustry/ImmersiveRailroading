@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.model.obj.OBJModel;
@@ -10,7 +11,6 @@ import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock.BoilerRol
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
-import net.minecraft.util.ResourceLocation;
 
 public class BoilerRollerRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -20,10 +20,10 @@ public class BoilerRollerRender implements IMultiblockRender {
 
 	public BoilerRollerRender() {
 		try {
-			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/boiler_rolling_machine.obj"), 0.1f));
-			segments = new ArrayList<String>();
-			product = new ArrayList<String>();
-			rest = new ArrayList<String>();
+			this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/boiler_rolling_machine.obj"), 0.1f));
+			segments = new ArrayList<>();
+			product = new ArrayList<>();
+			rest = new ArrayList<>();
 			for (String name : renderer.model.groups.keySet()) {
 				if (name.contains("SEGMENT_")) {
 					segments.add(name);

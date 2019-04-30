@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
+import cam72cam.mod.util.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
@@ -21,7 +22,6 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformT
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import util.Matrix4;
 
@@ -31,7 +31,7 @@ public class RailCastItemRender implements IBakedModel {
 
 	static {
 		try {
-			model = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.05f));
+			model = new OBJRender(new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.05f));
 			groups = new ArrayList<String>();
 			
 			for (String groupName : model.model.groups())  {

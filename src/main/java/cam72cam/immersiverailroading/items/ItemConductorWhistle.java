@@ -11,7 +11,9 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.mod.World;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.math.Vec3d;
@@ -19,7 +21,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 public class ItemConductorWhistle extends ItemBase {
@@ -51,16 +52,16 @@ public class ItemConductorWhistle extends ItemBase {
 					Gauge.from(Gauge.STANDARD)
 			);
 			ImmersiveRailroading.net.sendToAllAround(packet, new NetworkRegistry.TargetPoint(player.internal.dimension, player.internal.posX, player.internal.posY, player.internal.posZ, Config.ConfigBalance.villagerConductorDistance * 1.2f));
-			
-			AxisAlignedBB bb = player.internal.getEntityBoundingBox().grow(Config.ConfigBalance.villagerConductorDistance, 4, Config.ConfigBalance.villagerConductorDistance);
-			List<EntityCoupleableRollingStock> carsNearby = world.internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, bb);
+
+			IBoundingBox bb = player.getBounds().grow(new Vec3d(Config.ConfigBalance.villagerConductorDistance, 4, Config.ConfigBalance.villagerConductorDistance));
+			List<EntityCoupleableRollingStock> carsNearby = world.getEntities((EntityCoupleableRollingStock stock) -> bb.intersects(stock.getBounds()), EntityCoupleableRollingStock.class);
 			EntityCoupleableRollingStock closestToPlayer = null;
 			for (EntityCoupleableRollingStock car : carsNearby) {
 				if (closestToPlayer == null) {
 					closestToPlayer = car;
 					continue;
 				}
-				if (closestToPlayer.getPositionVector().distanceTo(player.getPosition().internal) > car.getPositionVector().distanceTo(player.getPosition().internal)) {
+				if (closestToPlayer.getPosition().distanceTo(player.getPosition()) > car.getPosition().distanceTo(player.getPosition())) {
 					closestToPlayer = car;
 				}
 			}
@@ -72,7 +73,7 @@ public class ItemConductorWhistle extends ItemBase {
 						EntityCoupleableRollingStock closest = null;
 						for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
 							if (car.canFitPassenger(new Entity(villager)) && car.getDefinition().acceptsPassengers()) {
-								if (closest == null || closest.getPositionVector().distanceTo(villager.getPositionVector()) > car.getPositionVector().distanceTo(villager.getPositionVector())) {
+								if (closest == null || closest.getPosition().internal.distanceTo(villager.getPositionVector()) > car.getPosition().internal.distanceTo(villager.getPositionVector())) {
 									closest = car;
 								}
 							}
@@ -83,9 +84,9 @@ public class ItemConductorWhistle extends ItemBase {
 					}
 				} else {
 					for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
-						if (car.getPositionVector().distanceTo(player.getPosition().internal) < Config.ConfigBalance.villagerConductorDistance) {
+						if (car.getPosition().distanceTo(player.getPosition()) < Config.ConfigBalance.villagerConductorDistance) {
 							while (car.getPassengerCount() != 0) {
-                                car.dismountRidingEntity();
+                                car.removePassenger((ModdedEntity.StaticPassenger s) -> s.isVillager);
 							}
 						}
 					}

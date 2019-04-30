@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import java.util.Map;
 
+import cam72cam.mod.World;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.multiblock.Multiblock;
@@ -15,7 +16,6 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class MBBlueprintRender {
 	private static BlockRendererDispatcher blockRenderer;
@@ -45,7 +45,7 @@ public class MBBlueprintRender {
 			}
 			
 			IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
-			blockRenderer.getBlockModelRenderer().renderModel(world, model, state, pos.subtract(mb.placementPos()), worldRenderer, false);
+			blockRenderer.getBlockModelRenderer().renderModel(world.internal, model, state, pos.subtract(mb.placementPos()), worldRenderer, false);
 		}
 		
 		worldRenderer.finishDrawing();

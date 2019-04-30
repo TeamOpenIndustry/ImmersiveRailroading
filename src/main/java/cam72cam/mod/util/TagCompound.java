@@ -73,6 +73,19 @@ public class TagCompound {
         internal.setString(key, value);
     }
 
+    public UUID getUUID(String key) {
+        if (!internal.hasKey(key)) {
+            return null;
+        }
+        return internal.getUniqueId(key);
+    }
+    public void setUUID(String key, UUID value) {
+        internal.removeTag(key);
+        if (value != null) {
+            internal.setUniqueId(key, value);
+        }
+    }
+
     public Vec3i getVec3i(String key) {
         NBTTagCompound tag = internal.getCompoundTag(key);
         return new Vec3i(tag.getInteger("X"), tag.getInteger("Y"), tag.getInteger("Z"));
@@ -102,7 +115,7 @@ public class TagCompound {
     public cam72cam.mod.entity.Entity getEntity(String key) {
         return new cam72cam.mod.entity.Entity(getEntity(key, Entity.class));
     }
-    public <T extends Entity> T getEntity(String key, Class<T> cls) {
+    public <T> T getEntity(String key, Class<T> cls) {
         NBTTagCompound data = internal.getCompoundTag(key);
         UUID id = data.getUniqueId("id");
         int dim = data.getInteger("world");

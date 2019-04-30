@@ -37,8 +37,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 				if (pos.equals(Vec3i.ZERO)) {
 					delta = delta.subtract(new Vec3d(new Vec3i(info.placementInfo.placementPosition)));
 				}
-				PlacementInfo startPos = new PlacementInfo(new Vec3d(subCurve.p1.add(delta.internal)), info.placementInfo.direction, subCurve.angleStart(), new Vec3d(subCurve.ctrl1.add(delta.internal)));
-				PlacementInfo endPos   = new PlacementInfo(new Vec3d(subCurve.p2.add(delta.internal)), info.placementInfo.direction, subCurve.angleStop()+180, new Vec3d(subCurve.ctrl2.add(delta.internal)));
+				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), subCurve.ctrl1.add(delta));
+				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180, subCurve.ctrl2.add(delta));
 				RailInfo subInfo = new RailInfo(info.world, info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
 				Vec3i sPos = new Vec3i(startPos.placementPosition);
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, sPos);
@@ -59,7 +59,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 	private HashMap<Double, List<PosStep>> cache;
 
 	public CubicCurve getCurve() {
-		Vec3d nextPos = new Vec3d(new Vec3i(new Vec3d(VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45))));
+		Vec3d nextPos = new Vec3d(new Vec3i(VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45)));
 
 		boolean isDefault = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition);
 		if (!isDefault) {
@@ -75,17 +75,17 @@ public class BuilderCubicCurve extends BuilderIterator {
 			angle2 = info.customInfo.yaw;
 		}
 
-		net.minecraft.util.math.Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
-		net.minecraft.util.math.Vec3d ctrl2 = nextPos.internal.add(VecUtil.fromYaw(ctrlGuess, angle2));
+		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
+		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
 
 		if (info.placementInfo.control != null) {
-			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition).internal;
+			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition);
 		}
 		if (info.customInfo.control != null && !isDefault) {
-            ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition).internal;
+            ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition);
 		}
 
-		return new CubicCurve(Vec3d.ZERO.internal, ctrl1, ctrl2, nextPos.internal);
+		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos);
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		// Skip the super long calculation since it'll be overridden anyways
 		curve = curve.subsplit(200).get(0);
 
-		List<Vec3d> points = curve.toList(stepSize).stream().map(Vec3d::new).collect(Collectors.toList());
+		List<Vec3d> points = curve.toList(stepSize);
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			float yaw;
@@ -125,7 +125,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				Vec3d prev = points.get(i-1);
 				Vec3d next = points.get(i+1);
 				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
-				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)).internal);
+				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
 			res.add(new PosStep(p, yaw, pitch));
 		}
@@ -195,7 +195,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			super.build();
 		} else {
-			subBuilders.stream().forEach(BuilderBase::build);
+			subBuilders.forEach(BuilderBase::build);
 		}
 	}
 
@@ -204,7 +204,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			super.clearArea();
 		} else {
-			subBuilders.stream().forEach(BuilderBase::clearArea);
+			subBuilders.forEach(BuilderBase::clearArea);
 		}
 	}
 

@@ -16,12 +16,12 @@ import net.minecraftforge.fml.relauncher.Side;
 public abstract class Packet implements IMessage {
     private static int pktCount = 0;
 
-    public static void register(Class<Packet> cls, PacketDirection dir) {
-        ImmersiveRailroading.net.registerMessage(Packet.Handler.class, cls, pktCount++, dir == PacketDirection.ServerToClient ? Side.CLIENT : Side.SERVER);
+    public static void register(Class<? extends Packet> cls, PacketDirection dir) {
+        ImmersiveRailroading.net.registerMessage(new Packet.Handler<>(), cls, pktCount++, dir == PacketDirection.ServerToClient ? Side.CLIENT : Side.SERVER);
     }
 
     protected TagCompound data = new TagCompound();
-    private MessageContext ctx;
+    MessageContext ctx;
 
     public abstract void handle();
 
@@ -50,14 +50,14 @@ public abstract class Packet implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<Packet, IMessage> {
+    public static class Handler<T extends Packet> implements IMessageHandler<T, IMessage> {
         @Override
-        public IMessage onMessage(Packet message, MessageContext ctx) {
+        public IMessage onMessage(T message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(Packet message, MessageContext ctx) {
+        private void handle(T message, MessageContext ctx) {
             message.ctx = ctx;
             message.handle();
         }

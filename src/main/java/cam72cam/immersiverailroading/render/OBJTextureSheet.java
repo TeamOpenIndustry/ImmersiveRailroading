@@ -1,14 +1,13 @@
 package cam72cam.immersiverailroading.render;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
 import cam72cam.immersiverailroading.util.GPUInfo;
+import cam72cam.mod.util.Identifier;
 import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -44,13 +43,13 @@ public class OBJTextureSheet {
 		private int minV = 0;
 		private int maxU = 1;
 		private int maxV = 1;
-		public ResourceLocation tex;
+		public Identifier tex;
 
 		private boolean isFlatMaterial;
 		private int[] pixels;
 
 		
-		SubTexture(ResourceLocation tex, ResourceLocation fallback, Function<Integer, Integer> scale) throws IOException {
+		SubTexture(Identifier tex, Identifier fallback, Function<Integer, Integer> scale) throws IOException {
 			InputStream input;
 			try {
 				input = ImmersiveRailroading.proxy.getResourceStream(tex);
@@ -85,7 +84,7 @@ public class OBJTextureSheet {
 			maxU = 1;
 			minV = 0;
 			maxV = 1;
-			this.tex = new ResourceLocation("generated:" + name);
+			this.tex = new Identifier("generated:" + name);
 			isFlatMaterial = true;
 			
 			pixels = new int[realWidth * realHeight];
@@ -265,11 +264,11 @@ public class OBJTextureSheet {
 					String key = model.materials.get(mtlName).texKd.toString();
 					if (!mappings.containsKey(key)) {
 						try {
-							ResourceLocation kd = model.materials.get(mtlName).texKd;
+							Identifier kd = model.materials.get(mtlName).texKd;
 							if (texPrefix != null) {
 								String[] sp = kd.toString().split("/");
 								String fname = sp[sp.length-1];
-								kd = new ResourceLocation(kd.toString().replaceAll(fname, texPrefix + "/" + fname));
+								kd = new Identifier(kd.toString().replaceAll(fname, texPrefix + "/" + fname));
 							}
 							mappings.put(key, new SubTexture(kd, model.materials.get(mtlName).texKd, scaleFn));
 						} catch (IOException e) {
@@ -369,7 +368,7 @@ public class OBJTextureSheet {
 
 	public float convertU(String mtlName, float u) {
 		if (model.materials.containsKey(mtlName)) {
-			ResourceLocation kd = model.materials.get(mtlName).texKd;
+			Identifier kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
 				mtlName = kd.toString();
 			}
@@ -381,7 +380,7 @@ public class OBJTextureSheet {
 	}
 	public float convertV(String mtlName, float v) {
 		if (model.materials.containsKey(mtlName)) {
-			ResourceLocation kd = model.materials.get(mtlName).texKd;
+			Identifier kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
 				mtlName = kd.toString();
 			}
@@ -398,7 +397,7 @@ public class OBJTextureSheet {
 
 	public int samp(String mtlName, float u, float v) {
 		if (model.materials.containsKey(mtlName)) {
-			ResourceLocation kd = model.materials.get(mtlName).texKd;
+			Identifier kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
 				mtlName = kd.toString();
 			}
@@ -418,7 +417,7 @@ public class OBJTextureSheet {
 
 	public boolean isFlatMaterial(String mtlName) {
 		if (model.materials.containsKey(mtlName)) {
-			ResourceLocation kd = model.materials.get(mtlName).texKd;
+			Identifier kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
 				mtlName = kd.toString();
 			}

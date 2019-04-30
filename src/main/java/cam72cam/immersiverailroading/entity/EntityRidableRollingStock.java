@@ -5,20 +5,22 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.custom.IRidable;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.Hand;
 import net.minecraft.item.Item;
 
-import java.util.*;
+import java.util.List;
 
-public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock {
+public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
 	private static final double pressDist = 0.05;
 
-	public EntityRidableRollingStock(net.minecraft.world.World world) {
-		super(world);
+	public EntityRidableRollingStock(ModdedEntity entity) {
+		super(entity);
 	}
 
 	@Override
@@ -30,11 +32,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 		if (player.isCrouching()) {
 			return ClickResult.PASS;
-		} else if (this.isPassenger(player)) {
+		} else if (isPassenger(player)) {
 			return ClickResult.PASS;
 		} else {
-			if (world.isServer) {
-				this.addPassenger(player);
+			if (getWorld().isServer) {
+				addPassenger(player);
 			}
 			return ClickResult.ACCEPTED;
 		}
@@ -44,9 +46,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	public Vec3d getMountPosition(Entity entity) {
 		Vec3d pos = entity.getPosition();
 		Vec3d center = this.getDefinition().getPassengerCenter(gauge);
-		center = VecUtil.rotateWrongYaw(center, this.rotationYaw);
-		center = center.add(this.self.getPosition());
-		Vec3d off = VecUtil.rotateWrongYaw(center.subtract(pos), -this.rotationYaw);
+		center = VecUtil.rotateWrongYaw(center, super.getRotationYaw());
+		center = center.add(this.getPosition());
+		Vec3d off = VecUtil.rotateWrongYaw(center.subtract(pos), -this.getRotationYaw());
 
 		off = this.getDefinition().correctPassengerBounds(gauge, off);
 		int wiggle = entity.isVillager() ? 10 : 2;
@@ -55,10 +57,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		off = off.add(0, -off.y, 0);
 		return off;
 	}
-	
+
 	@Override
 	public boolean canFitPassenger(Entity passenger) {
-		return this.getPassengerCount() < this.getDefinition().getMaxPassengers();
+		return getPassengerCount() < this.getDefinition().getMaxPassengers();
 	}
 	
 	@Override
@@ -94,9 +96,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
 			
 			movement = VecUtil.rotateWrongYaw(movement, source.getYawHead());
-			movement = VecUtil.rotateWrongYaw(movement, 180-this.rotationYaw);
+			movement = VecUtil.rotateWrongYaw(movement, 180-this.getRotationYaw());
 
-			Vec3d pos = this.getRidingOffset(source).add(movement);
+			Vec3d pos = getRidingOffset(source).add(movement);
 
 			if (this instanceof EntityCoupleableRollingStock) {
 				if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
@@ -110,7 +112,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
 			
 			pos = this.getDefinition().correctPassengerBounds(gauge, pos);
-			this.setRidingOffset(source, pos);
+			setRidingOffset(source, pos);
 		}
 	}
 
@@ -120,30 +122,28 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (ppos != null && this.isPassenger(passenger)) {
 			Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
 			pos = pos.add(ppos);
-			pos = VecUtil.rotatePitch(pos, rotationPitch);
-			pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
-			pos = pos.add(self.getPosition());
+			pos = VecUtil.rotatePitch(pos, getRotationPitch());
+			pos = VecUtil.rotateWrongYaw(pos, getRotationYaw());
+			pos = pos.add(getPosition());
 			if (shouldRiderSit(passenger)) {
 				pos = pos.subtract(0, 0.75, 0);
 			}
-			passenger.internal.setPosition(pos.x, pos.y, pos.z);
-			passenger.internal.motionX = this.motionX;
-			passenger.internal.motionY = this.motionY;
-			passenger.internal.motionZ = this.motionZ;
-			
+			passenger.setPosition(pos);
+			passenger.setVelocity(this.getVelocity());
+
 			passenger.internal.prevRotationYaw = passenger.internal.rotationYaw;
-			passenger.internal.rotationYaw += (this.rotationYaw - this.prevRotationYaw);
+			passenger.internal.rotationYaw += (this.getRotationYaw() - this.getPrevRotationYaw());
 		}
 	}
 
-    public Vec3d getDismountPosition(Entity ent) {
+	public Vec3d getDismountPosition(Entity ent) {
 		Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
 		pos = pos.add(this.getRidingOffset(ent));
-		pos = VecUtil.rotateWrongYaw(pos, this.rotationYaw);
-		pos = pos.add(this.self.getPosition());
+		pos = VecUtil.rotateWrongYaw(pos, getRotationYaw());
+		pos = pos.add(this.getPosition());
 
 		Vec3d ppos = getRidingOffset(ent);
-		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.rotationYaw + (ppos.z > 0 ? 90 : -90));
+		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.getRotationYaw() + (ppos.z > 0 ? 90 : -90));
 		
 		return delta.add(pos);
 	}
@@ -151,14 +151,14 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	@Override
 	public void onDismountPassenger(Entity entity) {
 		if (entity.isVillager()) {
-			double distanceMoved = entity.getPosition().distanceTo(self.getPosition());
+			double distanceMoved = entity.getPosition().distanceTo(getPosition());
 
 			int payout = (int) Math.floor(distanceMoved * Config.ConfigBalance.villagerPayoutPerMeter);
 
 			List<Item> payouts = Config.ConfigBalance.getVillagerPayout();
 			if (payouts.size() != 0) {
 				int type = (int)(Math.random() * 100) % payouts.size();
-				world.dropItem(new ItemStack(payouts.get(type), payout), self.getBlockPosition());
+				getWorld().dropItem(new ItemStack(payouts.get(type), payout), getBlockPosition());
 				// TODO drop by player or new pos?
 			}
 		}

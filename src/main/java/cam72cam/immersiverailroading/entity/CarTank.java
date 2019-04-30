@@ -4,12 +4,13 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.registry.CarTankDefinition;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.mod.entity.ModdedEntity;
 import net.minecraftforge.fluids.Fluid;
 
 public class CarTank extends FreightTank {
 
-	public CarTank(net.minecraft.world.World world) {
-		super(world);
+	public CarTank(ModdedEntity entity) {
+		super(entity);
 	}
 
 	@Override

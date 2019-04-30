@@ -36,7 +36,7 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.TextUtil;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
+import cam72cam.mod.util.Identifier;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -47,9 +47,10 @@ public abstract class EntityRollingStockDefinition {
 	
 	public final EntityRollingStock spawn(World world, Vec3d pos, EnumFacing facing, Gauge gauge, String texture) {
 		EntityRollingStock stock = instance(world);
-		stock.setPosition(pos.x, pos.y, pos.z);
-		stock.prevRotationYaw = facing.getHorizontalAngle();
-		stock.rotationYaw = facing.getHorizontalAngle();
+		stock.setPosition(pos);
+		stock.setRotationYaw(facing.getHorizontalAngle());
+		// Override prev
+		stock.setRotationYaw(facing.getHorizontalAngle());
 		stock.setup(defID, gauge, texture);
 		world.spawnEntity(stock);
 
@@ -82,7 +83,7 @@ public abstract class EntityRollingStockDefinition {
 	protected double internal_inv_scale;
 	public Gauge recommended_gauge;
 	public Boolean shouldSit;
-	public ResourceLocation wheel_sound;
+	public Identifier wheel_sound;
 	
 	private Map<RenderComponentType, List<RenderComponent>> renderComponents;
 	ArrayList<ItemComponentType> itemComponents;
@@ -138,7 +139,7 @@ public abstract class EntityRollingStockDefinition {
 			this.internal_inv_scale = Gauge.STANDARD / recommended_gauge.value();
 		}
 		
-		model = new OBJModel(new ResourceLocation(data.get("model").getAsString()), darken, internal_model_scale);
+		model = new OBJModel(new Identifier(data.get("model").getAsString()), darken, internal_model_scale);
 		textureNames = new LinkedHashMap<String, String>();
 		textureNames.put(null, "Default");
 		if (data.has("tex_variants")) {
@@ -148,7 +149,7 @@ public abstract class EntityRollingStockDefinition {
 			}
 		}
 		
-		ResourceLocation alt_textures = new ResourceLocation(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
+		Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
 		try {
 			List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
 			for (InputStream input : alts) {
@@ -223,9 +224,9 @@ public abstract class EntityRollingStockDefinition {
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		if (sounds != null && sounds.has("wheels")) {
-			wheel_sound = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("wheels").getAsString());
+			wheel_sound = new Identifier(ImmersiveRailroading.MODID, sounds.get("wheels").getAsString());
 		} else {
-			wheel_sound = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
+			wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
 		}
 	}
 	
@@ -410,8 +411,8 @@ public abstract class EntityRollingStockDefinition {
 						double fheight = 0;
 						boolean first = true;
 						for (int[] point : model.points(face)) {
-							net.minecraft.util.math.Vec3d vert = model.vertices(point[0]);
-							vert = vert.addVector(this.frontBounds, 0, this.widthBounds/2);
+							Vec3d vert = model.vertices(point[0]);
+							vert = vert.add(this.frontBounds, 0, this.widthBounds/2);
 							if (first) {
 								path.moveTo(vert.x * ratio, vert.z * ratio);
 								first = false;
@@ -484,7 +485,7 @@ public abstract class EntityRollingStockDefinition {
 		for (int f : faces) {
 			float sum = 0;
 			for (int[] point : model.points(f)) {
-				net.minecraft.util.math.Vec3d pt = model.vertices(point[0]);
+				Vec3d pt = model.vertices(point[0]);
 				sum += pt.x;
 			}
 			depthCache[f] = sum / 3; //We know it's a tri
@@ -512,8 +513,8 @@ public abstract class EntityRollingStockDefinition {
 				vv += vt.y/3;
 
 
-				net.minecraft.util.math.Vec3d vert = model.vertices(point[0]);
-				vert = vert.addVector(0, 0, this.widthBounds/2);
+				Vec3d vert = model.vertices(point[0]);
+				vert = vert.add(0, 0, this.widthBounds/2);
 				if (first) {
 					path.moveTo(vert.z / nx + xoff / nx, vert.y / nx);
 				} else {
@@ -582,7 +583,7 @@ public abstract class EntityRollingStockDefinition {
 
 	public RealBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {
 		return (RealBB) new RealBB(gauge.scale() * frontBounds, gauge.scale() * -rearBounds, gauge.scale() * widthBounds,
-				gauge.scale() * heightBounds, stock.rotationYaw).offset(stock.getPositionVector());
+				gauge.scale() * heightBounds, stock.getRotationYaw()).offset(stock.getPosition());
 	}
 	
 	List<Vec3d> blocksInBounds = null;

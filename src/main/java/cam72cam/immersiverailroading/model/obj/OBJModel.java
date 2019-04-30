@@ -13,16 +13,16 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.RelativeResource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
 
 public class OBJModel {
 	// LinkedHashMap is ordered
-	public Map<String, int[]> groups = new LinkedHashMap<String, int[]>();
+	public Map<String, int[]> groups = new LinkedHashMap<>();
 	public float[] vertices;
 	public float[] vertexNormals;
 	public float[] vertexTextures;
@@ -31,32 +31,32 @@ public class OBJModel {
 	public byte[] offsetU;
 	public byte[] offsetV;
 
-	public Map<String, Material> materials = new HashMap<String, Material>();
+	public Map<String, Material> materials = new HashMap<>();
 	//public Map<Integer, String> mtlLookup = new HashMap<Integer, String>();
 	public float darken;
 
 	private Map<String, Vec3d> mins = new HashMap<>();
 	private Map<String, Vec3d> maxs = new HashMap<>();
 
-	public OBJModel(ResourceLocation modelLoc, float darken) throws Exception {
+	public OBJModel(Identifier modelLoc, float darken) throws Exception {
 		this(modelLoc, darken, 1);
 	}
 
-	public OBJModel(ResourceLocation modelLoc, float darken, double scale) throws Exception {
+	public OBJModel(Identifier modelLoc, float darken, double scale) throws Exception {
 		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		this.darken = darken;
 
 		String currentGroupName = "defaultName";
-		List<Integer> currentGroup = new ArrayList<Integer>();
-		List<String> materialPaths = new ArrayList<String>();
+		List<Integer> currentGroup = new ArrayList<>();
+		List<String> materialPaths = new ArrayList<>();
 		String currentMaterial = null;
 		
-		List<Integer> faceVerts = new ArrayList<Integer>();
-		List<String> faceMTLs = new ArrayList<String>();
-		List<Float> vertices = new ArrayList<Float>();
-		List<Float> vertexNormals = new ArrayList<Float>();
-		List<Float> vertexTextures = new ArrayList<Float>();
+		List<Integer> faceVerts = new ArrayList<>();
+		List<String> faceMTLs = new ArrayList<>();
+		List<Float> vertices = new ArrayList<>();
+		List<Float> vertexNormals = new ArrayList<>();
+		List<Float> vertexTextures = new ArrayList<>();
 		
 		Consumer<String[]> addFace = (String[] args) -> {
 			for(int i = 0; i < args.length; i++) {

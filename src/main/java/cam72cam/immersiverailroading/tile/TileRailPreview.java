@@ -134,7 +134,7 @@ public class TileRailPreview extends TickableTileEntity {
 	@Override
 	public void update() {
 		if (world.isServer && isMulti()) {
-			ChunkManager.flagEntityPos(world.internal, pos.internal);
+			ChunkManager.flagEntityPos(world, pos);
 
 			if (this.ticksAlive % 20 == 0) {
 				ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));

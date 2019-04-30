@@ -18,7 +18,7 @@ public class BuilderStraight extends BuilderCubicCurve {
 	public CubicCurve getCurve() {
 		double length = info.settings.length - 1;
 		CubicCurve curve = new CubicCurve(
-				Vec3d.ZERO.internal,
+				Vec3d.ZERO,
 				VecUtil.fromYaw(length*0.25, info.placementInfo.yaw),
                 VecUtil.fromYaw(length*0.75, info.placementInfo.yaw),
                 VecUtil.fromYaw(length, info.placementInfo.yaw)

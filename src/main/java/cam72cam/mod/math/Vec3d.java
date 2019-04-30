@@ -55,4 +55,11 @@ public class Vec3d {
     public Vec3d normalize() {
         return new Vec3d(internal.normalize());
     }
+
+    public Vec3d min(Vec3d other) {
+        return new Vec3d(Math.min(x, other.x), Math.min(y, other.y), Math.min(z, other.z));
+    }
+    public Vec3d max(Vec3d other) {
+        return new Vec3d(Math.max(x, other.x), Math.max(y, other.y), Math.max(z, other.z));
+    }
 }

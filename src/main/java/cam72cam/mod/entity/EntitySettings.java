@@ -5,12 +5,14 @@ public class EntitySettings {
     boolean immuneToFire;
     float entityCollisionReduction;
     boolean attachedToPlayer;
+    boolean defaultMovement;
 
     public EntitySettings() {
         this.immuneToFire = false;
         this.entityCollisionReduction = 0;
         this.attachedToPlayer = true;
         this.canBePushed = false;
+        this.defaultMovement = true;
     }
 
     public EntitySettings setImmuneToFire(boolean immuneToFire) {
@@ -30,6 +32,10 @@ public class EntitySettings {
 
     public EntitySettings setCanBePushed(boolean canBePushed) {
         this.canBePushed = canBePushed;
+        return this;
+    }
+    public EntitySettings setDefaultMovement(boolean defaultMovement) {
+        this.defaultMovement = defaultMovement;
         return this;
     }
 }

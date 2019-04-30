@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.net.PaintSyncPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.*;
+import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
@@ -17,16 +18,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class EntityRollingStock extends RidableEntity {
-	public static final EntitySettings settings = new EntitySettings().setCollisionReduction(1f).setImmuneToFire(true).setAttachedToPlayer(false);
-	
+public class EntityRollingStock extends Entity implements IWorldData, ISpawnData, ITickable, IClickable, IKillable {
+	public static final EntitySettings settings = new EntitySettings().setCollisionReduction(1f).setImmuneToFire(true).setAttachedToPlayer(false).setDefaultMovement(false);
+
 	protected String defID;
 	public Gauge gauge;
 	public String tag = "";
 	public String texture;
 
-	public EntityRollingStock(net.minecraft.world.World world) {
-		super(world);
+	public EntityRollingStock(ModdedEntity entity) {
+		super(entity);
 	}
 
 	public void setup(String defID, Gauge gauge, String texture) {
@@ -41,7 +42,7 @@ public abstract class EntityRollingStock extends RidableEntity {
 		return this.getDefinition().name();
 	}
 	*/
-	
+
 	public EntityRollingStockDefinition getDefinition() {
 		return this.getDefinition(EntityRollingStockDefinition.class);
 	}
@@ -65,10 +66,10 @@ public abstract class EntityRollingStock extends RidableEntity {
 
 	@Override
 	public void onTick() {
-		if (world.isServer && this.ticksExisted % 5 == 0) {
+		if (getWorld().isServer && this.getTickCount() % 5 == 0) {
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 			if (def == null) {
-				world.removeEntity(this);
+				this.kill();
 			}
 		}
 	}
@@ -79,7 +80,7 @@ public abstract class EntityRollingStock extends RidableEntity {
 	 */
 
 	@Override
-	protected void save(TagCompound nbttagcompound) {
+	public void save(TagCompound nbttagcompound) {
 		nbttagcompound.setString("defID", defID);
 		nbttagcompound.setDouble("gauge", gauge.value());
 		nbttagcompound.setString("tag", tag);
@@ -90,20 +91,39 @@ public abstract class EntityRollingStock extends RidableEntity {
 	}
 
 	@Override
-	protected void load(TagCompound nbttagcompound) {
+	public void load(TagCompound nbttagcompound) {
 		defID = nbttagcompound.getString("defID");
-		if (nbttagcompound.hasKey("gauge")) {
-			gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
-		} else {
-			gauge = Gauge.from(Gauge.STANDARD);
-		}
-		
+        gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
+
 		tag = nbttagcompound.getString("tag");
 		
 		if (nbttagcompound.hasKey("texture")) {
 			texture = nbttagcompound.getString("texture");
 		}
 	}
+
+
+	@Override
+	public void saveSpawn(TagCompound data) {
+		data.setString("defID", defID);
+		data.setDouble("gauge", gauge.value());
+		data.setString("tag", tag);
+
+		if (this.texture != null) {
+			data.setString("texture", texture);
+		}
+	}
+	@Override
+	public void loadSpawn(TagCompound data) {
+		defID = data.getString("defID");
+        gauge = Gauge.from(data.getDouble("gauge"));
+		tag = data.getString("tag");
+
+		if (data.hasKey("texture")) {
+			texture = data.getString("texture");
+		}
+	}
+
 
 	/*
 	 * Player Interactions
@@ -127,13 +147,8 @@ public abstract class EntityRollingStock extends RidableEntity {
 	}
 
 	@Override
-	public boolean canBeCollidedWith() {
-		// Needed for right click, probably a forge or MC bug
-		return true;
-	}
-
 	public void onDamage(DamageType type, Entity source, float amount) {
-		if (world.isClient) {
+		if (getWorld().isClient) {
 			return;
 		}
 
@@ -149,6 +164,11 @@ public abstract class EntityRollingStock extends RidableEntity {
 					this.kill();
 				}
 		}
+	}
+
+	@Override
+	public void onRemoved() {
+
 	}
 
 	protected boolean shouldDropItems(DamageType type, float amount) {
@@ -187,5 +207,4 @@ public abstract class EntityRollingStock extends RidableEntity {
 	public Gauge soundGauge() {
 		return this.getDefinition().shouldScalePitch() ? gauge : Gauge.from(Gauge.STANDARD);
 	}
-
 }

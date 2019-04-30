@@ -9,7 +9,7 @@ import cam72cam.mod.net.Packet;
  */
 public class BuildableStockSyncPacket extends Packet {
 	public BuildableStockSyncPacket(EntityBuildableRollingStock stock) {
-		this.data.setEntity("entity", stock.self);
+		this.data.setEntity("entity", stock);
 		this.data.setEnumList("items", stock.getItemComponents());
 	}
 

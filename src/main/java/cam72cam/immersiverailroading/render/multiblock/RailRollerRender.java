@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -11,7 +12,6 @@ import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock.RailRollerI
 import cam72cam.immersiverailroading.render.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
-import net.minecraft.util.ResourceLocation;
 
 public class RailRollerRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -21,10 +21,10 @@ public class RailRollerRender implements IMultiblockRender {
 
 	public RailRollerRender() {
 		try {
-			this.renderer = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.1f));
-			input = new ArrayList<String>();
-			output = new ArrayList<String>();
-			rest = new ArrayList<String>();
+			this.renderer = new OBJRender(new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.1f));
+			input = new ArrayList<>();
+			output = new ArrayList<>();
+			rest = new ArrayList<>();
 			for (String name : renderer.model.groups.keySet()) {
 				if (name.contains("INPUT_CAST")) {
 					input.add(name);
@@ -73,7 +73,7 @@ public class RailRollerRender implements IMultiblockRender {
 		}
 		GL11.glPopMatrix();
 		
-		renderer.drawGroups(rest);;
+		renderer.drawGroups(rest);
 		GL11.glPopMatrix();
 		
 		this.renderer.restoreTexture();

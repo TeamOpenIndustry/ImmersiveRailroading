@@ -1,11 +1,12 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.registry.CarFreightDefinition;
+import cam72cam.mod.entity.ModdedEntity;
 
 public class CarFreight extends Freight {
 
-	public CarFreight(net.minecraft.world.World world) {
-		super(world);
+	public CarFreight(ModdedEntity entity) {
+		super(entity);
 	}
 	
 	@Override

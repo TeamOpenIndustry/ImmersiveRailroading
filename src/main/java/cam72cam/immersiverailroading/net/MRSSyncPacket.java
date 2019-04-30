@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class MRSSyncPacket extends Packet {
 	public MRSSyncPacket(EntityMoveableRollingStock mrs, List<TickPos> positions) {
-		data.setEntity("stock", mrs.self);
-		data.setDouble("tps", ConfigDebug.serverTickCompensation ? 20 : CommonProxy.getServerTPS(mrs.getEntityWorld(), positions.size()));
+		data.setEntity("stock", mrs);
+		data.setDouble("tps", ConfigDebug.serverTickCompensation ? 20 : CommonProxy.getServerTPS(mrs.getWorld().internal, positions.size()));
 		data.setList("positions", positions, TickPos::toTag);
 	}
 	@Override

@@ -58,7 +58,7 @@ public class CommonAPI {
             info.put("tag", stock.tag);
             info.put("weight", stock.getWeight());
 
-            EnumFacing dir = EnumFacing.fromAngle(stock.rotationYaw);
+            EnumFacing dir = EnumFacing.fromAngle(stock.getRotationYaw());
             if (stock instanceof EntityMoveableRollingStock) {
                 EntityMoveableRollingStock movable = (EntityMoveableRollingStock) stock;
                 info.put("speed", movable.getCurrentSpeed().metric());
@@ -70,8 +70,7 @@ public class CommonAPI {
             info.put("direction", dir.toString());
 
             if (stock instanceof EntityRidableRollingStock) {
-                EntityRidableRollingStock ridable = (EntityRidableRollingStock) stock;
-                info.put("passengers", stock.getPassengers().size() + ridable.staticPassengers.size());
+                info.put("passengers", stock.getPassengerCount());
             }
 
             if (stock instanceof Locomotive) {
@@ -131,7 +130,7 @@ public class CommonAPI {
         info.put("tractive_effort_N", acc.tractiveEffortNewtons);
         info.put("weight_kg", acc.massToMoveKg);
         info.put("speed_km", stock.getCurrentSpeed().metric());
-        EnumFacing dir = EnumFacing.fromAngle(stock.rotationYaw);
+        EnumFacing dir = EnumFacing.fromAngle(stock.getRotationYaw());
         if (stock.getCurrentSpeed().metric() < 0) {
             dir = dir.getOpposite();
         }

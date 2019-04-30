@@ -1,7 +1,9 @@
 package cam72cam.mod;
 
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ModdedEntity;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -10,21 +12,147 @@ import cam72cam.mod.util.Facing;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.Chunk;
 
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 public class World {
+    /* Static access to loaded worlds */
+    private static Map<net.minecraft.world.World, World> worlds = new HashMap<>();
+    private static Map<Integer, World> worldsByID = new HashMap<>();
+
+    public static IWorldEventsReciever load(net.minecraft.world.World world) {
+        World worldWrap = new World(world);
+        worlds.put(world, worldWrap);
+        worldsByID.put(world.provider.getDimension(), worldWrap);
+        return new IWorldEventsReciever() {
+            @Override
+            public void onEntityAdded(net.minecraft.entity.Entity entity) {
+                worldWrap.onEntityAdded(entity);
+            }
+
+            @Override
+            public void onEntityRemoved(net.minecraft.entity.Entity entity) {
+                worldWrap.onEntityRemoved(entity);
+            }
+        };
+    }
+    public static void unload(net.minecraft.world.World world) {
+        worlds.remove(world);
+        worlds.remove(world.provider.getDimension());
+    }
+    public static World get(net.minecraft.world.World world) {
+        return worlds.get(world);
+    }
+    public static World get(int dimID) {
+        return worldsByID.get(dimID);
+    }
+
+    public interface IWorldEventsReciever {
+        void onEntityAdded(net.minecraft.entity.Entity entity);
+        void onEntityRemoved(net.minecraft.entity.Entity entity);
+    }
+
+    /* World Initialization */
+
     public final net.minecraft.world.World internal;
     public final boolean isClient;
     public final boolean isServer;
+    private final List<Entity> entities;
+    private final Map<Integer, Entity> entityByID;
+    private final Map<UUID, Entity> entityByUUID;
 
-    public World(net.minecraft.world.World world) {
-        this.internal = world;
-        this.isClient = world.isRemote;
-        this.isServer = !world.isRemote;
+    private World(net.minecraft.world.World world) {
+        internal = world;
+        isClient = world.isRemote;
+        isServer = !world.isRemote;
+        entities = new ArrayList<>();
+        entityByID = new HashMap<>();
+        entityByUUID = new HashMap<>();
     }
+
+    /* Event Methods */
+
+    private void onEntityAdded(net.minecraft.entity.Entity entityIn) {
+        Entity entity;
+        if (entityIn instanceof ModdedEntity) {
+            entity = ((ModdedEntity) entityIn).getSelf();
+        } else if (entityIn instanceof EntityPlayer) {
+            entity = new Player((EntityPlayer) entityIn);
+        } else {
+            entity = new Entity(entityIn);
+        }
+        entities.add(entity);
+        entityByID.put(entityIn.getEntityId(), entity);
+        entityByUUID.put(entity.getUUID(), entity);
+    }
+    private void onEntityRemoved(net.minecraft.entity.Entity entity) {
+        entities.remove(entity);
+        entityByID.remove(entity.getEntityId());
+        entityByUUID.remove(entity.getUniqueID());
+    }
+
+    /* Entity Methods */
+
+    public <T extends Entity> T getEntity(int id, Class<T> type) {
+        Entity ent = entityByID.get(id);
+        if (ent == null) {
+            return null;
+        }
+        if (!ent.getClass().isInstance(type)) {
+            // TODO Warning???
+            return null;
+        }
+        return (T)ent;
+    }
+
+    public <T extends Entity> T getEntity(UUID id, Class<T> type) {
+        Entity ent = entityByUUID.get(id);
+        if (ent == null) {
+            return null;
+        }
+        if (!ent.getClass().isInstance(type)) {
+            // TODO Warning???
+            return null;
+        }
+        return (T)ent;
+    }
+
+    public <T extends Entity> List<T> getEntities(Class<T> type) {
+        return getEntities((T val) -> true, type);
+    }
+
+    public <T extends Entity> List<T> getEntities(Predicate<T> filter, Class<T> type) {
+        return entities.stream().map(entity -> entity.as(type)).filter(entity -> entity != null).filter(filter).collect(Collectors.toList());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public <T extends net.minecraft.tileentity.TileEntity> T getTileEntity(Vec3i pos, Class<T> cls) {
         return getTileEntity(pos, cls, true);
@@ -52,6 +180,23 @@ public class World {
         return internal.getWorldTime();
     }
 
+    public double getTPS(int sampleSize) {
+        long[] ttl = internal.getMinecraftServer().tickTimeArray;
+
+        sampleSize = Math.min(sampleSize, ttl.length);
+        double ttus = 0;
+        for (int i = 0; i < sampleSize; i++) {
+            ttus += ttl[ttl.length - 1 - i] / sampleSize;
+        }
+
+        if (ttus == 0) {
+            ttus = 0.01;
+        }
+
+        double ttms = ttus * 1.0E-6D;
+        return Math.min(1000.0 / ttms, 20);
+    }
+
     public Vec3i getPrecipitationHeight(Vec3i offset) {
         return new Vec3i(internal.getPrecipitationHeight(offset.internal));
     }
@@ -72,11 +217,16 @@ public class World {
         return 0;
     }
 
+    public boolean isSnow(Vec3i ph) {
+        Block block = internal.getBlockState(ph.internal).getBlock();
+        return block == Blocks.SNOW || block == Blocks.SNOW_LAYER;
+    }
+
     public boolean isSnowBlock(Vec3i ph) {
         return internal.getBlockState(ph.internal).getBlock() == Blocks.SNOW;
     }
 
-    public boolean isRaining() {
+    public boolean isPrecipitating() {
         return internal.isRaining();
     }
 
@@ -85,7 +235,10 @@ public class World {
     }
 
     public void breakBlock(Vec3i pos) {
-        internal.destroyBlock(pos.internal, true);
+        this.breakBlock(pos, true);
+    }
+    public void breakBlock(Vec3i pos, boolean drop) {
+        internal.destroyBlock(pos.internal, drop);
     }
 
     public void dropItem(ItemStack stack, Vec3i pos) {
@@ -114,7 +267,24 @@ public class World {
         return power;
     }
 
-    public void removeEntity(Entity entity) {
-        internal.removeEntity(entity);
+    public void removeEntity(cam72cam.mod.entity.Entity entity) {
+        internal.removeEntity(entity.internal);
+    }
+
+    public boolean canSeeSky(Vec3i position) {
+        return internal.canSeeSky(position.internal);
+    }
+
+    public boolean isRaining(Vec3i position) {
+        return internal.getBiome(position.internal).canRain();
+    }
+    public boolean isSnowing(Vec3i position) {
+        return internal.getBiome(position.internal).isSnowyBiome();
+    }
+
+    public float getTemperature(Vec3i pos) {
+        float mctemp = internal.getBiome(pos.internal).getTemperature(pos.internal);
+        //https://www.reddit.com/r/Minecraft/comments/3eh7yu/the_rl_temperature_of_minecraft_biomes_revealed/ctex050/
+        return (13.6484805403f*mctemp)+7.0879687222f;
     }
 }

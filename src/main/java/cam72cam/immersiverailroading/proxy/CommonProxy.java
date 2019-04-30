@@ -1,51 +1,16 @@
 package cam72cam.immersiverailroading.proxy;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import cam72cam.immersiverailroading.net.*;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.block.IBreakCancelable;
-import cam72cam.mod.entity.RidableEntity;
-import cam72cam.mod.math.Vec3i;
-import org.apache.commons.io.IOUtils;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.CarFreight;
-import cam72cam.immersiverailroading.entity.CarPassenger;
-import cam72cam.immersiverailroading.entity.CarTank;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.FreightTank;
-import cam72cam.immersiverailroading.entity.HandCar;
-import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
-import cam72cam.immersiverailroading.entity.LocomotiveSteam;
-import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.gui.FreightContainer;
-import cam72cam.immersiverailroading.gui.SteamHammerContainer;
-import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
-import cam72cam.immersiverailroading.gui.TankContainer;
-import cam72cam.immersiverailroading.gui.TenderContainer;
+import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock;
-import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
-import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
-import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
-import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock;
-import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock;
+import cam72cam.immersiverailroading.multiblock.*;
+import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
@@ -54,6 +19,16 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.mod.World;
+import cam72cam.mod.block.IBreakCancelable;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ModdedEntity;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.Registry;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.net.Packet;
+import cam72cam.mod.net.PacketDirection;
+import cam72cam.mod.util.Identifier;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -61,8 +36,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -75,25 +48,34 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
+import org.apache.commons.io.IOUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
-	protected static List<Class<? extends EntityRollingStock>> entityClasses = new ArrayList<Class<? extends EntityRollingStock>>();
+	protected static List<Function<ModdedEntity, Entity>> entityClasses = new ArrayList<>();
 	protected String configDir;
 	private static String cacheDir;
     static {
-    	entityClasses.add(LocomotiveSteam.class);
-    	entityClasses.add(LocomotiveDiesel.class);
-    	entityClasses.add(CarPassenger.class);
-    	entityClasses.add(CarFreight.class);
-    	entityClasses.add(CarTank.class);
-    	entityClasses.add(Tender.class);
-    	entityClasses.add(HandCar.class);
+    	entityClasses.add(LocomotiveSteam::new);
+    	entityClasses.add(LocomotiveDiesel::new);
+    	entityClasses.add(CarPassenger::new);
+    	entityClasses.add(CarFreight::new);
+    	entityClasses.add(CarTank::new);
+    	entityClasses.add(Tender::new);
+    	entityClasses.add(HandCar::new);
     }
     
     public static String getCacheFile(String fname) {
@@ -122,16 +104,16 @@ public abstract class CommonProxy implements IGuiHandler {
     }
     
     public void init(FMLInitializationEvent event) {
-    	ImmersiveRailroading.net.registerMessage(MRSSyncPacket.Handler.class, MRSSyncPacket.class, 0, Side.CLIENT);
-    	ImmersiveRailroading.net.registerMessage(KeyPressPacket.Handler.class, KeyPressPacket.class, 1, Side.SERVER);
-    	ImmersiveRailroading.net.registerMessage(RidableEntity.PassengerPositionsPacket.Handler.class, RidableEntity.PassengerPositionsPacket.class, 2, Side.CLIENT);
-    	ImmersiveRailroading.net.registerMessage(MousePressPacket.Handler.class, MousePressPacket.class, 6, Side.SERVER);
-    	ImmersiveRailroading.net.registerMessage(ItemRailUpdatePacket.Handler.class, ItemRailUpdatePacket.class, 7, Side.SERVER);
-    	ImmersiveRailroading.net.registerMessage(BuildableStockSyncPacket.Handler.class, BuildableStockSyncPacket.class, 8, Side.CLIENT);
-    	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
-    	ImmersiveRailroading.net.registerMessage(SoundPacket.Handler.class, SoundPacket.class, 10, Side.CLIENT);
-    	ImmersiveRailroading.net.registerMessage(PaintSyncPacket.Handler.class, PaintSyncPacket.class, 11, Side.CLIENT);
-	ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
+    	Packet.register(MRSSyncPacket.class, PacketDirection.ServerToClient);
+    	Packet.register(KeyPressPacket.class, PacketDirection.ClientToServer);
+    	Packet.register(MousePressPacket.class, PacketDirection.ClientToServer);
+    	Packet.register(ItemRailUpdatePacket.class, PacketDirection.ClientToServer);
+    	Packet.register(BuildableStockSyncPacket.class, PacketDirection.ServerToClient);
+    	Packet.register(MultiblockSelectCraftPacket.class, PacketDirection.ClientToServer);
+    	Packet.register(SoundPacket.class, PacketDirection.ServerToClient);
+    	Packet.register(PaintSyncPacket.class, PacketDirection.ServerToClient);
+        Packet.register(PreviewRenderPacket.class, PacketDirection.ServerToClient);
+        Packet.register(ModdedEntity.PassengerPositionsPacket.class, PacketDirection.ServerToClient);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
@@ -148,8 +130,6 @@ public abstract class CommonProxy implements IGuiHandler {
 	public void serverStarting(FMLServerStartingEvent event) {
 		event.registerServerCommand(new IRCommand());
 	}
-    
-    public abstract World getWorld(int dimension);
     
     @SubscribeEvent
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
@@ -205,10 +185,8 @@ public abstract class CommonProxy implements IGuiHandler {
     
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
-    	int lastEntityID = 0;
-    	for (Class<? extends EntityRollingStock> type : entityClasses) {
-        	lastEntityID ++;
-        	EntityRegistry.registerModEntity(new ResourceLocation(ImmersiveRailroading.MODID, type.getSimpleName()), type, type.getSimpleName(), lastEntityID, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE, 20, false);	
+    	for (Function<ModdedEntity, Entity> type : entityClasses) {
+			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings);
     	}
     }
 	
@@ -217,7 +195,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
 		if (block instanceof IBreakCancelable) {
 			IBreakCancelable cancelable = (IBreakCancelable) block;
-			if (!cancelable.tryBreak(new cam72cam.mod.World(event.getWorld()), new Vec3i(event.getPos()), new Player(event.getPlayer()))) {
+			if (!cancelable.tryBreak(cam72cam.mod.World.get(event.getWorld()), new Vec3i(event.getPos()), new Player(event.getPlayer()))) {
 				event.setCanceled(true);
 				//TODO updateListeners?
 			}
@@ -234,21 +212,21 @@ public abstract class CommonProxy implements IGuiHandler {
 		
 		if (!event.world.isRemote) {
 			ChunkManager.handleWorldTick(event.world);
-			WorldServer world = event.world.getMinecraftServer().getWorld(event.world.provider.getDimension());
+			World world = World.get(event.world);
 			// We do this here as to let all the entities do their onTick first.  Otherwise some might be one onTick ahead
 			// if we did this in the onUpdate method
-			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class, EntitySelectors.IS_ALIVE);
+			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class);
 			
 			// Try locomotives first
 			for (EntityCoupleableRollingStock stock : entities) {
 				if (stock instanceof Locomotive) {
-					stock = stock.findByUUID(stock.getPersistentID());
+					stock = stock.findByUUID(stock.getUUID());
 					stock.tickPosRemainingCheck();
 				}
 			}
 			// Try rest
 			for (EntityCoupleableRollingStock stock : entities) {
-				stock = stock.findByUUID(stock.getPersistentID());
+				stock = stock.findByUUID(stock.getUUID());
 				stock.tickPosRemainingCheck();
 			}
 			
@@ -263,9 +241,9 @@ public abstract class CommonProxy implements IGuiHandler {
 	public abstract int getTicks();
 
 
-	public abstract List<InputStream> getResourceStreamAll(ResourceLocation modelLoc) throws IOException;
+	public abstract List<InputStream> getResourceStreamAll(Identifier modelLoc) throws IOException;
 
-	public InputStream getResourceStream(ResourceLocation location) throws IOException {
+	public InputStream getResourceStream(Identifier location) throws IOException {
 		InputStream chosen = null;
 		for (InputStream strm : getResourceStreamAll(location)) {
 			if (chosen == null) {
@@ -281,21 +259,16 @@ public abstract class CommonProxy implements IGuiHandler {
 	}
 
     
-    protected String pathString(ResourceLocation location, boolean startingSlash) {
-    	return (startingSlash ? "/" : "") + "assets/" + location.getResourceDomain() + "/" + location.getResourcePath();
+    protected String pathString(Identifier location, boolean startingSlash) {
+    	return (startingSlash ? "/" : "") + "assets/" + location.getDomain() + "/" + location.getPath();
     }
     
-    protected List<InputStream> getFileResourceStreams(ResourceLocation location) throws IOException {
+    protected List<InputStream> getFileResourceStreams(Identifier location) throws IOException {
     	List<InputStream> streams = new ArrayList<InputStream>();
     	File folder = new File(this.configDir);
     	if (folder.exists()) {
     		if (folder.isDirectory()) {
-	    		File[] files = folder.listFiles(new FilenameFilter() {
-				    @Override
-				    public boolean accept(File dir, String name) {
-				        return name.endsWith(".zip");
-				    }
-				});
+	    		File[] files = folder.listFiles((dir, name) -> name.endsWith(".zip"));
 	    		for (File file : files) {
 	    			ZipFile resourcePack = new ZipFile(file);
 	    			ZipEntry entry = resourcePack.getEntry(pathString(location, false));
@@ -315,24 +288,26 @@ public abstract class CommonProxy implements IGuiHandler {
 		return streams;
     }
 	
-	public ISound newSound(ResourceLocation oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
+	public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
 		return null;
 	}
 
     @Override
-    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int entityIDorX, int y, int z) {
+    public Object getServerGuiElement(int ID, EntityPlayer player, net.minecraft.world.World worldIn, int entityIDorX, int y, int z) {
+		World world = World.get(worldIn);
+
     	switch(GuiTypes.values()[ID]) {
 		case FREIGHT:
-	    	return new FreightContainer(player.inventory, (CarFreight) world.getEntityByID(entityIDorX));
+	    	return new FreightContainer(player.inventory, world.getEntity(entityIDorX, CarFreight.class));
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
-	    	return new TankContainer(player.inventory, (FreightTank) world.getEntityByID(entityIDorX));
+	    	return new TankContainer(player.inventory, world.getEntity(entityIDorX, FreightTank.class));
 		case TENDER:
-			return new TenderContainer(player.inventory, (Tender) world.getEntityByID(entityIDorX));
+			return new TenderContainer(player.inventory, world.getEntity(entityIDorX, Tender.class));
 		case STEAM_LOCOMOTIVE:
-			return new SteamLocomotiveContainer(player.inventory, (LocomotiveSteam) world.getEntityByID(entityIDorX));
+			return new SteamLocomotiveContainer(player.inventory, world.getEntity(entityIDorX, LocomotiveSteam.class));
 		case STEAM_HAMMER:
-			TileMultiblock te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(entityIDorX, y, z), TileMultiblock.class);
+			TileMultiblock te = world.getTileEntity(new Vec3i(entityIDorX, y, z), TileMultiblock.class);
 			if (te == null) {
 				return null;
 			}
@@ -344,23 +319,6 @@ public abstract class CommonProxy implements IGuiHandler {
 
 	public int getRenderDistance() {
 		return 8;
-	}
-	
-	public static double getServerTPS(World world, double sampleSize) {
-		long[] ttl = world.getMinecraftServer().tickTimeArray;
-		
-		sampleSize = Math.min(sampleSize, ttl.length);
-		double ttus = 0;
-		for (int i = 0; i < sampleSize; i++) {
-			ttus += ttl[ttl.length - 1 - i] / sampleSize;
-		}
-		
-		if (ttus == 0) {
-			ttus = 0.01;
-		}
-		
-		double ttms = ttus * 1.0E-6D;
-		return Math.min(1000.0 / ttms, 20);
 	}
 
     public abstract void addPreview(int dimension, TileRailPreview preview);

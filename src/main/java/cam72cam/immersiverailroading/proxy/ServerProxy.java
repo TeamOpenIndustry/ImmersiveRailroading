@@ -15,10 +15,10 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import net.minecraft.entity.Entity;
+import cam72cam.mod.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.util.Identifier;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -29,7 +29,6 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.server.FMLServerHandler;
 
 @EventBusSubscriber(Side.SERVER)
 public class ServerProxy extends CommonProxy {
@@ -51,23 +50,18 @@ public class ServerProxy extends CommonProxy {
 	}
 
     @Override
-    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int entityID, int nop1, int nop2) {
+    public Object getClientGuiElement(int ID, EntityPlayer player, net.minecraft.world.World world, int entityID, int nop1, int nop2) {
     	return null;
     }
 
-    @Override
-	public World getWorld(int dimension)  {
-		return FMLServerHandler.instance().getServer().getWorld(dimension);
-	}
-    
-    private InputStream getEmbeddedResourceStream(ResourceLocation location) throws IOException {
+    private InputStream getEmbeddedResourceStream(Identifier location) throws IOException {
         URL url = ImmersiveRailroading.class.getResource(pathString(location, true));
 		return url != null ? ImmersiveRailroading.class.getResourceAsStream(pathString(location, true)) : null;
     }
 
 	@Override
-	public List<InputStream> getResourceStreamAll(ResourceLocation location) throws IOException {
-		List<InputStream> res = new ArrayList<InputStream>();
+	public List<InputStream> getResourceStreamAll(Identifier location) throws IOException {
+		List<InputStream> res = new ArrayList<>();
 		InputStream stream = getEmbeddedResourceStream(location);
 		if (stream != null) {
 			res.add(stream);
@@ -85,8 +79,8 @@ public class ServerProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
-		if(event.getEntity() instanceof EntityRollingStock) {
-			EntityRollingStock stock = (EntityRollingStock)event.getEntity();
+		EntityRollingStock stock = World.get(event.getWorld()).getEntity(event.getEntity().getUniqueID(), EntityRollingStock.class);
+		if(stock != null) {
 			String defID = stock.getDefinitionID();
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 			if (def == null) {
@@ -99,24 +93,21 @@ public class ServerProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onPlayerJoin(PlayerLoggedInEvent event) {
-		EntityPlayer player = event.player;
-		World world = player.world;
-		
-		if (logoffRide.containsKey(player.getUniqueID())) {
-			for (Entity ent: world.loadedEntityList) {
-				if (ent.getUniqueID() == logoffRide.get(player.getUniqueID())) {
-					System.out.println("WOOO");
-					player.startRiding(ent, true);
-				}
+		Player player = new Player(event.player);
+
+		if (logoffRide.containsKey(player.getUUID())) {
+			EntityRidableRollingStock ent = player.getWorld().getEntity(logoffRide.get(player.getUUID()), EntityRidableRollingStock.class);
+			if(ent != null) {
+				ent.addPassenger(player);
 			}
 		}
 	}
 	
 	@SubscribeEvent
 	public static void onPlayerLeave(PlayerLoggedOutEvent event) {
-		EntityPlayer player = event.player;
-		if (player.getRidingEntity() instanceof EntityRidableRollingStock) {
-			logoffRide.put(player.getUniqueID(), player.getRidingEntity().getUniqueID());		
+		Player player = new Player(event.player);
+		if (player.getRiding() instanceof EntityRidableRollingStock) {
+			logoffRide.put(player.getUUID(), player.getRiding().getUUID());
 		}
 	}
 	

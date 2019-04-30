@@ -18,6 +18,7 @@ import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.mod.entity.DamageType;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
@@ -30,27 +31,42 @@ import net.minecraft.util.text.TextComponentString;
 public class EntityBuildableRollingStock extends EntityRollingStock {
 	private boolean isBuilt = false;
 	private List<ItemComponentType> builtItems = new ArrayList<>();
-	public EntityBuildableRollingStock(net.minecraft.world.World world) {
-		super(world);
+
+	public EntityBuildableRollingStock(ModdedEntity entity) {
+		super(entity);
 	}
 
 	@Override
-	protected void save(TagCompound nbt) {
-		super.save(nbt);
-		nbt.setBoolean("isBuilt", isBuilt);
-		nbt.setEnumList("builtItems", builtItems);
+	public void save(TagCompound data) {
+		super.save(data);
+		data.setBoolean("isBuilt", isBuilt);
+		data.setEnumList("builtItems", builtItems);
 	}
 	
 	@Override
-	protected void load(TagCompound nbt) {
-		super.load(nbt);
+	public void load(TagCompound data) {
+		super.load(data);
 
-		isBuilt = nbt.getBoolean("isBuilt");
+		isBuilt = data.getBoolean("isBuilt");
 		if (isBuilt) {
 			setComponents(this.getDefinition().getItemComponents());
 		} else {
-			setComponents(nbt.getEnumList("builtItems", ItemComponentType.class));
+			setComponents(data.getEnumList("builtItems", ItemComponentType.class));
 		}
+	}
+
+	@Override
+	public void saveSpawn(TagCompound data) {
+		super.saveSpawn(data);
+		data.setBoolean("isBuilt", isBuilt);
+		data.setEnumList("builtItems", builtItems);
+	}
+
+	@Override
+	public void loadSpawn(TagCompound data) {
+		super.loadSpawn(data);
+		isBuilt = data.getBoolean("isBuilt");
+		setComponents(data.getEnumList("builtItems", ItemComponentType.class));
 	}
 	
 	public void setComponents(List<ItemComponentType> items) {
@@ -58,7 +74,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		this.isBuilt = false;
 		this.isBuilt = getMissingItemComponents().isEmpty();
 		
-		if (world.isServer) {
+		if (getWorld().isServer) {
 			this.sendToObserving(new BuildableStockSyncPacket(this));
 		}
 
@@ -329,7 +345,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		ItemDefinition.setID(item, defID);
 		ItemGauge.set(item, gauge);
 		ItemComponent.setComponentType(item, toRemove);
-		world.dropItem(item, player.getBlockPosition());
+		getWorld().dropItem(item, player.getBlockPosition());
 
 		if (this instanceof EntityMoveableRollingStock) {
 			((EntityMoveableRollingStock)this).clearHeightMap();
@@ -345,7 +361,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			return clickRes;
 		}
 		
-		if (world.isClient) {
+		if (getWorld().isClient) {
 			return ClickResult.PASS;
 		}
 		if (player.getHeldItem(hand).item == IRItems.ITEM_LARGE_WRENCH || player.getHeldItem(hand).item == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
@@ -369,14 +385,14 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 				ItemDefinition.setID(item, defID);
 				ItemGauge.set(item, gauge);
 				ItemTextureVariant.set(item, texture);
-				world.dropItem(item, source.getBlockPosition());
+				getWorld().dropItem(item, source.getBlockPosition());
 			} else {
 				for (ItemComponentType component : this.builtItems) {
 					ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
 					ItemDefinition.setID(item, defID);
 					ItemGauge.set(item, gauge);
 					ItemComponent.setComponentType(item, component);
-					world.dropItem(item, source.getBlockPosition());
+					getWorld().dropItem(item, source.getBlockPosition());
 				}
 			}
 		}

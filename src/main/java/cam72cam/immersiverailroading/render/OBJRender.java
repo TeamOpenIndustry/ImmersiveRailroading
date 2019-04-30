@@ -4,17 +4,16 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
-import util.Matrix4;
 
 import java.util.*;
 
 public class OBJRender {
 
 	public OBJModel model;
-	public Map<String, OBJTextureSheet> textures = new HashMap<String, OBJTextureSheet>();
+	public Map<String, OBJTextureSheet> textures = new HashMap<>();
 	private int prevTexture = -1;
 	private VBA vba;
 
