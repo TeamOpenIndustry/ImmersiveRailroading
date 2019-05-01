@@ -8,6 +8,9 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 
 public class MultiblockSelectCraftPacket extends Packet {
+	public MultiblockSelectCraftPacket() {
+		// Forge Reflection
+	}
 	public MultiblockSelectCraftPacket(Vec3i tilePreviewPos, ItemStack selected, CraftingMachineMode mode) {
 		data.setVec3i("pos", tilePreviewPos);
 		data.setStack("stack", selected);

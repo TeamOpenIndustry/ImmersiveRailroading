@@ -2,7 +2,7 @@ package cam72cam.mod.item;
 
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
@@ -62,7 +62,7 @@ public class ItemBase extends Item {
 
     @Override
     public final EnumActionResult onItemUse(EntityPlayer player, net.minecraft.world.World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        return this.onClickBlock(new Player(player), new World(worldIn), new Vec3i(pos), Hand.from(hand), Facing.from(facing), new Vec3d(hitX, hitY, hitZ)).internal;
+        return this.onClickBlock(new Player(player), World.get(worldIn), new Vec3i(pos), Hand.from(hand), Facing.from(facing), new Vec3d(hitX, hitY, hitZ)).internal;
     }
     public ClickResult onClickBlock(Player player, World world, Vec3i vec3i, Hand from, Facing from1, Vec3d vec3d) {
         return ClickResult.PASS;
@@ -70,7 +70,7 @@ public class ItemBase extends Item {
 
     @Override
     public final ActionResult<net.minecraft.item.ItemStack> onItemRightClick(net.minecraft.world.World world, EntityPlayer player, EnumHand hand) {
-        onClickAir(new Player(player), new World(world), Hand.from(hand));
+        onClickAir(new Player(player), World.get(world), Hand.from(hand));
         return super.onItemRightClick(world, player, hand);
     }
     public void onClickAir(Player player, World world, Hand hand) {

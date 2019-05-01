@@ -12,9 +12,12 @@ import java.util.List;
  * Movable rolling stock sync packet
  */
 public class MRSSyncPacket extends Packet {
+	public MRSSyncPacket() {
+		// Forge Reflection
+	}
 	public MRSSyncPacket(EntityMoveableRollingStock mrs, List<TickPos> positions) {
 		data.setEntity("stock", mrs);
-		data.setDouble("tps", ConfigDebug.serverTickCompensation ? 20 : CommonProxy.getServerTPS(mrs.getWorld().internal, positions.size()));
+		data.setDouble("tps", ConfigDebug.serverTickCompensation ? 20 : mrs.getWorld().getTPS(positions.size()));
 		data.setList("positions", positions, TickPos::toTag);
 	}
 	@Override

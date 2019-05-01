@@ -9,7 +9,7 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.track.*;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;

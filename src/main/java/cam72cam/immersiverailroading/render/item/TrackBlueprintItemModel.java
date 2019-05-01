@@ -42,7 +42,7 @@ public class TrackBlueprintItemModel implements IBakedModel {
 		if (world == null) {
 			world = Minecraft.getMinecraft().world;
 		}
-		info = new RailInfo(new cam72cam.mod.World(world), new cam72cam.mod.item.ItemStack(stack), new PlacementInfo(new cam72cam.mod.item.ItemStack(stack), 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5)), null);
+		info = new RailInfo(cam72cam.mod.world.World.get(world), new cam72cam.mod.item.ItemStack(stack), new PlacementInfo(new cam72cam.mod.item.ItemStack(stack), 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5)), null);
 		info = info.withLength(10);
 	}
 

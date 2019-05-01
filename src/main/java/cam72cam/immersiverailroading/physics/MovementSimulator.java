@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import trackapi.lib.ITrack;

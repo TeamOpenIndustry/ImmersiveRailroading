@@ -10,7 +10,10 @@ import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
 import net.minecraftforge.oredict.OreDictionary;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TrackDefinition {
@@ -19,12 +22,47 @@ public class TrackDefinition {
     public final List<TrackModel> models;
     public final Map<TrackComponent, List<TrackMaterial>> materials = new HashMap<>();
 
+    TrackDefinition(String trackID, JsonObject object) throws Exception {
+        this.trackID = trackID;
+        this.name = object.get("name").getAsString();
+        this.models = new ArrayList<>();
+        for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("models").entrySet()) {
+            models.add(new TrackModel(entry.getKey(), entry.getValue().getAsString()));
+        }
+
+        JsonObject mats = object.getAsJsonObject("materials");
+        for (TrackComponent comp : TrackComponent.values()) {
+            if (mats.has(comp.name())) {
+                List<TrackMaterial> parts = new ArrayList<>();
+                for (JsonElement part : mats.get(comp.name()).getAsJsonArray()) {
+                    parts.add(new TrackMaterial(
+                            part.getAsJsonObject().get("item").getAsString(),
+                            part.getAsJsonObject().get("cost").getAsFloat()
+                    ));
+                }
+                if (parts.size() > 0) {
+                    materials.put(comp, parts);
+                }
+            }
+        }
+    }
+
+    public TrackModel getTrackForGauge(double gauge) {
+        for (TrackModel model : models) {
+            if (model.canRender(gauge)) {
+                return model;
+            }
+        }
+        ImmersiveRailroading.warn("Bad track gauge def for %s - %s", trackID, gauge);
+        return models.get(0);
+    }
+
     public static class TrackMaterial {
         public final String item;
         public final float cost;
         public final int meta;
 
-        public TrackMaterial(String item, float cost) {
+        TrackMaterial(String item, float cost) {
             if (item.contains("|")) {
                 this.item = item.split("\\|")[0];
                 this.meta = Integer.parseInt(item.split("\\|")[1]);
@@ -68,39 +106,5 @@ public class TrackDefinition {
             }
             return stack.item == Item.getByNameOrId(item) && stack.internal.getMetadata() == meta;
         }
-    }
-
-    public TrackDefinition(String trackID, JsonObject object) throws Exception {
-        this.trackID = trackID;
-        this.name = object.get("name").getAsString();
-        this.models = new ArrayList<>();
-        for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("models").entrySet()) {
-            models.add(new TrackModel(entry.getKey(), entry.getValue().getAsString()));
-        }
-
-        JsonObject mats = object.getAsJsonObject("materials");
-        for (TrackComponent comp : TrackComponent.values()) {
-            if (mats.has(comp.name())) {
-                List<TrackMaterial> parts = new ArrayList<>();
-                for (JsonElement part : mats.get(comp.name()).getAsJsonArray()) {
-                    parts.add(new TrackMaterial(
-                            part.getAsJsonObject().get("item").getAsString(),
-                            part.getAsJsonObject().get("cost").getAsFloat()
-                    ));
-                }
-                if (parts.size() > 0) {
-                    materials.put(comp, parts);
-                }
-            }
-        }
-    }
-    public TrackModel getTrackForGauge(double gauge) {
-        for (TrackModel model : models) {
-            if (model.canRender(gauge)) {
-                return model;
-            }
-        }
-        ImmersiveRailroading.warn("Bad track gauge def for %s - %s", trackID, gauge);
-        return models.get(0);
     }
 }

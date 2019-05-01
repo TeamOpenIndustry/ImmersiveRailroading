@@ -17,6 +17,9 @@ public interface IBoundingBox {
     boolean contains(Vec3d vec);
 
     static IBoundingBox from(AxisAlignedBB internal) {
+        if (internal == null) {
+            return null;
+        }
         return new IBoundingBox() {
             @Override
             public Vec3d min() {

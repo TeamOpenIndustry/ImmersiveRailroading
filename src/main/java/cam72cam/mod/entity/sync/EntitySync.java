@@ -11,6 +11,7 @@ public class EntitySync extends TagCompound {
     public EntitySync(Entity entity) {
         super();
         this.entity = entity;
+        this.old = this;
     }
 
     public void send() {

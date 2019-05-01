@@ -5,6 +5,9 @@ import cam72cam.mod.net.Packet;
 import cam72cam.mod.util.Hand;
 
 public class MousePressPacket extends Packet {
+	public MousePressPacket() {
+		// Forge Reflection
+	}
 	public MousePressPacket(Hand hand, Entity target) {
 		super();
 		data.setEnum("hand", hand);

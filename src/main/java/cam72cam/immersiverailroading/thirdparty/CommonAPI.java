@@ -25,7 +25,7 @@ public class CommonAPI {
     }
 
     public static CommonAPI create(World world, BlockPos pos, Class<? extends EntityRollingStock> stockClass) {
-        TileRailBase te = new cam72cam.mod.World(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
+        TileRailBase te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
         if (te != null) {
             EntityRollingStock stock = te.getStockNearBy(stockClass, null);
             if (stock != null) {
@@ -40,11 +40,13 @@ public class CommonAPI {
     }
 
     public FluidStack getFluid() {
+        /*
         Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
         IFluidHandler fh = stock.getCapability(capability, null);
         if (fh != null) {
             return fh.drain(Integer.MAX_VALUE, false);
         }
+        */
         return null;
     }
 
@@ -201,11 +203,11 @@ public class CommonAPI {
     }
 
     public Vec3d getPosition() {
-        return stock.getPositionVector();
+        return stock.getPosition().internal;
     }
 
     public UUID getUniqueID() {
-        return stock.getUniqueID();
+        return stock.getUUID();
     }
 
 }

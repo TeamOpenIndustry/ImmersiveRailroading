@@ -46,13 +46,12 @@ public class LocomotiveSteam extends Locomotive {
 	
 	public LocomotiveSteam(ModdedEntity entity) {
 		super(entity);
-		
-		sync.setFloat(BOILER_PRESSURE, 0f);
-		sync.setFloat(BOILER_TEMPERATURE, ambientTemperature());
-		sync.setBoolean(PRESSURE_VALVE, false);
-		sync.set(BURN_TIME, new TagCompound());
-		sync.set(BURN_MAX, new TagCompound());
-		
+
+        sync.setFloat(BOILER_PRESSURE, 0f);
+        sync.setFloat(BOILER_TEMPERATURE, ambientTemperature());
+        sync.setBoolean(PRESSURE_VALVE, false);
+        sync.set(BURN_TIME, new TagCompound());
+        sync.set(BURN_MAX, new TagCompound());
 	}
 
 	@Override
@@ -121,9 +120,9 @@ public class LocomotiveSteam extends Locomotive {
 		return sync.getMap(BURN_TIME, Integer::parseInt, (TagCompound tag) -> tag.getInteger("val"));
 	}
 	private void setBurnTime(Map<Integer, Integer> burnTime) {
-		sync.setMap(BURN_TIME, burnTime, (Integer i) -> i.toString(), (Integer i) -> {
+		sync.setMap(BURN_TIME, burnTime, Object::toString, (Integer i) -> {
 			TagCompound tag = new TagCompound();
-			tag.setInteger("val", i.intValue());
+			tag.setInteger("val", i);
 			return tag;
 		});
 	}
@@ -131,9 +130,9 @@ public class LocomotiveSteam extends Locomotive {
 		return sync.getMap(BURN_MAX, Integer::parseInt, (TagCompound tag) -> tag.getInteger("val"));
 	}
 	private void setBurnMax(Map<Integer, Integer> burnMax) {
-		sync.setMap(BURN_MAX, burnMax, (Integer i) -> i.toString(), (Integer i) -> {
+		sync.setMap(BURN_MAX, burnMax, Object::toString, (Integer i) -> {
 			TagCompound tag = new TagCompound();
-			tag.setInteger("val", i.intValue());
+			tag.setInteger("val", i);
 			return tag;
 		});
 	}
@@ -182,11 +181,11 @@ public class LocomotiveSteam extends Locomotive {
 		return phase;
 	}
 	
-	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
-	private List<ISound> sndCache = new ArrayList<ISound>();
+	private Map<String, Boolean> phaseOn = new HashMap<>();
+	private List<ISound> sndCache = new ArrayList<>();
 	private int sndCacheId = 0;
 	private ISound whistle;
-	private List<ISound> chimes = new ArrayList<ISound>();
+	private List<ISound> chimes = new ArrayList<>();
 	private float pullString = 0;
 	private float soundDampener = 0;
 	private ISound idle;
@@ -253,7 +252,7 @@ public class LocomotiveSteam extends Locomotive {
 								}
 								if (sync.get(HORN_PLAYER) != null) {
 									for (Entity pass : this.getPassengers()) {
-										if (!pass.getUUID().equals(sync.get(HORN_PLAYER))) {
+										if (!pass.getUUID().equals(sync.getUUID(HORN_PLAYER))) {
 											continue;
 										}
 										
@@ -329,7 +328,7 @@ public class LocomotiveSteam extends Locomotive {
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
 				for (RenderComponent smoke : smokes) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(new Vec3d(smoke.center()), this.getRotationYaw() + 180));
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(smoke.center(), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 					if (this.getTickCount() % 1 == 0 ) {
 						float darken = 0;
@@ -373,7 +372,7 @@ public class LocomotiveSteam extends Locomotive {
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
 				) {
 				for (RenderComponent whistle : whistles) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(new Vec3d(whistle.center()), this.getRotationYaw() + 180));
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(whistle.center(), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 					
 					float darken = 0;
@@ -395,7 +394,7 @@ public class LocomotiveSteam extends Locomotive {
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
 			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 				for (RenderComponent piston : pistons) {
-					float phaseOffset = 0;
+					float phaseOffset;
 					double tickDelt;
 					switch (piston.side) {
 					case "LEFT":
@@ -434,7 +433,7 @@ public class LocomotiveSteam extends Locomotive {
 					double phaseSpike = Math.pow(phase, 4);
 					
 					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
-						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(new Vec3d(piston.min()), this.getRotationYaw() + 180));
+						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(piston.min(), this.getRotationYaw() + 180));
 						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, 80, 0, 0.6f, 0.2);
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 						double accell = 0.3 * gauge.scale();
@@ -501,7 +500,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 				if (ConfigGraphics.particlesEnabled) {
 					for (RenderComponent steam : steams) {
-						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(new Vec3d(steam.center()), this.getRotationYaw() + 180));
+						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(steam.center(), this.getRotationYaw() + 180));
 						particlePos = particlePos.subtract(fakeMotion);
 						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, 40, 0, 0.2f, steam.width());
 						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
@@ -539,8 +538,7 @@ public class LocomotiveSteam extends Locomotive {
 					pressure.setVelocity(getVelocity());
 					pressure.update();
 				}
-				for (int i = 0; i < sndCache.size(); i ++) {
-					ISound snd = sndCache.get(i);
+				for (ISound snd : sndCache) {
 					if (snd.isPlaying()) {
 						snd.setPosition(getPosition());
 						snd.setVelocity(getVelocity());
@@ -587,20 +585,20 @@ public class LocomotiveSteam extends Locomotive {
 		float waterLevelMB = this.getLiquidAmount();
 		Map<Integer, Integer> burnTime = getBurnTime();
 		Map<Integer, Integer> burnMax = getBurnMax();
-		Boolean changedBurnTime = false;
-		Boolean changedBurnMax = false;
+		boolean changedBurnTime = false;
+		boolean changedBurnMax = false;
 		int burningSlots = 0;
 		float waterUsed = 0;
 		
 		if (this.getLiquidAmount() > 0) {
 			for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
-				int remainingTime = burnTime.containsKey(slot) ? burnTime.get(slot) : 0;
+				int remainingTime = burnTime.getOrDefault(slot, 0);
 				if (remainingTime <= 0) {
 					ItemStack stack = this.cargoItems.getStackInSlot(slot);
 					if (stack.getCount() <= 0 || BurnUtil.getBurnTime(stack) == 0) {
 						continue;
 					}
-					remainingTime = (int) (BurnUtil.getBurnTime(stack) * 1/gauge.scale() * (Config.ConfigBalance.locoSteamFuelEfficiency / 100.0));
+					remainingTime = (int) (BurnUtil.getBurnTime(stack) /gauge.scale() * (Config.ConfigBalance.locoSteamFuelEfficiency / 100.0));
 					burnTime.put(slot, remainingTime);
 					burnMax.put(slot, remainingTime);
 					stack.setCount(stack.getCount()-1);
@@ -785,7 +783,6 @@ public class LocomotiveSteam extends Locomotive {
 		double coalEnergyBTU = coalEnergyKJ * 0.958; // 1 KJ = 0.958 BTU
 		double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
 		double coalBurnTicks = 1600; // This is a bit of fudge
-		double coalEnergyKCalTick = coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
-		return coalEnergyKCalTick;
+		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
 	}
 }

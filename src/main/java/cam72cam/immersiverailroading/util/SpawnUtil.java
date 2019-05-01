@@ -16,13 +16,12 @@ import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
-import net.minecraft.util.EnumFacing;
 import trackapi.lib.ITrack;
 import trackapi.lib.Util;
 
@@ -48,7 +47,7 @@ public class SpawnUtil {
 		if (!tp.isOffTrack) {
 			if (worldIn.isServer) {
 				String texture = ItemTextureVariant.get(player.getHeldItem(hand));
-				EntityRollingStock stock = def.spawn(worldIn.internal, tp.position, EnumFacing.fromAngle(player.getYawHead()), gauge, texture);
+				EntityRollingStock stock = def.spawn(worldIn, tp.position, player.getYawHead(), gauge, texture);
 				
 				if (stock instanceof EntityBuildableRollingStock) {
 					((EntityBuildableRollingStock)stock).setComponents(list);

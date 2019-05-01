@@ -1,14 +1,12 @@
 package cam72cam.mod.entity;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.mod.World;
-import cam72cam.mod.entity.boundingbox.BoundingBox;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.entity.sync.EntitySync;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -115,7 +113,7 @@ public class Entity {
     }
 
     public <T extends Entity> T as(Class<T> type) {
-        if (this.getClass().isInstance(type)) {
+        if (type.isInstance(this)) {
             return (T)this;
         }
         return null;

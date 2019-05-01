@@ -1,6 +1,5 @@
-package cam72cam.mod.proxy;
+package cam72cam.mod.world;
 
-import cam72cam.mod.World;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,20 +7,19 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldEventListener;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-class WorldListener implements IWorldEventListener {
+public class WorldEventListener implements IWorldEventListener {
+    private final cam72cam.mod.world.World world;
 
-
-    private final World.IWorldEventsReciever world;
-
-    public WorldListener(World.IWorldEventsReciever world) {
-        this.world = world;
+    public WorldEventListener(cam72cam.mod.world.World worldWrap) {
+        this.world = worldWrap;
     }
 
     @Override
-    public void notifyBlockUpdate(net.minecraft.world.World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
+    public void notifyBlockUpdate(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
 
     }
 

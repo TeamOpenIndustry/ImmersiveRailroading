@@ -7,12 +7,11 @@ import java.util.List;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.text.TextComponentString;
 
 public class IRCommand extends CommandBase {

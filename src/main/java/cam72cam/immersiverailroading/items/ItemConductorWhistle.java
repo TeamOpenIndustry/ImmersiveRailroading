@@ -9,7 +9,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.mod.World;
+import cam72cam.mod.entity.boundingbox.BoundingBox;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
@@ -68,7 +69,7 @@ public class ItemConductorWhistle extends ItemBase {
 			
 			if (closestToPlayer != null) {
 				if (!player.isCrouching()) {
-					List<EntityVillager> villagers = world.internal.getEntitiesWithinAABB(EntityVillager.class, bb);
+					List<EntityVillager> villagers = world.internal.getEntitiesWithinAABB(EntityVillager.class, new BoundingBox(bb));
 					for (EntityVillager villager : villagers) {
 						EntityCoupleableRollingStock closest = null;
 						for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {

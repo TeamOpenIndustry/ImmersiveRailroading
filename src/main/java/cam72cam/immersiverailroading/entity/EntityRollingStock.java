@@ -50,7 +50,7 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		if (def == null) {
 			try {
-				return type.getConstructor(String.class, JsonObject.class).newInstance(defID, null);
+				return type.getConstructor(String.class, JsonObject.class).newInstance(null);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 					| SecurityException e) {
 				e.printStackTrace();

@@ -15,7 +15,7 @@ import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.math.Vec3d;
 import com.google.common.base.Predicate;

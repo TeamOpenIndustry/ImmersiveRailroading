@@ -19,7 +19,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.item.ArmorSlot;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.CreativeTab;

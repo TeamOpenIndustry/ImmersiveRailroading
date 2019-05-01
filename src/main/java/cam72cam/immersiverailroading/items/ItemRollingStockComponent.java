@@ -14,7 +14,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.CreativeTab;

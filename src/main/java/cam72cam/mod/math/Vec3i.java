@@ -89,4 +89,9 @@ public class Vec3i {
     public Vec3i rotate(Rotation rotation) {
         return new Vec3i(internal.rotate(rotation.internal));
     }
+
+    @Override
+    public String toString() {
+        return internal.toString();
+    }
 }

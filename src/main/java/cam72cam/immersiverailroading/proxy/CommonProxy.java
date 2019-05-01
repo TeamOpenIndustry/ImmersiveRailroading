@@ -19,7 +19,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.OreHelper;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
@@ -34,7 +34,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -195,7 +194,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
 		if (block instanceof IBreakCancelable) {
 			IBreakCancelable cancelable = (IBreakCancelable) block;
-			if (!cancelable.tryBreak(cam72cam.mod.World.get(event.getWorld()), new Vec3i(event.getPos()), new Player(event.getPlayer()))) {
+			if (!cancelable.tryBreak(World.get(event.getWorld()), new Vec3i(event.getPos()), new Player(event.getPlayer()))) {
 				event.setCanceled(true);
 				//TODO updateListeners?
 			}

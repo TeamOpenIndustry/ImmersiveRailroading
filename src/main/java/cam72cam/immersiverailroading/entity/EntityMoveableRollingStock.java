@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -20,7 +19,6 @@ import cam72cam.mod.entity.custom.ICollision;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.block.Block;
 import net.minecraft.util.DamageSource;
 
 import java.util.ArrayList;
@@ -92,8 +90,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @Override
     public void saveSpawn(TagCompound data) {
         super.saveSpawn(data);
-        data.setFloat("frontYaw", frontYaw);
-        data.setFloat("rearYaw", rearYaw);
+        data.setFloat("frontYaw", frontYaw != null ? frontYaw : getRotationYaw());
+        data.setFloat("rearYaw", rearYaw != null ? rearYaw : getRotationYaw());
         data.setInteger("tickPosID", (int) tickPosID);
         data.setDouble("tickSkew", tickSkew);
         data.setList("positions", positions, TickPos::toTag);
@@ -400,12 +398,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				
 				if (!getWorld().isAir(bp)) {
 					if (!BlockUtil.isIRRail(getWorld(), bp)) {
-						AxisAlignedBB bbb = state.getCollisionBoundingBox(world, bp);
-						if (bbb == null) {
-							continue;
-						}
-						bbb = bbb.offset(bp);
-						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
+					    if (getWorld().doesBlockCollideWith(bp, bb)) {
 							if (!BlockUtil.isIRRail(getWorld(), bp.up())) {
 								getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(getWorld().isSnow(bp)));
 							}

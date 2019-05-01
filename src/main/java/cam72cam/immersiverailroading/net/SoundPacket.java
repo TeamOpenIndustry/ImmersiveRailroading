@@ -8,6 +8,9 @@ import cam72cam.mod.net.Packet;
 import cam72cam.mod.util.Identifier;
 
 public class SoundPacket extends Packet {
+	public SoundPacket() {
+		// Forge Reflection
+	}
 	public SoundPacket(String soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, Gauge gauge) {
 		data.setString("file", soundfile);
 		data.setVec3d("pos", pos);
