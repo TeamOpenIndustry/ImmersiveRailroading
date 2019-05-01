@@ -24,7 +24,7 @@ public class ComputerCraft {
             @Nullable
             @Override
             public IPeripheral getPeripheral(@Nonnull World world, @Nonnull BlockPos blockPos, @Nonnull EnumFacing enumFacing) {
-                TileRailBase rail = new cam72cam.mod.World(world).getTileEntity(new Vec3i(blockPos), TileRailBase.class);
+                TileRailBase rail = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(blockPos), TileRailBase.class);
                 if (rail != null) {
                     if (rail.getAugment() == Augment.DETECTOR) {
                         return new DetectorPeripheral(world, blockPos);

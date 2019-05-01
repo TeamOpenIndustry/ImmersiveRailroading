@@ -211,20 +211,20 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		return fLoad;
 	}
 
-    @Override
+    //@Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return true;
         }
-        return super.hasCapability(capability, facing);
+        return false;//super.hasCapability(capability, facing);
     }
 
     @SuppressWarnings("unchecked")
-	@Override
+	//@Override
     public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return (T) cargoItems;
         }
-        return super.getCapability(capability, facing);
+        return null;//super.getCapability(capability, facing);
     }
 }

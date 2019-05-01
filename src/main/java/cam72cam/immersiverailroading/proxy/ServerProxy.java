@@ -15,7 +15,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.util.Identifier;
 import net.minecraft.entity.player.EntityPlayer;

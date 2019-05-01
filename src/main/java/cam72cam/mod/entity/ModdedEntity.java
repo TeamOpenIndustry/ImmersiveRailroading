@@ -55,9 +55,9 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
 
     /* Init Self Wrapper */
 
-    private final void loadSelf(TagCompound data) {
+    protected final void init(String type) {
         if (self == null) {
-            this.type = data.getString("custom_mob_type");
+            this.type = type;
             self = Registry.create(type, this);
 
             EntitySettings settings = Registry.getSettings(type);
@@ -73,6 +73,9 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
             iRidable = IRidable.get(self);
             iCollision = ICollision.get(self);
         }
+    }
+    private final void loadSelf(TagCompound data) {
+        init(data.getString("custom_mob_type"));
     }
     private final void saveSelf(TagCompound data) {
         data.setString("custom_mob_type", type);
@@ -118,8 +121,8 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public final void readSpawnData(ByteBuf additionalData) {
         TagCompound data = new TagCompound(ByteBufUtils.readTag(additionalData));
-        iSpawnData.loadSpawn(data);
         loadSelf(data);
+        iSpawnData.loadSpawn(data);
         self.sync.receive(data.get("sync"));
     }
     @Override
@@ -219,6 +222,9 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
         return null;
     }
 
+    public Vec3d getRidingOffset(UUID id) {
+        return this.passengerPositions.get(id);
+    }
     public Vec3d getRidingOffset(cam72cam.mod.entity.Entity ent) {
         return this.passengerPositions.get(ent.getUUID());
     }
@@ -251,7 +257,14 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
         return this.staticPassengers.size() + this.getPassengers().size();
     }
 
+    public boolean shouldRender() {
+        //TODO setting??
+        return false;
+    }
 
+    public List<StaticPassenger> getStaticPassengers() {
+        return staticPassengers;
+    }
 
     public static class StaticPassenger {
         public Identifier ident;
@@ -299,6 +312,10 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     public static class PassengerPositionsPacket extends Packet {
+        public PassengerPositionsPacket() {
+            // Forge Reflection
+        }
+
         public PassengerPositionsPacket(ModdedEntity stock) {
             data.setEntity("stock", stock.self);
 
@@ -314,9 +331,12 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
 
         @Override
         public void handle() {
-            ModdedEntity stock = data.getEntity("stock", ModdedEntity.class);
-            stock.handlePassengerPositions(data.getMap("passengers", UUID::fromString, (TagCompound tag) -> tag.getVec3d("pos")));
-            stock.staticPassengers = data.getList("staticPassengers", StaticPassenger::new);
+            cam72cam.mod.entity.Entity entity = data.getEntity("stock");
+            if (entity != null && entity.internal instanceof ModdedEntity) {
+                ModdedEntity stock = (ModdedEntity) entity.internal;
+                stock.handlePassengerPositions(data.getMap("passengers", UUID::fromString, (TagCompound tag) -> tag.getVec3d("pos")));
+                stock.staticPassengers = data.getList("staticPassengers", StaticPassenger::new);
+            }
         }
     }
 

@@ -8,6 +8,9 @@ import cam72cam.mod.net.Packet;
  * Movable rolling stock sync packet
  */
 public class PreviewRenderPacket extends Packet {
+	public PreviewRenderPacket() {
+		// Forge Reflection
+	}
 	public PreviewRenderPacket(TileRailPreview preview) {
 		preview.save(data);
 		//TODO proper world dim sync

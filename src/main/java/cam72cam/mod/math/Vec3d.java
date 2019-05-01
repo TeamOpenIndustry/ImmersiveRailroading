@@ -62,4 +62,9 @@ public class Vec3d {
     public Vec3d max(Vec3d other) {
         return new Vec3d(Math.max(x, other.x), Math.max(y, other.y), Math.max(z, other.z));
     }
+
+    @Override
+    public String toString() {
+        return internal.toString();
+    }
 }

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import com.google.common.base.Predicate;

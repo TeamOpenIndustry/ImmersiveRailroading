@@ -7,6 +7,9 @@ import cam72cam.mod.net.Packet;
  * Movable rolling stock sync packet
  */
 public class PaintSyncPacket extends Packet {
+	public PaintSyncPacket() {
+		// Forge Reflection
+	}
 	public PaintSyncPacket(EntityRollingStock mrs) {
 		data.setString("texture", mrs.texture);
 		data.setEntity("target", mrs);

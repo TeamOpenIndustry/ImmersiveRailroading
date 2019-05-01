@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.UUID;
 
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
@@ -211,7 +211,7 @@ public abstract class Locomotive extends FreightTank {
 				sync.setInteger(HORN, sync.getInteger(HORN)-1);
 				sync.send();
 			} else if (sync.get(HORN_PLAYER) != null) {
-				sync.set(HORN_PLAYER, null);
+				sync.setUUID(HORN_PLAYER, null);
 				sync.send();
 			}
 			if (getBell() > 0 && !this.getDefinition().toggleBell) {
@@ -343,7 +343,8 @@ public abstract class Locomotive extends FreightTank {
 	}
 	
 	public float ambientTemperature() {
-		return getWorld().getTemperature(getBlockPosition());
+	    // null during registration
+		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;
 	}
 	
 }

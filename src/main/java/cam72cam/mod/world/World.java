@@ -1,9 +1,11 @@
-package cam72cam.mod;
+package cam72cam.mod.world;
 
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -16,35 +18,35 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Mod.EventBusSubscriber
 public class World {
+
     /* Static access to loaded worlds */
     private static Map<net.minecraft.world.World, World> worlds = new HashMap<>();
     private static Map<Integer, World> worldsByID = new HashMap<>();
 
-    public static IWorldEventsReciever load(net.minecraft.world.World world) {
+    @SubscribeEvent
+    public static void onWorldLoad(WorldEvent.Load event) {
+        net.minecraft.world.World world = event.getWorld();
         World worldWrap = new World(world);
         worlds.put(world, worldWrap);
         worldsByID.put(world.provider.getDimension(), worldWrap);
-        return new IWorldEventsReciever() {
-            @Override
-            public void onEntityAdded(net.minecraft.entity.Entity entity) {
-                worldWrap.onEntityAdded(entity);
-            }
 
-            @Override
-            public void onEntityRemoved(net.minecraft.entity.Entity entity) {
-                worldWrap.onEntityRemoved(entity);
-            }
-        };
+        world.addEventListener(new WorldEventListener(worldWrap));
     }
-    public static void unload(net.minecraft.world.World world) {
+    @SubscribeEvent
+    public static void onWorldUnload(WorldEvent.Unload event) {
+        net.minecraft.world.World world = event.getWorld();
         worlds.remove(world);
-        worlds.remove(world.provider.getDimension());
+        worldsByID.remove(world.provider.getDimension());
     }
     public static World get(net.minecraft.world.World world) {
         return worlds.get(world);
@@ -53,9 +55,9 @@ public class World {
         return worldsByID.get(dimID);
     }
 
-    public interface IWorldEventsReciever {
-        void onEntityAdded(net.minecraft.entity.Entity entity);
-        void onEntityRemoved(net.minecraft.entity.Entity entity);
+    public boolean doesBlockCollideWith(Vec3i bp, RealBB bb) {
+        IBoundingBox bbb = IBoundingBox.from(internal.getBlockState(bp.internal).getCollisionBoundingBox(internal, bp.internal));
+        return bbb != null && bb.intersects(bbb);
     }
 
     /* World Initialization */
@@ -78,7 +80,7 @@ public class World {
 
     /* Event Methods */
 
-    private void onEntityAdded(net.minecraft.entity.Entity entityIn) {
+    void onEntityAdded(net.minecraft.entity.Entity entityIn) {
         Entity entity;
         if (entityIn instanceof ModdedEntity) {
             entity = ((ModdedEntity) entityIn).getSelf();
@@ -91,10 +93,12 @@ public class World {
         entityByID.put(entityIn.getEntityId(), entity);
         entityByUUID.put(entity.getUUID(), entity);
     }
-    private void onEntityRemoved(net.minecraft.entity.Entity entity) {
-        entities.remove(entity);
-        entityByID.remove(entity.getEntityId());
-        entityByUUID.remove(entity.getUniqueID());
+    void onEntityRemoved(net.minecraft.entity.Entity entity) {
+        if (entityByUUID.containsKey(entity.getUniqueID())) {
+            entities.remove(entityByUUID.get(entity.getUniqueID()));
+            entityByID.remove(entity.getEntityId());
+            entityByUUID.remove(entity.getUniqueID());
+        }
     }
 
     /* Entity Methods */
@@ -104,7 +108,7 @@ public class World {
         if (ent == null) {
             return null;
         }
-        if (!ent.getClass().isInstance(type)) {
+        if (!type.isInstance(ent)) {
             // TODO Warning???
             return null;
         }
@@ -116,7 +120,7 @@ public class World {
         if (ent == null) {
             return null;
         }
-        if (!ent.getClass().isInstance(type)) {
+        if (!type.isInstance(ent)) {
             // TODO Warning???
             return null;
         }
@@ -128,7 +132,11 @@ public class World {
     }
 
     public <T extends Entity> List<T> getEntities(Predicate<T> filter, Class<T> type) {
-        return entities.stream().map(entity -> entity.as(type)).filter(entity -> entity != null).filter(filter).collect(Collectors.toList());
+        return entities.stream().map(entity -> entity.as(type)).filter(Objects::nonNull).filter(filter).collect(Collectors.toList());
+    }
+
+    public boolean spawnEntity(Entity ent) {
+        return internal.spawnEntity(ent.internal);
     }
 
 
@@ -159,8 +167,13 @@ public class World {
     }
     public <T extends net.minecraft.tileentity.TileEntity> T getTileEntity(Vec3i pos, Class<T> cls, boolean create) {
         net.minecraft.tileentity.TileEntity ent = internal.getChunkFromBlockCoords(pos.internal).getTileEntity(pos.internal, create ? Chunk.EnumCreateEntityType.IMMEDIATE : Chunk.EnumCreateEntityType.CHECK);
-        if (ent != null && ent.getClass().isInstance(cls)) {
+        if (ent != null && cls.isInstance(ent)) {
             return (T) ent;
+        }
+        if (ent != null) {
+            System.out.println("WHAAAA");
+            System.out.println(ent.getClass());
+            System.out.println(cls);
         }
         return null;
     }
@@ -181,12 +194,16 @@ public class World {
     }
 
     public double getTPS(int sampleSize) {
+        if (internal.getMinecraftServer() == null) {
+            return 20;
+        }
+
         long[] ttl = internal.getMinecraftServer().tickTimeArray;
 
         sampleSize = Math.min(sampleSize, ttl.length);
         double ttus = 0;
         for (int i = 0; i < sampleSize; i++) {
-            ttus += ttl[ttl.length - 1 - i] / sampleSize;
+            ttus += ttl[ttl.length - 1 - i] / (double)sampleSize;
         }
 
         if (ttus == 0) {

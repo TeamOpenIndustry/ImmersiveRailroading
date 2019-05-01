@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;

@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
 import net.minecraftforge.fml.relauncher.Side;
@@ -51,7 +52,7 @@ public class TileRail extends TileRailBase {
 		info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
 		this.markDirty();
 		
-		List<EntityCoupleableRollingStock> ents = world.internal.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, new net.minecraft.util.math.AxisAlignedBB(-info.settings.length, 0, -info.settings.length, info.settings.length, 5, info.settings.length).offset(this.getPos()));
+		List<EntityCoupleableRollingStock> ents = world.getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(pos)) < info.settings.length, EntityCoupleableRollingStock.class);
 		for(EntityCoupleableRollingStock stock : ents) {
 			stock.triggerResimulate();
 		}

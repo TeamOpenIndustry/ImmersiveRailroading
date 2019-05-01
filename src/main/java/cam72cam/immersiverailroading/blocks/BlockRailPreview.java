@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.block.BlockEntityBase;
 import cam72cam.mod.block.BlockSettings;
 import cam72cam.mod.block.IBreakCancelable;

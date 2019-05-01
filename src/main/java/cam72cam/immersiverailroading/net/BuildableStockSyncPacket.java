@@ -8,6 +8,10 @@ import cam72cam.mod.net.Packet;
  * Movable rolling stock sync packet
  */
 public class BuildableStockSyncPacket extends Packet {
+	public BuildableStockSyncPacket() {
+		// Forge Reflection
+	}
+
 	public BuildableStockSyncPacket(EntityBuildableRollingStock stock) {
 		this.data.setEntity("entity", stock);
 		this.data.setEnumList("items", stock.getItemComponents());

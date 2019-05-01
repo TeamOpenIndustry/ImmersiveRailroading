@@ -1,59 +1,8 @@
 package cam72cam.immersiverailroading.proxy;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.function.Function;
-
-import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.immersiverailroading.render.OBJTextureSheet;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.*;
-
-import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.World;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.Identifier;
-import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ColorizerGrass;
-import net.minecraft.world.biome.BiomeColorHelper;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
-
-import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.CarFreight;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.FreightTank;
-import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
-import cam72cam.immersiverailroading.entity.LocomotiveSteam;
-import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.gui.CastingGUI;
-import cam72cam.immersiverailroading.gui.FreightContainer;
-import cam72cam.immersiverailroading.gui.FreightContainerGui;
-import cam72cam.immersiverailroading.gui.PlateRollerGUI;
-import cam72cam.immersiverailroading.gui.SteamHammerContainer;
-import cam72cam.immersiverailroading.gui.SteamHammerContainerGui;
-import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
-import cam72cam.immersiverailroading.gui.SteamLocomotiveContainerGui;
-import cam72cam.immersiverailroading.gui.TankContainer;
-import cam72cam.immersiverailroading.gui.TankContainerGui;
-import cam72cam.immersiverailroading.gui.TenderContainer;
-import cam72cam.immersiverailroading.gui.TenderContainerGui;
-import cam72cam.immersiverailroading.gui.TrackGui;
+import cam72cam.immersiverailroading.*;
+import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
@@ -65,6 +14,8 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
@@ -79,23 +30,27 @@ import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.EntityRenderer;
+import cam72cam.mod.render.IEntityRender;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.util.Identifier;
+import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
@@ -103,10 +58,13 @@ import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.ColorizerGrass;
+import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
@@ -118,7 +76,6 @@ import net.minecraftforge.event.entity.EntityEvent.EnteringChunk;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Unload;
-import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -134,7 +91,17 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
 import paulscode.sound.SoundSystemConfig;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.function.Function;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -252,35 +219,34 @@ public class ClientProxy extends CommonProxy {
 		blockColors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> worldIn != null && pos != null ? BiomeColorHelper.getGrassColorAtPos(worldIn, pos) : ColorizerGrass.getGrassColor(0.5D, 1.0D), IRBlocks.BLOCK_RAIL, IRBlocks.BLOCK_RAIL_GAG);
 	}
 
-	public static final IRenderFactory<EntityRollingStock> RENDER_INSTANCE = new IRenderFactory<EntityRollingStock>() {
-		@Override
-		public Render<? super EntityRollingStock> createRenderFor(RenderManager manager) {
-			return new StockEntityRender(manager);
-		}
-	};
+	public static final IRenderFactory<EntitySmokeParticle> PARTICLE_RENDER = ParticleRender::new;
 	
-	public static final IRenderFactory<EntitySmokeParticle> PARTICLE_RENDER = new IRenderFactory<EntitySmokeParticle>() {
-		@Override
-		public Render<? super EntitySmokeParticle> createRenderFor(RenderManager manager) {
-			return new ParticleRender(manager);
-		}
-	};
-	
-	public static final IRenderFactory<MagicEntity> MAGIC_RENDER = new IRenderFactory<MagicEntity>() {
-		@Override
-		public Render<? super MagicEntity> createRenderFor(RenderManager manager) {
-			return new MagicEntityRender(manager);
-		}
-	};
+	public static final IRenderFactory<MagicEntity> MAGIC_RENDER = MagicEntityRender::new;
 
 	@SubscribeEvent
 	public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
-		for (Class<? extends EntityRollingStock> type : entityClasses) {
-			RenderingRegistry.registerEntityRenderingHandler(type, RENDER_INSTANCE);
-		}
-
 		RenderingRegistry.registerEntityRenderingHandler(EntitySmokeParticle.class, PARTICLE_RENDER);
 		RenderingRegistry.registerEntityRenderingHandler(MagicEntity.class, MAGIC_RENDER);
+
+		IEntityRender<EntityRollingStock> stockRender = (entity, partialTicks) -> {
+			GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
+			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+
+			String def = entity.getDefinitionID();
+
+			StockRenderCache.getRender(def).draw(entity, partialTicks);
+
+			cull.restore();
+			light.restore();
+		};
+
+		EntityRenderer.register(LocomotiveSteam.class, stockRender);
+		EntityRenderer.register(LocomotiveDiesel.class, stockRender);
+		EntityRenderer.register(CarPassenger.class, stockRender);
+		EntityRenderer.register(CarFreight.class, stockRender);
+		EntityRenderer.register(CarTank.class, stockRender);
+		EntityRenderer.register(Tender.class, stockRender);
+		EntityRenderer.register(HandCar.class, stockRender);
 	}
 
 	@SubscribeEvent
@@ -573,6 +539,9 @@ public class ClientProxy extends CommonProxy {
 		Player player = MinecraftClient.getPlayer();
 		World world = player.getWorld();
 		ItemStack stack = event.getPlayer().getHeldItemMainhand();
+		if (event.getTarget().getBlockPos() == null) {
+			return;
+		}
 		Vec3i pos = new Vec3i(event.getTarget().getBlockPos());
 		
 		if (event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -693,12 +662,15 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onEnterChunk(EnteringChunk event) {
+		if (event.getEntity().getEntityWorld().isRemote) {
+			// Somehow loading a chunk in the server thread can call a client event handler
+			// what the fuck forge???
+			return;
+		}
 		//TODO call modded entity onEnterChunk instead
 		EntityMoveableRollingStock stock = World.get(event.getEntity().getEntityWorld()).getEntity(event.getEntity().getUniqueID(), EntityMoveableRollingStock.class);
 
 		if (stock == null || stock.getWorld().isClient) {
-			// Somehow loading a chunk in the server thread can call a client event handler
-			// what the fuck forge???
 			return;
 		}
 

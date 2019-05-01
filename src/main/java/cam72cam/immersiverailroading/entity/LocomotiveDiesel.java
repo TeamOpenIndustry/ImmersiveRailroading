@@ -238,7 +238,7 @@ public class LocomotiveDiesel extends Locomotive {
 			float throttle = Math.abs(this.getThrottle()) + 0.05f;
 			if (exhausts != null && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(new Vec3d(exhaust.center()), this.getRotationYaw() + 180));
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(exhaust.center(), this.getRotationYaw() + 180));
 					
 					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
 					

@@ -9,6 +9,10 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 
 public class ItemRailUpdatePacket extends Packet {
+	public ItemRailUpdatePacket() {
+		// Forge Reflection
+	}
+
 	public ItemRailUpdatePacket(int slot, RailSettings settings) {
 		super();
 		data.setInteger("slot", slot);

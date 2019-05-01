@@ -65,7 +65,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 
 	@Override
 	public boolean isLoaded() {
-		return world.isServer || hasTileData;
+		return super.isLoaded() && world.isServer || hasTileData;
 	}
 
 	public void setBedHeight(float height) {
@@ -465,6 +465,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 	
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type, Capability<?> capability){
+        /* TODO
 		AxisAlignedBB bb = new AxisAlignedBB(this.pos.south().west().internal, this.pos.up(3).east().north().internal);
 		List<T> stocks = this.world.internal.getEntitiesWithinAABB(type, bb);
 		for (T stock : stocks) {
@@ -474,6 +475,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 				}
 			}
 		}
+		*/
 		return null;
 	}
 	
@@ -499,9 +501,11 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 			case ITEM_UNLOADER:
 				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 					EntityMoveableRollingStock stock = getStockNearBy(capability);
+					/* TODO
 					if (stock != null) {
 						return stock.getCapability(capability, null);
 					}
+					*/
 					return (T) new ItemStackHandler(0);
 				}
 			case DETECTOR:
@@ -650,6 +654,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		IFluidHandler stock_fluid;
 		IItemHandler stock_items;
 
+		/* TODO
 		try {
 			switch (this.augment) {
 			case ITEM_LOADER:
@@ -799,6 +804,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		} catch (Exception ex) {
 			ImmersiveRailroading.catching(ex);
 		}
+		*/
 	}
 	
 	public int getRedstoneLevel() {

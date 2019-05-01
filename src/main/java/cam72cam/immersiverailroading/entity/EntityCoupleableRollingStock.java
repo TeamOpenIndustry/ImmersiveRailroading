@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import cam72cam.immersiverailroading.util.RealBB;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
@@ -18,7 +18,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.util.math.AxisAlignedBB;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;

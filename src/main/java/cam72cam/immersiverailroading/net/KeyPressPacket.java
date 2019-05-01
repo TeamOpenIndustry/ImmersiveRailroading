@@ -7,6 +7,9 @@ import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.library.KeyTypes;
 
 public class KeyPressPacket extends Packet {
+	public KeyPressPacket() {
+		// Forge Reflection
+	}
 	public KeyPressPacket(KeyTypes key, Player player, EntityRidableRollingStock riding) {
 		super();
 		data.setEnum("key", key);

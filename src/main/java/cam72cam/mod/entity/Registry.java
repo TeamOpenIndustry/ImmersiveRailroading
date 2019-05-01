@@ -1,6 +1,7 @@
 package cam72cam.mod.entity;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.world.World;
 import cam72cam.mod.util.Identifier;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 
@@ -9,8 +10,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class Registry {
+    private static final Map<Class<? extends Entity>, String> identifiers = new HashMap<>();
     private static final Map<String, Function<ModdedEntity, Entity>> constructors = new HashMap<>();
     private static final Map<String, EntitySettings> registered = new HashMap<>();
+
     private Registry() {
 
     }
@@ -22,6 +25,7 @@ public class Registry {
         // This has back-compat for older entity names
         EntityRegistry.registerModEntity(id.internal, ModdedEntity.class, type.getSimpleName(), constructors.size(), ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE, 20, false);
 
+        identifiers.put(type, id.toString());
         constructors.put(id.toString(), ctr);
         registered.put(id.toString(), settings);
     }
@@ -33,7 +37,15 @@ public class Registry {
         return constructors.get(type);
     }
 
-    public static Entity create(String type, ModdedEntity base) {
+    protected static Entity create(String type, ModdedEntity base) {
         return getConstructor(type).apply(base);
+    }
+
+    public static Entity create(World world, Class<? extends Entity> cls) {
+        //TODO null checks
+        ModdedEntity ent = new ModdedEntity(world.internal);
+        String id = identifiers.get(cls);
+        ent.init(id);
+        return ent.getSelf();
     }
 }

@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
+import cam72cam.mod.util.Identifier;
 import org.lwjgl.opengl.ARBFragmentShader;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.ARBVertexShader;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import net.minecraft.util.ResourceLocation;
 
 public class GLSLShader {
 	private int program;
@@ -64,7 +64,7 @@ public class GLSLShader {
 	private String readShader(String fname) {
 		InputStream input;
 		try {
-			input = ImmersiveRailroading.proxy.getResourceStream(new ResourceLocation("immersiverailroading:particles/" + fname));
+			input = ImmersiveRailroading.proxy.getResourceStream(new Identifier("immersiverailroading:particles/" + fname));
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error reading shader " + fname);

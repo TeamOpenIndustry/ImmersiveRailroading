@@ -1,7 +1,7 @@
 package cam72cam.mod.net;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.util.TagCompound;
 import io.netty.buffer.ByteBuf;

@@ -6,12 +6,12 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.World;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
+import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,13 +80,17 @@ public abstract class BuilderBase {
 	public boolean canBuild() {
 		for(TrackBase track : tracks) {
 			if (!track.canPlaceTrack()) {
+				System.out.println("CAN'tBUILD");
+				System.out.println(track.getPos());
 				return false;
 			}
 		}
+		System.out.println("CAN BUILD");
 		return true;
 	}
 	
 	public void build() {
+		System.out.println("BUILD");
 		/*
 		Assume we have already tested.
 		There are a few edge cases which break with overlapping split builders

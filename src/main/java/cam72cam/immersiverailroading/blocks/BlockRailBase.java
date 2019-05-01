@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.SwitchUtil;
-import cam72cam.mod.*;
 import cam72cam.mod.block.BlockEntityBase;
 import cam72cam.mod.block.BlockSettings;
 import cam72cam.mod.block.IBreakCancelable;
@@ -23,6 +22,7 @@ import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.world.World;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -234,7 +234,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
     public IBlockState getExtendedState(IBlockState origState, IBlockAccess internal, BlockPos pos)
     {
     	IExtendedBlockState state = (IExtendedBlockState)origState;
-    	TileRailBase te = new World((net.minecraft.world.World) internal).getTileEntity(new Vec3i(pos), TileRailBase.class);
+    	TileRailBase te = World.get((net.minecraft.world.World) internal).getTileEntity(new Vec3i(pos), TileRailBase.class);
     	if (te != null) {
 			if (te.getRenderRailBed() != null) {
 				state = state.withProperty(RAIL_BED, te.getRenderRailBed().internal);

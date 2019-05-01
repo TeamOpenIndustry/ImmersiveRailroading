@@ -159,7 +159,7 @@ public abstract class FreightTank extends Freight {
 
 	@Override
 	public void save(TagCompound data) {
-		super.load(data);
+		super.save(data);
 		data.set("tank", new TagCompound(this.theTank.writeToNBT(new NBTTagCompound())));
 	}
 

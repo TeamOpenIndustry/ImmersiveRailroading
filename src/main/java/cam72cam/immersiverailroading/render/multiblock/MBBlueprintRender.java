@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import java.util.Map;
 
-import cam72cam.mod.World;
+import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.multiblock.Multiblock;

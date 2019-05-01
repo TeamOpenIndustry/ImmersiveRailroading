@@ -9,7 +9,6 @@ import java.util.Set;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.math.Vec3i;
-import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
@@ -63,7 +62,7 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 		return TICKETS.get(dim);
 	}
 
-	public static void flagEntityPos(cam72cam.mod.World world, Vec3i inPos) {
+	public static void flagEntityPos(cam72cam.mod.world.World world, Vec3i inPos) {
 		if (world.isClient) {
 			return;
 		}
