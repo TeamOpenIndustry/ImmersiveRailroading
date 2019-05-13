@@ -105,7 +105,7 @@ public class ItemRailAugment extends ItemBase {
 	@Override
 	public String getUnlocalizedName(ItemStack stack)
 	{
-		return super.getUnlocalizedName() + "." + ItemAugmentType.get(stack).name();
+		return super.getUnlocalizedName() + "." + ItemAugmentType.getContents(stack).name();
 	}
 	*/
 }

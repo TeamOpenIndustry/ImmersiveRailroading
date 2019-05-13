@@ -10,6 +10,10 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
+import cam72cam.mod.capability.ITank;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidStack;
+import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -19,16 +23,11 @@ import cam72cam.mod.tile.TickableTileEntity;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -195,7 +194,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 			this.railBedCache = new ItemStack(nbt.get("renderBed"));
 		}
 		if (this.augmentTank != null && this.augment == Augment.WATER_TROUGH) {
-			int delta = clientLastTankAmount - this.augmentTank.getFluidAmount();
+			int delta = clientLastTankAmount - this.augmentTank.getContents().getAmount();
 			if (delta > 0) {
 				// We lost water, do spray
 				// TODO, this fires during rebalance which is not correct
@@ -209,7 +208,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 					clientSoundTimeout = world.getTime() + 10;
 				}
 			}
-			clientLastTankAmount = this.augmentTank.getFluidAmount();
+			clientLastTankAmount = this.augmentTank.getContents().getAmount();
 		}
 	}
 	
@@ -249,7 +248,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 
 		if (nbt.hasKey("augmentTank")) {
 			createAugmentTank();
-			augmentTank.readFromNBT(nbt.get("augmentTank").internal);
+			augmentTank.read(nbt.get("augmentTank"));
 		}
 		if (nbt.hasKey("augmentFilterID")) {
 			augmentFilterID = nbt.getString("augmentFilterID");
@@ -281,7 +280,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		if (augment != null) {
 			nbt.setInteger("augment", this.augment.ordinal());
 			if (augmentTank != null) {
-				nbt.set("augmentTank", new TagCompound(augmentTank.writeToNBT(new NBTTagCompound())));
+				nbt.set("augmentTank", augmentTank.write(new TagCompound()));
 			}
 			if (augmentFilterID != null) {
 				nbt.setString("augmentFilterID", augmentFilterID);
@@ -464,25 +463,15 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		return super.hasCapability(capability, facing);
 	}
 	
-	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type, Capability<?> capability){
-        /* TODO
-		AxisAlignedBB bb = new AxisAlignedBB(this.pos.south().west().internal, this.pos.up(3).east().north().internal);
-		List<T> stocks = this.world.internal.getEntitiesWithinAABB(type, bb);
-		for (T stock : stocks) {
-			if (capability == null || stock.hasCapability(capability, null)) {
-				if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
-					return stock;
-				}
+	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type){
+		return world.getEntities((T stock) -> {
+			if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
+				return stock.getBounds().intersects(new Vec3d(this.pos.south().west()), new Vec3d(this.pos.up(3).east().north()));
 			}
-		}
-		*/
-		return null;
+			return false;
+		}, type).stream().findFirst().orElse(null);
 	}
 	
-	public EntityMoveableRollingStock getStockNearBy(Capability<?> capability){
-		return getStockNearBy(EntityMoveableRollingStock.class, capability);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
@@ -500,12 +489,10 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
 				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-					EntityMoveableRollingStock stock = getStockNearBy(capability);
-					/* TODO
+					Freight stock = getStockNearBy(Freight.class);
 					if (stock != null) {
-						return stock.getCapability(capability, null);
+						return (T) stock.cargoItems;
 					}
-					*/
 					return (T) new ItemStackHandler(0);
 				}
 			case DETECTOR:
@@ -521,27 +508,29 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 	
 	private void balanceTanks() {
+		/*
 		for (Facing facing : Facing.values()) {
 			TileRailBase neighbor = world.getTileEntity(pos.offset(facing), TileRailBase.class);
 			if (neighbor != null && neighbor.augmentTank != null) {
-				if (neighbor.augmentTank.getFluidAmount() + 1 < augmentTank.getFluidAmount()) {
-					transferAllFluid(augmentTank, neighbor.augmentTank, (augmentTank.getFluidAmount() - neighbor.augmentTank.getFluidAmount())/2);
+				if (neighbor.augmentTank.getContents().getAmount() + 1 < augmentTank.getContents().getAmount()) {
+					transferAllFluid(augmentTank, neighbor.augmentTank, (augmentTank.getContents().getAmount() - neighbor.augmentTank.getContents().getAmount())/2);
 					this.markDirty();
 				}
 			}
 		}
+		*/
 	}
-	
+
 	private void createAugmentTank() {
 		switch(this.augment) {
 		case FLUID_LOADER:
 		case FLUID_UNLOADER:
-			this.augmentTank = new FluidTank(1000);
+			this.augmentTank = new FluidTank(null, 1000);
 			break;
 		case WATER_TROUGH:
-			this.augmentTank = new FluidTank(FluidRegistry.WATER, 0, 1000) {
+			this.augmentTank = new FluidTank(new FluidStack(Fluid.WATER, 0), 1000) {
 				@Override
-				protected void onContentsChanged() {
+				public void onChanged() {
 					balanceTanks();
 					markDirty();
 				}
@@ -551,16 +540,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 			break;
 		}
 	}
-	
-	public void transferAllFluid(IFluidHandler source, IFluidHandler dest, int maxQuantity) {
-		FluidStack possibleDrain = source.drain(maxQuantity, false);
-		if (possibleDrain == null || possibleDrain.amount == 0) {
-			return;
-		}
-		int filled = dest.fill(possibleDrain, true);
-		source.drain(filled, true);
-	}
-	
+
 	public void transferAllItems(IItemHandler source, IItemHandler dest, int numstacks) {
 		for (int slot = 0; slot < source.getSlots(); slot++) {
 			net.minecraft.item.ItemStack stack = source.getStackInSlot(slot);
@@ -607,8 +587,8 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		
 		ticksExisted += 1;
 		
-		if (Config.ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
-			if ((int)(Math.random() * Config.ConfigDebug.snowMeltRate * 10) == 0) {
+		if (ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
+			if ((int)(Math.random() * ConfigDebug.snowMeltRate * 10) == 0) {
 				if (!world.isPrecipitating()) {
 					this.setSnowLayers(this.snowLayers -= 1);
 				}
@@ -650,68 +630,67 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		
 		Capability<IFluidHandler> fluid_cap = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
 		Capability<IItemHandler> item_cap = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
-		EntityMoveableRollingStock stock;
-		IFluidHandler stock_fluid;
-		IItemHandler stock_items;
 
-		/* TODO
 		try {
 			switch (this.augment) {
-			case ITEM_LOADER:
-				stock = this.getStockNearBy(item_cap);
-				if (stock == null) {
+            case ITEM_LOADER:
+			{
+				Freight freight = this.getStockNearBy(Freight.class);
+				if (freight == null) {
 					break;
 				}
-				stock_items = stock.getCapability(item_cap, null);
+				IItemHandler freight_items = freight.cargoItems;
 				for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-					transferAllItems(neighbor, stock_items, 1);
+					transferAllItems(neighbor, freight_items, 1);
 				}
-				break;
-			case ITEM_UNLOADER:
-				stock = this.getStockNearBy(item_cap);
-				if (stock == null) {
+			}
+			break;
+			case ITEM_UNLOADER: {
+				Freight freight = this.getStockNearBy(Freight.class);
+				if (freight == null) {
 					break;
 				}
-				stock_items = stock.getCapability(item_cap, null);
+				IItemHandler freight_items = freight.cargoItems;
 				for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-					transferAllItems(stock_items, neighbor, 1);
+					transferAllItems(freight_items, neighbor, 1);
 				}
-				break;
-			case FLUID_LOADER:
+			}
+			break;
+			case FLUID_LOADER: {
 				if (this.augmentTank == null) {
 					this.createAugmentTank();
 				}
-				
-				stock = this.getStockNearBy(fluid_cap);
+
+				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
 				}
-				
-				stock_fluid = stock.getCapability(fluid_cap, null);
-				transferAllFluid(augmentTank, stock_fluid, 100);
+
+				augmentTank.tryFill(stock.theTank, 100, false);
 				for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-					transferAllFluid(neighbor, stock_fluid, 100);
+					stock.theTank.tryDrain(ITank.getTank(neighbor), 100, false);
 				}
-				
+			}
 				break;
-			case FLUID_UNLOADER:
+			case FLUID_UNLOADER: {
 				if (this.augmentTank == null) {
 					this.createAugmentTank();
 				}
-				
-				stock = this.getStockNearBy(fluid_cap);
+
+				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
 				}
-				
-				stock_fluid = stock.getCapability(fluid_cap, null);
-				transferAllFluid(stock_fluid, augmentTank, 100);				
+
+				augmentTank.tryDrain(stock.theTank, 100, false);
 				for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-					transferAllFluid(stock_fluid, neighbor, 100);
+					stock.theTank.tryFill(ITank.getTank(neighbor), 100, false);
 				}
+			}
 				
 				break;
 			case WATER_TROUGH:
+				/*
 				if (this.augmentTank == null) {
 					this.createAugmentTank();
 				}
@@ -721,90 +700,91 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 				} else if (this.ticksExisted % 20 == 0) {
 					balanceTanks();
 				}
+                */
 				break;
-			case LOCO_CONTROL:
-				Locomotive loco = this.getStockNearBy(Locomotive.class, null);
+			case LOCO_CONTROL: {
+				Locomotive loco = this.getStockNearBy(Locomotive.class);
 				if (loco != null) {
 					int power = world.getRedstone(pos);
-					
-					switch(controlMode) {
-					case THROTTLE_FORWARD:
-						loco.setThrottle(power/15f);
-						break;
-					case THROTTLE_REVERSE:
-						loco.setThrottle(-power/15f);
-						break;
-					case BRAKE:
-						loco.setAirBrake(power/15f);
-						break;
-					case HORN:
-						loco.setHorn(40, null);
-						break;
-					case COMPUTER:
-						//NOP
-						break;
+
+					switch (controlMode) {
+						case THROTTLE_FORWARD:
+							loco.setThrottle(power / 15f);
+							break;
+						case THROTTLE_REVERSE:
+							loco.setThrottle(-power / 15f);
+							break;
+						case BRAKE:
+							loco.setAirBrake(power / 15f);
+							break;
+						case HORN:
+							loco.setHorn(40, null);
+							break;
+						case COMPUTER:
+							//NOP
+							break;
 					}
 				}
+			}
 				break;
-			case DETECTOR:
-				stock = this.getStockNearBy(null);
+			case DETECTOR: {
+				EntityMoveableRollingStock stock = this.getStockNearBy(EntityMoveableRollingStock.class);
 				int currentRedstone = redstoneLevel;
 				int newRedstone = 0;
-	
-				switch (this.redstoneMode ) {
-				case SIMPLE:
-					newRedstone = stock != null ? 15 : 0;
-					break;
-				case SPEED:
-					newRedstone = stock != null ? (int)Math.floor(Math.abs(stock.getCurrentSpeed().metric())/10) : 0;
-					break;
-				case PASSENGERS:
-					newRedstone = stock != null ? Math.min(15, stock.getPassengerCount()) : 0;
-					break;
-				case CARGO:
-					if (stock != null && stock instanceof Freight) {
-						newRedstone = stock != null ? ((Freight)stock).getPercentCargoFull()*15/100 : 0;
-					}
-					break;
-				case LIQUID:
-					if (stock != null && stock instanceof FreightTank) {
-						newRedstone = stock != null ? ((FreightTank)stock).getPercentLiquidFull()*15/100 : 0;
-					}
-					break;
+
+				switch (this.redstoneMode) {
+					case SIMPLE:
+						newRedstone = stock != null ? 15 : 0;
+						break;
+					case SPEED:
+						newRedstone = stock != null ? (int) Math.floor(Math.abs(stock.getCurrentSpeed().metric()) / 10) : 0;
+						break;
+					case PASSENGERS:
+						newRedstone = stock != null ? Math.min(15, stock.getPassengerCount()) : 0;
+						break;
+					case CARGO:
+						if (stock != null && stock instanceof Freight) {
+							newRedstone = stock != null ? ((Freight) stock).getPercentCargoFull() * 15 / 100 : 0;
+						}
+						break;
+					case LIQUID:
+						if (stock != null && stock instanceof FreightTank) {
+							newRedstone = stock != null ? ((FreightTank) stock).getPercentLiquidFull() * 15 / 100 : 0;
+						}
+						break;
 				}
-				
-				
+
+
 				if (newRedstone != currentRedstone) {
 					this.redstoneLevel = newRedstone;
 					this.markDirty(); //TODO overkill
 				}
+			}
 				break;
-			case COUPLER:
-				stock = this.getStockNearBy(null);
-				int power = world.getRedstone(pos);
-				if (stock != null && stock instanceof EntityCoupleableRollingStock && power > 0) {
-					EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock)stock;
+			case COUPLER: {
+				EntityCoupleableRollingStock stock = this.getStockNearBy(EntityCoupleableRollingStock.class);
+				if (stock != null) {
 					switch (couplerMode) {
-					case ENGAGED:
-						for (CouplerType coupler : CouplerType.values()) {
-							couplable.setCouplerEngaged(coupler, true);
-						}
-						break;
-					case DISENGAGED:
-						for (CouplerType coupler : CouplerType.values()) {
-							couplable.setCouplerEngaged(coupler, false);
-						}
-						break;
+						case ENGAGED:
+							for (CouplerType coupler : CouplerType.values()) {
+								stock.setCouplerEngaged(coupler, true);
+							}
+							break;
+						case DISENGAGED:
+							for (CouplerType coupler : CouplerType.values()) {
+								stock.setCouplerEngaged(coupler, false);
+							}
+							break;
 					}
 					break;
 				}
+			}
 			default:
 				break;
 			}
 		} catch (Exception ex) {
 			ImmersiveRailroading.catching(ex);
 		}
-		*/
 	}
 	
 	public int getRedstoneLevel() {
@@ -812,7 +792,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 	
 	public double getTankLevel() {
-		return this.augmentTank == null ? 0 : (double)this.augmentTank.getFluidAmount() / this.augmentTank.getCapacity(); 
+		return this.augmentTank == null ? 0 : (double)this.augmentTank.getContents().getAmount() / this.augmentTank.getCapacity();
 	}
 	
 	private static int waterPressureFromSpeed(double speed) {

@@ -34,7 +34,7 @@ public class TankContainerGui extends ContainerGuiBase {
         currY = drawTopBar(i, currY, horizSlots);
     	currY = drawSlotBlock(i, currY, horizSlots, inventoryRows, horizSlots * inventoryRows);
     	
-    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, stock.getLiquid(), stock.getLiquidAmount() / (float)stock.getTankCapacity().MilliBuckets());
+    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, stock.getLiquid().internal, stock.getLiquidAmount() / (float)stock.getTankCapacity().MilliBuckets());
     	int quantX = i + paddingLeft + horizSlots * slotSize/2;
     	int quantY = currY - inventoryRows * slotSize + inventoryRows * slotSize/2;
 

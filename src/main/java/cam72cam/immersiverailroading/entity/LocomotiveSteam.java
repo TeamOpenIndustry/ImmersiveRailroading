@@ -19,12 +19,12 @@ import cam72cam.immersiverailroading.util.LiquidUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.Explosion;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -560,7 +560,7 @@ public class LocomotiveSteam extends Locomotive {
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
-				FluidUtil.tryFluidTransfer(this.theTank, tender.theTank, desiredDrain, true);
+				theTank.tryDrain(tender.theTank, desiredDrain, false);
 			}
 			
 			if (this.getTickCount() % 20 == 0) {
@@ -673,7 +673,7 @@ public class LocomotiveSteam extends Locomotive {
 			double burnableSlots = this.cargoItems.getSlots()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
 			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
-			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen capability to balance heat loss
+			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss
 			
 			float delta = (float) (throttle * maxPressureTick);
 			
@@ -683,12 +683,12 @@ public class LocomotiveSteam extends Locomotive {
 		
 		if (waterUsed != 0) {
 			if (waterUsed > 0) {
-				theTank.drain((int) Math.floor(waterUsed), true);
+				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.floor(waterUsed)), true);
 				waterUsed = waterUsed % 1;
 			}
 			// handle remainder
 			if (Math.random() <= waterUsed) {
-				theTank.drain(1, true);
+				theTank.drain(new FluidStack(Fluid.WATER, 1), true);
 			}
 		}
 		

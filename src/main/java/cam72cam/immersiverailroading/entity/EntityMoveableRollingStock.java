@@ -331,7 +331,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				
 				if (entity.isPlayer()) {
 					if (entity.getTickCount() < 20 * 5) {
-						// Give the internal a chance to get out of the way
+						// Give the internal a chance to getContents out of the way
 						continue;
 					}
 				}
