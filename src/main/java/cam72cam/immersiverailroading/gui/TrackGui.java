@@ -104,7 +104,7 @@ public class TrackGui extends GuiScreen {
 		NonNullList<ItemStack> oreDict = NonNullList.create();
 
 		//if (!DefinitionManager.getTrackIDs().contains(type)) {
-		//	track = DefinitionManager.getTrackIDs().stream().findFirst().get();
+		//	track = DefinitionManager.getTrackIDs().stream().findFirst().getContents();
 		//}
 		
 		oreDict.add(new ItemStack(Items.AIR, 1));

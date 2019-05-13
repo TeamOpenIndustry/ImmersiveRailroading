@@ -94,13 +94,13 @@ public class AugmentDriver implements DriverBlock {
 			Node node = this.node();
 			if (this.ticksAlive == 0) {
 				TileRailBase te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
-				EntityRollingStock nearby = te.getStockNearBy(typeFilter, null);
+				EntityRollingStock nearby = te.getStockNearBy(typeFilter);
 				wasOverhead = nearby != null ? nearby.getUUID() : null;
 			}
 			
 			if (node != null && this.ticksAlive % Math.max(Config.ConfigDebug.ocPollDelayTicks, 1) == 0) {
 				TileRailBase te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
-				EntityRollingStock nearby = te.getStockNearBy(typeFilter, null);
+				EntityRollingStock nearby = te.getStockNearBy(typeFilter);
 				UUID isOverhead = nearby != null ? nearby.getUUID() : null;
 				if (isOverhead != wasOverhead) {
 					Node neighbor = node.neighbors().iterator().next();

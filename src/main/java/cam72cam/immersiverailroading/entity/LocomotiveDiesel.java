@@ -15,9 +15,10 @@ import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.TagCompound;
-import net.minecraftforge.fluids.Fluid;
 
 import java.util.List;
 
@@ -272,7 +273,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			while (internalBurn < 0 && this.getLiquidAmount() > 0) {
 				internalBurn += burnTime;
-				theTank.drain(1, true);
+				theTank.drain(new FluidStack(theTank.getContents().getFluid(), 1), true);
 			}
 			
 			consumption *= 100;

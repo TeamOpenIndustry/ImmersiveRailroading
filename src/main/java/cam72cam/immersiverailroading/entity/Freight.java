@@ -17,18 +17,15 @@ import cam72cam.mod.util.TagCompound;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 public abstract class Freight extends EntityCoupleableRollingStock {
-	protected FilteredStackHandler cargoItems = new FilteredStackHandler(0) {
+	public FilteredStackHandler cargoItems = new FilteredStackHandler(0) {
         @Override
         protected void onContentsChanged(int slot) {
             // We need to tell the tile entity that something has changed so
-            // that the chest contents is persisted
+            // that the chest getContents is persisted
         	Freight.this.onInventoryChanged();
         }
     };
@@ -210,21 +207,4 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		fLoad = fLoad + super.getWeight();
 		return fLoad;
 	}
-
-    //@Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return true;
-        }
-        return false;//super.hasCapability(capability, facing);
-    }
-
-    @SuppressWarnings("unchecked")
-	//@Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return (T) cargoItems;
-        }
-        return null;//super.getCapability(capability, facing);
-    }
 }

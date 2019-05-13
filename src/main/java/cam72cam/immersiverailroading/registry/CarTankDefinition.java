@@ -5,10 +5,9 @@ import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.mod.fluid.Fluid;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +38,7 @@ public class CarTankDefinition extends FreightDefinition {
         if (tank.has("whitelist")) {
             fluidFilter = new ArrayList<>();
             for (JsonElement allowed : tank.get("whitelist").getAsJsonArray()) {
-                Fluid allowedFluid = FluidRegistry.getFluid(allowed.getAsString());
+                Fluid allowedFluid = Fluid.getFluid(allowed.getAsString());
                 if (allowedFluid == null) {
                     ImmersiveRailroading.warn("Skipping unknown whitelisted fluid: " + allowed.getAsString());
                     continue;

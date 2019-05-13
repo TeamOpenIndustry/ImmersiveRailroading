@@ -3,10 +3,9 @@ package cam72cam.immersiverailroading.util;
 import java.util.ArrayList;
 import java.util.List;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
+import cam72cam.mod.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 
 public class BurnUtil {
 	
@@ -15,15 +14,15 @@ public class BurnUtil {
 	}
 	
 	public static int getBurnTime(Fluid fluid) {
-		if (ConfigBalance.dieselFuels.containsKey(fluid.getName())) {
-			return ConfigBalance.dieselFuels.get(fluid.getName());
+		if (ConfigBalance.dieselFuels.containsKey(fluid.ident)) {
+			return ConfigBalance.dieselFuels.get(fluid.ident);
 		}
 		return 0;
 	}
 	public static List<Fluid> burnableFluids() {
-		List<Fluid> values = new ArrayList<Fluid>();
+		List<Fluid> values = new ArrayList<>();
 		for (String name : ConfigBalance.dieselFuels.keySet()) {
-			Fluid found = FluidRegistry.getFluid(name);
+			Fluid found = Fluid.getFluid(name);
 			if (found != null) {
 				values.add(found);
 			}

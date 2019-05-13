@@ -37,7 +37,7 @@ public class SteamLocomotiveContainerGui extends ContainerGuiBase {
         currY = drawTopBar(i, currY, horizSlots*2);
     	currY = drawSlotBlock(i, currY, horizSlots*2, inventoryRows, horizSlots*2 * inventoryRows);
     	
-    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots*2, inventoryRows, stock.getLiquid(), stock.getLiquidAmount() / (float)stock.getTankCapacity().MilliBuckets());
+    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots*2, inventoryRows, stock.getLiquid().internal, stock.getLiquidAmount() / (float)stock.getTankCapacity().MilliBuckets());
 
     	int quantX = i + paddingLeft + horizSlots*2 * slotSize/2;
     	int quantY = currY - inventoryRows * slotSize + inventoryRows * slotSize/2 - 4;

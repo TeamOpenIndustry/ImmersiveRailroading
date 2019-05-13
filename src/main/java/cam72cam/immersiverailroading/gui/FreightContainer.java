@@ -2,8 +2,6 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.entity.CarFreight;
 import net.minecraft.inventory.IInventory;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import invtweaks.api.container.ChestContainer;
 
 @ChestContainer
@@ -18,13 +16,11 @@ public class FreightContainer extends ContainerBase {
         int horizSlots = stock.getInventoryWidth();
 		this.numRows = (int) Math.ceil((double)stock.getInventorySize() / horizSlots);
 		this.numSlots = stock.getInventorySize(); 
-		
-		IItemHandler itemHandler = this.freight.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-		
+
 		int width = 0;
 		int currY = 0;
 		currY = offsetTopBar(0, currY, horizSlots);
-		currY = addSlotBlock(itemHandler, stock.getInventorySize(), 0, currY, horizSlots);
+		currY = addSlotBlock(freight.cargoItems, stock.getInventorySize(), 0, currY, horizSlots);
     	currY = offsetPlayerInventoryConnector(0, currY, width, horizSlots);
     	currY = addPlayerInventory(playerInventory, currY, horizSlots);
 	}

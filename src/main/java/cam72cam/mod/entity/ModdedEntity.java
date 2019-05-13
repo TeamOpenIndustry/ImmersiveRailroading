@@ -401,4 +401,43 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
             super.setVelocity(x, y, z);
         }
     }
+
+    /*
+    * TODO!!!
+     */
+    /*
+    //@Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return true;
+        }
+        return false;//super.hasCapability(energyCapability, facing);
+    }
+
+    @SuppressWarnings("unchecked")
+	//@Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return (T) cargoItems;
+        }
+        return null;//super.getCapability(energyCapability, facing);
+    }
+
+	@Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            return true;
+        }
+        return super.hasCapability(capability, facing);
+    }
+
+    @SuppressWarnings("unchecked")
+	@Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            return (T) theTank;
+        }
+        return super.getCapability(capability, facing);
+    }
+     */
 }

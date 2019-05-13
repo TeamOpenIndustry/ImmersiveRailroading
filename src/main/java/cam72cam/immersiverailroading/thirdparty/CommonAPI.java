@@ -27,7 +27,7 @@ public class CommonAPI {
     public static CommonAPI create(World world, BlockPos pos, Class<? extends EntityRollingStock> stockClass) {
         TileRailBase te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), TileRailBase.class);
         if (te != null) {
-            EntityRollingStock stock = te.getStockNearBy(stockClass, null);
+            EntityRollingStock stock = te.getStockNearBy(stockClass);
             if (stock != null) {
                 return new CommonAPI(stock);
             }
@@ -41,8 +41,8 @@ public class CommonAPI {
 
     public FluidStack getFluid() {
         /*
-        Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
-        IFluidHandler fh = stock.getCapability(capability, null);
+        Capability<ITank> energyCapability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
+        ITank fh = stock.getCapability(energyCapability, null);
         if (fh != null) {
             return fh.drain(Integer.MAX_VALUE, false);
         }

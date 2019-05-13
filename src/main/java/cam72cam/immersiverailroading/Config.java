@@ -72,7 +72,7 @@ public class Config {
 		@Comment("Drop snowballs when the train can't push a block out of the way")
 		public static boolean dropSnowBalls = false;
 		
-		@Comment("Trains get destroyed by Mob explosions")
+		@Comment("Trains getContents destroyed by Mob explosions")
 		public static boolean trainMobExplosionDamage = true;
 	}
 
@@ -128,7 +128,7 @@ public class Config {
 		@Comment("How much water the locomotive should use")
 		public static float locoWaterUsage = 10;
 
-		@Comment("How much you get payed per meter the villager traveled (default 1 emerald per km)")
+		@Comment("How much you getContents payed per meter the villager traveled (default 1 emerald per km)")
 		public static double villagerPayoutPerMeter = 0.001;
 
 		@Comment("Distance the villagers will hear the conductor's whistle")
@@ -171,7 +171,7 @@ public class Config {
 		@Comment("Range of radio-control, positive integer")
 		public static int RadioRange = 500;
 		
-		@Comment("Energy cost (RF) per radio transmission per metre")
+		@Comment("IEnergy cost (RF) per radio transmission per metre")
 		public static int RadioCostPerMetre = 0;
 		
 		@Comment("Prevent stock from being built outside the recommended and model gauges")

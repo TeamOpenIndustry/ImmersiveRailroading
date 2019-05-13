@@ -2,8 +2,6 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import net.minecraft.inventory.IInventory;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public class SteamLocomotiveContainer extends ContainerBase {
@@ -15,8 +13,6 @@ public class SteamLocomotiveContainer extends ContainerBase {
 		this.Tank = stock;
         int horizSlots = stock.getInventoryWidth();
 		this.numRows = (int) Math.ceil(((double)stock.getInventorySize()-2) / horizSlots);
-		
-		IItemHandler itemHandler = this.Tank.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
 		stock.addListener(this);
 		
@@ -25,11 +21,11 @@ public class SteamLocomotiveContainer extends ContainerBase {
 		currY = offsetTopBar(0, currY, horizSlots*2);
 		currY = offsetSlotBlock(0, currY, horizSlots*2, numRows);
 		
-		this.addSlotToContainer(new SlotItemHandler(itemHandler, stock.getInventorySize()-2, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
-		this.addSlotToContainer(new SlotItemHandler(itemHandler, stock.getInventorySize()-1, 0 + paddingLeft + slotSize * horizSlots*2 - slotSize - 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems, stock.getInventorySize()-2, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems, stock.getInventorySize()-1, 0 + paddingLeft + slotSize * horizSlots*2 - slotSize - 5, currY - numRows * slotSize + 4));
 		currY = offsetPlayerInventoryConnector(0, currY, width, horizSlots*2);
 		
-		currY = addSlotBlock(itemHandler, stock.getInventorySize()-2, horizSlots * slotSize/2, currY, horizSlots);
+		currY = addSlotBlock(this.Tank.cargoItems, stock.getInventorySize()-2, horizSlots * slotSize/2, currY, horizSlots);
 		
     	currY = offsetPlayerInventoryConnector(0, currY, width/2, horizSlots);
     	currY = addPlayerInventory(playerInventory, currY, horizSlots*2);
