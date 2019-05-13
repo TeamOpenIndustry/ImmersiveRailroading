@@ -167,7 +167,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 10);
+				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 12);
 				ItemGauge.set(out, ItemGauge.get(input));
 				outputTe.getContainer().setStackInSlot(0, out);
 				input.shrink(1);
