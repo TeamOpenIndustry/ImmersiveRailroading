@@ -741,7 +741,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case LOCO_CONTROL:
 				Locomotive loco = this.getStockNearBy(Locomotive.class, null);
 				if (loco != null) {
-					power = RedstoneUtil.getPower(world, pos);
 					
 					switch(controlMode) {
 					case THROTTLE_FORWARD:
