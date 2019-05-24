@@ -796,7 +796,6 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				break;
 			case COUPLER:
 				stock = this.getStockNearBy(null);
-				power = RedstoneUtil.getPower(world, pos);
 				if (stock != null && stock instanceof EntityCoupleableRollingStock && power > 0) {
 					EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock)stock;
 					switch (couplerMode) {
