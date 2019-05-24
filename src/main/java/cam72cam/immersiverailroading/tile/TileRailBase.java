@@ -666,15 +666,18 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		IItemHandler stock_items;
 
 		try {
+			int power = RedstoneUtil.getPower(world, pos);
 			switch (this.augment) {
 			case ITEM_LOADER:
 				stock = this.getStockNearBy(item_cap);
 				if (stock == null) {
 					break;
 				}
-				stock_items = stock.getCapability(item_cap, null);
-				for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-					transferAllItems(neighbor, stock_items, 1);
+				if(power == 0) {
+					stock_items = stock.getCapability(item_cap, null);
+					for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+						transferAllItems(neighbor, stock_items, 1);
+					}
 				}
 				break;
 			case ITEM_UNLOADER:
@@ -682,9 +685,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				if (stock == null) {
 					break;
 				}
-				stock_items = stock.getCapability(item_cap, null);
-				for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-					transferAllItems(stock_items, neighbor, 1);
+				if(power == 0) {
+					stock_items = stock.getCapability(item_cap, null);
+					for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+						transferAllItems(stock_items, neighbor, 1);
+					}
 				}
 				break;
 			case FLUID_LOADER:
@@ -696,13 +701,13 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				if (stock == null) {
 					break;
 				}
-				
-				stock_fluid = stock.getCapability(fluid_cap, null);
-				transferAllFluid(augmentTank, stock_fluid, 100);
-				for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-					transferAllFluid(neighbor, stock_fluid, 100);
+				if(power == 0) {
+					stock_fluid = stock.getCapability(fluid_cap, null);
+					transferAllFluid(augmentTank, stock_fluid, 100);
+					for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
+						transferAllFluid(neighbor, stock_fluid, 100);
+					}
 				}
-				
 				break;
 			case FLUID_UNLOADER:
 				if (this.augmentTank == null) {
@@ -714,12 +719,13 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					break;
 				}
 				
-				stock_fluid = stock.getCapability(fluid_cap, null);
-				transferAllFluid(stock_fluid, augmentTank, 100);				
-				for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-					transferAllFluid(stock_fluid, neighbor, 100);
+				if(power == 0) {
+					stock_fluid = stock.getCapability(fluid_cap, null);
+					transferAllFluid(stock_fluid, augmentTank, 100);				
+					for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
+						transferAllFluid(stock_fluid, neighbor, 100);
+					}
 				}
-				
 				break;
 			case WATER_TROUGH:
 				if (this.augmentTank == null) {
@@ -735,7 +741,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case LOCO_CONTROL:
 				Locomotive loco = this.getStockNearBy(Locomotive.class, null);
 				if (loco != null) {
-					int power = RedstoneUtil.getPower(world, pos);
+					power = RedstoneUtil.getPower(world, pos);
 					
 					switch(controlMode) {
 					case THROTTLE_FORWARD:
@@ -791,7 +797,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				break;
 			case COUPLER:
 				stock = this.getStockNearBy(null);
-				int power = RedstoneUtil.getPower(world, pos);
+				power = RedstoneUtil.getPower(world, pos);
 				if (stock != null && stock instanceof EntityCoupleableRollingStock && power > 0) {
 					EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock)stock;
 					switch (couplerMode) {
