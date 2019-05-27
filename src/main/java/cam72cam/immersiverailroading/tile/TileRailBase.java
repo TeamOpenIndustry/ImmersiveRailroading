@@ -71,6 +71,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private StockDetectorMode redstoneMode = StockDetectorMode.SIMPLE;
 	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD;
 	private CouplerAugmentMode couplerMode = CouplerAugmentMode.ENGAGED;
+	private LoaderMode loaderMode = LoaderMode.DEFAULT_ON;
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
@@ -141,6 +142,12 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		case COUPLER:
 			couplerMode = CouplerAugmentMode.values()[((couplerMode.ordinal() + 1) % (CouplerAugmentMode.values().length))];
 			return couplerMode.toString();
+		case FLUID_LOADER:
+		case FLUID_UNLOADER:
+		case ITEM_LOADER:
+		case ITEM_UNLOADER:
+			loaderMode = LoaderMode.values()[((loaderMode.ordinal() + 1) % (LoaderMode.values().length))];
+			return loaderMode.toString();
 		default:
 			return null;
 		}
@@ -277,6 +284,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		if (nbt.hasKey("couplerMode")) {
 			couplerMode = CouplerAugmentMode.values()[nbt.getInteger("couplerMode")];
 		}
+		if (nbt.hasKey("loaderMode")) {
+			loaderMode = LoaderMode.values()[nbt.getInteger("loaderMode")];
+		}
 		if (nbt.hasKey("railHeight")) {
 			railHeight = nbt.getFloat("railHeight");
 		}
@@ -304,6 +314,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		nbt.setInteger("redstoneMode", redstoneMode.ordinal());
 		nbt.setInteger("controlMode", controlMode.ordinal());
 		nbt.setInteger("couplerMode", couplerMode.ordinal());
+		nbt.setInteger("loaderMode", loaderMode.ordinal());
 		
 		nbt.setInteger("version", 3);
 		
@@ -673,24 +684,68 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				if (stock == null) {
 					break;
 				}
-				if(power == 0) {
-					stock_items = stock.getCapability(item_cap, null);
-					for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-						transferAllItems(neighbor, stock_items, 1);
-					}
+				
+				switch(loaderMode) {
+					case DEFAULT_ON:
+						if(power == 0) {
+							stock_items = stock.getCapability(item_cap, null);
+							for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+								transferAllItems(neighbor, stock_items, 1);
+							}
+						}
+						break;
+					case DEFAULT_OFF:
+						if(power > 0) {
+							stock_items = stock.getCapability(item_cap, null);
+							for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+								transferAllItems(neighbor, stock_items, 1);
+							}
+						}
+						break;
+					case ALWAYS_ON:
+						stock_items = stock.getCapability(item_cap, null);
+						for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+							transferAllItems(neighbor, stock_items, 1);
+						}
+						break;
+					case ALWAYS_OFF:
+						break;
 				}
+				
 				break;
 			case ITEM_UNLOADER:
 				stock = this.getStockNearBy(item_cap);
 				if (stock == null) {
 					break;
 				}
-				if(power == 0) {
+				
+				switch(loaderMode) {
+				case DEFAULT_ON:
+					if(power == 0) {
+						stock_items = stock.getCapability(item_cap, null);
+						for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+							transferAllItems(stock_items, neighbor, 1);
+						}
+					}
+					break;
+				case DEFAULT_OFF:
+					if(power > 0) {
+						stock_items = stock.getCapability(item_cap, null);
+						for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+							transferAllItems(stock_items, neighbor, 1);
+						}
+					}
+					break;
+				case ALWAYS_ON:
 					stock_items = stock.getCapability(item_cap, null);
 					for (IItemHandler neighbor : getCapsNearby(item_cap)) {
 						transferAllItems(stock_items, neighbor, 1);
 					}
+					break;
+				case ALWAYS_OFF:
+					break;
 				}
+				
 				break;
 			case FLUID_LOADER:
 				if (this.augmentTank == null) {
@@ -701,13 +756,37 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				if (stock == null) {
 					break;
 				}
-				if(power == 0) {
+				
+				switch(loaderMode) {
+				case DEFAULT_ON:
+					if(power == 0) {
+						stock_fluid = stock.getCapability(fluid_cap, null);
+						transferAllFluid(augmentTank, stock_fluid, 100);
+						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
+							transferAllFluid(neighbor, stock_fluid, 100);
+						}
+					}
+					break;
+				case DEFAULT_OFF:
+					if(power > 0) {
+						stock_fluid = stock.getCapability(fluid_cap, null);
+						transferAllFluid(augmentTank, stock_fluid, 100);
+						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
+							transferAllFluid(neighbor, stock_fluid, 100);
+						}
+					}
+					break;
+				case ALWAYS_ON:
 					stock_fluid = stock.getCapability(fluid_cap, null);
 					transferAllFluid(augmentTank, stock_fluid, 100);
 					for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
 						transferAllFluid(neighbor, stock_fluid, 100);
 					}
+					break;
+				case ALWAYS_OFF:
+					break;
 				}
+				
 				break;
 			case FLUID_UNLOADER:
 				if (this.augmentTank == null) {
@@ -719,13 +798,38 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 					break;
 				}
 				
-				if(power == 0) {
+				switch(loaderMode) {
+				case DEFAULT_ON:
+					if(power == 0) {
+						stock_fluid = stock.getCapability(fluid_cap, null);
+						transferAllFluid(stock_fluid, augmentTank, 100);				
+						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
+							transferAllFluid(stock_fluid, neighbor, 100);
+						}
+					}
+					
+					break;
+				case DEFAULT_OFF:
+					if(power > 0) {
+						stock_fluid = stock.getCapability(fluid_cap, null);
+						transferAllFluid(stock_fluid, augmentTank, 100);				
+						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
+							transferAllFluid(stock_fluid, neighbor, 100);
+						}
+					}
+					
+					break;
+				case ALWAYS_ON:
 					stock_fluid = stock.getCapability(fluid_cap, null);
 					transferAllFluid(stock_fluid, augmentTank, 100);				
 					for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
 						transferAllFluid(stock_fluid, neighbor, 100);
 					}
+					break;
+				case ALWAYS_OFF:
+					break;
 				}
+				
 				break;
 			case WATER_TROUGH:
 				if (this.augmentTank == null) {

@@ -201,7 +201,10 @@ immersiverailroading:loco_control_mode.horn=Horn
 immersiverailroading:loco_control_mode.computer=Computer
 immersiverailroading:coupler_augment_mode.engaged=Coupling
 immersiverailroading:coupler_augment_mode.disengaged=Decoupling
-
+immersiverailroading:loader_mode.default_on=On by Default
+immersiverailroading:loader_mode.default_off=Off by Default
+immersiverailroading:loader_mode.always_on=Always On
+immersiverailroading:loader_mode.always_off=Disabled
 immersiverailroading:switch_state.none=None
 immersiverailroading:switch_state.straight=Straight
 immersiverailroading:switch_state.turn=Diverge
