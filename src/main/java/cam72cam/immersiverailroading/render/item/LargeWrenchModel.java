@@ -40,7 +40,6 @@ public class LargeWrenchModel implements IBakedModel {
 	private OBJRender renderer;
 	
 	public LargeWrenchModel() {
-		//RENDERER = null;
 		if (RENDERER == null) {
 			try {
 				RENDERER = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/item/wrench/wrench.obj"), -0.5f));
