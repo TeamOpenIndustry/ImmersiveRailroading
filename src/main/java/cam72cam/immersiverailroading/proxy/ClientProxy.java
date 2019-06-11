@@ -425,6 +425,7 @@ public class ClientProxy extends CommonProxy {
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName(), ""), new PlateItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL.getRegistryName(), ""), new RailBaseModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL_GAG.getRegistryName(), ""), new RailBaseModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.getRegistryName(), ""), new LargeWrenchModel());
 	}
 
 	@SubscribeEvent
