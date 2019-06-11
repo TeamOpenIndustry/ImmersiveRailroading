@@ -77,7 +77,9 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private int ticksExisted;
 	public boolean blockUpdate;
 
-
+	private boolean isPowered; //if this track receives a redstone signal
+	private boolean shouldUpdateRestoneState;
+	
 	@Override
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -116,9 +118,11 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	
 	public void setAugment(Augment augment) {
 		this.augment = augment;
+		this.shouldUpdateRestoneState = augment.ordinal() > 2 || augment.ordinal() < 7;
 		setAugmentFilter(null);
 		this.markDirty();
 	}
+	
 	public boolean setAugmentFilter(String definitionID) {
 		if (definitionID != augmentFilterID) {
 			this.augmentFilterID = definitionID;
@@ -128,6 +132,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		this.markDirty();
 		return this.augmentFilterID != null;
 	}
+	
 	public String nextAugmentRedstoneMode() {
 		if (this.augment == null) {
 			return null;
@@ -474,10 +479,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
 			case WATER_TROUGH:
-				return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
+				return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && !this.isPowered;
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
-				return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+				return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && !this.isPowered;
 			case DETECTOR:
 			case LOCO_CONTROL:
 			case SPEED_RETARDER:
@@ -515,7 +520,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
 			case WATER_TROUGH:
-				if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+				if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && !this.isPowered) {
 					if (this.augmentTank == null) {
 						this.createAugmentTank();
 					}
@@ -523,7 +528,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
-				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && !this.isPowered) {
 					EntityMoveableRollingStock stock = getStockNearBy(capability);
 					if (stock != null) {
 						return stock.getCapability(capability, null);
@@ -627,6 +632,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return;
 		}
 		
+		if (this.shouldUpdateRestoneState && this.ticksExisted % 5 == 0) {
+			this.isPowered = this.world.isBlockPowered(this.pos);
+		}
+		
 		ticksExisted += 1;
 		
 		if (Config.ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
@@ -675,159 +684,65 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		EntityMoveableRollingStock stock;
 		IFluidHandler stock_fluid;
 		IItemHandler stock_items;
+		
+		boolean canTransfer = false;
+		if (this.loaderMode == LoaderMode.DEFAULT_ON && !this.isPowered) canTransfer = true;
+		else if (this.loaderMode == LoaderMode.DEFAULT_OFF && this.isPowered) canTransfer = true;
+		else if (this.loaderMode == LoaderMode.ALWAYS_ON) canTransfer = true;
 
 		try {
-			int power = RedstoneUtil.getPower(world, pos);
 			switch (this.augment) {
 			case ITEM_LOADER:
 				stock = this.getStockNearBy(item_cap);
-				if (stock == null) {
-					break;
-				}
+				if (stock == null) break;
 				
-				switch(loaderMode) {
-					case DEFAULT_ON:
-						if(power == 0) {
-							stock_items = stock.getCapability(item_cap, null);
-							for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-								transferAllItems(neighbor, stock_items, 1);
-							}
-						}
-						break;
-					case DEFAULT_OFF:
-						if(power > 0) {
-							stock_items = stock.getCapability(item_cap, null);
-							for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-								transferAllItems(neighbor, stock_items, 1);
-							}
-						}
-						break;
-					case ALWAYS_ON:
-						stock_items = stock.getCapability(item_cap, null);
-						for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-							transferAllItems(neighbor, stock_items, 1);
-						}
-						break;
-					case ALWAYS_OFF:
-						break;
+				if (canTransfer) {
+					stock_items = stock.getCapability(item_cap, null);
+					for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+						transferAllItems(neighbor, stock_items, 1);
+					}
 				}
 				
 				break;
 			case ITEM_UNLOADER:
 				stock = this.getStockNearBy(item_cap);
-				if (stock == null) {
-					break;
-				}
+				if (stock == null) break;
 				
-				switch(loaderMode) {
-				case DEFAULT_ON:
-					if(power == 0) {
-						stock_items = stock.getCapability(item_cap, null);
-						for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-							transferAllItems(stock_items, neighbor, 1);
-						}
-					}
-					break;
-				case DEFAULT_OFF:
-					if(power > 0) {
-						stock_items = stock.getCapability(item_cap, null);
-						for (IItemHandler neighbor : getCapsNearby(item_cap)) {
-							transferAllItems(stock_items, neighbor, 1);
-						}
-					}
-					break;
-				case ALWAYS_ON:
+				if (canTransfer) {
 					stock_items = stock.getCapability(item_cap, null);
 					for (IItemHandler neighbor : getCapsNearby(item_cap)) {
 						transferAllItems(stock_items, neighbor, 1);
 					}
-					break;
-				case ALWAYS_OFF:
-					break;
 				}
 				
 				break;
 			case FLUID_LOADER:
-				if (this.augmentTank == null) {
-					this.createAugmentTank();
-				}
+				if (this.augmentTank == null) this.createAugmentTank();
 				
 				stock = this.getStockNearBy(fluid_cap);
-				if (stock == null) {
-					break;
-				}
+				if (stock == null) break;
 				
-				switch(loaderMode) {
-				case DEFAULT_ON:
-					if(power == 0) {
-						stock_fluid = stock.getCapability(fluid_cap, null);
-						transferAllFluid(augmentTank, stock_fluid, 100);
-						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-							transferAllFluid(neighbor, stock_fluid, 100);
-						}
-					}
-					break;
-				case DEFAULT_OFF:
-					if(power > 0) {
-						stock_fluid = stock.getCapability(fluid_cap, null);
-						transferAllFluid(augmentTank, stock_fluid, 100);
-						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-							transferAllFluid(neighbor, stock_fluid, 100);
-						}
-					}
-					break;
-				case ALWAYS_ON:
+				if (canTransfer) {
 					stock_fluid = stock.getCapability(fluid_cap, null);
 					transferAllFluid(augmentTank, stock_fluid, 100);
 					for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
 						transferAllFluid(neighbor, stock_fluid, 100);
 					}
-					break;
-				case ALWAYS_OFF:
-					break;
 				}
 				
 				break;
 			case FLUID_UNLOADER:
-				if (this.augmentTank == null) {
-					this.createAugmentTank();
-				}
+				if (this.augmentTank == null) this.createAugmentTank();
 				
 				stock = this.getStockNearBy(fluid_cap);
-				if (stock == null) {
-					break;
-				}
+				if (stock == null) break;
 				
-				switch(loaderMode) {
-				case DEFAULT_ON:
-					if(power == 0) {
-						stock_fluid = stock.getCapability(fluid_cap, null);
-						transferAllFluid(stock_fluid, augmentTank, 100);				
-						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-							transferAllFluid(stock_fluid, neighbor, 100);
-						}
-					}
-					
-					break;
-				case DEFAULT_OFF:
-					if(power > 0) {
-						stock_fluid = stock.getCapability(fluid_cap, null);
-						transferAllFluid(stock_fluid, augmentTank, 100);				
-						for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-							transferAllFluid(stock_fluid, neighbor, 100);
-						}
-					}
-					
-					break;
-				case ALWAYS_ON:
+				if (canTransfer) {
 					stock_fluid = stock.getCapability(fluid_cap, null);
 					transferAllFluid(stock_fluid, augmentTank, 100);				
 					for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
 						transferAllFluid(stock_fluid, neighbor, 100);
 					}
-					break;
-				case ALWAYS_OFF:
-					break;
 				}
 				
 				break;
@@ -845,6 +760,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case LOCO_CONTROL:
 				Locomotive loco = this.getStockNearBy(Locomotive.class, null);
 				if (loco != null) {
+					int power = RedstoneUtil.getPower(world, pos);
 					
 					switch(controlMode) {
 					case THROTTLE_FORWARD:
@@ -900,6 +816,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				break;
 			case COUPLER:
 				stock = this.getStockNearBy(null);
+				int power = RedstoneUtil.getPower(world, pos);
 				if (stock != null && stock instanceof EntityCoupleableRollingStock && power > 0) {
 					EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock)stock;
 					switch (couplerMode) {
