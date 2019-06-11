@@ -75,7 +75,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
-
+	
+	private boolean isPowered; //if the track is receiving a redstone signal
 
 	@Override
 	public boolean isLoaded() {
@@ -463,10 +464,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
 			case WATER_TROUGH:
-				return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
+				return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && !this.isPowered;
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
-				return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+				return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && !this.isPowered;
 			case DETECTOR:
 			case LOCO_CONTROL:
 			case SPEED_RETARDER:
@@ -504,7 +505,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
 			case WATER_TROUGH:
-				if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+				if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && !this.isPowered) {
 					if (this.augmentTank == null) {
 						this.createAugmentTank();
 					}
@@ -512,7 +513,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
-				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && !this.isPowered) {
 					EntityMoveableRollingStock stock = getStockNearBy(capability);
 					if (stock != null) {
 						return stock.getCapability(capability, null);
@@ -616,6 +617,10 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return;
 		}
 		
+		if (ticksExisted % 5 == 0) {
+			this.isPowered = this.world.isBlockPowered(this.pos);
+		}
+		
 		ticksExisted += 1;
 		
 		if (Config.ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
@@ -668,6 +673,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		try {
 			switch (this.augment) {
 			case ITEM_LOADER:
+				if (isPowered) break;
+				
 				stock = this.getStockNearBy(item_cap);
 				if (stock == null) {
 					break;
@@ -678,6 +685,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 				break;
 			case ITEM_UNLOADER:
+				if (isPowered) break;
+				
 				stock = this.getStockNearBy(item_cap);
 				if (stock == null) {
 					break;
@@ -688,6 +697,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				}
 				break;
 			case FLUID_LOADER:
+				if (isPowered) break;
+					
 				if (this.augmentTank == null) {
 					this.createAugmentTank();
 				}
@@ -705,6 +716,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				
 				break;
 			case FLUID_UNLOADER:
+				if (isPowered) break;
+				
 				if (this.augmentTank == null) {
 					this.createAugmentTank();
 				}
@@ -761,7 +774,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 				int currentRedstone = redstoneLevel;
 				int newRedstone = 0;
 	
-				switch (this.redstoneMode ) {
+				switch (this.redstoneMode) {
 				case SIMPLE:
 					newRedstone = stock != null ? 15 : 0;
 					break;
