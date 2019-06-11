@@ -36,6 +36,7 @@ import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.gui.CastingGUI;
 import cam72cam.immersiverailroading.gui.FreightContainer;
 import cam72cam.immersiverailroading.gui.FreightContainerGui;
+import cam72cam.immersiverailroading.gui.TrackExchangerGui;
 import cam72cam.immersiverailroading.gui.PlateRollerGUI;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.SteamHammerContainerGui;
@@ -197,6 +198,8 @@ public class ClientProxy extends CommonProxy {
 				return null;
 			}
 			return new CastingGUI(te);
+		case TRACK_EXCHANGER:
+			return new TrackExchangerGui();
 		default:
 			return null;
 		}
@@ -334,6 +337,9 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_KEY, 0,
 				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName(), ""));
+		
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_TRACK_EXCHANGER, 0,
+				new ModelResourceLocation(IRItems.ITEM_TRACK_EXCHANGER.getRegistryName(), ""));
 	}
 
 	private static final Map<String, BufferedImage> cachedIcons = new HashMap<>();
@@ -425,6 +431,7 @@ public class ClientProxy extends CommonProxy {
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName(), ""), new PlateItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL.getRegistryName(), ""), new RailBaseModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL_GAG.getRegistryName(), ""), new RailBaseModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_TRACK_EXCHANGER.getRegistryName(), ""), new TrackExchangerModel());
 	}
 
 	@SubscribeEvent

@@ -134,7 +134,8 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(SoundPacket.Handler.class, SoundPacket.class, 10, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(PaintSyncPacket.Handler.class, PaintSyncPacket.class, 11, Side.CLIENT);
-	ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
+    	ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
+    	ImmersiveRailroading.net.registerMessage(ItemTrackExchangerUpdatePacket.Handler.class, ItemTrackExchangerUpdatePacket.class, 13, Side.SERVER);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
@@ -202,8 +203,9 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE);
     	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH);
     	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE);
-      event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD);
+    	event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD);
     	event.getRegistry().register(IRItems.ITEM_SWITCH_KEY);
+    	event.getRegistry().register(IRItems.ITEM_TRACK_EXCHANGER);
     }
     
     @SubscribeEvent

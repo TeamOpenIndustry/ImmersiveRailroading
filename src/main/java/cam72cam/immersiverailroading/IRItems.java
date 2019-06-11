@@ -20,4 +20,5 @@ public class IRItems {
 	public static ItemGoldenSpike ITEM_GOLDEN_SPIKE = new ItemGoldenSpike();
 	public static ItemRadioCtrlCard ITEM_RADIO_CONTROL_CARD = new ItemRadioCtrlCard();
 	public static ItemSwitchKey ITEM_SWITCH_KEY = new ItemSwitchKey();
+	public static ItemTrackExchanger ITEM_TRACK_EXCHANGER = new ItemTrackExchanger();
 }

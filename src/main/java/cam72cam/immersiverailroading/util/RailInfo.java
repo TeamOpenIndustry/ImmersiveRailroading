@@ -115,6 +115,11 @@ public class RailInfo {
 		RailSettings settings = this.settings.withType(type);
 		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
 	}
+	
+	public RailInfo withTrack(String track) {
+		RailSettings settings = this.settings.withTrack(track);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+	}
 
 	public Map<BlockPos, BuilderBase> builders = new HashMap<>();
 	public BuilderBase getBuilder(BlockPos pos) {
@@ -207,18 +212,22 @@ public class RailInfo {
 	}
 
 	public boolean build(EntityPlayer player) {
+		return this.build(player, true);
+	}
+	
+	public boolean build(EntityPlayer player, boolean placeTrack) {
 		BuilderBase builder = getBuilder(new BlockPos(placementInfo.placementPosition));
 
-		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks) {
+		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks && placeTrack) {
 			if (!world.isRemote) {
 				builder.clearArea();
 			}
 		}
 
 
-		if (builder.canBuild()) {
+		if (!placeTrack || (placeTrack && builder.canBuild())) {
 			if (!world.isRemote) {
-				if (player.isCreative()) {
+				if (player.isCreative() && placeTrack) {
 					builder.build();
 					return true;
 				}
@@ -271,7 +280,7 @@ public class RailInfo {
 				}
 
 				builder.setDrops(drops);
-				builder.build();
+				if (placeTrack) builder.build();
 				return true;
 			}
 		}

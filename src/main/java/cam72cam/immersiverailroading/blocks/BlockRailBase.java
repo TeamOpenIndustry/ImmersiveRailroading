@@ -1,14 +1,24 @@
 package cam72cam.immersiverailroading.blocks;
 
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.items.nbt.ItemTrackExchanger;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.SyncdTileEntity;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.SwitchUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -17,14 +27,19 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -36,10 +51,9 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.common.property.PropertyFloat;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import javax.annotation.Nonnull;
 
 public abstract class BlockRailBase extends Block {
 	
@@ -302,6 +316,34 @@ public abstract class BlockRailBase extends Block {
 					SwitchState switchForced = te.cycleSwitchForced();
 					if (!worldIn.isRemote) {
 						playerIn.sendMessage(switchForced.equals(SwitchState.NONE) ? new TextComponentString(ChatText.SWITCH_UNLOCKED.toString()) : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
+					}
+				}
+			} else if (stack.getItem() == IRItems.ITEM_TRACK_EXCHANGER) {
+				TileRail tileRail = te.getParentTile();
+				String track = ItemTrackExchanger.get(stack);
+				if (track != null && !track.equals(tileRail.info.settings.track)) {
+					if (!playerIn.isCreative()) {
+						RailInfo info = tileRail.info.withTrack(track);
+						if (info.build(playerIn, false)) { //cancel if player doesn't have all required items
+							FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers( //we need to send the packet because this code is executed on the server side
+									new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
+							tileRail.info = info;
+							
+							List<ItemStack> drops = tileRail.getDrops();
+							if (drops != null) {
+								for (ItemStack s : drops) {
+									if (!playerIn.addItemStackToInventory(s)) { //spawn item in world if it can't be added to the inventory
+										worldIn.spawnEntity(new EntityItem(worldIn, playerIn.posX, playerIn.posY, playerIn.posZ, s));
+									}
+								}
+							}
+							tileRail.setDrops(info.getBuilder(new BlockPos(info.placementInfo.placementPosition)).drops);
+							tileRail.markDirty();
+						}
+					} else {
+						FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers(
+								new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
+						tileRail.info = tileRail.info.withTrack(track);
 					}
 				}
 			}

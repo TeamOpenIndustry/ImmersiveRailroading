@@ -130,6 +130,9 @@ public class TileRail extends TileRailBase {
 	public void setDrops(List<ItemStack> drops) {
 		this.drops = drops;
 	}
+	public List<ItemStack> getDrops () {
+		return this.drops;
+	}
 	public void spawnDrops() {
 		if (!world.isRemote) {
 			if (drops != null && drops.size() != 0) {
