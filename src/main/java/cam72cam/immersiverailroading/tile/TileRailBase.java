@@ -258,6 +258,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		
 		if (nbt.hasKey("augment")) {
 			augment = Augment.values()[nbt.getInteger("augment")];
+			this.shouldUpdateRestoneState = augment.ordinal() > 2 || augment.ordinal() < 7;
 		}
 
 		parent = BlockPos.fromLong(nbt.getLong("parent"));
