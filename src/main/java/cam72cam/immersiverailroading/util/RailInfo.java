@@ -65,6 +65,12 @@ public class RailInfo {
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
 			id += placementInfo.placementPosition.subtract(customInfo.placementPosition);
 		}
+		if (placementInfo.control != null) {
+			id += placementInfo.control;
+		}
+		if (customInfo.control != null) {
+			id += customInfo.control;
+		}
 		uniqueID = id;
 	}
 
