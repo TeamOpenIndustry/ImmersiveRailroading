@@ -1,20 +1,10 @@
 package cam72cam.immersiverailroading.thirdparty.opencomputers;
 
-import java.util.*;
-
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.Freight;
-import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
-import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.thirdparty.CommonAPI;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import li.cil.oc.api.Network;
 import li.cil.oc.api.driver.DriverBlock;
@@ -29,10 +19,8 @@ import li.cil.oc.api.prefab.AbstractManagedEnvironment;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+
+import java.util.UUID;
 
 public class AugmentDriver implements DriverBlock {
 
@@ -141,152 +129,42 @@ public class AugmentDriver implements DriverBlock {
 			return "ir_augment_detector";
 		}
 		
-		private FluidStack getFluid() {
-			TileRailBase te = TileRailBase.get(world, pos);
-			Capability<IFluidHandler> capability = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
-			EntityMoveableRollingStock stock = te.getStockNearBy(capability);
-			if (stock != null) {
-				IFluidHandler fh = stock.getCapability(capability, null);
-				return fh.drain(Integer.MAX_VALUE, false);
-			}
-			return null;
-		}
-		
-		public void loco_info(Locomotive car, Map<String, Object> info) {
-			TileRailBase te = TileRailBase.get(world, pos);
-			EntityMoveableRollingStock stock = te.getStockNearBy(null);
-			EntityRollingStockDefinition def = car.getDefinition();
-
-			info.put("id", def.defID);
-			info.put("name", def.name());
-			info.put("tag", car.tag);
-			EnumFacing dir = EnumFacing.fromAngle(car.rotationYaw);
-			if (car.getCurrentSpeed().metric() < 0) {
-				dir = dir.getOpposite();
-			}
-			info.put("direction", dir.toString());
-
-			info.put("passengers", car.getPassengers().size() + stock.staticPassengers.size());
-			info.put("speed", car.getCurrentSpeed().metric());
-			info.put("weight", car.getWeight());
-			LocomotiveDefinition locoDef = car.getDefinition();
-			info.put("horsepower", locoDef.getHorsePower(car.gauge));
-			info.put("traction", locoDef.getStartingTractionNewtons(car.gauge));
-			info.put("max_speed", locoDef.getMaxSpeed(car.gauge).metric());
-			info.put("brake", car.getAirBrake());
-			info.put("throttle", car.getThrottle());
-
-			if (car instanceof LocomotiveSteam) {
-				LocomotiveSteam steam = (LocomotiveSteam) car;
-				info.put("pressure", steam.getBoilerPressure());
-				info.put("temperature", steam.getBoilerTemperature());
-			}
-			if (car instanceof LocomotiveDiesel) {
-				info.put("temperature", ((LocomotiveDiesel) car).getEngineTemperature());
-			}
-		}
-
 		@Callback(doc = "function():table -- returns an info dump about the current car")
 		public Object[] info(Context context, Arguments arguments) {
-			TileRailBase te = TileRailBase.get(world, pos);
-			EntityMoveableRollingStock stock = te.getStockNearBy(null);
-			if (stock != null) {
-				Map<String, Object> info = new HashMap<String, Object>();
-				EntityRollingStockDefinition def = stock.getDefinition();
-
-				info.put("id", def.defID);
-				info.put("name", def.name());
-				info.put("tag", stock.tag);
-				EnumFacing dir = EnumFacing.fromAngle(stock.rotationYaw);
-				if (stock.getCurrentSpeed().metric() < 0) {
-					dir = dir.getOpposite();
-				}
-				info.put("direction", dir.toString());
-
-				info.put("passengers", stock.getPassengers().size() + stock.staticPassengers.size());
-				info.put("speed", stock.getCurrentSpeed().metric());
-				info.put("weight", stock.getWeight());
-
-				if (stock instanceof Locomotive) {
-					loco_info((Locomotive)stock, info);
-				}
-
-				FluidStack fluid = getFluid();
-				if (fluid != null) {
-					info.put("fluid_type", fluid.getFluid().getName());
-					info.put("fluid_amount", fluid.amount);
-				} else {
-					info.put("fluid_type", null);
-					info.put("fluid_amount", 0);
-				}
-				if (stock instanceof FreightTank) {
-					info.put("fluid_max", ((FreightTank) stock).getTankCapacity().MilliBuckets());
-				}
-
-				if (stock instanceof Freight) {
-					Freight freight = ((Freight) stock);
-					info.put("cargo_percent", freight.getPercentCargoFull());
-					info.put("cargo_size", freight.getInventorySize());
-				}
-				return new Object[] { info };
+			CommonAPI api = CommonAPI.create(world, pos);
+			if (api != null) {
+				return new Object[] {
+						api.info()
+				};
 			}
 			return null;
 		}
 		
 		@Callback(doc = "function():table -- returns an info dump about the current consist")
 		public Object[] consist(Context context, Arguments arguments) {
-			TileRailBase te = TileRailBase.get(world, pos);
-			EntityCoupleableRollingStock stock = te.getStockNearBy(EntityCoupleableRollingStock.class, null);
-			if (stock != null) {
-				int traction=0;
-				PhysicsAccummulator acc = new PhysicsAccummulator(stock.getCurrentTickPosAndPrune());
-				stock.mapTrain(stock, true, true, acc::accumulate);
-				Map<String, Object> info = new HashMap<String, Object>();
-				List<Object> locos = new ArrayList<Object>();
-				
-				info.put("cars", acc.count);
-				info.put("tractive_effort_N", acc.tractiveEffortNewtons);
-				info.put("weight_kg", acc.massToMoveKg);
-				info.put("speed_km", stock.getCurrentSpeed().metric());
-				EnumFacing dir = EnumFacing.fromAngle(stock.rotationYaw);
-				if (stock.getCurrentSpeed().metric() < 0) {
-					dir = dir.getOpposite();
-				}
-				info.put("direction", dir.toString());
-				
-				for (EntityCoupleableRollingStock car : stock.getTrain()) {
-					if (car instanceof Locomotive) {
-						LocomotiveDefinition locoDef = ((Locomotive)car).getDefinition();
-						traction+=locoDef.getStartingTractionNewtons(car.gauge);
-						Map<String, Object> sub_info = new HashMap<String, Object>();
-						loco_info((Locomotive) car, sub_info);
-						locos.add(sub_info);
-					}
-				}
-				info.put("locomotives", locos);
-				info.put("totoal_traction_N", traction);
-				
-				return new Object[] { info };
+			CommonAPI api = CommonAPI.create(world, pos);
+			if (api != null) {
+				return new Object[] {
+						api.consist(true)
+				};
 			}
 			return null;
 		}
 		
 		@Callback(doc = "function():table -- gets the stock's tag")
 		public Object[] getTag(Context context, Arguments arguments) {
-			TileRailBase te = TileRailBase.get(world, pos);
-			EntityMoveableRollingStock stock = te.getStockNearBy(null);
-			if (stock != null) {
-				return new Object[] {stock.tag};
+			CommonAPI api = CommonAPI.create(world, pos);
+			if (api != null) {
+				return new Object[] { api.getTag() };
 			}
 			return null;
 		}
 		
 		@Callback(doc = "function():table -- sets the stock's tag")
 		public Object[] setTag(Context context, Arguments arguments) {
-			TileRailBase te = TileRailBase.get(world, pos);
-			EntityMoveableRollingStock stock = te.getStockNearBy(null);
-			if (stock != null) {
-				stock.tag = arguments.checkString(0);
+			CommonAPI api = CommonAPI.create(world, pos);
+			if (api != null) {
+				api.setTag(arguments.checkString(0));
 			}
 			return null;
 		}
@@ -319,52 +197,35 @@ public class AugmentDriver implements DriverBlock {
 
 		@Callback(doc = "function(double) -- sets the locomotive throttle")
 		public Object[] setThrottle(Context context, Arguments arguments) throws Exception {
-			TileRailBase te = TileRailBase.get(world, pos);
-			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
-			if (stock != null) {
-				stock.setThrottle(normalize(arguments.checkDouble(0)));
+			CommonAPI api = CommonAPI.create(world, pos, Locomotive.class);
+			if (api != null) {
+				api.setThrottle(arguments.checkDouble(0));
 			}
 			return null;
-		}
-		
-		private float normalize(double val) {
-			if (Double.isNaN(val)) {
-				return 0;
-			}
-			if (val > 1) {
-				return 1;
-			}
-			if (val < -1) {
-				return -1;
-			}
-			return (float)val;
 		}
 
 		@Callback(doc = "function(double) -- sets the locomotive brake")
 		public Object[] setBrake(Context context, Arguments arguments) throws Exception {
-			TileRailBase te = TileRailBase.get(world, pos);
-			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
-			if (stock != null) {
-				stock.setAirBrake(normalize(arguments.checkDouble(0)));
+			CommonAPI api = CommonAPI.create(world, pos, Locomotive.class);
+			if (api != null) {
+				api.setAirBrake(arguments.checkDouble(0));
 			}
 			return null;
 		}
 
 		@Callback(doc = "function() -- fires the locomotive horn")
 		public Object[] horn(Context context, Arguments arguments) throws Exception {
-			TileRailBase te = TileRailBase.get(world, pos);
-			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
-			if (stock != null) {
-				stock.setHorn(arguments.optInteger(0, 40), null);
+			CommonAPI api = CommonAPI.create(world, pos, Locomotive.class);
+			if (api != null) {
+				api.setHorn(arguments.optInteger(0, 40));
 			}
 			return null;
 		}
 		@Callback(doc = "function() -- sets the locomotive bell")
 		public Object[] bell(Context context, Arguments arguments) throws Exception {
-			TileRailBase te = TileRailBase.get(world, pos);
-			Locomotive stock = te.getStockNearBy(Locomotive.class, null);
-			if (stock != null) {
-				stock.setBell(arguments.optInteger(0, 40));
+			CommonAPI api = CommonAPI.create(world, pos, Locomotive.class);
+			if (api != null) {
+				api.setBell(arguments.optInteger(0, 40));
 			}
 			return null;
 		}
