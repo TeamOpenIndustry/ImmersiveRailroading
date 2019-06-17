@@ -13,7 +13,7 @@ public class PlateRollerRender implements IMultiblockRender {
 
 	public PlateRollerRender() {
 		try {
-			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/plate_rolling_machine.obj"), 0.1f));
+			this.renderer = new OBJRender(new OBJModel(new ResourceLocation("immersiverailroading:models/multiblocks/plate_rolling_machine.obj"), -0.05f));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
