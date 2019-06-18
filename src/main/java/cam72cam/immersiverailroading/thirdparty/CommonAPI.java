@@ -159,7 +159,7 @@ public class CommonAPI {
     }
 
     public String getTag() {
-    	TagEvent tagEvent = new TagEvent(TagEvent.EventType.GetTag);
+    	TagEvent tagEvent = new TagEvent(TagEvent.EventType.GetTag, stock.getPersistentID());
     	MinecraftForge.EVENT_BUS.post(tagEvent);
     	
     	if (tagEvent.tag != null)
@@ -171,7 +171,7 @@ public class CommonAPI {
     }
 
     public void setTag(String tag) {
-    	TagEvent tagEvent = new TagEvent(TagEvent.EventType.SetTag);
+    	TagEvent tagEvent = new TagEvent(TagEvent.EventType.SetTag, stock.getPersistentID());
     	tagEvent.tag = tag;
     	MinecraftForge.EVENT_BUS.post(tagEvent);
     	
