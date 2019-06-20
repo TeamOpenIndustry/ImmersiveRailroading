@@ -4,8 +4,7 @@ import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
-import cam72cam.immersiverailroading.thirdparty.event.GetTagEvent;
-import cam72cam.immersiverailroading.thirdparty.event.SetTagEvent;
+import cam72cam.immersiverailroading.thirdparty.event.TagEvent;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -160,7 +159,7 @@ public class CommonAPI {
     }
 
     public String getTag() {
-    	GetTagEvent tagEvent = new GetTagEvent(stock.getPersistentID());
+    	TagEvent.GetTagEvent tagEvent = new TagEvent.GetTagEvent(stock.getPersistentID());
     	MinecraftForge.EVENT_BUS.post(tagEvent);
     	
     	if (tagEvent.tag != null)
@@ -172,7 +171,7 @@ public class CommonAPI {
     }
 
     public void setTag(String tag) {
-    	SetTagEvent tagEvent = new SetTagEvent(stock.getPersistentID(), tag);
+    	TagEvent.SetTagEvent tagEvent = new TagEvent.SetTagEvent(stock.getPersistentID(), tag);
     	MinecraftForge.EVENT_BUS.post(tagEvent);
     	
         stock.tag = tag;
