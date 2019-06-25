@@ -79,4 +79,8 @@ public class ItemStack {
     public boolean equals(ItemStack other) {
         return internal.isItemEqual(other.internal);
     }
+
+    public boolean is(Fuzzy fuzzy) {
+        return fuzzy.matches(this);
+    }
 }

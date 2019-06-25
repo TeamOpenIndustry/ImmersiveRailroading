@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.util;
+package cam72cam.mod.text;
 
 import net.minecraft.util.text.translation.I18n;
 

@@ -40,6 +40,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.EntityRenderer;
 import cam72cam.mod.render.IEntityRender;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.Identifier;
 import cam72cam.mod.world.World;
@@ -62,7 +63,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.client.event.*;
@@ -718,9 +718,9 @@ public class ClientProxy extends CommonProxy {
 		dampenSound();
 		
 		if (missingResources != null) {
-			Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString(missingResources));
+			Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(PlayerMessage.direct(missingResources).internal);
 			Minecraft.getMinecraft().loadWorld(null);
-			Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", new TextComponentString(missingResources)));
+			Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", PlayerMessage.direct(missingResources).internal));
 			missingResources = null;
 		}
 

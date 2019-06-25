@@ -21,12 +21,11 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.util.text.TextComponentString;
 
 public class EntityBuildableRollingStock extends EntityRollingStock {
 	private boolean isBuilt = false;
@@ -198,7 +197,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 					}
 				}
 			}
-			if (found.item == Item.getItemFromBlock(Blocks.PLANKS)) {
+			if (found.is(Fuzzy.WOOD_PLANK)) {
 				wood += found.getCount();
 			}
 		}
@@ -211,8 +210,8 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 				}
 				
 				for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
-					net.minecraft.item.ItemStack found = player.internal.inventory.getStackInSlot(i);
-					if (found.getItem() == Item.getItemFromBlock(Blocks.PLANKS)) {
+					cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
+					if (found.is(Fuzzy.WOOD_PLANK)) {
 						net.minecraft.item.ItemStack itemUsed = player.internal.inventory.decrStackSize(i, woodUsed);
 						
 						woodUsed -= itemUsed.getCount();
@@ -305,7 +304,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			} else {
 				str += String.format(" (%d x %s)", component.getWoodCost(gauge, getDefinition()), ChatText.WOOD_PLANKS.toString());
 			}
-			player.sendMessage(new TextComponentString(str));
+			player.sendMessage(PlayerMessage.direct(str));
 		}
 	}
 	

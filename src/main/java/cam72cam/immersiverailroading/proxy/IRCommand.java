@@ -7,12 +7,12 @@ import java.util.List;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
 
 public class IRCommand extends CommandBase {
 
@@ -53,7 +53,7 @@ public class IRCommand extends CommandBase {
 			List<EntityRollingStock> ents = World.get(sender.getEntityWorld()).getEntities(EntityRollingStock.class);
 			ents.sort(Comparator.comparing(a -> a.getUUID().toString()));
 			for (EntityRollingStock ent : ents) {
-				sender.sendMessage(new TextComponentString(String.format("%s : %s - %s : %s", ent.getUUID(), ent.internal.getEntityId(), ent.getDefinitionID(), ent.getPosition())));
+				sender.sendMessage(PlayerMessage.direct(String.format("%s : %s - %s : %s", ent.getUUID(), ent.internal.getEntityId(), ent.getDefinitionID(), ent.getPosition())).internal);
 			}
 			return;
 		}

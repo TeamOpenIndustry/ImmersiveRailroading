@@ -14,7 +14,7 @@ import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
 import cam72cam.immersiverailroading.util.RealBB;
-import cam72cam.immersiverailroading.util.TextUtil;
+import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Registry;
 import cam72cam.mod.math.Vec3d;

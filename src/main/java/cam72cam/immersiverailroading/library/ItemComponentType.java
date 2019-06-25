@@ -6,7 +6,7 @@ import java.util.List;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
-import cam72cam.immersiverailroading.util.TextUtil;
+import cam72cam.mod.text.TextUtil;
 
 public enum ItemComponentType {
 	FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRAME), //TODO
