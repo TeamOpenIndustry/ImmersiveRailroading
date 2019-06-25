@@ -7,11 +7,19 @@ public class FluidTank implements ITank {
     private final net.minecraftforge.fluids.FluidTank internal;
 
     public FluidTank(FluidStack fluidStack, int capacity) {
-        internal = new net.minecraftforge.fluids.FluidTank(fluidStack.internal, capacity) {
-            public void onContentsChanged() {
-                FluidTank.this.onChanged();
-            }
-        };
+        if (fluidStack == null) {
+            internal = new net.minecraftforge.fluids.FluidTank(capacity) {
+                public void onContentsChanged() {
+                    FluidTank.this.onChanged();
+                }
+            };
+        } else {
+            internal = new net.minecraftforge.fluids.FluidTank(fluidStack.internal, capacity) {
+                public void onContentsChanged() {
+                    FluidTank.this.onChanged();
+                }
+            };
+        }
     }
 
     public void onChanged() {

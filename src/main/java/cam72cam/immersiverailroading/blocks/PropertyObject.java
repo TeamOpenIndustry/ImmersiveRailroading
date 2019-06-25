@@ -1,12 +1,11 @@
 package cam72cam.immersiverailroading.blocks;
 
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
-public class PropertyItemStack implements IUnlistedProperty<ItemStack> {
+public class PropertyObject implements IUnlistedProperty<Object> {
 	private final String name;
 
-	public PropertyItemStack(String name) {
+	public PropertyObject(String name) {
 		this.name = name;
 	}
 
@@ -16,17 +15,17 @@ public class PropertyItemStack implements IUnlistedProperty<ItemStack> {
 	}
 
 	@Override
-	public boolean isValid(ItemStack value) {
+	public boolean isValid(Object value) {
 		return true;
 	}
 
 	@Override
-	public Class<ItemStack> getType() {
-		return ItemStack.class;
+	public Class<Object> getType() {
+		return Object.class;
 	}
 
 	@Override
-	public String valueToString(ItemStack value) {
+	public String valueToString(Object value) {
 		return value.toString();
 	}
 }

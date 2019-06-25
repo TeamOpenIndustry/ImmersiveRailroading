@@ -104,7 +104,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		this.markDirty();
 	}
 	public boolean setAugmentFilter(String definitionID) {
-		if (!definitionID.equals(augmentFilterID)) {
+		if (definitionID != null && !definitionID.equals(augmentFilterID)) {
 			this.augmentFilterID = definitionID;
 		} else {
 			this.augmentFilterID = null;

@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.blocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -19,7 +18,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
@@ -30,13 +28,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
-import net.minecraftforge.common.property.PropertyFloat;
 
 import javax.annotation.Nonnull;
 
@@ -208,26 +204,13 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
     }
 
 
-	public static final PropertyItemStack RAIL_BED = new PropertyItemStack("RAIL_BED");
-	public static final PropertyFloat HEIGHT = new PropertyFloat("HEIGHT");
-	public static final PropertyFloat SNOW = new PropertyFloat("SNOW");
-	public static final PropertyFloat GAUGE = new PropertyFloat("GAUGE");
-	public static final PropertyEnum<Augment> AUGMENT = new PropertyEnum<Augment>("AUGMENT", Augment.class);
-	public static final PropertyFloat LIQUID = new PropertyFloat("LIQUID");
-	public static final PropertyEnum<EnumFacing> FACING = new PropertyEnum<EnumFacing>("FACING", EnumFacing.class);
+	public static final PropertyObject RAIL_DATA = new PropertyObject("RAIL_DATA");
+
 	@Override
     @Nonnull
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty<?>[] {
-        	RAIL_BED,
-        	HEIGHT,
-        	SNOW,
-        	GAUGE,
-        	AUGMENT,
-        	LIQUID,
-        	FACING,
-        });
+        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty<?>[] {RAIL_DATA});
     }
 
 	@Override
@@ -235,29 +218,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
     {
     	IExtendedBlockState state = (IExtendedBlockState)origState;
     	TileRailBase te = World.get((net.minecraft.world.World) internal).getTileEntity(new Vec3i(pos), TileRailBase.class);
-    	if (te != null) {
-			if (te.getRenderRailBed() != null) {
-				state = state.withProperty(RAIL_BED, te.getRenderRailBed().internal);
-				state = state.withProperty(HEIGHT, te.getBedHeight());
-				state = state.withProperty(SNOW, (float)te.getSnowLayers());
-				state = state.withProperty(GAUGE, (float)te.getRenderGauge());
-				state = state.withProperty(AUGMENT, te.getAugment());
-				state = state.withProperty(LIQUID, (float)te.getTankLevel());
-				TileRail parent = te.getParentTile();
-				if (parent != null) {
-					if (parent.info.placementInfo.facing().getAxis() == Axis.X) {
-						if (parent.getPos().getZ() == te.getPos().getZ()) {
-							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing().internal);
-						}
-					}
-					if (parent.info.placementInfo.facing().getAxis() == Axis.Z) {
-						if (parent.getPos().getX() == te.getPos().getX()) {
-							state = state.withProperty(FACING, te.getParentTile().info.placementInfo.facing().internal);
-						}
-					}
-				}
-			}
-    	}
+        state = state.withProperty(RAIL_DATA, te);
         return state;
     }
 }

@@ -269,7 +269,7 @@ public class World {
         internal.setBlockState(pos.internal, block.getDefaultState());
     }
     public void setBlock(Vec3i pos, ItemStack item) {
-        internal.setBlockState(pos.internal, BlockUtil.itemToBlockState(item.internal));
+        internal.setBlockState(pos.internal, BlockUtil.itemToBlockState(item));
     }
 
     public boolean isTopSolid(Vec3i pos) {

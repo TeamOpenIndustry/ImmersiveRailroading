@@ -37,7 +37,7 @@ public class RailBaseRender {
 		if (info.settings.railBed.isEmpty()) {
 			return null;
 		}
-		IBlockState gravelState = BlockUtil.itemToBlockState(info.settings.railBed.internal);
+		IBlockState gravelState = BlockUtil.itemToBlockState(info.settings.railBed);
 		
 		// Create render targets
 		BufferBuilder worldRenderer = new BufferBuilder(2048);
