@@ -13,14 +13,15 @@ import cam72cam.immersiverailroading.util.OreHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.text.PlayerMessage;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -94,7 +95,7 @@ public abstract class Multiblock {
 	}
 	
 	public abstract BlockPos placementPos();
-	public void place(World world, EntityPlayer player, BlockPos pos, Rotation rot) {
+	public void place(World world, Player player, BlockPos pos, Rotation rot) {
 		Map<String, Integer> missing = new HashMap<String, Integer>();
 		BlockPos origin = pos.subtract(this.placementPos().rotate(rot));
 		for (BlockPos offset : this.componentPositions) {
@@ -116,7 +117,7 @@ public abstract class Multiblock {
 			MultiblockComponent component = lookup(offset);
 			BlockPos compPos = origin.add(offset.rotate(rot));
 			if (!component.valid(world, compPos)) {
-				if (!component.place(world, player, compPos)) {
+				if (!component.place(world, player.internal, compPos)) {
 					if (!missing.containsKey(component.name)) {
 						missing.put(component.name, 0);
 					}
@@ -128,7 +129,7 @@ public abstract class Multiblock {
 		if (missing.size() != 0) {
 			player.sendMessage(ChatText.STOCK_MISSING.getMessage());
 			for (String name : missing.keySet()) {
-				player.sendMessage(new TextComponentString(String.format("  - %d x %s", missing.get(name), name)));
+				player.sendMessage(PlayerMessage.direct(String.format("  - %d x %s", missing.get(name), name)));
 			}
 		}
 	}

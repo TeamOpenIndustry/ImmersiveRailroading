@@ -18,6 +18,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
@@ -31,7 +32,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
@@ -66,7 +66,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
             if (tileSwitch != null) {
                 SwitchState switchForced = te.cycleSwitchForced();
                 if (te.world.isServer) {
-                    player.sendMessage(switchForced.equals(SwitchState.NONE) ? new TextComponentString(ChatText.SWITCH_UNLOCKED.toString()) : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
+                    player.sendMessage(switchForced.equals(SwitchState.NONE) ? ChatText.SWITCH_UNLOCKED.getMessage() : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
                 }
             }
         }
@@ -74,7 +74,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
             String next = te.nextAugmentRedstoneMode();
             if (next != null) {
                 if (te.world.isServer) {
-                    player.sendMessage(new TextComponentString(next));
+                    player.sendMessage(PlayerMessage.direct(next));
                 }
                 return true;
             }

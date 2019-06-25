@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
@@ -18,8 +19,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 
@@ -42,7 +41,7 @@ public class ItemManual extends ItemBase {
 				List<String> keys = MultiblockRegistry.keys();
 				current = keys.get((keys.indexOf(current) + 1) % (keys.size()));
 				ItemMultiblockType.set(item, current);
-				player.sendMessage(new TextComponentString("Placing: " + current));
+				player.sendMessage(PlayerMessage.direct("Placing: " + current));
 			}
 		} else {
 			if (world.isClient) {
@@ -58,7 +57,7 @@ public class ItemManual extends ItemBase {
 						e.printStackTrace();
 					}
 				} else {
-					player.sendMessage(ForgeHooks.newChatWithLinks("https://github.com/cam72cam/ImmersiveRailroading/wiki"));
+					player.sendMessage(PlayerMessage.url("https://github.com/cam72cam/ImmersiveRailroading/wiki"));
 				}
 			}
 		}
@@ -76,7 +75,7 @@ public class ItemManual extends ItemBase {
 			if (facing == Facing.UP) {
 				realPos = realPos.up();
 			}
-			MultiblockRegistry.get(current).place(world.internal, player.internal, realPos.internal, Rotation.from(Facing.fromAngle(player.getYawHead()+180)).internal);
+			MultiblockRegistry.get(current).place(world.internal, player, realPos.internal, Rotation.from(Facing.fromAngle(player.getYawHead()+180)).internal);
 		}
 		return ClickResult.ACCEPTED;
 	}

@@ -1,9 +1,9 @@
 package cam72cam.mod.entity;
 
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.ITextComponent;
 
 public class Player extends Entity {
     public final EntityPlayer internal;
@@ -17,8 +17,8 @@ public class Player extends Entity {
         return new ItemStack(internal.getHeldItem(hand.internal));
     }
 
-    public void sendMessage(ITextComponent o) {
-        internal.sendMessage(o);
+    public void sendMessage(PlayerMessage o) {
+        internal.sendMessage(o.internal);
     }
 
     public boolean isCrouching() {
