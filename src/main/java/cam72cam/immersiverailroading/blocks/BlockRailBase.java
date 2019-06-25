@@ -14,6 +14,7 @@ import cam72cam.mod.block.BlockSettings;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.block.Material;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -25,9 +26,6 @@ import cam72cam.mod.world.World;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -66,7 +64,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
                 }
             }
         }
-        if (stack.item == Items.REDSTONE) {
+        if (stack.is(Fuzzy.REDSTONE_DUST)) {
             String next = te.nextAugmentRedstoneMode();
             if (next != null) {
                 if (te.world.isServer) {
@@ -75,13 +73,13 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
                 return true;
             }
         }
-        if (stack.item == Item.getItemFromBlock(Blocks.SNOW_LAYER)) {
+        if (stack.is(Fuzzy.SNOW_LAYER)) {
             if (te.world.isServer) {
                 te.handleSnowTick();
             }
             return true;
         }
-        if (stack.item == Item.getItemFromBlock(Blocks.SNOW)) {
+        if (stack.is(Fuzzy.SNOW_BLOCK)) {
             if (te.world.isServer) {
                 for (int i = 0; i < 8; i ++) {
                     te.handleSnowTick();
@@ -123,7 +121,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
 
         te.blockUpdate = true;
 
-        if (world.getBlock(te.pos.up()) == Blocks.SNOW_LAYER) {
+        if (new ItemStack(world.getBlock(te.pos.up())).is(Fuzzy.SNOW_LAYER)) {
             if (te.handleSnowTick()) {
                 world.setToAir(te.pos.up());
             }

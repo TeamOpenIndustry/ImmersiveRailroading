@@ -167,7 +167,7 @@ public class World {
     }
     public <T extends net.minecraft.tileentity.TileEntity> T getTileEntity(Vec3i pos, Class<T> cls, boolean create) {
         net.minecraft.tileentity.TileEntity ent = internal.getChunkFromBlockCoords(pos.internal).getTileEntity(pos.internal, create ? Chunk.EnumCreateEntityType.IMMEDIATE : Chunk.EnumCreateEntityType.CHECK);
-        if (ent != null && cls.isInstance(ent)) {
+        if (cls.isInstance(ent)) {
             return (T) ent;
         }
         if (ent != null) {
