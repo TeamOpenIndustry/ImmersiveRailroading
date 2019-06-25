@@ -35,6 +35,6 @@ public enum Augment {
 		case COUPLER:
 			return EnumDyeColor.ORANGE;
 		}
-		return null;
+		return EnumDyeColor.WHITE;
 	}
 }

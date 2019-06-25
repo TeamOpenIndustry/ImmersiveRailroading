@@ -12,10 +12,16 @@ public class FluidStack {
     }
 
     public Fluid getFluid() {
+        if (internal == null) {
+            return null;
+        }
         return Fluid.getFluid(internal.getFluid().getUnlocalizedName());
     }
 
     public int getAmount() {
+        if (internal == null) {
+            return 0;
+        }
         return internal.amount;
     }
 }

@@ -59,10 +59,10 @@ public class BlockUtil {
 		return false;
 	}
 	
-	public static IBlockState itemToBlockState(ItemStack stack) {
-		Block block = Block.getBlockFromItem(stack.getItem());
+	public static IBlockState itemToBlockState(cam72cam.mod.item.ItemStack stack) {
+		Block block = Block.getBlockFromItem(stack.item);
 		@SuppressWarnings("deprecation")
-		IBlockState gravelState = block.getStateFromMeta(stack.getMetadata());
+		IBlockState gravelState = block.getStateFromMeta(stack.internal.getMetadata());
 		if (block instanceof BlockLog ) {
 			gravelState = gravelState.withProperty(BlockLog.LOG_AXIS, BlockLog.EnumAxis.Z);
 		}
