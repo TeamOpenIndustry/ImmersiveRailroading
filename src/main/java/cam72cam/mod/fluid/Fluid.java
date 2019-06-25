@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Fluid {
+    private static Map<String, Fluid> registryCache = new HashMap<>();
+
     public static final int BUCKET_VOLUME = net.minecraftforge.fluids.Fluid.BUCKET_VOLUME;
     public static final Fluid WATER = getFluid("water");
     public final String ident;
     public final net.minecraftforge.fluids.Fluid internal;
 
-    private static Map<String, Fluid> registryCache = new HashMap<>();
 
     private Fluid(String ident) {
         this.ident = ident;
