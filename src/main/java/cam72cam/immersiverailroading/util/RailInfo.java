@@ -71,6 +71,8 @@ public class RailInfo {
 		if (customInfo.control != null) {
 			id += customInfo.control;
 		}
+		id += placementInfo.grade;
+		id += customInfo.grade;
 		uniqueID = id;
 	}
 
