@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
@@ -83,7 +84,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				double relHeight = MathUtil.trueModulus(gagPos.y, 1);
 
 				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
-				float bedScaleFactor = RailBaseRender.bedScaleFactor(info.settings.gauge);
+				float bedScaleFactor = bedScaleFactor(info.settings.gauge);
 				//if we haven't done this position yet add it
 				//else prioritize the start and end points so they always line up with other track
 				//else prioritize lowest y for consistency
@@ -134,6 +135,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			tg.setBedHeight(bedHeights.get(pair));
 			tracks.add(tg);
 		}
+	}
+
+	public static float bedScaleFactor(Gauge gauge) {
+		return 0.1f * (float) gauge.scale();
 	}
 
 	private float getBedHeight(float height, float relHeight, float bedScaleFactor) {
