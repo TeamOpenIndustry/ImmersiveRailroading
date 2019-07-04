@@ -134,13 +134,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		if (nbttagcompound.hasKey("CoupledBack")) {
 			coupledBack = UUID.fromString(nbttagcompound.getString("CoupledBack"));
-			if (nbttagcompound.getTag("lastKnownRear").getId() == 10) {
-				// Legacy
-				// TODO remove 2.0
-				NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownRear");
-				lastKnownRear = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
-			} else {
-				lastKnownRear = BlockPos.fromLong(nbttagcompound.getLong("lastKnownRear"));
+			if (nbttagcompound.hasKey("lastKnownRear")) {
+				if (nbttagcompound.getTag("lastKnownRear").getId() == 10) {
+					// Legacy
+					// TODO remove 2.0
+					NBTTagCompound pos = nbttagcompound.getCompoundTag("lastKnownRear");
+					lastKnownRear = new BlockPos(pos.getInteger("x"), pos.getInteger("y"), pos.getInteger("z"));
+				} else {
+					lastKnownRear = BlockPos.fromLong(nbttagcompound.getLong("lastKnownRear"));
+				}
 			}
 		}
 		backCouplerEngaged = nbttagcompound.getBoolean("backCouplerEngaged");
@@ -261,7 +263,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				CouplerType otherCoupler = potential.getRight();
 				this.setCoupledUUID(coupler, stock.getPersistentID());
 				stock.setCoupledUUID(otherCoupler, this.getPersistentID());
-				this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
+				if (stock.isCouplerEngaged(otherCoupler) && this.isCouplerEngaged(coupler)) {
+					this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
+				}
 			}
 		}
 	}
@@ -672,7 +676,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		//Don't ask me why these are reversed...
 		if (coupler == CouplerType.FRONT) {
 			if (couplerFrontPosition == null) {
-				couplerFrontPosition = predictRearBogeyPosition(pos, (float) (this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
+				couplerFrontPosition = predictRearBogeyPosition(pos, (float) -(this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).addVector(0, 1, 0);
 			}
 			return couplerFrontPosition;
 		} else {

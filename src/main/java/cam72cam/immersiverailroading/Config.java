@@ -10,10 +10,42 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config.Comment;
+import net.minecraftforge.common.config.ConfigManager;
 
 @net.minecraftforge.common.config.Config(modid = ImmersiveRailroading.MODID)
 public class Config {
 	public static ConfigDamage damage;
+
+	public static void init() {
+		if (ConfigBalance.dieselFuels.size() == 0) {
+			// BC
+			ConfigBalance.dieselFuels.put("oil", 100);
+			ConfigBalance.dieselFuels.put("oil_heavy", 70);
+			ConfigBalance.dieselFuels.put("oil_dense", 110);
+			ConfigBalance.dieselFuels.put("oil_distilled", 50);
+			ConfigBalance.dieselFuels.put("fuel_dense", 110);
+			ConfigBalance.dieselFuels.put("fuel_mixed_heavy", 130);
+			ConfigBalance.dieselFuels.put("fuel_light", 150);
+			ConfigBalance.dieselFuels.put("fuel_mixed_light", 100);
+			// IE/IP
+			ConfigBalance.dieselFuels.put("diesel", 200);
+			ConfigBalance.dieselFuels.put("biodiesel", 170);
+			ConfigBalance.dieselFuels.put("biofuel", 170);
+			ConfigBalance.dieselFuels.put("ethanol", 170);
+			ConfigBalance.dieselFuels.put("gasoline", 100);
+			//Thermal Foundation
+			ConfigBalance.dieselFuels.put("refined_fuel", 150);
+			ConfigBalance.dieselFuels.put("refined_oil", 100);
+			//PneumaticCraft
+			ConfigBalance.dieselFuels.put("lpg", 150);
+			ConfigBalance.dieselFuels.put("kerosene", 180);
+			ConfigBalance.dieselFuels.put("fuel", 180);
+
+			// Other
+			ConfigBalance.dieselFuels.put("olive_oil", 40);
+			ConfigManager.sync(ImmersiveRailroading.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
+		}
+	}
 
 	public static class ConfigDamage {
 		@Comment({ "Enable Boiler Explosions" })
@@ -110,35 +142,7 @@ public class Config {
 		@Comment("Fuels for diesel Locomotives" + 
 				"\nNote: Naphtha of Thermal Foundation is internally registered as 'refined oil'.")
 		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();
-		static {
-			dieselFuels.clear();
-			// BC
-			dieselFuels.put("oil", 100);
-			dieselFuels.put("oil_heavy", 70);
-			dieselFuels.put("oil_dense", 110);
-			dieselFuels.put("oil_distilled", 50);
-			dieselFuels.put("fuel_dense", 110);
-			dieselFuels.put("fuel_mixed_heavy", 130);
-			dieselFuels.put("fuel_light", 150);
-			dieselFuels.put("fuel_mixed_light", 100);
-			// IE/IP
-			dieselFuels.put("diesel", 200);
-			dieselFuels.put("biodiesel", 170);
-			dieselFuels.put("biofuel", 170);
-			dieselFuels.put("ethanol", 170);
-			dieselFuels.put("gasoline", 100);
-			//Thermal Foundation
-			dieselFuels.put("refined_fuel", 150);
-			dieselFuels.put("refined_oil", 100);
-			//PneumaticCraft
-			dieselFuels.put("lpg", 150);
-			dieselFuels.put("kerosene", 180);
-			dieselFuels.put("fuel", 180);
-			
-			// Other
-			dieselFuels.put("olive_oil", 40);
-		};
-		
+
 		@Comment("Water Substitutes")
 		public static String[] waterTypes = new String[] {
 			"water",
@@ -160,6 +164,18 @@ public class Config {
 			}
 			return items;
 		}
+		
+		@Comment("Only select Locomotives with suitable equipment can be radio-controlled")
+		public static boolean RadioEquipmentRequired = true;
+		
+		@Comment("Range of radio-control, positive integer")
+		public static int RadioRange = 500;
+		
+		@Comment("Energy cost (RF) per radio transmission per metre")
+		public static int RadioCostPerMetre = 0;
+		
+		@Comment("Prevent stock from being built outside the recommended and model gauges")
+		public static boolean DesignGaugeLock = false;
 	}
 
 	public static ConfigDebug debug;

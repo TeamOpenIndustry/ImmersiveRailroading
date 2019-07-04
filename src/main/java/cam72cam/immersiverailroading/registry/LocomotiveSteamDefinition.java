@@ -30,6 +30,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 	public ResourceLocation idle;
 	public ResourceLocation chuff;
 	public ResourceLocation pressure;
+	public ResourceLocation bell;
 	
 	public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
 		super(defID, data);
@@ -52,15 +53,17 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
 		
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
-		
+
+		//sets default sounds
 		whistle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
 		idle = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
 		chuff = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
 		pressure = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
+		bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
 
 		boolean whistleSet = false;
 		
-		
+		//overrides original sounds with added sounds
 		if (sounds != null) {
 			if (sounds.has("whistle")) {
 				whistle = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString());
@@ -77,6 +80,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			
 			if (sounds.has("pressure")) {
 				pressure = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString());
+			}
+
+			if (sounds.has("bell")) {
+				bell = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
 			}
 			
 			if (sounds.has("quilling")) {
@@ -108,13 +115,14 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		case WALSCHAERTS:
 		case TRI_WALSCHAERTS:
 		case HIDDEN:
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < 100; i++) {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
 			}
 			break;
 		case T1:
+		case GARRAT:
 		case MALLET_WALSCHAERTS:
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < 100; i++) {
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
 				addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
 			};
@@ -127,11 +135,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 		}
 		
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 100; i++) {
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOILER_SEGMENT_X, this, groups, i), true);
 		}
 		
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 100; i++) {
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.PARTICLE_CHIMNEY_X, this, groups, i), false);
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.PRESSURE_VALVE_X, this, groups, i), false);
 		}
@@ -154,6 +162,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 			sides.add("RIGHT");
 			sides.add("LEFT");
 		case T1:
+        case GARRAT:
 		case MALLET_WALSCHAERTS:
 			if (sides.size() == 0) {
 				sides.add("LEFT_FRONT");

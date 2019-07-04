@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.rail;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.proxy.ClientProxy;
@@ -66,7 +67,12 @@ public class RailBaseRender {
 	}
 	
 	private static synchronized void drawSync(RailInfo info) {
-		RailRenderUtil.draw(getBaseBuffer(info));
+		try {
+			RailRenderUtil.draw(getBaseBuffer(info));
+		} catch (Exception ex) {
+			//This can happen with invalid pick blocks
+			ImmersiveRailroading.catching(ex);
+		}
 	}
 
 	private static DisplayListCache displayLists = new DisplayListCache();

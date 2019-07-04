@@ -35,14 +35,12 @@ chat.immersiverailroading:coupler.disengaged=Die %s Kupplung wurde auf rangieren
 chat.immersiverailroading:coupler.status.coupled=Die %s Kupplung ist an %s gekuppelt (%s, %s, %s)
 chat.immersiverailroading:coupler.status.decoupled.engaged=Die %s Kupplung ist im normalen Modus entkuppelt
 chat.immersiverailroading:coupler.status.decoupled.disengaged=Die %s Kupplung ist im rangierenden Modus entkuppelt
-chat.immersiverailroading:build.missing.ties=Es fehlen %s Bindungen
-chat.immersiverailroading:build.missing.rails=Es fehlen %s Schienen
-chat.immersiverailroading:build.missing.rail_bed=Es fehlen %s Schienenbett
-chat.immersiverailroading:build.missing.rail_bed_fill=Es fehlen %s Schienenbett Füllung
+chat.immersiverailroading:build.missing=Es fehlen %s %s
 chat.immersiverailroading:augment.set=Erweitung reagiert nun nur noch auf %s
 chat.immersiverailroading:augment.reset=Erweiterung reagiert nun auf alle Fahrzeuge
 chat.immersiverailroading:misc.wood_planks=Holzbretter
 chat.immersiverailroading:build.invalid_block=Ungültiger Block bei x=%s y=%s z=%s
+chat.immersiverailroading:brush.no.variants=
 
 gui.immersiverailroading:label.brake=Bremse
 gui.immersiverailroading:label.throttle=Gas
@@ -174,6 +172,7 @@ immersiverailroading:detector_mode.speed=Geschwindigkeit erkennen
 immersiverailroading:detector_mode.passengers=Anzahl an Passagieren erkennen
 immersiverailroading:detector_mode.cargo=Volle Güterwagen erkennen
 immersiverailroading:detector_mode.liquid=Volle Tankwagen erkennen
+immersiverailroading:detector_mode.computer=Computer
 immersiverailroading:loco_control_mode.throttle_forward=Vorwärts
 immersiverailroading:loco_control_mode.throttle_reverse=Rückwärts
 immersiverailroading:loco_control_mode.brake=Bremse

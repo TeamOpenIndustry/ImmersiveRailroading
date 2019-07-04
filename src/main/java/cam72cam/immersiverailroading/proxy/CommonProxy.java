@@ -13,6 +13,7 @@ import java.util.zip.ZipFile;
 import cam72cam.immersiverailroading.net.*;
 import org.apache.commons.io.IOUtils;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
@@ -110,7 +111,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	new File(cacheDir).mkdirs();
     	
     	DefinitionManager.initDefinitions();
-    	;
+    	Config.init();
     	OreHelper.IR_RAIL_BED.add(Blocks.BRICK_BLOCK);
     	OreHelper.IR_RAIL_BED.add(Blocks.COBBLESTONE);
     	OreHelper.IR_RAIL_BED.add(new ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
@@ -133,7 +134,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	ImmersiveRailroading.net.registerMessage(MultiblockSelectCraftPacket.Handler.class, MultiblockSelectCraftPacket.class, 9, Side.SERVER);
     	ImmersiveRailroading.net.registerMessage(SoundPacket.Handler.class, SoundPacket.class, 10, Side.CLIENT);
     	ImmersiveRailroading.net.registerMessage(PaintSyncPacket.Handler.class, PaintSyncPacket.class, 11, Side.CLIENT);
-		ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
+	ImmersiveRailroading.net.registerMessage(PreviewRenderPacket.Handler.class, PreviewRenderPacket.class, 12, Side.CLIENT);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
@@ -161,11 +162,13 @@ public abstract class CommonProxy implements IGuiHandler {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:switch key"));
     	} else {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:hook_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:manual_iron"));
     		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint_iron"));
+    		modRegistry.remove(new ResourceLocation("immersiverailroading:switch key_iron"));
     	}
     }
     
@@ -199,6 +202,8 @@ public abstract class CommonProxy implements IGuiHandler {
     	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE);
     	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH);
     	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE);
+      event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD);
+    	event.getRegistry().register(IRItems.ITEM_SWITCH_KEY);
     }
     
     @SubscribeEvent

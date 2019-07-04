@@ -1,0 +1,7 @@
+{
+  "types" : [
+    "default",
+    "concrete",
+    "railsonly"
+  ]
+}

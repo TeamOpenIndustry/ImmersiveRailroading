@@ -1,8 +1,6 @@
 package cam72cam.immersiverailroading.render.item;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
@@ -42,7 +40,7 @@ public class StockItemModel implements IBakedModel {
 	private OBJRender model;
 	private double scale;
 	private String defID;
-	private ImmutableList<BakedQuad> iconQuads;
+	private static Map<String, ImmutableList<BakedQuad>> iconQuads = new HashMap<>();
 	private String texture;
 
 	public StockItemModel() {
@@ -55,7 +53,6 @@ public class StockItemModel implements IBakedModel {
 		if (model == null) {
 			stack.setCount(0);
 		}
-		iconQuads = null;
 		texture = ItemTextureVariant.get(stack);
 	}
 	
@@ -75,9 +72,9 @@ public class StockItemModel implements IBakedModel {
 		 */
 		
 		
-		if (ConfigGraphics.enableIconCache) {
-			if (iconQuads != null) {
-				return iconQuads.asList();
+		if (ConfigGraphics.enableFlatIcons) {
+			if (iconQuads.get(defID) != null) {
+				return iconQuads.get(defID).asList();
 			}
 		}
 		
@@ -142,12 +139,13 @@ public class StockItemModel implements IBakedModel {
 	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		
-		if (ConfigGraphics.enableIconCache && this.defID != null) {
-			if (iconQuads == null) {
+		if (ConfigGraphics.enableFlatIcons && this.defID != null) {
+			if (iconQuads.get(defID) == null) {
+				// Might need to wipe iconQuads when a new texturesheet is loaded
 				TextureMap map = Minecraft.getMinecraft().getTextureMapBlocks();
 				TextureAtlasSprite sprite = map.getAtlasSprite(new ResourceLocation(ImmersiveRailroading.MODID, defID).toString());
 				if (!sprite.equals(map.getMissingSprite())) {					
-					iconQuads = ItemLayerModel.getQuadsForSprite(-1, sprite, DefaultVertexFormats.ITEM, Optional.empty());
+					iconQuads.put(defID, ItemLayerModel.getQuadsForSprite(-1, sprite, DefaultVertexFormats.ITEM, Optional.empty()));
 				}
 			}
 			if (iconQuads != null) {

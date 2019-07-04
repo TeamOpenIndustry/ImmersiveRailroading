@@ -1,32 +1,28 @@
 package cam72cam.immersiverailroading.render;
 
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.model.obj.Material;
 import cam72cam.immersiverailroading.model.obj.OBJModel;
 import cam72cam.immersiverailroading.model.obj.Vec2f;
+import cam72cam.immersiverailroading.util.GPUInfo;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.List;
+import java.util.function.Function;
 
 public class OBJTextureSheet {
 	public Map<String, SubTexture> mappings;
@@ -34,8 +30,10 @@ public class OBJTextureSheet {
 	private int sheetHeight = 0;
 	public final int textureID;
 	private OBJModel model;
-	
+
 	private  class SubTexture {
+		private BufferedImage image;
+		private Function<Integer, Integer> scale;
 		public int realWidth;
 		private int realHeight;
 		private int sheetWidth;
@@ -50,8 +48,6 @@ public class OBJTextureSheet {
 
 		private boolean isFlatMaterial;
 		private int[] pixels;
-		
-		public final int sampPx;
 
 		
 		SubTexture(ResourceLocation tex, ResourceLocation fallback, Function<Integer, Integer> scale) throws IOException {
@@ -66,19 +62,15 @@ public class OBJTextureSheet {
 			
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
-			
-			if (scale != null) {
-				image = convertToBufferedImage(image.getScaledInstance(scale.apply(realWidth), scale.apply(realHeight), BufferedImage.SCALE_FAST));
-				realWidth = image.getWidth();
-				realHeight = image.getHeight();
-			}
-					
+
+			this.scale = scale;
+
 			this.tex = tex;
 			isFlatMaterial = false;
 
 			pixels = new int[realWidth * realHeight];
 			image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
-	        sampPx = pixels[0];
+			this.image = image;
 		}
 		SubTexture(String name, int r, int g, int b, int a) {
 			BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
@@ -98,8 +90,6 @@ public class OBJTextureSheet {
 			
 			pixels = new int[realWidth * realHeight];
 			image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
-	        
-	        sampPx = pixels[0];
 		}
 		
 		public Vec2f extendSpace(List<Vec2f> vts) {
@@ -142,6 +132,25 @@ public class OBJTextureSheet {
 		    g.dispose();
 		    return newImage;
 		}
+
+		public void resize() {
+			if (image == null) {
+				return;
+			}
+
+			if (scale != null && realWidth * copiesU() * realHeight * copiesV() > ConfigGraphics.scaleTextureCutoff * ConfigGraphics.scaleTextureCutoff) {
+				realWidth = scale.apply(realWidth);
+				realHeight = scale.apply(realHeight);
+			}
+			if (realHeight != image.getHeight() || realWidth != image.getWidth()) {
+				image = convertToBufferedImage(image.getScaledInstance(realWidth, realHeight, BufferedImage.SCALE_FAST));
+				pixels = new int[realWidth * realHeight];
+				image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
+			}
+
+			image = null;
+			scale = null;
+		}
 		
 		public void upload(int textureID, int originX, int originY, int sheetWidth, int sheetHeight) {
 			this.originX = originX;
@@ -177,8 +186,10 @@ public class OBJTextureSheet {
 					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 				}
 			}
-			
-			pixels = null;
+
+			if (!ConfigGraphics.enableFlatIcons) {
+				pixels = null;
+			}
 		}
 		public int copiesU() {
 			return maxU - minU;
@@ -224,12 +235,12 @@ public class OBJTextureSheet {
 		model.offsetV =  new byte[model.faceVerts.length / 9];
 		
 		Function<Integer, Integer> scaleFn = null;
-		if (ConfigGraphics.textureScale != 1) {
+		if (ConfigGraphics.scaleTexture != 1) {
 			scaleFn = (Integer val) -> {
 				if (val == 1) {
 					return 1;
 				}
-				return (int)Math.ceil(val/ConfigGraphics.textureScale);
+				return (int)Math.ceil(val/ConfigGraphics.scaleTexture);
 			};
 		}
 		
@@ -306,6 +317,8 @@ public class OBJTextureSheet {
 		Collections.sort(texs, (SubTexture a, SubTexture b) -> { return b.size().compareTo(a.size()); });
 		
 		for (SubTexture tex : texs) {
+			tex.resize();
+
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;
@@ -325,10 +338,12 @@ public class OBJTextureSheet {
 		rowHeight = 0;
 
 		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
-		
+
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-		
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+
         ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
         if (sheetWidth > maxSize || sheetHeight > maxSize)
         	ImmersiveRailroading.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
@@ -349,8 +364,9 @@ public class OBJTextureSheet {
 			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
 			currentX += tex.getAbsoluteWidth();
 		}
+		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
 	}
-	
+
 	public float convertU(String mtlName, float u) {
 		if (model.materials.containsKey(mtlName)) {
 			ResourceLocation kd = model.materials.get(mtlName).texKd;
@@ -380,7 +396,7 @@ public class OBJTextureSheet {
 		GL11.glDeleteTextures(textureID);
 	}
 
-	public int samp(String mtlName) {
+	public int samp(String mtlName, float u, float v) {
 		if (model.materials.containsKey(mtlName)) {
 			ResourceLocation kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
@@ -388,7 +404,14 @@ public class OBJTextureSheet {
 			}
 		}
 		if (mappings.containsKey(mtlName)) {
-			return mappings.get(mtlName).sampPx;
+			SubTexture mapping = mappings.get(mtlName);
+			u = ((u % 1) + 1) % 1;
+			v = ((v % 1) + 1) % 1;
+			u = u * mapping.realWidth;
+			v = mapping.realHeight - v * mapping.realHeight;
+			v = (int)v;
+			u = (int)u;
+			return mapping.pixels[(int) (Math.min(v * mapping.realWidth + u, mapping.pixels.length-1))];
 		}
 		return 0;
 	}
@@ -404,5 +427,11 @@ public class OBJTextureSheet {
 			return mappings.get(mtlName).isFlatMaterial;
 		}
 		return false;
+	}
+
+	public void freePx() {
+		for (SubTexture tex : mappings.values()) {
+			tex.pixels = null;
+		}
 	}
 }

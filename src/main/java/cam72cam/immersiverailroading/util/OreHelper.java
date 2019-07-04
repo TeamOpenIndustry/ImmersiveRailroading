@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.IRItems;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -76,10 +77,11 @@ public class OreHelper {
 	public static final OreAbstract IR_STEEL_BLOCK = new OreAbstract("blockSteel", new ItemStack(Blocks.IRON_BLOCK));
 	public static final OreAbstract IR_STEEL_INGOT = new OreAbstract("ingotSteel", new ItemStack(Items.IRON_INGOT));
 	public static final OreAbstract IR_TIE = new OreAbstract("irTie", "plankTreatedWood", new ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
+	public static final OreAbstract IR_RAIL = new OreAbstract("irRail", new ItemStack(IRItems.ITEM_RAIL));
 	public static final OreAbstract IR_RAIL_BED = new OreAbstract("railBed", new ItemStack(Blocks.GRAVEL));
+
 	
-	
-	private static boolean oreDictionaryContainsMatch(boolean strict, NonNullList<ItemStack> ores, ItemStack playerStack) {
+	public static boolean oreDictionaryContainsMatch(boolean strict, NonNullList<ItemStack> ores, ItemStack playerStack) {
         for (ItemStack target : ores)
         {
             if (OreDictionary.itemMatches(target, playerStack, strict))

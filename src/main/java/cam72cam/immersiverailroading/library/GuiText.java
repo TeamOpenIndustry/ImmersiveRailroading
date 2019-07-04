@@ -14,6 +14,7 @@ public enum GuiText {
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),
 	SELECTOR_GRADE_CROSSING("selector.grade_crossing"),
 	SELECTOR_GAUGE("selector.gauge"),
+	SELECTOR_TRACK("selector.track"),
 	SELECTOR_PLATE_TYPE("selector.plate_type"),
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),
 	SELECTOR_CAST_SINGLE("selector.cast_single"),
@@ -40,10 +41,12 @@ public enum GuiText {
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
 	WEIGHT_TOOLTIP("stock.weight"),
 	TEXTURE_TOOLTIP("stock.texture"),
-	
+	SWITCH_HAMMER_TOOLTIP("item.switch_hammer"),
+	MODELER_TOOLTIP("stock.modeler"),
+	PACK_TOOLTIP("stock.pack"),
 	NONE("none"),
 	;
-	
+
 	private String value;
 	GuiText(String value) {
 		this.value = value;

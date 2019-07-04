@@ -18,4 +18,6 @@ public class IRItems {
 	public static ItemConductorWhistle ITEM_CONDUCTOR_WHISTLE = new ItemConductorWhistle();
 	public static ItemPaintBrush ITEM_PAINT_BRUSH = new ItemPaintBrush(); 
 	public static ItemGoldenSpike ITEM_GOLDEN_SPIKE = new ItemGoldenSpike();
+	public static ItemRadioCtrlCard ITEM_RADIO_CONTROL_CARD = new ItemRadioCtrlCard();
+	public static ItemSwitchKey ITEM_SWITCH_KEY = new ItemSwitchKey();
 }

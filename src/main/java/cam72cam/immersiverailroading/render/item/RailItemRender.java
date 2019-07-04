@@ -3,6 +3,9 @@ package cam72cam.immersiverailroading.render.item;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.render.StockRenderCache;
+import cam72cam.immersiverailroading.render.VBA;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -20,18 +23,19 @@ import net.minecraft.util.ResourceLocation;
 
 public class RailItemRender implements IBakedModel {
 	private static OBJRender baseRailModel;
-	private static List<String> groups;
+	private static List<String> left;
 
 	static {
 		try {
-			baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"), 0.05f));
-			groups = new ArrayList<String>();
+			baseRailModel = StockRenderCache.getTrackRenderer(DefinitionManager.getTracks().stream().findFirst().get().getTrackForGauge(0));
+			List<String> groups = new ArrayList<String>();
 			
 			for (String groupName : baseRailModel.model.groups())  {
 				if (groupName.contains("RAIL_LEFT")) {
 					groups.add(groupName);
 				}
 			}
+			left = groups;
 		} catch (Exception e) {
 			ImmersiveRailroading.catching(e);
 		}
@@ -42,9 +46,9 @@ public class RailItemRender implements IBakedModel {
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(0, 0.2, 0.55);
+			GL11.glTranslated(0.5, 0.2, 0.55);
 			baseRailModel.bindTexture();
-			baseRailModel.drawGroups(groups);
+			baseRailModel.drawGroups(left);
 			baseRailModel.restoreTexture();
 		}
 		GL11.glPopMatrix();

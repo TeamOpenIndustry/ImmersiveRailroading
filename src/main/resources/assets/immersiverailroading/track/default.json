@@ -1,0 +1,17 @@
+{
+  "name": "Default",
+  "models": {
+    ">0.2": "immersiverailroading:models/track/default/track_1m.obj",
+    ">0": "immersiverailroading:models/track/default/track_1m_model.obj"
+  },
+  "materials": {
+    "TIE": [{
+      "item": "ore:irTie",
+      "cost": 1
+    }],
+    "RAIL": [{
+      "item": "ore:irRail",
+      "cost": 2
+    }]
+  }
+}

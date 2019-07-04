@@ -1,10 +1,5 @@
 package cam72cam.immersiverailroading.tile;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
@@ -18,17 +13,9 @@ import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.library.CouplerAugmentMode;
-import cam72cam.immersiverailroading.library.LocoControlMode;
-import cam72cam.immersiverailroading.library.StockDetectorMode;
-import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.ParticleUtil;
-import cam72cam.immersiverailroading.util.RedstoneUtil;
-import cam72cam.immersiverailroading.util.SwitchUtil;
-import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.immersiverailroading.util.*;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -56,7 +43,11 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
+import org.apache.commons.lang3.ArrayUtils;
 import trackapi.lib.ITrack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	public static TileRailBase get(IBlockAccess world, BlockPos pos) {
@@ -84,7 +75,8 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
-	
+
+
 	@Override
 	public boolean isLoaded() {
 		return !world.isRemote || hasTileData;
@@ -94,7 +86,25 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		this.bedHeight = height;
 	}
 	public float getBedHeight() {
+		if (this.replaced != null && this.replaced.hasKey("height")) {
+			float replacedHeight = this.replaced.getFloat("height");
+			return Math.min(this.bedHeight, replacedHeight);
+		}
 		return this.bedHeight;
+	}
+	public double getRenderGauge() {
+		double gauge = 0;
+		TileRail parent = this.getParentTile();
+		if (parent != null) {
+			gauge = parent.info.settings.gauge.value();
+		}
+		if (this.getParentReplaced() != null && world != null) {
+			parent = TileRail.get(world, this.getParentReplaced());
+            if (parent != null) {
+                gauge = Math.min(gauge, parent.info.settings.gauge.value());
+            }
+		}
+		return gauge;
 	}
 	public void setRailHeight(float height) {
 		this.railHeight = height;
@@ -174,7 +184,7 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 	}
 	
 	public boolean isFlexible() {
-		return this.flexible;
+		return this.flexible || !(this instanceof TileRail);
 	}
 	
 	public ItemStack getRenderRailBed() {
@@ -388,42 +398,58 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 		}
 		return 0;
 	}
-	
+
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
-		TileRail tile;
-		TileRail self = this instanceof TileRail ? (TileRail) this : this.getParentTile();
-		
-		if (self == null) {
-			return currentPosition;
-		}
-
-		SwitchState state = SwitchUtil.getSwitchState(self, currentPosition);
-		if (state == SwitchState.STRAIGHT) {
-			tile = self.getParentTile();
-		} else {
-			tile = self;
-		}
-
-		if (tile == null) {
-			return currentPosition;
-		}
-		
 		double distanceMeters = motion.lengthVector();
 		float rotationYaw = VecUtil.toWrongYaw(motion);
+		Vec3d nextPos = currentPosition;
 
-		Vec3d nextPos = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+		TileRailBase self = this;
+		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 
-		if (state != SwitchState.NONE && nextPos.distanceTo(currentPosition) > Math.abs(distanceMeters) * 2) {
-			tile = self.getParentTile();
-			if (tile != null) {
-				Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
-				if (potential.distanceTo(currentPosition) < nextPos.distanceTo(currentPosition)) {
+		while(tile != null) {
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+
+			if (state == SwitchState.STRAIGHT) {
+				tile = tile.getParentTile();
+			}
+
+
+			Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+			if (state == SwitchState.TURN) {
+				float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
+				double diff = MathUtil.trueModulus(other - rotationYaw, 360);
+				diff = Math.min(360-diff, diff);
+				if (diff < 30) {
+					nextPos = potential;
+					break;
+				}
+			} else {
+				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion)) ||
+						currentPosition == nextPos) {
 					nextPos = potential;
 				}
 			}
-		}
 
+			if (self.getParentTile() == null) {
+				// Still loading
+				ImmersiveRailroading.warn("Unloaded parent at %s", self.getParent());
+				break;
+			}
+
+			tile = null;
+			BlockPos currentParent = self.getParentTile().getParent();
+			for (NBTTagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
+				self = new TileRailBase();
+				self.readFromNBT(data);
+				self.setWorld(world);
+				if (!currentParent.equals(self.getParent())) {
+					tile = self.getParentTile();
+					break;
+				}
+			}
+		}
 		return nextPos;
 	}
 	
@@ -803,5 +829,70 @@ public class TileRailBase extends SyncdTileEntity implements ITrack, ITickable {
 			return 0;
 		}
 		return (int) ((speed * speed) / 200);
+	}
+
+	public BlockPos getParentReplaced() {
+		if (this.replaced == null) {
+			return null;
+		}
+		if (!this.replaced.hasKey("parent")) {
+			return null;
+		}
+		return BlockPos.fromLong(this.replaced.getLong("parent")).add(pos);
+	}
+
+	public SwitchState cycleSwitchForced() {
+		TileRail tileSwitch = this.findSwitchParent();
+		SwitchState newForcedState = SwitchState.NONE;
+
+		if (tileSwitch != null) {
+			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
+			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
+			tileSwitch.markDirty();
+			this.markDirty();
+			this.getParentTile().markDirty();
+		}
+
+		return newForcedState;
+	}
+
+	public boolean isSwitchForced() {
+		TileRail tileSwitch = this.findSwitchParent();
+		if (tileSwitch != null) {
+			return tileSwitch.info.switchForced != SwitchState.NONE;
+		} else {
+			return false;
+		}
+	}
+
+	/** Finds a parent of <code>this</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
+	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 */
+	public TileRail findSwitchParent() {
+		return findSwitchParent(this);
+	}
+
+	/** Finds a parent of <code>cur</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
+	 * @param cur TileRailBase whose parents are to be traversed
+	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 */
+	public TileRail findSwitchParent(TileRailBase cur) {
+		if (cur == null) {
+			return null;
+		}
+
+		if (cur instanceof TileRail) {
+			TileRail curTR = (TileRail) cur;
+			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
+				return curTR;
+			}
+		}
+
+		// Prevent infinite recursion
+		if (cur.getPos().equals(cur.getParentTile().getPos())) {
+			return null;
+		}
+
+		return findSwitchParent(cur.getParentTile());
 	}
 }

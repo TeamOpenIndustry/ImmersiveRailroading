@@ -58,7 +58,7 @@ public class BoilerRollerRender implements IMultiblockRender {
 			renderer.drawGroups(segments);
 		}
 		
-		renderer.drawDirectGroups(rest);;
+		renderer.drawGroups(rest);
 		GL11.glPopMatrix();
 		
 		this.renderer.restoreTexture();

@@ -19,6 +19,8 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 	private int fuelEfficiency;
 	public ResourceLocation idle;
 	public ResourceLocation horn;
+	public ResourceLocation bell;
+	private boolean hornSus;
 	public boolean muliUnitCapable;
 
 	public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
@@ -42,7 +44,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FLUID_COUPLING, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.FINAL_DRIVE, this, groups), true);
 		addComponentIfExists(RenderComponent.parse(RenderComponentType.TORQUE_CONVERTER, this, groups), true);
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 100; i++) {
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.PISTON_X, this, groups, i), true);
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.DIESEL_EXHAUST_X, this, groups, i), false);
 			addComponentIfExists(RenderComponent.parseID(RenderComponentType.FAN_X, this, groups, i), true);
@@ -60,7 +62,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		fuelCapacity = FluidQuantity.FromLiters((int)Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
 		fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
 		muliUnitCapable = properties.has("multi_unit_capable") ? properties.get("multi_unit_capable").getAsBoolean() : true;
-		
+
+		hornSus = false;
+		if (properties.has("horn_sustained")) {
+			hornSus = properties.get("horn_sustained").getAsBoolean();
+		}
 		JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 		
 		if (sounds != null && sounds.has("idle")) {
@@ -74,6 +80,16 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 		} else {
 			horn = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
 		}
+		if (sounds != null && sounds.has("bell")) {
+			bell = new ResourceLocation(ImmersiveRailroading.MODID, sounds.get("bell").getAsString());
+		} else {
+			bell = new ResourceLocation(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
+		}
+	}
+
+	//checks to see if horn is sustained, on by default
+	public boolean getHornSus(){
+		return hornSus;
 	}
 
 	@Override

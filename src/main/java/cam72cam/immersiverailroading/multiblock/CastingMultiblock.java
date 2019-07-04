@@ -191,8 +191,11 @@ public class CastingMultiblock extends Multiblock {
 						break;
 					}
 					ItemStack stack = item.getItem();
-					int cost = ItemCastingCost.getCastCost(stack);
+					ItemStack craftStack = stack.copy();
+					int cost = ItemCastingCost.getCastCost(craftStack);
 					if (cost != ItemCastingCost.BAD_CAST_COST) {
+						cost /= craftStack.getCount();
+
 						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + cost) {
 							if (!hasPower()) {
 								break;
@@ -306,7 +309,11 @@ public class CastingMultiblock extends Multiblock {
 			if (craftTe == null) {
 				return false;
 			}
-			return craftTe.getCraftProgress() > 0;
+			TileMultiblock fluidTe = getTile(fluid);
+			if (fluidTe == null) {
+				return false;
+			}
+			return craftTe.getCraftProgress() > 0 && fluidTe.getCraftProgress() > 0;
 		}
 
 		public double getSteelLevel() {

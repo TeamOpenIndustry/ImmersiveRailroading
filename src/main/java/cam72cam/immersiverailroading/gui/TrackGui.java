@@ -1,14 +1,15 @@
 package cam72cam.immersiverailroading.gui;
 
 import java.io.IOException;
+import java.util.List;
 import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import com.google.common.base.Predicate;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -38,11 +39,13 @@ public class TrackGui extends GuiScreen {
 	private GuiCheckBox isPreviewCB;
 	private GuiCheckBox isGradeCrossingCB;
 	private GuiButton gaugeButton;
+	private GuiButton trackButton;
 
 	private int slot;
 	private int length;
 	private int quarters;
 	private Gauge gauge;
+	private String track;
 	private boolean isPreview;
 	private boolean isGradeCrossing;
 	private TrackItems type;
@@ -93,11 +96,16 @@ public class TrackGui extends GuiScreen {
 		quarters = settings.quarters;
 		type = settings.type;
 		gauge = settings.gauge;
+		track = settings.track;
 		posType = settings.posType;
 		direction = settings.direction;
 		isPreview = settings.isPreview;
 		isGradeCrossing = settings.isGradeCrossing;
 		NonNullList<ItemStack> oreDict = NonNullList.create();
+
+		//if (!DefinitionManager.getTrackIDs().contains(type)) {
+		//	track = DefinitionManager.getTrackIDs().stream().findFirst().get();
+		//}
 		
 		oreDict.add(new ItemStack(Items.AIR));
 		
@@ -169,6 +177,9 @@ public class TrackGui extends GuiScreen {
 	public void initGui() {
 		int buttonID = 0;
 
+		trackButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
+		this.buttonList.add(trackButton);
+
 		typeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22-1, GuiText.SELECTOR_TYPE.toString(type));
 		this.buttonList.add(typeButton);
 
@@ -205,10 +216,10 @@ public class TrackGui extends GuiScreen {
 		
 		gaugeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_GAUGE.toString(gauge));
 		this.buttonList.add(gaugeButton);
-		
+
 		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview);
 		this.buttonList.add(isPreviewCB);
-		
+
 		isGradeCrossingCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing);
 		this.buttonList.add(isGradeCrossingCB);
 		
@@ -225,6 +236,13 @@ public class TrackGui extends GuiScreen {
 		if (button == gaugeButton) {
 			gauge = gauge.next();
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+		}
+		if (button == trackButton) {
+			List<String> defs = DefinitionManager.getTrackIDs();
+			int idx = defs.indexOf(track);
+			idx = (idx + 1) % defs.size();
+			track = defs.get(idx);
+			trackButton.displayString = GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name);
 		}
 		if (button == posTypeButton) {
 			posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
@@ -253,7 +271,7 @@ public class TrackGui extends GuiScreen {
         // Enter or ESC
         if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
         	if (!this.lengthInput.getText().isEmpty()) {
-				RailSettings settings = new RailSettings(gauge, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing);
+				RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing);
         		if (this.tilePreviewPos != null) {
     				ImmersiveRailroading.net.sendToServer(
     						new ItemRailUpdatePacket(tilePreviewPos, settings));

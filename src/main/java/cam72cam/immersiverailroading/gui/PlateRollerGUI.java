@@ -1,8 +1,11 @@
 package cam72cam.immersiverailroading.gui;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
@@ -44,6 +47,11 @@ public class PlateRollerGUI extends GuiScreen {
         	if (item != null) {
         		String defID = ItemDefinition.getID(item);
         		ItemDefinition.setID(currentItem, defID);
+        		EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
+					gauge = def.recommended_gauge;
+					gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+				}
         		updatePickerButton();
 	        	sendPacket();
         	}
@@ -81,7 +89,16 @@ public class PlateRollerGUI extends GuiScreen {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == gaugeButton) {
-			gauge = gauge.next();
+			if(!currentItem.isEmpty()) {
+				EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null && plate == PlateType.BOILER && ConfigBalance.DesignGaugeLock) {
+					List<Gauge> validGauges = new ArrayList<Gauge>();
+					validGauges.add(Gauge.from(def.recommended_gauge.value()));
+					gauge = gauge.next(validGauges);
+				} else {
+					gauge = gauge.next();
+				}
+			}
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
 			sendPacket();
 		}
