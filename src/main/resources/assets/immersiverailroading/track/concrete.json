@@ -1,0 +1,20 @@
+{
+  "name": "Concrete Ties",
+  "models": {
+    ">0.2": "immersiverailroading:models/track/concrete/concrete_track.obj",
+    ">0": "immersiverailroading:models/track/concrete/concrete_track_model.obj"
+  },
+  "materials": {
+    "TIE": [{
+      "item": "minecraft:concrete|8",
+      "cost": 2
+    },{
+      "item": "ore:ingotIron",
+      "cost": 1
+    }],
+    "RAIL": [{
+      "item": "ore:irRail",
+      "cost": 2
+    }]
+  }
+}

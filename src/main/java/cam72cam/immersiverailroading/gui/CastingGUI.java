@@ -1,8 +1,14 @@
 package cam72cam.immersiverailroading.gui;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
+import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
+import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
@@ -11,6 +17,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstance;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import net.minecraft.client.gui.GuiButton;
@@ -44,6 +51,11 @@ public class CastingGUI extends GuiScreen {
         	
         	if (item != null) {
         		currentItem = item;
+				EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
+					gauge = def.recommended_gauge;
+					gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
+				}
         		updatePickerButton();
     			sendItemPacket();
         	}
@@ -125,7 +137,16 @@ public class CastingGUI extends GuiScreen {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == gaugeButton) {
-			gauge = gauge.next();
+			if(!currentItem.isEmpty()) {
+				EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+				if (def != null && ConfigBalance.DesignGaugeLock) {
+					List<Gauge> validGauges = new ArrayList<Gauge>();
+					validGauges.add(Gauge.from(def.recommended_gauge.value()));
+					gauge = gauge.next(validGauges);
+				} else {
+					gauge = gauge.next();
+				}
+			}
 			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
 			sendItemPacket();
 		}

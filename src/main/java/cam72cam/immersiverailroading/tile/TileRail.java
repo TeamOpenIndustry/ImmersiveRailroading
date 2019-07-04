@@ -1,29 +1,23 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.track.TrackBase;
+import cam72cam.immersiverailroading.util.PlacementInfo;
+import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
-import cam72cam.immersiverailroading.track.TrackBase;
-import cam72cam.immersiverailroading.track.TrackRail;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
 
 public class TileRail extends TileRailBase {
 
@@ -34,7 +28,6 @@ public class TileRail extends TileRailBase {
 
 	public RailInfo info;
 	private List<ItemStack> drops;
-	private boolean hackSwitch;
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -57,14 +50,14 @@ public class TileRail extends TileRailBase {
 
 	public void setSwitchState(SwitchState state) {
 		if (state != info.switchState) {
-			info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, state, info.tablePos);
+			info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, state, info.switchForced, info.tablePos);
 			this.markDirty();
 		}
 	}
 
 	public void nextTablePos(boolean back) {
 		double tablePos = (info.tablePos + 1.0/info.settings.length * (back ? 1 : -1)) % 8;
-		info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, info.switchState, tablePos);
+		info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
 		this.markDirty();
 		
 		List<EntityCoupleableRollingStock> ents = world.getEntitiesWithinAABB(EntityCoupleableRollingStock.class, new AxisAlignedBB(-info.settings.length, 0, -info.settings.length, info.settings.length, 5, info.settings.length).offset(this.getPos()));
@@ -112,10 +105,11 @@ public class TileRail extends TileRailBase {
             placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
+			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-            RailSettings settings = new RailSettings(gauge, type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
-			info = new RailInfo(world, settings, placementInfo, null, switchState, tablePos);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters, TrackPositionType.FIXED, TrackDirection.NONE, railBed, ItemStack.EMPTY, false, false);
+			info = new RailInfo(world, settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}
 
@@ -155,7 +149,7 @@ public class TileRail extends TileRailBase {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(pos).getTracksForRender()) {
+		for (TrackBase track : info.getBuilder(new BlockPos(info.placementInfo.placementPosition)).getTracksForRender()) {
 			BlockPos tpos = track.getPos();
 			total++;
 

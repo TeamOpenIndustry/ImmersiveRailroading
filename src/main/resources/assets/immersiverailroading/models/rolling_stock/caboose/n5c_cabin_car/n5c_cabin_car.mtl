@@ -1,5 +1,5 @@
 # Blender MTL File: 'N5c Cabin Car.blend'
-# Material Count: 6
+# Material Count: 7
 
 newmtl ctp1
 Ns 96.078431
@@ -9,7 +9,7 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd ctp1.png
 
 newmtl ctp2
@@ -20,7 +20,18 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
+map_Kd ctp2.png
+
+newmtl ctp2_ctp2.png.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
 map_Kd ctp2.png
 
 newmtl fp2
@@ -31,10 +42,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd fp2.png
 
-newmtl glass
+newmtl glassconstant
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -42,10 +53,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd glass.png
+illum 0
+map_Kd glassconstant.png
 
-newmtl metal
+newmtl n5c_caboose
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -53,10 +64,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd metal.png
+illum 0
+map_Kd n5c_caboose.png
 
-newmtl spring
+newmtl n5c_caboose_n5c_caboose.001
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -64,5 +75,5 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd spring.png
+illum 0
+map_Kd n5c_caboose.png

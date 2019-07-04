@@ -206,6 +206,7 @@ public class LocomotiveSteam extends Locomotive {
 	private float soundDampener = 0;
 	private ISound idle;
 	private ISound pressure;
+
 	private int tickMod = 0;
 	@Override
 	public void onUpdate() {
@@ -222,6 +223,7 @@ public class LocomotiveSteam extends Locomotive {
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
 					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
+					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 					whistle.setPitch(1);
 					
 					if (this.getDefinition().quill != null) {
@@ -395,7 +397,7 @@ public class LocomotiveSteam extends Locomotive {
 					int lifespan = (int) (40 * (1 + smokeMod * gauge.scale()));
 					float verticalSpeed = 0.8f;
 					double size = 0.3 * (0.8 + smokeMod);
-					
+
 					particlePos = particlePos.subtract(fakeMotion);
 					
 					EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan, darken, thickness, size);
@@ -720,7 +722,7 @@ public class LocomotiveSteam extends Locomotive {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
-			
+
 			if (Config.ConfigDamage.explosionsEnabled) {
 				if (Config.ConfigDamage.explosionEnvDamageEnabled) {
 					for (int i = 0; i < 5; i++) {

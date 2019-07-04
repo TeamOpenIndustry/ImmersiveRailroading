@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.render.item;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.VBA;
 import org.lwjgl.opengl.GL11;
 
@@ -25,7 +27,7 @@ public class RailItemRender implements IBakedModel {
 
 	static {
 		try {
-			baseRailModel = new OBJRender(new OBJModel(new ResourceLocation(ImmersiveRailroading.MODID, "models/block/track_1m.obj"), 0.05f));
+			baseRailModel = StockRenderCache.getTrackRenderer(DefinitionManager.getTracks().stream().findFirst().get().getTrackForGauge(0));
 			List<String> groups = new ArrayList<String>();
 			
 			for (String groupName : baseRailModel.model.groups())  {
@@ -44,7 +46,7 @@ public class RailItemRender implements IBakedModel {
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(0, 0.2, 0.55);
+			GL11.glTranslated(0.5, 0.2, 0.55);
 			baseRailModel.bindTexture();
 			baseRailModel.drawGroups(left);
 			baseRailModel.restoreTexture();

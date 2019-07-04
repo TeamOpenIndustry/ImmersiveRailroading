@@ -9,7 +9,7 @@
 		"water_capacity_l": 13000, 
 		"horsepower": 2010,
 		"tractive_effort_lbf": 30190,
-		"max_speed_kmh": 48,
+		"max_speed_kmh": 88,
 		"valve_gear": "walschaerts",
 		"weight_kg": 59760
 	},

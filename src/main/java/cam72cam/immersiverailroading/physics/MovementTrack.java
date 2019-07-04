@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
@@ -14,6 +16,7 @@ import net.minecraft.world.World;
 import trackapi.lib.ITrack;
 import trackapi.lib.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovementTrack {
@@ -31,16 +34,18 @@ public class MovementTrack {
 			-0.25,
 			0.5,
 			-0.5,
+			0.75,
+			-0.75
 		};
 		
 		for (Vec3d pos : positions) {
 			for (double height : heightSkew) {
-				ITrack te = Util.getTileEntity(world, pos.addVector(0, height + 0.35, 0), true);
+				ITrack te = Util.getTileEntity(world, pos.addVector(0, height + (currentPosition.y%1), 0), true);
 				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 					return te;
 				}
 				// HACK for cross gauge
-				TileRailBase rail = TileRailBase.get(world, new BlockPos(pos.addVector(0, height + 0.35, 0)));
+				TileRailBase rail = TileRailBase.get(world, new BlockPos(pos.addVector(0, height + (currentPosition.y%1), 0)));
 				if (rail != null && rail.getParentReplaced() != null) {
 					return rail;
 				}
@@ -86,8 +91,9 @@ public class MovementTrack {
 			}
 		}
 
+		double railHeight = rail.info.getTrackHeight();
 		double distance = delta.lengthVector();
-		double heightOffset = 0.35 * rail.info.settings.gauge.scale();
+		double heightOffset = railHeight * rail.info.settings.gauge.scale();
 
 		if (rail.info.settings.type == TrackItems.CROSSING) {
 			delta = VecUtil.fromWrongYaw(distance, EnumFacing.fromAngle(trainYaw).getHorizontalAngle());

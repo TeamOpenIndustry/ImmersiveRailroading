@@ -18,9 +18,11 @@ public class RailSettings {
     public final ItemStack railBedFill;
     public final boolean isPreview;
     public final boolean isGradeCrossing;
+    public final String track;
 
-    public RailSettings(Gauge gauge, TrackItems type, int length, int quarters, TrackPositionType posType, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, int quarters, TrackPositionType posType, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
         this.gauge = gauge;
+        this.track = track;
         this.type = type;
         this.length = length;
         this.quarters = quarters;
@@ -35,6 +37,7 @@ public class RailSettings {
     public RailSettings(NBTTagCompound nbt) {
         if (nbt.hasKey("gauge")) {
             gauge = Gauge.from(nbt.getDouble("gauge"));
+            track = nbt.getString("track");
             type = TrackItems.values()[nbt.getInteger("type")];
             length = nbt.getInteger("length");
             quarters = nbt.hasKey("quarters") ? nbt.getInteger("quarters") : 4;
@@ -47,6 +50,7 @@ public class RailSettings {
         } else {
             gauge = Gauge.from(Gauge.STANDARD);
             type = TrackItems.STRAIGHT;
+            track = "default";
             length = 10;
             quarters = 4;
             posType = TrackPositionType.FIXED;
@@ -61,6 +65,7 @@ public class RailSettings {
     public NBTTagCompound toNBT() {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setDouble("gauge", gauge.value());
+        nbt.setString("track", track);
         nbt.setInteger("type", type.ordinal());
         nbt.setInteger("length", length);
         nbt.setInteger("quarters", quarters);
@@ -76,6 +81,7 @@ public class RailSettings {
     public RailSettings withLength(int length) {
        return new RailSettings(
 				gauge,
+				track,
 				type,
 				length,
 				quarters,
@@ -91,6 +97,7 @@ public class RailSettings {
     public RailSettings withType(TrackItems type) {
         return new RailSettings(
                 gauge,
+                track,
                 type,
                 length,
                 quarters,

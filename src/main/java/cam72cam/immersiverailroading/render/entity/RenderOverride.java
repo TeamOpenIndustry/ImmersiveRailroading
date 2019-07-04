@@ -42,7 +42,7 @@ import org.lwjgl.opengl.GLContext;
 
 public class RenderOverride {
 
-	private static Vec3d getCameraPos(float partialTicks) {
+	public static Vec3d getCameraPos(float partialTicks) {
         Entity playerrRender = Minecraft.getMinecraft().getRenderViewEntity();
         double d0 = playerrRender.lastTickPosX + (playerrRender.posX - playerrRender.lastTickPosX) * partialTicks;
         double d1 = playerrRender.lastTickPosY + (playerrRender.posY - playerrRender.lastTickPosY) * partialTicks;
@@ -156,8 +156,6 @@ public class RenderOverride {
 
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 	
-        OBJRender model = RailBuilderRender.getModel(Gauge.from(Gauge.STANDARD)); 
-        model.bindTexture();
         List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
         for (TileEntity te : entities) {
         	if (te instanceof TileRail) {
@@ -230,7 +228,6 @@ public class RenderOverride {
 			blend.restore();
 			Minecraft.getMinecraft().mcProfiler.endSection();
 		}
-        model.restoreTexture();
 
         Minecraft.getMinecraft().mcProfiler.endSection();;
 	}

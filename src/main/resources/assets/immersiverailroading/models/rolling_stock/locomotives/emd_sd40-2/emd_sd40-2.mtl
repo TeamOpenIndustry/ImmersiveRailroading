@@ -1,26 +1,7 @@
 # Blender MTL File: 'EMD SD40-2.blend'
-# Material Count: 14
+# Material Count: 8
 
-newmtl None
-Ns 0
-Ka 0.000000 0.000000 0.000000
-Kd 0.8 0.8 0.8
-Ks 0.8 0.8 0.8
-d 1
-illum 2
-
-newmtl black2.001
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd black2.png
-
-newmtl brakestand
+newmtl cab_stand_
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -28,41 +9,8 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd brakestand.png
-
-newmtl cabstand01
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd cabstand01.png
-
-newmtl cabwall
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd cabwall.png
-
-newmtl chrome.002
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd chrome.png
+illum 0
+map_Kd cab_stand.png
 
 newmtl gauge_air_emd
 Ns 96.078431
@@ -72,8 +20,19 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd gauge_air_emd.png
+
+newmtl gauge_amp_alco
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd gauge_amp_alco.png
 
 newmtl gauge_amp_emd
 Ns 96.078431
@@ -83,10 +42,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
+illum 0
 map_Kd gauge_amp_emd.png
 
-newmtl glass
+newmtl glassconstant
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -94,10 +53,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd glass.png
+illum 0
+map_Kd glassconstant.png
 
-newmtl metal
+newmtl glassconstant_glassconstant.png
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -105,10 +64,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd metal.png
+illum 0
+map_Kd glassconstant.png
 
-newmtl red
+newmtl sd40-2
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -116,10 +75,10 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd red.png
+illum 0
+map_Kd sd40-2.png
 
-newmtl rod01.001
+newmtl sd40-2_sd40-2.png
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -127,27 +86,5 @@ Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 2
-map_Kd rod01.png
-
-newmtl speedo_white_freight
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd speedo_white_freight.png
-
-newmtl standmount01
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd standmount01.png
+illum 0
+map_Kd sd40-2.png

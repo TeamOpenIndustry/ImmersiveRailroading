@@ -1,24 +1,24 @@
 package cam72cam.immersiverailroading.util;
 
-import java.util.*;
-
 import cam72cam.immersiverailroading.Config.ConfigDamage;
-import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.library.SwitchState;
-import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.track.*;
-import cam72cam.immersiverailroading.track.BuilderCubicCurve;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RailInfo {
 	public final World world;
@@ -28,11 +28,12 @@ public class RailInfo {
 
 	// Used for tile rendering only
 	public final SwitchState switchState;
+	public final SwitchState switchForced;
 	public final double tablePos;
 	public final String uniqueID;
 
 
-	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, double tablePos) {
+	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 		}
@@ -42,6 +43,7 @@ public class RailInfo {
 		this.placementInfo = placementInfo;
 		this.customInfo = customInfo;
 		this.switchState = switchState;
+		this.switchForced = switchForced;
 		this.tablePos = tablePos;
 
 		Object[] props = new Object [] {
@@ -50,7 +52,9 @@ public class RailInfo {
 				this.settings.quarters,
 				this.settings.railBed,
 				this.settings.gauge,
+				this.settings.track,
 				this.switchState,
+				this.switchForced,
 				this.tablePos,
 				this.placementInfo.yaw,
 				this.placementInfo.direction,
@@ -59,14 +63,19 @@ public class RailInfo {
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
-			id += placementInfo.placementPosition;
-			id += customInfo.placementPosition;
+			id += placementInfo.placementPosition.subtract(customInfo.placementPosition);
+		}
+		if (placementInfo.control != null) {
+			id += placementInfo.control;
+		}
+		if (customInfo.control != null) {
+			id += customInfo.control;
 		}
 		uniqueID = id;
 	}
 
 	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, 0);
+		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
 	public RailInfo(World world, BlockPos pos, NBTTagCompound nbt) {
@@ -76,6 +85,7 @@ public class RailInfo {
 				new PlacementInfo(nbt.getCompoundTag("placement"), pos),
 				new PlacementInfo(nbt.getCompoundTag("custom"), pos),
 				SwitchState.values()[nbt.getInteger("switchState")],
+				SwitchState.values()[nbt.getInteger("switchForced")],
 				nbt.getDouble("tablePos")
 		);
 	}
@@ -86,23 +96,24 @@ public class RailInfo {
 		nbt.setTag("placement", placementInfo.toNBT(pos));
 		nbt.setTag("custom", customInfo.toNBT(pos));
 		nbt.setInteger("switchState", switchState.ordinal());
+		nbt.setInteger("switchForced", switchForced.ordinal());
 		nbt.setDouble("tablePos", tablePos);
 		return nbt;
 	}
 
 	@Override
 	public RailInfo clone() {
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
 	}
 
 	public RailInfo withLength(int length) {
 		RailSettings settings = this.settings.withLength(length);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
 	}
 
 	public RailInfo withType(TrackItems type) {
 		RailSettings settings = this.settings.withType(type);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
 	}
 
 	public Map<BlockPos, BuilderBase> builders = new HashMap<>();
@@ -137,6 +148,64 @@ public class RailInfo {
 		return getBuilder(BlockPos.ORIGIN);
 	}
 
+	private class MaterialManager {
+		private final Function<ItemStack, Boolean> material;
+		private final int count;
+		private final ItemStack[] examples;
+
+		MaterialManager(int count, Function<ItemStack, Boolean> material, ItemStack ...examples) {
+			this.material = material;
+			this.count = count;
+			this.examples = examples;
+		}
+
+		public MaterialManager(int count, Function<ItemStack, Boolean> material, List<ItemStack> examples) {
+			this(count, material, examples.toArray(new ItemStack[0]));
+		}
+
+		private boolean checkMaterials(EntityPlayer player) {
+			int found = 0;
+			for (ItemStack stack : player.inventory.mainInventory) {
+				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+					found += stack.getCount();
+				}
+			}
+
+			if (found < count) {
+				String example = Arrays.stream(examples).map(ItemStack::getDisplayName).collect(Collectors.joining(" | "));
+				if (examples.length > 1) {
+					example = "[ " + example + " ]";
+				}
+				player.sendMessage(ChatText.BUILD_MISSING.getMessage(count - found, example));
+				return false;
+			}
+			return true;
+		}
+
+		private List<ItemStack> useMaterials(EntityPlayer player) {
+			List<ItemStack> drops = new ArrayList<>();
+			int required = this.count;
+			for (ItemStack stack : player.inventory.mainInventory) {
+				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+					if (required > stack.getCount()) {
+						required -= stack.getCount();
+						ItemStack copy = stack.copy();
+						copy.setCount(stack.getCount());
+						drops.add(copy);
+						stack.setCount(0);
+					} else if (required != 0) {
+						ItemStack copy = stack.copy();
+						copy.setCount(required);
+						drops.add(copy);
+						stack.setCount(stack.getCount() - required);
+						required = 0;
+					}
+				}
+			}
+			return drops;
+		}
+	}
+
 	public boolean build(EntityPlayer player) {
 		BuilderBase builder = getBuilder(new BlockPos(placementInfo.placementPosition));
 
@@ -156,126 +225,74 @@ public class RailInfo {
 
 				// Survival check
 
-				int ties = 0;
-				int rails = 0;
-				int bed = 0;
-				int fill = 0;
+				TrackDefinition def = getDefinition();
 
-				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (playerStack.getItem() == IRItems.ITEM_RAIL && ItemGauge.get(playerStack) == settings.gauge) {
-						rails += playerStack.getCount();
+				List<MaterialManager> materials = new ArrayList<>();
+
+				if (settings.railBed.getItem() != Items.AIR) {
+					materials.add(new MaterialManager(builder.costBed(), settings.railBed::isItemEqual, settings.railBed));
+				}
+				if (settings.railBedFill.getItem() != Items.AIR) {
+					materials.add(new MaterialManager(builder.costFill(), settings.railBedFill::isItemEqual, settings.railBedFill));
+				}
+
+				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);
+				List<TrackDefinition.TrackMaterial> railParts = def.materials.get(TrackComponent.RAIL);
+				List<TrackDefinition.TrackMaterial> bedParts = def.materials.get(TrackComponent.BED);
+
+				if (tieParts != null) {
+					for (TrackDefinition.TrackMaterial tiePart : tieParts) {
+						materials.add(new MaterialManager((int) Math.ceil(builder.costTies() * tiePart.cost), tiePart::matches, tiePart.examples()));
 					}
-					if (OreHelper.IR_TIE.matches(playerStack, false)) {
-						ties += playerStack.getCount();
+				}
+				if (railParts != null) {
+					for (TrackDefinition.TrackMaterial railPart : railParts) {
+						materials.add(new MaterialManager((int) Math.ceil(builder.costRails() * railPart.cost), railPart::matches, railPart.examples()));
 					}
-					if (settings.railBed.getItem() != Items.AIR && settings.railBed.getItem() == playerStack.getItem() && settings.railBed.getMetadata() == playerStack.getMetadata()) {
-						bed += playerStack.getCount();
-					}
-					if (settings.railBedFill.getItem() != Items.AIR && settings.railBedFill.getItem() == playerStack.getItem() && settings.railBedFill.getMetadata() == playerStack.getMetadata()) {
-						fill += playerStack.getCount();
+				}
+				if (bedParts != null) {
+					for (TrackDefinition.TrackMaterial bedPart : bedParts) {
+						materials.add(new MaterialManager((int) Math.ceil(builder.costBed() * bedPart.cost), bedPart::matches, bedPart.examples()));
 					}
 				}
 
 				boolean isOk = true;
-
-				if (ties < builder.costTies()) {
-					player.sendMessage(ChatText.BUILD_MISSING_TIES.getMessage(builder.costTies() - ties));
-					isOk = false;
+				for (MaterialManager material : materials) {
+					isOk = isOk & material.checkMaterials(player);
 				}
-
-				if (rails < builder.costRails()) {
-					player.sendMessage(ChatText.BUILD_MISSING_RAILS.getMessage(builder.costRails() - rails));
-					isOk = false;
-				}
-
-				if (settings.railBed.getItem() != Items.AIR && bed < builder.costBed()) {
-					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED.getMessage(builder.costBed() - bed));
-					isOk = false;
-				}
-
-				if (settings.railBedFill.getItem() != Items.AIR && fill < builder.costFill()) {
-					player.sendMessage(ChatText.BUILD_MISSING_RAIL_BED_FILL.getMessage(builder.costFill() - fill));
-					isOk = false;
-				}
-
 				if (!isOk) {
 					return false;
 				}
 
-				ties = builder.costTies();
-				rails = builder.costRails();
-				bed = builder.costBed();
-				fill = builder.costFill();
-				List<ItemStack> drops = new ArrayList<ItemStack>();
+				List<ItemStack> drops = new ArrayList<>();
 
-				for (ItemStack playerStack : player.inventory.mainInventory) {
-					if (playerStack.getItem() == IRItems.ITEM_RAIL && ItemGauge.get(playerStack) == settings.gauge) {
-						if (rails > playerStack.getCount()) {
-							rails -= playerStack.getCount();
-							ItemStack copy = playerStack.copy();
-							copy.setCount(playerStack.getCount());
-							drops.add(copy);
-							playerStack.setCount(0);
-						} else if (rails != 0) {
-							ItemStack copy = playerStack.copy();
-							copy.setCount(rails);
-							drops.add(copy);
-							playerStack.setCount(playerStack.getCount() - rails);
-							rails = 0;
-						}
-					}
-					if (OreHelper.IR_TIE.matches(playerStack, false)) {
-						if (ties > playerStack.getCount()) {
-							ties -= playerStack.getCount();
-							ItemStack copy = playerStack.copy();
-							copy.setCount(playerStack.getCount());
-							drops.add(copy);
-							playerStack.setCount(0);
-						} else if (ties != 0) {
-							ItemStack copy = playerStack.copy();
-							copy.setCount(ties);
-							drops.add(copy);
-							playerStack.setCount(playerStack.getCount() - ties);
-							ties = 0;
-						}
-					}
-					if (settings.railBed.getItem() != Items.AIR && settings.railBed.getItem() == playerStack.getItem() && settings.railBed.getMetadata() == playerStack.getMetadata()) {
-						if (bed > playerStack.getCount()) {
-							bed -= playerStack.getCount();
-							ItemStack copy = playerStack.copy();
-							copy.setCount(playerStack.getCount());
-							drops.add(copy);
-							playerStack.setCount(0);
-						} else if (bed != 0) {
-							ItemStack copy = playerStack.copy();
-							copy.setCount(bed);
-							drops.add(copy);
-							playerStack.setCount(playerStack.getCount() - bed);
-							bed = 0;
-						}
-					}
-					if (settings.railBedFill.getItem() != Items.AIR && settings.railBedFill.getItem() == playerStack.getItem() && settings.railBedFill.getMetadata() == playerStack.getMetadata()) {
-						if (fill > playerStack.getCount()) {
-							fill -= playerStack.getCount();
-							ItemStack copy = playerStack.copy();
-							copy.setCount(playerStack.getCount());
-							//drops.add(copy);
-							playerStack.setCount(0);
-						} else if (fill != 0) {
-							ItemStack copy = playerStack.copy();
-							copy.setCount(fill);
-							//drops.add(copy);
-							playerStack.setCount(playerStack.getCount() - fill);
-							fill = 0;
-						}
-					}
+				for (MaterialManager material : materials) {
+					drops.addAll(material.useMaterials(player));
 				}
+
 				builder.setDrops(drops);
 				builder.build();
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public TrackDefinition getDefinition() {
+		return DefinitionManager.getTrack(settings.track);
+	}
+
+	public TrackModel getTrackModel() {
+		return DefinitionManager.getTrack(settings.track, settings.gauge.value());
+	}
+
+	private double trackHeight = -1;
+	public double getTrackHeight() {
+		if (trackHeight == -1) {
+			TrackModel model = getTrackModel();
+			trackHeight = model.getHeight();
+		}
+		return trackHeight;
 	}
 
 }

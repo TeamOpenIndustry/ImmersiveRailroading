@@ -54,12 +54,12 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		PosStep end = path.get(path.size()-1);
 
 		Vec3d placeOff = new Vec3d(
-				Math.abs(info.placementInfo.placementPosition.x%1)-0.5,
+				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.x, 1)),
 				0,
-                Math.abs(info.placementInfo.placementPosition.z%1)-0.5
-		).scale(-1);
-		int mainX = (int) Math.round(path.get(path.size()/2).x+placeOff.x);
-		int mainZ = (int) Math.round(path.get(path.size()/2).z+placeOff.z);
+                Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
+		);
+		int mainX = (int) Math.floor(path.get(path.size()/2).x+placeOff.x);
+		int mainZ = (int) Math.floor(path.get(path.size()/2).z+placeOff.z);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale()/2));
 
 		for (PosStep cur : path) {
@@ -71,9 +71,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
-				//TODO: check if this is the cause of rail bed shift, possible rounding of negative floats
-				int posX = (int)Math.round(gagPos.x+nextUp.x+placeOff.x);
-				int posZ = (int)Math.round(gagPos.z+nextUp.z+placeOff.z);
+				int posX = (int)Math.floor(gagPos.x+nextUp.x+placeOff.x);
+				int posZ = (int)Math.floor(gagPos.z+nextUp.z+placeOff.z);
 				double height = 0;
 				if (info.settings.isGradeCrossing) {
 					height = (1 - Math.abs((int)q)/horiz)/3 - 0.05;
@@ -109,8 +108,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 			}
 			if (!isFlex && endOfTrack) {
-				mainX = (int) Math.round(gagPos.x+placeOff.x);
-				mainZ = (int) Math.round(gagPos.z+placeOff.z);
+				mainX = (int) Math.floor(gagPos.x+placeOff.x);
+				mainZ = (int) Math.floor(gagPos.z+placeOff.z);
 			}
 		}
 

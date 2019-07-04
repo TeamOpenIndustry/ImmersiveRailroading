@@ -15,15 +15,12 @@ public class ConfigGraphics {
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
-	@Comment("Enable priming of item render cache.  Disable this if you keep crashing in the world loading screen")
-	public static boolean enableItemRenderPriming = true;
-
-	@Comment({ "Override GPU Max texture settings !DEV USE ONLY! (-1 == disable)" })
-	public static int overrideGPUTexSize = -1;
-
 	@RequiresMcRestart
 	@Comment("Generate static icons.  Drastically reduces render overhead for IR items")
-	public static boolean enableIconCache = false;
+	public static boolean enableFlatIcons = false;
+
+	@Comment({"Size of icon cache images (larger = slower)"})
+	public static int flatIconSize = 128;
 
 	@Comment("If you are having render problems in game, try setting this to false")
 	public static boolean useShaderFriendlyRender = true;
@@ -31,8 +28,11 @@ public class ConfigGraphics {
 	@Comment("Limit GPU load while models/world is loading.  1 == slow load, 3 == reasonable load, 10 = fast load, 100 = as fast as possible")
 	public static int limitGraphicsLoadMS = 3;
 
-	@Comment({ "Scale the textures to reduce GPU memory usage (1 == normal, 1.5 == low, 2 == super low" })
-	public static double textureScale = 1;
+	@Comment({ "Scale the textures to reduce GPU memory usage (1 == highest, 1.5 == medium, 2 == low" })
+	public static double scaleTexture = 1.5;
+
+	@Comment({"Point at which textures start being scaled.  Any textures larger than this will have scaleTexture applied"})
+	public static int scaleTextureCutoff=2048;
 
 	@Comment({ "Self explanitory" })
 	public static boolean trainsOnTheBrain = true;
@@ -40,6 +40,6 @@ public class ConfigGraphics {
 	@Comment({ "What unit to use for speedometer. (kmh, mph or ms)" })
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
 
-	@Comment({"Size of icon cache images (larger = slower)"})
-    public static int iconCacheSize = 128;
+	@Comment({ "Override GPU Max texture settings !DEV USE ONLY! (-1 == disable)" })
+	public static int overrideGPUTexSize = -1;
 }

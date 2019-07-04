@@ -9,13 +9,11 @@ import java.util.function.Function;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.OBJTextureSheet;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import net.minecraft.block.state.IBlockState;
+import cam72cam.immersiverailroading.util.*;
+
 import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ColorizerGrass;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.biome.BiomeColorHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -27,7 +25,6 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
@@ -60,23 +57,12 @@ import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.item.PlateItemModel;
-import cam72cam.immersiverailroading.render.item.RailAugmentItemModel;
-import cam72cam.immersiverailroading.render.item.RailCastItemRender;
-import cam72cam.immersiverailroading.render.item.RailItemRender;
-import cam72cam.immersiverailroading.render.item.StockItemComponentModel;
-import cam72cam.immersiverailroading.render.item.StockItemModel;
-import cam72cam.immersiverailroading.render.item.TrackBlueprintItemModel;
-import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
-import cam72cam.immersiverailroading.render.entity.MagicEntityRender;
-import cam72cam.immersiverailroading.render.entity.MagicEntity;
-import cam72cam.immersiverailroading.render.entity.ParticleRender;
-import cam72cam.immersiverailroading.render.entity.RenderOverride;
-import cam72cam.immersiverailroading.render.entity.StockEntityRender;
-import cam72cam.immersiverailroading.render.entity.StockModel;
+import cam72cam.immersiverailroading.render.entity.*;
+import cam72cam.immersiverailroading.render.item.*;
+import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.tile.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.tile.TileRailPreviewRender;
@@ -86,6 +72,8 @@ import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -114,14 +102,8 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
@@ -245,7 +227,8 @@ public class ClientProxy extends CommonProxy {
 		keys.put(KeyTypes.HORN, new KeyBinding("ir_keys.horn", Keyboard.KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.DEAD_MANS_SWITCH, new KeyBinding("ir_keys.dead_mans_switch", Keyboard.KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.START_STOP_ENGINE, new KeyBinding("ir_keys.start_stop_engine", Keyboard.KEY_ADD, "key.categories." + ImmersiveRailroading.MODID));
-		
+		keys.put(KeyTypes.BELL, new KeyBinding("ir_keys.bell", Keyboard.KEY_SUBTRACT, "key.categories." + ImmersiveRailroading.MODID));
+
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_UP));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_DOWN));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_ZERO));
@@ -253,6 +236,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_DOWN));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_ZERO));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.HORN));
+		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.BELL));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.DEAD_MANS_SWITCH));
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.START_STOP_ENGINE));
 		
@@ -344,11 +328,15 @@ public class ClientProxy extends CommonProxy {
 
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE, 0,
 				new ModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.getRegistryName(), ""));
-		
+
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD, 0,
 				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName(), ""));
+
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_KEY, 0,
+				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName(), ""));
 	}
-	
+
+	private static final Map<String, BufferedImage> cachedIcons = new HashMap<>();
 	public static final class StockIcon extends TextureAtlasSprite
     {
         private EntityRollingStockDefinition def;
@@ -357,7 +345,7 @@ public class ClientProxy extends CommonProxy {
         {
             super(new ResourceLocation(ImmersiveRailroading.MODID, def.defID).toString());
             this.def = def;
-            this.width = this.height = ConfigGraphics.iconCacheSize;
+            this.width = this.height = ConfigGraphics.flatIconSize;
         }
 
         @Override
@@ -369,22 +357,28 @@ public class ClientProxy extends CommonProxy {
         @Override
         public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
         {
-            BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-            
-            EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
+			StockModel renderer = StockRenderCache.getRender(def.defID);
 
-            StockModel renderer = StockRenderCache.getRender(def.defID);
-    		for (int x = 0; x < this.getIconWidth(); x++) {
-    			for (int y = 0; y < this.getIconHeight(); y++) {
-    				if (map[x][y] != null) {
-						EntityRollingStockDefinition.IconPart pt = map[x][y];
-    					int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
-    					image.setRGB(x, this.getIconWidth() - (y + 1), color);
-    				} else {
-    					image.setRGB(x, this.getIconWidth() - (y + 1), 0);
-    				}
-    			}
-    		}
+            BufferedImage image;
+            if (!cachedIcons.containsKey(def.defID)) {
+            	image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+
+                EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
+
+                for (int x = 0; x < this.getIconWidth(); x++) {
+                    for (int y = 0; y < this.getIconHeight(); y++) {
+                        if (map[x][y] != null) {
+                            EntityRollingStockDefinition.IconPart pt = map[x][y];
+                            int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
+                            image.setRGB(x, this.getIconWidth() - (y + 1), color);
+                        } else {
+                            image.setRGB(x, this.getIconWidth() - (y + 1), 0);
+                        }
+                    }
+                }
+                cachedIcons.put(def.defID, image);
+			}
+			image = cachedIcons.get(def.defID);
     		for (OBJTextureSheet tex : renderer.textures.values()) {
     			tex.freePx();
 			}
@@ -407,7 +401,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onTextureStich(TextureStitchEvent.Pre event) {
-		if (ConfigGraphics.enableIconCache) {
+		if (ConfigGraphics.enableFlatIcons) {
 			for (String defID : DefinitionManager.getDefinitionNames()) {
 				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 				event.getMap().setTextureEntry(new StockIcon(def));
@@ -600,7 +594,7 @@ public class ClientProxy extends CommonProxy {
 				}
 
 		        RailInfo info = new RailInfo(player.world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ), null);
-		        String key = info.uniqueID + pos.toLong();
+		        String key = info.uniqueID + info.placementInfo.placementPosition;
 				RailInfo cached = infoCache.get(key);
 		        if (cached != null) {
 					info = cached;
@@ -617,12 +611,9 @@ public class ClientProxy extends CommonProxy {
 						GL14.glBlendColor(1, 1, 1, 0.5f);
 					}
 					
-	                double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * event.getPartialTicks();
-	                double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * event.getPartialTicks();
-	                double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.getPartialTicks();
-
-					Vec3d placementPosition = info.placementInfo.placementPosition;
-	                GL11.glTranslated(placementPosition.x-d0, placementPosition.y-d1, placementPosition.z-d2);
+					Vec3d cameraPos = RenderOverride.getCameraPos(event.getPartialTicks());
+					Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
+					GL11.glTranslated(offPos.x, offPos.y, offPos.z);
 
 	                RailRenderUtil.render(info, true);
 
@@ -660,7 +651,21 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 	}
-	
+
+	@SubscribeEvent
+	public static void onDebugRender(RenderGameOverlayEvent.Text event) {
+		if (Minecraft.getMinecraft().gameSettings.showDebugInfo && GPUInfo.hasGPUInfo()) {
+			int i;
+			for (i = 0; i < event.getRight().size(); i++) {
+				if (event.getRight().get(i).startsWith("Display: ")) {
+					i++;
+					break;
+				}
+			}
+			event.getRight().add(i, GPUInfo.debug());
+		}
+	}
+
 	@SubscribeEvent
 	public static void onSoundLoad(SoundLoadEvent event) {
 		if (manager == null) {

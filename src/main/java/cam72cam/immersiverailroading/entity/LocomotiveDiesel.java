@@ -31,6 +31,8 @@ public class LocomotiveDiesel extends Locomotive {
 	private float soundThrottle;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
+	private float hornVolume = 0;
+	private static float hornStep = 0.25f;
 	
 	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.FLOAT);
 	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
@@ -160,6 +162,8 @@ public class LocomotiveDiesel extends Locomotive {
 		return 0;
 	}
 
+
+
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -167,10 +171,12 @@ public class LocomotiveDiesel extends Locomotive {
 		if (world.isRemote) {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
-					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, false, 100, this.soundGauge());
+                    bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
+					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, this.getDefinition().getHornSus(), 100, this.soundGauge());
 					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
+
+
 				}
-				
 				if (isRunning()) {
 					if (!idle.isPlaying()) {
 						this.idle.play(getPositionVector());
@@ -180,9 +186,26 @@ public class LocomotiveDiesel extends Locomotive {
 						idle.stop();
 					}
 				}
-				
+
 				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
+					if (this.getDefinition().getHornSus()) {
+						hornVolume = 0.5f;
+						horn.setVolume(hornVolume);
+					}
 					horn.play(getPositionVector());
+				}
+				else if(this.getDataManager().get(HORN) == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
+					if (hornVolume > 0.5) {
+						hornVolume -= 0.25;
+						horn.setVolume(hornVolume);
+					} else {
+						horn.stop();
+					}
+				}
+
+				if (this.getDefinition().getHornSus() && this.getDataManager().get(HORN) != 0 && hornVolume < 1) {
+					hornVolume += 0.25;
+					horn.setVolume(hornVolume);
 				}
 				
 				float absThrottle = Math.abs(this.getThrottle());
@@ -197,6 +220,7 @@ public class LocomotiveDiesel extends Locomotive {
 					horn.setVelocity(getVelocity());
 					horn.update();
 				}
+
 				
 				if (idle.isPlaying()) {
 					idle.setPitch(0.7f+this.soundThrottle/4);

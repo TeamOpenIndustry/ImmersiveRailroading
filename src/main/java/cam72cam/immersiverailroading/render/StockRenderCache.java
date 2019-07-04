@@ -6,22 +6,29 @@ import java.util.Map;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.entity.StockModel;
 import net.minecraftforge.fml.common.ProgressManager;
 import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
 
 public class StockRenderCache {
-	private static Map<String, StockModel> render_cache = new HashMap<String, StockModel>();
+	private static Map<String, StockModel> render_cache = new HashMap<>();
+	private static Map<TrackModel, OBJRender> track_cache = new HashMap<>();
 	private static boolean isCachePrimed = false;
 
 	public static void clearRenderCache() {
 		for (StockModel model : render_cache.values()) {
 			model.freeGL();
 		}
-		render_cache = new HashMap<String, StockModel>();
+		for (OBJRender model : track_cache.values()) {
+			model.freeGL();
+		}
+		render_cache = new HashMap<>();
+		track_cache = new HashMap<>();
 		isCachePrimed = false;
 	}
 
@@ -46,15 +53,23 @@ public class StockRenderCache {
 			bar.step(DefinitionManager.getDefinition(def).name());
 			ImmersiveRailroading.info(def);
 			StockModel renderer = getRender(def);
-			if (ConfigGraphics.enableItemRenderPriming) {
-				renderer.bindTexture();
-				renderer.draw();
-				renderer.restoreTexture();
-				ClientProxy.renderCacheLimiter.reset();
-			}
+            renderer.bindTexture();
+            renderer.draw();
+            renderer.restoreTexture();
+            ClientProxy.renderCacheLimiter.reset();
 		}
 
 		ProgressManager.pop(bar);
+
+		for (TrackDefinition def : DefinitionManager.getTracks()) {
+			ImmersiveRailroading.info(def.trackID);
+			for (TrackModel model : def.models) {
+				getTrackRenderer(model).bindTexture();
+				getTrackRenderer(model).draw();
+				getTrackRenderer(model).restoreTexture();
+				ClientProxy.renderCacheLimiter.reset();
+			}
+		}
 	}
 
 	public static StockModel getRender(String defID) {
@@ -65,6 +80,13 @@ public class StockRenderCache {
 			}
 		}
 		return render_cache.get(defID);
+	}
+
+	public static OBJRender getTrackRenderer(TrackModel model) {
+		if (!track_cache.containsKey(model)) {
+			track_cache.put(model, new OBJRender(model));
+		}
+		return track_cache.get(model);
 	}
 
 	public static void tryPrime() {

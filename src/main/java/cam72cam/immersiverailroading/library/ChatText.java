@@ -18,10 +18,7 @@ public enum ChatText {
 	COUPLER_STATUS_COUPLED("coupler.status.coupled"),
 	COUPLER_STATUS_DECOUPLED_ENGAGED("coupler.status.decoupled.engaged"),
 	COUPLER_STATUS_DECOUPLED_DISENGAGED("coupler.status.decoupled.disengaged"),
-	BUILD_MISSING_TIES("build.missing.ties"),
-	BUILD_MISSING_RAILS("build.missing.rails"),
-	BUILD_MISSING_RAIL_BED("build.missing.rail_bed"),
-	BUILD_MISSING_RAIL_BED_FILL("build.missing.rail_bed_fill"),
+	BUILD_MISSING("build.missing"),
 	SET_AUGMENT_FILTER("augment.set"),
 	RESET_AUGMENT_FILTER("augment.reset"),
 	WOOD_PLANKS("misc.wood_planks"),
@@ -32,6 +29,8 @@ public enum ChatText {
 	RADIO_NOLINK("radio.nolink"),
 	RADIO_CANT_LINK("radio.cant_link"),
 	BRUSH_NO_VARIANTS("brush.no.variants"),
+	SWITCH_UNLOCKED("switch_state.unlocked"),
+	SWITCH_LOCKED("switch_state.locked"),
 	;
 	
 	private String value;
