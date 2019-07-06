@@ -35,7 +35,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			return ClickResult.PASS;
 		} else {
 			if (getWorld().isServer) {
-				addPassenger(player);
+				player.startRiding(this);
 			}
 			return ClickResult.ACCEPTED;
 		}

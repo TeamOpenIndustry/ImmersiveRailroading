@@ -1,6 +1,7 @@
 package cam72cam.mod.entity;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.entity.sync.EntitySync;
@@ -45,15 +46,7 @@ public class Entity {
         return new Vec3d(internal.getPositionVector());
     }
     public void setPosition(Vec3d pos) {
-        internal.prevPosX = internal.posX;
-	    internal.prevPosY = internal.posY;
-	    internal.prevPosZ = internal.posZ;
-	    internal.lastTickPosX = internal.posX;
-	    internal.lastTickPosY = internal.posY;
-	    internal.lastTickPosZ = internal.posZ;
-        internal.posX = pos.x;
-        internal.posY = pos.y;
-        internal.posZ = pos.z;
+        internal.setPosition(pos.x, pos.y, pos.z);
     }
 
     public Vec3d getVelocity() {
@@ -188,7 +181,10 @@ public class Entity {
     }
 
     public Entity getRiding() {
-        return new Entity(internal.getRidingEntity());
+        if (internal.getRidingEntity() != null) {
+            return getWorld().getEntity(internal.getRidingEntity().getUniqueID(), Entity.class);
+        }
+        return null;
     }
 
     public IBoundingBox getBounds() {
@@ -205,5 +201,9 @@ public class Entity {
 
     public boolean isLiving() {
         return internal instanceof EntityLivingBase;
+    }
+
+    public void startRiding(Entity entity) {
+        internal.startRiding(entity.internal);
     }
 }
