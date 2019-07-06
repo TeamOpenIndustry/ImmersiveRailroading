@@ -12,7 +12,6 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.Hand;
-import net.minecraft.item.Item;
 
 import java.util.List;
 
@@ -155,10 +154,12 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 			int payout = (int) Math.floor(distanceMoved * Config.ConfigBalance.villagerPayoutPerMeter);
 
-			List<Item> payouts = Config.ConfigBalance.getVillagerPayout();
+			List<ItemStack> payouts = Config.ConfigBalance.getVillagerPayout();
 			if (payouts.size() != 0) {
 				int type = (int)(Math.random() * 100) % payouts.size();
-				getWorld().dropItem(new ItemStack(payouts.get(type), payout), getBlockPosition());
+				ItemStack stack = payouts.get(type).copy();
+				stack.setCount(payout);
+				getWorld().dropItem(stack, getBlockPosition());
 				// TODO drop by player or new pos?
 			}
 		}

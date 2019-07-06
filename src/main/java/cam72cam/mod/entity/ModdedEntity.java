@@ -217,7 +217,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
             iRidable.onDismountPassenger(new cam72cam.mod.entity.Entity(ent));
             ent.setPosition(dismountPos.x, dismountPos.y, dismountPos.z);
 
-            return new cam72cam.mod.entity.Entity(ent);
+            return self.getWorld().getEntity(ent.getUniqueID(), cam72cam.mod.entity.Entity.class);
         }
         return null;
     }

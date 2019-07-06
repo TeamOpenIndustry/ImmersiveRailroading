@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.mod.item.ItemStack;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -154,12 +155,12 @@ public class Config {
 		@Comment("Allow diesel locomotive engine overheating")
 		public static boolean canDieselEnginesOverheat = true;
 		
-		public static List<Item> getVillagerPayout() {
-			List<Item> items = new ArrayList<Item>();
+		public static List<ItemStack> getVillagerPayout() {
+			List<ItemStack> items = new ArrayList<>();
 			for (String irl : villagerPayoutItems) {
 				Item item = Item.REGISTRY.getObject(new ResourceLocation(irl));
 				if(item != null) {
-					items.add(item);
+					items.add(new ItemStack(item));
 				}
 			}
 			return items;
