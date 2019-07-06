@@ -40,7 +40,7 @@ public class ItemTrackBlueprint extends ItemBase {
 
 		if (world.isServer && hand == Hand.SECONDARY) {
 			RailSettings info = settings(stack);
-			ItemStack blockinfo = new ItemStack(world.getBlock(pos).getItem(world.internal, pos.internal, world.internal.getBlockState(pos.internal)));
+			ItemStack blockinfo = new ItemStack(world.getBlockInternal(pos).getItem(world.internal, pos.internal, world.internal.getBlockState(pos.internal)));
 			if (player.isCrouching()) {
 				info = new RailSettings(
                     info.gauge,

@@ -169,7 +169,7 @@ public abstract class Multiblock {
 				BlockPos pos = getPos(offset);
 				IBlockState origState = world.getBlockState(pos);
 				
-				world.setBlockState(pos, IRBlocks.BLOCK_MULTIBLOCK.getDefaultState());
+				world.setBlockState(pos, IRBlocks.BLOCK_MULTIBLOCK.internal.getDefaultState());
 				TileMultiblock te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), TileMultiblock.class);
 				
 				te.configure(name, cam72cam.mod.math.Rotation.from(rot), new Vec3i(offset), origState);

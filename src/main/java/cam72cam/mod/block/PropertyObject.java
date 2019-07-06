@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.blocks;
+package cam72cam.mod.block;
 
 import net.minecraftforge.common.property.IUnlistedProperty;
 

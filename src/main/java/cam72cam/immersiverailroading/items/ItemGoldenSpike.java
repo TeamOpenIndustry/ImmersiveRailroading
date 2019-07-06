@@ -26,7 +26,7 @@ public class ItemGoldenSpike extends ItemBase {
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack held = player.getHeldItem(hand);
-		if (world.getBlock(pos) == IRBlocks.BLOCK_RAIL_PREVIEW) {
+		if (world.isBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW)) {
 			setPosition(held, pos);
 			world.internal.playSound(pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f, false);
 		} else {

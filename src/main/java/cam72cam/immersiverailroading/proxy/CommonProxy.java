@@ -152,10 +152,10 @@ public abstract class CommonProxy implements IGuiHandler {
 	@SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
     {
-		event.getRegistry().register(IRBlocks.BLOCK_RAIL_GAG);
-		event.getRegistry().register(IRBlocks.BLOCK_RAIL);
-		event.getRegistry().register(IRBlocks.BLOCK_RAIL_PREVIEW);
-		event.getRegistry().register(IRBlocks.BLOCK_MULTIBLOCK);
+		event.getRegistry().register(IRBlocks.BLOCK_RAIL_GAG.internal);
+		event.getRegistry().register(IRBlocks.BLOCK_RAIL.internal);
+		event.getRegistry().register(IRBlocks.BLOCK_RAIL_PREVIEW.internal);
+		event.getRegistry().register(IRBlocks.BLOCK_MULTIBLOCK.internal);
     	GameRegistry.registerTileEntity(TileRailGag.class, IRBlocks.BLOCK_RAIL_GAG.getName());
     	GameRegistry.registerTileEntity(TileRail.class, IRBlocks.BLOCK_RAIL.getName());
     	GameRegistry.registerTileEntity(TileRailPreview.class, IRBlocks.BLOCK_RAIL_PREVIEW.getName());

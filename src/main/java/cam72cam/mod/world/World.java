@@ -1,7 +1,9 @@
 package cam72cam.mod.world;
 
+import cam72cam.immersiverailroading.blocks.BlockRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
+import cam72cam.mod.block.BlockBase;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.ModdedEntity;
@@ -189,7 +191,7 @@ public class World {
         internal.setBlockToAir(pos.internal);
     }
 
-    public Block getBlock(Vec3i pos) {
+    public Block getBlockInternal(Vec3i pos) {
         return internal.getBlockState(pos.internal).getBlock();
     }
 
@@ -269,8 +271,8 @@ public class World {
         internal.spawnEntity(new EntityItem(internal, pos.x, pos.y, pos.z, stack.internal));
     }
 
-    public void setBlock(Vec3i pos, Block block) {
-        internal.setBlockState(pos.internal, block.getDefaultState());
+    public void setBlock(Vec3i pos, BlockBase block) {
+        internal.setBlockState(pos.internal, block.internal.getDefaultState());
     }
     public void setBlock(Vec3i pos, ItemStack item) {
         internal.setBlockState(pos.internal, BlockUtil.itemToBlockState(item));
@@ -307,5 +309,9 @@ public class World {
         float mctemp = internal.getBiome(pos.internal).getTemperature(pos.internal);
         //https://www.reddit.com/r/Minecraft/comments/3eh7yu/the_rl_temperature_of_minecraft_biomes_revealed/ctex050/
         return (13.6484805403f*mctemp)+7.0879687222f;
+    }
+
+    public boolean isBlock(Vec3i pos, BlockBase block) {
+        return internal.getBlockState(pos.internal).getBlock() == block.internal;
     }
 }
