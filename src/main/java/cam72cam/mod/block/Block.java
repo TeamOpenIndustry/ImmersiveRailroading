@@ -8,7 +8,6 @@ import cam72cam.mod.tile.IRedstoneProvider;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
-import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
@@ -30,15 +29,15 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
 
-public abstract class BlockBase {
+public abstract class Block {
     private final BlockSettings settings;
-    public final Block internal;
+    public final net.minecraft.block.Block internal;
     public static final PropertyObject BLOCK_DATA = new PropertyObject("BLOCK_DATA");
 
-    public BlockBase(BlockSettings settings) {
+    public Block(BlockSettings settings) {
         this.settings = settings;
 
-        internal = new Block(settings.material.internal) {
+        internal = new net.minecraft.block.Block(settings.material.internal) {
             {
                 setHardness(settings.hardness);
                 setSoundType(settings.material.soundType);
@@ -48,24 +47,24 @@ public abstract class BlockBase {
 
             @Override
             public final void breakBlock(net.minecraft.world.World world, BlockPos pos, IBlockState state) {
-                BlockBase.this.onBreak(World.get(world), new Vec3i(pos));
+                Block.this.onBreak(World.get(world), new Vec3i(pos));
                 super.breakBlock(world, pos, state);
             }
             @Override
             public final boolean onBlockActivated(net.minecraft.world.World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-                return BlockBase.this.onClick(World.get(world), new Vec3i(pos), new Player(player), Hand.from(hand), Facing.from(facing), new Vec3d(hitX, hitY, hitZ));
+                return Block.this.onClick(World.get(world), new Vec3i(pos), new Player(player), Hand.from(hand), Facing.from(facing), new Vec3d(hitX, hitY, hitZ));
             }
             @Override
             public final net.minecraft.item.ItemStack getPickBlock(IBlockState state, RayTraceResult target, net.minecraft.world.World world, BlockPos pos, EntityPlayer player) {
-                return BlockBase.this.onPick(World.get(world), new Vec3i(pos)).internal;
+                return Block.this.onPick(World.get(world), new Vec3i(pos)).internal;
             }
             @Override
-            public void neighborChanged(IBlockState state, net.minecraft.world.World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+            public void neighborChanged(IBlockState state, net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.block.Block blockIn, BlockPos fromPos) {
                 this.onNeighborChange(worldIn, pos, fromPos);
             }
             @Override
             public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
-                BlockBase.this.onNeighborChange(World.get((net.minecraft.world.World) world), new Vec3i(pos), new Vec3i(neighbor));
+                Block.this.onNeighborChange(World.get((net.minecraft.world.World) world), new Vec3i(pos), new Vec3i(neighbor));
             }
 
             /*
@@ -130,7 +129,7 @@ public abstract class BlockBase {
                 if (entity == null) {
                     return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
                 }
-                return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, BlockBase.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 1.0F);
+                return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Block.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 1.0F);
             }
 
 
@@ -140,7 +139,7 @@ public abstract class BlockBase {
                 if (entity == null) {
                     return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
                 }
-                return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, BlockBase.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 1.0F);
+                return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Block.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 1.0F);
             }
 
             @Override
