@@ -23,7 +23,7 @@ public class ItemButton extends GuiButton {
 		Gui.drawRect(x, y, x+32, y+32, 0xFFFFFFFF);
 		RenderHelper.enableStandardItemLighting();
 
-        FontRenderer font = stack.item.getFontRenderer(stack.internal);
+        FontRenderer font = stack.internal.getItem().getFontRenderer(stack.internal);
         if (font == null) {
         	font = mc.fontRenderer;
         }

@@ -16,6 +16,7 @@ import cam72cam.mod.block.Material;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.ToolType;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.PlayerMessage;
@@ -87,7 +88,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
             }
             return true;
         }
-        if (stack.item.getToolClasses(stack.internal).contains("shovel")) {
+        if (stack.isValidTool(ToolType.SHOVEL)) {
             if (te.world.isServer) {
                 te.cleanSnow();
                 te.setSnowLayers(0);

@@ -154,7 +154,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.item == IRItems.ITEM_PLATE.internal && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
+				if (input.is(IRItems.ITEM_PLATE) && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
 					progress = 100;
 					craftTe.setCraftProgress(100);
 				}

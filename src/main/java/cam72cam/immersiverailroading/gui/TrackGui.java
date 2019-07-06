@@ -162,13 +162,13 @@ public class TrackGui extends GuiScreen {
 	}
 	
 	public String getBedstackName() {
-		if (bedSelector.choosenItem.item != Items.AIR) {
+		if (!bedSelector.choosenItem.isEmpty()) {
 			return bedSelector.choosenItem.getDisplayName();
 		}
 		return GuiText.NONE.toString();
 	}
 	public String getBedFillName() {
-		if (bedFillSelector.choosenItem.item != Items.AIR) {
+		if (!bedFillSelector.choosenItem.isEmpty()) {
 			return bedFillSelector.choosenItem.getDisplayName();
 		}
 		return GuiText.NONE.toString();

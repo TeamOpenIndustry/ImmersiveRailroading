@@ -104,7 +104,7 @@ public class TrackDefinition {
                 }
                 return OreHelper.oreDictionaryContainsMatch(false, OreDictionary.getOres(oreName).stream().map(ItemStack::new).collect(Collectors.toList()), stack);
             }
-            return stack.item == Item.getByNameOrId(item) && stack.internal.getMetadata() == meta;
+            return stack.internal.getItem() == Item.getByNameOrId(item) && stack.internal.getMetadata() == meta;
         }
     }
 }

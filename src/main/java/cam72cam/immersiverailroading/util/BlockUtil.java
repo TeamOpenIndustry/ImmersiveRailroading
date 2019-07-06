@@ -60,7 +60,7 @@ public class BlockUtil {
 	}
 	
 	public static IBlockState itemToBlockState(cam72cam.mod.item.ItemStack stack) {
-		Block block = Block.getBlockFromItem(stack.item);
+		Block block = Block.getBlockFromItem(stack.internal.getItem());
 		@SuppressWarnings("deprecation")
 		IBlockState gravelState = block.getStateFromMeta(stack.internal.getMetadata());
 		if (block instanceof BlockLog ) {
