@@ -10,7 +10,7 @@ public class ItemStack {
     public static final ItemStack EMPTY = new ItemStack(net.minecraft.item.ItemStack.EMPTY);
 
     public net.minecraft.item.ItemStack internal;
-    public final Item item;
+    private final Item item;
 
     public ItemStack(net.minecraft.item.ItemStack internal) {
         this.internal = internal;
@@ -110,4 +110,7 @@ public class ItemStack {
         return internal.getMaxStackSize();
     }
 
+    public boolean isValidTool(ToolType tool) {
+        return item.getToolClasses(internal).contains(tool.toString());
+    }
 }
