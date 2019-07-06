@@ -186,9 +186,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     public final void addPassenger(Entity entityIn) {
         cam72cam.mod.entity.Entity entity = new cam72cam.mod.entity.Entity(entityIn);
         passengerPositions.put(entity.getUUID(), iRidable.getMountPosition(entity));
-        if (entity.is(EntityPlayer.class)) {
-            entity.internal.startRiding(this);
-            addPassenger(entityIn);
+        if (entity.isPlayer()) {
             super.addPassenger(entityIn);
         } else {
             StaticPassenger sp = new StaticPassenger(entity);
@@ -201,6 +199,14 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public final void updatePassenger(net.minecraft.entity.Entity passenger) {
         iRidable.updatePassenger(new cam72cam.mod.entity.Entity(passenger));
+    }
+
+    @Override
+    public final void removePassenger(net.minecraft.entity.Entity ent) {
+        super.removePassenger(ent);
+        iRidable.onDismountPassenger(new cam72cam.mod.entity.Entity(ent));
+        Vec3d dismountPos = iRidable.getDismountPosition(new cam72cam.mod.entity.Entity(ent));
+        ent.setPosition(dismountPos.x, dismountPos.y, dismountPos.z);
     }
 
     public final cam72cam.mod.entity.Entity removePassenger() {

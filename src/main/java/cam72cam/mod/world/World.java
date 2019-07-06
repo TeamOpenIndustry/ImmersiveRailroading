@@ -32,29 +32,36 @@ import java.util.stream.Collectors;
 public class World {
 
     /* Static access to loaded worlds */
-    private static Map<net.minecraft.world.World, World> worlds = new HashMap<>();
-    private static Map<Integer, World> worldsByID = new HashMap<>();
+    private static ThreadLocal<Map<net.minecraft.world.World, World>> worlds = new ThreadLocal<>();
+    private static ThreadLocal<Map<Integer, World>> worldsByID = new ThreadLocal<>();
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
+        if (worlds.get() == null) {
+            worlds.set(new HashMap<>());
+        }
+        if (worldsByID.get() == null) {
+            worldsByID.set(new HashMap<>());
+        }
+
         net.minecraft.world.World world = event.getWorld();
         World worldWrap = new World(world);
-        worlds.put(world, worldWrap);
-        worldsByID.put(world.provider.getDimension(), worldWrap);
+        worlds.get().put(world, worldWrap);
+        worldsByID.get().put(world.provider.getDimension(), worldWrap);
 
         world.addEventListener(new WorldEventListener(worldWrap));
     }
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload event) {
         net.minecraft.world.World world = event.getWorld();
-        worlds.remove(world);
-        worldsByID.remove(world.provider.getDimension());
+        worlds.get().remove(world);
+        worldsByID.get().remove(world.provider.getDimension());
     }
     public static World get(net.minecraft.world.World world) {
-        return worlds.get(world);
+        return worlds.get().get(world);
     }
     public static World get(int dimID) {
-        return worldsByID.get(dimID);
+        return worldsByID.get().get(dimID);
     }
 
     public boolean doesBlockCollideWith(Vec3i bp, RealBB bb) {

@@ -359,7 +359,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		if (clickRes != ClickResult.PASS) {
 			return clickRes;
 		}
-		
+
 		if (getWorld().isClient) {
 			return ClickResult.PASS;
 		}
