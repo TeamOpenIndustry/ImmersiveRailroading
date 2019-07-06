@@ -55,7 +55,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
 	@Override
 	public boolean onClick(TileRailBase te, Player player, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
-        if (stack.item == IRItems.ITEM_SWITCH_KEY) {
+        if (stack.is(IRItems.ITEM_SWITCH_KEY)) {
             TileRail tileSwitch = te.findSwitchParent();
             if (tileSwitch != null) {
                 SwitchState switchForced = te.cycleSwitchForced();

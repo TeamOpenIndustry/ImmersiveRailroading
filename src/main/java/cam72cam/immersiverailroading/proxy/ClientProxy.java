@@ -257,50 +257,50 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_LARGE_WRENCH, 0,
-				new ModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.getRegistryName().internal, ""));
 
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_HOOK, 0,
-				new ModelResourceLocation(IRItems.ITEM_HOOK.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_HOOK.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_HOOK.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE, 0,
-				new ModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT, 0,
-				new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName().internal, ""));
 
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 0,
-				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName().internal, ""));
 
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK, 0,
-				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_AUGMENT, 0,
-				new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_AUGMENT.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RAIL, 0,
-				new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RAIL.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CAST_RAIL, 0,
-				new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CAST_RAIL.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PLATE, 0,
-				new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PLATE.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL, 0,
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL.internal, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PAINT_BRUSH, 0,
-				new ModelResourceLocation(IRItems.ITEM_PAINT_BRUSH.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PAINT_BRUSH.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_PAINT_BRUSH.getRegistryName().internal, ""));
 
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE, 0,
-				new ModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_GOLDEN_SPIKE.getRegistryName().internal, ""));
 
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD, 0,
-				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_RADIO_CONTROL_CARD.getRegistryName().internal, ""));
 
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_KEY, 0,
-				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName(), ""));
+		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_SWITCH_KEY.internal, 0,
+				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName().internal, ""));
 	}
 
 	private static final Map<String, BufferedImage> cachedIcons = new HashMap<>();
@@ -383,13 +383,13 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public static void onModelBakeEvent(ModelBakeEvent event) {
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName(), ""), new StockItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName(), ""), new TrackBlueprintItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName(), ""), new StockItemComponentModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName(), ""), new RailAugmentItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName(), ""), new RailItemRender());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName(), ""), new RailCastItemRender());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName(), ""), new PlateItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""), new StockItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName().internal, ""), new TrackBlueprintItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName().internal, ""), new StockItemComponentModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName().internal, ""), new RailAugmentItemModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName().internal, ""), new RailItemRender());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName().internal, ""), new RailCastItemRender());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName().internal, ""), new PlateItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL.getRegistryName(), ""), new RailBaseModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL_GAG.getRegistryName(), ""), new RailBaseModel());
 	}
@@ -545,7 +545,7 @@ public class ClientProxy extends CommonProxy {
 		Vec3i pos = new Vec3i(event.getTarget().getBlockPos());
 		
 		if (event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
-			if (stack.getItem() == IRItems.ITEM_TRACK_BLUEPRINT) {
+			if (stack.getItem() == IRItems.ITEM_TRACK_BLUEPRINT.internal) {
 				
 				Vec3d vec = new Vec3d(event.getTarget().hitVec);
 				Vec3d hit = vec.subtract(pos);
@@ -586,7 +586,7 @@ public class ClientProxy extends CommonProxy {
 				}
 				GL11.glPopMatrix();
 			}
-			if (stack.getItem() == IRItems.ITEM_MANUAL) {
+			if (stack.getItem() == IRItems.ITEM_MANUAL.internal) {
 				pos = pos.up();
 				
 				GL11.glPushMatrix();

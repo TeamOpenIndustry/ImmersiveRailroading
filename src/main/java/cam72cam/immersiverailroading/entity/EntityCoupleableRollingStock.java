@@ -120,7 +120,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 	@Override
     public ClickResult onClick(Player player, Hand hand) {
-		if (player.getHeldItem(hand).item == IRItems.ITEM_HOOK) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_HOOK)) {
 			CouplerType coupler = CouplerType.FRONT;
 			if (this.getCouplerPosition(CouplerType.FRONT).distanceTo(player.getPosition()) > this.getCouplerPosition(CouplerType.BACK).distanceTo(player.getPosition())) {
 				coupler = CouplerType.BACK;

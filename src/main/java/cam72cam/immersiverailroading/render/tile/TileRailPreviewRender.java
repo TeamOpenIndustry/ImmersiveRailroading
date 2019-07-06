@@ -52,7 +52,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 		{
 			GL11.glTranslated(x, y, z);
 			GL11.glTranslated(0.5, 0.5, 0.5);
-			Minecraft.getMinecraft().getRenderItem().renderItem(new ItemStack(IRItems.ITEM_GOLDEN_SPIKE), ItemCameraTransforms.TransformType.GROUND);
+			Minecraft.getMinecraft().getRenderItem().renderItem(new ItemStack(IRItems.ITEM_GOLDEN_SPIKE.internal), ItemCameraTransforms.TransformType.GROUND);
 		}
 		GL11.glPopMatrix();
 		blend.restore();

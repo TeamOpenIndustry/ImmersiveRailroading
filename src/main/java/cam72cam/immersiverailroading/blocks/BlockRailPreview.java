@@ -49,7 +49,7 @@ public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implement
 			}
 			return false;
 		} else {
-			if (player.getHeldItem(hand).item == IRItems.ITEM_GOLDEN_SPIKE) {
+			if (player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE)) {
 				return false;
 			}
 			//TODO player.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL_PREVIEW.ordinal(), worldIn, pos.getX(), pos.getY(), pos.getZ());

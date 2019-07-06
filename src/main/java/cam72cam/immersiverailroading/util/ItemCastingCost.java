@@ -14,12 +14,12 @@ public class ItemCastingCost {
 		cam72cam.mod.item.ItemStack item = new cam72cam.mod.item.ItemStack(itema);
 		int cost = BAD_CAST_COST;
 		int count = 1;
-		if (item.item == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+		if (item.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
 			ItemComponentType component = ItemComponent.getComponentType(item);
 			cost = component.getCastCost(ItemDefinition.get(item), ItemGauge.get(item));
-		} else if (item.item == IRItems.ITEM_CAST_RAIL) {
+		} else if (item.is(IRItems.ITEM_CAST_RAIL)) {
 			cost = (int) Math.ceil(20 * ItemGauge.get(item).scale());
-		} else if (item.item == IRItems.ITEM_AUGMENT) {
+		} else if (item.is(IRItems.ITEM_AUGMENT)) {
 			cost = (int) Math.ceil(8 * ItemGauge.get(item).scale());
 			count = 8;
 		} else if (OreHelper.IR_STEEL_BLOCK.matches(item, false)) {

@@ -56,7 +56,7 @@ public class IGWMod {
 			@Override
 			public ItemStack renderTabIcon(GuiWiki gui) {
 				NonNullList<ItemStack> items = NonNullList.create();
-				items.add(new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT));
+				items.add(new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT.internal));
 				return items.get(0);
 			}
 

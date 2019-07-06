@@ -165,21 +165,21 @@ public abstract class CommonProxy implements IGuiHandler {
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event)
     {
-    	event.getRegistry().register(IRItems.ITEM_TRACK_BLUEPRINT);
-    	event.getRegistry().register(IRItems.ITEM_ROLLING_STOCK);
-    	event.getRegistry().register(IRItems.ITEM_ROLLING_STOCK_COMPONENT);
-    	event.getRegistry().register(IRItems.ITEM_LARGE_WRENCH);
-    	event.getRegistry().register(IRItems.ITEM_HOOK);
-    	event.getRegistry().register(IRItems.ITEM_AUGMENT);
-    	event.getRegistry().register(IRItems.ITEM_MANUAL);
-    	event.getRegistry().register(IRItems.ITEM_RAIL);
-    	event.getRegistry().register(IRItems.ITEM_PLATE);
-    	event.getRegistry().register(IRItems.ITEM_CAST_RAIL);
-    	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE);
-    	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH);
-    	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE);
-      event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD);
-    	event.getRegistry().register(IRItems.ITEM_SWITCH_KEY);
+    	event.getRegistry().register(IRItems.ITEM_TRACK_BLUEPRINT.internal);
+    	event.getRegistry().register(IRItems.ITEM_ROLLING_STOCK.internal);
+    	event.getRegistry().register(IRItems.ITEM_ROLLING_STOCK_COMPONENT.internal);
+    	event.getRegistry().register(IRItems.ITEM_LARGE_WRENCH.internal);
+    	event.getRegistry().register(IRItems.ITEM_HOOK.internal);
+    	event.getRegistry().register(IRItems.ITEM_AUGMENT.internal);
+    	event.getRegistry().register(IRItems.ITEM_MANUAL.internal);
+    	event.getRegistry().register(IRItems.ITEM_RAIL.internal);
+    	event.getRegistry().register(IRItems.ITEM_PLATE.internal);
+    	event.getRegistry().register(IRItems.ITEM_CAST_RAIL.internal);
+    	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE.internal);
+    	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH.internal);
+    	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE.internal);
+      event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD.internal);
+    	event.getRegistry().register(IRItems.ITEM_SWITCH_KEY.internal);
     }
     
     @SubscribeEvent
