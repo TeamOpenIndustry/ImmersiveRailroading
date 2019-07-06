@@ -9,7 +9,7 @@ import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
-public abstract class BlockEntityBase<T extends TileEntity> extends BlockBase {
+public abstract class BlockEntityBase<T extends TileEntity> extends Block {
     private final Class<? extends TileEntity> cls;
 
     public BlockEntityBase(BlockSettings settings) {

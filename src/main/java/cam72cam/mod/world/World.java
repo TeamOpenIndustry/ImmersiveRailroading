@@ -1,9 +1,8 @@
 package cam72cam.mod.world;
 
-import cam72cam.immersiverailroading.blocks.BlockRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
-import cam72cam.mod.block.BlockBase;
+import cam72cam.mod.block.Block;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.ModdedEntity;
@@ -14,7 +13,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.tile.TileEntity;
 import cam72cam.mod.util.Facing;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLiving;
@@ -191,7 +189,7 @@ public class World {
         internal.setBlockToAir(pos.internal);
     }
 
-    public Block getBlockInternal(Vec3i pos) {
+    public net.minecraft.block.Block getBlockInternal(Vec3i pos) {
         return internal.getBlockState(pos.internal).getBlock();
     }
 
@@ -241,7 +239,7 @@ public class World {
     }
 
     public boolean isSnow(Vec3i ph) {
-        Block block = internal.getBlockState(ph.internal).getBlock();
+        net.minecraft.block.Block block = internal.getBlockState(ph.internal).getBlock();
         return block == Blocks.SNOW || block == Blocks.SNOW_LAYER;
     }
 
@@ -271,7 +269,7 @@ public class World {
         internal.spawnEntity(new EntityItem(internal, pos.x, pos.y, pos.z, stack.internal));
     }
 
-    public void setBlock(Vec3i pos, BlockBase block) {
+    public void setBlock(Vec3i pos, Block block) {
         internal.setBlockState(pos.internal, block.internal.getDefaultState());
     }
     public void setBlock(Vec3i pos, ItemStack item) {
@@ -311,7 +309,7 @@ public class World {
         return (13.6484805403f*mctemp)+7.0879687222f;
     }
 
-    public boolean isBlock(Vec3i pos, BlockBase block) {
+    public boolean isBlock(Vec3i pos, Block block) {
         return internal.getBlockState(pos.internal).getBlock() == block.internal;
     }
 }

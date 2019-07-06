@@ -3,14 +3,13 @@ package cam72cam.immersiverailroading.render.block;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.mod.block.BlockBase;
+import cam72cam.mod.block.Block;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.Facing;
@@ -38,7 +37,7 @@ public class RailBaseModel implements IBakedModel {
 			return EMPTY;
 		}
 		IExtendedBlockState railState = (IExtendedBlockState)state;
-		Object data = railState.getValue(BlockBase.BLOCK_DATA);
+		Object data = railState.getValue(Block.BLOCK_DATA);
 		if (data == null) {
 			return EMPTY;
 		}
