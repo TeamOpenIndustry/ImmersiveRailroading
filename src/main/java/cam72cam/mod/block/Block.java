@@ -78,10 +78,7 @@ public abstract class Block {
 
             @Override
             public final net.minecraft.tileentity.TileEntity createTileEntity(net.minecraft.world.World world, IBlockState state) {
-                net.minecraft.tileentity.TileEntity val = settings.entity != null ? settings.entity.get() : null;
-                System.out.println("createTile!");
-                System.out.println(val);
-                return val;
+                return settings.entity != null ? settings.entity.get() : null;
             }
 
             @Override
@@ -127,7 +124,7 @@ public abstract class Block {
             public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
                 TileEntity entity = source.getTileEntity(pos);
                 if (entity == null) {
-                    return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+                    return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
                 }
                 return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Block.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 1.0F);
             }
@@ -137,15 +134,15 @@ public abstract class Block {
             public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
                 TileEntity entity = source.getTileEntity(pos);
                 if (entity == null) {
-                    return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+                    return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
                 }
-                return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Block.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 1.0F);
+                return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Math.max(Block.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 0.25), 1.0F);
             }
 
             @Override
             public AxisAlignedBB getSelectedBoundingBox(IBlockState state, net.minecraft.world.World worldIn, BlockPos pos)
             {
-                return  getCollisionBoundingBox(state, worldIn, pos);//.expand(0, 0.1, 0).offset(pos);
+                return  getCollisionBoundingBox(state, worldIn, pos).expand(0, 0.1, 0).offset(pos);
             }
 
             @Override

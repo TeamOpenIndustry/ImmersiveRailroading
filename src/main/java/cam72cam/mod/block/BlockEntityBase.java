@@ -59,7 +59,7 @@ public abstract class BlockEntityBase<T extends TileEntity> extends Block {
     public final double getHeight(World world, Vec3i pos) {
         T te = (T) world.getTileEntity(pos, cls, false);
         if (te != null) {
-            getHeight(te);
+            return getHeight(te);
         }
         return 1;
     }

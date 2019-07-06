@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -184,8 +185,6 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
 
     @Override
     public double getHeight(TileRailBase te) {
-        //TODO collision height
-        // height = te.getFullHeight() +0.1 * (te.getTrackGauge() / Gauge.STANDARD);
-        return te.getFullHeight();
+        return te.getFullHeight() +0.1 * (te.getTrackGauge() / Gauge.STANDARD);
     }
 }
