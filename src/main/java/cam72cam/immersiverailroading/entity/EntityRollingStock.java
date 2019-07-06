@@ -131,7 +131,7 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 	
 	@Override
 	public ClickResult onClick(Player player, Hand hand) {
-		if (player.getHeldItem(hand).item == IRItems.ITEM_PAINT_BRUSH) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH)) {
 			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
 			if (texNames.size() > 1) {
 				int idx = texNames.indexOf(this.texture);

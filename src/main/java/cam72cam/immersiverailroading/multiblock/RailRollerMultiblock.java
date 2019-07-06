@@ -81,7 +81,7 @@ public class RailRollerMultiblock extends Multiblock {
 					ItemStack outstack = outputTe.getContainer().getStackInSlot(0);
 					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
 					outputTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
-				} else if (held.getItem() == IRItems.ITEM_CAST_RAIL) {
+				} else if (held.getItem() == IRItems.ITEM_CAST_RAIL.internal) {
 					TileMultiblock inputTe = getTile(input);
 					if (inputTe == null) {
 						return false;
@@ -159,7 +159,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.getItem() == IRItems.ITEM_CAST_RAIL && output.isEmpty()) {
+				if (input.getItem() == IRItems.ITEM_CAST_RAIL.internal && output.isEmpty()) {
 					progress = 100;
 					craftingTe.setCraftProgress(100);
 				}
@@ -167,7 +167,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 10);
+				ItemStack out = new ItemStack(IRItems.ITEM_RAIL.internal, 10);
 				ItemGauge.set(new cam72cam.mod.item.ItemStack(out), ItemGauge.get(new cam72cam.mod.item.ItemStack(input)));
 				outputTe.getContainer().setStackInSlot(0, out);
 				input.shrink(1);
@@ -177,7 +177,7 @@ public class RailRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return offset.equals(input) && stack.getItem() == IRItems.ITEM_CAST_RAIL;
+			return offset.equals(input) && stack.getItem() == IRItems.ITEM_CAST_RAIL.internal;
 		}
 
 		@Override

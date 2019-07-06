@@ -25,7 +25,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 
 	@Override
 	public boolean worksWith(ItemStack stack) {
-		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
+		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD.internal) {
 			return true;
 		}
 		return false;
@@ -34,7 +34,7 @@ public class RadioCtrlCardDriver implements DriverItem {
 	@Override
 	public ManagedEnvironment createEnvironment(ItemStack stack, EnvironmentHost host) {
 		World hostWorld = host.world();
-		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD) {
+		if (stack != null && stack.getItem() == IRItems.ITEM_RADIO_CONTROL_CARD.internal) {
 			for (Object e : hostWorld.loadedEntityList) {
 				if (e instanceof Locomotive) {
 					Locomotive train = (Locomotive) e;

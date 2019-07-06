@@ -86,7 +86,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
 					
 					craftTe.getContainer().setStackInSlot(1, ItemStack.EMPTY);
-				} else if (held.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(new cam72cam.mod.item.ItemStack(held)) == PlateType.BOILER) {
+				} else if (held.getItem() == IRItems.ITEM_PLATE.internal && ItemPlateType.get(new cam72cam.mod.item.ItemStack(held)) == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
 					if (craftTe == null) {
 						return false;
@@ -154,7 +154,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.item == IRItems.ITEM_PLATE && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
+				if (input.item == IRItems.ITEM_PLATE.internal && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
 					progress = 100;
 					craftTe.setCraftProgress(100);
 				}

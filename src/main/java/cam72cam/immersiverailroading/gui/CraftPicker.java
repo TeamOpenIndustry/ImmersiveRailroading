@@ -78,7 +78,7 @@ public class CraftPicker extends GuiScreen {
 		}
 		
 		itemSelector = new ItemPickerGUI(NonNullList.create(), this::onItemExit);
-		if (current != null && current.item == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+		if (current != null && current.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
 			itemSelector.choosenItem = current;
 		}
 	}
@@ -88,10 +88,10 @@ public class CraftPicker extends GuiScreen {
 			return false;
 		}
 		
-    	if (stock.item != IRItems.ITEM_ROLLING_STOCK) {
+    	if (!stock.is(IRItems.ITEM_ROLLING_STOCK)) {
     		return false;
     	}
-    	if (item.item != IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+    	if (!item.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
     		return false;
     	}
     	return ItemDefinition.getID(item).equals(ItemDefinition.getID(stock));

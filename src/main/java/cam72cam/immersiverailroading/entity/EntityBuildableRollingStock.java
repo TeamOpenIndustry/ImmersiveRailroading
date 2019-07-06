@@ -159,7 +159,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
 			cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
-			if (found.item == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+			if (found.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
 				if (ItemDefinition.getID(found).equals(this.defID)) {
 					if ((player.isCreative() || ItemGauge.get(found) == this.gauge) && !ItemRollingStockComponent.requiresHammering(found)) {
 						ItemComponentType type = ItemComponent.getComponentType(found);
@@ -180,7 +180,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		
 		for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
 			cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
-			if (found.item == IRItems.ITEM_PLATE) {
+			if (found.is(IRItems.ITEM_PLATE)) {
 				if (ItemGauge.get(found) == this.gauge) {
 					switch (ItemPlateType.get(found)) {
 					case LARGE:
@@ -255,7 +255,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			
 			for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
 				cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
-				if (found.item == IRItems.ITEM_PLATE) {
+				if (found.is(IRItems.ITEM_PLATE)) {
 					if (ItemGauge.get(found) == this.gauge) {
 						if (ItemPlateType.get(found) == type.getPlateType()) {
 							ItemStack itemUsed = new ItemStack(player.internal.inventory.decrStackSize(i, platesUsed));
@@ -363,7 +363,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		if (getWorld().isClient) {
 			return ClickResult.PASS;
 		}
-		if (player.getHeldItem(hand).item == IRItems.ITEM_LARGE_WRENCH || player.getHeldItem(hand).item == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_LARGE_WRENCH) || player.getHeldItem(hand).is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
 			if (!player.isCrouching()) {
 				addNextComponent(player);
 			} else {

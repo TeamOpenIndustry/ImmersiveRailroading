@@ -150,7 +150,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
     public ClickResult onClick(Player player, Hand hand) {
-		if (player.getHeldItem(hand).item == IRItems.ITEM_RADIO_CONTROL_CARD) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
 				TagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
 				if(cardNBT == null) { 

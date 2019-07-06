@@ -41,6 +41,10 @@ public class ItemStack {
         this(new net.minecraft.item.ItemStack(item));
     }
 
+    public ItemStack(ItemBase item, int count) {
+        this(item.internal, count);
+    }
+
     public TagCompound getTagCompound() {
         if (internal.getTagCompound() == null) {
             internal.setTagCompound(new TagCompound().internal);
@@ -86,6 +90,10 @@ public class ItemStack {
         return fuzzy.matches(this);
     }
 
+    public boolean is(ItemBase item) {
+        return item.internal == this.item;
+    }
+
     public boolean isFluidContainer() {
         return FluidUtil.getFluidHandler(internal) != null;
     }
@@ -101,4 +109,5 @@ public class ItemStack {
     public int getLimit() {
         return internal.getMaxStackSize();
     }
+
 }
