@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Rotation;
@@ -15,7 +14,6 @@ import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.IPlantable;
 import trackapi.lib.Util;
 
@@ -26,7 +24,7 @@ public class BlockUtil {
 			return true;
 		}
 		
-		Block block = world.getBlock(pos);
+		Block block = world.getBlockInternal(pos);
 		
 		if (block == null) {
 			return true;
@@ -49,10 +47,10 @@ public class BlockUtil {
 		if (block instanceof BlockLeaves) {
 			return true;
 		}
-		if (block == IRBlocks.BLOCK_RAIL_PREVIEW) {
+		if (world.isBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW)) {
 			return true;
 		}
-		if (allowFlex && block instanceof BlockRailBase) {
+		if (allowFlex && isIRRail(world, pos)) {
 			TileRailBase te = world.getTileEntity(pos, TileRailBase.class);
 			return te != null && te.isFlexible();
 		}
@@ -70,7 +68,7 @@ public class BlockUtil {
 	}
 	
 	public static boolean isIRRail(World world, Vec3i pos) {
-		return world.getBlock(pos) instanceof BlockRailBase;
+		return world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG) || world.isBlock(pos, IRBlocks.BLOCK_RAIL);
 	}
 	
 	public static boolean isRail(World world, Vec3i pos) {

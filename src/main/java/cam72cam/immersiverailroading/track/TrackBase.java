@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -81,10 +82,10 @@ public abstract class TrackBase {
 
 		TagCompound replaced = null;
 		
-		Block removed = builder.info.world.getBlock(pos);
+		Block removed = builder.info.world.getBlockInternal(pos);
 		TileRailBase te = null;
 		if (removed != null) {
-			if (removed instanceof BlockRailBase) {
+			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
 				te = builder.info.world.getTileEntity(pos, TileRailBase.class);
 				if (te != null) {
 					replaced = new TagCompound();

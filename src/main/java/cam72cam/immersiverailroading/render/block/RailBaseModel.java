@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.render.BakedScaledModel;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.block.BlockBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.Facing;
@@ -37,7 +38,7 @@ public class RailBaseModel implements IBakedModel {
 			return EMPTY;
 		}
 		IExtendedBlockState railState = (IExtendedBlockState)state;
-		Object data = railState.getValue(BlockRailBase.RAIL_DATA);
+		Object data = railState.getValue(BlockBase.BLOCK_DATA);
 		if (data == null) {
 			return EMPTY;
 		}

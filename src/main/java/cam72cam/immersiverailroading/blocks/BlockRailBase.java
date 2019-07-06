@@ -9,10 +9,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.SwitchUtil;
-import cam72cam.mod.block.BlockEntityBase;
-import cam72cam.mod.block.BlockSettings;
-import cam72cam.mod.block.IBreakCancelable;
-import cam72cam.mod.block.Material;
+import cam72cam.mod.block.*;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
@@ -24,16 +21,6 @@ import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.property.ExtendedBlockState;
-import net.minecraftforge.common.property.IExtendedBlockState;
-import net.minecraftforge.common.property.IUnlistedProperty;
-
-import javax.annotation.Nonnull;
 
 public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implements IBreakCancelable {
 	public BlockRailBase(BlockSettings settings) {
@@ -122,7 +109,7 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
 
         te.blockUpdate = true;
 
-        if (new ItemStack(world.getBlock(te.pos.up())).is(Fuzzy.SNOW_LAYER)) {
+        if (new ItemStack(world.getBlockInternal(te.pos.up())).is(Fuzzy.SNOW_LAYER)) {
             if (te.handleSnowTick()) {
                 world.setToAir(te.pos.up());
             }
@@ -200,24 +187,5 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
         //TODO collision height
         // height = te.getFullHeight() +0.1 * (te.getTrackGauge() / Gauge.STANDARD);
         return te.getFullHeight();
-    }
-
-
-	public static final PropertyObject RAIL_DATA = new PropertyObject("RAIL_DATA");
-
-	@Override
-    @Nonnull
-    protected BlockStateContainer createBlockState()
-    {
-        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty<?>[] {RAIL_DATA});
-    }
-
-	@Override
-    public IBlockState getExtendedState(IBlockState origState, IBlockAccess internal, BlockPos pos)
-    {
-    	IExtendedBlockState state = (IExtendedBlockState)origState;
-    	TileRailBase te = World.get((net.minecraft.world.World) internal).getTileEntity(new Vec3i(pos), TileRailBase.class);
-        state = state.withProperty(RAIL_DATA, te);
-        return state;
     }
 }
