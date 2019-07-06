@@ -21,9 +21,9 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.Explosion;
 
 import java.util.ArrayList;
@@ -568,8 +568,8 @@ public class LocomotiveSteam extends Locomotive {
 				for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
 					if (BurnUtil.getBurnTime(this.cargoItems.getStackInSlot(slot)) != 0) {
 						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlots(); tenderSlot ++) {
-							if (this.cargoItems.getStackInSlot(slot).isItemEqual(tender.cargoItems.getStackInSlot(tenderSlot))) {
-								if (this.cargoItems.getStackInSlot(slot).getMaxStackSize() > this.cargoItems.getStackInSlot(slot).getCount()) {
+							if (this.cargoItems.getStackInSlot(slot).equals(tender.cargoItems.getStackInSlot(tenderSlot))) {
+								if (this.cargoItems.getStackInSlot(slot).getLimit() > this.cargoItems.getStackInSlot(slot).getCount()) {
 									ItemStack extracted = tender.cargoItems.extractItem(tenderSlot, 1, false);
 									this.cargoItems.insertItem(slot, extracted, false);
 								}

@@ -20,7 +20,7 @@ public class FreightContainer extends ContainerBase {
 		int width = 0;
 		int currY = 0;
 		currY = offsetTopBar(0, currY, horizSlots);
-		currY = addSlotBlock(freight.cargoItems, stock.getInventorySize(), 0, currY, horizSlots);
+		currY = addSlotBlock(freight.cargoItems.internal, stock.getInventorySize(), 0, currY, horizSlots);
     	currY = offsetPlayerInventoryConnector(0, currY, width, horizSlots);
     	currY = addPlayerInventory(playerInventory, currY, horizSlots);
 	}

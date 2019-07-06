@@ -21,8 +21,8 @@ public class TankContainer extends ContainerBase {
 		currY = offsetTopBar(0, currY, horizSlots);
 		currY = offsetSlotBlock(0, currY, horizSlots, numRows);
 		
-		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems, 0, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
-		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems, 1, 0 + paddingLeft + slotSize * horizSlots - slotSize - 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems.internal, 0, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems.internal, 1, 0 + paddingLeft + slotSize * horizSlots - slotSize - 5, currY - numRows * slotSize + 4));
 		
     	currY = offsetPlayerInventoryConnector(0, currY, width, horizSlots);
     	currY = addPlayerInventory(playerInventory, currY, horizSlots);

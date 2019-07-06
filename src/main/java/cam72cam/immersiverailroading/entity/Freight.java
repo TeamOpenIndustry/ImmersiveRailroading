@@ -10,15 +10,15 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.ItemStackHandler;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.items.ItemStackHandler;
 
 public abstract class Freight extends EntityCoupleableRollingStock {
 	public FilteredStackHandler cargoItems = new FilteredStackHandler(0) {
@@ -77,7 +77,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 				ItemStack itemstack = cargoItems.getStackInSlot(slot);
 				if (itemstack.getCount() != 0) {
 					Vec3d pos = getPosition().add(VecUtil.fromWrongYaw(4, this.getRotationYaw()+90));
-					getWorld().dropItem(new cam72cam.mod.item.ItemStack(itemstack.copy()), new Vec3i(pos));
+					getWorld().dropItem(itemstack.copy(), new Vec3i(pos));
 					itemstack.setCount(0);
 				}
 			}
@@ -114,7 +114,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			}
 		}
 
-		if (player.getHeldItem(Hand.PRIMARY).item == Items.LEAD) {
+		if (player.getHeldItem(Hand.PRIMARY).is(Fuzzy.LEAD)) {
 			Entity passenger = this.removePassenger((ModdedEntity.StaticPassenger sp) -> !sp.isVillager);
 			if (passenger != null) {
 				EntityLiving living = passenger.asInternal(EntityLiving.class);
@@ -162,20 +162,20 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@Override
 	public void save(TagCompound data) {
 		super.save(data);
-		data.set("items", new TagCompound(cargoItems.serializeNBT()));
+		data.set("items", cargoItems.save());
 	}
 
 	@Override
 	public void load(TagCompound data) {
 		super.load(data);
 		ItemStackHandler temp = new ItemStackHandler();
-		temp.deserializeNBT(data.get("items").internal);
+		temp.load(data.get("items"));
 		cargoItems.setSize(this.getInventorySize());
 		for (int slot = 0; slot < temp.getSlots(); slot ++) {
 			if (slot < cargoItems.getSlots()) {
 				cargoItems.setStackInSlot(slot, temp.getStackInSlot(slot));
 			} else {
-				getWorld().dropItem(new cam72cam.mod.item.ItemStack(temp.getStackInSlot(slot)), getPosition());
+				getWorld().dropItem(temp.getStackInSlot(slot), getPosition());
 			}
 		}
 		handleMass();
@@ -194,7 +194,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
 				ItemStack itemstack = cargoItems.getStackInSlot(slot);
 				if (itemstack.getCount() != 0) {
-					getWorld().dropItem(new cam72cam.mod.item.ItemStack(itemstack.copy()), getPosition());
+					getWorld().dropItem(itemstack.copy(), getPosition());
 					itemstack.setCount(0);
 				}
 			}
