@@ -3,6 +3,7 @@ package cam72cam.mod.world;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -14,6 +15,7 @@ import cam72cam.mod.util.Facing;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -86,6 +88,8 @@ public class World {
             entity = ((ModdedEntity) entityIn).getSelf();
         } else if (entityIn instanceof EntityPlayer) {
             entity = new Player((EntityPlayer) entityIn);
+        } else if (entityIn instanceof EntityLiving) {
+            entity = new Living((EntityLiving) entityIn);
         } else {
             entity = new Entity(entityIn);
         }

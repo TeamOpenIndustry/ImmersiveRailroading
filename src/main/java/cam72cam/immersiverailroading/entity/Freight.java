@@ -5,10 +5,7 @@ import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.entity.DamageType;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.ModdedEntity;
-import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.*;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
@@ -17,8 +14,8 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.util.math.AxisAlignedBB;
+
+import java.util.List;
 
 public abstract class Freight extends EntityCoupleableRollingStock {
 	public FilteredStackHandler cargoItems = new FilteredStackHandler(0) {
@@ -98,17 +95,16 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 
 		// See ItemLead.attachToFence
-		double dist = 10.0D;
 		double i = player.internal.posX;
 		double j = player.internal.posY;
 		double k = player.internal.posZ;
 
-		for (EntityLiving entityliving : getWorld().internal.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double) i - dist, (double) j - 7.0D,
-				(double) k - dist, (double) i + dist, (double) j + dist, (double) k + dist))) {
-			if (entityliving.getLeashed() && entityliving.getLeashHolder() == player.internal) {
-				if (canFitPassenger(new Entity(entityliving)) && this.getDefinition().acceptsLivestock()) {
-					entityliving.clearLeashed(true, !player.isCreative());
-					this.addPassenger(new Entity(entityliving));
+		if (this.getDefinition().acceptsLivestock()) {
+			List<Living> leashed = getWorld().getEntities((Living e) -> e.getPosition().distanceTo(player.getPosition()) < 16 && e.isLeashedTo(player), Living.class);
+			for (Living entity : leashed) {
+				if (canFitPassenger(entity)) {
+					entity.unleash(player);
+					this.addPassenger(entity);
 					return ClickResult.ACCEPTED;
 				}
 			}
@@ -117,9 +113,9 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		if (player.getHeldItem(Hand.PRIMARY).is(Fuzzy.LEAD)) {
 			Entity passenger = this.removePassenger((ModdedEntity.StaticPassenger sp) -> !sp.isVillager);
 			if (passenger != null) {
-				EntityLiving living = passenger.asInternal(EntityLiving.class);
-				if (living.canBeLeashedTo(player.internal)) {
-					living.setLeashHolder(player.internal, true);
+				Living living = (Living) passenger;
+				if (living.canBeLeashedTo(player)) {
+					living.setLeashHolder(player);
 					player.getHeldItem(Hand.PRIMARY).shrink(1);
 				}
 				return ClickResult.ACCEPTED;
