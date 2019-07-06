@@ -21,11 +21,11 @@ public class SteamLocomotiveContainer extends ContainerBase {
 		currY = offsetTopBar(0, currY, horizSlots*2);
 		currY = offsetSlotBlock(0, currY, horizSlots*2, numRows);
 		
-		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems, stock.getInventorySize()-2, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
-		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems, stock.getInventorySize()-1, 0 + paddingLeft + slotSize * horizSlots*2 - slotSize - 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems.internal, stock.getInventorySize()-2, 0 + paddingLeft + 5, currY - numRows * slotSize + 4));
+		this.addSlotToContainer(new SlotItemHandler(this.Tank.cargoItems.internal, stock.getInventorySize()-1, 0 + paddingLeft + slotSize * horizSlots*2 - slotSize - 5, currY - numRows * slotSize + 4));
 		currY = offsetPlayerInventoryConnector(0, currY, width, horizSlots*2);
 		
-		currY = addSlotBlock(this.Tank.cargoItems, stock.getInventorySize()-2, horizSlots * slotSize/2, currY, horizSlots);
+		currY = addSlotBlock(this.Tank.cargoItems.internal, stock.getInventorySize()-2, horizSlots * slotSize/2, currY, horizSlots);
 		
     	currY = offsetPlayerInventoryConnector(0, currY, width/2, horizSlots);
     	currY = addPlayerInventory(playerInventory, currY, horizSlots*2);

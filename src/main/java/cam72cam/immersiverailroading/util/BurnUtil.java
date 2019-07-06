@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.mod.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityFurnace;
+import cam72cam.mod.item.ItemStack;
 
 public class BurnUtil {
-	
+
 	public static int getBurnTime(ItemStack stack) {
-		return TileEntityFurnace.getItemBurnTime(stack);
+		return stack.getBurnTime();
 	}
-	
+
 	public static int getBurnTime(Fluid fluid) {
 		if (ConfigBalance.dieselFuels.containsKey(fluid.ident)) {
 			return ConfigBalance.dieselFuels.get(fluid.ident);

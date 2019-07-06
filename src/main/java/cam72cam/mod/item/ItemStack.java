@@ -3,6 +3,8 @@ package cam72cam.mod.item;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraftforge.fluids.FluidUtil;
 
 public class ItemStack {
     public static final ItemStack EMPTY = new ItemStack(net.minecraft.item.ItemStack.EMPTY);
@@ -82,5 +84,21 @@ public class ItemStack {
 
     public boolean is(Fuzzy fuzzy) {
         return fuzzy.matches(this);
+    }
+
+    public boolean isFluidContainer() {
+        return FluidUtil.getFluidHandler(internal) != null;
+    }
+
+    public boolean isFlammable() {
+        return getBurnTime() != 0;
+    }
+
+    public int getBurnTime() {
+        return TileEntityFurnace.getItemBurnTime(internal);
+    }
+
+    public int getLimit() {
+        return internal.getMaxStackSize();
     }
 }

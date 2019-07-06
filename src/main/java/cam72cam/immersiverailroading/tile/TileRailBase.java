@@ -29,9 +29,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -541,7 +539,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		}
 	}
 
-	public void transferAllItems(IItemHandler source, IItemHandler dest, int numstacks) {
+	public void transferAllItems(ItemStackHandler source, ItemStackHandler dest, int numstacks) {
 		for (int slot = 0; slot < source.getSlots(); slot++) {
 			net.minecraft.item.ItemStack stack = source.getStackInSlot(slot);
 			if (stack.isEmpty()) {
@@ -627,9 +625,10 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		if (this.augment == null) {
 			return;
 		}
-		
+
+		/*
 		Capability<IFluidHandler> fluid_cap = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
-		Capability<IItemHandler> item_cap = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+		Capability<ItemStackHandler> item_cap = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
 
 		try {
 			switch (this.augment) {
@@ -639,8 +638,8 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 				if (freight == null) {
 					break;
 				}
-				IItemHandler freight_items = freight.cargoItems;
-				for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+				ItemStackHandler freight_items = freight.cargoItems;
+				for (ItemStackHandler neighbor : getCapsNearby(item_cap)) {
 					transferAllItems(neighbor, freight_items, 1);
 				}
 			}
@@ -650,8 +649,8 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 				if (freight == null) {
 					break;
 				}
-				IItemHandler freight_items = freight.cargoItems;
-				for (IItemHandler neighbor : getCapsNearby(item_cap)) {
+				ItemStackHandler freight_items = freight.cargoItems;
+				for (ItemStackHandler neighbor : getCapsNearby(item_cap)) {
 					transferAllItems(freight_items, neighbor, 1);
 				}
 			}
@@ -701,6 +700,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 					balanceTanks();
 				}
                 */
+		/*
 				break;
 			case LOCO_CONTROL: {
 				Locomotive loco = this.getStockNearBy(Locomotive.class);
@@ -785,6 +785,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		} catch (Exception ex) {
 			ImmersiveRailroading.catching(ex);
 		}
+		*/
 	}
 	
 	public int getRedstoneLevel() {

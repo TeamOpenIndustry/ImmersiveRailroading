@@ -185,7 +185,7 @@ public abstract class FreightTank extends Freight {
 		}
 
 		for (int inputSlot : getContainerInputSlots()) {
-			ItemStack input = new ItemStack(cargoItems.getStackInSlot(inputSlot));
+			ItemStack input = cargoItems.getStackInSlot(inputSlot);
 
 			final ItemStack[] inputCopy = {input.copy()};
 			inputCopy[0].setCount(1);
@@ -215,7 +215,7 @@ public abstract class FreightTank extends Freight {
 						// Can we move it to an output slot?
 						ItemStack out = inputCopy[0].copy();
 						for (Integer slot : this.getContainertOutputSlots()) {
-							if (this.cargoItems.insertItem(slot, out.internal, true).getCount() == 0) {
+							if (this.cargoItems.insertItem(slot, out, true).getCount() == 0) {
 								// Move Liquid
 								if (doFill) {
 									theTank.tryFill(inputTank, theTank.getCapacity(), false);
@@ -227,7 +227,7 @@ public abstract class FreightTank extends Freight {
 									cargoItems.extractItem(inputSlot, 1, false);
 									
 									// Increase output
-									this.cargoItems.insertItem(slot, out.internal, false);
+									this.cargoItems.insertItem(slot, out, false);
 									break;
 								}
 							}
