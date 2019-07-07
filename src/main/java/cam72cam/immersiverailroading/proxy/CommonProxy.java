@@ -19,6 +19,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.mod.entity.sync.EntitySync;
 import cam72cam.mod.world.World;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.entity.Entity;
@@ -112,7 +113,9 @@ public abstract class CommonProxy implements IGuiHandler {
     	Packet.register(SoundPacket.class, PacketDirection.ServerToClient);
     	Packet.register(PaintSyncPacket.class, PacketDirection.ServerToClient);
         Packet.register(PreviewRenderPacket.class, PacketDirection.ServerToClient);
+
         Packet.register(ModdedEntity.PassengerPositionsPacket.class, PacketDirection.ServerToClient);
+        Packet.register(EntitySync.EntitySyncPacket.class, PacketDirection.ServerToClient);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	

@@ -105,7 +105,6 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	private void setBoilerTemperature(float temp) {
 		this.sync.setFloat(BOILER_TEMPERATURE, temp);
-		this.sync.send();
 	}
 	
 	public float getBoilerPressure() {
@@ -113,7 +112,6 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	private void setBoilerPressure(float temp) {
 		this.sync.setFloat(BOILER_PRESSURE, temp);
-		this.sync.send();
 	}
 
 	public Map<Integer, Integer> getBurnTime() {

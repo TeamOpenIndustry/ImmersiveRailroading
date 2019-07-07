@@ -209,10 +209,8 @@ public abstract class Locomotive extends FreightTank {
 			}
 			if (sync.getInteger(HORN) > 0) {
 				sync.setInteger(HORN, sync.getInteger(HORN)-1);
-				sync.send();
 			} else if (sync.get(HORN_PLAYER) != null) {
 				sync.setUUID(HORN_PLAYER, null);
-				sync.send();
 			}
 			if (getBell() > 0 && !this.getDefinition().toggleBell) {
 				setBell(getBell()-1);
@@ -300,7 +298,6 @@ public abstract class Locomotive extends FreightTank {
 		if (currentPlayer == null || currentPlayer == uuid) {
 			sync.setInteger(HORN, val);
 		}
-		sync.send();
 	}
 
 	public float getAirBrake() {
@@ -319,7 +316,6 @@ public abstract class Locomotive extends FreightTank {
 	public void setBell(int newBell) {
 		if (this.getBell() != newBell) {
 			sync.setInteger(BELL, newBell);
-			sync.send();
 		}
 	}
 

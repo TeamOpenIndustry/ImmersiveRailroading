@@ -134,7 +134,6 @@ public abstract class FreightTank extends Freight {
 		} else {
 			sync.setString(FLUID_TYPE, theTank.getContents().getFluid().ident);
 		}
-		sync.send();
 	}
 	
 	public int getServerLiquidAmount() {
