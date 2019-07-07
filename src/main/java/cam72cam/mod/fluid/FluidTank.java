@@ -46,7 +46,7 @@ public class FluidTank implements ITank {
         if (!allows(fluidStack.getFluid())) {
             return 0;
         }
-        return internal.fill(fluidStack.internal, simulate);
+        return internal.fill(fluidStack.internal, !simulate);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class FluidTank implements ITank {
         if (!allows(fluidStack.getFluid())) {
             return null;
         }
-        return new FluidStack(internal.drain(fluidStack.internal, simulate));
+        return new FluidStack(internal.drain(fluidStack.internal, !simulate));
     }
 
     public void setCapacity(int milliBuckets) {
@@ -70,30 +70,54 @@ public class FluidTank implements ITank {
     }
 
     public boolean tryFill(ITank inputTank, int max, boolean simulate) {
-        //TODO limit
-        int destCapacity = this.fill(inputTank.getContents(), true);
-        FluidStack sourceCapacity = inputTank.drain(new FluidStack(inputTank.getContents().getFluid(), destCapacity), true);
-        if (sourceCapacity == null || sourceCapacity.getAmount() != destCapacity) {
+        int maxTransfer = this.fill(inputTank.getContents(), true);
+        maxTransfer = Math.min(maxTransfer, max);
+
+        if (maxTransfer == 0) {
+            // Out of room or limit too small
             return false;
         }
-        if (!simulate) {
-            this.fill(inputTank.getContents(), false);
-            inputTank.drain(new FluidStack(inputTank.getContents().getFluid(), destCapacity), false);
+
+        FluidStack attemptedDrain = inputTank.drain(new FluidStack(inputTank.getContents().getFluid(), maxTransfer), true);
+
+        if (attemptedDrain == null || attemptedDrain.getAmount() != maxTransfer) {
+            // Can't transfer the full amount
+            return false;
         }
-        return true;
+
+        // Either attempt or do fill
+        boolean ok = this.fill(inputTank.getContents(), simulate) == attemptedDrain.getAmount();
+
+        if (!simulate) {
+            // Drain input tank
+            inputTank.drain(new FluidStack(inputTank.getContents().getFluid(), maxTransfer), false);
+        }
+        return ok;
     }
 
     public boolean tryDrain(ITank inputTank, int max, boolean simulate) {
-        //TODO limit
-        int destCapacity = inputTank.fill(this.getContents(), true);
-        FluidStack sourceCapacity = this.drain(new FluidStack(this.getContents().getFluid(), destCapacity), true);
-        if (sourceCapacity == null || sourceCapacity.getAmount() != destCapacity) {
+        int maxTransfer = inputTank.fill(this.getContents(), true);
+        maxTransfer = Math.min(maxTransfer, max);
+
+        if (maxTransfer == 0) {
+            // Out of room or limit too small
             return false;
         }
-        if (!simulate) {
-            inputTank.fill(this.getContents(), false);
-            this.drain(new FluidStack(this.getContents().getFluid(), destCapacity), false);
+
+        FluidStack attemptedDrain = this.drain(new FluidStack(this.getContents().getFluid(), maxTransfer), true);
+
+        if (attemptedDrain == null || attemptedDrain.getAmount() != maxTransfer) {
+            // Can't transfer the full amount
+            return false;
         }
-        return true;
+
+        // Either attempt or do fill
+        boolean ok = inputTank.fill(this.getContents(), simulate) == attemptedDrain.getAmount();
+
+        if (!simulate) {
+            // Drain input tank
+            this.drain(new FluidStack(this.getContents().getFluid(), maxTransfer), false);
+        }
+        return ok;
     }
 }

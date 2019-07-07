@@ -42,16 +42,20 @@ public interface ITank {
 
             @Override
             public int fill(FluidStack fluidStack, boolean simulate) {
-                int result = internal.fill(fluidStack.internal, !simulate);
-                onUpdate.accept(new ItemStack(internal.getContainer()));
-                return result;
+                IFluidHandlerItem temp = FluidUtil.getFluidHandler(inputCopy.copy().internal);
+                temp.fill(fluidStack.internal, true);
+                onUpdate.accept(new ItemStack(temp.getContainer()));
+
+                return internal.fill(fluidStack.internal, !simulate);
             }
 
             @Override
             public FluidStack drain(FluidStack fluidStack, boolean simulate) {
-                FluidStack result = new FluidStack(internal.drain(fluidStack.internal, !simulate));
-                onUpdate.accept(new ItemStack(internal.getContainer()));
-                return result;
+                IFluidHandlerItem temp = FluidUtil.getFluidHandler(inputCopy.copy().internal);
+                temp.drain(fluidStack.internal, true);
+                onUpdate.accept(new ItemStack(temp.getContainer()));
+
+                return new FluidStack(internal.drain(fluidStack.internal, !simulate));
             }
         };
     }

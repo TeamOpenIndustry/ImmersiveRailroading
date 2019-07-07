@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import java.io.IOException;
 
+import cam72cam.mod.fluid.Fluid;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -51,8 +52,8 @@ public class SteamHammerContainerGui extends ContainerGuiBase {
     	
     	this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
     	
-    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, FluidRegistry.LAVA, this.tile.getCraftProgress()/100f);
-    	
+    	drawTankBlock(i + paddingLeft, currY - inventoryRows * slotSize, horizSlots, inventoryRows, Fluid.LAVA, this.tile.getCraftProgress()/100f);
+
     	drawSlot(i + paddingLeft+5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
     	drawSlot(i + paddingLeft + slotSize * horizSlots - slotSize-5, currY - inventoryRows * slotSize + (int)(slotSize * 1.5));
     	
