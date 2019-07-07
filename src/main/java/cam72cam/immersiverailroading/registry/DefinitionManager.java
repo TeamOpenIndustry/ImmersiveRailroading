@@ -3,13 +3,12 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.mod.gui.Progress;
 import cam72cam.mod.util.Identifier;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraftforge.fml.common.ProgressManager;
-import net.minecraftforge.fml.common.ProgressManager.ProgressBar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,7 +116,7 @@ public class DefinitionManager {
                 }
             }
 
-            ProgressBar bar = ProgressManager.push("Loading Models", steps);
+            Progress.Bar bar = Progress.push("Loading Models", steps);
 
 
             for (String defType : defTypes) {
@@ -140,18 +139,18 @@ public class DefinitionManager {
                 }
             }
 
-            ProgressManager.pop(bar);
+            Progress.pop(bar);
         }
-        ProgressBar bar = ProgressManager.push("Generating Heightmap", definitions.size());
+        Progress.Bar bar = Progress.push("Generating Heightmap", definitions.size());
 
         for (EntityRollingStockDefinition def : definitions.values()) {
             bar.step(def.name());
             def.initHeightMap();
         }
 
-        ProgressManager.pop(bar);
+        Progress.pop(bar);
 
-        //ProgressBar bar = ProgressManager.push("Loading tracks", )
+        //Progress bar = ProgressManager.push("Loading tracks", )
         Identifier track_json = new Identifier(ImmersiveRailroading.MODID, "track/track.json");
 
         inputs = ImmersiveRailroading.proxy.getResourceStreamAll(track_json);
@@ -162,7 +161,7 @@ public class DefinitionManager {
             input.close();
 
             JsonArray types = track.getAsJsonArray("types");
-            bar = ProgressManager.push("Loading Tracks", types.size());
+            bar = Progress.push("Loading Tracks", types.size());
 
             for (JsonElement def : types) {
                 bar.step(def.getAsString());
@@ -177,7 +176,7 @@ public class DefinitionManager {
                 }
             }
 
-            ProgressManager.pop(bar);
+            Progress.pop(bar);
         }
     }
 
