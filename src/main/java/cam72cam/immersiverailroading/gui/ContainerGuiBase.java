@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
+import cam72cam.mod.fluid.Fluid;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.gui.Gui;
@@ -13,7 +14,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.Fluid;
 
 public abstract class ContainerGuiBase extends GuiContainer {
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
@@ -119,10 +119,10 @@ public abstract class ContainerGuiBase extends GuiContainer {
 	}
     
     public void drawFluid(Fluid fluid, int x, int y, int width, int height, int scale) {
-		TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite(fluid.getStill().toString());
+		TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite(fluid.internal.getStill().toString());
 		if(sprite != null)
 		{
-			drawSprite(sprite, fluid.getColor(), x, y, width, height, scale);
+			drawSprite(sprite, fluid.internal.getColor(), x, y, width, height, scale);
 		}
     }
     

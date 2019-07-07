@@ -8,14 +8,14 @@ public class FluidStack {
     }
 
     public FluidStack(Fluid fluid, int amount) {
-        this.internal = new net.minecraftforge.fluids.FluidStack(fluid.internal, amount);
+        this.internal = fluid != null && fluid.internal != null ? new net.minecraftforge.fluids.FluidStack(fluid.internal, amount) : null;
     }
 
     public Fluid getFluid() {
         if (internal == null) {
             return null;
         }
-        return Fluid.getFluid(internal.getFluid().getUnlocalizedName());
+        return Fluid.getFluid(internal.getFluid().getName());
     }
 
     public int getAmount() {
