@@ -4,11 +4,10 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
-import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,9 +84,9 @@ public class TrackDefinition {
                 if (oreName.equals("irTie")) {
                     examples.addAll(OreHelper.IR_TIE.getOres());
                 }
-                examples.addAll(OreDictionary.getOres(oreName).stream().map(ItemStack::new).collect(Collectors.toList()));
+                examples.addAll(new Fuzzy(oreName).enumerate());
             } else {
-                examples.add(new ItemStack(Item.getByNameOrId(this.item), 1, meta));
+                examples.add(new ItemStack(this.item, 1, meta));
             }
             return examples;
         }
@@ -102,9 +101,9 @@ public class TrackDefinition {
                 if (oreName.equals("irTie")) {
                     return OreHelper.IR_TIE.matches(stack, false);
                 }
-                return OreHelper.oreDictionaryContainsMatch(false, OreDictionary.getOres(oreName).stream().map(ItemStack::new).collect(Collectors.toList()), stack);
+                return new Fuzzy(oreName).matches(stack);
             }
-            return stack.internal.getItem() == Item.getByNameOrId(item) && stack.internal.getMetadata() == meta;
+            return stack.equals(new ItemStack(item, 1, meta));
         }
     }
 }

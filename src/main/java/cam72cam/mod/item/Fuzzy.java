@@ -6,6 +6,9 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraftforge.oredict.OreDictionary;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Fuzzy {
     public static final Fuzzy WOOD_PLANK = new Fuzzy("plankWood");
     public static final Fuzzy REDSTONE_DUST = new Fuzzy("dustRedstone");
@@ -31,5 +34,9 @@ public class Fuzzy {
 
     public boolean matches(ItemStack stack) {
         return OreDictionary.getOres(ident).stream().anyMatch((net.minecraft.item.ItemStack potential) -> OreDictionary.itemMatches(potential, stack.internal, false));
+    }
+
+    public List<ItemStack> enumerate() {
+        return OreDictionary.getOres(ident).stream().map(ItemStack::new).collect(Collectors.toList());
     }
 }

@@ -45,6 +45,10 @@ public class ItemStack {
         this(item.internal, count);
     }
 
+    public ItemStack(String item, int i, int meta) {
+        this(Item.getByNameOrId(item), i, meta);
+    }
+
     public TagCompound getTagCompound() {
         if (internal.getTagCompound() == null) {
             internal.setTagCompound(new TagCompound().internal);

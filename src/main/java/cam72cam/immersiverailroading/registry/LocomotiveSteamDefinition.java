@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.util.Identifier;
 import com.google.gson.JsonObject;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -209,10 +208,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     public int getInventorySize(Gauge gauge) {
-        return MathHelper.ceil(numSlots * gauge.scale());
+        return (int) Math.ceil(numSlots * gauge.scale());
     }
 
     public int getInventoryWidth(Gauge gauge) {
-        return Math.max(3, MathHelper.ceil(width * gauge.scale()));
+        return (int) Math.max(3, Math.ceil(width * gauge.scale()));
     }
 }
