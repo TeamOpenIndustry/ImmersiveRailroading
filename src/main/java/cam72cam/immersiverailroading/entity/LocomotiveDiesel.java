@@ -49,12 +49,10 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	private void setEngineTemperature(float temp) {
 		sync.setFloat(ENGINE_TEMPERATURE, temp);
-		sync.send();
 	}
 	
 	public void setTurnedOn(boolean value) {
 		sync.setBoolean(TURNED_ON, value);
-		sync.send();
 	}
 	
 	public boolean isTurnedOn() {
@@ -63,7 +61,6 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	public void setEngineOverheated(boolean value) {
 		sync.setBoolean(ENGINE_OVERHEATED, value);
-		sync.send();
 	}
 	
 	public boolean isEngineOverheated() {

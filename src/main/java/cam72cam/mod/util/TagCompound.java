@@ -200,4 +200,7 @@ public class TagCompound {
         internal.setTag(key, stack.toTag().internal);
     }
 
+    public String toString() {
+        return internal.toString();
+    }
 }

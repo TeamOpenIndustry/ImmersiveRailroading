@@ -140,6 +140,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public final void onUpdate() {
         iTickable.onTick();
+        self.sync.send();
     }
 
     /* Player Interact */

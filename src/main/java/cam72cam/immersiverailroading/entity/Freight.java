@@ -148,7 +148,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 		this.sync.setInteger(CARGO_ITEMS, itemInsideCount);
 		this.sync.setInteger(PERCENT_FULL, stacksWithStuff * 100 / this.getInventorySize());
-		this.sync.send();
 	}
 	
 	public int getPercentCargoFull() {
