@@ -9,7 +9,7 @@ import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.world.World;
-import cam72cam.mod.block.BlockEntityBase;
+import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.BlockSettings;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.block.Material;
@@ -18,7 +18,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 
-public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implements IBreakCancelable {
+public class BlockRailPreview extends BlockEntity<TileRailPreview> implements IBreakCancelable {
 	public BlockRailPreview() {
 		super(new BlockSettings(ImmersiveRailroading.MODID, "block_rail_preview")
 				.withMaterial(Material.WOOL)
@@ -27,6 +27,19 @@ public class BlockRailPreview extends BlockEntityBase<TileRailPreview> implement
 				.withConnectable(false)
 				.withBlockEntity(TileRailPreview::new)
 		);
+	}
+
+
+	protected class RailBlockInternal extends BlockInternal implements IBreakCancelable {
+		@Override
+		public boolean tryBreak(World world, Vec3i pos, Player player) {
+			return BlockRailPreview.this.tryBreak(world, pos, player);
+		}
+	}
+
+	@Override
+	protected BlockInternal getBlock() {
+		return new RailBlockInternal();
 	}
 
 	@Override
