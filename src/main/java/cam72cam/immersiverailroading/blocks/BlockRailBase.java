@@ -23,7 +23,7 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 
-public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implements IBreakCancelable {
+public abstract class BlockRailBase extends BlockEntity<TileRailBase> {
 	public BlockRailBase(BlockSettings settings) {
 		super(settings
                 .withConnectable(false)
@@ -31,6 +31,18 @@ public abstract class BlockRailBase extends BlockEntityBase<TileRailBase> implem
                 .withHardness(1F)
         );
 	}
+
+	protected class RailBlockInternal extends BlockInternal implements IBreakCancelable {
+        @Override
+        public boolean tryBreak(World world, Vec3i pos, Player player) {
+            return BlockRailBase.this.tryBreak(world, pos, player);
+        }
+    }
+
+    @Override
+    protected BlockInternal getBlock() {
+        return new RailBlockInternal();
+    }
 
 	@Override
 	public void onBreak(TileRailBase te) {
