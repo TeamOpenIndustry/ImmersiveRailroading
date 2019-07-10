@@ -170,7 +170,7 @@ public abstract class Multiblock {
 				IBlockState origState = world.getBlockState(pos);
 				
 				world.setBlockState(pos, IRBlocks.BLOCK_MULTIBLOCK.internal.getDefaultState());
-				TileMultiblock te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), TileMultiblock.class);
+				TileMultiblock te = cam72cam.mod.world.World.get(world).getBlockEntity(new Vec3i(pos), TileMultiblock.class);
 				
 				te.configure(name, cam72cam.mod.math.Rotation.from(rot), new Vec3i(offset), origState);
 			}
@@ -190,12 +190,12 @@ public abstract class Multiblock {
 					continue;
 				}
 				BlockPos pos = getPos(offset);
-				TileMultiblock te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), TileMultiblock.class);
+				TileMultiblock te = cam72cam.mod.world.World.get(world).getBlockEntity(new Vec3i(pos), TileMultiblock.class);
 				if (te == null) {
 					world.destroyBlock(pos, true);
 					continue;
 				}
-				te.onBreak();
+				te.onBreakEvent();
 			}
 		}
 		
@@ -207,7 +207,7 @@ public abstract class Multiblock {
 		}
 		
 		protected TileMultiblock getTile(BlockPos offset) {
-			TileMultiblock te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(getPos(offset)), TileMultiblock.class);
+			TileMultiblock te = cam72cam.mod.world.World.get(world).getBlockEntity(new Vec3i(getPos(offset)), TileMultiblock.class);
 			if (te == null) {
 				if (!world.isRemote) {
 					ImmersiveRailroading.warn("Multiblock TE is null: %s %s %s %s", getPos(offset), offset, world.isRemote, this.getClass());

@@ -4,24 +4,30 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
-import cam72cam.mod.capability.ITank;
+import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.BlockEntityInstance;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.fluid.FluidTank;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.ToolType;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.tile.IRedstoneProvider;
-import cam72cam.mod.tile.ITrack;
-import cam72cam.mod.tile.TickableTileEntity;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.world.World;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -37,7 +43,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileRailBase extends TickableTileEntity implements ITrack, IRedstoneProvider {
+public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	private Vec3i parent;
 	private float bedHeight = 0;
 	private float railHeight = 0;
@@ -59,10 +65,13 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	private int ticksExisted;
 	public boolean blockUpdate;
 
+	public RailBaseInstance(BlockEntity.Internal internal) {
+		super(internal);
+	}
 
-	@Override
 	public boolean isLoaded() {
-		return super.isLoaded() && world.isServer || hasTileData;
+		// TODO removeme
+		return true;
 	}
 
 	public void setBedHeight(float height) {
@@ -77,12 +86,12 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 	public double getRenderGauge() {
 		double gauge = 0;
-		TileRail parent = this.getParentTile();
+		RailInstance parent = this.getParentTile();
 		if (parent != null) {
 			gauge = parent.info.settings.gauge.value();
 		}
 		if (this.getParentReplaced() != null && world != null) {
-			parent = world.getTileEntity(this.getParentReplaced(), TileRail.class);
+			parent = world.getBlockEntity(this.getParentReplaced(), RailInstance.class);
             if (parent != null) {
                 gauge = Math.min(gauge, parent.info.settings.gauge.value());
             }
@@ -167,12 +176,12 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 	
 	public boolean isFlexible() {
-		return this.flexible || !(this instanceof TileRail);
+		return this.flexible || !(this instanceof RailInstance);
 	}
 	
 	public ItemStack getRenderRailBed() {
 		if (railBedCache == null) {
-			TileRail pt = this.getParentTile();
+			RailInstance pt = this.getParentTile();
 			if (pt != null) {
 				railBedCache = pt.info.settings.railBed;
 			}
@@ -212,21 +221,19 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	
 	@Override
 	public void load(TagCompound nbt) {
-		super.load(nbt);
-		
 		int version = 0;
 		if (nbt.hasKey("version")) {
 			version = nbt.getInteger("version");
 		}
-		
-		
+
+
 		railHeight = bedHeight = nbt.getFloat("height");
 		snowLayers = nbt.getInteger("snowLayers");
 		flexible = nbt.getBoolean("flexible");
 		if (nbt.hasKey("replaced")) {
 			replaced = nbt.get("replaced");
 		}
-		
+
 		if (nbt.hasKey("augment")) {
 			augment = Augment.values()[nbt.getInteger("augment")];
 		}
@@ -274,7 +281,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		if (replaced != null) {
 			nbt.set("replaced", replaced);
 		}
-		
+
 		if (augment != null) {
 			nbt.setInteger("augment", this.augment.ordinal());
 			if (augmentTank != null) {
@@ -287,18 +294,15 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		nbt.setInteger("redstoneMode", redstoneMode.ordinal());
 		nbt.setInteger("controlMode", controlMode.ordinal());
 		nbt.setInteger("couplerMode", couplerMode.ordinal());
-		
+
 		nbt.setInteger("version", 3);
-		
-		
-		super.save(nbt);
 	}
-	
-	public TileRail getParentTile() {
+
+	public RailInstance getParentTile() {
 		if (this.getParent() == null) {
 			return null;
 		}
-		TileRail te = world.getTileEntity(this.getParent(), TileRail.class);
+		RailInstance te = world.getBlockEntity(this.getParent(), RailInstance.class);
 		if (te == null || !te.isLoaded()) {
 			return null;
 		}
@@ -372,23 +376,21 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 		}
 	}
 	
-	@Override
 	public double getTrackGauge() {
-		TileRail parent = this.getParentTile();
+		RailInstance parent = this.getParentTile();
 		if (parent != null) {
 			return parent.info.settings.gauge.value();
 		}
 		return 0;
 	}
 
-	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		double distanceMeters = motion.length();
 		float rotationYaw = VecUtil.toWrongYaw(motion);
 		Vec3d nextPos = currentPosition;
 
-		TileRailBase self = this;
-		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
+		RailBaseInstance self = this;
+		RailInstance tile = this instanceof RailInstance ? (RailInstance) this : this.getParentTile();
 
 		while(tile != null) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
@@ -423,7 +425,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 			tile = null;
 			Vec3i currentParent = self.getParentTile().getParent();
 			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
-				self = new TileRailBase();
+				self = new RailBaseInstance();
 				self.readFromNBT(data.internal);
 				self.setWorld(world);
 				if (!currentParent.equals(self.getParent())) {
@@ -508,7 +510,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	private void balanceTanks() {
 		/*
 		for (Facing facing : Facing.values()) {
-			TileRailBase neighbor = world.getTileEntity(pos.offset(facing), TileRailBase.class);
+			RailBaseInstance neighbor = world.getTileEntity(pos.offset(facing), RailBaseInstance.class);
 			if (neighbor != null && neighbor.augmentTank != null) {
 				if (neighbor.augmentTank.getContents().getAmount() + 1 < augmentTank.getContents().getAmount()) {
 					transferAllFluid(augmentTank, neighbor.augmentTank, (augmentTank.getContents().getAmount() - neighbor.augmentTank.getContents().getAmount())/2);
@@ -611,8 +613,8 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 				return;
 			}
 			
-			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
-				double floating = ((TileRail)this).percentFloating();
+			if (Config.ConfigDamage.requireSolidBlocks && this instanceof RailInstance) {
+				double floating = ((RailInstance)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
 					if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(world, pos, null)) {
 						world.breakBlock(pos);
@@ -814,7 +816,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 
 	public SwitchState cycleSwitchForced() {
-		TileRail tileSwitch = this.findSwitchParent();
+		RailInstance tileSwitch = this.findSwitchParent();
 		SwitchState newForcedState = SwitchState.NONE;
 
 		if (tileSwitch != null) {
@@ -829,7 +831,7 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 
 	public boolean isSwitchForced() {
-		TileRail tileSwitch = this.findSwitchParent();
+		RailInstance tileSwitch = this.findSwitchParent();
 		if (tileSwitch != null) {
 			return tileSwitch.info.switchForced != SwitchState.NONE;
 		} else {
@@ -838,33 +840,153 @@ public class TileRailBase extends TickableTileEntity implements ITrack, IRedston
 	}
 
 	/** Finds a parent of <code>this</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
-	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 * @return parent RailInstance where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
-	public TileRail findSwitchParent() {
+	public RailInstance findSwitchParent() {
 		return findSwitchParent(this);
 	}
 
 	/** Finds a parent of <code>cur</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
-	 * @param cur TileRailBase whose parents are to be traversed
-	 * @return parent TileRail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 * @param cur RailBaseInstance whose parents are to be traversed
+	 * @return parent RailInstance where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
-	public TileRail findSwitchParent(TileRailBase cur) {
+	public RailInstance findSwitchParent(RailBaseInstance cur) {
 		if (cur == null) {
 			return null;
 		}
 
-		if (cur instanceof TileRail) {
-			TileRail curTR = (TileRail) cur;
+		if (cur instanceof RailInstance) {
+			RailInstance curTR = (RailInstance) cur;
 			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
 				return curTR;
 			}
 		}
 
 		// Prevent infinite recursion
-		if (cur.getPos().equals(cur.getParentTile().getPos())) {
+		if (cur.pos.equals(cur.getParentTile().pos)) {
 			return null;
 		}
 
 		return findSwitchParent(cur.getParentTile());
 	}
+
+	/* NEW STUFF */
+
+
+
+
+	@Override
+	public double getHeight() {
+		return getFullHeight() +0.1 * (getTrackGauge() / Gauge.STANDARD);
+	}
+
+	@Override
+	public void onBreak() {
+		if (this instanceof RailInstance) {
+			((RailInstance) this).spawnDrops();
+		}
+
+		BlockRailBase.breakParentIfExists(this);
+	}
+
+	@Override
+	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
+		ItemStack stack = player.getHeldItem(hand);
+		if (stack.is(IRItems.ITEM_SWITCH_KEY)) {
+			RailInstance tileSwitch = this.findSwitchParent();
+			if (tileSwitch != null) {
+				SwitchState switchForced = this.cycleSwitchForced();
+				if (this.world.isServer) {
+					player.sendMessage(switchForced.equals(SwitchState.NONE) ? ChatText.SWITCH_UNLOCKED.getMessage() : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
+				}
+			}
+		}
+		if (stack.is(Fuzzy.REDSTONE_DUST)) {
+			String next = this.nextAugmentRedstoneMode();
+			if (next != null) {
+				if (this.world.isServer) {
+					player.sendMessage(PlayerMessage.direct(next));
+				}
+				return true;
+			}
+		}
+		if (stack.is(Fuzzy.SNOW_LAYER)) {
+			if (this.world.isServer) {
+				this.handleSnowTick();
+			}
+			return true;
+		}
+		if (stack.is(Fuzzy.SNOW_BLOCK)) {
+			if (this.world.isServer) {
+				for (int i = 0; i < 8; i ++) {
+					this.handleSnowTick();
+				}
+			}
+			return true;
+		}
+		if (stack.isValidTool(ToolType.SHOVEL)) {
+			if (this.world.isServer) {
+				this.cleanSnow();
+				this.setSnowLayers(0);
+				stack.internal.damageItem(1, player.internal);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public ItemStack onPick() {
+		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
+		if (!this.isLoaded()) {
+			return stack;
+		}
+
+		RailInstance parent = this.getParentTile();
+		if (parent == null) {
+			return stack;
+		}
+		ItemTrackBlueprint.settings(stack, parent.info.settings);
+		return stack;
+	}
+
+	@Override
+	public void onNeighborChange(Vec3i neighbor) {
+		RailBaseInstance te = this;
+
+		World world = te.world;
+		if (world.isClient) {
+			return;
+		}
+
+		te.blockUpdate = true;
+
+		if (new ItemStack(world.getBlockInternal(te.pos.up())).is(Fuzzy.SNOW_LAYER)) {
+			if (te.handleSnowTick()) {
+				world.setToAir(te.pos.up());
+			}
+		}
+
+		TagCompound data = te.getReplaced();
+		while (true) {
+			if (te.getParentTile() != null && te.getParentTile().getParentTile() != null) {
+				RailInstance switchTile = te.getParentTile();
+				if (te instanceof RailInstance) {
+					switchTile = (RailInstance) te;
+				}
+				SwitchState state = SwitchUtil.getSwitchState(switchTile);
+				if (state != SwitchState.NONE) {
+					switchTile.setSwitchState(state);
+				}
+			}
+			if (data == null) {
+				break;
+			}
+			te = new RailBaseInstance();
+			te.load(data);
+			te.setWorld(world);
+			data = te.getReplaced();
+		}
+	}
+
 }

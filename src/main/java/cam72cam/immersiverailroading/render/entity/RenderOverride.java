@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.RailInstance;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
@@ -145,13 +145,13 @@ public class RenderOverride {
 	
         List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
         for (TileEntity te : entities) {
-        	if (te instanceof TileRail) {
-        		if (!((TileRail) te).isLoaded()) {
+        	if (te instanceof RailInstance) {
+        		if (!((RailInstance) te).isLoaded()) {
         			continue;
         		}
-	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((TileRail) te).pos))) {
+	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((RailInstance) te).pos))) {
 
-	        		RailInfo info = ((TileRail) te).info;
+	        		RailInfo info = ((RailInstance) te).info;
 	        		if (info == null) {
 	        			// Still loading...
 	        			continue;

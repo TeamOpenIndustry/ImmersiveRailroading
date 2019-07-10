@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.track;
 
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailBaseInstance;
 import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.tile.RailGagInstance;
 import cam72cam.mod.math.Vec3i;
 
 public class TrackGag extends TrackBase {
@@ -11,8 +11,8 @@ public class TrackGag extends TrackBase {
 	}
 
 	@Override
-	public TileRailBase placeTrack(boolean actuallyPlace) {
-		TileRailGag tileGag = (TileRailGag) super.placeTrack(actuallyPlace);
+	public RailBaseInstance placeTrack(boolean actuallyPlace) {
+		RailGagInstance tileGag = (RailGagInstance) super.placeTrack(actuallyPlace);
 		
 		tileGag.setFlexible(isFlexible());
 		

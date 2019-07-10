@@ -18,34 +18,8 @@ public class BlockMultiblock extends BlockEntity<TileMultiblock> {
 		super(new BlockSettings(ImmersiveRailroading.MODID, "multiblock")
 				.withMaterial(Material.METAL)
 				.withHardness(0.2F)
-				.withBlockEntity(TileMultiblock::new)
+				, TileMultiblock::new
 		);
 	}
 
-	@Override
-	public void onBreak(TileMultiblock te) {
-        try {
-            // Multiblock break
-            te.breakBlock();
-        } catch (Exception ex) {
-            ImmersiveRailroading.catching(ex);
-            // Something broke
-            // TODO figure out why
-            te.world.setToAir(te.pos);
-        }
-	}
-
-	@Override
-	public boolean onClick(TileMultiblock te, Player player, Hand hand, Facing facing, Vec3d hit) {
-        return te.onBlockActivated(player, hand);
-	}
-
-	@Override
-	public ItemStack onPick(TileMultiblock te) {
-		return ItemStack.EMPTY;
-	}
-
-	@Override
-	public void onNeighborChange(TileMultiblock entity, Vec3i neighbor) {
-	}
 }

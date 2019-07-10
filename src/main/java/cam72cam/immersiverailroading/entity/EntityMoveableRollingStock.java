@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.sound.ISound;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailBaseInstance;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
@@ -404,7 +404,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							}
 						}
 					} else {
-						TileRailBase te = getWorld().getTileEntity(bp, TileRailBase.class);
+						RailBaseInstance te = getWorld().getBlockEntity(bp, RailBaseInstance.class);
 						if (te != null) {
 							te.cleanSnow();
 							continue;
@@ -507,7 +507,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             }
 
             try {
-                TileRailBase te = getWorld().getTileEntity(bp, TileRailBase.class, false);
+                RailBaseInstance te = getWorld().getBlockEntity(bp, RailBaseInstance.class); // , false
                 if (te != null) {
                     if (te.getAugment() == Augment.SPEED_RETARDER) {
                         max = Math.max(max, getWorld().getRedstone(bp));

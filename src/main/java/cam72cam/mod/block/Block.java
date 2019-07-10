@@ -4,17 +4,13 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.tile.IRedstoneProvider;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -23,16 +19,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.property.ExtendedBlockState;
-import net.minecraftforge.common.property.IExtendedBlockState;
-import net.minecraftforge.common.property.IUnlistedProperty;
-
-import javax.annotation.Nonnull;
 
 public abstract class Block {
-    private final BlockSettings settings;
+    protected final BlockSettings settings;
     public final net.minecraft.block.Block internal;
-    public static final PropertyObject BLOCK_DATA = new PropertyObject("BLOCK_DATA");
 
     protected class BlockInternal extends net.minecraft.block.Block {
         public BlockInternal() {
@@ -68,33 +58,6 @@ public abstract class Block {
             /*
             Overrides
              */
-
-        @Override
-        public final boolean hasTileEntity(IBlockState state) {
-            return settings.entity != null;
-        }
-
-        @Override
-        public final net.minecraft.tileentity.TileEntity createTileEntity(net.minecraft.world.World world, IBlockState state) {
-            return settings.entity != null ? settings.entity.get() : null;
-        }
-
-        @Override
-        @Nonnull
-        protected BlockStateContainer createBlockState()
-        {
-            return settings.entity == null ? super.createBlockState() : new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty<?>[]{BLOCK_DATA});
-        }
-
-        @Override
-        public IBlockState getExtendedState(IBlockState origState, IBlockAccess internal, BlockPos pos)
-        {
-            IExtendedBlockState state = (IExtendedBlockState)origState;
-            Object te = World.get((net.minecraft.world.World) internal).getTileEntity(new Vec3i(pos), TileEntity.class);
-            state = state.withProperty(BLOCK_DATA, te);
-            return state;
-        }
-
         @Override
         public final float getExplosionResistance(Entity exploder) {
             return settings.resistance;
@@ -120,21 +83,12 @@ public abstract class Block {
 
         @Override
         public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-            TileEntity entity = source.getTileEntity(pos);
-            if (entity == null) {
-                return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
-            }
-            return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Block.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 1.0F);
+            return new AxisAlignedBB(0, 0, 0, 1, Block.this.getHeight(), 1);
         }
-
 
         @Override
         public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-            TileEntity entity = source.getTileEntity(pos);
-            if (entity == null) {
-                return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
-            }
-            return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, Math.max(Block.this.getHeight(World.get(entity.getWorld()), new Vec3i(pos)), 0.25), 1.0F);
+            return new AxisAlignedBB(0, 0, 0, 1, Block.this.getHeight(), 1);
         }
 
         @Override
@@ -171,6 +125,7 @@ public abstract class Block {
         }
 
         /* Redstone */
+        /* TODO REDSTONE!!!
 
         @Override
         public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
@@ -198,6 +153,7 @@ public abstract class Block {
         {
             return true;
         }
+        */
 
             /* TODO
             @SideOnly(Side.CLIENT)
@@ -234,5 +190,5 @@ public abstract class Block {
     public abstract boolean onClick(World world, Vec3i pos, Player player, Hand hand, Facing facing, Vec3d hit);
     public abstract ItemStack onPick(World world, Vec3i pos);
     public abstract void onNeighborChange(World world, Vec3i pos, Vec3i neighbor);
-    public double getHeight(World world, Vec3i pos) { return 1; }
+    public double getHeight() { return 1; }
 }

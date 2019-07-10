@@ -15,8 +15,8 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.tile.RailInstance;
+import cam72cam.immersiverailroading.tile.RailGagInstance;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.OreHelper;
 import cam72cam.mod.entity.sync.EntitySync;
@@ -159,8 +159,8 @@ public abstract class CommonProxy implements IGuiHandler {
 		event.getRegistry().register(IRBlocks.BLOCK_RAIL.internal);
 		event.getRegistry().register(IRBlocks.BLOCK_RAIL_PREVIEW.internal);
 		event.getRegistry().register(IRBlocks.BLOCK_MULTIBLOCK.internal);
-    	GameRegistry.registerTileEntity(TileRailGag.class, IRBlocks.BLOCK_RAIL_GAG.getName());
-    	GameRegistry.registerTileEntity(TileRail.class, IRBlocks.BLOCK_RAIL.getName());
+    	GameRegistry.registerTileEntity(RailGagInstance.class, IRBlocks.BLOCK_RAIL_GAG.getName());
+    	GameRegistry.registerTileEntity(RailInstance.class, IRBlocks.BLOCK_RAIL.getName());
     	GameRegistry.registerTileEntity(TileRailPreview.class, IRBlocks.BLOCK_RAIL_PREVIEW.getName());
     	GameRegistry.registerTileEntity(TileMultiblock.class, IRBlocks.BLOCK_MULTIBLOCK.getName());
     }

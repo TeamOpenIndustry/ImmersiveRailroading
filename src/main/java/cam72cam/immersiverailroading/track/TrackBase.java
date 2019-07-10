@@ -3,9 +3,9 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.tile.RailInstance;
+import cam72cam.immersiverailroading.tile.RailBaseInstance;
+import cam72cam.immersiverailroading.tile.RailGagInstance;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
@@ -48,7 +48,7 @@ public abstract class TrackBase {
 	}
 
 	public boolean isOverTileRail() {
-		return builder.info.world.getTileEntity(getPos(), TileRail.class) != null && this instanceof TrackGag;
+		return builder.info.world.getTileEntity(getPos(), RailInstance.class) != null && this instanceof TrackGag;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -58,11 +58,11 @@ public abstract class TrackBase {
 		return isDownSolid() && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
-	public TileRailBase placeTrack(boolean actuallyPlace) {
+	public RailBaseInstance placeTrack(boolean actuallyPlace) {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			TileRailGag tr = new TileRailGag();
+			RailGagInstance tr = new RailGagInstance();
 			tr.setPos(pos);
 			tr.setWorld(builder.info.world);
 			if (parent != null) {
@@ -83,10 +83,10 @@ public abstract class TrackBase {
 		TagCompound replaced = null;
 		
 		Block removed = builder.info.world.getBlockInternal(pos);
-		TileRailBase te = null;
+		RailBaseInstance te = null;
 		if (removed != null) {
 			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
-				te = builder.info.world.getTileEntity(pos, TileRailBase.class);
+				te = builder.info.world.getTileEntity(pos, RailBaseInstance.class);
 				if (te != null) {
 					replaced = new TagCompound();
 					te.save(replaced);
@@ -104,7 +104,7 @@ public abstract class TrackBase {
             te.setWillBeReplaced(false);
         }
 
-		TileRailBase tr = builder.info.world.getTileEntity(pos, TileRailBase.class);
+		RailBaseInstance tr = builder.info.world.getTileEntity(pos, RailBaseInstance.class);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);
