@@ -110,16 +110,18 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (world.isRemote) {
 				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
-					world.playSound(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					world.playSound(te.pos.x, te.pos.y, te.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
 				}
 				return;
 			}
 			
 			// Decrement craft progress down to 0
 			if (te.getCraftProgress() != 0) {
+				/* TODO CAPABILITIES
 				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 				energy.extractEnergy(32, false);
 				te.setCraftProgress(Math.max(0, te.getCraftProgress() - 1));
+				*/
 			}
 			
 			float progress = te.getCraftProgress();
@@ -174,8 +176,11 @@ public class SteamHammerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
+			return true;
+			/* TODO CAPABILITIES
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
+			*/
 			
 		}
 	}

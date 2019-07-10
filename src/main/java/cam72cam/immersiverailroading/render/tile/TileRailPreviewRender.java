@@ -15,7 +15,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
-public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPreview> {
+public class TileRailPreviewRender {/*extends TileEntitySpecialRenderer<TileRailPreview> {
 	
 	@Override
 	public boolean isGlobalRenderer(TileRailPreview te) {
@@ -41,7 +41,7 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 		{
 			// Move to specified position
 			Vec3d placementPosition = info.placementInfo.placementPosition.internal;
-			placementPosition = placementPosition.subtract(new Vec3d(te.getPos())).addVector(x, y, z);
+			placementPosition = placementPosition.subtract(new Vec3d(te.pos.internal)).addVector(x, y, z);
 			GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
 			if (!te.isMulti()) {
 				RailRenderUtil.render(info, true);
@@ -57,5 +57,5 @@ public class TileRailPreviewRender extends TileEntitySpecialRenderer<TileRailPre
 		GL11.glPopMatrix();
 		blend.restore();
 		Minecraft.getMinecraft().mcProfiler.endSection();
-	}
+	}*/
 }

@@ -19,9 +19,11 @@ public class PreviewRenderPacket extends Packet {
 
 	@Override
 	public void handle() {
+		/* TODO HACKS
 		int dimension = data.getInteger("dimIDCustom");
 		TileRailPreview preview = new TileRailPreview();
 		preview.load(data);
 		ImmersiveRailroading.proxy.addPreview(dimension, preview);
+		*/
 	}
 }

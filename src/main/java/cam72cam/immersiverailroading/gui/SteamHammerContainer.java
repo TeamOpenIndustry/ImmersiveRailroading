@@ -15,7 +15,7 @@ public class SteamHammerContainer extends ContainerBase {
 		this.numRows = 4;
 		this.tile = tile;
 		
-		IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+		IItemHandler itemHandler = null; // TODO CAPABILITIES tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 		
 		int width = 0;
 		int currY = 0;

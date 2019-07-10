@@ -154,11 +154,11 @@ public class CastingMultiblock extends Multiblock {
 			
 			TileMultiblock powerTe = getTile(power);
 			
-			if (powerTe == null) {
+			if (powerTe == null || 1 == 1) { //TODO CAPABILITIES
 				return;
 			}
 			
-			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+			IEnergyStorage energy = null;// TODO CAPABILITIES powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			
 			if (world.isRemote) {
 				if (offset.getZ() > 7 && offset.getY() > 1 && isPouring()) {
@@ -296,8 +296,11 @@ public class CastingMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
+			return true;
+			/* TODO CAPABILITIES
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
+			*/
 		}
 
 		public boolean isPouring() {

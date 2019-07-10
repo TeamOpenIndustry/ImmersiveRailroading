@@ -19,10 +19,19 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.RegistryManager;
 
 public abstract class Block {
     protected final BlockSettings settings;
     public final net.minecraft.block.Block internal;
+
+    public void register() {
+        ForgeRegistry<net.minecraft.block.Block> blocks = RegistryManager.ACTIVE.getRegistry(GameData.BLOCKS);
+        blocks.register(internal);
+        System.out.println("REGISTER BLOCK" + internal);
+    }
 
     protected class BlockInternal extends net.minecraft.block.Block {
         public BlockInternal() {
@@ -172,14 +181,6 @@ public abstract class Block {
 
     protected BlockInternal getBlock() {
         return new BlockInternal();
-    }
-
-    /*
-    Helper Methods
-     */
-
-    public final String getName() {
-        return internal.getRegistryName().getResourcePath();
     }
 
     /*

@@ -51,6 +51,7 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
+import net.minecraftforge.registries.RegistryManager;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -62,6 +63,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import static net.minecraftforge.registries.GameData.BLOCKS;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
@@ -155,14 +158,10 @@ public abstract class CommonProxy implements IGuiHandler {
 	@SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
     {
-		event.getRegistry().register(IRBlocks.BLOCK_RAIL_GAG.internal);
-		event.getRegistry().register(IRBlocks.BLOCK_RAIL.internal);
-		event.getRegistry().register(IRBlocks.BLOCK_RAIL_PREVIEW.internal);
-		event.getRegistry().register(IRBlocks.BLOCK_MULTIBLOCK.internal);
-    	GameRegistry.registerTileEntity(RailGagInstance.class, IRBlocks.BLOCK_RAIL_GAG.getName());
-    	GameRegistry.registerTileEntity(RailInstance.class, IRBlocks.BLOCK_RAIL.getName());
-    	GameRegistry.registerTileEntity(TileRailPreview.class, IRBlocks.BLOCK_RAIL_PREVIEW.getName());
-    	GameRegistry.registerTileEntity(TileMultiblock.class, IRBlocks.BLOCK_MULTIBLOCK.getName());
+    	IRBlocks.BLOCK_RAIL_GAG.register();
+		IRBlocks.BLOCK_RAIL.register();
+		IRBlocks.BLOCK_RAIL_PREVIEW.register();
+		IRBlocks.BLOCK_MULTIBLOCK.register();
     }
     
     @SubscribeEvent
@@ -309,7 +308,7 @@ public abstract class CommonProxy implements IGuiHandler {
 		case STEAM_LOCOMOTIVE:
 			return new SteamLocomotiveContainer(player.inventory, world.getEntity(entityIDorX, LocomotiveSteam.class));
 		case STEAM_HAMMER:
-			TileMultiblock te = world.getTileEntity(new Vec3i(entityIDorX, y, z), TileMultiblock.class);
+			TileMultiblock te = world.getBlockEntity(new Vec3i(entityIDorX, y, z), TileMultiblock.class);
 			if (te == null) {
 				return null;
 			}

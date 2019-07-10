@@ -134,16 +134,18 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (world.isRemote) {
 				if (craftTe.getRenderTicks() % 10 == 0 && craftTe.getCraftProgress() != 0) {
-					world.playSound(craftTe.getPos().getX(), craftTe.getPos().getY(), craftTe.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					world.playSound(craftTe.pos.x, craftTe.pos.y, craftTe.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
 				}
 				return;
 			}
 			
 			// Decrement craft progress down to 0
 			if (craftTe.getCraftProgress() != 0) {
+				/* TODO CAPABILITIES
 				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 				energy.extractEnergy(32, false);
 				craftTe.setCraftProgress(Math.max(0, craftTe.getCraftProgress() - 1));
+				*/
 			}
 			
 			float progress = craftTe.getCraftProgress();
@@ -199,8 +201,11 @@ public class BoilerRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
+			return true;
+			/* TODO CAPABILITIES
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-			return energy.getEnergyStored() > 32;			
+			return energy.getEnergyStored() > 32;
+			*/
 		}
 		
 		public boolean hasInput() {

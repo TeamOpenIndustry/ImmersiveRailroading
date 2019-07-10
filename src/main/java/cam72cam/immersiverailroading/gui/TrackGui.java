@@ -83,7 +83,7 @@ public class TrackGui extends GuiScreen {
 
 	public TrackGui(World world, int posX, int posY, int posZ) {
 		this.tilePreviewPos = new Vec3i(posX, posY, posZ);
-		TileRailPreview te = world.getTileEntity(tilePreviewPos, TileRailPreview.class);
+		TileRailPreview te = world.getBlockEntity(tilePreviewPos, TileRailPreview.class);
 		if (te != null) {
 			init(te.getItem());
 		}

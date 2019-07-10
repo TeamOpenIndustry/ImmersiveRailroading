@@ -24,7 +24,7 @@ public class ComputerCraft {
             @Nullable
             @Override
             public IPeripheral getPeripheral(@Nonnull World world, @Nonnull BlockPos blockPos, @Nonnull EnumFacing enumFacing) {
-                RailBaseInstance rail = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(blockPos), RailBaseInstance.class);
+                RailBaseInstance rail = cam72cam.mod.world.World.get(world).getBlockEntity(new Vec3i(blockPos), RailBaseInstance.class);
                 if (rail != null) {
                     if (rail.getAugment() == Augment.DETECTOR) {
                         return new DetectorPeripheral(world, blockPos);

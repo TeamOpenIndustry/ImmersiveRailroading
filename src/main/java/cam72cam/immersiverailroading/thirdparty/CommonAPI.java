@@ -22,7 +22,7 @@ public class CommonAPI {
     }
 
     public static CommonAPI create(World world, BlockPos pos, Class<? extends EntityRollingStock> stockClass) {
-        RailBaseInstance te = cam72cam.mod.world.World.get(world).getTileEntity(new Vec3i(pos), RailBaseInstance.class);
+        RailBaseInstance te = cam72cam.mod.world.World.get(world).getBlockEntity(new Vec3i(pos), RailBaseInstance.class);
         if (te != null) {
             EntityRollingStock stock = te.getStockNearBy(stockClass);
             if (stock != null) {

@@ -35,8 +35,8 @@ public class MovementSimulator {
 		if (Math.abs(moveDistance) < 0.001) {
 			boolean isTurnTable;
 			
-			RailBaseInstance frontBase = world.getTileEntity(new Vec3i(front), RailBaseInstance.class);
-			RailBaseInstance rearBase  = world.getTileEntity(new Vec3i(rear),  RailBaseInstance.class);
+			RailBaseInstance frontBase = world.getBlockEntity(new Vec3i(front), RailBaseInstance.class);
+			RailBaseInstance rearBase  = world.getBlockEntity(new Vec3i(rear),  RailBaseInstance.class);
 			isTurnTable = frontBase != null &&
 					frontBase.getParentTile() != null &&
 					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
@@ -125,12 +125,12 @@ public class MovementSimulator {
 			return currentPosition;
 		}
 		// Not using bogey yaw here, is that OK?
-		Vec3d result = new Vec3d(rail.getNextPosition(currentPosition.internal, VecUtil.fromWrongYaw(distance, rotationYaw).internal));
+		net.minecraft.util.math.Vec3d result = rail.getNextPosition(currentPosition.internal, VecUtil.fromWrongYaw(distance, rotationYaw).internal);
 		if (result == null) {
 			position.isOffTrack = true;
 			return currentPosition;
 		}
-		return result;
+		return new Vec3d(result);
 	}
 
 	public Vec3d frontBogeyPosition() {

@@ -159,17 +159,19 @@ public class PlateRollerMultiblock extends Multiblock {
 			
 			if (world.isRemote) {
 				if (craftingTe.getRenderTicks() % 10 == 0 && craftingTe.getCraftProgress() != 0) {
-					world.playSound(craftingTe.getPos().getX(), craftingTe.getPos().getY(), craftingTe.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					world.playSound(craftingTe.pos.x, craftingTe.pos.y, craftingTe.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
 				}
 				return;
 			}
 			
 			// Decrement craft progress down to 0
+			/* TODO HACKS
 			if (craftingTe.getCraftProgress() != 0) {
 				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 				energy.extractEnergy(32, false);
 				craftingTe.setCraftProgress(Math.max(0, craftingTe.getCraftProgress() - 1));
 			}
+			*/
 			
 			float progress = craftingTe.getCraftProgress();
 			
@@ -218,8 +220,11 @@ public class PlateRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
+			return true;
+			/* TODO CAPABILITIES
 			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
 			return energy.getEnergyStored() > 32;
+			*/
 			
 		}
 	}
