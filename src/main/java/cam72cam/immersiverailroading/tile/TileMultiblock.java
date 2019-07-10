@@ -8,9 +8,11 @@ import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import javax.annotation.Nonnull;
 
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.BlockEntityInstance;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.tile.TickableTileEntity;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.entity.Player;
@@ -30,7 +32,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class TileMultiblock extends TickableTileEntity {
+public class TileMultiblock extends BlockEntityInstance.Tickable {
 	
 	private IBlockState replaced;
 	private Vec3i offset;
@@ -77,12 +79,15 @@ public class TileMultiblock extends TickableTileEntity {
     		return val;
     	}
     };
-    
-    @Override
+
+	public TileMultiblock(BlockEntity.Internal internal) {
+		super(internal);
+	}
+
 	public boolean isLoaded() {
-    	return super.isLoaded() && this.name != null;
+    	return this.name != null;
     }
-	
+
 	public void configure(String name, Rotation rot, Vec3i offset, IBlockState replaced) {
 		this.name = name;
 		this.rotation = rot;
@@ -111,14 +116,10 @@ public class TileMultiblock extends TickableTileEntity {
 
             nbt.setInteger("energy", energy.getEnergyStored());
 		}
-
-		super.save(nbt);
 	}
-	
+
 	@Override
 	public void load(TagCompound nbt) {
-		super.load(nbt);
-
 		name = nbt.getString("name");
 		rotation = Rotation.values()[nbt.getInteger("rotation")];
 		offset = nbt.getVec3i("offset");
@@ -137,7 +138,17 @@ public class TileMultiblock extends TickableTileEntity {
 		energy.extractEnergy(energy.getEnergyStored(), false);
 		energy.receiveEnergy(nbt.getInteger("energy"), false);
 	}
-	
+
+	@Override
+	public void writeUpdate(TagCompound nbt) {
+
+	}
+
+	@Override
+	public void readUpdate(TagCompound nbt) {
+
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public double getMaxRenderDistanceSquared() {
@@ -200,7 +211,7 @@ public class TileMultiblock extends TickableTileEntity {
 	 * Event Handlers
 	 */
 	
-	public void onBreak() {
+	public void onBreakEvent() {
 		for (int slot = 0; slot < container.getSlots(); slot ++) {
 			net.minecraft.item.ItemStack item = container.extractItem(slot, Integer.MAX_VALUE, false);
 			if (!item.isEmpty()) {
@@ -329,4 +340,31 @@ public class TileMultiblock extends TickableTileEntity {
 		}
         return super.getCapability(capability, facing);
     }
+
+	@Override
+	public void onBreak() {
+		try {
+			// Multiblock break
+			this.breakBlock();
+		} catch (Exception ex) {
+			ImmersiveRailroading.catching(ex);
+			// Something broke
+			// TODO figure out why
+			world.setToAir(pos);
+		}
+	}
+
+	@Override
+	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
+		return onBlockActivated(player, hand);
+	}
+
+	@Override
+	public ItemStack onPick() {
+		return ItemStack.EMPTY;
+	}
+
+	@Override
+	public void onNeighborChange(Vec3i neighbor) {
+	}
 }

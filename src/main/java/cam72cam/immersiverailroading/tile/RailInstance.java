@@ -6,21 +6,25 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileRail extends TileRailBase {
+public class RailInstance extends RailBaseInstance {
 
 	public RailInfo info;
 	private List<ItemStack> drops;
 
+	public RailInstance(BlockEntity.Internal internal) {
+		super(internal);
+	}
+
+	/* TODO RENDERING SYSTEM
 	@Override
 	@SideOnly(Side.CLIENT)
 	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
@@ -39,6 +43,7 @@ public class TileRail extends TileRailBase {
 	public double getMaxRenderDistanceSquared() {
 		return Math.pow(8*32, 2);
 	}
+	*/
 
 	public void setSwitchState(SwitchState state) {
 		if (state != info.switchState) {
@@ -161,5 +166,12 @@ public class TileRail extends TileRailBase {
 			return 0;
 		}
 		return info.settings.gauge.value();
+	}
+
+
+	@Override
+	public void onBreak() {
+		this.spawnDrops();
+		super.onBreak();
 	}
 }

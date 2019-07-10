@@ -3,6 +3,8 @@ package cam72cam.mod.world;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.block.Block;
+import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.BlockEntityInstance;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.ModdedEntity;
@@ -11,7 +13,6 @@ import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.tile.TileEntity;
 import cam72cam.mod.util.Facing;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
@@ -188,8 +189,25 @@ public class World {
         }
         return null;
     }
-    public void setTileEntity(Vec3i pos, TileEntity tile) {
-        internal.setTileEntity(pos.internal, tile);
+
+    public <T extends BlockEntityInstance> T getBlockEntity(Vec3i pos, Class<T> cls) {
+        BlockEntity.Internal te = getTileEntity(pos, BlockEntity.Internal.class);
+        if (te == null) {
+            return null;
+        }
+        BlockEntityInstance instance = te.instance();
+        if (cls.isInstance(instance)) {
+            return (T) instance;
+        }
+        return null;
+    }
+
+    public <T extends BlockEntityInstance> boolean hasBlockEntity(Vec3i pos, Class<T> cls) {
+        BlockEntity.Internal te = getTileEntity(pos, BlockEntity.Internal.class);
+        if (te == null) {
+            return false;
+        }
+        return cls.isInstance(te.instance());
     }
 
     public void setToAir(Vec3i pos) {

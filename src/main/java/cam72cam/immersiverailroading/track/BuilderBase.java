@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.RailInstance;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
@@ -11,7 +11,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
-import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,7 +101,7 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
-				TileRail rail = info.world.getTileEntity(track.getPos(), TileRail.class);
+				RailInstance rail = info.world.getTileEntity(track.getPos(), RailInstance.class);
 				TagCompound data = new TagCompound();
 				track.placeTrack(false).save(data);
 				rail.setReplaced(data);

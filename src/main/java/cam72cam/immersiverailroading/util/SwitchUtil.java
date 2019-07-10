@@ -3,25 +3,25 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailInstance;
+import cam72cam.immersiverailroading.tile.RailBaseInstance;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 
 public class SwitchUtil {
-	public static SwitchState getSwitchState(TileRail rail) {
+	public static SwitchState getSwitchState(RailInstance rail) {
 		return getSwitchState(rail, null);
 	}
 
-	public static SwitchState getSwitchState(TileRail rail, Vec3d position) {
+	public static SwitchState getSwitchState(RailInstance rail, Vec3d position) {
 		if (rail == null) {
 			return SwitchState.NONE;
 		}
 		if (!rail.isLoaded()) {
 			return SwitchState.NONE;
 		}
-		TileRail parent = rail.getParentTile();
+		RailInstance parent = rail.getParentTile();
 		if (parent == null || !parent.isLoaded()) {
 			return SwitchState.NONE;
 		}
@@ -58,7 +58,7 @@ public class SwitchUtil {
 		return SwitchState.STRAIGHT;
 	}
 
-	public static boolean isRailPowered(TileRail rail) {
+	public static boolean isRailPowered(RailInstance rail) {
 		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
 		double horiz = rail.info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
@@ -68,7 +68,7 @@ public class SwitchUtil {
 		for (int x = -scale; x <= scale; x++) {
 			for (int z = -scale; z <= scale; z++) {
 				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
-				TileRailBase gagRail = rail.world.getTileEntity(gagPos, TileRailBase.class);
+				RailBaseInstance gagRail = rail.world.getTileEntity(gagPos, RailBaseInstance.class);
 				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
 					if (rail.getWorld().isBlockIndirectlyGettingPowered(gagPos.internal) > 0) {
 						return true;

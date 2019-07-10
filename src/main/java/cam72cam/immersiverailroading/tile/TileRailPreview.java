@@ -1,27 +1,38 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.BlockEntityInstance;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.tile.TickableTileEntity;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TileRailPreview extends TickableTileEntity {
+public class TileRailPreview extends BlockEntityInstance.Tickable {
 	private int ticksAlive;
 	private RailInfo info;
 
 	private ItemStack item;
 	private PlacementInfo placementInfo;
 	private PlacementInfo customInfo;
-	
+
+	public TileRailPreview(BlockEntity.Internal internal) {
+		super(internal);
+	}
+
+	/* TODO RENDER
 	@Override
 	@SideOnly(Side.CLIENT)
 	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
@@ -34,6 +45,7 @@ public class TileRailPreview extends TickableTileEntity {
 	{
 		return Double.MAX_VALUE;
 	}
+	*/
 
 	public ItemStack getItem() {
 		return this.item;
@@ -81,8 +93,6 @@ public class TileRailPreview extends TickableTileEntity {
 	
 	@Override
 	public void load(TagCompound nbt) {
-		super.load(nbt);
-		
 		item = new ItemStack(nbt.get("item"));
 		//TODO nbt legacy
 		/*
@@ -105,12 +115,59 @@ public class TileRailPreview extends TickableTileEntity {
 		if (customInfo != null) {
 			nbt.set("customInfo", customInfo.toNBT());
 		}
-
-		super.save(nbt);
 	}
-	
+
+	@Override
+	public void writeUpdate(TagCompound nbt) {
+
+	}
+
+	@Override
+	public void readUpdate(TagCompound nbt) {
+
+	}
+
+	@Override
+	public void onBreak() {
+
+	}
+
+	@Override
+	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
+		if (player.isCrouching()) {
+			Vec3i pos = this.pos;
+			if (world.isServer) {
+				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
+						pos = pos.down();
+					}
+				}
+				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), pos, hit));
+			}
+			return false;
+		} else {
+			return !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE);
+			//TODO player.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL_PREVIEW.ordinal(), worldIn, pos.getX(), pos.getY(), pos.getZ());
+		}
+	}
+
+	@Override
+	public ItemStack onPick() {
+		return item;
+	}
+
+	@Override
+	public double getHeight() {
+		return 0.125;
+	}
+
+	@Override
+	public void onNeighborChange(Vec3i neighbor) {
+
+	}
+
 	public RailInfo getRailRenderInfo() {
-		if (hasWorld() && info.world == null) {
+		if (info.world == null) {
 			info = new RailInfo(world, item, placementInfo, customInfo);
 		}
 		return info;

@@ -28,9 +28,9 @@ import cam72cam.immersiverailroading.render.tile.TileRailPreviewRender;
 import cam72cam.immersiverailroading.render.tile.TileRailRender;
 import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
+import cam72cam.immersiverailroading.tile.RailInstance;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailBaseInstance;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.MinecraftClient;
@@ -253,7 +253,7 @@ public class ClientProxy extends CommonProxy {
 	public static void registerModels(ModelRegistryEvent event) {
 		OBJLoader.INSTANCE.addDomain(ImmersiveRailroading.MODID.toLowerCase());
 
-		ClientRegistry.bindTileEntitySpecialRenderer(TileRail.class, new TileRailRender());
+		ClientRegistry.bindTileEntitySpecialRenderer(RailInstance.class, new TileRailRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
 		
@@ -553,7 +553,7 @@ public class ClientProxy extends CommonProxy {
 				pos = pos.up();
 
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getTileEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getTileEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}
