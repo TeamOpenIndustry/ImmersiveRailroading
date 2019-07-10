@@ -51,7 +51,7 @@ public class BlockUtil {
 			return true;
 		}
 		if (allowFlex && isIRRail(world, pos)) {
-			RailBaseInstance te = world.getTileEntity(pos, RailBaseInstance.class);
+			RailBaseInstance te = world.getBlockEntity(pos, RailBaseInstance.class);
 			return te != null && te.isFlexible();
 		}
 		return false;

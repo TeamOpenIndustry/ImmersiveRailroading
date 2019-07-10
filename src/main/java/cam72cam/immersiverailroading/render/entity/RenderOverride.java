@@ -15,6 +15,8 @@ import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.BlockEntityInstance;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.math.Vec3d;
@@ -144,12 +146,16 @@ public class RenderOverride {
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 	
         List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
-        for (TileEntity te : entities) {
+        for (TileEntity tea : entities) {
+        	if (!(tea instanceof BlockEntity.Internal)) {
+        		continue;
+			}
+			BlockEntityInstance te = ((BlockEntity.Internal) tea).instance();
         	if (te instanceof RailInstance) {
         		if (!((RailInstance) te).isLoaded()) {
         			continue;
         		}
-	        	if (camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((RailInstance) te).pos))) {
+	        	if (true) { // TODO RENDER camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((RailInstance) te).pos))) {
 
 	        		RailInfo info = ((RailInstance) te).info;
 	        		if (info == null) {
@@ -159,7 +165,7 @@ public class RenderOverride {
 
 	        		GL11.glPushMatrix();
 	        		{
-	        	        int i = te.getWorld().getCombinedLight(te.getPos(), 0);
+	        	        int i = te.world.internal.getCombinedLight(te.pos.internal, 0);
 	        	        int j = i % 65536;
 	        	        int k = i / 65536;
 	        	        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
@@ -178,6 +184,7 @@ public class RenderOverride {
         	}
         }
 		blend.restore();
+        /* TODO RENDER
 
         ClientProxy proxy = (ClientProxy) ImmersiveRailroading.proxy;
 		Collection<TileRailPreview> previews = proxy.getPreviews();
@@ -217,6 +224,7 @@ public class RenderOverride {
 		}
 
         Minecraft.getMinecraft().mcProfiler.endSection();;
+        */
 	}
 }
  

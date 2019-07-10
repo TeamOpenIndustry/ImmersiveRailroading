@@ -42,9 +42,9 @@ public class MovementTrack {
 					return te;
 				}
 				// HACK for cross gauge
-				RailBaseInstance rail = world.getTileEntity(new Vec3i(pos).add(new Vec3i(0, (int)(height + (currentPosition.y%1)), 0)), RailBaseInstance.class);
+				RailBaseInstance rail = world.getBlockEntity(new Vec3i(pos).add(new Vec3i(0, (int)(height + (currentPosition.y%1)), 0)), RailBaseInstance.class);
 				if (rail != null && rail.getParentReplaced() != null) {
-					return rail;
+					return (ITrack) rail.internal;
 				}
 			}
 		}

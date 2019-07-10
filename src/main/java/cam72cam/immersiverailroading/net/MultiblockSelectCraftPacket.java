@@ -23,7 +23,7 @@ public class MultiblockSelectCraftPacket extends Packet {
 		ItemStack stack = data.getStack("stack");
 		CraftingMachineMode mode = data.getEnum("mode", CraftingMachineMode.class);
 
-		TileMultiblock tile = getWorld().getTileEntity(pos, TileMultiblock.class);
+		TileMultiblock tile = getWorld().getBlockEntity(pos, TileMultiblock.class);
 		if (tile == null) {
 			ImmersiveRailroading.warn("Got invalid craft update packet at %s", pos);
 			return;

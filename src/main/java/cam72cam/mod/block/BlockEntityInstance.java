@@ -10,7 +10,7 @@ import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 
 public abstract class BlockEntityInstance {
-    private final BlockEntity.Internal internal;
+    public final BlockEntity.Internal internal;
     public final World world;
     public final Vec3i pos;
 
@@ -43,7 +43,7 @@ public abstract class BlockEntityInstance {
         return 1;
     }
 
-    protected void markDirty() {
+    public void markDirty() {
         internal.markDirty();
     }
 }

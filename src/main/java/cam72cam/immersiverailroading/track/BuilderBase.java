@@ -101,7 +101,7 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
-				RailInstance rail = info.world.getTileEntity(track.getPos(), RailInstance.class);
+				RailInstance rail = info.world.getBlockEntity(track.getPos(), RailInstance.class);
 				TagCompound data = new TagCompound();
 				track.placeTrack(false).save(data);
 				rail.setReplaced(data);

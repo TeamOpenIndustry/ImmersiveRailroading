@@ -68,9 +68,9 @@ public class SwitchUtil {
 		for (int x = -scale; x <= scale; x++) {
 			for (int z = -scale; z <= scale; z++) {
 				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
-				RailBaseInstance gagRail = rail.world.getTileEntity(gagPos, RailBaseInstance.class);
-				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
-					if (rail.getWorld().isBlockIndirectlyGettingPowered(gagPos.internal) > 0) {
+				RailBaseInstance gagRail = rail.world.getBlockEntity(gagPos, RailBaseInstance.class);
+				if (gagRail != null && (rail.pos.equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
+					if (rail.world.internal.isBlockIndirectlyGettingPowered(gagPos.internal) > 0) {
 						return true;
 					}
 				}

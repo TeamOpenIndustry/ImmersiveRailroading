@@ -31,7 +31,7 @@ public class ItemRailAugment extends ItemBase {
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
-			RailBaseInstance te = world.getTileEntity(pos, RailBaseInstance.class);
+			RailBaseInstance te = world.getBlockEntity(pos, RailBaseInstance.class);
 			if (te != null) {
 				ItemStack stack = player.getHeldItem(hand);
 				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == ItemGauge.get(stack))) {

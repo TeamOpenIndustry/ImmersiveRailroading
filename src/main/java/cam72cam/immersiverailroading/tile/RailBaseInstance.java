@@ -314,7 +314,8 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	public TagCompound getReplaced() {
 		return replaced;
 	}
-	
+
+	/* TODO HACKS
 	@Override
 	public boolean shouldRefresh(net.minecraft.world.World world, net.minecraft.util.math.BlockPos pos, net.minecraft.block.state.IBlockState oldState, net.minecraft.block.state.IBlockState newState) {
 		// This works around a hack where Chunk does a removeTileEntity directly after calling breakBlock
@@ -324,6 +325,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 		}
 		return super.shouldRefresh(world, pos, oldState, newState);
 	}
+	*/
 	
 	// Called before flex track replacement
 	public void setWillBeReplaced(boolean value) {
@@ -422,6 +424,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 				break;
 			}
 
+			/* TODO HACKS
 			tile = null;
 			Vec3i currentParent = self.getParentTile().getParent();
 			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
@@ -433,6 +436,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 					break;
 				}
 			}
+			*/
 		}
 		return nextPos;
 	}
@@ -440,6 +444,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	/*
 	 * Capabilities tie ins
 	 */
+	/* TODO CAPABILITIES
 	@Override
 	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
 		if (this.getAugment() != null) {
@@ -462,6 +467,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 		}
 		return super.hasCapability(capability, facing);
 	}
+	*/
 	
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type){
 		return world.getEntities((T stock) -> {
@@ -471,7 +477,8 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 			return false;
 		}, type).stream().findFirst().orElse(null);
 	}
-	
+
+	/* TODO CAPABILITIES
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
@@ -506,6 +513,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 		}
 		return super.getCapability(capability, facing);
 	}
+	*/
 	
 	private void balanceTanks() {
 		/*
@@ -966,6 +974,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 				world.setToAir(te.pos.up());
 			}
 		}
+		/* TODO HACKS
 
 		TagCompound data = te.getReplaced();
 		while (true) {
@@ -987,6 +996,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 			te.setWorld(world);
 			data = te.getReplaced();
 		}
+		*/
 	}
 
 }

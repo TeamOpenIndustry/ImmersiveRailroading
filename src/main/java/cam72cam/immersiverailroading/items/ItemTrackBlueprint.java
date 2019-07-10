@@ -77,7 +77,7 @@ public class ItemTrackBlueprint extends ItemBase {
 		pos = pos.up();
 		
 		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			if (!BlockUtil.isIRRail(world, pos.down()) || world.getTileEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
+			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
 				pos = pos.down();
 			}
 		}
@@ -88,7 +88,7 @@ public class ItemTrackBlueprint extends ItemBase {
 				pos = pos.up();
 			}
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
-			TileRailPreview te = world.getTileEntity(pos, TileRailPreview.class);
+			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
 				te.setup(stack, placementInfo);
 			}

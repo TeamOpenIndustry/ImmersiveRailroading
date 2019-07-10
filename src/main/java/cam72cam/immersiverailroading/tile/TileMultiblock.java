@@ -149,11 +149,13 @@ public class TileMultiblock extends BlockEntityInstance.Tickable {
 
 	}
 
+	/* TODO RENDER
 	@Override
 	@SideOnly(Side.CLIENT)
 	public double getMaxRenderDistanceSquared() {
 		return Math.pow(ImmersiveRailroading.proxy.getRenderDistance()*16, 2);
 	}
+	*/
 
 	@Override
 	public void update() {
@@ -165,11 +167,13 @@ public class TileMultiblock extends BlockEntityInstance.Tickable {
 		this.getMultiblock().tick(offset.internal);
 	}
 
+	/* TODO RENDER
     @SideOnly(Side.CLIENT)
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
     	return INFINITE_EXTENT_AABB;
     }
+    */
 	
 	public Vec3i getOrigin() {
 		return pos.subtract(offset.rotate(rotation));
@@ -278,7 +282,8 @@ public class TileMultiblock extends BlockEntityInstance.Tickable {
 	/*
 	 * Capabilities
 	 */
-	
+
+	/* TODO CAPABILITIES
 	@Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
 		if (this.isLoaded()) {
@@ -340,6 +345,7 @@ public class TileMultiblock extends BlockEntityInstance.Tickable {
 		}
         return super.getCapability(capability, facing);
     }
+    */
 
 	@Override
 	public void onBreak() {

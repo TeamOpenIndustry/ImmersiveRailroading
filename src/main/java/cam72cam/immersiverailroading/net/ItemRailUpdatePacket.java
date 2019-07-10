@@ -30,7 +30,7 @@ public class ItemRailUpdatePacket extends Packet {
 		RailSettings settings = new RailSettings(data.get("settings"));
 		if (data.hasKey("pos")) {
 			Vec3i pos = data.getVec3i("pos");
-			TileRailPreview tile = this.getWorld().getTileEntity(pos, TileRailPreview.class);
+			TileRailPreview tile = this.getWorld().getBlockEntity(pos, TileRailPreview.class);
 			ItemStack stack = tile.getItem();
 			ItemTrackBlueprint.settings(stack, settings);
 			tile.setItem(stack);

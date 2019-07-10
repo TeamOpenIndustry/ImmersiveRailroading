@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.tile.RailInstance;
 import cam72cam.immersiverailroading.tile.RailBaseInstance;
 import cam72cam.immersiverailroading.tile.RailGagInstance;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.Block;
@@ -48,7 +49,7 @@ public abstract class TrackBase {
 	}
 
 	public boolean isOverTileRail() {
-		return builder.info.world.getTileEntity(getPos(), RailInstance.class) != null && this instanceof TrackGag;
+		return builder.info.world.getBlockEntity(getPos(), RailInstance.class) != null && this instanceof TrackGag;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -62,9 +63,11 @@ public abstract class TrackBase {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			RailGagInstance tr = new RailGagInstance();
-			tr.setPos(pos);
-			tr.setWorld(builder.info.world);
+			BlockEntity<RailGagInstance>.Internal te = IRBlocks.BLOCK_RAIL_GAG.getTile();
+			te.setPos(pos);
+			te.setWorld(builder.info.world);
+			//TODO setup so instance works!!
+			RailGagInstance tr = te.instance();
 			if (parent != null) {
 				tr.setParent(parent);
 			} else {
@@ -86,7 +89,7 @@ public abstract class TrackBase {
 		RailBaseInstance te = null;
 		if (removed != null) {
 			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
-				te = builder.info.world.getTileEntity(pos, RailBaseInstance.class);
+				te = builder.info.world.getBlockEntity(pos, RailBaseInstance.class);
 				if (te != null) {
 					replaced = new TagCompound();
 					te.save(replaced);
@@ -104,7 +107,7 @@ public abstract class TrackBase {
             te.setWillBeReplaced(false);
         }
 
-		RailBaseInstance tr = builder.info.world.getTileEntity(pos, RailBaseInstance.class);
+		RailBaseInstance tr = builder.info.world.getBlockEntity(pos, RailBaseInstance.class);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);

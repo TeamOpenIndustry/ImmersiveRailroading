@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.RailBaseInstance;
-import cam72cam.immersiverailroading.tile.RailGagInstance;
 import cam72cam.immersiverailroading.tile.RailInstance;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.BlockSettings;
@@ -11,14 +10,13 @@ import cam72cam.mod.block.Material;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 import trackapi.lib.ITrack;
 
 import java.util.function.Function;
 
-public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEntity<T> {
-	public BlockRailBase(BlockSettings settings, Function<Internal, T> constructData) {
+public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEntity.Tickable<T> {
+	public BlockRailBase(BlockSettings settings, Function<BlockEntity<T>.Internal, T> constructData) {
 		super(settings
                 .withConnectable(false)
                 .withMaterial(Material.METAL)
@@ -65,7 +63,7 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
     }
 
     @Override
-    protected Internal getTile() {
+    public Internal getTile() {
         return new RailBlockEntityInternal();
     }
 
@@ -91,6 +89,7 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
             RailBaseInstance rail = world.getBlockEntity(pos, RailBaseInstance.class);
             if (rail != null) {
                 if (rail.getReplaced() != null) {
+                    /* TODO HACKS
                     // new object here is important
                     RailGagInstance newGag = new RailGagInstance();
                     newGag.load(rail.getReplaced());
@@ -111,6 +110,7 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
                         newGag = new RailGagInstance();
                         newGag.load(data);
                     }
+                    */
                 }
             }
         } catch (StackOverflowError ex) {

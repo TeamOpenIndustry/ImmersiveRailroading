@@ -14,6 +14,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -21,6 +22,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
@@ -32,6 +34,13 @@ public abstract class BlockEntity<T extends BlockEntityInstance> extends Block {
     public BlockEntity(BlockSettings settings, Function<Internal, T> constructData) {
         super(settings);
         this.instance = constructData;
+    }
+
+    public void register() {
+        super.register();
+        System.out.println(getTile().getClass());
+        System.out.println(internal.getRegistryName());
+        GameRegistry.registerTileEntity(getTile().getClass(), internal.getRegistryName().getResourcePath());
     }
 
     /*
@@ -142,9 +151,15 @@ public abstract class BlockEntity<T extends BlockEntityInstance> extends Block {
         public void load(TagCompound data) {
             super.readFromNBT(data.internal);
             pos = new Vec3i(super.pos);
+            if (instance() != null) {
+                instance().load(data);
+            }
         }
         public void save(TagCompound data) {
             super.writeToNBT(data.internal);
+            if (instance() != null) {
+                instance().save(data);
+            }
         }
 
         @Override
@@ -157,8 +172,8 @@ public abstract class BlockEntity<T extends BlockEntityInstance> extends Block {
         }
         @Override
         public void setPos(BlockPos pos) {
-            this.pos = new Vec3i(pos);
             super.setPos(pos);
+            this.pos = new Vec3i(pos);
         }
         public void setPos(Vec3i pos) {
             super.setPos(pos.internal);
@@ -178,8 +193,14 @@ public abstract class BlockEntity<T extends BlockEntityInstance> extends Block {
         }
 
         public void writeUpdate(TagCompound nbt) {
+            if (instance() != null) {
+                instance().writeUpdate(nbt);
+            }
         }
         public void readUpdate(TagCompound nbt) {
+            if (instance() != null) {
+                instance().readUpdate(nbt);
+            }
         }
 
 

@@ -91,7 +91,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
-			RailBaseInstance te = world.getTileEntity(pos, RailBaseInstance.class);
+			RailBaseInstance te = world.getBlockEntity(pos, RailBaseInstance.class);
 			if (te.getAugment() != null) {
 				switch(te.getAugment()) {
 				case DETECTOR:

@@ -8,4 +8,11 @@ public class BlockRail extends BlockRailBase<RailInstance> {
 	public BlockRail() {
 		super(new BlockSettings(ImmersiveRailroading.MODID, "block_rail"), RailInstance::new);
 	}
+
+	@Override
+	public Internal getTile() {
+		return new RailBlockEntityInternal() {
+
+		};
+	}
 }

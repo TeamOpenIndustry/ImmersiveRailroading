@@ -20,7 +20,7 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
-public class TileMultiblockRender extends TileEntitySpecialRenderer<TileMultiblock> {
+public class TileMultiblockRender {/*extends TileEntitySpecialRenderer<TileMultiblock> {
 	
 	public final Map<String, IMultiblockRender> renderers = new HashMap<String, IMultiblockRender>();
 	
@@ -47,5 +47,5 @@ public class TileMultiblockRender extends TileEntitySpecialRenderer<TileMultiblo
 				blend.restore();
 			}
 		}
-	}
+	}*/
 }

@@ -153,19 +153,19 @@ public class ClientProxy extends CommonProxy {
 		case RAIL_PREVIEW:
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		case STEAM_HAMMER:
-			te = world.getTileEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
+			te = world.getBlockEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
 			if (te == null || !te.isLoaded()) {
 				return null;
 			}
 			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, te));
 		case PLATE_ROLLER:
-			te = world.getTileEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
+			te = world.getBlockEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
 			if (te == null || !te.isLoaded()) {
 				return null;
 			}
 			return new PlateRollerGUI(te);
 		case CASTING:
-			te = world.getTileEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
+			te = world.getBlockEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
 			if (te == null || !te.isLoaded()) {
 				return null;
 			}
@@ -253,9 +253,11 @@ public class ClientProxy extends CommonProxy {
 	public static void registerModels(ModelRegistryEvent event) {
 		OBJLoader.INSTANCE.addDomain(ImmersiveRailroading.MODID.toLowerCase());
 
+		/* TODO RENDER
 		ClientRegistry.bindTileEntitySpecialRenderer(RailInstance.class, new TileRailRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
+		*/
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.getRegistryName().internal, ""));
@@ -553,7 +555,7 @@ public class ClientProxy extends CommonProxy {
 				pos = pos.up();
 
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getTileEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}
@@ -779,6 +781,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void addPreview(int dimension, TileRailPreview preview) {
+		/* TODO HACKS
 		if (!previews.containsKey(dimension)) {
 			previews.put(dimension, new ExpireableList<BlockPos, TileRailPreview>() {
 				@Override
@@ -792,13 +795,14 @@ public class ClientProxy extends CommonProxy {
 			});
 		}
 		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(dimension);
-		TileRailPreview curr = pvs.get(preview.getPos());
+		TileRailPreview curr = pvs.get(preview.pos.internal);
 		if (curr != null) {
 			if (curr.writeToNBT(new NBTTagCompound()).equals(preview.writeToNBT(new NBTTagCompound()))) {
 				preview = curr;
 			}
 		}
-		previews.get(dimension).put(preview.getPos(), preview);
+		previews.get(dimension).put(preview.pos.internal, preview);
+		*/
 	}
 	public Collection<TileRailPreview> getPreviews() {
 		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(Minecraft.getMinecraft().player.dimension);
