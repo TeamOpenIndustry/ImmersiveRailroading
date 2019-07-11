@@ -1,22 +1,23 @@
 package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
-import cam72cam.immersiverailroading.tile.RailInstance;
-import cam72cam.mod.block.BlockEntity;
-import cam72cam.mod.block.BlockSettings;
-import cam72cam.mod.block.IBreakCancelable;
-import cam72cam.mod.block.Material;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.mod.block.*;
+import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.block.tile.TileEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Identifier;
 import cam72cam.mod.world.World;
+import scala.reflect.internal.Trees;
 import trackapi.lib.ITrack;
 
 import java.util.function.Function;
 
-public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEntity.Tickable<T> {
-	public BlockRailBase(BlockSettings settings, Function<BlockEntity<T>.Internal, T> constructData) {
+public abstract class BlockRailBase extends BlockTypeTickable {
+	BlockRailBase(BlockSettings settings, Function<TileEntity, BlockEntity> constructData) {
 		super(settings
                 .withConnectable(false)
                 .withMaterial(Material.METAL)
@@ -27,11 +28,11 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
 
 	/*
 
-	Custom Block for IBreakCancellable
+	Custom BlockType for IBreakCancellable
 
 	 */
 
-    protected class RailBlockInternal extends BlockEntityInternal implements IBreakCancelable {
+    protected class RailBlockInternal extends BlockTypeInternal implements IBreakCancelable {
         @Override
         public boolean tryBreak(World world, Vec3i pos, Player player) {
             return BlockRailBase.this.tryBreak(world, pos, player);
@@ -49,22 +50,27 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
 
      */
 
-    protected class RailBlockEntityInternal extends Internal implements ITrack {
+    public static class TileEntityRailBlock extends TileEntityTickable implements ITrack {
 
         @Override
         public double getTrackGauge() {
-            return instance() instanceof RailBaseInstance ? ((RailBaseInstance)instance()).getTrackGauge() : 0;
+            return instance() instanceof RailBase ? ((RailBase)instance()).getTrackGauge() : 0;
         }
 
         @Override
         public net.minecraft.util.math.Vec3d getNextPosition(net.minecraft.util.math.Vec3d pos, net.minecraft.util.math.Vec3d mot) {
-            return instance() instanceof RailBaseInstance ? ((RailBaseInstance)instance()).getNextPosition(new Vec3d(pos), new Vec3d(mot)).internal : pos;
+            return instance() instanceof RailBase ? ((RailBase)instance()).getNextPosition(new Vec3d(pos), new Vec3d(mot)).internal : pos;
+        }
+
+        @Override
+        public Identifier getName() {
+            return new Identifier(ImmersiveRailroading.MODID, "tile_track");
         }
     }
 
     @Override
-    public Internal getTile() {
-        return new RailBlockEntityInternal();
+    public TileEntity getTile() {
+        return new TileEntityRailBlock();
     }
 
     /*
@@ -74,8 +80,8 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
      */
 
 
-	public static void breakParentIfExists(RailBaseInstance te) {
-		RailInstance parent = te.getParentTile();
+	public static void breakParentIfExists(RailBase te) {
+		Rail parent = te.getParentTile();
 		if (parent != null && !te.getWillBeReplaced()) {
             parent.spawnDrops();
             //if (tryBreak(te.getWorld(), te.getPos())) {
@@ -86,15 +92,15 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
 
     public boolean tryBreak(World world, Vec3i pos, Player player) {
         try {
-            RailBaseInstance rail = world.getBlockEntity(pos, RailBaseInstance.class);
+            RailBase rail = world.getBlockEntity(pos, RailBase.class);
             if (rail != null) {
                 if (rail.getReplaced() != null) {
                     /* TODO HACKS
                     // new object here is important
-                    RailGagInstance newGag = new RailGagInstance();
+                    RailGag newGag = new RailGag();
                     newGag.load(rail.getReplaced());
                     while(true) {
-                        if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), RailInstance.class)) {
+                        if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), Rail.class)) {
                             rail.world.setTileEntity(pos, newGag);
                             newGag.markDirty();
                             breakParentIfExists(rail);
@@ -107,7 +113,7 @@ public abstract class BlockRailBase<T extends RailBaseInstance> extends BlockEnt
                             break;
                         }
 
-                        newGag = new RailGagInstance();
+                        newGag = new RailGag();
                         newGag.load(data);
                     }
                     */

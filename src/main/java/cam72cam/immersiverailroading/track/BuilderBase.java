@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.RailInstance;
+import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
@@ -101,7 +101,7 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
-				RailInstance rail = info.world.getBlockEntity(track.getPos(), RailInstance.class);
+				Rail rail = info.world.getBlockEntity(track.getPos(), Rail.class);
 				TagCompound data = new TagCompound();
 				track.placeTrack(false).save(data);
 				rail.setReplaced(data);

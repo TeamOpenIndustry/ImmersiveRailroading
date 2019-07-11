@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -15,12 +15,12 @@ import cam72cam.mod.util.TagCompound;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RailInstance extends RailBaseInstance {
+public class Rail extends RailBase {
 
 	public RailInfo info;
 	private List<ItemStack> drops;
 
-	public RailInstance(BlockEntity.Internal internal) {
+	public Rail(TileEntity internal) {
 		super(internal);
 	}
 

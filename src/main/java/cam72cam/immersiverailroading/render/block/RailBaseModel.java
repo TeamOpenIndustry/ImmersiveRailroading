@@ -6,10 +6,10 @@ import java.util.List;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.render.BakedScaledModel;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
-import cam72cam.immersiverailroading.tile.RailInstance;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.BlockTypeEntity;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.Facing;
@@ -37,12 +37,12 @@ public class RailBaseModel implements IBakedModel {
 			return EMPTY;
 		}
 		IExtendedBlockState railState = (IExtendedBlockState)state;
-		Object data = railState.getValue(BlockEntity.BLOCK_DATA);
+		Object data = railState.getValue(BlockTypeEntity.BLOCK_DATA);
 		if (data == null) {
 			return EMPTY;
 		}
 
-        RailBaseInstance te = (RailBaseInstance) data;
+        RailBase te = (RailBase) data;
 		ItemStack bed = te.getRenderRailBed();
 		if (bed == null) {
             // wait for tile to be initialized
@@ -56,7 +56,7 @@ public class RailBaseModel implements IBakedModel {
 		double gauged = te.getRenderGauge();
 		double liquid = te.getTankLevel();
 		Facing facing = Facing.NORTH;
-		RailInstance parent = te.getParentTile();
+		Rail parent = te.getParentTile();
 		if (parent != null) {
 			if (parent.info.placementInfo.facing().getAxis() == Axis.X) {
 				if (parent.pos.z == te.pos.z) {

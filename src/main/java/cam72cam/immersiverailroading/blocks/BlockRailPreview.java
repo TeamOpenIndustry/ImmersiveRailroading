@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.BlockTypeEntity;
 import cam72cam.mod.block.BlockSettings;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.block.Material;
@@ -10,7 +10,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
-public class BlockRailPreview extends BlockEntity<TileRailPreview> {
+public class BlockRailPreview extends BlockTypeEntity {
 	public BlockRailPreview() {
 		super(new BlockSettings(ImmersiveRailroading.MODID, "block_rail_preview")
 				.withMaterial(Material.WOOL)
@@ -22,7 +22,7 @@ public class BlockRailPreview extends BlockEntity<TileRailPreview> {
 
 	/*
 
-	Custom Block for IBreakCancellable
+	Custom BlockType for IBreakCancellable
 
 	 */
 

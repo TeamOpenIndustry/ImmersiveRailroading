@@ -8,8 +8,8 @@ import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
-import cam72cam.immersiverailroading.tile.RailInstance;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
@@ -29,7 +29,7 @@ public class ItemLargeWrench extends ItemBase {
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
-			RailBaseInstance te = world.getBlockEntity(pos, RailBaseInstance.class);
+			RailBase te = world.getBlockEntity(pos, RailBase.class);
 			if (te != null) {
 				Augment augment = te.getAugment();
 				if (augment != null) {
@@ -43,7 +43,7 @@ public class ItemLargeWrench extends ItemBase {
 					}
 					return ClickResult.ACCEPTED;
 				}
-				RailInstance parent = te.getParentTile();
+				Rail parent = te.getParentTile();
 				if (world.isServer) {
 					if (parent != null && parent.info.settings.type == TrackItems.TURNTABLE) {
 						parent.nextTablePos(player.isCrouching());

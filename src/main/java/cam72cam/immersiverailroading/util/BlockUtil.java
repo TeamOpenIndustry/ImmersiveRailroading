@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
@@ -51,7 +51,7 @@ public class BlockUtil {
 			return true;
 		}
 		if (allowFlex && isIRRail(world, pos)) {
-			RailBaseInstance te = world.getBlockEntity(pos, RailBaseInstance.class);
+			RailBase te = world.getBlockEntity(pos, RailBase.class);
 			return te != null && te.isFlexible();
 		}
 		return false;

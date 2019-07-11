@@ -1,18 +1,15 @@
 package cam72cam.immersiverailroading.render.tile;
 
-import cam72cam.immersiverailroading.tile.RailInstance;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-
-public class TileRailRender {/*extends TileEntitySpecialRenderer<RailInstance> {
+public class TileRailRender {/*extends TileEntitySpecialRenderer<Rail> {
 	
 	@Override
-	public boolean isGlobalRenderer(RailInstance te) {
+	public boolean isGlobalRenderer(Rail te) {
 		return true;
 	}
 	
 
 	@Override
-	public void render(RailInstance te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+	public void render(Rail te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		//NOP
 	}*/
 }

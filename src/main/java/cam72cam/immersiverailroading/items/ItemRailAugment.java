@@ -9,8 +9,8 @@ import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.tile.RailInstance;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
@@ -31,12 +31,12 @@ public class ItemRailAugment extends ItemBase {
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
-			RailBaseInstance te = world.getBlockEntity(pos, RailBaseInstance.class);
+			RailBase te = world.getBlockEntity(pos, RailBase.class);
 			if (te != null) {
 				ItemStack stack = player.getHeldItem(hand);
 				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == ItemGauge.get(stack))) {
 					Augment augment = ItemAugmentType.get(stack);
-					RailInstance parent = te.getParentTile();
+					Rail parent = te.getParentTile();
 					if (parent == null) {
 						return ClickResult.REJECTED;
 					}

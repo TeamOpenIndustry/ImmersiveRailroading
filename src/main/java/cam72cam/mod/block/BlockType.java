@@ -23,14 +23,17 @@ import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.RegistryManager;
 
-public abstract class Block {
+public abstract class BlockType {
     protected final BlockSettings settings;
     public final net.minecraft.block.Block internal;
 
     public void register() {
         ForgeRegistry<net.minecraft.block.Block> blocks = RegistryManager.ACTIVE.getRegistry(GameData.BLOCKS);
         blocks.register(internal);
-        System.out.println("REGISTER BLOCK" + internal);
+    }
+
+    public String getName() {
+        return settings.name;
     }
 
     protected class BlockInternal extends net.minecraft.block.Block {
@@ -44,16 +47,16 @@ public abstract class Block {
 
         @Override
         public final void breakBlock(net.minecraft.world.World world, BlockPos pos, IBlockState state) {
-            Block.this.onBreak(World.get(world), new Vec3i(pos));
+            BlockType.this.onBreak(World.get(world), new Vec3i(pos));
             super.breakBlock(world, pos, state);
         }
         @Override
         public final boolean onBlockActivated(net.minecraft.world.World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-            return Block.this.onClick(World.get(world), new Vec3i(pos), new Player(player), Hand.from(hand), Facing.from(facing), new Vec3d(hitX, hitY, hitZ));
+            return BlockType.this.onClick(World.get(world), new Vec3i(pos), new Player(player), Hand.from(hand), Facing.from(facing), new Vec3d(hitX, hitY, hitZ));
         }
         @Override
         public final net.minecraft.item.ItemStack getPickBlock(IBlockState state, RayTraceResult target, net.minecraft.world.World world, BlockPos pos, EntityPlayer player) {
-            return Block.this.onPick(World.get(world), new Vec3i(pos)).internal;
+            return BlockType.this.onPick(World.get(world), new Vec3i(pos)).internal;
         }
         @Override
         public void neighborChanged(IBlockState state, net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.block.Block blockIn, BlockPos fromPos) {
@@ -61,7 +64,7 @@ public abstract class Block {
         }
         @Override
         public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor){
-            Block.this.onNeighborChange(World.get((net.minecraft.world.World) world), new Vec3i(pos), new Vec3i(neighbor));
+            BlockType.this.onNeighborChange(World.get((net.minecraft.world.World) world), new Vec3i(pos), new Vec3i(neighbor));
         }
 
             /*
@@ -92,12 +95,12 @@ public abstract class Block {
 
         @Override
         public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-            return new AxisAlignedBB(0, 0, 0, 1, Block.this.getHeight(), 1);
+            return new AxisAlignedBB(0, 0, 0, 1, BlockType.this.getHeight(), 1);
         }
 
         @Override
         public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-            return new AxisAlignedBB(0, 0, 0, 1, Block.this.getHeight(), 1);
+            return new AxisAlignedBB(0, 0, 0, 1, BlockType.this.getHeight(), 1);
         }
 
         @Override
@@ -173,7 +176,7 @@ public abstract class Block {
 
     }
 
-    public Block(BlockSettings settings) {
+    public BlockType(BlockSettings settings) {
         this.settings = settings;
 
         internal = getBlock();

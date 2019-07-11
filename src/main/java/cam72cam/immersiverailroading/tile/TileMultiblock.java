@@ -5,11 +5,9 @@ import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 
-import javax.annotation.Nonnull;
-
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
-import cam72cam.mod.block.BlockEntity;
-import cam72cam.mod.block.BlockEntityInstance;
+import cam72cam.mod.block.BlockEntityTickable;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -21,18 +19,10 @@ import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class TileMultiblock extends BlockEntityInstance.Tickable {
+public class TileMultiblock extends BlockEntityTickable {
 	
 	private IBlockState replaced;
 	private Vec3i offset;
@@ -80,7 +70,7 @@ public class TileMultiblock extends BlockEntityInstance.Tickable {
     	}
     };
 
-	public TileMultiblock(BlockEntity.Internal internal) {
+	public TileMultiblock(TileEntity internal) {
 		super(internal);
 	}
 
@@ -199,7 +189,7 @@ public class TileMultiblock extends BlockEntityInstance.Tickable {
 	}
 
 	/*
-	 * Block Functions to pass on to the multiblock
+	 * BlockType Functions to pass on to the multiblock
 	 */
 	public void breakBlock() {
 		if (getMultiblock() != null) {

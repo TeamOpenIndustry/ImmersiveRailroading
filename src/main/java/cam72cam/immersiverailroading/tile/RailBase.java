@@ -12,8 +12,8 @@ import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
-import cam72cam.mod.block.BlockEntity;
-import cam72cam.mod.block.BlockEntityInstance;
+import cam72cam.mod.block.BlockEntityTickable;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
@@ -29,13 +29,9 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -43,7 +39,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RailBaseInstance extends BlockEntityInstance.Tickable {
+public class RailBase extends BlockEntityTickable {
 	private Vec3i parent;
 	private float bedHeight = 0;
 	private float railHeight = 0;
@@ -65,7 +61,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	private int ticksExisted;
 	public boolean blockUpdate;
 
-	public RailBaseInstance(BlockEntity.Internal internal) {
+	public RailBase(TileEntity internal) {
 		super(internal);
 	}
 
@@ -86,12 +82,12 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	}
 	public double getRenderGauge() {
 		double gauge = 0;
-		RailInstance parent = this.getParentTile();
+		Rail parent = this.getParentTile();
 		if (parent != null) {
 			gauge = parent.info.settings.gauge.value();
 		}
 		if (this.getParentReplaced() != null && world != null) {
-			parent = world.getBlockEntity(this.getParentReplaced(), RailInstance.class);
+			parent = world.getBlockEntity(this.getParentReplaced(), Rail.class);
             if (parent != null) {
                 gauge = Math.min(gauge, parent.info.settings.gauge.value());
             }
@@ -176,12 +172,12 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	}
 	
 	public boolean isFlexible() {
-		return this.flexible || !(this instanceof RailInstance);
+		return this.flexible || !(this instanceof Rail);
 	}
 	
 	public ItemStack getRenderRailBed() {
 		if (railBedCache == null) {
-			RailInstance pt = this.getParentTile();
+			Rail pt = this.getParentTile();
 			if (pt != null) {
 				railBedCache = pt.info.settings.railBed;
 			}
@@ -298,11 +294,11 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 		nbt.setInteger("version", 3);
 	}
 
-	public RailInstance getParentTile() {
+	public Rail getParentTile() {
 		if (this.getParent() == null) {
 			return null;
 		}
-		RailInstance te = world.getBlockEntity(this.getParent(), RailInstance.class);
+		Rail te = world.getBlockEntity(this.getParent(), Rail.class);
 		if (te == null || !te.isLoaded()) {
 			return null;
 		}
@@ -379,7 +375,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	}
 	
 	public double getTrackGauge() {
-		RailInstance parent = this.getParentTile();
+		Rail parent = this.getParentTile();
 		if (parent != null) {
 			return parent.info.settings.gauge.value();
 		}
@@ -391,8 +387,8 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 		float rotationYaw = VecUtil.toWrongYaw(motion);
 		Vec3d nextPos = currentPosition;
 
-		RailBaseInstance self = this;
-		RailInstance tile = this instanceof RailInstance ? (RailInstance) this : this.getParentTile();
+		RailBase self = this;
+		Rail tile = this instanceof Rail ? (Rail) this : this.getParentTile();
 
 		while(tile != null) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
@@ -424,11 +420,11 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 				break;
 			}
 
+            tile = null;
 			/* TODO HACKS
-			tile = null;
 			Vec3i currentParent = self.getParentTile().getParent();
 			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
-				self = new RailBaseInstance();
+				self = new RailBase();
 				self.readFromNBT(data.internal);
 				self.setWorld(world);
 				if (!currentParent.equals(self.getParent())) {
@@ -518,7 +514,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	private void balanceTanks() {
 		/*
 		for (Facing facing : Facing.values()) {
-			RailBaseInstance neighbor = world.getTileEntity(pos.offset(facing), RailBaseInstance.class);
+			RailBase neighbor = world.getTileEntity(pos.offset(facing), RailBase.class);
 			if (neighbor != null && neighbor.augmentTank != null) {
 				if (neighbor.augmentTank.getContents().getAmount() + 1 < augmentTank.getContents().getAmount()) {
 					transferAllFluid(augmentTank, neighbor.augmentTank, (augmentTank.getContents().getAmount() - neighbor.augmentTank.getContents().getAmount())/2);
@@ -575,7 +571,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 			if (world.isAir(npos) || BlockUtil.isIRRail(world, npos)) {
 				continue;
 			}
-			TileEntity nte = world.getTileEntity(npos, TileEntity.class);
+			net.minecraft.tileentity.TileEntity nte = world.getTileEntity(npos, net.minecraft.tileentity.TileEntity.class);
 			if (nte == null) {
 				continue;
 			}
@@ -621,8 +617,8 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 				return;
 			}
 			
-			if (Config.ConfigDamage.requireSolidBlocks && this instanceof RailInstance) {
-				double floating = ((RailInstance)this).percentFloating();
+			if (Config.ConfigDamage.requireSolidBlocks && this instanceof Rail) {
+				double floating = ((Rail)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
 					if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(world, pos, null)) {
 						world.breakBlock(pos);
@@ -824,7 +820,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	}
 
 	public SwitchState cycleSwitchForced() {
-		RailInstance tileSwitch = this.findSwitchParent();
+		Rail tileSwitch = this.findSwitchParent();
 		SwitchState newForcedState = SwitchState.NONE;
 
 		if (tileSwitch != null) {
@@ -839,7 +835,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	}
 
 	public boolean isSwitchForced() {
-		RailInstance tileSwitch = this.findSwitchParent();
+		Rail tileSwitch = this.findSwitchParent();
 		if (tileSwitch != null) {
 			return tileSwitch.info.switchForced != SwitchState.NONE;
 		} else {
@@ -848,23 +844,23 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	}
 
 	/** Finds a parent of <code>this</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
-	 * @return parent RailInstance where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 * @return parent Rail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
-	public RailInstance findSwitchParent() {
+	public Rail findSwitchParent() {
 		return findSwitchParent(this);
 	}
 
 	/** Finds a parent of <code>cur</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
-	 * @param cur RailBaseInstance whose parents are to be traversed
-	 * @return parent RailInstance where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
+	 * @param cur RailBase whose parents are to be traversed
+	 * @return parent Rail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
-	public RailInstance findSwitchParent(RailBaseInstance cur) {
+	public Rail findSwitchParent(RailBase cur) {
 		if (cur == null) {
 			return null;
 		}
 
-		if (cur instanceof RailInstance) {
-			RailInstance curTR = (RailInstance) cur;
+		if (cur instanceof Rail) {
+			Rail curTR = (Rail) cur;
 			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
 				return curTR;
 			}
@@ -890,8 +886,8 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 
 	@Override
 	public void onBreak() {
-		if (this instanceof RailInstance) {
-			((RailInstance) this).spawnDrops();
+		if (this instanceof Rail) {
+			((Rail) this).spawnDrops();
 		}
 
 		BlockRailBase.breakParentIfExists(this);
@@ -901,7 +897,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
 		if (stack.is(IRItems.ITEM_SWITCH_KEY)) {
-			RailInstance tileSwitch = this.findSwitchParent();
+			Rail tileSwitch = this.findSwitchParent();
 			if (tileSwitch != null) {
 				SwitchState switchForced = this.cycleSwitchForced();
 				if (this.world.isServer) {
@@ -950,7 +946,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 			return stack;
 		}
 
-		RailInstance parent = this.getParentTile();
+		Rail parent = this.getParentTile();
 		if (parent == null) {
 			return stack;
 		}
@@ -960,7 +956,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 
 	@Override
 	public void onNeighborChange(Vec3i neighbor) {
-		RailBaseInstance te = this;
+		RailBase te = this;
 
 		World world = te.world;
 		if (world.isClient) {
@@ -979,9 +975,9 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 		TagCompound data = te.getReplaced();
 		while (true) {
 			if (te.getParentTile() != null && te.getParentTile().getParentTile() != null) {
-				RailInstance switchTile = te.getParentTile();
-				if (te instanceof RailInstance) {
-					switchTile = (RailInstance) te;
+				Rail switchTile = te.getParentTile();
+				if (te instanceof Rail) {
+					switchTile = (Rail) te;
 				}
 				SwitchState state = SwitchUtil.getSwitchState(switchTile);
 				if (state != SwitchState.NONE) {
@@ -991,7 +987,7 @@ public class RailBaseInstance extends BlockEntityInstance.Tickable {
 			if (data == null) {
 				break;
 			}
-			te = new RailBaseInstance();
+			te = new RailBase();
 			te.load(data);
 			te.setWorld(world);
 			data = te.getReplaced();

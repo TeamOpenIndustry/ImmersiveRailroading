@@ -3,11 +3,11 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.tile.RailInstance;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
-import cam72cam.immersiverailroading.tile.RailGagInstance;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.RailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.Block;
@@ -42,14 +42,14 @@ public abstract class TrackBase {
             solidNotRequired ||
             // Valid block beneath
             builder.info.world.isTopSolid(pos.down()) ||
-            // Block below is replaceable and we will replace it with something
+            // BlockType below is replaceable and we will replace it with something
             (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && !builder.info.settings.railBedFill.isEmpty()) ||
-            // Block below is an IR Rail
+            // BlockType below is an IR Rail
             BlockUtil.isIRRail(builder.info.world, pos.down());
 	}
 
 	public boolean isOverTileRail() {
-		return builder.info.world.getBlockEntity(getPos(), RailInstance.class) != null && this instanceof TrackGag;
+		return builder.info.world.getBlockEntity(getPos(), Rail.class) != null && this instanceof TrackGag;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -59,15 +59,15 @@ public abstract class TrackBase {
 		return isDownSolid() && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
-	public RailBaseInstance placeTrack(boolean actuallyPlace) {
+	public RailBase placeTrack(boolean actuallyPlace) {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			BlockEntity<RailGagInstance>.Internal te = IRBlocks.BLOCK_RAIL_GAG.getTile();
+			TileEntity te = IRBlocks.BLOCK_RAIL_GAG.getTile();
 			te.setPos(pos);
 			te.setWorld(builder.info.world);
 			//TODO setup so instance works!!
-			RailGagInstance tr = te.instance();
+			RailGag tr = (RailGag) te.instance();
 			if (parent != null) {
 				tr.setParent(parent);
 			} else {
@@ -86,10 +86,10 @@ public abstract class TrackBase {
 		TagCompound replaced = null;
 		
 		Block removed = builder.info.world.getBlockInternal(pos);
-		RailBaseInstance te = null;
+		RailBase te = null;
 		if (removed != null) {
 			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
-				te = builder.info.world.getBlockEntity(pos, RailBaseInstance.class);
+				te = builder.info.world.getBlockEntity(pos, RailBase.class);
 				if (te != null) {
 					replaced = new TagCompound();
 					te.save(replaced);
@@ -107,7 +107,7 @@ public abstract class TrackBase {
             te.setWillBeReplaced(false);
         }
 
-		RailBaseInstance tr = builder.info.world.getBlockEntity(pos, RailBaseInstance.class);
+		RailBase tr = builder.info.world.getBlockEntity(pos, RailBase.class);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);

@@ -15,8 +15,6 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.tile.RailInstance;
-import cam72cam.immersiverailroading.tile.RailGagInstance;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.OreHelper;
 import cam72cam.mod.entity.sync.EntitySync;
@@ -48,10 +46,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
-import net.minecraftforge.registries.RegistryManager;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -63,8 +59,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import static net.minecraftforge.registries.GameData.BLOCKS;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
@@ -153,7 +147,7 @@ public abstract class CommonProxy implements IGuiHandler {
     		modRegistry.remove(new ResourceLocation("immersiverailroading:switch key_iron"));
     	}
     }
-    
+
     @SuppressWarnings("deprecation")
 	@SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
@@ -162,6 +156,8 @@ public abstract class CommonProxy implements IGuiHandler {
 		IRBlocks.BLOCK_RAIL.register();
 		IRBlocks.BLOCK_RAIL_PREVIEW.register();
 		IRBlocks.BLOCK_MULTIBLOCK.register();
+
+		Legacy.registerBlocks();
     }
     
     @SubscribeEvent
