@@ -66,7 +66,6 @@ public abstract class TrackBase {
 			TileEntity te = IRBlocks.BLOCK_RAIL_GAG.getTile();
 			te.setPos(pos);
 			te.setWorld(builder.info.world);
-			//TODO setup so instance works!!
 			RailGag tr = (RailGag) te.instance();
 			if (parent != null) {
 				tr.setParent(parent);

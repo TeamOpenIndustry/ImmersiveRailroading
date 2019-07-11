@@ -11,7 +11,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Identifier;
 import cam72cam.mod.world.World;
-import scala.reflect.internal.Trees;
 import trackapi.lib.ITrack;
 
 import java.util.function.Function;
@@ -52,6 +51,14 @@ public abstract class BlockRailBase extends BlockTypeTickable {
 
     public static class TileEntityRailBlock extends TileEntityTickable implements ITrack {
 
+        public TileEntityRailBlock() {
+            super();
+        }
+
+        public TileEntityRailBlock(Identifier id) {
+            super(id);
+        }
+
         @Override
         public double getTrackGauge() {
             return instance() instanceof RailBase ? ((RailBase)instance()).getTrackGauge() : 0;
@@ -70,7 +77,7 @@ public abstract class BlockRailBase extends BlockTypeTickable {
 
     @Override
     public TileEntity getTile() {
-        return new TileEntityRailBlock();
+        return new TileEntityRailBlock(id);
     }
 
     /*

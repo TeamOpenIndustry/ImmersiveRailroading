@@ -201,6 +201,12 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
     public BlockEntity instance() {
         if (this.instance == null) {
             if (isLoaded()) {
+                if (this.instanceId == null) {
+                    System.out.println("WAT NULL");
+                }
+                if (!registry.containsKey(instanceId)) {
+                    System.out.println("WAT " + instanceId);
+                }
                 this.instance = registry.get(this.instanceId).apply(this);
                 if (deferredLoad != null) {
                     this.instance.load(deferredLoad);
