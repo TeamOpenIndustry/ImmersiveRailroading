@@ -39,4 +39,10 @@ public abstract class BlockEntity {
     public void markDirty() {
         internal.markDirty();
     }
+
+    public TagCompound getData() {
+        TagCompound data = new TagCompound();
+        internal.save(data);
+        return data;
+    }
 }

@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.blocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailGag;
 import cam72cam.mod.block.*;
 import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.block.tile.TileEntityTickable;
@@ -10,6 +11,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Identifier;
+import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 import trackapi.lib.ITrack;
 
@@ -102,13 +104,12 @@ public abstract class BlockRailBase extends BlockTypeTickable {
             RailBase rail = world.getBlockEntity(pos, RailBase.class);
             if (rail != null) {
                 if (rail.getReplaced() != null) {
-                    /* TODO HACKS
                     // new object here is important
-                    RailGag newGag = new RailGag();
-                    newGag.load(rail.getReplaced());
+                    RailGag newGag = (RailGag) world.reconstituteBlockEntity(rail.getReplaced());
+
                     while(true) {
                         if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), Rail.class)) {
-                            rail.world.setTileEntity(pos, newGag);
+                            rail.world.internal.setTileEntity(pos.internal, newGag.internal);
                             newGag.markDirty();
                             breakParentIfExists(rail);
                             return false;
@@ -120,10 +121,8 @@ public abstract class BlockRailBase extends BlockTypeTickable {
                             break;
                         }
 
-                        newGag = new RailGag();
-                        newGag.load(data);
+                        newGag = (RailGag) world.reconstituteBlockEntity(data);
                     }
-                    */
                 }
             }
         } catch (StackOverflowError ex) {

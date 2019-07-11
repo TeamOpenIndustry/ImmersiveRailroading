@@ -90,8 +90,7 @@ public abstract class TrackBase {
 			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
 				te = builder.info.world.getBlockEntity(pos, RailBase.class);
 				if (te != null) {
-					replaced = new TagCompound();
-					te.save(replaced);
+					replaced = te.getData();
 				}
 			} else {
 				builder.info.world.breakBlock(pos);

@@ -71,6 +71,11 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
         this.world = World.get(world);
     }
     @Override
+    protected void setWorldCreate(net.minecraft.world.World worldIn) {
+        super.setWorld(worldIn);
+        this.world = World.get(worldIn);
+    }
+    @Override
     public void setPos(BlockPos pos) {
         super.setPos(pos);
         this.pos = new Vec3i(pos);
@@ -79,6 +84,7 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
 
     @Override
     public final void readFromNBT(NBTTagCompound compound) {
+        hasTileData = true;
         load(new TagCompound(compound));
     }
     @Override
@@ -97,13 +103,13 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
     }
     @Override
     public final void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        hasTileData = true;
         this.readFromNBT(pkt.getNbtCompound());
         this.readUpdate(new TagCompound(pkt.getNbtCompound()));
         super.onDataPacket(net, pkt);
         if (updateRerender()) {
             world.internal.markBlockRangeForRenderUpdate(getPos(), getPos());
         }
-        hasTileData = true;
     }
 
     @Override
@@ -117,13 +123,13 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
     }
     @Override
     public final void handleUpdateTag(NBTTagCompound tag) {
+        hasTileData = true;
         this.readFromNBT(tag);
         this.readUpdate(new TagCompound(tag));
         super.handleUpdateTag(tag);
         if (updateRerender()) {
             world.internal.markBlockRangeForRenderUpdate(getPos(), getPos());
         }
-        hasTileData = true;
     }
 
 
