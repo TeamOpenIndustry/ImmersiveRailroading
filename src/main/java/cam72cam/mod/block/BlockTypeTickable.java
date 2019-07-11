@@ -12,6 +12,6 @@ public class BlockTypeTickable extends BlockTypeEntity {
 
     @Override
     protected TileEntity getTile() {
-        return new TileEntityTickable();
+        return new TileEntityTickable(id);
     }
 }
