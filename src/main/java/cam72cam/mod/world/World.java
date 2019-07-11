@@ -14,6 +14,7 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLiving;
@@ -208,6 +209,17 @@ public class World {
             return false;
         }
         return cls.isInstance(te.instance());
+    }
+
+    public BlockEntity reconstituteBlockEntity(TagCompound data) {
+        TileEntity te = (TileEntity) TileEntity.create(internal, data.internal);
+        if (te == null) {
+            System.out.println("BAD TE DATA " + data);
+        }
+        if (te.instance() == null) {
+            System.out.println("Loaded " + te.isLoaded() + " " + data);
+        }
+        return te.instance();
     }
 
     public void setToAir(Vec3i pos) {

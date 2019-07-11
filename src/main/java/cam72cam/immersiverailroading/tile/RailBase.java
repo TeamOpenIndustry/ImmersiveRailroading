@@ -421,18 +421,14 @@ public class RailBase extends BlockEntityTickable {
 			}
 
             tile = null;
-			/* TODO HACKS
 			Vec3i currentParent = self.getParentTile().getParent();
 			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
-				self = new RailBase();
-				self.readFromNBT(data.internal);
-				self.setWorld(world);
+				self = (RailBase) world.reconstituteBlockEntity(data);
 				if (!currentParent.equals(self.getParent())) {
 					tile = self.getParentTile();
 					break;
 				}
 			}
-			*/
 		}
 		return nextPos;
 	}
@@ -958,19 +954,17 @@ public class RailBase extends BlockEntityTickable {
 	public void onNeighborChange(Vec3i neighbor) {
 		RailBase te = this;
 
-		World world = te.world;
 		if (world.isClient) {
 			return;
 		}
 
-		te.blockUpdate = true;
+		blockUpdate = true;
 
-		if (new ItemStack(world.getBlockInternal(te.pos.up())).is(Fuzzy.SNOW_LAYER)) {
-			if (te.handleSnowTick()) {
-				world.setToAir(te.pos.up());
+		if (new ItemStack(world.getBlockInternal(pos.up())).is(Fuzzy.SNOW_LAYER)) {
+			if (handleSnowTick()) {
+				world.setToAir(pos.up());
 			}
 		}
-		/* TODO HACKS
 
 		TagCompound data = te.getReplaced();
 		while (true) {
@@ -987,12 +981,9 @@ public class RailBase extends BlockEntityTickable {
 			if (data == null) {
 				break;
 			}
-			te = new RailBase();
-			te.load(data);
-			te.setWorld(world);
+			te = (RailBase) world.reconstituteBlockEntity(data);
 			data = te.getReplaced();
 		}
-		*/
 	}
 
 }
