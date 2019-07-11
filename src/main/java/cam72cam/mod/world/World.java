@@ -2,9 +2,9 @@ package cam72cam.mod.world;
 
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
-import cam72cam.mod.block.Block;
 import cam72cam.mod.block.BlockEntity;
-import cam72cam.mod.block.BlockEntityInstance;
+import cam72cam.mod.block.BlockType;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.ModdedEntity;
@@ -190,20 +190,20 @@ public class World {
         return null;
     }
 
-    public <T extends BlockEntityInstance> T getBlockEntity(Vec3i pos, Class<T> cls) {
-        BlockEntity.Internal te = getTileEntity(pos, BlockEntity.Internal.class);
+    public <T extends BlockEntity> T getBlockEntity(Vec3i pos, Class<T> cls) {
+        TileEntity te = getTileEntity(pos, TileEntity.class);
         if (te == null) {
             return null;
         }
-        BlockEntityInstance instance = te.instance();
+        BlockEntity instance = te.instance();
         if (cls.isInstance(instance)) {
             return (T) instance;
         }
         return null;
     }
 
-    public <T extends BlockEntityInstance> boolean hasBlockEntity(Vec3i pos, Class<T> cls) {
-        BlockEntity.Internal te = getTileEntity(pos, BlockEntity.Internal.class);
+    public <T extends BlockEntity> boolean hasBlockEntity(Vec3i pos, Class<T> cls) {
+        TileEntity te = getTileEntity(pos, TileEntity.class);
         if (te == null) {
             return false;
         }
@@ -294,7 +294,7 @@ public class World {
         internal.spawnEntity(new EntityItem(internal, pos.x, pos.y, pos.z, stack.internal));
     }
 
-    public void setBlock(Vec3i pos, Block block) {
+    public void setBlock(Vec3i pos, BlockType block) {
         internal.setBlockState(pos.internal, block.internal.getDefaultState());
     }
     public void setBlock(Vec3i pos, ItemStack item) {
@@ -334,7 +334,7 @@ public class World {
         return (13.6484805403f*mctemp)+7.0879687222f;
     }
 
-    public boolean isBlock(Vec3i pos, Block block) {
+    public boolean isBlock(Vec3i pos, BlockType block) {
         return internal.getBlockState(pos.internal).getBlock() == block.internal;
     }
 }

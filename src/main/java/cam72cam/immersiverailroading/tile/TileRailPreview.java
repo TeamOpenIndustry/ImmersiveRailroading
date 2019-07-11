@@ -10,8 +10,8 @@ import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.block.BlockEntity;
-import cam72cam.mod.block.BlockEntityInstance;
+import cam72cam.mod.block.BlockEntityTickable;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -20,7 +20,7 @@ import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 
-public class TileRailPreview extends BlockEntityInstance.Tickable {
+public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
 	private RailInfo info;
 
@@ -28,7 +28,7 @@ public class TileRailPreview extends BlockEntityInstance.Tickable {
 	private PlacementInfo placementInfo;
 	private PlacementInfo customInfo;
 
-	public TileRailPreview(BlockEntity.Internal internal) {
+	public TileRailPreview(TileEntity internal) {
 		super(internal);
 	}
 
@@ -138,7 +138,7 @@ public class TileRailPreview extends BlockEntityInstance.Tickable {
 			Vec3i pos = this.pos;
 			if (world.isServer) {
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}

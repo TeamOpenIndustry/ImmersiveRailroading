@@ -23,14 +23,10 @@ import cam72cam.immersiverailroading.render.entity.*;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.render.tile.TileMultiblockRender;
-import cam72cam.immersiverailroading.render.tile.TileRailPreviewRender;
-import cam72cam.immersiverailroading.render.tile.TileRailRender;
 import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
-import cam72cam.immersiverailroading.tile.RailInstance;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.MinecraftClient;
@@ -59,7 +55,6 @@ import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -254,7 +249,7 @@ public class ClientProxy extends CommonProxy {
 		OBJLoader.INSTANCE.addDomain(ImmersiveRailroading.MODID.toLowerCase());
 
 		/* TODO RENDER
-		ClientRegistry.bindTileEntitySpecialRenderer(RailInstance.class, new TileRailRender());
+		ClientRegistry.bindTileEntitySpecialRenderer(Rail.class, new TileRailRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
 		*/
@@ -555,7 +550,7 @@ public class ClientProxy extends CommonProxy {
 				pos = pos.up();
 
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}

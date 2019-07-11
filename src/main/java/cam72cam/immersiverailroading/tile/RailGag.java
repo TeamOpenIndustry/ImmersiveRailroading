@@ -1,9 +1,9 @@
 package cam72cam.immersiverailroading.tile;
 
-import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.tile.TileEntity;
 
-public class RailGagInstance extends RailBaseInstance {
-	public RailGagInstance(BlockEntity.Internal internal) {
+public class RailGag extends RailBase {
+	public RailGag(TileEntity internal) {
 		super(internal);
 	}
 

@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.tile.RailInstance;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.mod.math.Vec3i;
 
 public class TrackRail extends TrackBase {
@@ -12,8 +12,8 @@ public class TrackRail extends TrackBase {
 	}
 
 	@Override
-	public RailBaseInstance placeTrack(boolean actuallyPlace) {
-		RailInstance tileRail = (RailInstance) super.placeTrack(actuallyPlace);
+	public RailBase placeTrack(boolean actuallyPlace) {
+		Rail tileRail = (Rail) super.placeTrack(actuallyPlace);
 
 		tileRail.info = builder.info;
 		tileRail.setDrops(builder.drops);

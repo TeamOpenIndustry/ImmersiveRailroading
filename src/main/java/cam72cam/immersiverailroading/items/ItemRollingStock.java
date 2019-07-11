@@ -15,7 +15,7 @@ import cam72cam.immersiverailroading.registry.CarPassengerDefinition;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -91,7 +91,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
-			RailBaseInstance te = world.getBlockEntity(pos, RailBaseInstance.class);
+			RailBase te = world.getBlockEntity(pos, RailBase.class);
 			if (te.getAugment() != null) {
 				switch(te.getAugment()) {
 				case DETECTOR:

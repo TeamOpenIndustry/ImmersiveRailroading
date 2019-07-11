@@ -1,22 +1,16 @@
 package cam72cam.immersiverailroading.render.entity;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.tile.RailInstance;
-import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.track.BuilderBase;
-import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.block.BlockEntity;
-import cam72cam.mod.block.BlockEntityInstance;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.math.Vec3d;
@@ -26,11 +20,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.MinecraftForgeClient;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
 
 import java.util.*;
 
@@ -145,19 +136,19 @@ public class RenderOverride {
 
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
 	
-        List<TileEntity> entities = new ArrayList<TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
-        for (TileEntity tea : entities) {
-        	if (!(tea instanceof BlockEntity.Internal)) {
+        List<net.minecraft.tileentity.TileEntity> entities = new ArrayList<net.minecraft.tileentity.TileEntity>(Minecraft.getMinecraft().player.getEntityWorld().loadedTileEntityList);
+        for (net.minecraft.tileentity.TileEntity tea : entities) {
+        	if (!(tea instanceof TileEntity)) {
         		continue;
 			}
-			BlockEntityInstance te = ((BlockEntity.Internal) tea).instance();
-        	if (te instanceof RailInstance) {
-        		if (!((RailInstance) te).isLoaded()) {
+			BlockEntity te = ((TileEntity) tea).instance();
+        	if (te instanceof Rail) {
+        		if (!((Rail) te).isLoaded()) {
         			continue;
         		}
-	        	if (true) { // TODO RENDER camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((RailInstance) te).pos))) {
+	        	if (true) { // TODO RENDER camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((Rail) te).pos))) {
 
-	        		RailInfo info = ((RailInstance) te).info;
+	        		RailInfo info = ((Rail) te).info;
 	        		if (info == null) {
 	        			// Still loading...
 	        			continue;

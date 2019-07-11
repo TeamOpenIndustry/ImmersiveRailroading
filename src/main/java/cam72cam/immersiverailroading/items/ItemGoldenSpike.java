@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.tile.RailBaseInstance;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -35,7 +35,7 @@ public class ItemGoldenSpike extends ItemBase {
 			Vec3i tepos = getPosition(held);
 			if (tepos != null) {
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBaseInstance.class).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}
