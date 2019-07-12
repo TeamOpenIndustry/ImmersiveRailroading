@@ -601,10 +601,8 @@ public class ClientProxy extends CommonProxy {
 	                GL11.glTranslated(offset.x, offset.y, offset.z);
 	                
 	                GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
-	                
-	                GL11.glTranslated(-0.5, -0.5, -0.5);
-	                
-	                MBBlueprintRender.draw(player.getWorld(), ItemMultiblockType.get(new cam72cam.mod.item.ItemStack(stack)));
+
+	                MBBlueprintRender.draw(ItemMultiblockType.get(new cam72cam.mod.item.ItemStack(stack)));
 
 					blend.restore();
 				}

@@ -8,7 +8,11 @@ import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.energy.Energy;
+import cam72cam.mod.energy.IEnergy;
+import cam72cam.mod.item.IInventory;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.ItemStackHandler;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
@@ -19,8 +23,6 @@ import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraftforge.energy.EnergyStorage;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class TileMultiblock extends BlockEntityTickable {
 	
@@ -42,15 +44,15 @@ public class TileMultiblock extends BlockEntityTickable {
         }
 
 		@Override
-		public int getSlotLimit(int slot) {
+		public int getLimit(int slot) {
 			if (isLoaded()) {
-				return Math.min(super.getSlotLimit(slot), getMultiblock().getSlotLimit(offset.internal, slot));
+				return Math.min(super.getLimit(slot), getMultiblock().getSlotLimit(offset, slot));
 			}
 			return 0;
 		}
     };
     
-    private EnergyStorage energy = new EnergyStorage(1000) {
+    private Energy energy = new Energy(1000) {
     	@Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
     		int val = super.receiveEnergy(maxReceive, simulate);
@@ -84,7 +86,7 @@ public class TileMultiblock extends BlockEntityTickable {
 		this.offset = offset;
 		this.replaced = replaced;
 		
-		container.setSize(this.getMultiblock().getInvSize(offset.internal));
+		container.setSize(this.getMultiblock().getInvSize(offset));
 		
 		markDirty();
 	}
@@ -99,7 +101,7 @@ public class TileMultiblock extends BlockEntityTickable {
             nbt.setVec3i("offset", offset);
             nbt.set("replaced", new TagCompound(NBTUtil.writeBlockState(new NBTTagCompound(), replaced)));
 
-            nbt.set("inventory", new TagCompound(container.serializeNBT()));
+            nbt.set("inventory", container.save());
             nbt.set("craftItem", craftItem.toTag());
             nbt.setInteger("craftProgress", craftProgress);
             nbt.setInteger("craftMode", craftMode.ordinal());
@@ -115,7 +117,7 @@ public class TileMultiblock extends BlockEntityTickable {
 		offset = nbt.getVec3i("offset");
 		replaced = NBTUtil.readBlockState(nbt.get("replaced").internal);
 		
-		container.deserializeNBT(nbt.get("inventory").internal);
+		container.load(nbt.get("inventory"));
 		craftItem = new ItemStack(nbt.get("craftItem"));
 		craftProgress = nbt.getInteger("craftProgress");
 		
@@ -154,7 +156,7 @@ public class TileMultiblock extends BlockEntityTickable {
 			return;
 		}
 		this.ticks += 1;
-		this.getMultiblock().tick(offset.internal);
+		this.getMultiblock().tick(offset);
 	}
 
 	/* TODO RENDER
@@ -171,7 +173,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	
 	public MultiblockInstance getMultiblock() {
 		if (this.mb == null && this.isLoaded()) {
-			this.mb = MultiblockRegistry.get(name).instance(world.internal, getOrigin().internal, rotation.internal);
+			this.mb = MultiblockRegistry.get(name).instance(world, getOrigin(), rotation);
 		}
 		return this.mb;
 	}
@@ -198,7 +200,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 
 	public boolean onBlockActivated(Player player, Hand hand) {
-		return getMultiblock().onBlockActivated(player.internal, hand.internal, offset.internal);
+		return getMultiblock().onBlockActivated(player, hand, offset);
 	}
 	
 	/*
@@ -206,10 +208,10 @@ public class TileMultiblock extends BlockEntityTickable {
 	 */
 	
 	public void onBreakEvent() {
-		for (int slot = 0; slot < container.getSlots(); slot ++) {
-			net.minecraft.item.ItemStack item = container.extractItem(slot, Integer.MAX_VALUE, false);
+		for (int slot = 0; slot < container.getSlotCount(); slot ++) {
+			ItemStack item = container.get(slot);
 			if (!item.isEmpty()) {
-				world.dropItem(new ItemStack(item), pos);
+				world.dropItem(item, pos);
 			}
 		}
 		world.internal.removeTileEntity(pos.internal);
@@ -217,7 +219,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 
 	public boolean isRender() {
-		return getMultiblock().isRender(offset.internal);
+		return getMultiblock().isRender(offset);
 	}
 
 	public double getRotation() {
@@ -273,69 +275,55 @@ public class TileMultiblock extends BlockEntityTickable {
 	 * Capabilities
 	 */
 
-	/* TODO CAPABILITIES
 	@Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-		if (this.isLoaded()) {
-	        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-	            return this.getMultiblock().getInvSize(offset.internal) != 0;
-	        }
-	        if (capability == CapabilityEnergy.ENERGY) {
-	        	return this.getMultiblock().canRecievePower(offset.internal);
-	        }
+	public IInventory getInventory(Facing facing) {
+		if (this.getMultiblock().getInvSize(offset) == 0) {
+			return null;
 		}
-        return super.hasCapability(capability, facing);
-    }
+
+		return new IInventory() {
+			@Override
+			public int getSlotCount() {
+				return container.getSlotCount();
+			}
+
+			@Override
+			public ItemStack get(int slot) {
+				return container.get(slot);
+			}
+
+			@Override
+			public void set(int slot, ItemStack stack) {
+				container.set(slot, stack);
+			}
+
+			@Override
+			public ItemStack insert(int slot, ItemStack stack, boolean simulate) {
+				if (getMultiblock().canInsertItem(offset, slot, stack)) {
+					return container.insert(slot, stack, simulate);
+				}
+				return stack;
+			}
+
+			@Override
+			public ItemStack extract(int slot, int amount, boolean simulate) {
+				if (getMultiblock().isOutputSlot(offset, slot)) {
+					return container.extract(slot, amount, simulate);
+				}
+				return ItemStack.EMPTY;
+			}
+
+			@Override
+			public int getLimit(int slot) {
+				return container.getLimit(slot);
+			}
+		};
+	}
 
 	@Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		if (this.isLoaded()) {
-	        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-	        	if (this.getMultiblock().getInvSize(offset.internal) != 0) {
-	        		return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new IItemHandlerModifiable()  {
-						@Override
-						public int getSlotCount() {
-							return container.getSlotCount();
-						}
-						@Override
-						public net.minecraft.item.ItemStack get(int slot) {
-							return container.get(slot);
-						}
-						@Override
-	        	        public net.minecraft.item.ItemStack insert(int slot, @Nonnull net.minecraft.item.ItemStack stack, boolean simulate) {
-	        	        	if (getMultiblock().canInsertItem(offset.internal, slot, stack)) {
-	        	        		return container.insert(slot, stack, simulate);
-	        	        	}
-	        	        	return stack;
-	        	        }
-	        	        @Override
-	        	        public net.minecraft.item.ItemStack extract(int slot, int amount, boolean simulate) {
-	        	        	if (getMultiblock().isOutputSlot(offset.internal, slot)) {
-	        	        		return container.extract(slot, amount, simulate);
-	        	        	}
-	        	        	return ItemStack.EMPTY.internal;
-	        	        }
-						@Override
-						public int getSlotLimit(int slot) {
-							return container.getSlotLimit(slot);
-						}
-						
-						@Override
-						public void set(int slot, net.minecraft.item.ItemStack stack) {
-							container.set(slot, stack);
-						}
-	        		});
-	        	}
-	        }
-	        if (capability == CapabilityEnergy.ENERGY) {
-	        	if (this.getMultiblock().canRecievePower(offset.internal)) {
-	        		return CapabilityEnergy.ENERGY.cast(this.energy);
-	        	}
-	        }
-		}
-        return super.getCapability(capability, facing);
-    }
-    */
+	public IEnergy getEnergy(Facing facing) {
+		return this.getMultiblock().canRecievePower(offset) ? energy : null;
+	}
 
 	@Override
 	public void onBreak() {

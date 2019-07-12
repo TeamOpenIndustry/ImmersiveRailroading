@@ -1,6 +1,7 @@
 package cam72cam.mod.entity.boundingbox;
 
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public interface IBoundingBox {
@@ -77,6 +78,10 @@ public interface IBoundingBox {
             }
         };
     }
+    static IBoundingBox from(Vec3i pos) {
+        return from(new AxisAlignedBB(pos.internal));
+    }
+
 
     default boolean intersects(IBoundingBox bounds) {
         return this.intersects(bounds.min(), bounds.max());

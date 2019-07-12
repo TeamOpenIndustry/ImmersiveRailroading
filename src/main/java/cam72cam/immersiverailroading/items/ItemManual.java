@@ -75,7 +75,7 @@ public class ItemManual extends ItemBase {
 			if (facing == Facing.UP) {
 				realPos = realPos.up();
 			}
-			MultiblockRegistry.get(current).place(world.internal, player, realPos.internal, Rotation.from(Facing.fromAngle(player.getYawHead()+180)).internal);
+			MultiblockRegistry.get(current).place(world, player, realPos, Rotation.from(Facing.fromAngle(player.getYawHead()+180)));
 		}
 		return ClickResult.ACCEPTED;
 	}

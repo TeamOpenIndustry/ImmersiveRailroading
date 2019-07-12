@@ -13,4 +13,16 @@ public enum ClickResult {
     ClickResult(EnumActionResult internal) {
         this.internal = internal;
     }
+
+    public static ClickResult from(EnumActionResult ear) {
+        switch (ear) {
+            case SUCCESS:
+                return ACCEPTED;
+            case PASS:
+                return PASS;
+            case FAIL:
+                return REJECTED;
+        }
+        return null;
+    }
 }

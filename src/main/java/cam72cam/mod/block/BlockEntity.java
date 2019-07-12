@@ -1,6 +1,7 @@
 package cam72cam.mod.block;
 
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.IInventory;
@@ -53,6 +54,10 @@ public abstract class BlockEntity {
     }
 
     public ITank getTank(Facing side) {
+        return null;
+    }
+
+    public IEnergy getEnergy(Facing side) {
         return null;
     }
 }
