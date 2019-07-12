@@ -18,7 +18,6 @@ import cam72cam.mod.util.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.util.RelativeResource;
 
 public class OBJModel {
 	// LinkedHashMap is ordered
@@ -164,7 +163,7 @@ public class OBJModel {
 
 			Material currentMTL = null;
 
-			input = ImmersiveRailroading.proxy.getResourceStream(RelativeResource.getRelative(modelLoc, materialPath));
+			input = ImmersiveRailroading.proxy.getResourceStream(modelLoc.getRelative(materialPath));
 			reader = new BufferedReader(new InputStreamReader(input));
 			while ((line = reader.readLine()) != null) {
 				if (line.startsWith("#")) {
@@ -219,7 +218,7 @@ public class OBJModel {
 					currentMTL.Ks.position(0);
 					break;
 				case "map_Kd":
-					currentMTL.texKd = RelativeResource.getRelative(modelLoc, parts[1]);
+					currentMTL.texKd = modelLoc.getRelative(parts[1]);
 					break;
 				case "Ns":
 					//Ignore
