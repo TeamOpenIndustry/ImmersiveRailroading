@@ -21,7 +21,7 @@ public class MultiblockComponent {
 	public MultiblockComponent() {
 		def = ItemStack.EMPTY;
 		name = "none";
-		this.itemCheck = (ItemStack stack) -> false;
+		this.itemCheck = ItemStack::isEmpty;
 	}
 	
 	@SuppressWarnings("deprecation")
