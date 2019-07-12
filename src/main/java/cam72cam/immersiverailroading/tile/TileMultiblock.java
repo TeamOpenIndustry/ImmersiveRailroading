@@ -294,24 +294,24 @@ public class TileMultiblock extends BlockEntityTickable {
 	        	if (this.getMultiblock().getInvSize(offset.internal) != 0) {
 	        		return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new IItemHandlerModifiable()  {
 						@Override
-						public int getSlots() {
-							return container.getSlots();
+						public int getSlotCount() {
+							return container.getSlotCount();
 						}
 						@Override
-						public net.minecraft.item.ItemStack getStackInSlot(int slot) {
-							return container.getStackInSlot(slot);
+						public net.minecraft.item.ItemStack get(int slot) {
+							return container.get(slot);
 						}
 						@Override
-	        	        public net.minecraft.item.ItemStack insertItem(int slot, @Nonnull net.minecraft.item.ItemStack stack, boolean simulate) {
+	        	        public net.minecraft.item.ItemStack insert(int slot, @Nonnull net.minecraft.item.ItemStack stack, boolean simulate) {
 	        	        	if (getMultiblock().canInsertItem(offset.internal, slot, stack)) {
-	        	        		return container.insertItem(slot, stack, simulate);
+	        	        		return container.insert(slot, stack, simulate);
 	        	        	}
 	        	        	return stack;
 	        	        }
 	        	        @Override
-	        	        public net.minecraft.item.ItemStack extractItem(int slot, int amount, boolean simulate) {
+	        	        public net.minecraft.item.ItemStack extract(int slot, int amount, boolean simulate) {
 	        	        	if (getMultiblock().isOutputSlot(offset.internal, slot)) {
-	        	        		return container.extractItem(slot, amount, simulate);
+	        	        		return container.extract(slot, amount, simulate);
 	        	        	}
 	        	        	return ItemStack.EMPTY.internal;
 	        	        }
@@ -321,8 +321,8 @@ public class TileMultiblock extends BlockEntityTickable {
 						}
 						
 						@Override
-						public void setStackInSlot(int slot, net.minecraft.item.ItemStack stack) {
-							container.setStackInSlot(slot, stack);
+						public void set(int slot, net.minecraft.item.ItemStack stack) {
+							container.set(slot, stack);
 						}
 	        		});
 	        	}

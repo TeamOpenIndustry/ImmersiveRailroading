@@ -5,11 +5,13 @@ import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.BlockType;
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.item.IInventory;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -23,8 +25,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -182,11 +189,6 @@ public class World {
         net.minecraft.tileentity.TileEntity ent = internal.getChunkFromBlockCoords(pos.internal).getTileEntity(pos.internal, create ? Chunk.EnumCreateEntityType.IMMEDIATE : Chunk.EnumCreateEntityType.CHECK);
         if (cls.isInstance(ent)) {
             return (T) ent;
-        }
-        if (ent != null) {
-            System.out.println("WHAAAA");
-            System.out.println(ent.getClass());
-            System.out.println(cls);
         }
         return null;
     }
@@ -348,5 +350,28 @@ public class World {
 
     public boolean isBlock(Vec3i pos, BlockType block) {
         return internal.getBlockState(pos.internal).getBlock() == block.internal;
+    }
+
+    /* Capabilities */
+    public IInventory getInventory(Vec3i offset) {
+        net.minecraft.tileentity.TileEntity te = internal.getTileEntity(offset.internal);
+        if (te != null && te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
+            IItemHandler inv = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+            if (inv instanceof IItemHandlerModifiable) {
+                return IInventory.from((IItemHandlerModifiable) inv);
+            }
+        }
+        return null;
+    }
+
+    public ITank getTank(Vec3i offset) {
+        net.minecraft.tileentity.TileEntity te = internal.getTileEntity(offset.internal);
+        if (te != null && te.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)) {
+            IFluidHandler tank = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+            if (tank != null) {
+                return ITank.getTank(tank);
+            }
+        }
+        return null;
     }
 }

@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class Forge {
+    /*
     public static <T> T getCapability(Object target, Capability<T> capability) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return target instanceof IInventory ? inventoryCapability((IInventory)target) : null;
@@ -158,4 +159,5 @@ public class Forge {
             }
         });
     }
+    */
 }

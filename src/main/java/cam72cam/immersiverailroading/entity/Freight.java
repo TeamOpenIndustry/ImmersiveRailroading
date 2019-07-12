@@ -70,8 +70,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		super.onDissassemble();
 		
 		if (getWorld().isServer) {
-			for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
-				ItemStack itemstack = cargoItems.getStackInSlot(slot);
+			for (int slot = 0; slot < cargoItems.getSlotCount(); slot++) {
+				ItemStack itemstack = cargoItems.get(slot);
 				if (itemstack.getCount() != 0) {
 					Vec3d pos = getPosition().add(VecUtil.fromWrongYaw(4, this.getRotationYaw()+90));
 					getWorld().dropItem(itemstack.copy(), new Vec3i(pos));
@@ -140,9 +140,9 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	protected void handleMass() {
 		int itemInsideCount = 0;
 		int stacksWithStuff = 0;
-		for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
-			itemInsideCount += cargoItems.getStackInSlot(slot).getCount();
-			if (cargoItems.getStackInSlot(slot).getCount() != 0) {
+		for (int slot = 0; slot < cargoItems.getSlotCount(); slot++) {
+			itemInsideCount += cargoItems.get(slot).getCount();
+			if (cargoItems.get(slot).getCount() != 0) {
 				stacksWithStuff += 1;
 			}
 		}
@@ -166,11 +166,11 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		ItemStackHandler temp = new ItemStackHandler();
 		temp.load(data.get("items"));
 		cargoItems.setSize(this.getInventorySize());
-		for (int slot = 0; slot < temp.getSlots(); slot ++) {
-			if (slot < cargoItems.getSlots()) {
-				cargoItems.setStackInSlot(slot, temp.getStackInSlot(slot));
+		for (int slot = 0; slot < temp.getSlotCount(); slot ++) {
+			if (slot < cargoItems.getSlotCount()) {
+				cargoItems.set(slot, temp.get(slot));
 			} else {
-				getWorld().dropItem(temp.getStackInSlot(slot), getPosition());
+				getWorld().dropItem(temp.get(slot), getPosition());
 			}
 		}
 		handleMass();
@@ -186,8 +186,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		super.onDamage(type, source, amount);
 
 		if (this.isDead() && getWorld().isServer) {
-			for (int slot = 0; slot < cargoItems.getSlots(); slot++) {
-				ItemStack itemstack = cargoItems.getStackInSlot(slot);
+			for (int slot = 0; slot < cargoItems.getSlotCount(); slot++) {
+				ItemStack itemstack = cargoItems.get(slot);
 				if (itemstack.getCount() != 0) {
 					getWorld().dropItem(itemstack.copy(), getPosition());
 					itemstack.setCount(0);

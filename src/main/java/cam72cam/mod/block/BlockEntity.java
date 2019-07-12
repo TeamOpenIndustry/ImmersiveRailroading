@@ -2,6 +2,8 @@ package cam72cam.mod.block;
 
 import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.fluid.ITank;
+import cam72cam.mod.item.IInventory;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -44,5 +46,13 @@ public abstract class BlockEntity {
         TagCompound data = new TagCompound();
         internal.save(data);
         return data;
+    }
+
+    public IInventory getInventory(Facing side) {
+        return null;
+    }
+
+    public ITank getTank(Facing side) {
+        return null;
     }
 }

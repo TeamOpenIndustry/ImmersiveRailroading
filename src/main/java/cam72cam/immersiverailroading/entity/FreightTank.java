@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.mod.capability.ITank;
+import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidTank;
@@ -179,12 +179,12 @@ public abstract class FreightTank extends Freight {
 			return;
 		}
 		
-		if (cargoItems.getSlots() == 0) {
+		if (cargoItems.getSlotCount() == 0) {
 			return;
 		}
 
 		for (int inputSlot : getContainerInputSlots()) {
-			ItemStack input = cargoItems.getStackInSlot(inputSlot);
+			ItemStack input = cargoItems.get(inputSlot);
 
 			final ItemStack[] inputCopy = {input.copy()};
 			inputCopy[0].setCount(1);
@@ -203,9 +203,9 @@ public abstract class FreightTank extends Freight {
 				for (Boolean doFill : new Boolean[] { false, true }) {
 					boolean success;
 					if (doFill) {
-						success = theTank.tryFill(inputTank, theTank.getCapacity(), true);
-					} else {
 						success = theTank.tryDrain(inputTank, theTank.getCapacity(), true);
+					} else {
+						success = theTank.tryFill(inputTank, theTank.getCapacity(), true);
 					}
 
 					if (success) {
@@ -214,19 +214,19 @@ public abstract class FreightTank extends Freight {
 						// Can we move it to an output slot?
 						ItemStack out = inputCopy[0].copy();
 						for (Integer slot : this.getContainertOutputSlots()) {
-							if (this.cargoItems.insertItem(slot, out, true).getCount() == 0) {
+							if (this.cargoItems.insert(slot, out, true).getCount() == 0) {
 								// Move Liquid
 								if (doFill) {
-									theTank.tryFill(inputTank, theTank.getCapacity(), false);
-								} else {
 									theTank.tryDrain(inputTank, theTank.getCapacity(), false);
+								} else {
+									theTank.tryFill(inputTank, theTank.getCapacity(), false);
 								}
 								if (!ConfigDebug.debugInfiniteLiquids) {
 									// Decrease input
-									cargoItems.extractItem(inputSlot, 1, false);
+									cargoItems.extract(inputSlot, 1, false);
 									
 									// Increase output
-									this.cargoItems.insertItem(slot, out, false);
+									this.cargoItems.insert(slot, out, false);
 									break;
 								}
 							}

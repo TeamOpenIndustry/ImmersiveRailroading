@@ -558,18 +558,18 @@ public class LocomotiveSteam extends Locomotive {
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
-				theTank.tryDrain(tender.theTank, desiredDrain, false);
+				theTank.tryFill(tender.theTank, desiredDrain, false);
 			}
 			
 			if (this.getTickCount() % 20 == 0) {
 				// Top off stacks
-				for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
-					if (BurnUtil.getBurnTime(this.cargoItems.getStackInSlot(slot)) != 0) {
-						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlots(); tenderSlot ++) {
-							if (this.cargoItems.getStackInSlot(slot).equals(tender.cargoItems.getStackInSlot(tenderSlot))) {
-								if (this.cargoItems.getStackInSlot(slot).getLimit() > this.cargoItems.getStackInSlot(slot).getCount()) {
-									ItemStack extracted = tender.cargoItems.extractItem(tenderSlot, 1, false);
-									this.cargoItems.insertItem(slot, extracted, false);
+				for (int slot = 0; slot < this.cargoItems.getSlotCount()-2; slot ++) {
+					if (BurnUtil.getBurnTime(this.cargoItems.get(slot)) != 0) {
+						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlotCount(); tenderSlot ++) {
+							if (this.cargoItems.get(slot).equals(tender.cargoItems.get(tenderSlot))) {
+								if (this.cargoItems.get(slot).getLimit() > this.cargoItems.get(slot).getCount()) {
+									ItemStack extracted = tender.cargoItems.extract(tenderSlot, 1, false);
+									this.cargoItems.insert(slot, extracted, false);
 								}
 							}
 						}
@@ -589,10 +589,10 @@ public class LocomotiveSteam extends Locomotive {
 		float waterUsed = 0;
 		
 		if (this.getLiquidAmount() > 0) {
-			for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
+			for (int slot = 0; slot < this.cargoItems.getSlotCount()-2; slot ++) {
 				int remainingTime = burnTime.getOrDefault(slot, 0);
 				if (remainingTime <= 0) {
-					ItemStack stack = this.cargoItems.getStackInSlot(slot);
+					ItemStack stack = this.cargoItems.get(slot);
 					if (stack.getCount() <= 0 || BurnUtil.getBurnTime(stack) == 0) {
 						continue;
 					}
@@ -600,7 +600,7 @@ public class LocomotiveSteam extends Locomotive {
 					burnTime.put(slot, remainingTime);
 					burnMax.put(slot, remainingTime);
 					stack.setCount(stack.getCount()-1);
-					this.cargoItems.setStackInSlot(slot, stack);
+					this.cargoItems.set(slot, stack);
 					changedBurnMax = true;
 				} else {
 					burnTime.put(slot, remainingTime - 1);
@@ -668,7 +668,7 @@ public class LocomotiveSteam extends Locomotive {
 		
 		float throttle = Math.abs(getThrottle());
 		if (throttle != 0 && boilerPressure > 0) {
-			double burnableSlots = this.cargoItems.getSlots()-2;
+			double burnableSlots = this.cargoItems.getSlotCount()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
 			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
 			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss
