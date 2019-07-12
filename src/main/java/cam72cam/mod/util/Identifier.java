@@ -1,6 +1,7 @@
 package cam72cam.mod.util;
 
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.io.FilenameUtils;
 
 public class Identifier {
     public final ResourceLocation internal;
@@ -28,5 +29,9 @@ public class Identifier {
 
     public String getPath() {
         return internal.getResourcePath();
+    }
+
+    public Identifier getRelative(String path) {
+        return new Identifier(getDomain(), FilenameUtils.concat(FilenameUtils.getPath(getPath()), path).replace('\\', '/'));
     }
 }
