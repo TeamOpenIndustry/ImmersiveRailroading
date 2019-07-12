@@ -1,6 +1,7 @@
 package cam72cam.mod.block.tile;
 
 import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.IInventory;
@@ -17,6 +18,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -275,7 +277,38 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
             });
         }
         if (capability == CapabilityEnergy.ENERGY) {
-            return null;//getEnergy(Facing.from(facing));
+            IEnergy target = getEnergy(Facing.from(facing));
+            return CapabilityEnergy.ENERGY.cast(new IEnergyStorage() {
+                @Override
+                public int receiveEnergy(int maxReceive, boolean simulate) {
+                    return target.receiveEnergy(maxReceive, simulate);
+                }
+
+                @Override
+                public int extractEnergy(int maxExtract, boolean simulate) {
+                    return target.extractEnergy(maxExtract, simulate);
+                }
+
+                @Override
+                public int getEnergyStored() {
+                    return target.getEnergyStored();
+                }
+
+                @Override
+                public int getMaxEnergyStored() {
+                    return target.getMaxEnergyStored();
+                }
+
+                @Override
+                public boolean canExtract() {
+                    return true;
+                }
+
+                @Override
+                public boolean canReceive() {
+                    return true;
+                }
+            });
         }
         return null;
     }
@@ -370,7 +403,7 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
         return instance() != null ? instance().getTank(side) : null;
     }
 
-    public Object getEnergy(Facing side) {
-        return null;
+    public IEnergy getEnergy(Facing side) {
+        return instance() != null ? instance().getEnergy(side) : null;
     }
 }

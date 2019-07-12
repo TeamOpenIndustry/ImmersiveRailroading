@@ -78,6 +78,9 @@ public class Vec3i {
     public Vec3i add(Vec3i other) {
         return new Vec3i(internal.add(other.internal));
     }
+    public Vec3i add(int x, int y, int z) {
+        return new Vec3i(internal.add(x, y, z));
+    }
     public Vec3i subtract(Vec3i other) {
         return new Vec3i(internal.subtract(other.internal));
     }

@@ -1,7 +1,6 @@
 package cam72cam.mod.item;
 
 import cam72cam.mod.util.TagCompound;
-import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nonnull;
 import java.util.function.BiPredicate;
@@ -68,11 +67,6 @@ public class ItemStackHandler implements IInventory {
     @Override
     public int getLimit(int slot) {
         return internal.getSlotLimit(slot);
-    }
-
-    @Override
-    public IItemHandlerModifiable internal() {
-        return internal;
     }
 
     public TagCompound save() {

@@ -43,7 +43,7 @@ public class CastingGUI extends GuiScreen {
 	
 	public CastingGUI(TileMultiblock te) {
 		this.tile = te;
-		currentItem = new ItemStack(((CastingInstance) te.getMultiblock()).getCraftItem());
+		currentItem = ((CastingInstance) te.getMultiblock()).getCraftItem();
 		
 		gauge = ItemGauge.get(currentItem);
 		picker = new CraftPicker(currentItem, CraftingType.CASTING, (ItemStack item) -> {
@@ -116,7 +116,7 @@ public class CastingGUI extends GuiScreen {
 
 		double fluidPercent = ((CastingInstance) tile.getMultiblock()).getSteelLevel();
 		int progress = this.tile.getCraftProgress();
-		float cost = ItemCastingCost.getCastCost(currentItem.internal);
+		float cost = ItemCastingCost.getCastCost(currentItem);
 		if(cost == ItemCastingCost.BAD_CAST_COST) {
 			cost = 0;
 		}

@@ -52,7 +52,7 @@ public class ItemLargeWrench extends ItemBase {
 			}
 		} else {
 			for (String key : MultiblockRegistry.keys()) {
-				if (MultiblockRegistry.get(key).tryCreate(world.internal, pos.internal)) {
+				if (MultiblockRegistry.get(key).tryCreate(world, pos)) {
 					return ClickResult.ACCEPTED;
 				}
 			}

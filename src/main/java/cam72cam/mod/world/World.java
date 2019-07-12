@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.BlockType;
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.entity.boundingbox.BoundingBox;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
@@ -34,6 +35,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -373,5 +375,15 @@ public class World {
             }
         }
         return null;
+    }
+
+    public ItemStack getItemStack(Vec3i pos) {
+        IBlockState state = internal.getBlockState(pos.internal);
+        return new ItemStack(state.getBlock().getItemDropped(state, internal.rand, 0), 1, state.getBlock().damageDropped(state));
+    }
+
+    public List<ItemStack> getDroppedItems(IBoundingBox bb) {
+        List<EntityItem> items = internal.getEntitiesWithinAABB(EntityItem.class, new BoundingBox(bb));
+        return items.stream().map((EntityItem::getItem)).map(ItemStack::new).collect(Collectors.toList());
     }
 }

@@ -3,25 +3,23 @@ package cam72cam.immersiverailroading.multiblock;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import cam72cam.mod.energy.IEnergy;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Rotation;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.World;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 
 public class RailRollerMultiblock extends Multiblock {
 	public static final String NAME = "RAIL_MACHINE";
-	private static final BlockPos render = new BlockPos(0,0,0);
-	private static final BlockPos crafter = new BlockPos(1,1,15);
-	private static final BlockPos input = new BlockPos(1,0,0);
-	private static final BlockPos output = new BlockPos(1,0,29);
-	private static final BlockPos power = new BlockPos(1,2,15);
+	private static final Vec3i render = new Vec3i(0,0,0);
+	private static final Vec3i crafter = new Vec3i(1,1,15);
+	private static final Vec3i input = new Vec3i(1,0,0);
+	private static final Vec3i output = new Vec3i(1,0,29);
+	private static final Vec3i power = new Vec3i(1,2,15);
 	
 	private static MultiblockComponent[][][] componentGenerator() {
 		MultiblockComponent[][][] result = new MultiblockComponent[30][][];
@@ -51,26 +49,26 @@ public class RailRollerMultiblock extends Multiblock {
 	}
 	
 	@Override
-	public BlockPos placementPos() {
+	public Vec3i placementPos() {
 		return input;
 	}
 
 	@Override
-	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {
+	protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
 		return new RailRollerInstance(world, origin, rot);
 	}
 	public class RailRollerInstance extends MultiblockInstance {
 		
-		public RailRollerInstance(World world, BlockPos origin, Rotation rot) {
+		public RailRollerInstance(World world, Vec3i origin, Rotation rot) {
 			super(world, origin, rot);
 		}
 
 		@Override
-		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
-			if (world.isRemote) {
+		public boolean onBlockActivated(Player player, Hand hand, Vec3i offset) {
+			if (world.isClient) {
 				return false;
 			}
-			if (!player.isSneaking()) {
+			if (!player.isCrouching()) {
 				ItemStack held = player.getHeldItem(hand);
 				if (held.isEmpty() && outputFull()) {
 					TileMultiblock outputTe = getTile(output);
@@ -78,18 +76,18 @@ public class RailRollerMultiblock extends Multiblock {
 						return false;
 					}
 
-					ItemStack outstack = outputTe.getContainer().getStackInSlot(0);
-					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
-					outputTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
-				} else if (held.getItem() == IRItems.ITEM_CAST_RAIL.internal) {
+					ItemStack outstack = outputTe.getContainer().get(0);
+					world.dropItem(outstack, player.getPosition());
+					outputTe.getContainer().set(0, ItemStack.EMPTY);
+				} else if (held.is(IRItems.ITEM_CAST_RAIL)) {
 					TileMultiblock inputTe = getTile(input);
 					if (inputTe == null) {
 						return false;
 					}
-					if (inputTe.getContainer().getStackInSlot(0).isEmpty()) {
+					if (inputTe.getContainer().get(0).isEmpty()) {
 						ItemStack inputStack = held.copy();
 						inputStack.setCount(1);
-						inputTe.getContainer().setStackInSlot(0, inputStack);
+						inputTe.getContainer().set(0, inputStack);
 						held.shrink(1);
 						player.setHeldItem(hand, held);
 					}
@@ -99,17 +97,17 @@ public class RailRollerMultiblock extends Multiblock {
 		}
 
 		@Override
-		public boolean isRender(BlockPos offset) {
+		public boolean isRender(Vec3i offset) {
 			return render.equals(offset);
 		}
 
 		@Override
-		public int getInvSize(BlockPos offset) {
+		public int getInvSize(Vec3i offset) {
 			return offset.equals(input) || offset.equals(output) ? 1 : 0;
 		}
 
 		@Override
-		public void tick(BlockPos offset) {
+		public void tick(Vec3i offset) {
 			if (!offset.equals(crafter)) {
 				return;
 			}
@@ -137,31 +135,29 @@ public class RailRollerMultiblock extends Multiblock {
 				return;
 			}
 			
-			if (world.isRemote) {
+			if (world.isClient) {
 				if (craftingTe.getRenderTicks() % 10 == 0 && craftingTe.getCraftProgress() != 0) {
-					world.playSound(craftingTe.pos.x, craftingTe.pos.y, craftingTe.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					world.internal.playSound(craftingTe.pos.x, craftingTe.pos.y, craftingTe.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
 				}
 				return;
 			}
 			
 			// Decrement craft progress down to 0
 			if (craftingTe.getCraftProgress() != 0) {
-				/* TODO CAPABILITIES
-				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+				IEnergy energy = powerTe.getEnergy(null);
 				energy.extractEnergy(32, false);
 				craftingTe.setCraftProgress(Math.max(0, craftingTe.getCraftProgress() - 1));
-				*/
 			}
 			
 			float progress = craftingTe.getCraftProgress();
 			
-			ItemStack input = inputTe.getContainer().getStackInSlot(0);
-			ItemStack output = outputTe.getContainer().getStackInSlot(0);
+			ItemStack input = inputTe.getContainer().get(0);
+			ItemStack output = outputTe.getContainer().get(0);
 			
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.getItem() == IRItems.ITEM_CAST_RAIL.internal && output.isEmpty()) {
+				if (input.is(IRItems.ITEM_CAST_RAIL) && output.isEmpty()) {
 					progress = 100;
 					craftingTe.setCraftProgress(100);
 				}
@@ -169,31 +165,31 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(IRItems.ITEM_RAIL.internal, 10);
-				ItemGauge.set(new cam72cam.mod.item.ItemStack(out), ItemGauge.get(new cam72cam.mod.item.ItemStack(input)));
-				outputTe.getContainer().setStackInSlot(0, out);
+				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 10);
+				ItemGauge.set(out, ItemGauge.get(input));
+				outputTe.getContainer().set(0, out);
 				input.shrink(1);
-				inputTe.getContainer().setStackInSlot(0, input);;
+				inputTe.getContainer().set(0, input);
 			}
 		}
 
 		@Override
-		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
-			return offset.equals(input) && stack.getItem() == IRItems.ITEM_CAST_RAIL.internal;
+		public boolean canInsertItem(Vec3i offset, int slot, ItemStack stack) {
+			return offset.equals(input) && stack.is(IRItems.ITEM_CAST_RAIL);
 		}
 
 		@Override
-		public boolean isOutputSlot(BlockPos offset, int slot) {
+		public boolean isOutputSlot(Vec3i offset, int slot) {
 			return offset.equals(output);
 		}
 
 		@Override
-		public int getSlotLimit(BlockPos offset, int slot) {
+		public int getSlotLimit(Vec3i offset, int slot) {
 			return offset.equals(input) || offset.equals(output) ? 1 : 0;
 		}
 
 		@Override
-		public boolean canRecievePower(BlockPos offset) {
+		public boolean canRecievePower(Vec3i offset) {
 			return offset.equals(power);
 		}
 
@@ -202,12 +198,8 @@ public class RailRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return true;
-			/* TODO CAPABILITIES
-			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-			return energy.getEnergyStored() > 32;
-			*/
-			
+			return powerTe.getEnergy(null).getEnergyStored() > 32;
+
 		}
 
 		public int getCraftProgress() {
@@ -223,7 +215,7 @@ public class RailRollerMultiblock extends Multiblock {
 			if (outputTe == null) {
 				return false;
 			}
-			return !outputTe.getContainer().getStackInSlot(0).isEmpty();
+			return !outputTe.getContainer().get(0).isEmpty();
 		}
 	}
 }
