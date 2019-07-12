@@ -1,11 +1,12 @@
 package cam72cam.mod.item;
 
 import cam72cam.mod.util.TagCompound;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nonnull;
 import java.util.function.BiPredicate;
 
-public class ItemStackHandler {
+public class ItemStackHandler implements IInventory {
     public final net.minecraftforge.items.ItemStackHandler internal;
     protected BiPredicate<Integer, ItemStack> checkSlot = (integer, itemStack) -> true;
 
@@ -44,21 +45,34 @@ public class ItemStackHandler {
         internal.setSize(inventorySize);
     }
 
-    public int getSlots() {
+    @Override
+    public int getSlotCount() {
         return internal.getSlots();
     }
-
-    public ItemStack getStackInSlot(int slot) {
+    @Override
+    public ItemStack get(int slot) {
         return new ItemStack(internal.getStackInSlot(slot));
     }
-    public void setStackInSlot(int slot, ItemStack stack) {
+    @Override
+    public void set(int slot, ItemStack stack) {
         internal.setStackInSlot(slot, stack.internal);
     }
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+    @Override
+    public ItemStack insert(int slot, ItemStack stack, boolean simulate) {
         return new ItemStack(internal.insertItem(slot, stack.internal, simulate));
     }
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+    @Override
+    public ItemStack extract(int slot, int amount, boolean simulate) {
         return new ItemStack(internal.extractItem(slot, amount, simulate));
+    }
+    @Override
+    public int getLimit(int slot) {
+        return internal.getSlotLimit(slot);
+    }
+
+    @Override
+    public IItemHandlerModifiable internal() {
+        return internal;
     }
 
     public TagCompound save() {

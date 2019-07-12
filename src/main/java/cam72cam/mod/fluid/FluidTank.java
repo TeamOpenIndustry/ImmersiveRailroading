@@ -1,10 +1,9 @@
 package cam72cam.mod.fluid;
 
-import cam72cam.mod.capability.ITank;
 import cam72cam.mod.util.TagCompound;
 
 public class FluidTank implements ITank {
-    private final net.minecraftforge.fluids.FluidTank internal;
+    public final net.minecraftforge.fluids.FluidTank internal;
 
     public FluidTank(FluidStack fluidStack, int capacity) {
         if (fluidStack == null) {
@@ -69,7 +68,8 @@ public class FluidTank implements ITank {
         internal.readFromNBT(tag.internal);
     }
 
-    public boolean tryFill(ITank inputTank, int max, boolean simulate) {
+    public boolean tryDrain(ITank inputTank, int max, boolean simulate) {
+        //TODO broken max
         int maxTransfer = this.fill(inputTank.getContents(), true);
         maxTransfer = Math.min(maxTransfer, max);
 
@@ -95,7 +95,8 @@ public class FluidTank implements ITank {
         return ok;
     }
 
-    public boolean tryDrain(ITank inputTank, int max, boolean simulate) {
+    public boolean tryFill(ITank inputTank, int max, boolean simulate) {
+        //TODO broken max
         int maxTransfer = inputTank.fill(this.getContents(), true);
         maxTransfer = Math.min(maxTransfer, max);
 

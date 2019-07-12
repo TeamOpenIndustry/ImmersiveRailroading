@@ -23,6 +23,9 @@ public enum Facing {
     };
 
     public static Facing from(EnumFacing facing) {
+        if (facing == null) {
+            return null;
+        }
         switch (facing) {
             case DOWN:
                 return DOWN;

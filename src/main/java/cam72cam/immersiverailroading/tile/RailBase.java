@@ -8,36 +8,29 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.fluid.FluidTank;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.item.ToolType;
+import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
-import cam72cam.mod.world.World;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RailBase extends BlockEntityTickable {
 	private Vec3i parent;
@@ -436,31 +429,7 @@ public class RailBase extends BlockEntityTickable {
 	/*
 	 * Capabilities tie ins
 	 */
-	/* TODO CAPABILITIES
-	@Override
-	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-		if (this.getAugment() != null) {
-			switch(this.getAugment()) {
-			case FLUID_LOADER:
-			case FLUID_UNLOADER:
-			case WATER_TROUGH:
-				return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
-			case ITEM_LOADER:
-			case ITEM_UNLOADER:
-				return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
-			case DETECTOR:
-			case LOCO_CONTROL:
-			case SPEED_RETARDER:
-			case COUPLER:
-				break;
-			default:
-				break;
-			}
-		}
-		return super.hasCapability(capability, facing);
-	}
-	*/
-	
+
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type){
 		return world.getEntities((T stock) -> {
 			if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
@@ -470,43 +439,37 @@ public class RailBase extends BlockEntityTickable {
 		}, type).stream().findFirst().orElse(null);
 	}
 
-	/* TODO CAPABILITIES
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+	public IInventory getInventory(Facing side) {
 		if (this.getAugment() != null) {
-			switch(this.getAugment()) {
-			case FLUID_LOADER:
-			case FLUID_UNLOADER:
-			case WATER_TROUGH:
-				if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-					if (this.augmentTank == null) {
-						this.createAugmentTank();
-					}
-					return (T) this.augmentTank;
-				}
-			case ITEM_LOADER:
-			case ITEM_UNLOADER:
-				if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+			switch (this.getAugment()) {
+				case ITEM_LOADER:
+				case ITEM_UNLOADER:
 					Freight stock = getStockNearBy(Freight.class);
 					if (stock != null) {
-						return (T) stock.cargoItems;
+						return stock.cargoItems;
 					}
-					return (T) new ItemStackHandler(0);
-				}
-			case DETECTOR:
-			case LOCO_CONTROL:
-			case SPEED_RETARDER:
-			case COUPLER:
-				break;
-			default:
-				break;
+					return new ItemStackHandler(0);
 			}
 		}
-		return super.getCapability(capability, facing);
+		return null;
 	}
-	*/
-	
+
+	@Override
+	public ITank getTank(Facing side) {
+		if (this.getAugment() != null) {
+			switch (this.getAugment()) {
+				case FLUID_LOADER:
+				case FLUID_UNLOADER:
+                    if (this.augmentTank == null) {
+                        this.createAugmentTank();
+                    }
+                    return this.augmentTank;
+			}
+		}
+		return null;
+	}
+
 	private void balanceTanks() {
 		/*
 		for (Facing facing : Facing.values()) {
@@ -539,44 +502,6 @@ public class RailBase extends BlockEntityTickable {
 		default:
 			break;
 		}
-	}
-
-	public void transferAllItems(ItemStackHandler source, ItemStackHandler dest, int numstacks) {
-		for (int slot = 0; slot < source.getSlots(); slot++) {
-			net.minecraft.item.ItemStack stack = source.getStackInSlot(slot);
-			if (stack.isEmpty()) {
-				continue;
-			}
-			int orig_count = stack.getCount();
-			stack = ItemHandlerHelper.insertItem(dest, stack, false);
-			if (stack.getCount() != orig_count) {
-				source.extractItem(slot, orig_count - stack.getCount(), false);
-				numstacks --;
-			}
-			if (numstacks <= 0) {
-				return;
-			}
-		}
-	}
-	
-	private <T> List<T> getCapsNearby(Capability<T> cap) {
-		List<T> found = new ArrayList<T>();
-		
-		for (Facing facing : Facing.values()) {
-			Vec3i npos = pos.offset(facing);
-			if (world.isAir(npos) || BlockUtil.isIRRail(world, npos)) {
-				continue;
-			}
-			net.minecraft.tileentity.TileEntity nte = world.getTileEntity(npos, net.minecraft.tileentity.TileEntity.class);
-			if (nte == null) {
-				continue;
-			}
-			if (nte.hasCapability(cap, facing.getOpposite().internal)) {
-				found.add(nte.getCapability(cap, facing.getOpposite().internal));
-			}
-		}
-		
-		return found;
 	}
 
 	@Override
@@ -628,10 +553,6 @@ public class RailBase extends BlockEntityTickable {
 			return;
 		}
 
-		/*
-		Capability<IFluidHandler> fluid_cap = CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
-		Capability<ItemStackHandler> item_cap = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
-
 		try {
 			switch (this.augment) {
             case ITEM_LOADER:
@@ -641,8 +562,11 @@ public class RailBase extends BlockEntityTickable {
 					break;
 				}
 				ItemStackHandler freight_items = freight.cargoItems;
-				for (ItemStackHandler neighbor : getCapsNearby(item_cap)) {
-					transferAllItems(neighbor, freight_items, 1);
+				for (Facing side : Facing.values()) {
+					IInventory inventory = world.getInventory(pos.offset(side));
+					if (inventory != null) {
+						inventory.transferAllTo(freight_items);
+					}
 				}
 			}
 			break;
@@ -652,8 +576,11 @@ public class RailBase extends BlockEntityTickable {
 					break;
 				}
 				ItemStackHandler freight_items = freight.cargoItems;
-				for (ItemStackHandler neighbor : getCapsNearby(item_cap)) {
-					transferAllItems(freight_items, neighbor, 1);
+				for (Facing side : Facing.values()) {
+					IInventory inventory = world.getInventory(pos.offset(side));
+					if (inventory != null) {
+						inventory.transferAllFrom(freight_items);
+					}
 				}
 			}
 			break;
@@ -666,10 +593,12 @@ public class RailBase extends BlockEntityTickable {
 				if (stock == null) {
 					break;
 				}
-
 				augmentTank.tryFill(stock.theTank, 100, false);
-				for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-					stock.theTank.tryDrain(ITank.getTank(neighbor), 100, false);
+                for (Facing side : Facing.values()) {
+                	ITank tank = world.getTank(pos.offset(side));
+                	if (tank != null) {
+						stock.theTank.tryDrain(tank, 100, false);
+					}
 				}
 			}
 				break;
@@ -684,8 +613,11 @@ public class RailBase extends BlockEntityTickable {
 				}
 
 				augmentTank.tryDrain(stock.theTank, 100, false);
-				for (IFluidHandler neighbor : getCapsNearby(fluid_cap)) {
-					stock.theTank.tryFill(ITank.getTank(neighbor), 100, false);
+                for (Facing side : Facing.values()) {
+                    ITank tank = world.getTank(pos.offset(side));
+                    if (tank != null) {
+						stock.theTank.tryFill(tank, 100, false);
+					}
 				}
 			}
 				
@@ -702,7 +634,6 @@ public class RailBase extends BlockEntityTickable {
 					balanceTanks();
 				}
                 */
-		/*
 				break;
 			case LOCO_CONTROL: {
 				Locomotive loco = this.getStockNearBy(Locomotive.class);
@@ -745,13 +676,15 @@ public class RailBase extends BlockEntityTickable {
 						newRedstone = stock != null ? Math.min(15, stock.getPassengerCount()) : 0;
 						break;
 					case CARGO:
-						if (stock != null && stock instanceof Freight) {
-							newRedstone = stock != null ? ((Freight) stock).getPercentCargoFull() * 15 / 100 : 0;
+						newRedstone = 0;
+						if (stock instanceof Freight) {
+							newRedstone = ((Freight) stock).getPercentCargoFull() * 15 / 100;
 						}
 						break;
 					case LIQUID:
-						if (stock != null && stock instanceof FreightTank) {
-							newRedstone = stock != null ? ((FreightTank) stock).getPercentLiquidFull() * 15 / 100 : 0;
+						newRedstone = 0;
+						if (stock instanceof FreightTank) {
+							newRedstone = ((FreightTank) stock).getPercentLiquidFull() * 15 / 100;
 						}
 						break;
 				}
@@ -787,7 +720,6 @@ public class RailBase extends BlockEntityTickable {
 		} catch (Exception ex) {
 			ImmersiveRailroading.catching(ex);
 		}
-		*/
 	}
 	
 	public int getRedstoneLevel() {

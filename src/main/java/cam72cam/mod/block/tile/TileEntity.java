@@ -1,17 +1,31 @@
 package cam72cam.mod.block.tile;
 
 import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.ITank;
+import cam72cam.mod.item.IInventory;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Identifier;
 import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 import com.google.common.collect.HashBiMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -143,6 +157,129 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
         }
     }
 
+    /* Forge Overrides */
+
+    @Override
+    public boolean hasCapability(net.minecraftforge.common.capabilities.Capability<?> capability, @Nullable net.minecraft.util.EnumFacing facing) {
+        //TODO more efficient
+        return getCapability(capability, facing) != null;
+    }
+
+    @Override
+    @Nullable
+    public <T> T getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.util.EnumFacing facing) {
+        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            ITank target = getTank(Facing.from(facing));
+            if (target == null) {
+                return null;
+            }
+            return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(new IFluidHandler() {
+                @Override
+                public IFluidTankProperties[] getTankProperties() {
+                    return new IFluidTankProperties[] {
+                        new IFluidTankProperties() {
+                            @Nullable
+                            @Override
+                            public FluidStack getContents() {
+                                return target.getContents().internal;
+                            }
+
+                            @Override
+                            public int getCapacity() {
+                                return target.getCapacity();
+                            }
+
+                            @Override
+                            public boolean canFill() {
+                                return true;
+                            }
+
+                            @Override
+                            public boolean canDrain() {
+                                return true;
+                            }
+
+                            @Override
+                            public boolean canFillFluidType(FluidStack fluidStack) {
+                                return target.allows(Fluid.getFluid(fluidStack.getFluid()));
+                            }
+
+                            @Override
+                            public boolean canDrainFluidType(FluidStack fluidStack) {
+                                return target.allows(Fluid.getFluid(fluidStack.getFluid()));
+                            }
+                        }
+                    };
+                }
+
+                @Override
+                public int fill(FluidStack resource, boolean doFill) {
+                    int res = target.fill(new cam72cam.mod.fluid.FluidStack(resource), !doFill);
+                    return res;
+                }
+
+                @Nullable
+                @Override
+                public FluidStack drain(FluidStack resource, boolean doDrain) {
+                    return target.drain(new cam72cam.mod.fluid.FluidStack(resource), !doDrain).internal;
+                }
+
+                @Nullable
+                @Override
+                public FluidStack drain(int maxDrain, boolean doDrain) {
+                    if (target.getContents().internal == null) {
+                        return null;
+                    }
+                    return target.drain(new cam72cam.mod.fluid.FluidStack(new FluidStack(target.getContents().internal, maxDrain)), doDrain).internal;
+                }
+            });
+        }
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            IInventory target = getInventory(Facing.from(facing));
+            if (target == null) {
+                return null;
+            }
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(new IItemHandlerModifiable() {
+                @Override
+                public int getSlots() {
+                    return target.getSlotCount();
+                }
+
+                @Override
+                public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+                    target.set(slot, new cam72cam.mod.item.ItemStack(stack));
+                }
+
+                @Nonnull
+                @Override
+                public ItemStack getStackInSlot(int slot) {
+                    return target.get(slot).internal;
+                }
+
+                @Nonnull
+                @Override
+                public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                    return target.insert(slot, new cam72cam.mod.item.ItemStack(stack), simulate).internal;
+                }
+
+                @Nonnull
+                @Override
+                public ItemStack extractItem(int slot, int amount, boolean simulate) {
+                    return target.extract(slot, amount, simulate).internal;
+                }
+
+                @Override
+                public int getSlotLimit(int slot) {
+                    return target.getLimit(slot);
+                }
+            });
+        }
+        if (capability == CapabilityEnergy.ENERGY) {
+            return null;//getEnergy(Facing.from(facing));
+        }
+        return null;
+    }
+
     /*
     Wrapped functionality
     */
@@ -221,5 +358,19 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
             }
         }
         return this.instance;
+    }
+
+    /* Capabilities */
+
+    public IInventory getInventory(Facing side) {
+        return instance() != null ? instance().getInventory(side) : null;
+    }
+
+    public ITank getTank(Facing side) {
+        return instance() != null ? instance().getTank(side) : null;
+    }
+
+    public Object getEnergy(Facing side) {
+        return null;
     }
 }
