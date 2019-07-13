@@ -20,15 +20,13 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.init.Items;
 import net.minecraftforge.fml.client.config.GuiCheckBox;
 import net.minecraftforge.fml.client.config.GuiSlider;
-import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.StringUtils;
 
@@ -107,16 +105,9 @@ public class TrackGui extends GuiScreen {
 		//	track = DefinitionManager.getTrackIDs().stream().findFirst().getContents();
 		//}
 		
-		oreDict.add(new ItemStack(Items.AIR, 1));
-		
-		for (ItemStack ore : OreHelper.IR_RAIL_BED.getOres()) {
-			if (ore.internal.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
-				NonNullList<net.minecraft.item.ItemStack> temp = NonNullList.create();
-				ore.internal.getItem().getSubItems(ore.internal.getItem().getCreativeTab(), temp);
-			} else {
-				oreDict.add(ore);
-			}
-		}
+		oreDict.add(ItemStack.EMPTY);
+
+		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
 		bedSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
 			bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
 			this.mc.displayGuiScreen(this);
