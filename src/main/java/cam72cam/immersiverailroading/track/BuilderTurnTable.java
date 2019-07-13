@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import org.apache.commons.lang3.tuple.Pair;
@@ -23,7 +24,7 @@ public class BuilderTurnTable extends BuilderBase {
 		positions = new HashSet<>();
 		
 		offset = new Vec3i(0, 1, info.settings.length);
-		offset = BlockUtil.rotateYaw(offset, info.placementInfo.facing());
+		offset = offset.rotate(Rotation.from(info.placementInfo.facing()));
 		
 		double radius = info.settings.length;
 		

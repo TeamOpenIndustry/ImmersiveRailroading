@@ -1,16 +1,12 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import java.util.List;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
-import cam72cam.immersiverailroading.util.ParticleUtil;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.entity.boundingbox.BoundingBox;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
@@ -19,9 +15,11 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
+import cam72cam.mod.world.World.ParticleType;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
+
+import java.util.List;
 
 public class CastingMultiblock extends Multiblock {
 	private static MultiblockComponent STONE = new MultiblockComponent(Fuzzy.STONE_BRICK);
@@ -165,8 +163,8 @@ public class CastingMultiblock extends Multiblock {
 				if (offset.z > 7 && offset.y > 1 && isPouring()) {
 					Vec3d pos = new Vec3d(getPos(offset)).add(0, 1, 0).add(0.5, 0.5, 0.5);
 					if (Math.random() < 0.01) {
-						ParticleUtil.spawnParticle(world.internal, EnumParticleTypes.SMOKE_NORMAL, pos.internal);
-						ParticleUtil.spawnParticle(world.internal, EnumParticleTypes.SMOKE_NORMAL, pos.internal);
+						world.createParticle(ParticleType.SMOKE, pos, Vec3d.ZERO);
+						world.createParticle(ParticleType.SMOKE, pos, Vec3d.ZERO);
 					}
 					if (Math.random() < 0.001) {
 						world.internal.playSound(pos.x, pos.y, pos.z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f, false);
