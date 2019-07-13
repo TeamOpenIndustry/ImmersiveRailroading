@@ -18,13 +18,15 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.block.BlockSnow;
+import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -35,7 +37,6 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -313,8 +314,9 @@ public class World {
     public void setBlock(Vec3i pos, BlockType block) {
         internal.setBlockState(pos.internal, block.internal.getDefaultState());
     }
-    public void setBlock(Vec3i pos, ItemStack item) {
-        internal.setBlockState(pos.internal, BlockUtil.itemToBlockState(item));
+    public void setBlock(Vec3i pos, ItemStack stack) {
+        IBlockState state = Block.getBlockFromItem(stack.internal.getItem()).getStateFromMeta(stack.internal.getMetadata());
+        internal.setBlockState(pos.internal, state);
     }
 
     public boolean isTopSolid(Vec3i pos) {
@@ -354,6 +356,34 @@ public class World {
         return internal.getBlockState(pos.internal).getBlock() == block.internal;
     }
 
+    public boolean isReplacable(Vec3i pos) {
+        if (isAir(pos)) {
+            return true;
+        }
+
+        Block block = internal.getBlockState(pos.internal).getBlock();
+
+        if (block.isReplaceable(internal, pos.internal)) {
+            return true;
+        }
+        if (block instanceof IGrowable && !(block instanceof BlockGrass)) {
+            return true;
+        }
+        if (block instanceof IPlantable) {
+            return true;
+        }
+        if (block instanceof BlockLiquid) {
+            return true;
+        }
+        if (block instanceof BlockSnow) {
+            return true;
+        }
+        if (block instanceof BlockLeaves) {
+            return true;
+        }
+        return false;
+    }
+
     /* Capabilities */
     public IInventory getInventory(Vec3i offset) {
         net.minecraft.tileentity.TileEntity te = internal.getTileEntity(offset.internal);
@@ -385,5 +415,20 @@ public class World {
     public List<ItemStack> getDroppedItems(IBoundingBox bb) {
         List<EntityItem> items = internal.getEntitiesWithinAABB(EntityItem.class, new BoundingBox(bb));
         return items.stream().map((EntityItem::getItem)).map(ItemStack::new).collect(Collectors.toList());
+    }
+
+    public enum ParticleType {
+        SMOKE(EnumParticleTypes.SMOKE_NORMAL),
+        ;
+
+        private final EnumParticleTypes internal;
+
+        ParticleType(EnumParticleTypes internal) {
+            this.internal = internal;
+        }
+    }
+
+    public void createParticle(ParticleType type, Vec3d position, Vec3d velocity) {
+        internal.spawnParticle(type.internal, position.x, position.y, position.z, velocity.x, velocity.y, velocity.z);
     }
 }
