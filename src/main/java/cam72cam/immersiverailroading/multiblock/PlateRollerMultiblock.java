@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.multiblock;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
@@ -90,7 +90,7 @@ public class PlateRollerMultiblock extends Multiblock {
 						}
 						return true;
 					}
-				} else if (OreHelper.IR_STEEL_BLOCK.matches(held, false)) {
+				} else if (IRFuzzy.IR_STEEL_BLOCK.matches(held)) {
 					TileMultiblock inputTe = getTile(input);
 					if (inputTe == null) {
 						return false;
@@ -177,7 +177,7 @@ public class PlateRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if ( OreHelper.IR_STEEL_BLOCK.matches(input, false) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
+				if ( IRFuzzy.IR_STEEL_BLOCK.matches(input) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
 					input.setCount(input.getCount() - 1);
 					inputTe.getContainer().set(0, input);;
 					progress = 100;
@@ -193,7 +193,7 @@ public class PlateRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean canInsertItem(Vec3i offset, int slot, ItemStack stack) {
-			return offset.equals(input) && OreHelper.IR_STEEL_BLOCK.matches(stack, false);
+			return offset.equals(input) && IRFuzzy.IR_STEEL_BLOCK.matches(stack);
 		}
 
 		@Override

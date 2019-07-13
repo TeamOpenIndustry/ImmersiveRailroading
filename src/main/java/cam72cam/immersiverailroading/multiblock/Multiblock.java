@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,21 +30,21 @@ public abstract class Multiblock {
 	
 	protected static final MultiblockComponent AIR = new MultiblockComponent();
 	protected static MultiblockComponent STEEL() {
-		return new MultiblockComponent(OreHelper.IR_STEEL_BLOCK);
+		return new MultiblockComponent(IRFuzzy.IR_STEEL_BLOCK);
 	}
 	
 	protected static MultiblockComponent CASING() {
-		return new MultiblockComponent(OreHelper.IR_CASTING_CASING);
+		return new MultiblockComponent(IRFuzzy.IR_CASTING_CASING);
 	}
 	
 	protected static MultiblockComponent L_ENG() {
-		return new MultiblockComponent(OreHelper.IR_LIGHT_ENG);
+		return new MultiblockComponent(IRFuzzy.IR_LIGHT_ENG);
 	}
 	protected static MultiblockComponent H_ENG() {
-		return new MultiblockComponent(OreHelper.IR_HEAVY_ENG);
+		return new MultiblockComponent(IRFuzzy.IR_HEAVY_ENG);
 	}
 	protected static MultiblockComponent S_SCAF() {
-		return new MultiblockComponent(OreHelper.IR_SCAFFOLDING);
+		return new MultiblockComponent(IRFuzzy.IR_SCAFFOLDING);
 	}
 
 	protected Multiblock(String name, MultiblockComponent[][][] components) {

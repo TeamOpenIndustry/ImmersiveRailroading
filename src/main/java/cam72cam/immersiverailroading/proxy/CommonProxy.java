@@ -16,8 +16,9 @@ import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.entity.sync.EntitySync;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.world.World;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.entity.Entity;
@@ -30,7 +31,6 @@ import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.util.Identifier;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
@@ -88,16 +88,6 @@ public abstract class CommonProxy implements IGuiHandler {
     	
     	DefinitionManager.initDefinitions();
     	Config.init();
-    	OreHelper.IR_RAIL_BED.add(Blocks.BRICK_BLOCK);
-    	OreHelper.IR_RAIL_BED.add(Blocks.COBBLESTONE);
-    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.CONCRETE, 1, OreDictionary.WILDCARD_VALUE));
-    	OreHelper.IR_RAIL_BED.add(Blocks.DIRT);
-    	OreHelper.IR_RAIL_BED.add(Blocks.GRAVEL);
-    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
-    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.LOG, 1, OreDictionary.WILDCARD_VALUE));
-    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.LOG2, 1, OreDictionary.WILDCARD_VALUE));
-    	OreHelper.IR_RAIL_BED.add(Blocks.NETHER_BRICK);
-    	OreHelper.IR_RAIL_BED.add(new cam72cam.mod.item.ItemStack(Blocks.PLANKS, 1, OreDictionary.WILDCARD_VALUE));
     }
     
     public void init(FMLInitializationEvent event) {
@@ -123,6 +113,18 @@ public abstract class CommonProxy implements IGuiHandler {
     	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
     	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
     	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
+
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.BRICK_BLOCK);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.COBBLESTONE);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.CONCRETE);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.DIRT);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.GRAVEL_BLOCK);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.HARDENED_CLAY);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.LOG_WOOD);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.NETHER_BRICK);
+		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.WOOD_PLANK);
+
+		IRFuzzy.applyFallbacks();
     }
     
 

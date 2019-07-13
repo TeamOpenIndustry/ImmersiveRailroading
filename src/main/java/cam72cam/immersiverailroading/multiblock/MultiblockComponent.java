@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.multiblock;
 
 import java.util.function.Function;
 
-import cam72cam.immersiverailroading.util.OreHelper.OreAbstract;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
@@ -24,14 +23,6 @@ public class MultiblockComponent {
 		this.itemCheck = ItemStack::isEmpty;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public MultiblockComponent(OreAbstract ore) {
-		ItemStack stack = ore.example();
-		this.name = stack.getDisplayName();
-		this.def = stack;
-		this.itemCheck = (ItemStack tstack) -> ore.matches(tstack, false);
-	}
-
 	public MultiblockComponent(Fuzzy fuzzy) {
 		this.name = fuzzy.example().getDisplayName();
 		this.def = fuzzy.example();

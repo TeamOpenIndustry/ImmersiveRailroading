@@ -21,9 +21,9 @@ public class ItemCastingCost {
 		} else if (item.is(IRItems.ITEM_AUGMENT)) {
 			cost = (int) Math.ceil(8 * ItemGauge.get(item).scale());
 			count = 8;
-		} else if (OreHelper.IR_STEEL_BLOCK.matches(item, false)) {
+		} else if (IRFuzzy.IR_STEEL_BLOCK.matches(item)) {
 			cost = 9;
-		} else if (OreHelper.IR_STEEL_INGOT.matches(item, false)) {
+		} else if (IRFuzzy.IR_STEEL_INGOT.matches(item)) {
 			cost = 1;
 		}
 		item.setCount(count);

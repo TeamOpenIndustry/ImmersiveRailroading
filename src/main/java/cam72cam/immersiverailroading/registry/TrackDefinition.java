@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import com.google.gson.JsonElement;
@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class TrackDefinition {
     public final String trackID;
@@ -79,10 +78,10 @@ public class TrackDefinition {
                 String oreName = item.replace("ore:", "");
                 //TODO make IR ore dicts actual ore dicts
                 if (oreName.equals("irRail")) {
-                    examples.addAll(OreHelper.IR_RAIL.getOres());
+                    examples.addAll(IRFuzzy.IR_RAIL.enumerate());
                 }
                 if (oreName.equals("irTie")) {
-                    examples.addAll(OreHelper.IR_TIE.getOres());
+                    examples.addAll(IRFuzzy.IR_TIE.enumerate());
                 }
                 examples.addAll(new Fuzzy(oreName).enumerate());
             } else {
@@ -96,10 +95,10 @@ public class TrackDefinition {
                 String oreName = item.replace("ore:", "");
                 //TODO make IR ore dicts actual ore dicts
                 if (oreName.equals("irRail")) {
-                    return OreHelper.IR_RAIL.matches(stack, false);
+                    return IRFuzzy.IR_RAIL.matches(stack);
                 }
                 if (oreName.equals("irTie")) {
-                    return OreHelper.IR_TIE.matches(stack, false);
+                    return IRFuzzy.IR_TIE.matches(stack);
                 }
                 return new Fuzzy(oreName).matches(stack);
             }
