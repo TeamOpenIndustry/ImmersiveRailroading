@@ -1,25 +1,19 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
+import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.BufferUtil;
-import cam72cam.immersiverailroading.util.RedstoneUtil;
-import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.immersiverailroading.util.*;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -37,7 +31,12 @@ import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock {
+
+	public static final String DAMAGE_SOURCE_HIT = "immersiverailroading:hitByTrain";
 
 	private Float frontYaw;
 	private Float rearYaw;
@@ -403,7 +402,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 				double speedDamage = this.getCurrentSpeed().metric() / ConfigDamage.entitySpeedDamage;
 				if (speedDamage > 1) {
-					entity.attackEntityFrom((new DamageSource("immersiverailroading:hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
+					entity.attackEntityFrom((new DamageSource(DAMAGE_SOURCE_HIT)).setDamageBypassesArmor(), (float) speedDamage);
 				}
 			}
 	
@@ -451,8 +450,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				}
 				
 				IBlockState state = world.getBlockState(bp);
-				if (state.getBlock() != Blocks.AIR) {
+				Block block = state.getBlock();
+				if (block != Blocks.AIR) {
 					if (!BlockUtil.isIRRail(world, bp)) {
+						// Skip blocks that deny collision with the rolling stock.
+						if (block instanceof IConditionalCollision && !((IConditionalCollision) block).canCollide(
+								world,
+								bp,
+								state,
+								new DamageSource(DAMAGE_SOURCE_HIT)
+						)) {
+							continue;
+						}
+
 						AxisAlignedBB bbb = state.getCollisionBoundingBox(world, bp);
 						if (bbb == null) {
 							continue;
@@ -460,7 +470,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 						bbb = bbb.offset(bp);
 						if (bb.intersects(bbb)) { // This is slow, do it as little as possible
 							if (!BlockUtil.isIRRail(world, bp.up())) {
-								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(state.getBlock() == Blocks.SNOW || state.getBlock() == Blocks.SNOW_LAYER));										
+								world.destroyBlock(bp, Config.ConfigDamage.dropSnowBalls || !(block == Blocks.SNOW || block == Blocks.SNOW_LAYER));
 							}
 						}
 					} else {
