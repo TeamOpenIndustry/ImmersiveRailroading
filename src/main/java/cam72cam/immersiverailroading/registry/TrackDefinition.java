@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import com.google.gson.JsonElement;
@@ -76,13 +75,6 @@ public class TrackDefinition {
 
             if (item.startsWith("ore:")) {
                 String oreName = item.replace("ore:", "");
-                //TODO make IR ore dicts actual ore dicts
-                if (oreName.equals("irRail")) {
-                    examples.addAll(IRFuzzy.IR_RAIL.enumerate());
-                }
-                if (oreName.equals("irTie")) {
-                    examples.addAll(IRFuzzy.IR_TIE.enumerate());
-                }
                 examples.addAll(new Fuzzy(oreName).enumerate());
             } else {
                 examples.add(new ItemStack(this.item, 1, meta));
@@ -93,13 +85,6 @@ public class TrackDefinition {
         public boolean matches(ItemStack stack) {
             if (item.startsWith("ore:")) {
                 String oreName = item.replace("ore:", "");
-                //TODO make IR ore dicts actual ore dicts
-                if (oreName.equals("irRail")) {
-                    return IRFuzzy.IR_RAIL.matches(stack);
-                }
-                if (oreName.equals("irTie")) {
-                    return IRFuzzy.IR_TIE.matches(stack);
-                }
                 return new Fuzzy(oreName).matches(stack);
             }
             return stack.equals(new ItemStack(item, 1, meta));
