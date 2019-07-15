@@ -167,7 +167,7 @@ public abstract class CommonProxy implements IGuiHandler {
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
     	for (Function<ModdedEntity, Entity> type : entityClasses) {
-			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings);
+			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
     	}
     }
 	
