@@ -186,6 +186,9 @@ public class ClientProxy extends CommonProxy {
 
 		ItemRender.register(IRItems.ITEM_PLATE, PlateItemModel::getModel);
 		ItemRender.register(IRItems.ITEM_AUGMENT, RailAugmentItemModel::getModel);
+		ItemRender.register(IRItems.ITEM_RAIL, RailItemRender::getModel);
+		ItemRender.register(IRItems.ITEM_CAST_RAIL, RailCastItemRender::getModel);
+		ItemRender.register(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::getModel);
 	}
 
 	@Override
@@ -268,20 +271,11 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.internal, 0,
-				new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName().internal, ""));
-
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName().internal, ""));
 
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""));
-		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RAIL.internal, 0,
-				new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName().internal, ""));
-		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CAST_RAIL.internal, 0,
-				new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName().internal, ""));
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL.internal, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
@@ -380,10 +374,7 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onModelBakeEvent(ModelBakeEvent event) {
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""), new StockItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName().internal, ""), new TrackBlueprintItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName().internal, ""), new StockItemComponentModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName().internal, ""), new RailItemRender());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName().internal, ""), new RailCastItemRender());
 	}
 
 	@SubscribeEvent
