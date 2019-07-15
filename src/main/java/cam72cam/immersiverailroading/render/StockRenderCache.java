@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.mod.gui.Progress;
+import cam72cam.mod.render.obj.OBJRender;
 
 public class StockRenderCache {
 	private static Map<String, StockModel> render_cache = new HashMap<>();

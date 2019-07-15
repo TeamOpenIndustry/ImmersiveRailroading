@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.model.obj.OBJModel;
-import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.StandardModel;

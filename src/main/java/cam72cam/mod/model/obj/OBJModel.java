@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.model.obj;
+package cam72cam.mod.model.obj;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

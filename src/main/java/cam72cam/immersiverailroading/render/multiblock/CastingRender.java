@@ -6,9 +6,9 @@ import java.util.List;
 import cam72cam.mod.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstance;
-import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 
