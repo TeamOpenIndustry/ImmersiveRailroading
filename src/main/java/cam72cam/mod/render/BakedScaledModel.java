@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cam72cam.mod.math.Vec3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -13,7 +14,6 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3d;
 
 public class BakedScaledModel implements IBakedModel {
 	// I know this is evil and I love it :D
@@ -21,7 +21,7 @@ public class BakedScaledModel implements IBakedModel {
 	private IBakedModel source;
 	private final Vec3d scale;
 	private final Vec3d transform;
-	private Map<EnumFacing, List<BakedQuad>> quadCache = new HashMap<EnumFacing, List<BakedQuad>>();
+	private Map<EnumFacing, List<BakedQuad>> quadCache = new HashMap<>();
 	
 	public BakedScaledModel(IBakedModel source, Vec3d scale, Vec3d transform) {
 		this.source = source;
@@ -39,7 +39,7 @@ public class BakedScaledModel implements IBakedModel {
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		if (quadCache.get(side) == null) {
 			List<BakedQuad> quads = source.getQuads(state, side, rand);
-			quadCache.put(side, new ArrayList<BakedQuad>());
+			quadCache.put(side, new ArrayList<>());
 			for (BakedQuad quad : quads) {
 				int[] newData = Arrays.copyOf(quad.getVertexData(), quad.getVertexData().length);
 	

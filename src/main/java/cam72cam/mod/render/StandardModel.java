@@ -18,31 +18,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StandardModel {
-    private List<Pair<IBlockState, IBakedModel>> models;
-    public StandardModel() {
-        this.models = new ArrayList<>();
-    }
+    private List<Pair<IBlockState, IBakedModel>> models = new ArrayList<>();
 
     public void addColorBlock(Color color, Vec3d translate, Vec3d scale) {
-         // TODO rest of scale/translate
         IBlockState state = Blocks.CONCRETE.getDefaultState();
         state = state.withProperty(BlockColored.COLOR, color.internal);
         IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-        models.add(Pair.of(state, new BakedScaledModel(model, (float) scale.y)));
+        models.add(Pair.of(state, new BakedScaledModel(model, scale, translate)));
     }
 
     public void addSnow(int layers, Vec3d translate) {
-         // TODO rest of scale/translate
         layers = Math.min(layers, 8);
         IBlockState state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, layers);
         IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-        models.add(Pair.of(state, model));
+        models.add(Pair.of(state, new BakedScaledModel(model, new Vec3d(1, 1,1), translate)));
     }
     public void addItem(ItemStack bed, Vec3d translate, Vec3d scale) {
-        // TODO rest of scale/translate
         IBlockState state = itemToBlockState(bed);
         IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
-        models.add(Pair.of(state, new BakedScaledModel(model, (float)scale.y)));
+        models.add(Pair.of(state, new BakedScaledModel(model, scale, translate)));
     }
 
     public List<BakedQuad> getQuads(EnumFacing side, long rand) {
