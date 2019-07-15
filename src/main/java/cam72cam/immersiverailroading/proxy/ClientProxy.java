@@ -25,7 +25,6 @@ import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.RailBase;
-import cam72cam.immersiverailroading.tile.RailGag;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.*;
@@ -387,21 +386,21 @@ public class ClientProxy extends CommonProxy {
 		for (KeyTypes key : keys.keySet()) {
 			KeyBinding binding = keys.get(key);
 			if (binding.isKeyDown()) {
-				ImmersiveRailroading.net.sendToServer(new KeyPressPacket(key, player, riding));
+				new KeyPressPacket(key, player, riding).sendToServer();
 			}
 		}
 		
 		if (player.isLeftKeyDown()) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_LEFT, player, riding));
+			new KeyPressPacket(KeyTypes.PLAYER_LEFT, player, riding).sendToServer();
 		}
 		if (player.isRightKeyDown()) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_RIGHT, player, riding));
+			new KeyPressPacket(KeyTypes.PLAYER_RIGHT, player, riding).sendToServer();
 		}
 		if (player.isForwardKeyDown()) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_FORWARD, player, riding));
+			new KeyPressPacket(KeyTypes.PLAYER_FORWARD, player, riding).sendToServer();
 		}
 		if (player.isBackKeyDown()) {
-			ImmersiveRailroading.net.sendToServer(new KeyPressPacket(KeyTypes.PLAYER_BACKWARD, player, riding));
+			new KeyPressPacket(KeyTypes.PLAYER_BACKWARD, player, riding).sendToServer();
 		}
 	}
 	
@@ -424,13 +423,13 @@ public class ClientProxy extends CommonProxy {
 			
 			Entity entity = MinecraftClient.getEntityMouseOver();
 			if (entity instanceof EntityRidableRollingStock) {
-				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, entity));
+				new MousePressPacket(button, entity).sendToServer();
 				event.setCanceled(true);
 				return;
 			}
 			Entity riding = MinecraftClient.getPlayer().getRiding();
 			if (riding instanceof EntityRidableRollingStock) {
-				ImmersiveRailroading.net.sendToServer(new MousePressPacket(button, riding));
+				new MousePressPacket(button, riding).sendToServer();
 				event.setCanceled(true);
 				return;
 			}

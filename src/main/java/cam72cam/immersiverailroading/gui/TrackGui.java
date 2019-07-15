@@ -1,34 +1,28 @@
 package cam72cam.immersiverailroading.gui;
 
-import java.io.IOException;
-import java.util.List;
-import javax.annotation.Nullable;
-
-import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.mod.world.World;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3i;
-import com.google.common.base.Predicate;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.world.World;
+import com.google.common.base.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraftforge.fml.client.config.GuiCheckBox;
-import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.StringUtils;
+import net.minecraftforge.fml.client.config.GuiCheckBox;
+import net.minecraftforge.fml.client.config.GuiSlider;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.List;
 
 public class TrackGui extends GuiScreen {
 	private GuiButton typeButton;
@@ -265,12 +259,10 @@ public class TrackGui extends GuiScreen {
         	if (!this.lengthInput.getText().isEmpty()) {
 				RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing);
         		if (this.tilePreviewPos != null) {
-    				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, settings));
+                    new ItemRailUpdatePacket(tilePreviewPos, settings).sendToServer();
         		} else {
-				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, settings));
-        		}
+					new ItemRailUpdatePacket(slot, settings).sendToServer();
+				}
         	}
 			this.mc.displayGuiScreen(null);
 			if (this.mc.currentScreen == null)

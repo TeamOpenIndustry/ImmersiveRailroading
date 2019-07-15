@@ -251,7 +251,7 @@ public class TileMultiblock extends BlockEntityTickable {
 				this.markDirty();
 			}
 		} else {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(pos, craftItem, mode));
+			new MultiblockSelectCraftPacket(pos, craftItem, mode).sendToServer();
 		}
 	}
 	
@@ -267,7 +267,7 @@ public class TileMultiblock extends BlockEntityTickable {
 				this.markDirty();
 			}
 		} else {
-			ImmersiveRailroading.net.sendToServer(new MultiblockSelectCraftPacket(pos, selected, craftMode));
+			new MultiblockSelectCraftPacket(pos, selected, craftMode).sendToServer();
 		}
 	}
 	
