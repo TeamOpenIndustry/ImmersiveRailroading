@@ -14,10 +14,8 @@ import java.util.function.Consumer;
 
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 
 public class OBJModel {
 	// LinkedHashMap is ordered
@@ -42,7 +40,7 @@ public class OBJModel {
 	}
 
 	public OBJModel(Identifier modelLoc, float darken, double scale) throws Exception {
-		InputStream input = ImmersiveRailroading.proxy.getResourceStream(modelLoc);
+		InputStream input = modelLoc.getResourceStream();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		this.darken = darken;
 
@@ -139,7 +137,7 @@ public class OBJModel {
 				// TODO might be able to use this for details
 				break;
 			default:
-				ImmersiveRailroading.debug("OBJ: ignored line '" + line + "'");
+				//System.out.println("OBJ: ignored line '" + line + "'");
 				break;
 			}
 		}
@@ -163,7 +161,7 @@ public class OBJModel {
 
 			Material currentMTL = null;
 
-			input = ImmersiveRailroading.proxy.getResourceStream(modelLoc.getRelative(materialPath));
+			input = modelLoc.getRelative(materialPath).getResourceStream();
 			reader = new BufferedReader(new InputStreamReader(input));
 			while ((line = reader.readLine()) != null) {
 				if (line.startsWith("#")) {
@@ -236,7 +234,7 @@ public class OBJModel {
 					//ignore
 					break;
 				default:
-					ImmersiveRailroading.debug("MTL: ignored line '" + line + "'");
+					//System.out.println("MTL: ignored line '" + line + "'");
 					break;
 				}
 			}

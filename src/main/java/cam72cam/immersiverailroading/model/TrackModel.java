@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.mod.model.obj.OBJModel;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.ArrayList;
 

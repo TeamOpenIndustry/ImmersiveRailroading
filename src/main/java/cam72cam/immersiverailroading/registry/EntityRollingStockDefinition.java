@@ -18,7 +18,7 @@ import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Registry;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -138,7 +138,7 @@ public abstract class EntityRollingStockDefinition {
 
         Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
         try {
-            List<InputStream> alts = ImmersiveRailroading.proxy.getResourceStreamAll(alt_textures);
+            List<InputStream> alts = alt_textures.getResourceStreamAll();
             for (InputStream input : alts) {
                 JsonParser parser = new JsonParser();
                 JsonElement variants = parser.parse(new InputStreamReader(input));

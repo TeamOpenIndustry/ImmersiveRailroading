@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.render.multiblock;
 
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.mod.model.obj.OBJModel;

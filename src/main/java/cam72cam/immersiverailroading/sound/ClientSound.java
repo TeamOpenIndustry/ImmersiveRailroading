@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.util.math.MathHelper;

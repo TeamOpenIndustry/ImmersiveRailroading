@@ -1,6 +1,6 @@
 package cam72cam.mod.model.obj;
 
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 
 import java.nio.FloatBuffer;
 

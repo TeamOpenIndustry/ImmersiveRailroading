@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.mod.block.tile.TileEntityTickable;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.TagCompound;
 
 public class Legacy {

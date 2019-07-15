@@ -1,23 +1,13 @@
 package cam72cam.immersiverailroading.proxy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.world.World;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -29,6 +19,11 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @EventBusSubscriber(Side.SERVER)
 public class ServerProxy extends CommonProxy {
@@ -53,24 +48,6 @@ public class ServerProxy extends CommonProxy {
     public Object getClientGuiElement(int ID, EntityPlayer player, net.minecraft.world.World world, int entityID, int nop1, int nop2) {
     	return null;
     }
-
-    private InputStream getEmbeddedResourceStream(Identifier location) throws IOException {
-        URL url = ImmersiveRailroading.class.getResource(pathString(location, true));
-		return url != null ? ImmersiveRailroading.class.getResourceAsStream(pathString(location, true)) : null;
-    }
-
-	@Override
-	public List<InputStream> getResourceStreamAll(Identifier location) throws IOException {
-		List<InputStream> res = new ArrayList<>();
-		InputStream stream = getEmbeddedResourceStream(location);
-		if (stream != null) {
-			res.add(stream);
-		}
-		
-		res.addAll(getFileResourceStreams(location));
-		
-		return res;
-	}
 
 	@Override
 	public void addPreview(int dimension, TileRailPreview preview) {
