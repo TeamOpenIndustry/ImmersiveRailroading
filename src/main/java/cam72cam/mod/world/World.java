@@ -1,6 +1,5 @@
 package cam72cam.mod.world;
 
-import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.BlockType;
@@ -44,36 +43,41 @@ import java.util.stream.Collectors;
 public class World {
 
     /* Static access to loaded worlds */
-    private static ThreadLocal<Map<net.minecraft.world.World, World>> worlds = new ThreadLocal<>();
-    private static ThreadLocal<Map<Integer, World>> worldsByID = new ThreadLocal<>();
+    private static Map<net.minecraft.world.World, World> clientWorlds = new HashMap<>();
+    private static Map<net.minecraft.world.World, World> serverWorlds = new HashMap<>();
+    private static Map<Integer, World> clientWorldsByID = new HashMap<>();
+    private static Map<Integer, World> serverWorldsByID = new HashMap<>();
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
-        if (worlds.get() == null) {
-            worlds.set(new HashMap<>());
-        }
-        if (worldsByID.get() == null) {
-            worldsByID.set(new HashMap<>());
-        }
+        Map<net.minecraft.world.World, World> worlds = event.getWorld().isRemote ? clientWorlds : serverWorlds;
+        Map<Integer, World> worldsByID = event.getWorld().isRemote ? clientWorldsByID : serverWorldsByID;
 
         net.minecraft.world.World world = event.getWorld();
         World worldWrap = new World(world);
-        worlds.get().put(world, worldWrap);
-        worldsByID.get().put(world.provider.getDimension(), worldWrap);
+        worlds.put(world, worldWrap);
+        worldsByID.put(world.provider.getDimension(), worldWrap);
 
         world.addEventListener(new WorldEventListener(worldWrap));
     }
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload event) {
+        Map<net.minecraft.world.World, World> worlds = event.getWorld().isRemote ? clientWorlds : serverWorlds;
+        Map<Integer, World> worldsByID = event.getWorld().isRemote ? clientWorldsByID : serverWorldsByID;
+
         net.minecraft.world.World world = event.getWorld();
-        worlds.get().remove(world);
-        worldsByID.get().remove(world.provider.getDimension());
+        worlds.remove(world);
+        worldsByID.remove(world.provider.getDimension());
     }
     public static World get(net.minecraft.world.World world) {
-        return worlds.get().get(world);
+        Map<net.minecraft.world.World, World> worlds = world.isRemote ? clientWorlds : serverWorlds;
+
+        return worlds.get(world);
     }
-    public static World get(int dimID) {
-        return worldsByID.get().get(dimID);
+    public static World get(int dimID, boolean isClient) {
+        Map<Integer, World> worldsByID = isClient ? clientWorldsByID : serverWorldsByID;
+
+        return worldsByID.get(dimID);
     }
 
     public boolean doesBlockCollideWith(Vec3i bp, RealBB bb) {

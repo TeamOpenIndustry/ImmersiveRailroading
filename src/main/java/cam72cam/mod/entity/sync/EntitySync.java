@@ -65,7 +65,7 @@ public class EntitySync extends TagCompound {
 
         @Override
         public void handle() {
-            Entity stock = data.getEntity("target", Entity.class);
+            Entity stock = data.getEntity("target", getWorld(), Entity.class);
             if (stock != null) {
                 stock.sync.receive(data.get("info"));
             }

@@ -1,11 +1,12 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.render.StandardModel;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.BakedModelCache;
-import cam72cam.immersiverailroading.render.BakedScaledModel;
+import cam72cam.mod.render.BakedScaledModel;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -16,7 +17,6 @@ import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.Items;
 
 public class RailBaseRender {
 	private static BlockRendererDispatcher blockRenderer;
@@ -37,7 +37,7 @@ public class RailBaseRender {
 		if (info.settings.railBed.isEmpty()) {
 			return null;
 		}
-		IBlockState gravelState = BlockUtil.itemToBlockState(info.settings.railBed);
+		IBlockState gravelState = StandardModel.itemToBlockState(info.settings.railBed);
 		
 		// Create render targets
 		BufferBuilder worldRenderer = new BufferBuilder(2048);
