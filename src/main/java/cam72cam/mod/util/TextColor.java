@@ -34,4 +34,8 @@ public enum TextColor {
     public String wrap(String text) {
         return internal + text + TextColor.RESET;
     }
+
+    public String toString() {
+        return internal.toString();
+    }
 }

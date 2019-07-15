@@ -38,6 +38,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.BlockRender;
 import cam72cam.mod.render.EntityRenderer;
 import cam72cam.mod.render.IEntityRender;
+import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.Identifier;
@@ -182,6 +183,9 @@ public class ClientProxy extends CommonProxy {
 
 		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, RailGag.class);
 		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailGag.class);
+
+		ItemRender.register(IRItems.ITEM_PLATE, PlateItemModel::getModel);
+		ItemRender.register(IRItems.ITEM_AUGMENT, RailAugmentItemModel::getModel);
 	}
 
 	@Override
@@ -273,17 +277,11 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_AUGMENT.internal, 0,
-				new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName().internal, ""));
-		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_RAIL.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName().internal, ""));
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CAST_RAIL.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName().internal, ""));
-		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_PLATE.internal, 0,
-				new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName().internal, ""));
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL.internal, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
@@ -384,10 +382,8 @@ public class ClientProxy extends CommonProxy {
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""), new StockItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_TRACK_BLUEPRINT.getRegistryName().internal, ""), new TrackBlueprintItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName().internal, ""), new StockItemComponentModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_AUGMENT.getRegistryName().internal, ""), new RailAugmentItemModel());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName().internal, ""), new RailItemRender());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName().internal, ""), new RailCastItemRender());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName().internal, ""), new PlateItemModel());
 	}
 
 	@SubscribeEvent
