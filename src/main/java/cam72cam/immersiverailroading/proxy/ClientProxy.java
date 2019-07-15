@@ -189,6 +189,7 @@ public class ClientProxy extends CommonProxy {
 		ItemRender.register(IRItems.ITEM_RAIL, RailItemRender::getModel);
 		ItemRender.register(IRItems.ITEM_CAST_RAIL, RailCastItemRender::getModel);
 		ItemRender.register(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::getModel);
+		ItemRender.register(IRItems.ITEM_ROLLING_STOCK_COMPONENT, StockItemComponentModel::getModel);
 	}
 
 	@Override
@@ -271,9 +272,6 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.getRegistryName().internal, ""));
 		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.internal, 0,
-				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName().internal, ""));
-
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""));
 		
@@ -374,7 +372,6 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onModelBakeEvent(ModelBakeEvent event) {
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""), new StockItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getRegistryName().internal, ""), new StockItemComponentModel());
 	}
 
 	@SubscribeEvent
