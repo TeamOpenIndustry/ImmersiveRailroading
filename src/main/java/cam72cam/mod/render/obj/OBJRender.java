@@ -1,6 +1,5 @@
 package cam72cam.mod.render.obj;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.render.VBA;
 import cam72cam.mod.model.obj.Material;
 import cam72cam.mod.model.obj.OBJModel;
@@ -120,7 +119,7 @@ public class OBJRender {
 					a = currentMTL.Kd.get(3);
 				}
 			} else {
-				ImmersiveRailroading.warn("Missing group %s", mtlName);
+				System.out.println(String.format("Missing group %s", mtlName));
 			}
 			
 			for (int[] point : model.points(face)) {
