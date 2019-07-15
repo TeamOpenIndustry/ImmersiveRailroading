@@ -117,4 +117,9 @@ public class ItemStack {
     public boolean isValidTool(ToolType tool) {
         return item.getToolClasses(internal).contains(tool.toString());
     }
+
+    @Override
+    public String toString() {
+        return internal.toString();
+    }
 }
