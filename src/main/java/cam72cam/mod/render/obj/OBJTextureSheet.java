@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.model.obj.Material;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.model.obj.Vec2f;
-import cam72cam.immersiverailroading.util.GPUInfo;
+import cam72cam.mod.render.GPUInfo;
 import cam72cam.mod.resource.Identifier;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.math.MathHelper;
