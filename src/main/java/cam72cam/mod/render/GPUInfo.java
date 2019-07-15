@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.util;
+package cam72cam.mod.render;
 
 import org.lwjgl.opengl.*;
 
