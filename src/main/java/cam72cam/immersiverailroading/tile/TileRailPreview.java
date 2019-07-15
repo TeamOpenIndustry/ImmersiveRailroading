@@ -177,7 +177,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		super.markDirty();
         info = new RailInfo(world, item, placementInfo, customInfo);
         if (isMulti()) {
-			ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
+			new PreviewRenderPacket(this).sendToAll();
 		}
 	}
 
@@ -194,7 +194,7 @@ public class TileRailPreview extends BlockEntityTickable {
 			ChunkManager.flagEntityPos(world, pos);
 
 			if (this.ticksAlive % 20 == 0) {
-				ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
+				new PreviewRenderPacket(this).sendToAll();
 			}
 			this.ticksAlive ++;
 		}

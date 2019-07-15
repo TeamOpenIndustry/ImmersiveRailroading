@@ -27,9 +27,7 @@ public class ImmersiveRailroading
     
 	private static Logger logger;
 	public static ImmersiveRailroading instance;
-	
-	public static final SimpleNetworkWrapper net = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-	
+
 	@SidedProxy(clientSide="cam72cam.immersiverailroading.proxy.ClientProxy", serverSide="cam72cam.immersiverailroading.proxy.ServerProxy")
 	public static CommonProxy proxy;
 	

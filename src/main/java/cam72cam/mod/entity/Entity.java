@@ -1,7 +1,6 @@
 package cam72cam.mod.entity;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.entity.sync.EntitySync;
@@ -11,7 +10,6 @@ import cam72cam.mod.net.Packet;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import java.util.List;
 import java.util.UUID;
@@ -136,8 +134,7 @@ public class Entity {
             }
         }
         if (found) {
-            ImmersiveRailroading.net.sendToAllAround(packet,
-                    new NetworkRegistry.TargetPoint(internal.dimension, internal.posX, internal.posY, internal.posZ, ImmersiveRailroading.ENTITY_SYNC_DISTANCE));
+            packet.sendToAllAround(getWorld(), getPosition(), ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
         }
     }
 

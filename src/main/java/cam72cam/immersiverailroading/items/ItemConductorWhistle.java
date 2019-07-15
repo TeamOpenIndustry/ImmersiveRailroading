@@ -22,7 +22,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 public class ItemConductorWhistle extends ItemBase {
 	private static HashMap<UUID, Integer> cooldown = new HashMap<>();
@@ -52,7 +51,7 @@ public class ItemConductorWhistle extends ItemBase {
 					(int) (Config.ConfigBalance.villagerConductorDistance * 1.2f), 
 					Gauge.from(Gauge.STANDARD)
 			);
-			ImmersiveRailroading.net.sendToAllAround(packet, new NetworkRegistry.TargetPoint(player.internal.dimension, player.internal.posX, player.internal.posY, player.internal.posZ, Config.ConfigBalance.villagerConductorDistance * 1.2f));
+			packet.sendToAllAround(world, player.getPosition(), Config.ConfigBalance.villagerConductorDistance * 1.2f);
 
 			IBoundingBox bb = player.getBounds().grow(new Vec3d(Config.ConfigBalance.villagerConductorDistance, 4, Config.ConfigBalance.villagerConductorDistance));
 			List<EntityCoupleableRollingStock> carsNearby = world.getEntities((EntityCoupleableRollingStock stock) -> bb.intersects(stock.getBounds()), EntityCoupleableRollingStock.class);
