@@ -179,8 +179,8 @@ public class ClientProxy extends CommonProxy {
 			FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
 		}
 
-		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, RailGag.class);
-		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailGag.class);
+		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, RailBase.class);
+		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailBase.class);
 
 		ItemRender.register(IRItems.ITEM_PLATE, PlateItemModel::getModel);
 		ItemRender.register(IRItems.ITEM_AUGMENT, RailAugmentItemModel::getModel);
