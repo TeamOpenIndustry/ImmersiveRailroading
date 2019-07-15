@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 
 public class SoundPacket extends Packet {
 	public SoundPacket() {

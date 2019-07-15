@@ -17,18 +17,18 @@ import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.mod.entity.sync.EntitySync;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.world.World;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.Registry;
+import cam72cam.mod.entity.sync.EntitySync;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.world.World;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -48,23 +48,15 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistryModifiable;
-import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
 	protected static List<Function<ModdedEntity, Entity>> entityClasses = new ArrayList<>();
-	protected String configDir;
-	private static String cacheDir;
     static {
     	entityClasses.add(LocomotiveSteam::new);
     	entityClasses.add(LocomotiveDiesel::new);
@@ -75,17 +67,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	entityClasses.add(HandCar::new);
     }
     
-    public static String getCacheFile(String fname) {
-    	return cacheDir + fname;
-    }
-    
     public void preInit(FMLPreInitializationEvent event) throws IOException {
-    	configDir = event.getModConfigurationDirectory().getAbsolutePath() + File.separator + ImmersiveRailroading.MODID;
-    	// foo/config/immersiverailroading/../../cache/fname
-    	cacheDir = configDir + File.separator + ".." + File.separator + ".." + File.separator + "cache" + File.separator;
-    	new File(configDir).mkdirs();
-    	new File(cacheDir).mkdirs();
-    	
     	DefinitionManager.initDefinitions();
     	Config.init();
     }
@@ -240,53 +222,6 @@ public abstract class CommonProxy implements IGuiHandler {
 	public abstract int getTicks();
 
 
-	public abstract List<InputStream> getResourceStreamAll(Identifier modelLoc) throws IOException;
-
-	public InputStream getResourceStream(Identifier location) throws IOException {
-		InputStream chosen = null;
-		for (InputStream strm : getResourceStreamAll(location)) {
-			if (chosen == null) {
-				chosen = strm;
-			} else {
-				strm.close();
-			}
-		}
-		if (chosen == null) {
-			throw new java.io.FileNotFoundException(location.toString());
-		}
-		return chosen;
-	}
-
-    
-    protected String pathString(Identifier location, boolean startingSlash) {
-    	return (startingSlash ? "/" : "") + "assets/" + location.getDomain() + "/" + location.getPath();
-    }
-    
-    protected List<InputStream> getFileResourceStreams(Identifier location) throws IOException {
-    	List<InputStream> streams = new ArrayList<InputStream>();
-    	File folder = new File(this.configDir);
-    	if (folder.exists()) {
-    		if (folder.isDirectory()) {
-	    		File[] files = folder.listFiles((dir, name) -> name.endsWith(".zip"));
-	    		for (File file : files) {
-	    			ZipFile resourcePack = new ZipFile(file);
-	    			ZipEntry entry = resourcePack.getEntry(pathString(location, false));
-	    			if (entry != null) {
-	    				// Copy the input stream so we can close the resource pack
-	    				InputStream stream = resourcePack.getInputStream(entry);
-	    				streams.add(new ByteArrayInputStream(IOUtils.toByteArray(stream)));
-	    			}
-	    			resourcePack.close();
-	    		}
-    		} else {
-    			ImmersiveRailroading.error("Expecting " + this.configDir + " to be a directory");
-    		}
-    	} else {
-			folder.mkdirs();
-    	}
-		return streams;
-    }
-	
 	public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
 		return null;
 	}

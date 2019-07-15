@@ -6,7 +6,7 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 

@@ -10,7 +10,7 @@ import cam72cam.mod.block.tile.TileEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 import trackapi.lib.ITrack;

@@ -2,7 +2,7 @@ package cam72cam.mod.item;
 
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;

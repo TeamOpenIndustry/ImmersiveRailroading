@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.mod.gui.Progress;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -49,7 +49,7 @@ public class DefinitionManager {
 
         List<Double> toRemove = new ArrayList<>();
 
-        List<InputStream> inputs = ImmersiveRailroading.proxy.getResourceStreamAll(gauges_json);
+        List<InputStream> inputs = gauges_json.getResourceStreamAll();
         for (InputStream input : inputs) {
             JsonParser parser = new JsonParser();
             JsonObject gauges = parser.parse(new InputStreamReader(input)).getAsJsonObject();
@@ -84,7 +84,7 @@ public class DefinitionManager {
 
         Identifier blacklist_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/blacklist.json");
 
-        List<InputStream> inputs = ImmersiveRailroading.proxy.getResourceStreamAll(blacklist_json);
+        List<InputStream> inputs = blacklist_json.getResourceStreamAll();
         for (InputStream input : inputs) {
             JsonParser parser = new JsonParser();
             JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
@@ -101,7 +101,7 @@ public class DefinitionManager {
 
         Identifier stock_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
 
-        inputs = ImmersiveRailroading.proxy.getResourceStreamAll(stock_json);
+        inputs = stock_json.getResourceStreamAll();
         for (InputStream input : inputs) {
 
             JsonParser parser = new JsonParser();
@@ -153,7 +153,7 @@ public class DefinitionManager {
         //Progress bar = ProgressManager.push("Loading tracks", )
         Identifier track_json = new Identifier(ImmersiveRailroading.MODID, "track/track.json");
 
-        inputs = ImmersiveRailroading.proxy.getResourceStreamAll(track_json);
+        inputs = track_json.getResourceStreamAll();
         for (InputStream input : inputs) {
 
             JsonParser parser = new JsonParser();
@@ -168,7 +168,7 @@ public class DefinitionManager {
                 String trackID = String.format("immersiverailroading:track/%s.json", def.getAsString());
                 ImmersiveRailroading.info("Loading Track %s", trackID);
                 JsonParser trackParser = new JsonParser();
-                JsonObject trackData = trackParser.parse(new InputStreamReader(ImmersiveRailroading.proxy.getResourceStream(new Identifier(trackID)))).getAsJsonObject();
+                JsonObject trackData = trackParser.parse(new InputStreamReader(new Identifier(trackID).getResourceStream())).getAsJsonObject();
                 try {
                     tracks.put(trackID, new TrackDefinition(trackID, trackData));
                 } catch (Exception e) {
@@ -184,7 +184,7 @@ public class DefinitionManager {
         ImmersiveRailroading.info("Loading stock " + defID);
         Identifier resource = new Identifier(ImmersiveRailroading.MODID, defID);
 
-        InputStream input = ImmersiveRailroading.proxy.getResourceStream(resource);
+        InputStream input = resource.getResourceStream();
 
         JsonParser parser = new JsonParser();
         JsonObject result = parser.parse(new InputStreamReader(input)).getAsJsonObject();

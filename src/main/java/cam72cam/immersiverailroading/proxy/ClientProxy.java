@@ -15,7 +15,6 @@ import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.mod.render.obj.OBJTextureSheet;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
@@ -39,9 +38,10 @@ import cam72cam.mod.render.BlockRender;
 import cam72cam.mod.render.EntityRenderer;
 import cam72cam.mod.render.IEntityRender;
 import cam72cam.mod.render.ItemRender;
+import cam72cam.mod.render.obj.OBJTextureSheet;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.Identifier;
 import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDisconnected;
@@ -51,7 +51,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
@@ -94,7 +93,6 @@ import paulscode.sound.SoundSystemConfig;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 
@@ -439,20 +437,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	@Override
-	public List<InputStream> getResourceStreamAll(Identifier modelLoc) throws IOException {
-		List<InputStream> res = new ArrayList<InputStream>();
-		try {
-			for (IResource resource : Minecraft.getMinecraft().getResourceManager().getAllResources(modelLoc.internal)) {
-				res.add(resource.getInputStream());
-			}
-		} catch (java.io.FileNotFoundException ex) {
-			// Ignore
-		}
-		res.addAll(getFileResourceStreams(modelLoc));
-		return res;
-	}
-	
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
 		// TODO this does not actually work!

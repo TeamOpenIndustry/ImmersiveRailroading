@@ -6,7 +6,7 @@ import cam72cam.mod.model.obj.Material;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.model.obj.Vec2f;
 import cam72cam.immersiverailroading.util.GPUInfo;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.BufferUtils;
@@ -52,9 +52,9 @@ public class OBJTextureSheet {
 		SubTexture(Identifier tex, Identifier fallback, Function<Integer, Integer> scale) throws IOException {
 			InputStream input;
 			try {
-				input = ImmersiveRailroading.proxy.getResourceStream(tex);
+				input = tex.getResourceStream();
 			} catch (FileNotFoundException ex) {
-				input = ImmersiveRailroading.proxy.getResourceStream(fallback);
+				input = fallback.getResourceStream();
 			}
 			BufferedImage image = TextureUtil.readBufferedImage(input);
 			input.close();

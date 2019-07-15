@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.ARBFragmentShader;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.ARBVertexShader;
 import org.lwjgl.opengl.GL11;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 
 public class GLSLShader {
 	private int program;
@@ -64,7 +62,7 @@ public class GLSLShader {
 	private String readShader(String fname) {
 		InputStream input;
 		try {
-			input = ImmersiveRailroading.proxy.getResourceStream(new Identifier(fname));
+			input = new Identifier(fname).getResourceStream();
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error reading shader " + fname);

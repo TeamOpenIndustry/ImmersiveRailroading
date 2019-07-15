@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
 
 import java.util.Set;

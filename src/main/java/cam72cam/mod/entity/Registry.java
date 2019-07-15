@@ -2,7 +2,7 @@ package cam72cam.mod.entity;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.world.World;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 import java.util.HashMap;

@@ -1,7 +1,7 @@
 package cam72cam.mod.block.tile;
 
 import cam72cam.mod.block.BlockEntityTickable;
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import net.minecraft.util.ITickable;
 
 public class TileEntityTickable extends TileEntity implements ITickable {

@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.mod.util.Identifier;
+import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
