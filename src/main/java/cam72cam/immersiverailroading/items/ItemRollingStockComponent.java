@@ -23,7 +23,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.TextColor;
+import cam72cam.mod.text.TextColor;
 
 public class ItemRollingStockComponent extends BaseItemRollingStock {
 	public static final String NAME = "item_rolling_stock_component";

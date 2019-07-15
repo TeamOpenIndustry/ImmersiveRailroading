@@ -1,4 +1,4 @@
-package cam72cam.mod.util;
+package cam72cam.mod.text;
 
 import net.minecraft.util.text.TextFormatting;
 

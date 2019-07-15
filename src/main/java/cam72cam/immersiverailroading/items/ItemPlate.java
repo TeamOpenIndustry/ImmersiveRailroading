@@ -16,7 +16,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.util.TextColor;
+import cam72cam.mod.text.TextColor;
 
 public class ItemPlate extends ItemBase {
 	public ItemPlate() {
