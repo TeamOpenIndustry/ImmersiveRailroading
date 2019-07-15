@@ -1,6 +1,5 @@
 package cam72cam.mod.entity;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.world.World;
 import cam72cam.mod.resource.Identifier;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
@@ -17,13 +16,14 @@ public class Registry {
     private Registry() {
 
     }
-    public static void register(String modID, Function<ModdedEntity, Entity> ctr, EntitySettings settings) {
+    public static void register(String modID, Function<ModdedEntity, Entity> ctr, EntitySettings settings, Object mod, int distance) {
         Entity tmp = ctr.apply(null);
         Class<? extends Entity> type = tmp.getClass();
         Identifier id = new Identifier(modID, type.getSimpleName());
 
         // This has back-compat for older entity names
-        EntityRegistry.registerModEntity(id.internal, ModdedEntity.class, type.getSimpleName(), constructors.size(), ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE, 20, false);
+        // TODO expose updateFreq and vecUpdates
+        EntityRegistry.registerModEntity(id.internal, ModdedEntity.class, type.getSimpleName(), constructors.size(), mod, distance, 20, false);
 
         identifiers.put(type, id.toString());
         constructors.put(id.toString(), ctr);
