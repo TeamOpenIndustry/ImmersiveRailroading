@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.render;
+package cam72cam.mod.render;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +64,7 @@ public class GLSLShader {
 	private String readShader(String fname) {
 		InputStream input;
 		try {
-			input = ImmersiveRailroading.proxy.getResourceStream(new Identifier("immersiverailroading:particles/" + fname));
+			input = ImmersiveRailroading.proxy.getResourceStream(new Identifier(fname));
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error reading shader " + fname);

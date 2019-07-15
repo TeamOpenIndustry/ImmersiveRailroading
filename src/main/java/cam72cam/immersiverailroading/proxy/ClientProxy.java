@@ -15,7 +15,7 @@ import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.immersiverailroading.render.OBJTextureSheet;
+import cam72cam.mod.render.obj.OBJTextureSheet;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;

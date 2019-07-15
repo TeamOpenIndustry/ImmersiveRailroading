@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.DisplayListCache;
-import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;

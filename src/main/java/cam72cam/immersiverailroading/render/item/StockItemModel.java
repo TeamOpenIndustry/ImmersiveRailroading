@@ -14,7 +14,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
-import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import net.minecraft.block.state.IBlockState;

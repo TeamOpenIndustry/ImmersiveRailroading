@@ -17,7 +17,7 @@ import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.model.MultiRenderComponent;
-import cam72cam.immersiverailroading.model.obj.OBJModel;
+import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
@@ -25,7 +25,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
-import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
 

@@ -1,6 +1,6 @@
-package cam72cam.immersiverailroading.render;
+package cam72cam.mod.render;
 
-import cam72cam.immersiverailroading.model.obj.Vec2f;
+import cam72cam.mod.model.obj.Vec2f;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
