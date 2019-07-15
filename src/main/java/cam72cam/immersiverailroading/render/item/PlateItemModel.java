@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render.item;
 
 import java.util.List;
 
-import cam72cam.immersiverailroading.render.BakedScaledModel;
+import cam72cam.mod.render.BakedScaledModel;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

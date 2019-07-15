@@ -17,7 +17,7 @@ public class MousePressPacket extends Packet {
 	@Override
 	public void handle() {
 		Hand hand = data.getEnum("hand", Hand.class);
-		Entity target = data.getEntity("target");
+		Entity target = data.getEntity("target", getWorld());
 		if (target != null) {
 			switch (hand) {
 				case PRIMARY:

@@ -6,7 +6,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
 import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.render.BakedScaledModel;
+import cam72cam.mod.render.BakedScaledModel;
+import cam72cam.mod.render.Color;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -22,9 +23,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.lwjgl.input.Mouse;
 
 public class RailAugmentItemModel implements IBakedModel {
-	private EnumDyeColor color;
+	private Color color;
 
 	public RailAugmentItemModel() {
 	}
@@ -32,7 +34,7 @@ public class RailAugmentItemModel implements IBakedModel {
 	public RailAugmentItemModel(ItemStack stack, World world) {
 		Augment augment = ItemAugmentType.get(new cam72cam.mod.item.ItemStack(stack));
 		if (augment != null) {
-			color = augment.tempColor();
+			color = augment.color();
 		}
 	}
 
@@ -40,7 +42,7 @@ public class RailAugmentItemModel implements IBakedModel {
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		state = Blocks.CONCRETE.getDefaultState();
 		if (color != null) {
-			state = state.withProperty(BlockColored.COLOR, color);
+			state = state.withProperty(BlockColored.COLOR, color.internal);
 		}
 		IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
 		return new BakedScaledModel(model, new Vec3d(1, 0.2f, 1), new Vec3d(0, 0.4, 0)).getQuads(state, side, rand);

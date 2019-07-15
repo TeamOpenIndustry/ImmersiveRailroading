@@ -17,7 +17,7 @@ public class PaintSyncPacket extends Packet {
 	@Override
 	public void handle() {
 		String texture = data.getString("texture");
-		EntityRollingStock stock = data.getEntity("target", EntityRollingStock.class);
+		EntityRollingStock stock = data.getEntity("target", getWorld(), EntityRollingStock.class);
 		if (stock != null) {
 			stock.texture = texture;
 		}

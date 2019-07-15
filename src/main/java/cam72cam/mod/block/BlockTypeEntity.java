@@ -62,15 +62,20 @@ public abstract class BlockTypeEntity extends BlockType {
         }
 
         @Override
-        public IBlockState getExtendedState(IBlockState origState, IBlockAccess internal, BlockPos pos)
+        public IBlockState getExtendedState(IBlockState origState, IBlockAccess access, BlockPos pos)
         {
-            Object te = World.get((net.minecraft.world.World) internal).getBlockEntity(new Vec3i(pos), cam72cam.mod.block.BlockEntity.class);
-            if (te != null) {
-                IExtendedBlockState state = (IExtendedBlockState) origState;
-                state = state.withProperty(BLOCK_DATA, te);
-                return state;
+            // Try to get the "real" world object
+            net.minecraft.tileentity.TileEntity teorig = access.getTileEntity(pos);
+            if (teorig != null && teorig.hasWorld()) {
+
+                Object te = World.get(teorig.getWorld()).getBlockEntity(new Vec3i(pos), cam72cam.mod.block.BlockEntity.class);
+                if (te != null) {
+                    IExtendedBlockState state = (IExtendedBlockState) origState;
+                    state = state.withProperty(BLOCK_DATA, te);
+                    return state;
+                }
             }
-            return super.getExtendedState(origState, internal, pos);
+            return super.getExtendedState(origState, access, pos);
         }
         @Override
         public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {

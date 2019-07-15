@@ -20,7 +20,7 @@ public class KeyPressPacket extends Packet {
 	@Override
 	public void handle() {
 		KeyTypes key = data.getEnum("key", KeyTypes.class);
-		EntityRidableRollingStock riding = data.getEntity("riding", EntityRidableRollingStock.class);
+		EntityRidableRollingStock riding = data.getEntity("riding", getWorld(), EntityRidableRollingStock.class);
 		boolean sprinting = data.getBoolean("sprinting");
 
 		if (riding != null) {

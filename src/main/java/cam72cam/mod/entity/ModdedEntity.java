@@ -338,7 +338,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
 
         @Override
         public void handle() {
-            cam72cam.mod.entity.Entity entity = data.getEntity("stock");
+            cam72cam.mod.entity.Entity entity = data.getEntity("stock", getWorld());
             if (entity != null && entity.internal instanceof ModdedEntity) {
                 ModdedEntity stock = (ModdedEntity) entity.internal;
                 stock.handlePassengerPositions(data.getMap("passengers", UUID::fromString, (TagCompound tag) -> tag.getVec3d("pos")));

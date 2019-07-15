@@ -26,6 +26,7 @@ import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.RailGag;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.*;
@@ -34,6 +35,7 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.BlockRender;
 import cam72cam.mod.render.EntityRenderer;
 import cam72cam.mod.render.IEntityRender;
 import cam72cam.mod.text.PlayerMessage;
@@ -47,7 +49,6 @@ import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
@@ -58,8 +59,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.ColorizerGrass;
-import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
@@ -180,6 +179,9 @@ public class ClientProxy extends CommonProxy {
 		if (Loader.isModLoaded("igwmod")) {
 			FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
 		}
+
+		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, RailGag.class);
+		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailGag.class);
 	}
 
 	@Override
@@ -210,8 +212,7 @@ public class ClientProxy extends CommonProxy {
 		
 		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
 
-		BlockColors blockColors = Minecraft.getMinecraft().getBlockColors();
-		blockColors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> worldIn != null && pos != null ? BiomeColorHelper.getGrassColorAtPos(worldIn, pos) : ColorizerGrass.getGrassColor(0.5D, 1.0D), IRBlocks.BLOCK_RAIL.internal, IRBlocks.BLOCK_RAIL_GAG.internal);
+		BlockRender.onPostColorSetup();
 	}
 
 	public static final IRenderFactory<EntitySmokeParticle> PARTICLE_RENDER = ParticleRender::new;
@@ -387,8 +388,6 @@ public class ClientProxy extends CommonProxy {
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_RAIL.getRegistryName().internal, ""), new RailItemRender());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_CAST_RAIL.getRegistryName().internal, ""), new RailCastItemRender());
 		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_PLATE.getRegistryName().internal, ""), new PlateItemModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL.internal.getRegistryName(), ""), new RailBaseModel());
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRBlocks.BLOCK_RAIL_GAG.internal.getRegistryName(), ""), new RailBaseModel());
 	}
 
 	@SubscribeEvent

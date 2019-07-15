@@ -19,7 +19,7 @@ public class BuildableStockSyncPacket extends Packet {
 
 	@Override
 	public void handle() {
-		EntityBuildableRollingStock stock = data.getEntity("entity", EntityBuildableRollingStock.class);
+		EntityBuildableRollingStock stock = data.getEntity("entity", getWorld(), EntityBuildableRollingStock.class);
 		if (stock != null) {
 			stock.setComponents(data.getEnumList("items", ItemComponentType.class));
 		}

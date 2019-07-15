@@ -22,7 +22,7 @@ public class MRSSyncPacket extends Packet {
 	}
 	@Override
 	public void handle() {
-		EntityMoveableRollingStock stock = data.getEntity("stock", EntityMoveableRollingStock.class);
+		EntityMoveableRollingStock stock = data.getEntity("stock", getWorld(), EntityMoveableRollingStock.class);
 		if (stock != null) {
             stock.handleTickPosPacket(data.getList("positions", TickPos::new), data.getDouble("tps"));
 		}

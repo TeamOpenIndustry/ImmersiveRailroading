@@ -78,8 +78,8 @@ public abstract class BlockType {
 
         @Override
         public final EnumBlockRenderType getRenderType(IBlockState state) {
-            // TESR Renderer
-            return EnumBlockRenderType.INVISIBLE;
+            // TESR Renderer TODO OPTIONAL!@!!!!
+            return EnumBlockRenderType.MODEL;
         }
 
 

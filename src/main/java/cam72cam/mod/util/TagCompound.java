@@ -4,7 +4,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.*;
@@ -113,14 +112,14 @@ public class TagCompound {
         internal.setTag(key, nbt);
     }
 
-    public cam72cam.mod.entity.Entity getEntity(String key) {
-        return getEntity(key, cam72cam.mod.entity.Entity.class);
+    public cam72cam.mod.entity.Entity getEntity(String key, World world) {
+        return getEntity(key, world, cam72cam.mod.entity.Entity.class);
     }
-    public <T extends cam72cam.mod.entity.Entity> T getEntity(String key, Class<T> cls) {
+    public <T extends cam72cam.mod.entity.Entity> T getEntity(String key, World world, Class<T> cls) {
         NBTTagCompound data = internal.getCompoundTag(key);
         UUID id = data.getUniqueId("id");
         int dim = data.getInteger("world");
-        World world = World.get(dim);
+        world = World.get(dim, world.isClient);
         if (world == null) {
             return null;
         }
