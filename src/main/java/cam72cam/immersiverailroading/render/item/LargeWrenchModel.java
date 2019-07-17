@@ -37,7 +37,7 @@ import util.Matrix4;
 public class LargeWrenchModel implements IBakedModel {
 	private static OBJRender RENDERER;
 	
-	private OBJRender renderer;
+	private boolean rendered;
 	
 	public LargeWrenchModel() {
 		if (RENDERER == null) {
@@ -47,26 +47,24 @@ public class LargeWrenchModel implements IBakedModel {
 				e.printStackTrace();
 			}
 		}
-		
-		this.renderer = RENDERER;
 	}
 
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		if (this.renderer != null) {
+		if (!this.rendered) {
 			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 			GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
 
 			GL11.glPushMatrix();
-			this.renderer.bindTexture();
-			this.renderer.draw();
-			this.renderer.restoreTexture();
+			RENDERER.bindTexture();
+			RENDERER.draw();
+			RENDERER.restoreTexture();
 			GL11.glPopMatrix();
 
 			lighting.restore();
 			cull.restore();
 			
-			this.renderer = null;
+			this.rendered = true;
 		}
 		
 		return new ArrayList<BakedQuad>();
@@ -91,21 +89,15 @@ public class LargeWrenchModel implements IBakedModel {
 	public TextureAtlasSprite getParticleTexture() {
 		return null;
 	}
-	
-	public class ItemOverrideListHack extends ItemOverrideList {
-		public ItemOverrideListHack() {
-			super(new ArrayList<ItemOverride>());
-		}
-
-		@Override
-		public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
-			return new LargeWrenchModel();
-		}
-	}
 
 	@Override
 	public ItemOverrideList getOverrides() {
-		return new ItemOverrideListHack();
+		return new ItemOverrideList(new ArrayList<ItemOverride>()) {
+			@Override
+			public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
+				return new LargeWrenchModel();
+			}
+		};
 	}
 
 	@Override
@@ -113,10 +105,11 @@ public class LargeWrenchModel implements IBakedModel {
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		switch (cameraTransformType) {
 		case THIRD_PERSON_LEFT_HAND:
+			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).translate(-1.5, 0.375, 1.5).scale(3, 3, 3).toMatrix4f());
 		case THIRD_PERSON_RIGHT_HAND:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).translate(1.5, 0.375, 1.5).scale(3, 3, 3).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).translate(1.5, 0.375, 1.5).scale(3, 3, 3).toMatrix4f());
 		case FIRST_PERSON_LEFT_HAND:
+			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-45), 0, 0, 1).translate(-13.5, 1, 23.2).scale(35, 35, 35).toMatrix4f());
 		case FIRST_PERSON_RIGHT_HAND:
 			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-45), 0, 0, 1).translate(21, 1, 23.2).scale(35, 35, 35).toMatrix4f());
 		case GROUND:
@@ -127,8 +120,7 @@ public class LargeWrenchModel implements IBakedModel {
 		case GUI:
 			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-45), 0, 0, 1).scale(1.25, 1.25, 1.25).translate(0.5, 0.2, 0).rotate(Math.toRadians(0), 0, 1, 0).toMatrix4f());
 		case HEAD:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().translate(0, 0, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
+			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0, 0, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
 		case NONE:
 			return defaultVal;
 		}
