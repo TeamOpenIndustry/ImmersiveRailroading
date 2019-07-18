@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Fuzzy {
+    public static final Fuzzy WOOD_STICK = new Fuzzy("stickWood");
     public static final Fuzzy WOOD_PLANK = new Fuzzy("plankWood");
     public static final Fuzzy REDSTONE_DUST = new Fuzzy("dustRedstone");
     public static final Fuzzy SNOW_LAYER = new Fuzzy("layerSnow").add(Blocks.SNOW_LAYER);
@@ -23,6 +24,8 @@ public class Fuzzy {
     public static final Fuzzy SAND = new Fuzzy("sand");
     public static final Fuzzy PISTON = new Fuzzy("piston").add(Blocks.PISTON);
 
+    public static final Fuzzy GOLD_INGOT = new Fuzzy("ingotGold");
+    public static final Fuzzy STEEL_INGOT = new Fuzzy("ingotSteel");
     public static final Fuzzy IRON_INGOT = new Fuzzy("ingotIron");
     public static final Fuzzy IRON_BLOCK = new Fuzzy("blockIron");
     public static final Fuzzy IRON_BARS = new Fuzzy("barsIron").add(Blocks.IRON_BARS);
@@ -35,6 +38,9 @@ public class Fuzzy {
     public static final Fuzzy DIRT = new Fuzzy("dirt");
     public static final Fuzzy HARDENED_CLAY = new Fuzzy("hardened_clay").add(new ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
     public static final Fuzzy LOG_WOOD = new Fuzzy("logWood");
+    public static final Fuzzy PAPER = new Fuzzy("paper");
+    public static final Fuzzy BOOK = new Fuzzy("book").add(Items.BOOK);
+    public static final Fuzzy WOOL_BLOCK = new Fuzzy("wool").add(new ItemStack(Blocks.WOOL, 1, OreDictionary.WILDCARD_VALUE));
 
     private final String ident;
 
@@ -90,5 +96,10 @@ public class Fuzzy {
     public void clear() {
         // This might break stuff in fantastic ways!
         OreDictionary.getOres(ident).clear();
+    }
+
+    @Override
+    public String toString() {
+        return ident;
     }
 }
