@@ -35,9 +35,7 @@ public abstract class FreightTank extends Freight {
 		}
 	};
 
-	public FreightTank(ModdedEntity entity) {
-		super(entity);
-		
+	public FreightTank() {
 		sync.setInteger(FLUID_AMOUNT, 0);
 		sync.setString(FLUID_TYPE, "EMPTY");
 	}

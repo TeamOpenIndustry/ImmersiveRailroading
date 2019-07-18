@@ -4,11 +4,6 @@ import cam72cam.immersiverailroading.registry.CarFreightDefinition;
 import cam72cam.mod.entity.ModdedEntity;
 
 public class CarFreight extends Freight {
-
-	public CarFreight(ModdedEntity entity) {
-		super(entity);
-	}
-	
 	@Override
 	public CarFreightDefinition getDefinition() {
 		return super.getDefinition(CarFreightDefinition.class);

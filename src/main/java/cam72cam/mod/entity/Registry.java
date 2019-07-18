@@ -6,18 +6,18 @@ import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Registry {
     private static final Map<Class<? extends Entity>, String> identifiers = new HashMap<>();
-    private static final Map<String, Function<ModdedEntity, Entity>> constructors = new HashMap<>();
+    private static final Map<String, Supplier<Entity>> constructors = new HashMap<>();
     private static final Map<String, EntitySettings> registered = new HashMap<>();
 
     private Registry() {
 
     }
-    public static void register(String modID, Function<ModdedEntity, Entity> ctr, EntitySettings settings, Object mod, int distance) {
-        Entity tmp = ctr.apply(null);
+    public static void register(String modID, Supplier<Entity> ctr, EntitySettings settings, Object mod, int distance) {
+        Entity tmp = ctr.get();
         Class<? extends Entity> type = tmp.getClass();
         Identifier id = new Identifier(modID, type.getSimpleName());
 
@@ -33,12 +33,12 @@ public class Registry {
         return registered.get(type);
     }
 
-    public static Function<ModdedEntity, Entity> getConstructor(String type) {
+    public static Supplier<Entity> getConstructor(String type) {
         return constructors.get(type);
     }
 
     protected static Entity create(String type, ModdedEntity base) {
-        return getConstructor(type).apply(base);
+        return getConstructor(type).get().setup(base);
     }
 
     public static Entity create(World world, Class<? extends Entity> cls) {

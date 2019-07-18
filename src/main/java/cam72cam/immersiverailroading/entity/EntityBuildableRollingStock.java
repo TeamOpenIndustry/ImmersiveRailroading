@@ -31,10 +31,6 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	private boolean isBuilt = false;
 	private List<ItemComponentType> builtItems = new ArrayList<>();
 
-	public EntityBuildableRollingStock(ModdedEntity entity) {
-		super(entity);
-	}
-
 	@Override
 	public void save(TagCompound data) {
 		super.save(data);

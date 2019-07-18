@@ -52,10 +52,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy implements IGuiHandler {
-	protected static List<Function<ModdedEntity, Entity>> entityClasses = new ArrayList<>();
+	protected static List<Supplier<Entity>> entityClasses = new ArrayList<>();
     static {
     	entityClasses.add(LocomotiveSteam::new);
     	entityClasses.add(LocomotiveDiesel::new);
@@ -163,7 +164,7 @@ public abstract class CommonProxy implements IGuiHandler {
     
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
-    	for (Function<ModdedEntity, Entity> type : entityClasses) {
+    	for (Supplier<Entity> type : entityClasses) {
 			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
     	}
     }
