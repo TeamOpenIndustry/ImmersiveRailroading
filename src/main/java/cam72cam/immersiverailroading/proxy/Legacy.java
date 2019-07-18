@@ -6,7 +6,12 @@ import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.mod.block.tile.TileEntityTickable;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.TagCompound;
+import net.minecraft.block.Block;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+@Mod.EventBusSubscriber
 public class Legacy {
     public static class LegacyRailGagTile extends BlockRailBase.TileEntityRailBlock {
         @Override
@@ -62,7 +67,8 @@ public class Legacy {
         }
     }
 
-    public static void registerBlocks() {
+    @SubscribeEvent
+    public static void registerBlocks(RegistryEvent.Register<Block> event) {
         // register legacy TE's
         // Forge can go suck a NPE
 
