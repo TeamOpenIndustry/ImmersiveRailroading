@@ -6,6 +6,7 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.TagCompound;
@@ -319,6 +320,9 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     public static class PassengerPositionsPacket extends Packet {
+        static {
+            Packet.register(ModdedEntity.PassengerPositionsPacket::new, PacketDirection.ServerToClient);
+        }
         public PassengerPositionsPacket() {
             // Forge Reflection
         }

@@ -22,7 +22,6 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.Registry;
-import cam72cam.mod.entity.sync.EntitySync;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
@@ -73,18 +72,16 @@ public abstract class CommonProxy implements IGuiHandler {
     }
     
     public void init(FMLInitializationEvent event) {
-    	Packet.register(MRSSyncPacket.class, PacketDirection.ServerToClient);
-    	Packet.register(KeyPressPacket.class, PacketDirection.ClientToServer);
-    	Packet.register(MousePressPacket.class, PacketDirection.ClientToServer);
-    	Packet.register(ItemRailUpdatePacket.class, PacketDirection.ClientToServer);
-    	Packet.register(BuildableStockSyncPacket.class, PacketDirection.ServerToClient);
-    	Packet.register(MultiblockSelectCraftPacket.class, PacketDirection.ClientToServer);
-    	Packet.register(SoundPacket.class, PacketDirection.ServerToClient);
-    	Packet.register(PaintSyncPacket.class, PacketDirection.ServerToClient);
-        Packet.register(PreviewRenderPacket.class, PacketDirection.ServerToClient);
+    	Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
+    	Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
+    	Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
+    	Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
+    	Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
+    	Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
+    	Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
+    	Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
+        Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 
-        Packet.register(ModdedEntity.PassengerPositionsPacket.class, PacketDirection.ServerToClient);
-        Packet.register(EntitySync.EntitySyncPacket.class, PacketDirection.ServerToClient);
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
     	
