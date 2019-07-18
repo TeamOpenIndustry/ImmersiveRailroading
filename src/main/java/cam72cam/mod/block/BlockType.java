@@ -21,6 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -34,12 +35,21 @@ public abstract class BlockType {
     public final net.minecraft.block.Block internal;
 
     private static List<Consumer<RegistryEvent.Register<Block>>> registrations = new ArrayList<>();
-
-
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
     {
         registrations.forEach(reg -> reg.accept(event));
+    }
+    @SubscribeEvent
+    public static void onBlockBreakEvent(BlockEvent.BreakEvent event) {
+        Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
+        if (block instanceof BlockInternal) {
+            BlockInternal internal = (BlockInternal)block;
+            if (!internal.tryBreak(event.getWorld(), event.getPos(), event.getPlayer())) {
+                event.setCanceled(true);
+                //TODO updateListeners?
+            }
+        }
     }
 
     public String getName() {
@@ -146,6 +156,10 @@ public abstract class BlockType {
             return BlockFaceShape.UNDEFINED;
         }
 
+        public boolean tryBreak(net.minecraft.world.World world, BlockPos pos, EntityPlayer player) {
+            return BlockType.this.tryBreak(World.get(world), new Vec3i(pos), new Player(player));
+        }
+
         /* Redstone */
         /* TODO REDSTONE!!!
 
@@ -202,6 +216,7 @@ public abstract class BlockType {
     Public functionality
      */
 
+    public abstract boolean tryBreak(World world, Vec3i pos, Player player);
     public abstract void onBreak(World world, Vec3i pos);
     public abstract boolean onClick(World world, Vec3i pos, Player player, Hand hand, Facing facing, Vec3d hit);
     public abstract ItemStack onPick(World world, Vec3i pos);

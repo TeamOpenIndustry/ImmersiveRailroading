@@ -60,4 +60,8 @@ public abstract class BlockEntity {
     public IEnergy getEnergy(Facing side) {
         return null;
     }
+
+    public boolean tryBreak(Player player) {
+        return true;
+    }
 }

@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
@@ -198,5 +197,13 @@ public class TileRailPreview extends BlockEntityTickable {
 			}
 			this.ticksAlive ++;
 		}
+	}
+
+	@Override
+	public boolean tryBreak(Player entityPlayer) {
+		if (entityPlayer.isCrouching()) {
+			return this.getRailRenderInfo().build(entityPlayer);
+		}
+		return false;
 	}
 }

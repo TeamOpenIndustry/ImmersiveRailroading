@@ -2,8 +2,6 @@ package cam72cam.immersiverailroading.proxy;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
-import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.*;
@@ -17,22 +15,16 @@ import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.Registry;
 import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -114,18 +106,6 @@ public abstract class CommonProxy implements IGuiHandler {
 			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
     	}
     }
-
-	@SubscribeEvent
-	public static void onBlockBreakEvent(BreakEvent event) {
-		Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
-		if (block instanceof IBreakCancelable) {
-			IBreakCancelable cancelable = (IBreakCancelable) block;
-			if (!cancelable.tryBreak(World.get(event.getWorld()), new Vec3i(event.getPos()), new Player(event.getPlayer()))) {
-				event.setCanceled(true);
-				//TODO updateListeners?
-			}
-		}
-	}
 
 	@SubscribeEvent
 	public static void onWorldTick(WorldTickEvent event) {
