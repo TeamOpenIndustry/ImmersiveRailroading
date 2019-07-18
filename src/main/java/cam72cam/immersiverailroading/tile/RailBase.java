@@ -817,7 +817,7 @@ public class RailBase extends BlockEntityTickable {
 			((Rail) this).spawnDrops();
 		}
 
-		BlockRailBase.breakParentIfExists(this);
+		breakParentIfExists();
 	}
 
 	@Override
@@ -917,4 +917,46 @@ public class RailBase extends BlockEntityTickable {
 		}
 	}
 
+	private void breakParentIfExists() {
+		Rail parent = getParentTile();
+		if (parent != null && !getWillBeReplaced()) {
+			parent.spawnDrops();
+			//if (tryBreak(getWorld(), te.getPos())) {
+			world.setToAir(parent.pos);
+			//}
+		}
+	}
+
+	@Override
+	public boolean tryBreak(Player player) {
+		try {
+			RailBase rail = this;
+			if (rail.getReplaced() != null) {
+				// new object here is important
+				RailGag newGag = (RailGag) world.reconstituteBlockEntity(rail.getReplaced());
+
+				while(true) {
+					if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), Rail.class)) {
+						rail.world.internal.setTileEntity(pos.internal, newGag.internal);
+						newGag.markDirty();
+						rail.breakParentIfExists();
+						return false;
+					}
+					// Only do replacement if parent still exists
+
+					TagCompound data = newGag.getReplaced();
+					if (data == null) {
+						break;
+					}
+
+					newGag = (RailGag) world.reconstituteBlockEntity(data);
+				}
+			}
+		} catch (StackOverflowError ex) {
+			ImmersiveRailroading.error("Invalid recursive rail block at %s", pos);
+			ImmersiveRailroading.catching(ex);
+			world.setToAir(pos);
+		}
+		return true;
+	}
 }

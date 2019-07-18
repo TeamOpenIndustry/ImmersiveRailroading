@@ -116,6 +116,15 @@ public abstract class BlockTypeEntity extends BlockType {
      */
 
     @Override
+    public final boolean tryBreak(World world, Vec3i pos, Player player) {
+        BlockEntity instance = getInstance(world, pos);
+        if (instance != null) {
+            return instance.tryBreak(player);
+        }
+        return true;
+    }
+
+    @Override
     public final void onBreak(World world, Vec3i pos) {
         BlockEntity instance = getInstance(world, pos);
         if (instance != null) {
