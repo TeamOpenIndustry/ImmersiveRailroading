@@ -17,14 +17,21 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Entity {
-    public final net.minecraft.entity.Entity internal;
-    private final ModdedEntity modded;
+    public net.minecraft.entity.Entity internal;
+    private ModdedEntity modded;
     public final EntitySync sync;
 
+    protected Entity() {
+        this.sync = new EntitySync(this);
+    }
     public Entity(net.minecraft.entity.Entity entity) {
+        this();
+        setup(entity);
+    }
+    Entity setup(net.minecraft.entity.Entity entity) {
         this.internal = entity;
         this.modded = entity instanceof ModdedEntity ? (ModdedEntity)entity : null;
-        this.sync = new EntitySync(this);
+        return this;
     }
 
     public World getWorld() {

@@ -26,10 +26,6 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 	public String tag = "";
 	public String texture;
 
-	public EntityRollingStock(ModdedEntity entity) {
-		super(entity);
-	}
-
 	public void setup(String defID, Gauge gauge, String texture) {
 		this.defID = defID;
 		this.gauge = gauge;

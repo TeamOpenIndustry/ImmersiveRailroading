@@ -41,10 +41,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     private ISound wheel_sound;
 
-    public EntityMoveableRollingStock(ModdedEntity entity) {
-        super(entity);
-    }
-
     @Override
     public void save(TagCompound data) {
         super.save(data);

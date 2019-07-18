@@ -8,11 +8,6 @@ import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.fluid.Fluid;
 
 public class CarTank extends FreightTank {
-
-	public CarTank(ModdedEntity entity) {
-		super(entity);
-	}
-
 	@Override
 	public CarTankDefinition getDefinition() {
 		return super.getDefinition(CarTankDefinition.class);

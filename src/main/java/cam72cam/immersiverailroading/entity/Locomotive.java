@@ -38,9 +38,7 @@ public abstract class Locomotive extends FreightTank {
 
 	private int bellKeyTimeout;
 
-	public Locomotive(ModdedEntity entity) {
-		super(entity);
-
+	public Locomotive() {
 		sync.setFloat(THROTTLE, 0f);
 		sync.setFloat(AIR_BRAKE, 0f);
 		sync.setInteger(HORN, 0);

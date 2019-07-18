@@ -30,9 +30,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	protected final static String CARGO_ITEMS = "CARGO_ITEMS";
 	protected final static String PERCENT_FULL = "PERCENT_FULL";
 
-	public Freight(ModdedEntity entity) {
-		super(entity);
-
+	public Freight() {
 		this.sync.setInteger(CARGO_ITEMS, 0);
 		this.sync.setInteger(PERCENT_FULL, 0);
 	}

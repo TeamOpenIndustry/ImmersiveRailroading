@@ -67,10 +67,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private boolean backCouplerEngaged = true;
 	private Vec3d couplerRearPosition = null;
 
-	public EntityCoupleableRollingStock(ModdedEntity entity) {
-		super(entity);
-	}
-
 	/*
 	 * 
 	 * Data Read/Write

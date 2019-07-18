@@ -10,11 +10,6 @@ import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.fluid.Fluid;
 
 public class Tender extends CarTank {
-	
-	public Tender(ModdedEntity entity) {
-		super(entity);
-	}
-
 	@Override
 	public TenderDefinition getDefinition() {
 		return super.getDefinition(TenderDefinition.class);

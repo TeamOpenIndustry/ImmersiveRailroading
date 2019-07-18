@@ -10,10 +10,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 
 public class HandCar extends Locomotive {
-	
-	public HandCar(ModdedEntity entity) {
-		super(entity);
-	}
 
 	@Override
 	protected int getAvailableHP() {

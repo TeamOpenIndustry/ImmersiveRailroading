@@ -36,8 +36,7 @@ public class LocomotiveDiesel extends Locomotive {
 	private final static String TURNED_ON = "TURNED_ON";
 	private final static String ENGINE_OVERHEATED = "ENGINE_OVERHEATED";
 
-	public LocomotiveDiesel(ModdedEntity entity) {
-		super(entity);
+	public LocomotiveDiesel() {
 		sync.setFloat(ENGINE_TEMPERATURE, ambientTemperature());
 		sync.setBoolean(TURNED_ON, false);
 		sync.setBoolean(ENGINE_OVERHEATED, false);

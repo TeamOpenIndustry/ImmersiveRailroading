@@ -18,10 +18,6 @@ import java.util.List;
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
 	private static final double pressDist = 0.05;
 
-	public EntityRidableRollingStock(ModdedEntity entity) {
-		super(entity);
-	}
-
 	@Override
 	public ClickResult onClick(Player player, Hand hand) {
 		ClickResult clickRes = super.onClick(player, hand);

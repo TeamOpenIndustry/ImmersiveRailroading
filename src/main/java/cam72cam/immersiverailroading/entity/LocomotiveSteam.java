@@ -44,9 +44,7 @@ public class LocomotiveSteam extends Locomotive {
 	private final static String BURN_MAX  = "BURN_MAX";
 	private double driverDiameter;
 	
-	public LocomotiveSteam(ModdedEntity entity) {
-		super(entity);
-
+	public LocomotiveSteam() {
         sync.setFloat(BOILER_PRESSURE, 0f);
         sync.setFloat(BOILER_TEMPERATURE, ambientTemperature());
         sync.setBoolean(PRESSURE_VALVE, false);
