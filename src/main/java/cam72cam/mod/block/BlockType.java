@@ -7,6 +7,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -19,17 +20,26 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.GameData;
-import net.minecraftforge.registries.RegistryManager;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+@Mod.EventBusSubscriber
 public abstract class BlockType {
     protected final BlockSettings settings;
     public final net.minecraft.block.Block internal;
 
-    public void register() {
-        ForgeRegistry<net.minecraft.block.Block> blocks = RegistryManager.ACTIVE.getRegistry(GameData.BLOCKS);
-        blocks.register(internal);
+    private static List<Consumer<RegistryEvent.Register<Block>>> registrations = new ArrayList<>();
+
+
+    @SubscribeEvent
+    public static void registerBlocks(RegistryEvent.Register<Block> event)
+    {
+        registrations.forEach(reg -> reg.accept(event));
     }
 
     public String getName() {
@@ -180,6 +190,8 @@ public abstract class BlockType {
         this.settings = settings;
 
         internal = getBlock();
+
+        registrations.add(reg -> reg.getRegistry().register(internal));
     }
 
     protected BlockInternal getBlock() {
