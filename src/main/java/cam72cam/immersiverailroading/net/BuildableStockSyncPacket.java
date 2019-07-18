@@ -9,7 +9,6 @@ import cam72cam.mod.net.Packet;
  */
 public class BuildableStockSyncPacket extends Packet {
 	public BuildableStockSyncPacket() {
-		// Forge Reflection
 	}
 
 	public BuildableStockSyncPacket(EntityBuildableRollingStock stock) {

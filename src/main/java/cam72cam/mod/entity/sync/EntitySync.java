@@ -2,6 +2,7 @@ package cam72cam.mod.entity.sync;
 
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.nbt.NBTBase;
 
@@ -53,6 +54,9 @@ public class EntitySync extends TagCompound {
     }
 
     public static class EntitySyncPacket extends Packet {
+        static {
+            Packet.register(EntitySync.EntitySyncPacket::new, PacketDirection.ServerToClient);
+        }
 
         public EntitySyncPacket() {
             // Reflection
