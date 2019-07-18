@@ -19,10 +19,10 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.block.IBreakCancelable;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.Registry;
 import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
@@ -31,8 +31,6 @@ import cam72cam.mod.world.World;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -45,13 +43,10 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
-import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.registries.IForgeRegistryModifiable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
@@ -66,12 +61,32 @@ public abstract class CommonProxy implements IGuiHandler {
     	entityClasses.add(Tender::new);
     	entityClasses.add(HandCar::new);
     }
-    
+
     public void preInit(FMLPreInitializationEvent event) throws IOException {
     	DefinitionManager.initDefinitions();
     	Config.init();
+
+		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
+		Fuzzy gold = Fuzzy.GOLD_INGOT;
+
+		Recipes.register(IRItems.ITEM_HOOK, 2,
+				steel, steel, steel, null, steel, null);
+		Recipes.register(IRItems.ITEM_GOLDEN_SPIKE, 2,
+				gold, gold, gold, null, gold, null);
+		Recipes.register(IRItems.ITEM_LARGE_WRENCH, 3,
+				null, steel, null, steel, steel, steel, steel, null, steel);
+		Recipes.register(IRItems.ITEM_SWITCH_KEY, 2,
+				null, steel, null, steel, steel, steel);
+		Recipes.register(IRItems.ITEM_TRACK_BLUEPRINT, 3,
+				steel, null, steel, steel, Fuzzy.PAPER, steel, steel, null, steel);
+		Recipes.register(IRItems.ITEM_MANUAL, 3,
+				steel, null, steel, steel, Fuzzy.BOOK, steel, steel, null, steel);
+		Recipes.register(IRItems.ITEM_PAINT_BRUSH, 1,
+				Fuzzy.WOOL_BLOCK, Fuzzy.IRON_INGOT, Fuzzy.WOOD_STICK);
+		Recipes.register(IRItems.ITEM_CONDUCTOR_WHISTLE, 2,
+				gold, gold, gold, gold, gold, gold);
     }
-    
+
     public void init(FMLInitializationEvent event) {
     	Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
     	Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
@@ -85,9 +100,9 @@ public abstract class CommonProxy implements IGuiHandler {
 
 
     	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
-    	
+
     	CompatLoader.load();
-    	
+
     	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
     	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
     	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
@@ -106,29 +121,11 @@ public abstract class CommonProxy implements IGuiHandler {
 
 		IRFuzzy.applyFallbacks();
     }
-    
+
 
 	public void serverStarting(FMLServerStartingEvent event) {
 		event.registerServerCommand(new IRCommand());
 	}
-    
-    @SubscribeEvent
-    public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
-    	IForgeRegistryModifiable<IRecipe> modRegistry = (IForgeRegistryModifiable<IRecipe>) event.getRegistry();
-    	if (!OreDictionary.doesOreNameExist("ingotSteel")) {
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:hook"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:manual"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:switch key"));
-    	} else {
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:wrench_iron"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:hook_iron"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:manual_iron"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:track blueprint_iron"));
-    		modRegistry.remove(new ResourceLocation("immersiverailroading:switch key_iron"));
-    	}
-    }
 
     @SuppressWarnings("deprecation")
 	@SubscribeEvent
@@ -141,7 +138,7 @@ public abstract class CommonProxy implements IGuiHandler {
 
 		Legacy.registerBlocks();
     }
-    
+
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event)
     {
@@ -161,14 +158,14 @@ public abstract class CommonProxy implements IGuiHandler {
       event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD.internal);
     	event.getRegistry().register(IRItems.ITEM_SWITCH_KEY.internal);
     }
-    
+
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
     	for (Supplier<Entity> type : entityClasses) {
 			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
     	}
     }
-	
+
 	@SubscribeEvent
 	public static void onBlockBreakEvent(BreakEvent event) {
 		Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
@@ -180,22 +177,22 @@ public abstract class CommonProxy implements IGuiHandler {
 			}
 		}
 	}
-	
+
 	@SubscribeEvent
 	public static void onWorldTick(WorldTickEvent event) {
 		if (event.phase != Phase.START) {
 			return;
 		}
-		
-		
-		
+
+
+
 		if (!event.world.isRemote) {
 			ChunkManager.handleWorldTick(event.world);
 			World world = World.get(event.world);
 			// We do this here as to let all the entities do their onTick first.  Otherwise some might be one onTick ahead
 			// if we did this in the onUpdate method
 			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class);
-			
+
 			// Try locomotives first
 			for (EntityCoupleableRollingStock stock : entities) {
 				if (stock instanceof Locomotive) {
@@ -208,7 +205,7 @@ public abstract class CommonProxy implements IGuiHandler {
 				stock = stock.findByUUID(stock.getUUID());
 				stock.tickPosRemainingCheck();
 			}
-			
+
 			try {
 				Thread.sleep(ConfigDebug.lagServer);
 			} catch (InterruptedException e) {
@@ -216,7 +213,7 @@ public abstract class CommonProxy implements IGuiHandler {
 			}
 		}
 	}
-	
+
 	public abstract int getTicks();
 
 
