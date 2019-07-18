@@ -108,14 +108,6 @@ public abstract class CommonProxy implements IGuiHandler {
 		event.registerServerCommand(new IRCommand());
 	}
 
-    @SuppressWarnings("deprecation")
-	@SubscribeEvent
-    public static void registerBlocks(RegistryEvent.Register<Block> event)
-    {
-
-		Legacy.registerBlocks();
-    }
-
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
     	for (Supplier<Entity> type : entityClasses) {
