@@ -66,25 +66,6 @@ public abstract class CommonProxy implements IGuiHandler {
     	DefinitionManager.initDefinitions();
     	Config.init();
 
-		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
-		Fuzzy gold = Fuzzy.GOLD_INGOT;
-
-		Recipes.register(IRItems.ITEM_HOOK, 2,
-				steel, steel, steel, null, steel, null);
-		Recipes.register(IRItems.ITEM_GOLDEN_SPIKE, 2,
-				gold, gold, gold, null, gold, null);
-		Recipes.register(IRItems.ITEM_LARGE_WRENCH, 3,
-				null, steel, null, steel, steel, steel, steel, null, steel);
-		Recipes.register(IRItems.ITEM_SWITCH_KEY, 2,
-				null, steel, null, steel, steel, steel);
-		Recipes.register(IRItems.ITEM_TRACK_BLUEPRINT, 3,
-				steel, null, steel, steel, Fuzzy.PAPER, steel, steel, null, steel);
-		Recipes.register(IRItems.ITEM_MANUAL, 3,
-				steel, null, steel, steel, Fuzzy.BOOK, steel, steel, null, steel);
-		Recipes.register(IRItems.ITEM_PAINT_BRUSH, 1,
-				Fuzzy.WOOL_BLOCK, Fuzzy.IRON_INGOT, Fuzzy.WOOD_STICK);
-		Recipes.register(IRItems.ITEM_CONDUCTOR_WHISTLE, 2,
-				gold, gold, gold, gold, gold, gold);
     }
 
     public void init(FMLInitializationEvent event) {

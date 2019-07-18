@@ -8,12 +8,10 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.mod.item.*;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.ItemBase;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -25,6 +23,10 @@ import net.minecraftforge.fml.common.Loader;
 public class ItemManual extends ItemBase {
 	public ItemManual() {
 		super(ImmersiveRailroading.MODID, "item_manual", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
+		Recipes.register(this, 3,
+				steel, null, steel, steel, Fuzzy.BOOK, steel, steel, null, steel);
 	}
 	
 	@Override

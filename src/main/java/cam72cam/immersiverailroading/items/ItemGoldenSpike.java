@@ -6,11 +6,9 @@ import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
+import cam72cam.mod.item.*;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.ItemBase;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
@@ -21,6 +19,10 @@ import net.minecraft.util.SoundCategory;
 public class ItemGoldenSpike extends ItemBase {
 	public ItemGoldenSpike() {
 		super(ImmersiveRailroading.MODID, "item_golden_spike", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy gold = Fuzzy.GOLD_INGOT;
+		Recipes.register(this, 2,
+				gold, gold, gold, null, gold, null);
 	}
 
 	@Override
