@@ -10,6 +10,8 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.mod.entity.boundingbox.BoundingBox;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.Recipes;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
@@ -28,6 +30,10 @@ public class ItemConductorWhistle extends ItemBase {
 	
 	public ItemConductorWhistle() {
 		super(ImmersiveRailroading.MODID, "item_conductor_whistle", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy gold = Fuzzy.GOLD_INGOT;
+		Recipes.register(this, 2,
+				gold, gold, gold, gold, gold, gold);
 	}
 	
 	@Override

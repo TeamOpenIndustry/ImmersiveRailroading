@@ -10,11 +10,9 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.item.*;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.ItemBase;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
@@ -25,6 +23,10 @@ import java.util.List;
 public class ItemTrackBlueprint extends ItemBase {
 	public ItemTrackBlueprint() {
 		super(ImmersiveRailroading.MODID, "item_rail", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
+		Recipes.register(this, 3,
+				steel, null, steel, steel, Fuzzy.PAPER, steel, steel, null, steel);
 	}
 	
 	@Override

@@ -11,11 +11,9 @@ import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.item.*;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.ItemBase;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
@@ -24,6 +22,10 @@ import cam72cam.mod.util.Hand;
 public class ItemLargeWrench extends ItemBase {
 	public ItemLargeWrench() {
 		super(ImmersiveRailroading.MODID, "item_large_wrench", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
+		Recipes.register(this, 3,
+				null, steel, null, steel, steel, steel, steel, null, steel);
 	}
 
 	@Override
