@@ -131,10 +131,6 @@ public abstract class CommonProxy implements IGuiHandler {
 	@SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event)
     {
-    	IRBlocks.BLOCK_RAIL_GAG.register();
-		IRBlocks.BLOCK_RAIL.register();
-		IRBlocks.BLOCK_RAIL_PREVIEW.register();
-		IRBlocks.BLOCK_MULTIBLOCK.register();
 
 		Legacy.registerBlocks();
     }

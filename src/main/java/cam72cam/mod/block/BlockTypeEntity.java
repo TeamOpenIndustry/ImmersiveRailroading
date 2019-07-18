@@ -30,10 +30,6 @@ public abstract class BlockTypeEntity extends BlockType {
         super(settings);
         id = new Identifier(settings.modID, settings.name);
         TileEntity.register(constructData, id);
-    }
-
-    public void register() {
-        super.register();
         this.getTile().register(); // Idempotent
     }
 
