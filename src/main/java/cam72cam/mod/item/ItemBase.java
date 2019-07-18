@@ -16,6 +16,9 @@ import net.minecraft.item.Item;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -23,9 +26,20 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+@Mod.EventBusSubscriber
 public class ItemBase {
+    private static List<Consumer<RegistryEvent.Register<Item>>> registrations = new ArrayList<>();
+
+    @SubscribeEvent
+    public static void registerItems(RegistryEvent.Register<Item> event)
+    {
+        registrations.forEach((consumer) -> consumer.accept(event));
+    }
+
+
     private final CreativeTab[] creativeTabs;
     public final Item internal;
 
@@ -74,6 +88,8 @@ public class ItemBase {
         internal.setMaxStackSize(stackSize);
         internal.setCreativeTab(tabs[0].internal);
         this.creativeTabs = tabs;
+
+        registrations.add((event) -> event.getRegistry().register(internal));
     }
 
     /* Overrides */

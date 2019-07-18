@@ -136,26 +136,6 @@ public abstract class CommonProxy implements IGuiHandler {
     }
 
     @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event)
-    {
-    	event.getRegistry().register(IRItems.ITEM_TRACK_BLUEPRINT.internal);
-    	event.getRegistry().register(IRItems.ITEM_ROLLING_STOCK.internal);
-    	event.getRegistry().register(IRItems.ITEM_ROLLING_STOCK_COMPONENT.internal);
-    	event.getRegistry().register(IRItems.ITEM_LARGE_WRENCH.internal);
-    	event.getRegistry().register(IRItems.ITEM_HOOK.internal);
-    	event.getRegistry().register(IRItems.ITEM_AUGMENT.internal);
-    	event.getRegistry().register(IRItems.ITEM_MANUAL.internal);
-    	event.getRegistry().register(IRItems.ITEM_RAIL.internal);
-    	event.getRegistry().register(IRItems.ITEM_PLATE.internal);
-    	event.getRegistry().register(IRItems.ITEM_CAST_RAIL.internal);
-    	event.getRegistry().register(IRItems.ITEM_CONDUCTOR_WHISTLE.internal);
-    	event.getRegistry().register(IRItems.ITEM_PAINT_BRUSH.internal);
-    	event.getRegistry().register(IRItems.ITEM_GOLDEN_SPIKE.internal);
-      event.getRegistry().register(IRItems.ITEM_RADIO_CONTROL_CARD.internal);
-    	event.getRegistry().register(IRItems.ITEM_SWITCH_KEY.internal);
-    }
-
-    @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
     	for (Supplier<Entity> type : entityClasses) {
 			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
