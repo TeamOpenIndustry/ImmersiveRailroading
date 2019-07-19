@@ -10,15 +10,13 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.mod.model.obj.Material;
-import cam72cam.mod.model.obj.OBJModel;
-import cam72cam.mod.model.obj.Vec2f;
 import cam72cam.immersiverailroading.util.RealBB;
-import cam72cam.mod.text.TextUtil;
-import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Registry;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.text.TextUtil;
+import cam72cam.mod.world.World;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -420,93 +418,6 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public IconPart[][] getIcon(int i) {
-
-        ImmersiveRailroading.info("Generating model icon map %s...", this.defID);
-
-        IconPart[][] map = new IconPart[i][i];
-
-        // Distance per pixel
-        double nx = Math.max(this.heightBounds, this.widthBounds) / map.length;
-        double xoff = 0;
-        if (this.heightBounds > this.widthBounds) {
-            xoff = (this.heightBounds - this.widthBounds) / 2;
-        }
-
-        List<Integer> faces = new ArrayList<>();
-        for (List<RenderComponent> rcl : this.renderComponents.values()) {
-            for (RenderComponent rc : rcl) {
-                if (!rc.type.collisionsEnabled) {
-                    continue;
-                }
-                for (String group : rc.modelIDs) {
-                    for (int face : model.groups.get(group)) {
-                        faces.add(face);
-                    }
-                }
-            }
-        }
-        float[] depthCache = new float[model.faceVerts.length / 9];
-        for (int f : faces) {
-            float sum = 0;
-            for (int[] point : model.points(f)) {
-                Vec3d pt = model.vertices(point[0]);
-                sum += pt.x;
-            }
-            depthCache[f] = sum / 3; //We know it's a tri
-        }
-
-        faces.sort((o1, o2) -> Float.compare(depthCache[o1], depthCache[o2]));
-
-        for (int f : faces) {
-            Material mtl = model.materials.get(model.faceMTLs[f]);
-            if (mtl == null || mtl.name.equals("")) {
-                continue;
-            }
-            Path2D path = new Path2D.Double();
-            boolean first = true;
-            float vu = 0;
-            float vv = 0;
-            for (int[] point : model.points(f)) {
-                Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : Vec2f.ZERO;
-                vu += vt.x / 3;
-                vv += vt.y / 3;
-
-
-                Vec3d vert = model.vertices(point[0]);
-                vert = vert.add(0, 0, this.widthBounds / 2);
-                if (first) {
-                    path.moveTo(vert.z / nx + xoff / nx, vert.y / nx);
-                } else {
-                    path.lineTo(vert.z / nx + xoff / nx, vert.y / nx);
-                }
-                first = false;
-            }
-            Rectangle2D bounds = path.getBounds2D();
-            if (bounds.getWidth() * bounds.getHeight() < 1) {
-                continue;
-            }
-
-            int minZ = (int) Math.max(0, bounds.getMinX() - 2);
-            int maxZ = (int) Math.min(bounds.getMaxX() + 2, i);
-            int minY = (int) Math.max(0, bounds.getMinY() - 2);
-            int maxY = (int) Math.min(bounds.getMaxY() + 2, i);
-            for (int z = minZ; z < maxZ; z++) {
-                for (int y = minY; y < maxY; y++) {
-                    if (map[z][y] != null) {
-                        continue;
-                    }
-                    double relZ = z;
-                    double relY = y;
-                    if (bounds.contains(relZ, relY) && path.contains(relZ, relY)) {
-                        map[z][y] = new IconPart(mtl.name, vu, vv);
-                    }
-                }
-            }
-        }
-        return map;
-    }
-
     public double[][] createHeightMap(EntityBuildableRollingStock stock) {
         double[][] heightMap = new double[xRes][zRes];
 
@@ -620,15 +531,4 @@ public abstract class EntityRollingStockDefinition {
         this.model = null;
     }
 
-    public class IconPart {
-        public final String mtl;
-        public final float u;
-        public final float v;
-
-        IconPart(String mtl, float u, float v) {
-            this.mtl = mtl;
-            this.u = u;
-            this.v = v;
-        }
-    }
 }
