@@ -33,14 +33,15 @@ public class RailItemRender {
 	}
 
 	public static StandardModel getModel(ItemStack stack, World world) {
-		GL11.glPushMatrix();
-		{
-			GL11.glTranslated(0.5, 0.2, -0.3);
-			baseRailModel.bindTexture();
-			baseRailModel.drawGroups(left);
-			baseRailModel.restoreTexture();
-		}
-		GL11.glPopMatrix();
-		return null;
+		return new StandardModel().addCustom(() -> {
+            GL11.glPushMatrix();
+            {
+                GL11.glTranslated(0.5, 0.2, -0.3);
+                baseRailModel.bindTexture();
+                baseRailModel.drawGroups(left);
+                baseRailModel.restoreTexture();
+            }
+            GL11.glPopMatrix();
+		});
 	}
 }

@@ -15,6 +15,9 @@ import org.lwjgl.opengl.GL11;
 
 public class TrackBlueprintItemModel {
 	public static StandardModel getModel(ItemStack stack, World world) {
+		return new StandardModel().addCustom(() -> TrackBlueprintItemModel.render(stack, world));
+	}
+	public static void render(ItemStack stack, World world) {
 		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5)), null);
 		info = info.withLength(10);
 
@@ -55,7 +58,5 @@ public class TrackBlueprintItemModel {
 			cull.restore();
 		}
 		GL11.glPopMatrix();
-
-		return null;
 	}
 }

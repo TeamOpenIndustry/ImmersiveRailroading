@@ -58,19 +58,7 @@ public class StockItemModel implements IBakedModel {
 	
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		
-		/*
-		 * I am an evil wizard!
-		 * 
-		 * So it turns out that I can stick a draw call in here to
-		 * render my own stuff. This subverts forge's entire baked model
-		 * system with a single line of code and injects my own OpenGL
-		 * payload. Fuck you modeling restrictions.
-		 * 
-		 * This is probably really fragile if someone calls getQuads
-		 * before actually setting up the correct GL context.
-		 */
-		
+
 		
 		if (ConfigGraphics.enableFlatIcons) {
 			if (iconQuads.get(defID) != null) {
