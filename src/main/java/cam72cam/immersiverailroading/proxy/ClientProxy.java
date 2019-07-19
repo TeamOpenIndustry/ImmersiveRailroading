@@ -484,6 +484,9 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
+		if (event.getWorld() == null) {
+			return;
+		}
 		// TODO this does not actually work!
 		World world = World.get(event.getWorld());
 		EntityRollingStock stock = world.getEntity(event.getEntity().getUniqueID(), EntityRollingStock.class);
@@ -672,6 +675,9 @@ public class ClientProxy extends CommonProxy {
 		if (event.getEntity().getEntityWorld().isRemote) {
 			// Somehow loading a chunk in the server thread can call a client event handler
 			// what the fuck forge???
+			return;
+		}
+		if (World.get(event.getEntity().getEntityWorld()) == null) {
 			return;
 		}
 		//TODO call modded entity onEnterChunk instead
