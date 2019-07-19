@@ -46,9 +46,7 @@ public class OBJTextureSheet {
 		public Identifier tex;
 
 		private boolean isFlatMaterial;
-		private int[] pixels;
 
-		
 		SubTexture(Identifier tex, Identifier fallback, Function<Integer, Integer> scale) throws IOException {
 			InputStream input;
 			try {
@@ -67,12 +65,10 @@ public class OBJTextureSheet {
 			this.tex = tex;
 			isFlatMaterial = false;
 
-			pixels = new int[realWidth * realHeight];
-			image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
 			this.image = image;
 		}
 		SubTexture(String name, int r, int g, int b, int a) {
-			BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
+			image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
 			for (int x = 0; x < 8; x ++) {
 				for (int y = 0; y < 8; y ++) {					
 					image.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
@@ -86,9 +82,6 @@ public class OBJTextureSheet {
 			maxV = 1;
 			this.tex = new Identifier("generated:" + name);
 			isFlatMaterial = true;
-			
-			pixels = new int[realWidth * realHeight];
-			image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
 		}
 		
 		public Vec2f extendSpace(List<Vec2f> vts) {
@@ -133,21 +126,13 @@ public class OBJTextureSheet {
 		}
 
 		public void resize() {
-			if (image == null) {
-				return;
-			}
-
 			if (scale != null && realWidth * copiesU() * realHeight * copiesV() > ConfigGraphics.scaleTextureCutoff * ConfigGraphics.scaleTextureCutoff) {
 				realWidth = scale.apply(realWidth);
 				realHeight = scale.apply(realHeight);
 			}
 			if (realHeight != image.getHeight() || realWidth != image.getWidth()) {
 				image = convertToBufferedImage(image.getScaledInstance(realWidth, realHeight, BufferedImage.SCALE_FAST));
-				pixels = new int[realWidth * realHeight];
-				image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
 			}
-
-			image = null;
 			scale = null;
 		}
 		
@@ -156,6 +141,9 @@ public class OBJTextureSheet {
 			this.originY = originY;
 			this.sheetWidth = sheetWidth;
 			this.sheetHeight = sheetHeight;
+
+			int[] pixels = new int[realWidth * realHeight];
+            image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
 			
 	        ByteBuffer buffer = BufferUtils.createByteBuffer(realWidth * realHeight * 4);
 	        for(int y = 0; y < realHeight; y++){
@@ -186,9 +174,7 @@ public class OBJTextureSheet {
 				}
 			}
 
-			if (!ConfigGraphics.enableFlatIcons) {
-				pixels = null;
-			}
+			image = null;
 		}
 		public int copiesU() {
 			return maxU - minU;
@@ -393,26 +379,6 @@ public class OBJTextureSheet {
 	
 	public void freeGL() {
 		GL11.glDeleteTextures(textureID);
-	}
-
-	public int samp(String mtlName, float u, float v) {
-		if (model.materials.containsKey(mtlName)) {
-			Identifier kd = model.materials.get(mtlName).texKd;
-			if (kd != null) {
-				mtlName = kd.toString();
-			}
-		}
-		if (mappings.containsKey(mtlName)) {
-			SubTexture mapping = mappings.get(mtlName);
-			u = ((u % 1) + 1) % 1;
-			v = ((v % 1) + 1) % 1;
-			u = u * mapping.realWidth;
-			v = mapping.realHeight - v * mapping.realHeight;
-			v = (int)v;
-			u = (int)u;
-			return mapping.pixels[(int) (Math.min(v * mapping.realWidth + u, mapping.pixels.length-1))];
-		}
-		return 0;
 	}
 
 	public boolean isFlatMaterial(String mtlName) {
