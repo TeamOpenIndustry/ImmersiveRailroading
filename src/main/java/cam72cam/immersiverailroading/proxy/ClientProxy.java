@@ -53,6 +53,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -312,39 +313,19 @@ public class ClientProxy extends CommonProxy {
         @Override
         public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
         {
-        	// Based off of http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
+			Framebuffer fb = new Framebuffer(width, height, true);
+			fb.setFramebufferColor(0, 0, 0, 0);
+			fb.framebufferClear();
+			fb.bindFramebuffer(true);
+
             BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-
-            int fb = OpenGlHelper.glGenFramebuffers();
-            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
-
-            int tex = GL11.glGenTextures();
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-            ByteBuffer init = ByteBuffer.allocateDirect(width * height * 4);
-            for (int i = 0; i < init.capacity() / 4; i++) {
-                init.putInt(0);
-            }
-            init.flip();
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, init);
-
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-
-            int depth = OpenGlHelper.glGenRenderbuffers();
-            OpenGlHelper.glBindRenderbuffer(OpenGlHelper.GL_RENDERBUFFER, depth);
-            OpenGlHelper.glRenderbufferStorage(OpenGlHelper.GL_RENDERBUFFER, GL11.GL_DEPTH_COMPONENT, width, height);
-            OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depth);
-
-            OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, tex, 0);
-            GL11.glDrawBuffer(OpenGlHelper.GL_COLOR_ATTACHMENT0);
 
             if (OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER) != OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) {
                 throw new RuntimeException("WOOOO!");
             }
 
-            GL11.glViewport(0, 0, width, height);
             GL11.glEnable(GL11.GL_DEPTH_TEST);
-            GL11.glDepthFunc(GL11.GL_GREATER);
+            GL11.glDepthFunc(GL11.GL_LESS);
             GL11.glClearDepth(1);
 
             StockModel model = StockRenderCache.getRender(def.defID);
@@ -354,14 +335,12 @@ public class ClientProxy extends CommonProxy {
             double scale = -0.60 / def.recommended_gauge.value();
             GL11.glTranslated(0, 0.85, -0.5);
             GL11.glScaled(scale, scale, scale / (modelLength /2));
-            GL11.glRotated(95 + 180, 0, 1, 0);
+            GL11.glRotated(85, 0, 1, 0);
             model.draw();
             GL11.glPopMatrix();
             model.restoreTexture();
 
             ByteBuffer buff = ByteBuffer.allocateDirect(4 * width * height);
-            //GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-            //GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
 			GL11.glReadPixels(0, 0, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);
 
             for (int y = 0; y < height; y++) {
@@ -375,9 +354,8 @@ public class ClientProxy extends CommonProxy {
                 }
             }
 
-            OpenGlHelper.glDeleteFramebuffers(fb);
-            OpenGlHelper.glDeleteRenderbuffers(depth);
-			GL11.glDeleteTextures(tex);
+			fb.unbindFramebuffer();
+			fb.deleteFramebuffer();
 
 			File loc = new File("/home/gilligan/test/" + def.defID.replace('/', '.') + ".png");
 			try {
@@ -399,6 +377,8 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onTextureStich(TextureStitchEvent.Pre event) {
+		StockRenderCache.tryPrime();
+
 		if (ConfigGraphics.enableFlatIcons) {
 			for (String defID : DefinitionManager.getDefinitionNames()) {
 				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
@@ -409,7 +389,6 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void afterTextureStitch(TextureStitchEvent.Post event) {
-		StockRenderCache.tryPrime();
 	}
 
 	@SubscribeEvent
