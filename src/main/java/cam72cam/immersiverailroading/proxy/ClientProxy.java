@@ -359,16 +359,24 @@ public class ClientProxy extends CommonProxy {
 			int fb = OpenGlHelper.glGenFramebuffers();
 			OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
 
+			int width = 1024;
+			int height = 768;
+
 			int tex = GL11.glGenTextures();
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, 1024, 768, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null); //TODO RGBA
+			ByteBuffer init = ByteBuffer.allocateDirect(width * height * 4);
+			for (int i = 0; i< init.capacity()/4; i++) {
+				init.putInt(0);
+			}
+			init.flip();
+			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, init);
 
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 
 			int depth = OpenGlHelper.glGenRenderbuffers();
 			OpenGlHelper.glBindRenderbuffer(OpenGlHelper.GL_RENDERBUFFER, depth);
-			OpenGlHelper.glRenderbufferStorage(OpenGlHelper.GL_RENDERBUFFER, GL11.GL_DEPTH_COMPONENT, 1024, 768);
+			OpenGlHelper.glRenderbufferStorage(OpenGlHelper.GL_RENDERBUFFER, GL11.GL_DEPTH_COMPONENT, width, height);
 			OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depth);
 
 			//TODO DIFFERENT
@@ -386,23 +394,28 @@ public class ClientProxy extends CommonProxy {
 
 			// probably don't need this
 			OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
-			GL11.glViewport(0, 0, 1024, 768);
+			GL11.glViewport(0, 0, width, height);
 
 			//TODO SHADER!!!
 
-
 			StockRenderCache.getRender(defID).draw();
 
-			ByteBuffer buff = ByteBuffer.allocateDirect(8 * 1024 * 768);
-			GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buff);
+			ByteBuffer buff = ByteBuffer.allocateDirect(12 * width * height);
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+			GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
 
 			File loc = new File("/home/gilligan/test/" + defID.replace('/', '.') + ".png");
-			BufferedImage img = new BufferedImage(1024, 768, BufferedImage.TYPE_INT_RGB);
-			//img.setRGB(0, 0, 1024, 768, );
-			IntBuffer ints = buff.asIntBuffer();
-            for (int y = 0; y < 768; y++) {
-                for (int x = 0; x < 1024; x++) {
-					img.setRGB(x, y, ints.get());
+			BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			//buff.flip();
+			//img.setRGB(0, 0, width, height, );
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                	int i = 0;
+                	i += buff.get() << 16;
+                	i += buff.get() << 8;
+                	i += buff.get() << 0;
+					i += buff.get() << 24;
+					img.setRGB(x, y, i);
 				}
 			}
 			try {
