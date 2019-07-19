@@ -427,10 +427,4 @@ public class OBJTextureSheet {
 		}
 		return false;
 	}
-
-	public void freePx() {
-		for (SubTexture tex : mappings.values()) {
-			tex.pixels = null;
-		}
-	}
 }
