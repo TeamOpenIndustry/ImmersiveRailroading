@@ -44,6 +44,7 @@ import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -82,13 +83,15 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
+import org.lwjgl.opengl.*;
 import paulscode.sound.SoundSystemConfig;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 import java.util.function.Function;
 
@@ -350,6 +353,68 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onTextureStich(TextureStitchEvent.Pre event) {
+		for (String defID : DefinitionManager.getDefinitionNames()) {
+			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+
+			int fb = OpenGlHelper.glGenFramebuffers();
+			OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
+
+			int tex = GL11.glGenTextures();
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, 1024, 768, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null); //TODO RGBA
+
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+
+			int depth = OpenGlHelper.glGenRenderbuffers();
+			OpenGlHelper.glBindRenderbuffer(OpenGlHelper.GL_RENDERBUFFER, depth);
+			OpenGlHelper.glRenderbufferStorage(OpenGlHelper.GL_RENDERBUFFER, GL11.GL_DEPTH_COMPONENT, 1024, 768);
+			OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depth);
+
+			//TODO DIFFERENT
+			//OpenGlHelper.glFramebufferTexture2D();
+			GL32.glFramebufferTexture(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, tex, 0);
+			//GL11.GlDrawBuffer
+			IntBuffer buf = ByteBuffer.allocateDirect(4).asIntBuffer();
+			buf.put(OpenGlHelper.GL_COLOR_ATTACHMENT0);
+			buf.flip();
+			GL20.glDrawBuffers(buf);
+
+			if(OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER) != OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) {
+				throw new RuntimeException("WOOOO!");
+			}
+
+			// probably don't need this
+			OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
+			GL11.glViewport(0, 0, 1024, 768);
+
+			//TODO SHADER!!!
+
+
+			StockRenderCache.getRender(defID).draw();
+
+			ByteBuffer buff = ByteBuffer.allocateDirect(8 * 1024 * 768);
+			GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buff);
+
+			File loc = new File("/home/gilligan/test/" + defID.replace('/', '.') + ".png");
+			BufferedImage img = new BufferedImage(1024, 768, BufferedImage.TYPE_INT_RGB);
+			//img.setRGB(0, 0, 1024, 768, );
+			IntBuffer ints = buff.asIntBuffer();
+            for (int y = 0; y < 768; y++) {
+                for (int x = 0; x < 1024; x++) {
+					img.setRGB(x, y, ints.get());
+				}
+			}
+			try {
+				ImageIO.write(img, "png", loc);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+
+			OpenGlHelper.glDeleteFramebuffers(fb);
+			OpenGlHelper.glDeleteRenderbuffers(depth);
+		}
 		if (ConfigGraphics.enableFlatIcons) {
 			for (String defID : DefinitionManager.getDefinitionNames()) {
 				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
