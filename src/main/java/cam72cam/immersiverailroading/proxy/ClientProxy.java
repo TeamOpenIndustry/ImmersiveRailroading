@@ -359,8 +359,8 @@ public class ClientProxy extends CommonProxy {
 			int fb = OpenGlHelper.glGenFramebuffers();
 			OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
 
-			int width = 1024;
-			int height = 768;
+			int width = 512;
+			int height = 512;
 
 			int tex = GL11.glGenTextures();
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
@@ -398,7 +398,21 @@ public class ClientProxy extends CommonProxy {
 
 			//TODO SHADER!!!
 
-			StockRenderCache.getRender(defID).draw();
+			GL11.glEnable(GL11.GL_DEPTH_TEST);
+			GL11.glDepthFunc(GL11.GL_GREATER);
+			GL11.glClearDepth(1);
+
+			StockModel model = StockRenderCache.getRender(defID);
+			model.bindTexture();
+			GL11.glPushMatrix();
+			double modelLength = model.model.lengthOfGroups(model.model.groups());
+			double scale = -0.60 / def.recommended_gauge.value();
+			GL11.glTranslated(0, 0.85, -0.5);
+			GL11.glScaled(scale, scale, scale/modelLength);
+			GL11.glRotated(95+180, 0, 1, 0);
+			model.draw();
+			GL11.glPopMatrix();
+			model.restoreTexture();
 
 			ByteBuffer buff = ByteBuffer.allocateDirect(12 * width * height);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
