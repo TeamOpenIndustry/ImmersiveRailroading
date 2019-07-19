@@ -27,14 +27,16 @@ import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.*;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.immersiverailroading.util.PlacementInfo;
+import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.*;
-import cam72cam.mod.render.obj.OBJTextureSheet;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
@@ -83,15 +85,14 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
 import paulscode.sound.SoundSystemConfig;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.*;
 import java.util.function.Function;
 
@@ -288,7 +289,6 @@ public class ClientProxy extends CommonProxy {
 				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName().internal, ""));
 	}
 
-	private static final Map<String, BufferedImage> cachedIcons = new HashMap<>();
 	public static final class StockIcon extends TextureAtlasSprite
     {
         private EntityRollingStockDefinition def;
@@ -309,139 +309,83 @@ public class ClientProxy extends CommonProxy {
         @Override
         public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
         {
-			StockModel renderer = StockRenderCache.getRender(def.defID);
+        	// Based off of http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
+            BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
 
-            BufferedImage image;
-            if (!cachedIcons.containsKey(def.defID)) {
-            	image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+            int fb = OpenGlHelper.glGenFramebuffers();
+            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
 
-                EntityRollingStockDefinition.IconPart[][] map = def.getIcon(this.getIconWidth());
+            int tex = GL11.glGenTextures();
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+            ByteBuffer init = ByteBuffer.allocateDirect(width * height * 4);
+            for (int i = 0; i < init.capacity() / 4; i++) {
+                init.putInt(0);
+            }
+            init.flip();
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, init);
 
-                for (int x = 0; x < this.getIconWidth(); x++) {
-                    for (int y = 0; y < this.getIconHeight(); y++) {
-                        if (map[x][y] != null) {
-                            EntityRollingStockDefinition.IconPart pt = map[x][y];
-                            int color = renderer.textures.get(null).samp(pt.mtl, pt.u, pt.v);
-                            image.setRGB(x, this.getIconWidth() - (y + 1), color);
-                        } else {
-                            image.setRGB(x, this.getIconWidth() - (y + 1), 0);
-                        }
-                    }
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+
+            int depth = OpenGlHelper.glGenRenderbuffers();
+            OpenGlHelper.glBindRenderbuffer(OpenGlHelper.GL_RENDERBUFFER, depth);
+            OpenGlHelper.glRenderbufferStorage(OpenGlHelper.GL_RENDERBUFFER, GL11.GL_DEPTH_COMPONENT, width, height);
+            OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depth);
+
+            OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, tex, 0);
+            GL11.glDrawBuffer(OpenGlHelper.GL_COLOR_ATTACHMENT0);
+
+            if (OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER) != OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) {
+                throw new RuntimeException("WOOOO!");
+            }
+
+            GL11.glViewport(0, 0, width, height);
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GL11.glDepthFunc(GL11.GL_GREATER);
+            GL11.glClearDepth(1);
+
+            StockModel model = StockRenderCache.getRender(def.defID);
+            model.bindTexture();
+            GL11.glPushMatrix();
+            double modelLength = model.model.lengthOfGroups(model.model.groups());
+            double scale = -0.60 / def.recommended_gauge.value();
+            GL11.glTranslated(0, 0.85, -0.5);
+            GL11.glScaled(scale, scale, scale / modelLength);
+            GL11.glRotated(95 + 180, 0, 1, 0);
+            model.draw();
+            GL11.glPopMatrix();
+            model.restoreTexture();
+
+            ByteBuffer buff = ByteBuffer.allocateDirect(12 * width * height);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+            GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int i = 0;
+                    i += buff.get() << 16;
+                    i += buff.get() << 8;
+                    i += buff.get() << 0;
+                    i += buff.get() << 24;
+                    image.setRGB(x, y, i);
                 }
-                cachedIcons.put(def.defID, image);
-			}
-			image = cachedIcons.get(def.defID);
-    		for (OBJTextureSheet tex : renderer.textures.values()) {
-    			tex.freePx();
-			}
-            
-            int[][] pixels = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
-            pixels[0] = new int[image.getWidth() * image.getHeight()];
-            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels[0], 0, image.getWidth());
+            }
+
+            OpenGlHelper.glDeleteFramebuffers(fb);
+            OpenGlHelper.glDeleteRenderbuffers(depth);
+
+            int[] pixels = new int[image.getWidth() * image.getHeight()];
+            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
             this.clearFramesTextureData();
-            this.framesTextureData.add(pixels);
-            /*
-            try {
-    			ImageIO.write(image, "PNG", new File("/home/gilligan/foo" + Math.random() + ".png"));
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}*/
-            
+			int[][] fd = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
+			fd[0] = pixels;
+            this.framesTextureData.add(fd);
             return false;
         }
     }
 	
 	@SubscribeEvent
 	public static void onTextureStich(TextureStitchEvent.Pre event) {
-		for (String defID : DefinitionManager.getDefinitionNames()) {
-			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
-
-			int fb = OpenGlHelper.glGenFramebuffers();
-			OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
-
-			int width = 512;
-			int height = 512;
-
-			int tex = GL11.glGenTextures();
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-			ByteBuffer init = ByteBuffer.allocateDirect(width * height * 4);
-			for (int i = 0; i< init.capacity()/4; i++) {
-				init.putInt(0);
-			}
-			init.flip();
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, init);
-
-			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-
-			int depth = OpenGlHelper.glGenRenderbuffers();
-			OpenGlHelper.glBindRenderbuffer(OpenGlHelper.GL_RENDERBUFFER, depth);
-			OpenGlHelper.glRenderbufferStorage(OpenGlHelper.GL_RENDERBUFFER, GL11.GL_DEPTH_COMPONENT, width, height);
-			OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depth);
-
-			//TODO DIFFERENT
-			//OpenGlHelper.glFramebufferTexture2D();
-			GL32.glFramebufferTexture(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, tex, 0);
-			//GL11.GlDrawBuffer
-			IntBuffer buf = ByteBuffer.allocateDirect(4).asIntBuffer();
-			buf.put(OpenGlHelper.GL_COLOR_ATTACHMENT0);
-			buf.flip();
-			GL20.glDrawBuffers(buf);
-
-			if(OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER) != OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) {
-				throw new RuntimeException("WOOOO!");
-			}
-
-			// probably don't need this
-			OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, fb);
-			GL11.glViewport(0, 0, width, height);
-
-			//TODO SHADER!!!
-
-			GL11.glEnable(GL11.GL_DEPTH_TEST);
-			GL11.glDepthFunc(GL11.GL_GREATER);
-			GL11.glClearDepth(1);
-
-			StockModel model = StockRenderCache.getRender(defID);
-			model.bindTexture();
-			GL11.glPushMatrix();
-			double modelLength = model.model.lengthOfGroups(model.model.groups());
-			double scale = -0.60 / def.recommended_gauge.value();
-			GL11.glTranslated(0, 0.85, -0.5);
-			GL11.glScaled(scale, scale, scale/modelLength);
-			GL11.glRotated(95+180, 0, 1, 0);
-			model.draw();
-			GL11.glPopMatrix();
-			model.restoreTexture();
-
-			ByteBuffer buff = ByteBuffer.allocateDirect(12 * width * height);
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-			GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
-
-			File loc = new File("/home/gilligan/test/" + defID.replace('/', '.') + ".png");
-			BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			//buff.flip();
-			//img.setRGB(0, 0, width, height, );
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                	int i = 0;
-                	i += buff.get() << 16;
-                	i += buff.get() << 8;
-                	i += buff.get() << 0;
-					i += buff.get() << 24;
-					img.setRGB(x, y, i);
-				}
-			}
-			try {
-				ImageIO.write(img, "png", loc);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-
-			OpenGlHelper.glDeleteFramebuffers(fb);
-			OpenGlHelper.glDeleteRenderbuffers(depth);
-		}
 		if (ConfigGraphics.enableFlatIcons) {
 			for (String defID : DefinitionManager.getDefinitionNames()) {
 				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
