@@ -19,24 +19,32 @@ import java.util.List;
 
 public class StandardModel {
     private List<Pair<IBlockState, IBakedModel>> models = new ArrayList<>();
+    private List<Runnable> custom = new ArrayList<>();
 
-    public void addColorBlock(Color color, Vec3d translate, Vec3d scale) {
+    public StandardModel addColorBlock(Color color, Vec3d translate, Vec3d scale) {
         IBlockState state = Blocks.CONCRETE.getDefaultState();
         state = state.withProperty(BlockColored.COLOR, color.internal);
         IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
         models.add(Pair.of(state, new BakedScaledModel(model, scale, translate)));
+        return this;
     }
 
-    public void addSnow(int layers, Vec3d translate) {
+    public StandardModel addSnow(int layers, Vec3d translate) {
         layers = Math.min(layers, 8);
         IBlockState state = Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, layers);
         IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
         models.add(Pair.of(state, new BakedScaledModel(model, new Vec3d(1, 1,1), translate)));
+        return this;
     }
-    public void addItem(ItemStack bed, Vec3d translate, Vec3d scale) {
+    public StandardModel addItem(ItemStack bed, Vec3d translate, Vec3d scale) {
         IBlockState state = itemToBlockState(bed);
         IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
         models.add(Pair.of(state, new BakedScaledModel(model, scale, translate)));
+        return this;
+    }
+    public StandardModel addCustom(Runnable fn) {
+        this.custom.add(fn);
+        return this;
     }
 
     public List<BakedQuad> getQuads(EnumFacing side, long rand) {
@@ -44,6 +52,24 @@ public class StandardModel {
         for (Pair<IBlockState, IBakedModel> model : models) {
             quads.addAll(model.getValue().getQuads(model.getKey(), side, rand));
         }
+
+        /*
+         * I am an evil wizard!
+         *
+         * So it turns out that I can stick a draw call in here to
+         * render my own stuff. This subverts forge's entire baked model
+         * system with a single line of code and injects my own OpenGL
+         * payload. Fuck you modeling restrictions.
+         *
+         * This is probably really fragile if someone calls getQuads
+         * before actually setting up the correct GL context.
+         */
+
+        // Model can only be rendered once.  If mods go through the RenderItem.renderModel as they are supposed to this should work just fine
+        if (side == null) {
+            custom.forEach(Runnable::run);
+        }
+
         return quads;
     }
 

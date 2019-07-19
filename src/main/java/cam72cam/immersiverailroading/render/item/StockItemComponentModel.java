@@ -23,6 +23,9 @@ import java.util.ArrayList;
 
 public class StockItemComponentModel {
     public static StandardModel getModel(ItemStack stack, World world) {
+        return new StandardModel().addCustom(() -> StockItemComponentModel.render(stack));
+    }
+    public static void render(ItemStack stack) {
         double itemScale = ItemGauge.get(stack).scale();
         String defID = ItemDefinition.getID(stack);
         ItemComponentType item = ItemComponent.getComponentType(stack);
@@ -31,7 +34,7 @@ public class StockItemComponentModel {
         if (def == null) {
             ImmersiveRailroading.error("Item %s missing definition!", stack);
             stack.setCount(0);
-            return null;
+            return;
         }
 
         StockModel renderer = StockRenderCache.getRender(defID);
@@ -75,6 +78,6 @@ public class StockItemComponentModel {
         }
         GL11.glPopMatrix();
 
-        return null;
+        return;
     }
 }

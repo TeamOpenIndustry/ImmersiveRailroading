@@ -33,18 +33,19 @@ public class RailCastItemRender {
 	}
 
 	public static StandardModel getModel(ItemStack stack, World world) {
-		GL11.glPushMatrix();
-		{
-			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-			model.bindTexture();
-			GL11.glRotated(90, 1, 0, 0);
-			GL11.glTranslated(0, -1, 1);
-			GL11.glTranslated(-0.5, 0.6, 0.6);
-			model.drawGroups(groups);
-			model.restoreTexture();
-			tex.restore();
-		}
-		GL11.glPopMatrix();
-		return null;
+		return new StandardModel().addCustom(() -> {
+			GL11.glPushMatrix();
+			{
+				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
+				model.bindTexture();
+				GL11.glRotated(90, 1, 0, 0);
+				GL11.glTranslated(0, -1, 1);
+				GL11.glTranslated(-0.5, 0.6, 0.6);
+				model.drawGroups(groups);
+				model.restoreTexture();
+				tex.restore();
+			}
+			GL11.glPopMatrix();
+		});
 	}
 }

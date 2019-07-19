@@ -15,8 +15,6 @@ public class RailAugmentItemModel {
 			return null;
 		}
 		Color color = augment.color();
-		StandardModel model = new StandardModel();
-		model.addColorBlock(color, new Vec3d(0, 0.4, 0), new Vec3d(1, 0.2f, 1));
-		return model;
+		return new StandardModel().addColorBlock(color, new Vec3d(0, 0.4, 0), new Vec3d(1, 0.2f, 1));
 	}
 }
