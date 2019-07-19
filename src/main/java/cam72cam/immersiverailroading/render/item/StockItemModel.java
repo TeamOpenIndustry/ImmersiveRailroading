@@ -61,9 +61,27 @@ public class StockItemModel implements IBakedModel {
 
 		
 		if (ConfigGraphics.enableFlatIcons) {
-			if (iconQuads.get(defID) != null) {
-				return iconQuads.get(defID).asList();
-			}
+			//if (iconQuads.get(defID) != null) {
+			//	return iconQuads.get(defID).asList();
+			//}
+
+
+			TextureMap map = Minecraft.getMinecraft().getTextureMapBlocks();
+			TextureAtlasSprite sprite = map.getAtlasSprite(new ResourceLocation(ImmersiveRailroading.MODID, defID).toString());
+			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+
+			GL11.glPushMatrix();
+			GL11.glRotated(180, 1, 0, 0);
+			GL11.glTranslated(0, -1, 0);
+			GL11.glBegin(GL11.GL_QUADS);
+			GL11.glColor4f(1, 1, 1, 1);
+			GL11.glTexCoord2f(sprite.getMinU(), sprite.getMinV()); GL11.glVertex3f(0, 0, 0);
+			GL11.glTexCoord2f(sprite.getMinU(), sprite.getMaxV()); GL11.glVertex3f(0, 1, 0);
+			GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMaxV()); GL11.glVertex3f(1, 1, 0);
+			GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMinV()); GL11.glVertex3f(1, 0, 0);
+			GL11.glEnd();
+			GL11.glPopMatrix();
+			return new ArrayList<>();
 		}
 		
 		if (model != null) {
@@ -123,8 +141,8 @@ public class StockItemModel implements IBakedModel {
 		return new ItemOverrideListHack();
 	}
 
-	@Override
-	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
+	//@Override
+	public Pair<? extends IBakedModel, Matrix4f> handlePerspectivea(TransformType cameraTransformType) {
 		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		
 		if (ConfigGraphics.enableFlatIcons && this.defID != null) {
