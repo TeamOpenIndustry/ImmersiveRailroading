@@ -15,10 +15,6 @@ public class ConfigGraphics {
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
-	@RequiresMcRestart
-	@Comment("Generate static getIcon.  Drastically reduces render overhead for IR items")
-	public static boolean enableFlatIcons = false;
-
 	@Comment({"Size of icon cache images (larger = slower)"})
 	public static int flatIconSize = 128;
 
