@@ -208,7 +208,7 @@ public class ItemRender {
         public StockIcon(Pair<String, StandardModel> pair) {
             super(pair.getKey());
             this.model = pair.getValue();
-            this.width = this.height = ConfigGraphics.flatIconSize;
+            this.width = this.height = 64;
         }
 
         @Override

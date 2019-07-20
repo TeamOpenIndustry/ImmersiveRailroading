@@ -15,9 +15,6 @@ public class ConfigGraphics {
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
-	@Comment({"Size of icon cache images (larger = slower)"})
-	public static int flatIconSize = 128;
-
 	@Comment("If you are having render problems in game, try setting this to false")
 	public static boolean useShaderFriendlyRender = true;
 
