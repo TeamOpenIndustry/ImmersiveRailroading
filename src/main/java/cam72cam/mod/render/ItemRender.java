@@ -1,6 +1,5 @@
 package cam72cam.mod.render;
 
-import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
@@ -29,12 +28,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
