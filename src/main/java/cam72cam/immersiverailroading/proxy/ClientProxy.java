@@ -46,17 +46,12 @@ import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.*;
@@ -87,18 +82,12 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 import paulscode.sound.SoundSystemConfig;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.function.Function;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -192,6 +181,7 @@ public class ClientProxy extends CommonProxy {
 		ItemRender.register(IRItems.ITEM_CAST_RAIL, RailCastItemRender::getModel);
 		ItemRender.register(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::getModel);
 		ItemRender.register(IRItems.ITEM_ROLLING_STOCK_COMPONENT, StockItemComponentModel::getModel);
+		ItemRender.register(IRItems.ITEM_ROLLING_STOCK, StockItemModel::getModel, StockItemModel::getIcon);
 	}
 
 	@Override
@@ -273,10 +263,7 @@ public class ClientProxy extends CommonProxy {
 		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_CONDUCTOR_WHISTLE.getRegistryName().internal, ""));
-		
-		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.internal, 0,
-				new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""));
-		
+
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_MANUAL.internal, 0,
 				new ModelResourceLocation("minecraft:written_book", ""));
 		
@@ -293,107 +280,10 @@ public class ClientProxy extends CommonProxy {
 				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName().internal, ""));
 	}
 
-	public static final class StockIcon extends TextureAtlasSprite
-    {
-        private EntityRollingStockDefinition def;
 
-		public StockIcon(EntityRollingStockDefinition def)
-        {
-            super(new ResourceLocation(ImmersiveRailroading.MODID, def.defID).toString());
-            this.def = def;
-            this.width = this.height = ConfigGraphics.flatIconSize;
-        }
-
-        @Override
-        public boolean hasCustomLoader(IResourceManager manager, ResourceLocation location)
-        {
-            return true;
-        }
-
-        @Override
-        public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
-        {
-			Framebuffer fb = new Framebuffer(width, height, true);
-			fb.setFramebufferColor(0, 0, 0, 0);
-			fb.framebufferClear();
-			fb.bindFramebuffer(true);
-
-            BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-
-            if (OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER) != OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) {
-                throw new RuntimeException("WOOOO!");
-            }
-
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
-            GL11.glDepthFunc(GL11.GL_LESS);
-            GL11.glClearDepth(1);
-
-            StockModel model = StockRenderCache.getRender(def.defID);
-            model.bindTexture();
-            GL11.glPushMatrix();
-            double modelLength = model.model.lengthOfGroups(model.model.groups());
-            double scale = -0.60 / def.recommended_gauge.value();
-            GL11.glTranslated(0, 0.85, -0.5);
-            GL11.glScaled(scale, scale, scale / (modelLength /2));
-            GL11.glRotated(85, 0, 1, 0);
-            model.draw();
-            GL11.glPopMatrix();
-            model.restoreTexture();
-
-            ByteBuffer buff = ByteBuffer.allocateDirect(4 * width * height);
-			GL11.glReadPixels(0, 0, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);
-
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int i = 0;
-                    i += buff.get() << 0;
-                    i += buff.get() << 8;
-                    i += buff.get() << 16;
-                    i += buff.get() << 24;
-                    image.setRGB(x, y, i);
-                }
-            }
-
-			fb.unbindFramebuffer();
-			fb.deleteFramebuffer();
-
-			File loc = new File("/home/gilligan/test/" + def.defID.replace('/', '.') + ".png");
-			try {
-				ImageIO.write(image, "png", loc);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-
-			int[] pixels = new int[image.getWidth() * image.getHeight()];
-            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-            this.clearFramesTextureData();
-			int[][] fd = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
-			fd[0] = pixels;
-            this.framesTextureData.add(fd);
-            return false;
-        }
-    }
-	
 	@SubscribeEvent
 	public static void onTextureStich(TextureStitchEvent.Pre event) {
 		StockRenderCache.tryPrime();
-
-		if (ConfigGraphics.enableFlatIcons) {
-			for (String defID : DefinitionManager.getDefinitionNames()) {
-				EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
-				event.getMap().setTextureEntry(new StockIcon(def));
-			}
-		}
-	}
-	
-	@SubscribeEvent
-	public static void afterTextureStitch(TextureStitchEvent.Post event) {
-	}
-
-	@SubscribeEvent
-	public static void onModelBakeEvent(ModelBakeEvent event) {
-		event.getModelRegistry().putObject(new ModelResourceLocation(IRItems.ITEM_ROLLING_STOCK.getRegistryName().internal, ""), new StockItemModel());
 	}
 
 	@SubscribeEvent
