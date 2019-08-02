@@ -55,7 +55,7 @@ public class RenderOverride {
         if (pass != 0 && ConfigGraphics.useShaderFriendlyRender) {
         	return;
         }
-        
+
 		Minecraft.getMinecraft().mcProfiler.startSection("ir_entity");
 
         ICamera camera = getCamera(partialTicks);
