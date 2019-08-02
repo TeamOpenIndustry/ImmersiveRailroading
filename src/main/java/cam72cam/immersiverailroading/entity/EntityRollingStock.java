@@ -20,8 +20,9 @@ import java.util.List;
 
 public class EntityRollingStock extends Entity implements IWorldData, ISpawnData, ITickable, IClickable, IKillable {
 	public static final EntitySettings settings = new EntitySettings().setCollisionReduction(1f).setImmuneToFire(true).setAttachedToPlayer(false).setDefaultMovement(false);
+	public float lastRenderTick;
 
-	protected String defID;
+    protected String defID;
 	public Gauge gauge;
 	public String tag = "";
 	public String texture;

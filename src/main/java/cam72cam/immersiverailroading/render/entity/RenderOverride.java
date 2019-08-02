@@ -63,6 +63,10 @@ public class RenderOverride {
         World world = MinecraftClient.getPlayer().getWorld();
         List<EntityRollingStock> entities = world.getEntities(EntityRollingStock.class);
         for (EntityRollingStock entity : entities) {
+			float time = entity.getTickCount() + partialTicks;
+			if (entity.lastRenderTick == time && !MinecraftClient.isPaused()) {
+				continue;
+			}
         	if (camera.isBoundingBoxInFrustum(entity.internal.getRenderBoundingBox())) {
         		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity.internal, partialTicks, true);
         	}

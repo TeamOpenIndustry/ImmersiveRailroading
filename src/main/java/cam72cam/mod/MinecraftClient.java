@@ -31,4 +31,8 @@ public class MinecraftClient {
         }
         return null;
     }
+
+    public static boolean isPaused() {
+        return Minecraft.getMinecraft().isGamePaused();
+    }
 }

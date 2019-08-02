@@ -265,11 +265,6 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
         return this.staticPassengers.size() + this.getPassengers().size();
     }
 
-    public boolean shouldRender() {
-        //TODO setting??
-        return false;
-    }
-
     public List<StaticPassenger> getStaticPassengers() {
         return staticPassengers;
     }
