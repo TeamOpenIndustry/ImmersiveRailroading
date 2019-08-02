@@ -80,6 +80,10 @@ public class StockModel extends OBJRender {
 	}
 
 	public void draw(EntityRollingStock stock, float partialTicks) {
+
+		stock.lastRenderTick = stock.getTickCount() + partialTicks;
+
+
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, super.hasTexture());
 		
 		

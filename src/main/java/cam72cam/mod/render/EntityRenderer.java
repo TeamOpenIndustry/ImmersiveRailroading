@@ -67,11 +67,6 @@ public class EntityRenderer extends Render<ModdedEntity> {
 
     }
 
-    @Override
-    public boolean shouldRender(ModdedEntity entity, ICamera camera, double camX, double camY, double camZ) {
-        return entity.shouldRender();
-    }
-
     @Nullable
     @Override
     protected ResourceLocation getEntityTexture(ModdedEntity entity) {
