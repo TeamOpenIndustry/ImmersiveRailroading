@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.math.Vec3d;
@@ -18,8 +19,10 @@ import com.google.common.base.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.client.MinecraftForgeClient;
 import org.lwjgl.opengl.GL11;
 
@@ -63,11 +66,9 @@ public class RenderOverride {
         World world = MinecraftClient.getPlayer().getWorld();
         List<EntityRollingStock> entities = world.getEntities(EntityRollingStock.class);
         for (EntityRollingStock entity : entities) {
-			float time = entity.getTickCount() + partialTicks;
-			if (entity.lastRenderTick == time && !MinecraftClient.isPaused()) {
-				continue;
-			}
-        	if (camera.isBoundingBoxInFrustum(entity.internal.getRenderBoundingBox())) {
+        	// Duplicate forge logic and render entity if the chunk is not rendered but entity is visible (MC entitysize issues/optimization)
+			AxisAlignedBB chunk = new AxisAlignedBB(entity.getBlockPosition().toChunkMin().internal, entity.getBlockPosition().toChunkMax().internal);
+        	if (!camera.isBoundingBoxInFrustum(chunk) && camera.isBoundingBoxInFrustum(entity.internal.getRenderBoundingBox())) {
         		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity.internal, partialTicks, true);
         	}
         }
