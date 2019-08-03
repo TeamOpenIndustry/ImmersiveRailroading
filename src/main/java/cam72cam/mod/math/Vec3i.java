@@ -84,6 +84,9 @@ public class Vec3i {
     public Vec3i subtract(Vec3i other) {
         return new Vec3i(internal.subtract(other.internal));
     }
+    public Vec3i subtract(int x, int y, int z) {
+        return add(-x, -y, -z);
+    }
 
     public long toLong() {
         return internal.toLong();
@@ -96,5 +99,12 @@ public class Vec3i {
     @Override
     public String toString() {
         return internal.toString();
+    }
+
+    public Vec3d toChunkMin() {
+        return new Vec3d(x >> 4 << 4, 0, z >> 4 << 4);
+    }
+    public Vec3d toChunkMax() {
+        return new Vec3d((x >> 4 << 4) + 16, Double.POSITIVE_INFINITY, (z >> 4 << 4) + 16);
     }
 }
