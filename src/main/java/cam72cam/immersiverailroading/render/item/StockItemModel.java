@@ -55,6 +55,7 @@ public class StockItemModel {
 		StockModel model = StockRenderCache.getRender(defID);
 
 		return Pair.of(defID, new StandardModel().addCustom(() -> {
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
             model.bindTexture();
             GL11.glPushMatrix();
             double modelLength = model.model.lengthOfGroups(model.model.groups());
@@ -65,6 +66,7 @@ public class StockItemModel {
             model.draw();
             GL11.glPopMatrix();
             model.restoreTexture();
+			tex.restore();
         }));
 	}
 }

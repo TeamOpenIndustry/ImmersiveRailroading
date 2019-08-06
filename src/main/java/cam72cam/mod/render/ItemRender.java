@@ -1,5 +1,6 @@
 package cam72cam.mod.render;
 
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
@@ -61,21 +62,10 @@ public class ItemRender {
     }
 
     public static void register(ItemBase item, BiFunction<ItemStack, World, StandardModel> model) {
-        _register(item, model, null);
+        register(item, model, null);
     }
-
 
     public static void register(ItemBase item, BiFunction<ItemStack, World, StandardModel> model, Function<ItemStack, Pair<String, StandardModel>> cacheRender) {
-        try {
-            Class.forName("net.optifine.shaders.ShadersRender");
-            cacheRender = null;
-        } catch (ClassNotFoundException e) {
-            // NOP
-        }
-        _register(item, model, cacheRender);
-    }
-
-    private static void _register(ItemBase item, BiFunction<ItemStack, World, StandardModel> model, Function<ItemStack, Pair<String, StandardModel>> cacheRender) {
         mappers.add(() ->
                 ModelLoader.setCustomModelResourceLocation(item.internal, 0, new ModelResourceLocation(item.getRegistryName().internal, ""))
         );
@@ -240,7 +230,7 @@ public class ItemRender {
 
             BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
 
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GLBoolTracker depth = new GLBoolTracker(GL11.GL_DEPTH_TEST, true);
             GL11.glDepthFunc(GL11.GL_LESS);
             GL11.glClearDepth(1);
 
@@ -262,6 +252,7 @@ public class ItemRender {
 
             fb.unbindFramebuffer();
             fb.deleteFramebuffer();
+            depth.restore();
 
             /*
             File loc = new File("/home/gilligan/test/" + super.getIconName().replace('/', '.') + ".png");
