@@ -39,16 +39,22 @@ public class OBJRender {
 	public void bindTexture() {
 		bindTexture(null);
 	}
-	
+
 	public void bindTexture(String texName) {
+		bindTexture(texName, false);
+	}
+	
+	public void bindTexture(String texName, boolean icon) {
 		if (hasTexture()) {
 			int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 			if (this.textures.get(texName) == null) {
 				texName = null; // Default
 			}
-			if (currentTexture != this.textures.get(texName).textureID) {
+
+			int newTexture = icon ? this.textures.get(texName).iconTextureID : this.textures.get(texName).textureID;
+			if (currentTexture != newTexture) {
 				prevTexture  = currentTexture;
-				GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textures.get(texName).textureID);
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
 			}
 		}
 	}
