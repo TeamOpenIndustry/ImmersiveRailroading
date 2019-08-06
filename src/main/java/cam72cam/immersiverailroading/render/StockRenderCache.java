@@ -20,10 +20,10 @@ public class StockRenderCache {
 
 	public static void clearRenderCache() {
 		for (StockModel model : render_cache.values()) {
-			model.freeGL();
+			model.free();
 		}
 		for (OBJRender model : track_cache.values()) {
-			model.freeGL();
+			model.free();
 		}
 		render_cache = new HashMap<>();
 		track_cache = new HashMap<>();
@@ -44,7 +44,7 @@ public class StockRenderCache {
 			bar.step(DefinitionManager.getDefinition(def).name());
 			ImmersiveRailroading.info(def);
 			StockModel renderer = getRender(def);
-            renderer.bindTexture();
+            renderer.bindTexture(true);
             renderer.draw();
             renderer.restoreTexture();
             ClientProxy.renderCacheLimiter.reset();
@@ -55,7 +55,7 @@ public class StockRenderCache {
 		for (TrackDefinition def : DefinitionManager.getTracks()) {
 			ImmersiveRailroading.info(def.trackID);
 			for (TrackModel model : def.models) {
-				getTrackRenderer(model).bindTexture();
+				getTrackRenderer(model).bindTexture(true);
 				getTrackRenderer(model).draw();
 				getTrackRenderer(model).restoreTexture();
 				ClientProxy.renderCacheLimiter.reset();

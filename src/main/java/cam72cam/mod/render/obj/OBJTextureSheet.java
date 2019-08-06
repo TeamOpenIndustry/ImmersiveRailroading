@@ -8,6 +8,9 @@ import cam72cam.mod.render.GPUInfo;
 import cam72cam.mod.resource.Identifier;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -21,12 +24,17 @@ import java.nio.IntBuffer;
 import java.util.*;
 import java.util.List;
 
+@Mod.EventBusSubscriber
 public class OBJTextureSheet {
+	final BufferedImage image; // temporary
+	final BufferedImage icon; // temporary
 	private Map<String, SubTexture> mappings;
 	private int sheetWidth = 0;
 	private int sheetHeight = 0;
-	int textureID = -1;
-	int iconTextureID = -1;
+	private int textureID = -1;
+	private long textureLastUsed = System.currentTimeMillis();
+	private int iconTextureID = -1;
+	private long iconLastUsed = System.currentTimeMillis();
 	private OBJModel model;
 
 	private  class SubTexture {
@@ -168,7 +176,7 @@ public class OBJTextureSheet {
 	
 	OBJTextureSheet(OBJModel model, String texPrefix) {
 		this.model = model;
-		
+
 
 		model.offsetU =  new byte[model.faceVerts.length / 9];
 		model.offsetV =  new byte[model.faceVerts.length / 9];
@@ -252,7 +260,7 @@ public class OBJTextureSheet {
 			this.sheetHeight = Math.max(this.sheetHeight, currentY + rowHeight); 
 		}
 
-		BufferedImage image = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
+		this.image = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();
 
 
@@ -281,12 +289,13 @@ public class OBJTextureSheet {
 			currentX += tex.getAbsoluteWidth();
 		}
 
-		textureID = uploadTexture(image);
 		if (image.getWidth() * image.getHeight() > 128 * 128) {
-			iconTextureID = uploadTexture(scaleImage(image, image.getWidth() / 10, image.getHeight() / 10));
+			icon = scaleImage(image, image.getWidth() / 10, image.getHeight() / 10);
 		} else {
-			iconTextureID = uploadTexture(image);
+			icon = image;
 		}
+
+		textures.add(this);
 		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
 	}
 
@@ -298,7 +307,7 @@ public class OBJTextureSheet {
 		return target;
 	}
 
-	private int uploadTexture(BufferedImage image) {
+	int uploadTexture(BufferedImage image) {
 		int textureID = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 		TextureUtil.allocateTexture(textureID, image.getWidth(), image.getHeight());
@@ -340,15 +349,6 @@ public class OBJTextureSheet {
 		}
 		return 0;
 	}
-	
-	void freeGL() {
-		if (textureID != -1) {
-			GL11.glDeleteTextures(textureID);
-		}
-		if (iconTextureID != -1) {
-			GL11.glDeleteTextures(iconTextureID);
-		}
-	}
 
 	boolean isFlatMaterial(String mtlName) {
 		if (model.materials.containsKey(mtlName)) {
@@ -362,4 +362,81 @@ public class OBJTextureSheet {
 		}
 		return false;
 	}
+
+	void freeGL() {
+		if (textureID != -1) {
+			GL11.glDeleteTextures(textureID);
+		}
+		if (iconTextureID != -1) {
+			GL11.glDeleteTextures(iconTextureID);
+		}
+	}
+
+	int bind() {
+		this.textureLastUsed = System.currentTimeMillis();
+
+		int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+
+		if (this.textureID == -1) {
+			System.out.println("ALLOC");
+			this.textureID = this.uploadTexture(this.image);
+		}
+		int newTexture = this.textureID;
+
+		if (currentTexture == newTexture) {
+			return -1;
+		}
+
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
+		return currentTexture;
+	}
+
+	int bindIcon() {
+		this.iconLastUsed = System.currentTimeMillis();
+
+		int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+
+		if (this.iconTextureID == -1) {
+			System.out.println("ALLOC ICON");
+			this.iconTextureID = this.uploadTexture(this.icon);
+		}
+		int newTexture = this.iconTextureID;
+
+		if (currentTexture == newTexture) {
+			return -1;
+		}
+
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
+		return currentTexture;
+	}
+
+	private void onTick() {
+		if (this.textureID != -1) {
+			if (System.currentTimeMillis() - this.textureLastUsed > 5 * 1000) {
+				System.out.println("DEALLOC");
+				GL11.glDeleteTextures(this.textureID);
+				this.textureID = -1;
+			}
+		}
+		if (this.iconTextureID != -1) {
+			if (System.currentTimeMillis() - this.iconLastUsed > 10 * 1000) {
+				System.out.println("DEALLOC ICON");
+				GL11.glDeleteTextures(this.iconTextureID);
+				this.iconTextureID = -1;
+			}
+		}
+	}
+
+	private static List<OBJTextureSheet> textures = new ArrayList<>();
+	@SubscribeEvent
+	public static void onTick(TickEvent.ClientTickEvent event) {
+		if (event.phase != TickEvent.Phase.START) {
+			return;
+		}
+
+		for (OBJTextureSheet texture : textures) {
+			texture.onTick();
+		}
+	}
+
 }
