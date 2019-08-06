@@ -41,7 +41,7 @@ public class RailRollerRender implements IMultiblockRender {
 	
 	@Override
 	public void render(TileMultiblock te, double x, double y, double z, float partialTicks) {
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, this.renderer.hasTexture());
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		this.renderer.bindTexture();
 		
 		GL11.glPushMatrix();

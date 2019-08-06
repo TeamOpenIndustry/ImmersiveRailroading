@@ -81,7 +81,7 @@ public class StockModel extends OBJRender {
 
 	public void draw(EntityRollingStock stock, float partialTicks) {
 
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, super.hasTexture());
+		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		
 		
 		if (stock instanceof EntityMoveableRollingStock) {

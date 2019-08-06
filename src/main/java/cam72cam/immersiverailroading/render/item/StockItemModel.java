@@ -30,7 +30,7 @@ public class StockItemModel {
 		}
 		String texture = ItemTextureVariant.get(stack);
 
-        GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
+        GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
         GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 
         GL11.glPushMatrix();
@@ -55,7 +55,7 @@ public class StockItemModel {
 		StockModel model = StockRenderCache.getRender(defID);
 
 		return Pair.of(defID, new StandardModel().addCustom(() -> {
-			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, model.hasTexture());
+			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
             model.bindTexture();
             GL11.glPushMatrix();
             double modelLength = model.model.lengthOfGroups(model.model.groups());

@@ -65,7 +65,7 @@ public class StockItemComponentModel {
 
             GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
             GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-            GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, renderer.hasTexture());
+            GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
             GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
             renderer.bindTexture(null, true);
             renderer.drawGroups(groups);
