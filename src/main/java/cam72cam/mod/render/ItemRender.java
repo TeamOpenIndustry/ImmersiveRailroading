@@ -61,10 +61,21 @@ public class ItemRender {
     }
 
     public static void register(ItemBase item, BiFunction<ItemStack, World, StandardModel> model) {
-        register(item, model, null);
+        _register(item, model, null);
     }
 
+
     public static void register(ItemBase item, BiFunction<ItemStack, World, StandardModel> model, Function<ItemStack, Pair<String, StandardModel>> cacheRender) {
+        try {
+            Class.forName("net.optifine.shaders.ShadersRender");
+            cacheRender = null;
+        } catch (ClassNotFoundException e) {
+            // NOP
+        }
+        _register(item, model, cacheRender);
+    }
+
+    private static void _register(ItemBase item, BiFunction<ItemStack, World, StandardModel> model, Function<ItemStack, Pair<String, StandardModel>> cacheRender) {
         mappers.add(() ->
                 ModelLoader.setCustomModelResourceLocation(item.internal, 0, new ModelResourceLocation(item.getRegistryName().internal, ""))
         );
@@ -112,21 +123,27 @@ public class ItemRender {
             if (isGUI) {
                 TextureMap map = Minecraft.getMinecraft().getTextureMapBlocks();
                 TextureAtlasSprite sprite = map.getAtlasSprite(cacheRender.apply(stack).getKey());
-                Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-                // TODO figure out how to make this bakedquads...
+                if (!sprite.equals(map.getMissingSprite())) {
+                    Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+                    // TODO figure out how to make this bakedquads...
 
-                GL11.glPushMatrix();
-                GL11.glRotated(180, 1, 0, 0);
-                GL11.glTranslated(0, -1, 0);
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glColor4f(1, 1, 1, 1);
-                GL11.glTexCoord2f(sprite.getMinU(), sprite.getMinV()); GL11.glVertex3f(0, 0, 0);
-                GL11.glTexCoord2f(sprite.getMinU(), sprite.getMaxV()); GL11.glVertex3f(0, 1, 0);
-                GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMaxV()); GL11.glVertex3f(1, 1, 0);
-                GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMinV()); GL11.glVertex3f(1, 0, 0);
-                GL11.glEnd();
-                GL11.glPopMatrix();
-                return EMPTY;
+                    GL11.glPushMatrix();
+                    GL11.glRotated(180, 1, 0, 0);
+                    GL11.glTranslated(0, -1, 0);
+                    GL11.glBegin(GL11.GL_QUADS);
+                    GL11.glColor4f(1, 1, 1, 1);
+                    GL11.glTexCoord2f(sprite.getMinU(), sprite.getMinV());
+                    GL11.glVertex3f(0, 0, 0);
+                    GL11.glTexCoord2f(sprite.getMinU(), sprite.getMaxV());
+                    GL11.glVertex3f(0, 1, 0);
+                    GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMaxV());
+                    GL11.glVertex3f(1, 1, 0);
+                    GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMinV());
+                    GL11.glVertex3f(1, 0, 0);
+                    GL11.glEnd();
+                    GL11.glPopMatrix();
+                    return EMPTY;
+                }
             }
 
             StandardModel std = model.apply(stack, world);
