@@ -1,6 +1,5 @@
 package cam72cam.mod.render.obj;
 
-import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.model.obj.Material;
 import cam72cam.mod.model.obj.OBJModel;
@@ -13,25 +12,23 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.List;
 
 public class OBJTextureSheet {
-	public Map<String, SubTexture> mappings;
+	private Map<String, SubTexture> mappings;
 	private int sheetWidth = 0;
 	private int sheetHeight = 0;
-	public final int textureID;
+	final int textureID;
 	private OBJModel model;
 
 	private  class SubTexture {
 		private BufferedImage image;
-		public int realWidth;
+		int realWidth;
 		private int realHeight;
 		private int originX;
 		private int originY;
@@ -78,7 +75,7 @@ public class OBJTextureSheet {
 			isFlatMaterial = true;
 		}
 		
-		public Vec2f extendSpace(List<Vec2f> vts) {
+		Vec2f extendSpace(List<Vec2f> vts) {
 			float vminU = vts.get(0).x;
 			float vmaxU = vts.get(0).x;
 			float vminV = -vts.get(0).y;
@@ -107,19 +104,8 @@ public class OBJTextureSheet {
 			
 			return offset;
 		}
-		
-		public BufferedImage convertToBufferedImage(Image image)
-		{
-		    BufferedImage newImage = new BufferedImage(
-		        image.getWidth(null), image.getHeight(null),
-		        BufferedImage.TYPE_INT_ARGB);
-		    Graphics2D g = newImage.createGraphics();
-		    g.drawImage(image, 0, 0, null);
-		    g.dispose();
-		    return newImage;
-		}
 
-		public void upload(int originX, int originY) {
+		void upload(int originX, int originY) {
 			this.originX = originX;
 			this.originY = originY;
 
@@ -157,27 +143,27 @@ public class OBJTextureSheet {
 
 			image = null;
 		}
-		public int copiesU() {
+		int copiesU() {
 			return maxU - minU;
 		}
-		public int copiesV() {
+		int copiesV() {
 			return maxV - minV;
 		}
-		public int getAbsoluteWidth() {
+		int getAbsoluteWidth() {
 			return realWidth * copiesU();
 		}
-		public int getAbsoluteHeight() {
+		int getAbsoluteHeight() {
 			return realHeight * copiesV();
 		}
 		
-		public float convertU(float relativeU) {
+		float convertU(float relativeU) {
 			if (isFlatMaterial) {
 				relativeU = 0.5f;
 			}
 			return originX / (float)sheetWidth + (relativeU - minU) * ((float)this.realWidth / sheetWidth);
 		}
 		
-		public float convertV(float relativeV) {
+		float convertV(float relativeV) {
 			if (isFlatMaterial) {
 				relativeV = 0.5f;
 			}
@@ -189,19 +175,19 @@ public class OBJTextureSheet {
 		}
 	}
 	
-	public OBJTextureSheet(OBJModel model) {
+	OBJTextureSheet(OBJModel model) {
 		this(model, null);
 	}
 	
-	public OBJTextureSheet(OBJModel model, String texPrefix) {
+	OBJTextureSheet(OBJModel model, String texPrefix) {
 		this.model = model;
 		
 
 		model.offsetU =  new byte[model.faceVerts.length / 9];
 		model.offsetV =  new byte[model.faceVerts.length / 9];
 		
-		mappings = new HashMap<String, SubTexture>();
-		Set<String> missing = new HashSet<String>();
+		mappings = new HashMap<>();
+		Set<String> missing = new HashSet<>();
 		for (String groupName : model.groups.keySet()) {
 			int[] quads = model.groups.get(groupName);
 			for (int face : quads) {
@@ -234,7 +220,7 @@ public class OBJTextureSheet {
 							continue;
 						}
 					}
-					List<Vec2f> vts = new ArrayList<Vec2f>();
+					List<Vec2f> vts = new ArrayList<>();
 					for (int[] point : model.points(face)) {
 						Vec2f vt = point[1] != -1 ? model.vertexTextures(point[1]) : null;
 						if (vt != null) {
@@ -262,11 +248,10 @@ public class OBJTextureSheet {
 		int currentX = 0;
 		int currentY = 0;
 		int rowHeight = 0;
+
+		List<SubTexture> texs = new ArrayList<>(mappings.values());
 		
-		List<SubTexture> texs = new ArrayList<SubTexture>();
-		texs.addAll(mappings.values());
-		
-		Collections.sort(texs, (SubTexture a, SubTexture b) -> { return b.size().compareTo(a.size()); });
+		texs.sort((SubTexture a, SubTexture b) -> b.size().compareTo(a.size()));
 		
 		for (SubTexture tex : texs) {
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
@@ -317,7 +302,7 @@ public class OBJTextureSheet {
 		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
 	}
 
-	public float convertU(String mtlName, float u) {
+	float convertU(String mtlName, float u) {
 		if (model.materials.containsKey(mtlName)) {
 			Identifier kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
@@ -329,7 +314,7 @@ public class OBJTextureSheet {
 		}
 		return 0;
 	}
-	public float convertV(String mtlName, float v) {
+	float convertV(String mtlName, float v) {
 		if (model.materials.containsKey(mtlName)) {
 			Identifier kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
@@ -342,11 +327,11 @@ public class OBJTextureSheet {
 		return 0;
 	}
 	
-	public void freeGL() {
+	void freeGL() {
 		GL11.glDeleteTextures(textureID);
 	}
 
-	public boolean isFlatMaterial(String mtlName) {
+	boolean isFlatMaterial(String mtlName) {
 		if (model.materials.containsKey(mtlName)) {
 			Identifier kd = model.materials.get(mtlName).texKd;
 			if (kd != null) {
