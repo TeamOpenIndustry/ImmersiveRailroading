@@ -5,13 +5,15 @@ import cam72cam.mod.model.obj.Material;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.model.obj.Vec2f;
 import cam72cam.mod.math.Vec3d;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 
 public class OBJRender {
-
 	public OBJModel model;
 	public Map<String, OBJTextureSheet> textures = new HashMap<>();
 	private int prevTexture = -1;
@@ -36,27 +38,36 @@ public class OBJRender {
 		bindTexture(null);
 	}
 
+	public void bindTexture(boolean icon) {
+		bindTexture(null, icon);
+	}
+
 	public void bindTexture(String texName) {
 		bindTexture(texName, false);
 	}
 	
 	public void bindTexture(String texName, boolean icon) {
-        int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         if (this.textures.get(texName) == null) {
             texName = null; // Default
         }
 
-        int newTexture = icon ? this.textures.get(texName).iconTextureID : this.textures.get(texName).textureID;
-        if (currentTexture != newTexture) {
-            prevTexture  = currentTexture;
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
-        }
+		OBJTextureSheet tex = this.textures.get(texName);
+
+		if (icon) {
+			this.prevTexture = tex.bindIcon();
+		} else {
+			this.prevTexture = tex.bind();
+		}
 	}
 	public void restoreTexture() {
         if (prevTexture != -1) {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
             prevTexture = -1;
         }
+	}
+	private void onTick() {
+		for (OBJTextureSheet tex : textures.values()) {
+		}
 	}
 
 	public void draw() {
@@ -150,7 +161,7 @@ public class OBJRender {
 		return vba;
 	}
 
-	public void freeGL() {
+	public void free() {
         for (OBJTextureSheet texture : textures.values()) {
             texture.freeGL();
         }

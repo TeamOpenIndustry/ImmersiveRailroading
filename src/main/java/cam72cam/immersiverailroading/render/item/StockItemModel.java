@@ -56,7 +56,7 @@ public class StockItemModel {
 
 		return Pair.of(defID, new StandardModel().addCustom(() -> {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-            model.bindTexture();
+            model.bindTexture(true);
             GL11.glPushMatrix();
             double modelLength = model.model.lengthOfGroups(model.model.groups());
             double scale = -0.60 / def.recommended_gauge.value();
