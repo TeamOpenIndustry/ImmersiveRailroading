@@ -32,10 +32,6 @@ public class OBJRender {
 		}
 	}
 
-	public boolean hasTexture() {
-		return true;
-	}
-	
 	public void bindTexture() {
 		bindTexture(null);
 	}
@@ -45,26 +41,22 @@ public class OBJRender {
 	}
 	
 	public void bindTexture(String texName, boolean icon) {
-		if (hasTexture()) {
-			int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-			if (this.textures.get(texName) == null) {
-				texName = null; // Default
-			}
+        int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        if (this.textures.get(texName) == null) {
+            texName = null; // Default
+        }
 
-			int newTexture = icon ? this.textures.get(texName).iconTextureID : this.textures.get(texName).textureID;
-			if (currentTexture != newTexture) {
-				prevTexture  = currentTexture;
-				GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
-			}
-		}
+        int newTexture = icon ? this.textures.get(texName).iconTextureID : this.textures.get(texName).textureID;
+        if (currentTexture != newTexture) {
+            prevTexture  = currentTexture;
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
+        }
 	}
 	public void restoreTexture() {
-		if (hasTexture()) {
-			if (prevTexture != -1) {
-				GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
-				prevTexture = -1;
-			}
-		}
+        if (prevTexture != -1) {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
+            prevTexture = -1;
+        }
 	}
 
 	public void draw() {
@@ -159,11 +151,9 @@ public class OBJRender {
 	}
 
 	public void freeGL() {
-		if (this.hasTexture()) {
-			for (OBJTextureSheet texture : textures.values()) {
-				texture.freeGL();
-			}
-		}
+        for (OBJTextureSheet texture : textures.values()) {
+            texture.freeGL();
+        }
 		if (vba != null) {
 			vba.free();
 		}
