@@ -32,7 +32,4 @@ public class ConfigGraphics {
 	
 	@Comment({ "What unit to use for speedometer. (kmh, mph or ms)" })
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
-
-	@Comment({ "Override GPU Max texture settings !DEV USE ONLY! (-1 == disable)" })
-	public static int overrideGPUTexSize = -1;
 }

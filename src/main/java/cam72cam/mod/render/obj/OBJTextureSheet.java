@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.List;
-import java.util.function.Function;
 
 public class OBJTextureSheet {
 	public Map<String, SubTexture> mappings;
@@ -32,7 +31,6 @@ public class OBJTextureSheet {
 
 	private  class SubTexture {
 		private BufferedImage image;
-		private Function<Integer, Integer> scale;
 		public int realWidth;
 		private int realHeight;
 		private int originX;
@@ -45,7 +43,7 @@ public class OBJTextureSheet {
 
 		private boolean isFlatMaterial;
 
-		SubTexture(Identifier tex, Identifier fallback, Function<Integer, Integer> scale) throws IOException {
+		SubTexture(Identifier tex, Identifier fallback) throws IOException {
 			InputStream input;
 			try {
 				input = tex.getResourceStream();
@@ -57,8 +55,6 @@ public class OBJTextureSheet {
 			
 			realWidth = image.getWidth();
 			realHeight = image.getHeight();
-
-			this.scale = scale;
 
 			this.tex = tex;
 			isFlatMaterial = false;
@@ -123,17 +119,6 @@ public class OBJTextureSheet {
 		    return newImage;
 		}
 
-		public void resize() {
-			if (scale != null && realWidth * copiesU() * realHeight * copiesV() > ConfigGraphics.scaleTextureCutoff * ConfigGraphics.scaleTextureCutoff) {
-				realWidth = scale.apply(realWidth);
-				realHeight = scale.apply(realHeight);
-			}
-			if (realHeight != image.getHeight() || realWidth != image.getWidth()) {
-				image = convertToBufferedImage(image.getScaledInstance(realWidth, realHeight, BufferedImage.SCALE_FAST));
-			}
-			scale = null;
-		}
-		
 		public void upload(int originX, int originY) {
 			this.originX = originX;
 			this.originY = originY;
@@ -215,16 +200,6 @@ public class OBJTextureSheet {
 		model.offsetU =  new byte[model.faceVerts.length / 9];
 		model.offsetV =  new byte[model.faceVerts.length / 9];
 		
-		Function<Integer, Integer> scaleFn = null;
-		if (ConfigGraphics.scaleTexture != 1) {
-			scaleFn = (Integer val) -> {
-				if (val == 1) {
-					return 1;
-				}
-				return (int)Math.ceil(val/ConfigGraphics.scaleTexture);
-			};
-		}
-		
 		mappings = new HashMap<String, SubTexture>();
 		Set<String> missing = new HashSet<String>();
 		for (String groupName : model.groups.keySet()) {
@@ -252,7 +227,7 @@ public class OBJTextureSheet {
 								String fname = sp[sp.length-1];
 								kd = new Identifier(kd.toString().replaceAll(fname, texPrefix + "/" + fname));
 							}
-							mappings.put(key, new SubTexture(kd, model.materials.get(mtlName).texKd, scaleFn));
+							mappings.put(key, new SubTexture(kd, model.materials.get(mtlName).texKd));
 						} catch (IOException e) {
 							e.printStackTrace();
 							missing.add(mtlName);
@@ -284,10 +259,6 @@ public class OBJTextureSheet {
 			}
 		}
 		int maxSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
-		if (ConfigGraphics.overrideGPUTexSize != -1) {
-			maxSize = ConfigGraphics.overrideGPUTexSize;
-		}
-		
 		int currentX = 0;
 		int currentY = 0;
 		int rowHeight = 0;
@@ -298,8 +269,6 @@ public class OBJTextureSheet {
 		Collections.sort(texs, (SubTexture a, SubTexture b) -> { return b.size().compareTo(a.size()); });
 		
 		for (SubTexture tex : texs) {
-			tex.resize();
-
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;
