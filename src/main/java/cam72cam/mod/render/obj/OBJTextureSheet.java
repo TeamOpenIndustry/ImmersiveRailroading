@@ -12,12 +12,14 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.List;
 
 public class OBJTextureSheet {
 	private Map<String, SubTexture> mappings;
@@ -105,26 +107,10 @@ public class OBJTextureSheet {
 			return offset;
 		}
 
-		void upload(int originX, int originY) {
+		void upload(Graphics2D graphics, int originX, int originY) {
 			this.originX = originX;
 			this.originY = originY;
 
-			int[] pixels = new int[realWidth * realHeight];
-            image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
-			
-	        ByteBuffer buffer = BufferUtils.createByteBuffer(realWidth * realHeight * 4);
-	        for(int y = 0; y < realHeight; y++){
-	            for(int x = 0; x < realWidth; x++){
-	                int pixel = pixels[y * realWidth + x];
-	                buffer.put((byte) ((pixel >> 16) & 0xFF));
-	                buffer.put((byte) ((pixel >> 8) & 0xFF));
-	                buffer.put((byte) ((pixel >> 0)& 0xFF));
-	                buffer.put((byte) ((pixel >> 24) & 0xFF));
-	            }
-	        }
-	        buffer.flip();
-			
-			
 			for (int cU = 0; cU < copiesU(); cU++) {
 				for (int cV = 0; cV < copiesV(); cV++) {
 					int offX = originX + this.realWidth * cU;
@@ -137,11 +123,11 @@ public class OBJTextureSheet {
 						return;
 					}
 					
-					GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, offX, offY, realWidth, realHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+					graphics.drawImage(this.image, null, offX, offY);
 				}
 			}
 
-			image = null;
+			this.image = null;
 		}
 		int copiesU() {
 			return maxU - minU;
@@ -264,20 +250,14 @@ public class OBJTextureSheet {
 			this.sheetWidth = Math.max(this.sheetWidth, currentX);
 			this.sheetHeight = Math.max(this.sheetHeight, currentY + rowHeight); 
 		}
-		
-		textureID = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-		
+
+		BufferedImage image = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D graphics = image.createGraphics();
+
+
 		currentX = 0;
 		currentY = 0;
 		rowHeight = 0;
-
-		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
-
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 
         ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
         if (sheetWidth > maxSize || sheetHeight > maxSize)
@@ -296,9 +276,33 @@ public class OBJTextureSheet {
 				ImmersiveRailroading.debug("NEXT_LINE");
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
-			tex.upload(currentX, currentY);
+			tex.upload(graphics, currentX, currentY);
 			currentX += tex.getAbsoluteWidth();
 		}
+
+		textureID = GL11.glGenTextures();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+
+		int[] pixels = new int[sheetWidth * sheetHeight];
+		image.getRGB(0, 0, sheetWidth, sheetHeight, pixels, 0, sheetWidth);
+		ByteBuffer buffer = BufferUtils.createByteBuffer(sheetWidth * sheetHeight * 4);
+		for(int y = 0; y < sheetHeight; y++){
+			for(int x = 0; x < sheetWidth; x++){
+				int pixel = pixels[y * sheetWidth + x];
+				buffer.put((byte) ((pixel >> 16) & 0xFF));
+				buffer.put((byte) ((pixel >> 8) & 0xFF));
+				buffer.put((byte) ((pixel >> 0)& 0xFF));
+				buffer.put((byte) ((pixel >> 24) & 0xFF));
+			}
+		}
+		buffer.flip();
+        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, sheetWidth, sheetHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+
 		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
 	}
 
