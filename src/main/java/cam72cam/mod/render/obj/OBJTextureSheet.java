@@ -35,8 +35,6 @@ public class OBJTextureSheet {
 		private Function<Integer, Integer> scale;
 		public int realWidth;
 		private int realHeight;
-		private int sheetWidth;
-		private int sheetHeight;
 		private int originX;
 		private int originY;
 		private int minU = 0;
@@ -136,11 +134,9 @@ public class OBJTextureSheet {
 			scale = null;
 		}
 		
-		public void upload(int textureID, int originX, int originY, int sheetWidth, int sheetHeight) {
+		public void upload(int originX, int originY) {
 			this.originX = originX;
 			this.originY = originY;
-			this.sheetWidth = sheetWidth;
-			this.sheetHeight = sheetHeight;
 
 			int[] pixels = new int[realWidth * realHeight];
             image.getRGB(0, 0, realWidth, realHeight, pixels, 0, realWidth);
@@ -163,10 +159,10 @@ public class OBJTextureSheet {
 					int offX = originX + this.realWidth * cU;
 					int offY = originY + this.realHeight * cV;
 					
-					if (offX + realWidth > this.sheetWidth) {
+					if (offX + realWidth > sheetWidth) {
 						return;
 					}
-					if (offY + realHeight > this.sheetHeight) {
+					if (offY + realHeight > sheetHeight) {
 						return;
 					}
 					
@@ -346,7 +342,7 @@ public class OBJTextureSheet {
 				ImmersiveRailroading.debug("NEXT_LINE");
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
-			tex.upload(textureID, currentX, currentY, sheetWidth, sheetHeight);
+			tex.upload(currentX, currentY);
 			currentX += tex.getAbsoluteWidth();
 		}
 		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
