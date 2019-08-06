@@ -39,7 +39,7 @@ public class StockItemModel {
 			GL11.glRotated(-90, 0, 1, 0);
 			scale = 0.2 * Math.sqrt(scale);
 			GL11.glScaled(scale, scale, scale);
-			model.bindTexture(texture);
+			model.bindTexture(texture, true);
 			model.draw();
 			model.restoreTexture();
 		}

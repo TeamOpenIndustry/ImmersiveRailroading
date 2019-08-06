@@ -17,7 +17,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 import java.util.List;
 
@@ -25,7 +25,8 @@ public class OBJTextureSheet {
 	private Map<String, SubTexture> mappings;
 	private int sheetWidth = 0;
 	private int sheetHeight = 0;
-	final int textureID;
+	int textureID = -1;
+	int iconTextureID = -1;
 	private OBJModel model;
 
 	private  class SubTexture {
@@ -280,30 +281,39 @@ public class OBJTextureSheet {
 			currentX += tex.getAbsoluteWidth();
 		}
 
-		textureID = GL11.glGenTextures();
+		textureID = uploadTexture(image);
+		if (image.getWidth() * image.getHeight() > 128 * 128) {
+			iconTextureID = uploadTexture(scaleImage(image, image.getWidth() / 10, image.getHeight() / 10));
+		} else {
+			iconTextureID = uploadTexture(image);
+		}
+		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
+	}
+
+	private BufferedImage scaleImage(BufferedImage image, int x, int y) {
+		BufferedImage target = new BufferedImage(x, y, image.getType());
+		Graphics2D g = target.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.drawImage(image, 0, 0, x, y, 0, 0, image.getWidth(), image.getHeight(), null);
+		return target;
+	}
+
+	private int uploadTexture(BufferedImage image) {
+		int textureID = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-		TextureUtil.allocateTexture(textureID, sheetWidth, sheetHeight);
+		TextureUtil.allocateTexture(textureID, image.getWidth(), image.getHeight());
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 
-		int[] pixels = new int[sheetWidth * sheetHeight];
-		image.getRGB(0, 0, sheetWidth, sheetHeight, pixels, 0, sheetWidth);
-		ByteBuffer buffer = BufferUtils.createByteBuffer(sheetWidth * sheetHeight * 4);
-		for(int y = 0; y < sheetHeight; y++){
-			for(int x = 0; x < sheetWidth; x++){
-				int pixel = pixels[y * sheetWidth + x];
-				buffer.put((byte) ((pixel >> 16) & 0xFF));
-				buffer.put((byte) ((pixel >> 8) & 0xFF));
-				buffer.put((byte) ((pixel >> 0)& 0xFF));
-				buffer.put((byte) ((pixel >> 24) & 0xFF));
-			}
-		}
+		int[] pixels = new int[image.getWidth() * image.getHeight()];
+		image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+		IntBuffer buffer = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4).asIntBuffer();
+		buffer.put(pixels);
 		buffer.flip();
-        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, sheetWidth, sheetHeight, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-
-		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
+		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, image.getWidth(), image.getHeight(), GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buffer);
+		return textureID;
 	}
 
 	float convertU(String mtlName, float u) {
@@ -332,7 +342,12 @@ public class OBJTextureSheet {
 	}
 	
 	void freeGL() {
-		GL11.glDeleteTextures(textureID);
+		if (textureID != -1) {
+			GL11.glDeleteTextures(textureID);
+		}
+		if (iconTextureID != -1) {
+			GL11.glDeleteTextures(iconTextureID);
+		}
 	}
 
 	boolean isFlatMaterial(String mtlName) {
