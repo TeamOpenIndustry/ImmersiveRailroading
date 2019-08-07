@@ -4,37 +4,27 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.model.obj.Material;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.model.obj.Vec2f;
+import cam72cam.mod.render.GLTexture;
 import cam72cam.mod.render.GPUInfo;
 import cam72cam.mod.resource.Identifier;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.IntBuffer;
 import java.util.*;
 import java.util.List;
 
-@Mod.EventBusSubscriber
 public class OBJTextureSheet {
-	final BufferedImage image; // temporary
-	final BufferedImage icon; // temporary
+	private final GLTexture texture;
+	private final GLTexture icon;
 	private Map<String, SubTexture> mappings;
 	private int sheetWidth = 0;
 	private int sheetHeight = 0;
-	private int textureID = -1;
-	private long textureLastUsed = System.currentTimeMillis();
-	private int iconTextureID = -1;
-	private long iconLastUsed = System.currentTimeMillis();
 	private OBJModel model;
 
 	private  class SubTexture {
@@ -260,7 +250,7 @@ public class OBJTextureSheet {
 			this.sheetHeight = Math.max(this.sheetHeight, currentY + rowHeight); 
 		}
 
-		this.image = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage image = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();
 
 
@@ -289,13 +279,14 @@ public class OBJTextureSheet {
 			currentX += tex.getAbsoluteWidth();
 		}
 
+		String path = model.modelLoc.getPath().replace("/", ".") + texPrefix;
+		this.texture = new GLTexture(path + ".png", image, 5, false);
 		if (image.getWidth() * image.getHeight() > 128 * 128) {
-			icon = scaleImage(image, image.getWidth() / 10, image.getHeight() / 10);
+			icon = new GLTexture(path + "_icon.png", scaleImage(image, image.getWidth() / 10, image.getHeight() / 10), 30, true);
 		} else {
-			icon = image;
+			icon = new GLTexture(path + "_icon.png", image, 30, true);
 		}
 
-		textures.add(this);
 		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
 	}
 
@@ -305,24 +296,6 @@ public class OBJTextureSheet {
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g.drawImage(image, 0, 0, x, y, 0, 0, image.getWidth(), image.getHeight(), null);
 		return target;
-	}
-
-	int uploadTexture(BufferedImage image) {
-		int textureID = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-		TextureUtil.allocateTexture(textureID, image.getWidth(), image.getHeight());
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-
-		int[] pixels = new int[image.getWidth() * image.getHeight()];
-		image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-		IntBuffer buffer = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4).asIntBuffer();
-		buffer.put(pixels);
-		buffer.flip();
-		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, image.getWidth(), image.getHeight(), GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buffer);
-		return textureID;
 	}
 
 	float convertU(String mtlName, float u) {
@@ -364,79 +337,15 @@ public class OBJTextureSheet {
 	}
 
 	void freeGL() {
-		if (textureID != -1) {
-			GL11.glDeleteTextures(textureID);
-		}
-		if (iconTextureID != -1) {
-			GL11.glDeleteTextures(iconTextureID);
-		}
+		texture.freeGL();
+		icon.freeGL();
 	}
 
 	int bind() {
-		this.textureLastUsed = System.currentTimeMillis();
-
-		int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-
-		if (this.textureID == -1) {
-			System.out.println("ALLOC");
-			this.textureID = this.uploadTexture(this.image);
-		}
-		int newTexture = this.textureID;
-
-		if (currentTexture == newTexture) {
-			return -1;
-		}
-
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
-		return currentTexture;
+		return texture.bind();
 	}
 
 	int bindIcon() {
-		this.iconLastUsed = System.currentTimeMillis();
-
-		int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-
-		if (this.iconTextureID == -1) {
-			System.out.println("ALLOC ICON");
-			this.iconTextureID = this.uploadTexture(this.icon);
-		}
-		int newTexture = this.iconTextureID;
-
-		if (currentTexture == newTexture) {
-			return -1;
-		}
-
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, newTexture);
-		return currentTexture;
+		return icon.bind();
 	}
-
-	private void onTick() {
-		if (this.textureID != -1) {
-			if (System.currentTimeMillis() - this.textureLastUsed > 5 * 1000) {
-				System.out.println("DEALLOC");
-				GL11.glDeleteTextures(this.textureID);
-				this.textureID = -1;
-			}
-		}
-		if (this.iconTextureID != -1) {
-			if (System.currentTimeMillis() - this.iconLastUsed > 10 * 1000) {
-				System.out.println("DEALLOC ICON");
-				GL11.glDeleteTextures(this.iconTextureID);
-				this.iconTextureID = -1;
-			}
-		}
-	}
-
-	private static List<OBJTextureSheet> textures = new ArrayList<>();
-	@SubscribeEvent
-	public static void onTick(TickEvent.ClientTickEvent event) {
-		if (event.phase != TickEvent.Phase.START) {
-			return;
-		}
-
-		for (OBJTextureSheet texture : textures) {
-			texture.onTick();
-		}
-	}
-
 }
