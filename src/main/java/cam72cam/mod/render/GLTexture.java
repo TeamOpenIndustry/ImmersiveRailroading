@@ -22,8 +22,9 @@ import java.util.concurrent.Executors;
 
 @Mod.EventBusSubscriber
 public class GLTexture {
-    private static ExecutorService executorService = Executors.newFixedThreadPool(1);
-    private static ExecutorService priorityExecutorService = Executors.newFixedThreadPool(1);
+    private static ExecutorService saveImage = Executors.newFixedThreadPool(1);
+    private static ExecutorService prioritySaveImage = Executors.newFixedThreadPool(1);
+    private static ExecutorService readImage = Executors.newFixedThreadPool(1);
 
     private final File texLoc;
     private final int cacheSeconds;
@@ -31,29 +32,34 @@ public class GLTexture {
     private long lastUsed;
 
     private BufferedImage image;
+    private boolean loading = false;
 
     public GLTexture(String name, BufferedImage image, int cacheSeconds, boolean upload) {
         File cacheDir = Paths.get(Loader.instance().getConfigDir().getParentFile().getPath(), "cache", "modcore").toFile();
         cacheDir.mkdirs();
 
-        texLoc = new File(cacheDir, name);
-        glTexID = -1;
+        this.texLoc = new File(cacheDir, name);
+        this.glTexID = -1;
         this.cacheSeconds = cacheSeconds;
-        textures.add(this);
+        this.image = image;
+
         if (upload) {
-            this.glTexID = uploadTexture(image);
+            tryUpload();
         }
 
-        this.image = image;
-        (upload ? priorityExecutorService : executorService).submit(() -> {
+        (upload ? prioritySaveImage : saveImage).submit(() -> {
             try {
                 ImageIO.write(GLTexture.this.image, "png", texLoc);
-                GLTexture.this.image = null;
+                synchronized (this) {
+                    GLTexture.this.image = null;
+                }
             } catch (IOException e) {
                 //TODO throw?
                 e.printStackTrace();
             }
         });
+
+        textures.add(this);
     }
 
 
@@ -76,24 +82,41 @@ public class GLTexture {
         return textureID;
     }
 
-    private boolean upload() {
-        try {
-            this.glTexID = uploadTexture(ImageIO.read(texLoc));
+    public boolean isLoaded() {
+        return this.glTexID != -1;
+    }
+
+    public boolean tryUpload() {
+        if (this.glTexID != -1) {
             return true;
-        } catch (IOException e) {
-            //TODO throw?
-            e.printStackTrace();
         }
-        return false;
+        if (image != null) {
+            synchronized (this) {
+                this.glTexID = uploadTexture(image);
+                loading = false;
+            }
+        } else {
+            if (loading) {
+                return false;
+            }
+            loading = true;
+            readImage.submit(() -> {
+                try {
+                    this.image = ImageIO.read(texLoc);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            return false; //PENDING
+        }
+        return true;
     }
 
     public int bind() {
         lastUsed = System.currentTimeMillis();
         int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-        if (this.glTexID == -1) {
-            if (!upload()) {
-                return -1;
-            }
+        if (!tryUpload()) {
+            return -1;
         }
         if (glTexID == currentTexture) {
             return -1; //NOP
