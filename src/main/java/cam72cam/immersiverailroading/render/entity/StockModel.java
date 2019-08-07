@@ -81,6 +81,8 @@ public class StockModel extends OBJRender {
 
 	public void draw(EntityRollingStock stock, float partialTicks) {
 
+		boolean isFarAway = MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > 100;
+
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		
 		
@@ -91,7 +93,9 @@ public class StockModel extends OBJRender {
 			this.distanceTraveled = 0;
 		}
 
-		this.bindTexture(stock.texture);
+
+
+		this.bindTexture(stock.texture, isFarAway);
 		
 		if (stock instanceof LocomotiveSteam) {
 			drawSteamLocomotive((LocomotiveSteam) stock);
