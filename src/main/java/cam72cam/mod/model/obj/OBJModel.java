@@ -18,6 +18,7 @@ import cam72cam.mod.resource.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class OBJModel {
+	public final Identifier modelLoc;
 	// LinkedHashMap is ordered
 	public Map<String, int[]> groups = new LinkedHashMap<>();
 	public float[] vertices;
@@ -43,6 +44,7 @@ public class OBJModel {
 		InputStream input = modelLoc.getResourceStream();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		this.darken = darken;
+		this.modelLoc = modelLoc;
 
 		String currentGroupName = "defaultName";
 		List<Integer> currentGroup = new ArrayList<>();
