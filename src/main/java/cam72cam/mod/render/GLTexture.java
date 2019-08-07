@@ -17,12 +17,11 @@ import java.nio.IntBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 @Mod.EventBusSubscriber
 public class GLTexture {
-    private static ExecutorService saveImage = Executors.newFixedThreadPool(1);
+    private static ExecutorService saveImage = new ThreadPoolExecutor(0, 5, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(5));
     private static ExecutorService prioritySaveImage = Executors.newFixedThreadPool(1);
     private static ExecutorService readImage = Executors.newFixedThreadPool(1);
 
