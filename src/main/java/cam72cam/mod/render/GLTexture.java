@@ -31,7 +31,9 @@ public class GLTexture {
     private int glTexID;
     private long lastUsed;
 
-    private BufferedImage image;
+    private final int width;
+    private final int height;
+    private IntBuffer pixels;
     private boolean loading = false;
 
     public GLTexture(String name, BufferedImage image, int cacheSeconds, boolean upload) {
@@ -41,7 +43,11 @@ public class GLTexture {
         this.texLoc = new File(cacheDir, name);
         this.glTexID = -1;
         this.cacheSeconds = cacheSeconds;
-        this.image = image;
+        this.pixels = imageToPixels(image);
+        this.width = image.getWidth();
+        this.height = image.getHeight();
+
+        BufferedImage writeImage = image;
 
         if (upload) {
             tryUpload();
@@ -49,10 +55,7 @@ public class GLTexture {
 
         (upload ? prioritySaveImage : saveImage).submit(() -> {
             try {
-                ImageIO.write(GLTexture.this.image, "png", texLoc);
-                synchronized (this) {
-                    GLTexture.this.image = null;
-                }
+                ImageIO.write(writeImage, "png", texLoc);
             } catch (IOException e) {
                 //TODO throw?
                 e.printStackTrace();
@@ -62,23 +65,27 @@ public class GLTexture {
         textures.add(this);
     }
 
-
-    private int uploadTexture(BufferedImage image) {
-        System.out.println("ALLOC " + this.texLoc);
-        int textureID = GL11.glGenTextures();
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-        TextureUtil.allocateTexture(textureID, image.getWidth(), image.getHeight());
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-
+    private IntBuffer imageToPixels(BufferedImage image) {
         int[] pixels = new int[image.getWidth() * image.getHeight()];
         image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
         IntBuffer buffer = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4).asIntBuffer();
         buffer.put(pixels);
         buffer.flip();
-        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, image.getWidth(), image.getHeight(), GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buffer);
+        return buffer;
+    }
+
+
+    private int uploadTexture() {
+        System.out.println("ALLOC " + this.texLoc);
+        int textureID = GL11.glGenTextures();
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+        TextureUtil.allocateTexture(textureID, width, height);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+
+        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, pixels);
         return textureID;
     }
 
@@ -90,11 +97,9 @@ public class GLTexture {
         if (this.glTexID != -1) {
             return true;
         }
-        if (image != null) {
-            synchronized (this) {
-                this.glTexID = uploadTexture(image);
-                loading = false;
-            }
+        if (pixels != null) {
+            this.glTexID = uploadTexture();
+            pixels = null;
         } else {
             if (loading) {
                 return false;
@@ -102,7 +107,8 @@ public class GLTexture {
             loading = true;
             readImage.submit(() -> {
                 try {
-                    this.image = ImageIO.read(texLoc);
+                    this.pixels = imageToPixels(ImageIO.read(texLoc));
+                    loading = false;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
