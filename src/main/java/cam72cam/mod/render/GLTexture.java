@@ -21,7 +21,8 @@ import java.util.concurrent.*;
 
 @Mod.EventBusSubscriber
 public class GLTexture {
-    private static ExecutorService saveImage = new ThreadPoolExecutor(0, 5, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(5));
+    private static LinkedBlockingQueue queue = new LinkedBlockingQueue<>(5);
+    private static ExecutorService saveImage = new ThreadPoolExecutor(0, 5, 30, TimeUnit.SECONDS, queue);
     private static ExecutorService prioritySaveImage = Executors.newFixedThreadPool(1);
     private static ExecutorService readImage = Executors.newFixedThreadPool(1);
 
@@ -53,6 +54,14 @@ public class GLTexture {
         }
 
         if (!texLoc.exists()) {
+            while (queue.size() == 5) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
             //TODO check some sort of hash...
             (upload ? prioritySaveImage : saveImage).submit(() -> {
                 try {
