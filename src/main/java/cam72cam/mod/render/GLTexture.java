@@ -53,14 +53,17 @@ public class GLTexture {
             tryUpload();
         }
 
-        (upload ? prioritySaveImage : saveImage).submit(() -> {
-            try {
-                ImageIO.write(writeImage, "png", texLoc);
-            } catch (IOException e) {
-                //TODO throw?
-                e.printStackTrace();
-            }
-        });
+        if (!texLoc.exists()) {
+            //TODO check some sort of hash...
+            (upload ? prioritySaveImage : saveImage).submit(() -> {
+                try {
+                    ImageIO.write(writeImage, "png", texLoc);
+                } catch (IOException e) {
+                    //TODO throw?
+                    e.printStackTrace();
+                }
+            });
+        }
 
         textures.add(this);
     }
