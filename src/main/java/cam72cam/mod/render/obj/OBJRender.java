@@ -65,10 +65,6 @@ public class OBJRender {
             prevTexture = -1;
         }
 	}
-	private void onTick() {
-		for (OBJTextureSheet tex : textures.values()) {
-		}
-	}
 
 	public void draw() {
 		createVBA().draw();

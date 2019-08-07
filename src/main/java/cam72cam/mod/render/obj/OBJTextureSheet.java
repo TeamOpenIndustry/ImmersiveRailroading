@@ -342,7 +342,15 @@ public class OBJTextureSheet {
 	}
 
 	int bind() {
-		return texture.bind();
+		if (!texture.isLoaded()) {
+			icon.tryUpload(); //hit the queue first
+		}
+
+		if (texture.tryUpload()) {
+			return texture.bind();
+		}
+		System.out.println("DEFER...");
+		return bindIcon();
 	}
 
 	int bindIcon() {
