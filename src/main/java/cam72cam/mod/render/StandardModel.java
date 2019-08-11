@@ -1,5 +1,6 @@
 package cam72cam.mod.render;
 
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import net.minecraft.block.Block;
@@ -8,14 +9,24 @@ import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.pipeline.LightUtil;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StandardModel {
     private List<Pair<IBlockState, IBakedModel>> models = new ArrayList<>();
@@ -81,5 +92,24 @@ public class StandardModel {
             gravelState = gravelState.withProperty(BlockLog.LOG_AXIS, BlockLog.EnumAxis.Z);
         }
         return gravelState;
+    }
+
+    public void render() {
+        custom.forEach(Runnable::run);
+
+        List<BakedQuad> quads = new ArrayList<>();
+        for (Pair<IBlockState, IBakedModel> model : models) {
+            quads.addAll(model.getRight().getQuads(null, null, 0));
+            for (EnumFacing facing : EnumFacing.values()) {
+                quads.addAll(model.getRight().getQuads(null, facing, 0));
+            }
+
+        }
+
+        BufferBuilder worldRenderer = new BufferBuilder(2048);
+        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        quads.forEach(quad -> LightUtil.renderQuadColor(worldRenderer, quad, -1));
+        worldRenderer.finishDrawing();
+        new WorldVertexBufferUploader().draw(worldRenderer);
     }
 }
