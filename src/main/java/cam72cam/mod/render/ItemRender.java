@@ -6,15 +6,11 @@ import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.world.World;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -31,7 +27,6 @@ import org.lwjgl.opengl.GL12;
 import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +40,7 @@ public class ItemRender {
     private static final List<Consumer<ModelBakeEvent>> bakers = new ArrayList<>();
     private static final List<Runnable> mappers = new ArrayList<>();
     private static final List<Consumer<TextureStitchEvent.Pre>> textures = new ArrayList<>();
+    private static final SpriteSheet iconSheet = new SpriteSheet(128);
 
     @SubscribeEvent
     public static void onModelBakeEvent(ModelBakeEvent event) {
@@ -75,7 +71,8 @@ public class ItemRender {
         if (cacheRender != null) {
             textures.add((event) -> {
                 for (ItemStack stack : item.getItemVariants(null)) {
-                    event.getMap().setTextureEntry(new StockIcon(cacheRender.apply(stack)));
+                    Pair<String, StandardModel> info = cacheRender.apply(stack);
+                    createSprite(info.getKey(), info.getValue());
                 }
             });
         }
@@ -111,29 +108,8 @@ public class ItemRender {
             }
 
             if (isGUI) {
-                TextureMap map = Minecraft.getMinecraft().getTextureMapBlocks();
-                TextureAtlasSprite sprite = map.getAtlasSprite(cacheRender.apply(stack).getKey());
-                if (!sprite.equals(map.getMissingSprite())) {
-                    Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-                    // TODO figure out how to make this bakedquads...
-
-                    GL11.glPushMatrix();
-                    GL11.glRotated(180, 1, 0, 0);
-                    GL11.glTranslated(0, -1, 0);
-                    GL11.glBegin(GL11.GL_QUADS);
-                    GL11.glColor4f(1, 1, 1, 1);
-                    GL11.glTexCoord2f(sprite.getMinU(), sprite.getMinV());
-                    GL11.glVertex3f(0, 0, 0);
-                    GL11.glTexCoord2f(sprite.getMinU(), sprite.getMaxV());
-                    GL11.glVertex3f(0, 1, 0);
-                    GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMaxV());
-                    GL11.glVertex3f(1, 1, 0);
-                    GL11.glTexCoord2f(sprite.getMaxU(), sprite.getMinV());
-                    GL11.glVertex3f(1, 0, 0);
-                    GL11.glEnd();
-                    GL11.glPopMatrix();
-                    return EMPTY;
-                }
+                iconSheet.renderSprite(cacheRender.apply(stack).getKey());
+                return EMPTY;
             }
 
             StandardModel std = model.apply(stack, world);
@@ -204,73 +180,27 @@ public class ItemRender {
         }
     }
 
-    public static final class StockIcon extends TextureAtlasSprite
-    {
-        private final StandardModel model;
+    private static void createSprite(String id, StandardModel model) {
+        int width = iconSheet.spriteSize;
+        int height = iconSheet.spriteSize;
+        Framebuffer fb = new Framebuffer(width, height, true);
+        fb.setFramebufferColor(0, 0, 0, 0);
+        fb.framebufferClear();
+        fb.bindFramebuffer(true);
 
-        public StockIcon(Pair<String, StandardModel> pair) {
-            super(pair.getKey());
-            this.model = pair.getValue();
-            this.width = this.height = 64;
-        }
+        GLBoolTracker depth = new GLBoolTracker(GL11.GL_DEPTH_TEST, true);
+        GL11.glDepthFunc(GL11.GL_LESS);
+        GL11.glClearDepth(1);
 
-        @Override
-        public boolean hasCustomLoader(IResourceManager manager, ResourceLocation location)
-        {
-            return true;
-        }
+        model.getQuads(null, 0);
 
-        @Override
-        public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
-        {
-            Framebuffer fb = new Framebuffer(width, height, true);
-            fb.setFramebufferColor(0, 0, 0, 0);
-            fb.framebufferClear();
-            fb.bindFramebuffer(true);
+        ByteBuffer buff = ByteBuffer.allocateDirect(4 * width * height);
+        GL11.glReadPixels(0, 0, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);
 
-            BufferedImage image = new BufferedImage(this.getIconWidth(), this.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+        fb.unbindFramebuffer();
+        fb.deleteFramebuffer();
+        depth.restore();
 
-            GLBoolTracker depth = new GLBoolTracker(GL11.GL_DEPTH_TEST, true);
-            GL11.glDepthFunc(GL11.GL_LESS);
-            GL11.glClearDepth(1);
-
-            model.getQuads(null, 0);
-
-            ByteBuffer buff = ByteBuffer.allocateDirect(4 * width * height);
-            GL11.glReadPixels(0, 0, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);
-
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int i = 0;
-                    i += buff.get() << 0;
-                    i += buff.get() << 8;
-                    i += buff.get() << 16;
-                    i += buff.get() << 24;
-                    image.setRGB(x, y, i);
-                }
-            }
-
-            fb.unbindFramebuffer();
-            fb.deleteFramebuffer();
-            depth.restore();
-
-            /*
-            File loc = new File("/home/gilligan/test/" + super.getIconName().replace('/', '.') + ".png");
-            try {
-                ImageIO.write(image, "png", loc);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            */
-
-
-            int[] pixels = new int[image.getWidth() * image.getHeight()];
-            image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-            this.clearFramesTextureData();
-            int[][] fd = new int[Minecraft.getMinecraft().gameSettings.mipmapLevels + 1][];
-            fd[0] = pixels;
-            this.framesTextureData.add(fd);
-            return false;
-        }
+        iconSheet.setSprite(id, buff);
     }
 }
