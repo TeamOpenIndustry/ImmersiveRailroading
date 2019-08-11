@@ -293,7 +293,7 @@ public abstract class Locomotive extends FreightTank {
 			currentPlayer = uuid;
 			sync.setUUID(HORN_PLAYER, uuid);
 		}
-		if (currentPlayer == null || currentPlayer == uuid) {
+		if (currentPlayer == null || currentPlayer.equals(uuid)) {
 			sync.setInteger(HORN, val);
 		}
 	}
