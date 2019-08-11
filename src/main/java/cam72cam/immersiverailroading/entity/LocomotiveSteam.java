@@ -246,7 +246,7 @@ public class LocomotiveSteam extends Locomotive {
 								if (soundDampener < 1) {
 									soundDampener += 0.1;
 								}
-								if (sync.get(HORN_PLAYER) != null) {
+								if (sync.getUUID(HORN_PLAYER) != null) {
 									for (Entity pass : this.getPassengers()) {
 										if (!pass.getUUID().equals(sync.getUUID(HORN_PLAYER))) {
 											continue;

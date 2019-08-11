@@ -81,12 +81,12 @@ public class TagCompound {
         if (!internal.hasKey(key)) {
             return null;
         }
-        return internal.getUniqueId(key);
+        return UUID.fromString(getString(key));
     }
     public void setUUID(String key, UUID value) {
         internal.removeTag(key);
         if (value != null) {
-            internal.setUniqueId(key, value);
+            setString(key, value.toString());
         }
     }
 
