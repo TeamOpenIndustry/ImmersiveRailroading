@@ -53,28 +53,25 @@ public class GLTexture {
             tryUpload();
         }
 
-        //TODO check some sort of hash...
-        if (!texLoc.exists()) {
-            if (!isSmallEnoughToUpload) {
-                while (queue.size() != 0) {
-                    try {
-                        Thread.sleep(1000);
-                        System.out.println("Waiting for free write slot...");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            (isSmallEnoughToUpload ? prioritySaveImage : saveImage).submit(() -> {
+        if (!isSmallEnoughToUpload) {
+            while (queue.size() != 0) {
                 try {
-                    ImageIO.write(image, "png", texLoc);
-                } catch (IOException e) {
-                    //TODO throw?
+                    Thread.sleep(1000);
+                    System.out.println("Waiting for free write slot...");
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            });
+            }
         }
+
+        (isSmallEnoughToUpload ? prioritySaveImage : saveImage).submit(() -> {
+            try {
+                ImageIO.write(image, "png", texLoc);
+            } catch (IOException e) {
+                //TODO throw?
+                e.printStackTrace();
+            }
+        });
 
         textures.add(this);
     }
