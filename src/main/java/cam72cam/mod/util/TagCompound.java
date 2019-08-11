@@ -70,7 +70,11 @@ public class TagCompound {
         return internal.getString(key);
     }
     public void setString(String key, String value) {
-        internal.setString(key, value);
+        if (value == null) {
+            internal.removeTag(key);
+        } else {
+            internal.setString(key, value);
+        }
     }
 
     public UUID getUUID(String key) {
