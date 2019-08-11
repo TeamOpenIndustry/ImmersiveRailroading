@@ -21,8 +21,8 @@ import java.util.concurrent.*;
 
 @Mod.EventBusSubscriber
 public class GLTexture {
-    private static LinkedBlockingQueue queue = new LinkedBlockingQueue<>(5);
-    private static ExecutorService saveImage = new ThreadPoolExecutor(0, 5, 30, TimeUnit.SECONDS, queue);
+    private static LinkedBlockingQueue queue = new LinkedBlockingQueue<>(1);
+    private static ExecutorService saveImage = new ThreadPoolExecutor(5, 5, 60, TimeUnit.SECONDS, queue);
     private static ExecutorService prioritySaveImage = Executors.newFixedThreadPool(1);
     private static ExecutorService readImage = Executors.newFixedThreadPool(1);
 
@@ -34,38 +34,41 @@ public class GLTexture {
     private final int width;
     private final int height;
     private IntBuffer pixels;
-    private boolean loading = false;
+    private boolean loading;
 
-    public GLTexture(String name, BufferedImage image, int cacheSeconds, boolean upload) {
+    public GLTexture(String name, BufferedImage image, int cacheSeconds, boolean isSmallEnoughToUpload) {
         File cacheDir = Paths.get(Loader.instance().getConfigDir().getParentFile().getPath(), "cache", "modcore").toFile();
         cacheDir.mkdirs();
 
         this.texLoc = new File(cacheDir, name);
         this.glTexID = -1;
         this.cacheSeconds = cacheSeconds;
-        this.pixels = imageToPixels(image);
         this.width = image.getWidth();
         this.height = image.getHeight();
+        this.loading = false;
 
-        BufferedImage writeImage = image;
 
-        if (upload) {
+        if (isSmallEnoughToUpload) {
+            this.pixels = imageToPixels(image);
             tryUpload();
         }
 
+        //TODO check some sort of hash...
         if (!texLoc.exists()) {
-            while (queue.size() == 5) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            if (!isSmallEnoughToUpload) {
+                while (queue.size() != 0) {
+                    try {
+                        Thread.sleep(1000);
+                        System.out.println("Waiting for free write slot...");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
-            //TODO check some sort of hash...
-            (upload ? prioritySaveImage : saveImage).submit(() -> {
+            (isSmallEnoughToUpload ? prioritySaveImage : saveImage).submit(() -> {
                 try {
-                    ImageIO.write(writeImage, "png", texLoc);
+                    ImageIO.write(image, "png", texLoc);
                 } catch (IOException e) {
                     //TODO throw?
                     e.printStackTrace();

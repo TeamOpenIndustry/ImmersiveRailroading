@@ -250,6 +250,8 @@ public class OBJTextureSheet {
 			this.sheetHeight = Math.max(this.sheetHeight, currentY + rowHeight); 
 		}
 
+		sheetWidth = Math.max(sheetWidth, 1);
+		sheetHeight = Math.max(sheetHeight, 1);
 		BufferedImage image = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();
 
