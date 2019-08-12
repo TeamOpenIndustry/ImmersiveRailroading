@@ -2,6 +2,7 @@ package cam72cam.mod.render;
 
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.gui.Progress;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.world.World;
@@ -70,10 +71,14 @@ public class ItemRender {
 
         if (cacheRender != null) {
             textures.add((event) -> {
-                for (ItemStack stack : item.getItemVariants(null)) {
+                List<ItemStack> variants = item.getItemVariants(null);
+                Progress.Bar bar = Progress.push(item.getClass().getSimpleName() + " Icon", variants.size());
+                for (ItemStack stack : variants) {
                     Pair<String, StandardModel> info = cacheRender.apply(stack);
+                    bar.step(info.getKey());
                     createSprite(info.getKey(), info.getValue());
                 }
+                Progress.pop(bar);
             });
         }
     }

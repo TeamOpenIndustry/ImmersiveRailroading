@@ -293,12 +293,6 @@ public class ClientProxy extends CommonProxy {
 				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName().internal, ""));
 	}
 
-
-	@SubscribeEvent
-	public static void onTextureStich(TextureStitchEvent.Pre event) {
-		StockRenderCache.tryPrime();
-	}
-
 	@SubscribeEvent
 	public static void onKeyInput(ClientTickEvent event) {
 		Player player = MinecraftClient.getPlayer();
