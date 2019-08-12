@@ -176,6 +176,8 @@ public class ClientProxy extends CommonProxy {
 
 		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, RailBase.class);
 		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailBase.class);
+		BlockRender.register(IRBlocks.BLOCK_RAIL_PREVIEW, ent -> null, TileMultiblock.class);
+		BlockRender.register(IRBlocks.BLOCK_MULTIBLOCK, ent -> null, TileMultiblock.class);
 
 		ItemRender.register(IRItems.ITEM_PLATE, PlateItemModel::getModel);
 		ItemRender.register(IRItems.ITEM_AUGMENT, RailAugmentItemModel::getModel);
