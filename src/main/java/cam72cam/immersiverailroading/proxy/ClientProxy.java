@@ -117,7 +117,7 @@ public class ClientProxy extends CommonProxy {
 			dampeningAmount = ridableStock.getDefinition().dampeningAmount;
 		}
 	}
-	
+
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, net.minecraft.world.World worldIn, int entityIDorPosX, int posY, int posZ) {
 		World world = World.get(worldIn);
@@ -186,6 +186,16 @@ public class ClientProxy extends CommonProxy {
 		ItemRender.register(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::getModel);
 		ItemRender.register(IRItems.ITEM_ROLLING_STOCK_COMPONENT, StockItemComponentModel::getModel);
 		ItemRender.register(IRItems.ITEM_ROLLING_STOCK, StockItemModel::getModel, StockItemModel::getIcon);
+
+
+		IEntityRender<EntityRollingStock> stockRender = ClientProxy::stockRender;
+		EntityRenderer.register(LocomotiveSteam.class, stockRender);
+		EntityRenderer.register(LocomotiveDiesel.class, stockRender);
+		EntityRenderer.register(CarPassenger.class, stockRender);
+		EntityRenderer.register(CarFreight.class, stockRender);
+		EntityRenderer.register(CarTank.class, stockRender);
+		EntityRenderer.register(Tender.class, stockRender);
+		EntityRenderer.register(HandCar.class, stockRender);
 	}
 
 	@Override
@@ -219,31 +229,24 @@ public class ClientProxy extends CommonProxy {
 		BlockRender.onPostColorSetup();
 	}
 
+	private static void stockRender(EntityRollingStock entity, float partialTicks) {
+		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
+		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+
+		String def = entity.getDefinitionID();
+
+		StockRenderCache.getRender(def).draw(entity, partialTicks);
+
+		cull.restore();
+		light.restore();
+	}
+
+
 	public static final IRenderFactory<EntitySmokeParticle> PARTICLE_RENDER = ParticleRender::new;
 
 	@SubscribeEvent
 	public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
 		RenderingRegistry.registerEntityRenderingHandler(EntitySmokeParticle.class, PARTICLE_RENDER);
-
-		IEntityRender<EntityRollingStock> stockRender = (entity, partialTicks) -> {
-			GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
-			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-
-			String def = entity.getDefinitionID();
-
-			StockRenderCache.getRender(def).draw(entity, partialTicks);
-
-			cull.restore();
-			light.restore();
-		};
-
-		EntityRenderer.register(LocomotiveSteam.class, stockRender);
-		EntityRenderer.register(LocomotiveDiesel.class, stockRender);
-		EntityRenderer.register(CarPassenger.class, stockRender);
-		EntityRenderer.register(CarFreight.class, stockRender);
-		EntityRenderer.register(CarTank.class, stockRender);
-		EntityRenderer.register(Tender.class, stockRender);
-		EntityRenderer.register(HandCar.class, stockRender);
 	}
 
 	@SubscribeEvent
