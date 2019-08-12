@@ -4,11 +4,11 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.DisplayListCache;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.client.Minecraft;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import util.Matrix4;
@@ -104,9 +104,9 @@ public class RailBuilderRender {
         }
 
         trackRenderer.bindTexture();
-        Minecraft.getMinecraft().mcProfiler.startSection("dl");
+        MinecraftClient.startProfiler("dl");
         GL11.glCallList(displayList);
-        Minecraft.getMinecraft().mcProfiler.endSection();;
+        MinecraftClient.endProfiler();
         trackRenderer.restoreTexture();
     }
 }
