@@ -121,6 +121,23 @@ public class ItemRender {
             if (std == null) {
                 return EMPTY;
             }
+
+
+            /*
+             * I am an evil wizard!
+             *
+             * So it turns out that I can stick a draw call in here to
+             * render my own stuff. This subverts forge's entire baked model
+             * system with a single line of code and injects my own OpenGL
+             * payload. Fuck you modeling restrictions.
+             *
+             * This is probably really fragile if someone calls getQuads
+             * before actually setting up the correct GL context.
+             */
+            if (side == null) {
+                std.renderCustom();
+            }
+
             return std.getQuads(side, rand);
         }
 
@@ -197,7 +214,7 @@ public class ItemRender {
         GL11.glDepthFunc(GL11.GL_LESS);
         GL11.glClearDepth(1);
 
-        model.getQuads(null, 0);
+        model.renderCustom();
 
         ByteBuffer buff = ByteBuffer.allocateDirect(4 * width * height);
         GL11.glReadPixels(0, 0, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);

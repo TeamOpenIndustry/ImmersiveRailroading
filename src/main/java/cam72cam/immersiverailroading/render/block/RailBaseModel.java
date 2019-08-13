@@ -2,10 +2,16 @@ package cam72cam.immersiverailroading.render.block;
 
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
+import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
+import net.minecraft.client.renderer.OpenGlHelper;
+import org.lwjgl.opengl.GL11;
 
 public class RailBaseModel {
 	public static StandardModel getModel(RailBase te) {
@@ -23,6 +29,20 @@ public class RailBaseModel {
 		Gauge gauge = Gauge.from(gauged);
 
 		StandardModel model = new StandardModel();
+		if (te instanceof Rail) {
+			model.addCustom(() -> {
+				RailInfo info = ((Rail) te).info;
+                if (info.settings.type == TrackItems.SWITCH) {
+                    //TODO render switch and don't render turn
+                    info = info.withType(TrackItems.STRAIGHT);
+                }
+
+				Vec3d pos = info.placementInfo.placementPosition.subtract(te.pos);
+				GL11.glTranslated(pos.x, pos.y, pos.z);
+
+                RailBuilderRender.renderRailBuilder(info);
+			});
+		}
 
 		if (augment != null) {
 			height = height + 0.1f * (float)gauge.scale() * 1.25f;
@@ -41,6 +61,6 @@ public class RailBaseModel {
 			return model;
 		}
 
-		return null;
+		return model;
 	}
 }

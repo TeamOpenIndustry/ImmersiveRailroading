@@ -65,23 +65,6 @@ public class StandardModel {
             quads.addAll(model.getValue().getQuads(model.getKey(), side, rand));
         }
 
-        /*
-         * I am an evil wizard!
-         *
-         * So it turns out that I can stick a draw call in here to
-         * render my own stuff. This subverts forge's entire baked model
-         * system with a single line of code and injects my own OpenGL
-         * payload. Fuck you modeling restrictions.
-         *
-         * This is probably really fragile if someone calls getQuads
-         * before actually setting up the correct GL context.
-         */
-
-        // Model can only be rendered once.  If mods go through the RenderItem.renderModel as they are supposed to this should work just fine
-        if (side == null) {
-            custom.forEach(Runnable::run);
-        }
-
         return quads;
     }
 
@@ -96,11 +79,11 @@ public class StandardModel {
     }
 
     public void render() {
-        custom.forEach(Runnable::run);
+        renderCustom();
+        renderQuads();
+    }
 
-        Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
-
+    public void renderQuads() {
         List<BakedQuad> quads = new ArrayList<>();
         for (Pair<IBlockState, IBakedModel> model : models) {
             quads.addAll(model.getRight().getQuads(null, null, 0));
@@ -109,11 +92,24 @@ public class StandardModel {
             }
 
         }
+        if (quads.isEmpty()) {
+            return;
+        }
+
+        Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
         BufferBuilder worldRenderer = new BufferBuilder(2048);
         worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
         quads.forEach(quad -> LightUtil.renderQuadColor(worldRenderer, quad, -1));
         worldRenderer.finishDrawing();
         new WorldVertexBufferUploader().draw(worldRenderer);
+    }
+
+    public void renderCustom() {
+        custom.forEach(Runnable::run);
+    }
+
+    public boolean hasCustom() {
+        return !custom.isEmpty();
     }
 }

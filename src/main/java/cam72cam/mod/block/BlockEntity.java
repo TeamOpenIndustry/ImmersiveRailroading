@@ -3,6 +3,7 @@ package cam72cam.mod.block;
 import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.IInventory;
 import cam72cam.mod.item.ItemStack;
@@ -63,5 +64,12 @@ public abstract class BlockEntity {
 
     public boolean tryBreak(Player player) {
         return true;
+    }
+
+    public IBoundingBox getBoundingBox() {
+        return null;
+    }
+    public double getRenderDistance() {
+        return 4096.0D; // MC default
     }
 }

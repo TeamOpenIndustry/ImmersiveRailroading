@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -24,26 +25,22 @@ public class Rail extends RailBase {
 		super(internal);
 	}
 
-	/* TODO RENDERING SYSTEM
 	@Override
-	@SideOnly(Side.CLIENT)
-	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
+    public IBoundingBox getBoundingBox() {
 		if (info == null) {
-			return new net.minecraft.util.math.AxisAlignedBB(0, 0, 0, 0, 0, 0);
+			return null;
 		}
 		int length = info.settings.length;
 		if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 		}
-		return new net.minecraft.util.math.AxisAlignedBB(-length, -length, -length, length, length, length).offset(pos.internal);
+		return IBoundingBox.from(pos).grow(new Vec3d(length, length, length));
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-	public double getMaxRenderDistanceSquared() {
-		return Math.pow(8*32, 2);
+	public double getRenderDistance() {
+		return 8*32;
 	}
-	*/
 
 	public void setSwitchState(SwitchState state) {
 		if (state != info.switchState) {
