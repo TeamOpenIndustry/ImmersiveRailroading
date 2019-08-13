@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
-import net.minecraft.client.renderer.OpenGlHelper;
 import org.lwjgl.opengl.GL11;
 
 public class RailBaseModel {
@@ -57,7 +56,7 @@ public class RailBaseModel {
 			model.addSnow(snow + (int)(height * 8), Vec3d.ZERO);
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {
-			model.addItem(bed, Vec3d.ZERO, new Vec3d(1, height, 1));
+			model.addItemBlock(bed, Vec3d.ZERO, new Vec3d(1, height, 1));
 			return model;
 		}
 

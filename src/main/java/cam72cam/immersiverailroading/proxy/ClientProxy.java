@@ -24,6 +24,7 @@ import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.*;
@@ -175,7 +176,7 @@ public class ClientProxy extends CommonProxy {
 
 		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, Rail.class);
 		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailGag.class);
-		BlockRender.register(IRBlocks.BLOCK_RAIL_PREVIEW, ent -> null, TileMultiblock.class);
+		BlockRender.register(IRBlocks.BLOCK_RAIL_PREVIEW, RailPreviewRender::render, TileRailPreview.class);
 		BlockRender.register(IRBlocks.BLOCK_MULTIBLOCK, TileMultiblockRender::render, TileMultiblock.class);
 
 		ItemRender.register(IRItems.ITEM_PLATE, PlateItemModel::getModel);
@@ -263,7 +264,7 @@ public class ClientProxy extends CommonProxy {
 
 		/* TODO RENDER
 		ClientRegistry.bindTileEntitySpecialRenderer(Rail.class, new TileRailRender());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new TileRailPreviewRender());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new RailPreviewRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
 		*/
 		
