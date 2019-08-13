@@ -11,16 +11,7 @@ public class RailGag extends RailBase {
 		this.flexible = flexible;
 	}
 
-	/* TODO RENDER
-	@Override
-	public boolean hasFastRenderer()
-    {
-        return false;
-    }
-	
-	@Override
-	public boolean updateRerender() {
-		return true;
+	public double getRenderDistance() {
+		return 0;
 	}
-	*/
 }

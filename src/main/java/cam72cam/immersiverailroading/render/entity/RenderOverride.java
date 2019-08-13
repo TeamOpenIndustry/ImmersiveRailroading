@@ -151,7 +151,7 @@ public class RenderOverride {
         		if (!((Rail) te).isLoaded()) {
         			continue;
         		}
-	        	if (true) { // TODO RENDER camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((Rail) te).pos))) {
+	        	if (false) { // TODO RENDER camera.isBoundingBoxInFrustum(te.getRenderBoundingBox()) && isInRenderDistance(new Vec3d(((Rail) te).pos))) {
 
 	        		RailInfo info = ((Rail) te).info;
 	        		if (info == null) {

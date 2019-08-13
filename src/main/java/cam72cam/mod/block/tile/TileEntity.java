@@ -2,6 +2,8 @@ package cam72cam.mod.block.tile;
 
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.energy.IEnergy;
+import cam72cam.mod.entity.boundingbox.BoundingBox;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.IInventory;
@@ -160,6 +162,19 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
     }
 
     /* Forge Overrides */
+
+    public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
+        if (instance() != null) {
+            IBoundingBox bb = instance().getBoundingBox();
+            if (bb != null) {
+                return new BoundingBox(bb);
+            }
+        }
+        return INFINITE_EXTENT_AABB;
+    }
+    public double getMaxRenderDistanceSquared() {
+        return instance() != null ? instance().getRenderDistance() * instance().getRenderDistance() : Integer.MAX_VALUE;
+    }
 
     @Override
     public boolean hasCapability(net.minecraftforge.common.capabilities.Capability<?> capability, @Nullable net.minecraft.util.EnumFacing facing) {
