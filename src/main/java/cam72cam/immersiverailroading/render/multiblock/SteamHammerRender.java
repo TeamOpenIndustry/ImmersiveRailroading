@@ -34,14 +34,13 @@ public class SteamHammerRender implements IMultiblockRender {
 	}
 	
 	@Override
-	public void render(TileMultiblock te, double x, double y, double z, float partialTicks) {
+	public void render(TileMultiblock te, float partialTicks) {
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		this.renderer.bindTexture();
 		
 		SteamHammerInstance mb = (SteamHammerInstance) te.getMultiblock();
 		
 		GL11.glPushMatrix();
-		GL11.glTranslated(x, y, z);
 		//GL11.glScaled(2, 2, 2);
 		GL11.glTranslated(0.5, 0, 0.5);
 		GL11.glRotated(te.getRotation(), 0, 1, 0);

@@ -74,7 +74,7 @@ public class BlockRender {
                 GL11.glPushMatrix();
                 {
                     GL11.glTranslated(x, y, z);
-                    model.renderCustom();
+                    model.renderCustom(partialTicks);
                 }
                 GL11.glPopMatrix();
             }

@@ -27,11 +27,12 @@ import org.lwjgl.opengl.GL11;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class StandardModel {
     private List<Pair<IBlockState, IBakedModel>> models = new ArrayList<>();
-    private List<Runnable> custom = new ArrayList<>();
+    private List<Consumer<Float>> custom = new ArrayList<>();
 
     public StandardModel addColorBlock(Color color, Vec3d translate, Vec3d scale) {
         IBlockState state = Blocks.CONCRETE.getDefaultState();
@@ -55,6 +56,10 @@ public class StandardModel {
         return this;
     }
     public StandardModel addCustom(Runnable fn) {
+        this.custom.add(pt -> fn.run());
+        return this;
+    }
+    public StandardModel addCustom(Consumer<Float> fn) {
         this.custom.add(fn);
         return this;
     }
@@ -106,7 +111,11 @@ public class StandardModel {
     }
 
     public void renderCustom() {
-        custom.forEach(Runnable::run);
+        renderCustom(0);
+    }
+
+    public void renderCustom(float partialTicks) {
+        custom.forEach(cons -> cons.accept(partialTicks));
     }
 
     public boolean hasCustom() {
