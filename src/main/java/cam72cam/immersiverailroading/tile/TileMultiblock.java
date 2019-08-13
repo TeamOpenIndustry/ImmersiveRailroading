@@ -112,7 +112,6 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	@Override
 	public void load(TagCompound nbt) {
-		name = nbt.getString("name");
 		rotation = Rotation.values()[nbt.getInteger("rotation")];
 		offset = nbt.getVec3i("offset");
 		replaced = NBTUtil.readBlockState(nbt.get("replaced").internal);
@@ -129,6 +128,8 @@ public class TileMultiblock extends BlockEntityTickable {
 		// Empty and then refill energy storage
 		energy.extractEnergy(energy.getEnergyStored(), false);
 		energy.receiveEnergy(nbt.getInteger("energy"), false);
+
+		name = nbt.getString("name");
 	}
 
 	@Override
