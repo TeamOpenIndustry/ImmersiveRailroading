@@ -30,6 +30,14 @@ public class Vec3i {
         this(new BlockPos(pos.internal));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Vec3i) {
+            return ((Vec3i)o).internal.equals(this.internal);
+        }
+        return false;
+    }
+
     public Vec3i offset(Facing facing, int offset) {
         return new Vec3i(internal.offset(facing.internal, offset));
     }

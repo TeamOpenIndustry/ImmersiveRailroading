@@ -39,14 +39,13 @@ public class BoilerRollerRender implements IMultiblockRender {
 	}
 	
 	@Override
-	public void render(TileMultiblock te, double x, double y, double z, float partialTicks) {
+	public void render(TileMultiblock te, float partialTicks) {
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		this.renderer.bindTexture();
 		
 		BoilerRollerInstance tmb = (BoilerRollerInstance) te.getMultiblock();
 		
 		GL11.glPushMatrix();
-		GL11.glTranslated(x, y, z);
 		GL11.glTranslated(0.5, 0, 0.5);
 		GL11.glRotated(te.getRotation()-90, 0, 1, 0);
 		GL11.glTranslated(-3.35, 0, -2.5);
