@@ -18,29 +18,29 @@ public class CastingRender implements IMultiblockRender {
 	private List<String> steel_level;
 	private List<String> rest;
 
-	public CastingRender() {
-		try {
-			this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/casting_machine.obj"), 0.1f));
-			flowing_steel = new ArrayList<>();
-			steel_level = new ArrayList<>();
-			rest = new ArrayList<>();
-			for (String name : renderer.model.groups.keySet()) {
-				if (name.contains("FLOWING_STEEL")) {
-					flowing_steel.add(name);
-				} else if (name.contains("STEEL_LEVEL")) {
-					steel_level.add(name);
-				} else {
-					rest.add(name);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	@Override
 	public void render(TileMultiblock te, float partialTicks) {
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
+		if (renderer == null) {
+			try {
+				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/casting_machine.obj"), 0.1f));
+				flowing_steel = new ArrayList<>();
+				steel_level = new ArrayList<>();
+				rest = new ArrayList<>();
+				for (String name : renderer.model.groups.keySet()) {
+					if (name.contains("FLOWING_STEEL")) {
+						flowing_steel.add(name);
+					} else if (name.contains("STEEL_LEVEL")) {
+						steel_level.add(name);
+					} else {
+						rest.add(name);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		this.renderer.bindTexture();
 		
 		GL11.glPushMatrix();

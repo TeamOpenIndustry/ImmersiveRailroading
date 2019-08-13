@@ -1,6 +1,5 @@
 package cam72cam.mod.render;
 
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import net.minecraft.block.Block;
@@ -13,22 +12,18 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemOverrideList;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class StandardModel {
     private List<Pair<IBlockState, IBakedModel>> models = new ArrayList<>();
@@ -49,10 +44,22 @@ public class StandardModel {
         models.add(Pair.of(state, new BakedScaledModel(model, new Vec3d(1, 1,1), translate)));
         return this;
     }
-    public StandardModel addItem(ItemStack bed, Vec3d translate, Vec3d scale) {
+    public StandardModel addItemBlock(ItemStack bed, Vec3d translate, Vec3d scale) {
         IBlockState state = itemToBlockState(bed);
         IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state);
         models.add(Pair.of(state, new BakedScaledModel(model, scale, translate)));
+        return this;
+    }
+    public StandardModel addItem(ItemStack stack, Vec3d translate, Vec3d scale) {
+        custom.add((pt) -> {
+            GL11.glPushMatrix();
+            {
+                GL11.glScaled(scale.x, scale.y, scale.z);
+                GL11.glTranslated(translate.x, translate.y, translate.z);
+                Minecraft.getMinecraft().getRenderItem().renderItem(stack.internal, ItemCameraTransforms.TransformType.GROUND);
+            }
+            GL11.glPopMatrix();
+        });
         return this;
     }
     public StandardModel addCustom(Runnable fn) {
@@ -84,7 +91,10 @@ public class StandardModel {
     }
 
     public void render() {
-        renderCustom();
+        render(0);
+    }
+    public void render(float partialTicks) {
+        renderCustom(partialTicks);
         renderQuads();
     }
 

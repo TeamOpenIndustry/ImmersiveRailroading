@@ -17,7 +17,7 @@ public class RailBaseRender {
 		StandardModel model = new StandardModel();
 
 		for (TrackBase base : info.getBuilder().getTracksForRender()) {
-			model.addItem(info.settings.railBed, new Vec3d(base.getPos()), new Vec3d(1, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale(), 1));
+			model.addItemBlock(info.settings.railBed, new Vec3d(base.getPos()), new Vec3d(1, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale(), 1));
 		}
 
 		model.render();
