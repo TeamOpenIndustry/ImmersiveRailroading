@@ -54,9 +54,9 @@ public class StandardModel {
         custom.add((pt) -> {
             GL11.glPushMatrix();
             {
-                GL11.glScaled(scale.x, scale.y, scale.z);
                 GL11.glTranslated(translate.x, translate.y, translate.z);
-                Minecraft.getMinecraft().getRenderItem().renderItem(stack.internal, ItemCameraTransforms.TransformType.GROUND);
+                GL11.glScaled(scale.x, scale.y, scale.z);
+                Minecraft.getMinecraft().getRenderItem().renderItem(stack.internal, ItemCameraTransforms.TransformType.NONE);
             }
             GL11.glPopMatrix();
         });

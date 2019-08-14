@@ -42,7 +42,7 @@ public class RailPreviewRender {
             MinecraftClient.endProfiler();
 		});
 
-        model.addItem(new ItemStack(IRItems.ITEM_GOLDEN_SPIKE, 1), new Vec3d(0.5, 0.5, 0.5), new Vec3d(1, 1, 1));
+        model.addItem(new ItemStack(IRItems.ITEM_GOLDEN_SPIKE, 1), new Vec3d(0.5, 0.5, 0.5), new Vec3d(.1, .1, .1));
 
     	return model;
 	}
