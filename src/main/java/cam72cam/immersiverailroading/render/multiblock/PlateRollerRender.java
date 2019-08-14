@@ -11,16 +11,15 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 public class PlateRollerRender implements IMultiblockRender {
 	private OBJRender renderer;
 
-	public PlateRollerRender() {
-		try {
-			this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/plate_rolling_machine.obj"), 0.1f));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	@Override
 	public void render(TileMultiblock te, float partialTicks) {
+		if (renderer == null) {
+			try {
+				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/plate_rolling_machine.obj"), 0.1f));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		this.renderer.bindTexture();
 		
