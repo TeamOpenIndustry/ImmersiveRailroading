@@ -55,8 +55,8 @@ public class RealBB implements IBoundingBox {
 		Vec3d v2 = rearPos.add(offsetRight);
 		Vec3d v3 = frontPos.add(offsetLeft);
 		Vec3d v4 = rearPos.add(offsetLeft);
-		this.min = v1.min(v2.min(v3).min(v4));
-		this.max = v1.max(v2.max(v3).max(v4));
+		this.min = v1.min(v2.min(v3).min(v4)).add(centerX, centerY, centerZ);
+		this.max = v1.max(v2.max(v3).max(v4)).add(0, height, 0).add(centerX, centerY, centerZ);
 	}
 
 	@Override
@@ -156,7 +156,7 @@ public class RealBB implements IBoundingBox {
 	}
 	
 	public Pair<Boolean, Double> intersectsAt(Vec3d min, Vec3d max, boolean useHeightmap) {
-		if (this.min.x < max.x && this.max.x > min.x && this.min.y < max.y && this.max.y > min.y && this.min.z < max.z && this.max.z > min.z) {
+		if (!(this.min.x < max.x && this.max.x > min.x && this.min.y < max.y && this.max.y > min.y && this.min.z < max.z && this.max.z > min.z)) {
 			return Pair.of(false, min.y);
 		}
 		
