@@ -16,25 +16,24 @@ public class SteamHammerRender implements IMultiblockRender {
 	private ArrayList<String> hammer;
 	private ArrayList<String> rest;
 
-	public SteamHammerRender() {
-		try {
-			this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f));
-			this.hammer = new ArrayList<>();
-			this.rest = new ArrayList<>();
-			for (String group : renderer.model.groups()) {
-				if (group.contains("Hammer")) {
-					hammer.add(group);
-				} else {
-					rest.add(group);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	@Override
 	public void render(TileMultiblock te, float partialTicks) {
+		if (renderer == null) {
+			try {
+				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f));
+				this.hammer = new ArrayList<>();
+				this.rest = new ArrayList<>();
+				for (String group : renderer.model.groups()) {
+					if (group.contains("Hammer")) {
+						hammer.add(group);
+					} else {
+						rest.add(group);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		this.renderer.bindTexture();
 		
