@@ -19,8 +19,8 @@ import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.BlockInfo;
 import cam72cam.mod.world.World;
-import net.minecraft.block.state.IBlockState;
 
 public abstract class Multiblock {
 	// z y x
@@ -164,8 +164,8 @@ public abstract class Multiblock {
 				}
 
 				Vec3i pos = getPos(offset);
-				IBlockState origState = world.internal.getBlockState(pos.internal);
-				
+				BlockInfo origState = world.getBlock(pos);
+
 				world.internal.setBlockState(pos.internal, IRBlocks.BLOCK_MULTIBLOCK.internal.getDefaultState());
 
 				TileMultiblock te = world.getBlockEntity(pos, TileMultiblock.class);

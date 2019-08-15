@@ -421,6 +421,13 @@ public class World {
         return items.stream().map((EntityItem::getItem)).map(ItemStack::new).collect(Collectors.toList());
     }
 
+    public BlockInfo getBlock(Vec3i pos) {
+        return new BlockInfo(internal.getBlockState(pos.internal));
+    }
+    public void setBlock(Vec3i pos, BlockInfo info) {
+        internal.setBlockState(pos.internal, info.internal);
+    }
+
     public enum ParticleType {
         SMOKE(EnumParticleTypes.SMOKE_NORMAL),
         ;
