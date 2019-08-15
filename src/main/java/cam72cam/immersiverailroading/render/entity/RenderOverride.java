@@ -37,14 +37,14 @@ public class RenderOverride {
         double d2 = playerrRender.lastTickPosZ + (playerrRender.posZ - playerrRender.lastTickPosZ) * partialTicks;
         return new Vec3d(d0, d1, d2);
 	}
-	
+
 	private static ICamera getCamera(float partialTicks) {
         ICamera camera = new Frustum();
         Vec3d cameraPos = getCameraPos(partialTicks);
         camera.setPosition(cameraPos.x, cameraPos.y, cameraPos.z);
         return camera;
 	}
-	
+
 	private static boolean isInRenderDistance(Vec3d pos) {
 		// max rail length is 100, 50 is center
 		return MinecraftClient.getPlayer().getPosition().distanceTo(pos) < ((Minecraft.getMinecraft().gameSettings.renderDistanceChunks+1) * 16 + 50);
@@ -53,32 +53,9 @@ public class RenderOverride {
 	private static final Predicate<Entity> IN_RENDER_DISTANCE = p_apply_1_ -> isInRenderDistance(p_apply_1_.getPosition());
 	private static final Predicate<net.minecraft.entity.Entity> _IN_RENDER_DISTANCE = p_apply_1_ -> isInRenderDistance(new Vec3d(p_apply_1_.getPositionVector()));
 
-	public static void renderStock(float partialTicks) {
-        int pass = MinecraftForgeClient.getRenderPass();
-        if (pass != 0 && ConfigGraphics.useShaderFriendlyRender) {
-        	return;
-        }
-
-		Minecraft.getMinecraft().mcProfiler.startSection("ir_entity");
-
-        ICamera camera = getCamera(partialTicks);
-        
-        World world = MinecraftClient.getPlayer().getWorld();
-        List<EntityRollingStock> entities = world.getEntities(EntityRollingStock.class);
-        for (EntityRollingStock entity : entities) {
-        	// Duplicate forge logic and render entity if the chunk is not rendered but entity is visible (MC entitysize issues/optimization)
-			AxisAlignedBB chunk = new AxisAlignedBB(entity.getBlockPosition().toChunkMin().internal, entity.getBlockPosition().toChunkMax().internal);
-        	if (!camera.isBoundingBoxInFrustum(chunk) && camera.isBoundingBoxInFrustum(entity.internal.getRenderBoundingBox())) {
-        		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity.internal, partialTicks, true);
-        	}
-        }
-
-        Minecraft.getMinecraft().mcProfiler.endSection();;
-	}
-	
 	public static void renderParticles(float partialTicks) {
 		int pass = MinecraftForgeClient.getRenderPass();
-        if (pass != 1 && ConfigGraphics.useShaderFriendlyRender) {
+        if (pass != 1) {
         	return;
         }
 		Minecraft.getMinecraft().mcProfiler.startSection("ir_particles");
@@ -129,7 +106,7 @@ public class RenderOverride {
 
 	public static void renderTiles(float partialTicks) {
         int pass = MinecraftForgeClient.getRenderPass();
-        if (pass != 0 && ConfigGraphics.useShaderFriendlyRender) {
+        if (pass != 0) {
         	return;
         }
         
