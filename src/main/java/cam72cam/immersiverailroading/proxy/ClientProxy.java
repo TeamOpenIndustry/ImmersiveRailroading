@@ -1,6 +1,9 @@
 package cam72cam.immersiverailroading.proxy;
 
-import cam72cam.immersiverailroading.*;
+import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
@@ -23,8 +26,8 @@ import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.sound.IRSoundManager;
 import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.tile.*;
@@ -46,15 +49,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.*;
@@ -196,6 +195,12 @@ public class ClientProxy extends CommonProxy {
 		EntityRenderer.register(CarTank.class, stockRender);
 		EntityRenderer.register(Tender.class, stockRender);
 		EntityRenderer.register(HandCar.class, stockRender);
+
+
+		GlobalRender.registerRender(partialTicks -> {
+			RenderOverride.renderTiles(partialTicks);
+			RenderOverride.renderParticles(partialTicks);
+		});
 	}
 
 	@Override
@@ -253,20 +258,6 @@ public class ClientProxy extends CommonProxy {
 	public static void registerModels(ModelRegistryEvent event) {
 		OBJLoader.INSTANCE.addDomain(ImmersiveRailroading.MODID.toLowerCase());
 
-		ClientRegistry.bindTileEntitySpecialRenderer(Magic.class, new TileEntitySpecialRenderer<Magic>() {
-			@Override
-			public void render(Magic te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-				RenderOverride.renderTiles(partialTicks);
-				RenderOverride.renderParticles(partialTicks);
-			}
-		});
-
-		/* TODO RENDER
-		ClientRegistry.bindTileEntitySpecialRenderer(Rail.class, new TileRailRender());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileRailPreview.class, new RailPreviewRender());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileMultiblock.class, new TileMultiblockRender());
-		*/
-		
 		ModelLoader.setCustomModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.internal, 0,
 				new ModelResourceLocation(IRItems.ITEM_LARGE_WRENCH.getRegistryName().internal, ""));
 
@@ -571,37 +562,12 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	private static int tickCount = 0;
-	public static class Magic extends TileEntity {
-
-		public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
-			return INFINITE_EXTENT_AABB;
-		}
-
-		public double getDistanceSq(double x, double y, double z) {
-			return 1;
-		}
-
-		public boolean shouldRenderInPass(int pass) {
-			return true;
-		}
-
-	}
-	private static TileEntity magic = new Magic();
-
-	private static List<TileEntity> magicList = new ArrayList<>();
-	static {
-		magicList.add(magic);
-	}
-
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
 		if (event.phase != Phase.START) {
 			return;
 		}
 
-		Minecraft.getMinecraft().renderGlobal.updateTileEntities(magicList, magicList);
-
-		
 		dampenSound();
 		
 		if (missingResources != null) {
