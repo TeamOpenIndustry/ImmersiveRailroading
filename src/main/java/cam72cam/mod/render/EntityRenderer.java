@@ -1,14 +1,17 @@
 package cam72cam.mod.render;
 
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -19,6 +22,7 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
@@ -81,5 +85,31 @@ public class EntityRenderer extends Render<ModdedEntity> {
 
     public static void register(Class<? extends Entity> type, IEntityRender render) {
         renderers.put(type, render);
+    }
+
+    static {
+        GlobalRender.registerRender(EntityRenderer::renderLargeEntities);
+    }
+
+    private static void renderLargeEntities(float partialTicks) {
+        if (GlobalRender.isTransparentPass()) {
+            return;
+        }
+
+        Minecraft.getMinecraft().mcProfiler.startSection("large_entity_helper");
+
+        ICamera camera = GlobalRender.getCamera(partialTicks);
+
+        World world = MinecraftClient.getPlayer().getWorld();
+        List<Entity> entities = world.getEntities(Entity.class);
+        for (Entity entity : entities) {
+            // Duplicate forge logic and render entity if the chunk is not rendered but entity is visible (MC entitysize issues/optimization)
+            AxisAlignedBB chunk = new AxisAlignedBB(entity.getBlockPosition().toChunkMin().internal, entity.getBlockPosition().toChunkMax().internal);
+            if (!camera.isBoundingBoxInFrustum(chunk) && camera.isBoundingBoxInFrustum(entity.internal.getRenderBoundingBox())) {
+                Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity.internal, partialTicks, true);
+            }
+        }
+
+        Minecraft.getMinecraft().mcProfiler.endSection();
     }
 }

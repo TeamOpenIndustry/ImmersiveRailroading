@@ -257,7 +257,6 @@ public class ClientProxy extends CommonProxy {
 			@Override
 			public void render(Magic te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 				RenderOverride.renderTiles(partialTicks);
-				RenderOverride.renderStock(partialTicks);
 				RenderOverride.renderParticles(partialTicks);
 			}
 		});
@@ -384,32 +383,6 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onHackRenderEvent(RenderWorldLastEvent event) {
-		/*
-		 * Minecraft does NOT support rendering entities which overlap with the field of view but don't exist in it
-		 * 
-		 * For large entities this breaks in awesome ways, like walking past the center of a rail car
-		 * 
-		 * To fix this we render the entity the internal is riding by hand at the end of the render loop
-		 * This is a bad hack but it works
-		 * 
-		 */
-
-		if (!ConfigGraphics.useShaderFriendlyRender) {
-			float partialTicks = event.getPartialTicks();
-
-			GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
-			RenderHelper.enableStandardItemLighting();
-			Minecraft.getMinecraft().entityRenderer.enableLightmap();
-			GlStateManager.enableAlpha();
-			RenderOverride.renderTiles(partialTicks);
-			RenderOverride.renderStock(partialTicks);
-			RenderOverride.renderParticles(partialTicks);
-
-			GlStateManager.disableAlpha();
-			Minecraft.getMinecraft().entityRenderer.disableLightmap();
-			RenderHelper.disableStandardItemLighting();
-			color.restore();
-		}
 		renderCacheLimiter.reset();
 	}
 	
