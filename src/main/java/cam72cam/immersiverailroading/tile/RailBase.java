@@ -891,7 +891,7 @@ public class RailBase extends BlockEntityTickable {
 
 		blockUpdate = true;
 
-		if (new ItemStack(world.getBlockInternal(pos.up())).is(Fuzzy.SNOW_LAYER)) {
+		if (world.getItemStack(pos.up()).is(Fuzzy.SNOW_LAYER)) {
 			if (handleSnowTick()) {
 				world.setToAir(pos.up());
 			}
