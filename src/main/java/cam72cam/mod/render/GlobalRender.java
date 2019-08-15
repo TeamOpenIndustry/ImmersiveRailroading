@@ -24,9 +24,9 @@ public class GlobalRender {
 
     @SubscribeEvent
     public static void registerGlobalRenderer(RegistryEvent.Register<EntityEntry> event) {
-        ClientRegistry.bindTileEntitySpecialRenderer(LargeEntityRenderHelper.class, new TileEntitySpecialRenderer<LargeEntityRenderHelper>() {
+        ClientRegistry.bindTileEntitySpecialRenderer(GlobalRenderHelper.class, new TileEntitySpecialRenderer<GlobalRenderHelper>() {
             @Override
-            public void render(LargeEntityRenderHelper te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+            public void render(GlobalRenderHelper te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
                 renderFuncs.forEach(r -> r.accept(partialTicks));
             }
         });
@@ -41,10 +41,10 @@ public class GlobalRender {
     }
 
 
-    private static TileEntity lerh = new LargeEntityRenderHelper();
-    private static List<TileEntity> lerhList = new ArrayList<>();
+    private static TileEntity grh = new GlobalRenderHelper();
+    private static List<TileEntity> grhList = new ArrayList<>();
     static {
-        lerhList.add(lerh);
+        grhList.add(grh);
     }
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -52,10 +52,10 @@ public class GlobalRender {
             return;
         }
 
-        Minecraft.getMinecraft().renderGlobal.updateTileEntities(lerhList, lerhList);
+        Minecraft.getMinecraft().renderGlobal.updateTileEntities(grhList, grhList);
     }
 
-    public static class LargeEntityRenderHelper extends TileEntity {
+    public static class GlobalRenderHelper extends TileEntity {
 
         public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
             return INFINITE_EXTENT_AABB;
