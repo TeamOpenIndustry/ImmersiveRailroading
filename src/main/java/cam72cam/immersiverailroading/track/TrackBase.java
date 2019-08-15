@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.block.Block;
 
 public abstract class TrackBase {
 	public BuilderBase builder;
@@ -84,9 +83,8 @@ public abstract class TrackBase {
 
 		TagCompound replaced = null;
 		
-		Block removed = builder.info.world.getBlockInternal(pos);
 		RailBase te = null;
-		if (removed != null) {
+		if (!builder.info.world.isAir(pos)) {
 			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
 				te = builder.info.world.getBlockEntity(pos, RailBase.class);
 				if (te != null) {

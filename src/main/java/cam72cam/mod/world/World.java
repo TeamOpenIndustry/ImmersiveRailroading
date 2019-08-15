@@ -235,10 +235,6 @@ public class World {
         internal.setBlockToAir(pos.internal);
     }
 
-    public net.minecraft.block.Block getBlockInternal(Vec3i pos) {
-        return internal.getBlockState(pos.internal).getBlock();
-    }
-
     public long getTime() {
         return internal.getWorldTime();
     }
