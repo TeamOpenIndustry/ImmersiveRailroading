@@ -202,8 +202,9 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer.isCrouching()) {
-			return this.getRailRenderInfo().build(entityPlayer);
+			this.getRailRenderInfo().build(entityPlayer);
+			return false;
 		}
-		return false;
+		return true;
 	}
 }
