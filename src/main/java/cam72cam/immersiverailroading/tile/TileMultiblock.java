@@ -3,30 +3,27 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
-import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
-
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
+import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.energy.Energy;
 import cam72cam.mod.energy.IEnergy;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.IInventory;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.ItemStackHandler;
+import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.math.Rotation;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
+import cam72cam.mod.world.BlockInfo;
 
 public class TileMultiblock extends BlockEntityTickable {
 	
-	private IBlockState replaced;
+	private BlockInfo replaced;
 	private Vec3i offset;
 	private Rotation rotation;
 	private String name;
@@ -80,7 +77,7 @@ public class TileMultiblock extends BlockEntityTickable {
     	return this.name != null;
     }
 
-	public void configure(String name, Rotation rot, Vec3i offset, IBlockState replaced) {
+	public void configure(String name, Rotation rot, Vec3i offset, BlockInfo replaced) {
 		this.name = name;
 		this.rotation = rot;
 		this.offset = offset;
@@ -99,7 +96,7 @@ public class TileMultiblock extends BlockEntityTickable {
             nbt.setString("name", name);
             nbt.setInteger("rotation", rotation.ordinal());
             nbt.setVec3i("offset", offset);
-            nbt.set("replaced", new TagCompound(NBTUtil.writeBlockState(new NBTTagCompound(), replaced)));
+            nbt.set("replaced", replaced.toNBT());
 
             nbt.set("inventory", container.save());
             nbt.set("craftItem", craftItem.toTag());
@@ -114,7 +111,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	public void load(TagCompound nbt) {
 		rotation = Rotation.values()[nbt.getInteger("rotation")];
 		offset = nbt.getVec3i("offset");
-		replaced = NBTUtil.readBlockState(nbt.get("replaced").internal);
+		replaced = new BlockInfo(nbt.get("replaced"));
 		
 		container.load(nbt.get("inventory"));
 		craftItem = new ItemStack(nbt.get("craftItem"));
@@ -216,7 +213,7 @@ public class TileMultiblock extends BlockEntityTickable {
 			}
 		}
 		world.internal.removeTileEntity(pos.internal);
-		world.internal.setBlockState(pos.internal, replaced, 3);
+		world.setBlock(pos, replaced);
 	}
 
 	public boolean isRender() {
