@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -39,6 +40,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private float sndRand;
 
     private ISound wheel_sound;
+    private ISound clackFront;
+    private ISound clackRear;
+    private Vec3i clackFrontPos;
+    private Vec3i clackRearPos;
 
     @Override
     public void save(TagCompound data) {
@@ -244,14 +249,25 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     wheel_sound = ImmersiveRailroading.proxy.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
                     this.sndRand = (float) Math.random() / 10;
                 }
+                if (this.clackFront == null) {
+                    clackFront = ImmersiveRailroading.proxy.newSound(new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, gauge);
+                }
+                if (this.clackRear == null) {
+                    clackRear = ImmersiveRailroading.proxy.newSound(new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, gauge);
+                }
+                float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
+                float pitch = adjust + 0.7f;
+                if (getDefinition().shouldScalePitch()) {
+                    pitch = (float) (pitch/ gauge.scale());
+                }
+                float volume = 0.01f + adjust;
 
                 if (Math.abs(this.getCurrentSpeed().metric()) > 5) {
                     if (!wheel_sound.isPlaying()) {
                         wheel_sound.play(getPosition());
                     }
-                    float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
-                    wheel_sound.setPitch(adjust + 0.7f + this.sndRand);
-                    wheel_sound.setVolume(adjust);
+                    wheel_sound.setPitch(pitch + this.sndRand);
+                    wheel_sound.setVolume(volume);
 
                     wheel_sound.setPosition(getPosition());
                     wheel_sound.setVelocity(getVelocity());
@@ -259,7 +275,29 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 } else {
                     if (wheel_sound.isPlaying()) {
                         wheel_sound.stop();
-                        ;
+                    }
+                }
+
+                Vec3i posFront = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyFront(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
+                if (BlockUtil.isIRRail(getWorld(), posFront)) {
+                    RailBase rb = getWorld().getBlockEntity(posFront, RailBase.class);
+                    rb = rb.getParentTile();
+                    if (rb != null && !rb.pos.equals(clackFrontPos)) {
+                        clackFront.setPitch(pitch);
+                        clackFront.setVolume(volume);
+                        clackFront.play(new Vec3d(posFront));
+                        clackFrontPos = rb.pos;
+                    }
+                }
+                Vec3i posRear = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyRear(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
+                if (BlockUtil.isIRRail(getWorld(), posRear)) {
+                    RailBase rb = getWorld().getBlockEntity(posRear, RailBase.class);
+                    rb = rb.getParentTile();
+                    if (rb != null && !rb.pos.equals(clackRearPos)) {
+                        clackRear.setPitch(pitch);
+                        clackRear.setVolume(volume);
+                        clackRear.play(new Vec3d(posRear));
+                        clackRearPos = rb.pos;
                     }
                 }
             }
@@ -529,6 +567,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         super.onRemoved();
         if (this.wheel_sound != null) {
             wheel_sound.stop();
+        }
+        if (this.clackFront != null) {
+            clackFront.stop();
         }
     }
 }

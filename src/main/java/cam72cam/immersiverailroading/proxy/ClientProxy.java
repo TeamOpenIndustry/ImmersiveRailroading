@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
@@ -28,8 +27,6 @@ import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.mod.sound.ModSoundManager;
-import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.tile.*;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -41,7 +38,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.*;
-import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
@@ -58,14 +54,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.EntityEvent.EnteringChunk;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -89,7 +82,9 @@ import org.lwjgl.opengl.GLContext;
 import paulscode.sound.SoundSystemConfig;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -478,16 +473,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-
-	@SubscribeEvent
-	public static void onWorldLoad(Load event) {
-		if (sndCache == null) {
-			sndCache = new ArrayList<ISound>();
-			for (int i = 0; i < 16; i ++) {
-				sndCache.add(ImmersiveRailroading.proxy.newSound(new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, Gauge.from(Gauge.STANDARD)));
-			}
-		}
-	}
 	
 	@SubscribeEvent
 	public static void onWorldUnload(Unload event) {
@@ -495,54 +480,6 @@ public class ClientProxy extends CommonProxy {
 		//sndCache = null;
 	}
 	
-	private static int sndCacheId = 0;
-	private static List<ISound> sndCache;
-	
-	@SubscribeEvent
-	public static void onEnterChunk(EnteringChunk event) {
-		if (event.getEntity().getEntityWorld().isRemote) {
-			// Somehow loading a chunk in the server thread can call a client event handler
-			// what the fuck forge???
-			return;
-		}
-		if (World.get(event.getEntity().getEntityWorld()) == null) {
-			return;
-		}
-		//TODO call modded entity onEnterChunk instead
-		EntityMoveableRollingStock stock = World.get(event.getEntity().getEntityWorld()).getEntity(event.getEntity().getUniqueID(), EntityMoveableRollingStock.class);
-
-		if (stock == null || stock.getWorld().isClient) {
-			return;
-		}
-
-		if (!ConfigSound.soundEnabled) {
-			return;
-		}
-		
-		if (sndCache != null) {
-			
-			if(event.getNewChunkX() == event.getOldChunkX() && event.getNewChunkZ() % 8 != 0) {
-				return;
-			}
-			
-			if(event.getNewChunkZ() == event.getOldChunkZ() && event.getNewChunkX() % 8 != 0) {
-				return;
-			}
-			
-			ISound snd = sndCache.get(sndCacheId);
-			float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
-			if(stock.getDefinition().shouldScalePitch()) {
-				snd.setPitch((float) ((adjust + 0.7)/stock.gauge.scale()));
-			} else {
-				snd.setPitch((float) ((adjust + 0.7)));
-			}
-			snd.setVolume(0.01f + adjust);
-			snd.play(stock.getPosition());
-	    	sndCacheId++;
-	    	sndCacheId = sndCacheId % sndCache.size();
-			
-		}
-	}
 
 	private static int tickCount = 0;
 	@SubscribeEvent
