@@ -37,6 +37,8 @@ public abstract class EntityRollingStockDefinition {
     public Gauge recommended_gauge;
     public Boolean shouldSit;
     public Identifier wheel_sound;
+    public Identifier clackFront;
+    public Identifier clackRear;
     double internal_model_scale;
     double internal_inv_scale;
     private String name = "Unknown";
@@ -207,11 +209,26 @@ public abstract class EntityRollingStockDefinition {
 
         weight = (int) Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_inv_scale);
 
+        wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
+        clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
+        clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
+
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
-        if (sounds != null && sounds.has("wheels")) {
-            wheel_sound = new Identifier(ImmersiveRailroading.MODID, sounds.get("wheels").getAsString());
-        } else {
-            wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
+        if (sounds != null) {
+            if (sounds.has("wheels")) {
+                wheel_sound = new Identifier(ImmersiveRailroading.MODID, sounds.get("wheels").getAsString());
+            }
+
+            if (sounds.has("clack")) {
+                clackFront = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack").getAsString());
+                clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack").getAsString());
+            }
+            if (sounds.has("clack_front")) {
+                clackFront = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_front").getAsString());
+            }
+            if (sounds.has("clack_rear")) {
+                clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString());
+            }
         }
     }
 
