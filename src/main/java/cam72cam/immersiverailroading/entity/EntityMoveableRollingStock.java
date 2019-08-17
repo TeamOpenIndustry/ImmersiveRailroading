@@ -7,8 +7,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
@@ -18,6 +16,7 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.custom.ICollision;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.util.DamageSource;
 
@@ -250,10 +249,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     this.sndRand = (float) Math.random() / 10;
                 }
                 if (this.clackFront == null) {
-                    clackFront = ImmersiveRailroading.proxy.newSound(new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, gauge);
+                    clackFront = ImmersiveRailroading.proxy.newSound(this.getDefinition().clackFront, false, 30, gauge);
                 }
                 if (this.clackRear == null) {
-                    clackRear = ImmersiveRailroading.proxy.newSound(new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg"), false, 30, gauge);
+                    clackRear = ImmersiveRailroading.proxy.newSound(this.getDefinition().clackRear, false, 30, gauge);
                 }
                 float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
                 float pitch = adjust + 0.7f;
