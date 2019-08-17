@@ -152,6 +152,9 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	@Override
 	public ItemStack onPick() {
+		if (item == null) {
+			return ItemStack.EMPTY;
+		}
 		return item;
 	}
 
