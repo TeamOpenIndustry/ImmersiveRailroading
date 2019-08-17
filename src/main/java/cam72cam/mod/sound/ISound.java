@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.sound;
+package cam72cam.mod.sound;
 
 import cam72cam.mod.math.Vec3d;
 

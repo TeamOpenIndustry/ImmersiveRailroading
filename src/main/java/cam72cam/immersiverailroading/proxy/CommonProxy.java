@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.proxy;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.*;
@@ -10,7 +11,8 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.sound.ISound;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
@@ -147,7 +149,7 @@ public abstract class CommonProxy implements IGuiHandler {
 
 
 	public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
-		return null;
+		return Audio.newSound(oggLocation, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
 
     @Override

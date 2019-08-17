@@ -28,8 +28,8 @@ import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.sound.IRSoundManager;
-import cam72cam.immersiverailroading.sound.ISound;
+import cam72cam.mod.sound.ModSoundManager;
+import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.tile.*;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
@@ -97,8 +97,6 @@ public class ClientProxy extends CommonProxy {
 	private static Map<Integer, ExpireableList<BlockPos, TileRailPreview>> previews = new HashMap<>();
 	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
 
-	private static IRSoundManager manager;
-	
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
@@ -480,19 +478,9 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	@SubscribeEvent
-	public static void onSoundLoad(SoundLoadEvent event) {
-		if (manager == null) {
-			manager = new IRSoundManager(event.getManager());
-		} else {
-			manager.handleReload(false);
-		}
-	}
-	
+
 	@SubscribeEvent
 	public static void onWorldLoad(Load event) {
-		manager.handleReload(true);
-		
 		if (sndCache == null) {
 			sndCache = new ArrayList<ISound>();
 			for (int i = 0; i < 16; i ++) {
@@ -503,7 +491,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onWorldUnload(Unload event) {
-		//manager.stop();
+		//soundManager.stop();
 		//sndCache = null;
 	}
 	
@@ -555,12 +543,7 @@ public class ClientProxy extends CommonProxy {
 			
 		}
 	}
-	
-	@Override
-	public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
-		return manager.createSound(oggLocation, repeats, attenuationDistance, gauge);
-	}
-	
+
 	private static int tickCount = 0;
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -577,21 +560,8 @@ public class ClientProxy extends CommonProxy {
 			missingResources = null;
 		}
 
-		Player player = MinecraftClient.getPlayer();
-		World world = null;
-		if (player != null) {
-			world = player.getWorld();
-		}
-		
-		
-		if (world == null && manager != null && manager.hasSounds()) {
-			ImmersiveRailroading.warn("Unloading IR sound system");
-			manager.stop();
-			sndCache = null;
-		}
-		
+		//TODO clear sndCache
 		tickCount++;
-		manager.tick();
 	}
 
 
