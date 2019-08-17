@@ -8,10 +8,11 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.SoundCategory;
 
 public class RailRollerMultiblock extends Multiblock {
 	public static final String NAME = "RAIL_MACHINE";
@@ -137,7 +138,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (craftingTe.getRenderTicks() % 10 == 0 && craftingTe.getCraftProgress() != 0) {
-					world.internal.playSound(craftingTe.pos.x, craftingTe.pos.y, craftingTe.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					Audio.playSound(craftingTe.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
 				}
 				return;
 			}

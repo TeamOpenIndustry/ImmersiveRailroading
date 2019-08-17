@@ -13,11 +13,12 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 import cam72cam.mod.world.World.ParticleType;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.SoundCategory;
 
 import java.util.List;
 
@@ -167,7 +168,7 @@ public class CastingMultiblock extends Multiblock {
 						world.createParticle(ParticleType.SMOKE, pos, Vec3d.ZERO);
 					}
 					if (Math.random() < 0.001) {
-						world.internal.playSound(pos.x, pos.y, pos.z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f, false);
+						Audio.playSound(pos, StandardSound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f);
 					}
 				}
 				

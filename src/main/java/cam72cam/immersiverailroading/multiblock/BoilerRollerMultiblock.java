@@ -13,11 +13,13 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.SoundCategory;
 
 public class BoilerRollerMultiblock extends Multiblock {
 	private static MultiblockComponent slab = new MultiblockComponent(Fuzzy.STONE_SLAB);
@@ -132,7 +134,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (craftTe.getRenderTicks() % 10 == 0 && craftTe.getCraftProgress() != 0) {
-					world.internal.playSound(craftTe.pos.x, craftTe.pos.y, craftTe.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					Audio.playSound(craftTe.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
 				}
 				return;
 			}
