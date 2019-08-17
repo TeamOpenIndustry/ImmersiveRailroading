@@ -1,7 +1,5 @@
-package cam72cam.immersiverailroading.sound;
+package cam72cam.mod.sound;
 
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
@@ -29,17 +27,17 @@ public class ClientSound implements ISound {
 	private float currentPitch = 1;
 	private float currentVolume = 1;
 	private float baseSoundMultiplier;
-	private Gauge gauge;
+	private float scale;
 	private boolean disposable = false;
 
-	public ClientSound(Supplier<SoundSystem> soundSystem, Identifier oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance, Gauge gauge) {
+	ClientSound(Supplier<SoundSystem> soundSystem, Identifier oggLocation, URL resource, float baseSoundMultiplier, boolean repeats, float attenuationDistance, float scale) {
 		this.sndSystem = soundSystem;
 		this.resource = resource;
 		this.baseSoundMultiplier = baseSoundMultiplier;
 		this.repeats = repeats;
 		this.oggLocation = oggLocation;
-		this.attenuationDistance = attenuationDistance * (float)gauge.scale() * (float)ConfigSound.soundDistanceScale;
-		this.gauge = gauge;
+		this.attenuationDistance = attenuationDistance;
+		this.scale = scale;
 	}
 	
 	public void init() {
@@ -82,8 +80,8 @@ public class ClientSound implements ISound {
 
 		MinecraftClient.startProfiler("irSound");
 		SoundSystem snd = sndSystem.get();
-		float rootedScale = (float)Math.sqrt(Math.sqrt(gauge.scale()));
-		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * rootedScale;
+		//(float)Math.sqrt(Math.sqrt(scale()))
+		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * scale;
 		snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
 			
 		if (currentPos != null) {
@@ -91,7 +89,7 @@ public class ClientSound implements ISound {
 		}
 		
 		if (currentPos == null || velocity == null) {
-			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, currentPitch / rootedScale));
+			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, currentPitch / scale));
 		} else {
 			//Doppler shift
 			
@@ -111,8 +109,8 @@ public class ClientSound implements ISound {
 				appliedPitch *= 1 - (newDist-origDist) * dopplerScale;
 			}
 			
-			sndSystem.get().setPitch(id, appliedPitch / rootedScale);
-			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, appliedPitch / rootedScale));
+			sndSystem.get().setPitch(id, appliedPitch / scale);
+			snd.CommandQueue(new CommandObject(CommandObject.SET_PITCH, id, appliedPitch / scale));
 		}
 
 		MinecraftClient.endProfiler();

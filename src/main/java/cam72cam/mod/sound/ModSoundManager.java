@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.sound;
+package cam72cam.mod.sound;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -12,14 +12,13 @@ import cam72cam.mod.resource.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.Gauge;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import paulscode.sound.SoundSystem;
 
-public class IRSoundManager {
+public class ModSoundManager {
 	private SoundManager manager;
 	private Function<ResourceLocation, URL> getURLForSoundResource;
 	private Supplier<SoundSystem> soundSystem;
@@ -28,7 +27,8 @@ public class IRSoundManager {
 	private SoundCategory category = SoundCategory.AMBIENT;
 	private SoundSystem cachedSnd;
 
-	public IRSoundManager(SoundManager manager) {
+
+	public ModSoundManager(SoundManager manager) {
 		this.manager = manager;
 		
 		initSoundSystem(Pair.of("field_148620_e", "func_148612_a"), Pair.of("sndSystem", "getURLForSoundResource"));
@@ -77,13 +77,13 @@ public class IRSoundManager {
 		}
 	}
 	
-	public ISound createSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
+	public ISound createSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale) {
         SoundSystem sndSystem = this.soundSystem.get();
 		if (sndSystem == null) {
 			return null;
 		}
 		
-		ClientSound snd = new ClientSound(this.soundSystem, oggLocation, getURLForSoundResource.apply(oggLocation.internal), lastSoundLevel, repeats, attenuationDistance, gauge);
+		ClientSound snd = new ClientSound(this.soundSystem, oggLocation, getURLForSoundResource.apply(oggLocation.internal), lastSoundLevel, repeats, attenuationDistance, scale);
 		this.sounds.add(snd);
         
         return snd;
@@ -140,4 +140,7 @@ public class IRSoundManager {
 			sound.reload();
 		}
 	}
+
+
+	private static ModSoundManager soundManager;
 }

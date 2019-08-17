@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.util.Hand;
@@ -18,7 +17,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.immersiverailroading.sound.ISound;
+import cam72cam.mod.sound.ISound;
 
 public abstract class Locomotive extends FreightTank {
 
