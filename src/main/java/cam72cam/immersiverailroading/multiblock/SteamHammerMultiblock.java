@@ -10,10 +10,11 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.ItemStackHandler;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.SoundCategory;
 
 public class SteamHammerMultiblock extends Multiblock {
 	private static MultiblockComponent piston = new MultiblockComponent(Fuzzy.PISTON);
@@ -108,7 +109,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
-					world.internal.playSound(te.pos.x, te.pos.y, te.pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					Audio.playSound(te.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
 				}
 				return;
 			}

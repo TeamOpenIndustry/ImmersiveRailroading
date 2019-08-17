@@ -7,14 +7,15 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.mod.item.*;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.SoundCategory;
 
 public class ItemGoldenSpike extends ItemBase {
 	public ItemGoldenSpike() {
@@ -30,7 +31,7 @@ public class ItemGoldenSpike extends ItemBase {
 		ItemStack held = player.getHeldItem(hand);
 		if (world.isBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW)) {
 			setPosition(held, pos);
-			world.internal.playSound(pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f, false);
+			Audio.playSound(pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f);
 		} else {
 			pos = pos.up();
 			

@@ -2,6 +2,8 @@ package cam72cam.mod.sound;
 
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
@@ -16,18 +18,31 @@ public class Audio {
     @SidedProxy(clientSide="cam72cam.mod.sound.Audio$ClientProxy", serverSide="cam72cam.mod.sound.Audio$ServerProxy")
     public static IAudioProxy proxy;
 
+    public static void playSound(Vec3d pos, StandardSound sound, SoundCategory category, float volume, float pitch) {
+        proxy.playSound(pos, sound, category, volume, pitch);
+    }
+    public static void playSound(Vec3i pos, StandardSound sound, SoundCategory category, float volume, float pitch) {
+        proxy.playSound(new Vec3d(pos), sound, category, volume, pitch);
+    }
+
     public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale) {
-        return proxy.newSound(oggLocation, repeats, attenuationDistance, scale);
+        return proxy.loadSound(oggLocation, repeats, attenuationDistance, scale);
     }
 
     private interface IAudioProxy {
-        ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale);
+        ISound loadSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale);
+        void playSound(Vec3d pos, StandardSound sound, SoundCategory category, float volume, float pitch);
     }
 
     public static class ServerProxy implements IAudioProxy {
         @Override
-        public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale) {
+        public ISound loadSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale) {
             throw new RuntimeException("Unable to play audio directly on the server...");
+        }
+
+        @Override
+        public void playSound(Vec3d pos, StandardSound sound, SoundCategory category, float volume, float pitch) {
+            //Same as server world in MC
         }
     }
 
@@ -74,8 +89,13 @@ public class Audio {
             soundManager.stop();
         }
 
-        public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale) {
+        public ISound loadSound(Identifier oggLocation, boolean repeats, float attenuationDistance, float scale) {
             return soundManager.createSound(oggLocation, repeats, attenuationDistance, scale);
+        }
+
+        @Override
+        public void playSound(Vec3d pos, StandardSound sound, SoundCategory category, float volume, float pitch) {
+            MinecraftClient.getPlayer().getWorld().internal.playSound(pos.x, pos.y, pos.z, sound.event, category.category, volume, pitch, false);
         }
     }
 }
