@@ -137,6 +137,7 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 				return ClickResult.ACCEPTED;
 			} else {
 				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
+				return ClickResult.ACCEPTED;
 			}
 		}
 		return ClickResult.PASS;
