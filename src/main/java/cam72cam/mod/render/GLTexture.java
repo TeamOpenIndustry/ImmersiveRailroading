@@ -149,6 +149,14 @@ public class GLTexture {
         textures.remove(this);
     }
 
+    public void dealloc() {
+        if (this.glTexID != -1) {
+            System.out.println("DEALLOC " + this.texLoc);
+            GL11.glDeleteTextures(this.glTexID);
+            this.glTexID = -1;
+        }
+    }
+
     private static List<GLTexture> textures = new ArrayList<>();
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent event) {
@@ -161,9 +169,7 @@ public class GLTexture {
                 continue;
             }
             if (System.currentTimeMillis() - texture.lastUsed > texture.cacheSeconds * 1000) {
-                System.out.println("DEALLOC " + texture.texLoc);
-                GL11.glDeleteTextures(texture.glTexID);
-                texture.glTexID = -1;
+                texture.dealloc();
             }
         }
     }

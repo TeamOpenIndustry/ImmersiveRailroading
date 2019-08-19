@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.obj.OBJTextureSheet;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
@@ -69,6 +70,7 @@ public class StockItemModel {
             model.draw();
             GL11.glPopMatrix();
             model.restoreTexture();
+            model.textures.forEach((k, ts) -> ts.dealloc());
 			tex.restore();
         }));
 	}
