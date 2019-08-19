@@ -21,7 +21,7 @@ import java.util.List;
 
 public class OBJTextureSheet {
 	private final GLTexture texture;
-	private final GLTexture icon;
+	public final GLTexture icon;
 	private Map<String, SubTexture> mappings;
 	private int sheetWidth = 0;
 	private int sheetHeight = 0;
@@ -283,8 +283,12 @@ public class OBJTextureSheet {
 
 		String path = model.modelLoc.getPath().replace("/", ".") + texPrefix;
 		this.texture = new GLTexture(path + ".png", image, 5, false);
-		if (image.getWidth() * image.getHeight() > 128 * 128) {
-			icon = new GLTexture(path + "_icon.png", scaleImage(image, image.getWidth() / 10, image.getHeight() / 10), 30, true);
+
+		int iconSize = 1024;
+		if (image.getWidth() * image.getHeight() > iconSize * iconSize) {
+			float scale = (float)(iconSize * iconSize) / (image.getWidth() * image.getHeight());
+			System.out.println(scale);
+			icon = new GLTexture(path + "_icon.png", scaleImage(image, (int)(image.getWidth() * scale), (int) (image.getHeight() * scale)), 30, true);
 		} else {
 			icon = new GLTexture(path + "_icon.png", image, 30, true);
 		}
@@ -342,6 +346,11 @@ public class OBJTextureSheet {
 		texture.freeGL();
 		icon.freeGL();
 	}
+	public void dealloc() {
+		texture.dealloc();
+		icon.dealloc();
+	}
+
 
 	int bind() {
 		if (!texture.isLoaded()) {
