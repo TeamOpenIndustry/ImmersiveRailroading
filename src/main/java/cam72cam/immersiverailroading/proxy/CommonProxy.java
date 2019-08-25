@@ -5,12 +5,17 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.*;
+import cam72cam.immersiverailroading.gui.SteamHammerContainer;
+import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
+import cam72cam.immersiverailroading.gui.TankContainer;
+import cam72cam.immersiverailroading.gui.TenderContainer;
+import cam72cam.immersiverailroading.gui.container.FreightContainer;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.mod.gui.container.ServerContainer;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
@@ -158,7 +163,8 @@ public abstract class CommonProxy implements IGuiHandler {
 
     	switch(GuiTypes.values()[ID]) {
 		case FREIGHT:
-	    	return new FreightContainer(player.inventory, world.getEntity(entityIDorX, CarFreight.class));
+			FreightContainer freight = new FreightContainer(world.getEntity(entityIDorX, CarFreight.class));
+			return new ServerContainer(player.inventory, freight.freight.getInventoryWidth(), freight.freight.getInventorySize() / freight.freight.getInventoryWidth(), freight::draw);
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
 	    	return new TankContainer(player.inventory, world.getEntity(entityIDorX, FreightTank.class));
