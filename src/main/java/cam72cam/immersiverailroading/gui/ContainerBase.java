@@ -47,10 +47,6 @@ public abstract class ContainerBase extends Container implements ISyncableSlots 
 		return y + midBarHeight;
 	}
 
-	public int offsetPlayerInventory(int x, int y) {
-		return y+96;
-	}
-
 	public int offsetPlayerInventoryConnector(int x, int y, int aboveWidth, int horizSlots) {
     	if (horizSlots > 9) {
     		return drawBottomBar(x, y, horizSlots);

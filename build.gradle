@@ -73,6 +73,10 @@ dependencies {
 		'TrackAPI-1.1_1.12.jar'
 	)
 
+	compile files(
+		'InventoryTweaks-1.63-api.jar'
+	)
+
 	compile "igwmod:IGW-Mod-1.12.2:1.4.4-15:userdev"
 	compile "li.cil.oc:OpenComputers:MC1.12.2-1.7.+:api"
 	runtime "li.cil.oc:OpenComputers:MC1.12.2-1.7.+"
