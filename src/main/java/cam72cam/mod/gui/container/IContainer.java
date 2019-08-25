@@ -12,10 +12,13 @@ public interface IContainer {
     int drawPlayerInventory(int currY, int horizSlots);
     int drawPlayerMidBar(int x, int y);
 
-    void drawSlot(int x, int y);
-    void drawSlotOverlay(ItemStack stack, int i, int j);
-    int drawSlotRow(int x, int y, int slots, int numSlots);
-    int drawSlotBlock(ItemStackHandler handler, int slots, int x, int y, int slotX);
+    void drawSlotOverlay(ItemStack stack, int x, int y);
+
+    void drawSlot(ItemStackHandler handler, int slotID, int x, int y);
+    int drawSlotRow(ItemStackHandler handler, int start, int cols, int x, int y);
+    int drawSlotBlock(ItemStackHandler handler, int start, int cols, int x, int y);
 
     void drawTankBlock(int x, int y, int horizSlots, int inventoryRows, Fluid fluid, float percentFull);
+
+    void drawCenteredString(String quantityStr, int x, int y);
 }

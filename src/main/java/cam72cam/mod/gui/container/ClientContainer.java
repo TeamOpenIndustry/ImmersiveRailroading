@@ -63,32 +63,34 @@ public class ClientContainer extends GuiContainer implements IContainer {
     }
 
     @Override
-    public void drawSlot(int x, int y) {
-        super.drawTexturedModalRect(centerX + x, centerY + y, paddingLeft, topOffset, slotSize, slotSize);
+    public void drawSlot(ItemStackHandler handler, int slotID, int x, int y) {
+        x += paddingLeft;
+        if (handler != null && handler.getSlotCount() > slotID) {
+            super.drawTexturedModalRect(centerX + x, centerY + y, paddingLeft, topOffset, slotSize, slotSize);
+        } else {
+            Gui.drawRect(centerX + x, centerY + y, centerX + x + slotSize, centerY + y + slotSize, 0xFF444444);
+        }
     }
 
     @Override
-    public int drawSlotRow(int x, int y, int slots, int numSlots) {
+    public int drawSlotRow(ItemStackHandler handler, int start, int cols, int x, int y) {
         // Left Side
         super.drawTexturedModalRect(centerX + x, centerY + y, 0, topOffset, paddingLeft, slotSize);
         // Middle Slots
-        for (int k = 1; k <= slots; k++) {
-            if (k <= numSlots) {
-                drawSlot(x + paddingLeft + (k-1) * slotSize, y);
-            } else {
-                Gui.drawRect(centerX + x + paddingLeft + (k-1) * slotSize, centerY + y, x + paddingLeft + (k-1) * slotSize + slotSize, y + slotSize, 0xFF444444);
-            }
+        for (int slotID = start; slotID < start + cols; slotID++) {
+            int slotOff = (slotID - start);
+            drawSlot(handler, slotID, x + slotOff * slotSize, y);
         }
         GL11.glColor4f(1, 1, 1, 1);
         // Right Side
-        super.drawTexturedModalRect(centerX + x + paddingLeft + slots * slotSize, centerY + y, paddingLeft + stdUiHorizSlots * slotSize, topOffset, paddingRight, slotSize);
+        super.drawTexturedModalRect(centerX + x + paddingLeft + cols * slotSize, centerY + y, paddingLeft + stdUiHorizSlots * slotSize, topOffset, paddingRight, slotSize);
         return y + slotSize;
     }
 
     @Override
-    public int drawSlotBlock(ItemStackHandler handler, int numSlots,int x, int y, int slotX) {
-        for (; 0 < numSlots; numSlots -= slotX) {
-            y = drawSlotRow(x, y, slotX, numSlots);
+    public int drawSlotBlock(ItemStackHandler handler, int start, int cols, int x, int y) {
+        for (int slotID = start; slotID < handler.getSlotCount(); slotID += cols) {
+            y = drawSlotRow(handler, slotID, cols, x, y);
         }
         return y;
     }
@@ -178,6 +180,9 @@ public class ClientContainer extends GuiContainer implements IContainer {
 
     @Override
     public void drawTankBlock(int x, int y, int horizSlots, int inventoryRows, Fluid fluid, float percentFull) {
+        x += paddingLeft + centerX;
+        y += centerY;
+
         int width = horizSlots * slotSize;
         int height = inventoryRows * slotSize;
         Gui.drawRect(x, y, x+width, y+height, 0xFF000000);
@@ -190,18 +195,21 @@ public class ClientContainer extends GuiContainer implements IContainer {
     }
 
     @Override
-    public void drawSlotOverlay(ItemStack stack, int i, int j) {
-        i++;
-        j++;
+    public void drawCenteredString(String text, int x, int y) {
+        super.drawCenteredString(this.fontRenderer, text, x + centerX + this.xSize/2, y + centerY, 14737632);
+    }
 
-        this.mc.getRenderItem().renderItemIntoGUI(stack.internal, i, j);
+    @Override
+    public void drawSlotOverlay(ItemStack stack, int x, int y) {
+        x += centerX + 1 + paddingLeft;
+        y += centerY + 1;
+
+        this.mc.getRenderItem().renderItemIntoGUI(stack.internal, x, y);
         this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
 
-        GlStateManager.enableAlpha();;
+        GlStateManager.enableAlpha();
         GlStateManager.disableDepth();
-        int j1 = i;
-        int k1 = j;
-        Gui.drawRect(centerX + j1, centerY + k1, j1 + 16, k1 + 16, -2130706433);
+        Gui.drawRect(x, y, x + 16, y + 16, -2130706433);
         GlStateManager.enableDepth();
 
         GL11.glColor4f(1,1,1,1);

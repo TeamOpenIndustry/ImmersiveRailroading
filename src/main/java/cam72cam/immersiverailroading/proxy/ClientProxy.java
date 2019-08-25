@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.*;
-import cam72cam.immersiverailroading.gui.container.FreightContainer;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
@@ -122,8 +121,7 @@ public class ClientProxy extends CommonProxy {
 			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
-			return new TankContainerGui(world.getEntity(entityIDorPosX, FreightTank.class),
-					new TankContainer(player.inventory, world.getEntity(entityIDorPosX, FreightTank.class)));
+			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
 		case TENDER:
 			return new TenderContainerGui(world.getEntity(entityIDorPosX, Tender.class),
 					new TenderContainer(player.inventory, world.getEntity(entityIDorPosX, Tender.class)));

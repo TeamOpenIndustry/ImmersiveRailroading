@@ -73,13 +73,29 @@ public class ServerContainer extends net.minecraft.inventory.Container implement
     }
 
     @Override
-    public void drawSlot(int x, int y) {
-
+    public void drawSlot(ItemStackHandler handler, int slotID, int x, int y) {
+        x += paddingLeft;
+        if (handler != null && handler.getSlotCount() > slotID) {
+            this.addSlotToContainer(new SlotItemHandler(handler.internal, slotID, x, y));
+            slotRefs.get(ContainerSection.CHEST).add(inventorySlots.get(inventorySlots.size() - 1));
+        }
     }
 
     @Override
-    public int drawSlotRow(int x, int y, int slots, int numSlots) {
+    public int drawSlotRow(ItemStackHandler handler, int start, int cols, int x, int y) {
+        for (int slotID = start; slotID < start + cols; slotID++) {
+            drawSlot(handler, slotID, x + (slotID - start) * slotSize, y);
+        }
         return y + slotSize;
+    }
+
+
+    @Override
+    public int drawSlotBlock(ItemStackHandler handler, int start, int cols, int x, int y) {
+        for (int slotID = start; slotID < (handler != null ? handler.getSlotCount() : cols); slotID += cols) {
+            y = drawSlotRow(handler, slotID, cols, x, y);
+        }
+        return y;
     }
 
     @Override
@@ -111,27 +127,12 @@ public class ServerContainer extends net.minecraft.inventory.Container implement
     }
 
     @Override
-    public int drawSlotBlock(ItemStackHandler handler, int slots, int x, int y, int slotX) {
-        if (handler == null) {
-            // Not real slots
-            for (int i = 0; i < slots; i+=slotX) {
-                y = drawSlotRow(x, y, slotX, slots);
-            }
-            return y;
-        }
+    public void drawTankBlock(int x, int y, int horizSlots, int inventoryRows, Fluid fluid, float percentFull) {
 
-
-        for (int slotID = 0; slotID < slots; slotID++) {
-            int row = slotID / slotX;
-            int col = slotID % slotX;
-            this.addSlotToContainer(new SlotItemHandler(handler.internal, slotID, x + paddingLeft + col * slotSize, y + row * slotSize));
-            slotRefs.get(ContainerSection.CHEST).add(inventorySlots.get(inventorySlots.size()-1));
-        }
-        return y + slotSize * (int) Math.ceil((double)slots / slotX);
     }
 
     @Override
-    public void drawTankBlock(int x, int y, int horizSlots, int inventoryRows, Fluid fluid, float percentFull) {
+    public void drawCenteredString(String quantityStr, int x, int y) {
 
     }
 
