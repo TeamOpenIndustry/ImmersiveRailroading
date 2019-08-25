@@ -93,21 +93,21 @@ public class CarArtillery extends CarFreight {
 	
 	private void fire() {
 		Vec3d shotInfo = getDefinition().getProjectileInfo();
-		dataManager.set(RECOIL_FORCE, (float)(shotInfo.x * shotInfo.z));
 		
 		Vec3d curOrientVec = new Vec3d(getTurretOrient().getX(), getTurretOrient().getY(), getTurretOrient().getZ());
 		Vec3d muzzle = muzzlePosition();
 		muzzle = VecUtil.rotateWrongYaw(muzzle, this.rotationYaw + 180);
+		dataManager.set(RECOIL_FORCE, (float)(shotInfo.x * shotInfo.z * this.getVectorForRotation(this.rotationPitch, this.rotationYaw).normalize().dotProduct(muzzle.normalize())));
 		if (Config.ConfigDamage.explosionsEnabled) {
 				world.createExplosion(this, this.posX + muzzle.x, this.posY + muzzle.y, this.posZ + muzzle.z, 3f, false);
 		}
 		
 		double dispersion = this.getDefinition().getAccuracy() * (new Vec3d(getAimPoint()).subtract(this.getPositionVector()).lengthVector() / this.getDefinition().getRange());
 		Vec3d hitCoord = new Vec3d(getAimPoint().getX() + dispersion * (this.rand.nextDouble() - 0.5), 255, getAimPoint().getZ() + dispersion * (this.rand.nextDouble() - 0.5));
-		int ticksInFlight = (int)Math.floor((2 * shotInfo.z * Math.sin(Math.toRadians(curOrientVec.x))) / 9.81) * 20;
+		int ticksOfFlight = (int)Math.floor((2 * shotInfo.z * Math.sin(Math.toRadians(curOrientVec.x))) / 9.81) * 20;
 		ImmersiveRailroading.info("Firing at %f,%f", hitCoord.x, hitCoord.z);
 		ChunkManager.flagEntityPos(world, new BlockPos(hitCoord));
-		world.spawnEntity(new EntityArtilleryStrike(this.world, hitCoord, (float)shotInfo.x, (float)shotInfo.z, (float)shotInfo.y, ticksInFlight));
+		world.spawnEntity(new EntityArtilleryStrike(this.world, hitCoord, (float)shotInfo.x, (float)shotInfo.z, (float)shotInfo.y, ticksOfFlight));
 		dataManager.set(RELOAD_TIME, this.ticksExisted + (20 * this.getDefinition().getReloadTime()));
 		triggerResimulate();
 	}
