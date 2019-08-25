@@ -41,6 +41,7 @@ public class Fuzzy {
     public static final Fuzzy PAPER = new Fuzzy("paper");
     public static final Fuzzy BOOK = new Fuzzy("book").add(Items.BOOK);
     public static final Fuzzy WOOL_BLOCK = new Fuzzy("wool").add(new ItemStack(Blocks.WOOL, 1, OreDictionary.WILDCARD_VALUE));
+    public static final Fuzzy BUCKET = new Fuzzy("bucket").add(new ItemStack(Items.BUCKET, 1));
 
     private final String ident;
 

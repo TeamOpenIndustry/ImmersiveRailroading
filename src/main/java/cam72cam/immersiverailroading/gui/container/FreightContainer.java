@@ -16,7 +16,7 @@ public class FreightContainer {
     public void draw(IContainer container){
         int currY = 0;
         currY = container.drawTopBar(0, currY, freight.getInventoryWidth());
-        currY = container.drawSlotBlock(freight.cargoItems, freight.getInventorySize(), 0, currY, freight.getInventoryWidth());
+        currY = container.drawSlotBlock(freight.cargoItems, 0, freight.getInventoryWidth(), 0, currY);
         currY = container.drawPlayerInventoryConnector(0, currY, freight.getInventoryWidth());
         currY = container.drawPlayerInventory(currY, freight.getInventoryWidth());
     }

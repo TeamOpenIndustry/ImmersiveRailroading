@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
-import cam72cam.immersiverailroading.gui.TankContainer;
+import cam72cam.immersiverailroading.gui.container.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.gui.container.FreightContainer;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -167,7 +167,8 @@ public abstract class CommonProxy implements IGuiHandler {
 			return new ServerContainer(player.inventory, freight.freight.getInventoryWidth(), freight.freight.getInventorySize() / freight.freight.getInventoryWidth(), freight::draw);
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
-	    	return new TankContainer(player.inventory, world.getEntity(entityIDorX, FreightTank.class));
+			TankContainer tank = new TankContainer(world.getEntity(entityIDorX, CarTank.class));
+			return new ServerContainer(player.inventory, 10, tank.tank.getInventorySize() / 10, tank::draw);
 		case TENDER:
 			return new TenderContainer(player.inventory, world.getEntity(entityIDorX, Tender.class));
 		case STEAM_LOCOMOTIVE:
