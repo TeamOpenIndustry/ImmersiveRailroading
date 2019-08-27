@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
-import cam72cam.immersiverailroading.gui.SteamLocomotiveContainer;
+import cam72cam.immersiverailroading.gui.container.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.container.TankContainer;
 import cam72cam.immersiverailroading.gui.TenderContainer;
 import cam72cam.immersiverailroading.gui.container.FreightContainer;
@@ -164,15 +164,16 @@ public abstract class CommonProxy implements IGuiHandler {
     	switch(GuiTypes.values()[ID]) {
 		case FREIGHT:
 			FreightContainer freight = new FreightContainer(world.getEntity(entityIDorX, CarFreight.class));
-			return new ServerContainer(player.inventory, freight.freight.getInventoryWidth(), freight.freight.getInventorySize() / freight.freight.getInventoryWidth(), freight::draw);
+			return new ServerContainer(player.inventory, freight.stock.getInventoryWidth(), freight.stock.getInventorySize() / freight.stock.getInventoryWidth(), freight::draw);
 		case TANK:
 		case DIESEL_LOCOMOTIVE:
 			TankContainer tank = new TankContainer(world.getEntity(entityIDorX, CarTank.class));
-			return new ServerContainer(player.inventory, 10, tank.tank.getInventorySize() / 10, tank::draw);
+			return new ServerContainer(player.inventory, 10, tank.stock.getInventorySize() / 10, tank::draw);
 		case TENDER:
 			return new TenderContainer(player.inventory, world.getEntity(entityIDorX, Tender.class));
 		case STEAM_LOCOMOTIVE:
-			return new SteamLocomotiveContainer(player.inventory, world.getEntity(entityIDorX, LocomotiveSteam.class));
+			SteamLocomotiveContainer loco = new SteamLocomotiveContainer(world.getEntity(entityIDorX, LocomotiveSteam.class));
+			return new ServerContainer(player.inventory, loco.stock.getInventoryWidth() * 2, loco.stock.getInventorySize() / loco.stock.getInventoryWidth(), loco::draw);
 		case STEAM_HAMMER:
 			TileMultiblock te = world.getBlockEntity(new Vec3i(entityIDorX, y, z), TileMultiblock.class);
 			if (te == null) {

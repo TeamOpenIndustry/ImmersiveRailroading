@@ -4,20 +4,17 @@ import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.mod.gui.container.IContainer;
 
 public class FreightContainer {
-    public CarFreight freight;
-    protected int numRows;
+    public CarFreight stock;
 
     public FreightContainer(CarFreight stock) {
-        this.freight = stock;
-        int horizSlots = stock.getInventoryWidth();
-        this.numRows = (int) Math.ceil((double)stock.getInventorySize() / horizSlots);
+        this.stock = stock;
     }
 
     public void draw(IContainer container){
         int currY = 0;
-        currY = container.drawTopBar(0, currY, freight.getInventoryWidth());
-        currY = container.drawSlotBlock(freight.cargoItems, 0, freight.getInventoryWidth(), 0, currY);
-        currY = container.drawPlayerInventoryConnector(0, currY, freight.getInventoryWidth());
-        currY = container.drawPlayerInventory(currY, freight.getInventoryWidth());
+        currY = container.drawTopBar(0, currY, stock.getInventoryWidth());
+        currY = container.drawSlotBlock(stock.cargoItems, 0, stock.getInventoryWidth(), 0, currY);
+        currY = container.drawPlayerInventoryConnector(0, currY, stock.getInventoryWidth());
+        currY = container.drawPlayerInventory(currY, stock.getInventoryWidth());
     }
 }
