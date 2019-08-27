@@ -123,8 +123,7 @@ public class ClientProxy extends CommonProxy {
 		case DIESEL_LOCOMOTIVE:
 			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
 		case TENDER:
-			return new TenderContainerGui(world.getEntity(entityIDorPosX, Tender.class),
-					new TenderContainer(player.inventory, world.getEntity(entityIDorPosX, Tender.class)));
+			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
 		case STEAM_LOCOMOTIVE:
 			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
 		case RAIL:

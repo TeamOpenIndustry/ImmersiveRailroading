@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.container.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.container.TankContainer;
-import cam72cam.immersiverailroading.gui.TenderContainer;
+import cam72cam.immersiverailroading.gui.container.TenderContainer;
 import cam72cam.immersiverailroading.gui.container.FreightContainer;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -170,7 +170,8 @@ public abstract class CommonProxy implements IGuiHandler {
 			TankContainer tank = new TankContainer(world.getEntity(entityIDorX, CarTank.class));
 			return new ServerContainer(player.inventory, 10, tank.stock.getInventorySize() / 10, tank::draw);
 		case TENDER:
-			return new TenderContainer(player.inventory, world.getEntity(entityIDorX, Tender.class));
+			TenderContainer tender = new TenderContainer(world.getEntity(entityIDorX, Tender.class));
+			return new ServerContainer(player.inventory, tender.stock.getInventoryWidth(), tender.stock.getInventorySize() / tender.stock.getInventoryWidth(), tender::draw);
 		case STEAM_LOCOMOTIVE:
 			SteamLocomotiveContainer loco = new SteamLocomotiveContainer(world.getEntity(entityIDorX, LocomotiveSteam.class));
 			return new ServerContainer(player.inventory, loco.stock.getInventoryWidth() * 2, loco.stock.getInventorySize() / loco.stock.getInventoryWidth(), loco::draw);
