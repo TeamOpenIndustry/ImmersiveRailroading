@@ -44,10 +44,11 @@ public class ServerContainer extends net.minecraft.inventory.Container implement
 
         slotRefs.put(ContainerSection.CHEST, new ArrayList<>());
 
-        draw.accept(this);
-        this.draw = draw;
         this.slotsX = slotsX;
         this.slotsY = slotsY;
+
+        this.draw = draw;
+        draw.accept(this);
     }
 
     /* Inv Tweaks */
@@ -92,6 +93,10 @@ public class ServerContainer extends net.minecraft.inventory.Container implement
 
     @Override
     public int drawSlotBlock(ItemStackHandler handler, int start, int cols, int x, int y) {
+        if (cols < slotsX) {
+            x += (slotsX - cols) * slotSize / 2;
+        }
+
         for (int slotID = start; slotID < (handler != null ? handler.getSlotCount() : cols); slotID += cols) {
             y = drawSlotRow(handler, slotID, cols, x, y);
         }

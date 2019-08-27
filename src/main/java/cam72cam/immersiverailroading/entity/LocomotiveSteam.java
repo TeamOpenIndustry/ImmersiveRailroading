@@ -738,8 +738,8 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	protected void initContainerFilter() {
 		cargoItems.filter.clear();
-		this.cargoItems.filter.put(getInventorySize()-2, SlotFilter.FLUID_CONTAINER);
-		this.cargoItems.filter.put(getInventorySize()-1, SlotFilter.FLUID_CONTAINER);
+		this.cargoItems.filter.put(0, SlotFilter.FLUID_CONTAINER);
+		this.cargoItems.filter.put(1, SlotFilter.FLUID_CONTAINER);
 		this.cargoItems.defaultFilter = SlotFilter.BURNABLE;
 	}
 
@@ -754,11 +754,11 @@ public class LocomotiveSteam extends Locomotive {
 	
 	@Override
 	protected int[] getContainerInputSlots() {
-		return new int[] { getInventorySize()-2 };
+		return new int[] { 0 };
 	}
 	@Override
 	protected int[] getContainertOutputSlots() {
-		return new int[] { getInventorySize()-1 };
+		return new int[] { 1 };
 	}
 
 	@Override

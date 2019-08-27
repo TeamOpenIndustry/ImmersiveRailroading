@@ -89,6 +89,10 @@ public class ClientContainer extends GuiContainer implements IContainer {
 
     @Override
     public int drawSlotBlock(ItemStackHandler handler, int start, int cols, int x, int y) {
+        if (cols < server.slotsX) {
+            x += (server.slotsX - cols) * slotSize / 2;
+        }
+
         for (int slotID = start; slotID < handler.getSlotCount(); slotID += cols) {
             y = drawSlotRow(handler, slotID, cols, x, y);
         }
@@ -131,12 +135,16 @@ public class ClientContainer extends GuiContainer implements IContainer {
     @Override
     public int drawPlayerInventoryConnector(int x, int y, int horizSlots) {
         int normInvOffset = (horizSlots - stdUiHorizSlots) * slotSize / 2 + paddingLeft - 7;
+        if (horizSlots < server.slotsX) {
+            x += (server.slotsX - horizSlots) * slotSize / 2;
+        }
+
         if (horizSlots > 9) {
             return drawBottomBar(x, y, horizSlots);
         } else if (horizSlots < 9){
-            return drawPlayerTopBar(normInvOffset, y);
+            return drawPlayerTopBar(x + normInvOffset, y);
         } else {
-            return drawPlayerMidBar(normInvOffset, y);
+            return drawPlayerMidBar(x + normInvOffset, y);
         }
     }
 
@@ -197,6 +205,7 @@ public class ClientContainer extends GuiContainer implements IContainer {
     @Override
     public void drawCenteredString(String text, int x, int y) {
         super.drawCenteredString(this.fontRenderer, text, x + centerX + this.xSize/2, y + centerY, 14737632);
+        this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
     }
 
     @Override
