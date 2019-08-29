@@ -32,7 +32,7 @@ public class ItemTrackBlueprint extends ItemBase {
 	@Override
 	public void onClickAir(Player player, World world, Hand hand) {
 		if (world.isClient && hand == Hand.PRIMARY) {
-            player.internal.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), world.internal, (int) player.internal.posX, (int) player.internal.posY, (int) player.internal.posZ);
+			ImmersiveRailroading.proxy.GUI_REGISTRY.openGUI(player, GuiTypes.RAIL);
         }
 	}
 	

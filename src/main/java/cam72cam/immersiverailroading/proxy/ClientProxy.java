@@ -5,12 +5,10 @@ import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
-import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.net.MousePressPacket;
@@ -35,8 +33,6 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.container.ClientContainer;
-import cam72cam.mod.gui.container.ServerContainer;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.*;
@@ -50,7 +46,6 @@ import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -112,47 +107,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	@Override
-	public Object getClientGuiElement(int ID, EntityPlayer player, net.minecraft.world.World worldIn, int entityIDorPosX, int posY, int posZ) {
-		World world = World.get(worldIn);
-		TileMultiblock te;
-		switch (GuiTypes.values()[ID]) {
-		case FREIGHT:
-			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
-		case TANK:
-		case DIESEL_LOCOMOTIVE:
-			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
-		case TENDER:
-			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
-		case STEAM_LOCOMOTIVE:
-			return new ClientContainer((ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ));
-		case RAIL:
-			return new TrackGui();
-		case RAIL_PREVIEW:
-			return new TrackGui(world, entityIDorPosX, posY, posZ);
-		case STEAM_HAMMER:
-			ServerContainer hammer = (ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ);
-			if (hammer == null) {
-				return null;
-			}
-			return new ClientContainer(hammer);
-		case PLATE_ROLLER:
-			te = world.getBlockEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
-			if (te == null || !te.isLoaded()) {
-				return null;
-			}
-			return new PlateRollerGUI(te);
-		case CASTING:
-			te = world.getBlockEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
-			if (te == null || !te.isLoaded()) {
-				return null;
-			}
-			return new CastingGUI(te);
-		default:
-			return null;
-		}
-	}
-	
 	@Override
 	public void preInit(FMLPreInitializationEvent event) throws IOException {
 		super.preInit(event);

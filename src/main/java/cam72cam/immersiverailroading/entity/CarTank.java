@@ -9,6 +9,11 @@ import cam72cam.mod.fluid.Fluid;
 
 public class CarTank extends FreightTank {
 	@Override
+	public int getInventoryWidth() {
+		return 2;
+	}
+
+	@Override
 	public CarTankDefinition getDefinition() {
 		return super.getDefinition(CarTankDefinition.class);
 	}

@@ -67,7 +67,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			if (isCenter(offset)) {
 				if (world.isServer) {
 					Vec3i pos = getPos(offset);
-					player.internal.openGui(ImmersiveRailroading.instance, GuiTypes.STEAM_HAMMER.ordinal(), world.internal, pos.x, pos.y, pos.z);
+					ImmersiveRailroading.proxy.GUI_REGISTRY.openGUI(player, pos, GuiTypes.STEAM_HAMMER);
 				}
 				return true;
 			}

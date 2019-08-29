@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @ChestContainer
-public class ServerContainer extends net.minecraft.inventory.Container implements IContainer {
+public class ServerContainerBuilder extends net.minecraft.inventory.Container implements IContainerBuilder {
     private final IInventory playerInventory;
-    final Consumer<IContainer> draw;
+    final Consumer<IContainerBuilder> draw;
     final int slotsX;
     final int slotsY;
 
@@ -39,15 +39,15 @@ public class ServerContainer extends net.minecraft.inventory.Container implement
     private int rowSlots = 9;
     Map<ContainerSection, List<Slot>> slotRefs = new HashMap<>();
 
-    public ServerContainer(IInventory playerInventory, int slotsX, int slotsY, Consumer<IContainer> draw) {
+    public ServerContainerBuilder(IInventory playerInventory, IContainer container) {
         this.playerInventory = playerInventory;
 
         slotRefs.put(ContainerSection.CHEST, new ArrayList<>());
 
-        this.slotsX = slotsX;
-        this.slotsY = slotsY;
+        this.slotsX = container.getSlotsX();
+        this.slotsY = container.getSlotsY();
 
-        this.draw = draw;
+        this.draw = container::draw;
         draw.accept(this);
     }
 

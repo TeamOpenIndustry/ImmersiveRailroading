@@ -5,32 +5,22 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.container.SteamHammerContainer;
-import cam72cam.immersiverailroading.gui.container.SteamLocomotiveContainer;
-import cam72cam.immersiverailroading.gui.container.TankContainer;
-import cam72cam.immersiverailroading.gui.container.TenderContainer;
-import cam72cam.immersiverailroading.gui.container.FreightContainer;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.mod.gui.container.ServerContainer;
-import cam72cam.mod.sound.Audio;
-import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
-import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Registry;
 import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.ISound;
 import cam72cam.mod.world.World;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -39,8 +29,6 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
-import net.minecraftforge.fml.common.network.IGuiHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 
 import java.io.IOException;
@@ -49,7 +37,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
-public abstract class CommonProxy implements IGuiHandler {
+public abstract class CommonProxy {
 	protected static List<Supplier<Entity>> entityClasses = new ArrayList<>();
     static {
     	entityClasses.add(LocomotiveSteam::new);
@@ -61,7 +49,9 @@ public abstract class CommonProxy implements IGuiHandler {
     	entityClasses.add(HandCar::new);
     }
 
-    public void preInit(FMLPreInitializationEvent event) throws IOException {
+	public cam72cam.mod.gui.container.Registry GUI_REGISTRY;
+
+	public void preInit(FMLPreInitializationEvent event) throws IOException {
     	DefinitionManager.initDefinitions();
     	Config.init();
 
@@ -78,8 +68,7 @@ public abstract class CommonProxy implements IGuiHandler {
     	Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
         Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 
-
-    	NetworkRegistry.INSTANCE.registerGuiHandler(ImmersiveRailroading.instance, this);
+        this.GUI_REGISTRY = new cam72cam.mod.gui.container.Registry(ImmersiveRailroading.instance);
 
     	CompatLoader.load();
 
@@ -156,36 +145,6 @@ public abstract class CommonProxy implements IGuiHandler {
 	public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
 		return Audio.newSound(oggLocation, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
-
-    @Override
-    public Object getServerGuiElement(int ID, EntityPlayer player, net.minecraft.world.World worldIn, int entityIDorX, int y, int z) {
-		World world = World.get(worldIn);
-
-    	switch(GuiTypes.values()[ID]) {
-		case FREIGHT:
-			FreightContainer freight = new FreightContainer(world.getEntity(entityIDorX, CarFreight.class));
-			return new ServerContainer(player.inventory, freight.stock.getInventoryWidth(), freight.stock.getInventorySize() / freight.stock.getInventoryWidth(), freight::draw);
-		case TANK:
-		case DIESEL_LOCOMOTIVE:
-			TankContainer tank = new TankContainer(world.getEntity(entityIDorX, CarTank.class));
-			return new ServerContainer(player.inventory, 10, tank.stock.getInventorySize() / 10, tank::draw);
-		case TENDER:
-			TenderContainer tender = new TenderContainer(world.getEntity(entityIDorX, Tender.class));
-			return new ServerContainer(player.inventory, tender.stock.getInventoryWidth(), tender.stock.getInventorySize() / tender.stock.getInventoryWidth(), tender::draw);
-		case STEAM_LOCOMOTIVE:
-			SteamLocomotiveContainer loco = new SteamLocomotiveContainer(world.getEntity(entityIDorX, LocomotiveSteam.class));
-			return new ServerContainer(player.inventory, loco.stock.getInventoryWidth() * 2, loco.stock.getInventorySize() / loco.stock.getInventoryWidth(), loco::draw);
-		case STEAM_HAMMER:
-			TileMultiblock te = world.getBlockEntity(new Vec3i(entityIDorX, y, z), TileMultiblock.class);
-			if (te == null) {
-				return null;
-			}
-			SteamHammerContainer hammer = new SteamHammerContainer(te);
-			return new ServerContainer( player.inventory,10, 4, hammer::draw);
-		default:
-			return null;
-    	}
-    }
 
 	public int getRenderDistance() {
 		return 8;

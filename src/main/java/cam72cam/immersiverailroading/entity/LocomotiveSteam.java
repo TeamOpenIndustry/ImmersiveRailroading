@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.registry.Quilling.Chime;
+import cam72cam.mod.gui.container.Registry;
 import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -57,7 +58,7 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public GuiTypes guiType() {
+	public Registry.GUIType guiType() {
 		return GuiTypes.STEAM_LOCOMOTIVE;
 	}
 	

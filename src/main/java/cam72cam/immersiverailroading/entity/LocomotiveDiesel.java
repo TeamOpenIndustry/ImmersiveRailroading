@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
+import cam72cam.mod.gui.container.Registry;
 import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -40,7 +41,12 @@ public class LocomotiveDiesel extends Locomotive {
 		sync.setBoolean(TURNED_ON, false);
 		sync.setBoolean(ENGINE_OVERHEATED, false);
 	}
-	
+
+	@Override
+	public int getInventoryWidth() {
+		return 2;
+	}
+
 	public float getEngineTemperature() {
 		return sync.getFloat(ENGINE_TEMPERATURE);
 	}
@@ -78,7 +84,7 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
-	public GuiTypes guiType() {
+	public Registry.GUIType guiType() {
 		return GuiTypes.DIESEL_LOCOMOTIVE;
 	}
 	

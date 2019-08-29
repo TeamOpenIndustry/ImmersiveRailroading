@@ -1,7 +1,22 @@
 package cam72cam.immersiverailroading.library;
 
-public enum GuiTypes {
-	FREIGHT, TANK, TENDER, STEAM_LOCOMOTIVE, DIESEL_LOCOMOTIVE,
-	RAIL, RAIL_PREVIEW,
-	STEAM_HAMMER, CASTING, PLATE_ROLLER,
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.container.*;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.mod.gui.container.Registry.GUIType;
+
+public class GuiTypes {
+public static final GUIType FREIGHT = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(Freight.class, FreightContainer::new);
+public static final GUIType TANK = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(FreightTank.class, TankContainer::new);
+public static final GUIType TENDER = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(Tender.class, TenderContainer::new);
+public static final GUIType STEAM_LOCOMOTIVE = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(LocomotiveSteam.class, SteamLocomotiveContainer::new);
+public static final GUIType DIESEL_LOCOMOTIVE = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
+
+public static final GUIType RAIL = null;
+public static final GUIType RAIL_PREVIEW = null;
+
+public static final GUIType STEAM_HAMMER = ImmersiveRailroading.proxy.GUI_REGISTRY.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
+public static final GUIType CASTING = null;
+public static final GUIType PLATE_ROLLER = null;
 }

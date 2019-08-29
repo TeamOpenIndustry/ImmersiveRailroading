@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.world.World;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -43,11 +42,6 @@ public class ServerProxy extends CommonProxy {
 	public void init(FMLInitializationEvent event) {
 		super.init(event);
 	}
-
-    @Override
-    public Object getClientGuiElement(int ID, EntityPlayer player, net.minecraft.world.World world, int entityID, int nop1, int nop2) {
-    	return null;
-    }
 
 	@Override
 	public void addPreview(int dimension, TileRailPreview preview) {
