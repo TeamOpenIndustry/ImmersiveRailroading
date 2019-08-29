@@ -20,11 +20,11 @@ import java.util.function.Function;
 
 public class Registry {
 
-    private final ModContainer mod;
+    private final ImmersiveRailroading mod;
     private Map<Integer, Function<CreateEvent, Object>> registry = new HashMap<>();
 
     public Registry(ImmersiveRailroading modid) {
-        mod = FMLCommonHandler.instance().findContainerFor(modid);
+        mod = modid;
         NetworkRegistry.INSTANCE.registerGuiHandler(modid, new IGuiHandler() {
             @Nullable
             @Override

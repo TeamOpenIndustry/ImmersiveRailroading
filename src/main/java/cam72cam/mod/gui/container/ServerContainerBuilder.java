@@ -183,25 +183,25 @@ public class ServerContainerBuilder extends net.minecraft.inventory.Container im
         return true;
     }
 
-    /* TODO
     @Override
-    public final ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        ItemStack itemstack = ItemStack.EMPTY;
+    public final net.minecraft.item.ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+        net.minecraft.item.ItemStack itemstack = net.minecraft.item.ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
+        int numSlots = slotRefs.get(ContainerSection.CHEST).size();
 
         if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
+            net.minecraft.item.ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
-            if (index < numSlots()) {
-                if (!this.mergeItemStack(itemstack1, numSlots(), this.inventorySlots.size(), true)) {
-                    return ItemStack.EMPTY;
+            if (index < numSlots) {
+                if (!this.mergeItemStack(itemstack1, numSlots, this.inventorySlots.size(), true)) {
+                    return net.minecraft.item.ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, numSlots(), false)) {
-                return ItemStack.EMPTY;
+            } else if (!this.mergeItemStack(itemstack1, 0, numSlots, false)) {
+                return net.minecraft.item.ItemStack.EMPTY;
             }
 
             if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.putStack(net.minecraft.item.ItemStack.EMPTY);
             } else {
                 slot.onSlotChanged();
             }
@@ -209,5 +209,4 @@ public class ServerContainerBuilder extends net.minecraft.inventory.Container im
 
         return itemstack;
     }
-    */
 }
