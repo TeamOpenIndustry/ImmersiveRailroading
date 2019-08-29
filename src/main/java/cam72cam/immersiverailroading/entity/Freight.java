@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.*;
+import cam72cam.mod.gui.container.Registry;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
@@ -42,6 +43,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 
 	public abstract int getInventorySize();
+	public abstract int getInventoryWidth();
 
 	public boolean showCurrentLoadOnly() {
 		return this.getDefinition().shouldShowCurrentLoadOnly();
@@ -120,15 +122,14 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			}
 		}
 		
-		// I don't believe the positions are used
 		if (guiType() != null) {
-			player.internal.openGui(ImmersiveRailroading.instance, guiType().ordinal(), getWorld().internal, this.internal.getEntityId(), 0, 0);
+			ImmersiveRailroading.proxy.GUI_REGISTRY.openGUI(player, this, guiType());
 			return ClickResult.ACCEPTED;
 		}
 		return ClickResult.PASS;
 	}
 
-	protected GuiTypes guiType() {
+	protected Registry.GUIType guiType() {
 		return GuiTypes.FREIGHT;
 	}
 

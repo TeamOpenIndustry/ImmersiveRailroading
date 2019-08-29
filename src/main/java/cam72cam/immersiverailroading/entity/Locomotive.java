@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.UUID;
 
+import cam72cam.mod.gui.container.Registry;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -12,7 +13,6 @@ import cam72cam.mod.util.TagCompound;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
@@ -62,7 +62,7 @@ public abstract class Locomotive extends FreightTank {
 	 */
 
 	@Override
-	public GuiTypes guiType() {
+	public Registry.GUIType guiType() {
 		return null;
 	}
 

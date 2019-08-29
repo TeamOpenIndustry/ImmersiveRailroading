@@ -133,7 +133,7 @@ public class CastingMultiblock extends Multiblock {
 			} else {
 				if (world.isClient) {
 					Vec3i pos = getPos(craft);
-					player.internal.openGui(ImmersiveRailroading.instance, GuiTypes.CASTING.ordinal(), world.internal, pos.x, pos.y, pos.z);
+					ImmersiveRailroading.proxy.GUI_REGISTRY.openGUI(player, pos, GuiTypes.CASTING);
 				}
 			}
 			return true;

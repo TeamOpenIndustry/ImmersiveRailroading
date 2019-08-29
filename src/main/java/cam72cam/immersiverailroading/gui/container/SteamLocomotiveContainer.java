@@ -2,10 +2,11 @@ package cam72cam.immersiverailroading.gui.container;
 
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.mod.gui.container.IContainer;
+import cam72cam.mod.gui.container.IContainerBuilder;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 
-public class SteamLocomotiveContainer {
+public class SteamLocomotiveContainer implements IContainer {
     public final LocomotiveSteam stock;
     private final ItemStack template;
 
@@ -14,7 +15,7 @@ public class SteamLocomotiveContainer {
         this.template = Fuzzy.BUCKET.example();
     }
 
-    public void draw(IContainer container){
+    public void draw(IContainerBuilder container){
         int currY = 0;
         int horizSlots = stock.getInventoryWidth();
         int inventoryRows = (int) Math.ceil(((double)stock.getInventorySize()-2) / horizSlots);
@@ -45,5 +46,15 @@ public class SteamLocomotiveContainer {
 
         currY = container.drawPlayerInventoryConnector(0, currY, horizSlots);
         currY = container.drawPlayerInventory(currY, horizSlots*2);
+    }
+
+    @Override
+    public int getSlotsX() {
+        return stock.getInventoryWidth() * 2;
+    }
+
+    @Override
+    public int getSlotsY() {
+        return stock.getInventorySize() / stock.getInventoryWidth();
     }
 }

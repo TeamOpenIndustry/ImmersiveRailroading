@@ -60,4 +60,9 @@ public class HandCar extends Locomotive {
 	public List<Fluid> getFluidFilter() {
 		return new ArrayList<>();
 	}
+
+	@Override
+	public int getInventoryWidth() {
+		return 2;
+	}
 }

@@ -15,8 +15,8 @@ import org.lwjgl.opengl.GL11;
 
 import static cam72cam.immersiverailroading.gui.GUIHelpers.CHEST_GUI_TEXTURE;
 
-public class ClientContainer extends GuiContainer implements IContainer {
-    private final ServerContainer server;
+public class ClientContainerBuilder extends GuiContainer implements IContainerBuilder {
+    private final ServerContainerBuilder server;
     private int centerX;
     private int centerY;
 
@@ -31,7 +31,7 @@ public class ClientContainer extends GuiContainer implements IContainer {
     private static final int midBarOffset = 4;
     private static final int midBarHeight = 4;
 
-    public ClientContainer(ServerContainer serverContainer) {
+    public ClientContainerBuilder(ServerContainerBuilder serverContainer) {
         super(serverContainer);
         this.server = serverContainer;
         this.xSize = paddingRight + serverContainer.slotsX * slotSize + paddingLeft;
@@ -47,7 +47,7 @@ public class ClientContainer extends GuiContainer implements IContainer {
         server.draw.accept(this);
     }
 
-    /* IContainer */
+    /* IContainerBuilder */
 
     @Override
     public int drawTopBar(int x, int y, int slots) {
