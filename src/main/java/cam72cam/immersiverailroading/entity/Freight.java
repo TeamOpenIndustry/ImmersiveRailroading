@@ -34,6 +34,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	public Freight() {
 		this.sync.setInteger(CARGO_ITEMS, 0);
 		this.sync.setInteger(PERCENT_FULL, 0);
+
+		initContainerFilter();
 	}
 	
 	protected void onInventoryChanged() {
@@ -173,7 +175,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			}
 		}
 		handleMass();
-		initContainerFilter();
 	}
 	
 	protected void initContainerFilter() {
