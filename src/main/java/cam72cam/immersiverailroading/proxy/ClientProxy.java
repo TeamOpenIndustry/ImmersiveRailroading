@@ -131,11 +131,11 @@ public class ClientProxy extends CommonProxy {
 		case RAIL_PREVIEW:
 			return new TrackGui(world, entityIDorPosX, posY, posZ);
 		case STEAM_HAMMER:
-			te = world.getBlockEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
-			if (te == null || !te.isLoaded()) {
+			ServerContainer hammer = (ServerContainer) super.getServerGuiElement(ID, player, worldIn, entityIDorPosX, posY, posZ);
+			if (hammer == null) {
 				return null;
 			}
-			return new SteamHammerContainerGui(new SteamHammerContainer(player.inventory, te));
+			return new ClientContainer(hammer);
 		case PLATE_ROLLER:
 			te = world.getBlockEntity(new Vec3i(entityIDorPosX, posY, posZ), TileMultiblock.class);
 			if (te == null || !te.isLoaded()) {

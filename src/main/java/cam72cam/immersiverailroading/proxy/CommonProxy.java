@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.SteamHammerContainer;
+import cam72cam.immersiverailroading.gui.container.SteamHammerContainer;
 import cam72cam.immersiverailroading.gui.container.SteamLocomotiveContainer;
 import cam72cam.immersiverailroading.gui.container.TankContainer;
 import cam72cam.immersiverailroading.gui.container.TenderContainer;
@@ -180,7 +180,8 @@ public abstract class CommonProxy implements IGuiHandler {
 			if (te == null) {
 				return null;
 			}
-			return new SteamHammerContainer(player.inventory, te);
+			SteamHammerContainer hammer = new SteamHammerContainer(te);
+			return new ServerContainer( player.inventory,10, 4, hammer::draw);
 		default:
 			return null;
     	}
