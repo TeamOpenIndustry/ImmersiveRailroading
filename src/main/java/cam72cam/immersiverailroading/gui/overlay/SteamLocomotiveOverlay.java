@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
-import net.minecraftforge.fluids.Fluid;
+import cam72cam.mod.fluid.Fluid;
 
 public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 	public void draw() {
@@ -17,7 +17,7 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		}
 		LocomotiveSteam loco = (LocomotiveSteam) riding;
 		drawBackground(loco);
-		drawGauge(0xAA0F0FFF, ((float)loco.getLiquidAmount())/Fluid.BUCKET_VOLUME, loco.getTankCapacity().Buckets(), "B");
+		drawGauge(0xAA0F0FFF, ((float)loco.getLiquidAmount())/ Fluid.BUCKET_VOLUME, loco.getTankCapacity().Buckets(), "B");
 		drawGauge(0x99DDDDDD, loco.getBoilerPressure(), loco.getDefinition().getMaxPSI(loco.gauge), "PSI");
 		
 		int boilerColor = 0x99d1c715;
