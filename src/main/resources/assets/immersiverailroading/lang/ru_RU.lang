@@ -40,8 +40,8 @@ chat.immersiverailroading:coupler.status.coupled=%s сцепщик сцепле�
 chat.immersiverailroading:coupler.status.decoupled.engaged=%s сцепка расцеплена в стандартном режиме
 chat.immersiverailroading:coupler.status.decoupled.disengaged=%s сцепка расцеплена в маневровом режиме
 chat.immersiverailroading:build.missing=Недостает %s %s
-chat.immersiverailroading:augment.set=Set Augment to act only upon %s
-chat.immersiverailroading:augment.reset=Set Augment to act upon any stock
+chat.immersiverailroading:augment.set=Установлено условие, что данный элемент реагирует только на данный подвижной состав: %s
+chat.immersiverailroading:augment.reset=Установлено условие, что данный элемент реагирует на весь подвижной состав
 chat.immersiverailroading:misc.wood_planks=Деревянные доски
 chat.immersiverailroading:build.invalid_block=Несоответствующий блок на координатах: x=%s y=%s z=%s
 chat.immersiverailroading:radio.link=Радиоконтроллер подключен к локомотиву
