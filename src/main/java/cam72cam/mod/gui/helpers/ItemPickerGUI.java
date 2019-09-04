@@ -38,6 +38,10 @@ public class ItemPickerGUI {
 	}
 
 	public void show() {
+		if (this.items.size() == 1) {
+			onExit.accept(this.items.get(0));
+			return;
+		}
 		Minecraft.getMinecraft().displayGuiScreen(screen);
 	}
 

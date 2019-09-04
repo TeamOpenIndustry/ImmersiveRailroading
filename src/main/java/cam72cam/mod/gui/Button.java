@@ -35,4 +35,8 @@ public abstract class Button {
     public void setTextColor(int i) {
         button.packedFGColour = i;
     }
+
+    public void setVisible(boolean b) {
+        button.visible = b;
+    };
 }
