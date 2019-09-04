@@ -7,15 +7,15 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.util.Hand;
 
 public class ItemRailUpdatePacket extends Packet {
 	public ItemRailUpdatePacket() {
 		// Forge Reflection
 	}
 
-	public ItemRailUpdatePacket(int slot, RailSettings settings) {
+	public ItemRailUpdatePacket(RailSettings settings) {
 		super();
-		data.setInteger("slot", slot);
 		data.set("settings", settings.toNBT());
 	}
 
@@ -35,11 +35,10 @@ public class ItemRailUpdatePacket extends Packet {
 			ItemTrackBlueprint.settings(stack, settings);
 			tile.setItem(stack);
 		} else {
-			int slot = data.getInteger("slot");
 			Player player = this.getPlayer();
-			ItemStack stack = new ItemStack(player.internal.inventory.getStackInSlot(slot));
+			ItemStack stack = player.getHeldItem(Hand.PRIMARY);
 			ItemTrackBlueprint.settings(stack, settings);
-			player.internal.inventory.setInventorySlotContents(slot, stack.internal);
+			player.setHeldItem(Hand.PRIMARY, stack);
 		}
 	}
 }

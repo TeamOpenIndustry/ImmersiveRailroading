@@ -53,7 +53,7 @@ public class PlateRollerGUI implements IScreen {
 
 	@Override
 	public void init(IScreenBuilder screen) {
-		gaugeButton = screen.addButton(new Button(screen, 0 - 100, -24 + 0 * 30, GuiText.SELECTOR_GAUGE.toString(gauge)) {
+		gaugeButton = new Button(screen, 0 - 100, -24 + 0 * 30, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override
 			public void onClick(Hand hand) {
 				if(!currentItem.isEmpty()) {
@@ -69,9 +69,9 @@ public class PlateRollerGUI implements IScreen {
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
 				sendPacket();
 			}
-		});
+		};
 
-		plateButton = screen.addButton(new Button(screen, 0 - 100, -24 + 1 * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate)) {
+		plateButton = new Button(screen, 0 - 100, -24 + 1 * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate)) {
 			@Override
 			public void onClick(Hand hand) {
 				plate = PlateType.values()[((plate.ordinal() + 1) % (PlateType.values().length))];
@@ -79,9 +79,9 @@ public class PlateRollerGUI implements IScreen {
 				pickerButton.setVisible(plate == PlateType.BOILER);
 				sendPacket();
 			}
-		});
+		};
 
-		pickerButton = screen.addButton(new Button(screen, 0 - 100, -24 + 2 * 30, GuiText.SELECTOR_PLATE_BOILER.toString("")) {
+		pickerButton = new Button(screen, 0 - 100, -24 + 2 * 30, GuiText.SELECTOR_PLATE_BOILER.toString("")) {
 			@Override
 			public void onClick(Hand hand) {
 				CraftPicker.showCraftPicker(screen, null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
@@ -98,7 +98,7 @@ public class PlateRollerGUI implements IScreen {
 					}
 				});
 			}
-		});
+		};
 		pickerButton.setVisible(plate == PlateType.BOILER);
 		updatePickerButton();
 	}
