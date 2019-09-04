@@ -15,7 +15,6 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.gui.helpers.CraftPicker;
 import cam72cam.mod.item.ItemStack;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -28,8 +27,7 @@ public class PlateRollerGUI extends GuiScreen {
 	private PlateType plate;
 
 	private GuiButton pickerButton;
-	private CraftPicker picker;
-	
+
 	private TileMultiblock tile;
 	private ItemStack currentItem;
 	
@@ -42,7 +40,7 @@ public class PlateRollerGUI extends GuiScreen {
 		
 		gauge = ItemGauge.get(currentItem);
 		plate = ItemPlateType.get(currentItem);
-		picker = new CraftPicker(null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
+		CraftPicker.showCraftPicker(null, null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
         	this.mc.displayGuiScreen(this);
         	
         	if (item != null) {
@@ -110,7 +108,7 @@ public class PlateRollerGUI extends GuiScreen {
 			sendPacket();
 		}
 		if (button == pickerButton) {
-			this.mc.displayGuiScreen(picker);
+			//this.mc.displayGuiScreen(picker);
 		}
 	}
 	

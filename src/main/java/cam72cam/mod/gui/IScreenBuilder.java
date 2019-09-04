@@ -1,11 +1,7 @@
 package cam72cam.mod.gui;
 
-import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.resource.Identifier;
-
-import java.util.function.Consumer;
 
 public interface IScreenBuilder {
     void close();
@@ -19,5 +15,5 @@ public interface IScreenBuilder {
 
     void drawCenteredString(String str, int x, int y, int color);
 
-    void showCraftPicker(ItemStack currentItem, CraftingType casting, Consumer<ItemStack> o);
+    void show();
 }

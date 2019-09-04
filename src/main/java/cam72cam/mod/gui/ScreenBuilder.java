@@ -1,10 +1,7 @@
 package cam72cam.mod.gui;
 
-import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.gui.helpers.CraftPicker;
 import cam72cam.mod.gui.helpers.GUIHelpers;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.Hand;
 import net.minecraft.client.gui.GuiButton;
@@ -13,7 +10,6 @@ import net.minecraft.client.gui.GuiScreen;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 class ScreenBuilder extends GuiScreen implements IScreenBuilder {
     private final IScreen screen;
@@ -70,11 +66,8 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
     }
 
     @Override
-    public void showCraftPicker(ItemStack currentItem, CraftingType casting, Consumer<ItemStack> o) {
-        this.mc.displayGuiScreen(new CraftPicker(currentItem, casting, stack -> {
-            this.mc.displayGuiScreen(this);
-            o.accept(stack);
-        }));
+    public void show() {
+        this.mc.displayGuiScreen(this);
     }
 
     // GuiScreen

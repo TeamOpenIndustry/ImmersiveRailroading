@@ -136,15 +136,15 @@ public class TrackGui extends GuiScreen {
 	@Override
 	public void setWorldAndResolution(Minecraft mc, int width, int height) {
 		super.setWorldAndResolution(mc, width, height);
-		bedSelector.setWorldAndResolution(mc, width, height);
-		bedFillSelector.setWorldAndResolution(mc, width, height);
+		//bedSelector.setWorldAndResolution(mc, width, height);
+		//bedFillSelector.setWorldAndResolution(mc, width, height);
 	}
 	
 	@Override
 	public void setGuiSize(int w, int h) {
 		super.setGuiSize(w, h);
-		bedSelector.setGuiSize(w, h);
-		bedFillSelector.setGuiSize(w, h);
+		//bedSelector.setGuiSize(w, h);
+		//bedFillSelector.setGuiSize(w, h);
 	}
 	
 	public String getBedstackName() {
@@ -210,7 +210,7 @@ public class TrackGui extends GuiScreen {
 		isGradeCrossingCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing);
 		this.buttonList.add(isGradeCrossingCB);
 		
-		bedSelector.initGui();
+		//bedSelector.initGui();
 	}
 
 	@Override
@@ -240,10 +240,10 @@ public class TrackGui extends GuiScreen {
 			directionButton.displayString = GuiText.SELECTOR_DIRECTION.toString(direction);
 		}
 		if (button == bedTypeButton) {
-			this.mc.displayGuiScreen(bedSelector);
+			//this.mc.displayGuiScreen(bedSelector);
 		}
 		if (button == bedFillButton) {
-			this.mc.displayGuiScreen(bedFillSelector);
+			//this.mc.displayGuiScreen(bedFillSelector);
 		}
 		if (button == isPreviewCB) {
 			isPreview = isPreviewCB.isChecked();
