@@ -6,14 +6,18 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.Hand;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class ScreenBuilder extends GuiScreen implements IScreenBuilder {
     private final IScreen screen;
     private Map<GuiButton, Button> buttonMap = new HashMap<>();
+    private List<GuiTextField> textFields = new ArrayList<>();
 
     public ScreenBuilder(IScreen screen) {
         this.screen = screen;
@@ -32,10 +36,9 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
     }
 
     @Override
-    public Button addButton(Button btn) {
+    public void addButton(Button btn) {
         super.buttonList.add(btn.internal());
         this.buttonMap.put(btn.internal(), btn);
-        return btn;
     }
 
     @Override
@@ -70,6 +73,11 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
         this.mc.displayGuiScreen(this);
     }
 
+    @Override
+    public void addTextField(TextField textField) {
+        this.textFields.add(textField.internal());
+    }
+
     // GuiScreen
 
     @Override
@@ -85,13 +93,10 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
 
         screen.draw(this);
 
+        textFields.forEach(GuiTextField::drawTextBox);
+
         // draw buttons
         super.drawScreen(mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-
     }
 
     @Override
@@ -104,6 +109,8 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
         if (keyCode == 28 || keyCode == 156) {
             screen.onEnterKey(this);
         }
+
+        this.textFields.forEach(x -> x.textboxKeyTyped(typedChar, keyCode));
     }
 
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
@@ -120,6 +127,8 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
                 buttonMap.get(guibutton).onClick(mouseButton == 0 ? Hand.PRIMARY : Hand.SECONDARY);
             }
         }
+
+        this.textFields.forEach(x -> x.mouseClicked(mouseX, mouseY, mouseButton));
     }
 
     // Default overrides
@@ -127,5 +136,4 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
     public boolean doesGuiPauseGame() {
         return false;
     }
-
 }

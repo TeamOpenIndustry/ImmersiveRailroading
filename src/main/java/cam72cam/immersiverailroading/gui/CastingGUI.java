@@ -56,7 +56,7 @@ public class CastingGUI implements IScreen {
 
 	@Override
 	public void init(IScreenBuilder screen) {
-		pickerButton = screen.addButton(new Button(screen, -100, -20 - 10, GuiText.SELECTOR_TYPE.toString("")) {
+		pickerButton = new Button(screen, -100, -20 - 10, GuiText.SELECTOR_TYPE.toString("")) {
 			@Override
 			public void onClick(Hand hand) {
 				CraftPicker.showCraftPicker(screen, currentItem, CraftingType.CASTING, (ItemStack item) -> {
@@ -72,10 +72,10 @@ public class CastingGUI implements IScreen {
 					}
 				});
 			}
-		});
+		};
 		updatePickerButton();
 
-		gaugeButton = screen.addButton(new Button(screen, 0, -10, 100, 20, GuiText.SELECTOR_GAUGE.toString(gauge)) {
+		gaugeButton = new Button(screen, 0, -10, 100, 20, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override
 			public void onClick(Hand hand) {
 				if(!currentItem.isEmpty()) {
@@ -91,8 +91,8 @@ public class CastingGUI implements IScreen {
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
 				sendItemPacket();
 			}
-		});
-		singleCastButton = screen.addButton(new Button(screen, 0, +20 - 10, 100, 20, GuiText.SELECTOR_CAST_SINGLE.toString()) {
+		};
+		singleCastButton = new Button(screen, 0, +20 - 10, 100, 20, GuiText.SELECTOR_CAST_SINGLE.toString()) {
 			@Override
 			public void onClick(Hand hand) {
 				if (tile.getCraftMode() != CraftingMachineMode.SINGLE) {
@@ -105,8 +105,8 @@ public class CastingGUI implements IScreen {
 			public void onUpdate() {
 				singleCastButton.setTextColor(tile.getCraftMode() == CraftingMachineMode.SINGLE ? 0xcc4334 : 0);
 			}
-		});
-		repeatCastButton = screen.addButton(new Button(screen, 0, +40 - 10, 100, 20, GuiText.SELECTOR_CAST_REPEAT.toString()) {
+		};
+		repeatCastButton = new Button(screen, 0, +40 - 10, 100, 20, GuiText.SELECTOR_CAST_REPEAT.toString()) {
 			@Override
 			public void onClick(Hand hand) {
 				if (tile.getCraftMode() != CraftingMachineMode.REPEAT) {
@@ -119,7 +119,7 @@ public class CastingGUI implements IScreen {
 			public void onUpdate() {
 				repeatCastButton.setTextColor(tile.getCraftMode() == CraftingMachineMode.REPEAT ? 0xcc4334 : 0);
 			}
-		});
+		};
 	}
 
 	@Override

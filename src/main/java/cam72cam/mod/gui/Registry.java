@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 public class Registry {
@@ -64,6 +65,19 @@ public class Registry {
             this.z = z;
         }
     }
+
+
+    public GUIType register(String name, Supplier<IScreen> ctr) {
+        int id = name.hashCode();
+        registry.put(id, event -> {
+            if (event.isServer) {
+                return null;
+            }
+            return new ScreenBuilder(ctr.get());
+        });
+        return new GUIType(id);
+    }
+
     public <T extends BlockEntity> GUIType registerBlock(Class<T> cls, Function<T, IScreen> ctr) {
         int id = cls.toString().hashCode();
         registry.put(id, event -> {

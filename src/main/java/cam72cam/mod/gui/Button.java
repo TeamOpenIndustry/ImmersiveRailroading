@@ -12,6 +12,7 @@ public abstract class Button {
 
     public Button(IScreenBuilder builder, int x, int y, int width, int height, String text) {
         this.button = create(builder, x, y, width, height, text);
+        builder.addButton(this);
     }
 
     GuiButton create(IScreenBuilder builder, int x, int y, int width, int height, String text) {

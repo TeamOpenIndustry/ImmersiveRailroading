@@ -1,8 +1,10 @@
 package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.track.IIterableTrack;
@@ -145,8 +147,8 @@ public class TileRailPreview extends BlockEntityTickable {
 			}
 			return false;
 		} else {
+			ImmersiveRailroading.proxy.GUI_REGISTRY.openGUI(player, GuiTypes.RAIL_PREVIEW);
 			return !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE);
-			//TODO player.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL_PREVIEW.ordinal(), worldIn, pos.getX(), pos.getY(), pos.getZ());
 		}
 	}
 

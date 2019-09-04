@@ -5,7 +5,7 @@ import cam72cam.mod.resource.Identifier;
 
 public interface IScreenBuilder {
     void close();
-    Button addButton(Button btn);
+    void addButton(Button btn);
     int getWidth();
     int getHeight();
 
@@ -16,4 +16,6 @@ public interface IScreenBuilder {
     void drawCenteredString(String str, int x, int y, int color);
 
     void show();
+
+    void addTextField(TextField textField);
 }
