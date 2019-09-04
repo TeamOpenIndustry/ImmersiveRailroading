@@ -55,7 +55,7 @@ public class CraftPicker {
 			}
 		}
 		items.removeAll(toRemove);
-        
+
 
 		stockSelector = new ItemPickerGUI(stock, this::onStockExit);
 		toRemove = new ArrayList<ItemStack>();
@@ -83,6 +83,7 @@ public class CraftPicker {
         	stock.add(IRFuzzy.IR_STEEL_BLOCK.example());
 	        stock.addAll(IRItems.ITEM_AUGMENT.getItemVariants(ItemTabs.MAIN_TAB));
 		}
+		stockSelector.setItems(stock);
 		
 		itemSelector = new ItemPickerGUI(new ArrayList<>(), this::onItemExit);
 		if (current != null && current.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {

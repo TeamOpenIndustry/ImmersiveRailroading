@@ -3,7 +3,7 @@ package cam72cam.mod.gui;
 public interface IScreen {
     void init(IScreenBuilder screen);
 
-    void onEnterKey();
+    void onEnterKey(IScreenBuilder builder);
 
     void onClose();
 

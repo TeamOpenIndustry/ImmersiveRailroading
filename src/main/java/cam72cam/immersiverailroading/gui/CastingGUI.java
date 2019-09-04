@@ -123,7 +123,7 @@ public class CastingGUI implements IScreen {
 	}
 
 	@Override
-	public void onEnterKey() {
+	public void onEnterKey(IScreenBuilder b) {
 	}
 
 	@Override

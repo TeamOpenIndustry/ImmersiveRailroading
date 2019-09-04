@@ -102,7 +102,7 @@ class ScreenBuilder extends GuiScreen implements IScreenBuilder {
 
         // Enter
         if (keyCode == 28 || keyCode == 156) {
-            screen.onEnterKey();
+            screen.onEnterKey(this);
         }
     }
 

@@ -10,8 +10,6 @@ import cam72cam.mod.gui.container.ServerContainerBuilder;
 import cam72cam.mod.math.Vec3i;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
@@ -87,7 +85,7 @@ public class Registry {
     }
 
     public <T extends Entity> GUIType registerEntityContainer(Class<T> cls, Function<T, IContainer> ctr) {
-        int id = cls.toString().hashCode();
+        int id = ("container" + cls.toString()).hashCode();
         registry.put(id, event -> {
             T entity = event.player.getWorld().getEntity(event.entityIDorX, cls);
             if (entity == null) {
@@ -103,7 +101,7 @@ public class Registry {
     }
 
     public <T extends BlockEntity> GUIType registerBlockContainer(Class<T> cls, Function<T, IContainer> ctr) {
-        int id = cls.toString().hashCode();
+        int id = ("container" + cls.toString()).hashCode();
         registry.put(id, event -> {
             T entity = event.player.getWorld().getBlockEntity(new Vec3i(event.entityIDorX, event.y, event.z), cls);
             if (entity == null) {
