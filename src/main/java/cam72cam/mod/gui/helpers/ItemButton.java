@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.gui;
+package cam72cam.mod.gui.helpers;
 
 import cam72cam.mod.item.ItemStack;
 import org.lwjgl.opengl.GL11;
