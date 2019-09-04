@@ -59,7 +59,7 @@ public class CastingGUI implements IScreen {
 		pickerButton = screen.addButton(new Button(screen, -100, -20 - 10, GuiText.SELECTOR_TYPE.toString("")) {
 			@Override
 			public void onClick(Hand hand) {
-				screen.showCraftPicker(currentItem, CraftingType.CASTING, (ItemStack item) -> {
+				CraftPicker.showCraftPicker(screen, currentItem, CraftingType.CASTING, (ItemStack item) -> {
 					if (item != null) {
 						currentItem = item;
 						EntityRollingStockDefinition def = ItemDefinition.get(currentItem);

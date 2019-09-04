@@ -1,8 +1,4 @@
-package cam72cam.mod.gui.helpers;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTabs;
@@ -12,23 +8,34 @@ import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.mod.gui.IScreenBuilder;
+import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.NonNullList;
 
-public class CraftPicker extends GuiScreen {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+public class CraftPicker {
 	private ItemPickerGUI stockSelector;
 	private ItemPickerGUI itemSelector;
-	private NonNullList<ItemStack> items;
+	private List<ItemStack> items;
 	private Consumer<ItemStack> onChoose;
+
+	public static void showCraftPicker(IScreenBuilder screen, ItemStack current, CraftingType craftType, Consumer<ItemStack> onChoose) {
+		new CraftPicker(screen, current, craftType, onChoose);
+	}
 	
-	public CraftPicker(ItemStack current, CraftingType craftType, Consumer<ItemStack> onChoose) {
-		this.onChoose = onChoose;
-		this.items = NonNullList.create();
+	private CraftPicker(IScreenBuilder screen, ItemStack current, CraftingType craftType, Consumer<ItemStack> onChoose) {
+		this.onChoose = stack -> {
+			screen.show();
+			onChoose.accept(stack);
+		};
+		this.items = new ArrayList<>();
 		
         items.addAll(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getItemVariants(ItemTabs.COMPONENT_TAB));
         
-        NonNullList<ItemStack> stock = NonNullList.create();
+        List<ItemStack> stock = new ArrayList<>();
 
         stock.addAll(IRItems.ITEM_ROLLING_STOCK.getItemVariants(ItemTabs.LOCOMOTIVE_TAB));
         stock.addAll(IRItems.ITEM_ROLLING_STOCK.getItemVariants(ItemTabs.PASSENGER_TAB));
@@ -77,10 +84,20 @@ public class CraftPicker extends GuiScreen {
 	        stock.addAll(IRItems.ITEM_AUGMENT.getItemVariants(ItemTabs.MAIN_TAB));
 		}
 		
-		itemSelector = new ItemPickerGUI(NonNullList.create(), this::onItemExit);
+		itemSelector = new ItemPickerGUI(new ArrayList<>(), this::onItemExit);
 		if (current != null && current.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
 			itemSelector.choosenItem = current;
 		}
+
+		// Draw/init
+		if (stockSelector.choosenItem != null) {
+			setupItemSelector();
+			if (itemSelector.hasOptions()) {
+				itemSelector.show();
+				return;
+			}
+		}
+		stockSelector.show();
 	}
 	
 	private boolean isPartOf(ItemStack stock, ItemStack item) {
@@ -98,7 +115,7 @@ public class CraftPicker extends GuiScreen {
     }
 	
 	private void setupItemSelector() {
-		NonNullList<ItemStack> filteredItems = NonNullList.create();
+		List<ItemStack> filteredItems = new ArrayList<>();
 		for (ItemStack item : items) {
 			if (isPartOf(stockSelector.choosenItem, item)) {
 				filteredItems.add(item);
@@ -113,7 +130,7 @@ public class CraftPicker extends GuiScreen {
 		} else {
 			this.setupItemSelector();
 			if (itemSelector.hasOptions()) {
-        		this.mc.displayGuiScreen(itemSelector);
+				itemSelector.show();
 			} else {
 				this.itemSelector.choosenItem = null;
 	    		onChoose.accept(stack);
@@ -123,22 +140,9 @@ public class CraftPicker extends GuiScreen {
 	
 	private void onItemExit(ItemStack stack) {
 		if (stack == null) {
-    		this.mc.displayGuiScreen(stockSelector);
+			stockSelector.show();
 		} else {
 			onChoose.accept(stack);
 		}
 	}
-    
-    @Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-    	if (stockSelector.choosenItem != null) {
-    		setupItemSelector();
-			if (itemSelector.hasOptions()) {
-				this.mc.displayGuiScreen(itemSelector);
-				return;
-			}
-    	}
-		this.mc.displayGuiScreen(stockSelector);
-    }
 }
