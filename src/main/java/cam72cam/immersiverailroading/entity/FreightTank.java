@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidTank;
-import cam72cam.mod.gui.container.Registry;
+import cam72cam.mod.gui.Registry;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.TagCompound;
 import org.apache.commons.lang3.ArrayUtils;

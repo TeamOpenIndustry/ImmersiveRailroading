@@ -49,7 +49,7 @@ public abstract class CommonProxy {
     	entityClasses.add(HandCar::new);
     }
 
-	public cam72cam.mod.gui.container.Registry GUI_REGISTRY;
+	public cam72cam.mod.gui.Registry GUI_REGISTRY;
 
 	public void preInit(FMLPreInitializationEvent event) throws IOException {
     	DefinitionManager.initDefinitions();
@@ -68,7 +68,7 @@ public abstract class CommonProxy {
     	Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
         Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 
-        this.GUI_REGISTRY = new cam72cam.mod.gui.container.Registry(ImmersiveRailroading.instance);
+        this.GUI_REGISTRY = new cam72cam.mod.gui.Registry(ImmersiveRailroading.instance);
 
     	CompatLoader.load();
 

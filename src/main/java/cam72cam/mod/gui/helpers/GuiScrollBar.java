@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.gui;
+package cam72cam.mod.gui.helpers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.client.config.GuiSlider;

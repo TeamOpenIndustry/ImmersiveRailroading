@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.UUID;
 
-import cam72cam.mod.gui.container.Registry;
+import cam72cam.mod.gui.Registry;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;

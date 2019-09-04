@@ -2,9 +2,10 @@ package cam72cam.immersiverailroading.library;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.CastingGUI;
 import cam72cam.immersiverailroading.gui.container.*;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.gui.container.Registry.GUIType;
+import cam72cam.mod.gui.Registry.GUIType;
 
 public class GuiTypes {
 public static final GUIType FREIGHT = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(Freight.class, FreightContainer::new);
@@ -17,6 +18,6 @@ public static final GUIType RAIL = null;
 public static final GUIType RAIL_PREVIEW = null;
 
 public static final GUIType STEAM_HAMMER = ImmersiveRailroading.proxy.GUI_REGISTRY.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
-public static final GUIType CASTING = null;
+public static final GUIType CASTING = ImmersiveRailroading.proxy.GUI_REGISTRY.registerBlock(TileMultiblock.class, CastingGUI::new);
 public static final GUIType PLATE_ROLLER = null;
 }

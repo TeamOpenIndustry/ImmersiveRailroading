@@ -1,5 +1,6 @@
-package cam72cam.immersiverailroading.gui;
+package cam72cam.mod.gui.helpers;
 
+import cam72cam.mod.fluid.Fluid;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -10,7 +11,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.Fluid;
 
 public class GUIHelpers {
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
@@ -29,10 +29,10 @@ public class GUIHelpers {
 		Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-		bufferbuilder.pos((double)(x + 0), (double)(y + height), (double)zLevel ).endVertex();
-        bufferbuilder.pos((double)(x + width), (double)(y + height), (double)zLevel).endVertex();
-        bufferbuilder.pos((double)(x + width), (double)(y + 0), (double)zLevel).endVertex();
-        bufferbuilder.pos((double)(x + 0), (double)(y + 0), (double)zLevel).endVertex();
+		bufferbuilder.pos(x + 0, y + height, zLevel).endVertex();
+        bufferbuilder.pos(x + width, y + height, zLevel).endVertex();
+        bufferbuilder.pos(x + width, y + 0, zLevel).endVertex();
+        bufferbuilder.pos(x + 0, y + 0, zLevel).endVertex();
         tessellator.draw();
         
         GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -45,18 +45,18 @@ public class GUIHelpers {
 		Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		bufferbuilder.pos((double)(x + 0), (double)(y + height), (double)zLevel ).tex(0, 1).endVertex();
-        bufferbuilder.pos((double)(x + width), (double)(y + height), (double)zLevel).tex(1, 1).endVertex();
-        bufferbuilder.pos((double)(x + width), (double)(y + 0), (double)zLevel).tex(1, 0).endVertex();
-        bufferbuilder.pos((double)(x + 0), (double)(y + 0), (double)zLevel).tex(0, 0).endVertex();
+		bufferbuilder.pos(x + 0, y + height, zLevel).tex(0, 1).endVertex();
+        bufferbuilder.pos(x + width, y + height, zLevel).tex(1, 1).endVertex();
+        bufferbuilder.pos(x + width, y + 0, zLevel).tex(1, 0).endVertex();
+        bufferbuilder.pos(x + 0, y + 0, zLevel).tex(0, 0).endVertex();
         tessellator.draw();
 	}
     
     public static void drawFluid(Fluid fluid, double x, double d, double width, int height, int scale) {
-		TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fluid.getStill().toString());
+		TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fluid.internal.getStill().toString());
 		if(sprite != null)
 		{
-			drawSprite(sprite, fluid.getColor(), x, d, width, height, scale);
+			drawSprite(sprite, fluid.internal.getColor(), x, d, width, height, scale);
 		}
     }
     

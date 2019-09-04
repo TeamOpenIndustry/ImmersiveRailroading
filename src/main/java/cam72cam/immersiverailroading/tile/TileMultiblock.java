@@ -74,7 +74,8 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 
 	public boolean isLoaded() {
-    	return this.name != null;
+			//TODO FIX ME bad init
+    	return this.name != null && this.name.length() != 0;
     }
 
 	public void configure(String name, Rotation rot, Vec3i offset, BlockInfo replaced) {

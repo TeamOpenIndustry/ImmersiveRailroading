@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.gui;
+package cam72cam.mod.gui.helpers;
 
 import java.io.IOException;
 import java.util.List;
