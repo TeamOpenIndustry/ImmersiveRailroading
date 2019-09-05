@@ -14,7 +14,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.Hand;
 import com.google.common.base.Predicate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -156,7 +155,7 @@ public class TrackGui implements IScreen {
 					screen.show();
 				});
 				ip.choosenItem = bedFill;
-				((ItemPickerGUI) ip).show();
+				ip.show();
 			}
 		};
 
