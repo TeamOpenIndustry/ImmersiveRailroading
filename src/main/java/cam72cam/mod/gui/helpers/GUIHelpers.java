@@ -1,6 +1,8 @@
 package cam72cam.mod.gui.helpers;
 
 import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.resource.Identifier;
+import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -107,5 +109,21 @@ public class GUIHelpers {
 			drawRect(x, y + height - fullHeight, width, fullHeight, color);
     	}
     	GlStateManager.color(1, 1, 1, 1);
+	}
+
+	public static void drawCenteredString(String text, int x, int y, int color) {
+		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, (float)(x - Minecraft.getMinecraft().fontRenderer.getStringWidth(text) / 2), (float)y, color);
+	}
+
+	public static void bindTexture(Identifier tex) {
+		Minecraft.getMinecraft().renderEngine.bindTexture(tex.internal);
+	}
+
+	public static int getScreenWidth() {
+		return new ScaledResolution(Minecraft.getMinecraft()).getScaledWidth();
+	}
+
+	public static int getScreenHeight() {
+		return new ScaledResolution(Minecraft.getMinecraft()).getScaledHeight();
 	}
 }
