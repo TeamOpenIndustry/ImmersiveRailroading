@@ -127,7 +127,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (this.boundingBox == null) {
             this.boundingBox = this.getDefinition().getBounds(this, this.gauge)
                     .withHeightMap(this.getHeightMap())
-                    .contract(new Vec3d(0, 0.5, 0)).offset(new Vec3d(0, 0.5, 0));
+                    .contract(new Vec3d(0, 0.5 * this.gauge.scale(), 0)).offset(new Vec3d(0, 0.5 * this.gauge.scale(), 0));
         }
         return this.boundingBox;
     }
