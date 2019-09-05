@@ -189,6 +189,13 @@ public class World {
 
 
 
+    public <T extends BlockEntity> List<T> getBlockEntities(Class<T> cls) {
+        return internal.loadedTileEntityList.stream()
+                .filter(x -> x instanceof cam72cam.mod.block.tile.TileEntity && ((TileEntity) x).isLoaded() && cls.isInstance(((TileEntity) x).instance()))
+                .map(x -> (T)((TileEntity) x).instance())
+                .collect(Collectors.toList());
+    }
+
     public <T extends net.minecraft.tileentity.TileEntity> T getTileEntity(Vec3i pos, Class<T> cls) {
         return getTileEntity(pos, cls, true);
     }
