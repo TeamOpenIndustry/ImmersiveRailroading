@@ -11,12 +11,12 @@ public abstract class Button {
     }
 
     public Button(IScreenBuilder builder, int x, int y, int width, int height, String text) {
-        this.button = create(builder, x, y, width, height, text);
-        builder.addButton(this);
+        this(builder, new GuiButton(-1, builder.getWidth() / 2 + x, builder.getHeight() / 4 + y, width, height, text));
     }
 
-    GuiButton create(IScreenBuilder builder, int x, int y, int width, int height, String text) {
-        return new GuiButton(-1, builder.getWidth() / 2 + x, builder.getHeight() / 4 + y, width, height, text);
+    Button(IScreenBuilder builder, GuiButton button) {
+        this.button = button;
+        builder.addButton(this);
     }
 
     public void setText(String text) {
