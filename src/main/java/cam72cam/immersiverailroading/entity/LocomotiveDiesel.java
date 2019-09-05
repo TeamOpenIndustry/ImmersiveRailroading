@@ -274,7 +274,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			while (internalBurn < 0 && this.getLiquidAmount() > 0) {
 				internalBurn += burnTime;
-				theTank.drain(new FluidStack(theTank.getContents().getFluid(), 1), true);
+				theTank.drain(new FluidStack(theTank.getContents().getFluid(), 1), false);
 			}
 			
 			consumption *= 100;
