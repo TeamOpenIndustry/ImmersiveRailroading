@@ -23,6 +23,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class BlockRender {
@@ -40,10 +42,23 @@ public class BlockRender {
     private static final List<Consumer<ModelBakeEvent>> bakers = new ArrayList<>();
     private static final List<Runnable> colors = new ArrayList<>();
     private static final Map<Class<? extends BlockEntity>, Function<BlockEntity, StandardModel>> renderers = new HashMap<>();
+    private static List<net.minecraft.tileentity.TileEntity> prev = new ArrayList<>();
 
     @SubscribeEvent
     public static void onModelBakeEvent(ModelBakeEvent event) {
         bakers.forEach(baker -> baker.accept(event));
+    }
+
+    @SubscribeEvent
+    public static void onTick(TickEvent.ClientTickEvent tick) {
+        if (Minecraft.getMinecraft().world == null) {
+            return;
+        }
+        List<net.minecraft.tileentity.TileEntity> tes = Minecraft.getMinecraft().world.loadedTileEntityList.stream()
+                .filter(x -> x instanceof TileEntity && ((TileEntity) x).isLoaded())
+                .collect(Collectors.toList());
+        Minecraft.getMinecraft().renderGlobal.updateTileEntities(prev, tes);
+        prev = tes;
     }
 
     public static void onPostColorSetup() {
