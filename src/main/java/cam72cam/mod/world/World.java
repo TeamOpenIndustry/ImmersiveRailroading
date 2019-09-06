@@ -174,6 +174,9 @@ public class World {
 
 
 
+    public void keepLoaded(Vec3i pos) {
+        ChunkManager.flagEntityPos(this, pos);
+    }
 
 
 

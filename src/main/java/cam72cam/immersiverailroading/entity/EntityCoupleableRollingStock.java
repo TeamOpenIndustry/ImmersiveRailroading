@@ -11,7 +11,6 @@ import java.util.function.Function;
 
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.world.World;
-import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
@@ -28,7 +27,6 @@ import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.immersiverailroading.proxy.ChunkManager;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 
@@ -167,14 +165,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 		
 		if (this.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
-			ChunkManager.flagEntityPos(world, getBlockPosition());
-			ChunkManager.flagEntityPos(world, new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
-			ChunkManager.flagEntityPos(world, new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
+			world.keepLoaded(getBlockPosition());
+			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
+			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
 			if (this.lastKnownFront != null) {
-				ChunkManager.flagEntityPos(world, this.lastKnownFront);
+				world.keepLoaded(this.lastKnownFront);
 			}
 			if (this.lastKnownRear != null) {
-				ChunkManager.flagEntityPos(world, this.lastKnownRear);
+				world.keepLoaded(this.lastKnownRear);
 			}
 		}
 		
@@ -433,9 +431,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 		
 		if (nextPos.speed.metric() != 0) {
-			ChunkManager.flagEntityPos(getWorld(), new Vec3i(nextPos.position));
+			getWorld().keepLoaded(new Vec3i(nextPos.position));
 			for (CouplerType toChunk : CouplerType.values()) {
-				ChunkManager.flagEntityPos(getWorld(), new Vec3i(this.getCouplerPosition(toChunk, nextPos)));
+				getWorld().keepLoaded(new Vec3i(this.getCouplerPosition(toChunk, nextPos)));
 			}
 		}
 

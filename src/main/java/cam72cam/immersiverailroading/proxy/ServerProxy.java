@@ -10,8 +10,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.world.World;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
@@ -30,8 +28,8 @@ public class ServerProxy extends CommonProxy {
 	private static Map<UUID, UUID> logoffRide = new HashMap<UUID, UUID>();
 
 	@Override
-	public void preInit(FMLPreInitializationEvent event) throws IOException {
-		super.preInit(event);
+	public void preInit() {
+		super.preInit();
 		
 		for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
 			def.clearModel();
@@ -39,8 +37,8 @@ public class ServerProxy extends CommonProxy {
 	}
 	
 	@Override
-	public void init(FMLInitializationEvent event) {
-		super.init(event);
+	public void init() {
+		super.init();
 	}
 
 	@Override
