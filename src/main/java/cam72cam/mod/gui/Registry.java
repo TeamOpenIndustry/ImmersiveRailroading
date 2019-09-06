@@ -1,6 +1,6 @@
 package cam72cam.mod.gui;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -22,12 +22,12 @@ import java.util.function.Supplier;
 
 public class Registry {
 
-    private final ImmersiveRailroading mod;
+    private final ModCore mod;
     private Map<Integer, Function<CreateEvent, Object>> registry = new HashMap<>();
 
-    public Registry(ImmersiveRailroading modid) {
-        mod = modid;
-        NetworkRegistry.INSTANCE.registerGuiHandler(modid, new IGuiHandler() {
+    public Registry(ModCore.Mod modid) {
+        mod = modid.instance;
+        NetworkRegistry.INSTANCE.registerGuiHandler(mod, new IGuiHandler() {
             @Nullable
             @Override
             public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {

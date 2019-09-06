@@ -1,5 +1,6 @@
 package cam72cam.mod.entity;
 
+import cam72cam.mod.ModCore;
 import cam72cam.mod.world.World;
 import cam72cam.mod.resource.Identifier;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
@@ -16,14 +17,14 @@ public class Registry {
     private Registry() {
 
     }
-    public static void register(String modID, Supplier<Entity> ctr, EntitySettings settings, Object mod, int distance) {
+    public static void register(String modID, Supplier<Entity> ctr, EntitySettings settings, ModCore.Mod mod, int distance) {
         Entity tmp = ctr.get();
         Class<? extends Entity> type = tmp.getClass();
         Identifier id = new Identifier(modID, type.getSimpleName());
 
         // This has back-compat for older entity names
         // TODO expose updateFreq and vecUpdates
-        EntityRegistry.registerModEntity(id.internal, ModdedEntity.class, type.getSimpleName(), constructors.size(), mod, distance, 20, false);
+        EntityRegistry.registerModEntity(id.internal, ModdedEntity.class, type.getSimpleName(), constructors.size(), mod.instance, distance, 20, false);
 
         identifiers.put(type, id.toString());
         constructors.put(id.toString(), ctr);

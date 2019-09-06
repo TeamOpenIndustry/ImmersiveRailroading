@@ -63,9 +63,7 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -108,8 +106,8 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void preInit(FMLPreInitializationEvent event) throws IOException {
-		super.preInit(event);
+	public void preInit() {
+		super.preInit();
 		if (ConfigSound.overrideSoundChannels) {
 			SoundSystemConfig.setNumberNormalChannels(Math.max(SoundSystemConfig.getNumberNormalChannels(), 300));
 		}
@@ -149,8 +147,8 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void init(FMLInitializationEvent event) {
-		super.init(event);
+	public void init() {
+		super.init();
 		
 		keys.put(KeyTypes.THROTTLE_UP, new KeyBinding("ir_keys.increase_throttle", Keyboard.KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID));
 		keys.put(KeyTypes.THROTTLE_ZERO, new KeyBinding("ir_keys.zero_throttle", Keyboard.KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID));

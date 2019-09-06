@@ -23,8 +23,6 @@ import cam72cam.mod.sound.ISound;
 import cam72cam.mod.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -51,13 +49,17 @@ public abstract class CommonProxy {
 
 	public cam72cam.mod.gui.Registry GUI_REGISTRY;
 
-	public void preInit(FMLPreInitializationEvent event) throws IOException {
-    	DefinitionManager.initDefinitions();
-    	Config.init();
+	public void preInit() {
+		try {
+			DefinitionManager.initDefinitions();
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to load IR definitions", e);
+		}
+		Config.init();
 
     }
 
-    public void init(FMLInitializationEvent event) {
+    public void init() {
     	Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
     	Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
     	Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
@@ -112,7 +114,6 @@ public abstract class CommonProxy {
 
 
 		if (!event.world.isRemote) {
-			ChunkManager.handleWorldTick(event.world);
 			World world = World.get(event.world);
 			// We do this here as to let all the entities do their onTick first.  Otherwise some might be one onTick ahead
 			// if we did this in the onUpdate method

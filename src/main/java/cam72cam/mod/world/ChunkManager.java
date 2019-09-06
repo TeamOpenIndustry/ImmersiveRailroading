@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.proxy;
+package cam72cam.mod.world;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,12 +8,19 @@ import java.util.Map;
 import java.util.Set;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.proxy.ChunkPos;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManager.OrderedLoadingCallback{
+@Mod.EventBusSubscriber
+class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManager.OrderedLoadingCallback{
 	/*
 	 * This takes a similar approach to FTBUtilities
 	 * One massive ticket for each dim
@@ -26,15 +33,26 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 	
 	private static final Map<Integer, Ticket> TICKETS = new HashMap<Integer, Ticket>();
 	private static final Map<ChunkPos, Integer> CHUNK_MAP = new HashMap<ChunkPos, Integer>();
-	
-	public void init() {
+
+
+	private static ChunkManager instance;
+	@SubscribeEvent
+	public static void onWorldLoad(WorldEvent.Load event) {
+		if (instance == null) {
+			instance = new ChunkManager();
+			instance.init();
+		}
+	}
+
+
+	private void init() {
 		if (!ForgeChunkManager.getConfig().hasCategory(ImmersiveRailroading.MODID))
 		{
 			ForgeChunkManager.getConfig().get(ImmersiveRailroading.MODID, "maximumChunksPerTicket", 1000000).setMinValue(0);
 			ForgeChunkManager.getConfig().save();
 		}
 
-		ForgeChunkManager.setForcedChunkLoadingCallback(ImmersiveRailroading.instance, this);
+		ForgeChunkManager.setForcedChunkLoadingCallback(((ModCore.Mod)ImmersiveRailroading.instance).instance, this);
 	}
 
 	@Override
@@ -57,12 +75,12 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 	private static Ticket ticketForWorld(World world) {
 		int dim = world.provider.getDimension();
 		if (!TICKETS.containsKey(dim)) {
-			TICKETS.put(dim, ForgeChunkManager.requestTicket(ImmersiveRailroading.instance, world, ForgeChunkManager.Type.NORMAL));
+			TICKETS.put(dim, ForgeChunkManager.requestTicket(((ModCore.Mod)ImmersiveRailroading.instance).instance, world, ForgeChunkManager.Type.NORMAL));
 		}
 		return TICKETS.get(dim);
 	}
 
-	public static void flagEntityPos(cam72cam.mod.world.World world, Vec3i inPos) {
+	static void flagEntityPos(cam72cam.mod.world.World world, Vec3i inPos) {
 		if (world.isClient) {
 			return;
 		}
@@ -79,9 +97,15 @@ public class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChu
 		// max 5s before unload
 		CHUNK_MAP.put(pos, Math.max(100, Math.min(10, currTicks)));
 	}
-	
-	/* Call once per onTick */
-	public static void handleWorldTick(World world) {
+
+
+	@SubscribeEvent
+	public static void onWorldTick(TickEvent.WorldTickEvent event) {
+		if (event.phase != TickEvent.Phase.START) {
+			return;
+		}
+		World world = event.world;
+		
 		Ticket ticket;
 		try {
 			ticket = ticketForWorld(world);
