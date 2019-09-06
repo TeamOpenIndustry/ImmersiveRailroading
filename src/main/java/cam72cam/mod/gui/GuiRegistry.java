@@ -20,26 +20,25 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 
-public class Registry {
-
-    private final ModCore mod;
+public class GuiRegistry {
     private Map<Integer, Function<CreateEvent, Object>> registry = new HashMap<>();
 
-    public Registry(ModCore.Mod modid) {
-        mod = modid.instance;
-        NetworkRegistry.INSTANCE.registerGuiHandler(mod, new IGuiHandler() {
-            @Nullable
-            @Override
-            public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-                return registry.get(ID).apply(new CreateEvent(true, new Player(player), x, y, z));
-            }
+    public GuiRegistry(Class<? extends ModCore.Mod> type) {
+        ModCore.onInit(type, mod ->
+                NetworkRegistry.INSTANCE.registerGuiHandler(ModCore.instance, new IGuiHandler() {
+                    @Nullable
+                    @Override
+                    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+                        return registry.get(ID).apply(new CreateEvent(true, new Player(player), x, y, z));
+                    }
 
-            @Nullable
-            @Override
-            public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-                return registry.get(ID).apply(new CreateEvent(false, new Player(player), x, y, z));
-            }
-        });
+                    @Nullable
+                    @Override
+                    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+                        return registry.get(ID).apply(new CreateEvent(false, new Player(player), x, y, z));
+                    }
+                })
+        );
     }
 
     public static class GUIType {
@@ -131,12 +130,12 @@ public class Registry {
     }
 
     public void openGUI(Player player, GUIType type) {
-        player.internal.openGui(mod, type.id, player.getWorld().internal, 0, 0, 0);
+        player.internal.openGui(ModCore.instance, type.id, player.getWorld().internal, 0, 0, 0);
     }
     public void openGUI(Player player, Entity ent, GUIType type) {
-        player.internal.openGui(mod, type.id, player.getWorld().internal, ent.internal.getEntityId(), 0, 0);
+        player.internal.openGui(ModCore.instance, type.id, player.getWorld().internal, ent.internal.getEntityId(), 0, 0);
     }
     public void openGUI(Player player, Vec3i pos, GUIType type) {
-        player.internal.openGui(mod, type.id, player.getWorld().internal, pos.x, pos.y, pos.z);
+        player.internal.openGui(ModCore.instance, type.id, player.getWorld().internal, pos.x, pos.y, pos.z);
     }
 }

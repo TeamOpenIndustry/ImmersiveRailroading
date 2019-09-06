@@ -23,7 +23,6 @@ import cam72cam.mod.sound.ISound;
 import cam72cam.mod.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
@@ -47,8 +46,6 @@ public abstract class CommonProxy {
     	entityClasses.add(HandCar::new);
     }
 
-	public cam72cam.mod.gui.Registry GUI_REGISTRY;
-
 	public void preInit() {
 		try {
 			DefinitionManager.initDefinitions();
@@ -70,7 +67,6 @@ public abstract class CommonProxy {
     	Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
         Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 
-        this.GUI_REGISTRY = new cam72cam.mod.gui.Registry(ImmersiveRailroading.instance);
 
     	CompatLoader.load();
 
@@ -92,11 +88,6 @@ public abstract class CommonProxy {
 
 		IRFuzzy.applyFallbacks();
     }
-
-
-	public void serverStarting(FMLServerStartingEvent event) {
-		event.registerServerCommand(new IRCommand());
-	}
 
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {

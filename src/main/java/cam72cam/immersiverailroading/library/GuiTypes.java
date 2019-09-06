@@ -11,20 +11,20 @@ import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.gui.IScreen;
-import cam72cam.mod.gui.Registry.GUIType;
+import cam72cam.mod.gui.GuiRegistry.GUIType;
 
 public class GuiTypes {
-    public static final GUIType FREIGHT = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(Freight.class, FreightContainer::new);
-    public static final GUIType TANK = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(FreightTank.class, TankContainer::new);
-    public static final GUIType TENDER = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(Tender.class, TenderContainer::new);
-    public static final GUIType STEAM_LOCOMOTIVE = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(LocomotiveSteam.class, SteamLocomotiveContainer::new);
-    public static final GUIType DIESEL_LOCOMOTIVE = ImmersiveRailroading.proxy.GUI_REGISTRY.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
+    public static final GUIType FREIGHT = ImmersiveRailroading.GUI_REGISTRY.registerEntityContainer(Freight.class, FreightContainer::new);
+    public static final GUIType TANK = ImmersiveRailroading.GUI_REGISTRY.registerEntityContainer(FreightTank.class, TankContainer::new);
+    public static final GUIType TENDER = ImmersiveRailroading.GUI_REGISTRY.registerEntityContainer(Tender.class, TenderContainer::new);
+    public static final GUIType STEAM_LOCOMOTIVE = ImmersiveRailroading.GUI_REGISTRY.registerEntityContainer(LocomotiveSteam.class, SteamLocomotiveContainer::new);
+    public static final GUIType DIESEL_LOCOMOTIVE = ImmersiveRailroading.GUI_REGISTRY.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
 
-    public static final GUIType RAIL = ImmersiveRailroading.proxy.GUI_REGISTRY.register("RAIL", TrackGui::new);
-    public static final GUIType RAIL_PREVIEW = ImmersiveRailroading.proxy.GUI_REGISTRY.registerBlock(TileRailPreview.class, TrackGui::new);
+    public static final GUIType RAIL = ImmersiveRailroading.GUI_REGISTRY.register("RAIL", TrackGui::new);
+    public static final GUIType RAIL_PREVIEW = ImmersiveRailroading.GUI_REGISTRY.registerBlock(TileRailPreview.class, TrackGui::new);
 
-    public static final GUIType STEAM_HAMMER = ImmersiveRailroading.proxy.GUI_REGISTRY.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
-    public static final GUIType CASTING = ImmersiveRailroading.proxy.GUI_REGISTRY.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);
+    public static final GUIType STEAM_HAMMER = ImmersiveRailroading.GUI_REGISTRY.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
+    public static final GUIType CASTING = ImmersiveRailroading.GUI_REGISTRY.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);
     public static final GUIType PLATE_ROLLER = CASTING;
     private static IScreen createMultiblockScreen(TileMultiblock mb) {
         if (!mb.isLoaded()) {

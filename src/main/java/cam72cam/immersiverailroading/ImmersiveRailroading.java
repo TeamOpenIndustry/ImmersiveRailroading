@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.mod.ModCore;
+import cam72cam.mod.gui.GuiRegistry;
 import net.minecraftforge.fml.common.SidedProxy;
 
 public class ImmersiveRailroading extends ModCore.Mod {
@@ -12,6 +13,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 	public static final int ENTITY_SYNC_DISTANCE = 512;
 	public static ImmersiveRailroading instance;
+
+	public static GuiRegistry GUI_REGISTRY = new GuiRegistry(ImmersiveRailroading.class);
 
     static {
     	ModCore.register(ImmersiveRailroading::new);

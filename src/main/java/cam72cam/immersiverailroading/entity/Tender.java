@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
 import cam72cam.immersiverailroading.util.LiquidUtil;
 import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.gui.Registry;
+import cam72cam.mod.gui.GuiRegistry;
 
 public class Tender extends CarTank {
 	@Override
@@ -16,7 +16,7 @@ public class Tender extends CarTank {
 	}
 	
 	@Override
-	public Registry.GUIType guiType() {
+	public GuiRegistry.GUIType guiType() {
 		return GuiTypes.TENDER;
 	}
 

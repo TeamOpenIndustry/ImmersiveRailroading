@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidTank;
-import cam72cam.mod.gui.Registry;
+import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.TagCompound;
 import org.apache.commons.lang3.ArrayUtils;
@@ -144,7 +144,7 @@ public abstract class FreightTank extends Freight {
 	 */
 
 	@Override
-	public Registry.GUIType guiType() {
+	public GuiRegistry.GUIType guiType() {
 		return GuiTypes.TANK;
 	}
 
