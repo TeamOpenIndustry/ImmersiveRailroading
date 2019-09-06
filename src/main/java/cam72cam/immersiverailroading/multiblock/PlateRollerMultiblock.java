@@ -110,7 +110,7 @@ public class PlateRollerMultiblock extends Multiblock {
 				
 				if (world.isClient) {
 					Vec3i pos = getPos(crafter);
-					ImmersiveRailroading.proxy.GUI_REGISTRY.openGUI(player, pos, GuiTypes.PLATE_ROLLER);
+					ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.PLATE_ROLLER);
 				}
 				return true;
 			}
