@@ -60,14 +60,12 @@ public class Audio {
             World world = null;
             if (player != null) {
                 world = player.getWorld();
+                soundManager.tick();
             }
 
             if (world == null && soundManager != null && soundManager.hasSounds()) {
                 soundManager.stop();
             }
-
-            soundManager.tick();
-
         }
 
         @SubscribeEvent

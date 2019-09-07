@@ -2,8 +2,10 @@ package cam72cam.mod;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.proxy.IRCommand;
+import cam72cam.mod.render.BlockRender;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -39,7 +41,13 @@ public class ModCore {
         }
 
         public abstract String modID();
+
+        protected void initClient() {}
+        protected void initServer() {}
+
         protected abstract void setup();
+        protected void setupClient() {}
+        protected void setupServer() {}
     }
 
     @EventHandler
@@ -53,21 +61,55 @@ public class ModCore {
 
         mods = modCtrs.stream().map(Supplier::get).collect(Collectors.toList());
         mods.forEach(Mod::init);
+        proxy.init();
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
         mods.forEach(Mod::setup);
         onInit.forEach(Runnable::run);
+        proxy.setup();
     }
 
     public static void onInit(Class<? extends Mod> type, Consumer<Mod> fn) {
         onInit.add(() -> instance.mods.stream().filter(type::isInstance).findFirst().ifPresent(fn));
     }
 
-
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(new IRCommand());
     }
+
+    public static abstract class Proxy {
+        public abstract void init();
+        public abstract void setup();
+    }
+
+    public static class ClientProxy extends Proxy {
+        @Override
+        public void init() {
+            instance.mods.forEach(Mod::initClient);
+        }
+
+        @Override
+        public void setup() {
+            instance.mods.forEach(Mod::setupClient);
+            BlockRender.onPostColorSetup();
+        }
+    }
+
+    public static class ServerProxy extends Proxy {
+        @Override
+        public void init() {
+            instance.mods.forEach(Mod::initServer);
+        }
+
+        @Override
+        public void setup() {
+            instance.mods.forEach(Mod::setupServer);
+        }
+    }
+
+    @SidedProxy(serverSide = "cam72cam.mod.ModCore$ServerProxy", clientSide = "cam72cam.mod.ModCore$ClientProxy")
+    private static Proxy proxy;
 }
