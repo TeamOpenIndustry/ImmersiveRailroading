@@ -211,4 +211,8 @@ public class Entity {
     public void startRiding(Entity entity) {
         internal.startRiding(entity.internal);
     }
+
+    public float getRidingSoundModifier() {
+        return 1;
+    }
 }
