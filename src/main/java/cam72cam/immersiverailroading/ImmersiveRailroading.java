@@ -73,6 +73,9 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		}
 
 		Config.init();
+
+		IRBlocks.register();
+		IRItems.register();
 	}
 
 	@Override

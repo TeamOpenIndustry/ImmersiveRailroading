@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class Audio {
 
@@ -46,7 +47,7 @@ public class Audio {
         }
     }
 
-    @Mod.EventBusSubscriber
+    @Mod.EventBusSubscriber(Side.CLIENT)
     public static class ClientProxy implements IAudioProxy {
         private static ModSoundManager soundManager;
 
