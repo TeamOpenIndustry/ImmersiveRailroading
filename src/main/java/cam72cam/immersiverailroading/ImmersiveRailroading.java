@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.entity.RenderOverride;
@@ -26,7 +27,9 @@ import cam72cam.mod.render.*;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 import org.lwjgl.opengl.GL11;
 import paulscode.sound.SoundSystemConfig;
 
@@ -69,7 +72,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 			throw new RuntimeException("Unable to load IR definitions", e);
 		}
 
-		proxy.preInit();
+		Config.init();
 	}
 
 	@Override
@@ -129,6 +132,17 @@ public class ImmersiveRailroading extends ModCore.Mod {
 			RenderOverride.renderTiles(partialTicks);
 			RenderOverride.renderParticles(partialTicks);
 		});
+
+		if (Loader.isModLoaded("igwmod")) {
+			FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
+		}
+	}
+
+	@Override
+	protected void initServer() {
+		for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
+			def.clearModel();
+		}
 	}
 
 	public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {

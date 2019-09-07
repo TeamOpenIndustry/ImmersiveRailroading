@@ -100,16 +100,6 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void preInit() {
-		super.preInit();
-
-		if (Loader.isModLoaded("igwmod")) {
-			FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
-		}
-
-	}
-
-	@Override
 	public void init() {
 		super.init();
 		
