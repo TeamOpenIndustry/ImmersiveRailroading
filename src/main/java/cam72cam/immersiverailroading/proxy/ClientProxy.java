@@ -382,11 +382,6 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public int getRenderDistance() {
-		return Minecraft.getMinecraft().gameSettings.renderDistanceChunks;
-	}
-
-	@Override
 	public void addPreview(int dimension, TileRailPreview preview) {
 		/* TODO HACKS
 		if (!previews.containsKey(dimension)) {
