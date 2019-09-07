@@ -6,15 +6,29 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.render.StockRenderCache;
+import cam72cam.immersiverailroading.render.block.RailBaseModel;
+import cam72cam.immersiverailroading.render.entity.RenderOverride;
+import cam72cam.immersiverailroading.render.item.*;
+import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
+import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailGag;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.render.*;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import net.minecraftforge.fml.common.SidedProxy;
+import org.lwjgl.opengl.GL11;
+import paulscode.sound.SoundSystemConfig;
 
 import java.io.IOException;
 
@@ -70,6 +84,51 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 		IRFuzzy.applyFallbacks();
 		CompatLoader.load();
+	}
+
+	@Override
+	protected void initClient() {
+		if (ConfigSound.overrideSoundChannels) {
+			SoundSystemConfig.setNumberNormalChannels(Math.max(SoundSystemConfig.getNumberNormalChannels(), 300));
+		}
+		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, Rail.class);
+		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailGag.class);
+		BlockRender.register(IRBlocks.BLOCK_RAIL_PREVIEW, RailPreviewRender::render, TileRailPreview.class);
+		BlockRender.register(IRBlocks.BLOCK_MULTIBLOCK, TileMultiblockRender::render, TileMultiblock.class);
+
+		ItemRender.register(IRItems.ITEM_PLATE, PlateItemModel::getModel);
+		ItemRender.register(IRItems.ITEM_AUGMENT, RailAugmentItemModel::getModel);
+		ItemRender.register(IRItems.ITEM_RAIL, RailItemRender::getModel);
+		ItemRender.register(IRItems.ITEM_CAST_RAIL, RailCastItemRender::getModel);
+		ItemRender.register(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::getModel);
+		ItemRender.register(IRItems.ITEM_ROLLING_STOCK_COMPONENT, StockItemComponentModel::getModel);
+		ItemRender.register(IRItems.ITEM_ROLLING_STOCK, StockItemModel::getModel, StockItemModel::getIcon);
+
+
+		IEntityRender<EntityRollingStock> stockRender = (entity, partialTicks) -> {
+			GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
+			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+
+			String def = entity.getDefinitionID();
+
+			StockRenderCache.getRender(def).draw(entity, partialTicks);
+
+			cull.restore();
+			light.restore();
+		};
+		EntityRenderer.register(LocomotiveSteam.class, stockRender);
+		EntityRenderer.register(LocomotiveDiesel.class, stockRender);
+		EntityRenderer.register(CarPassenger.class, stockRender);
+		EntityRenderer.register(CarFreight.class, stockRender);
+		EntityRenderer.register(CarTank.class, stockRender);
+		EntityRenderer.register(Tender.class, stockRender);
+		EntityRenderer.register(HandCar.class, stockRender);
+
+
+		GlobalRender.registerRender(partialTicks -> {
+			RenderOverride.renderTiles(partialTicks);
+			RenderOverride.renderParticles(partialTicks);
+		});
 	}
 
 	public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {

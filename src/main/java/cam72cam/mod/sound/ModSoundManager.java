@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.resource.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -99,7 +100,7 @@ public class ModSoundManager {
 		}
 		
 
-		if (Minecraft.getMinecraft().player.ticksExisted % 20 == 0) {
+		if (MinecraftClient.getPlayer().getTickCount() % 20 == 0) {
 			// Clean up disposed sounds
 			
 			List<ISound> toRemove = new ArrayList<ISound>();

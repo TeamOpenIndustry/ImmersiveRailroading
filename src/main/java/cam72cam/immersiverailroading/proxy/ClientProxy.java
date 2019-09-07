@@ -1,10 +1,10 @@
 package cam72cam.immersiverailroading.proxy;
 
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
@@ -16,16 +16,12 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
-import cam72cam.immersiverailroading.render.StockRenderCache;
-import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
 import cam72cam.immersiverailroading.render.entity.RenderOverride;
-import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
-import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
-import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.tile.*;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -35,7 +31,7 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.*;
+import cam72cam.mod.render.GPUInfo;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
@@ -74,7 +70,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
-import paulscode.sound.SoundSystemConfig;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -107,42 +102,11 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void preInit() {
 		super.preInit();
-		if (ConfigSound.overrideSoundChannels) {
-			SoundSystemConfig.setNumberNormalChannels(Math.max(SoundSystemConfig.getNumberNormalChannels(), 300));
-		}
-		
+
 		if (Loader.isModLoaded("igwmod")) {
 			FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
 		}
 
-		BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, Rail.class);
-		BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailGag.class);
-		BlockRender.register(IRBlocks.BLOCK_RAIL_PREVIEW, RailPreviewRender::render, TileRailPreview.class);
-		BlockRender.register(IRBlocks.BLOCK_MULTIBLOCK, TileMultiblockRender::render, TileMultiblock.class);
-
-		ItemRender.register(IRItems.ITEM_PLATE, PlateItemModel::getModel);
-		ItemRender.register(IRItems.ITEM_AUGMENT, RailAugmentItemModel::getModel);
-		ItemRender.register(IRItems.ITEM_RAIL, RailItemRender::getModel);
-		ItemRender.register(IRItems.ITEM_CAST_RAIL, RailCastItemRender::getModel);
-		ItemRender.register(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::getModel);
-		ItemRender.register(IRItems.ITEM_ROLLING_STOCK_COMPONENT, StockItemComponentModel::getModel);
-		ItemRender.register(IRItems.ITEM_ROLLING_STOCK, StockItemModel::getModel, StockItemModel::getIcon);
-
-
-		IEntityRender<EntityRollingStock> stockRender = ClientProxy::stockRender;
-		EntityRenderer.register(LocomotiveSteam.class, stockRender);
-		EntityRenderer.register(LocomotiveDiesel.class, stockRender);
-		EntityRenderer.register(CarPassenger.class, stockRender);
-		EntityRenderer.register(CarFreight.class, stockRender);
-		EntityRenderer.register(CarTank.class, stockRender);
-		EntityRenderer.register(Tender.class, stockRender);
-		EntityRenderer.register(HandCar.class, stockRender);
-
-
-		GlobalRender.registerRender(partialTicks -> {
-			RenderOverride.renderTiles(partialTicks);
-			RenderOverride.renderParticles(partialTicks);
-		});
 	}
 
 	@Override
@@ -172,20 +136,6 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.START_STOP_ENGINE));
 		
 		((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ClientResourceReloadListener());
-
-		BlockRender.onPostColorSetup();
-	}
-
-	private static void stockRender(EntityRollingStock entity, float partialTicks) {
-		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
-		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-
-		String def = entity.getDefinitionID();
-
-		StockRenderCache.getRender(def).draw(entity, partialTicks);
-
-		cull.restore();
-		light.restore();
 	}
 
 
@@ -422,13 +372,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	
-	@SubscribeEvent
-	public static void onWorldUnload(Unload event) {
-		//soundManager.stop();
-		//sndCache = null;
-	}
-	
 
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
