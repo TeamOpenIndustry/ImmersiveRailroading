@@ -3,32 +3,34 @@ package cam72cam.mod.entity;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.world.World;
 import cam72cam.mod.resource.Identifier;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class Registry {
+public class EntityRegistry {
     private static final Map<Class<? extends Entity>, String> identifiers = new HashMap<>();
     private static final Map<String, Supplier<Entity>> constructors = new HashMap<>();
     private static final Map<String, EntitySettings> registered = new HashMap<>();
 
-    private Registry() {
+    private EntityRegistry() {
 
     }
-    public static void register(String modID, Supplier<Entity> ctr, EntitySettings settings, ModCore.Mod mod, int distance) {
+    public static void register(Class<? extends ModCore.Mod> cls, Supplier<Entity> ctr, EntitySettings settings, int distance) {
         Entity tmp = ctr.get();
         Class<? extends Entity> type = tmp.getClass();
-        Identifier id = new Identifier(modID, type.getSimpleName());
 
-        // This has back-compat for older entity names
-        // TODO expose updateFreq and vecUpdates
-        EntityRegistry.registerModEntity(id.internal, ModdedEntity.class, type.getSimpleName(), constructors.size(), mod.instance, distance, 20, false);
+        ModCore.onInit(cls, mod -> {
+            Identifier id = new Identifier(mod.modID(), type.getSimpleName());
 
-        identifiers.put(type, id.toString());
-        constructors.put(id.toString(), ctr);
-        registered.put(id.toString(), settings);
+            // This has back-compat for older entity names
+            // TODO expose updateFreq and vecUpdates
+            net.minecraftforge.fml.common.registry.EntityRegistry.registerModEntity(id.internal, ModdedEntity.class, type.getSimpleName(), constructors.size(), mod.instance, distance, 20, false);
+
+            identifiers.put(type, id.toString());
+            constructors.put(id.toString(), ctr);
+            registered.put(id.toString(), settings);
+        });
     }
     public static EntitySettings getSettings(String type) {
         return registered.get(type);

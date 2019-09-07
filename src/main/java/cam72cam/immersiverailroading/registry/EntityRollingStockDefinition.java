@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.util.RealBB;
-import cam72cam.mod.entity.Registry;
+import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.resource.Identifier;
@@ -84,7 +84,7 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public final EntityRollingStock spawn(World world, Vec3d pos, float yaw, Gauge gauge, String texture) {
-        EntityRollingStock stock = (EntityRollingStock) Registry.create(world, type);
+        EntityRollingStock stock = (EntityRollingStock) EntityRegistry.create(world, type);
         stock.setPosition(pos);
         stock.setRotationYaw(yaw);
         // Override prev

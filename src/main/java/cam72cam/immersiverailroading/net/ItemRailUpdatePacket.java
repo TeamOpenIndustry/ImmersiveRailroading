@@ -7,9 +7,13 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.util.Hand;
 
 public class ItemRailUpdatePacket extends Packet {
+	static {
+		Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
+	}
 	public ItemRailUpdatePacket() {
 		// Forge Reflection
 	}

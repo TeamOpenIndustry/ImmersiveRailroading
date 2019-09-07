@@ -5,8 +5,13 @@ import cam72cam.mod.net.Packet;
 
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.mod.net.PacketDirection;
 
 public class KeyPressPacket extends Packet {
+	static {
+		Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
+	}
+
 	public KeyPressPacket() {
 		// Forge Reflection
 	}

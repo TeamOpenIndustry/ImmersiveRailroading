@@ -2,9 +2,13 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.util.Hand;
 
 public class MousePressPacket extends Packet {
+	static {
+		Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
+	}
 	public MousePressPacket() {
 		// Forge Reflection
 	}
