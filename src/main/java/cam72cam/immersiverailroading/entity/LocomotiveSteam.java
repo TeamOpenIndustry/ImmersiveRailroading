@@ -202,23 +202,23 @@ public class LocomotiveSteam extends Locomotive {
 			
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
-					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
-					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
+					this.whistle = ImmersiveRailroading.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
+					this.bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 					whistle.setPitch(1);
 					
 					if (this.getDefinition().quill != null) {
 						for (Chime chime : this.getDefinition().quill.chimes) {
-							this.chimes.add(ImmersiveRailroading.proxy.newSound(chime.sample, true, 150, this.soundGauge()));
+							this.chimes.add(ImmersiveRailroading.newSound(chime.sample, true, 150, this.soundGauge()));
 						}
 					}
 	
 					for (int i = 0; i < 32; i ++) {
-						sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, this.soundGauge()));
+						sndCache.add(ImmersiveRailroading.newSound(this.getDefinition().chuff, false, 80, this.soundGauge()));
 					}
 					
-					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40, this.soundGauge());
+					this.idle = ImmersiveRailroading.newSound(this.getDefinition().idle, true, 40, this.soundGauge());
 					idle.setVolume(0.1f);
-					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, this.soundGauge());
+					this.pressure = ImmersiveRailroading.newSound(this.getDefinition().pressure, true, 40, this.soundGauge());
 					pressure.setVolume(0.3f);
 				}
 				

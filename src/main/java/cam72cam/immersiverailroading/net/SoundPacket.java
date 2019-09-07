@@ -34,7 +34,7 @@ public class SoundPacket extends Packet {
 		float pitch = data.getFloat("pitch");
 		int distance = data.getInteger("distance");
 		Gauge gauge = Gauge.from(data.getDouble("gauge"));
-		ISound snd = ImmersiveRailroading.proxy.newSound(new Identifier(soundfile), false, distance, gauge);
+		ISound snd = ImmersiveRailroading.newSound(new Identifier(soundfile), false, distance, gauge);
 		snd.setVelocity(motion);
 		snd.setVolume(volume);
 		snd.setPitch(pitch);

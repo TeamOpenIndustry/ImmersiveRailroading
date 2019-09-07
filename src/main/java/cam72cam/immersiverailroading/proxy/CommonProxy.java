@@ -2,21 +2,15 @@ package cam72cam.immersiverailroading.proxy;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
-import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.sound.Audio;
-import cam72cam.mod.sound.ISound;
 import cam72cam.mod.world.World;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
-import net.minecraftforge.fml.common.registry.EntityEntry;
 
 import java.util.List;
 
@@ -63,11 +57,6 @@ public abstract class CommonProxy {
 				ImmersiveRailroading.catching(e);
 			}
 		}
-	}
-
-
-	public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
-		return Audio.newSound(oggLocation, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
 
 	public int getRenderDistance() {

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -10,6 +11,9 @@ import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.ISound;
 import net.minecraftforge.fml.common.SidedProxy;
 
 import java.io.IOException;
@@ -66,6 +70,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 		IRFuzzy.applyFallbacks();
 		CompatLoader.load();
+	}
+
+	public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
+		return Audio.newSound(oggLocation, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
 
 	@SidedProxy(clientSide="cam72cam.immersiverailroading.proxy.ClientProxy", serverSide="cam72cam.immersiverailroading.proxy.ServerProxy")
