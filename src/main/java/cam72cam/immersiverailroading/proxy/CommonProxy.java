@@ -7,16 +7,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.multiblock.*;
-import cam72cam.immersiverailroading.net.*;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Registry;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
@@ -28,72 +19,20 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy {
-	protected static List<Supplier<Entity>> entityClasses = new ArrayList<>();
-    static {
-    	entityClasses.add(LocomotiveSteam::new);
-    	entityClasses.add(LocomotiveDiesel::new);
-    	entityClasses.add(CarPassenger::new);
-    	entityClasses.add(CarFreight::new);
-    	entityClasses.add(CarTank::new);
-    	entityClasses.add(Tender::new);
-    	entityClasses.add(HandCar::new);
-    }
 
 	public void preInit() {
-		try {
-			DefinitionManager.initDefinitions();
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to load IR definitions", e);
-		}
 		Config.init();
-
     }
 
     public void init() {
-    	Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
-    	Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
-    	Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
-    	Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
-    	Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
-    	Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
-    	Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
-    	Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
-        Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
-
-
-    	CompatLoader.load();
-
-    	MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
-    	MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
-    	MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
-    	MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
-    	MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
-
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.BRICK_BLOCK);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.COBBLESTONE);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.CONCRETE);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.DIRT);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.GRAVEL_BLOCK);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.HARDENED_CLAY);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.LOG_WOOD);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.NETHER_BRICK);
-		IRFuzzy.IR_RAIL_BED.addAll(Fuzzy.WOOD_PLANK);
-
-		IRFuzzy.applyFallbacks();
     }
 
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
-    	for (Supplier<Entity> type : entityClasses) {
-			Registry.register(ImmersiveRailroading.MODID, type, EntityRollingStock.settings, ImmersiveRailroading.instance, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
-    	}
     }
 
 	@SubscribeEvent

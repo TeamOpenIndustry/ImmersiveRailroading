@@ -38,6 +38,7 @@ public class ModCore {
             instance = ModCore.instance;
         }
 
+        public abstract String modID();
         protected abstract void setup();
     }
 

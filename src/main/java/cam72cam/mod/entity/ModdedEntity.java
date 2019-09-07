@@ -59,9 +59,9 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     protected final void init(String type) {
         if (self == null) {
             this.type = type;
-            self = Registry.create(type, this);
+            self = EntityRegistry.create(type, this);
 
-            EntitySettings settings = Registry.getSettings(type);
+            EntitySettings settings = EntityRegistry.getSettings(type);
             super.isImmuneToFire = settings.immuneToFire;
             super.entityCollisionReduction = settings.entityCollisionReduction;
             this.settings = settings;

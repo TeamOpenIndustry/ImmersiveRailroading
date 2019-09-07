@@ -1,10 +1,18 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
+import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.thirdparty.CompatLoader;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.ModCore;
+import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.gui.GuiRegistry;
 import net.minecraftforge.fml.common.SidedProxy;
+
+import java.io.IOException;
 
 public class ImmersiveRailroading extends ModCore.Mod {
     public static final String MODID = "immersiverailroading";
@@ -18,18 +26,46 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
     static {
     	ModCore.register(ImmersiveRailroading::new);
+
+		EntityRegistry.register(ImmersiveRailroading.class, CarFreight::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+		EntityRegistry.register(ImmersiveRailroading.class, CarPassenger::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+		EntityRegistry.register(ImmersiveRailroading.class, CarTank::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+		EntityRegistry.register(ImmersiveRailroading.class, HandCar::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+		EntityRegistry.register(ImmersiveRailroading.class, LocomotiveDiesel::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+		EntityRegistry.register(ImmersiveRailroading.class, LocomotiveSteam::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+		EntityRegistry.register(ImmersiveRailroading.class, Tender::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+
+		MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
+		MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
+		MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
+		MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
+		MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
 	}
 
 	public ImmersiveRailroading() {
     	instance = this;
 
+		try {
+			DefinitionManager.initDefinitions();
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to load IR definitions", e);
+		}
+
 		proxy.preInit();
+	}
+
+	@Override
+	public String modID() {
+		return MODID;
 	}
 
 	@Override
 	public void setup()
 	{
 		proxy.init();
+
+		IRFuzzy.applyFallbacks();
+		CompatLoader.load();
 	}
 
 	@SidedProxy(clientSide="cam72cam.immersiverailroading.proxy.ClientProxy", serverSide="cam72cam.immersiverailroading.proxy.ServerProxy")
