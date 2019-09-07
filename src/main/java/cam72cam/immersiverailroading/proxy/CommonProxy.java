@@ -55,9 +55,5 @@ public abstract class CommonProxy {
 		}
 	}
 
-	public int getRenderDistance() {
-		return 8;
-	}
-
     public abstract void addPreview(int dimension, TileRailPreview preview);
 }
