@@ -41,14 +41,14 @@ public class ItemConductorWhistle extends ItemBase {
 		if (world.isServer) {
 			if (cooldown.containsKey(player.getUUID())) {
 				int newtime = cooldown.get(player.getUUID());
-				if (newtime < ImmersiveRailroading.proxy.getTicks()) {
+				if (newtime < player.getTickCount()) {
 					cooldown.remove(player.getUUID());
 				} else {
 					return ClickResult.PASS;
 				}
 			}
 			
-			cooldown.put(player.getUUID(), ImmersiveRailroading.proxy.getTicks() + 40);
+			cooldown.put(player.getUUID(), player.getTickCount() + 40);
 			
 			SoundPacket packet = new SoundPacket(
 					ImmersiveRailroading.MODID + ":sounds/conductor_whistle.ogg",

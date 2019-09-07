@@ -76,7 +76,6 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 import paulscode.sound.SoundSystemConfig;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -431,7 +430,6 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 
-	private static int tickCount = 0;
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
 		if (event.phase != Phase.START) {
@@ -448,15 +446,8 @@ public class ClientProxy extends CommonProxy {
 		}
 
 		//TODO clear sndCache
-		tickCount++;
 	}
 
-
-	@Override
-	public int getTicks() {
-		return tickCount;
-	}
-	
 	@Override
 	public int getRenderDistance() {
 		return Minecraft.getMinecraft().gameSettings.renderDistanceChunks;

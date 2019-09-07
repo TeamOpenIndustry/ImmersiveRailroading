@@ -99,7 +99,7 @@ public class ModSoundManager {
 		}
 		
 
-		if (ImmersiveRailroading.proxy.getTicks() % 20 == 0) {
+		if (Minecraft.getMinecraft().player.ticksExisted % 20 == 0) {
 			// Clean up disposed sounds
 			
 			List<ISound> toRemove = new ArrayList<ISound>();
