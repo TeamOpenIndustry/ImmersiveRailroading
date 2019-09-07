@@ -52,14 +52,11 @@ import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -84,20 +81,6 @@ public class ClientProxy extends CommonProxy {
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
-	private static float dampeningAmount = 1.0f;
-	
-	public static float getDampeningAmount() {
-		return dampeningAmount;
-	}
-	
-	public static void dampenSound() {
-		Player player = MinecraftClient.getPlayer();
-		dampeningAmount = 1.0f;
-		if (player != null && player.getRiding() instanceof EntityRidableRollingStock) {
-			EntityRidableRollingStock ridableStock = (EntityRidableRollingStock) player.getRiding();
-			dampeningAmount = ridableStock.getDefinition().dampeningAmount;
-		}
-	}
 
 	@Override
 	public void init() {
@@ -369,8 +352,6 @@ public class ClientProxy extends CommonProxy {
 			return;
 		}
 
-		dampenSound();
-		
 		if (missingResources != null) {
 			Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(PlayerMessage.direct(missingResources).internal);
 			Minecraft.getMinecraft().loadWorld(null);

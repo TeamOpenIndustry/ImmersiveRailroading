@@ -1,5 +1,15 @@
 package cam72cam.mod.sound;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.resource.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import org.apache.commons.lang3.tuple.Pair;
+import paulscode.sound.SoundSystem;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -7,17 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.resource.Identifier;
-import org.apache.commons.lang3.tuple.Pair;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import paulscode.sound.SoundSystem;
 
 public class ModSoundManager {
 	private SoundManager manager;
@@ -91,7 +90,12 @@ public class ModSoundManager {
 	}
 	
 	public void tick() {
-		float newSoundLevel = Minecraft.getMinecraft().gameSettings.getSoundLevel(category);
+		float dampenLevel = 1;
+		if (MinecraftClient.getPlayer().getRiding() != null) {
+			dampenLevel = MinecraftClient.getPlayer().getRiding().getRidingSoundModifier();
+		}
+
+		float newSoundLevel = Minecraft.getMinecraft().gameSettings.getSoundLevel(category) * dampenLevel;
 		if (newSoundLevel != lastSoundLevel) {
 			lastSoundLevel = newSoundLevel;
 			for (ISound sound : this.sounds) {

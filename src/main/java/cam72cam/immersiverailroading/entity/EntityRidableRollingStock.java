@@ -18,6 +18,10 @@ import java.util.List;
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
 	private static final double pressDist = 0.05;
 
+	public float getRidingSoundModifier() {
+		return getDefinition().dampeningAmount;
+	}
+
 	@Override
 	public ClickResult onClick(Player player, Hand hand) {
 		ClickResult clickRes = super.onClick(player, hand);

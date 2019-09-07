@@ -1,6 +1,5 @@
 package cam72cam.mod.sound;
 
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
@@ -81,7 +80,8 @@ public class ClientSound implements ISound {
 		MinecraftClient.startProfiler("irSound");
 		SoundSystem snd = sndSystem.get();
 		//(float)Math.sqrt(Math.sqrt(scale()))
-		float vol = currentVolume * ClientProxy.getDampeningAmount() * baseSoundMultiplier * scale;
+
+		float vol = currentVolume * baseSoundMultiplier * scale;
 		snd.CommandQueue(new CommandObject(CommandObject.SET_VOLUME, id, vol));
 			
 		if (currentPos != null) {
