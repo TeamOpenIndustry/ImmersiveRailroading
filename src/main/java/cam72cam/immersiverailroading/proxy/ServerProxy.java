@@ -13,18 +13,14 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @EventBusSubscriber(Side.SERVER)
 public class ServerProxy extends CommonProxy {
-	private static int tickCount = 0;
 	private static Map<UUID, UUID> logoffRide = new HashMap<UUID, UUID>();
 
 	@Override
@@ -78,19 +74,5 @@ public class ServerProxy extends CommonProxy {
 		if (player.getRiding() instanceof EntityRidableRollingStock) {
 			logoffRide.put(player.getUUID(), player.getRiding().getUUID());
 		}
-	}
-	
-	@SubscribeEvent
-	public static void onServerTick(TickEvent.ServerTickEvent event) {
-		if (event.phase != Phase.START) {
-			return;
-		}
-		tickCount++;
-	}
-
-
-	@Override
-	public int getTicks() {
-		return tickCount;
 	}
 }

@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
@@ -29,10 +28,6 @@ public abstract class CommonProxy {
     }
 
     public void init() {
-    }
-
-    @SubscribeEvent
-    public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
     }
 
 	@SubscribeEvent
@@ -69,8 +64,6 @@ public abstract class CommonProxy {
 			}
 		}
 	}
-
-	public abstract int getTicks();
 
 
 	public ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
