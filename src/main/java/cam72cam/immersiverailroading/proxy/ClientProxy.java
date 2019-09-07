@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
-import cam72cam.immersiverailroading.net.MousePressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
@@ -27,13 +26,11 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.GPUInfo;
 import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDisconnected;
@@ -181,38 +178,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 	
-	@SubscribeEvent
-	public static void onClick(MouseEvent event) {
-		// So it turns out that the client sends mouse click packets to the server regardless of 
-		// if the entity being clicked is within the requisite distance.
-		// We need to override that distance because train centers are further away
-		// than 36m.
-		
-		int attackID = Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode() + 100;
-		int useID = Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode() + 100;
-		
-		if ((event.getButton() == attackID || event.getButton() == useID) && event.isButtonstate()) {
-			if (Minecraft.getMinecraft().objectMouseOver == null) {
-				return;
-			}
-			
-			Hand button = attackID == event.getButton() ? Hand.SECONDARY : Hand.PRIMARY;
-			
-			Entity entity = MinecraftClient.getEntityMouseOver();
-			if (entity instanceof EntityRidableRollingStock) {
-				new MousePressPacket(button, entity).sendToServer();
-				event.setCanceled(true);
-				return;
-			}
-			Entity riding = MinecraftClient.getPlayer().getRiding();
-			if (riding instanceof EntityRidableRollingStock) {
-				new MousePressPacket(button, riding).sendToServer();
-				event.setCanceled(true);
-				return;
-			}
-		}
-	}
-
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
 		if (event.getWorld() == null || World.get(event.getWorld()) == null) {
