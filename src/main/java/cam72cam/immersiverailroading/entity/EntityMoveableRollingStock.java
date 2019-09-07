@@ -245,14 +245,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (getWorld().isClient) {
             if (ConfigSound.soundEnabled) {
                 if (this.wheel_sound == null) {
-                    wheel_sound = ImmersiveRailroading.proxy.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
+                    wheel_sound = ImmersiveRailroading.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
                     this.sndRand = (float) Math.random() / 10;
                 }
                 if (this.clackFront == null) {
-                    clackFront = ImmersiveRailroading.proxy.newSound(this.getDefinition().clackFront, false, 30, gauge);
+                    clackFront = ImmersiveRailroading.newSound(this.getDefinition().clackFront, false, 30, gauge);
                 }
                 if (this.clackRear == null) {
-                    clackRear = ImmersiveRailroading.proxy.newSound(this.getDefinition().clackRear, false, 30, gauge);
+                    clackRear = ImmersiveRailroading.newSound(this.getDefinition().clackRear, false, 30, gauge);
                 }
                 float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
                 float pitch = adjust + 0.7f;
