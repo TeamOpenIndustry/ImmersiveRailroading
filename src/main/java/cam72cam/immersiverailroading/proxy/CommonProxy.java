@@ -17,10 +17,6 @@ import java.util.List;
 @EventBusSubscriber(modid = ImmersiveRailroading.MODID)
 public abstract class CommonProxy {
 
-	public void preInit() {
-		Config.init();
-    }
-
     public void init() {
     }
 

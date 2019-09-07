@@ -24,15 +24,6 @@ public class ServerProxy extends CommonProxy {
 	private static Map<UUID, UUID> logoffRide = new HashMap<UUID, UUID>();
 
 	@Override
-	public void preInit() {
-		super.preInit();
-		
-		for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
-			def.clearModel();
-		}
-	}
-	
-	@Override
 	public void init() {
 		super.init();
 	}
