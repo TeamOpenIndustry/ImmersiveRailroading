@@ -1,18 +1,18 @@
-package cam72cam.immersiverailroading.net;
+package cam72cam.mod.input;
 
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.util.Hand;
 
-public class MousePressPacket extends Packet {
+class MousePressPacket extends Packet {
 	static {
 		Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
 	}
-	public MousePressPacket() {
+	private MousePressPacket() {
 		// Forge Reflection
 	}
-	public MousePressPacket(Hand hand, Entity target) {
+	MousePressPacket(Hand hand, Entity target) {
 		super();
 		data.setEnum("hand", hand);
 		data.setEntity("target", target);

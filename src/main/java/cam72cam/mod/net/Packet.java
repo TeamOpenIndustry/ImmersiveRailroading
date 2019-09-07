@@ -73,14 +73,7 @@ public abstract class Packet {
     }
 
     protected final Player getPlayer() {
-        switch (ctx.side) {
-            case CLIENT:
-                return new Player(Minecraft.getMinecraft().player);
-            case SERVER:
-                return new Player(ctx.getServerHandler().player);
-            default:
-                return null;
-        }
+        return ctx.side == Side.CLIENT ? new Player(Minecraft.getMinecraft().player) : new Player(ctx.getServerHandler().player);
     }
 
     public void sendToAllAround(World world, Vec3d pos, double distance) {
