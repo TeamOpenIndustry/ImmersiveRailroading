@@ -3,6 +3,8 @@ package cam72cam.mod;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.proxy.IRCommand;
 import cam72cam.mod.render.BlockRender;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class ModCore {
     private static List<Supplier<Mod>> modCtrs = new ArrayList<>();
     private static List<Runnable> onInit = new ArrayList<>();
+    private static List<Runnable> onReload = new ArrayList<>();
 
     private List<Mod> mods;
 
@@ -83,6 +86,10 @@ public class ModCore {
         onInit.add(() -> instance.mods.stream().filter(type::isInstance).findFirst().ifPresent(fn));
     }
 
+    public static void onReload(Runnable fn) {
+        onReload.add(fn);
+    }
+
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(new IRCommand());
@@ -94,6 +101,8 @@ public class ModCore {
     }
 
     public static class ClientProxy extends Proxy {
+        public static boolean skipFirst = true;
+
         @Override
         public void init() {
             instance.mods.forEach(Mod::initClient);
@@ -102,6 +111,14 @@ public class ModCore {
         @Override
         public void setup() {
             instance.mods.forEach(Mod::setupClient);
+
+            ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(resourceManager -> {
+                if (skipFirst) {
+                    skipFirst = false;
+                    return;
+                }
+                onReload.forEach(Runnable::run);
+            });
             BlockRender.onPostColorSetup();
         }
     }

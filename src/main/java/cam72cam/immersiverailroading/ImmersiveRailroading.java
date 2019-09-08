@@ -155,6 +155,16 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		if (Loader.isModLoaded("igwmod")) {
 			FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
 		}
+
+		ModCore.onReload(() -> {
+			try {
+				DefinitionManager.initDefinitions();
+			} catch (IOException e) {
+				throw new RuntimeException("Unable to load IR definitions", e);
+			}
+
+			StockRenderCache.clearRenderCache();
+		});
 	}
 
 	@Override
