@@ -2,6 +2,9 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
+import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
+import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
@@ -11,6 +14,7 @@ import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.item.*;
+import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
@@ -87,9 +91,12 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	public void setup()
 	{
 		proxy.init();
+	}
 
-		IRFuzzy.applyFallbacks();
+	@Override
+	protected void finalize() {
 		CompatLoader.load();
+		IRFuzzy.applyFallbacks();
 	}
 
 	@Override
@@ -129,6 +136,15 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		EntityRenderer.register(CarTank.class, stockRender);
 		EntityRenderer.register(Tender.class, stockRender);
 		EntityRenderer.register(HandCar.class, stockRender);
+
+		GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
+		GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
+
+		GlobalRender.registerOverlay(pt -> {
+			new SteamLocomotiveOverlay().draw();
+			new DieselLocomotiveOverlay().draw();
+			new HandCarOverlay().draw();
+		});
 
 
 		GlobalRender.registerRender(partialTicks -> {

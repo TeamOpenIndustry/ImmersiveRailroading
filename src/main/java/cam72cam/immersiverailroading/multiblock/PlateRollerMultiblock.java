@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
@@ -23,31 +24,31 @@ public class PlateRollerMultiblock extends Multiblock {
 	private static final Vec3i output = new Vec3i(2,0,29);
 	private static final Vec3i power = new Vec3i(1,4,14);
 	
-	private static MultiblockComponent[][][] componentGenerator() {
-		MultiblockComponent[][][] result = new MultiblockComponent[30][][];
+	private static Fuzzy[][][] componentGenerator() {
+		Fuzzy[][][] result = new Fuzzy[30][][];
 		
-		MultiblockComponent[] bed = new MultiblockComponent[] {
+		Fuzzy[] bed = new Fuzzy[] {
 				L_ENG(), S_SCAF(), S_SCAF(), S_SCAF(), L_ENG()
 		};
-		MultiblockComponent[] mid = new MultiblockComponent[] {
+		Fuzzy[] mid = new Fuzzy[] {
 				L_ENG(), AIR, AIR, AIR, L_ENG()
 		};
-		MultiblockComponent[] top = new MultiblockComponent[] {
+		Fuzzy[] top = new Fuzzy[] {
 				H_ENG(), H_ENG(), H_ENG(), H_ENG(), H_ENG()
 		};
 		for (int i = 0; i < 30; i ++) {
 			if (i >= 11 && i <= 18) {
 				if (i >= 13 && i <=16) {
 					if (i == 14) {
-						result[i] = new MultiblockComponent[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR}, { AIR, H_ENG(), AIR, AIR, AIR } };
+						result[i] = new Fuzzy[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR}, { AIR, H_ENG(), AIR, AIR, AIR } };
 					} else {
-						result[i] = new MultiblockComponent[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR} };
+						result[i] = new Fuzzy[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR} };
 					}
 				} else {
-					result[i] = new MultiblockComponent[][] { bed, mid, top };
+					result[i] = new Fuzzy[][] { bed, mid, top };
 				}
 			} else {
-				result[i] = new MultiblockComponent[][] { bed };
+				result[i] = new Fuzzy[][] { bed };
 			}
 		}
 		

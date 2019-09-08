@@ -22,21 +22,21 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
 public class BoilerRollerMultiblock extends Multiblock {
-	private static MultiblockComponent slab = new MultiblockComponent(Fuzzy.STONE_SLAB);
+	private static Fuzzy slab = Fuzzy.STONE_SLAB;
 	public static final String NAME = "BOILER_MACHINE";
 	private static final Vec3i render = new Vec3i(2,0,0);
 	private static final Vec3i power = new Vec3i(5,0,3);
 	private static final Vec3i crafting = new Vec3i(2,0,4);
 	
-	private static MultiblockComponent[][][] componentGenerator() {
-		MultiblockComponent[] bed = new MultiblockComponent[] {
+	private static Fuzzy[][][] componentGenerator() {
+		Fuzzy[] bed = new Fuzzy[] {
 				L_ENG(), L_ENG(), L_ENG(), L_ENG(), H_ENG(), H_ENG()
 		};
-		MultiblockComponent[] table = new MultiblockComponent[] {
+		Fuzzy[] table = new Fuzzy[] {
 				slab, slab, slab, slab, AIR, AIR
 		};
 		
-		MultiblockComponent[][][] result = new MultiblockComponent[][][] {
+		Fuzzy[][][] result = new Fuzzy[][][] {
 			{ table },
 			{ table },
 			{ table },

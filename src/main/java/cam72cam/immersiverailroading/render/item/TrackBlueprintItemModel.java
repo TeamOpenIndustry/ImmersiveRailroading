@@ -1,17 +1,25 @@
 package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
 
 public class TrackBlueprintItemModel {
 	public static StandardModel getModel(ItemStack stack, World world) {
@@ -58,5 +66,48 @@ public class TrackBlueprintItemModel {
 			cull.restore();
 		}
 		GL11.glPopMatrix();
+	}
+
+	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
+	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, float partialTicks) {
+		Vec3d hit = vec.subtract(pos);
+		World world = player.getWorld();
+
+		pos = pos.up();
+
+		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
+				pos = pos.down();
+			}
+		}
+
+		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hit), null);
+		String key = info.uniqueID + info.placementInfo.placementPosition;
+		RailInfo cached = infoCache.get(key);
+		if (cached != null) {
+			info = cached;
+		} else {
+			infoCache.put(key, info);
+		}
+
+		GL11.glPushMatrix();
+		{
+			GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
+
+			GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
+			if (GLContext.getCapabilities().OpenGL14) {
+				GL14.glBlendColor(1, 1, 1, 0.5f);
+			}
+
+			Vec3d cameraPos = RenderOverride.getCameraPos(partialTicks);
+			Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
+			GL11.glTranslated(offPos.x, offPos.y, offPos.z);
+
+			RailRenderUtil.render(info, true);
+
+			blend.restore();
+		}
+		GL11.glPopMatrix();
+
 	}
 }

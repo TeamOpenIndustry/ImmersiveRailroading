@@ -17,13 +17,13 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
 public class SteamHammerMultiblock extends Multiblock {
-	private static MultiblockComponent piston = new MultiblockComponent(Fuzzy.PISTON);
+	private static Fuzzy piston = Fuzzy.PISTON;
 	public static final String NAME = "STEAM_HAMMER";
 	private static final Vec3i center = new Vec3i(2,0,0);
 	private static final Vec3i power = new Vec3i(2,5,0);
 
 	public SteamHammerMultiblock() {
-		super(NAME, new MultiblockComponent[][][] { // Z
+		super(NAME, new Fuzzy[][][] { // Z
 			{ // Y
 				{ //X
 					L_ENG(), AIR, STEEL(), AIR, L_ENG()

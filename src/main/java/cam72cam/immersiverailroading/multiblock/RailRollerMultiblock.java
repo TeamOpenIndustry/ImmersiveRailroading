@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
@@ -22,15 +23,15 @@ public class RailRollerMultiblock extends Multiblock {
 	private static final Vec3i output = new Vec3i(1,0,29);
 	private static final Vec3i power = new Vec3i(1,2,15);
 	
-	private static MultiblockComponent[][][] componentGenerator() {
-		MultiblockComponent[][][] result = new MultiblockComponent[30][][];
+	private static Fuzzy[][][] componentGenerator() {
+		Fuzzy[][][] result = new Fuzzy[30][][];
 		
-		MultiblockComponent[] bed = new MultiblockComponent[] {
+		Fuzzy[] bed = new Fuzzy[] {
 				S_SCAF(), S_SCAF()
 		};
 		for (int i = 0; i < 30; i ++) {
 			if (i >= 11 && i <= 18) {
-				result[i] = new MultiblockComponent[][] { {
+				result[i] = new Fuzzy[][] { {
 					L_ENG(), L_ENG()
 				}, {
 					H_ENG(), H_ENG()
@@ -38,7 +39,7 @@ public class RailRollerMultiblock extends Multiblock {
 					L_ENG(), L_ENG()
 				}};
 			} else {
-				result[i] = new MultiblockComponent[][] { bed };
+				result[i] = new Fuzzy[][] { bed };
 			}
 		}
 		

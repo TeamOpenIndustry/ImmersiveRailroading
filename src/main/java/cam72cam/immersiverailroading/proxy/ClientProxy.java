@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
-import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -16,20 +15,9 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
-import cam72cam.immersiverailroading.render.entity.RenderOverride;
-import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.GPUInfo;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
@@ -39,11 +27,11 @@ import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.config.ConfigManager;
@@ -61,9 +49,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,7 +58,6 @@ import java.util.Map;
 public class ClientProxy extends CommonProxy {
 	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
 	private static Map<Integer, ExpireableList<BlockPos, TileRailPreview>> previews = new HashMap<>();
-	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
 
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
@@ -210,106 +194,8 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onOverlayEvent(RenderGameOverlayEvent.Pre event) {
 		if (event.getType() == ElementType.ALL) {
-			new SteamLocomotiveOverlay().draw();
-			new DieselLocomotiveOverlay().draw();
-			new HandCarOverlay().draw();
 		}
 	}
-	
-	@SubscribeEvent
-	public static void onRenderMouseover(DrawBlockHighlightEvent event) {
-		Player player = MinecraftClient.getPlayer();
-		World world = player.getWorld();
-		ItemStack stack = event.getPlayer().getHeldItemMainhand();
-		if (event.getTarget().getBlockPos() == null) {
-			return;
-		}
-		Vec3i pos = new Vec3i(event.getTarget().getBlockPos());
-		
-		if (event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
-			if (stack.getItem() == IRItems.ITEM_TRACK_BLUEPRINT.internal) {
-				
-				Vec3d vec = new Vec3d(event.getTarget().hitVec);
-				Vec3d hit = vec.subtract(pos);
-
-				pos = pos.up();
-
-				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
-						pos = pos.down();
-					}
-				}
-
-		        RailInfo info = new RailInfo(world, new cam72cam.mod.item.ItemStack(stack), new PlacementInfo(new cam72cam.mod.item.ItemStack(stack), player.getRotationYawHead(), pos, hit), null);
-		        String key = info.uniqueID + info.placementInfo.placementPosition;
-				RailInfo cached = infoCache.get(key);
-		        if (cached != null) {
-					info = cached;
-				} else {
-		        	infoCache.put(key, info);
-				}
-
-		        GL11.glPushMatrix();
-				{
-					GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
-					
-					GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
-					if (GLContext.getCapabilities().OpenGL14) {
-						GL14.glBlendColor(1, 1, 1, 0.5f);
-					}
-					
-					Vec3d cameraPos = RenderOverride.getCameraPos(event.getPartialTicks());
-					Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
-					GL11.glTranslated(offPos.x, offPos.y, offPos.z);
-
-	                RailRenderUtil.render(info, true);
-
-					blend.restore();
-				}
-				GL11.glPopMatrix();
-			}
-			if (stack.getItem() == IRItems.ITEM_MANUAL.internal) {
-				pos = pos.up();
-				
-				GL11.glPushMatrix();
-				{
-					GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
-					
-					GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
-					if (GLContext.getCapabilities().OpenGL14) {
-						GL14.glBlendColor(1, 1, 1, 0.3f);
-					}
-
-					Vec3d playerPos = player.getPosition();
-					Vec3d lastPos = player.getLastTickPos();
-					Vec3d offset = new Vec3d(pos).add(0.5, 0.5, 0.5).subtract(lastPos.add(playerPos.subtract(lastPos).scale(event.getPartialTicks())));
-	                GL11.glTranslated(offset.x, offset.y, offset.z);
-	                
-	                GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
-
-	                MBBlueprintRender.draw(ItemMultiblockType.get(new cam72cam.mod.item.ItemStack(stack)));
-
-					blend.restore();
-				}
-				GL11.glPopMatrix();
-			}
-		}
-	}
-
-	@SubscribeEvent
-	public static void onDebugRender(RenderGameOverlayEvent.Text event) {
-		if (Minecraft.getMinecraft().gameSettings.showDebugInfo && GPUInfo.hasGPUInfo()) {
-			int i;
-			for (i = 0; i < event.getRight().size(); i++) {
-				if (event.getRight().get(i).startsWith("Display: ")) {
-					i++;
-					break;
-				}
-			}
-			event.getRight().add(i, GPUInfo.debug());
-		}
-	}
-
 
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
