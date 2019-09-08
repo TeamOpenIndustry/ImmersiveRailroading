@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +49,8 @@ public class ModCore {
         protected abstract void setup();
         protected void setupClient() {}
         protected void setupServer() {}
+
+        protected abstract void finalize();
     }
 
     @EventHandler
@@ -69,6 +72,11 @@ public class ModCore {
         mods.forEach(Mod::setup);
         onInit.forEach(Runnable::run);
         proxy.setup();
+    }
+
+    @EventHandler
+    public void postInit(FMLPostInitializationEvent event) {
+        mods.forEach(Mod::finalize);
     }
 
     public static void onInit(Class<? extends Mod> type, Consumer<Mod> fn) {
