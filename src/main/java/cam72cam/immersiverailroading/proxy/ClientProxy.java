@@ -4,15 +4,12 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
-import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
@@ -43,9 +40,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-
-import static org.lwjgl.input.Keyboard.*;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -54,13 +48,6 @@ public class ClientProxy extends CommonProxy {
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
-
-	@Override
-	public void init() {
-		super.init();
-
-	}
-
 
 	public static final IRenderFactory<EntitySmokeParticle> PARTICLE_RENDER = ParticleRender::new;
 
@@ -145,8 +132,6 @@ public class ClientProxy extends CommonProxy {
 			Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", PlayerMessage.direct(missingResources).internal));
 			missingResources = null;
 		}
-
-		//TODO clear sndCache
 	}
 
 	public void addPreview(int dimension, TileRailPreview preview) {

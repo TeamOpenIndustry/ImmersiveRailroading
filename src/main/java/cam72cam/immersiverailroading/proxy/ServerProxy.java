@@ -22,11 +22,6 @@ import java.util.UUID;
 public class ServerProxy extends CommonProxy {
 	private static Map<UUID, UUID> logoffRide = new HashMap<UUID, UUID>();
 
-	@Override
-	public void init() {
-		super.init();
-	}
-
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
 		EntityRollingStock stock = World.get(event.getWorld()).getEntity(event.getEntity().getUniqueID(), EntityRollingStock.class);
