@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.proxy;
+package cam72cam.mod.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
