@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.proxy.ChunkPos;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3i;
 import net.minecraft.world.World;
