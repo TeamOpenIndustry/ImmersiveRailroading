@@ -31,6 +31,7 @@ import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.input.Keyboard;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.render.*;
@@ -151,6 +152,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		ItemRender.register(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::getModel);
 		ItemRender.register(IRItems.ITEM_ROLLING_STOCK_COMPONENT, StockItemComponentModel::getModel);
 		ItemRender.register(IRItems.ITEM_ROLLING_STOCK, StockItemModel::getModel, StockItemModel::getIcon);
+		ItemRender.register(IRItems.ITEM_LARGE_WRENCH, ObjItemRender.getModelFor(new Identifier("immersiverailroading", "models/item/large_wrench.obj"), new Vec3d(0.5, 0, 0.5), 2));
 
 
 		IEntityRender<EntityRollingStock> stockRender = (entity, partialTicks) -> {
