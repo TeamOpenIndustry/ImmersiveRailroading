@@ -31,6 +31,32 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
+	static {
+		World.onTick(world -> {
+			// We do this here as to let all the entities do their onTick first.  Otherwise some might be one onTick ahead
+			// if we did this in the onUpdate method
+			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class);
+
+			// Try locomotives first
+			for (EntityCoupleableRollingStock stock : entities) {
+				if (stock instanceof Locomotive) {
+					stock = stock.findByUUID(stock.getUUID());
+					stock.tickPosRemainingCheck();
+				}
+			}
+			// Try rest
+			for (EntityCoupleableRollingStock stock : entities) {
+				stock = stock.findByUUID(stock.getUUID());
+				stock.tickPosRemainingCheck();
+			}
+
+			try {
+				Thread.sleep(ConfigDebug.lagServer);
+			} catch (InterruptedException e) {
+				ImmersiveRailroading.catching(e);
+			}
+		});
+	}
 
 	public enum CouplerType {
 		FRONT(0), BACK(180);

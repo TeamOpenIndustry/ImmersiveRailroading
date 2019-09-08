@@ -31,11 +31,13 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,8 @@ public class World {
     private static Map<net.minecraft.world.World, World> serverWorlds = new HashMap<>();
     private static Map<Integer, World> clientWorldsByID = new HashMap<>();
     private static Map<Integer, World> serverWorldsByID = new HashMap<>();
+
+    private static List<Consumer<World>> onTicks = new ArrayList<>();
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
@@ -69,6 +73,13 @@ public class World {
         worlds.remove(world);
         worldsByID.remove(world.provider.getDimension());
     }
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.WorldTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) {
+            return;
+        }
+        onTicks.forEach(fn -> fn.accept(get(event.world)));
+    }
     public static World get(net.minecraft.world.World world) {
         Map<net.minecraft.world.World, World> worlds = world.isRemote ? clientWorlds : serverWorlds;
 
@@ -78,6 +89,9 @@ public class World {
         Map<Integer, World> worldsByID = isClient ? clientWorldsByID : serverWorldsByID;
 
         return worldsByID.get(dimID);
+    }
+    public static void onTick(Consumer<World> fn) {
+        onTicks.add(fn);
     }
 
     public boolean doesBlockCollideWith(Vec3i bp, RealBB bb) {

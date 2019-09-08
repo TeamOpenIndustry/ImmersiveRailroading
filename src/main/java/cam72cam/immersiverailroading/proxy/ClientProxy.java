@@ -213,7 +213,6 @@ public class ClientProxy extends CommonProxy {
 		//TODO clear sndCache
 	}
 
-	@Override
 	public void addPreview(int dimension, TileRailPreview preview) {
 		/* TODO HACKS
 		if (!previews.containsKey(dimension)) {
