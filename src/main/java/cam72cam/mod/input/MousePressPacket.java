@@ -2,14 +2,12 @@ package cam72cam.mod.input;
 
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.util.Hand;
 
-class MousePressPacket extends Packet {
+public class MousePressPacket extends Packet {
 	static {
-		Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
 	}
-	private MousePressPacket() {
+	public MousePressPacket() {
 		// Forge Reflection
 	}
 	MousePressPacket(Hand hand, Entity target) {

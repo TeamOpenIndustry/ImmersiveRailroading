@@ -6,7 +6,9 @@ import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.multiblock.*;
+import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -26,7 +28,11 @@ import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.EntityRegistry;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.input.Keyboard;
+import cam72cam.mod.net.Packet;
+import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.render.*;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
@@ -38,6 +44,9 @@ import org.lwjgl.opengl.GL11;
 import paulscode.sound.SoundSystemConfig;
 
 import java.io.IOException;
+import java.util.function.Consumer;
+
+import static org.lwjgl.input.Keyboard.*;
 
 public class ImmersiveRailroading extends ModCore.Mod {
     public static final String MODID = "immersiverailroading";
@@ -65,6 +74,14 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
 		MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
 		MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
+
+		Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
+		Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
+		Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
+		Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
+		Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
+		Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
+		Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
 	}
 
 	public ImmersiveRailroading() {
@@ -87,10 +104,28 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		return MODID;
 	}
 
+	public static Consumer<Player> onKeyPress(KeyTypes type) {
+		return player -> {
+			if (player.getWorld().isServer && player.getRiding() instanceof EntityRollingStock) {
+				player.getRiding().as(EntityRollingStock.class).handleKeyPress(player, type);
+			}
+		};
+	}
+
+
 	@Override
 	public void setup()
 	{
-		proxy.init();
+		Keyboard.registerKey("ir_keys.increase_throttle", KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.THROTTLE_UP));
+		Keyboard.registerKey("ir_keys.zero_throttle", KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.THROTTLE_ZERO));
+		Keyboard.registerKey("ir_keys.decrease_throttle", KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.THROTTLE_DOWN));
+		Keyboard.registerKey("ir_keys.increase_brake", KEY_NUMPAD7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.AIR_BRAKE_UP));
+		Keyboard.registerKey("ir_keys.zero_brake", KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.AIR_BRAKE_ZERO));
+		Keyboard.registerKey("ir_keys.decrease_brake", KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.AIR_BRAKE_DOWN));
+		Keyboard.registerKey("ir_keys.horn", KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.HORN));
+		Keyboard.registerKey("ir_keys.dead_mans_switch", KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.DEAD_MANS_SWITCH));
+		Keyboard.registerKey("ir_keys.start_stop_engine", KEY_ADD, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.START_STOP_ENGINE));
+		Keyboard.registerKey("ir_keys.bell", KEY_SUBTRACT, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.BELL));
 	}
 
 	@Override

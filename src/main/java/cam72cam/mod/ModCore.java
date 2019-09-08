@@ -2,6 +2,12 @@ package cam72cam.mod;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.proxy.IRCommand;
+import cam72cam.mod.entity.ModdedEntity;
+import cam72cam.mod.entity.sync.EntitySync;
+import cam72cam.mod.input.Keyboard;
+import cam72cam.mod.input.MousePressPacket;
+import cam72cam.mod.net.Packet;
+import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.render.BlockRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
@@ -54,6 +60,14 @@ public class ModCore {
         protected void setupServer() {}
 
         protected abstract void finalize();
+    }
+
+    static {
+        Packet.register(EntitySync.EntitySyncPacket::new, PacketDirection.ServerToClient);
+        Packet.register(Keyboard.MovementPacket::new, PacketDirection.ClientToServer);
+        Packet.register(Keyboard.KeyPacket::new, PacketDirection.ClientToServer);
+        Packet.register(ModdedEntity.PassengerPositionsPacket::new, PacketDirection.ServerToClient);
+        Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
     }
 
     @EventHandler

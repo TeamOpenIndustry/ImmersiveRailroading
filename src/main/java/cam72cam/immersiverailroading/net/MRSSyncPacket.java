@@ -3,9 +3,7 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
 
 import java.util.List;
 
@@ -13,10 +11,6 @@ import java.util.List;
  * Movable rolling stock sync packet
  */
 public class MRSSyncPacket extends Packet {
-	static {
-		Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
-	}
-
 	public MRSSyncPacket() {
 		// Forge Reflection
 	}
