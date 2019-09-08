@@ -82,8 +82,9 @@ public abstract class Locomotive extends FreightTank {
 		deadMansSwitch = data.getBoolean("deadMansSwitch");
 		setBell(data.getInteger("bell"));
 	}
-	
-	public void handleKeyPress(Player source, KeyTypes key, boolean sprinting) {
+
+	@Override
+	public void handleKeyPress(Player source, KeyTypes key) {
 		switch(key) {
 		case HORN:
 			setHorn(10, source.getUUID());
@@ -139,6 +140,8 @@ public abstract class Locomotive extends FreightTank {
 				this.deadManChangeTimeout = 5;
 			}
 			break;
+			default:
+				super.handleKeyPress(source, key);
 		}
 	}
 

@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.PaintSyncPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -170,6 +171,10 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 
 	protected boolean shouldDropItems(DamageType type, float amount) {
 		return type != DamageType.EXPLOSION || amount < 20;
+	}
+
+	public void handleKeyPress(Player source, KeyTypes key) {
+
 	}
 
 

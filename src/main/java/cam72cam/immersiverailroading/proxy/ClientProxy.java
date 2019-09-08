@@ -2,20 +2,17 @@ package cam72cam.immersiverailroading.proxy;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
-import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.immersiverailroading.render.entity.ParticleRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
@@ -23,7 +20,6 @@ import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -35,56 +31,52 @@ import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
-import org.lwjgl.input.Keyboard;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+
+import static org.lwjgl.input.Keyboard.*;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
-	private static Map<KeyTypes, KeyBinding> keys = new HashMap<KeyTypes, KeyBinding>();
 	private static Map<Integer, ExpireableList<BlockPos, TileRailPreview>> previews = new HashMap<>();
 
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
 
+	public static Consumer<Player> onKeyPress(KeyTypes type) {
+		return player -> {
+			if (player.getWorld().isServer && player.getRiding() instanceof EntityRollingStock) {
+				player.getRiding().as(EntityRollingStock.class).handleKeyPress(player, type);
+			}
+		};
+	}
+
 	@Override
 	public void init() {
 		super.init();
-		
-		keys.put(KeyTypes.THROTTLE_UP, new KeyBinding("ir_keys.increase_throttle", Keyboard.KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.THROTTLE_ZERO, new KeyBinding("ir_keys.zero_throttle", Keyboard.KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.THROTTLE_DOWN, new KeyBinding("ir_keys.decrease_throttle", Keyboard.KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.AIR_BRAKE_UP, new KeyBinding("ir_keys.increase_brake", Keyboard.KEY_NUMPAD7, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.AIR_BRAKE_ZERO, new KeyBinding("ir_keys.zero_brake", Keyboard.KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.AIR_BRAKE_DOWN, new KeyBinding("ir_keys.decrease_brake", Keyboard.KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.HORN, new KeyBinding("ir_keys.horn", Keyboard.KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.DEAD_MANS_SWITCH, new KeyBinding("ir_keys.dead_mans_switch", Keyboard.KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.START_STOP_ENGINE, new KeyBinding("ir_keys.start_stop_engine", Keyboard.KEY_ADD, "key.categories." + ImmersiveRailroading.MODID));
-		keys.put(KeyTypes.BELL, new KeyBinding("ir_keys.bell", Keyboard.KEY_SUBTRACT, "key.categories." + ImmersiveRailroading.MODID));
 
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_UP));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_DOWN));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.THROTTLE_ZERO));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_UP));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_DOWN));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.AIR_BRAKE_ZERO));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.HORN));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.BELL));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.DEAD_MANS_SWITCH));
-		ClientRegistry.registerKeyBinding(keys.get(KeyTypes.START_STOP_ENGINE));
+		Keyboard.registerKey("ir_keys.increase_throttle", KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.THROTTLE_UP));
+		Keyboard.registerKey("ir_keys.zero_throttle", KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.THROTTLE_ZERO));
+		Keyboard.registerKey("ir_keys.decrease_throttle", KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.THROTTLE_DOWN));
+		Keyboard.registerKey("ir_keys.increase_brake", KEY_NUMPAD7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.AIR_BRAKE_UP));
+		Keyboard.registerKey("ir_keys.zero_brake", KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.AIR_BRAKE_ZERO));
+		Keyboard.registerKey("ir_keys.decrease_brake", KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.AIR_BRAKE_DOWN));
+		Keyboard.registerKey("ir_keys.horn", KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.HORN));
+		Keyboard.registerKey("ir_keys.dead_mans_switch", KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.DEAD_MANS_SWITCH));
+		Keyboard.registerKey("ir_keys.start_stop_engine", KEY_ADD, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.START_STOP_ENGINE));
+		Keyboard.registerKey("ir_keys.bell", KEY_SUBTRACT, "key.categories." + ImmersiveRailroading.MODID, onKeyPress(KeyTypes.BELL));
 	}
 
 
@@ -124,26 +116,6 @@ public class ClientProxy extends CommonProxy {
 				new ModelResourceLocation(IRItems.ITEM_SWITCH_KEY.getRegistryName().internal, ""));
 	}
 
-	@SubscribeEvent
-	public static void onKeyInput(ClientTickEvent event) {
-		Player player = MinecraftClient.getPlayer();
-		if (player == null) {
-			return;
-		}
-		if (!(player.getRiding() instanceof Locomotive)) {
-			return;
-		}
-
-		Locomotive riding = (Locomotive) player.getRiding();
-		
-		for (KeyTypes key : keys.keySet()) {
-			KeyBinding binding = keys.get(key);
-			if (binding.isKeyDown()) {
-				new KeyPressPacket(key, player, riding).sendToServer();
-			}
-		}
-	}
-	
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
 		if (event.getWorld() == null || World.get(event.getWorld()) == null) {
