@@ -83,7 +83,6 @@ public abstract class Locomotive extends FreightTank {
 		setBell(data.getInteger("bell"));
 	}
 	
-	@Override
 	public void handleKeyPress(Player source, KeyTypes key, boolean sprinting) {
 		switch(key) {
 		case HORN:
@@ -139,9 +138,6 @@ public abstract class Locomotive extends FreightTank {
 				}
 				this.deadManChangeTimeout = 5;
 			}
-			break;
-		default:
-			super.handleKeyPress(source, key, sprinting);
 			break;
 		}
 	}

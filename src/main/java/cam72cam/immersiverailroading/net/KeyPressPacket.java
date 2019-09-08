@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.net.Packet;
 
-import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.mod.net.PacketDirection;
 
@@ -15,7 +15,7 @@ public class KeyPressPacket extends Packet {
 	public KeyPressPacket() {
 		// Forge Reflection
 	}
-	public KeyPressPacket(KeyTypes key, Player player, EntityRidableRollingStock riding) {
+	public KeyPressPacket(KeyTypes key, Player player, Locomotive riding) {
 		super();
 		data.setEnum("key", key);
 		data.setEntity("riding", riding);
@@ -25,7 +25,7 @@ public class KeyPressPacket extends Packet {
 	@Override
 	public void handle() {
 		KeyTypes key = data.getEnum("key", KeyTypes.class);
-		EntityRidableRollingStock riding = data.getEntity("riding", getWorld(), EntityRidableRollingStock.class);
+		Locomotive riding = data.getEntity("riding", getWorld(), Locomotive.class);
 		boolean sprinting = data.getBoolean("sprinting");
 
 		if (riding != null) {

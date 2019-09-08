@@ -2,12 +2,11 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
+import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -16,8 +15,6 @@ import cam72cam.mod.util.Hand;
 import java.util.List;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
-	private static final double pressDist = 0.05;
-
 	public float getRidingSoundModifier() {
 		return getDefinition().dampeningAmount;
 	}
@@ -70,31 +67,27 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return this.gauge.shouldSit();
 	}
 
-	public void handleKeyPress(Player source, KeyTypes key, boolean sprinting) {
-		Vec3d movement;
-		switch (key) {
-		case PLAYER_FORWARD:
-			movement = new Vec3d(pressDist, 0, 0);
-			break;
-		case PLAYER_BACKWARD:
-			movement = new Vec3d(-pressDist, 0, 0);
-			break;
-		case PLAYER_LEFT:
-			movement = new Vec3d(0, 0, -pressDist);
-			break;
-		case PLAYER_RIGHT:
-			movement = new Vec3d(0, 0, pressDist);
-			break;
-		default:
-			//ignore key
+	@Override
+	public void onTick() {
+		super.onTick();
+		if (getWorld().isClient) {
 			return;
 		}
+		for (Entity passenger : this.getPassengers()) {
+			if (passenger.isPlayer()) {
+				playerMovement(passenger.asPlayer(), Keyboard.getMovement(passenger.asPlayer()));
+			}
+		}
+	}
+	private void playerMovement(Player source, Vec3d movement) {
 		if (this.isPassenger(source)) {
+			/*
 			if (sprinting) {
 				movement = movement.scale(3);
 			}
+			*/
 			
-			movement = VecUtil.rotateWrongYaw(movement, source.getYawHead());
+			movement = VecUtil.rotateYaw(new Vec3d(movement.x, 0, -movement.z), -source.getYawHead());
 			movement = VecUtil.rotateWrongYaw(movement, 180-this.getRotationYaw());
 
 			Vec3d pos = getRidingOffset(source).add(movement);
