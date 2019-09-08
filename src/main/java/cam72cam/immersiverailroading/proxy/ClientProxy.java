@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRidableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.net.KeyPressPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -129,30 +130,17 @@ public class ClientProxy extends CommonProxy {
 		if (player == null) {
 			return;
 		}
-		if (!(player.getRiding() instanceof EntityRidableRollingStock)) {
+		if (!(player.getRiding() instanceof Locomotive)) {
 			return;
 		}
 
-		EntityRidableRollingStock riding = (EntityRidableRollingStock) player.getRiding();
+		Locomotive riding = (Locomotive) player.getRiding();
 		
 		for (KeyTypes key : keys.keySet()) {
 			KeyBinding binding = keys.get(key);
 			if (binding.isKeyDown()) {
 				new KeyPressPacket(key, player, riding).sendToServer();
 			}
-		}
-		
-		if (player.isLeftKeyDown()) {
-			new KeyPressPacket(KeyTypes.PLAYER_LEFT, player, riding).sendToServer();
-		}
-		if (player.isRightKeyDown()) {
-			new KeyPressPacket(KeyTypes.PLAYER_RIGHT, player, riding).sendToServer();
-		}
-		if (player.isForwardKeyDown()) {
-			new KeyPressPacket(KeyTypes.PLAYER_FORWARD, player, riding).sendToServer();
-		}
-		if (player.isBackKeyDown()) {
-			new KeyPressPacket(KeyTypes.PLAYER_BACKWARD, player, riding).sendToServer();
 		}
 	}
 	

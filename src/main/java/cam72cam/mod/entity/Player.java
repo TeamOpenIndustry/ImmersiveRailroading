@@ -50,19 +50,6 @@ public class Player extends Entity {
         internal.getFoodStats().setFoodLevel(i);
     }
 
-    public boolean isLeftKeyDown() {
-        return (internal instanceof net.minecraft.client.entity.EntityPlayerSP) && ((net.minecraft.client.entity.EntityPlayerSP) internal).movementInput.leftKeyDown;
-    }
-    public boolean isRightKeyDown() {
-        return (internal instanceof net.minecraft.client.entity.EntityPlayerSP) && ((net.minecraft.client.entity.EntityPlayerSP) internal).movementInput.rightKeyDown;
-    }
-    public boolean isForwardKeyDown() {
-        return (internal instanceof net.minecraft.client.entity.EntityPlayerSP) && ((net.minecraft.client.entity.EntityPlayerSP) internal).movementInput.forwardKeyDown;
-    }
-    public boolean isBackKeyDown() {
-        return (internal instanceof net.minecraft.client.entity.EntityPlayerSP) && ((net.minecraft.client.entity.EntityPlayerSP) internal).movementInput.backKeyDown;
-    }
-
     public IInventory getInventory() {
         return IInventory.from(internal.inventory);
     }
