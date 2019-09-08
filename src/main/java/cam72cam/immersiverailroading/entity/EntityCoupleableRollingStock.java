@@ -33,6 +33,9 @@ import cam72cam.immersiverailroading.util.VecUtil;
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
 	static {
 		World.onTick(world -> {
+			if (world.isClient) {
+				return;
+			}
 			// We do this here as to let all the entities do their onTick first.  Otherwise some might be one onTick ahead
 			// if we did this in the onUpdate method
 			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class);
