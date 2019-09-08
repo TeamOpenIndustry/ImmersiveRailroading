@@ -3,7 +3,6 @@ package cam72cam.mod.input;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.KeyBinding;
@@ -52,10 +51,6 @@ public class Keyboard {
     }
 
     public static class MovementPacket extends Packet {
-        static {
-            Packet.register(MovementPacket::new, PacketDirection.ClientToServer);
-        }
-
         public MovementPacket() {
 
         }
@@ -101,10 +96,6 @@ public class Keyboard {
     }
 
     public static class KeyPacket extends Packet {
-        static {
-            Packet.register(KeyPacket::new, PacketDirection.ClientToServer);
-        }
-
         public KeyPacket() {
 
         }

@@ -1,11 +1,11 @@
 package cam72cam.mod.net;
 
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -44,7 +44,8 @@ public abstract class Packet {
         @Override
         public void fromBytes(ByteBuf buf) {
             TagCompound data = new TagCompound(ByteBufUtils.readTag(buf));
-            packet = types.get(data.getString("cam72cam.mod.pktid")).get();
+            String cls = data.getString("cam72cam.mod.pktid");
+            packet = types.get(cls).get();
             packet.data = data;
         }
 
@@ -60,20 +61,12 @@ public abstract class Packet {
     protected TagCompound data = new TagCompound();
     MessageContext ctx;
 
-    public final void fromBytes(ByteBuf buf) {
-        this.data = new TagCompound(ByteBufUtils.readTag(buf));
-    }
-
-    public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, data.internal);
-    }
-
     protected final World getWorld() {
         return getPlayer().getWorld();
     }
 
     protected final Player getPlayer() {
-        return ctx.side == Side.CLIENT ? new Player(Minecraft.getMinecraft().player) : new Player(ctx.getServerHandler().player);
+        return ctx.side == Side.CLIENT ? MinecraftClient.getPlayer() : new Player(ctx.getServerHandler().player);
     }
 
     public void sendToAllAround(World world, Vec3d pos, double distance) {

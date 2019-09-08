@@ -6,12 +6,8 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
 
 public class MultiblockSelectCraftPacket extends Packet {
-	static {
-		Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
-	}
 	public MultiblockSelectCraftPacket() {
 		// Forge Reflection
 	}
