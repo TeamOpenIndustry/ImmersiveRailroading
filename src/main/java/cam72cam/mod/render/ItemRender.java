@@ -5,10 +5,14 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.gui.Progress;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumFacing;
@@ -16,7 +20,9 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ItemLayerModel;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -56,6 +62,17 @@ public class ItemRender {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onTextureStich(TextureStitchEvent.Pre event) {
         textures.forEach(texture -> texture.accept(event));
+    }
+
+    public static void register(ItemBase item, Identifier tex) {
+        bakers.add(event -> event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName().internal, ""), new ItemLayerModel(ImmutableList.of(
+               tex.internal
+        )).bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, ModelLoader.defaultTextureGetter())));
+
+        textures.add(event -> Minecraft.getMinecraft().getTextureMapBlocks().registerSprite(tex.internal));
+
+        mappers.add(() -> ModelLoader.setCustomModelResourceLocation(item.internal, 0,
+                new ModelResourceLocation(item.getRegistryName().internal, "")));
     }
 
     public static void register(ItemBase item, BiFunction<ItemStack, World, StandardModel> model) {
