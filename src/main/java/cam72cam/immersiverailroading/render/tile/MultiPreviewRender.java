@@ -8,13 +8,16 @@ import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.world.World;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
 public class MultiPreviewRender {
-    private static ExpireableList<Long, TileRailPreview> previews = new ExpireableList<>();
+    private static ExpireableList<Pair<World, Vec3i>, TileRailPreview> previews = new ExpireableList<>();
 
     static {
         GlobalRender.registerRender(MultiPreviewRender::render);
@@ -51,6 +54,10 @@ public class MultiPreviewRender {
     }
 
     public static void add(TileRailPreview preview) {
-        previews.put(preview.pos.toLong(), preview);
+        previews.put(Pair.of(preview.world, preview.pos), preview);
+    }
+
+    public static void remove(World world, Vec3i removed) {
+        previews.put(Pair.of(world, removed), null);
     }
 }

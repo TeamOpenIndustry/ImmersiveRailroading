@@ -108,6 +108,10 @@ public class Vec3i {
     public String toString() {
         return internal.toString();
     }
+    @Override
+    public int hashCode() {
+        return internal.hashCode();
+    }
 
     public Vec3d toChunkMin() {
         return new Vec3d(x >> 4 << 4, 0, z >> 4 << 4);
