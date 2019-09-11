@@ -2,12 +2,10 @@ package cam72cam.immersiverailroading.proxy;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
-import cam72cam.immersiverailroading.render.entity.ParticleRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
@@ -16,20 +14,14 @@ import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.config.ConfigManager;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Collection;
@@ -43,13 +35,6 @@ public class ClientProxy extends CommonProxy {
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
-
-	public static final IRenderFactory<EntitySmokeParticle> PARTICLE_RENDER = ParticleRender::new;
-
-	@SubscribeEvent
-	public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
-		RenderingRegistry.registerEntityRenderingHandler(EntitySmokeParticle.class, PARTICLE_RENDER);
-	}
 
 	@SubscribeEvent
 	public static void onEntityJoin(EntityJoinWorldEvent event) {
@@ -78,12 +63,6 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public static void onHackRenderEvent(RenderWorldLastEvent event) {
 		renderCacheLimiter.reset();
-	}
-	
-	@SubscribeEvent
-	public static void onOverlayEvent(RenderGameOverlayEvent.Pre event) {
-		if (event.getType() == ElementType.ALL) {
-		}
 	}
 
 	@SubscribeEvent

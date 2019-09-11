@@ -38,6 +38,7 @@ import cam72cam.mod.render.*;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
@@ -193,7 +194,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 		GlobalRender.registerRender(partialTicks -> {
 			RenderOverride.renderTiles(partialTicks);
-			RenderOverride.renderParticles(partialTicks);
 		});
 
 		if (Loader.isModLoaded("igwmod")) {

@@ -19,6 +19,7 @@ import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.TagCompound;
+import net.minecraft.client.Minecraft;
 
 import java.util.List;
 
@@ -241,16 +242,10 @@ public class LocomotiveDiesel extends Locomotive {
 			if (exhausts != null && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {
 					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(exhaust.center(), this.getRotationYaw() + 180));
-					
-					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
-					
-					EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width());
-					
 					particlePos = particlePos.subtract(fakeMotion);
-					
-					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.4 * gauge.scale(), fakeMotion.z);
-					getWorld().internal.spawnEntity(sp);
+
+					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
+					Minecraft.getMinecraft().effectRenderer.addEffect(new EntitySmokeParticle(getWorld().internal, particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width()));
 				}
 			}
 			return;

@@ -24,6 +24,7 @@ import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.TagCompound;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.Explosion;
 
 import java.util.ArrayList;
@@ -354,10 +355,8 @@ public class LocomotiveSteam extends Locomotive {
 						
 						particlePos = particlePos.subtract(fakeMotion);
 						
-						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, lifespan , darken, thickness, size);
-						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-						sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
-						getWorld().internal.spawnEntity(sp);
+						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
+						Minecraft.getMinecraft().effectRenderer.addEffect(sp);
 					}
 				}
 			}
@@ -380,10 +379,8 @@ public class LocomotiveSteam extends Locomotive {
 
 					particlePos = particlePos.subtract(fakeMotion);
 					
-					EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, lifespan, darken, thickness, size);
-					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
-					getWorld().internal.spawnEntity(sp);
+					EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
+					Minecraft.getMinecraft().effectRenderer.addEffect(sp);
 				}
 			}
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
@@ -430,8 +427,6 @@ public class LocomotiveSteam extends Locomotive {
 					
 					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
 						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(piston.min(), this.getRotationYaw() + 180));
-						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, 80, 0, 0.6f, 0.2);
-						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
 						double accell = 0.3 * gauge.scale();
 						if (piston.side.contains("LEFT")) {
 							accell = -accell;
@@ -440,8 +435,8 @@ public class LocomotiveSteam extends Locomotive {
 							accell = 0;
 						}
 						Vec3d sideMotion = fakeMotion.add(VecUtil.fromWrongYaw(accell, this.getRotationYaw()+90));
-						sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
-						getWorld().internal.spawnEntity(sp);
+						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01, sideMotion.z), 80, 0, 0.6f, 0.2);
+						Minecraft.getMinecraft().effectRenderer.addEffect(sp);
 					}
 					
 					if (!ConfigSound.soundEnabled) {
@@ -498,10 +493,8 @@ public class LocomotiveSteam extends Locomotive {
 					for (RenderComponent steam : steams) {
 						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(steam.center(), this.getRotationYaw() + 180));
 						particlePos = particlePos.subtract(fakeMotion);
-						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, 40, 0, 0.2f, steam.width());
-						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-						sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z);
-						getWorld().internal.spawnEntity(sp);
+						EntitySmokeParticle sp = new EntitySmokeParticle(getWorld().internal, particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z),40, 0, 0.2f, steam.width());
+						Minecraft.getMinecraft().effectRenderer.addEffect(sp);
 					}
 				}
 			} else {
