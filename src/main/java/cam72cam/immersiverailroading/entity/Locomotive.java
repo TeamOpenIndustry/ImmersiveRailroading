@@ -2,7 +2,10 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.UUID;
 
+import cam72cam.immersiverailroading.library.Particles;
+import cam72cam.immersiverailroading.render.SmokeParticle.SmokeParticleData;
 import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -338,5 +341,9 @@ public abstract class Locomotive extends FreightTank {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;
 	}
-	
+
+	protected void addSmoke(Vec3d particlePos, Vec3d motion, int lifespan, float darken, float thickness, double diameter) {
+		assert getWorld().isClient;
+		Particles.SMOKE.accept(new SmokeParticleData(getWorld(), particlePos, motion, lifespan, darken, thickness, diameter));
+	}
 }
