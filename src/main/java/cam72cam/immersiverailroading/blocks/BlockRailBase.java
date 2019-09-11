@@ -2,10 +2,7 @@ package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.RailBase;
-import cam72cam.mod.block.BlockEntity;
-import cam72cam.mod.block.BlockSettings;
-import cam72cam.mod.block.BlockTypeTickable;
-import cam72cam.mod.block.Material;
+import cam72cam.mod.block.*;
 import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.block.tile.TileEntityTickable;
 import cam72cam.mod.math.Vec3d;
@@ -13,9 +10,10 @@ import cam72cam.mod.resource.Identifier;
 import trackapi.lib.ITrack;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class BlockRailBase extends BlockTypeTickable {
-	BlockRailBase(BlockSettings settings, Function<TileEntity, BlockEntity> constructData) {
+	BlockRailBase(BlockSettings settings, Supplier<BlockEntityTickable> constructData) {
 		super(settings
                 .withConnectable(false)
                 .withMaterial(Material.METAL)

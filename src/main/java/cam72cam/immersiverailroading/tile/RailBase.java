@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
@@ -14,7 +13,6 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.BlockEntityTickable;
-import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
@@ -50,10 +48,6 @@ public class RailBase extends BlockEntityTickable {
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
-
-	public RailBase(TileEntity internal) {
-		super(internal);
-	}
 
 	public boolean isLoaded() {
 		// TODO removeme

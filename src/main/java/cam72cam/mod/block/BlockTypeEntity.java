@@ -21,12 +21,13 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class BlockTypeEntity extends BlockType {
     public static final PropertyObject BLOCK_DATA = new PropertyObject("BLOCK_DATA");
     protected final Identifier id;
 
-    public BlockTypeEntity(BlockSettings settings, Function<TileEntity, BlockEntity> constructData) {
+    public BlockTypeEntity(BlockSettings settings, Supplier<BlockEntity> constructData) {
         super(settings);
         id = new Identifier(settings.modID, settings.name);
         TileEntity.register(constructData, id);
