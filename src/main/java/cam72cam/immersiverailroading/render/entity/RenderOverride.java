@@ -53,57 +53,6 @@ public class RenderOverride {
 	private static final Predicate<Entity> IN_RENDER_DISTANCE = p_apply_1_ -> isInRenderDistance(p_apply_1_.getPosition());
 	private static final Predicate<net.minecraft.entity.Entity> _IN_RENDER_DISTANCE = p_apply_1_ -> isInRenderDistance(new Vec3d(p_apply_1_.getPositionVector()));
 
-	public static void renderParticles(float partialTicks) {
-		int pass = MinecraftForgeClient.getRenderPass();
-        if (pass != 1) {
-        	return;
-        }
-		Minecraft.getMinecraft().mcProfiler.startSection("ir_particles");
-		
-		GlStateManager.depthMask(false);
-		
-        ICamera camera = getCamera(partialTicks);
-        Vec3d ep = getCameraPos(partialTicks);
-        
-        World world = MinecraftClient.getPlayer().getWorld();
-        List<EntitySmokeParticle> smokeEnts = world.internal.getEntities(EntitySmokeParticle.class, _IN_RENDER_DISTANCE);
-        Comparator<EntitySmokeParticle> compare = (EntitySmokeParticle e1, EntitySmokeParticle e2) -> {
-        	Double p1 = e1.getPositionVector().squareDistanceTo(ep.internal);
-        	Double p2 = e1.getPositionVector().squareDistanceTo(ep.internal);
-        	return p1.compareTo(p2);
-        };
-        Minecraft.getMinecraft().mcProfiler.startSection("ent_sort");
-    	Collections.sort(smokeEnts,  compare);
-        Minecraft.getMinecraft().mcProfiler.endSection();
-
-        ParticleRender.shader.bind();
-		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
-		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
-		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-		Minecraft.getMinecraft().mcProfiler.startSection("render_particle");
-        for (EntitySmokeParticle entity : smokeEnts) {
-        	if (camera.isBoundingBoxInFrustum(entity.getRenderBoundingBox()) ) {
-        		Minecraft.getMinecraft().getRenderManager().renderEntityStatic(entity, partialTicks, true);
-        	}
-        }
-        Minecraft.getMinecraft().mcProfiler.endSection();
-
-		blend.restore();
-		tex.restore();
-		cull.restore();
-		light.restore();
-		
-		ParticleRender.shader.unbind();
-		
-
-		GlStateManager.depthMask(true);
-		
-		Minecraft.getMinecraft().mcProfiler.endSection();
-	}
-
 	public static void renderTiles(float partialTicks) {
         int pass = MinecraftForgeClient.getRenderPass();
         if (pass != 0) {
