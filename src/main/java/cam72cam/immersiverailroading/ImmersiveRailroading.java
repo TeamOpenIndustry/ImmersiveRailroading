@@ -16,7 +16,6 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
-import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
@@ -190,11 +189,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 			new SteamLocomotiveOverlay().draw();
 			new DieselLocomotiveOverlay().draw();
 			new HandCarOverlay().draw();
-		});
-
-
-		GlobalRender.registerRender(partialTicks -> {
-			RenderOverride.renderTiles(partialTicks);
 		});
 
 		if (Loader.isModLoaded("igwmod")) {

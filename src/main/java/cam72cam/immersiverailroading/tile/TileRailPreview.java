@@ -32,21 +32,6 @@ public class TileRailPreview extends BlockEntityTickable {
 		super(internal);
 	}
 
-	/* TODO RENDER
-	@Override
-	@SideOnly(Side.CLIENT)
-	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
-		return INFINITE_EXTENT_AABB;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public double getMaxRenderDistanceSquared()
-	{
-		return Double.MAX_VALUE;
-	}
-	*/
-
 	public ItemStack getItem() {
 		return this.item;
 	}

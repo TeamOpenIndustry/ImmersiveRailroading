@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.immersiverailroading.render.entity.RenderOverride;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
@@ -15,6 +14,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
@@ -99,7 +99,7 @@ public class TrackBlueprintItemModel {
 				GL14.glBlendColor(1, 1, 1, 0.5f);
 			}
 
-			Vec3d cameraPos = RenderOverride.getCameraPos(partialTicks);
+			Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
 			Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
 			GL11.glTranslated(offPos.x, offPos.y, offPos.z);
 
