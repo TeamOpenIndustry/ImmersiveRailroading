@@ -143,4 +143,9 @@ public class GlobalRender {
             event.getRight().add(i, GPUInfo.debug());
         }
     }
+
+    public static boolean isInRenderDistance(Vec3d pos) {
+        // max rail length is 100, 50 is center
+        return MinecraftClient.getPlayer().getPosition().distanceTo(pos) < ((Minecraft.getMinecraft().gameSettings.renderDistanceChunks+1) * 16 + 50);
+    }
 }

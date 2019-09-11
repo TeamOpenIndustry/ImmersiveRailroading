@@ -4,16 +4,13 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
-import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -24,14 +21,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
-	private static Map<Integer, ExpireableList<BlockPos, TileRailPreview>> previews = new HashMap<>();
-
 	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
 
 	private static String missingResources;
@@ -77,38 +68,6 @@ public class ClientProxy extends CommonProxy {
 			Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", PlayerMessage.direct(missingResources).internal));
 			missingResources = null;
 		}
-	}
-
-	public void addPreview(int dimension, TileRailPreview preview) {
-		/* TODO HACKS
-		if (!previews.containsKey(dimension)) {
-			previews.put(dimension, new ExpireableList<BlockPos, TileRailPreview>() {
-				@Override
-				public int lifespan() {
-					return 2;
-				}
-				@Override
-				public boolean sliding() {
-					return false;
-				}
-			});
-		}
-		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(dimension);
-		TileRailPreview curr = pvs.get(preview.pos.internal);
-		if (curr != null) {
-			if (curr.writeToNBT(new NBTTagCompound()).equals(preview.writeToNBT(new NBTTagCompound()))) {
-				preview = curr;
-			}
-		}
-		previews.get(dimension).put(preview.pos.internal, preview);
-		*/
-	}
-	public Collection<TileRailPreview> getPreviews() {
-		ExpireableList<BlockPos, TileRailPreview> pvs = previews.get(Minecraft.getMinecraft().player.dimension);
-		if (pvs != null) {
-			return pvs.values();
-		}
-		return null;
 	}
 
 	@SubscribeEvent

@@ -1,5 +1,7 @@
 package cam72cam.mod.util;
 
+import cam72cam.mod.block.BlockEntity;
+import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -205,5 +207,34 @@ public class TagCompound {
 
     public String toString() {
         return internal.toString();
+    }
+
+    public void setWorld(String key, World world) {
+        setInteger(key, world.internal.provider.getDimension());
+    }
+
+    public World getWorld(String key, boolean isClient) {
+        return World.get(getInteger(key), isClient);
+    }
+
+    public <T extends BlockEntity> void setTile(String key, T preview) {
+        TagCompound ted = new TagCompound();
+        ted.setWorld("world", preview.world);
+
+        TagCompound data = new TagCompound();
+        preview.internal.writeToNBT(data.internal);
+        ted.set("data", data);
+
+        set(key, ted);
+    }
+
+    public <T extends BlockEntity> T getTile(String key, boolean isClient) {
+        TagCompound ted = get(key);
+        World world = ted.getWorld("world", isClient);
+
+        //TODO pull logic in here to avoid crash
+        net.minecraft.tileentity.TileEntity te = net.minecraft.tileentity.TileEntity.create(world.internal, ted.get("data").internal);
+        assert te instanceof TileEntity;
+        return (T) ((TileEntity)te).instance();
     }
 }
