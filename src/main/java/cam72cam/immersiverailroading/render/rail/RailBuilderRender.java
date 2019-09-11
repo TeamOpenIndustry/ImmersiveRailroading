@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.mod.MinecraftClient;
@@ -30,13 +29,11 @@ public class RailBuilderRender {
 
         Integer displayList = displayLists.get(info.uniqueID);
         if (displayList == null) {
+            displayList = GL11.glGenLists(1);
+            GL11.glNewList(displayList, GL11.GL_COMPILE);
 
-            if (!ClientProxy.renderCacheLimiter.canRender()) {
-                return;
-            }
-
-            displayList = ClientProxy.renderCacheLimiter.newList(() -> {
-                GL11.glPushMatrix();
+            GL11.glPushMatrix();
+            {
 
                 for (VecYawPitch piece : info.getBuilder().getRenderData()) {
                     Matrix4 m = new Matrix4();
@@ -54,11 +51,11 @@ public class RailBuilderRender {
 
                     m.transpose();
                     FloatBuffer fbm = BufferUtils.createFloatBuffer(16);
-                    fbm.put(new float [] {
-                            (float)m.m00, (float)m.m01, (float)m.m02, (float)m.m03,
-                            (float)m.m10, (float)m.m11, (float)m.m12, (float)m.m13,
-                            (float)m.m20, (float)m.m21, (float)m.m22, (float)m.m23,
-                            (float)m.m30, (float)m.m31, (float)m.m32, (float)m.m33
+                    fbm.put(new float[]{
+                            (float) m.m00, (float) m.m01, (float) m.m02, (float) m.m03,
+                            (float) m.m10, (float) m.m11, (float) m.m12, (float) m.m13,
+                            (float) m.m20, (float) m.m21, (float) m.m22, (float) m.m23,
+                            (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
                     });
                     fbm.flip();
                     GL11.glMultMatrix(fbm);
@@ -68,7 +65,7 @@ public class RailBuilderRender {
                         // TODO static
                         ArrayList<String> groups = new ArrayList<String>();
                         for (String baseGroup : piece.getGroups()) {
-                            for (String groupName : trackRenderer.model.groups())  {
+                            for (String groupName : trackRenderer.model.groups()) {
                                 if (groupName.contains(baseGroup)) {
                                     groups.add(groupName);
                                 }
@@ -97,9 +94,9 @@ public class RailBuilderRender {
                         GL11.glPushMatrix();
                     }
                 }
-                GL11.glPopMatrix();
-
-            });
+            }
+            GL11.glPopMatrix();
+            GL11.glEndList();
             displayLists.put(info.uniqueID, displayList);
         }
 

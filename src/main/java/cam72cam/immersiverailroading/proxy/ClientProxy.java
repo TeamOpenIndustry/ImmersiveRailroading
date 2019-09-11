@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.RenderCacheTimeLimiter;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import net.minecraft.client.Minecraft;
@@ -23,8 +22,6 @@ import net.minecraftforge.fml.relauncher.Side;
 
 @EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
-	public static RenderCacheTimeLimiter renderCacheLimiter = new RenderCacheTimeLimiter();
-
 	private static String missingResources;
 
 	@SubscribeEvent
@@ -53,7 +50,6 @@ public class ClientProxy extends CommonProxy {
 	
 	@SubscribeEvent
 	public static void onHackRenderEvent(RenderWorldLastEvent event) {
-		renderCacheLimiter.reset();
 	}
 
 	@SubscribeEvent

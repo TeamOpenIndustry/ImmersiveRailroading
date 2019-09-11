@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -27,11 +26,11 @@ public class RailBaseRender {
 	public static void draw(RailInfo info) {
 		Integer displayList = displayLists.get(info.uniqueID);
 		if (displayList == null) {
-			if (!ClientProxy.renderCacheLimiter.canRender()) {
-				return;
-			}
-			
-			displayList = ClientProxy.renderCacheLimiter.newList(() ->drawSync(info));
+			displayList = GL11.glGenLists(1);
+			GL11.glNewList(displayList, GL11.GL_COMPILE);
+			drawSync(info);
+			GL11.glEndList();
+
 			displayLists.put(info.uniqueID, displayList);
 		}
 		GL11.glCallList(displayList);
