@@ -7,11 +7,13 @@ import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.entity.RenderOverride;
@@ -38,7 +40,6 @@ import cam72cam.mod.render.*;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
@@ -209,6 +210,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 			StockRenderCache.clearRenderCache();
 		});
+
+		Particles.SMOKE = IParticle.register(SmokeParticle::new);
 	}
 
 	@Override

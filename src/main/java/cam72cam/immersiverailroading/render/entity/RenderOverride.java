@@ -1,8 +1,5 @@
 package cam72cam.immersiverailroading.render.entity;
 
-import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.EntitySmokeParticle;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.tile.Rail;
@@ -11,18 +8,13 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.tile.TileEntity;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.math.Vec3d;
 import com.google.common.base.Predicate;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.client.MinecraftForgeClient;
 import org.lwjgl.opengl.GL11;
 

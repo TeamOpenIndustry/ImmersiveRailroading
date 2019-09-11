@@ -9,17 +9,16 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
-import cam72cam.mod.gui.GuiRegistry;
-import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
+import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.client.Minecraft;
 
 import java.util.List;
 
@@ -245,7 +244,7 @@ public class LocomotiveDiesel extends Locomotive {
 					particlePos = particlePos.subtract(fakeMotion);
 
 					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
-					Minecraft.getMinecraft().effectRenderer.addEffect(new EntitySmokeParticle(getWorld().internal, particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width()));
+					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width());
 				}
 			}
 			return;
