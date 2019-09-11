@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -20,10 +19,6 @@ public class Rail extends RailBase {
 
 	public RailInfo info;
 	private List<ItemStack> drops;
-
-	public Rail(TileEntity internal) {
-		super(internal);
-	}
 
 	@Override
     public IBoundingBox getBoundingBox() {

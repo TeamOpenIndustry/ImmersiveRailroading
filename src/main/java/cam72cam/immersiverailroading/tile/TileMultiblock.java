@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
 import cam72cam.mod.block.BlockEntityTickable;
-import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.energy.Energy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
@@ -68,10 +67,6 @@ public class TileMultiblock extends BlockEntityTickable {
     		return val;
     	}
     };
-
-	public TileMultiblock(TileEntity internal) {
-		super(internal);
-	}
 
 	public boolean isLoaded() {
 			//TODO FIX ME bad init

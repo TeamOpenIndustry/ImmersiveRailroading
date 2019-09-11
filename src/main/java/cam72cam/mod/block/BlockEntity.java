@@ -15,15 +15,9 @@ import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.world.World;
 
 public abstract class BlockEntity {
-    public final TileEntity internal;
-    public final World world;
-    public final Vec3i pos;
-
-    public BlockEntity(TileEntity internal) {
-        this.internal = internal;
-        this.world = internal.world;
-        this.pos = internal.pos;
-    }
+    public TileEntity internal;
+    public World world;
+    public Vec3i pos;
 
     public abstract void load(TagCompound nbt);
     public abstract void save(TagCompound nbt);

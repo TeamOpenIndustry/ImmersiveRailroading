@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
-import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -27,10 +26,6 @@ public class TileRailPreview extends BlockEntityTickable {
 	private ItemStack item;
 	private PlacementInfo placementInfo;
 	private PlacementInfo customInfo;
-
-	public TileRailPreview(TileEntity internal) {
-		super(internal);
-	}
 
 	public ItemStack getItem() {
 		return this.item;

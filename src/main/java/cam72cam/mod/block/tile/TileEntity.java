@@ -31,7 +31,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class TileEntity extends net.minecraft.tileentity.TileEntity {
     public World world;
@@ -44,7 +44,7 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
     Tile registration
     */
 
-    private static final Map<String, Function<TileEntity, BlockEntity>> registry = HashBiMap.create();
+    private static final Map<String, Supplier<BlockEntity>> registry = HashBiMap.create();
     private TagCompound deferredLoad;
 
     public TileEntity() {
@@ -57,7 +57,7 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
         instanceId = id.toString();
     }
 
-    public static void register(Function<TileEntity, BlockEntity> instance, Identifier id) {
+    public static void register(Supplier<BlockEntity> instance, Identifier id) {
         registry.put(id.toString(), instance);
     }
 
@@ -398,7 +398,10 @@ public class TileEntity extends net.minecraft.tileentity.TileEntity {
                 if (!registry.containsKey(instanceId)) {
                     System.out.println("WAT " + instanceId);
                 }
-                this.instance = registry.get(this.instanceId).apply(this);
+                this.instance = registry.get(this.instanceId).get();
+                this.instance.internal = this;
+                this.instance.world = this.world;
+                this.instance.pos = this.pos;
                 if (deferredLoad != null) {
                     this.instance.load(deferredLoad);
                 }
