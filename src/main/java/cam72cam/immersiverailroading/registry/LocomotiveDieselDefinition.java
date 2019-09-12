@@ -20,7 +20,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private int fuelEfficiency;
     private boolean hornSus = true;
 
-    LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
+    public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
 
         // Handle null data

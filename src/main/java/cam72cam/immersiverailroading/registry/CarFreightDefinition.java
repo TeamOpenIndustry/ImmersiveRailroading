@@ -15,7 +15,7 @@ public class CarFreightDefinition extends FreightDefinition {
     private int width;
     private List<String> validCargo;
 
-    CarFreightDefinition(String defID, JsonObject data) throws Exception {
+    public CarFreightDefinition(String defID, JsonObject data) throws Exception {
         super(CarFreight.class, defID, data);
 
         // Handle null data

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -15,6 +16,7 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import com.google.gson.JsonObject;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,15 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 	}
 	*/
 
+	public String tryJoinWorld() {
+		if (DefinitionManager.getDefinition(defID) == null) {
+			String error = String.format("Missing definition %s, do you have all of the required resource packs?", defID);
+			ImmersiveRailroading.error(error);
+			return error;
+		}
+		return null;
+	}
+
 	public EntityRollingStockDefinition getDefinition() {
 		return this.getDefinition(EntityRollingStockDefinition.class);
 	}
@@ -47,7 +58,7 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		if (def == null) {
 			try {
-				return type.getConstructor(String.class, JsonObject.class).newInstance(null);
+				return type.getConstructor(String.class, JsonObject.class).newInstance(defID, null);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 					| SecurityException e) {
 				e.printStackTrace();

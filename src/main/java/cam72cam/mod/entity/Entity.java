@@ -34,6 +34,10 @@ public class Entity {
         return this;
     }
 
+    public String tryJoinWorld() {
+        return null;
+    }
+
     public World getWorld() {
         return World.get(internal.world);
     }

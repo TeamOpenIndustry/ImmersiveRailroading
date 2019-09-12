@@ -27,7 +27,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private int numSlots;
     private int width;
 
-    LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
+    public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveSteam.class, defID, data);
 
         // Handle null data

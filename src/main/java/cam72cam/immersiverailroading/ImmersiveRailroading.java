@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
-import cam72cam.immersiverailroading.proxy.CommonProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;
@@ -40,7 +39,6 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import org.lwjgl.opengl.GL11;
 import paulscode.sound.SoundSystemConfig;
@@ -218,9 +216,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
 		return Audio.newSound(oggLocation, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
-
-	@SidedProxy(clientSide="cam72cam.immersiverailroading.proxy.ClientProxy", serverSide="cam72cam.immersiverailroading.proxy.ServerProxy")
-	public static CommonProxy proxy;
 
     public static void debug(String msg, Object...params) {
     	if (instance.logger == null) {
