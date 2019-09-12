@@ -51,7 +51,7 @@ class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManag
 			ForgeChunkManager.getConfig().save();
 		}
 
-		ForgeChunkManager.setForcedChunkLoadingCallback(((ModCore.Mod)ImmersiveRailroading.instance).instance, this);
+		ForgeChunkManager.setForcedChunkLoadingCallback(ModCore.instance, this);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManag
 	private static Ticket ticketForWorld(World world) {
 		int dim = world.provider.getDimension();
 		if (!TICKETS.containsKey(dim)) {
-			TICKETS.put(dim, ForgeChunkManager.requestTicket(((ModCore.Mod)ImmersiveRailroading.instance).instance, world, ForgeChunkManager.Type.NORMAL));
+			TICKETS.put(dim, ForgeChunkManager.requestTicket(ModCore.instance, world, ForgeChunkManager.Type.NORMAL));
 		}
 		return TICKETS.get(dim);
 	}
