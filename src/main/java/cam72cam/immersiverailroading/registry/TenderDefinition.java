@@ -12,7 +12,7 @@ public class TenderDefinition extends CarTankDefinition {
     private int width;
     private boolean showCurrentLoadOnly;
 
-    TenderDefinition(String defID, JsonObject data) throws Exception {
+    public TenderDefinition(String defID, JsonObject data) throws Exception {
         super(Tender.class, defID, data);
     }
 

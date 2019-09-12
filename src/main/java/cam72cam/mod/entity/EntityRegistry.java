@@ -1,8 +1,18 @@
 package cam72cam.mod.entity;
 
 import cam72cam.mod.ModCore;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 import cam72cam.mod.resource.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiDisconnected;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiMultiplayer;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,5 +60,39 @@ public class EntityRegistry {
         String id = identifiers.get(cls);
         ent.init(id);
         return ent.getSelf();
+    }
+
+    private static String missingResources;
+
+    @EventBusSubscriber
+    public static class EntityEvents {
+        @SubscribeEvent
+        public static void onEntityJoin(EntityJoinWorldEvent event) {
+            if (World.get(event.getWorld()) == null) {
+                return;
+            }
+
+
+            if (event.getEntity() instanceof ModdedEntity) {
+                String msg = ((ModdedEntity)event.getEntity()).getSelf().tryJoinWorld();
+                if (msg != null) {
+                    event.setCanceled(true);
+                    missingResources = msg;
+                }
+            }
+        }
+    }
+
+    @EventBusSubscriber(Side.CLIENT)
+    public static class EntityClientEvents {
+        @SubscribeEvent
+        public static void onClientTick(TickEvent.ClientTickEvent event) {
+            if (missingResources != null && !Minecraft.getMinecraft().isSingleplayer()) {
+                Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(PlayerMessage.direct(missingResources).internal);
+                Minecraft.getMinecraft().loadWorld(null);
+                Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", PlayerMessage.direct(missingResources).internal));
+                missingResources = null;
+            }
+        }
     }
 }

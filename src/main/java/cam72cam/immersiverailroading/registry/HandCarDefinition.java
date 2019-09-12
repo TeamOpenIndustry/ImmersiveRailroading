@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.entity.HandCar;
 import com.google.gson.JsonObject;
 
 public class HandCarDefinition extends LocomotiveDefinition {
-    HandCarDefinition(String defID, JsonObject data) throws Exception {
+    public HandCarDefinition(String defID, JsonObject data) throws Exception {
         super(HandCar.class, defID, data);
     }
 

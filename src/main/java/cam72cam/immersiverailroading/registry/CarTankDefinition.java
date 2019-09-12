@@ -17,7 +17,7 @@ public class CarTankDefinition extends FreightDefinition {
     private List<Fluid> fluidFilter; // null == no filter
     private FluidQuantity capacity;
 
-    CarTankDefinition(String defID, JsonObject data) throws Exception {
+    public CarTankDefinition(String defID, JsonObject data) throws Exception {
         this(CarTank.class, defID, data);
     }
 

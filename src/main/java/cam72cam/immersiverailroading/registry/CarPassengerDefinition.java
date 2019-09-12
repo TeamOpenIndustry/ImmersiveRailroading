@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 
 public class CarPassengerDefinition extends EntityRollingStockDefinition {
 
-    CarPassengerDefinition(String defID, JsonObject data) throws Exception {
+    public CarPassengerDefinition(String defID, JsonObject data) throws Exception {
         super(CarPassenger.class, defID, data);
     }
 

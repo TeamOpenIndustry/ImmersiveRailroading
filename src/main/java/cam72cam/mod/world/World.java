@@ -81,6 +81,9 @@ public class World {
         onTicks.forEach(fn -> fn.accept(get(event.world)));
     }
     public static World get(net.minecraft.world.World world) {
+        if (world == null) {
+            return null;
+        }
         Map<net.minecraft.world.World, World> worlds = world.isRemote ? clientWorlds : serverWorlds;
 
         return worlds.get(world);
