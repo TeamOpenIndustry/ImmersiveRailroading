@@ -87,7 +87,8 @@ public class EntityRegistry {
     public static class EntityClientEvents {
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
-            if (missingResources != null && !Minecraft.getMinecraft().isSingleplayer()) {
+            if (missingResources != null && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().getConnection() != null) {
+                System.out.println(missingResources);
                 Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(PlayerMessage.direct(missingResources).internal);
                 Minecraft.getMinecraft().loadWorld(null);
                 Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", PlayerMessage.direct(missingResources).internal));
