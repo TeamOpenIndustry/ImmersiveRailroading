@@ -90,6 +90,9 @@ public class Fuzzy {
         OreDictionary.registerOre(ident, item);
         return this;
     }
+    public void add(ItemBase item) {
+        add(item.internal);
+    }
 
     public Fuzzy addAll(Fuzzy other) {
         return addAll(other.ident);

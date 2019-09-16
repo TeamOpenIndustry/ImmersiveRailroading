@@ -43,7 +43,7 @@ public class IRFuzzy {
             IR_TIE.addAll(Fuzzy.WOOD_PLANK);
         }
         if (IR_RAIL.example() == null) {
-            IR_RAIL_BED.add(IRItems.ITEM_RAIL.internal);
+            IR_RAIL.add(IRItems.ITEM_RAIL);
         }
         if (IR_RAIL_BED.example() == null) {
             IR_RAIL_BED.addAll(Fuzzy.GRAVEL_BLOCK);

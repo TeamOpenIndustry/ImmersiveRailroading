@@ -70,7 +70,7 @@ public class SwitchUtil {
 				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
 				RailBase gagRail = rail.world.getBlockEntity(gagPos, RailBase.class);
 				if (gagRail != null && (rail.pos.equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
-					if (rail.world.internal.isBlockIndirectlyGettingPowered(gagPos.internal) > 0) {
+					if (rail.world.getRedstone(gagPos) > 0) {
 						return true;
 					}
 				}
