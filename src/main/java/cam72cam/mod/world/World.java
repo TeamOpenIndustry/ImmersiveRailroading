@@ -251,11 +251,17 @@ public class World {
         TileEntity te = (TileEntity) TileEntity.create(internal, data.internal);
         if (te == null) {
             System.out.println("BAD TE DATA " + data);
+            return null;
         }
         if (te.instance() == null) {
             System.out.println("Loaded " + te.isLoaded() + " " + data);
         }
         return te.instance();
+    }
+
+    public void setBlockEntity(Vec3i pos, BlockEntity entity) {
+        internal.setTileEntity(pos.internal, entity.internal);
+        entity.markDirty();
     }
 
     public void setToAir(Vec3i pos) {
@@ -448,6 +454,7 @@ public class World {
         return new BlockInfo(internal.getBlockState(pos.internal));
     }
     public void setBlock(Vec3i pos, BlockInfo info) {
+        internal.removeTileEntity(pos.internal);
         internal.setBlockState(pos.internal, info.internal);
     }
 

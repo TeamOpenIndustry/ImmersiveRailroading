@@ -208,7 +208,7 @@ public class TileMultiblock extends BlockEntityTickable {
 				world.dropItem(item, pos);
 			}
 		}
-		world.internal.removeTileEntity(pos.internal);
+
 		world.setBlock(pos, replaced);
 	}
 
@@ -255,8 +255,8 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	public void setCraftItem(ItemStack selected) {
 		if (world.isServer) {
-			if (craftItem == null || selected == null || !net.minecraft.item.ItemStack.areItemStacksEqualUsingNBTShareTag(selected.internal, craftItem.internal)) {
-				this.craftItem = selected.copy();
+			if (craftItem == null || selected == null || !(selected.equals(craftItem) && selected.getTagCompound().equals(craftItem.getTagCompound()))) {
+				this.craftItem = selected == null ? null : selected.copy();
 				this.craftProgress = 0;
 				this.markDirty();
 			}

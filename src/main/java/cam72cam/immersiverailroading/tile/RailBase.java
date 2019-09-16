@@ -853,7 +853,7 @@ public class RailBase extends BlockEntityTickable {
 			if (this.world.isServer) {
 				this.cleanSnow();
 				this.setSnowLayers(0);
-				stack.internal.damageItem(1, player.internal);
+				stack.damageItem(1, player);
 			}
 			return true;
 		}
@@ -931,8 +931,7 @@ public class RailBase extends BlockEntityTickable {
 
 				while(true) {
 					if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), Rail.class)) {
-						rail.world.internal.setTileEntity(pos.internal, newGag.internal);
-						newGag.markDirty();
+						world.setBlockEntity(pos, newGag);
 						rail.breakParentIfExists();
 						return false;
 					}
