@@ -27,10 +27,12 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.ModCore;
+import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.input.Keyboard;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
@@ -57,6 +59,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	private static ImmersiveRailroading instance;
 
 	public static GuiRegistry GUI_REGISTRY = new GuiRegistry(ImmersiveRailroading.class);
+
+	public static void forceInit() {
+		//TODO figure out auto loading
+	}
 
     static {
     	ModCore.register(ImmersiveRailroading::new);
@@ -87,13 +93,16 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	public ImmersiveRailroading() {
     	instance = this;
 
+		Config.init();
+		ConfigFile.sync(Config.class, getConfig("immersiverailroading.cfg"));
+		ConfigFile.sync(ConfigGraphics.class, getConfig("immersiverailroading_graphics.cfg"));
+		ConfigFile.sync(ConfigSound.class, getConfig("immersiverailroading_sound.cfg"));
+
 		try {
 			DefinitionManager.initDefinitions();
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to load IR definitions", e);
 		}
-
-		Config.init();
 
 		IRBlocks.register();
 		IRItems.register();
@@ -218,7 +227,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	}
 
     public static void debug(String msg, Object...params) {
-    	if (instance.logger == null) {
+    	if (instance == null || instance.logger == null) {
     		System.out.println("DEBUG: " + String.format(msg, params));
     		return;
     	}
@@ -228,7 +237,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
     	}
     }
     public static void info(String msg, Object...params) {
-    	if (instance.logger == null) {
+    	if (instance == null || instance.logger == null) {
     		System.out.println("INFO: " + String.format(msg, params));
     		return;
     	}
@@ -236,7 +245,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
     	instance.logger.info(String.format(msg, params));
     }
     public static void warn(String msg, Object...params) {
-    	if (instance.logger == null) {
+    	if (instance == null || instance.logger == null) {
     		System.out.println("WARN: " + String.format(msg, params));
     		return;
     	}
@@ -244,7 +253,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
     	instance.logger.warn(String.format(msg, params));
     }
     public static void error(String msg, Object...params) {
-    	if (instance.logger == null) {
+    	if (instance == null || instance.logger == null) {
     		System.out.println("ERROR: " + String.format(msg, params));
     		return;
     	}
@@ -252,7 +261,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
     	instance.logger.error(String.format(msg, params));
     }
 	public static void catching(Throwable ex) {
-    	if (instance.logger == null) {
+    	if (instance == null || instance.logger == null) {
     		ex.printStackTrace();
     		return;
     	}

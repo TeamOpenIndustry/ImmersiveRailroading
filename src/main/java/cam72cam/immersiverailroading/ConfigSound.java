@@ -1,11 +1,12 @@
 package cam72cam.immersiverailroading;
 
-import net.minecraftforge.common.config.Config.Comment;
-import net.minecraftforge.common.config.Config.RequiresMcRestart;
+import cam72cam.mod.config.ConfigFile.Comment;
+import cam72cam.mod.config.ConfigFile.Name;
 
-@net.minecraftforge.common.config.Config(modid = ImmersiveRailroading.MODID, name = ImmersiveRailroading.MODID + "_sounds")
+@Comment("Configuration File")
+@Name("general")
 public class ConfigSound {
-	@RequiresMcRestart
+	//@RequiresMcRestart
 	@Comment("Enable Sounds")
 	public static boolean soundEnabled = true;
 
@@ -15,7 +16,7 @@ public class ConfigSound {
 	@Comment("Sound Distance Multiplier")
 	public static double soundDistanceScale = 1;
 
-	@RequiresMcRestart
+	//@RequiresMcRestart
 	@Comment("Re-configure the sound system to use more audo channels (fixes audio cutting out at high speed)")
 	public static boolean overrideSoundChannels = true;
 
