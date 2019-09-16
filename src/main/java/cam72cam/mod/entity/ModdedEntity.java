@@ -255,9 +255,10 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
 
     public void handlePassengerPositions(Map<UUID, Vec3d> passengerPositions) {
         this.passengerPositions = passengerPositions;
+        /*
         for (net.minecraft.entity.Entity passenger : this.getPassengers()) {
             this.updatePassenger(passenger);
-        }
+        }*/
     }
 
     public int getPassengerCount() {
