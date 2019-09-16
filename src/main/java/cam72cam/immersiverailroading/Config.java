@@ -3,14 +3,11 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Comment("Configuration File")
 @Name("general")
@@ -133,14 +130,14 @@ public class Config {
 		@Comment("Distance the villagers will hear the conductor's whistle")
 		public static double villagerConductorDistance = 50;
 		
-		@Comment("Villager payout items")
-		public static String[] villagerPayoutItems = new String[] {
-			// TODOItems.EMERALD.getRegistryName().toString()
+		@Comment("Villager payout items (ore dict)")
+		public static Fuzzy[] villagerPayoutItems = new Fuzzy[] {
+				Fuzzy.EMERALD
 		};
 		
 		@Comment("Fuels for diesel Locomotives" + 
 				"\nNote: Naphtha of Thermal Foundation is internally registered as 'refined oil'.")
-		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();
+		public static Map<String, Integer> dieselFuels = new HashMap<>();
 
 		@Comment("Water Substitutes")
 		public static String[] waterTypes = new String[] {
@@ -154,14 +151,7 @@ public class Config {
 		public static boolean canDieselEnginesOverheat = true;
 		
 		public static List<ItemStack> getVillagerPayout() {
-			List<ItemStack> items = new ArrayList<>();
-			for (String irl : villagerPayoutItems) {
-				Item item = Item.REGISTRY.getObject(new ResourceLocation(irl));
-				if(item != null) {
-					items.add(new ItemStack(item));
-				}
-			}
-			return items;
+			return Arrays.stream(villagerPayoutItems).map(f -> f.example()).collect(Collectors.toList());
 		}
 		
 		@Comment("Only select Locomotives with suitable equipment can be radio-controlled")

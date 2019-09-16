@@ -1,5 +1,6 @@
 package cam72cam.mod.item;
 
+import cam72cam.mod.config.ConfigFile;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -42,6 +43,11 @@ public class Fuzzy {
     public static final Fuzzy BOOK = new Fuzzy("book").add(Items.BOOK);
     public static final Fuzzy WOOL_BLOCK = new Fuzzy("wool").add(new ItemStack(Blocks.WOOL, 1, OreDictionary.WILDCARD_VALUE));
     public static final Fuzzy BUCKET = new Fuzzy("bucket").add(new ItemStack(Items.BUCKET, 1));
+    public static final Fuzzy EMERALD = new Fuzzy("gemEmerald");
+
+    static {
+        ConfigFile.addMapper(Fuzzy.class, Fuzzy::toString, Fuzzy::new);
+    }
 
     private final String ident;
 

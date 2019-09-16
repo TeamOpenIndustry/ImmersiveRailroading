@@ -12,6 +12,7 @@ import cam72cam.mod.render.BlockRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -20,6 +21,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -60,6 +63,11 @@ public class ModCore {
         protected void setupServer() {}
 
         protected abstract void finalize();
+
+
+        public final Path getConfig(String fname) {
+            return Paths.get(Loader.instance().getConfigDir().toString(), fname);
+        }
     }
 
     static {
@@ -68,6 +76,7 @@ public class ModCore {
         Packet.register(Keyboard.KeyPacket::new, PacketDirection.ClientToServer);
         Packet.register(ModdedEntity.PassengerPositionsPacket::new, PacketDirection.ServerToClient);
         Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
+        ImmersiveRailroading.forceInit();
     }
 
     @EventHandler

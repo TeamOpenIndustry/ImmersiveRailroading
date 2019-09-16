@@ -6,6 +6,8 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,29 +24,40 @@ public class ConfigFile {
         String value();
     }
 
-    public static void sync(Class cls) {
+    public static void sync(Class cls, Path path) {
         PropertyClass pc = new PropertyClass(cls);
-        pc.write().forEach(System.out::println);
 
-        List<String> lines = pc.write();
+        if (Files.exists(path)) {
+            List<String> lines;
+            try {
+                lines = Files.readAllLines(path);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to read config file " + path, e);
+            }
 
-        lines = lines.stream()
-                .filter(x -> !x.matches("\\s*#.*"))
-                .filter(x -> !x.matches("\\s*"))
-                .map(String::trim)
-                .collect(Collectors.toList());
-        
-        pc.read(lines);
+            lines = lines.stream()
+                    .filter(x -> !x.matches("\\s*#.*"))
+                    .filter(x -> !x.matches("\\s*"))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+
+            if (lines.size() > 2) {
+                pc.read(lines);
+            }
+        }
+        try {
+            Files.write(path, String.join(System.lineSeparator(), pc.write()).getBytes());
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to write config file " + path, e);
+        }
     }
 
     private static Map<Class<?>, Function<Object, String>> encoders = new HashMap<>();
     private static Map<Class<?>, Function<String, Object>> decoders = new HashMap<>();
-    private static Map<Class<?>, String> prefixes = new HashMap<>();
 
     public static <T> void addMapper(Class<T> cls, Function<T, String> encoder, Function<String, T> decoder) {
         encoders.put(cls, x -> encoder.apply((T) x));
         decoders.put(cls, decoder::apply);
-        prefixes.put(cls, cls.getSimpleName().substring(0, 1).toUpperCase());
     }
 
     static {
@@ -61,11 +74,32 @@ public class ConfigFile {
         addMapper(Boolean.class, i -> (i == null ? "" : i.toString()), Boolean::parseBoolean);
 
         addMapper(String.class, i -> (i == null ? "" : i), l -> l);
+
+    }
+
+    private static String getPrefix(Class<?> cls) {
+        if (cls.isEnum()) {
+            return "S";
+        }
+        return cls.getSimpleName().substring(0, 1).toUpperCase();
+    }
+
+    private static String encode(Class<?> cls, Object o) {
+        if (cls.isEnum()) {
+            return ((Enum) o).name();
+        }
+        return encoders.get(cls).apply(o);
+    }
+
+    private static Object decode(Class<?> cls, String s) {
+        if (cls.isEnum()) {
+            return Enum.valueOf((Class<? extends Enum>)cls, s);
+        }
+        return decoders.get(cls).apply(s);
     }
 
     private abstract static class Property {
         protected abstract <A extends Annotation> A getAnnotation(Class<A> cls);
-        protected abstract List<Property> getSubProperties();
 
         protected abstract void read(List<String> lines);
         protected abstract List<String> write();
@@ -117,11 +151,6 @@ public class ConfigFile {
         }
 
         @Override
-        protected List<Property> getSubProperties() {
-            return new ArrayList<>();
-        }
-
-        @Override
         protected void read(List<String> lines) {
             if (field.getType().isArray()) {
                 lines.remove(0);
@@ -132,11 +161,12 @@ public class ConfigFile {
                         try {
                             Object[] array = (Object[]) Array.newInstance(field.getType().getComponentType(), found.size());
                             for (int i = 0; i < found.size(); i++) {
-                                array[i] = decoders.get(field.getType().getComponentType()).apply(found.get(i));
+                                array[i] = decode(field.getType().getComponentType(), found.get(i));
                             }
                             field.set(null, array);
                         } catch (IllegalAccessException|NullPointerException e) {
-                            throw new RuntimeException("Error writing field " + field, e);
+                            System.out.println("Error reading field " + field);
+                            e.printStackTrace();
                         }
                         return;
                     } else {
@@ -161,12 +191,13 @@ public class ConfigFile {
                             Class<?> vt = (Class<?>) types[1];
                             for (String s : found) {
                                 String[] sp = s.split("=", 2);
-                                Object key = decoders.get(kt).apply(sp[0].substring(2));
-                                Object val = decoders.get(vt).apply(sp[1]);
+                                Object key = decode(kt, sp[0].substring(2));
+                                Object val = decode(vt, sp[1]);
                                 data.put(key, val);
                             }
                         } catch (IllegalAccessException|NullPointerException e) {
-                            throw new RuntimeException("Error writing field " + field, e);
+                            System.out.println("Error reading field " + field);
+                            e.printStackTrace();
                         }
                         return;
                     } else {
@@ -177,9 +208,10 @@ public class ConfigFile {
 
             String line = lines.remove(0);
             try {
-                field.set(null, decoders.get(field.getType()).apply(line.split("=", 2)[1]));
+                field.set(null, decode(field.getType(), line.split("=", 2)[1]));
             } catch (IllegalAccessException|NullPointerException e) {
-                throw new RuntimeException("Error writing field " + field, e);
+                System.out.println("Error reading field " + field);
+                e.printStackTrace();
             }
         }
 
@@ -194,7 +226,7 @@ public class ConfigFile {
                 try {
                     Object[] data = (Object[]) field.get(null);
                     for (Object elem : data) {
-                        lines.add("    " + encoders.get(aType).apply(elem));
+                        lines.add("    " + encode(aType, elem));
                     }
                 } catch (IllegalAccessException|NullPointerException e) {
                     throw new RuntimeException("Error writing field " + field, e);
@@ -210,7 +242,7 @@ public class ConfigFile {
                     Map<Object, Object> data = (Map<Object, Object>) field.get(null);
                     for(Object key : data.keySet()) {
                         Object value = data.get(key);
-                        lines.add("    " + prefixes.get(value.getClass()) + ":" + encoders.get(key.getClass()).apply(key) + "=" + encoders.get(value.getClass()).apply(value));
+                        lines.add("    " + getPrefix(value.getClass()) + ":" + encode(key.getClass(), key) + "=" + encode(value.getClass(), value));
                     }
                 } catch (IllegalAccessException|NullPointerException e) {
                     throw new RuntimeException("Error writing field " + field, e);
@@ -222,7 +254,7 @@ public class ConfigFile {
 
 
             try {
-                lines.add(prefixes.get(field.getType()) + ":" + getName() + "=" + encoders.get(field.getType()).apply(field.get(null)));
+                lines.add(getPrefix(field.getType()) + ":" + getName() + "=" + encode(field.getType(), field.get(null)));
             } catch (IllegalAccessException|NullPointerException e) {
                 throw new RuntimeException("Error writing field " + field, e);
             }
@@ -263,11 +295,6 @@ public class ConfigFile {
         @Override
         protected <A extends Annotation> A getAnnotation(Class<A> cls) {
             return this.cls.getAnnotation(cls);
-        }
-
-        @Override
-        protected List<Property> getSubProperties() {
-            return properties;
         }
 
         @Override
