@@ -1,22 +1,20 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.mod.config.ConfigFile.Comment;
+import cam72cam.mod.config.ConfigFile.Name;
+import cam72cam.mod.item.ItemStack;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.mod.item.ItemStack;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.config.Config.Comment;
-import net.minecraftforge.common.config.ConfigManager;
-
-@net.minecraftforge.common.config.Config(modid = ImmersiveRailroading.MODID)
+@Comment("Configuration File")
+@Name("general")
 public class Config {
-	public static ConfigDamage damage;
-
 	public static void init() {
 		if (ConfigBalance.dieselFuels.size() == 0) {
 			// BC
@@ -44,18 +42,19 @@ public class Config {
 
 			// Other
 			ConfigBalance.dieselFuels.put("olive_oil", 40);
-			ConfigManager.sync(ImmersiveRailroading.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
+			//ConfigManager.sync(ImmersiveRailroading.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
 		}
 	}
 
+	@Name("damage")
 	public static class ConfigDamage {
-		@Comment({ "Enable Boiler Explosions" })
+		@Comment( "Enable Boiler Explosions" )
 		public static boolean explosionsEnabled = true;
 
-		@Comment({ "Enable environmental damage of Boiler Explosions"})
+		@Comment( "Enable environmental damage of Boiler Explosions")
 		public static boolean explosionEnvDamageEnabled = true;
 		
-		@Comment({ "km/h to damage 1 heart on collision" })
+		@Comment( "km/h to damage 1 heart on collision" )
 		public static double entitySpeedDamage = 10;
 
 		@Comment("Trains should break block")
@@ -77,8 +76,7 @@ public class Config {
 		public static boolean trainMobExplosionDamage = true;
 	}
 
-	public static ConfigBalance balance;
-
+	@Name("balance")
 	public static class ConfigBalance {
 		
 		@Comment("Models require fuel")
@@ -96,10 +94,10 @@ public class Config {
 		@Comment("Traction Multiplier: Higher numbers decreases wheel slip, lower numders increase wheel slip")
 		public static double tractionMultiplier = 1.0;
 		
-		@Comment({ "How heavy is a single block in Kg" })
+		@Comment( "How heavy is a single block in Kg" )
 		public static int blockWeight = 10;
 
-		@Comment({ "MilliBuckets per Liter" })
+		@Comment( "MilliBuckets per Liter" )
 		public static int MB_PER_LITER = 1;
 
 		@Comment("Cost to place down a tie")
@@ -137,7 +135,7 @@ public class Config {
 		
 		@Comment("Villager payout items")
 		public static String[] villagerPayoutItems = new String[] {
-			Items.EMERALD.getRegistryName().toString()
+			// TODOItems.EMERALD.getRegistryName().toString()
 		};
 		
 		@Comment("Fuels for diesel Locomotives" + 
@@ -179,38 +177,37 @@ public class Config {
 		public static boolean DesignGaugeLock = false;
 	}
 
-	public static ConfigDebug debug;
-
+	@Name("debug")
 	public static class ConfigDebug {
 		
-		@Comment({ "Speed up IR stock server onTick stepping to compensate for tps lag" })
+		@Comment( "Speed up IR stock server onTick stepping to compensate for tps lag" )
 		public static boolean serverTickCompensation = true;
 
-		@Comment({ "Range between couplers to try coupling" })
+		@Comment( "Range between couplers to try coupling" )
 		public static double couplerRange = 0.3;
 
-		@Comment({ "Deep Snow on tracks" })
+		@Comment( "Deep Snow on tracks" )
 		public static boolean deepSnow = false;
 
-		@Comment({ "How fast deep snow should melt, 0 = disabled, 20 = fast, 400 = slow" })
+		@Comment( "How fast deep snow should melt, 0 = disabled, 20 = fast, 400 = slow" )
 		public static int snowMeltRate = 0;
 
 		@Comment("Keep rolling stock loaded even when it is not moving")
 		public static boolean keepStockLoaded = false;
 
-		@Comment({ "Print extra chunk loading info" })
+		@Comment( "Print extra chunk loading info" )
 		public static boolean debugLog = false;
 
-		@Comment({ "DEBUG: Buckets infinite fill/empty tanks" })
+		@Comment( "DEBUG: Buckets infinite fill/empty tanks" )
 		public static boolean debugInfiniteLiquids = false;
 
-		@Comment({"Time between open computers poll ticks for augments"})
+		@Comment("Time between open computers poll ticks for augments")
 		public static int ocPollDelayTicks = 1;
 		
-		@Comment({"DEV ONLY: How much to artifically lag the server (per internal)"})
+		@Comment("DEV ONLY: How much to artifically lag the server (per internal)")
 		public static int lagServer = 0;
 
-		@Comment({"Old Narrow track placement (single width instead of 3)"})
+		@Comment("Old Narrow track placement (single width instead of 3)")
         public static boolean oldNarrowWidth = false;
     }
 
