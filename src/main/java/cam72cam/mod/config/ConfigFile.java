@@ -5,10 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ConfigFile {
 
@@ -25,7 +25,16 @@ public class ConfigFile {
     public static void sync(Class cls) {
         PropertyClass pc = new PropertyClass(cls);
         pc.write().forEach(System.out::println);
-        pc.read(pc.write());
+
+        List<String> lines = pc.write();
+
+        lines = lines.stream()
+                .filter(x -> !x.matches("\\s*#.*"))
+                .filter(x -> !x.matches("\\s*"))
+                .map(String::trim)
+                .collect(Collectors.toList());
+        
+        pc.read(lines);
     }
 
     private static Map<Class<?>, Function<Object, String>> encoders = new HashMap<>();
@@ -114,11 +123,63 @@ public class ConfigFile {
 
         @Override
         protected void read(List<String> lines) {
-            String name = getName();
-            for (String line : lines) {
-                if (line.startsWith(name + "=")) {
-                    //val = line.replace(name + "=", "");
+            if (field.getType().isArray()) {
+                lines.remove(0);
+                List<String> found = new ArrayList<>();
+                while(!lines.isEmpty()) {
+                    String line = lines.remove(0);
+                    if(line.equals(">")) {
+                        try {
+                            Object[] array = (Object[]) Array.newInstance(field.getType().getComponentType(), found.size());
+                            for (int i = 0; i < found.size(); i++) {
+                                array[i] = decoders.get(field.getType().getComponentType()).apply(found.get(i));
+                            }
+                            field.set(null, array);
+                        } catch (IllegalAccessException|NullPointerException e) {
+                            throw new RuntimeException("Error writing field " + field, e);
+                        }
+                        return;
+                    } else {
+                        found.add(line);
+                    }
                 }
+            }
+
+            if (Map.class.isAssignableFrom(field.getType())) {
+                lines.remove(0);
+                List<String> found = new ArrayList<>();
+                while(!lines.isEmpty()) {
+                    String line = lines.remove(0);
+                    if (line.equals("}")) {
+
+                        try {
+                            Map<Object, Object> data = (Map<Object, Object>) field.get(null);
+                            data.clear();
+
+                            Type[] types = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+                            Class<?> kt = (Class<?>) types[0];
+                            Class<?> vt = (Class<?>) types[1];
+                            for (String s : found) {
+                                String[] sp = s.split("=", 2);
+                                Object key = decoders.get(kt).apply(sp[0].substring(2));
+                                Object val = decoders.get(vt).apply(sp[1]);
+                                data.put(key, val);
+                            }
+                        } catch (IllegalAccessException|NullPointerException e) {
+                            throw new RuntimeException("Error writing field " + field, e);
+                        }
+                        return;
+                    } else {
+                        found.add(line);
+                    }
+                }
+            }
+
+            String line = lines.remove(0);
+            try {
+                field.set(null, decoders.get(field.getType()).apply(line.split("=", 2)[1]));
+            } catch (IllegalAccessException|NullPointerException e) {
+                throw new RuntimeException("Error writing field " + field, e);
             }
         }
 
@@ -211,7 +272,23 @@ public class ConfigFile {
 
         @Override
         protected void read(List<String> lines) {
-            // TODO
+            lines.remove(0);
+            while(!lines.isEmpty()) {
+                String line = lines.get(0);
+
+                if (line.equals("}")) {
+                    lines.remove(0);
+                    return;
+                }
+
+                String[] parts = line.split("[ =]");
+                Property prop = properties.stream().filter(x -> x.getName().equals(parts[0]) || x.getName().equals(parts[0].substring(2))).findFirst().orElse(null);
+                if (prop != null) {
+                    prop.read(lines);
+                } else {
+                    lines.remove(0);
+                }
+            }
         }
 
         @Override
