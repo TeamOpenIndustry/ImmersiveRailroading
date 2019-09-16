@@ -97,10 +97,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 
 		// See ItemLead.attachToFence
-		double i = player.internal.posX;
-		double j = player.internal.posY;
-		double k = player.internal.posZ;
-
 		if (this.getDefinition().acceptsLivestock()) {
 			List<Living> leashed = getWorld().getEntities((Living e) -> e.getPosition().distanceTo(player.getPosition()) < 16 && e.isLeashedTo(player), Living.class);
 			for (Living entity : leashed) {

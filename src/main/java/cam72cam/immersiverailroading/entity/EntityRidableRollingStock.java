@@ -123,8 +123,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			passenger.setPosition(pos);
 			passenger.setVelocity(this.getVelocity());
 
-			passenger.internal.prevRotationYaw = passenger.internal.rotationYaw;
-			passenger.internal.rotationYaw += (this.getRotationYaw() - this.getPrevRotationYaw());
+            passenger.setRotationYaw(passenger.getRotationYaw() + (this.getRotationYaw() - this.getPrevRotationYaw()));
 		}
 	}
 
