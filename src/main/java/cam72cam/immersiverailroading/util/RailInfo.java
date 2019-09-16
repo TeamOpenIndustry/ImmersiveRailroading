@@ -159,8 +159,8 @@ public class RailInfo {
 
 		private boolean checkMaterials(Player player) {
 			int found = 0;
-			for (net.minecraft.item.ItemStack stacka : player.internal.inventory.mainInventory) {
-				ItemStack stack = new ItemStack(stacka);
+			for (int i = 0; i < player.getInventory().getSlotCount(); i++) {
+				ItemStack stack = player.getInventory().get(i);
 				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					found += stack.getCount();
 				}
@@ -180,8 +180,8 @@ public class RailInfo {
 		private List<ItemStack> useMaterials(Player player) {
 			List<ItemStack> drops = new ArrayList<>();
 			int required = this.count;
-			for (net.minecraft.item.ItemStack stacka : player.internal.inventory.mainInventory) {
-				ItemStack stack = new ItemStack(stacka);
+			for (int i = 0; i < player.getInventory().getSlotCount(); i++) {
+				ItemStack stack = player.getInventory().get(i);
 				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					if (required > stack.getCount()) {
 						required -= stack.getCount();
