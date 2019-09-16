@@ -18,7 +18,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.util.DamageSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -384,7 +383,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 				double speedDamage = this.getCurrentSpeed().metric() / Config.ConfigDamage.entitySpeedDamage;
 				if (speedDamage > 1) {
-					entity.internal.attackEntityFrom((new DamageSource("immersiverailroading:hitByTrain")).setDamageBypassesArmor(), (float) speedDamage);
+				    entity.directDamage("immersiverailroading:hitByTrain", speedDamage);
 				}
 			}
 	

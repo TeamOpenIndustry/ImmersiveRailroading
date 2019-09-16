@@ -24,7 +24,6 @@ import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.TagCompound;
-import net.minecraft.world.Explosion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -692,17 +691,7 @@ public class LocomotiveSteam extends Locomotive {
 
 			Vec3d pos = this.getPosition();
 			if (Config.ConfigDamage.explosionsEnabled) {
-				if (Config.ConfigDamage.explosionEnvDamageEnabled) {
-					for (int i = 0; i < 5; i++) {
-						getWorld().internal.createExplosion(this.internal, pos.x, pos.y, pos.z, boilerPressure/8, true);
-					}
-				} else {
-					for (int i = 0; i < 5; i++) {
-						Explosion explosion = new Explosion(getWorld().internal, this.internal, pos.x, pos.y, pos.z, boilerPressure/5, false, false);
-						explosion.doExplosionA();
-						explosion.doExplosionB(true);
-					}
-				}
+				this.createExplosion(pos, boilerPressure/5, Config.ConfigDamage.explosionEnvDamageEnabled);
 			}
 			getWorld().removeEntity(this);
 		}

@@ -18,7 +18,6 @@ import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.mod.entity.DamageType;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
@@ -153,15 +152,15 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			}
 		}
 		
-		for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
-			cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
+		for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+			ItemStack found = player.getInventory().get(i);
 			if (found.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
 				if (ItemDefinition.getID(found).equals(this.defID)) {
 					if ((player.isCreative() || ItemGauge.get(found) == this.gauge) && !ItemRollingStockComponent.requiresHammering(found)) {
 						ItemComponentType type = ItemComponent.getComponentType(found);
 						if (toAdd.contains(type)) {
 							addComponent(type);
-							player.internal.inventory.decrStackSize(i, 1);
+							player.getInventory().extract(i, 1, false);
 							return;
 						}
 					}
@@ -174,8 +173,8 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		int smallPlates = 0;
 		int wood = 0;
 		
-		for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
-			cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
+		for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+			ItemStack found = player.getInventory().get(i);
 			if (found.is(IRItems.ITEM_PLATE)) {
 				if (ItemGauge.get(found) == this.gauge) {
 					switch (ItemPlateType.get(found)) {
@@ -205,10 +204,10 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 					continue;
 				}
 				
-				for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
-					cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
+				for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+					ItemStack found = player.getInventory().get(i);
 					if (found.is(Fuzzy.WOOD_PLANK)) {
-						net.minecraft.item.ItemStack itemUsed = player.internal.inventory.decrStackSize(i, woodUsed);
+						ItemStack itemUsed = player.getInventory().extract(i, woodUsed, false);
 						
 						woodUsed -= itemUsed.getCount();
 						
@@ -249,12 +248,12 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 				continue;
 			}
 			
-			for (int i = 0; i < player.internal.inventory.getSizeInventory(); i ++) {
-				cam72cam.mod.item.ItemStack found = new cam72cam.mod.item.ItemStack(player.internal.inventory.getStackInSlot(i));
+			for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+				ItemStack found = player.getInventory().get(i);
 				if (found.is(IRItems.ITEM_PLATE)) {
 					if (ItemGauge.get(found) == this.gauge) {
 						if (ItemPlateType.get(found) == type.getPlateType()) {
-							ItemStack itemUsed = new ItemStack(player.internal.inventory.decrStackSize(i, platesUsed));
+							ItemStack itemUsed = player.getInventory().extract(i, platesUsed, false);
 							
 							platesUsed -= itemUsed.getCount();
 							
@@ -336,7 +335,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		this.sendToObserving(new BuildableStockSyncPacket(this));
 		
 		
-		cam72cam.mod.item.ItemStack item = new cam72cam.mod.item.ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
+		ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
 		ItemDefinition.setID(item, defID);
 		ItemGauge.set(item, gauge);
 		ItemComponent.setComponentType(item, toRemove);
