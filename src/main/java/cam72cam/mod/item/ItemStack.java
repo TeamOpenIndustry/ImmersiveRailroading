@@ -1,5 +1,6 @@
 package cam72cam.mod.item;
 
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.util.TagCompound;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -9,7 +10,7 @@ import net.minecraftforge.fluids.FluidUtil;
 public class ItemStack {
     public static final ItemStack EMPTY = new ItemStack(net.minecraft.item.ItemStack.EMPTY);
 
-    public net.minecraft.item.ItemStack internal;
+    public final net.minecraft.item.ItemStack internal;
     private final Item item;
 
     public ItemStack(net.minecraft.item.ItemStack internal) {
@@ -121,5 +122,9 @@ public class ItemStack {
     @Override
     public String toString() {
         return internal.toString();
+    }
+
+    public void damageItem(int i, Player player) {
+        internal.damageItem(i, player.internal);
     }
 }
