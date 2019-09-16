@@ -9,6 +9,8 @@ import cam72cam.mod.net.Packet;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
+import net.minecraft.world.Explosion;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 import java.util.List;
@@ -218,5 +220,17 @@ public class Entity {
 
     public float getRidingSoundModifier() {
         return 1;
+    }
+
+    public void directDamage(String msg, double damage) {
+        internal.attackEntityFrom((new DamageSource(msg)).setDamageBypassesArmor(), (float) damage);
+    }
+
+    protected void createExplosion(Vec3d pos, float size, boolean damageTerrain) {
+        Explosion explosion = new Explosion(getWorld().internal, this.internal, pos.x, pos.y, pos.z, size, false, damageTerrain);
+        if (net.minecraftforge.event.ForgeEventFactory.onExplosionStart(getWorld().internal, explosion)) return;
+        explosion.doExplosionA();
+        explosion.doExplosionB(true);
+
     }
 }
