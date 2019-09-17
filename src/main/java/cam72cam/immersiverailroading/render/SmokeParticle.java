@@ -9,7 +9,10 @@ import cam72cam.mod.render.IParticle;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
-public class SmokeParticle implements IParticle {
+import java.util.List;
+import java.util.function.Consumer;
+
+public class SmokeParticle extends IParticle {
 
 	public static class SmokeParticleData extends ParticleData {
 		private final float darken;
@@ -43,7 +46,10 @@ public class SmokeParticle implements IParticle {
 	}
 
 	@Override
-	public void render(Vec3d pos, int ticks, float partialTicks) {
+	public void render(float partialTicks) {
+	}
+
+	public static void renderAll(List<SmokeParticle> particles, Consumer<SmokeParticle> setPos, float partialTicks) {
 		if (shader == null) {
 			shader =new GLSLShader("immersiverailroading:particles/smoke_vert.c", "immersiverailroading:particles/smoke_frag.c");
 			dl = GL11.glGenLists(1);
@@ -64,54 +70,59 @@ public class SmokeParticle implements IParticle {
 			}
 			GL11.glEndList();
 		}
-
-		double life = ticks / (float)this.data.lifespan;
-
-		double expansionRate = 16;
-
-		double radius = this.data.diameter * (Math.sqrt(life) * expansionRate + 1) * 0.5;
-
-		float alpha = (this.data.thickness + 0.2f) * (1 - (float) Math.sqrt(life));
-
 		shader.bind();
 		GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
 		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
 		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 		GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glPushMatrix();
-		{
-			float darken = 0.9f-this.data.darken*0.9f;
 
-			shader.paramFloat("ALPHA", alpha);
-			shader.paramFloat("DARKEN", darken, darken, darken);
+		for (SmokeParticle particle : particles){
 
-			// Rotate to look at internal
-			Vec3d offsetForRot = MinecraftClient.getPlayer().getPositionEyes(partialTicks).subtract(pos);
-			GL11.glRotated(180 - VecUtil.toWrongYaw(offsetForRot), 0, 1, 0);
-			GL11.glRotated(180 - VecUtil.toPitch(offsetForRot)+90, 1, 0, 0);
+			double life = particle.ticks / (float) particle.data.lifespan;
 
-			// Apply size
-			GL11.glScaled(radius, radius, radius);
+			double expansionRate = 16;
 
-			// Noise Factor
-			GL11.glRotated(this.rot, 0, 0, 1);
-			GL11.glTranslated(0.5, 0, 0);
-			GL11.glRotated(-this.rot, 0, 0, 1);
+			double radius = particle.data.diameter * (Math.sqrt(life) * expansionRate + 1) * 0.5;
 
-			// Spin
-			double angle = ticks + partialTicks;// + 45;
-			GL11.glRotated(angle, 0, 0, 1);
+			float alpha = (particle.data.thickness + 0.2f) * (1 - (float) Math.sqrt(life));
+			GL11.glPushMatrix();
+			{
+				float darken = 0.9f - particle.data.darken * 0.9f;
 
-			//Draw
-			GL11.glCallList(dl);
+				shader.paramFloat("ALPHA", alpha);
+				shader.paramFloat("DARKEN", darken, darken, darken);
+
+				setPos.accept(particle);
+
+				// Rotate to look at internal
+				Vec3d offsetForRot = MinecraftClient.getPlayer().getPositionEyes(partialTicks).subtract(particle.pos);
+				GL11.glRotated(180 - VecUtil.toWrongYaw(offsetForRot), 0, 1, 0);
+				GL11.glRotated(180 - VecUtil.toPitch(offsetForRot) + 90, 1, 0, 0);
+
+				// Apply size
+				GL11.glScaled(radius, radius, radius);
+
+				// Noise Factor
+				GL11.glRotated(particle.rot, 0, 0, 1);
+				GL11.glTranslated(0.5, 0, 0);
+				GL11.glRotated(-particle.rot, 0, 0, 1);
+
+				// Spin
+				double angle = particle.ticks + partialTicks;// + 45;
+				GL11.glRotated(angle, 0, 0, 1);
+
+				//Draw
+				GL11.glCallList(dl);
+			}
+			GL11.glPopMatrix();
 		}
+
 		blend.restore();
 		tex.restore();
 		cull.restore();
 		light.restore();
 		shader.unbind();
 
-		GL11.glPopMatrix();
 	}
 }

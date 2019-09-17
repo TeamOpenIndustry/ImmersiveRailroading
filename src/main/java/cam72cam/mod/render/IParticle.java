@@ -6,16 +6,25 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.entity.Entity;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface IParticle {
-    boolean depthTestEnabled();
-    void render(Vec3d pos, int ticks, float partialTicks);
+public abstract class IParticle {
+    protected Vec3d pos;
+    protected long ticks;
+    boolean canRender = true;
 
-    class ParticleData {
+    Vec3d renderPos;
+
+    protected abstract boolean depthTestEnabled();
+    protected abstract void render(float partialTicks);
+
+    public static class ParticleData {
         public final World world;
         public final Vec3d pos;
         public final Vec3d motion;
@@ -29,9 +38,15 @@ public interface IParticle {
         }
     }
 
-    static <P extends ParticleData> Consumer<P> register(Function<P, IParticle> ctr) {
+    public static <P extends ParticleData> Consumer<P> register(Function<P, IParticle> ctr) {
+        return register(ctr, null);
+    }
+
+    public static <P extends ParticleData, I extends IParticle> Consumer<P> register(Function<P, I> ctr, TriConsumer<List<I>, Consumer<I>,  Float> renderer) {
+        List<I> particles = new ArrayList<>();
+
         return data -> {
-            IParticle ip = ctr.apply(data);
+            I ip = ctr.apply(data);
             Particle p = new Particle(data.world.internal, data.pos.x, data.pos.y, data.pos.z, data.motion.x, data.motion.y, data.motion.z) {
                 {
                     particleMaxAge = data.lifespan;
@@ -47,13 +62,28 @@ public interface IParticle {
 
                 @Override
                 public void renderParticle(BufferBuilder buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
-                    GL11.glPushMatrix();
-                    {
-                        GL11.glTranslated(posX - interpPosX, posY - interpPosY, posZ - interpPosZ);
-                        GL11.glTranslated(this.motionX * partialTicks, this.motionY * partialTicks, this.motionZ * partialTicks);
-                        ip.render(new Vec3d(posX, posY, posZ), particleAge, partialTicks);
+                    ip.ticks = particleAge;
+                    ip.pos = new Vec3d(posX, posY, posZ);
+                    ip.renderPos = new Vec3d(posX - interpPosX, posY - interpPosY, posZ - interpPosZ);
+                    ip.renderPos = ip.renderPos.add(this.motionX * partialTicks, this.motionY * partialTicks, this.motionZ * partialTicks);
+
+                    if (renderer == null) {
+                        GL11.glPushMatrix();
+                        {
+                            GL11.glTranslated(ip.renderPos.x, ip.renderPos.y, ip.renderPos.z);
+                            ip.render(partialTicks);
+                        }
+                        GL11.glPopMatrix();
+                    } else {
+                        if (!ip.canRender) {
+                            renderer.accept(particles, subp -> GL11.glTranslated(subp.renderPos.x, subp.renderPos.y, subp.renderPos.z), partialTicks);
+                            particles.forEach(p -> p.canRender = true);
+                            particles.clear();
+                        } else {
+                            particles.add(ip);
+                            ip.canRender = false;
+                        }
                     }
-                    GL11.glPopMatrix();
                 }
             };
 

@@ -211,7 +211,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 			StockRenderCache.clearRenderCache();
 		});
 
-		Particles.SMOKE = IParticle.register(SmokeParticle::new);
+		Particles.SMOKE = IParticle.register(SmokeParticle::new, SmokeParticle::renderAll);
 	}
 
 	@Override
