@@ -3,39 +3,37 @@ package cam72cam.immersiverailroading.proxy;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.mod.text.Command;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
 
-public class IRCommand extends CommandBase {
+public class IRCommand extends Command {
 
 	@Override
-	public String getName() {
+	public String getPrefix() {
 		return ImmersiveRailroading.MODID;
 	}
 
 	@Override
-	public String getUsage(ICommandSender sender) {
+	public String getUsage() {
 		return "Usage: " + ImmersiveRailroading.MODID + " (reload|debug)";
 	}
 	
 	@Override
-    public int getRequiredPermissionLevel()
+    public boolean opRequired()
     {
-        return 2;
+        return true;
     }
 
 	@Override
-	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+	public boolean execute(World world, Consumer<PlayerMessage> sender, String[] args) {
 		if (args.length != 1) {
-			throw new CommandException(getUsage(sender));
+			return false;
 		}
 		if (args[0].equals("reload")) {
 			ImmersiveRailroading.warn("Reloading Immersive Railroading definitions");
@@ -46,17 +44,17 @@ public class IRCommand extends CommandBase {
 				// Might want to stop the server here...
 			}
 			ImmersiveRailroading.info("Done reloading Immersive Railroading definitions");
-			return;
+			return true;
 		}
 		
 		if (args[0].equals("debug")) {
-			List<EntityRollingStock> ents = World.get(sender.getEntityWorld()).getEntities(EntityRollingStock.class);
+			List<EntityRollingStock> ents = world.getEntities(EntityRollingStock.class);
 			ents.sort(Comparator.comparing(a -> a.getUUID().toString()));
 			for (EntityRollingStock ent : ents) {
-				sender.sendMessage(PlayerMessage.direct(String.format("%s : %s - %s : %s", ent.getUUID(), ent.internal.getEntityId(), ent.getDefinitionID(), ent.getPosition())).internal);
+				sender.accept(PlayerMessage.direct(String.format("%s : %s - %s : %s", ent.getUUID(), ent.internal.getEntityId(), ent.getDefinitionID(), ent.getPosition())));
 			}
-			return;
+			return true;
 		}
-		throw new CommandException(getUsage(sender));
+		return false;
 	}
 }
