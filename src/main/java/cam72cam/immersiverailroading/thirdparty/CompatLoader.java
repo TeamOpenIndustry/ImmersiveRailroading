@@ -16,9 +16,13 @@ public class CompatLoader {
 		return null;
 	}
 	
-	public static void load() {
+	public static void setup() {
 		invokeStatic("opencomputers", "cam72cam.immersiverailroading.thirdparty.opencomputers.Compat", "init");
 		invokeStatic("immersiveengineering", "cam72cam.immersiverailroading.thirdparty.ImmersiveEngineering", "init");
 		invokeStatic("computercraft", "cam72cam.immersiverailroading.thirdparty.ComputerCraft", "init");
+	}
+
+	public static void init() {
+		invokeStatic("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
 	}
 }
