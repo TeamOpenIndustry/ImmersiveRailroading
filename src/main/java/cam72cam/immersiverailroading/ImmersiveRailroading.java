@@ -32,7 +32,6 @@ import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.input.Keyboard;
-import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
@@ -40,8 +39,6 @@ import cam72cam.mod.render.*;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.event.FMLInterModComms;
 import org.lwjgl.opengl.GL11;
 import paulscode.sound.SoundSystemConfig;
 
@@ -106,6 +103,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 		IRBlocks.register();
 		IRItems.register();
+
+		CompatLoader.init();
 	}
 
 	@Override
@@ -139,7 +138,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 	@Override
 	protected void finalize() {
-		CompatLoader.load();
+		CompatLoader.setup();
 		IRFuzzy.applyFallbacks();
 	}
 
@@ -197,10 +196,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 			new DieselLocomotiveOverlay().draw();
 			new HandCarOverlay().draw();
 		});
-
-		if (Loader.isModLoaded("igwmod")) {
-			FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "init");
-		}
 
 		ModCore.onReload(() -> {
 			try {

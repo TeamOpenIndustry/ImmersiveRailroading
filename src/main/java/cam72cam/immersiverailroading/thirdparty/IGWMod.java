@@ -7,9 +7,15 @@ import igwmod.gui.GuiWiki;
 import igwmod.gui.tabs.BaseWikiTab;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 
 public class IGWMod {
 	public static void init() {
+        FMLInterModComms.sendMessage("igwmod", "cam72cam.immersiverailroading.thirdparty.IGWMod", "setup");
+	}
+
+	public static void setup() {
 		WikiRegistry.registerWikiTab(new BaseWikiTab() {
 			{
 				pageEntries.add("home");
