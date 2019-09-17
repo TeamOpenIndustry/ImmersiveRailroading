@@ -187,13 +187,13 @@ public class LocomotiveDiesel extends Locomotive {
 
 				if (sync.getInteger(HORN) != 0 && !horn.isPlaying() && isRunning()) {
 					if (this.getDefinition().getHornSus()) {
-						hornVolume = 0.25f;
+						hornVolume = 0.5f;
 						horn.setVolume(hornVolume);
 					}
 					horn.play(getPosition());
 				}
 				else if(sync.getInteger(HORN) == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
-					if (hornVolume > 0) {
+                    if (hornVolume > 0.5) {
 						hornVolume -= 0.25;
 						horn.setVolume(hornVolume);
 					} else {
