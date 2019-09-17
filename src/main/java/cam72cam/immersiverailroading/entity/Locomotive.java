@@ -353,4 +353,12 @@ public abstract class Locomotive extends FreightTank {
 		assert getWorld().isClient;
 		Particles.SMOKE.accept(new SmokeParticleData(getWorld(), particlePos, motion, lifespan, darken, thickness, diameter));
 	}
+
+	@Override
+	public void onRemoved() {
+		super.onRemoved();
+		if (this.bell != null) {
+			bell.stop();
+		}
+	}
 }
