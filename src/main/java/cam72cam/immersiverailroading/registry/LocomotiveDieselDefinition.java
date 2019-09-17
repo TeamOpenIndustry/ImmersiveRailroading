@@ -18,7 +18,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     public boolean muliUnitCapable;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
-    private boolean hornSus = true;
+    private boolean hornSus;
 
     public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
@@ -60,6 +60,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
         muliUnitCapable = !properties.has("multi_unit_capable") || properties.get("multi_unit_capable").getAsBoolean();
 
+        hornSus = false;
         if (properties.has("horn_sustained")) {
             hornSus = properties.get("horn_sustained").getAsBoolean();
         }
