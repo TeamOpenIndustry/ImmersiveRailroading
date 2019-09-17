@@ -6,10 +6,13 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.immersiverailroading.thirdparty.event.TagEvent;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.*;
@@ -156,10 +159,21 @@ public class CommonAPI {
     }
 
     public String getTag() {
+    	TagEvent.GetTagEvent tagEvent = new TagEvent.GetTagEvent(stock.getUUID());
+    	MinecraftForge.EVENT_BUS.post(tagEvent);
+    	
+    	if (tagEvent.tag != null)
+    	{
+    		return tagEvent.tag;
+    	}
+    	
         return stock.tag;
     }
 
     public void setTag(String tag) {
+    	TagEvent.SetTagEvent tagEvent = new TagEvent.SetTagEvent(stock.getUUID(), tag);
+    	MinecraftForge.EVENT_BUS.post(tagEvent);
+    	
         stock.tag = tag;
     }
 
@@ -206,5 +220,4 @@ public class CommonAPI {
     public UUID getUniqueID() {
         return stock.getUUID();
     }
-
 }
