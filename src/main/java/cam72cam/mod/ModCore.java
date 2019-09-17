@@ -1,7 +1,6 @@
 package cam72cam.mod;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.proxy.IRCommand;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.sync.EntitySync;
 import cam72cam.mod.input.Keyboard;
@@ -15,10 +14,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
@@ -34,6 +30,7 @@ public class ModCore {
     private static List<Supplier<Mod>> modCtrs = new ArrayList<>();
     private static List<Runnable> onInit = new ArrayList<>();
     private static List<Runnable> onReload = new ArrayList<>();
+    private static List<Runnable> onServerStarting = new ArrayList<>();
 
     private List<Mod> mods;
 
@@ -105,6 +102,11 @@ public class ModCore {
         mods.forEach(Mod::finalize);
     }
 
+    @EventHandler
+    public void serverStarting(FMLServerStartedEvent event) {
+        onServerStarting.forEach(Runnable::run);
+    }
+
     public static void onInit(Class<? extends Mod> type, Consumer<Mod> fn) {
         onInit.add(() -> instance.mods.stream().filter(type::isInstance).findFirst().ifPresent(fn));
     }
@@ -113,9 +115,8 @@ public class ModCore {
         onReload.add(fn);
     }
 
-    @EventHandler
-    public void serverStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(new IRCommand());
+    public static void onServerStarting(Runnable fn) {
+        onServerStarting.add(fn);
     }
 
     public static abstract class Proxy {

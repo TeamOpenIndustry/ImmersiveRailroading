@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
+import cam72cam.immersiverailroading.proxy.IRCommand;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;
@@ -39,6 +40,7 @@ import cam72cam.mod.render.*;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
+import cam72cam.mod.text.Command;
 import org.lwjgl.opengl.GL11;
 import paulscode.sound.SoundSystemConfig;
 
@@ -85,6 +87,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
 		Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 		Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
+
+		Command.register(new IRCommand());
 	}
 
 	public ImmersiveRailroading() {
