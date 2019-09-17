@@ -147,14 +147,14 @@ public class RailInfo {
 		private final int count;
 		private final ItemStack[] examples;
 
-		MaterialManager(int count, Function<ItemStack, Boolean> material, ItemStack ...examples) {
+		MaterialManager(boolean isDrop, int count, Function<ItemStack, Boolean> material, ItemStack... examples) {
 			this.material = material;
 			this.count = count;
 			this.examples = examples;
 		}
 
 		public MaterialManager(int count, Function<ItemStack, Boolean> material, List<ItemStack> examples) {
-			this(count, material, examples.toArray(new ItemStack[0]));
+			this(true, count, material, examples.toArray(new ItemStack[0]));
 		}
 
 		private boolean checkMaterials(Player player) {
@@ -226,10 +226,10 @@ public class RailInfo {
 				List<MaterialManager> materials = new ArrayList<>();
 
 				if (!settings.railBed.isEmpty()) {
-					materials.add(new MaterialManager(builder.costBed(), settings.railBed::equals, settings.railBed));
+					materials.add(new MaterialManager(true, builder.costBed(), settings.railBed::equals, settings.railBed));
 				}
 				if (settings.railBedFill.isEmpty()) {
-					materials.add(new MaterialManager(builder.costFill(), settings.railBedFill::equals, settings.railBedFill));
+					materials.add(new MaterialManager(false, builder.costFill(), settings.railBedFill::equals, settings.railBedFill));
 				}
 
 				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);
