@@ -150,7 +150,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	public RailInfo getRailRenderInfo() {
-		if (info.world == null) {
+		if (world != null && (info == null || info.world == null)) {
 			info = new RailInfo(world, item, placementInfo, customInfo);
 		}
 		return info;
