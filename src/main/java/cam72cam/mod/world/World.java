@@ -23,6 +23,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.IPlantable;
@@ -456,6 +457,12 @@ public class World {
     public void setBlock(Vec3i pos, BlockInfo info) {
         internal.removeTileEntity(pos.internal);
         internal.setBlockState(pos.internal, info.internal);
+    }
+
+    public boolean canEntityCollideWith(Vec3i bp, String damageType) {
+        Block block = internal.getBlockState(bp.internal).getBlock();
+        return block instanceof IConditionalCollision &&
+            ((IConditionalCollision) block).canCollide(internal, bp.internal, internal.getBlockState(bp.internal), new DamageSource(damageType));
     }
 
     public enum ParticleType {

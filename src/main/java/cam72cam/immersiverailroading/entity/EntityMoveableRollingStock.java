@@ -24,6 +24,8 @@ import java.util.List;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
 
+    public static final String DAMAGE_SOURCE_HIT = "immersiverailroading:hitByTrain";
+
     private Float frontYaw;
     private Float rearYaw;
     public float distanceTraveled = 0;
@@ -383,7 +385,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 				double speedDamage = this.getCurrentSpeed().metric() / Config.ConfigDamage.entitySpeedDamage;
 				if (speedDamage > 1) {
-				    entity.directDamage("immersiverailroading:hitByTrain", speedDamage);
+				    entity.directDamage(DAMAGE_SOURCE_HIT, speedDamage);
 				}
 			}
 	
@@ -429,7 +431,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				
 				if (!getWorld().isAir(bp)) {
 					if (!BlockUtil.isIRRail(getWorld(), bp)) {
-					    if (getWorld().doesBlockCollideWith(bp, bb)) {
+					    if (getWorld().doesBlockCollideWith(bp, bb) && getWorld().canEntityCollideWith(bp, DAMAGE_SOURCE_HIT)) {
 							if (!BlockUtil.isIRRail(getWorld(), bp.up())) {
 								getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(getWorld().isSnow(bp)));
 							}
