@@ -106,7 +106,7 @@ public class PlacementInfo {
 			this.yaw = nbt.getFloat("yaw");
 		} else {
 			int rotationQuarter = nbt.getInteger("rotationQuarter");
-			Facing facing = Facing.from(net.minecraft.util.EnumFacing.getFront(nbt.getByte("facing")));
+			Facing facing = Facing.from(nbt.getByte("facing"));
 			float facingAngle = 180 - facing.getHorizontalAngle();
 			float rotAngle = rotationQuarter/4f*90;
 			if (direction != TrackDirection.RIGHT) {
