@@ -138,7 +138,7 @@ public class Rail extends RailBase {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(pos).getTracksForRender()) {
+		for (TrackBase track : info.getBuilder(new Vec3i(info.placementInfo.placementPosition)).getTracksForRender()) {
 			Vec3i tpos = track.getPos();
 			total++;
 
