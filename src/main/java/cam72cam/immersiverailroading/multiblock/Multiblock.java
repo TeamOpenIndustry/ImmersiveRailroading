@@ -200,7 +200,7 @@ public abstract class Multiblock {
 				Vec3i pos = getPos(offset);
 				BlockInfo origState = world.getBlock(pos);
 
-				world.internal.setBlockState(pos.internal, IRBlocks.BLOCK_MULTIBLOCK.internal.getDefaultState());
+				world.setBlock(pos, IRBlocks.BLOCK_MULTIBLOCK);
 
 				TileMultiblock te = world.getBlockEntity(pos, TileMultiblock.class);
 				
