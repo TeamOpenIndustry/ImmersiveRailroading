@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
@@ -256,7 +255,7 @@ public class OBJModel {
 					if (min == null) {
 						min = v;
 					} else {
-						min = VecUtil.min(min, v);
+						min = min.min(v);
 					}
 				}
 			}
@@ -271,7 +270,7 @@ public class OBJModel {
 					if (max == null) {
 						max = v;
 					} else {
-						max = VecUtil.max(max, v);
+						max = max.max(v);
 					}
 				}
 			}
@@ -301,7 +300,7 @@ public class OBJModel {
 			if (min == null) {
 				min = gmin;
 			} else {
-				min = VecUtil.min(min, gmin);
+				min = min.min(gmin);
 			}
 		}
 		return min;
@@ -313,7 +312,7 @@ public class OBJModel {
 			if (max == null) {
 				max = gmax;
 			} else {
-				max = VecUtil.max(max, gmax);
+				max = max.max(gmax);
 			}
 		}
 		return max;

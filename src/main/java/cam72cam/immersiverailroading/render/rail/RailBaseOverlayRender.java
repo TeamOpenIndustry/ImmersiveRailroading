@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3i;
 import org.lwjgl.opengl.GL11;

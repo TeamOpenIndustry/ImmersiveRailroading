@@ -1,7 +1,7 @@
 package cam72cam.mod.sound;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.resource.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
@@ -46,12 +46,12 @@ public class ModSoundManager {
 					try {
 						return (URL) getURLField.invoke(null, loc);
 					} catch (Exception e) {
-						ImmersiveRailroading.catching(e);
+						ModCore.catching(e);
 					}
 					return null;
 				};
 			} catch (Exception e) {
-				ImmersiveRailroading.catching(e);
+				ModCore.catching(e);
 				continue;
 			}
 			
@@ -65,13 +65,13 @@ public class ModSoundManager {
 		        		}
 						return cachedSnd;
 					} catch (Exception e) {
-						ImmersiveRailroading.catching(e);
+						ModCore.catching(e);
 						return null;
 					}
 		        };
 		        return;
 			} catch (Exception e) {
-				ImmersiveRailroading.catching(e);
+				ModCore.catching(e);
 				continue;
 			}
 		}

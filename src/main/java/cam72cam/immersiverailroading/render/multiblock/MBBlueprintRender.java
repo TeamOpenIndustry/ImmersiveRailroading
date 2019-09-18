@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.multiblock.Multiblock;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;

@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.render;
 
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;

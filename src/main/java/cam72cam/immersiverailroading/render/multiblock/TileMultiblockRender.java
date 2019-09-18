@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.mod.render.StandardModel;
 import org.lwjgl.opengl.GL11;
 

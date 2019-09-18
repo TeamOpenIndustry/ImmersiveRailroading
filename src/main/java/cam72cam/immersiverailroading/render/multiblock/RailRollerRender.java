@@ -11,7 +11,7 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock.RailRollerInstance;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 
 public class RailRollerRender implements IMultiblockRender {
 	private OBJRender renderer;

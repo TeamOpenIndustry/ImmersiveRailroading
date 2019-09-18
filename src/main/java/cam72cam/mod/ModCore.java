@@ -1,6 +1,6 @@
 package cam72cam.mod;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.Mod;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.sync.EntitySync;
 import cam72cam.mod.input.Keyboard;
@@ -25,8 +25,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@net.minecraftforge.fml.common.Mod(modid=ImmersiveRailroading.MODID, name=ImmersiveRailroading.NAME, version=ImmersiveRailroading.VERSION, acceptedMinecraftVersions = "[1.12,1.13)")
+@net.minecraftforge.fml.common.Mod(modid= Mod.MODID, name=Mod.NAME, version=Mod.VERSION, acceptedMinecraftVersions = "[1.12,1.13)")
 public class ModCore {
+    public static final String MODID = cam72cam.Mod.MODID;
     private static List<Supplier<Mod>> modCtrs = new ArrayList<>();
     private static List<Runnable> onInit = new ArrayList<>();
     private static List<Runnable> onReload = new ArrayList<>();
@@ -73,7 +74,11 @@ public class ModCore {
         Packet.register(Keyboard.KeyPacket::new, PacketDirection.ClientToServer);
         Packet.register(ModdedEntity.PassengerPositionsPacket::new, PacketDirection.ServerToClient);
         Packet.register(MousePressPacket::new, PacketDirection.ClientToServer);
-        ImmersiveRailroading.forceInit();
+        try {
+            Class.forName(cam72cam.Mod.MODCLASS);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @EventHandler
@@ -161,4 +166,47 @@ public class ModCore {
 
     @SidedProxy(serverSide = "cam72cam.mod.ModCore$ServerProxy", clientSide = "cam72cam.mod.ModCore$ClientProxy")
     private static Proxy proxy;
+
+    public static void debug(String msg, Object...params) {
+        if (instance == null || instance.logger == null) {
+            System.out.println("DEBUG: " + String.format(msg, params));
+            return;
+        }
+
+        /*TODO if (ConfigDebug.debugLog) {
+            instance.logger.info(String.format(msg, params));
+        }*/
+    }
+    public static void info(String msg, Object...params) {
+        if (instance == null || instance.logger == null) {
+            System.out.println("INFO: " + String.format(msg, params));
+            return;
+        }
+
+        instance.logger.info(String.format(msg, params));
+    }
+    public static void warn(String msg, Object...params) {
+        if (instance == null || instance.logger == null) {
+            System.out.println("WARN: " + String.format(msg, params));
+            return;
+        }
+
+        instance.logger.warn(String.format(msg, params));
+    }
+    public static void error(String msg, Object...params) {
+        if (instance == null || instance.logger == null) {
+            System.out.println("ERROR: " + String.format(msg, params));
+            return;
+        }
+
+        instance.logger.error(String.format(msg, params));
+    }
+    public static void catching(Throwable ex) {
+        if (instance == null || instance.logger == null) {
+            ex.printStackTrace();
+            return;
+        }
+
+        instance.logger.catching(ex);
+    }
 }

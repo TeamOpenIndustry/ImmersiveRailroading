@@ -1,6 +1,5 @@
 package cam72cam.mod.render;
 
-import cam72cam.immersiverailroading.util.GLBoolTracker;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.gui.Progress;
 import cam72cam.mod.item.ItemBase;

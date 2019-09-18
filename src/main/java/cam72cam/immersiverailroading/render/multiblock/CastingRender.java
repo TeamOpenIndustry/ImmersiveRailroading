@@ -10,7 +10,7 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstance;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 
 public class CastingRender implements IMultiblockRender {
 	private OBJRender renderer;

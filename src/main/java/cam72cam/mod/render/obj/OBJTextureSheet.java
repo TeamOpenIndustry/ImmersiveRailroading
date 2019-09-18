@@ -1,6 +1,6 @@
 package cam72cam.mod.render.obj;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.model.obj.Material;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.model.obj.Vec2f;
@@ -183,7 +183,7 @@ public class OBJTextureSheet {
 				}
 				
 				if (!model.materials.containsKey(mtlName)) {
-					ImmersiveRailroading.warn("Missing material %s", mtlName);
+					ModCore.warn("Missing material %s", mtlName);
 					missing.add(mtlName);
 					continue;
 				}
@@ -260,21 +260,21 @@ public class OBJTextureSheet {
 		currentY = 0;
 		rowHeight = 0;
 
-        ImmersiveRailroading.debug("Max Tex Size: %s", maxSize);
+        ModCore.debug("Max Tex Size: %s", maxSize);
         if (sheetWidth > maxSize || sheetHeight > maxSize)
-        	ImmersiveRailroading.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
+        	ModCore.warn("Sheet WxH: %sx%s", sheetWidth, sheetHeight);
 
 		for (SubTexture tex : texs) {
-			ImmersiveRailroading.debug("%s copies %s x %s", tex.tex, tex.copiesU(), tex.copiesV());
-			ImmersiveRailroading.debug("%s  actual %s x %s", tex.tex, tex.getAbsoluteWidth(), tex.getAbsoluteHeight());
+			ModCore.debug("%s copies %s x %s", tex.tex, tex.copiesU(), tex.copiesV());
+			ModCore.debug("%s  actual %s x %s", tex.tex, tex.getAbsoluteWidth(), tex.getAbsoluteHeight());
 			if (tex.getAbsoluteWidth() > maxSize) {
-				ImmersiveRailroading.error("BAD TEXTURE, HACKING...");
+				ModCore.error("BAD TEXTURE, HACKING...");
 			}
 			if (currentX + tex.getAbsoluteWidth() > maxSize) {
 				currentX = 0;
 				currentY += rowHeight;
 				rowHeight = 0;
-				ImmersiveRailroading.debug("NEXT_LINE");
+				ModCore.debug("NEXT_LINE");
 			}
 			rowHeight = Math.max(rowHeight, tex.getAbsoluteHeight());
 			tex.upload(graphics, currentX, currentY);
@@ -293,7 +293,7 @@ public class OBJTextureSheet {
 			icon = new GLTexture(path + "_icon.png", image, 30, true);
 		}
 
-		ImmersiveRailroading.info(GPUInfo.debug().replace("%", "%%"));
+		ModCore.info(GPUInfo.debug().replace("%", "%%"));
 	}
 
 	private BufferedImage scaleImage(BufferedImage image, int x, int y) {

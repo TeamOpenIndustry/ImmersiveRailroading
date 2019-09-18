@@ -1,9 +1,8 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;

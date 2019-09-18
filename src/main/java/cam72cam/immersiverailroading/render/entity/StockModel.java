@@ -26,7 +26,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.VecUtil;
 
 public class StockModel extends OBJRender {
