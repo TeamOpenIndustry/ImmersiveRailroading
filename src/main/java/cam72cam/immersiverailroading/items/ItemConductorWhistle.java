@@ -1,29 +1,24 @@
 package cam72cam.immersiverailroading.items;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.mod.entity.boundingbox.BoundingBox;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.Recipes;
-import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import net.minecraft.entity.passive.EntityVillager;
+import cam72cam.mod.world.World;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class ItemConductorWhistle extends ItemBase {
 	private static HashMap<UUID, Integer> cooldown = new HashMap<>();
@@ -37,14 +32,14 @@ public class ItemConductorWhistle extends ItemBase {
 	}
 	
 	@Override
-	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
+    public void onClickAir(Player player, World world, Hand hand) {
 		if (world.isServer) {
 			if (cooldown.containsKey(player.getUUID())) {
 				int newtime = cooldown.get(player.getUUID());
 				if (newtime < player.getTickCount()) {
 					cooldown.remove(player.getUUID());
 				} else {
-					return ClickResult.PASS;
+					return;
 				}
 			}
 			
@@ -74,32 +69,29 @@ public class ItemConductorWhistle extends ItemBase {
 			
 			if (closestToPlayer != null) {
 				if (!player.isCrouching()) {
-					List<EntityVillager> villagers = world.internal.getEntitiesWithinAABB(EntityVillager.class, new BoundingBox(bb));
-					for (EntityVillager villager : villagers) {
+					List<Entity> villagers = world.getEntities(x -> x.isVillager() && bb.intersects(x.getBounds()), Entity.class);
+					for (Entity villager : villagers) {
 						EntityCoupleableRollingStock closest = null;
 						for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
-							if (car.canFitPassenger(new Entity(villager)) && car.getDefinition().acceptsPassengers()) {
-								if (closest == null || closest.getPosition().internal.distanceTo(villager.getPositionVector()) > car.getPosition().internal.distanceTo(villager.getPositionVector())) {
+							if (car.canFitPassenger(villager) && car.getDefinition().acceptsPassengers()) {
+								if (closest == null || closest.getPosition().distanceTo(villager.getPosition()) > car.getPosition().distanceTo(villager.getPosition())) {
 									closest = car;
 								}
 							}
 						}
 						if (closest != null) {
-							closest.addPassenger(new Entity(villager));
+							closest.addPassenger(villager);
 						}
 					}
 				} else {
 					for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
 						if (car.getPosition().distanceTo(player.getPosition()) < Config.ConfigBalance.villagerConductorDistance) {
-							while (car.getPassengerCount() != 0) {
-                                car.removePassenger((ModdedEntity.StaticPassenger s) -> s.isVillager);
+							while (car.removePassenger((ModdedEntity.StaticPassenger s) -> s.isVillager) != null) {
 							}
 						}
 					}
 				}
 			}
 		}
-		
-		return ClickResult.PASS;
 	}
 }

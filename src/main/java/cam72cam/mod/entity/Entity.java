@@ -106,7 +106,7 @@ public class Entity {
     }
 
     public boolean is(Class<? extends net.minecraft.entity.Entity> entity) {
-        return internal.getClass().isInstance(entity);
+        return entity.isInstance(internal);
     }
 
     public <T extends net.minecraft.entity.Entity> T asInternal(Class<T> entity) {
@@ -128,7 +128,6 @@ public class Entity {
     }
 
     public void kill() {
-        internal.setDead();
         internal.world.removeEntity(internal);
     }
     public final boolean isDead() {

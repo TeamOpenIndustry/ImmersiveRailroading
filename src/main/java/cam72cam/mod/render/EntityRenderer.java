@@ -47,7 +47,7 @@ public class EntityRenderer extends Render<ModdedEntity> {
 
             for (ModdedEntity.StaticPassenger pass : stock.getStaticPassengers()) {
                 if (pass.cache == null) {
-                    pass.cache = pass.respawn(stock.world);
+                    pass.cache = pass.reconstitute(stock.world);
                 }
                 Vec3d pos = stock.getRidingOffset(pass.uuid);
                 if (pos == null) {

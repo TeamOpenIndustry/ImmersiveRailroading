@@ -218,7 +218,9 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     public final cam72cam.mod.entity.Entity removePassenger(Predicate<StaticPassenger> filter) {
         Optional<StaticPassenger> found = staticPassengers.stream().filter(filter).findFirst();
         if (found.isPresent()) {
-            Entity ent = found.get().respawn(world);
+            staticPassengers.remove(found.get());
+            Entity ent = found.get().reconstitute(world);
+            world.spawnEntity(ent);
 
             Vec3d dismountPos = iRidable.getDismountPosition(new cam72cam.mod.entity.Entity(ent));
             iRidable.onDismountPassenger(new cam72cam.mod.entity.Entity(ent));
@@ -307,7 +309,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
             return init;
         }
 
-        public Entity respawn(World world) {
+        public Entity reconstitute(World world) {
             Entity ent = EntityList.createEntityByIDFromName(ident.internal, world);
             ent.readFromNBT(data.internal);
             return ent;
