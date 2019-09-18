@@ -94,9 +94,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     private final void load(TagCompound data) {
         loadSelf(data);
         iWorldData.load(data);
-
-        passengerPositions = data.getMap("passengers", UUID::fromString, (TagCompound tag) -> tag.getVec3d("pos"));
-        staticPassengers = data.getList("staticPassengers", StaticPassenger::new);
+        readPassengerData(data);
     }
 
     @Override
@@ -106,14 +104,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
     private final void save(TagCompound data) {
         iWorldData.save(data);
         saveSelf(data);
-
-        data.setMap("passengers", passengerPositions, UUID::toString, (Vec3d pos) -> {
-            //TODO single encoder step
-            TagCompound tmp = new TagCompound();
-            tmp.setVec3d("pos", pos);
-            return tmp;
-        });
-        data.setList("staticPassengers", staticPassengers, StaticPassenger::toTag);
+        writePassengerData(data);
     }
 
     /* ISpawnData */
@@ -124,6 +115,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
         loadSelf(data);
         iSpawnData.loadSpawn(data);
         self.sync.receive(data.get("sync"));
+        readPassengerData(data);
     }
     @Override
     public final void writeSpawnData(ByteBuf buffer) {
@@ -131,6 +123,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
         iSpawnData.saveSpawn(data);
         saveSelf(data);
         data.set("sync", self.sync);
+        writePassengerData(data);
 
         ByteBufUtils.writeTag(buffer, data.internal);
     }
@@ -226,6 +219,8 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
             iRidable.onDismountPassenger(new cam72cam.mod.entity.Entity(ent));
             ent.setPosition(dismountPos.x, dismountPos.y, dismountPos.z);
 
+            self.sendToObserving(new PassengerPositionsPacket(this));
+
             return self.getWorld().getEntity(ent.getUniqueID(), cam72cam.mod.entity.Entity.class);
         }
         return null;
@@ -316,6 +311,20 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
         }
     }
 
+    private void readPassengerData(TagCompound data) {
+        passengerPositions = data.getMap("passengers", UUID::fromString, (TagCompound tag) -> tag.getVec3d("pos"));
+        staticPassengers = data.getList("staticPassengers", StaticPassenger::new);
+    }
+    private void writePassengerData(TagCompound data) {
+        data.setMap("passengers", passengerPositions, UUID::toString, (Vec3d pos) -> {
+            //TODO single encoder step
+            TagCompound tmp = new TagCompound();
+            tmp.setVec3d("pos", pos);
+            return tmp;
+        });
+        data.setList("staticPassengers", staticPassengers, StaticPassenger::toTag);
+    }
+
     public static class PassengerPositionsPacket extends Packet {
         public PassengerPositionsPacket() {
             // Forge Reflection
@@ -324,14 +333,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
         public PassengerPositionsPacket(ModdedEntity stock) {
             data.setEntity("stock", stock.self);
 
-            data.setMap("passengers", stock.passengerPositions, UUID::toString, (Vec3d pos) -> {
-                //TODO single encoder step
-                TagCompound tmp = new TagCompound();
-                tmp.setVec3d("pos", pos);
-                return tmp;
-            });
-
-            data.setList("staticPassengers", stock.staticPassengers, StaticPassenger::toTag);
+            stock.writePassengerData(data);
         }
 
         @Override
@@ -339,8 +341,7 @@ public class ModdedEntity extends Entity implements IEntityAdditionalSpawnData {
             cam72cam.mod.entity.Entity entity = data.getEntity("stock", getWorld());
             if (entity != null && entity.internal instanceof ModdedEntity) {
                 ModdedEntity stock = (ModdedEntity) entity.internal;
-                stock.handlePassengerPositions(data.getMap("passengers", UUID::fromString, (TagCompound tag) -> tag.getVec3d("pos")));
-                stock.staticPassengers = data.getList("staticPassengers", StaticPassenger::new);
+                stock.readPassengerData(data);
             }
         }
     }

@@ -22,7 +22,7 @@ import java.util.UUID;
 
 public class ItemConductorWhistle extends ItemBase {
 	private static HashMap<UUID, Integer> cooldown = new HashMap<>();
-	
+
 	public ItemConductorWhistle() {
 		super(ImmersiveRailroading.MODID, "item_conductor_whistle", 1, ItemTabs.MAIN_TAB);
 
@@ -36,7 +36,7 @@ public class ItemConductorWhistle extends ItemBase {
 		if (world.isServer) {
 			if (cooldown.containsKey(player.getUUID())) {
 				int newtime = cooldown.get(player.getUUID());
-				if (newtime < player.getTickCount()) {
+				if (newtime < player.getTickCount() || newtime > world.getTicks()) {
 					cooldown.remove(player.getUUID());
 				} else {
 					return;
