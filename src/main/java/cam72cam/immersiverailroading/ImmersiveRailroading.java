@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
-import cam72cam.immersiverailroading.proxy.IRCommand;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;

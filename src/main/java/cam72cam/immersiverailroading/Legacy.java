@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.proxy;
+package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
