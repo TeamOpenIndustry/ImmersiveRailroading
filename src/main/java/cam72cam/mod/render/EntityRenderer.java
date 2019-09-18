@@ -54,7 +54,6 @@ public class EntityRenderer extends Render<ModdedEntity> {
                     continue;
                 }
 
-                //TODO pos = pos.add(stock.getDefinition().getPassengerCenter(stock.gauge));
                 //TileEntityMobSpawnerRenderer
                 EntityLiving ent = (EntityLiving) pass.cache;
                 GL11.glPushMatrix();

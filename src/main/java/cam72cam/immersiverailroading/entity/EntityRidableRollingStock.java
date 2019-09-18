@@ -50,7 +50,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		int wiggle = entity.isVillager() ? 10 : 2;
 		off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
 		off = this.getDefinition().correctPassengerBounds(gauge, off);
-		off = off.add(0, -off.y, 0);
+		off = new Vec3d(off.x, this.getDefinition().getPassengerCenter(gauge).y, off.z);
 		return off;
 	}
 
@@ -120,7 +120,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			if (shouldRiderSit(passenger)) {
 				pos = pos.subtract(0, 0.75, 0);
 			}
-			passenger.setPosition(pos);
+			passenger.setPosition(new Vec3d(pos.x, getPosition().y + getDefinition().getPassengerCenter(gauge).y, pos.z));
 			passenger.setVelocity(this.getVelocity());
 
             passenger.setRotationYaw(passenger.getRotationYaw() + (this.getRotationYaw() - this.getPrevRotationYaw()));
@@ -135,8 +135,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 		Vec3d ppos = getRidingOffset(ent);
 		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.getRotationYaw() + (ppos.z > 0 ? 90 : -90));
-		
-		return delta.add(pos);
+
+		pos = delta.add(pos);
+
+		return new Vec3d(pos.x, getPosition().y+1, pos.z);
 	}
 
 	@Override

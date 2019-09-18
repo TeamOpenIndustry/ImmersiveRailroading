@@ -80,6 +80,7 @@ public class World {
             return;
         }
         onTicks.forEach(fn -> fn.accept(get(event.world)));
+        get(event.world).ticks ++;
     }
     public static World get(net.minecraft.world.World world) {
         if (world == null) {
@@ -111,6 +112,7 @@ public class World {
     private final List<Entity> entities;
     private final Map<Integer, Entity> entityByID;
     private final Map<UUID, Entity> entityByUUID;
+    private long ticks;
 
     private World(net.minecraft.world.World world) {
         internal = world;
@@ -271,6 +273,9 @@ public class World {
 
     public long getTime() {
         return internal.getWorldTime();
+    }
+    public long getTicks() {
+        return ticks;
     }
 
     public double getTPS(int sampleSize) {
