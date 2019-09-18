@@ -16,16 +16,7 @@ public class ConfigGraphics {
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
-	@Comment("Limit GPU load while models/internal is loading.  1 == slow load, 3 == reasonable load, 10 = fast load, 100 = as fast as possible")
-	public static int limitGraphicsLoadMS = 3;
-
-	@Comment( "Scale the textures to reduce GPU memory usage (1 == highest, 1.5 == medium, 2 == low" )
-	public static double scaleTexture = 1.5;
-
-	@Comment("Point at which textures start being scaled.  Any textures larger than this will have scaleTexture applied")
-	public static int scaleTextureCutoff=2048;
-
-	@Comment( "Self explanitory" )
+	@Comment( "Self explanatory" )
 	public static boolean trainsOnTheBrain = true;
 	
 	@Comment( "What unit to use for speedometer. (kmh, mph or ms)" )
