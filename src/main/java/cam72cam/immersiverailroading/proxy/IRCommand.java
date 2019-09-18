@@ -51,7 +51,7 @@ public class IRCommand extends Command {
 			List<EntityRollingStock> ents = world.getEntities(EntityRollingStock.class);
 			ents.sort(Comparator.comparing(a -> a.getUUID().toString()));
 			for (EntityRollingStock ent : ents) {
-				sender.accept(PlayerMessage.direct(String.format("%s : %s - %s : %s", ent.getUUID(), ent.internal.getEntityId(), ent.getDefinitionID(), ent.getPosition())));
+				sender.accept(PlayerMessage.direct(String.format("%s : %s - %s : %s", ent.getUUID(), ent.getId(), ent.getDefinitionID(), ent.getPosition())));
 			}
 			return true;
 		}
