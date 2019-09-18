@@ -11,6 +11,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.util.ITrack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -153,13 +154,13 @@ public abstract class BuilderBase {
 		for (TrackBase track : tracks) {
 			for (int i = 0; i < 6 * info.settings.gauge.scale(); i++) {
 				Vec3i main = track.getPos().up(i);
-				if (!BlockUtil.isRail(info.world, main)) {
+				if (!ITrack.isRail(info.world, main)) {
 					info.world.setToAir(main);
 				}
 				if (info.settings.gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.settings.type != TrackItems.SLOPE && info.settings.type != TrackItems.TURNTABLE) {
 					for (Facing facing : Facing.HORIZONTALS) {
 						Vec3i pos = main.offset(facing);
-						if (!BlockUtil.isRail(info.world, pos)) {
+						if (!ITrack.isRail(info.world, pos)) {
 							info.world.setToAir(pos);
 						}
 					}

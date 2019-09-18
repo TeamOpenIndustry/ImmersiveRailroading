@@ -16,18 +16,17 @@ import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.util.ITrack;
 import cam72cam.mod.world.World;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
-import trackapi.lib.ITrack;
-import trackapi.lib.Util;
 
 public class SpawnUtil {
 	public static ClickResult placeStock(Player player, Hand hand, World worldIn, Vec3i pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
-		ITrack initte = Util.getTileEntity(worldIn.internal, new Vec3d(pos).add(0, 0.7, 0).internal, true);
+		ITrack initte = ITrack.get(worldIn, new Vec3d(pos).add(0, 0.7, 0), true);
 		if (initte == null) {
 			return ClickResult.REJECTED;
 		}

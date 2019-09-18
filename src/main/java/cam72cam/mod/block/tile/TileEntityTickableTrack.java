@@ -1,12 +1,10 @@
 package cam72cam.mod.block.tile;
 
 import cam72cam.Mod;
-import cam72cam.mod.block.BlockEntityTickableTrack;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
-import trackapi.lib.ITrack;
+import cam72cam.mod.util.ITrack;
 
-public class TileEntityTickableTrack extends TileEntityTickable implements ITrack {
+public class TileEntityTickableTrack extends TileEntityTickable implements trackapi.lib.ITrack {
 
     public TileEntityTickableTrack() {
         super();
@@ -16,14 +14,18 @@ public class TileEntityTickableTrack extends TileEntityTickable implements ITrac
         super(id);
     }
 
+    private trackapi.lib.ITrack track() {
+        return instance() instanceof ITrack ? ((ITrack) instance()).to() : null;
+    }
+
     @Override
     public double getTrackGauge() {
-        return instance() instanceof BlockEntityTickableTrack ? ((BlockEntityTickableTrack)instance()).getTrackGauge() : 0;
+        return track() != null ? track().getTrackGauge() : 0;
     }
 
     @Override
     public net.minecraft.util.math.Vec3d getNextPosition(net.minecraft.util.math.Vec3d pos, net.minecraft.util.math.Vec3d mot) {
-        return instance() instanceof BlockEntityTickableTrack ? ((BlockEntityTickableTrack)instance()).getNextPosition(new Vec3d(pos), new Vec3d(mot)).internal : pos;
+        return track() != null ? track().getNextPosition(pos, mot) : pos;
     }
 
     @Override

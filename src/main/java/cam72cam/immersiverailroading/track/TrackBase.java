@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.immersiverailroading.blocks.BlockRailGag;
 import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.RailGag;
@@ -62,10 +63,7 @@ public abstract class TrackBase {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			TileEntity te = (TileEntity) IRBlocks.BLOCK_RAIL_GAG.internal.createTileEntity(null, null);
-			te.setPos(pos);
-			te.setWorld(builder.info.world);
-			RailGag tr = (RailGag) te.instance();
+			RailGag tr = (RailGag) IRBlocks.BLOCK_RAIL_GAG.createBlockEntity(builder.info.world, pos);
 			if (parent != null) {
 				tr.setParent(parent);
 			} else {

@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
-import cam72cam.mod.block.BlockEntityTickableTrack;
+import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
@@ -25,9 +25,10 @@ import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.util.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class RailBase extends BlockEntityTickableTrack {
+public class RailBase extends BlockEntityTickable implements ITrack {
 	private Vec3i parent;
 	private float bedHeight = 0;
 	private float railHeight = 0;
@@ -332,7 +333,7 @@ public class RailBase extends BlockEntityTickableTrack {
 				for (Facing facing : horiz) {
 					Vec3i ph = world.getPrecipitationHeight(pos.offset(facing, i));
 					for (int j = 0; j < 3; j ++) {
-						if (world.isAir(ph) && !BlockUtil.isRail(world, ph.down())) {
+						if (world.isAir(ph) && !ITrack.isRail(world, ph.down())) {
 							world.setSnowLevel(ph, snowDown);
 							return;
 						}

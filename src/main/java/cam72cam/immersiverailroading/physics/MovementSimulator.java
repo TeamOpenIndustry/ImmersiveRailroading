@@ -4,10 +4,10 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.util.ITrack;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import trackapi.lib.ITrack;
 
 public class MovementSimulator {
 	private World world;
@@ -125,12 +125,12 @@ public class MovementSimulator {
 			return currentPosition;
 		}
 		// Not using bogey yaw here, is that OK?
-		net.minecraft.util.math.Vec3d result = rail.getNextPosition(currentPosition.internal, VecUtil.fromWrongYaw(distance, rotationYaw).internal);
+		Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, rotationYaw));
 		if (result == null) {
 			position.isOffTrack = true;
 			return currentPosition;
 		}
-		return new Vec3d(result);
+		return result;
 	}
 
 	public Vec3d frontBogeyPosition() {

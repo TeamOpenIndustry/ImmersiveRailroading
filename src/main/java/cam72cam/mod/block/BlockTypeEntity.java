@@ -10,6 +10,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.util.ITrack;
 import cam72cam.mod.world.World;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
@@ -37,6 +38,14 @@ public abstract class BlockTypeEntity extends BlockType {
         ((TileEntity)internal.createTileEntity(null, null)).register();
     }
 
+    public BlockEntity createBlockEntity(World world, Vec3i pos) {
+        TileEntity te = ((TileEntity)internal.createTileEntity(null, null));
+        te.hasTileData = true;
+        te.world = world;
+        te.pos = pos;
+        return te.instance();
+    }
+
     /*
 
     BlockType Implementation
@@ -51,10 +60,10 @@ public abstract class BlockTypeEntity extends BlockType {
 
         @Override
         public final net.minecraft.tileentity.TileEntity createTileEntity(net.minecraft.world.World world, IBlockState state) {
-            if (constructData.get() instanceof BlockEntityTickableTrack) {
-                return new TileEntityTickableTrack(id);
-            }
             if (constructData.get() instanceof BlockEntityTickable) {
+                if (constructData.get() instanceof ITrack) {
+                    return new TileEntityTickableTrack(id);
+                }
                 return new TileEntityTickable(id);
             }
             return new TileEntity(id);
