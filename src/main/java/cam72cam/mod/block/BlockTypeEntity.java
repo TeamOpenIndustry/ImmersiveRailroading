@@ -1,6 +1,8 @@
 package cam72cam.mod.block;
 
 import cam72cam.mod.block.tile.TileEntity;
+import cam72cam.mod.block.tile.TileEntityTickable;
+import cam72cam.mod.block.tile.TileEntityTickableTrack;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -20,18 +22,19 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class BlockTypeEntity extends BlockType {
     public static final PropertyObject BLOCK_DATA = new PropertyObject("BLOCK_DATA");
     protected final Identifier id;
+    private final Supplier<BlockEntity> constructData;
 
     public BlockTypeEntity(BlockSettings settings, Supplier<BlockEntity> constructData) {
         super(settings);
         id = new Identifier(settings.modID, settings.name);
+        this.constructData = constructData;
         TileEntity.register(constructData, id);
-        this.getTile().register(); // Idempotent
+        ((TileEntity)internal.createTileEntity(null, null)).register();
     }
 
     /*
@@ -48,7 +51,13 @@ public abstract class BlockTypeEntity extends BlockType {
 
         @Override
         public final net.minecraft.tileentity.TileEntity createTileEntity(net.minecraft.world.World world, IBlockState state) {
-            return getTile();
+            if (constructData.get() instanceof BlockEntityTickableTrack) {
+                return new TileEntityTickableTrack(id);
+            }
+            if (constructData.get() instanceof BlockEntityTickable) {
+                return new TileEntityTickable(id);
+            }
+            return new TileEntity(id);
         }
 
         @Override
@@ -96,11 +105,6 @@ public abstract class BlockTypeEntity extends BlockType {
     protected BlockInternal getBlock() {
         return new BlockTypeInternal();
     }
-
-    protected TileEntity getTile() {
-        return new TileEntity(id);
-    }
-
 
     private BlockEntity getInstance(World world, Vec3i pos) {
         TileEntity te = world.getTileEntity(pos, TileEntity.class);

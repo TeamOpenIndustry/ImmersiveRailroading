@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
-import cam72cam.mod.block.BlockEntityTickable;
+import cam72cam.mod.block.BlockEntityTickableTrack;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
@@ -27,7 +27,7 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class RailBase extends BlockEntityTickable {
+public class RailBase extends BlockEntityTickableTrack {
 	private Vec3i parent;
 	private float bedHeight = 0;
 	private float railHeight = 0;
@@ -359,7 +359,8 @@ public class RailBase extends BlockEntityTickable {
 			}
 		}
 	}
-	
+
+	@Override
 	public double getTrackGauge() {
 		Rail parent = this.getParentTile();
 		if (parent != null) {
@@ -368,6 +369,7 @@ public class RailBase extends BlockEntityTickable {
 		return 0;
 	}
 
+	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		double distanceMeters = motion.length();
 		float rotationYaw = VecUtil.toWrongYaw(motion);
