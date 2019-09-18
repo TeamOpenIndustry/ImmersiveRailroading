@@ -62,7 +62,7 @@ public abstract class TrackBase {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			TileEntity te = IRBlocks.BLOCK_RAIL_GAG.getTile();
+			TileEntity te = (TileEntity) IRBlocks.BLOCK_RAIL_GAG.internal.createTileEntity(null, null);
 			te.setPos(pos);
 			te.setWorld(builder.info.world);
 			RailGag tr = (RailGag) te.instance();

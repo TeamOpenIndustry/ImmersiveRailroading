@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.proxy;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
+import cam72cam.mod.block.tile.TileEntityTickableTrack;
 import cam72cam.mod.block.tile.TileEntityTickable;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.TagCompound;
@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Mod.EventBusSubscriber
 public class Legacy {
-    public static class LegacyRailGagTile extends BlockRailBase.TileEntityRailBlock {
+    public static class LegacyRailGagTile extends TileEntityTickableTrack {
         @Override
         public Identifier getName() {
             return new Identifier("minecraft", IRBlocks.BLOCK_RAIL_GAG.getName());
@@ -27,7 +27,7 @@ public class Legacy {
         }
     }
 
-    public static class LegacyRailTile extends BlockRailBase.TileEntityRailBlock {
+    public static class LegacyRailTile extends TileEntityTickableTrack {
         @Override
         public Identifier getName() {
             return new Identifier("minecraft", IRBlocks.BLOCK_RAIL.getName());
