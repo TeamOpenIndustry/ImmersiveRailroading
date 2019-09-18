@@ -25,8 +25,5 @@ public class BlockUtil {
 	public static boolean isIRRail(World world, Vec3i pos) {
 		return world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG) || world.isBlock(pos, IRBlocks.BLOCK_RAIL);
 	}
-	
-	public static boolean isRail(World world, Vec3i pos) {
-		return Util.getTileEntity(world.internal, new net.minecraft.util.math.Vec3d(pos.internal), true) != null;
-	}
+
 }

@@ -7,12 +7,11 @@ import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.util.ITrack;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
-import trackapi.lib.ITrack;
-import trackapi.lib.Util;
 
 import java.util.List;
 
@@ -37,14 +36,14 @@ public class MovementTrack {
 		
 		for (Vec3d pos : positions) {
 			for (double height : heightSkew) {
-				ITrack te = Util.getTileEntity(world.internal, pos.add(0, height + (currentPosition.y%1), 0).internal, true);
+				ITrack te = ITrack.get(world, pos.add(0, height + (currentPosition.y%1), 0), true);
 				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 					return te;
 				}
 				// HACK for cross gauge
 				RailBase rail = world.getBlockEntity(new Vec3i(pos).add(new Vec3i(0, (int)(height + (currentPosition.y%1)), 0)), RailBase.class);
 				if (rail != null && rail.getParentReplaced() != null) {
-					return (ITrack) rail.internal;
+					return rail;
 				}
 			}
 		}
@@ -63,7 +62,7 @@ public class MovementTrack {
 					return currentPosition;
 				}
 				Vec3d pastPos = currentPosition;
-				currentPosition = new Vec3d(te.getNextPosition(currentPosition.internal, VecUtil.fromWrongYaw(maxDelta, trainYaw).internal));
+				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(maxDelta, trainYaw));
 				trainYaw = VecUtil.toWrongYaw(currentPosition.subtract(pastPos));
 			}
 
@@ -71,7 +70,7 @@ public class MovementTrack {
 			if (te == null) {
 				return currentPosition;
 			}
-			return new Vec3d(te.getNextPosition(currentPosition.internal, VecUtil.fromWrongYaw(distanceMeters % maxDelta, trainYaw).internal));
+			return te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distanceMeters % maxDelta, trainYaw));
 		} else {
 			return nextPositionInner(world, currentPosition, rail, trainYaw, distanceMeters);
 		}
