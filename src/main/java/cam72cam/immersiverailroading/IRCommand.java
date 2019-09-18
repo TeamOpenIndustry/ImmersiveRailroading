@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.proxy;
+package cam72cam.immersiverailroading;
 
 import java.io.IOException;
 import java.util.Comparator;
