@@ -1,6 +1,5 @@
 package cam72cam.mod.world;
 
-import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.block.BlockEntity;
 import cam72cam.mod.block.BlockType;
 import cam72cam.mod.block.tile.TileEntity;
@@ -99,7 +98,7 @@ public class World {
         onTicks.add(fn);
     }
 
-    public boolean doesBlockCollideWith(Vec3i bp, RealBB bb) {
+    public boolean doesBlockCollideWith(Vec3i bp, IBoundingBox bb) {
         IBoundingBox bbb = IBoundingBox.from(internal.getBlockState(bp.internal).getCollisionBoundingBox(internal, bp.internal));
         return bbb != null && bb.intersects(bbb);
     }

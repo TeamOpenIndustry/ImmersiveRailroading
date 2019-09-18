@@ -47,31 +47,4 @@ public class VecUtil {
 	public static Vec3d between(Vec3d front, Vec3d rear) {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
 	}
-
-	public static Vec3d min(Vec3d a, Vec3d b) {
-		if (a.x > b.x) {
-			a = new Vec3d(b.x, a.y, a.z);
-		}
-		if (a.y > b.y) {
-			a = new Vec3d(a.x, b.y, a.z);
-		}
-		if (a.z > b.z) {
-			a = new Vec3d(a.x, a.y, b.z);
-		}
-		return a;
-	}
-
-	public static Vec3d max(Vec3d a, Vec3d b) {
-		if (a.x < b.x) {
-			a = new Vec3d(b.x, a.y, a.z);
-		}
-		if (a.y < b.y) {
-			a = new Vec3d(a.x, b.y, a.z);
-		}
-		if (a.z < b.z) {
-			a = new Vec3d(a.x, a.y, b.z);
-		}
-		return a;
-	}
-
 }

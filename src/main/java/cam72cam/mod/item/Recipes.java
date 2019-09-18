@@ -1,5 +1,6 @@
 package cam72cam.mod.item;
 
+import cam72cam.mod.ModCore;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.NonNullList;
@@ -40,7 +41,7 @@ public class Recipes {
                     primer.input.set(i, new OreIngredient(ingredients[i].toString()));
                 }
             }
-            ShapedOreRecipe sor = new ShapedOreRecipe(new ResourceLocation("immersiverailroading:recipes"), result.internal, primer);
+            ShapedOreRecipe sor = new ShapedOreRecipe(new ResourceLocation(ModCore.MODID, "recipes"), result.internal, primer);
             sor.setRegistryName(result.internal.getItem().getRegistryName());
             ForgeRegistries.RECIPES.register(sor);
         });

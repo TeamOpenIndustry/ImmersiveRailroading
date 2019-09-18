@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3i;
 import net.minecraft.world.World;
@@ -45,9 +44,9 @@ class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManag
 
 
 	private void init() {
-		if (!ForgeChunkManager.getConfig().hasCategory(ImmersiveRailroading.MODID))
+		if (!ForgeChunkManager.getConfig().hasCategory(ModCore.MODID))
 		{
-			ForgeChunkManager.getConfig().get(ImmersiveRailroading.MODID, "maximumChunksPerTicket", 1000000).setMinValue(0);
+			ForgeChunkManager.getConfig().get(ModCore.MODID, "maximumChunksPerTicket", 1000000).setMinValue(0);
 			ForgeChunkManager.getConfig().save();
 		}
 
@@ -91,7 +90,7 @@ class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManag
 		if (CHUNK_MAP.containsKey(pos)) {
 			currTicks = CHUNK_MAP.get(pos) + 1;
 		} else {
-			ImmersiveRailroading.debug("NEW CHUNK %s %s", pos.chunkX, pos.chunkZ);
+			ModCore.debug("NEW CHUNK %s %s", pos.chunkX, pos.chunkZ);
 		}
 		// max 5s before unload
 		CHUNK_MAP.put(pos, Math.max(100, Math.min(10, currTicks)));
@@ -109,7 +108,7 @@ class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManag
 		try {
 			ticket = ticketForWorld(world);
 		} catch (Exception ex) {
-			ImmersiveRailroading.error("Something broke inside ticketForWorld!");
+			ModCore.error("Something broke inside ticketForWorld!");
 			return;
 		}
 
@@ -153,21 +152,21 @@ class ChunkManager implements ForgeChunkManager.LoadingCallback, ForgeChunkManag
 				// Leave chunk loaded
 				//System.out.println(String.format("NOP CHUNK %s %s", chunk.x, chunk.z));
 			} else {
-				ImmersiveRailroading.debug("UNLOADED CHUNK %s %s", chunk.x, chunk.z);
+				ModCore.debug("UNLOADED CHUNK %s %s", chunk.x, chunk.z);
 				try {
 					ForgeChunkManager.unforceChunk(ticket, chunk);
 				} catch (Exception ex) {
-					ImmersiveRailroading.catching(ex);
+					ModCore.catching(ex);
 				}
 			}
 		}
 		 
 		for (ChunkPos pos : loaded) {
-			ImmersiveRailroading.debug("LOADED CHUNK %s %s", pos.chunkX, pos.chunkZ);
+			ModCore.debug("LOADED CHUNK %s %s", pos.chunkX, pos.chunkZ);
 			try {
 				ForgeChunkManager.forceChunk(ticket, new net.minecraft.util.math.ChunkPos(pos.chunkX, pos.chunkZ));
 			} catch (Exception ex) {
-				ImmersiveRailroading.catching(ex);
+				ModCore.catching(ex);
 			}
 		}
 	}

@@ -25,7 +25,7 @@ import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.tile.RailGag;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.config.ConfigFile;
