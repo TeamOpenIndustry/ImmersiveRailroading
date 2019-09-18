@@ -1,24 +1,21 @@
 package cam72cam.immersiverailroading.items;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
-import cam72cam.mod.item.*;
-import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.world.World;
+import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.*;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Loader;
+import cam72cam.mod.world.World;
+
+import java.util.List;
 
 public class ItemManual extends ItemBase {
 	public ItemManual() {
@@ -47,18 +44,7 @@ public class ItemManual extends ItemBase {
 			}
 		} else {
 			if (world.isClient) {
-				if (Loader.isModLoaded("igwmod")) {
-					// This is lousy code...
-					try {
-						Class<?> cls = Class.forName("igwmod.gui.GuiWiki");
-						Object wiki = cls.newInstance();
-						FMLCommonHandler.instance().showGuiScreen(wiki);
-						Method scf = cls.getMethod("setCurrentFile", String.class, Object[].class);
-						scf.invoke(wiki, "immersiverailroading:home", new Object[] {});
-					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException e) {
-						e.printStackTrace();
-					}
-				} else {
+				if (!CompatLoader.openWiki()) {
 					player.sendMessage(PlayerMessage.url("https://github.com/cam72cam/ImmersiveRailroading/wiki"));
 				}
 			}
