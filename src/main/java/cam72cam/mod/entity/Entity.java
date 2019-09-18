@@ -232,4 +232,8 @@ public class Entity {
         explosion.doExplosionB(true);
 
     }
+
+    public int getId() {
+        return internal.getEntityId();
+    }
 }
