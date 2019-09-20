@@ -63,7 +63,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	}
 
     static {
-    	ModCore.register(ImmersiveRailroading::new);
+    	//ModCore.register(ImmersiveRailroading::new);
 
 		EntityRegistry.register(ImmersiveRailroading.class, CarFreight::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 		EntityRegistry.register(ImmersiveRailroading.class, CarPassenger::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
