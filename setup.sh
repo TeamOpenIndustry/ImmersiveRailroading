@@ -9,12 +9,15 @@ unlink $PWD/src/main/java/cam72cam/immersiverailroading/thirdparty
 rm -rf ./ImmersiveRailroadingMod
 rm -rf ./ImmersiveRailroadingIntegration
 
+mkdir -p run
+
 git clone --branch $branch git@github.com:cam72cam/ImmersiveRailroadingIntegration.git
 git clone --branch $branch git@github.com:cam72cam/ModCoreMod.git ImmersiveRailroadingMod
 
 ln -s $PWD/src/main/java/cam72cam/immersiverailroading $PWD/ImmersiveRailroadingMod/src/main/java/cam72cam/immersiverailroading
 ln -s $PWD/ImmersiveRailroadingIntegration/src/main/java/cam72cam/immersiverailroading/thirdparty $PWD/ImmersiveRailroadingMod/src/main/java/cam72cam/immersiverailroading/thirdparty
 ln -s $PWD/src/main/resources $PWD/ImmersiveRailroadingMod/src/main/resources
+ln -s $PWD/run $PWD/ImmersiveRailroadingMod/run
 
 pushd ImmersiveRailroadingMod
 		bash setup.sh $branch immersiverailroading ImmersiveRailroading 1.6.1 cam72cam.immersiverailroading.ImmersiveRailroading
