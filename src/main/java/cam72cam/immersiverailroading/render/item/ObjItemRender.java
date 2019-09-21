@@ -9,13 +9,23 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 public class ObjItemRender {
+    public static Map<Identifier, OBJRender> cache = new HashMap<>();
+
     public static BiFunction<ItemStack, World, StandardModel> getModelFor(Identifier id, Vec3d translate, float scale) {
-        try {
-            OBJRender renderer = new OBJRender(new OBJModel(id, 0));
             return (stack, world) -> new StandardModel().addCustom(() -> {
+                if (!cache.containsKey(id)) {
+                    try {
+                        cache.put(id, new OBJRender(new OBJModel(id, 0)));
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error loading item model...", e);
+                    }
+                }
+                OBJRender renderer = cache.get(id);
                 GL11.glPushMatrix();
                 {
                     renderer.bindTexture();
@@ -26,8 +36,5 @@ public class ObjItemRender {
                 }
                 GL11.glPopMatrix();
             });
-        } catch (Exception e) {
-            throw new RuntimeException("Error loading item model...", e);
-        }
     }
 }
