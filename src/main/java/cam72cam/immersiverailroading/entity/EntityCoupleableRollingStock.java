@@ -43,13 +43,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			// Try locomotives first
 			for (EntityCoupleableRollingStock stock : entities) {
 				if (stock instanceof Locomotive) {
-					stock = stock.findByUUID(stock.getUUID());
+					//stock = stock.findByUUID(stock.getUUID());
 					stock.tickPosRemainingCheck();
 				}
 			}
 			// Try rest
 			for (EntityCoupleableRollingStock stock : entities) {
-				stock = stock.findByUUID(stock.getUUID());
+				//stock = stock.findByUUID(stock.getUUID());
 				stock.tickPosRemainingCheck();
 			}
 
@@ -124,13 +124,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		super.load(data);
 		if (data.hasKey("CoupledFront")) {
 			coupledFront = UUID.fromString(data.getString("CoupledFront"));
-            lastKnownFront = data.getVec3i("lastKnownFront");
+            lastKnownFront = new Vec3i(data.getLong("lastKnownFront"));
 		}
 		frontCouplerEngaged = data.getBoolean("frontCouplerEngaged");
 
 		if (data.hasKey("CoupledBack")) {
 			coupledBack = UUID.fromString(data.getString("CoupledBack"));
-            lastKnownRear = data.getVec3i("lastKnownRear");
+            lastKnownRear = new Vec3i(data.getLong("lastKnownRear"));
 		}
 		backCouplerEngaged = data.getBoolean("backCouplerEngaged");
 	}

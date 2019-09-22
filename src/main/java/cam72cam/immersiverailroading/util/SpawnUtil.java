@@ -58,6 +58,8 @@ public class SpawnUtil {
 					tp.speed = Speed.ZERO;
 					mrs.initPositions(tp);
 				}
+
+				worldIn.spawnEntity(stock);
 			}
 			if (!player.isCreative()) {
 				ItemStack stack = player.getHeldItem(hand);
