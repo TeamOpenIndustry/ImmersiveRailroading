@@ -90,7 +90,6 @@ public abstract class EntityRollingStockDefinition {
         // Override prev
         stock.setRotationYaw(yaw);
         stock.setup(defID, gauge, texture);
-        world.spawnEntity(stock);
 
         return stock;
     }

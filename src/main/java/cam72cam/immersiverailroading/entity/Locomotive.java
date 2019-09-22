@@ -208,7 +208,7 @@ public abstract class Locomotive extends FreightTank {
 			}
 			if (sync.getInteger(HORN) > 0) {
 				sync.setInteger(HORN, sync.getInteger(HORN)-1);
-			} else if (sync.get(HORN_PLAYER) != null) {
+			} else if (sync.getUUID(HORN_PLAYER) != null) {
 				sync.setUUID(HORN_PLAYER, null);
 			}
 			if (getBell() > 0 && !this.getDefinition().toggleBell) {
