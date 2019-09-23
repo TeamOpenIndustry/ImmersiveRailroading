@@ -137,8 +137,10 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Hand hand) {
 				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
-					TrackGui.this.bed = bed;
-					bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed)));
+					if (bed != null) {
+						TrackGui.this.bed = bed;
+						bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed)));
+					}
 					screen.show();
 				});
 				ip.choosenItem = bed;
@@ -150,8 +152,10 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Hand hand) {
 				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
-					TrackGui.this.bedFill = bed;
-					bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill)));
+					if (bed != null) {
+						TrackGui.this.bedFill = bed;
+						bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill)));
+					}
 					screen.show();
 				});
 				ip.choosenItem = bedFill;
