@@ -221,7 +221,7 @@ public class RailBase extends BlockEntityTickable implements ITrack {
 			augment = Augment.values()[nbt.getInteger("augment")];
 		}
 
-		parent = new Vec3i(nbt.getLong("parent"));
+		parent = nbt.getVec3i("parent");
 
 		switch(version) {
 		case 0:
@@ -256,7 +256,7 @@ public class RailBase extends BlockEntityTickable implements ITrack {
 	}
 	@Override
 	public void save(TagCompound nbt) {
-		nbt.setLong("parent", parent.toLong());
+		nbt.setVec3i("parent", parent);
 		nbt.setFloat("height", bedHeight);
 		nbt.setFloat("railHeight", railHeight);
 		nbt.setInteger("snowLayers", snowLayers);
