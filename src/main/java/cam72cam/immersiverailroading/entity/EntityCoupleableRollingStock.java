@@ -106,14 +106,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (coupledFront != null) {
 			data.setString("CoupledFront", coupledFront.toString());
 			if (lastKnownFront != null) {
-				data.setLong("lastKnownFront", lastKnownFront.toLong());
+				data.setVec3i("lastKnownFront", lastKnownFront);
 			}
 		}
 		data.setBoolean("frontCouplerEngaged", frontCouplerEngaged);
 		if (coupledBack != null) {
 			data.setString("CoupledBack", coupledBack.toString());
 			if (lastKnownRear != null) {
-				data.setLong("lastKnownRear", lastKnownRear.toLong());
+				data.setVec3i("lastKnownRear", lastKnownRear);
 			}
 		}
 		data.setBoolean("backCouplerEngaged", backCouplerEngaged);
@@ -124,13 +124,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		super.load(data);
 		if (data.hasKey("CoupledFront")) {
 			coupledFront = UUID.fromString(data.getString("CoupledFront"));
-            lastKnownFront = new Vec3i(data.getLong("lastKnownFront"));
+            lastKnownFront = data.getVec3i("lastKnownFront");
 		}
 		frontCouplerEngaged = data.getBoolean("frontCouplerEngaged");
 
 		if (data.hasKey("CoupledBack")) {
 			coupledBack = UUID.fromString(data.getString("CoupledBack"));
-            lastKnownRear = new Vec3i(data.getLong("lastKnownRear"));
+            lastKnownRear = data.getVec3i("lastKnownRear");
 		}
 		backCouplerEngaged = data.getBoolean("backCouplerEngaged");
 	}
