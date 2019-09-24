@@ -80,7 +80,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 	}
 	private void playerMovement(Player source, Vec3d movement) {
-		if (this.isPassenger(source)) {
+		if (this.isPassenger(source) && getRidingOffset(source) != null) {
 			/*
 			if (sprinting) {
 				movement = movement.scale(3);

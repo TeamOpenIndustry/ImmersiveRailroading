@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.Fuzzy;
@@ -86,7 +85,10 @@ public class ItemConductorWhistle extends ItemBase {
 				} else {
 					for (EntityCoupleableRollingStock car : closestToPlayer.getTrain()) {
 						if (car.getPosition().distanceTo(player.getPosition()) < Config.ConfigBalance.villagerConductorDistance) {
-							while (car.removePassenger((ModdedEntity.StaticPassenger s) -> s.isVillager) != null) {
+							for (Entity passenger : car.getPassengers()) {
+								if (passenger.isVillager()) {
+									car.removePassenger(passenger);
+								}
 							}
 						}
 					}

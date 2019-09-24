@@ -109,14 +109,15 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 
 		if (player.getHeldItem(Hand.PRIMARY).is(Fuzzy.LEAD)) {
-			Entity passenger = this.removePassenger((ModdedEntity.StaticPassenger sp) -> !sp.isVillager);
-			if (passenger != null) {
-				Living living = (Living) passenger;
-				if (living.canBeLeashedTo(player)) {
-					living.setLeashHolder(player);
-					player.getHeldItem(Hand.PRIMARY).shrink(1);
+			for (Entity passenger : this.getPassengers()) {
+				if (passenger instanceof Living && !passenger.isVillager()) {
+					Living living = (Living) passenger;
+					if (living.canBeLeashedTo(player)) {
+						living.setLeashHolder(player);
+						player.getHeldItem(Hand.PRIMARY).shrink(1);
+					}
+					return ClickResult.ACCEPTED;
 				}
-				return ClickResult.ACCEPTED;
 			}
 		}
 		
