@@ -39,18 +39,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	@Override
-	public Vec3d getMountPosition(Entity entity) {
-		Vec3d pos = entity.getPosition();
-		Vec3d center = this.getDefinition().getPassengerCenter(gauge);
-		center = VecUtil.rotateWrongYaw(center, super.getRotationYaw());
-		center = center.add(this.getPosition());
-		Vec3d off = VecUtil.rotateWrongYaw(center.subtract(pos), -this.getRotationYaw());
-
-		off = this.getDefinition().correctPassengerBounds(gauge, off);
-		int wiggle = entity.isVillager() ? 10 : 2;
+	public Vec3d getMountOffset(Entity passenger, Vec3d off) {
+		int wiggle = passenger.isVillager() ? 10 : 2;
 		off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
-		off = this.getDefinition().correctPassengerBounds(gauge, off);
-		off = new Vec3d(off.x, this.getDefinition().getPassengerCenter(gauge).y, off.z);
+		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger));
 		return off;
 	}
 
@@ -60,7 +52,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 	
 	@Override
-	public boolean shouldRiderSit(Entity ent) {
+	public boolean shouldRiderSit(Entity passenger) {
 		if (this.getDefinition().shouldSit != null) {
 			return this.getDefinition().shouldSit;
 		}
@@ -68,83 +60,50 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	@Override
-	public void onTick() {
-		super.onTick();
-		if (getWorld().isClient) {
-			return;
+	public Vec3d onPassengerUpdate(Entity passenger, Vec3d offset) {
+		if (passenger.isPlayer()) {
+			offset = playerMovement(passenger.asPlayer(), offset);
 		}
-		for (Entity passenger : this.getPassengers()) {
-			if (passenger.isPlayer()) {
-				playerMovement(passenger.asPlayer(), Keyboard.getMovement(passenger.asPlayer()));
-			}
-		}
-	}
-	private void playerMovement(Player source, Vec3d movement) {
-		if (this.isPassenger(source) && getRidingOffset(source) != null) {
-			/*
-			if (sprinting) {
-				movement = movement.scale(3);
-			}
-			*/
-			
-			movement = VecUtil.rotateYaw(new Vec3d(movement.x, 0, -movement.z), -source.getYawHead());
-			movement = VecUtil.rotateWrongYaw(movement, 180-this.getRotationYaw());
 
-			Vec3d pos = getRidingOffset(source).add(movement);
+		offset = this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(passenger));
 
-			if (this instanceof EntityCoupleableRollingStock) {
-				if (this.getDefinition().isAtFront(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
-					((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT).addPassenger(source);
-					return;
-				}
-				if (this.getDefinition().isAtRear(gauge, pos) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
-					((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK).addPassenger(source);
-					return;
-				}
-			}
-			
-			pos = this.getDefinition().correctPassengerBounds(gauge, pos);
-			setRidingOffset(source, pos);
-		}
+		return offset;
 	}
 
-	@Override
-    public void updatePassenger(Entity passenger) {
-		Vec3d ppos = getRidingOffset(passenger);
-		if (ppos != null && this.isPassenger(passenger)) {
-			Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
-			pos = pos.add(ppos);
-			pos = VecUtil.rotatePitch(pos, getRotationPitch());
-			pos = VecUtil.rotateWrongYaw(pos, getRotationYaw());
-			pos = pos.add(getPosition());
-			if (shouldRiderSit(passenger)) {
-				pos = pos.subtract(0, 0.75, 0);
-			}
-			passenger.setPosition(new Vec3d(pos.x, getPosition().y + getDefinition().getPassengerCenter(gauge).y, pos.z));
-			passenger.setVelocity(this.getVelocity());
+	private Vec3d playerMovement(Player source, Vec3d offset) {
+		Vec3d movement = Keyboard.getMovement(source);
+        /*
+        if (sprinting) {
+            movement = movement.scale(3);
+        }
+        */
+        if (movement.length() < 0.1) {
+            return offset;
+        }
 
-            passenger.setRotationYaw(passenger.getRotationYaw() + (this.getRotationYaw() - this.getPrevRotationYaw()));
-		}
+        movement = new Vec3d(movement.x, 0, movement.z).rotateMinecraftYaw(source.getRotationYawHead()-this.getRotationYaw());
+
+        offset = offset.add(movement);
+
+        if (this instanceof EntityCoupleableRollingStock) {
+            if (this.getDefinition().isAtFront(gauge, offset) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
+                ((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT).addPassenger(source);
+                return offset;
+            }
+            if (this.getDefinition().isAtRear(gauge, offset) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
+                ((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK).addPassenger(source);
+                return offset;
+            }
+        }
+		return offset;
 	}
 
-	public Vec3d getDismountPosition(Entity ent) {
-		Vec3d pos = this.getDefinition().getPassengerCenter(gauge);
-		pos = pos.add(this.getRidingOffset(ent));
-		pos = VecUtil.rotateWrongYaw(pos, getRotationYaw());
-		pos = pos.add(this.getPosition());
+	public Vec3d onDismountPassenger(Entity passenger, Vec3d offset) {
+		//TODO calculate better dismount offset
+		offset = new Vec3d(Math.copySign(getDefinition().getWidth(gauge)/2 + 1, offset.x), 0, offset.z);
 
-		Vec3d ppos = getRidingOffset(ent);
-		Vec3d delta = VecUtil.fromWrongYaw(this.getDefinition().getPassengerCompartmentWidth(gauge)/2 + 1.3 * gauge.scale(), this.getRotationYaw() + (ppos.z > 0 ? 90 : -90));
-
-		pos = delta.add(pos);
-
-		return new Vec3d(pos.x, getPosition().y+1, pos.z);
-	}
-
-	@Override
-	public void onDismountPassenger(Entity entity) {
-		if (entity.isVillager()) {
-			double distanceMoved = entity.getPosition().distanceTo(getPosition());
+		if (passenger.isVillager()) {
+			double distanceMoved = passenger.getPosition().distanceTo(getPosition());
 
 			int payout = (int) Math.floor(distanceMoved * Config.ConfigBalance.villagerPayoutPerMeter);
 
@@ -157,5 +116,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				// TODO drop by player or new pos?
 			}
 		}
+
+		return offset;
 	}
 }
