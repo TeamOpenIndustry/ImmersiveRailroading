@@ -150,7 +150,7 @@ public abstract class EntityRollingStockDefinition {
         }
 
         JsonObject passenger = data.get("passenger").getAsJsonObject();
-        passengerCenter = new Vec3d(passenger.get("center_x").getAsDouble(), passenger.get("center_y").getAsDouble() - 0.35, 0).scale(internal_model_scale);
+        passengerCenter = new Vec3d(0, passenger.get("center_y").getAsDouble() - 0.35, passenger.get("center_x").getAsDouble()).scale(internal_model_scale);
         passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_model_scale;
         passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_model_scale;
         maxPassengers = passenger.get("slots").getAsInt();
@@ -327,33 +327,35 @@ public abstract class EntityRollingStockDefinition {
         return components;
     }
 
-    public Vec3d getPassengerCenter(Gauge gauge) {
-        return this.passengerCenter.scale(gauge.scale());
-    }
-
-    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos) {
+    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos, boolean shouldSit) {
         double gs = gauge.scale();
-        if (pos.x > this.passengerCompartmentLength * gs) {
-            pos = new Vec3d(this.passengerCompartmentLength * gs, pos.y, pos.z);
+        Vec3d passengerCenter = this.passengerCenter.scale(gs);
+        pos = pos.subtract(passengerCenter);
+        if (pos.z > this.passengerCompartmentLength * gs) {
+            pos = new Vec3d(pos.x, pos.y, this.passengerCompartmentLength * gs);
         }
 
-        if (pos.x < -this.passengerCompartmentLength * gs) {
-            pos = new Vec3d(-this.passengerCompartmentLength * gs, pos.y, pos.z);
+        if (pos.z < -this.passengerCompartmentLength * gs) {
+            pos = new Vec3d(pos.x, pos.y, -this.passengerCompartmentLength * gs);
         }
 
-        if (Math.abs(pos.z) > this.passengerCompartmentWidth / 2 * gs) {
-            pos = new Vec3d(pos.x, pos.y, Math.copySign(this.passengerCompartmentWidth / 2 * gs, pos.z));
+        if (Math.abs(pos.x) > this.passengerCompartmentWidth / 2 * gs) {
+            pos = new Vec3d(Math.copySign(this.passengerCompartmentWidth / 2 * gs, pos.x), pos.y, pos.z);
         }
+
+        pos = new Vec3d(pos.x, passengerCenter.y - (shouldSit ? 0.75 : 0), pos.z + passengerCenter.z);
 
         return pos;
     }
 
     public boolean isAtFront(Gauge gauge, Vec3d pos) {
-        return pos.x >= this.passengerCompartmentLength * gauge.scale();
+        pos = pos.subtract(passengerCenter.scale(gauge.scale()));
+        return pos.z >= this.passengerCompartmentLength * gauge.scale();
     }
 
     public boolean isAtRear(Gauge gauge, Vec3d pos) {
-        return pos.x <= -this.passengerCompartmentLength * gauge.scale();
+        pos = pos.subtract(passengerCenter.scale(gauge.scale()));
+        return pos.z <= -this.passengerCompartmentLength * gauge.scale();
     }
 
     public List<ItemComponentType> getItemComponents() {
@@ -507,11 +509,6 @@ public abstract class EntityRollingStockDefinition {
         tips.add(GuiText.PACK_TOOLTIP.toString(packName));
         return tips;
     }
-
-    public double getPassengerCompartmentWidth(Gauge gauge) {
-        return gauge.scale() * this.passengerCompartmentWidth;
-    }
-
     public OBJModel getModel() {
         return model;
     }
