@@ -1,7 +1,5 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.List;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
@@ -11,18 +9,18 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
-import cam72cam.immersiverailroading.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraftforge.fluids.*;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidStack;
+import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.sound.ISound;
+import cam72cam.mod.util.TagCompound;
+
+import java.util.List;
 
 public class LocomotiveDiesel extends Locomotive {
 
@@ -34,43 +32,43 @@ public class LocomotiveDiesel extends Locomotive {
 	private float hornVolume = 0;
 	private static float hornStep = 0.25f;
 	
-	private static DataParameter<Float> ENGINE_TEMPERATURE = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.FLOAT);
-	private static DataParameter<Boolean> TURNED_ON = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
-	private static DataParameter<Boolean> ENGINE_OVERHEATED = EntityDataManager.createKey(LocomotiveDiesel.class, DataSerializers.BOOLEAN);
+	private final static String ENGINE_TEMPERATURE = "ENGINE_TEMPERATURE";
+	private final static String TURNED_ON = "TURNED_ON";
+	private final static String ENGINE_OVERHEATED = "ENGINE_OVERHEATED";
 
-	public LocomotiveDiesel(World world) {
-		this(world, null);
+	public LocomotiveDiesel() {
+		sync.setFloat(ENGINE_TEMPERATURE, ambientTemperature());
+		sync.setBoolean(TURNED_ON, false);
+		sync.setBoolean(ENGINE_OVERHEATED, false);
 	}
 
-	public LocomotiveDiesel(World world, String defID) {
-		super(world, defID);
-		this.getDataManager().register(ENGINE_TEMPERATURE, ambientTemperature());
-		this.getDataManager().register(TURNED_ON, false);
-		this.getDataManager().register(ENGINE_OVERHEATED, false);
+	@Override
+	public int getInventoryWidth() {
+		return 2;
 	}
-	
+
 	public float getEngineTemperature() {
-		return this.dataManager.get(ENGINE_TEMPERATURE);
+		return sync.getFloat(ENGINE_TEMPERATURE);
 	}
 	
 	private void setEngineTemperature(float temp) {
-		this.dataManager.set(ENGINE_TEMPERATURE, temp);
+		sync.setFloat(ENGINE_TEMPERATURE, temp);
 	}
 	
 	public void setTurnedOn(boolean value) {
-		this.dataManager.set(TURNED_ON, value);
+		sync.setBoolean(TURNED_ON, value);
 	}
 	
 	public boolean isTurnedOn() {
-		return this.dataManager.get(TURNED_ON);
+		return sync.getBoolean(TURNED_ON);
 	}
 	
 	public void setEngineOverheated(boolean value) {
-		this.dataManager.set(ENGINE_OVERHEATED, value);
+		sync.setBoolean(ENGINE_OVERHEATED, value);
 	}
 	
 	public boolean isEngineOverheated() {
-		return this.dataManager.get(ENGINE_OVERHEATED) && Config.ConfigBalance.canDieselEnginesOverheat;
+		return sync.getBoolean(ENGINE_OVERHEATED) && Config.ConfigBalance.canDieselEnginesOverheat;
 	}
 	
 	public boolean isRunning() {
@@ -86,31 +84,31 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
-	public GuiTypes guiType() {
+	public GuiRegistry.GUIType guiType() {
 		return GuiTypes.DIESEL_LOCOMOTIVE;
 	}
 	
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setFloat("engine_temperature", getEngineTemperature());
-		nbttagcompound.setBoolean("turned_on", isTurnedOn());
-		nbttagcompound.setBoolean("engine_overheated", isEngineOverheated());
+	public void save(TagCompound data) {
+		super.save(data);
+		data.setFloat("engine_temperature", getEngineTemperature());
+		data.setBoolean("turned_on", isTurnedOn());
+		data.setBoolean("engine_overheated", isEngineOverheated());
 	}
 	
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		setEngineTemperature(nbttagcompound.getFloat("engine_temperature"));
-		setTurnedOn(nbttagcompound.getBoolean("turned_on"));
-		setEngineOverheated(nbttagcompound.getBoolean("engine_overheated"));
-		super.readEntityFromNBT(nbttagcompound);
+	public void load(TagCompound data) {
+		setEngineTemperature(data.getFloat("engine_temperature"));
+		setTurnedOn(data.getBoolean("turned_on"));
+		setEngineOverheated(data.getBoolean("engine_overheated"));
+		super.load(data);
 	}
 	
 	/*
 	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
 	 */
 	@Override
-	public void handleKeyPress(Entity source, KeyTypes key, boolean sprinting) {
+	public void handleKeyPress(Player source, KeyTypes key) {
 		switch(key) {
 			case START_STOP_ENGINE:
 				if (turnOnOffDelay == 0) {
@@ -119,7 +117,7 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 				break;
 			default:
-				super.handleKeyPress(source, key, sprinting);
+				super.handleKeyPress(source, key);
 		}
 	}
 	
@@ -165,21 +163,21 @@ public class LocomotiveDiesel extends Locomotive {
 
 
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void onTick() {
+		super.onTick();
 		
-		if (world.isRemote) {
+		if (getWorld().isClient) {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
-                    bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
-					this.horn = ImmersiveRailroading.proxy.newSound(this.getDefinition().horn, this.getDefinition().getHornSus(), 100, this.soundGauge());
-					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
+                    bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
+					this.horn = ImmersiveRailroading.newSound(this.getDefinition().horn, this.getDefinition().getHornSus(), 100, this.soundGauge());
+					this.idle = ImmersiveRailroading.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
 
 
 				}
 				if (isRunning()) {
 					if (!idle.isPlaying()) {
-						this.idle.play(getPositionVector());
+						this.idle.play(getPosition());
 					}
 				} else {
 					if (idle.isPlaying()) {
@@ -187,15 +185,15 @@ public class LocomotiveDiesel extends Locomotive {
 					}
 				}
 
-				if (this.getDataManager().get(HORN) != 0 && !horn.isPlaying() && isRunning()) {
+				if (sync.getInteger(HORN) != 0 && !horn.isPlaying() && isRunning()) {
 					if (this.getDefinition().getHornSus()) {
 						hornVolume = 0.5f;
 						horn.setVolume(hornVolume);
 					}
-					horn.play(getPositionVector());
+					horn.play(getPosition());
 				}
-				else if(this.getDataManager().get(HORN) == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
-					if (hornVolume > 0.5) {
+				else if(sync.getInteger(HORN) == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
+                    if (hornVolume > 0.5) {
 						hornVolume -= 0.25;
 						horn.setVolume(hornVolume);
 					} else {
@@ -203,7 +201,7 @@ public class LocomotiveDiesel extends Locomotive {
 					}
 				}
 
-				if (this.getDefinition().getHornSus() && this.getDataManager().get(HORN) != 0 && hornVolume < 1) {
+				if (this.getDefinition().getHornSus() && sync.getInteger(HORN) != 0 && hornVolume < 1) {
 					hornVolume += 0.25;
 					horn.setVolume(hornVolume);
 				}
@@ -216,7 +214,7 @@ public class LocomotiveDiesel extends Locomotive {
 				}
 	
 				if (horn.isPlaying()) {
-					horn.setPosition(getPositionVector());
+					horn.setPosition(getPosition());
 					horn.setVelocity(getVelocity());
 					horn.update();
 				}
@@ -225,7 +223,7 @@ public class LocomotiveDiesel extends Locomotive {
 				if (idle.isPlaying()) {
 					idle.setPitch(0.7f+this.soundThrottle/4);
 					idle.setVolume(Math.max(0.1f, this.soundThrottle));
-					idle.setPosition(getPositionVector());
+					idle.setPosition(getPosition());
 					idle.setVelocity(getVelocity());
 					idle.update();
 				}
@@ -236,23 +234,17 @@ public class LocomotiveDiesel extends Locomotive {
 				return;
 			}
 			
-			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromWrongYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
+			Vec3d fakeMotion = this.getVelocity();
 			
 			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
 			float throttle = Math.abs(this.getThrottle()) + 0.05f;
 			if (exhausts != null && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateWrongYaw(exhaust.center(), this.rotationYaw + 180));
-					
-					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
-					
-					EntitySmokeParticle sp = new EntitySmokeParticle(world, (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width());
-					
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(exhaust.center(), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
-					
-					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.4 * gauge.scale(), fakeMotion.z);
-					world.spawnEntity(sp);
+
+					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
+					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width());
 				}
 			}
 			return;
@@ -276,7 +268,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			while (internalBurn < 0 && this.getLiquidAmount() > 0) {
 				internalBurn += burnTime;
-				theTank.drain(1, true);
+				theTank.drain(new FluidStack(theTank.getContents().getFluid(), 1), false);
 			}
 			
 			consumption *= 100;
@@ -304,9 +296,9 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
-	public void setDead() {
-		super.setDead();
-		
+	public void onRemoved() {
+		super.onRemoved();
+
 		if (idle != null) {
 			idle.stop();
 		}

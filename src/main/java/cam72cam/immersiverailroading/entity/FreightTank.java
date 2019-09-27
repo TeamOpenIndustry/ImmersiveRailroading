@@ -1,52 +1,43 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.*;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import cam72cam.mod.fluid.ITank;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidTank;
+import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.util.TagCompound;
+import org.apache.commons.lang3.ArrayUtils;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class FreightTank extends Freight {
-	private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.createKey(FreightTank.class, DataSerializers.VARINT);
-	private static final DataParameter<String> FLUID_TYPE = EntityDataManager.createKey(FreightTank.class, DataSerializers.STRING);
-	protected final FluidTank theTank = new FluidTank(null, 0) {
+	private static final String FLUID_AMOUNT = "FLUID_AMOUNT";
+	private static final String FLUID_TYPE = "FLUID_TYPE";
+
+	public final FluidTank theTank = new FluidTank(null, 0) {
 		@Override
-		public boolean canFillFluidType(FluidStack fluid) {
-			return canFill() && (getFluidFilter() == null || getFluidFilter().contains(fluid.getFluid()));
+		public boolean allows(Fluid fluid) {
+			return (getFluidFilter() == null || getFluidFilter().contains(fluid));
 		}
 		
 		@Override
-		public void onContentsChanged() {
-			if (!world.isRemote) {
+		public void onChanged() {
+			if (getWorld().isServer) {
 				FreightTank.this.onTankContentsChanged();
 			}
 		}
-	};;
+	};
 
-	public FreightTank(World world, String defID) {
-		super(world, defID);
-		
-		dataManager.register(FLUID_AMOUNT, 0);
-		dataManager.register(FLUID_TYPE, "EMPTY");
+	public FreightTank() {
+		sync.setInteger(FLUID_AMOUNT, 0);
+		sync.setString(FLUID_TYPE, "EMPTY");
 	}
 
 	/*
@@ -89,15 +80,15 @@ public abstract class FreightTank extends Freight {
 	}
 	
 	public int getLiquidAmount() {
-		return this.dataManager.get(FLUID_AMOUNT);
+		return sync.getInteger(FLUID_AMOUNT);
 	}
 	
 	public Fluid getLiquid() {
-		String type = this.dataManager.get(FLUID_TYPE);
+		String type = sync.getString(FLUID_TYPE);
 		if (type.equals("EMPTY")) {
 			return null;
 		}
-		return FluidRegistry.getFluid(type);
+		return Fluid.getFluid(type);
 	}
 	
 	@Override
@@ -125,26 +116,26 @@ public abstract class FreightTank extends Freight {
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		this.theTank.drain(this.theTank.getFluidAmount(), true);
+		this.theTank.drain(this.theTank.getContents(), true);
 		this.theTank.setCapacity(0);
 		onTankContentsChanged();
 	}
 
 	protected void onTankContentsChanged() {
-		if (world.isRemote) {
+		if (getWorld().isClient) {
 			return;
 		}
 		
-		this.dataManager.set(FLUID_AMOUNT, theTank.getFluidAmount());
-		if (theTank.getFluid() == null) {
-			this.dataManager.set(FLUID_TYPE, "EMPTY");
+		sync.setInteger(FLUID_AMOUNT, theTank.getContents().getAmount());
+		if (theTank.getContents().getFluid() == null) {
+			sync.setString(FLUID_TYPE, "EMPTY");
 		} else {
-			this.dataManager.set(FLUID_TYPE, FluidRegistry.getFluidName(theTank.getFluid()));
+			sync.setString(FLUID_TYPE, theTank.getContents().getFluid().ident);
 		}
 	}
 	
 	public int getServerLiquidAmount() {
-		return theTank.getFluidAmount();
+		return theTank.getContents().getAmount();
 	}
 
 	/*
@@ -153,32 +144,32 @@ public abstract class FreightTank extends Freight {
 	 */
 
 	@Override
-	public GuiTypes guiType() {
+	public GuiRegistry.GUIType guiType() {
 		return GuiTypes.TANK;
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setTag("tank", this.theTank.writeToNBT(new NBTTagCompound()));
+	public void save(TagCompound data) {
+		super.save(data);
+		data.set("tank", this.theTank.write(new TagCompound()));
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readEntityFromNBT(nbttagcompound);
-		this.theTank.readFromNBT(nbttagcompound.getCompoundTag("tank"));
+	public void load(TagCompound data) {
+		super.load(data);
+		this.theTank.read(data.get("tank"));
 		onTankContentsChanged();
 	}
 	
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void onTick() {
+		super.onTick();
 		checkInvent();
 	}
 
 	protected void checkInvent() {
 
-		if (world.isRemote) {
+		if (getWorld().isClient) {
 			return;
 		}
 		
@@ -186,21 +177,18 @@ public abstract class FreightTank extends Freight {
 			return;
 		}
 		
-		if (cargoItems.getSlots() == 0) {
+		if (cargoItems.getSlotCount() == 0) {
 			return;
 		}
 
 		for (int inputSlot : getContainerInputSlots()) {
-			ItemStack input = cargoItems.getStackInSlot(inputSlot);
+			ItemStack input = cargoItems.get(inputSlot);
 
-			if (input == null) {
-				continue;
-			}
+			final ItemStack[] inputCopy = {input.copy()};
+			inputCopy[0].setCount(1);
+			ITank inputTank = ITank.getTank(inputCopy[0], (ItemStack stack) -> inputCopy[0] = stack);
 
-			ItemStack inputCopy = ItemHandlerHelper.copyStackWithSize(input, 1);
-			IFluidHandlerItem containerFluidHandler = FluidUtil.getFluidHandler(inputCopy);
-
-			if (containerFluidHandler == null) {
+			if (inputTank == null) {
 				continue;
 			}
 
@@ -211,34 +199,32 @@ public abstract class FreightTank extends Freight {
 				// to fill it
 
 				for (Boolean doFill : new Boolean[] { false, true }) {
-
-					FluidActionResult inputAttempt;
-
+					boolean success;
 					if (doFill) {
-						inputAttempt = FluidUtil.tryFillContainer(inputCopy, theTank, Integer.MAX_VALUE, null, false);
+						success = theTank.tryDrain(inputTank, theTank.getCapacity(), true);
 					} else {
-						inputAttempt = FluidUtil.tryEmptyContainer(inputCopy, theTank, Integer.MAX_VALUE, null, false);
+						success = theTank.tryFill(inputTank, theTank.getCapacity(), true);
 					}
 
-					if (inputAttempt.isSuccess()) {
+					if (success) {
 						// We were able to drain into the container
 
 						// Can we move it to an output slot?
-						ItemStack out = inputAttempt.getResult();
+						ItemStack out = inputCopy[0].copy();
 						for (Integer slot : this.getContainertOutputSlots()) {
-							if (this.cargoItems.insertItem(slot, out, true).getCount() == 0) {
+							if (this.cargoItems.insert(slot, out, true).getCount() == 0) {
 								// Move Liquid
 								if (doFill) {
-									FluidUtil.tryFillContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
+									theTank.tryDrain(inputTank, theTank.getCapacity(), false);
 								} else {
-									FluidUtil.tryEmptyContainer(inputCopy, theTank, Integer.MAX_VALUE, null, true);
+									theTank.tryFill(inputTank, theTank.getCapacity(), false);
 								}
 								if (!ConfigDebug.debugInfiniteLiquids) {
 									// Decrease input
-									cargoItems.extractItem(inputSlot, 1, false);
+									cargoItems.extract(inputSlot, 1, false);
 									
 									// Increase output
-									this.cargoItems.insertItem(slot, out, false);
+									this.cargoItems.insert(slot, out, false);
 									break;
 								}
 							}
@@ -251,7 +237,7 @@ public abstract class FreightTank extends Freight {
 
 	/*
 	 * 
-	 * IFluidHandler Overrides
+	 * ITank Overrides
 	 * 
 	 */
 	
@@ -268,11 +254,11 @@ public abstract class FreightTank extends Freight {
 		return this.getLiquidAmount() * 100 / this.getTankCapacity().MilliBuckets();
 	}
 
-	private List<ISyncableSlots> listners = new ArrayList<ISyncableSlots>();
+	private List<ISyncableSlots> listners = new ArrayList<>();
 	@Override
 	protected void onInventoryChanged() {
 		super.onInventoryChanged();
-		if (!world.isRemote) {
+		if (getWorld().isServer) {
 			for(ISyncableSlots container : listners) {
 				container.syncSlots();;
 			}
@@ -281,21 +267,4 @@ public abstract class FreightTank extends Freight {
 	public void addListener(ISyncableSlots tankContainer) {
 		this.listners.add(tankContainer);
 	}
-	
-	@Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            return true;
-        }
-        return super.hasCapability(capability, facing);
-    }
-
-    @SuppressWarnings("unchecked")
-	@Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            return (T) theTank;
-        }
-        return super.getCapability(capability, facing);
-    }
 }

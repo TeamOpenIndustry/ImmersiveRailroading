@@ -8,35 +8,35 @@ import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
+import cam72cam.mod.energy.IEnergy;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Rotation;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.World;
 
 public class BoilerRollerMultiblock extends Multiblock {
-	private static MultiblockComponent slab = new MultiblockComponent(Blocks.STONE_SLAB);
+	private static Fuzzy slab = Fuzzy.STONE_SLAB;
 	public static final String NAME = "BOILER_MACHINE";
-	private static final BlockPos render = new BlockPos(2,0,0);
-	private static final BlockPos power = new BlockPos(5,0,3);
-	private static final BlockPos crafting = new BlockPos(2,0,4);
+	private static final Vec3i render = new Vec3i(2,0,0);
+	private static final Vec3i power = new Vec3i(5,0,3);
+	private static final Vec3i crafting = new Vec3i(2,0,4);
 	
-	private static MultiblockComponent[][][] componentGenerator() {
-		MultiblockComponent[] bed = new MultiblockComponent[] {
+	private static Fuzzy[][][] componentGenerator() {
+		Fuzzy[] bed = new Fuzzy[] {
 				L_ENG(), L_ENG(), L_ENG(), L_ENG(), H_ENG(), H_ENG()
 		};
-		MultiblockComponent[] table = new MultiblockComponent[] {
+		Fuzzy[] table = new Fuzzy[] {
 				slab, slab, slab, slab, AIR, AIR
 		};
 		
-		MultiblockComponent[][][] result = new MultiblockComponent[][][] {
+		Fuzzy[][][] result = new Fuzzy[][][] {
 			{ table },
 			{ table },
 			{ table },
@@ -54,27 +54,27 @@ public class BoilerRollerMultiblock extends Multiblock {
 	}
 	
 	@Override
-	public BlockPos placementPos() {
-		return new BlockPos(2, 0, 0);
+	public Vec3i placementPos() {
+		return new Vec3i(2, 0, 0);
 	}
 
 	@Override
-	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {
+	protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
 		return new BoilerRollerInstance(world, origin, rot);
 	}
 	public class BoilerRollerInstance extends MultiblockInstance {
 		
-		public BoilerRollerInstance(World world, BlockPos origin, Rotation rot) {
+		public BoilerRollerInstance(World world, Vec3i origin, Rotation rot) {
 			super(world, origin, rot);
 		}
 
 		@Override
-		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
-			if (world.isRemote) {
+		public boolean onBlockActivated(Player player, Hand hand, Vec3i offset) {
+			if (world.isClient) {
 				return false;
 			}
 			
-			if (!player.isSneaking()) {
+			if (!player.isCrouching()) {
 				ItemStack held = player.getHeldItem(hand);
 				if (held.isEmpty()) {
 					TileMultiblock craftTe = getTile(crafting);
@@ -82,19 +82,19 @@ public class BoilerRollerMultiblock extends Multiblock {
 						return false;
 					}
 					
-					ItemStack outstack = craftTe.getContainer().getStackInSlot(1);
-					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outstack));
-					
-					craftTe.getContainer().setStackInSlot(1, ItemStack.EMPTY);
-				} else if (held.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(held) == PlateType.BOILER) {
+					ItemStack outstack = craftTe.getContainer().get(1);
+					world.dropItem(outstack, player.getPosition());
+
+					craftTe.getContainer().set(1, ItemStack.EMPTY);
+				} else if (held.is(IRItems.ITEM_PLATE) && ItemPlateType.get(held) == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
 					if (craftTe == null) {
 						return false;
 					}
-					if (craftTe.getContainer().getStackInSlot(0).isEmpty()) {
+					if (craftTe.getContainer().get(0).isEmpty()) {
 						ItemStack inputStack = held.copy();
 						inputStack.setCount(1);
-						craftTe.getContainer().setStackInSlot(0, inputStack);
+						craftTe.getContainer().set(0, inputStack);
 						held.shrink(1);
 						player.setHeldItem(hand, held);
 					}
@@ -104,17 +104,17 @@ public class BoilerRollerMultiblock extends Multiblock {
 		}
 
 		@Override
-		public boolean isRender(BlockPos offset) {
+		public boolean isRender(Vec3i offset) {
 			return offset.equals(render);
 		}
 
 		@Override
-		public int getInvSize(BlockPos offset) {
+		public int getInvSize(Vec3i offset) {
 			return offset.equals(crafting) ? 2 : 0;
 		}
 
 		@Override
-		public void tick(BlockPos offset) {
+		public void tick(Vec3i offset) {
 			if (!offset.equals(crafting)) {
 				return;
 			}
@@ -132,29 +132,29 @@ public class BoilerRollerMultiblock extends Multiblock {
 				return;
 			}
 			
-			if (world.isRemote) {
+			if (world.isClient) {
 				if (craftTe.getRenderTicks() % 10 == 0 && craftTe.getCraftProgress() != 0) {
-					world.playSound(craftTe.getPos().getX(), craftTe.getPos().getY(), craftTe.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					Audio.playSound(craftTe.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
 				}
 				return;
 			}
 			
 			// Decrement craft progress down to 0
 			if (craftTe.getCraftProgress() != 0) {
-				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+				IEnergy energy = powerTe.getEnergy(null);
 				energy.extractEnergy(32, false);
 				craftTe.setCraftProgress(Math.max(0, craftTe.getCraftProgress() - 1));
 			}
 			
 			float progress = craftTe.getCraftProgress();
 			
-			ItemStack input = craftTe.getContainer().getStackInSlot(0);
-			ItemStack output = craftTe.getContainer().getStackInSlot(1);
+			cam72cam.mod.item.ItemStack input = craftTe.getContainer().get(0);
+			cam72cam.mod.item.ItemStack output = craftTe.getContainer().get(1);
 			
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.getItem() == IRItems.ITEM_PLATE && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
+				if (input.is(IRItems.ITEM_PLATE) && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
 					progress = 100;
 					craftTe.setCraftProgress(100);
 				}
@@ -162,35 +162,35 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
+				cam72cam.mod.item.ItemStack out = new cam72cam.mod.item.ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
 				ItemGauge.set(out, ItemGauge.get(input));
 				ItemDefinition.setID(out, ItemDefinition.getID(input));
 				ItemComponent.setComponentType(out, ItemComponentType.BOILER_SEGMENT);
-				craftTe.getContainer().setStackInSlot(1, out);
+				craftTe.getContainer().set(1, out);
 				input.shrink(1);
-				craftTe.getContainer().setStackInSlot(0, input);;
+				craftTe.getContainer().set(0, input);
 			}
 		}
 
 		@Override
-		public boolean canInsertItem(BlockPos pos, int slot, ItemStack stack) {
+		public boolean canInsertItem(Vec3i pos, int slot, ItemStack stack) {
 			//TODO
 			return false;
 		}
 
 		@Override
-		public boolean isOutputSlot(BlockPos pos, int slot) {
+		public boolean isOutputSlot(Vec3i pos, int slot) {
 			//TODO
 			return false;
 		}
 
 		@Override
-		public int getSlotLimit(BlockPos offset, int slot) {
+		public int getSlotLimit(Vec3i offset, int slot) {
 			return offset.equals(crafting) ? 1 : 0;
 		}
 
 		@Override
-		public boolean canRecievePower(BlockPos offset) {
+		public boolean canRecievePower(Vec3i offset) {
 			return offset.equals(power);
 		}
 
@@ -199,8 +199,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-			return energy.getEnergyStored() > 32;			
+			return powerTe.getEnergy(null).getEnergyStored() > 32;
 		}
 		
 		public boolean hasInput() {
@@ -208,7 +207,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			if (craftTe == null) {
 				return false;
 			}
-			return !craftTe.getContainer().getStackInSlot(0).isEmpty();
+			return !craftTe.getContainer().get(0).isEmpty();
 		}
 
 		public boolean hasOutput() {
@@ -216,7 +215,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			if (craftTe == null) {
 				return false;
 			}
-			return !craftTe.getContainer().getStackInSlot(1).isEmpty();
+			return !craftTe.getContainer().get(1).isEmpty();
 		}
 
 		

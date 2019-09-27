@@ -1,17 +1,15 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import net.minecraft.item.Item;
-//TODO buildcraft.api.tools.IToolWrench
-import net.minecraft.util.ResourceLocation;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.Recipes;
 
-public class ItemPaintBrush extends Item {
-	public static final String NAME = "item_paint_brush";
-	
+public class ItemPaintBrush extends ItemBase {
 	public ItemPaintBrush() {
-		super();
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_paint_brush", 1, ItemTabs.MAIN_TAB);
+
+		Recipes.register(this, 1,
+				Fuzzy.WOOL_BLOCK, Fuzzy.IRON_INGOT, Fuzzy.WOOD_STICK);
 	}
 }

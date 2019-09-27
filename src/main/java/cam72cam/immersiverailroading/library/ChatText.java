@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.library;
 
-import cam72cam.immersiverailroading.util.TextUtil;
-import net.minecraft.util.text.TextComponentTranslation;
+import cam72cam.mod.text.TextUtil;
+import cam72cam.mod.text.PlayerMessage;
 
 public enum ChatText {
 	STOCK_BUILT("stock.built"), 
@@ -38,12 +38,12 @@ public enum ChatText {
 		this.value = value;
 	}
 	
-	public String getRaw() {
+	private String getRaw() {
 		return "chat.immersiverailroading:" + value;
 	}
 	
-	public TextComponentTranslation getMessage(Object... objects) {
-		return new TextComponentTranslation(getRaw(), objects);
+	public PlayerMessage getMessage(Object... objects) {
+		return PlayerMessage.translate(getRaw(), objects);
 	}
 
 	@Override

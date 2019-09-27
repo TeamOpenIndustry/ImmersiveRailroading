@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 
 public class BuilderSlope extends BuilderStraight {
-	public BuilderSlope(RailInfo info, BlockPos pos) {
+	public BuilderSlope(RailInfo info, Vec3i pos) {
 		super(info, pos);
 	}
 	

@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.model;
 import java.util.List;
 
 import cam72cam.immersiverailroading.library.Gauge;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
 
 public class MultiRenderComponent {
 	private final Vec3d min;

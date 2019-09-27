@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
 
 public class PosStep extends Vec3d {
     public final float yaw;

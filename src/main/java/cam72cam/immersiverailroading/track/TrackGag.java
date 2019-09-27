@@ -1,19 +1,18 @@
 package cam72cam.immersiverailroading.track;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.tile.TileRailGag;
-import net.minecraft.util.math.BlockPos;
+import cam72cam.immersiverailroading.tile.RailGag;
+import cam72cam.mod.math.Vec3i;
 
 public class TrackGag extends TrackBase {
-	public TrackGag(BuilderBase builder, BlockPos rel) {
+	public TrackGag(BuilderBase builder, Vec3i rel) {
 		super(builder, rel, IRBlocks.BLOCK_RAIL_GAG);
 	}
 
 	@Override
-	public TileEntity placeTrack(boolean actuallyPlace) {
-		TileRailGag tileGag = (TileRailGag) super.placeTrack(actuallyPlace);
+	public RailBase placeTrack(boolean actuallyPlace) {
+		RailGag tileGag = (RailGag) super.placeTrack(actuallyPlace);
 		
 		tileGag.setFlexible(isFlexible());
 		

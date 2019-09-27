@@ -1,65 +1,49 @@
 package cam72cam.immersiverailroading.items;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackPositionType;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import cam72cam.mod.item.*;
+import cam72cam.mod.world.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 
-import net.minecraftforge.fml.common.Optional;
+import java.util.List;
 
-@Optional.Interface(iface = "mezz.jei.api.ingredients.ISlowRenderItem", modid = "jei")
-public class ItemTrackBlueprint extends Item {
-	public static final String NAME = "item_rail";
-
+public class ItemTrackBlueprint extends ItemBase {
 	public ItemTrackBlueprint() {
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_rail", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
+		Recipes.register(this, 3,
+				steel, null, steel, steel, Fuzzy.PAPER, steel, steel, null, steel);
 	}
 	
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if (worldIn.isRemote && handIn == EnumHand.MAIN_HAND) {
-            playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.RAIL.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
+	public void onClickAir(Player player, World world, Hand hand) {
+		if (world.isClient && hand == Hand.PRIMARY) {
+			ImmersiveRailroading.GUI_REGISTRY.openGUI(player, GuiTypes.RAIL);
         }
-        return super.onItemRightClick(worldIn, playerIn, handIn);
 	}
 	
 	@Override
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
 
-		if (!world.isRemote && hand == EnumHand.OFF_HAND) {
+		if (world.isServer && hand == Hand.SECONDARY) {
 			RailSettings info = settings(stack);
-			ItemStack blockinfo = world.getBlockState(pos).getBlock().getItem(world, pos, world.getBlockState(pos));
-			if (player.isSneaking()) {
+			ItemStack blockinfo = world.getItemStack(pos);
+			if (player.isCrouching()) {
 				info = new RailSettings(
                     info.gauge,
                     info.track,
@@ -89,38 +73,37 @@ public class ItemTrackBlueprint extends Item {
 				);
 			}
 			settings(stack, info);
-			return EnumActionResult.SUCCESS;
+			return ClickResult.ACCEPTED;
 		}
 
 		pos = pos.up();
 		
 		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
 				pos = pos.down();
 			}
 		}
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), pos, hitX, hitY, hitZ);
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), pos, hit);
 		
 		if (settings(stack).isPreview) {
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
 				pos = pos.up();
 			}
-			world.setBlockState(pos, IRBlocks.BLOCK_RAIL_PREVIEW.getDefaultState());
-			TileRailPreview te = TileRailPreview.get(world, pos);
+			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
+			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
 				te.setup(stack, placementInfo);
 			}
-			return EnumActionResult.SUCCESS;
+			return ClickResult.ACCEPTED;
 		}
 
-		RailInfo info = new RailInfo(player.world, stack, placementInfo, null);
+		RailInfo info = new RailInfo(world, stack, placementInfo, null);
 		info.build(player);
-		return EnumActionResult.SUCCESS;
+		return ClickResult.ACCEPTED;
     }
 
 	@Override
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+	public void addInformation(ItemStack stack, List<String> tooltip) {
         RailSettings settings = settings(stack);
         tooltip.add(GuiText.TRACK_TYPE.toString(settings.type));
         tooltip.add(GuiText.TRACK_GAUGE.toString(settings.gauge));
@@ -138,9 +121,6 @@ public class ItemTrackBlueprint extends Item {
 	}
 	
 	public static RailSettings settings(ItemStack stack) {
-		if (stack.getTagCompound() == null){
-			stack.setTagCompound(new NBTTagCompound());
-		}
 		return new RailSettings(stack.getTagCompound());
 	}
 }

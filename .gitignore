@@ -25,3 +25,7 @@ run
 *.skb
 
 *.jar
+
+ImmersiveRailroadingMod
+ImmersiveRailroadingIntegration
+src/main/java/cam72cam/immersiverailroading/thirdparty

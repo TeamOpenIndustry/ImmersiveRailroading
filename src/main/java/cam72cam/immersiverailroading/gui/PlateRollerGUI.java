@@ -15,20 +15,21 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.item.ItemStack;
+import cam72cam.mod.gui.Button;
+import cam72cam.mod.gui.IScreen;
+import cam72cam.mod.gui.IScreenBuilder;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.util.Hand;
 
-public class PlateRollerGUI extends GuiScreen {
-	private GuiButton gaugeButton;
+public class PlateRollerGUI implements IScreen {
+	private Button gaugeButton;
 	private Gauge gauge;
 	
-	private GuiButton plateButton;
+	private Button plateButton;
 	private PlateType plate;
 
-	private GuiButton pickerButton;
-	private CraftPicker picker;
-	
+	private Button pickerButton;
+
 	private TileMultiblock tile;
 	private ItemStack currentItem;
 	
@@ -41,78 +42,83 @@ public class PlateRollerGUI extends GuiScreen {
 		
 		gauge = ItemGauge.get(currentItem);
 		plate = ItemPlateType.get(currentItem);
-		picker = new CraftPicker(null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
-        	this.mc.displayGuiScreen(this);
-        	
-        	if (item != null) {
-        		String defID = ItemDefinition.getID(item);
-        		ItemDefinition.setID(currentItem, defID);
-        		EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
-				if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
-					gauge = def.recommended_gauge;
-					gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
-				}
-        		updatePickerButton();
-	        	sendPacket();
-        	}
-        });
 	}
 	
 	private void updatePickerButton() {
 		EntityRollingStockDefinition def = ItemDefinition.get(currentItem.copy());
 		if (def != null) {
-			pickerButton.displayString = GuiText.SELECTOR_PLATE_BOILER.toString(def.name());
+			pickerButton.setText(GuiText.SELECTOR_PLATE_BOILER.toString(def.name()));
 		}
 	}
 
 	@Override
-	public boolean doesGuiPauseGame() {
-		return false;
-	}
-	
-	@Override
-	public void initGui() {
-		int buttonID = 0;
-
-		gaugeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_GAUGE.toString(gauge));
-		this.buttonList.add(gaugeButton);
-		
-		plateButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate));
-		this.buttonList.add(plateButton);
-		
-		pickerButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 4 - 24 + buttonID * 30, GuiText.SELECTOR_PLATE_BOILER.toString(""));
-		pickerButton.visible = plate == PlateType.BOILER;
-		updatePickerButton();
-		this.buttonList.add(pickerButton);
-	}
-	
-	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
-		if (button == gaugeButton) {
-			if(!currentItem.isEmpty()) {
-				EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
-				if (def != null && plate == PlateType.BOILER && ConfigBalance.DesignGaugeLock) {
-					List<Gauge> validGauges = new ArrayList<Gauge>();
-					validGauges.add(Gauge.from(def.recommended_gauge.value()));
-					gauge = gauge.next(validGauges);
-				} else {
-					gauge = gauge.next();
+	public void init(IScreenBuilder screen) {
+		gaugeButton = new Button(screen, 0 - 100, -24 + 0 * 30, GuiText.SELECTOR_GAUGE.toString(gauge)) {
+			@Override
+			public void onClick(Hand hand) {
+				if(!currentItem.isEmpty()) {
+					EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+					if (def != null && plate == PlateType.BOILER && ConfigBalance.DesignGaugeLock) {
+						List<Gauge> validGauges = new ArrayList<Gauge>();
+						validGauges.add(Gauge.from(def.recommended_gauge.value()));
+						gauge = gauge.next(validGauges);
+					} else {
+						gauge = gauge.next();
+					}
 				}
+				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
+				sendPacket();
 			}
-			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
-			sendPacket();
-		}
-		if (button == plateButton) {
-			plate = PlateType.values()[((plate.ordinal() + 1) % (PlateType.values().length))];
-			plateButton.displayString = GuiText.SELECTOR_PLATE_TYPE.toString(plate);
-			pickerButton.visible = plate == PlateType.BOILER;
-			sendPacket();
-		}
-		if (button == pickerButton) {
-			this.mc.displayGuiScreen(picker);
-		}
+		};
+
+		plateButton = new Button(screen, 0 - 100, -24 + 1 * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate)) {
+			@Override
+			public void onClick(Hand hand) {
+				plate = PlateType.values()[((plate.ordinal() + 1) % (PlateType.values().length))];
+				plateButton.setText(GuiText.SELECTOR_PLATE_TYPE.toString(plate));
+				pickerButton.setVisible(plate == PlateType.BOILER);
+				sendPacket();
+			}
+		};
+
+		pickerButton = new Button(screen, 0 - 100, -24 + 2 * 30, GuiText.SELECTOR_PLATE_BOILER.toString("")) {
+			@Override
+			public void onClick(Hand hand) {
+				CraftPicker.showCraftPicker(screen, null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
+					if (item != null) {
+						String defID = ItemDefinition.getID(item);
+						ItemDefinition.setID(currentItem, defID);
+						EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+						if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
+							gauge = def.recommended_gauge;
+							gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
+						}
+						updatePickerButton();
+						sendPacket();
+					}
+				});
+			}
+		};
+		pickerButton.setVisible(plate == PlateType.BOILER);
+		updatePickerButton();
 	}
-	
+
+	@Override
+	public void onEnterKey(IScreenBuilder builder) {
+		sendPacket();
+		builder.close();
+	}
+
+	@Override
+	public void onClose() {
+		sendPacket();
+	}
+
+	@Override
+	public void draw(IScreenBuilder builder) {
+
+	}
+
 	private void sendPacket() {
 		ItemGauge.set(currentItem, gauge);
 		ItemPlateType.set(currentItem, plate);
@@ -135,16 +141,4 @@ public class PlateRollerGUI extends GuiScreen {
 		currentItem.setCount(Math.max(1, (int) Math.floor(currentItem.getCount()/gauge.scale())));
 		tile.setCraftItem(currentItem);
     }
-	
-	@Override
-	protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        // Enter or ESC
-        if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
-        	sendPacket();
-
-			this.mc.displayGuiScreen(null);
-			if (this.mc.currentScreen == null)
-				this.mc.setIngameFocus();
-        }
-	}
 }

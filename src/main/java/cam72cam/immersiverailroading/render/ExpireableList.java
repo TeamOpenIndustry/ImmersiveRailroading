@@ -52,8 +52,12 @@ public class ExpireableList<K,V> {
 
 	public void put(K key, V displayList) {
 		synchronized(this) {
-			mapUsage.put(key, timeS());
-			map.put(key, displayList);
+			if (displayList == null) {
+				map.remove(key);
+			} else {
+				mapUsage.put(key, timeS());
+				map.put(key, displayList);
+			}
 		}
 	}
 

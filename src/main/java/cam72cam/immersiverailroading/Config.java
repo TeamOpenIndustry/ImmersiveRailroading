@@ -1,21 +1,17 @@
 package cam72cam.immersiverailroading;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import cam72cam.immersiverailroading.library.Gauge;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.config.Config.Comment;
-import net.minecraftforge.common.config.ConfigManager;
+import cam72cam.mod.config.ConfigFile.Comment;
+import cam72cam.mod.config.ConfigFile.Name;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
 
-@net.minecraftforge.common.config.Config(modid = ImmersiveRailroading.MODID)
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Comment("Configuration File")
+@Name("general")
 public class Config {
-	public static ConfigDamage damage;
-
 	public static void init() {
 		if (ConfigBalance.dieselFuels.size() == 0) {
 			// BC
@@ -43,41 +39,41 @@ public class Config {
 
 			// Other
 			ConfigBalance.dieselFuels.put("olive_oil", 40);
-			ConfigManager.sync(ImmersiveRailroading.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
+			//ConfigManager.sync(ImmersiveRailroading.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
 		}
 	}
 
+	@Name("damage")
 	public static class ConfigDamage {
-		@Comment({ "Enable Boiler Explosions" })
+		@Comment( "Enable Boiler Explosions" )
 		public static boolean explosionsEnabled = true;
 
-		@Comment({ "Enable environmental damage of Boiler Explosions"})
+		@Comment( "Enable environmental damage of Boiler Explosions")
 		public static boolean explosionEnvDamageEnabled = true;
 		
-		@Comment({ "km/h to damage 1 heart on collision" })
+		@Comment( "km/h to damage 1 heart on collision" )
 		public static double entitySpeedDamage = 10;
 
-		@Comment("Trains should break blocks")
+		@Comment("Trains should break block")
 		public static boolean TrainsBreakBlocks = true;
 
-		@Comment("Break blocks around the border of the tracks in creative")
+		@Comment("Break block around the border of the tracks in creative")
 		public static boolean enableSideBlockClearing = true;
 
 		@Comment("Clear blocsk in creative mode when placing tracks")
 		public static boolean creativePlacementClearsBlocks = true;
 
-		@Comment("Requires solid blocks to be placed under the rails")
+		@Comment("Requires solid block to be placed under the rails")
 		public static boolean requireSolidBlocks = true;
 
 		@Comment("Drop snowballs when the train can't push a block out of the way")
 		public static boolean dropSnowBalls = false;
 		
-		@Comment("Trains get destroyed by Mob explosions")
+		@Comment("Trains getContents destroyed by Mob explosions")
 		public static boolean trainMobExplosionDamage = true;
 	}
 
-	public static ConfigBalance balance;
-
+	@Name("balance")
 	public static class ConfigBalance {
 		
 		@Comment("Models require fuel")
@@ -95,10 +91,10 @@ public class Config {
 		@Comment("Traction Multiplier: Higher numbers decreases wheel slip, lower numders increase wheel slip")
 		public static double tractionMultiplier = 1.0;
 		
-		@Comment({ "How heavy is a single block in Kg" })
+		@Comment( "How heavy is a single block in Kg" )
 		public static int blockWeight = 10;
 
-		@Comment({ "MilliBuckets per Liter" })
+		@Comment( "MilliBuckets per Liter" )
 		public static int MB_PER_LITER = 1;
 
 		@Comment("Cost to place down a tie")
@@ -110,7 +106,7 @@ public class Config {
 		@Comment("Cost to place down rail bed")
 		public static double BedCostMultiplier = 0.25;
 
-		@Comment("If more than X% of the tracks are above non solid blocks, break the track")
+		@Comment("If more than X% of the tracks are above non solid block, break the track")
 		public static double trackFloatingPercent = 0.05;
 		
 		@Comment("Diesel Fuel Efficiency")
@@ -119,29 +115,29 @@ public class Config {
 		@Comment("Steam Fuel Efficiency")
 		public static int locoSteamFuelEfficiency = 100;
 
-		@Comment("How fast the steam locomotive should heat up.  1 is real world (slow), 72 is scaled to minecraft time")
+		@Comment("How fast the steam locomotive should heat up.  1 is real internal (slow), 72 is scaled to minecraft time")
 		public static int locoHeatTimeScale = 72;
 		
-		@Comment("How fast the diesel locomotive should heat up. 1 is real world (slow), 72 is scaled to minecraft time")
+		@Comment("How fast the diesel locomotive should heat up. 1 is real internal (slow), 72 is scaled to minecraft time")
 		public static int dieselLocoHeatTimeScale = 72;
 
 		@Comment("How much water the locomotive should use")
 		public static float locoWaterUsage = 10;
 
-		@Comment("How much you get payed per meter the villager traveled (default 1 emerald per km)")
+		@Comment("How much you getContents payed per meter the villager traveled (default 1 emerald per km)")
 		public static double villagerPayoutPerMeter = 0.001;
 
 		@Comment("Distance the villagers will hear the conductor's whistle")
 		public static double villagerConductorDistance = 50;
 		
-		@Comment("Villager payout items")
-		public static String[] villagerPayoutItems = new String[] {
-			Items.EMERALD.getRegistryName().toString()
+		@Comment("Villager payout items (ore dict)")
+		public static Fuzzy[] villagerPayoutItems = new Fuzzy[] {
+				Fuzzy.EMERALD
 		};
 		
 		@Comment("Fuels for diesel Locomotives" + 
 				"\nNote: Naphtha of Thermal Foundation is internally registered as 'refined oil'.")
-		public static Map<String, Integer> dieselFuels = new HashMap<String, Integer>();
+		public static Map<String, Integer> dieselFuels = new HashMap<>();
 
 		@Comment("Water Substitutes")
 		public static String[] waterTypes = new String[] {
@@ -154,15 +150,8 @@ public class Config {
 		@Comment("Allow diesel locomotive engine overheating")
 		public static boolean canDieselEnginesOverheat = true;
 		
-		public static List<Item> getVillagerPayout() {
-			List<Item> items = new ArrayList<Item>();
-			for (String irl : villagerPayoutItems) {
-				Item item = Item.REGISTRY.getObject(new ResourceLocation(irl));
-				if(item != null) {
-					items.add(item);
-				}
-			}
-			return items;
+		public static List<ItemStack> getVillagerPayout() {
+			return Arrays.stream(villagerPayoutItems).map(f -> f.example()).collect(Collectors.toList());
 		}
 		
 		@Comment("Only select Locomotives with suitable equipment can be radio-controlled")
@@ -171,45 +160,44 @@ public class Config {
 		@Comment("Range of radio-control, positive integer")
 		public static int RadioRange = 500;
 		
-		@Comment("Energy cost (RF) per radio transmission per metre")
+		@Comment("IEnergy cost (RF) per radio transmission per metre")
 		public static int RadioCostPerMetre = 0;
 		
 		@Comment("Prevent stock from being built outside the recommended and model gauges")
 		public static boolean DesignGaugeLock = false;
 	}
 
-	public static ConfigDebug debug;
-
+	@Name("debug")
 	public static class ConfigDebug {
 		
-		@Comment({ "Speed up IR stock server tick stepping to compensate for tps lag" })
+		@Comment( "Speed up IR stock server onTick stepping to compensate for tps lag" )
 		public static boolean serverTickCompensation = true;
 
-		@Comment({ "Range between couplers to try coupling" })
+		@Comment( "Range between couplers to try coupling" )
 		public static double couplerRange = 0.3;
 
-		@Comment({ "Deep Snow on tracks" })
+		@Comment( "Deep Snow on tracks" )
 		public static boolean deepSnow = false;
 
-		@Comment({ "How fast deep snow should melt, 0 = disabled, 20 = fast, 400 = slow" })
+		@Comment( "How fast deep snow should melt, 0 = disabled, 20 = fast, 400 = slow" )
 		public static int snowMeltRate = 0;
 
 		@Comment("Keep rolling stock loaded even when it is not moving")
 		public static boolean keepStockLoaded = false;
 
-		@Comment({ "Print extra chunk loading info" })
+		@Comment( "Print extra chunk loading info" )
 		public static boolean debugLog = false;
 
-		@Comment({ "DEBUG: Buckets infinite fill/empty tanks" })
+		@Comment( "DEBUG: Buckets infinite fill/empty tanks" )
 		public static boolean debugInfiniteLiquids = false;
 
-		@Comment({"Time between open computers poll ticks for augments"})
+		@Comment("Time between open computers poll ticks for augments")
 		public static int ocPollDelayTicks = 1;
 		
-		@Comment({"DEV ONLY: How much to artifically lag the server (per world)"})
+		@Comment("DEV ONLY: How much to artifically lag the server (per internal)")
 		public static int lagServer = 0;
 
-		@Comment({"Old Narrow track placement (single width instead of 3)"})
+		@Comment("Old Narrow track placement (single width instead of 3)")
         public static boolean oldNarrowWidth = false;
     }
 

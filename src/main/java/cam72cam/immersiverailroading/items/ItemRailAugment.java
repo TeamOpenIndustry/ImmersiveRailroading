@@ -1,8 +1,7 @@
 package cam72cam.immersiverailroading.items;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
@@ -10,50 +9,40 @@ import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cam72cam.mod.world.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.CreativeTab;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 
-public class ItemRailAugment extends Item {
-	public static final String NAME = "item_augment";
-	
+public class ItemRailAugment extends ItemBase {
 	public ItemRailAugment() {
-		super();
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-        setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
-        this.setMaxStackSize(16);
+		super(ImmersiveRailroading.MODID, "item_augment", 16, ItemTabs.MAIN_TAB);
 	}
 	
 	@Override
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
-			TileRailBase te = TileRailBase.get(world, pos);
+			RailBase te = world.getBlockEntity(pos, RailBase.class);
 			if (te != null) {
 				ItemStack stack = player.getHeldItem(hand);
 				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == ItemGauge.get(stack))) {
 					Augment augment = ItemAugmentType.get(stack);
-					TileRail parent = te.getParentTile();
+					Rail parent = te.getParentTile();
 					if (parent == null) {
-						return EnumActionResult.FAIL;
+						return ClickResult.REJECTED;
 					}
 					switch(augment) {
 					case WATER_TROUGH:
-						return EnumActionResult.FAIL;
+						return ClickResult.REJECTED;
 						/*
 						if (parent.getRotationQuarter() != 0) {
 							return EnumActionResult.FAIL;
@@ -67,7 +56,7 @@ public class ItemRailAugment extends Item {
 						switch(parent.info.settings.type) {
 						case SWITCH:
 						case TURN:
-							return EnumActionResult.FAIL; 
+							return ClickResult.REJECTED;
 						default:
 							break;
 						}
@@ -75,29 +64,24 @@ public class ItemRailAugment extends Item {
 						break;
 					}
 
-					if(!world.isRemote) {
+					if(world.isServer) {
 						te.setAugment(augment);
 						if (!player.isCreative()) {
 							stack.setCount(stack.getCount()-1);;
 						}
 					}
-					return EnumActionResult.SUCCESS;
+					return ClickResult.ACCEPTED;
 				}
 			}
 		}
-		return EnumActionResult.PASS;
+		return ClickResult.PASS;
 	}
-	
+
 	@Override
-	public String getUnlocalizedName(ItemStack stack)
+	public List<ItemStack> getItemVariants(CreativeTab tab)
     {
-        return super.getUnlocalizedName() + "." + ItemAugmentType.get(stack).name();
-    }
-	
-	@Override
-	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
-    {
-        if (this.isInCreativeTab(tab))
+		List<ItemStack> items = new ArrayList<>();
+        if (tab == null || tab.equals(ItemTabs.MAIN_TAB))
         {
         	for (Augment augment : Augment.values()) {
         		if (augment == Augment.WATER_TROUGH) {
@@ -108,13 +92,20 @@ public class ItemRailAugment extends Item {
                 items.add(stack);
         	}
         }
+		return items;
     }
 	
-	@SideOnly(Side.CLIENT)
 	@Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
+	public void addInformation(ItemStack stack, List<String> tooltip)
     {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
     }
+
+    /* TODO
+	@Override
+	public String getUnlocalizedName(ItemStack stack)
+	{
+		return super.getUnlocalizedName() + "." + ItemAugmentType.getContents(stack).name();
+	}
+	*/
 }

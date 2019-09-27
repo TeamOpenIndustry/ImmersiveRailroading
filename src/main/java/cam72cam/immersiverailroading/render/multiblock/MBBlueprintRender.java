@@ -1,55 +1,66 @@
 package cam72cam.immersiverailroading.render.multiblock;
 
-import java.util.Map;
-
-import org.lwjgl.opengl.GL11;
-
+import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
 import cam72cam.immersiverailroading.multiblock.Multiblock;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import cam72cam.mod.render.GLBoolTracker;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.StandardModel;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
+
+import java.util.Map;
 
 public class MBBlueprintRender {
-	private static BlockRendererDispatcher blockRenderer;
-
-	public static void draw(World world, String name) {
-		if (blockRenderer == null) {
-			blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
-		}
-		
-		// Create render targets
-		BufferBuilder worldRenderer = new BufferBuilder(2048);
-
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-		worldRenderer.color(255, 255, 255, 255);
-		
+	public static void draw(String name) {
 		Multiblock mb = MultiblockRegistry.get(name);
 		if (mb == null) {
 			// Some wrappers (Akashic Tome) remove the metadata
 			return;
 		}
-		Map<BlockPos, IBlockState> bp = mb.blueprint();
-		for (BlockPos pos : bp.keySet()) {
-			
-			IBlockState state = bp.get(pos);
-			if (state == null || state.getBlock() == Blocks.AIR) {
-				continue;
-			}
-			
-			IBakedModel model = blockRenderer.getBlockModelShapes().getModelForState(state);
-			blockRenderer.getBlockModelRenderer().renderModel(world, model, state, pos.subtract(mb.placementPos()), worldRenderer, false);
-		}
-		
-		worldRenderer.finishDrawing();
+		float scale = 0.8f;
+		Map<Vec3i, ItemStack> bp = mb.blueprint();
+        StandardModel model = new StandardModel();
+        for (Vec3i pos : bp.keySet()) {
 
-		RailRenderUtil.draw(worldRenderer);
+            ItemStack state = bp.get(pos);
+            if (state == null || state.isEmpty()) {
+                continue;
+            }
+
+            Vec3i rPos = pos.subtract(mb.placementPos());
+            model.addItem(state, new Vec3d(rPos.x, rPos.y, rPos.z), new Vec3d(scale,scale,scale));
+        }
+        model.render();
 	}
+
+    public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d hit, float partialTicks) {
+        pos = pos.up();
+
+        GL11.glPushMatrix();
+        {
+            GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
+
+            GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
+            if (GLContext.getCapabilities().OpenGL14) {
+                GL14.glBlendColor(1, 1, 1, 0.3f);
+            }
+
+            Vec3d playerPos = player.getPosition();
+            Vec3d lastPos = player.getLastTickPos();
+            Vec3d offset = new Vec3d(pos).add(0.5, 0.5, 0.5).subtract(lastPos.add(playerPos.subtract(lastPos).scale(partialTicks)));
+            GL11.glTranslated(offset.x, offset.y, offset.z);
+
+            GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
+
+            MBBlueprintRender.draw(ItemMultiblockType.get(stack));
+
+            blend.restore();
+        }
+        GL11.glPopMatrix();
+    }
 }

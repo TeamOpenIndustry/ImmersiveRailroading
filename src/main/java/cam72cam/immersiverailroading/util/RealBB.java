@@ -4,29 +4,27 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
-
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 
 /*
  * For now this just wraps the AABB constructor
  * 
  *  In the future we can override the intersects functions for better bounding boxes
  */
-public class RealBB extends AxisAlignedBB {
-	private double front;
-	private double rear;
-	private double width;
-	private double height;
-	private float yaw;
-	private double centerX;
-	private double centerY;
-	private double centerZ;
-	private double[][] heightMap;
+public class RealBB implements IBoundingBox {
+	private final Vec3d min;
+	private final Vec3d max;
+	private final double front;
+	private final double rear;
+	private final double width;
+	private final double height;
+	private final float yaw;
+	private final double centerX;
+	private final double centerY;
+	private final double centerZ;
+	private final double[][] heightMap;
 	
 	public RealBB(double front, double rear, double width, double height, float yaw) {
 		this(front, rear, width, height, yaw, null);		
@@ -37,7 +35,6 @@ public class RealBB extends AxisAlignedBB {
 	}
 	
 	private RealBB(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ, double[][] heightMap) {
-		this(constructorParams(front, rear, width, height, yaw, centerX, centerY, centerZ));
 		this.front = front;
 		this.rear = rear;
 		this.width = width;
@@ -47,170 +44,133 @@ public class RealBB extends AxisAlignedBB {
 		this.centerY = centerY;
 		this.centerZ = centerZ;
 		this.heightMap = heightMap;
-	}
-	
-	private RealBB(double[] constructorParams) {
-		super(constructorParams[0], constructorParams[1], constructorParams[2], constructorParams[3], constructorParams[4], constructorParams[5]);
-	}
 
-	private static AxisAlignedBB newBB(Vec3d min, Vec3d max) {
-		//Why the fuck is this ClientOnly?
-		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
-	}
-
-	private static double[] constructorParams(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ) {
-		Vec3d frontPos = VecUtil.fromWrongYaw(front, yaw);
+        Vec3d frontPos = VecUtil.fromWrongYaw(front, yaw);
 		Vec3d rearPos = VecUtil.fromWrongYaw(rear, yaw);
 
 		// width
 		Vec3d offsetRight = VecUtil.fromWrongYaw(width / 2, yaw + 90);
 		Vec3d offsetLeft = VecUtil.fromWrongYaw(width / 2, yaw - 90);
-		AxisAlignedBB rightBox = newBB(frontPos.add(offsetRight), rearPos.add(offsetRight));
-		AxisAlignedBB leftBox = newBB(frontPos.add(offsetLeft), rearPos.add(offsetLeft));
-
-		AxisAlignedBB newthis = rightBox.union(leftBox).offset(centerX, centerY, centerZ);
-		return new double[] { newthis.maxX, newthis.maxY + height, newthis.maxZ, newthis.minX, newthis.minY, newthis.minZ };
+		Vec3d v1 = frontPos.add(offsetRight);
+		Vec3d v2 = rearPos.add(offsetRight);
+		Vec3d v3 = frontPos.add(offsetLeft);
+		Vec3d v4 = rearPos.add(offsetLeft);
+		this.min = v1.min(v2.min(v3).min(v4)).add(centerX, centerY, centerZ);
+		this.max = v1.max(v2.max(v3).max(v4)).add(0, height, 0).add(centerX, centerY, centerZ);
 	}
-	
+
+	@Override
+	public Vec3d min() {
+		return min;
+	}
+
+	@Override
+	public Vec3d max() {
+		return max;
+	}
+
 	@Override
 	public RealBB clone() {
 		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ, heightMap);
 	}
-	public RealBB cloneRaw() {
-		RealBB clone = new RealBB(new double[] {
-				super.minX, super.minY, super.minZ, super.maxX, super.maxY, super.maxZ
-		});
-		clone.front = front;
-		clone.rear = rear;
-		clone.width = width;
-		clone.height = height;
-		clone.yaw = yaw;
-		clone.centerX = centerX;
-		clone.centerY = centerY;
-		clone.centerZ = centerZ;
-		clone.heightMap = heightMap;
-		return clone;
-	}
 	@Override
-	public AxisAlignedBB setMaxY(double y2) {
-		return this.cloneRaw();
-	}
-	@Override
-	public AxisAlignedBB contract(double x, double y, double z) {
-		RealBB expanded = this.cloneRaw();
-		
-		if (x > 0) {
-			expanded.front -= x;
+	public RealBB contract(Vec3d val) {
+		double front = this.front;
+		double rear = this.rear;
+		double width = this.width;
+		double height = this.height;
+		double centerY = this.centerY;
+		if (val.x > 0) {
+			front -= val.x;
 		} else {
-			expanded.rear -= x;
+			rear -= val.x;
 		}
 		
-		if (y > 0) {
-			expanded.height -= y;
+		if (val.y > 0) {
+			height -= val.y;
 		} else {
-			expanded.centerY -= y;
+			centerY -= val.y;
 		}
 		
-		expanded.width -= z;
+		width -= val.z;
 		
-		return expanded.clone();
+		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ, heightMap);
 	}
 	@Override
-	public AxisAlignedBB expand(double x, double y, double z) {
-		RealBB expanded = this.cloneRaw();
-		
-		if (x > 0) {
-			expanded.front += x;
+	public RealBB expand(Vec3d val) {
+		double front = this.front;
+		double rear = this.rear;
+		double width = this.width;
+		double height = this.height;
+		double centerY = this.centerY;
+		if (val.x > 0) {
+			front += val.x;
 		} else {
-			expanded.rear += x;
+			rear += val.x;
 		}
-		
-		if (y > 0) {
-			expanded.height += y;
+
+		if (val.y > 0) {
+			height += val.y;
 		} else {
-			expanded.centerY += y;
+			centerY += val.y;
 		}
-		
-		expanded.width += z;
-		
-		return expanded.clone();
+
+		width += val.z;
+
+		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ, heightMap);
 	}
 	@Override
-	public AxisAlignedBB grow(double x, double y, double z) {
-		RealBB growed = this.cloneRaw();
-		growed.front += x;
-		growed.rear += x;
-		growed.height += y;
-		growed.centerY += y;
-		growed.width += z + z;
-		return growed.clone();
+	public RealBB grow(Vec3d val) {
+		return new RealBB(
+				front+val.x, rear+val.x,
+				width+val.z + val.z, height+val.y,
+				yaw,
+				centerX, centerY+val.y, centerZ,
+				heightMap);
 	}
+
 	@Override
-	public AxisAlignedBB intersect(AxisAlignedBB p_191500_1_) {
-		return this.cloneRaw();
-	}
-	@Override
-	public AxisAlignedBB union(AxisAlignedBB other) {
-		return this.cloneRaw();
+	public RealBB offset(Vec3d val) {
+		return new RealBB(front, rear, width, height, yaw, centerX+val.x, centerY+val.y, centerZ+val.z, heightMap);
 	}
 	
 	@Override
-	public AxisAlignedBB offset(BlockPos pos) {
-		return this.offset(pos.getX(), pos.getY(), pos.getZ());
-	}
-	@Override
-	public AxisAlignedBB offset(Vec3d vec) {
-		return this.offset(vec.x, vec.y, vec.z);
-	}
-	@Override
-	public AxisAlignedBB offset(double x, double y, double z) {
-		RealBB offsetted = this.cloneRaw();
-		offsetted.centerX += x;
-		offsetted.centerY += y;
-		offsetted.centerZ += z;
-		return offsetted.clone();
-	}
-	
-	@Override
-	public double calculateXOffset(AxisAlignedBB other, double offsetX) {
+	public double calculateXOffset(IBoundingBox other, double offsetX) {
 		return 0;
 	}
 	@Override
-	public double calculateYOffset(AxisAlignedBB other, double offsetY) {
+    public double calculateYOffset(IBoundingBox other, double offsetY) {
 		double hack = 0.04;
-		other = other.grow(hack, 0, hack);
-		Double intersect = intersectsAt(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ, true).getRight();
-		if (other.minY < intersect) {
-			return Math.min(0.1, intersect - other.minY);
+		other = other.grow(new Vec3d(hack, 0, hack));
+		Double intersect = intersectsAt(other.min(), other.max(), true).getRight();
+		double minY = other.min().y;
+		if (minY < intersect) {
+			return Math.min(0.1, intersect - minY);
 		} else {
 			return 0;
 		}
 	}
 	@Override
-	public double calculateZOffset(AxisAlignedBB other, double offsetZ) {
+	public double calculateZOffset(IBoundingBox other, double offsetZ) {
 		return 0;
 	}
 	
-	@Override
-	public boolean intersects(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-		return intersectsAt(minX, minY, minZ, maxX, maxY, maxZ, true).getLeft();
-	}
-	public Pair<Boolean, Double> intersectsAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, boolean useHeightmap) {
-		if (!super.intersects(minX, minY, minZ, maxX, maxY, maxZ)) {
-			return Pair.of(false, minY);
+	public Pair<Boolean, Double> intersectsAt(Vec3d min, Vec3d max, boolean useHeightmap) {
+		if (!(this.min.x < max.x && this.max.x > min.x && this.min.y < max.y && this.max.y > min.y && this.min.z < max.z && this.max.z > min.z)) {
+			return Pair.of(false, min.y);
 		}
 		
 		double actualYMin = this.centerY;
 		double actualYMax = this.centerY + this.height;
-		if (! (actualYMin < maxY && actualYMax > minY)) {
-			return Pair.of(false, minY);
+		if (! (actualYMin < max.y && actualYMax > min.y)) {
+			return Pair.of(false, min.y);
 		}
 		
-		Rectangle2D otherRect = new Rectangle2D.Double(minX, minZ, 0, 0);
-		if (minX == maxX && minZ == maxZ) {
-			otherRect.add(maxX+0.2, maxZ + 0.2);
+		Rectangle2D otherRect = new Rectangle2D.Double(min.x, min.z, 0, 0);
+		if (min.x == max.x && min.z == max.z) {
+			otherRect.add(max.x+0.2, max.z + 0.2);
 		} else {
-			otherRect.add(maxX, maxZ);
+			otherRect.add(max.x, max.z);
 		}
 		
 		Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width/2, 0, 0);
@@ -228,7 +188,7 @@ public class RealBB extends AxisAlignedBB {
 		otherArea.transform(otherTransform);
 
 		if (!otherArea.intersects(myArea.getBounds2D())) {
-			return Pair.of(false, minY);
+			return Pair.of(false, min.y);
 		}
 		if (this.heightMap != null && useHeightmap) {
 			int xRes = this.heightMap.length-1;
@@ -263,38 +223,21 @@ public class RealBB extends AxisAlignedBB {
 				}
 			}
 
-			return Pair.of(actualYMin < maxY && actualYMax > minY, actualYMax);
+			return Pair.of(actualYMin < max.y && actualYMax > min.y, actualYMax);
 		}
 		
-		return Pair.of(true, this.maxY);
-	}
-	
-	@Override
-	public boolean contains(Vec3d vec) {
-		return this.intersectsAt(vec.x, vec.y, vec.z, vec.x, vec.y, vec.z, false).getLeft();
+		return Pair.of(true, this.max.y);
 	}
 	@Override
-	public RayTraceResult calculateIntercept(Vec3d vecA, Vec3d vecB) {
-		// This does NOT set enumfacing.  The places where this code (entity) is used don't use that value as of 1.12.
-		int steps = 10;
-		double xDist = vecB.x - vecA.x;
-		double yDist = vecB.y - vecA.y;
-		double zDist = vecB.z - vecA.z;
-		double xDelta = xDist / steps;
-		double yDelta = yDist / steps;
-		double zDelta = zDist / steps;
-		for (int step = 0; step < steps; step ++) {
-			Vec3d stepPos = new Vec3d(vecA.x + xDelta * step, vecA.y + yDelta * step, vecA.z + zDelta * step);
-			if (this.contains(stepPos)) {
-				return new RayTraceResult(stepPos, EnumFacing.UP); 
-			}
-		}
-		return null;
+	public boolean intersects(Vec3d min, Vec3d max) {
+		return intersectsAt(min, max, true).getLeft();
 	}
 
-	public AxisAlignedBB withHeightMap(double[][] heightMap) {
-		RealBB bb = this.cloneRaw();
-		bb.heightMap = heightMap;
-		return bb;
+	@Override
+	public boolean contains(Vec3d vec) {
+		return this.intersectsAt(vec, vec, false).getLeft();
+	}
+	public RealBB withHeightMap(double[][] heightMap) {
+		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ, heightMap);
 	}
 }

@@ -2,15 +2,15 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 
 public class BuilderStraight extends BuilderCubicCurve {
-	public BuilderStraight(RailInfo info, BlockPos pos) {
+	public BuilderStraight(RailInfo info, Vec3i pos) {
 		this(info, pos, false);
 	}
 
-	public BuilderStraight(RailInfo info, BlockPos pos, boolean endOfTrack) {
+	public BuilderStraight(RailInfo info, Vec3i pos, boolean endOfTrack) {
 		super(info, pos, endOfTrack);
 	}
 

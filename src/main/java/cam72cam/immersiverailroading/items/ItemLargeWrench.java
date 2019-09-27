@@ -1,7 +1,5 @@
 package cam72cam.immersiverailroading.items;
 
-import java.util.HashSet;
-
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
@@ -10,62 +8,57 @@ import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import net.minecraft.block.Block;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTool;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-//TODO buildcraft.api.tools.IToolWrench
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import cam72cam.mod.item.*;
+import cam72cam.mod.world.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 
-public class ItemLargeWrench extends ItemTool {
-	public static final String NAME = "item_large_wrench";
-	
+public class ItemLargeWrench extends ItemBase {
 	public ItemLargeWrench() {
-		super(8, -3.2F, ToolMaterial.IRON, new HashSet<Block>());
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_large_wrench", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
+		Recipes.register(this, 3,
+				null, steel, null, steel, steel, steel, steel, null, steel);
 	}
+
 	@Override
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
-			TileRailBase te = TileRailBase.get(world, pos);
+			RailBase te = world.getBlockEntity(pos, RailBase.class);
 			if (te != null) {
 				Augment augment = te.getAugment();
 				if (augment != null) {
 					te.setAugment(null);
 
-					if(!world.isRemote) {
+					if(world.isServer) {
 						ItemStack stack = new ItemStack(IRItems.ITEM_AUGMENT, 1);
 						ItemAugmentType.set(stack, augment);
 						ItemGauge.set(stack, Gauge.from(te.getTrackGauge()));
-						world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), stack));
+						world.dropItem(stack, pos);
 					}
-					return EnumActionResult.SUCCESS;
+					return ClickResult.ACCEPTED;
 				}
-				TileRail parent = te.getParentTile();
-				if (!world.isRemote) {
+				Rail parent = te.getParentTile();
+				if (world.isServer) {
 					if (parent != null && parent.info.settings.type == TrackItems.TURNTABLE) {
-						parent.nextTablePos(player.isSneaking());
+						parent.nextTablePos(player.isCrouching());
 					}
 				}
 			}
 		} else {
 			for (String key : MultiblockRegistry.keys()) {
 				if (MultiblockRegistry.get(key).tryCreate(world, pos)) {
-					return EnumActionResult.SUCCESS;
+					return ClickResult.ACCEPTED;
 				}
 			}
 		}
-		return EnumActionResult.PASS;
+		return ClickResult.PASS;
 	}
 }

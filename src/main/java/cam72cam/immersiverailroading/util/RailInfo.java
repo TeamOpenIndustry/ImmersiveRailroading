@@ -9,12 +9,11 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.track.*;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import cam72cam.mod.world.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.TagCompound;
 
 import java.util.*;
 import java.util.function.Function;
@@ -53,6 +52,7 @@ public class RailInfo {
 				this.settings.railBed,
 				this.settings.gauge,
 				this.settings.track,
+				this.settings.isGradeCrossing,
 				this.switchState,
 				this.switchForced,
 				this.tablePos,
@@ -78,23 +78,23 @@ public class RailInfo {
 		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
-	public RailInfo(World world, BlockPos pos, NBTTagCompound nbt) {
+	public RailInfo(World world, Vec3i pos, TagCompound nbt) {
 		this(
 				world,
-				new RailSettings(nbt.getCompoundTag("settings")),
-				new PlacementInfo(nbt.getCompoundTag("placement"), pos),
-				new PlacementInfo(nbt.getCompoundTag("custom"), pos),
+				new RailSettings(nbt.get("settings")),
+				new PlacementInfo(nbt.get("placement"), pos),
+				new PlacementInfo(nbt.get("custom"), pos),
 				SwitchState.values()[nbt.getInteger("switchState")],
 				SwitchState.values()[nbt.getInteger("switchForced")],
 				nbt.getDouble("tablePos")
 		);
 	}
 
-	public NBTTagCompound toNBT(BlockPos pos) {
-		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setTag("settings", settings.toNBT());
-		nbt.setTag("placement", placementInfo.toNBT(pos));
-		nbt.setTag("custom", customInfo.toNBT(pos));
+	public TagCompound toNBT(Vec3i pos) {
+		TagCompound nbt = new TagCompound();
+		nbt.set("settings", settings.toNBT());
+		nbt.set("placement", placementInfo.toNBT(pos));
+		nbt.set("custom", customInfo.toNBT(pos));
 		nbt.setInteger("switchState", switchState.ordinal());
 		nbt.setInteger("switchForced", switchForced.ordinal());
 		nbt.setDouble("tablePos", tablePos);
@@ -116,15 +116,15 @@ public class RailInfo {
 		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
 	}
 
-	public Map<BlockPos, BuilderBase> builders = new HashMap<>();
-	public BuilderBase getBuilder(BlockPos pos) {
+	public Map<Vec3i, BuilderBase> builders = new HashMap<>();
+	public BuilderBase getBuilder(Vec3i pos) {
 		if (builders.containsKey(pos)) {
 			return builders.get(pos);
 		}
 		builders.put(pos, constructBuilder(pos));
 		return builders.get(pos);
 	}
-	private BuilderBase constructBuilder(BlockPos pos) {
+	private BuilderBase constructBuilder(Vec3i pos) {
 		switch (settings.type) {
 		case STRAIGHT:
 			return new BuilderStraight(this, pos);
@@ -145,7 +145,7 @@ public class RailInfo {
 	}
 
 	public BuilderBase getBuilder() {
-		return getBuilder(BlockPos.ORIGIN);
+		return getBuilder(Vec3i.ZERO);
 	}
 
 	private class MaterialManager {
@@ -153,19 +153,20 @@ public class RailInfo {
 		private final int count;
 		private final ItemStack[] examples;
 
-		MaterialManager(int count, Function<ItemStack, Boolean> material, ItemStack ...examples) {
+		MaterialManager(boolean isDrop, int count, Function<ItemStack, Boolean> material, ItemStack... examples) {
 			this.material = material;
 			this.count = count;
 			this.examples = examples;
 		}
 
 		public MaterialManager(int count, Function<ItemStack, Boolean> material, List<ItemStack> examples) {
-			this(count, material, examples.toArray(new ItemStack[0]));
+			this(true, count, material, examples.toArray(new ItemStack[0]));
 		}
 
-		private boolean checkMaterials(EntityPlayer player) {
+		private boolean checkMaterials(Player player) {
 			int found = 0;
-			for (ItemStack stack : player.inventory.mainInventory) {
+			for (int i = 0; i < player.getInventory().getSlotCount(); i++) {
+				ItemStack stack = player.getInventory().get(i);
 				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					found += stack.getCount();
 				}
@@ -182,10 +183,11 @@ public class RailInfo {
 			return true;
 		}
 
-		private List<ItemStack> useMaterials(EntityPlayer player) {
+		private List<ItemStack> useMaterials(Player player) {
 			List<ItemStack> drops = new ArrayList<>();
 			int required = this.count;
-			for (ItemStack stack : player.inventory.mainInventory) {
+			for (int i = 0; i < player.getInventory().getSlotCount(); i++) {
+				ItemStack stack = player.getInventory().get(i);
 				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
 					if (required > stack.getCount()) {
 						required -= stack.getCount();
@@ -206,18 +208,18 @@ public class RailInfo {
 		}
 	}
 
-	public boolean build(EntityPlayer player) {
-		BuilderBase builder = getBuilder(new BlockPos(placementInfo.placementPosition));
+	public boolean build(Player player) {
+		BuilderBase builder = getBuilder(new Vec3i(placementInfo.placementPosition));
 
 		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks) {
-			if (!world.isRemote) {
+			if (world.isServer) {
 				builder.clearArea();
 			}
 		}
 
 
 		if (builder.canBuild()) {
-			if (!world.isRemote) {
+			if (world.isServer) {
 				if (player.isCreative()) {
 					builder.build();
 					return true;
@@ -229,11 +231,11 @@ public class RailInfo {
 
 				List<MaterialManager> materials = new ArrayList<>();
 
-				if (settings.railBed.getItem() != Items.AIR) {
-					materials.add(new MaterialManager(builder.costBed(), settings.railBed::isItemEqual, settings.railBed));
+				if (!settings.railBed.isEmpty()) {
+					materials.add(new MaterialManager(true, builder.costBed(), settings.railBed::equals, settings.railBed));
 				}
-				if (settings.railBedFill.getItem() != Items.AIR) {
-					materials.add(new MaterialManager(builder.costFill(), settings.railBedFill::isItemEqual, settings.railBedFill));
+				if (settings.railBedFill.isEmpty()) {
+					materials.add(new MaterialManager(false, builder.costFill(), settings.railBedFill::equals, settings.railBedFill));
 				}
 
 				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);

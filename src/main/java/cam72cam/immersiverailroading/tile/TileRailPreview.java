@@ -1,50 +1,31 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
-import cam72cam.immersiverailroading.proxy.ChunkManager;
-import cam72cam.immersiverailroading.track.BuilderBase;
-import cam72cam.immersiverailroading.track.BuilderCubicCurve;
-import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cam72cam.mod.block.BlockEntityTickable;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.util.TagCompound;
 
-public class TileRailPreview extends SyncdTileEntity implements ITickable {
+public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
 	private RailInfo info;
-
-	public static TileRailPreview get(IBlockAccess world, BlockPos pos) {
-		TileEntity te = world.getTileEntity(pos);
-		return te instanceof TileRailPreview ? (TileRailPreview) te : null;
-	}
 
 	private ItemStack item;
 	private PlacementInfo placementInfo;
 	private PlacementInfo customInfo;
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-	public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox() {
-		return INFINITE_EXTENT_AABB;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public double getMaxRenderDistanceSquared()
-	{
-		return Double.MAX_VALUE;
-	}
 
 	public ItemStack getItem() {
 		return this.item;
@@ -91,10 +72,8 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		
-		item = new ItemStack(nbt.getCompoundTag("item"));
+	public void load(TagCompound nbt) {
+		item = new ItemStack(nbt.get("item"));
 		//TODO nbt legacy
 		/*
 		yawHead = nbt.getFloat("yawHead");
@@ -103,25 +82,75 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 		hitZ = nbt.getFloat("hitZ");
 		 */
 		
-		placementInfo = new PlacementInfo(nbt.getCompoundTag("placementInfo"));
+		placementInfo = new PlacementInfo(nbt.get("placementInfo"));
 		if (nbt.hasKey("customInfo")) {
-			customInfo = new PlacementInfo(nbt.getCompoundTag("customInfo"));
+			customInfo = new PlacementInfo(nbt.get("customInfo"));
 		}
 		info = new RailInfo(world, item, placementInfo, customInfo);
 	}
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt.setTag("item", item.serializeNBT());
-		nbt.setTag("placementInfo", placementInfo.toNBT());
+	public void save(TagCompound nbt) {
+		nbt.set("item", item.toTag());
+		nbt.set("placementInfo", placementInfo.toNBT());
 		if (customInfo != null) {
-			nbt.setTag("customInfo", customInfo.toNBT());
+			nbt.set("customInfo", customInfo.toNBT());
 		}
-		
-		return super.writeToNBT(nbt);
 	}
-	
+
+	@Override
+	public void writeUpdate(TagCompound nbt) {
+
+	}
+
+	@Override
+	public void readUpdate(TagCompound nbt) {
+
+	}
+
+	@Override
+	public void onBreak() {
+
+	}
+
+	@Override
+	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
+		if (player.isCrouching()) {
+			Vec3i pos = this.pos;
+			if (world.isServer) {
+				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
+						pos = pos.down();
+					}
+				}
+				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), pos, hit));
+			}
+			return false;
+		} else {
+			ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.RAIL_PREVIEW);
+			return !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE);
+		}
+	}
+
+	@Override
+	public ItemStack onPick() {
+		if (item == null) {
+			return ItemStack.EMPTY;
+		}
+		return item;
+	}
+
+	@Override
+	public double getHeight() {
+		return 0.125;
+	}
+
+	@Override
+	public void onNeighborChange(Vec3i neighbor) {
+
+	}
+
 	public RailInfo getRailRenderInfo() {
-		if (hasWorld() && (info == null || info.world == null)) {
+		if (world != null && (info == null || info.world == null)) {
 			info = new RailInfo(world, item, placementInfo, customInfo);
 		}
 		return info;
@@ -131,7 +160,7 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 		super.markDirty();
         info = new RailInfo(world, item, placementInfo, customInfo);
         if (isMulti()) {
-			ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
+			new PreviewRenderPacket(this).sendToAll();
 		}
 	}
 
@@ -144,13 +173,25 @@ public class TileRailPreview extends SyncdTileEntity implements ITickable {
 
 	@Override
 	public void update() {
-		if (!world.isRemote && isMulti()) {
-			ChunkManager.flagEntityPos(world, pos);
+		if (world.isServer && isMulti()) {
+			world.keepLoaded(pos);
 
 			if (this.ticksAlive % 20 == 0) {
-				ImmersiveRailroading.net.sendToAll(new PreviewRenderPacket(this));
+				new PreviewRenderPacket(this).sendToAll();
 			}
 			this.ticksAlive ++;
 		}
+	}
+
+	@Override
+	public boolean tryBreak(Player entityPlayer) {
+		if (entityPlayer.isCrouching()) {
+			if (this.getRailRenderInfo().build(entityPlayer)) {
+				new PreviewRenderPacket(this.world, this.pos).sendToAll();
+			}
+			return false;
+		}
+		new PreviewRenderPacket(this.world, this.pos).sendToAll();
+		return true;
 	}
 }

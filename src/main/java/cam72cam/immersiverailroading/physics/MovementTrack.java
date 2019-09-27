@@ -2,21 +2,17 @@ package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import trackapi.lib.ITrack;
-import trackapi.lib.Util;
+import cam72cam.mod.util.ITrack;
+import cam72cam.mod.world.World;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MovementTrack {
@@ -40,12 +36,12 @@ public class MovementTrack {
 		
 		for (Vec3d pos : positions) {
 			for (double height : heightSkew) {
-				ITrack te = Util.getTileEntity(world, pos.addVector(0, height + (currentPosition.y%1), 0), true);
+				ITrack te = ITrack.get(world, pos.add(0, height + (currentPosition.y%1), 0), true);
 				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
 					return te;
 				}
 				// HACK for cross gauge
-				TileRailBase rail = TileRailBase.get(world, new BlockPos(pos.addVector(0, height + (currentPosition.y%1), 0)));
+				RailBase rail = world.getBlockEntity(new Vec3i(pos).add(new Vec3i(0, (int)(height + (currentPosition.y%1)), 0)), RailBase.class);
 				if (rail != null && rail.getParentReplaced() != null) {
 					return rail;
 				}
@@ -55,7 +51,7 @@ public class MovementTrack {
 	}
 	
 
-	public static Vec3d nextPosition(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
+	public static Vec3d nextPosition(World world, Vec3d currentPosition, Rail rail, float trainYaw, double distanceMeters) {
 		double maxDelta = 0.5;
 		if (distanceMeters > maxDelta) {
 			double dist = 0;
@@ -67,7 +63,7 @@ public class MovementTrack {
 				}
 				Vec3d pastPos = currentPosition;
 				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(maxDelta, trainYaw));
-				trainYaw = VecUtil.toWrongYaw(pastPos.subtractReverse(currentPosition));
+				trainYaw = VecUtil.toWrongYaw(currentPosition.subtract(pastPos));
 			}
 
 			ITrack te = findTrack(world, currentPosition, trainYaw, rail.getTrackGauge());
@@ -80,11 +76,11 @@ public class MovementTrack {
 		}
 	}
 
-	public static Vec3d nextPositionInner(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
+	public static Vec3d nextPositionInner(World world, Vec3d currentPosition, Rail rail, float trainYaw, double distanceMeters) {
 		Vec3d delta = VecUtil.fromWrongYaw(distanceMeters, trainYaw);
 		
 		if (rail == null) {
-			if (!world.isRemote) {
+			if (world.isServer) {
 				return null; // OFF TRACK
 			} else {
 				return currentPosition.add(delta);
@@ -92,18 +88,18 @@ public class MovementTrack {
 		}
 
 		double railHeight = rail.info.getTrackHeight();
-		double distance = delta.lengthVector();
+		double distance = delta.length();
 		double heightOffset = railHeight * rail.info.settings.gauge.scale();
 
 		if (rail.info.settings.type == TrackItems.CROSSING) {
-			delta = VecUtil.fromWrongYaw(distance, EnumFacing.fromAngle(trainYaw).getHorizontalAngle());
+			delta = VecUtil.fromWrongYaw(distance, Facing.fromAngle(trainYaw).getHorizontalAngle());
 			return currentPosition.add(delta);
 		} else if (rail.info.settings.type == TrackItems.TURNTABLE) {
 			double tablePos = rail.getParentTile().info.tablePos;
 			
 			currentPosition = currentPosition.add(delta);
 			
-			Vec3d center = new Vec3d(rail.getParentTile().getPos()).addVector(0.5, 1 + heightOffset, 0.5);
+			Vec3d center = new Vec3d(rail.getParentTile().pos).add(0.5, 1 + heightOffset, 0.5);
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			
@@ -130,7 +126,7 @@ public class MovementTrack {
 			
 			Vec3d estimatedPosition = currentPosition.add(delta);
 			
-			Vec3d closePos = center.add(close).addVector(0, heightOffset, 0);
+			Vec3d closePos = center.add(close).add(0, heightOffset, 0);
 			double distToClose = closePos.distanceTo(estimatedPosition);
 
 			Vec3d curveDelta = new Vec3d(distToClose, 0, 0);
