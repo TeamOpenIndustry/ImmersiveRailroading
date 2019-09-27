@@ -11,8 +11,8 @@ rm -rf ./ImmersiveRailroadingIntegration
 
 mkdir -p run
 
-git clone --branch $branch git@github.com:cam72cam/ImmersiveRailroadingIntegration.git
-git clone --branch $branch git@github.com:cam72cam/ModCoreMod.git ImmersiveRailroadingMod
+git clone --branch $branch git@github.com:TeamOpenIndustry/ImmersiveRailroadingIntegration.git
+git clone --branch $branch git@github.com:TeamOpenIndustry/ModCoreMod.git ImmersiveRailroadingMod
 
 ln -s $PWD/src/main/java/cam72cam/immersiverailroading $PWD/ImmersiveRailroadingMod/src/main/java/cam72cam/immersiverailroading
 ln -s $PWD/ImmersiveRailroadingIntegration/src/main/java/cam72cam/immersiverailroading/thirdparty $PWD/ImmersiveRailroadingMod/src/main/java/cam72cam/immersiverailroading/thirdparty
