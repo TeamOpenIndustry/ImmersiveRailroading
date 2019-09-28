@@ -6,9 +6,15 @@ if(Test-Path -Path $PWD/src/main/java/cam72cam/immersiverailroading/thirdparty )
 		Remove-Item $PWD/src/main/java/cam72cam/immersiverailroading/thirdparty
 }
 
-Remove-Item -Recurse -Force ./TrackAPI
-Remove-Item -Recurse -Force ./UniversalModCore
-Remove-Item -Recurse -Force ./ImmersiveRailroadingIntegration
+if(Test-Path -Path TrackAPI ){
+		Remove-Item -Recurse -Force ./TrackAPI
+}
+if(Test-Path -Path UniversalModCore ){
+		Remove-Item -Recurse -Force ./UniversalModCore
+}
+if(Test-Path -Path ImmersiveRailroadingIntegration ){
+		Remove-Item -Recurse -Force ./ImmersiveRailroadingIntegration
+}
 
 git clone --branch $branch git@github.com:TeamOpenIndustry/TrackAPI.git
 git clone --branch $branch git@github.com:TeamOpenIndustry/UniversalModCore.git
