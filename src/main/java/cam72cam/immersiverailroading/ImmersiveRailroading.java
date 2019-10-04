@@ -28,7 +28,6 @@ import cam72cam.mod.ModCore;
 import cam72cam.mod.ModEvent;
 import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.entity.EntityRegistry;
-import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.math.Vec3d;
@@ -43,7 +42,6 @@ import org.lwjgl.opengl.GL11;
 import paulscode.sound.SoundSystemConfig;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.lwjgl.input.Keyboard.*;
@@ -92,6 +90,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 				Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
+				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
 
 				Command.register(new IRCommand());
 				break;
@@ -168,11 +167,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					SoundSystemConfig.setNumberNormalChannels(Math.max(SoundSystemConfig.getNumberNormalChannels(), 300));
 				}
 
-				Function<KeyTypes, Consumer<Player>> onKeyPress = type -> player -> {
-					if (player.getWorld().isServer && player.getRiding() instanceof EntityRollingStock) {
-						player.getRiding().as(EntityRollingStock.class).handleKeyPress(player, type);
-					}
-				};
+				Function<KeyTypes, Runnable> onKeyPress = type -> () -> new KeyPressPacket(type).sendToServer();
 				Keyboard.registerKey("ir_keys.increase_throttle", KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
 				Keyboard.registerKey("ir_keys.zero_throttle", KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
 				Keyboard.registerKey("ir_keys.decrease_throttle", KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
