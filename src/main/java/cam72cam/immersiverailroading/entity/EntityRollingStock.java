@@ -35,12 +35,12 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 		this.texture = texture;
 	}
 
-	/* TODO?
+	
 	@Override
 	public String getName() {
 		return this.getDefinition().name();
 	}
-	*/
+	
 
 	public String tryJoinWorld() {
 		if (DefinitionManager.getDefinition(defID) == null) {
