@@ -39,12 +39,9 @@ import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.Command;
 import org.lwjgl.opengl.GL11;
-import paulscode.sound.SoundSystemConfig;
 
 import java.io.IOException;
 import java.util.function.Function;
-
-import static org.lwjgl.input.Keyboard.*;
 
 public class ImmersiveRailroading extends ModCore.Mod {
     public static final String MODID = "immersiverailroading";
@@ -91,6 +88,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 				Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
 				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
+				IRBlocks.register();
+				IRItems.register();
 
 				Command.register(new IRCommand());
 				break;
@@ -105,9 +104,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				} catch (IOException e) {
 					throw new RuntimeException("Unable to load IR definitions", e);
 				}
-
-				IRBlocks.register();
-				IRItems.register();
 
 				CompatLoader.init();
 				break;
@@ -161,23 +157,24 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRenderer.register(CarTank.class, stockRender);
 				EntityRenderer.register(Tender.class, stockRender);
 				EntityRenderer.register(HandCar.class, stockRender);
+
+
+				Function<KeyTypes, Runnable> onKeyPress = type -> () -> new KeyPressPacket(type).sendToServer();
+				Keyboard.registerKey("ir_keys.increase_throttle", 320+8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
+				Keyboard.registerKey("ir_keys.zero_throttle", 320+5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
+				Keyboard.registerKey("ir_keys.decrease_throttle", 320+2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
+				Keyboard.registerKey("ir_keys.increase_brake", 320+7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_UP));
+				Keyboard.registerKey("ir_keys.zero_brake", 320+4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_ZERO));
+				Keyboard.registerKey("ir_keys.decrease_brake", 320+1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_DOWN));
+				Keyboard.registerKey("ir_keys.horn", 335, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.HORN));
+				Keyboard.registerKey("ir_keys.dead_mans_switch", 336, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.DEAD_MANS_SWITCH));
+				Keyboard.registerKey("ir_keys.start_stop_engine", 334, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.START_STOP_ENGINE));
+				Keyboard.registerKey("ir_keys.bell", 333, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.BELL));
 				break;
 			case SETUP:
 				if (ConfigSound.overrideSoundChannels) {
-					SoundSystemConfig.setNumberNormalChannels(Math.max(SoundSystemConfig.getNumberNormalChannels(), 300));
+					Audio.setSoundChannels(300);
 				}
-
-				Function<KeyTypes, Runnable> onKeyPress = type -> () -> new KeyPressPacket(type).sendToServer();
-				Keyboard.registerKey("ir_keys.increase_throttle", KEY_NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
-				Keyboard.registerKey("ir_keys.zero_throttle", KEY_NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
-				Keyboard.registerKey("ir_keys.decrease_throttle", KEY_NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
-				Keyboard.registerKey("ir_keys.increase_brake", KEY_NUMPAD7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_UP));
-				Keyboard.registerKey("ir_keys.zero_brake", KEY_NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_ZERO));
-				Keyboard.registerKey("ir_keys.decrease_brake", KEY_NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_DOWN));
-				Keyboard.registerKey("ir_keys.horn", KEY_NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.HORN));
-				Keyboard.registerKey("ir_keys.dead_mans_switch", KEY_NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.DEAD_MANS_SWITCH));
-				Keyboard.registerKey("ir_keys.start_stop_engine", KEY_ADD, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.START_STOP_ENGINE));
-				Keyboard.registerKey("ir_keys.bell", KEY_SUBTRACT, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.BELL));
 
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
