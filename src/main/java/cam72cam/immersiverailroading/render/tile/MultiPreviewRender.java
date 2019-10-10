@@ -5,16 +5,14 @@ import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
-import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.GLTransparencyHelper;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
 
 public class MultiPreviewRender {
     private static ExpireableList<Pair<World, Vec3i>, TileRailPreview> previews = new ExpireableList<>();
@@ -24,11 +22,8 @@ public class MultiPreviewRender {
     }
 
     private static void render(float partialTicks) {
-        GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
-        GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
-        if (GLContext.getCapabilities().OpenGL14) {
-            GL14.glBlendColor(1, 1, 1, 0.7f);
-        }
+        GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.7f);
+
         for (TileRailPreview preview : previews.values()) {
             for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.pos)).getSubBuilders()) {
                 RailInfo info = builder.info;
@@ -47,10 +42,7 @@ public class MultiPreviewRender {
             }
         }
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        if (GLContext.getCapabilities().OpenGL14) {
-            GL14.glBlendColor(1, 1, 1, 1f);
-        }
-        blend.restore();
+        transparency.restore();
     }
 
     public static void add(TileRailPreview preview) {

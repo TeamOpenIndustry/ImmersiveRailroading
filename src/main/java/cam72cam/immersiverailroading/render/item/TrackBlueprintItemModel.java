@@ -14,12 +14,11 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.GLTransparencyHelper;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
 
 public class TrackBlueprintItemModel {
 	public static StandardModel getModel(ItemStack stack, World world) {
@@ -92,12 +91,7 @@ public class TrackBlueprintItemModel {
 
 		GL11.glPushMatrix();
 		{
-			GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
-
-			GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
-			if (GLContext.getCapabilities().OpenGL14) {
-				GL14.glBlendColor(1, 1, 1, 0.5f);
-			}
+			GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.5f);
 
 			Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
 			Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
@@ -105,7 +99,7 @@ public class TrackBlueprintItemModel {
 
 			RailRenderUtil.render(info, true);
 
-			blend.restore();
+			transparency.restore();
 		}
 		GL11.glPopMatrix();
 

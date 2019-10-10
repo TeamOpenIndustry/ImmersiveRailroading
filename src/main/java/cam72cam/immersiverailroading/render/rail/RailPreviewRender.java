@@ -7,10 +7,9 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.render.GLTransparencyHelper;
 import cam72cam.mod.render.StandardModel;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GLContext;
 
 public class RailPreviewRender {
     public static StandardModel render(TileRailPreview te) {
@@ -22,11 +21,8 @@ public class RailPreviewRender {
 		StandardModel model = new StandardModel();
         model.addCustom(() -> {
             MinecraftClient.startProfiler("tile_rail_preview");
-            GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, true);
-            GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE);
-            if (GLContext.getCapabilities().OpenGL14) {
-                GL14.glBlendColor(1, 1, 1, 0.7f);
-            }
+
+            GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.7f);
             GL11.glPushMatrix();
             {
                 // Move to specified position
@@ -37,7 +33,7 @@ public class RailPreviewRender {
                 }
             }
             GL11.glPopMatrix();
-            blend.restore();
+            transparency.restore();
             MinecraftClient.endProfiler();
 		});
 

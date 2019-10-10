@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
@@ -58,7 +59,7 @@ public class RailBuilderRender {
                             (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
                     });
                     fbm.flip();
-                    GL11.glMultMatrix(fbm);
+                    GlobalRender.mulMatrix(fbm);
 
 
                     if (piece.getGroups().size() != 0) {
@@ -87,7 +88,7 @@ public class RailBuilderRender {
                                 (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
                         });
                         fbm.flip();
-                        GL11.glMultMatrix(fbm);
+                        GlobalRender.mulMatrix(fbm);
                     } catch (SingularMatrixException e) {
                         // Some weird math happened.  Do this the slow way and reset the matrix
                         GL11.glPopMatrix();
