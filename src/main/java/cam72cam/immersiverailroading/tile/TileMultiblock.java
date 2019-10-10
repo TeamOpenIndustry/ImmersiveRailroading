@@ -181,6 +181,9 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 	
 	public ItemStackHandler getContainer() {
+		if (container.getSlotCount() != getMultiblock().getInvSize(offset)) {
+			container.setSize(getMultiblock().getInvSize(offset));
+		}
 		return this.container;
 	}
 
@@ -273,6 +276,10 @@ public class TileMultiblock extends BlockEntityTickable {
 	public IInventory getInventory(Facing facing) {
 		if (this.getMultiblock().getInvSize(offset) == 0) {
 			return null;
+		}
+
+		if (container.getSlotCount() != getMultiblock().getInvSize(offset)) {
+			container.setSize(getMultiblock().getInvSize(offset));
 		}
 
 		return new IInventory() {
