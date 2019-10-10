@@ -145,7 +145,9 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 				int idx = texNames.indexOf(this.texture);
 				idx = (idx + (player.isCrouching() ? -1 : 1) + texNames.size()) % (texNames.size());
 				this.texture = texNames.get(idx);
-				this.sendToObserving(new PaintSyncPacket(this));
+				if (getWorld().isServer) {
+					this.sendToObserving(new PaintSyncPacket(this));
+				}
 				return ClickResult.ACCEPTED;
 			} else {
 				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
