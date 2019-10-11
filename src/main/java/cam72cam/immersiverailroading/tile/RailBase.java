@@ -836,7 +836,7 @@ public class RailBase extends BlockEntityTickable implements ITrack, IRedstonePr
 				}
 			}
 		}
-		if (stack.is(Fuzzy.REDSTONE_DUST)) {
+		if (stack.is(Fuzzy.REDSTONE_TORCH)) {
 			String next = this.nextAugmentRedstoneMode();
 			if (next != null) {
 				if (this.world.isServer) {
