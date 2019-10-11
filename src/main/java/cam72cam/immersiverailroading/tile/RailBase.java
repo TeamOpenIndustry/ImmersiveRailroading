@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.BlockEntityTickable;
+import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
@@ -28,7 +29,7 @@ import cam72cam.mod.util.TagCompound;
 import cam72cam.mod.util.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class RailBase extends BlockEntityTickable implements ITrack {
+public class RailBase extends BlockEntityTickable implements ITrack, IRedstoneProvider {
 	private Vec3i parent;
 	private float bedHeight = 0;
 	private float railHeight = 0;
@@ -717,11 +718,17 @@ public class RailBase extends BlockEntityTickable implements ITrack {
 			ImmersiveRailroading.catching(ex);
 		}
 	}
-	
-	public int getRedstoneLevel() {
+
+	@Override
+	public int getStrongPower(Facing facing) {
 		return getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
 	}
-	
+
+	@Override
+	public int getWeakPower(Facing facing) {
+		return getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
+	}
+
 	public double getTankLevel() {
 		return this.augmentTank == null ? 0 : (double)this.augmentTank.getContents().getAmount() / this.augmentTank.getCapacity();
 	}
