@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
@@ -153,9 +154,14 @@ public class CastingGUI implements IScreen {
 	}
 	
 	private void sendItemPacket() {
-		ItemGauge.set(currentItem, gauge);
 		currentItem.setCount(1);
-		ItemRawCast.set(currentItem, true);
+
+        if (currentItem.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT) || currentItem.is(IRItems.ITEM_CAST_RAIL) || currentItem.is(IRItems.ITEM_AUGMENT)) {
+			ItemGauge.set(currentItem, gauge);
+			ItemRawCast.set(currentItem, true);
+		} else {
+        	currentItem.clearTagCompound();
+		}
 		tile.setCraftItem(currentItem);
     }
 }

@@ -116,11 +116,8 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			// Decrement craft progress down to 0
 			if (te.getCraftProgress() != 0) {
-				/* TODO CAPABILITIES
-				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-				energy.extractEnergy(32, false);
+				powerTe.getEnergy(null).extract(32, false);
 				te.setCraftProgress(Math.max(0, te.getCraftProgress() - 1));
-				*/
 			}
 			
 			float progress = te.getCraftProgress();

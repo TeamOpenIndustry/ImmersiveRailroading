@@ -150,7 +150,9 @@ public class TileMultiblock extends BlockEntityTickable {
 			return;
 		}
 		this.ticks += 1;
-		this.getMultiblock().tick(offset);
+		if (getMultiblock() != null) {
+			this.getMultiblock().tick(offset);
+		}
 	}
 
 	/* TODO RENDER
@@ -323,7 +325,7 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	@Override
 	public IEnergy getEnergy(Facing facing) {
-		return this.getMultiblock().canRecievePower(offset) ? energy : null;
+		return this.isLoaded() && this.getMultiblock().canRecievePower(offset) ? energy : null;
 	}
 
 	@Override
