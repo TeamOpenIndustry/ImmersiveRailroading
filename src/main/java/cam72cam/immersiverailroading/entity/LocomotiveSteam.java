@@ -105,7 +105,7 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	public float getBoilerPressure() {
-		return this.sync.getInteger(BOILER_PRESSURE);
+		return this.sync.getFloat(BOILER_PRESSURE);
 	}
 	private void setBoilerPressure(float temp) {
 		this.sync.setFloat(BOILER_PRESSURE, temp);
