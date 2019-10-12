@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.net.PaintSyncPacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.*;
@@ -16,7 +15,6 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
 import com.google.gson.JsonObject;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +25,11 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
     protected String defID;
 	public Gauge gauge;
 	public String tag = "";
-	public String texture;
 
 	public void setup(String defID, Gauge gauge, String texture) {
 		this.defID = defID;
 		this.gauge = gauge;
-		this.texture = texture;
+		this.sync.setString("texture", texture);
 	}
 
 	/* TODO?
@@ -92,10 +89,7 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 		nbttagcompound.setString("defID", defID);
 		nbttagcompound.setDouble("gauge", gauge.value());
 		nbttagcompound.setString("tag", tag);
-		
-		if (this.texture != null) {
-			nbttagcompound.setString("texture", texture);
-		}
+        nbttagcompound.setString("texture", sync.getString("texture"));
 	}
 
 	@Override
@@ -104,10 +98,8 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
         gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
 
 		tag = nbttagcompound.getString("tag");
-		
-		if (nbttagcompound.hasKey("texture")) {
-			texture = nbttagcompound.getString("texture");
-		}
+
+		sync.setString("texture", nbttagcompound.getString("texture"));
 	}
 
 
@@ -117,9 +109,7 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 		data.setDouble("gauge", gauge.value());
 		data.setString("tag", tag);
 
-		if (this.texture != null) {
-			data.setString("texture", texture);
-		}
+        data.setString("texture", sync.getString("texture"));
 	}
 	@Override
 	public void loadSpawn(TagCompound data) {
@@ -127,9 +117,7 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
         gauge = Gauge.from(data.getDouble("gauge"));
 		tag = data.getString("tag");
 
-		if (data.hasKey("texture")) {
-			texture = data.getString("texture");
-		}
+		sync.setString("texture", data.getString("texture"));
 	}
 
 
@@ -142,12 +130,10 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH)) {
 			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
 			if (texNames.size() > 1) {
-				int idx = texNames.indexOf(this.texture);
+				int idx = texNames.indexOf(sync.getString("texture"));
 				idx = (idx + (player.isCrouching() ? -1 : 1) + texNames.size()) % (texNames.size());
-				this.texture = texNames.get(idx);
-				if (getWorld().isServer) {
-					this.sendToObserving(new PaintSyncPacket(this));
-				}
+				sync.setString("texture", texNames.get(idx));
+                sync.send();
 				return ClickResult.ACCEPTED;
 			} else {
 				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
@@ -221,5 +207,9 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 
 	public Gauge soundGauge() {
 		return this.getDefinition().shouldScalePitch() ? gauge : Gauge.from(Gauge.STANDARD);
+	}
+
+	public String getTexture() {
+		return sync.getString("texture");
 	}
 }

@@ -378,7 +378,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 				ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK, 1);
 				ItemDefinition.setID(item, defID);
 				ItemGauge.set(item, gauge);
-				ItemTextureVariant.set(item, texture);
+				ItemTextureVariant.set(item, sync.getString("texture"));
 				getWorld().dropItem(item, source.getBlockPosition());
 			} else {
 				for (ItemComponentType component : this.builtItems) {

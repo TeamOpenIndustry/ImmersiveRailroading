@@ -84,7 +84,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
 				Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
-				Packet.register(PaintSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 				Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
 				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);

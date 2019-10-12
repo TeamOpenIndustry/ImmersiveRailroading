@@ -95,7 +95,7 @@ public class StockModel extends OBJRender {
 
 
 
-		this.bindTexture(stock.texture, isFarAway);
+		this.bindTexture(stock.getTexture(), isFarAway);
 		
 		if (stock instanceof LocomotiveSteam) {
 			drawSteamLocomotive((LocomotiveSteam) stock);
