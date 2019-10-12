@@ -543,12 +543,12 @@ public class LocomotiveSteam extends Locomotive {
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
-				theTank.tryFill(tender.theTank, desiredDrain, false);
+				theTank.tryDrain(tender.theTank, desiredDrain, false);
 			}
 			
 			if (this.getTickCount() % 20 == 0) {
 				// Top off stacks
-				for (int slot = 0; slot < this.cargoItems.getSlotCount()-2; slot ++) {
+				for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
 					if (BurnUtil.getBurnTime(this.cargoItems.get(slot)) != 0) {
 						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlotCount(); tenderSlot ++) {
 							if (this.cargoItems.get(slot).equals(tender.cargoItems.get(tenderSlot))) {
@@ -666,12 +666,12 @@ public class LocomotiveSteam extends Locomotive {
 		
 		if (waterUsed != 0) {
 			if (waterUsed > 0) {
-				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.floor(waterUsed)), true);
+				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.ceil(waterUsed)), false);
 				waterUsed = waterUsed % 1;
 			}
 			// handle remainder
 			if (Math.random() <= waterUsed) {
-				theTank.drain(new FluidStack(Fluid.WATER, 1), true);
+				theTank.drain(new FluidStack(Fluid.WATER, 1), false);
 			}
 		}
 		
