@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
-import cam72cam.immersiverailroading.gui.ISyncableSlots;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -14,7 +13,6 @@ import cam72cam.mod.util.TagCompound;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class FreightTank extends Freight {
@@ -252,19 +250,5 @@ public abstract class FreightTank extends Freight {
 	
 	public int getPercentLiquidFull() {
 		return this.getLiquidAmount() * 100 / this.getTankCapacity().MilliBuckets();
-	}
-
-	private List<ISyncableSlots> listners = new ArrayList<>();
-	@Override
-	protected void onInventoryChanged() {
-		super.onInventoryChanged();
-		if (getWorld().isServer) {
-			for(ISyncableSlots container : listners) {
-				container.syncSlots();;
-			}
-		}
-	}
-	public void addListener(ISyncableSlots tankContainer) {
-		this.listners.add(tankContainer);
 	}
 }
