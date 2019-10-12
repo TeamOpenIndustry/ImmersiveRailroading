@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
@@ -90,6 +91,7 @@ public class ItemRailAugment extends ItemBase {
         		}
         		ItemStack stack = new ItemStack(this, 1);
         		ItemAugmentType.set(stack, augment);
+        		applyCustomName(stack);
                 items.add(stack);
         	}
         }
@@ -102,11 +104,8 @@ public class ItemRailAugment extends ItemBase {
         return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
     }
 
-    /* TODO
 	@Override
-	public String getUnlocalizedName(ItemStack stack)
-	{
-		return super.getUnlocalizedName() + "." + ItemAugmentType.getContents(stack).name();
+	public String getCustomName(ItemStack stack) {
+		return TextUtil.translate("item.immersiverailroading:item_augment." + ItemAugmentType.get(stack).name() + ".name");
 	}
-	*/
 }
