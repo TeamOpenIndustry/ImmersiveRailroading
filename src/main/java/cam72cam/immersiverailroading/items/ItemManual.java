@@ -11,6 +11,7 @@ import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.PlayerMessage;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
@@ -27,8 +28,8 @@ public class ItemManual extends ItemBase {
 	}
 	
 	@Override
-	public void addInformation(ItemStack stack, List<String> tooltip) {
-		tooltip.add(GuiText.SELECTOR_TYPE.toString(ItemMultiblockType.get(stack)));
+	public List<String> getTooltip(ItemStack stack) {
+		return CollectionUtil.listOf(GuiText.SELECTOR_TYPE.toString(ItemMultiblockType.get(stack)));
 	}
 
 	@Override

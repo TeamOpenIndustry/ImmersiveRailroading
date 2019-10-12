@@ -74,8 +74,9 @@ public class ItemRollingStock extends BaseItemRollingStock {
     }
 
     @Override
-    public void addInformation(ItemStack stack, List<String> tooltip)
+    public List<String> getTooltip(ItemStack stack)
     {
+    	List<String> tooltip = new ArrayList<>();
 		Gauge gauge = ItemGauge.get(stack);
         EntityRollingStockDefinition def = ItemDefinition.get(stack);
         if (def != null) {
@@ -86,6 +87,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
         if (texture != null && def != null && def.textureNames.get(texture) != null) {
 	        tooltip.add(GuiText.TEXTURE_TOOLTIP.toString(def.textureNames.get(texture)));
         }
+        return tooltip;
     }
 	
 	@Override

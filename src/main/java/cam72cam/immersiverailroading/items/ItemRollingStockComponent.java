@@ -26,8 +26,7 @@ import cam72cam.mod.util.Hand;
 import cam72cam.mod.text.TextColor;
 
 public class ItemRollingStockComponent extends BaseItemRollingStock {
-	public static final String NAME = "item_rolling_stock_component";
-	
+
 	public ItemRollingStockComponent() {
 		super(ImmersiveRailroading.MODID, "item_rolling_stock_component", 64, ItemTabs.COMPONENT_TAB);
 	}
@@ -61,11 +60,13 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 	}
 	
 	@Override
-	public void addInformation(ItemStack stack, List<String> tooltip) {
+	public List<String> getTooltip(ItemStack stack) {
+		List<String> tooltip = new ArrayList<>();
 		tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
 		if (requiresHammering(stack)) {
 			tooltip.add(TextColor.RED.wrap(GuiText.RAW_CAST_TOOLTIP.toString()));
 		}
+		return tooltip;
 	}
 
 	@Override

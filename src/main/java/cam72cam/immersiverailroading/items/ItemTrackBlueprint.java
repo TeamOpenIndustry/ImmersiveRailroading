@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.*;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
@@ -103,17 +104,19 @@ public class ItemTrackBlueprint extends ItemBase {
     }
 
 	@Override
-	public void addInformation(ItemStack stack, List<String> tooltip) {
+	public List<String> getTooltip(ItemStack stack) {
         RailSettings settings = settings(stack);
-        tooltip.add(GuiText.TRACK_TYPE.toString(settings.type));
-        tooltip.add(GuiText.TRACK_GAUGE.toString(settings.gauge));
-        tooltip.add(GuiText.TRACK_LENGTH.toString(settings.length));
-        tooltip.add(GuiText.TRACK_POSITION.toString(settings.posType));
-        tooltip.add(GuiText.TRACK_DIRECTION.toString(settings.direction));
-        tooltip.add(GuiText.TRACK_RAIL_BED.toString(settings.railBed.getDisplayName()));
-        tooltip.add(GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName()));
-        tooltip.add((settings.isPreview ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString());
-        tooltip.add(GuiText.TRACK_QUARTERS.toString(settings.quarters * 90.0/4 ));
+        return CollectionUtil.listOf(
+            GuiText.TRACK_TYPE.toString(settings.type),
+            GuiText.TRACK_GAUGE.toString(settings.gauge),
+            GuiText.TRACK_LENGTH.toString(settings.length),
+            GuiText.TRACK_POSITION.toString(settings.posType),
+            GuiText.TRACK_DIRECTION.toString(settings.direction),
+            GuiText.TRACK_RAIL_BED.toString(settings.railBed.getDisplayName()),
+            GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName()),
+            (settings.isPreview ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString(),
+            GuiText.TRACK_QUARTERS.toString(settings.quarters * 90.0/4 )
+		);
 	}
 
 	public static void settings(ItemStack stack, RailSettings settings) {

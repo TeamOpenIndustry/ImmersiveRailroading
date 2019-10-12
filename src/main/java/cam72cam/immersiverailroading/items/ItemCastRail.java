@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.util.CollectionUtil;
 
 public class ItemCastRail extends ItemBase {
 	public ItemCastRail() {
@@ -14,8 +15,8 @@ public class ItemCastRail extends ItemBase {
 	}
 	
 	@Override
-    public void addInformation(ItemStack stack, List<String> tooltip)
+    public List<String> getTooltip(ItemStack stack)
     {
-        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
+        return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
     }
 }

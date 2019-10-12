@@ -6,6 +6,7 @@ import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.Recipes;
+import cam72cam.mod.util.CollectionUtil;
 
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class ItemSwitchKey extends ItemBase {
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, List<String> tooltip)
+	public List<String> getTooltip(ItemStack stack)
 	{
-		tooltip.add(GuiText.SWITCH_HAMMER_TOOLTIP.toString());
+		return CollectionUtil.listOf(GuiText.SWITCH_HAMMER_TOOLTIP.toString());
 	}
 }

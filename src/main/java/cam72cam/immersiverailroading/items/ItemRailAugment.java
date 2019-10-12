@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.Rail;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
@@ -96,9 +97,9 @@ public class ItemRailAugment extends ItemBase {
     }
 	
 	@Override
-	public void addInformation(ItemStack stack, List<String> tooltip)
+	public List<String> getTooltip(ItemStack stack)
     {
-        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
+        return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
     }
 
     /* TODO

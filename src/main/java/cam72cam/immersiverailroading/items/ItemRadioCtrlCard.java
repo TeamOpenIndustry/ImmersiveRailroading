@@ -5,6 +5,7 @@ import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.Recipes;
+import cam72cam.mod.util.CollectionUtil;
 
 import java.util.List;
 
@@ -21,11 +22,11 @@ public class ItemRadioCtrlCard extends ItemBase {
     }
 
     @Override
-    public void addInformation(ItemStack stack, List<String> tooltip) {
+    public List<String> getTooltip(ItemStack stack) {
         if (!stack.getTagCompound().hasKey("linked_uuid")) {
-            tooltip.add("Not linked to any locomotive");
+            return CollectionUtil.listOf("Not linked to any locomotive");
         } else {
-            tooltip.add("Linked to: " + stack.getTagCompound().getString("linked_uuid"));
+            return CollectionUtil.listOf("Linked to: " + stack.getTagCompound().getString("linked_uuid"));
         }
     }
 }

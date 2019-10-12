@@ -17,6 +17,7 @@ import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.text.TextColor;
+import cam72cam.mod.util.CollectionUtil;
 
 public class ItemPlate extends ItemBase {
 	public ItemPlate() {
@@ -67,9 +68,9 @@ public class ItemPlate extends ItemBase {
 	}
 	
 	@Override
-	public void addInformation(ItemStack stack, List<String> tooltip)
+	public List<String> getTooltip(ItemStack stack)
     {
-        tooltip.add(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
+    	return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
     }
 }
 
