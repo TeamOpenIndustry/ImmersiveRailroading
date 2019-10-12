@@ -17,6 +17,7 @@ import cam72cam.mod.entity.custom.ICollision;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.sound.ISound;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.util.TagCompound;
 
 import java.util.ArrayList;
@@ -98,13 +99,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public void initPositions() {
-        this.positions = new ArrayList<>();
-        this.positions.add(new TickPos((int) this.tickPosID, this.getCurrentSpeed(), getPosition(), getRotationYaw(), getRotationYaw(), getRotationYaw(), getRotationPitch(), false));
+        initPositions(new TickPos((int) this.tickPosID, this.getCurrentSpeed(), getPosition(), getRotationYaw(), getRotationYaw(), getRotationYaw(), getRotationPitch(), false));
     }
 
     public void initPositions(TickPos tp) {
-        this.positions = new ArrayList<>();
-        this.positions.add(tp);
+        this.positions = CollectionUtil.listOf(tp);
     }
 
     /*

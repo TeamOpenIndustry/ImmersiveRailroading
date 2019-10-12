@@ -19,10 +19,10 @@ import cam72cam.mod.gui.IScreen;
 import cam72cam.mod.gui.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.util.Hand;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CastingGUI implements IScreen {
@@ -81,8 +81,7 @@ public class CastingGUI implements IScreen {
 				if(!currentItem.isEmpty()) {
 					EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
 					if (def != null && ConfigBalance.DesignGaugeLock) {
-						List<Gauge> validGauges = new ArrayList<Gauge>();
-						validGauges.add(Gauge.from(def.recommended_gauge.value()));
+						List<Gauge> validGauges = CollectionUtil.listOf(Gauge.from(def.recommended_gauge.value()));
 						gauge = gauge.next(validGauges);
 					} else {
 						gauge = gauge.next();

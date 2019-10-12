@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
@@ -75,8 +76,6 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 			return ClickResult.REJECTED;
 		}
 		
-		List<ItemComponentType> frame = new ArrayList<ItemComponentType>();
-		frame.add(ItemComponentType.FRAME);
-		return tryPlaceStock(player, world, pos, hand, frame);
+		return tryPlaceStock(player, world, pos, hand, CollectionUtil.listOf(ItemComponentType.FRAME));
 	}
 }

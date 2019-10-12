@@ -31,10 +31,8 @@ public class CraftPicker {
 			screen.show();
 			onChoose.accept(stack);
 		};
-		this.items = new ArrayList<>();
-		
-        items.addAll(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getItemVariants(ItemTabs.COMPONENT_TAB));
-        
+		this.items = new ArrayList<>(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getItemVariants(ItemTabs.COMPONENT_TAB));
+
         List<ItemStack> stock = new ArrayList<>();
 
         stock.addAll(IRItems.ITEM_ROLLING_STOCK.getItemVariants(ItemTabs.LOCOMOTIVE_TAB));
@@ -58,7 +56,7 @@ public class CraftPicker {
 
 
 		stockSelector = new ItemPickerGUI(stock, this::onStockExit);
-		toRemove = new ArrayList<ItemStack>();
+		toRemove = new ArrayList<>();
 		for (ItemStack itemStock : stock) {
 			boolean hasComponent = false;
 			for (ItemStack item : items) {
