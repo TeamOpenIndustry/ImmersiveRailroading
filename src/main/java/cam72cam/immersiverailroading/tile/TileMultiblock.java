@@ -50,8 +50,8 @@ public class TileMultiblock extends BlockEntityTickable {
     
     private Energy energy = new Energy(1000) {
     	@Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-    		int val = super.receiveEnergy(maxReceive, simulate);
+        public int receive(int maxReceive, boolean simulate) {
+    		int val = super.receive(maxReceive, simulate);
     		if (!simulate && val != 0 && isLoaded()) {
     			markDirty();
     		}
@@ -59,8 +59,8 @@ public class TileMultiblock extends BlockEntityTickable {
     	}
     	
     	@Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-    		int val = super.extractEnergy(maxExtract, simulate);
+        public int extract(int maxExtract, boolean simulate) {
+    		int val = super.extract(maxExtract, simulate);
     		if (!simulate && val != 0 && isLoaded()) {
     			markDirty();
     		}
@@ -99,7 +99,7 @@ public class TileMultiblock extends BlockEntityTickable {
             nbt.setInteger("craftProgress", craftProgress);
             nbt.setInteger("craftMode", craftMode.ordinal());
 
-            nbt.setInteger("energy", energy.getEnergyStored());
+            nbt.setInteger("energy", energy.getCurrent());
 		}
 	}
 
@@ -119,8 +119,8 @@ public class TileMultiblock extends BlockEntityTickable {
 		}
 		
 		// Empty and then refill energy storage
-		energy.extractEnergy(energy.getEnergyStored(), false);
-		energy.receiveEnergy(nbt.getInteger("energy"), false);
+		energy.extract(energy.getCurrent(), false);
+		energy.receive(nbt.getInteger("energy"), false);
 
 		name = nbt.getString("name");
 	}

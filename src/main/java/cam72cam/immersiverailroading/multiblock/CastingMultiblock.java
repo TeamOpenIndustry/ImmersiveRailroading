@@ -192,7 +192,7 @@ public class CastingMultiblock extends Multiblock {
 							if (!hasPower()) {
 								break;
 							}
-							energy.extractEnergy(32, false);
+							energy.extract(32, false);
 							stack.shrink(1);
 							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + cost);
 						}
@@ -265,7 +265,7 @@ public class CastingMultiblock extends Multiblock {
 			}
 			
 			if (offset.equals(power)) {
-				energy.extractEnergy(32, false);
+				energy.extract(32, false);
 			}
 		}
 
@@ -294,7 +294,7 @@ public class CastingMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getEnergyStored() > 32;
+			return powerTe.getEnergy(null).getCurrent() > 32;
 		}
 
 		public boolean isPouring() {

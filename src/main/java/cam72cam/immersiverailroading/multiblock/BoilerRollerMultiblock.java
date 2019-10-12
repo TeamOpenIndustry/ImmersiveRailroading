@@ -13,7 +13,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
@@ -142,7 +141,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			// Decrement craft progress down to 0
 			if (craftTe.getCraftProgress() != 0) {
 				IEnergy energy = powerTe.getEnergy(null);
-				energy.extractEnergy(32, false);
+				energy.extract(32, false);
 				craftTe.setCraftProgress(Math.max(0, craftTe.getCraftProgress() - 1));
 			}
 			
@@ -199,7 +198,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getEnergyStored() > 32;
+			return powerTe.getEnergy(null).getCurrent() > 32;
 		}
 		
 		public boolean hasInput() {

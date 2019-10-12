@@ -175,7 +175,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getEnergyStored() > 32;
+			return powerTe.getEnergy(null).getCurrent() > 32;
 
 		}
 	}

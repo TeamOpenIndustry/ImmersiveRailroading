@@ -147,7 +147,7 @@ public class RailRollerMultiblock extends Multiblock {
 			// Decrement craft progress down to 0
 			if (craftingTe.getCraftProgress() != 0) {
 				IEnergy energy = powerTe.getEnergy(null);
-				energy.extractEnergy(32, false);
+				energy.extract(32, false);
 				craftingTe.setCraftProgress(Math.max(0, craftingTe.getCraftProgress() - 1));
 			}
 			
@@ -200,7 +200,7 @@ public class RailRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getEnergyStored() > 32;
+			return powerTe.getEnergy(null).getCurrent() > 32;
 
 		}
 
