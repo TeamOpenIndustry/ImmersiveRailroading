@@ -6,6 +6,8 @@ import cam72cam.mod.gui.container.IContainerBuilder;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 
+import java.util.Map;
+
 public class SteamLocomotiveContainer implements IContainer {
     public final LocomotiveSteam stock;
     private final ItemStack template;
@@ -35,11 +37,26 @@ public class SteamLocomotiveContainer implements IContainer {
 
         currY = container.drawBottomBar(0, currY, horizSlots*2);
 
+        int containerY = currY;
         currY = container.drawSlotBlock(stock.cargoItems, 2, stock.getInventoryWidth(), 0, currY);
+        Map<Integer, Integer> burnTime = stock.getBurnTime();
+        Map<Integer, Integer> burnMax = stock.getBurnMax();
+        for (int slot : burnTime.keySet()) {
+            int time = stock.getBurnTime().get(slot);
+            if (time != 0) {
+                float perc = Math.min(1f, (float)time / burnMax.get(slot));
+
+                int xSlot = (slot-2) % horizSlots;
+                int ySlot = (slot-2) / horizSlots;
+
+
+                container.drawSlotOverlay("minecraft:blocks/fire_layer_1", xSlot * 18 + ((horizSlots) * 9), containerY + ySlot * 18, perc, 0x77c64306);
+            }
+        }
 
         container.drawSlotOverlay(template, 1, slotY);
         container.drawSlot(stock.cargoItems, 0, 1, slotY);
-        container.drawSlot(stock.cargoItems, 1,  1 + horizSlots * 2 * 16, slotY);
+        container.drawSlot(stock.cargoItems, 1, (horizSlots * 2 - 1) * 18 -1, slotY);
 
         String quantityStr = String.format("%s/%s", stock.getLiquidAmount(), stock.getTankCapacity().MilliBuckets());
         container.drawCenteredString(quantityStr, 0, slotY);
