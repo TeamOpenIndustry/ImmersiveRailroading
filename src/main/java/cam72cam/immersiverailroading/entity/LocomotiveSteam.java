@@ -574,7 +574,7 @@ public class LocomotiveSteam extends Locomotive {
 		float waterUsed = 0;
 		
 		if (this.getLiquidAmount() > 0) {
-			for (int slot = 0; slot < this.cargoItems.getSlotCount()-2; slot ++) {
+			for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
 				int remainingTime = burnTime.getOrDefault(slot, 0);
 				if (remainingTime <= 0) {
 					ItemStack stack = this.cargoItems.get(slot);
