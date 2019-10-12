@@ -152,11 +152,13 @@ public class RailInfo {
 		private final Function<ItemStack, Boolean> material;
 		private final int count;
 		private final ItemStack[] examples;
+		private final boolean isDrop;
 
 		MaterialManager(boolean isDrop, int count, Function<ItemStack, Boolean> material, ItemStack... examples) {
 			this.material = material;
 			this.count = count;
 			this.examples = examples;
+			this.isDrop = isDrop;
 		}
 
 		public MaterialManager(int count, Function<ItemStack, Boolean> material, List<ItemStack> examples) {
@@ -173,8 +175,9 @@ public class RailInfo {
 			}
 
 			if (found < count) {
-				String example = Arrays.stream(examples).map(ItemStack::getDisplayName).collect(Collectors.joining(" | "));
-				if (examples.length > 1) {
+				Set<String> exStrs = Arrays.stream(examples).map(ItemStack::getDisplayName).collect(Collectors.toSet());
+				String example = String.join(" | ", exStrs);
+				if (exStrs.size() > 1) {
 					example = "[ " + example + " ]";
 				}
 				player.sendMessage(ChatText.BUILD_MISSING.getMessage(count - found, example));
@@ -204,7 +207,7 @@ public class RailInfo {
 					}
 				}
 			}
-			return drops;
+			return this.isDrop ? drops : Collections.emptyList();
 		}
 	}
 
@@ -234,7 +237,7 @@ public class RailInfo {
 				if (!settings.railBed.isEmpty()) {
 					materials.add(new MaterialManager(true, builder.costBed(), settings.railBed::equals, settings.railBed));
 				}
-				if (settings.railBedFill.isEmpty()) {
+				if (!settings.railBedFill.isEmpty()) {
 					materials.add(new MaterialManager(false, builder.costFill(), settings.railBedFill::equals, settings.railBedFill));
 				}
 
