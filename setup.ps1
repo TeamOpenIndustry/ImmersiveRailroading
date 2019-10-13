@@ -14,4 +14,4 @@ git clone --branch $branch git@github.com:TeamOpenIndustry/ImmersiveRailroadingI
 
 ./UniversalModCore/template/setup.ps1 $branch immersiverailroading ImmersiveRailroading 1.6.1 cam72cam.immersiverailroading.ImmersiveRailroading
 
-./ImmersiveRailroadingIntegration/setup.s1 $branch
+./ImmersiveRailroadingIntegration/setup.ps1 $branch
