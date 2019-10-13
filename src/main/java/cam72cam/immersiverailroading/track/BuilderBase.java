@@ -11,7 +11,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
-import cam72cam.mod.util.ITrack;
+import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 
 import java.util.ArrayList;
 import java.util.Arrays;

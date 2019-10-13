@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
+import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.block.IRedstoneProvider;
@@ -26,10 +27,10 @@ import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.util.TagCompound;
-import cam72cam.mod.util.ITrack;
+import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class RailBase extends BlockEntityTickable implements ITrack, IRedstoneProvider {
+public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	private Vec3i parent;
 	private float bedHeight = 0;
 	private float railHeight = 0;
