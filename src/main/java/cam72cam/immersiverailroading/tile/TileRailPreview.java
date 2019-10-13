@@ -150,7 +150,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	public RailInfo getRailRenderInfo() {
-		if (world != null && (info == null || info.world == null)) {
+		if (world != null && item != null && (info == null || info.world == null)) {
 			info = new RailInfo(world, item, placementInfo, customInfo);
 		}
 		return info;
@@ -186,7 +186,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo().build(entityPlayer)) {
+			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer)) {
 				new PreviewRenderPacket(this.world, this.pos).sendToAll();
 			}
 			return false;
