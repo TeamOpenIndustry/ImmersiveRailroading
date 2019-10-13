@@ -450,7 +450,7 @@ public class LocomotiveSteam extends Locomotive {
 							if (phase > 0.5) {
 						    	double speed = Math.abs(getCurrentSpeed().minecraft());
 						    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-						    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.max(0.3f, Math.abs(this.getThrottle()));
+						    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(this.getThrottle());
 						    	volume = (float) Math.sqrt(volume);
 						    	double fraction = 3;
 						    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
