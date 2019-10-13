@@ -43,7 +43,7 @@ public class HandCar extends Locomotive {
 					Player player = passenger.asPlayer();
 					if (!player.isCreative()) {
 						if (player.getFoodLevel() > 0) {
-							player.setFoodLevel(player.getFoodLevel() - 1);
+							player.useFood(1);
 						}
 					}
 				}
