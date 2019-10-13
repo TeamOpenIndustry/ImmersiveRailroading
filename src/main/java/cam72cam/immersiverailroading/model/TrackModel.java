@@ -16,7 +16,7 @@ public class TrackModel extends OBJModel {
         this.size = Double.parseDouble(condition.substring(1));
         ArrayList<String> groups = new ArrayList<>();
         for (String group : groups()) {
-            if (group.contains("RAIL")) {
+            if (group.contains("RAIL_LEFT") || group.contains("RAIL_RIGHT")) {
                 groups.add(group);
             }
         }
