@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
@@ -9,10 +10,12 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.gui.*;
+import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.Hand;
 import com.google.common.base.Predicate;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -221,7 +224,25 @@ public class TrackGui implements IScreen {
 
 	@Override
 	public void draw(IScreenBuilder builder) {
+		if (lengthInput.getText().isEmpty()) {
+			return;
+		}
+		int scale = 8;
 
+		// This could be more efficient...
+		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bed, bedFill, isPreview, isGradeCrossing);
+		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
+		ItemTrackBlueprint.settings(stack, settings);
+		GL11.glPushMatrix();
+		GL11.glTranslated(GUIHelpers.getScreenWidth()/2 + builder.getWidth()/4,  builder.getHeight() / 4, 0);
+		GL11.glScaled(scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0);
+		GL11.glPopMatrix();
+		GL11.glPushMatrix();
+		GL11.glTranslated(GUIHelpers.getScreenWidth()/2 - builder.getWidth()/4,  builder.getHeight() / 4, 0);
+		GL11.glScaled(-scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0);
+		GL11.glPopMatrix();
 	}
 
 }
