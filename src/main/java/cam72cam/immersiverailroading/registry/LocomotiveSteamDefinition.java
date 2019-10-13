@@ -105,14 +105,14 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             case WALSCHAERTS:
             case TRI_WALSCHAERTS:
             case HIDDEN:
-                for (int i = 0; i < 100; i++) {
+                for (int i = 100; i >= 0; i--) {
                     addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
                 }
                 break;
             case T1:
             case GARRAT:
             case MALLET_WALSCHAERTS:
-                for (int i = 0; i < 100; i++) {
+                for (int i = 100; i >= 0; i--) {
                     addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
                     addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
                 }
@@ -125,11 +125,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         }
 
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 100; i >= 0; i--) {
             addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOILER_SEGMENT_X, this, groups, i), true);
         }
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 100; i >= 0; i--) {
             addComponentIfExists(RenderComponent.parseID(RenderComponentType.PARTICLE_CHIMNEY_X, this, groups, i), false);
             addComponentIfExists(RenderComponent.parseID(RenderComponentType.PRESSURE_VALVE_X, this, groups, i), false);
         }

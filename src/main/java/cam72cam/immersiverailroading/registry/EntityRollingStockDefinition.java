@@ -236,10 +236,10 @@ public abstract class EntityRollingStockDefinition {
             if (!renderComponents.containsKey(renderComponent.type)) {
                 renderComponents.put(renderComponent.type, new ArrayList<>());
             }
-            renderComponents.get(renderComponent.type).add(renderComponent);
+            renderComponents.get(renderComponent.type).add(0, renderComponent);
 
             if (itemComponent && renderComponent.type != RenderComponentType.REMAINING) {
-                itemComponents.add(ItemComponentType.from(renderComponent.type));
+                itemComponents.add(0, ItemComponentType.from(renderComponent.type));
             }
         }
     }
@@ -248,13 +248,15 @@ public abstract class EntityRollingStockDefinition {
         return true;
     }
 
+
+
     protected Set<String> parseComponents() {
         renderComponents = new HashMap<>();
         itemComponents = new ArrayList<>();
 
         Set<String> groups = new HashSet<>(model.groups());
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 100; i >= 0; i--) {
             if (unifiedBogies()) {
                 addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "FRONT", i), true);
                 addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "REAR", i), true);

@@ -31,7 +31,7 @@ public class PreviewRenderPacket extends Packet {
 
 		TileRailPreview preview = data.getTile("preview", true);
 
-		if (preview.world != getPlayer().getWorld()) {
+		if (preview == null || preview.world != getPlayer().getWorld()) {
 			return;
 		}
 
