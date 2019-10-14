@@ -17,24 +17,31 @@ public class ObjItemRender {
     public static Map<Identifier, OBJRender> cache = new HashMap<>();
 
     public static BiFunction<ItemStack, World, StandardModel> getModelFor(Identifier id, Vec3d translate, float scale) {
-            return (stack, world) -> new StandardModel().addCustom(() -> {
-                if (!cache.containsKey(id)) {
-                    try {
-                        cache.put(id, new OBJRender(new OBJModel(id, 0)));
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error loading item model...", e);
-                    }
+            return getModelFor(id, translate, Vec3d.ZERO, scale);
+    }
+
+    public static BiFunction<ItemStack, World, StandardModel> getModelFor(Identifier id, Vec3d translate, Vec3d rotation, float scale) {
+        return (stack, world) -> new StandardModel().addCustom(() -> {
+            if (!cache.containsKey(id)) {
+                try {
+                    cache.put(id, new OBJRender(new OBJModel(id, 0)));
+                } catch (Exception e) {
+                    throw new RuntimeException("Error loading item model...", e);
                 }
-                OBJRender renderer = cache.get(id);
-                GL11.glPushMatrix();
-                {
-                    renderer.bindTexture();
-                    GL11.glTranslated(translate.x, translate.y, translate.z);
-                    GL11.glScaled(scale, scale, scale);
-                    renderer.draw();
-                    renderer.restoreTexture();
-                }
-                GL11.glPopMatrix();
-            });
+            }
+            OBJRender renderer = cache.get(id);
+            GL11.glPushMatrix();
+            {
+                renderer.bindTexture();
+                GL11.glTranslated(translate.x, translate.y, translate.z);
+                GL11.glRotated(rotation.x, 1, 0, 0);
+                GL11.glRotated(rotation.y, 0, 1, 0);
+                GL11.glRotated(rotation.z, 0, 0, 1);
+                GL11.glScaled(scale, scale, scale);
+                renderer.draw();
+                renderer.restoreTexture();
+            }
+            GL11.glPopMatrix();
+        });
     }
 }
