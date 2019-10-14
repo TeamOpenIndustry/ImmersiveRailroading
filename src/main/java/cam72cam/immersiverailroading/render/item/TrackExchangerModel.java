@@ -12,7 +12,7 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
-import cam72cam.immersiverailroading.items.nbt.ItemTrackExchanger;
+import cam72cam.immersiverailroading.items.nbt.ItemTrackExchangerType;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -41,7 +41,7 @@ public class TrackExchangerModel {
 
 	public static void render(cam72cam.mod.item.ItemStack stack, cam72cam.mod.world.World world) {
 		RailInfo info = new RailInfo(world,
-				new RailSettings(Gauge.from(Gauge.STANDARD), ItemTrackExchanger.get(stack), TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackDirection.NONE, ItemStack.EMPTY, ItemStack.EMPTY, false, false),
+				new RailSettings(Gauge.from(Gauge.STANDARD), ItemTrackExchangerType.get(stack), TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackDirection.NONE, ItemStack.EMPTY, ItemStack.EMPTY, false, false),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,

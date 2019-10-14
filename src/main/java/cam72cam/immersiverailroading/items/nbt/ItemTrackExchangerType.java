@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.items.nbt;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.TagCompound;
 
-public class ItemTrackExchanger {
+public class ItemTrackExchangerType {
 	public static void set(ItemStack stack, String track) {
 		if (stack.getTagCompound() == null) {
 			stack.setTagCompound(new TagCompound());

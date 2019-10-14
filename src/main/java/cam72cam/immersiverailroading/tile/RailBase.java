@@ -9,7 +9,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.items.nbt.ItemTrackExchanger;
+import cam72cam.immersiverailroading.items.nbt.ItemTrackExchangerType;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
@@ -839,7 +839,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 		}
 		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER)) {
 			Rail tileRail = this.getParentTile();
-			String track = ItemTrackExchanger.get(stack);
+			String track = ItemTrackExchangerType.get(stack);
 			if (track != null && !track.equals(tileRail.info.settings.track)) {
 				if (!player.isCreative()) {
 					RailInfo info = tileRail.info.withTrack(track);
