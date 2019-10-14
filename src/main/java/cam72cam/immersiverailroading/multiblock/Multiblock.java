@@ -8,81 +8,86 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.OreHelper;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.IInventory;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Rotation;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.text.PlayerMessage;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.BlockInfo;
+import cam72cam.mod.world.World;
 
 public abstract class Multiblock {
 	// z y x
-	private final MultiblockComponent[][][] components;
+	private final Fuzzy[][][] components;
 	private final String name;
-	protected final List<BlockPos> componentPositions;
+	protected final List<Vec3i> componentPositions;
 	
-	protected static final MultiblockComponent AIR = new MultiblockComponent();
-	protected static final MultiblockComponent STEEL() {
-		return new MultiblockComponent(OreHelper.IR_STEEL_BLOCK);
-	}
-	
-	protected static final MultiblockComponent CASING() {
-		return new MultiblockComponent(OreHelper.IR_CASTING_CASING);
+	protected static final Fuzzy AIR = null;
+	protected static Fuzzy STEEL() {
+		return IRFuzzy.IR_STEEL_BLOCK;
 	}
 	
-	protected static final MultiblockComponent L_ENG() {
-		return new MultiblockComponent(OreHelper.IR_LIGHT_ENG);
+	protected static Fuzzy CASING() {
+		return IRFuzzy.IR_CASTING_CASING;
 	}
-	protected static final MultiblockComponent H_ENG() {
-		return new MultiblockComponent(OreHelper.IR_HEAVY_ENG);
+	
+	protected static Fuzzy L_ENG() {
+		return IRFuzzy.IR_LIGHT_ENG;
 	}
-	protected static final MultiblockComponent S_SCAF() {
-		return new MultiblockComponent(OreHelper.IR_SCAFFOLDING);
+	protected static Fuzzy H_ENG() {
+		return IRFuzzy.IR_HEAVY_ENG;
+	}
+	protected static Fuzzy S_SCAF() {
+		return IRFuzzy.IR_SCAFFOLDING;
 	}
 
-	protected Multiblock(String name, MultiblockComponent[][][] components) {
+	protected Multiblock(String name, Fuzzy[][][] components) {
 		this.name = name;
 		this.components = components;
-		componentPositions = new ArrayList<BlockPos>();
+		componentPositions = new ArrayList<>();
 		for (int z = 0; z < components.length; z++) {
-			MultiblockComponent[][] zcomp = components[z];
+			Fuzzy[][] zcomp = components[z];
 			for (int y = 0; y < components[z].length; y++) {
-				MultiblockComponent[] ycomp = zcomp[y];
+				Fuzzy[] ycomp = zcomp[y];
 				for (int x = 0; x < ycomp.length; x++) {
-					componentPositions.add(new BlockPos(x, y, z));
+					if (lookup(new Vec3i(x, y, z)) != null) {
+						componentPositions.add(new Vec3i(x, y, z));
+                    }
 				}
 			}
 		}
 	}
 	
-	protected MultiblockComponent lookup(BlockPos offset) {
-		return components[offset.getZ()][offset.getY()][offset.getX()];
+	private Fuzzy lookup(Vec3i offset) {
+		return components[offset.z][offset.y][offset.x];
 	}
 	
-	private boolean checkValid(IBlockAccess world, BlockPos origin, BlockPos offset, Rotation rot) {
-		BlockPos pos = origin.add(offset.rotate(rot));
-		MultiblockComponent component = lookup(offset);
-		return component.valid(world, pos);
+	private boolean checkValid(World world, Vec3i origin, Vec3i offset, Rotation rot) {
+		Vec3i pos = origin.add(offset.rotate(rot));
+		Fuzzy component = lookup(offset);
+		return component.matches(world.getItemStack(pos));
 	}
 	
-	public boolean tryCreate(World world, BlockPos pos) {
-		for (BlockPos activationLocation : this.componentPositions) {
+	public boolean tryCreate(World world, Vec3i pos) {
+		for (Vec3i activationLocation : this.componentPositions) {
 			for (Rotation rot : Rotation.values()) {
-				BlockPos origin = pos.subtract(activationLocation.rotate(rot));
+				Vec3i origin = pos.subtract(activationLocation.rotate(rot));
 				boolean valid = true;
-				for (BlockPos offset : this.componentPositions) {
+				for (Vec3i offset : this.componentPositions) {
 					valid = valid && checkValid(world, origin, offset, rot);
 				}
 				if (valid) {
-					if (!world.isRemote) {
+					if (world.isServer) {
 						instance(world, origin, rot).onCreate();
 					}
 					return true;
@@ -92,129 +97,154 @@ public abstract class Multiblock {
 		return false;
 	}
 	
-	public abstract BlockPos placementPos();
-	public void place(World world, EntityPlayer player, BlockPos pos, Rotation rot) {
+	public abstract Vec3i placementPos();
+	public void place(World world, Player player, Vec3i pos, Rotation rot) {
 		Map<String, Integer> missing = new HashMap<String, Integer>();
-		BlockPos origin = pos.subtract(this.placementPos().rotate(rot));
-		for (BlockPos offset : this.componentPositions) {
-			MultiblockComponent component = lookup(offset);
-			BlockPos compPos = origin.add(offset.rotate(rot));
-			if (!component.valid(world, compPos)) {
-				if (!world.isAirBlock(compPos)) {
+		Vec3i origin = pos.subtract(this.placementPos().rotate(rot));
+		for (Vec3i offset : this.componentPositions) {
+			Fuzzy component = lookup(offset);
+			Vec3i compPos = origin.add(offset.rotate(rot));
+			if (!component.matches(world.getItemStack(compPos))) {
+				if (!world.isAir(compPos)) {
 					if (BlockUtil.canBeReplaced(world, compPos, false)) {
-						world.destroyBlock(compPos, true);
+						world.breakBlock(compPos, true);
 					} else {
-						player.sendMessage(ChatText.INVALID_BLOCK.getMessage(compPos.getX(), compPos.getY(), compPos.getZ()));
+						player.sendMessage(ChatText.INVALID_BLOCK.getMessage(compPos.x, compPos.y, compPos.z));
 						return;
 					}
 				}
 			}
 		}
-		
-		for (BlockPos offset : this.componentPositions) {
-			MultiblockComponent component = lookup(offset);
-			BlockPos compPos = origin.add(offset.rotate(rot));
-			if (!component.valid(world, compPos)) {
-				if (!component.place(world, player, compPos)) {
-					if (!missing.containsKey(component.name)) {
-						missing.put(component.name, 0);
+
+		for (Vec3i offset : this.componentPositions) {
+			Fuzzy component = lookup(offset);
+			Vec3i compPos = origin.add(offset.rotate(rot));
+			if (!component.matches(world.getItemStack(compPos))) {
+				if (!place(component, world, player, compPos)) {
+					if (!missing.containsKey(component.example().getDisplayName())) {
+						missing.put(component.example().getDisplayName(), 0);
 					}
-					missing.put(component.name, missing.get(component.name)+1);
+					missing.put(component.example().getDisplayName(), missing.get(component.example().getDisplayName()) + 1);
 				}
 			}
 		}
-		
+
 		if (missing.size() != 0) {
 			player.sendMessage(ChatText.STOCK_MISSING.getMessage());
 			for (String name : missing.keySet()) {
-				player.sendMessage(new TextComponentString(String.format("  - %d x %s", missing.get(name), name)));
+				player.sendMessage(PlayerMessage.direct(String.format("  - %d x %s", missing.get(name), name)));
 			}
 		}
 	}
+	private boolean place(Fuzzy fuzzy, World world, Player player, Vec3i pos) {
+		if (player.isCreative()) {
+			if (fuzzy.example() != null) {
+				world.setBlock(pos, fuzzy.example());
+			}
+			return true;
+		} else {
+			IInventory inv = player.getInventory();
+			for (int slot = 0; slot < inv.getSlotCount(); slot++) {
+				ItemStack stack = inv.get(slot);
+				if (fuzzy.matches(stack)) {
+
+					int count = stack.getCount();
+
+					ItemStack backup = player.getHeldItem(Hand.PRIMARY).copy();
+					player.setHeldItem(Hand.PRIMARY, stack.copy());
+					ClickResult result = player.clickBlock(Hand.PRIMARY, pos, new Vec3d(0.5, 0, 0.5));
+					player.setHeldItem(Hand.PRIMARY, backup);
+
+					if (result == ClickResult.ACCEPTED) {
+						if (inv.get(slot).getCount() == count) {
+							//Decrement inv slot if not already decremented
+							stack.setCount(stack.getCount() - 1);
+							inv.set(slot, stack);
+						}
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
 	
-	public Map<BlockPos, IBlockState> blueprint() {
-		Map<BlockPos, IBlockState> result = new HashMap<BlockPos, IBlockState>();
-		for (BlockPos offset : this.componentPositions) {
-			MultiblockComponent component = lookup(offset);
-			result.put(offset, component.def);
+	public Map<Vec3i, ItemStack> blueprint() {
+		Map<Vec3i, ItemStack> result = new HashMap<>();
+		for (Vec3i offset : this.componentPositions) {
+			Fuzzy component = lookup(offset);
+            result.put(offset, component.example());
 		}
 		return result;
 	}
 	
-	public MultiblockInstance instance(World world, BlockPos origin, Rotation rot) {
+	public MultiblockInstance instance(World world, Vec3i origin, Rotation rot) {
 		return newInstance(world, origin, rot);
 	}
 	
-	protected abstract MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot);
+	protected abstract MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot);
 	public abstract class MultiblockInstance {
 		protected final World world;
-		protected final BlockPos origin;
+		protected final Vec3i origin;
 		protected final Rotation rot;
 		
-		public MultiblockInstance(World world, BlockPos origin, Rotation rot) {
+		public MultiblockInstance(World world, Vec3i origin, Rotation rot) {
 			this.world = world;
 			this.origin = origin;
 			this.rot = rot;
 		}
 		
 		public void onCreate() {
-			for (BlockPos offset : componentPositions) {
-				MultiblockComponent comp = lookup(offset);
-				if (comp == AIR) {
-					continue;
-				}
-				
-				BlockPos pos = getPos(offset);
-				IBlockState origState = world.getBlockState(pos);
-				
-				world.setBlockState(pos, IRBlocks.BLOCK_MULTIBLOCK.getDefaultState());
-				TileMultiblock te = TileMultiblock.get(world, pos);
+			for (Vec3i offset : componentPositions) {
+				Vec3i pos = getPos(offset);
+				BlockInfo origState = world.getBlock(pos);
+
+				world.setBlock(pos, IRBlocks.BLOCK_MULTIBLOCK);
+
+				TileMultiblock te = world.getBlockEntity(pos, TileMultiblock.class);
 				
 				te.configure(name, rot, offset, origState);
 			}
 		}
-		public abstract boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset);
-		public abstract int getInvSize(BlockPos offset);
-		public abstract boolean isRender(BlockPos offset);
-		public abstract void tick(BlockPos offset);
-		public abstract boolean canInsertItem(BlockPos offset, int slot, ItemStack stack);
-		public abstract boolean isOutputSlot(BlockPos offset, int slot);
-		public abstract int getSlotLimit(BlockPos offset, int slot);
-		public abstract boolean canRecievePower(BlockPos offset);
+		public abstract boolean onBlockActivated(Player player, Hand hand, Vec3i offset);
+		public abstract int getInvSize(Vec3i offset);
+		public abstract boolean isRender(Vec3i offset);
+		public abstract void tick(Vec3i offset);
+		public abstract boolean canInsertItem(Vec3i offset, int slot, ItemStack stack);
+		public abstract boolean isOutputSlot(Vec3i offset, int slot);
+		public abstract int getSlotLimit(Vec3i offset, int slot);
+		public abstract boolean canRecievePower(Vec3i offset);
 		public void onBreak() {
-			for (BlockPos offset : componentPositions) {
-				MultiblockComponent comp = lookup(offset);
-				if (comp == AIR) {
-					continue;
-				}
-				BlockPos pos = getPos(offset);
-				TileMultiblock te = TileMultiblock.get(world, pos);
+			for (Vec3i offset : componentPositions) {
+				Vec3i pos = getPos(offset);
+				TileMultiblock te = world.getBlockEntity(pos, TileMultiblock.class);
 				if (te == null) {
-					world.destroyBlock(pos, true);
+					world.breakBlock(pos, true);
 					continue;
 				}
-				te.onBreak();
+				te.onBreakEvent();
 			}
 		}
 		
 		/*
 		 * Helpers
 		 */
-		protected BlockPos getPos(BlockPos offset) {
+		protected Vec3i getPos(Vec3i offset) {
 			return origin.add(offset.rotate(rot));
 		}
 		
-		protected TileMultiblock getTile(BlockPos offset) {
-			TileMultiblock te = TileMultiblock.get(world, getPos(offset));
+		protected TileMultiblock getTile(Vec3i offset) {
+			TileMultiblock te = world.getBlockEntity(getPos(offset), TileMultiblock.class);
 			if (te == null) {
-				if (!world.isRemote) {
-					ImmersiveRailroading.warn("Multiblock TE is null: %s %s %s %s", getPos(offset), offset, world.isRemote, this.getClass());
+				if (world.isServer) {
+					ImmersiveRailroading.warn("Multiblock TE is null: %s %s %s %s", getPos(offset), offset, world.isClient, this.getClass());
 				}
 				return null;
 			}
 			if (!te.isLoaded()) {
-				if (!world.isRemote) {
-					ImmersiveRailroading.info("Multiblock is still loading: %s %s %s %s", getPos(offset), offset, world.isRemote, this.getClass());
+				if (world.isServer) {
+					ImmersiveRailroading.info("Multiblock is still loading: %s %s %s %s", getPos(offset), offset, world.isClient, this.getClass());
 				}
 				return null;
 			}

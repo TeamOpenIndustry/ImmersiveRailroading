@@ -14,82 +14,61 @@ import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
 import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
 import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.immersiverailroading.library.StockDeathType;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
-import cam72cam.immersiverailroading.util.BufferUtil;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.World;
+import cam72cam.mod.entity.DamageType;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.text.PlayerMessage;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.util.TagCompound;
 
 public class EntityBuildableRollingStock extends EntityRollingStock {
 	private boolean isBuilt = false;
-	private List<ItemComponentType> builtItems = new ArrayList<ItemComponentType>();
-	public EntityBuildableRollingStock(World world, String defID) {
-		super(world, defID);
-	}
-	//TODO PACKET
+	private List<ItemComponentType> builtItems = new ArrayList<>();
+
 	@Override
-	public void readSpawnData(ByteBuf additionalData) {
-		super.readSpawnData(additionalData);
-		setComponents(BufferUtil.readItemComponentTypes(additionalData));
+	public void save(TagCompound data) {
+		super.save(data);
+		data.setBoolean("isBuilt", isBuilt);
+		data.setEnumList("builtItems", builtItems);
+	}
+	
+	@Override
+	public void load(TagCompound data) {
+		super.load(data);
+
+		isBuilt = data.getBoolean("isBuilt");
+		if (isBuilt) {
+			setComponents(this.getDefinition().getItemComponents());
+		} else {
+			setComponents(data.getEnumList("builtItems", ItemComponentType.class));
+		}
 	}
 
 	@Override
-	public void writeSpawnData(ByteBuf buffer) {
-		super.writeSpawnData(buffer);
-		BufferUtil.writeItemComponentTypes(buffer, builtItems);
+	public void saveSpawn(TagCompound data) {
+		super.saveSpawn(data);
+		data.setBoolean("isBuilt", isBuilt);
+		data.setEnumList("builtItems", builtItems);
 	}
-	
+
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbt) {
-		super.writeEntityToNBT(nbt);
-		nbt.setBoolean("isBuilt", this.isBuilt);
-		
-		int[] items = new int[builtItems.size()];
-		for (int i = 0; i < items.length; i ++) {
-			items[i] = builtItems.get(i).ordinal();
-		}
-		
-		nbt.setIntArray("builtItems", items);
-	}
-	
-	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbt) {
-		super.readEntityFromNBT(nbt);
-		
-		isBuilt = nbt.getBoolean("isBuilt");
-		
-		if (isBuilt) {
-			// Grandfathered in
-			this.setComponents(this.getDefinition().getItemComponents());
-		} else {
-			// Partially built
-			List<ItemComponentType> newItems = new ArrayList<ItemComponentType>();
-			
-			int[] items = nbt.getIntArray("builtItems");
-			
-			for (int i = 0; i < items.length; i++) {
-				newItems.add(ItemComponentType.values()[items[i]]);
-			}
-			
-			this.setComponents(newItems);
-		}
+	public void loadSpawn(TagCompound data) {
+		super.loadSpawn(data);
+		isBuilt = data.getBoolean("isBuilt");
+		setComponents(data.getEnumList("builtItems", ItemComponentType.class));
 	}
 	
 	public void setComponents(List<ItemComponentType> items) {
-		this.builtItems = new ArrayList<ItemComponentType>(items);
+		this.builtItems = new ArrayList<>(items);
 		this.isBuilt = false;
 		this.isBuilt = getMissingItemComponents().isEmpty();
 		
-		if (!world.isRemote) {
+		if (getWorld().isServer) {
 			this.sendToObserving(new BuildableStockSyncPacket(this));
 		}
 
@@ -114,7 +93,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 
 	public boolean areWheelsBuilt() {
 		if (this.isBuilt) {
-			return this.isBuilt;
+			return true;
 		}
 		
 		for (ItemComponentType item : this.getMissingItemComponents()) {
@@ -127,7 +106,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	}
 	
 	public List<ItemComponentType> getMissingItemComponents() {
-		List<ItemComponentType> missing = new ArrayList<ItemComponentType>();
+		List<ItemComponentType> missing = new ArrayList<>();
 		if (this.isBuilt) {
 			return missing;
 		}
@@ -142,15 +121,6 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		return missing;
 	}
 
-	public boolean hasAllWheels() {
-		for (ItemComponentType item : this.getMissingItemComponents()) {
-			if (item.isWheelPart()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	public void addComponent(ItemComponentType item) {
 		this.builtItems.add(item);
 		this.isBuilt = getMissingItemComponents().isEmpty();
@@ -163,7 +133,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		this.sendToObserving(new BuildableStockSyncPacket(this));
 	}
 	
-	public void addNextComponent(EntityPlayer player) {
+	public void addNextComponent(Player player) {
 		if (this.isBuilt()) {
 			player.sendMessage(ChatText.STOCK_BUILT.getMessage(this.getDefinition().name()));
 			return;
@@ -182,15 +152,15 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			}
 		}
 		
-		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
-			ItemStack found = player.inventory.getStackInSlot(i);
-			if (found.getItem() == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
+		for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+			ItemStack found = player.getInventory().get(i);
+			if (found.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
 				if (ItemDefinition.getID(found).equals(this.defID)) {
 					if ((player.isCreative() || ItemGauge.get(found) == this.gauge) && !ItemRollingStockComponent.requiresHammering(found)) {
 						ItemComponentType type = ItemComponent.getComponentType(found);
 						if (toAdd.contains(type)) {
 							addComponent(type);
-							player.inventory.decrStackSize(i, 1);
+							player.getInventory().extract(i, 1, false);
 							return;
 						}
 					}
@@ -203,9 +173,9 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		int smallPlates = 0;
 		int wood = 0;
 		
-		for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
-			ItemStack found = player.inventory.getStackInSlot(i);
-			if (found.getItem() == IRItems.ITEM_PLATE) {
+		for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+			ItemStack found = player.getInventory().get(i);
+			if (found.is(IRItems.ITEM_PLATE)) {
 				if (ItemGauge.get(found) == this.gauge) {
 					switch (ItemPlateType.get(found)) {
 					case LARGE:
@@ -222,7 +192,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 					}
 				}
 			}
-			if (found.getItem() == Item.getItemFromBlock(Blocks.PLANKS)) {
+			if (found.is(Fuzzy.WOOD_PLANK)) {
 				wood += found.getCount();
 			}
 		}
@@ -234,10 +204,10 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 					continue;
 				}
 				
-				for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
-					ItemStack found = player.inventory.getStackInSlot(i);
-					if (found.getItem() == Item.getItemFromBlock(Blocks.PLANKS)) {
-						ItemStack itemUsed = player.inventory.decrStackSize(i, woodUsed);
+				for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+					ItemStack found = player.getInventory().get(i);
+					if (found.is(Fuzzy.WOOD_PLANK)) {
+						ItemStack itemUsed = player.getInventory().extract(i, woodUsed, false);
 						
 						woodUsed -= itemUsed.getCount();
 						
@@ -278,12 +248,12 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 				continue;
 			}
 			
-			for (int i = 0; i < player.inventory.getSizeInventory(); i ++) {
-				ItemStack found = player.inventory.getStackInSlot(i);
-				if (found.getItem() == IRItems.ITEM_PLATE) {
+			for (int i = 0; i < player.getInventory().getSlotCount(); i ++) {
+				ItemStack found = player.getInventory().get(i);
+				if (found.is(IRItems.ITEM_PLATE)) {
 					if (ItemGauge.get(found) == this.gauge) {
 						if (ItemPlateType.get(found) == type.getPlateType()) {
-							ItemStack itemUsed = player.inventory.decrStackSize(i, platesUsed);
+							ItemStack itemUsed = player.getInventory().extract(i, platesUsed, false);
 							
 							platesUsed -= itemUsed.getCount();
 							
@@ -329,11 +299,11 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 			} else {
 				str += String.format(" (%d x %s)", component.getWoodCost(gauge, getDefinition()), ChatText.WOOD_PLANKS.toString());
 			}
-			player.sendMessage(new TextComponentString(str));
+			player.sendMessage(PlayerMessage.direct(str));
 		}
 	}
 	
-	public ItemComponentType removeNextComponent(EntityPlayer player) {
+	public ItemComponentType removeNextComponent(Player player) {
 		if (this.isBuilt) {
 			this.onDissassemble();
 		}
@@ -365,12 +335,12 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		this.sendToObserving(new BuildableStockSyncPacket(this));
 		
 		
-		ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
+		ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
 		ItemDefinition.setID(item, defID);
 		ItemGauge.set(item, gauge);
 		ItemComponent.setComponentType(item, toRemove);
-		world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, item));
-		
+		getWorld().dropItem(item, player.getBlockPosition());
+
 		if (this instanceof EntityMoveableRollingStock) {
 			((EntityMoveableRollingStock)this).clearHeightMap();
 		}
@@ -379,42 +349,45 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 	}
 	
 	@Override
-	public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-		if (super.processInitialInteract(player, hand)) {
-			return true;
+	public ClickResult onClick(Player player, Hand hand) {
+		ClickResult clickRes = super.onClick(player, hand);
+		if (clickRes != ClickResult.PASS) {
+			return clickRes;
 		}
-		
-		if (world.isRemote) {
-			return false;
+
+		if (getWorld().isClient) {
+			return ClickResult.PASS;
 		}
-		if (player.getHeldItem(hand).getItem() == IRItems.ITEM_LARGE_WRENCH || player.getHeldItem(hand).getItem() == IRItems.ITEM_ROLLING_STOCK_COMPONENT) {
-			if (!player.isSneaking()) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_LARGE_WRENCH) || player.getHeldItem(hand).is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
+			if (!player.isCrouching()) {
 				addNextComponent(player);
 			} else {
 				this.removeNextComponent(player);
 			}
-			return true;
+			return ClickResult.ACCEPTED;
 		}
-		return false;
+        return ClickResult.PASS;
 	}
 	
 	@Override
-	public void onDeath(StockDeathType type) {
-		super.onDeath(type);
-		
-		if (this.isBuilt && type != StockDeathType.CATACYSM) {
-			ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK, 1, 0);
-			ItemDefinition.setID(item, defID);
-			ItemGauge.set(item, gauge);
-			ItemTextureVariant.set(item, texture);
-			world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
-		} else {
-			for (ItemComponentType component : this.builtItems) {
-				ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1, 0);
+    public void onDamage(DamageType type, Entity source, float amount) {
+		super.onDamage(type, source, amount);
+
+		if (this.isDead() && shouldDropItems(type, amount)) {
+			if (isBuilt) {
+				ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK, 1);
 				ItemDefinition.setID(item, defID);
 				ItemGauge.set(item, gauge);
-				ItemComponent.setComponentType(item, component);
-				world.spawnEntity(new EntityItem(world, posX, posY, posZ, item));
+				ItemTextureVariant.set(item, sync.getString("texture"));
+				getWorld().dropItem(item, source.getBlockPosition());
+			} else {
+				for (ItemComponentType component : this.builtItems) {
+					ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
+					ItemDefinition.setID(item, defID);
+					ItemGauge.set(item, gauge);
+					ItemComponent.setComponentType(item, component);
+					getWorld().dropItem(item, source.getBlockPosition());
+				}
 			}
 		}
 	}

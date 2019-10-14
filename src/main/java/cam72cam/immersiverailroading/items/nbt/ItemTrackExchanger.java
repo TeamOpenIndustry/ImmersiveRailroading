@@ -1,12 +1,12 @@
 package cam72cam.immersiverailroading.items.nbt;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.util.TagCompound;
 
 public class ItemTrackExchanger {
 	public static void set(ItemStack stack, String track) {
 		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
+			stack.setTagCompound(new TagCompound());
 		}
 		stack.getTagCompound().setString("track", track);
 	}

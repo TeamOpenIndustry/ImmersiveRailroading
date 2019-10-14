@@ -8,61 +8,52 @@ import cam72cam.immersiverailroading.items.nbt.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.net.ItemTrackExchangerUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.gui.Button;
+import cam72cam.mod.gui.IScreen;
+import cam72cam.mod.gui.IScreenBuilder;
+import cam72cam.mod.util.Hand;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class TrackExchangerGui extends GuiScreen {
-	private GuiButton trackSelector;
+public class TrackExchangerGui implements IScreen {
+	private Button trackSelector;
 	
 	private String track;
-	private int slot;
 	
 	public TrackExchangerGui () {
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		this.slot = player.inventory.currentItem;
+		Player player = MinecraftClient.getPlayer();
 		
-		String track = ItemTrackExchanger.get(player.getHeldItemMainhand());
+		String track = ItemTrackExchanger.get(player.getHeldItem(Hand.PRIMARY));
 		if (track != null) this.track = track;
 		else this.track = DefinitionManager.getTrack("").name;
 	}
-	
+
 	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		this.drawDefaultBackground();
-		super.drawScreen(mouseX, mouseY, partialTicks);
+	public void init(IScreenBuilder screen) {
+		trackSelector = new Button(screen, -100, -10, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name)) {
+			@Override
+			public void onClick(Hand hand) {
+				List<String> defs = DefinitionManager.getTrackIDs();
+				int idx = defs.indexOf(TrackExchangerGui.this.track);
+				idx = (idx + 1) % defs.size();
+				TrackExchangerGui.this.track = defs.get(idx);
+				trackSelector.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(TrackExchangerGui.this.track).name));
+			}
+		};
+		screen.addButton(trackSelector);
 	}
 
 	@Override
-	public boolean doesGuiPauseGame() {
-		return false;
+	public void onEnterKey(IScreenBuilder builder) {
+		builder.close();
 	}
 
 	@Override
-	public void initGui() {
-		trackSelector = new GuiButton(0, this.width / 2 - 100, this.height / 2 - 10, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name));
-		this.buttonList.add(trackSelector);
+	public void onClose() {
+		new ItemTrackExchangerUpdatePacket(this.track).sendToServer();
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
-		if (button == trackSelector) {
-			List<String> defs = DefinitionManager.getTrackIDs();
-			int idx = defs.indexOf(this.track);
-			idx = (idx + 1) % defs.size();
-			this.track = defs.get(idx);
-			trackSelector.displayString = GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name);
-		}
-	}
-	@Override
-	protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        // Enter or ESC
-        if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
-        	ImmersiveRailroading.net.sendToServer(new ItemTrackExchangerUpdatePacket(this.slot, this.track));
-        	
-			this.mc.displayGuiScreen(null);
-			if (this.mc.currentScreen == null) this.mc.setIngameFocus();
-        }
-	}
+	public void draw(IScreenBuilder builder) {}
 }

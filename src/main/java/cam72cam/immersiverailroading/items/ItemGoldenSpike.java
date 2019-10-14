@@ -2,68 +2,64 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.*;
-//TODO buildcraft.api.tools.IToolWrench
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import cam72cam.mod.item.*;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
+import cam72cam.mod.world.World;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.util.Hand;
 
-public class ItemGoldenSpike extends Item {
-	public static final String NAME = "item_golden_spike";
-	
+public class ItemGoldenSpike extends ItemBase {
 	public ItemGoldenSpike() {
-		super();
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        this.setCreativeTab(ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_golden_spike", 1, ItemTabs.MAIN_TAB);
+
+		Fuzzy gold = Fuzzy.GOLD_INGOT;
+		Recipes.register(this, 2,
+				gold, gold, gold, null, gold, null);
 	}
-	
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+
+	@Override
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack held = player.getHeldItem(hand);
-		if (world.getBlockState(pos).getBlock() == IRBlocks.BLOCK_RAIL_PREVIEW) {
+		if (world.isBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW)) {
 			setPosition(held, pos);
-			world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f, false);
+			Audio.playSound(pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f);
 		} else {
 			pos = pos.up();
 			
-			BlockPos tepos = getPosition(held);
+			Vec3i tepos = getPosition(held);
 			if (tepos != null) {
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || TileRailBase.get(world, pos.down()).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}
-				TileRailPreview tr = TileRailPreview.get(world, tepos);
+				TileRailPreview tr = world.getBlockEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
-					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getRotationYawHead(), pos, hitX, hitY, hitZ));
+					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), pos, hit));
 				}
 			}
 		}
-		//TODO
-		return EnumActionResult.SUCCESS;
+		return ClickResult.PASS;
 	}
 
-	public static BlockPos getPosition(ItemStack stack) {
-		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("pos")) { 
-			return NBTUtil.getPosFromTag(stack.getTagCompound().getCompoundTag("pos"));
+	public static Vec3i getPosition(ItemStack stack) {
+		if (stack.getTagCompound().hasKey("pos")) {
+			return stack.getTagCompound().getVec3i("pos");
 		} else {
 			return null;
 		}
 	}
 	
-	public static void setPosition(ItemStack stack, BlockPos pos) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setTag("pos", NBTUtil.createPosTag(pos));
+	public static void setPosition(ItemStack stack, Vec3i pos) {
+		stack.getTagCompound().setVec3i("pos", pos);
 	}
 }

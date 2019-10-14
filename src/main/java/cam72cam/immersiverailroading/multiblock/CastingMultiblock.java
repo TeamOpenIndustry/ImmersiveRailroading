@@ -1,68 +1,64 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import java.util.List;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
-import cam72cam.immersiverailroading.util.ParticleUtil;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
+import cam72cam.mod.energy.IEnergy;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Rotation;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.World;
+import cam72cam.mod.world.World.ParticleType;
+
+import java.util.List;
 
 public class CastingMultiblock extends Multiblock {
-	private static MultiblockComponent STONE = new MultiblockComponent(Blocks.STONEBRICK);
-	private static MultiblockComponent SAND = new MultiblockComponent(Blocks.SAND);
+	private static Fuzzy STONE = Fuzzy.STONE_BRICK;
+	private static Fuzzy SAND = Fuzzy.SAND;
 	public static final String NAME = "CASTING";
-	private static final BlockPos render = new BlockPos(3,3,7);
-	private static final BlockPos fluid = new BlockPos(3,3,3);
-	private static final BlockPos craft = new BlockPos(3,2,3);
-	private static final BlockPos output = new BlockPos(3,2,14);
-	private static final BlockPos power = new BlockPos(3,7,0);
+	private static final Vec3i render = new Vec3i(3,3,7);
+	private static final Vec3i fluid = new Vec3i(3,3,3);
+	private static final Vec3i craft = new Vec3i(3,2,3);
+	private static final Vec3i output = new Vec3i(3,2,14);
+	private static final Vec3i power = new Vec3i(3,7,0);
 	public static final double max_volume = 5 * 4 * 4.5 * 9;
 
-	private static MultiblockComponent[][][] cast_blueprint() {
-		MultiblockComponent[][][] bp = new MultiblockComponent[7+16][][];
+	private static Fuzzy[][][] cast_blueprint() {
+		Fuzzy[][][] bp = new Fuzzy[7+16][][];
 		for (int z = 0; z < 7; z++) {
-			MultiblockComponent[] base = new MultiblockComponent[] { AIR, AIR, AIR, AIR, AIR, AIR, AIR };
+			Fuzzy[] base = new Fuzzy[] { AIR, AIR, AIR, AIR, AIR, AIR, AIR };
 			if (z > 0 && z < 6) {
 				if (z > 1 && z < 5) {
-					base = new MultiblockComponent[] { AIR, S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), AIR };
+					base = new Fuzzy[] { AIR, S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), AIR };
 				} else {
-					base = new MultiblockComponent[] { AIR, AIR, S_SCAF(), S_SCAF(), S_SCAF(), AIR, AIR };
+					base = new Fuzzy[] { AIR, AIR, S_SCAF(), S_SCAF(), S_SCAF(), AIR, AIR };
 				}
 			}
 			
 
-			MultiblockComponent[] top = new MultiblockComponent[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
-			MultiblockComponent[] topfirst = new MultiblockComponent[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
+			Fuzzy[] top = new Fuzzy[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
+			Fuzzy[] topfirst = new Fuzzy[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
 			if (z > 0 && z < 6) {
 				if (z > 1 && z < 5) {
-					top = new MultiblockComponent[] { CASING(), AIR, AIR, AIR, AIR, AIR, CASING() };
-					topfirst = new MultiblockComponent[] { CASING(), CASING(), CASING(), H_ENG(), CASING(), CASING(), CASING() };
+					top = new Fuzzy[] { CASING(), AIR, AIR, AIR, AIR, AIR, CASING() };
+					topfirst = new Fuzzy[] { CASING(), CASING(), CASING(), H_ENG(), CASING(), CASING(), CASING() };
 				} else {
-					top = new MultiblockComponent[] { AIR, CASING(), AIR, AIR, AIR, CASING(), AIR };
-					topfirst = new MultiblockComponent[] { AIR, CASING(), CASING(), H_ENG(), CASING(), CASING(), AIR };
+					top = new Fuzzy[] { AIR, CASING(), AIR, AIR, AIR, CASING(), AIR };
+					topfirst = new Fuzzy[] { AIR, CASING(), CASING(), H_ENG(), CASING(), CASING(), AIR };
 				}
 			}
 
-			bp[z] = new MultiblockComponent[8][];
+			bp[z] = new Fuzzy[8][];
 			for (int y = 0; y < 8; y++) {
 				if (y < 3) {
 					bp[z][y] = base;
@@ -76,20 +72,20 @@ public class CastingMultiblock extends Multiblock {
 		
 		for (int z = 7; z < 7+16; z++) {
 			if (z == 7) {
-				bp[z] = new MultiblockComponent[][] {
+				bp[z] = new Fuzzy[][] {
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, AIR, AIR, STEEL(), AIR, AIR, AIR },
 				};
 			} else if (z == 7+16-1) {
-				bp[z] = new MultiblockComponent[][] {
+				bp[z] = new Fuzzy[][] {
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 				};
 			} else {
-				bp[z] = new MultiblockComponent[][] {
+				bp[z] = new Fuzzy[][] {
 					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
 					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
 					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
@@ -105,22 +101,22 @@ public class CastingMultiblock extends Multiblock {
 	}
 	
 	@Override
-	public BlockPos placementPos() {
-		return new BlockPos(3, 0, 0);
+	public Vec3i placementPos() {
+		return new Vec3i(3, 0, 0);
 	}
 
 	@Override
-	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {
+	protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
 		return new CastingInstance(world, origin, rot);
 	}
 	public class CastingInstance extends MultiblockInstance {
 		
-		public CastingInstance(World world, BlockPos origin, Rotation rot) {
+		public CastingInstance(World world, Vec3i origin, Rotation rot) {
 			super(world, origin, rot);
 		}
 
 		@Override
-		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
+		public boolean onBlockActivated(Player player, Hand hand, Vec3i offset) {
 			TileMultiblock outTe = getTile(output);
 			if (outTe == null) {
 				return false;
@@ -129,32 +125,32 @@ public class CastingMultiblock extends Multiblock {
 			if (craftTe == null) {
 				return false;
 			}
-			if (!outTe.getContainer().getStackInSlot(0).isEmpty()) {
-				if (!world.isRemote) {
-					world.spawnEntity(new EntityItem(world, player.posX, player.posY, player.posZ, outTe.getContainer().getStackInSlot(0)));
-					outTe.getContainer().setStackInSlot(0, ItemStack.EMPTY);
+			if (!outTe.getContainer().get(0).isEmpty()) {
+				if (world.isServer) {
+					world.dropItem(outTe.getContainer().get(0), player.getPosition());
+					outTe.getContainer().set(0, ItemStack.EMPTY);
 				}
 			} else {
-				if (world.isRemote) {
-					BlockPos pos = getPos(craft);
-					player.openGui(ImmersiveRailroading.instance, GuiTypes.CASTING.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
+				if (world.isClient) {
+					Vec3i pos = getPos(craft);
+					ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.CASTING);
 				}
 			}
 			return true;
 		}
 
 		@Override
-		public boolean isRender(BlockPos offset) {
+		public boolean isRender(Vec3i offset) {
 			return render.equals(offset);
 		}
 
 		@Override
-		public int getInvSize(BlockPos offset) {
+		public int getInvSize(Vec3i offset) {
 			return output.equals(offset) ? 1 : 0;
 		}
 
 		@Override
-		public void tick(BlockPos offset) {
+		public void tick(Vec3i offset) {
 			
 			TileMultiblock powerTe = getTile(power);
 			
@@ -162,17 +158,17 @@ public class CastingMultiblock extends Multiblock {
 				return;
 			}
 			
-			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
+			IEnergy energy = powerTe.getEnergy(null);
 			
-			if (world.isRemote) {
-				if (offset.getZ() > 7 && offset.getY() > 1 && isPouring()) {
-					Vec3d pos = new Vec3d(getPos(offset).add(0, 1, 0)).addVector(0.5, 0.5, 0.5);
+			if (world.isClient) {
+				if (offset.z > 7 && offset.y > 1 && isPouring()) {
+					Vec3d pos = new Vec3d(getPos(offset)).add(0, 1, 0).add(0.5, 0.5, 0.5);
 					if (Math.random() < 0.01) {
-						ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, pos);
-						ParticleUtil.spawnParticle(world, EnumParticleTypes.SMOKE_NORMAL, pos);
+						world.createParticle(ParticleType.SMOKE, pos, Vec3d.ZERO);
+						world.createParticle(ParticleType.SMOKE, pos, Vec3d.ZERO);
 					}
 					if (Math.random() < 0.001) {
-						world.playSound(pos.x, pos.y, pos.z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f, false);
+						Audio.playSound(pos, StandardSound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f);
 					}
 				}
 				
@@ -184,36 +180,34 @@ public class CastingMultiblock extends Multiblock {
 				if (fluidTe == null) {
 					return;
 				}
-				AxisAlignedBB bb = new AxisAlignedBB(getPos(offset.add(0, 1, 0))).grow(3, 0, 3);
-				List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, bb);
-				for (EntityItem item : items) {
-					if (!hasPower()) {
-						break;
-					}
-					ItemStack stack = item.getItem();
+
+				List<ItemStack> dropped = world.getDroppedItems(IBoundingBox.from(getPos(offset.add(0, 1, 0))).grow(new Vec3d(3, 0, 3)));
+				for (ItemStack stack : dropped) {
 					ItemStack craftStack = stack.copy();
 					int cost = ItemCastingCost.getCastCost(craftStack);
 					if (cost != ItemCastingCost.BAD_CAST_COST) {
 						cost /= craftStack.getCount();
 
-						while(stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + cost) {
+						while (stack.getCount() != 0 && fluidTe.getCraftProgress() < max_volume + cost) {
 							if (!hasPower()) {
 								break;
 							}
-							energy.extractEnergy(32, false);
+							energy.extract(32, false);
 							stack.shrink(1);
 							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + cost);
 						}
 					} else {
 						if (fluidTe.getCraftProgress() > 0) {
-							world.removeEntity(item);
+							stack.setCount(0);
 						}
 					}
 				}
+                /* TODO
 				List<EntityLivingBase> living = world.getEntitiesWithinAABB(EntityLivingBase.class, bb.expand(0,2.5,0));
 				for (EntityLivingBase alive : living) {
 					alive.attackEntityFrom(new DamageSource("immersiverailroading:casting"), 5);
 				}
+				*/
 			}
 			
 			if (offset.equals(craft)) {
@@ -244,7 +238,7 @@ public class CastingMultiblock extends Multiblock {
 					return;
 				}
 
-				if (! outTe.getContainer().getStackInSlot(0).isEmpty()) {
+				if (! outTe.getContainer().get(0).isEmpty()) {
 					return;
 				}
 				
@@ -258,7 +252,7 @@ public class CastingMultiblock extends Multiblock {
 					if (mode == CraftingMachineMode.SINGLE) {
 						craftTe.setCraftMode(CraftingMachineMode.STOPPED);
 					}
-					outTe.getContainer().setStackInSlot(0, item.copy());
+					outTe.getContainer().set(0, item.copy());
 				} else {
 					if (craftTe.getRenderTicks() % 10 == 0) {
 						if (fluidTe.getCraftProgress() > 0) {
@@ -271,27 +265,27 @@ public class CastingMultiblock extends Multiblock {
 			}
 			
 			if (offset.equals(power)) {
-				energy.extractEnergy(32, false);
+				energy.extract(32, false);
 			}
 		}
 
 		@Override
-		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
+		public boolean canInsertItem(Vec3i offset, int slot, ItemStack stack) {
 			return false;
 		}
 
 		@Override
-		public boolean isOutputSlot(BlockPos offset, int slot) {
+		public boolean isOutputSlot(Vec3i offset, int slot) {
 			return false;
 		}
 
 		@Override
-		public int getSlotLimit(BlockPos offset, int slot) {
+		public int getSlotLimit(Vec3i offset, int slot) {
 			return output.equals(offset) ? 1 : 0;
 		}
 
 		@Override
-		public boolean canRecievePower(BlockPos offset) {
+		public boolean canRecievePower(Vec3i offset) {
 			return offset.equals(power);
 		}
 
@@ -300,8 +294,7 @@ public class CastingMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-			return energy.getEnergyStored() > 32;
+			return powerTe.getEnergy(null).getCurrent() > 32;
 		}
 
 		public boolean isPouring() {

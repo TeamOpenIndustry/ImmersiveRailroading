@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 

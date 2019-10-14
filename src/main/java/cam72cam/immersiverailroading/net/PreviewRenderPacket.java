@@ -1,56 +1,40 @@
 package cam72cam.immersiverailroading.net;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.render.tile.MultiPreviewRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BufferUtil;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.net.Packet;
+import cam72cam.mod.world.World;
 
 /*
  * Movable rolling stock sync packet
  */
-public class PreviewRenderPacket implements IMessage {
-
-	private int dimension;
-	private TileRailPreview preview;
+public class PreviewRenderPacket extends Packet {
 
 	public PreviewRenderPacket() {
-		// Reflect constructor
+		// Forge Reflection
 	}
-
 	public PreviewRenderPacket(TileRailPreview preview) {
-		this.dimension = preview.getWorld().provider.getDimension();
-		this.preview = preview;
+		data.setTile("preview", preview);
+	}
+	public PreviewRenderPacket(World world, Vec3i removed) {
+		data.setVec3i("removed", removed);
+		data.setWorld("world", world);
 	}
 
 	@Override
-	public void toBytes(ByteBuf buf) {
-		buf.writeInt(dimension);
-		ByteBufUtils.writeTag(buf, preview.writeToNBT(new NBTTagCompound()));
-	}
-
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		dimension = buf.readInt();
-		preview = new TileRailPreview();
-		preview.readFromNBT(ByteBufUtils.readTag(buf));
-	}
-	public static class Handler implements IMessageHandler<PreviewRenderPacket, IMessage> {
-		@Override
-		public IMessage onMessage(PreviewRenderPacket message, MessageContext ctx) {
-			FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-			return null;
+	public void handle() {
+		if (data.hasKey("removed")) {
+			MultiPreviewRender.remove(data.getWorld("world", true), data.getVec3i("removed"));
 		}
 
-		private void handle(PreviewRenderPacket message, MessageContext ctx) {
-			ImmersiveRailroading.proxy.addPreview(message.dimension, message.preview);
+
+		TileRailPreview preview = data.getTile("preview", true);
+
+		if (preview == null || preview.world != getPlayer().getWorld()) {
+			return;
 		}
+
+		MultiPreviewRender.add(preview);
 	}
 }

@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.library;
 
-import net.minecraft.item.EnumDyeColor;
+import cam72cam.mod.render.Color;
 
 public enum Augment {
 	SPEED_RETARDER,
@@ -14,27 +14,27 @@ public enum Augment {
 	COUPLER,
 	;
 	
-	public EnumDyeColor tempColor() {
+	public Color color() {
 		switch (this) {
 		case DETECTOR:
-			return EnumDyeColor.RED;
+			return Color.RED;
 		case FLUID_LOADER:
-			return EnumDyeColor.BLUE;
+			return Color.BLUE;
 		case FLUID_UNLOADER:
-			return EnumDyeColor.LIGHT_BLUE;
+			return Color.LIGHT_BLUE;
 		case ITEM_LOADER:
-			return EnumDyeColor.GREEN;
+			return Color.GREEN;
 		case ITEM_UNLOADER:
-			return EnumDyeColor.LIME;
+			return Color.LIME;
 		case LOCO_CONTROL:
-			return EnumDyeColor.BLACK;
+			return Color.BLACK;
 		case SPEED_RETARDER:
-			return EnumDyeColor.GRAY;
+			return Color.GRAY;
 		case WATER_TROUGH:
-			return EnumDyeColor.CYAN;
+			return Color.CYAN;
 		case COUPLER:
-			return EnumDyeColor.ORANGE;
+			return Color.ORANGE;
 		}
-		return null;
+		return Color.WHITE;
 	}
 }

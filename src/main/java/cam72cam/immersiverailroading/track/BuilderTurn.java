@@ -1,13 +1,12 @@
 package cam72cam.immersiverailroading.track;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.util.math.BlockPos;
+import cam72cam.mod.math.Vec3i;
 import util.Matrix4;
 
 public class BuilderTurn extends BuilderCubicCurve {
-    public BuilderTurn(RailInfo info, BlockPos pos) {
+    public BuilderTurn(RailInfo info, Vec3i pos) {
         super(info, pos);
     }
 
@@ -24,7 +23,7 @@ public class BuilderTurn extends BuilderCubicCurve {
 
         double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
         if (height != 0) {
-            curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.addVector(0, height, 0), curve.p2.addVector(0, height, 0));
+            curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0));
         }
         return curve;
     }

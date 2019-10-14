@@ -3,26 +3,25 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.track.BuilderSwitch;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 
 public class SwitchUtil {
-	public static SwitchState getSwitchState(TileRail rail) {
+	public static SwitchState getSwitchState(Rail rail) {
 		return getSwitchState(rail, null);
 	}
 
-	public static SwitchState getSwitchState(TileRail rail, Vec3d position) {
+	public static SwitchState getSwitchState(Rail rail, Vec3d position) {
 		if (rail == null) {
 			return SwitchState.NONE;
 		}
 		if (!rail.isLoaded()) {
 			return SwitchState.NONE;
 		}
-		TileRail parent = rail.getParentTile();
+		Rail parent = rail.getParentTile();
 		if (parent == null || !parent.isLoaded()) {
 			return SwitchState.NONE;
 		}
@@ -59,7 +58,7 @@ public class SwitchUtil {
 		return SwitchState.STRAIGHT;
 	}
 
-	public static boolean isRailPowered(TileRail rail) {
+	public static boolean isRailPowered(Rail rail) {
 		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
 		double horiz = rail.info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
@@ -68,10 +67,10 @@ public class SwitchUtil {
 		int scale = (int)Math.round(horiz);
 		for (int x = -scale; x <= scale; x++) {
 			for (int z = -scale; z <= scale; z++) {
-				BlockPos gagPos = new BlockPos(redstoneOrigin.add(new Vec3d(x, 0, z)));
-				TileRailBase gagRail = TileRailBase.get(rail.getWorld(), gagPos);
-				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
-					if (rail.getWorld().isBlockIndirectlyGettingPowered(gagPos) > 0) {
+				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
+				RailBase gagRail = rail.world.getBlockEntity(gagPos, RailBase.class);
+				if (gagRail != null && (rail.pos.equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
+					if (rail.world.getRedstone(gagPos) > 0) {
 						return true;
 					}
 				}

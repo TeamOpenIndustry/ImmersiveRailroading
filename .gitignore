@@ -1,5 +1,4 @@
 # eclipse
-bin
 *.launch
 .settings
 .metadata
@@ -14,8 +13,8 @@ out
 .idea
 
 # gradle
+*gradle*
 build
-.gradle
 
 # other
 eclipse
@@ -25,3 +24,9 @@ run
 *.skb
 
 *.jar
+
+# Projects
+TrackAPI
+ImmersiveRailroadingIntegration
+UniversalModCore
+src/main/java/cam72cam/immersiverailroading/Mod.java

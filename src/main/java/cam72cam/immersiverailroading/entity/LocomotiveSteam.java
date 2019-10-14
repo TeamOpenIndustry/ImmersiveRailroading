@@ -1,10 +1,5 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.ConfigGraphics;
@@ -17,50 +12,43 @@ import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.registry.Quilling.Chime;
-import cam72cam.immersiverailroading.sound.ISound;
+import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.LiquidUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
-import net.minecraftforge.fluids.*;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidStack;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.TagCompound;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
-	private static DataParameter<Float> BOILER_PRESSURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
+	private final static String BOILER_PRESSURE  = "BOILER_PRESSURE";
 	// Celsius
-	private static DataParameter<Float> BOILER_TEMPERATURE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.FLOAT);
+	private final static String BOILER_TEMPERATURE  = "BOILER_TEMPERATURE";
 
-	private static DataParameter<Boolean> PRESSURE_VALVE = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.BOOLEAN);
+	private final static String PRESSURE_VALVE  = "PRESSURE_VALVE";
 	
 	// Map<Slot, TicksToBurn>
-	private static DataParameter<NBTTagCompound> BURN_TIME = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
-	private static DataParameter<NBTTagCompound> BURN_MAX = EntityDataManager.createKey(LocomotiveSteam.class, DataSerializers.COMPOUND_TAG);
+	private final static String BURN_TIME  = "BURN_TIME";
+	private final static String BURN_MAX  = "BURN_MAX";
 	private double driverDiameter;
 	
-	public LocomotiveSteam(World world) {
-		this(world, null);
-	}
-
-	public LocomotiveSteam(World world, String defID) {
-		super(world, defID);
-		
-		this.getDataManager().register(BOILER_PRESSURE, 0f);
-		this.getDataManager().register(BOILER_TEMPERATURE, ambientTemperature());
-		this.getDataManager().register(PRESSURE_VALVE, false);
-		this.getDataManager().register(BURN_TIME, new NBTTagCompound());
-		this.getDataManager().register(BURN_MAX, new NBTTagCompound());
-		
+	public LocomotiveSteam() {
+        sync.setFloat(BOILER_PRESSURE, 0f);
+        sync.setFloat(BOILER_TEMPERATURE, ambientTemperature());
+        sync.setBoolean(PRESSURE_VALVE, false);
+        sync.set(BURN_TIME, new TagCompound());
+        sync.set(BURN_MAX, new TagCompound());
 	}
 
 	@Override
@@ -69,33 +57,31 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public GuiTypes guiType() {
+	public GuiRegistry.GUIType guiType() {
 		return GuiTypes.STEAM_LOCOMOTIVE;
 	}
 	
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeEntityToNBT(nbttagcompound);
-		nbttagcompound.setFloat("boiler_temperature", getBoilerTemperature());
-		nbttagcompound.setFloat("boiler_psi", getBoilerPressure());
-		nbttagcompound.setTag("burn_time", dataManager.get(BURN_TIME));
-		nbttagcompound.setTag("burn_max", dataManager.get(BURN_MAX));
+	public void save(TagCompound data) {
+		super.save(data);
+		data.setFloat("boiler_temperature", getBoilerTemperature());
+		data.setFloat("boiler_psi", getBoilerPressure());
+		data.set("burn_time", sync.get(BURN_TIME));
+		data.set("burn_max", sync.get(BURN_MAX));
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readEntityFromNBT(nbttagcompound);
-		setBoilerTemperature(nbttagcompound.getFloat("boiler_temperature"));
-		setBoilerPressure(nbttagcompound.getFloat("boiler_psi"));
-		dataManager.set(BURN_TIME, (NBTTagCompound) nbttagcompound.getTag("burn_time"));
-		dataManager.set(BURN_MAX, (NBTTagCompound) nbttagcompound.getTag("burn_max"));
-		
-
+	public void load(TagCompound data) {
+		super.load(data);
+		setBoilerTemperature(data.getFloat("boiler_temperature"));
+		setBoilerPressure(data.getFloat("boiler_psi"));
+		sync.set(BURN_TIME, data.get("burn_time"));
+		sync.set(BURN_MAX, data.get("burn_max"));
 	}
 	
 	@Override
-	public void readSpawnData(ByteBuf additionalData) {
-		super.readSpawnData(additionalData);
+	public void loadSpawn(TagCompound data) {
+		super.loadSpawn(data);
 
 		List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
 		if (driving != null) {
@@ -112,45 +98,38 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	public float getBoilerTemperature() {
-		return this.dataManager.get(BOILER_TEMPERATURE);
+		return this.sync.getFloat(BOILER_TEMPERATURE);
 	}
 	private void setBoilerTemperature(float temp) {
-		this.dataManager.set(BOILER_TEMPERATURE, temp);
+		this.sync.setFloat(BOILER_TEMPERATURE, temp);
 	}
 	
 	public float getBoilerPressure() {
-		return this.dataManager.get(BOILER_PRESSURE);
+		return this.sync.getFloat(BOILER_PRESSURE);
 	}
 	private void setBoilerPressure(float temp) {
-		this.dataManager.set(BOILER_PRESSURE, temp);
+		this.sync.setFloat(BOILER_PRESSURE, temp);
 	}
-	
-	private NBTTagCompound mapToNBT(Map<Integer, Integer> map) {
-		NBTTagCompound data = new NBTTagCompound();
-		for (Integer slot : map.keySet()) {
-			data.setInteger("" + slot, map.get(slot));
-		}
-		return data;
-	}
-	private Map<Integer, Integer> NBTtoMap(NBTTagCompound nbt) {
-		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-		for (String key : nbt.getKeySet()) {
-			map.put(Integer.parseInt(key), nbt.getInteger(key));
-		}
-		return map;
-	}
-	
+
 	public Map<Integer, Integer> getBurnTime() {
-		return NBTtoMap(this.dataManager.get(BURN_TIME));
+		return sync.getMap(BURN_TIME, Integer::parseInt, (TagCompound tag) -> tag.getInteger("val"));
 	}
 	private void setBurnTime(Map<Integer, Integer> burnTime) {
-		this.dataManager.set(BURN_TIME, mapToNBT(burnTime));
+		sync.setMap(BURN_TIME, burnTime, Object::toString, (Integer i) -> {
+			TagCompound tag = new TagCompound();
+			tag.setInteger("val", i);
+			return tag;
+		});
 	}
 	public Map<Integer, Integer> getBurnMax() {
-		return NBTtoMap(this.dataManager.get(BURN_MAX));
+		return sync.getMap(BURN_MAX, Integer::parseInt, (TagCompound tag) -> tag.getInteger("val"));
 	}
 	private void setBurnMax(Map<Integer, Integer> burnMax) {
-		this.dataManager.set(BURN_MAX, mapToNBT(burnMax));
+		sync.setMap(BURN_MAX, burnMax, Object::toString, (Integer i) -> {
+			TagCompound tag = new TagCompound();
+			tag.setInteger("val", i);
+			return tag;
+		});
 	}
 	
 	
@@ -197,11 +176,11 @@ public class LocomotiveSteam extends Locomotive {
 		return phase;
 	}
 	
-	private Map<String, Boolean> phaseOn = new HashMap<String, Boolean>();
-	private List<ISound> sndCache = new ArrayList<ISound>();
+	private Map<String, Boolean> phaseOn = new HashMap<>();
+	private List<ISound> sndCache = new ArrayList<>();
 	private int sndCacheId = 0;
 	private ISound whistle;
-	private List<ISound> chimes = new ArrayList<ISound>();
+	private List<ISound> chimes = new ArrayList<>();
 	private float pullString = 0;
 	private float soundDampener = 0;
 	private ISound idle;
@@ -209,40 +188,40 @@ public class LocomotiveSteam extends Locomotive {
 
 	private int tickMod = 0;
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void onTick() {
+		super.onTick();
 		
-		if (this.ticksExisted < 2) {
+		if (this.getTickCount() < 2) {
 			// Prevent explosions
 			return;
 		}
 
-		if (world.isRemote) {
+		if (getWorld().isClient) {
 			// Particles and Sound
 			
 			if (ConfigSound.soundEnabled) {
 				if (this.sndCache.size() == 0) {
-					this.whistle = ImmersiveRailroading.proxy.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
-					this.bell = ImmersiveRailroading.proxy.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
+					this.whistle = ImmersiveRailroading.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
+					this.bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 					whistle.setPitch(1);
 					
 					if (this.getDefinition().quill != null) {
 						for (Chime chime : this.getDefinition().quill.chimes) {
-							this.chimes.add(ImmersiveRailroading.proxy.newSound(chime.sample, true, 150, this.soundGauge()));
+							this.chimes.add(ImmersiveRailroading.newSound(chime.sample, true, 150, this.soundGauge()));
 						}
 					}
 	
 					for (int i = 0; i < 32; i ++) {
-						sndCache.add(ImmersiveRailroading.proxy.newSound(this.getDefinition().chuff, false, 80, this.soundGauge()));
+						sndCache.add(ImmersiveRailroading.newSound(this.getDefinition().chuff, false, 80, this.soundGauge()));
 					}
 					
-					this.idle = ImmersiveRailroading.proxy.newSound(this.getDefinition().idle, true, 40, this.soundGauge());
+					this.idle = ImmersiveRailroading.newSound(this.getDefinition().idle, true, 40, this.soundGauge());
 					idle.setVolume(0.1f);
-					this.pressure = ImmersiveRailroading.proxy.newSound(this.getDefinition().pressure, true, 40, this.soundGauge());
+					this.pressure = ImmersiveRailroading.newSound(this.getDefinition().pressure, true, 40, this.soundGauge());
 					pressure.setVolume(0.3f);
 				}
 				
-				if (this.getDataManager().get(HORN) < 1) {
+				if (sync.getInteger(HORN) < 1) {
 					pullString = 0;
 					soundDampener = 0;
 					for (ISound chime : chimes) {
@@ -254,25 +233,25 @@ public class LocomotiveSteam extends Locomotive {
 					if (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge)) {
 						if (this.getDefinition().quill == null) {
 							if (!this.whistle.isPlaying()) {
-								this.whistle.play(getPositionVector());
+								this.whistle.play(getPosition());
 							}
 						} else {
 							float maxDelta = 1/20f;
 							float delta = 0;
-							if (this.getDataManager().get(HORN) > 5) {
+							if (sync.getInteger(HORN) > 5) {
 								if (soundDampener < 0.4) {
 									soundDampener = 0.4f;
 								}
 								if (soundDampener < 1) {
 									soundDampener += 0.1;
 								}
-								if (this.getDataManager().get(HORN_PLAYER).isPresent()) {
+								if (sync.getUUID(HORN_PLAYER) != null) {
 									for (Entity pass : this.getPassengers()) {
-										if (!pass.getPersistentID().equals(this.getDataManager().get(HORN_PLAYER).get())) {
+										if (!pass.getUUID().equals(sync.getUUID(HORN_PLAYER))) {
 											continue;
 										}
 										
-										float newString = (pass.rotationPitch+90) / 180;
+										float newString = (pass.getRotationPitch()+90) / 180;
 										delta = newString - pullString;
 									}
 								} else {
@@ -313,7 +292,7 @@ public class LocomotiveSteam extends Locomotive {
 									sound.setVolume((float) (perc * soundDampener));
 									
 									if (!sound.isPlaying()) {
-										sound.play(getPositionVector());
+										sound.play(getPosition());
 									}
 								} else {
 									if (sound.isPlaying()) {
@@ -327,7 +306,7 @@ public class LocomotiveSteam extends Locomotive {
 				
 				if (this.getBoilerTemperature() > this.ambientTemperature() + 5) {
 					if (!idle.isPlaying()) {
-						idle.play(getPositionVector());
+						idle.play(getPosition());
 					}
 				} else {
 					if (idle.isPlaying()) {
@@ -338,15 +317,15 @@ public class LocomotiveSteam extends Locomotive {
 			
 			double phase;
 			
-			Vec3d fakeMotion = new Vec3d(this.motionX, this.motionY, this.motionZ);//VecUtil.fromWrongYaw(this.getCurrentSpeed().minecraft(), this.rotationYaw);
+			Vec3d fakeMotion = this.getVelocity();
 			
 			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
 				for (RenderComponent smoke : smokes) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateWrongYaw(smoke.center(), this.rotationYaw + 180));
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(smoke.center(), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
-					if (this.ticksExisted % 1 == 0 ) {
+					if (this.getTickCount() % 1 == 0 ) {
 						float darken = 0;
 						float thickness = Math.abs(this.getThrottle())/2;
 						for (int i : this.getBurnTime().values()) {
@@ -373,22 +352,19 @@ public class LocomotiveSteam extends Locomotive {
 						}
 						
 						particlePos = particlePos.subtract(fakeMotion);
-						
-						EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan , darken, thickness, size);
-						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-						sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
-						world.spawnEntity(sp);
+
+						addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
 					}
 				}
 			}
 			
 			List<RenderComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE, gauge);
 			if (	whistles != null &&
-					(this.getDataManager().get(HORN) != 0 || whistle != null && whistle.isPlaying()) && 
+					(sync.getInteger(HORN) != 0 || whistle != null && whistle.isPlaying()) &&
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
 				) {
 				for (RenderComponent whistle : whistles) {
-					Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateWrongYaw(whistle.center(), this.rotationYaw + 180));
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(whistle.center(), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 					
 					float darken = 0;
@@ -399,18 +375,15 @@ public class LocomotiveSteam extends Locomotive {
 					double size = 0.3 * (0.8 + smokeMod);
 
 					particlePos = particlePos.subtract(fakeMotion);
-					
-					EntitySmokeParticle sp = new EntitySmokeParticle(world, lifespan, darken, thickness, size);
-					sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-					sp.setVelocity(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z);
-					world.spawnEntity(sp);
+
+					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
 				}
 			}
 			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
 			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 				for (RenderComponent piston : pistons) {
-					float phaseOffset = 0;
+					float phaseOffset;
 					double tickDelt;
 					switch (piston.side) {
 					case "LEFT":
@@ -449,9 +422,7 @@ public class LocomotiveSteam extends Locomotive {
 					double phaseSpike = Math.pow(phase, 4);
 					
 					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
-						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateWrongYaw(piston.min(), this.rotationYaw + 180));
-						EntitySmokeParticle sp = new EntitySmokeParticle(world, 80, 0, 0.6f, 0.2);
-						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
+						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(piston.min(), this.getRotationYaw() + 180));
 						double accell = 0.3 * gauge.scale();
 						if (piston.side.contains("LEFT")) {
 							accell = -accell;
@@ -459,9 +430,8 @@ public class LocomotiveSteam extends Locomotive {
 						if (piston.side.contains("CENTER") ) {
 							accell = 0;
 						}
-						Vec3d sideMotion = fakeMotion.add(VecUtil.fromWrongYaw(accell, this.rotationYaw+90));
-						sp.setVelocity(sideMotion.x, sideMotion.y+0.01, sideMotion.z);
-						world.spawnEntity(sp);
+						Vec3d sideMotion = fakeMotion.add(VecUtil.fromWrongYaw(accell, this.getRotationYaw()+90));
+						addSmoke(particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01, sideMotion.z), 80, 0, 0.6f, 0.2);
 					}
 					
 					if (!ConfigSound.soundEnabled) {
@@ -480,7 +450,7 @@ public class LocomotiveSteam extends Locomotive {
 							if (phase > 0.5) {
 						    	double speed = Math.abs(getCurrentSpeed().minecraft());
 						    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-						    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.max(0.3f, Math.abs(this.getThrottle()));
+						    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(this.getThrottle());
 						    	volume = (float) Math.sqrt(volume);
 						    	double fraction = 3;
 						    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
@@ -488,7 +458,7 @@ public class LocomotiveSteam extends Locomotive {
 						    	ISound snd = sndCache.get(sndCacheId);
 						    	snd.setPitch(pitch + delta);
 						    	snd.setVolume(volume + delta);
-						    	snd.play(getPositionVector());
+						    	snd.play(getPosition());
 						    	sndCacheId++;
 						    	sndCacheId = sndCacheId % sndCache.size();
 								phaseOn.put(key, true);
@@ -508,20 +478,17 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
-			if (steams != null && (this.getDataManager().get(PRESSURE_VALVE) && Config.isFuelRequired(gauge))) {
+			if (steams != null && (sync.getBoolean(PRESSURE_VALVE) && Config.isFuelRequired(gauge))) {
 				if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
 					if (!pressure.isPlaying()) {
-						pressure.play(getPositionVector());
+						pressure.play(getPosition());
 					}
 				}
 				if (ConfigGraphics.particlesEnabled) {
 					for (RenderComponent steam : steams) {
-						Vec3d particlePos = this.getPositionVector().add(VecUtil.rotateWrongYaw(steam.center(), this.rotationYaw + 180));
+						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(steam.center(), this.getRotationYaw() + 180));
 						particlePos = particlePos.subtract(fakeMotion);
-						EntitySmokeParticle sp = new EntitySmokeParticle(world, 40, 0, 0.2f, steam.width());
-						sp.setPosition(particlePos.x, particlePos.y, particlePos.z);
-						sp.setVelocity(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z);
-						world.spawnEntity(sp);
+						addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z),40, 0, 0.2f, steam.width());
 					}
 				}
 			} else {
@@ -533,31 +500,30 @@ public class LocomotiveSteam extends Locomotive {
 			if (ConfigSound.soundEnabled) {
 				// Update sound positions
 				if (whistle.isPlaying()) {
-					whistle.setPosition(getPositionVector());
+					whistle.setPosition(getPosition());
 					whistle.setVelocity(getVelocity());
 					whistle.update();
 				}
 				for (ISound chime : chimes) {
 					if (chime.isPlaying()) {
-						chime.setPosition(getPositionVector());
+						chime.setPosition(getPosition());
 						chime.setVelocity(getVelocity());
 						chime.update();
 					}
 				}
 				if (idle.isPlaying()) {
-					idle.setPosition(getPositionVector());
+					idle.setPosition(getPosition());
 					idle.setVelocity(getVelocity());
 					idle.update();
 				}
 				if (pressure.isPlaying()) {
-					pressure.setPosition(getPositionVector());
+					pressure.setPosition(getPosition());
 					pressure.setVelocity(getVelocity());
 					pressure.update();
 				}
-				for (int i = 0; i < sndCache.size(); i ++) {
-					ISound snd = sndCache.get(i);
+				for (ISound snd : sndCache) {
 					if (snd.isPlaying()) {
-						snd.setPosition(getPositionVector());
+						snd.setPosition(getPosition());
 						snd.setVelocity(getVelocity());
 						snd.update();
 					}
@@ -577,18 +543,18 @@ public class LocomotiveSteam extends Locomotive {
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
-				FluidUtil.tryFluidTransfer(this.theTank, tender.theTank, desiredDrain, true);
+				theTank.tryDrain(tender.theTank, desiredDrain, false);
 			}
 			
-			if (this.ticksExisted % 20 == 0) {
+			if (this.getTickCount() % 20 == 0) {
 				// Top off stacks
-				for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
-					if (BurnUtil.getBurnTime(this.cargoItems.getStackInSlot(slot)) != 0) {
-						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlots(); tenderSlot ++) {
-							if (this.cargoItems.getStackInSlot(slot).isItemEqual(tender.cargoItems.getStackInSlot(tenderSlot))) {
-								if (this.cargoItems.getStackInSlot(slot).getMaxStackSize() > this.cargoItems.getStackInSlot(slot).getCount()) {
-									ItemStack extracted = tender.cargoItems.extractItem(tenderSlot, 1, false);
-									this.cargoItems.insertItem(slot, extracted, false);
+				for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
+					if (BurnUtil.getBurnTime(this.cargoItems.get(slot)) != 0) {
+						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlotCount(); tenderSlot ++) {
+							if (this.cargoItems.get(slot).equals(tender.cargoItems.get(tenderSlot))) {
+								if (this.cargoItems.get(slot).getLimit() > this.cargoItems.get(slot).getCount()) {
+									ItemStack extracted = tender.cargoItems.extract(tenderSlot, 1, false);
+									this.cargoItems.insert(slot, extracted, false);
 								}
 							}
 						}
@@ -602,24 +568,24 @@ public class LocomotiveSteam extends Locomotive {
 		float waterLevelMB = this.getLiquidAmount();
 		Map<Integer, Integer> burnTime = getBurnTime();
 		Map<Integer, Integer> burnMax = getBurnMax();
-		Boolean changedBurnTime = false;
-		Boolean changedBurnMax = false;
+		boolean changedBurnTime = false;
+		boolean changedBurnMax = false;
 		int burningSlots = 0;
 		float waterUsed = 0;
 		
 		if (this.getLiquidAmount() > 0) {
-			for (int slot = 0; slot < this.cargoItems.getSlots()-2; slot ++) {
-				int remainingTime = burnTime.containsKey(slot) ? burnTime.get(slot) : 0;
+			for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
+				int remainingTime = burnTime.getOrDefault(slot, 0);
 				if (remainingTime <= 0) {
-					ItemStack stack = this.cargoItems.getStackInSlot(slot);
-					if (stack.getCount() <= 0 || !TileEntityFurnace.isItemFuel(stack)) {
+					ItemStack stack = this.cargoItems.get(slot);
+					if (stack.getCount() <= 0 || BurnUtil.getBurnTime(stack) == 0) {
 						continue;
 					}
-					remainingTime = (int) (BurnUtil.getBurnTime(stack) * 1/gauge.scale() * (Config.ConfigBalance.locoSteamFuelEfficiency / 100.0));
+					remainingTime = (int) (BurnUtil.getBurnTime(stack) /gauge.scale() * (Config.ConfigBalance.locoSteamFuelEfficiency / 100.0));
 					burnTime.put(slot, remainingTime);
 					burnMax.put(slot, remainingTime);
 					stack.setCount(stack.getCount()-1);
-					this.cargoItems.setStackInSlot(slot, stack);
+					this.cargoItems.set(slot, stack);
 					changedBurnMax = true;
 				} else {
 					burnTime.put(slot, remainingTime - 1);
@@ -670,7 +636,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			// Pressure relief valve
 			int maxPSI = this.getDefinition().getMaxPSI(gauge);
-			this.getDataManager().set(PRESSURE_VALVE, boilerPressure > maxPSI);
+			sync.setBoolean(PRESSURE_VALVE, boilerPressure > maxPSI);
 			if (boilerPressure > maxPSI) {
 				waterUsed += boilerPressure - maxPSI; 
 				boilerPressure = maxPSI;
@@ -682,15 +648,15 @@ public class LocomotiveSteam extends Locomotive {
 				boilerTemperature = 100;
 			}
 
-			this.getDataManager().set(PRESSURE_VALVE, false);
+			sync.setBoolean(PRESSURE_VALVE, false);
 		}
 		
 		float throttle = Math.abs(getThrottle());
 		if (throttle != 0 && boilerPressure > 0) {
-			double burnableSlots = this.cargoItems.getSlots()-2;
+			double burnableSlots = this.cargoItems.getSlotCount()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
 			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
-			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen capability to balance heat loss
+			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss
 			
 			float delta = (float) (throttle * maxPressureTick);
 			
@@ -700,12 +666,12 @@ public class LocomotiveSteam extends Locomotive {
 		
 		if (waterUsed != 0) {
 			if (waterUsed > 0) {
-				theTank.drain((int) Math.floor(waterUsed), true);
+				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.ceil(waterUsed)), false);
 				waterUsed = waterUsed % 1;
 			}
 			// handle remainder
 			if (Math.random() <= waterUsed) {
-				theTank.drain(1, true);
+				theTank.drain(new FluidStack(Fluid.WATER, 1), false);
 			}
 		}
 		
@@ -723,26 +689,17 @@ public class LocomotiveSteam extends Locomotive {
 			// Half max pressure and high boiler temperature
 			//EXPLODE
 
+			Vec3d pos = this.getPosition();
 			if (Config.ConfigDamage.explosionsEnabled) {
-				if (Config.ConfigDamage.explosionEnvDamageEnabled) {
-					for (int i = 0; i < 5; i++) {
-						world.createExplosion(this, this.posX, this.posY, this.posZ, boilerPressure/8, true);
-					}
-				} else {
-					for (int i = 0; i < 5; i++) {
-						Explosion explosion = new Explosion(this.world, this, this.posX, this.posY, this.posZ, boilerPressure/5, false, false);
-						explosion.doExplosionA();
-						explosion.doExplosionB(true);
-					}
-				}
+				this.createExplosion(pos, boilerPressure/5, Config.ConfigDamage.explosionEnvDamageEnabled);
 			}
-			world.removeEntity(this);
+			getWorld().removeEntity(this);
 		}
 	}
 
 	@Override
-	public void setDead() {
-		super.setDead();
+	public void onRemoved() {
+		super.onRemoved();
 
 		for (ISound chime : chimes) {
 			chime.stop();
@@ -759,8 +716,8 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	protected void initContainerFilter() {
 		cargoItems.filter.clear();
-		this.cargoItems.filter.put(getInventorySize()-2, SlotFilter.FLUID_CONTAINER);
-		this.cargoItems.filter.put(getInventorySize()-1, SlotFilter.FLUID_CONTAINER);
+		this.cargoItems.filter.put(0, SlotFilter.FLUID_CONTAINER);
+		this.cargoItems.filter.put(1, SlotFilter.FLUID_CONTAINER);
 		this.cargoItems.defaultFilter = SlotFilter.BURNABLE;
 	}
 
@@ -775,11 +732,11 @@ public class LocomotiveSteam extends Locomotive {
 	
 	@Override
 	protected int[] getContainerInputSlots() {
-		return new int[] { getInventorySize()-2 };
+		return new int[] { 0 };
 	}
 	@Override
 	protected int[] getContainertOutputSlots() {
-		return new int[] { getInventorySize()-1 };
+		return new int[] { 1 };
 	}
 
 	@Override
@@ -799,7 +756,6 @@ public class LocomotiveSteam extends Locomotive {
 		double coalEnergyBTU = coalEnergyKJ * 0.958; // 1 KJ = 0.958 BTU
 		double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
 		double coalBurnTicks = 1600; // This is a bit of fudge
-		double coalEnergyKCalTick = coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
-		return coalEnergyKCalTick;
+		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
 	}
 }

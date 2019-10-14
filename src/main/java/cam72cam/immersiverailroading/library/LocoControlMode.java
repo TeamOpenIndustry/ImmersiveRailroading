@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.library;
 
-import cam72cam.immersiverailroading.util.TextUtil;
+import cam72cam.mod.text.TextUtil;
 
 public enum LocoControlMode {
 	THROTTLE_FORWARD,

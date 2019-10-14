@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import cam72cam.immersiverailroading.util.TextUtil;
+import cam72cam.mod.text.TextUtil;
 import trackapi.lib.Gauges;
 
 public class Gauge {

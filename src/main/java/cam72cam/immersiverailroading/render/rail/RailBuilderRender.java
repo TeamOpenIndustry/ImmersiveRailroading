@@ -1,18 +1,14 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.immersiverailroading.model.obj.OBJModel;
-import cam72cam.immersiverailroading.proxy.ClientProxy;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.DisplayListCache;
-import cam72cam.immersiverailroading.render.OBJRender;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import util.Matrix4;
@@ -34,13 +30,11 @@ public class RailBuilderRender {
 
         Integer displayList = displayLists.get(info.uniqueID);
         if (displayList == null) {
+            displayList = GL11.glGenLists(1);
+            GL11.glNewList(displayList, GL11.GL_COMPILE);
 
-            if (!ClientProxy.renderCacheLimiter.canRender()) {
-                return;
-            }
-
-            displayList = ClientProxy.renderCacheLimiter.newList(() -> {
-                GL11.glPushMatrix();
+            GL11.glPushMatrix();
+            {
 
                 for (VecYawPitch piece : info.getBuilder().getRenderData()) {
                     Matrix4 m = new Matrix4();
@@ -58,21 +52,21 @@ public class RailBuilderRender {
 
                     m.transpose();
                     FloatBuffer fbm = BufferUtils.createFloatBuffer(16);
-                    fbm.put(new float [] {
-                            (float)m.m00, (float)m.m01, (float)m.m02, (float)m.m03,
-                            (float)m.m10, (float)m.m11, (float)m.m12, (float)m.m13,
-                            (float)m.m20, (float)m.m21, (float)m.m22, (float)m.m23,
-                            (float)m.m30, (float)m.m31, (float)m.m32, (float)m.m33
+                    fbm.put(new float[]{
+                            (float) m.m00, (float) m.m01, (float) m.m02, (float) m.m03,
+                            (float) m.m10, (float) m.m11, (float) m.m12, (float) m.m13,
+                            (float) m.m20, (float) m.m21, (float) m.m22, (float) m.m23,
+                            (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
                     });
                     fbm.flip();
-                    GL11.glMultMatrix(fbm);
+                    GlobalRender.mulMatrix(fbm);
 
 
                     if (piece.getGroups().size() != 0) {
                         // TODO static
                         ArrayList<String> groups = new ArrayList<String>();
                         for (String baseGroup : piece.getGroups()) {
-                            for (String groupName : trackRenderer.model.groups())  {
+                            for (String groupName : trackRenderer.model.groups()) {
                                 if (groupName.contains(baseGroup)) {
                                     groups.add(groupName);
                                 }
@@ -94,23 +88,23 @@ public class RailBuilderRender {
                                 (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
                         });
                         fbm.flip();
-                        GL11.glMultMatrix(fbm);
+                        GlobalRender.mulMatrix(fbm);
                     } catch (SingularMatrixException e) {
                         // Some weird math happened.  Do this the slow way and reset the matrix
                         GL11.glPopMatrix();
                         GL11.glPushMatrix();
                     }
                 }
-                GL11.glPopMatrix();
-
-            });
+            }
+            GL11.glPopMatrix();
+            GL11.glEndList();
             displayLists.put(info.uniqueID, displayList);
         }
 
         trackRenderer.bindTexture();
-        Minecraft.getMinecraft().mcProfiler.startSection("dl");
+        MinecraftClient.startProfiler("dl");
         GL11.glCallList(displayList);
-        Minecraft.getMinecraft().mcProfiler.endSection();;
+        MinecraftClient.endProfiler();
         trackRenderer.restoreTexture();
     }
 }

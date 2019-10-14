@@ -1,47 +1,39 @@
 package cam72cam.immersiverailroading.gui;
 
-import java.io.IOException;
-import java.util.List;
-import javax.annotation.Nullable;
-
-import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
-import com.google.common.base.Predicate;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.OreHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.init.Items;
-import net.minecraftforge.fml.client.config.GuiCheckBox;
-import net.minecraftforge.fml.client.config.GuiSlider;
-import net.minecraftforge.oredict.OreDictionary;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.gui.*;
+import cam72cam.mod.gui.helpers.GUIHelpers;
+import cam72cam.mod.gui.helpers.ItemPickerGUI;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.util.Hand;
+import com.google.common.base.Predicate;
+import org.lwjgl.opengl.GL11;
 
-public class TrackGui extends GuiScreen {
-	private GuiButton typeButton;
-	private GuiTextField lengthInput;
-	private GuiSlider quartersSlider;
-	private GuiCheckBox isPreviewCB;
-	private GuiCheckBox isGradeCrossingCB;
-	private GuiButton gaugeButton;
-	private GuiButton trackButton;
+import java.util.ArrayList;
+import java.util.List;
 
-	private int slot;
+public class TrackGui implements IScreen {
+	private TileRailPreview te;
+	private Button typeButton;
+	private TextField lengthInput;
+	private Slider quartersSlider;
+	private CheckBox isPreviewCB;
+	private CheckBox isGradeCrossingCB;
+	private Button gaugeButton;
+	private Button trackButton;
+	private Button posTypeButton;
+	private Button directionButton;
+	private Button bedTypeButton;
+	private Button bedFillButton;
+
 	private int length;
 	private int quarters;
 	private Gauge gauge;
@@ -51,45 +43,33 @@ public class TrackGui extends GuiScreen {
 	private TrackItems type;
 	private TrackPositionType posType;
 	private TrackDirection direction;
-	private GuiButton posTypeButton;
-	private GuiButton directionButton;
-	private GuiButton bedTypeButton;
-	private ItemPickerGUI bedSelector;
-	private GuiButton bedFillButton;
-	private ItemPickerGUI bedFillSelector;
+	private ItemStack bed;
+	private ItemStack bedFill;
+	List<ItemStack> oreDict;
 
-	private final Predicate<String> integerFilter = new Predicate<String>() {
-		@Override
-		public boolean apply(@Nullable String inputString) {
-			if (StringUtils.isNullOrEmpty(inputString)) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(inputString);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			return val > 0 && val <= 1000;
+	private final Predicate<String> integerFilter = inputString -> {
+		if (inputString == null || inputString.length() == 0) {
+			return true;
 		}
+		int val;
+		try {
+			val = Integer.parseInt(inputString);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return val > 0 && val <= 1000;
 	};
-	private BlockPos tilePreviewPos;
 
 	public TrackGui() {
-		slot = Minecraft.getMinecraft().player.inventory.currentItem;
-		ItemStack stack = Minecraft.getMinecraft().player.getHeldItemMainhand();
-		init(stack);
+		this(MinecraftClient.getPlayer().getHeldItem(Hand.PRIMARY));
 	}
 
-	public TrackGui(World world, int posX, int posY, int posZ) {
-		this.tilePreviewPos = new BlockPos(posX, posY, posZ);
-		TileRailPreview te = TileRailPreview.get(world, tilePreviewPos);
-		if (te != null) {
-			init(te.getItem());
-		}
+	public TrackGui(TileRailPreview te) {
+        this(te.getItem());
+        this.te = te;
 	}
 
-	private void init(ItemStack stack) {
+	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		RailSettings settings = ItemTrackBlueprint.settings(stack);
 		length = settings.length;
@@ -101,194 +81,168 @@ public class TrackGui extends GuiScreen {
 		direction = settings.direction;
 		isPreview = settings.isPreview;
 		isGradeCrossing = settings.isGradeCrossing;
-		NonNullList<ItemStack> oreDict = NonNullList.create();
+		bed = settings.railBed;
+		bedFill = settings.railBedFill;
+		oreDict = new ArrayList<>();
 
 		//if (!DefinitionManager.getTrackIDs().contains(type)) {
-		//	track = DefinitionManager.getTrackIDs().stream().findFirst().get();
+		//	track = DefinitionManager.getTrackIDs().stream().findFirst().getContents();
 		//}
 		
-		oreDict.add(new ItemStack(Items.AIR));
-		
-		for (ItemStack ore : OreHelper.IR_RAIL_BED.getOres()) {
-			if (ore.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
-				ore.getItem().getSubItems(ore.getItem().getCreativeTab(), oreDict);
-			} else {
-				oreDict.add(ore);
+		oreDict.add(ItemStack.EMPTY);
+
+		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
+	}
+
+	public String getStackName(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return GuiText.NONE.toString();
+		}
+		return stack.getDisplayName();
+	}
+
+	public void init(IScreenBuilder screen) {
+		trackButton = new Button(screen, 0 - 100, -24 + 0 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name)) {
+			@Override
+			public void onClick(Hand hand) {
+				List<String> defs = DefinitionManager.getTrackIDs();
+				int idx = defs.indexOf(track);
+				idx = (idx + 1) % defs.size();
+				track = defs.get(idx);
+				trackButton.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
 			}
-		}
-		bedSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
-			bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
-			this.mc.displayGuiScreen(this);
-		});
-		bedSelector.choosenItem = settings.railBed;
-		bedFillSelector = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
-			bedTypeButton.displayString = GuiText.SELECTOR_RAIL_BED.toString(getBedstackName());
-			this.mc.displayGuiScreen(this);
-		});
-		bedFillSelector.choosenItem = settings.railBedFill;
-	}
+		};
 
-	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		this.drawDefaultBackground();
-        this.lengthInput.drawTextBox();
-		super.drawScreen(mouseX, mouseY, partialTicks);
-	}
-	
-	@Override
-	public void updateScreen()
-    {
-        this.lengthInput.updateCursorCounter();
-    }
+		typeButton = new Button(screen, 0 - 100, -24 + 1 * 22 - 1, GuiText.SELECTOR_TYPE.toString(type)) {
+			@Override
+			public void onClick(Hand hand) {
+				type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
+				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
+				quartersSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+			}
+		};
 
-	@Override
-	public boolean doesGuiPauseGame() {
-		return false;
-	}
-	
-	@Override
-	public void setWorldAndResolution(Minecraft mc, int width, int height) {
-		super.setWorldAndResolution(mc, width, height);
-		bedSelector.setWorldAndResolution(mc, width, height);
-		bedFillSelector.setWorldAndResolution(mc, width, height);
-	}
-	
-	@Override
-	public void setGuiSize(int w, int h) {
-		super.setGuiSize(w, h);
-		bedSelector.setGuiSize(w, h);
-		bedFillSelector.setGuiSize(w, h);
-	}
-	
-	public String getBedstackName() {
-		if (bedSelector.choosenItem.getItem() != Items.AIR) {
-			return bedSelector.choosenItem.getDisplayName();
-		}
-		return GuiText.NONE.toString();
-	}
-	public String getBedFillName() {
-		if (bedFillSelector.choosenItem.getItem() != Items.AIR) {
-			return bedFillSelector.choosenItem.getDisplayName();
-		}
-		return GuiText.NONE.toString();
-	}
-
-	@Override
-	public void initGui() {
-		int buttonID = 0;
-
-		trackButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
-		this.buttonList.add(trackButton);
-
-		typeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22-1, GuiText.SELECTOR_TYPE.toString(type));
-		this.buttonList.add(typeButton);
-
-		this.lengthInput = new GuiTextField(buttonID++, this.fontRenderer, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, 200, 20);
+		this.lengthInput = new TextField(screen, 0 - 100,  - 24 + 2 * 22, 200, 20);
 		this.lengthInput.setText("" + length);
-		this.lengthInput.setMaxStringLength(5);
 		this.lengthInput.setValidator(this.integerFilter);
 		this.lengthInput.setFocused(true);
 
-		this.quartersSlider = new GuiSlider(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+1, "", 1, 4, quarters,
-				null) {
+		this.quartersSlider = new Slider(screen, 0 - 75,  - 24 + 3 * 22+1, "", 1, 4, quarters, false) {
 			@Override
-			public void updateSlider() {
-				super.updateSlider();
-				displayString = GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/4));
+			public void onSlider() {
+				quartersSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/4)));
 			}
 		};
-		quartersSlider.updateSlider();
-		quartersSlider.showDecimal = false;
-		quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
-		this.buttonList.add(quartersSlider);
-		
-		bedTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_RAIL_BED.toString(getBedstackName()));
-		this.buttonList.add(bedTypeButton);
+		quartersSlider.onSlider();
+		quartersSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
 
-		bedFillButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getBedFillName()));
-		this.buttonList.add(bedFillButton);
-		
-		posTypeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_POSITION.toString(posType));
-		this.buttonList.add(posTypeButton);
-		
-		directionButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_DIRECTION.toString(direction));
-		this.buttonList.add(directionButton);
-		
-		gaugeButton = new GuiButton(buttonID++, this.width / 2 - 100, this.height / 8 - 24 + buttonID * 22, GuiText.SELECTOR_GAUGE.toString(gauge));
-		this.buttonList.add(gaugeButton);
+		bedTypeButton = new Button(screen, 0 - 100, -24 + 4 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed))) {
+			@Override
+			public void onClick(Hand hand) {
+				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
+					if (bed != null) {
+						TrackGui.this.bed = bed;
+						bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed)));
+					}
+					screen.show();
+				});
+				ip.choosenItem = bed;
+				ip.show();
+			}
+		};
 
-		isPreviewCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview);
-		this.buttonList.add(isPreviewCB);
+		bedFillButton = new Button(screen, 0 - 100, -24 + 5 * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill))) {
+			@Override
+			public void onClick(Hand hand) {
+				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
+					if (bed != null) {
+						TrackGui.this.bedFill = bed;
+						bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill)));
+					}
+					screen.show();
+				});
+				ip.choosenItem = bedFill;
+				ip.show();
+			}
+		};
 
-		isGradeCrossingCB = new GuiCheckBox(buttonID++, this.width / 2 - 75, this.height / 8 - 24 + buttonID * 22+4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing);
-		this.buttonList.add(isGradeCrossingCB);
-		
-		bedSelector.initGui();
+		posTypeButton = new Button(screen, 0 - 100, -24 + 6 * 22, GuiText.SELECTOR_POSITION.toString(posType)) {
+			@Override
+			public void onClick(Hand hand) {
+				posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
+				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(posType));
+			}
+		};
+
+		directionButton = new Button(screen, 0 - 100, -24 + 7 * 22, GuiText.SELECTOR_DIRECTION.toString(direction)) {
+			@Override
+			public void onClick(Hand hand) {
+				direction = TrackDirection.values()[((direction.ordinal() + 1) % (TrackDirection.values().length))];
+				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(direction));
+			}
+		};
+
+		gaugeButton = new Button(screen, 0 - 100, -24 + 8 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
+			@Override
+			public void onClick(Hand hand) {
+				gauge = gauge.next();
+				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
+			}
+		};
+
+		isPreviewCB = new CheckBox(screen, -75, -24 + 9 * 22 + 4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview) {
+			@Override
+			public void onClick(Hand hand) {
+				isPreview = isPreviewCB.isChecked();
+			}
+		};
+
+		isGradeCrossingCB = new CheckBox(screen, 0 - 75, -24 + 10 * 22 + 4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing) {
+			@Override
+			public void onClick(Hand hand) {
+				isGradeCrossing = isGradeCrossingCB.isChecked();
+			}
+		};
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
-		if (button == typeButton) {
-			type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
-			typeButton.displayString = GuiText.SELECTOR_TYPE.toString(type);
-			quartersSlider.visible = type == TrackItems.SWITCH || type == TrackItems.TURN;
-		}
-		if (button == gaugeButton) {
-			gauge = gauge.next();
-			gaugeButton.displayString = GuiText.SELECTOR_GAUGE.toString(gauge);
-		}
-		if (button == trackButton) {
-			List<String> defs = DefinitionManager.getTrackIDs();
-			int idx = defs.indexOf(track);
-			idx = (idx + 1) % defs.size();
-			track = defs.get(idx);
-			trackButton.displayString = GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name);
-		}
-		if (button == posTypeButton) {
-			posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
-			posTypeButton.displayString = GuiText.SELECTOR_POSITION.toString(posType);
-		}
-		if (button == directionButton) {
-			direction = TrackDirection.values()[((direction.ordinal() + 1) % (TrackDirection.values().length))];
-			directionButton.displayString = GuiText.SELECTOR_DIRECTION.toString(direction);
-		}
-		if (button == bedTypeButton) {
-			this.mc.displayGuiScreen(bedSelector);
-		}
-		if (button == bedFillButton) {
-			this.mc.displayGuiScreen(bedFillSelector);
-		}
-		if (button == isPreviewCB) {
-			isPreview = isPreviewCB.isChecked();
-		}
-		if (button == isGradeCrossingCB) {
-			isGradeCrossing = isGradeCrossingCB.isChecked();
+	public void onEnterKey(IScreenBuilder builder) {
+		builder.close();
+	}
+
+	@Override
+	public void onClose() {
+		if (!this.lengthInput.getText().isEmpty()) {
+			RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bed, bedFill, isPreview, isGradeCrossing);
+			if (this.te != null) {
+				new ItemRailUpdatePacket(te.pos, settings).sendToServer();
+			} else {
+				new ItemRailUpdatePacket(settings).sendToServer();
+			}
 		}
 	}
+
 	@Override
-	protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        this.lengthInput.textboxKeyTyped(typedChar, keyCode);
-        // Enter or ESC
-        if (keyCode == 1 || keyCode == 28 || keyCode == 156) {
-        	if (!this.lengthInput.getText().isEmpty()) {
-				RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bedSelector.choosenItem, bedFillSelector.choosenItem, isPreview, isGradeCrossing);
-        		if (this.tilePreviewPos != null) {
-    				ImmersiveRailroading.net.sendToServer(
-    						new ItemRailUpdatePacket(tilePreviewPos, settings));
-        		} else {
-				ImmersiveRailroading.net.sendToServer(
-						new ItemRailUpdatePacket(slot, settings));
-        		}
-        	}
-			this.mc.displayGuiScreen(null);
-			if (this.mc.currentScreen == null)
-				this.mc.setIngameFocus();
-        }
+	public void draw(IScreenBuilder builder) {
+		if (lengthInput.getText().isEmpty()) {
+			return;
+		}
+		int scale = 8;
+
+		// This could be more efficient...
+		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, direction, bed, bedFill, isPreview, isGradeCrossing);
+		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
+		ItemTrackBlueprint.settings(stack, settings);
+		GL11.glPushMatrix();
+		GL11.glTranslated(GUIHelpers.getScreenWidth()/2 + builder.getWidth()/4,  builder.getHeight() / 4, 0);
+		GL11.glScaled(scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0);
+		GL11.glPopMatrix();
+		GL11.glPushMatrix();
+		GL11.glTranslated(GUIHelpers.getScreenWidth()/2 - builder.getWidth()/4,  builder.getHeight() / 4, 0);
+		GL11.glScaled(-scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0);
+		GL11.glPopMatrix();
 	}
-	@Override
-	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
-    {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        this.lengthInput.mouseClicked(mouseX, mouseY, mouseButton);
-    }
+
 }

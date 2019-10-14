@@ -1,21 +1,19 @@
 package cam72cam.immersiverailroading.track;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.TileRail;
-import net.minecraft.util.math.BlockPos;
+import cam72cam.immersiverailroading.tile.Rail;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.mod.math.Vec3i;
 
 public class TrackRail extends TrackBase {
 
-	public TrackRail(BuilderBase builder, BlockPos rel) {
+	public TrackRail(BuilderBase builder, Vec3i rel) {
 		super(builder, rel, IRBlocks.BLOCK_RAIL);
 	}
 
 	@Override
-	public TileEntity placeTrack(boolean actuallyPlace) {
-		TileRail tileRail = (TileRail) super.placeTrack(actuallyPlace);
+	public RailBase placeTrack(boolean actuallyPlace) {
+		Rail tileRail = (Rail) super.placeTrack(actuallyPlace);
 
 		tileRail.info = builder.info;
 		tileRail.setDrops(builder.drops);

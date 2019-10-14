@@ -4,8 +4,8 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.util.TagCompound;
 
 public class RailSettings {
     public final Gauge gauge;
@@ -34,7 +34,7 @@ public class RailSettings {
         this.isGradeCrossing = isGradeCrossing;
     }
 
-    public RailSettings(NBTTagCompound nbt) {
+    public RailSettings(TagCompound nbt) {
         if (nbt.hasKey("gauge")) {
             gauge = Gauge.from(nbt.getDouble("gauge"));
             track = nbt.getString("track");
@@ -43,8 +43,8 @@ public class RailSettings {
             quarters = nbt.hasKey("quarters") ? nbt.getInteger("quarters") : 4;
             posType = TrackPositionType.values()[nbt.getInteger("pos_type")];
             direction = TrackDirection.values()[nbt.getInteger("direction")];
-            railBed = new ItemStack(nbt.getCompoundTag("bedItem"));
-            railBedFill = new ItemStack(nbt.getCompoundTag("bedFill"));
+            railBed = new ItemStack(nbt.get("bedItem"));
+            railBedFill = new ItemStack(nbt.get("bedFill"));
             isPreview = nbt.getBoolean("isPreview");
             isGradeCrossing = nbt.getBoolean("isGradeCrossing");
         } else {
@@ -62,8 +62,8 @@ public class RailSettings {
         }
     }
 
-    public NBTTagCompound toNBT() {
-        NBTTagCompound nbt = new NBTTagCompound();
+    public TagCompound toNBT() {
+        TagCompound nbt = new TagCompound();
         nbt.setDouble("gauge", gauge.value());
         nbt.setString("track", track);
         nbt.setInteger("type", type.ordinal());
@@ -71,8 +71,8 @@ public class RailSettings {
         nbt.setInteger("quarters", quarters);
         nbt.setInteger("pos_type", posType.ordinal());
         nbt.setInteger("direction", direction.ordinal());
-        nbt.setTag("bedItem", railBed.serializeNBT());
-        nbt.setTag("bedFill", railBedFill.serializeNBT());
+        nbt.set("bedItem", railBed.toTag());
+        nbt.set("bedFill", railBedFill.toTag());
         nbt.setBoolean("isPreview", isPreview);
         nbt.setBoolean("isGradeCrossing", isGradeCrossing);
         return nbt;

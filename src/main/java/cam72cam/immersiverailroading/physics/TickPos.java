@@ -1,9 +1,8 @@
 package cam72cam.immersiverailroading.physics;
 
-import cam72cam.immersiverailroading.util.BufferUtil;
 import cam72cam.immersiverailroading.util.Speed;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.TagCompound;
 
 public class TickPos {
 	public int tickID;
@@ -19,10 +18,6 @@ public class TickPos {
 	public float rotationYaw;
 	public float rotationPitch;
 
-	
-	public TickPos() {
-	}
-	
 	public TickPos(int tickPosID, Speed speed, Vec3d position, float frontYaw, float rearYaw, float rotationYaw, float rotationPitch, boolean isOffTrack) {
 		this.tickID = tickPosID;
 		this.speed = speed;
@@ -34,38 +29,35 @@ public class TickPos {
 		this.rotationPitch = rotationPitch;
 	}
 
+	public TickPos(TagCompound tag) {
+		tickID = tag.getInteger("tickID");
+		speed = Speed.fromMetric(tag.getDouble("speed"));
+		isOffTrack = tag.getBoolean("offTrack");
+		position = tag.getVec3d("pos");
+
+		frontYaw = tag.getFloat("frontYaw");
+		rearYaw = tag.getFloat("rearYaw");
+		rotationYaw = tag.getFloat("rotationYaw");
+		rotationPitch = tag.getFloat("rotationPitch");
+	}
+
+	public TagCompound toTag() {
+		TagCompound tag = new TagCompound();
+
+		tag.setInteger("tickID", tickID);
+		tag.setDouble("speed", speed.metric());
+		tag.setBoolean("offTrack", isOffTrack);
+		tag.setVec3d("pos", position);
+		tag.setFloat("frontYaw", frontYaw);
+		tag.setFloat("rearYaw", rearYaw);
+		tag.setFloat("rotationYaw", rotationYaw);
+		tag.setFloat("rotationPitch", rotationPitch);
+
+		return tag;
+	}
+
 	@Override
 	public TickPos clone() {
 		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, rotationPitch, isOffTrack);
-	}
-
-	public void write(ByteBuf buf) {
-		buf.writeInt(tickID);
-		buf.writeFloat((float) speed.metric());
-		buf.writeBoolean(isOffTrack);
-		
-		//BufferUtil.writeVec3d(buf, frontPosition);
-		//BufferUtil.writeVec3d(buf, backPosition);
-		BufferUtil.writeVec3d(buf, position);
-		
-		buf.writeFloat(frontYaw);
-		buf.writeFloat(rearYaw);
-		buf.writeFloat(rotationYaw);
-		buf.writeFloat(rotationPitch);
-	}
-	
-	public void read(ByteBuf buf) {
-		tickID = buf.readInt();
-		speed = Speed.fromMetric(buf.readFloat());
-		isOffTrack = buf.readBoolean();
-		
-		//frontPosition = BufferUtil.readVec3d(buf);
-		//backPosition = BufferUtil.readVec3d(buf);
-		position = BufferUtil.readVec3d(buf);
-		
-		frontYaw = buf.readFloat();
-		rearYaw = buf.readFloat();
-		rotationYaw = buf.readFloat();
-		rotationPitch = buf.readFloat();
 	}
 }

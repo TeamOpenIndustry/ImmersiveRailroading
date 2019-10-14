@@ -9,30 +9,30 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.MathUtil;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
 	protected HashSet<Pair<Integer, Integer>> positions;
 	
-	public BuilderIterator(RailInfo info, BlockPos pos) {
+	public BuilderIterator(RailInfo info, Vec3i pos) {
 		this(info, pos, false);
 	}
 
 	public abstract List<PosStep> getPath(double stepSize);
 
-	public BuilderIterator(RailInfo info, BlockPos pos, boolean endOfTrack) {
+	public BuilderIterator(RailInfo info, Vec3i pos, boolean endOfTrack) {
 		super(info, pos);
 		
-		positions = new HashSet<Pair<Integer, Integer>>();
-		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<Pair<Integer, Integer>, Float>();
-		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<Pair<Integer, Integer>, Float>();
-		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<Pair<Integer, Integer>, Integer>();
-		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
+		positions = new HashSet<>();
+		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<>();
+		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<>();
+		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<>();
+		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<>();
 		
 		double horiz = info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && info.settings.gauge.value() < 1) {
@@ -62,7 +62,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
 
-			gagPos = gagPos.addVector(0, heightOffset, 0);
+			gagPos = gagPos.add(0, heightOffset, 0);
 
 			for (double q = -horiz; q <= horiz; q+=0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.yaw);
@@ -97,7 +97,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 		}
 
-		BlockPos mainPos = new BlockPos(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
+		Vec3i mainPos = new Vec3i(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
 		this.setParentPos(mainPos);
 		TrackRail main = new TrackRail(this, mainPos	);
 		tracks.add(main);
@@ -109,7 +109,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				// Skip parent block
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, new BlockPos(pair.getLeft(), yOffset.get(pair), pair.getRight()));
+			TrackBase tg = new TrackGag(this, new Vec3i(pair.getLeft(), yOffset.get(pair), pair.getRight()));
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
 			}

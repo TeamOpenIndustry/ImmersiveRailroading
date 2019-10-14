@@ -1,156 +1,107 @@
 package cam72cam.immersiverailroading.render.item;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.vecmath.Matrix4f;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.opengl.GL11;
-
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
-import cam72cam.immersiverailroading.util.GLBoolTracker;
+import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemOverrideList;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
-import net.minecraft.client.renderer.block.model.ItemOverride;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
-import util.Matrix4;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.GLTransparencyHelper;
+import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.world.World;
+import org.lwjgl.opengl.GL11;
 
-public class TrackBlueprintItemModel implements IBakedModel {
-	private RailInfo info;
-
-	public TrackBlueprintItemModel() {
+public class TrackBlueprintItemModel {
+	public static StandardModel getModel(ItemStack stack, World world) {
+		return new StandardModel().addCustom(() -> TrackBlueprintItemModel.render(stack, world));
 	}
-	
-	public TrackBlueprintItemModel(ItemStack stack, World world) {
-		if (world == null) {
-			world = Minecraft.getMinecraft().world;
-		}
-		info = new RailInfo(world, stack, new PlacementInfo(stack, 1, new BlockPos(0, 0, 0), 0.5f, 0.5f, 0.5f), null);
+	public static void render(ItemStack stack, World world) {
+		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5)), null);
 		info = info.withLength(10);
-	}
-
-	@Override
-	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		if (info == null) {
-			return new ArrayList<BakedQuad>();
-		}
-		
-		GL11.glPushMatrix();
-
-		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
-			GL11.glTranslated(0, 0, -0.1 * info.settings.quarters);
-		}
-		
-		GL11.glRotated(-90, 1, 0, 0);
-		GL11.glRotated(-90, 0, 0, 1);
-		
-		
-			
-		double scale = 0.95/info.settings.length;
-		if (info.settings.type == TrackItems.CROSSING) {
-			scale = 0.95 / 3;
-		}
-		if (info.settings.type == TrackItems.TURNTABLE) {
-			scale *= 0.25;
-		}
-		GL11.glScaled(-scale, -scale*2, scale);
-
-		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-		GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
 
 		GL11.glPushMatrix();
 		{
-			GL11.glTranslated(-0.5, 0, -0.5);
-			RailBaseRender.draw(info);
+			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
+			GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
+
+			if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
+				GL11.glTranslated(0, 0, -0.1 * info.settings.quarters);
+			}
+
+			GL11.glTranslated(0.5, 0, 0.5);
+
+			GL11.glRotated(-90, 1, 0, 0);
+
+
+			double scale = 0.95 / info.settings.length;
+			if (info.settings.type == TrackItems.CROSSING) {
+				scale = 0.95 / 3;
+			}
+			if (info.settings.type == TrackItems.TURNTABLE) {
+				scale *= 0.25;
+			}
+			GL11.glScaled(-scale, -scale * 2, scale);
+
+			GL11.glTranslated(0.5, 0, 0.5);
+
+			GL11.glPushMatrix();
+			{
+				GL11.glTranslated(-0.5, 0, -0.5);
+				RailBaseRender.draw(info);
+			}
+			GL11.glPopMatrix();
+			RailBuilderRender.renderRailBuilder(info);
+
+			lighting.restore();
+			cull.restore();
 		}
 		GL11.glPopMatrix();
-        RailBuilderRender.renderRailBuilder(info);
+	}
 
-		lighting.restore();
-		cull.restore();
-		
+	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
+	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, float partialTicks) {
+		Vec3d hit = vec.subtract(pos);
+		World world = player.getWorld();
+
+		pos = pos.up();
+
+		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
+				pos = pos.down();
+			}
+		}
+
+		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hit), null);
+		String key = info.uniqueID + info.placementInfo.placementPosition;
+		RailInfo cached = infoCache.get(key);
+		if (cached != null) {
+			info = cached;
+		} else {
+			infoCache.put(key, info);
+		}
+
+		GL11.glPushMatrix();
+		{
+			GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.5f);
+
+			Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
+			Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
+			GL11.glTranslated(offPos.x, offPos.y, offPos.z);
+
+			RailRenderUtil.render(info, true);
+
+			transparency.restore();
+		}
 		GL11.glPopMatrix();
-		
-		return new ArrayList<BakedQuad>();
-	}
 
-	@Override
-	public boolean isAmbientOcclusion() {
-		return true;
-	}
-
-	@Override
-	public boolean isGui3d() {
-		return true;
-	}
-
-	@Override
-	public boolean isBuiltInRenderer() {
-		return false;
-	}
-
-	@Override
-	public TextureAtlasSprite getParticleTexture() {
-		return null;
-	}
-	
-	public class ItemOverrideListHack extends ItemOverrideList {
-		public ItemOverrideListHack() {
-			super(new ArrayList<ItemOverride>());
-		}
-
-		@Override
-		public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
-			return new TrackBlueprintItemModel(stack, world);
-		}
-	}
-
-	@Override
-	public ItemOverrideList getOverrides() {
-		return new ItemOverrideListHack();
-	}
-
-	@Override
-	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
-		Pair<? extends IBakedModel, Matrix4f> defaultVal = ForgeHooksClient.handlePerspective(this, cameraTransformType);
-		switch (cameraTransformType) {
-		case THIRD_PERSON_LEFT_HAND:
-		case THIRD_PERSON_RIGHT_HAND:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-60), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
-		case FIRST_PERSON_LEFT_HAND:
-		case FIRST_PERSON_RIGHT_HAND:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().rotate(Math.toRadians(90), 0, 1, 0).rotate(Math.toRadians(-30), 0, 0, 1).translate(0.5,0.25,0.5).toMatrix4f());
-		case GROUND:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5,0,0.5).toMatrix4f());
-		case FIXED:
-			// Item Frame
-			return Pair.of(defaultVal.getLeft(), new Matrix4().rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
-		case GUI:
-			return Pair.of(defaultVal.getLeft(), new Matrix4().translate(0.5, 0, 0).rotate(Math.toRadians(+5+90), 0, 1, 0).toMatrix4f());
-		case HEAD:
-			return Pair.of(defaultVal.getLeft(),
-					new Matrix4().translate(0, 0, 0.5).rotate(Math.toRadians(-90), 0, 1, 0).toMatrix4f());
-		case NONE:
-			return defaultVal;
-		}
-		return defaultVal;
 	}
 }

@@ -1,14 +1,10 @@
 package cam72cam.immersiverailroading.items.nbt;
 
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import cam72cam.mod.item.ItemStack;
 
 public class ItemTextureVariant {
 	public static void set(ItemStack stack, String texture) {
-		if (stack.getTagCompound() == null) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
 		if (texture != null) {
 			EntityRollingStockDefinition def = ItemDefinition.get(stack);
 			if (def != null && def.textureNames.containsKey(texture)) {
@@ -16,7 +12,7 @@ public class ItemTextureVariant {
 				return;
 			}
 		}
-		stack.getTagCompound().removeTag("texture_variant");
+		stack.getTagCompound().remove("texture_variant");
 	}
 	
 	public static String get(ItemStack stack) {

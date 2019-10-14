@@ -1,14 +1,13 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import trackapi.lib.ITrack;
+import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.world.World;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 
 public class MovementSimulator {
 	private World world;
@@ -34,10 +33,10 @@ public class MovementSimulator {
 		Vec3d rear = rearBogeyPosition();
 		
 		if (Math.abs(moveDistance) < 0.001) {
-			boolean isTurnTable = false;
+			boolean isTurnTable;
 			
-			TileRailBase frontBase = TileRailBase.get(world, new BlockPos(front));
-			TileRailBase rearBase = TileRailBase.get(world, new BlockPos(rear));
+			RailBase frontBase = world.getBlockEntity(new Vec3i(front), RailBase.class);
+			RailBase rearBase  = world.getBlockEntity(new Vec3i(rear),  RailBase.class);
 			isTurnTable = frontBase != null &&
 					frontBase.getParentTile() != null &&
 					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
@@ -80,8 +79,8 @@ public class MovementSimulator {
 			}
 			return origPosition;
 		}
-		Vec3d frontDelta = front.subtractReverse(nextFront);
-		Vec3d rearDelta = rear.subtractReverse(nextRear);
+		Vec3d frontDelta = nextFront.subtract(front);
+		Vec3d rearDelta = nextRear.subtract(rear);
 		if (position.speed != Speed.ZERO) {
 			position.frontYaw = VecUtil.toWrongYaw(frontDelta);
 			position.rearYaw = VecUtil.toWrongYaw(rearDelta);
@@ -89,11 +88,11 @@ public class MovementSimulator {
 
 		Vec3d currCenter = VecUtil.between(front, rear);
 		Vec3d nextCenter = VecUtil.between(nextFront, nextRear);
-		Vec3d deltaCenter = currCenter.subtractReverse(nextCenter);
+		Vec3d deltaCenter = nextCenter.subtract(currCenter);
 
-		Vec3d bogeySkew = nextRear.subtractReverse(nextFront);
+		Vec3d bogeySkew = nextFront.subtract(nextRear);
 		position.rotationYaw = VecUtil.toWrongYaw(bogeySkew);
-		position.rotationPitch = (float) Math.toDegrees(MathHelper.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
+		position.rotationPitch = (float) Math.toDegrees(Math.atan2(bogeySkew.y, nextRear.distanceTo(nextFront)));
 
 		if (isReverse) {
 			position.frontYaw += 180;
@@ -110,7 +109,7 @@ public class MovementSimulator {
 		
 
 		position.position = position.position.add(deltaCenter);
-		if (world.isAirBlock(new BlockPos(position.position))) {
+		if (world.isAir(new Vec3i(position.position))) {
 			// Fall
 			//position.position = position.position.addVector(0, -0.1, 0);
 		}

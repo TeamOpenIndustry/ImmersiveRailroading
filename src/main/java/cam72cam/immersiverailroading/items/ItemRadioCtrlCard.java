@@ -1,41 +1,32 @@
 package cam72cam.immersiverailroading.items;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.Recipes;
+import cam72cam.mod.util.CollectionUtil;
+
 import java.util.List;
 
-import javax.annotation.Nullable;
+public class ItemRadioCtrlCard extends ItemBase {
+    public ItemRadioCtrlCard() {
+        super(ImmersiveRailroading.MODID, "item_radio_control_card", 1, ItemTabs.MAIN_TAB);
+        Fuzzy transistor = new Fuzzy("oc:materialTransistor");
+        Fuzzy dataCard = new Fuzzy("oc:dataCard1");
+        Recipes.register(this, 3,
+                null, Fuzzy.IRON_BARS, null,
+                transistor, Fuzzy.IRON_INGOT, transistor,
+                null, dataCard, null
+        );
+    }
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-public class ItemRadioCtrlCard extends Item {
-	public static final String NAME = "item_radio_control_card";
-	
-	public ItemRadioCtrlCard() {
-		super();
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-        	this.setCreativeTab(ItemTabs.MAIN_TAB);
-    		this.maxStackSize = 1;
-	}
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-    	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        	super.addInformation(stack, worldIn, tooltip, flagIn);
-        	if(stack.getTagCompound() == null) {
-			//skip
-		}
-        	else if(!stack.getTagCompound().hasKey("linked_uuid")) {
-			tooltip.add("Not linked to any locomotive");
-		}
-        	else {
-			tooltip.add("Linked to: " + stack.getTagCompound().getString("linked_uuid"));
-		}
-	}
+    @Override
+    public List<String> getTooltip(ItemStack stack) {
+        if (!stack.getTagCompound().hasKey("linked_uuid")) {
+            return CollectionUtil.listOf("Not linked to any locomotive");
+        } else {
+            return CollectionUtil.listOf("Linked to: " + stack.getTagCompound().getString("linked_uuid"));
+        }
+    }
 }

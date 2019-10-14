@@ -6,26 +6,17 @@ import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
 import cam72cam.immersiverailroading.util.LiquidUtil;
-import net.minecraft.world.World;
-import net.minecraftforge.fluids.*;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.gui.GuiRegistry;
 
 public class Tender extends CarTank {
-	
-	public Tender(World world) {
-		this(world, null);
-	}
-
-	public Tender(World world, String defID) {
-		super(world, defID);
-	}
-	
 	@Override
 	public TenderDefinition getDefinition() {
 		return super.getDefinition(TenderDefinition.class);
 	}
 	
 	@Override
-	public GuiTypes guiType() {
+	public GuiRegistry.GUIType guiType() {
 		return GuiTypes.TENDER;
 	}
 
@@ -46,17 +37,17 @@ public class Tender extends CarTank {
 	@Override
 	protected void initContainerFilter() {
 		cargoItems.filter.clear();
-		cargoItems.filter.put(getInventorySize()-2, SlotFilter.FLUID_CONTAINER);
-		cargoItems.filter.put(getInventorySize()-1, SlotFilter.FLUID_CONTAINER);
+		cargoItems.filter.put(0, SlotFilter.FLUID_CONTAINER);
+		cargoItems.filter.put(1, SlotFilter.FLUID_CONTAINER);
 		cargoItems.defaultFilter = SlotFilter.BURNABLE;
 	}
 	
 	@Override
 	protected int[] getContainerInputSlots() {
-		return new int[] { getInventorySize()-2 };
+		return new int[] { 0 };
 	}
 	@Override
 	protected int[] getContainertOutputSlots() {
-		return new int[] { getInventorySize()-1 };
+		return new int[] { 1 };
 	}
 }

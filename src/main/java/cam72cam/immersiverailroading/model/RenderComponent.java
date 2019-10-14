@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import net.minecraft.util.math.Vec3d;
+import cam72cam.mod.math.Vec3d;
 
 public class RenderComponent {
 	public final RenderComponentType type;

@@ -4,27 +4,26 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.ItemStackHandler;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.ItemStackHandler;
+import cam72cam.mod.math.Rotation;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.SoundCategory;
+import cam72cam.mod.sound.StandardSound;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.World;
 
 public class SteamHammerMultiblock extends Multiblock {
-	private static MultiblockComponent piston = new MultiblockComponent(Blocks.PISTON);
+	private static Fuzzy piston = Fuzzy.PISTON;
 	public static final String NAME = "STEAM_HAMMER";
-	private static final BlockPos center = new BlockPos(2,0,0);
-	private static final BlockPos power = new BlockPos(2,5,0);
+	private static final Vec3i center = new Vec3i(2,0,0);
+	private static final Vec3i power = new Vec3i(2,5,0);
 
 	public SteamHammerMultiblock() {
-		super(NAME, new MultiblockComponent[][][] { // Z
+		super(NAME, new Fuzzy[][][] { // Z
 			{ // Y
 				{ //X
 					L_ENG(), AIR, STEEL(), AIR, L_ENG()
@@ -49,48 +48,48 @@ public class SteamHammerMultiblock extends Multiblock {
 	}
 	
 	@Override
-	public BlockPos placementPos() {
-		return new BlockPos(2, 0, 0);
+	public Vec3i placementPos() {
+		return new Vec3i(2, 0, 0);
 	}
 
 	@Override
-	protected MultiblockInstance newInstance(World world, BlockPos origin, Rotation rot) {
+	protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
 		return new SteamHammerInstance(world, origin, rot);
 	}
 	public class SteamHammerInstance extends MultiblockInstance {
 		
-		public SteamHammerInstance(World world, BlockPos origin, Rotation rot) {
+		public SteamHammerInstance(World world, Vec3i origin, Rotation rot) {
 			super(world, origin, rot);
 		}
 
 		@Override
-		public boolean onBlockActivated(EntityPlayer player, EnumHand hand, BlockPos offset) {
+		public boolean onBlockActivated(Player player, Hand hand, Vec3i offset) {
 			if (isCenter(offset)) {
-				if (!world.isRemote) {
-					BlockPos pos = getPos(offset);
-					player.openGui(ImmersiveRailroading.instance, GuiTypes.STEAM_HAMMER.ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
+				if (world.isServer) {
+					Vec3i pos = getPos(offset);
+					ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.STEAM_HAMMER);
 				}
 				return true;
 			}
 			return false;
 		}
 		
-		private boolean isCenter(BlockPos offset) {
+		private boolean isCenter(Vec3i offset) {
 			return offset.equals(center);
 		}
 
 		@Override
-		public boolean isRender(BlockPos offset) {
+		public boolean isRender(Vec3i offset) {
 			return isCenter(offset);
 		}
 
 		@Override
-		public int getInvSize(BlockPos offset) {
+		public int getInvSize(Vec3i offset) {
 			return isCenter(offset) ? 2 : 0;
 		}
 
 		@Override
-		public void tick(BlockPos offset) {
+		public void tick(Vec3i offset) {
 			if (!isCenter(offset)) {
 				return;
 			}
@@ -108,26 +107,25 @@ public class SteamHammerMultiblock extends Multiblock {
 				return;
 			}
 			
-			if (world.isRemote) {
+			if (world.isClient) {
 				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
-					world.playSound(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1.0f, 0.2f, false);
+					Audio.playSound(te.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
 				}
 				return;
 			}
 			
 			// Decrement craft progress down to 0
 			if (te.getCraftProgress() != 0) {
-				IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-				energy.extractEnergy(32, false);
+				powerTe.getEnergy(null).extract(32, false);
 				te.setCraftProgress(Math.max(0, te.getCraftProgress() - 1));
 			}
 			
 			float progress = te.getCraftProgress();
-			
+
 			ItemStackHandler container = te.getContainer();
 			
-			ItemStack input = container.getStackInSlot(0);
-			ItemStack output = container.getStackInSlot(1);
+			ItemStack input = container.get(0);
+			ItemStack output = container.get(1);
 			
 			
 			if (progress == 0) {
@@ -142,30 +140,30 @@ public class SteamHammerMultiblock extends Multiblock {
 				ItemStack out = input.copy();
 				out.setCount(1);
 				ItemRawCast.set(out, false);
-				container.setStackInSlot(1, out);
+				container.set(1, out);
 				input.shrink(1);
-				container.setStackInSlot(0, input);;
+				container.set(0, input);;
 				progress = 100;
 			}
 		}
 
 		@Override
-		public boolean canInsertItem(BlockPos offset, int slot, ItemStack stack) {
+		public boolean canInsertItem(Vec3i offset, int slot, ItemStack stack) {
 			return slot == 0 && ItemRawCast.get(stack);
 		}
 
 		@Override
-		public boolean isOutputSlot(BlockPos offset, int slot) {
+		public boolean isOutputSlot(Vec3i offset, int slot) {
 			return slot == 1;
 		}
 
 		@Override
-		public int getSlotLimit(BlockPos offset, int slot) {
+		public int getSlotLimit(Vec3i offset, int slot) {
 			return isCenter(offset) ? 1 : 0;
 		}
 
 		@Override
-		public boolean canRecievePower(BlockPos offset) {
+		public boolean canRecievePower(Vec3i offset) {
 			return offset.equals(power);
 		}
 
@@ -174,9 +172,8 @@ public class SteamHammerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			IEnergyStorage energy = powerTe.getCapability(CapabilityEnergy.ENERGY, null);
-			return energy.getEnergyStored() > 32;
-			
+			return powerTe.getEnergy(null).getCurrent() > 32;
+
 		}
 	}
 }

@@ -1,49 +1,42 @@
 package cam72cam.immersiverailroading.items;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.Recipes;
+import cam72cam.mod.util.CollectionUtil;
+import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.World;
 
-public class ItemTrackExchanger extends Item {
+import java.util.List;
+
+public class ItemTrackExchanger extends ItemBase {
 	public static final String NAME = "item_track_exchanger";
 
 	public ItemTrackExchanger() {
-		super();
-		setUnlocalizedName(ImmersiveRailroading.MODID + ":" + NAME);
-		setRegistryName(new ResourceLocation(ImmersiveRailroading.MODID, NAME));
-		this.setCreativeTab(ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_track_exchanger", 1, ItemTabs.MAIN_TAB);
+		Fuzzy largeWrench = new Fuzzy("item_large_wrench").add(new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1));
+		Fuzzy trackBlueprint = new Fuzzy("item_rail").add(new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1));
+		Recipes.register(this, 3,
+				Fuzzy.GLASS_PANE, Fuzzy.GLASS_PANE, Fuzzy.GLASS_PANE,
+				largeWrench, Fuzzy.IRON_INGOT, trackBlueprint,
+				Fuzzy.GLASS_PANE, Fuzzy.REDSTONE_DUST, Fuzzy.GLASS_PANE);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-		super.addInformation(stack, worldIn, tooltip, flagIn);
-		tooltip.add(GuiText.TRACK_SWITCHER_TOOLTIP.toString());
+	public List<String> getTooltip(ItemStack stack) {
+		return CollectionUtil.listOf(GuiText.TRACK_SWITCHER_TOOLTIP.toString());
 	}
-	
+
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if (worldIn.isRemote && handIn == EnumHand.MAIN_HAND) {
-			if (Minecraft.getMinecraft().objectMouseOver.typeOfHit == RayTraceResult.Type.MISS) { //only open gui when player doesn't right-click a block
-				playerIn.openGui(ImmersiveRailroading.instance, GuiTypes.TRACK_EXCHANGER.ordinal(), worldIn, (int) playerIn.posX, (int) playerIn.posY, (int) playerIn.posZ);
-			}
-        }
-        return super.onItemRightClick(worldIn, playerIn, handIn);
+	public void onClickAir(Player player, World world, Hand hand) {
+		if (world.isClient && hand == Hand.PRIMARY) {
+			ImmersiveRailroading.GUI_REGISTRY.openGUI(player, GuiTypes.TRACK_EXCHANGER);
+		}
 	}
 }
