@@ -1,9 +1,7 @@
 package cam72cam.immersiverailroading.gui;
 
-import java.io.IOException;
 import java.util.List;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.net.ItemTrackExchangerUpdatePacket;
@@ -14,7 +12,6 @@ import cam72cam.mod.gui.Button;
 import cam72cam.mod.gui.IScreen;
 import cam72cam.mod.gui.IScreenBuilder;
 import cam72cam.mod.util.Hand;
-import net.minecraft.entity.player.EntityPlayer;
 
 public class TrackExchangerGui implements IScreen {
 	private Button trackSelector;
