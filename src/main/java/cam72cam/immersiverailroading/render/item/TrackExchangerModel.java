@@ -36,7 +36,7 @@ public class TrackExchangerModel {
 	}
 
 	public static StandardModel getModel(cam72cam.mod.item.ItemStack stack, cam72cam.mod.world.World world) {
-		return new StandardModel().addCustom(() -> TrackBlueprintItemModel.render(stack, world));
+		return new StandardModel().addCustom(() -> TrackExchangerModel.render(stack, world));
 	}
 
 	public static void render(cam72cam.mod.item.ItemStack stack, cam72cam.mod.world.World world) {
