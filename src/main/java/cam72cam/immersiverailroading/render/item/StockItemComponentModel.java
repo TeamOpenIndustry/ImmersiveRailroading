@@ -15,14 +15,16 @@ import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 
-public class StockItemComponentModel {
-    public static StandardModel getModel(ItemStack stack, World world) {
+public class StockItemComponentModel implements ItemRender.IItemModel {
+    @Override
+    public StandardModel getModel(World world, ItemStack stack) {
         return new StandardModel().addCustom(() -> StockItemComponentModel.render(stack));
     }
     public static void render(ItemStack stack) {
