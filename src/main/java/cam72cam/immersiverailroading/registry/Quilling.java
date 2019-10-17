@@ -28,6 +28,13 @@ public class Quilling {
         maxPull = 0.55;
     }
 
+    public boolean canLoad() {
+        for(Chime chime : chimes) {
+            if(!chime.sample.canLoad()) return false;
+        }
+        return true;
+    }
+
     public class Chime {
         public final double pull_start;
         public final double pull_end;
