@@ -7,21 +7,19 @@ import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.mod.render.GLBoolTracker;
+import cam72cam.mod.render.*;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.GLTransparencyHelper;
-import cam72cam.mod.render.GlobalRender;
-import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
-public class TrackBlueprintItemModel {
-	public static StandardModel getModel(ItemStack stack, World world) {
+public class TrackBlueprintItemModel implements ItemRender.IItemModel {
+	@Override
+	public StandardModel getModel(World world, ItemStack stack) {
 		return new StandardModel().addCustom(() -> TrackBlueprintItemModel.render(stack, world));
 	}
 	public static void render(ItemStack stack, World world) {
