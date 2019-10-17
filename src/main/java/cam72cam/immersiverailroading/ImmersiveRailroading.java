@@ -138,7 +138,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ItemRender.register(IRItems.ITEM_PAINT_BRUSH, ObjItemRender.getModelFor(new Identifier(MODID, "models/item/paint_brush.obj"), new Vec3d(0.5, 0.25, 0.5), 3));
 				ItemRender.register(IRItems.ITEM_RADIO_CONTROL_CARD, new Identifier(MODID, "items/radio_card"));
 				ItemRender.register(IRItems.ITEM_MANUAL, new Identifier(MODID, "items/engineerslexicon"));
-				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, TrackExchangerModel::getModel);
+				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, new TrackExchangerModel());
 
 				IEntityRender<EntityRollingStock> stockRender = (entity, partialTicks) -> {
 					GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
