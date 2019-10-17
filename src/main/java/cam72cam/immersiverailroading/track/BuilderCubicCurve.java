@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -75,8 +76,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 			angle2 = info.customInfo.yaw;
 		}
 
-		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
-		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
+		Vec3d ctrl1 = VecUtil.fromYawPitch(ctrlGuess, angle, MathUtil.gradeToDegrees(info.placementInfo.grade));
+		Vec3d ctrl2 = isDefault ? nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2)) : nextPos.add(VecUtil.fromYawPitch(ctrlGuess,
+				angle2, -MathUtil.gradeToDegrees(info.customInfo.grade)));
 
 		if (info.placementInfo.control != null) {
 			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition);

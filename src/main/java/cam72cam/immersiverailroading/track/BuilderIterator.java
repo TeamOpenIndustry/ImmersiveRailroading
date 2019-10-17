@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.MathUtil;
@@ -27,13 +28,17 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 	public BuilderIterator(RailInfo info, Vec3i pos, boolean endOfTrack) {
 		super(info, pos);
-		
-		positions = new HashSet<>();
-		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<>();
-		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<>();
-		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<>();
-		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<>();
-		
+
+		positions = new HashSet<Pair<Integer, Integer>>();
+		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<Pair<Integer, Integer>, Float>();
+		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<Pair<Integer, Integer>, Float>();
+		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<Pair<Integer, Integer>, Integer>();
+		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<Pair<Integer, Integer>>();
+
+		//use to guarantee all slopes look the same no matter what order the points get processed in
+		HashMap<Pair<Integer, Integer>, Float> minTracker = new HashMap<>();
+
+
 		double horiz = info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && info.settings.gauge.value() < 1) {
 			horiz = horiz/2;
@@ -42,7 +47,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			horiz += 2f * info.settings.gauge.scale();
 		}
 		double clamp = 0.17 * info.settings.gauge.scale();
-		float heightOffset = (float) ((info.placementInfo.placementPosition.y) % 1);
+		float heightOffset = (float) MathUtil.trueModulus(info.placementInfo.placementPosition.y, 1);
 
 		List<PosStep> path = getPath(0.25);
 		PosStep start = path.get(0);
@@ -51,7 +56,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Vec3d placeOff = new Vec3d(
 				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.x, 1)),
 				0,
-                Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
+				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
 		);
 		int mainX = (int) Math.floor(path.get(path.size()/2).x+placeOff.x);
 		int mainZ = (int) Math.floor(path.get(path.size()/2).z+placeOff.z);
@@ -75,18 +80,29 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					height = Math.min(height, clamp);
 				}
 
-				double relHeight = gagPos.y % 1;
-				if (gagPos.y < 0) {
-					relHeight += 1;
-				}
+				double relHeight = MathUtil.trueModulus(gagPos.y, 1);
 
 				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
-				if (!positions.contains(gag)) {
+				float bedScaleFactor = bedScaleFactor(info.settings.gauge);
+				//if we haven't done this position yet add it
+				//else prioritize the start and end points so they always line up with other track
+				//else prioritize lowest y for consistency
+				if (!positions.contains(gag) || gagPos.y < minTracker.get(gag) || cur == start || cur == end) {
 					positions.add(gag);
-                    bedHeights.put(gag, (float)(height + Math.max(0, relHeight - 0.1)));
-                    railHeights.put(gag, (float) relHeight);
-					yOffset.put(gag, (int) (gagPos.y - relHeight));
+					//ensure end positions aren't overwritten
+					if(cur == start || cur == end) {
+						minTracker.put(gag, -999999f);
+					}
+					else {
+						minTracker.put(gag, (float) gagPos.y);
+					}
+					bedHeights.put(gag, getBedHeight((float) height, (float) relHeight, bedScaleFactor));
+					railHeights.put(gag, (float) relHeight);
+					//add buffer space equal to the amount of extra room given to the rail base
+					//prevents full blocks of rail base
+					yOffset.put(gag,  (int) Math.floor(gagPos.y + bedScaleFactor));
 				}
+
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
 				}
@@ -109,6 +125,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				// Skip parent block
 				continue;
 			}
+
 			TrackBase tg = new TrackGag(this, new Vec3i(pair.getLeft(), yOffset.get(pair), pair.getRight()));
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
@@ -117,6 +134,14 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			tg.setBedHeight(bedHeights.get(pair));
 			tracks.add(tg);
 		}
+	}
+
+	public static float bedScaleFactor(Gauge gauge) {
+		return 0.1f * (float) gauge.scale();
+	}
+
+	private float getBedHeight(float height, float relHeight, float bedScaleFactor) {
+		return height + relHeight + bedScaleFactor > 1 ? height + relHeight - 1 : height + relHeight;
 	}
 	
 	@Override

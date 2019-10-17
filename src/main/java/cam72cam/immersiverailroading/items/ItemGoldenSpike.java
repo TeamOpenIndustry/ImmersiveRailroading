@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.ItemGradeControl;
 import cam72cam.immersiverailroading.tile.RailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -18,12 +19,31 @@ import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 
 public class ItemGoldenSpike extends ItemBase {
+	public static final float gradeChangeDelta = 0.25f;
+
 	public ItemGoldenSpike() {
 		super(ImmersiveRailroading.MODID, "item_golden_spike", 1, ItemTabs.MAIN_TAB);
 
 		Fuzzy gold = Fuzzy.GOLD_INGOT;
 		Recipes.register(this, 2,
 				gold, gold, gold, null, gold, null);
+	}
+
+	@Override
+	public void onClickAir(Player player, World world, Hand hand)
+	{
+		if(world.isServer)
+		{
+			ItemStack held = player.getHeldItem(hand);
+			if(player.isCrouching())
+			{
+				ItemGradeControl.incrementGrade(player, held);
+			}
+			else
+			{
+				ItemGradeControl.decrementGrade(player, held);
+			}
+		}
 	}
 
 	@Override
@@ -44,11 +64,12 @@ public class ItemGoldenSpike extends ItemBase {
 				}
 				TileRailPreview tr = world.getBlockEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
-					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), pos, hit));
+					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), pos, hit,
+							ItemGradeControl.getGrade(held)));
 				}
 			}
 		}
-		return ClickResult.PASS;
+		return ClickResult.ACCEPTED;
 	}
 
 	public static Vec3i getPosition(ItemStack stack) {

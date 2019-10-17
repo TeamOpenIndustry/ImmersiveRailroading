@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemGradeControl;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.mod.item.ItemStack;
@@ -9,20 +10,32 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.TagCompound;
 
-public class PlacementInfo {
+public class PlacementInfo
+{
 	public final Vec3d placementPosition; // relative
 	public final TrackDirection direction;
 	public final float yaw;
 	public final Vec3d control;
+	public final float grade;
 
-	public PlacementInfo(Vec3d placementPosition, TrackDirection direction, float yaw, Vec3d control) {
+	public PlacementInfo(Vec3d placementPosition, TrackDirection direction, float yaw, Vec3d control)
+	{
 		this.placementPosition = placementPosition;
 		this.direction = direction;
 		this.yaw = yaw;
 		this.control = control;
+
+		//control will handle grade
+		this.grade = 0;
+	}
+
+	public PlacementInfo(ItemStack stack, float yawHead, Vec3i pos, Vec3d hit)
+	{
+		//used for rendering and item states
+		this(stack, yawHead, pos, hit, 0);
 	}
 	
-	public PlacementInfo(ItemStack stack, float yawHead, Vec3i pos, Vec3d hit) {
+	public PlacementInfo(ItemStack stack, float yawHead, Vec3i pos, Vec3d hit, float grade) {
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		this.yaw = ((int)((yawHead + 90/8f) * 4)) / 90 * 90 / 4f;
 
@@ -92,6 +105,7 @@ public class PlacementInfo {
 
 		this.placementPosition = new Vec3d(pos).add(hitX, 0, hitZ);
 		this.direction = direction;
+		this.grade = grade;
 		this.control = null;
 	}
 
@@ -100,6 +114,7 @@ public class PlacementInfo {
 	}
 	
 	public PlacementInfo(TagCompound nbt, Vec3i offset) {
+		this.grade = nbt.getFloat(ItemGradeControl.GRADE_NAME);
 		this.placementPosition = nbt.getVec3d("placementPosition").add(offset);
 		this.direction = TrackDirection.values()[nbt.getInteger("direction")];
 		if (nbt.hasKey("yaw")) {
@@ -136,6 +151,7 @@ public class PlacementInfo {
 		if (control != null) {
 			nbt.setVec3d("control", control.subtract(offset));
 		}
+		nbt.setFloat(ItemGradeControl.GRADE_NAME, grade);
 		return nbt;
 	}
 

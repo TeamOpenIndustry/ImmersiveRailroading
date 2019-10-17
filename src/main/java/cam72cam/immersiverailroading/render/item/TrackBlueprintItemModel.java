@@ -25,7 +25,8 @@ public class TrackBlueprintItemModel {
 		return new StandardModel().addCustom(() -> TrackBlueprintItemModel.render(stack, world));
 	}
 	public static void render(ItemStack stack, World world) {
-		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5)), null);
+		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5))
+				, null);
 		info = info.withLength(10);
 
 		GL11.glPushMatrix();
@@ -80,7 +81,8 @@ public class TrackBlueprintItemModel {
 			}
 		}
 
-		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hit), null);
+		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hit),
+				null);
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {

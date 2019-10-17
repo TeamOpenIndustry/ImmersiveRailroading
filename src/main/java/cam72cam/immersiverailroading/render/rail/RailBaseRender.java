@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.render.DisplayListCache;
+import cam72cam.immersiverailroading.track.BuilderIterator;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
@@ -16,7 +17,9 @@ public class RailBaseRender {
 		StandardModel model = new StandardModel();
 
 		for (TrackBase base : info.getBuilder().getTracksForRender()) {
-			model.addItemBlock(info.settings.railBed, new Vec3d(base.getPos()), new Vec3d(1, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale(), 1));
+			model.addItemBlock(info.settings.railBed, new Vec3d(base.getPos()), new Vec3d(1, base.getBedHeight() +
+					BuilderIterator.bedScaleFactor(info.settings.gauge),
+					1));
 		}
 
 		model.render();

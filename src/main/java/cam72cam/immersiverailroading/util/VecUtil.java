@@ -40,6 +40,13 @@ public class VecUtil {
 		return fromWrongYaw(pos.x, rotationYaw).add(fromWrongYaw(pos.z, rotationYaw + 90).add(0, pos.y, 0));
 	}
 
+	public static Vec3d fromYawPitch(double distance, double yaw, double pitch) {
+		double flatDistance = Math.cos(Math.toRadians(pitch)) * distance;
+		return new Vec3d(Math.sin(Math.toRadians(yaw)) * flatDistance,
+				Math.sin(Math.toRadians(pitch)) * distance,
+				Math.cos(Math.toRadians(yaw)) * flatDistance);
+	}
+
 	public static Vec3d fromWrongYawPitch(float distance, float rotationYaw, float rotationPitch) {
 		return fromWrongYaw(distance, rotationYaw).add(0, Math.tan(Math.toRadians(rotationPitch)) * distance, 0);
 	}

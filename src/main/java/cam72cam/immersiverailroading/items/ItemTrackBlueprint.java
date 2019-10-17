@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.ItemGradeControl;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -10,18 +11,24 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.item.*;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
+import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.world.World;
 
 import java.util.List;
 
 public class ItemTrackBlueprint extends ItemBase {
+
 	public ItemTrackBlueprint() {
 		super(ImmersiveRailroading.MODID, "item_rail", 1, ItemTabs.MAIN_TAB);
 
@@ -32,9 +39,23 @@ public class ItemTrackBlueprint extends ItemBase {
 	
 	@Override
 	public void onClickAir(Player player, World world, Hand hand) {
-		if (world.isClient && hand == Hand.PRIMARY) {
+		if (world.isClient && hand == Hand.PRIMARY && !player.isCrouching()) {
 			ImmersiveRailroading.GUI_REGISTRY.openGUI(player, GuiTypes.RAIL);
         }
+		else if(world.isServer)
+		{
+			ItemStack held = player.getHeldItem(hand);
+			if(player.isCrouching())
+			{
+				System.out.println("Server incrementing grade at: " + ItemGradeControl.getGrade(held));
+				ItemGradeControl.incrementGrade(player, held);
+			}
+			else
+			{
+				System.out.println("Server decrementing grade at: " + ItemGradeControl.getGrade(held));
+				ItemGradeControl.decrementGrade(player, held);
+			}
+		}
 	}
 	
 	@Override
@@ -84,7 +105,8 @@ public class ItemTrackBlueprint extends ItemBase {
 				pos = pos.down();
 			}
 		}
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), pos, hit);
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), pos, hit,
+				ItemGradeControl.getGrade(stack));
 		
 		if (settings(stack).isPreview) {
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
@@ -120,10 +142,18 @@ public class ItemTrackBlueprint extends ItemBase {
 	}
 
 	public static void settings(ItemStack stack, RailSettings settings) {
-		stack.setTagCompound(settings.toNBT());
+		TagCompound baseTag = stack.getTagCompound();
+
+		if(baseTag == null)
+		{
+			baseTag = new TagCompound();
+			stack.setTagCompound(baseTag);
+		}
+
+		baseTag.set("settings", settings.toNBT());
 	}
 	
 	public static RailSettings settings(ItemStack stack) {
-		return new RailSettings(stack.getTagCompound());
+		return new RailSettings(stack.getTagCompound().get("settings"));
 	}
 }
