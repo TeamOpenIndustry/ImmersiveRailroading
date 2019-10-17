@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.Set;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
+    private static Identifier default_whistle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
+    private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
+    private static Identifier default_chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
+    private static Identifier default_pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
+    private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
+
     public Quilling quill;
     public Identifier whistle;
     public Identifier idle;
@@ -50,35 +56,35 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
         //sets default sounds
-        whistle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
-        idle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
-        chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
-        pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
-        bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
+        whistle = default_whistle;
+        idle = default_idle;
+        chuff = default_chuff;
+        pressure = default_pressure;
+        bell = default_bell;
 
         boolean whistleSet = false;
 
         //overrides original sounds with added sounds
         if (sounds != null) {
             if (sounds.has("whistle")) {
-                whistle = new Identifier(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString()).getOrDefault(whistle);
+                whistle = new Identifier(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString()).getOrDefault(default_whistle);
                 whistleSet = true;
             }
 
             if (sounds.has("idle")) {
-                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(idle);
+                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(default_idle);
             }
 
             if (sounds.has("chuff")) {
-                chuff = new Identifier(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString()).getOrDefault(chuff);
+                chuff = new Identifier(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString()).getOrDefault(default_chuff);
             }
 
             if (sounds.has("pressure")) {
-                pressure = new Identifier(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString()).getOrDefault(pressure);
+                pressure = new Identifier(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString()).getOrDefault(default_pressure);
             }
 
             if (sounds.has("bell")) {
-                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(bell);
+                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
             }
 
             if (sounds.has("quilling")) {

@@ -12,6 +12,10 @@ import com.google.gson.JsonObject;
 import java.util.Set;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
+    private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
+    private static Identifier default_horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
+    private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
+
     public Identifier idle;
     public Identifier horn;
     public Identifier bell;
@@ -66,21 +70,21 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         }
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
-        idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
-        horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
-        bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
+        idle = default_idle;
+        horn = default_horn;
+        bell = default_bell;
 
         if(sounds != null){
             if (sounds.has("idle")) {
-                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(idle);
+                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(default_idle);
             }
 
             if (sounds.has("horn")) {
-                horn = new Identifier(ImmersiveRailroading.MODID, sounds.get("horn").getAsString()).getOrDefault(horn);
+                horn = new Identifier(ImmersiveRailroading.MODID, sounds.get("horn").getAsString()).getOrDefault(default_horn);
             }
 
             if (sounds.has("bell")) {
-                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(bell);
+                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
             }
         }
     }
