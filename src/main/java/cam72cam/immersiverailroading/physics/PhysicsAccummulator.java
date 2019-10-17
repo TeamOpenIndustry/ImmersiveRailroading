@@ -54,7 +54,7 @@ public class PhysicsAccummulator {
 		// see http://hyperphysics.phy-astr.gsu.edu/hbase/mincl.html for slope physics
 		// negative because a positive rotationPitch means stock is pointing uphill
 		double gradeForceFactor = -Math.sin(Math.toRadians(posToUse.rotationPitch)) * Config.ConfigBalance.slopeMultiplier;
-		gradeForceNewtons += stock.getWeight() * gradeForceFactor * 9.8;
+		gradeForceNewtons += stock.getWeight() * gradeForceFactor * 9.8 * (direction ? 1 : -1);
 
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
