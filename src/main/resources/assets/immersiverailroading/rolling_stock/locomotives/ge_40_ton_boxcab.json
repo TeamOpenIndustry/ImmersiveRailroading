@@ -1,10 +1,11 @@
 {
 	"era": "diesel",
-	"name": "GE 40-Ton Diesel-Electric Boxcab",
+	"name": "Class B-B-70/70-4HM829 Boxcab",
 	"works": "General Electric",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/ge_40_ton_boxcab/ge_40_ton_boxcab.obj",
     "model_gauge_m": 0.9144,
 	"darken_model": "-0.1",
+	"multi_unit_capable": "false",
 	"properties": {
 		"fuel_efficiency_%": 90,
 		"fuel_capacity_l": 852,

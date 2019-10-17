@@ -8,7 +8,7 @@
 		"fuel_efficiency_%": 85,
 		"fuel_capacity_l": 3800,
 		"horsepower": 1000,
-		"tractive_effort_lbf": 40425,
+		"tractive_effort_lbf": 60000,
 		"max_speed_kmh": 97,
 		"weight_kg": 112300,
 		"horn_sustained": true
