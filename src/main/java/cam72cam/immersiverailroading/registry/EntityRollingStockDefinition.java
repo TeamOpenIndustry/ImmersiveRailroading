@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.util.FileUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
@@ -216,18 +215,18 @@ public abstract class EntityRollingStockDefinition {
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
         if (sounds != null) {
             if (sounds.has("wheels")) {
-                wheel_sound = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("wheels").getAsString()), wheel_sound);
+                wheel_sound = new Identifier(ImmersiveRailroading.MODID, sounds.get("wheels").getAsString()).getOrDefault(wheel_sound);
             }
 
             if (sounds.has("clack")) {
-                clackFront = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("clack").getAsString()), clackFront);
-                clackRear = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("clack").getAsString()), clackRear);
+                clackFront = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack").getAsString()).getOrDefault(clackFront);
+                clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack").getAsString()).getOrDefault(clackRear);
             }
             if (sounds.has("clack_front")) {
-                clackFront = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_front").getAsString()), clackFront);
+                clackFront = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_front").getAsString()).getOrDefault(clackFront);
             }
             if (sounds.has("clack_rear")) {
-                clackRear = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()), clackRear);
+                clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(clackRear);
             }
         }
     }

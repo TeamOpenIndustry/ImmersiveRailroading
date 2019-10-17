@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.util.FileUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
@@ -73,15 +72,15 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
         if(sounds != null){
             if (sounds.has("idle")) {
-                idle = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()), idle);
+                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(idle);
             }
 
             if (sounds.has("horn")) {
-                horn = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("horn").getAsString()), horn);
+                horn = new Identifier(ImmersiveRailroading.MODID, sounds.get("horn").getAsString()).getOrDefault(horn);
             }
 
             if (sounds.has("bell")) {
-                bell = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()), bell);
+                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(bell);
             }
         }
     }

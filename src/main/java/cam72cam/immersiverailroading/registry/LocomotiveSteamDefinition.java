@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.util.FileUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
@@ -62,24 +61,24 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         //overrides original sounds with added sounds
         if (sounds != null) {
             if (sounds.has("whistle")) {
-                whistle = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString()), whistle);
+                whistle = new Identifier(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString()).getOrDefault(whistle);
                 whistleSet = true;
             }
 
             if (sounds.has("idle")) {
-                idle = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()), idle);
+                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(idle);
             }
 
             if (sounds.has("chuff")) {
-                chuff = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString()), chuff);
+                chuff = new Identifier(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString()).getOrDefault(chuff);
             }
 
             if (sounds.has("pressure")) {
-                pressure = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString()), pressure);
+                pressure = new Identifier(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString()).getOrDefault(pressure);
             }
 
             if (sounds.has("bell")) {
-                bell = FileUtil.loadOrDefault(new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()), bell);
+                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(bell);
             }
 
             if (sounds.has("quilling")) {
