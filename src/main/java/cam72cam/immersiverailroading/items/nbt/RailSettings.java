@@ -109,4 +109,20 @@ public class RailSettings {
                 isGradeCrossing
         );
     }
+    
+    public RailSettings withTrack(String track) {
+        return new RailSettings(
+                gauge,
+                track,
+                type,
+                length,
+                quarters,
+                posType,
+                direction,
+                railBed,
+                railBedFill,
+                isPreview,
+                isGradeCrossing
+        );
+    }
 }

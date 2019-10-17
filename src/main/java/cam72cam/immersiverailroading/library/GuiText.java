@@ -44,6 +44,7 @@ public enum GuiText {
 	SWITCH_HAMMER_TOOLTIP("item.switch_hammer"),
 	MODELER_TOOLTIP("stock.modeler"),
 	PACK_TOOLTIP("stock.pack"),
+	TRACK_SWITCHER_TOOLTIP("item.track_exchanger"),
 	NONE("none"),
 	;
 

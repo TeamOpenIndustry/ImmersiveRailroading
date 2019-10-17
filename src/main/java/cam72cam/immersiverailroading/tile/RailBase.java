@@ -9,11 +9,11 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
+import cam72cam.immersiverailroading.items.nbt.ItemTrackExchangerType;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
 import cam72cam.immersiverailroading.util.*;
-import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
@@ -834,6 +834,28 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 				SwitchState switchForced = this.cycleSwitchForced();
 				if (this.world.isServer) {
 					player.sendMessage(switchForced.equals(SwitchState.NONE) ? ChatText.SWITCH_UNLOCKED.getMessage() : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
+				}
+			}
+		}
+		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER)) {
+			Rail tileRail = this.getParentTile();
+			String track = ItemTrackExchangerType.get(stack);
+			if (track != null && !track.equals(tileRail.info.settings.track)) {
+				if (!player.isCreative()) {
+					RailInfo info = tileRail.info.withTrack(track);
+					if (info.build(player, false)) { //cancel if player doesn't have all required items
+						//FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers( //we need to send the packet because this code is executed on the server side
+						//		new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
+						tileRail.info = info;
+
+						tileRail.spawnDrops(player.getPosition());
+						tileRail.setDrops(info.getBuilder(new Vec3i(info.placementInfo.placementPosition)).drops);
+						tileRail.markDirty();
+					}
+				} else {
+					//FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers(
+					//		new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
+					tileRail.info = tileRail.info.withTrack(track);
 				}
 			}
 		}
