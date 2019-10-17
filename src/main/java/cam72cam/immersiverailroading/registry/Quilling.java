@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.util.FileUtil;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -26,6 +27,13 @@ public class Quilling {
         chimes.add(new Chime(0.15, 0.45, 0.75 + pitchUp, 0.85 + pitchUp, sample));
         chimes.add(new Chime(0.4, 0.55, 0.95 + pitchUp, 1 + pitchUp, sample));
         maxPull = 0.55;
+    }
+
+    public boolean canLoad() {
+        for(Chime chime : chimes) {
+            if(!FileUtil.canLoad(chime.sample)) return false;
+        }
+        return true;
     }
 
     public class Chime {
