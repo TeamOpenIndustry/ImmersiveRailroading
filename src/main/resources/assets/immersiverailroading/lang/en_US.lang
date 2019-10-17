@@ -18,6 +18,7 @@ item.immersiverailroading:item_conductor_whistle.name=Conductor's Whistle
 item.immersiverailroading:item_golden_spike.name=Golden Spike
 item.immersiverailroading:item_radio_control_card.name=Train Radio-control Card
 item.immersiverailroading:item_switch_key.name=Switch Key
+item.immersiverailroading:item_track_exchanger.name=Track Exchanger
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -70,7 +71,8 @@ gui.immersiverailroading:selector.plate_boiler=Plate Boiler: %s
 gui.immersiverailroading:selector.cast_single=Single Casting
 gui.immersiverailroading:selector.cast_repeat=Repeat Casting
 
-gui.immersiverailroading:item.switch_key=Right-Click a switch to cycle between: [ locked straight, locked turn, unlocked ]. Redstone is ignored when locked!!
+gui.immersiverailroading:item.switch_hammer=Right-Click a switch to cycle between: [ locked straight, locked turn, unlocked ]. Redstone is ignored when locked!!
+gui.immersiverailroading:item.track_exchanger=Right-Click in air to open the selection gui. Right-Click on a track to change it's track type to the one defined in the gui
 gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s

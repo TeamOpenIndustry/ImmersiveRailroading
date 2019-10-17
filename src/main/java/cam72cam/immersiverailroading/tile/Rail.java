@@ -119,7 +119,14 @@ public class Rail extends RailBase {
 	public void setDrops(List<ItemStack> drops) {
 		this.drops = drops;
 	}
+	public List<ItemStack> getDrops () {
+		return this.drops;
+	}
 	public void spawnDrops() {
+		spawnDrops(new Vec3d(this.pos));
+	}
+
+	public void spawnDrops(Vec3d pos) {
 		if (world.isServer) {
 			if (drops != null && drops.size() != 0) {
 				for(ItemStack drop : drops) {

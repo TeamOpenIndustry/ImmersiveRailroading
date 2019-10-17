@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.CastingGUI;
 import cam72cam.immersiverailroading.gui.PlateRollerGUI;
+import cam72cam.immersiverailroading.gui.TrackExchangerGui;
 import cam72cam.immersiverailroading.gui.TrackGui;
 import cam72cam.immersiverailroading.gui.container.*;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
@@ -22,6 +23,7 @@ public class GuiTypes {
 
     public static final GUIType RAIL = ImmersiveRailroading.GUI_REGISTRY.register("RAIL", TrackGui::new);
     public static final GUIType RAIL_PREVIEW = ImmersiveRailroading.GUI_REGISTRY.registerBlock(TileRailPreview.class, TrackGui::new);
+    public static final GUIType TRACK_EXCHANGER = ImmersiveRailroading.GUI_REGISTRY.register("TRACK_EXCHANGER", TrackExchangerGui::new);
 
     public static final GUIType STEAM_HAMMER = ImmersiveRailroading.GUI_REGISTRY.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
     public static final GUIType CASTING = ImmersiveRailroading.GUI_REGISTRY.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);
