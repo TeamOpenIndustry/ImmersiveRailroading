@@ -126,8 +126,15 @@ public class TileRailPreview extends BlockEntityTickable {
 			}
 			return false;
 		} else {
-			ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.RAIL_PREVIEW);
-			return !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE);
+			if(player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE))
+			{
+				return false;
+			}
+			else
+			{
+				ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.RAIL_PREVIEW);
+				return true;
+			}
 		}
 	}
 
