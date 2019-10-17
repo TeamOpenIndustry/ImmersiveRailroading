@@ -10,18 +10,18 @@ import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.world.World;
-import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
-public class StockItemModel {
-
-	public static StandardModel getModel(ItemStack stack, World world) {
-		return new StandardModel().addCustom(() -> StockItemModel.render(stack));
+public class StockItemModel implements ItemRender.ISpriteItemModel {
+	@Override
+	public StandardModel getModel(World world, ItemStack stack) {
+		return new StandardModel().addCustom(() -> render(stack));
 	}
 
-	public static void render(ItemStack stack) {
+	private void render(ItemStack stack) {
 		double scale = ItemGauge.get(stack).scale();
 		String defID = ItemDefinition.getID(stack);
 		StockModel model = StockRenderCache.getRender(defID);
@@ -50,12 +50,18 @@ public class StockItemModel {
         cull.restore();
 	}
 
-	public static Pair<String, StandardModel> getIcon(ItemStack stack) {
+	@Override
+	public String getSpriteKey(ItemStack stack) {
+		return ItemDefinition.getID(stack);
+	}
+
+	@Override
+	public StandardModel getSpriteModel(ItemStack stack) {
 		String defID = ItemDefinition.getID(stack);
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		StockModel model = StockRenderCache.getRender(defID);
 
-		return Pair.of(defID, new StandardModel().addCustom(() -> {
+		return new StandardModel().addCustom(() -> {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
             model.bindTexture(true);
             GL11.glPushMatrix();
@@ -71,6 +77,6 @@ public class StockItemModel {
             model.restoreTexture();
             model.textures.forEach((k, ts) -> ts.dealloc());
 			tex.restore();
-        }));
+        });
 	}
 }
