@@ -82,9 +82,11 @@ public class BoilerRollerMultiblock extends Multiblock {
 					}
 					
 					ItemStack outstack = craftTe.getContainer().get(1);
-					world.dropItem(outstack, player.getPosition());
+					if (!outstack.isEmpty()) {
+						world.dropItem(outstack, player.getPosition());
 
-					craftTe.getContainer().set(1, ItemStack.EMPTY);
+						craftTe.getContainer().set(1, ItemStack.EMPTY);
+					}
 				} else if (held.is(IRItems.ITEM_PLATE) && ItemPlateType.get(held) == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
 					if (craftTe == null) {
