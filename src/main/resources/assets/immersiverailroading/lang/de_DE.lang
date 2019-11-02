@@ -158,7 +158,7 @@ immersiverailroading:crafting_type.plate_medium=Plattenwalze
 immersiverailroading:crafting_type.plate_large=Plattenwalze
 immersiverailroading:crafting_type.plate_boiler=Plattenwalze, Kesselwalze
 
-itemGroup.immersiverailroading=Immersive Railroading
+itemGroup.immersiverailroading.main=Immersive Railroading
 itemGroup.immersiverailroading.locomotive=Immersive Railroading Lokomotiven
 itemGroup.immersiverailroading.stock=Immersive Railroading Waggons
 itemGroup.immersiverailroading.passenger=Immersive Railroading Passagierwagen

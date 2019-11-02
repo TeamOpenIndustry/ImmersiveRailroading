@@ -16,7 +16,7 @@ public class ItemTabs {
 	public static CreativeTab COMPONENT_TAB;
 
 	static {
-		MAIN_TAB = new CreativeTab(ImmersiveRailroading.MODID, () -> new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1));
+		MAIN_TAB = new CreativeTab(ImmersiveRailroading.MODID + ".main", () -> new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1));
 		LOCOMOTIVE_TAB = new CreativeTab(ImmersiveRailroading.MODID + ".locomotive", () -> {
 			List<ItemStack> items = IRItems.ITEM_ROLLING_STOCK.getItemVariants(LOCOMOTIVE_TAB);
 			if (items.size() == 0) {

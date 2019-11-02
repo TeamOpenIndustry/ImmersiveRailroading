@@ -179,7 +179,7 @@ immersiverailroading:crafting_type.plate_medium=Пластина-вал сред
 immersiverailroading:crafting_type.plate_large=Пластина-вал большая
 immersiverailroading:crafting_type.plate_boiler=Пластина-вал универсальная котловая
 
-itemGroup.immersiverailroading=Железнодорожные системы (общее)
+itemGroup.immersiverailroading.main=Железнодорожные системы (общее)
 itemGroup.immersiverailroading.locomotive=Железнодорожные локомотивы
 itemGroup.immersiverailroading.stock=Железнодорожные грузовые вагоны
 itemGroup.immersiverailroading.passenger=Железнодорожные пассажирские вагоны

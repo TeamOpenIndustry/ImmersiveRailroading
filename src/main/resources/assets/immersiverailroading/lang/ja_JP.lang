@@ -162,7 +162,7 @@ immersiverailroading:crafting_type.plate_medium=プレートローラー
 immersiverailroading:crafting_type.plate_large=プレートローラー
 immersiverailroading:crafting_type.plate_boiler=プレートローラー, ボイラーローラー
 
-itemGroup.immersiverailroading=Immersive Railroading
+itemGroup.immersiverailroading.main=Immersive Railroading
 itemGroup.immersiverailroading.locomotive=IR 機関車
 itemGroup.immersiverailroading.stock=IR 運搬車
 itemGroup.immersiverailroading.passenger=IR 客車

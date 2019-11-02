@@ -173,7 +173,7 @@ immersiverailroading:crafting_type.plate_medium=辊压板
 immersiverailroading:crafting_type.plate_large=辊压板
 immersiverailroading:crafting_type.plate_boiler=辊压板，蒸汽辊压
 
-itemGroup.immersiverailroading=沉浸铁路
+itemGroup.immersiverailroading.main=沉浸铁路
 itemGroup.immersiverailroading.locomotive=沉浸铁路丨机车
 itemGroup.immersiverailroading.stock=沉浸铁路丨货车
 itemGroup.immersiverailroading.passenger=沉浸铁路丨客车
