@@ -203,11 +203,13 @@ public class RailInfo {
 						copy.setCount(stack.getCount());
 						drops.add(copy);
 						stack.setCount(0);
+						player.getInventory().set(i, stack);
 					} else if (required != 0) {
 						ItemStack copy = stack.copy();
 						copy.setCount(required);
 						drops.add(copy);
 						stack.setCount(stack.getCount() - required);
+						player.getInventory().set(i, stack);
 						required = 0;
 					}
 				}
