@@ -5,8 +5,8 @@ import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
-import cam72cam.immersiverailroading.tile.Rail;
-import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
@@ -46,9 +46,9 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 				0);
 		RailInfo lookInfo = null;
 		if (MinecraftClient.getBlockMouseOver() != null) {
-			RailBase railSlave = world.getBlockEntity(MinecraftClient.getBlockMouseOver(), RailBase.class);
+			TileRailBase railSlave = world.getBlockEntity(MinecraftClient.getBlockMouseOver(), TileRailBase.class);
 			if (railSlave != null) {
-				Rail rail = railSlave.getParentTile();
+				TileRail rail = railSlave.getParentTile();
 				if (rail != null) {
 					lookInfo = info.withTrack(rail.info.settings.track);
 				}

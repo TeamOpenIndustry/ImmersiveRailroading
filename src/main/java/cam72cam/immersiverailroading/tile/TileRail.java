@@ -15,7 +15,7 @@ import cam72cam.mod.util.TagCompound;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Rail extends RailBase {
+public class TileRail extends TileRailBase {
 
 	public RailInfo info;
 	private List<ItemStack> drops;

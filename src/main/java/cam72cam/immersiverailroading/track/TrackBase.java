@@ -3,12 +3,10 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.blocks.BlockRailGag;
-import cam72cam.immersiverailroading.tile.Rail;
-import cam72cam.immersiverailroading.tile.RailBase;
-import cam72cam.immersiverailroading.tile.RailGag;
+import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.mod.block.tile.TileEntity;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.TagCompound;
 
@@ -49,7 +47,7 @@ public abstract class TrackBase {
 	}
 
 	public boolean isOverTileRail() {
-		return builder.info.world.getBlockEntity(getPos(), Rail.class) != null && this instanceof TrackGag;
+		return builder.info.world.getBlockEntity(getPos(), TileRail.class) != null && this instanceof TrackGag;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -59,11 +57,11 @@ public abstract class TrackBase {
 		return isDownSolid() && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
-	public RailBase placeTrack(boolean actuallyPlace) {
+	public TileRailBase placeTrack(boolean actuallyPlace) {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			RailGag tr = (RailGag) IRBlocks.BLOCK_RAIL_GAG.createBlockEntity(builder.info.world, pos);
+			TileRailGag tr = (TileRailGag) IRBlocks.BLOCK_RAIL_GAG.createBlockEntity(builder.info.world, pos);
 			if (parent != null) {
 				tr.setParent(parent);
 			} else {
@@ -81,10 +79,10 @@ public abstract class TrackBase {
 
 		TagCompound replaced = null;
 		
-		RailBase te = null;
+		TileRailBase te = null;
 		if (!builder.info.world.isAir(pos)) {
 			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
-				te = builder.info.world.getBlockEntity(pos, RailBase.class);
+				te = builder.info.world.getBlockEntity(pos, TileRailBase.class);
 				if (te != null) {
 					replaced = te.getData();
 				}
@@ -101,7 +99,7 @@ public abstract class TrackBase {
             te.setWillBeReplaced(false);
         }
 
-		RailBase tr = builder.info.world.getBlockEntity(pos, RailBase.class);
+		TileRailBase tr = builder.info.world.getBlockEntity(pos, TileRailBase.class);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);

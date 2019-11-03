@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
-import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.render.*;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -73,7 +73,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		pos = pos.up();
 
 		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
+			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
 				pos = pos.down();
 			}
 		}

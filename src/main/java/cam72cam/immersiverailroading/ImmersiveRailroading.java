@@ -19,8 +19,8 @@ import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
-import cam72cam.immersiverailroading.tile.Rail;
-import cam72cam.immersiverailroading.tile.RailGag;
+import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
@@ -119,8 +119,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	public void clientEvent(ModEvent event) {
 		switch (event) {
 			case CONSTRUCT:
-				BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, Rail.class);
-				BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, RailGag.class);
+				BlockRender.register(IRBlocks.BLOCK_RAIL, RailBaseModel::getModel, TileRail.class);
+				BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, TileRailGag.class);
 				BlockRender.register(IRBlocks.BLOCK_RAIL_PREVIEW, RailPreviewRender::render, TileRailPreview.class);
 				BlockRender.register(IRBlocks.BLOCK_MULTIBLOCK, TileMultiblockRender::render, TileMultiblock.class);
 

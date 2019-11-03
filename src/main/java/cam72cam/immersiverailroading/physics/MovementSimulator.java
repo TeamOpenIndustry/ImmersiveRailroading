@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
@@ -35,8 +35,8 @@ public class MovementSimulator {
 		if (Math.abs(moveDistance) < 0.001) {
 			boolean isTurnTable;
 			
-			RailBase frontBase = world.getBlockEntity(new Vec3i(front), RailBase.class);
-			RailBase rearBase  = world.getBlockEntity(new Vec3i(rear),  RailBase.class);
+			TileRailBase frontBase = world.getBlockEntity(new Vec3i(front), TileRailBase.class);
+			TileRailBase rearBase  = world.getBlockEntity(new Vec3i(rear),  TileRailBase.class);
 			isTurnTable = frontBase != null &&
 					frontBase.getParentTile() != null &&
 					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;

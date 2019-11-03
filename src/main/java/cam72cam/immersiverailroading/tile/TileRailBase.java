@@ -30,7 +30,7 @@ import cam72cam.mod.util.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
+public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	private Vec3i parent;
 	private float bedHeight = 0;
 	private float railHeight = 0;
@@ -69,12 +69,12 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	}
 	public double getRenderGauge() {
 		double gauge = 0;
-		Rail parent = this.getParentTile();
+		TileRail parent = this.getParentTile();
 		if (parent != null) {
 			gauge = parent.info.settings.gauge.value();
 		}
 		if (this.getParentReplaced() != null && world != null) {
-			parent = world.getBlockEntity(this.getParentReplaced(), Rail.class);
+			parent = world.getBlockEntity(this.getParentReplaced(), TileRail.class);
             if (parent != null) {
                 gauge = Math.min(gauge, parent.info.settings.gauge.value());
             }
@@ -159,12 +159,12 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	}
 	
 	public boolean isFlexible() {
-		return this.flexible || !(this instanceof Rail);
+		return this.flexible || !(this instanceof TileRail);
 	}
 	
 	public ItemStack getRenderRailBed() {
 		if (railBedCache == null) {
-			Rail pt = this.getParentTile();
+			TileRail pt = this.getParentTile();
 			if (pt != null) {
 				railBedCache = pt.info.settings.railBed;
 			}
@@ -283,11 +283,11 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 		nbt.setInteger("version", 3);
 	}
 
-	public Rail getParentTile() {
+	public TileRail getParentTile() {
 		if (this.getParent() == null) {
 			return null;
 		}
-		Rail te = world.getBlockEntity(this.getParent(), Rail.class);
+		TileRail te = world.getBlockEntity(this.getParent(), TileRail.class);
 		if (te == null || !te.isLoaded()) {
 			return null;
 		}
@@ -365,7 +365,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 
 	@Override
 	public double getTrackGauge() {
-		Rail parent = this.getParentTile();
+		TileRail parent = this.getParentTile();
 		if (parent != null) {
 			return parent.info.settings.gauge.value();
 		}
@@ -378,8 +378,8 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 		float rotationYaw = VecUtil.toWrongYaw(motion);
 		Vec3d nextPos = currentPosition;
 
-		RailBase self = this;
-		Rail tile = this instanceof Rail ? (Rail) this : this.getParentTile();
+		TileRailBase self = this;
+		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 
 		while(tile != null) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
@@ -414,7 +414,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
             tile = null;
 			Vec3i currentParent = self.getParentTile().getParent();
 			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
-				self = (RailBase) world.reconstituteBlockEntity(data);
+				self = (TileRailBase) world.reconstituteBlockEntity(data);
 				if (!currentParent.equals(self.getParent())) {
 					tile = self.getParentTile();
 					break;
@@ -536,8 +536,8 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 				return;
 			}
 			
-			if (Config.ConfigDamage.requireSolidBlocks && this instanceof Rail) {
-				double floating = ((Rail)this).percentFloating();
+			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
+				double floating = ((TileRail)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
 					if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(world, pos, null)) {
 						world.breakBlock(pos);
@@ -752,7 +752,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	}
 
 	public SwitchState cycleSwitchForced() {
-		Rail tileSwitch = this.findSwitchParent();
+		TileRail tileSwitch = this.findSwitchParent();
 		SwitchState newForcedState = SwitchState.NONE;
 
 		if (tileSwitch != null) {
@@ -767,7 +767,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	}
 
 	public boolean isSwitchForced() {
-		Rail tileSwitch = this.findSwitchParent();
+		TileRail tileSwitch = this.findSwitchParent();
 		if (tileSwitch != null) {
 			return tileSwitch.info.switchForced != SwitchState.NONE;
 		} else {
@@ -778,7 +778,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	/** Finds a parent of <code>this</code> whose type is TrackItems.SWITCH. Returns null if one doesn't exist
 	 * @return parent Rail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
-	public Rail findSwitchParent() {
+	public TileRail findSwitchParent() {
 		return findSwitchParent(this);
 	}
 
@@ -786,13 +786,13 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	 * @param cur RailBase whose parents are to be traversed
 	 * @return parent Rail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
-	public Rail findSwitchParent(RailBase cur) {
+	public TileRail findSwitchParent(TileRailBase cur) {
 		if (cur == null) {
 			return null;
 		}
 
-		if (cur instanceof Rail) {
-			Rail curTR = (Rail) cur;
+		if (cur instanceof TileRail) {
+			TileRail curTR = (TileRail) cur;
 			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
 				return curTR;
 			}
@@ -818,8 +818,8 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 
 	@Override
 	public void onBreak() {
-		if (this instanceof Rail) {
-			((Rail) this).spawnDrops();
+		if (this instanceof TileRail) {
+			((TileRail) this).spawnDrops();
 		}
 
 		breakParentIfExists();
@@ -829,7 +829,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
 		if (stack.is(IRItems.ITEM_SWITCH_KEY)) {
-			Rail tileSwitch = this.findSwitchParent();
+			TileRail tileSwitch = this.findSwitchParent();
 			if (tileSwitch != null) {
 				SwitchState switchForced = this.cycleSwitchForced();
 				if (this.world.isServer) {
@@ -838,7 +838,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 			}
 		}
 		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER)) {
-			Rail tileRail = this.getParentTile();
+			TileRail tileRail = this.getParentTile();
 			String track = ItemTrackExchangerType.get(stack);
 			if (track != null && !track.equals(tileRail.info.settings.track)) {
 				if (!player.isCreative()) {
@@ -900,7 +900,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 			return stack;
 		}
 
-		Rail parent = this.getParentTile();
+		TileRail parent = this.getParentTile();
 		if (parent == null) {
 			return stack;
 		}
@@ -910,7 +910,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 
 	@Override
 	public void onNeighborChange(Vec3i neighbor) {
-		RailBase te = this;
+		TileRailBase te = this;
 
 		if (world.isClient) {
 			return;
@@ -927,9 +927,9 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 		TagCompound data = te.getReplaced();
 		while (true) {
 			if (te.getParentTile() != null && te.getParentTile().getParentTile() != null) {
-				Rail switchTile = te.getParentTile();
-				if (te instanceof Rail) {
-					switchTile = (Rail) te;
+				TileRail switchTile = te.getParentTile();
+				if (te instanceof TileRail) {
+					switchTile = (TileRail) te;
 				}
 				SwitchState state = SwitchUtil.getSwitchState(switchTile);
 				if (state != SwitchState.NONE) {
@@ -939,13 +939,13 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 			if (data == null) {
 				break;
 			}
-			te = (RailBase) world.reconstituteBlockEntity(data);
+			te = (TileRailBase) world.reconstituteBlockEntity(data);
 			data = te.getReplaced();
 		}
 	}
 
 	private void breakParentIfExists() {
-		Rail parent = getParentTile();
+		TileRail parent = getParentTile();
 		if (parent != null && !getWillBeReplaced()) {
 			parent.spawnDrops();
 			//if (tryBreak(getWorld(), te.getPos())) {
@@ -957,13 +957,13 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 	@Override
 	public boolean tryBreak(Player player) {
 		try {
-			RailBase rail = this;
+			TileRailBase rail = this;
 			if (rail.getReplaced() != null) {
 				// new object here is important
-				RailGag newGag = (RailGag) world.reconstituteBlockEntity(rail.getReplaced());
+				TileRailGag newGag = (TileRailGag) world.reconstituteBlockEntity(rail.getReplaced());
 
 				while(true) {
-					if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), Rail.class)) {
+					if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), TileRail.class)) {
 						world.setBlockEntity(pos, newGag);
 						rail.breakParentIfExists();
 						return false;
@@ -975,7 +975,7 @@ public class RailBase extends BlockEntityTrackTickable implements IRedstoneProvi
 						break;
 					}
 
-					newGag = (RailGag) world.reconstituteBlockEntity(data);
+					newGag = (TileRailGag) world.reconstituteBlockEntity(data);
 				}
 			}
 		} catch (StackOverflowError ex) {

@@ -1,10 +1,9 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
-import trackapi.lib.Util;
 
 public class BlockUtil {
 	public static boolean canBeReplaced(World world, Vec3i pos, boolean allowFlex) {
@@ -16,7 +15,7 @@ public class BlockUtil {
 			return true;
 		}
 		if (allowFlex && isIRRail(world, pos)) {
-			RailBase te = world.getBlockEntity(pos, RailBase.class);
+			TileRailBase te = world.getBlockEntity(pos, TileRailBase.class);
 			return te != null && te.isFlexible();
 		}
 		return false;

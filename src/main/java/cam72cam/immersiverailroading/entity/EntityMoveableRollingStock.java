@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
@@ -279,7 +279,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
                 Vec3i posFront = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyFront(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
                 if (BlockUtil.isIRRail(getWorld(), posFront)) {
-                    RailBase rb = getWorld().getBlockEntity(posFront, RailBase.class);
+                    TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
                     rb = rb.getParentTile();
                     if (rb != null && !rb.pos.equals(clackFrontPos)) {
                         clackFront.setPitch(pitch);
@@ -290,7 +290,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
                 Vec3i posRear = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyRear(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
                 if (BlockUtil.isIRRail(getWorld(), posRear)) {
-                    RailBase rb = getWorld().getBlockEntity(posRear, RailBase.class);
+                    TileRailBase rb = getWorld().getBlockEntity(posRear, TileRailBase.class);
                     rb = rb.getParentTile();
                     if (rb != null && !rb.pos.equals(clackRearPos)) {
                         clackRear.setPitch(pitch);
@@ -436,7 +436,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 							}
 						}
 					} else {
-						RailBase te = getWorld().getBlockEntity(bp, RailBase.class);
+						TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
 						if (te != null) {
 							te.cleanSnow();
 							continue;
@@ -539,7 +539,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             }
 
             try {
-                RailBase te = getWorld().getBlockEntity(bp, RailBase.class); // , false
+                TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class); // , false
                 if (te != null) {
                     if (te.getAugment() == Augment.SPEED_RETARDER) {
                         max = Math.max(max, getWorld().getRedstone(bp));

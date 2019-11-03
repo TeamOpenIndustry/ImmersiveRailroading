@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.Rail;
-import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -41,7 +41,7 @@ public class MovementTrack {
 					return te;
 				}
 				// HACK for cross gauge
-				RailBase rail = world.getBlockEntity(new Vec3i(pos).add(new Vec3i(0, (int)(height + (currentPosition.y%1)), 0)), RailBase.class);
+				TileRailBase rail = world.getBlockEntity(new Vec3i(pos).add(new Vec3i(0, (int)(height + (currentPosition.y%1)), 0)), TileRailBase.class);
 				if (rail != null && rail.getParentReplaced() != null) {
 					return rail;
 				}
@@ -51,7 +51,7 @@ public class MovementTrack {
 	}
 	
 
-	public static Vec3d nextPosition(World world, Vec3d currentPosition, Rail rail, float trainYaw, double distanceMeters) {
+	public static Vec3d nextPosition(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
 		double maxDelta = 0.5;
 		if (distanceMeters > maxDelta) {
 			double dist = 0;
@@ -76,7 +76,7 @@ public class MovementTrack {
 		}
 	}
 
-	public static Vec3d nextPositionInner(World world, Vec3d currentPosition, Rail rail, float trainYaw, double distanceMeters) {
+	public static Vec3d nextPositionInner(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
 		Vec3d delta = VecUtil.fromWrongYaw(distanceMeters, trainYaw);
 		
 		if (rail == null) {

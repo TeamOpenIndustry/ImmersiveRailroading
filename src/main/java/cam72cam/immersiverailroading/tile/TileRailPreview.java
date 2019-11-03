@@ -118,7 +118,7 @@ public class TileRailPreview extends BlockEntityTickable {
 			Vec3i pos = this.pos;
 			if (world.isServer) {
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), RailBase.class).getRailHeight() < 0.5) {
+					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
 						pos = pos.down();
 					}
 				}

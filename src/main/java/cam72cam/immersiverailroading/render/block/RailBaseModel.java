@@ -4,8 +4,8 @@ import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
-import cam72cam.immersiverailroading.tile.Rail;
-import cam72cam.immersiverailroading.tile.RailBase;
+import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -13,7 +13,7 @@ import cam72cam.mod.render.StandardModel;
 import org.lwjgl.opengl.GL11;
 
 public class RailBaseModel {
-	public static StandardModel getModel(RailBase te) {
+	public static StandardModel getModel(TileRailBase te) {
 		ItemStack bed = te.getRenderRailBed();
 		if (bed == null) {
             // wait for tile to be initialized
@@ -28,9 +28,9 @@ public class RailBaseModel {
 		Gauge gauge = Gauge.from(gauged);
 
 		StandardModel model = new StandardModel();
-		if (te instanceof Rail) {
+		if (te instanceof TileRail) {
 			model.addCustom(() -> {
-				RailInfo info = ((Rail) te).info;
+				RailInfo info = ((TileRail) te).info;
                 if (info.settings.type == TrackItems.SWITCH) {
                     //TODO render switch and don't render turn
                     info = info.withType(TrackItems.STRAIGHT);
