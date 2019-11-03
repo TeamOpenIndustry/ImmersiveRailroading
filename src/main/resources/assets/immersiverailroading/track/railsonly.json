@@ -6,7 +6,7 @@
   },
   "materials": {
     "TIE": [{
-      "item": "minecraft:concrete|7",
+      "item": "ore:concrete",
       "cost": 1
     },{
       "item": "ore:ingotIron",
