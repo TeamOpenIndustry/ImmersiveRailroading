@@ -34,7 +34,7 @@ public abstract class Multiblock {
 	
 	protected static final Fuzzy AIR = null;
 	protected static Fuzzy STEEL() {
-		return IRFuzzy.IR_STEEL_BLOCK;
+		return Fuzzy.STEEL_BLOCK;
 	}
 	
 	protected static Fuzzy CASING() {

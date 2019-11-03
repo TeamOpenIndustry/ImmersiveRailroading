@@ -8,8 +8,6 @@ public class IRFuzzy {
     public static final Fuzzy IR_LIGHT_ENG = new Fuzzy("irLightEngineering");
     public static final Fuzzy IR_HEAVY_ENG = new Fuzzy("irHeavyEngineering");
     public static final Fuzzy IR_SCAFFOLDING = new Fuzzy("irScaffolding");
-    public static final Fuzzy IR_STEEL_BLOCK = new Fuzzy("blockSteel");
-    public static final Fuzzy IR_STEEL_INGOT = new Fuzzy("ingotSteel");
     public static final Fuzzy IR_TIE = new Fuzzy("irTie");
     public static final Fuzzy IR_RAIL = new Fuzzy("irRail");
     public static final Fuzzy IR_RAIL_BED = new Fuzzy("railBed")
@@ -36,11 +34,11 @@ public class IRFuzzy {
         if (IR_SCAFFOLDING.example().isEmpty()) {
             IR_SCAFFOLDING.addAll(Fuzzy.IRON_BARS);
         }
-        if (IR_STEEL_INGOT.example().isEmpty()) {
-            IR_STEEL_INGOT.addAll(Fuzzy.IRON_INGOT);
+        if (Fuzzy.STEEL_INGOT.example().isEmpty()) {
+            Fuzzy.STEEL_INGOT.addAll(Fuzzy.IRON_INGOT);
         }
-        if (IR_STEEL_BLOCK.example().isEmpty()) {
-            IR_STEEL_BLOCK.addAll(Fuzzy.IRON_BLOCK);
+        if (Fuzzy.STEEL_BLOCK.example().isEmpty()) {
+            Fuzzy.STEEL_BLOCK.addAll(Fuzzy.IRON_BLOCK);
         }
         if (IR_TIE.example().isEmpty()) {
             IR_TIE.addAll(Fuzzy.WOOD_PLANK);

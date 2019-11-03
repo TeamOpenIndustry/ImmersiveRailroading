@@ -92,7 +92,7 @@ public class PlateRollerMultiblock extends Multiblock {
 						}
 						return true;
 					}
-				} else if (IRFuzzy.IR_STEEL_BLOCK.matches(held)) {
+				} else if (Fuzzy.STEEL_BLOCK.matches(held)) {
 					TileMultiblock inputTe = getTile(input);
 					if (inputTe == null) {
 						return false;
@@ -179,7 +179,7 @@ public class PlateRollerMultiblock extends Multiblock {
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if ( IRFuzzy.IR_STEEL_BLOCK.matches(input) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
+				if ( Fuzzy.STEEL_BLOCK.matches(input) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
 					input.setCount(input.getCount() - 1);
 					inputTe.getContainer().set(0, input);;
 					progress = 100;
@@ -195,7 +195,7 @@ public class PlateRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean canInsertItem(Vec3i offset, int slot, ItemStack stack) {
-			return offset.equals(input) && IRFuzzy.IR_STEEL_BLOCK.matches(stack);
+			return offset.equals(input) && Fuzzy.STEEL_BLOCK.matches(stack);
 		}
 
 		@Override
