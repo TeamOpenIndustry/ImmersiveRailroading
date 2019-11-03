@@ -51,4 +51,13 @@ public class RailCastItemRender implements ItemRender.IItemModel {
 			GL11.glPopMatrix();
 		});
 	}
+
+	@Override
+	public void applyTransform(ItemRender.ItemRenderType type) {
+		ItemRender.IItemModel.defaultTransform(type);
+
+		if (type == ItemRender.ItemRenderType.GUI) {
+			GL11.glScaled(1, 0.1, 1);
+		}
+	}
 }
