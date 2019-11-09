@@ -217,3 +217,4 @@ ir_keys.horn=Гудок
 ir_keys.bell=Колокол
 ir_keys.dead_mans_switch=Переключатель питания ТСКБМ
 ir_keys.start_stop_engine=Запуск/остановка двигателя (для диз- или эл-поездов)
+ir_keys.config=Config

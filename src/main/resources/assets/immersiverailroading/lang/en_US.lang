@@ -219,3 +219,4 @@ ir_keys.horn=Sound Horn
 ir_keys.bell=Sound Bell
 ir_keys.dead_mans_switch=Deadman's Switch
 ir_keys.start_stop_engine=Start/Stop engine
+ir_keys.config=Config

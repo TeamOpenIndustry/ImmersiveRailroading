@@ -193,3 +193,4 @@ ir_keys.decrease_brake=ブレーキを下げる
 ir_keys.horn=警笛を鳴らす
 ir_keys.dead_mans_switch=デッドマンスイッチ
 ir_keys.start_stop_engine=エンジンを始動/停止する
+ir_keys.config=Config

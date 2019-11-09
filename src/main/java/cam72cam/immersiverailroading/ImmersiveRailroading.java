@@ -169,10 +169,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Keyboard.registerKey("ir_keys.zero_brake", KeyCode.NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_ZERO));
 				Keyboard.registerKey("ir_keys.decrease_brake", KeyCode.NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_DOWN));
 				Keyboard.registerKey("ir_keys.horn", KeyCode.NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.HORN));
-				Keyboard.registerKey("ir_keys.dead_mans_switch", KeyCode.NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.DEAD_MANS_SWITCH));
+				Keyboard.registerKey("ir_keys.dead_mans_switch", KeyCode.MULTIPLY, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.DEAD_MANS_SWITCH));
 				Keyboard.registerKey("ir_keys.start_stop_engine", KeyCode.ADD, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.START_STOP_ENGINE));
 				Keyboard.registerKey("ir_keys.bell", KeyCode.SUBTRACT, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.BELL));
-				Keyboard.registerKey("ir_keys.config", KeyCode.MULTIPLY, "key.categories." + ImmersiveRailroading.MODID, () -> GuiTypes.CONFIG.open(MinecraftClient.getPlayer()));
+				Keyboard.registerKey("ir_keys.config", KeyCode.DIVIDE, "key.categories." + ImmersiveRailroading.MODID, () -> GuiTypes.CONFIG.open(MinecraftClient.getPlayer()));
 				break;
 			case SETUP:
 				if (ConfigSound.overrideSoundChannels) {
