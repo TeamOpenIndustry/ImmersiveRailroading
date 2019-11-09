@@ -39,7 +39,6 @@ public class Config {
 
 			// Other
 			ConfigBalance.dieselFuels.put("olive_oil", 40);
-			//ConfigManager.sync(ImmersiveRailroading.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
 		}
 	}
 
