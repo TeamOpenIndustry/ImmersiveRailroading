@@ -31,7 +31,7 @@ public abstract class TrackBase {
 		this.block = block;
 	}
 
-	public boolean isDownSolid() {
+	public boolean isDownSolid(boolean countFill) {
 		Vec3i pos = getPos();
 		return
             // Config to bypass solid block requirement
@@ -41,7 +41,7 @@ public abstract class TrackBase {
             // Valid block beneath
             builder.info.world.isTopSolid(pos.down()) ||
             // BlockType below is replaceable and we will replace it with something
-            (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && !builder.info.settings.railBedFill.isEmpty()) ||
+            countFill && (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && !builder.info.settings.railBedFill.isEmpty()) ||
             // BlockType below is an IR Rail
             BlockUtil.isIRRail(builder.info.world, pos.down());
 	}
@@ -54,7 +54,7 @@ public abstract class TrackBase {
 	public boolean canPlaceTrack() {
 		Vec3i pos = getPos();
 
-		return isDownSolid() && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
+		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
 	public TileRailBase placeTrack(boolean actuallyPlace) {

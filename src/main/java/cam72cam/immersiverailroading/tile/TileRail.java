@@ -152,7 +152,7 @@ public class TileRail extends TileRailBase {
 			if (!world.isBlockLoaded(tpos)) {
 				return 0;
 			}
-			if (!track.isDownSolid()) {
+			if (!track.isDownSolid(false)) {
 				floating++;
 			}
 		}
