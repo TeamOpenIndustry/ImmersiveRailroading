@@ -2,9 +2,11 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
+import cam72cam.mod.config.ConfigFile.File;
 
 @Comment("Configuration File")
 @Name("general")
+@File("immersiverailroading_sound.cfg")
 public class ConfigSound {
 	//@RequiresMcRestart
 	@Comment("Enable Sounds")

@@ -25,6 +25,7 @@ import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.ModEvent;
 import cam72cam.mod.config.ConfigFile;
@@ -40,6 +41,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.Command;
+import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -96,9 +98,9 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				break;
 			case INITIALIZE:
 				Config.init();
-				ConfigFile.sync(Config.class, getConfig("immersiverailroading.cfg"));
-				ConfigFile.sync(ConfigGraphics.class, getConfig("immersiverailroading_graphics.cfg"));
-				ConfigFile.sync(ConfigSound.class, getConfig("immersiverailroading_sound.cfg"));
+				ConfigFile.sync(Config.class);
+				ConfigFile.sync(ConfigGraphics.class);
+				ConfigFile.sync(ConfigSound.class);
 
 				try {
 					DefinitionManager.initDefinitions();
@@ -172,6 +174,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Keyboard.registerKey("ir_keys.dead_mans_switch", KeyCode.NUMPADEQUALS, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.DEAD_MANS_SWITCH));
 				Keyboard.registerKey("ir_keys.start_stop_engine", KeyCode.ADD, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.START_STOP_ENGINE));
 				Keyboard.registerKey("ir_keys.bell", KeyCode.SUBTRACT, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.BELL));
+				Keyboard.registerKey("ir_keys.config", KeyCode.MULTIPLY, "key.categories." + ImmersiveRailroading.MODID, () -> GuiRegistry.INSTANCE.openGUI(MinecraftClient.getPlayer(), GuiTypes.CONFIG));
 				break;
 			case SETUP:
 				if (ConfigSound.overrideSoundChannels) {

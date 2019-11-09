@@ -4,8 +4,11 @@ import cam72cam.immersiverailroading.library.SpeedDisplayType;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
 
+import static cam72cam.mod.config.ConfigFile.*;
+
 @Comment("Configuration File")
 @Name("general")
+@File("immersiverailroading_graphics.cfg")
 public class ConfigGraphics {
 	@Comment( "Place to draw the Train GUI as a % from the left of the screen" )
 	public static int GUIPositionHorizontal = 2;

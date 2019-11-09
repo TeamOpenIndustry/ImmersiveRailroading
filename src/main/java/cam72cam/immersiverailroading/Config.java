@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.mod.config.ConfigFile.Comment;
+import cam72cam.mod.config.ConfigFile.File;
 import cam72cam.mod.config.ConfigFile.Name;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Comment("Configuration File")
 @Name("general")
+@File("immersiverailroading.cfg")
 public class Config {
 	public static void init() {
 		if (ConfigBalance.dieselFuels.size() == 0) {

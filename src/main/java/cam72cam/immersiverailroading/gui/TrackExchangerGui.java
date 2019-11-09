@@ -38,7 +38,6 @@ public class TrackExchangerGui implements IScreen {
 				trackSelector.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(TrackExchangerGui.this.track).name));
 			}
 		};
-		screen.addButton(trackSelector);
 	}
 
 	@Override
