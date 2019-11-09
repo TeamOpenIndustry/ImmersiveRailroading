@@ -38,7 +38,7 @@ public class ItemTabs {
 			}
 			return items.get(0);
 		});
-		COMPONENT_TAB = new CreativeTab(ImmersiveRailroading.MODID + ".component", () -> {
+		COMPONENT_TAB = new CreativeTab(ImmersiveRailroading.MODID + ".components", () -> {
 			List<ItemStack> items = IRItems.ITEM_ROLLING_STOCK_COMPONENT.getItemVariants(COMPONENT_TAB);
 			if (items.size() == 0) {
 				return new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1);

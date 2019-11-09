@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -9,9 +9,6 @@ import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
@@ -121,16 +118,21 @@ public abstract class Multiblock {
 			Vec3i compPos = origin.add(offset.rotate(rot));
 			if (!component.matches(world.getItemStack(compPos))) {
 				if (!place(component, world, player, compPos)) {
-					if (!missing.containsKey(component.example().getDisplayName())) {
-						missing.put(component.example().getDisplayName(), 0);
+					Set<String> exStrs = component.enumerate().stream().map(ItemStack::getDisplayName).collect(Collectors.toSet());
+					String example = String.join(" | ", exStrs);
+					if (exStrs.size() > 1) {
+						example = "[ " + example + " ]";
 					}
-					missing.put(component.example().getDisplayName(), missing.get(component.example().getDisplayName()) + 1);
+					if (!missing.containsKey(example)) {
+						missing.put(example, 0);
+					}
+					missing.put(example, missing.get(example) + 1);
 				}
 			}
 		}
 
 		if (missing.size() != 0) {
-			player.sendMessage(ChatText.STOCK_MISSING.getMessage());
+			player.sendMessage(ChatText.BUILD_MISSING.getMessage("", ""));
 			for (String name : missing.keySet()) {
 				player.sendMessage(PlayerMessage.direct(String.format("  - %d x %s", missing.get(name), name)));
 			}
