@@ -53,8 +53,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	public static final int ENTITY_SYNC_DISTANCE = 512;
 	private static ImmersiveRailroading instance;
 
-	public static GuiRegistry GUI_REGISTRY = new GuiRegistry(ImmersiveRailroading.instance);
-
 	public ImmersiveRailroading() {
 		instance = this;
 	}
