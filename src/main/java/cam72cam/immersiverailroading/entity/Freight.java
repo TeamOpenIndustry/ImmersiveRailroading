@@ -112,6 +112,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 				if (passenger instanceof Living && !passenger.isVillager()) {
 					Living living = (Living) passenger;
 					if (living.canBeLeashedTo(player)) {
+						this.removePassenger(living);
 						living.setLeashHolder(player);
 						player.getHeldItem(Hand.PRIMARY).shrink(1);
 					}
