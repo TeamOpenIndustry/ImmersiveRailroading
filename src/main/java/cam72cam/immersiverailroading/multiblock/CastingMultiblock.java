@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -8,7 +7,6 @@ import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
@@ -134,7 +132,7 @@ public class CastingMultiblock extends Multiblock {
 			} else {
 				if (world.isClient) {
 					Vec3i pos = getPos(craft);
-					GuiRegistry.INSTANCE.openGUI(player, pos, GuiTypes.CASTING);
+					GuiTypes.CASTING.open(player, pos);
 				}
 			}
 			return true;

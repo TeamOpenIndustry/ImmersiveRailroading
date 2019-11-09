@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
@@ -37,7 +36,7 @@ public class ItemTrackExchanger extends ItemBase {
 	@Override
 	public void onClickAir(Player player, World world, Hand hand) {
 		if (world.isClient && hand == Hand.PRIMARY) {
-			GuiRegistry.INSTANCE.openGUI(player, GuiTypes.TRACK_EXCHANGER);
+			GuiTypes.TRACK_EXCHANGER.open(player);
 		}
 	}
 }

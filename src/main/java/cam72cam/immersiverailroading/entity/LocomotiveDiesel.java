@@ -84,7 +84,7 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
-	public GuiRegistry.GUIType guiType() {
+	public GuiRegistry.EntityGUI guiType() {
 		return GuiTypes.DIESEL_LOCOMOTIVE;
 	}
 	

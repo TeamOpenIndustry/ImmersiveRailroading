@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.*;
 import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
@@ -34,7 +33,7 @@ public class ItemTrackBlueprint extends ItemBase {
 	@Override
 	public void onClickAir(Player player, World world, Hand hand) {
 		if (world.isClient && hand == Hand.PRIMARY) {
-			GuiRegistry.INSTANCE.openGUI(player, GuiTypes.RAIL);
+			GuiTypes.RAIL.open(player);
         }
 	}
 	

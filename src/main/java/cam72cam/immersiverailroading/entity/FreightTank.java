@@ -142,7 +142,7 @@ public abstract class FreightTank extends Freight {
 	 */
 
 	@Override
-	public GuiRegistry.GUIType guiType() {
+	public GuiRegistry.EntityGUI guiType() {
 		return GuiTypes.TANK;
 	}
 

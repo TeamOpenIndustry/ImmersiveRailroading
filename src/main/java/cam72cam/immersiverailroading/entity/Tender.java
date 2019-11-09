@@ -16,7 +16,7 @@ public class Tender extends CarTank {
 	}
 	
 	@Override
-	public GuiRegistry.GUIType guiType() {
+	public GuiRegistry.EntityGUI guiType() {
 		return GuiTypes.TENDER;
 	}
 

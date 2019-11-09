@@ -65,7 +65,7 @@ public abstract class Locomotive extends FreightTank {
 	 */
 
 	@Override
-	public GuiRegistry.GUIType guiType() {
+	public GuiRegistry.EntityGUI guiType() {
 		return null;
 	}
 

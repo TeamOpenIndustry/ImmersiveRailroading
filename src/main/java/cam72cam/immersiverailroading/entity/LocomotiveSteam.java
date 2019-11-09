@@ -57,7 +57,7 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public GuiRegistry.GUIType guiType() {
+	public GuiRegistry.EntityGUI guiType() {
 		return GuiTypes.STEAM_LOCOMOTIVE;
 	}
 	
