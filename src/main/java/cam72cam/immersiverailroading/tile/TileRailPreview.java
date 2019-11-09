@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -126,7 +127,7 @@ public class TileRailPreview extends BlockEntityTickable {
 			}
 			return false;
 		} else {
-			ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.RAIL_PREVIEW);
+			GuiRegistry.INSTANCE.openGUI(player, pos, GuiTypes.RAIL_PREVIEW);
 			return !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE);
 		}
 	}

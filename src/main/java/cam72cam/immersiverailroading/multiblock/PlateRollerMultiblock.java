@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
@@ -111,7 +112,7 @@ public class PlateRollerMultiblock extends Multiblock {
 				
 				if (world.isClient) {
 					Vec3i pos = getPos(crafter);
-					ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.PLATE_ROLLER);
+					GuiRegistry.INSTANCE.openGUI(player, pos, GuiTypes.PLATE_ROLLER);
 				}
 				return true;
 			}

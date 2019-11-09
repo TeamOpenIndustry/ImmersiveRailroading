@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.ItemStackHandler;
@@ -67,7 +68,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			if (isCenter(offset)) {
 				if (world.isServer) {
 					Vec3i pos = getPos(offset);
-					ImmersiveRailroading.GUI_REGISTRY.openGUI(player, pos, GuiTypes.STEAM_HAMMER);
+					GuiRegistry.INSTANCE.openGUI(player, pos, GuiTypes.STEAM_HAMMER);
 				}
 				return true;
 			}

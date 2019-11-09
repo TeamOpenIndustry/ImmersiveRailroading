@@ -122,7 +122,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 		
 		if (guiType() != null) {
-			ImmersiveRailroading.GUI_REGISTRY.openGUI(player, this, guiType());
+			GuiRegistry.INSTANCE.openGUI(player, this, guiType());
 			return ClickResult.ACCEPTED;
 		}
 		return ClickResult.PASS;
