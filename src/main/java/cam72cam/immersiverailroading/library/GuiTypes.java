@@ -40,4 +40,9 @@ public class GuiTypes {
         }
         return null;
     }
+
+    public static void register() {
+        // loads static classes and ctrs
+    }
+
 }

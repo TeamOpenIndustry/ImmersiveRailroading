@@ -13,6 +13,5 @@ public class IRBlocks {
 
 	public static void register() {
 		// loads static classes and ctrs
-		//TODO explicit loading instead of CTR loading
 	}
 }

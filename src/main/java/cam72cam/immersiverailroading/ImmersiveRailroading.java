@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.multiblock.*;
@@ -91,6 +92,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(ItemTrackExchangerUpdatePacket::new, PacketDirection.ClientToServer);
 				IRBlocks.register();
 				IRItems.register();
+				GuiTypes.register();
 
 				Command.register(new IRCommand());
 				break;
