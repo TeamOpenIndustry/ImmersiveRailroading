@@ -92,7 +92,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
                 whistleSet = true;
             }
         }
-        if (!whistleSet || quill == null || !quill.canLoad()) {
+        if (!whistleSet && (quill == null || !quill.canLoad())) {
             quill = new Quilling(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
         }
     }

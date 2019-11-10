@@ -572,6 +572,10 @@ public class LocomotiveSteam extends Locomotive {
 		boolean changedBurnMax = false;
 		int burningSlots = 0;
 		float waterUsed = 0;
+
+		if (boilerPressure < 0) {
+			boilerPressure = 0;
+		}
 		
 		if (this.getLiquidAmount() > 0) {
 			for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
