@@ -3,7 +3,7 @@
   "modid": "immersiverailroading",
   "name": "Immersive Railroading",
   "description": "Adds Railroading to Minecraft",
-  "version": "",
+  "version": "1.7.0",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
