@@ -1,0 +1,52 @@
+modLoader="javafml" 
+loaderVersion="[28,)" 
+issueTrackerURL="http://my.issue.tracker/" 
+
+[[mods]] 
+modId="immersiverailroading" 
+version="1.6.1"
+displayName="Immersive Railroading" 
+credits="Thanks for this example mod goes to Java" 
+authors="Christian Mesh (cam72cam),TheLegend5550 ,WrongWeekend,DennisTheCan,Thomas4peyton,Larky2k,FriedrichLP,TartaricAcid,gaojie429,StuffedCroc,Fleegle411" 
+description='''
+Adds Railroading to Minecraft
+'''
+[[dependencies.immersiverailroading]] 
+    modId="forge" 
+    mandatory=true 
+    versionRange="[28.1.38,)" 
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.immersiverailroading]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14.4]"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.trackapi]]
+	modId="trackapi"
+	mandatory=true
+	versionRange="[1.2,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[mods]] 
+modId="universalmodcore" 
+version="1.0" 
+displayName="Universal Mod Core" 
+authors="cam72cam" 
+description='''
+A universal layer to write minecraft mods against
+'''
+[[dependencies.universalmodcore]] 
+    modId="forge" 
+    mandatory=true 
+    versionRange="[28.1.38,)" 
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.universalmodcore]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14.4]"
+    ordering="NONE"
+    side="BOTH"
