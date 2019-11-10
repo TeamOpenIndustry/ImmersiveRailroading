@@ -282,7 +282,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 Vec3i posFront = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyFront(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
                 if (BlockUtil.isIRRail(getWorld(), posFront)) {
                     TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
-                    rb = rb.getParentTile();
+                    rb = rb != null ? rb.getParentTile() : null;
                     if (rb != null && !rb.pos.equals(clackFrontPos)) {
                         clackFront.setPitch(pitch);
                         clackFront.setVolume(volume);
@@ -293,7 +293,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 Vec3i posRear = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyRear(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
                 if (BlockUtil.isIRRail(getWorld(), posRear)) {
                     TileRailBase rb = getWorld().getBlockEntity(posRear, TileRailBase.class);
-                    rb = rb.getParentTile();
+                    rb = rb != null ? rb.getParentTile() : null;
                     if (rb != null && !rb.pos.equals(clackRearPos)) {
                         clackRear.setPitch(pitch);
                         clackRear.setVolume(volume);
