@@ -415,6 +415,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			Vec3i currentParent = self.getParentTile().getParent();
 			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
 				self = (TileRailBase) world.reconstituteBlockEntity(data);
+				if (self == null) {
+					break;
+				}
 				if (!currentParent.equals(self.getParent())) {
 					tile = self.getParentTile();
 					break;
@@ -940,6 +943,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				break;
 			}
 			te = (TileRailBase) world.reconstituteBlockEntity(data);
+			if (te == null) {
+				break;
+			}
 			data = te.getReplaced();
 		}
 	}
@@ -961,6 +967,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (rail.getReplaced() != null) {
 				// new object here is important
 				TileRailGag newGag = (TileRailGag) world.reconstituteBlockEntity(rail.getReplaced());
+				if (newGag == null) {
+					return true;
+				}
 
 				while(true) {
 					if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), TileRail.class)) {
@@ -976,6 +985,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					}
 
 					newGag = (TileRailGag) world.reconstituteBlockEntity(data);
+					if (newGag == null) {
+						break;
+					}
 				}
 			}
 		} catch (StackOverflowError ex) {
