@@ -277,6 +277,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
 
+                volume = Math.min(1, volume * 2);
+
                 Vec3i posFront = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyFront(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
                 if (BlockUtil.isIRRail(getWorld(), posFront)) {
                     TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
