@@ -80,17 +80,13 @@ public abstract class BuilderBase {
 	public boolean canBuild() {
 		for(TrackBase track : tracks) {
 			if (!track.canPlaceTrack()) {
-				System.out.println("CAN'tBUILD");
-				System.out.println(track.getPos());
 				return false;
 			}
 		}
-		System.out.println("CAN BUILD");
 		return true;
 	}
 	
 	public void build() {
-		System.out.println("BUILD");
 		/*
 		Assume we have already tested.
 		There are a few edge cases which break with overlapping split builders
