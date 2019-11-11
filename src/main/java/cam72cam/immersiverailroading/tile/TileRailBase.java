@@ -70,12 +70,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public double getRenderGauge() {
 		double gauge = 0;
 		TileRail parent = this.getParentTile();
-		if (parent != null) {
+		if (parent != null && parent.info != null) {
 			gauge = parent.info.settings.gauge.value();
 		}
 		if (this.getParentReplaced() != null && world != null) {
 			parent = world.getBlockEntity(this.getParentReplaced(), TileRail.class);
-            if (parent != null) {
+            if (parent != null && parent.info != null) {
                 gauge = Math.min(gauge, parent.info.settings.gauge.value());
             }
 		}

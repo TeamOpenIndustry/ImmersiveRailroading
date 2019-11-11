@@ -28,7 +28,7 @@ public class RailBaseModel {
 		Gauge gauge = Gauge.from(gauged);
 
 		StandardModel model = new StandardModel();
-		if (te instanceof TileRail) {
+		if (te instanceof TileRail && ((TileRail) te).info != null) {
 			model.addCustom(() -> {
 				RailInfo info = ((TileRail) te).info;
                 if (info.settings.type == TrackItems.SWITCH) {
