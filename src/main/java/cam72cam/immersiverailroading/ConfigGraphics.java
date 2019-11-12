@@ -24,4 +24,7 @@ public class ConfigGraphics {
 	
 	@Comment( "What unit to use for speedometer. (kmh, mph or ms)" )
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
+
+	@Comment( "How long to keep textures in memory after they have left the screen (higher numbers = smoother game play, lower numbers = less GPU memory used)")
+    public static int textureCacheSeconds = 30;
 }

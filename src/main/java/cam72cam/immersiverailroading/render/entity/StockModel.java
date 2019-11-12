@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
@@ -33,7 +34,7 @@ public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
 
 	public StockModel(OBJModel objModel, Collection<String> textureNames) {
-		super(objModel, textureNames);
+		super(objModel, textureNames, ConfigGraphics.textureCacheSeconds);
 	}
 
 	private boolean isBuilt;
