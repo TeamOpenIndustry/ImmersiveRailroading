@@ -288,7 +288,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return null;
 		}
 		TileRail te = world.getBlockEntity(this.getParent(), TileRail.class);
-		if (te == null || !te.isLoaded()) {
+		if (te == null || !te.isLoaded() || te.info == null) {
 			return null;
 		}
 		return te;
