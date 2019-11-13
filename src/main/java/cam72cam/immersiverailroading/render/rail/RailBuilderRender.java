@@ -89,7 +89,7 @@ public class RailBuilderRender {
                         });
                         fbm.flip();
                         GlobalRender.mulMatrix(fbm);
-                    } catch (Exception e) {
+                    } catch (Exception | Error e) {
                         // Some weird math happened.  Do this the slow way and reset the matrix
                         GL11.glPopMatrix();
                         GL11.glPushMatrix();
