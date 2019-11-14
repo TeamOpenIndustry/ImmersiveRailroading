@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Run a one-line script
-      run: ./setup.sh forge_1.12.2
+      run: ./setup.sh forge_1.12.2 useHttps
     - name: Run a multi-line script
       run: ./gradlew build
     - uses: actions/upload-artifact@master
