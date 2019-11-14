@@ -167,7 +167,7 @@ public class CastingMultiblock extends Multiblock {
 						world.createParticle(ParticleType.SMOKE, pos, Vec3d.ZERO);
 					}
 					if (Math.random() < 0.001) {
-						Audio.playSound(pos, StandardSound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f);
+						Audio.playSound(world, pos, StandardSound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 0.25f);
 					}
 				}
 				

@@ -108,7 +108,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
-					Audio.playSound(te.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
+					Audio.playSound(world, te.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
 				}
 				return;
 			}

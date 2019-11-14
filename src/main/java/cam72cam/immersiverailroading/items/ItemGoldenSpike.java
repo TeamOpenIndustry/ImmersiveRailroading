@@ -31,7 +31,7 @@ public class ItemGoldenSpike extends ItemBase {
 		ItemStack held = player.getHeldItem(hand);
 		if (world.isBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW)) {
 			setPosition(held, pos);
-			Audio.playSound(pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f);
+			Audio.playSound(world, pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f);
 		} else {
 			pos = pos.up();
 			
