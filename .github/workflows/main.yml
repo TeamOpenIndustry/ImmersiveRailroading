@@ -1,0 +1,19 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run a one-line script
+      run: ./setup.sh forge_1.12.2
+    - name: Run a multi-line script
+      run: ./gradlew build
+    - uses: actions/upload-artifact@master
+      with:
+        name: Immersive Railroading 1.12.2
+        path: build/libs/ImmersiveRailroading-1.7.1_1.12.2.jar
