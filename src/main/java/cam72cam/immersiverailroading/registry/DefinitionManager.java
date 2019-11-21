@@ -130,6 +130,9 @@ public class DefinitionManager {
                         }
                         try {
                             String defID = String.format("rolling_stock/%s/%s.json", defType, defName.getAsString());
+                            if (definitions.containsKey(defID)) {
+                                continue;
+                            }
                             JsonObject data = getJsonData(defID);
                             definitions.put(defID, jsonLoaders.get(defType).apply(defID, data));
                         } catch (Exception ex) {
