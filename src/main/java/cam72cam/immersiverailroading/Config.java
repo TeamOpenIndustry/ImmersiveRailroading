@@ -172,7 +172,7 @@ public class Config {
 	public static class ConfigDebug {
 		
 		@Comment( "Speed up IR stock server onTick stepping to compensate for tps lag" )
-		public static boolean serverTickCompensation = true;
+		public static boolean serverTickCompensation = false;
 
 		@Comment( "Range between couplers to try coupling" )
 		public static double couplerRange = 0.3;
@@ -184,7 +184,7 @@ public class Config {
 		public static int snowMeltRate = 0;
 
 		@Comment("Keep rolling stock loaded even when it is not moving")
-		public static boolean keepStockLoaded = false;
+		public static boolean keepStockLoaded = true;
 
 		@Comment( "Print extra chunk loading info" )
 		public static boolean debugLog = false;
