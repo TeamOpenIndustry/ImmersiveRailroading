@@ -258,6 +258,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 	@Override
 	public void save(TagCompound nbt) {
+		if (parent == null) {
+			ImmersiveRailroading.warn("Trying to save a tile at " + pos + " with no parent!");
+			return;
+		}
 		nbt.setVec3i("parent", parent);
 		nbt.setFloat("height", bedHeight);
 		nbt.setFloat("railHeight", railHeight);
