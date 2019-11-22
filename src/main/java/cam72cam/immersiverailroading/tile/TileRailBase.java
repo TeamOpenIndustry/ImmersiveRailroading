@@ -431,10 +431,16 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	 * Capabilities tie ins
 	 */
 
+	private Vec3d bbMin;
+	private Vec3d bbMax;
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type){
 		return world.getEntities((T stock) -> {
 			if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
-				return stock.getBounds().intersects(new Vec3d(this.pos.south().west()), new Vec3d(this.pos.up(3).east().north()));
+				if (bbMin == null) {
+					bbMax = new Vec3d(this.pos.up(3).east().north()).max(new Vec3d(this.pos.south().west()));
+					bbMin = new Vec3d(this.pos.up(3).east().north()).min(new Vec3d(this.pos.south().west()));
+				}
+				return stock.getBounds().intersects(bbMin, bbMax);
 			}
 			return false;
 		}, type).stream().findFirst().orElse(null);
