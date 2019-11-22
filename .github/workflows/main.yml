@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install deps
-      run: sudo apt install -y pngquant xargs
+      run: sudo apt install -y pngquant findutils
     - name: Process images
       run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
