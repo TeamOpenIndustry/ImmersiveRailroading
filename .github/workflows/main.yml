@@ -11,9 +11,13 @@ jobs:
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1
-    - name: Run a one-line script
+    - name: Install deps
+      run: apt install -y pngquant xargs
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
+    - name: Setup Universal Mod Core (and helpers)
       run: ./setup.sh forge_1.12.2 useHttps
-    - name: Run a multi-line script
+    - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
       with:
