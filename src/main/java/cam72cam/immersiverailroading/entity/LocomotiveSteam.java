@@ -665,10 +665,11 @@ public class LocomotiveSteam extends Locomotive {
 			float delta = (float) (throttle * maxPressureTick);
 			
 			boilerPressure = Math.max(0, boilerPressure - delta);
-			waterUsed += delta * Config.ConfigBalance.locoWaterUsage;
+			waterUsed += delta;
 		}
 		
 		if (waterUsed != 0) {
+			waterUsed *= Config.ConfigBalance.locoWaterUsage;
 			if (waterUsed > 0) {
 				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.ceil(waterUsed)), false);
 				waterUsed = waterUsed % 1;
