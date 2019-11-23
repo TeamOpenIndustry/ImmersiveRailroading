@@ -294,7 +294,7 @@ public class CastingMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getCurrent() > powerRequired();
+			return powerTe.getEnergy(null).getCurrent() >= powerRequired();
 		}
 
 		public boolean isPouring() {

@@ -201,7 +201,7 @@ public class RailRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getCurrent() > powerRequired();
+			return powerTe.getEnergy(null).getCurrent() >= powerRequired();
 
 		}
 		private int powerRequired() {
