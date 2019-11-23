@@ -166,6 +166,9 @@ public class Config {
 		
 		@Comment("Prevent stock from being built outside the recommended and model gauges")
 		public static boolean DesignGaugeLock = false;
+
+		@Comment("Machine power factor (0 means no power required)")
+		public static float machinePowerFactor = 1.0f;
 	}
 
 	@Name("debug")

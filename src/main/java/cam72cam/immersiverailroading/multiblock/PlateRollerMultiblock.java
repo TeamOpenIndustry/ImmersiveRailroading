@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.multiblock;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.energy.IEnergy;
@@ -165,7 +166,7 @@ public class PlateRollerMultiblock extends Multiblock {
 			// Decrement craft progress down to 0
 			if (craftingTe.getCraftProgress() != 0) {
 				IEnergy energy = powerTe.getEnergy(null);
-				energy.extract(32, false);
+				energy.extract(powerRequired(), false);
 				craftingTe.setCraftProgress(Math.max(0, craftingTe.getCraftProgress() - 1));
 			}
 
@@ -216,7 +217,10 @@ public class PlateRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getCurrent() > 32;
+			return powerTe.getEnergy(null).getCurrent() > powerRequired();
+		}
+		private int powerRequired() {
+			return (int) Math.ceil(32 * Config.ConfigBalance.machinePowerFactor);
 		}
 	}
 }

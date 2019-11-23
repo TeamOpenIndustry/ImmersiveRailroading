@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.multiblock;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.ItemComponent;
 import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
@@ -143,7 +144,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			// Decrement craft progress down to 0
 			if (craftTe.getCraftProgress() != 0) {
 				IEnergy energy = powerTe.getEnergy(null);
-				energy.extract(32, false);
+				energy.extract(powerRequired(), false);
 				craftTe.setCraftProgress(Math.max(0, craftTe.getCraftProgress() - 1));
 			}
 			
@@ -200,7 +201,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getCurrent() > 32;
+			return powerTe.getEnergy(null).getCurrent() >= powerRequired();
 		}
 		
 		public boolean hasInput() {
@@ -219,6 +220,8 @@ public class BoilerRollerMultiblock extends Multiblock {
 			return !craftTe.getContainer().get(1).isEmpty();
 		}
 
-		
+		private int powerRequired() {
+			return (int) Math.ceil(32 * Config.ConfigBalance.machinePowerFactor);
+		}
 	}
 }

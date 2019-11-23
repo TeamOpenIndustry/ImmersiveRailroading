@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.multiblock;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -191,7 +192,7 @@ public class CastingMultiblock extends Multiblock {
 							if (!hasPower()) {
 								break;
 							}
-							energy.extract(32, false);
+							energy.extract(powerRequired(), false);
 							stack.shrink(1);
 							fluidTe.setCraftProgress(fluidTe.getCraftProgress() + cost);
 						}
@@ -264,7 +265,7 @@ public class CastingMultiblock extends Multiblock {
 			}
 			
 			if (offset.equals(power)) {
-				energy.extract(32, false);
+				energy.extract(powerRequired(), false);
 			}
 		}
 
@@ -293,7 +294,7 @@ public class CastingMultiblock extends Multiblock {
 			if (powerTe == null) {
 				return false;
 			}
-			return powerTe.getEnergy(null).getCurrent() > 32;
+			return powerTe.getEnergy(null).getCurrent() > powerRequired();
 		}
 
 		public boolean isPouring() {
@@ -322,6 +323,10 @@ public class CastingMultiblock extends Multiblock {
 				return ItemStack.EMPTY;
 			}
 			return craftingTe.getCraftItem();
+		}
+
+		private int powerRequired() {
+			return (int) Math.ceil(32 * Config.ConfigBalance.machinePowerFactor);
 		}
 	}
 }
