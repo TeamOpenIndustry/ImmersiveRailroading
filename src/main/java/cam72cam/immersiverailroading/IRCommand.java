@@ -1,16 +1,16 @@
 package cam72cam.immersiverailroading;
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Consumer;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.text.Command;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
+
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 public class IRCommand extends Command {
 
@@ -39,7 +39,7 @@ public class IRCommand extends Command {
 			ImmersiveRailroading.warn("Reloading Immersive Railroading definitions");
 			try {
 				DefinitionManager.initDefinitions();
-			} catch (IOException e) {
+			} catch (IOException | ExecutionException e) {
 				ImmersiveRailroading.catching(e);
 				// Might want to stop the server here...
 			}
