@@ -198,6 +198,7 @@ public class DefinitionManager {
             for (Object o : stockDefinitions) {
                 if (o == null) {
                     errorOccurred = true;
+                    bar.step("");
                     continue;
                 }
 
