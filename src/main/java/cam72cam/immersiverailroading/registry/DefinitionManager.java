@@ -81,7 +81,7 @@ public class DefinitionManager {
         }
     }
 
-    public static void initDefinitions() throws IOException, ExecutionException {
+    public static void initDefinitions() throws Exception {
         initGauges();
 
         definitions = new LinkedHashMap<>();
@@ -99,6 +99,10 @@ public class DefinitionManager {
             ConcurrencyUtil.shutdownService(service);
             Thread.currentThread().interrupt();
             return;
+        } catch (Exception e) {
+            ImmersiveRailroading.error("Error when initializing stock models and generating height maps.");
+            ConcurrencyUtil.shutdownService(service);
+            throw e;
         }
 
         ConcurrencyUtil.shutdownService(service);
@@ -184,6 +188,7 @@ public class DefinitionManager {
             completionService.submit(new ParseDefinitionsTask(definitions, jsonLoaders));
         }
 
+        boolean errorOccurred = false;
         int taskCount = definitionListParts.size();
         for (int receivedTasks = 0; receivedTasks < taskCount; receivedTasks++) {
             Future<Object> future = completionService.take();
@@ -191,10 +196,19 @@ public class DefinitionManager {
             //noinspection rawtypes
             Collection stockDefinitions = (Collection) future.get();
             for (Object o : stockDefinitions) {
+                if (o == null) {
+                    errorOccurred = true;
+                    continue;
+                }
+
                 EntityRollingStockDefinition stockDefinition = (EntityRollingStockDefinition) o;
                 bar.step(stockDefinition.name());
                 definitions.put(stockDefinition.defID, stockDefinition);
             }
+        }
+
+        if (errorOccurred) {
+            throw new RuntimeException("One or more stock definitions could not be loaded.");
         }
 
         Progress.pop(bar);

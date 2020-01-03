@@ -20,9 +20,9 @@ import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
 import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
-import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
@@ -42,8 +42,6 @@ import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.Command;
 import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class ImmersiveRailroading extends ModCore.Mod {
@@ -103,7 +101,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				try {
 					DefinitionManager.initDefinitions();
-				} catch (IOException | ExecutionException e) {
+				} catch (Exception e) {
 					throw new RuntimeException("Unable to load IR definitions", e);
 				}
 
@@ -194,7 +192,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 			case RELOAD:
 				try {
 					DefinitionManager.initDefinitions();
-				} catch (IOException | ExecutionException e) {
+				} catch (Exception e) {
 					throw new RuntimeException("Unable to load IR definitions", e);
 				}
 
