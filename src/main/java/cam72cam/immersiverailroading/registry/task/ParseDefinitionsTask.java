@@ -43,6 +43,7 @@ public class ParseDefinitionsTask implements Callable<Object> {
 
                 stockDefinitions.add(jsonLoaders.get(defType).apply(defID, data));
             } catch (Exception e) {
+                ImmersiveRailroading.error("Error loading model %s of type %s", defID, defType);
                 ImmersiveRailroading.catching(e);
 
                 // Important so that progress bar steps correctly.
