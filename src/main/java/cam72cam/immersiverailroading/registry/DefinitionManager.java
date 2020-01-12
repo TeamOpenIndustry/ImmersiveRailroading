@@ -3,10 +3,6 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.immersiverailroading.registry.task.GenerateDefinitionHeightMapsTask;
-import cam72cam.immersiverailroading.registry.task.ParseDefinitionsTask;
-import cam72cam.immersiverailroading.util.ConcurrencyUtil;
-import cam72cam.immersiverailroading.util.ListUtil;
 import cam72cam.mod.gui.Progress;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonArray;
@@ -20,10 +16,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 public class DefinitionManager {
 
@@ -81,32 +73,14 @@ public class DefinitionManager {
         }
     }
 
-    public static void initDefinitions() throws Exception {
+    public static void initDefinitions() throws IOException {
         initGauges();
 
         definitions = new LinkedHashMap<>();
         tracks = new LinkedHashMap<>();
 
-        int threadPoolSize = ConcurrencyUtil.calcThreadPoolSize();
-        ExecutorService service = ConcurrencyUtil.makeThreadPool(threadPoolSize);
-        CompletionService<Object> completionService = ConcurrencyUtil.makeCompletionService(service);
-
-        try {
-            initModels(completionService, threadPoolSize);
-            initModelHeightMaps(completionService, threadPoolSize);
-        } catch (InterruptedException e) {
-            ImmersiveRailroading.error("Initializing stock definitions has been interrupted.");
-            ConcurrencyUtil.shutdownService(service);
-            Thread.currentThread().interrupt();
-            return;
-        } catch (Exception e) {
-            ImmersiveRailroading.error("Error when initializing stock models and generating height maps.");
-            ConcurrencyUtil.shutdownService(service);
-            throw e;
-        }
-
-        ConcurrencyUtil.shutdownService(service);
-
+        initModels();
+        initModelHeightMaps();
         initTracks();
     }
 
@@ -142,7 +116,7 @@ public class DefinitionManager {
         return def;
     }
 
-    private static void initModels(CompletionService<Object> completionService, int threadPoolSize) throws IOException, InterruptedException, ExecutionException {
+    private static void initModels() throws IOException {
         ImmersiveRailroading.info("Loading stock models.");
 
         Set<String> defTypes = jsonLoaders.keySet();
@@ -183,34 +157,35 @@ public class DefinitionManager {
 
         Progress.Bar bar = Progress.push("Loading Models", definitionIDMap.size());
 
-        List<List<Tuple<String, String>>> definitionListParts = ListUtil.splitListIntoNParts(definitionList, threadPoolSize);
-        for (List<Tuple<String, String>> definitions : definitionListParts) {
-            completionService.submit(new ParseDefinitionsTask(definitions, jsonLoaders));
-        }
+        Object monitor = new Object();
+        definitionList.parallelStream().forEach(tuple -> {
+            String defID = tuple.getFirst();
+            String defType = tuple.getSecond();
 
-        boolean errorOccurred = false;
-        int taskCount = definitionListParts.size();
-        for (int receivedTasks = 0; receivedTasks < taskCount; receivedTasks++) {
-            Future<Object> future = completionService.take();
+            try {
+                ImmersiveRailroading.debug("Parsing model %s", defID);
+                Identifier resource = new Identifier(ImmersiveRailroading.MODID, defID);
+                InputStream input = resource.getResourceStream();
+                JsonParser parser = new JsonParser();
+                JsonObject data = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+                input.close();
 
-            //noinspection rawtypes
-            Collection stockDefinitions = (Collection) future.get();
-            for (Object o : stockDefinitions) {
-                if (o == null) {
-                    errorOccurred = true;
-                    bar.step("");
-                    continue;
+                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, data);
+
+                synchronized (monitor) {
+                    bar.step(stockDefinition.name());
+                    definitions.put(stockDefinition.defID, stockDefinition);
                 }
+            } catch (Exception e) {
+                ImmersiveRailroading.error("Error loading model %s of type %s", defID, defType);
+                ImmersiveRailroading.catching(e);
 
-                EntityRollingStockDefinition stockDefinition = (EntityRollingStockDefinition) o;
-                bar.step(stockDefinition.name());
-                definitions.put(stockDefinition.defID, stockDefinition);
+                // Important so that progress bar steps correctly.
+                synchronized (monitor) {
+                    bar.step("");
+                }
             }
-        }
-
-        if (errorOccurred) {
-            throw new RuntimeException("One or more stock definitions could not be loaded.");
-        }
+        });
 
         Progress.pop(bar);
     }
@@ -237,23 +212,19 @@ public class DefinitionManager {
         return blacklist;
     }
 
-    private static void initModelHeightMaps(CompletionService<Object> completionService, int threadPoolSize) throws InterruptedException {
+    private static void initModelHeightMaps() {
         ImmersiveRailroading.info("Generating height maps.");
 
-        List<EntityRollingStockDefinition> stockDefinitionList = new ArrayList<>(definitions.values());
-        List<List<EntityRollingStockDefinition>> definitionListParts = ListUtil.splitListIntoNParts(stockDefinitionList, threadPoolSize);
+        Collection<EntityRollingStockDefinition> stockDefinitions = definitions.values();
+        Progress.Bar bar = Progress.push("Generating Heightmap", stockDefinitions.size());
+        Object monitor = new Object();
+        stockDefinitions.parallelStream().forEach(stockDefinition -> {
+            synchronized (monitor) {
+                bar.step(stockDefinition.name());
+            }
 
-        Progress.Bar bar = Progress.push("Generating Heightmap", definitionListParts.size());
-
-        for (List<EntityRollingStockDefinition> stockDefinitions : definitionListParts) {
-            completionService.submit(new GenerateDefinitionHeightMapsTask(stockDefinitions), null);
-        }
-
-        int taskCount = definitionListParts.size();
-        for (int receivedTasks = 0; receivedTasks < taskCount; receivedTasks++) {
-            bar.step("Batch " + receivedTasks + 1);
-            completionService.take();
-        }
+            stockDefinition.initHeightMap();
+        });
 
         Progress.pop(bar);
     }

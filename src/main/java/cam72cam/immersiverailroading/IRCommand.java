@@ -6,6 +6,7 @@ import cam72cam.mod.text.Command;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -37,7 +38,7 @@ public class IRCommand extends Command {
 			ImmersiveRailroading.warn("Reloading Immersive Railroading definitions");
 			try {
 				DefinitionManager.initDefinitions();
-			} catch (Exception e) {
+			} catch (IOException e) {
 				ImmersiveRailroading.catching(e);
 				// Might want to stop the server here...
 			}

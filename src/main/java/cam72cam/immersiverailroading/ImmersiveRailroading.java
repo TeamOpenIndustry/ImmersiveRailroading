@@ -42,6 +42,7 @@ import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.Command;
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
 import java.util.function.Function;
 
 public class ImmersiveRailroading extends ModCore.Mod {
@@ -101,7 +102,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				try {
 					DefinitionManager.initDefinitions();
-				} catch (Exception e) {
+				} catch (IOException e) {
 					throw new RuntimeException("Unable to load IR definitions", e);
 				}
 
@@ -192,7 +193,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 			case RELOAD:
 				try {
 					DefinitionManager.initDefinitions();
-				} catch (Exception e) {
+				} catch (IOException e) {
 					throw new RuntimeException("Unable to load IR definitions", e);
 				}
 
