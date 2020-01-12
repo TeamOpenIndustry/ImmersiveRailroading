@@ -276,7 +276,7 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	@Override
 	public IInventory getInventory(Facing facing) {
-		if (this.getMultiblock().getInvSize(offset) == 0) {
+		if (this.getMultiblock() == null || this.getMultiblock().getInvSize(offset) == 0) {
 			return null;
 		}
 
