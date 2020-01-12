@@ -84,38 +84,6 @@ public class DefinitionManager {
         initTracks();
     }
 
-    public static EntityRollingStockDefinition getDefinition(String defID) {
-        return definitions.get(defID);
-    }
-
-    public static Collection<EntityRollingStockDefinition> getDefinitions() {
-        return definitions.values();
-    }
-
-    public static Set<String> getDefinitionNames() {
-        return definitions.keySet();
-    }
-
-    public static Collection<TrackDefinition> getTracks() {
-        return tracks.values();
-    }
-
-    public static List<String> getTrackIDs() {
-        return new ArrayList<>(tracks.keySet());
-    }
-
-    public static TrackModel getTrack(String track, double value) {
-        return getTrack(track).getTrackForGauge(value);
-    }
-
-    public static TrackDefinition getTrack(String track) {
-        TrackDefinition def = tracks.get(track);
-        if (def == null) {
-            def = tracks.values().stream().findFirst().get();
-        }
-        return def;
-    }
-
     private static void initModels() throws IOException {
         ImmersiveRailroading.info("Loading stock models.");
 
@@ -157,22 +125,14 @@ public class DefinitionManager {
 
         Progress.Bar bar = Progress.push("Loading Models", definitionIDMap.size());
 
-        Object monitor = new Object();
         definitionList.parallelStream().forEach(tuple -> {
             String defID = tuple.getFirst();
             String defType = tuple.getSecond();
 
             try {
-                ImmersiveRailroading.debug("Parsing model %s", defID);
-                Identifier resource = new Identifier(ImmersiveRailroading.MODID, defID);
-                InputStream input = resource.getResourceStream();
-                JsonParser parser = new JsonParser();
-                JsonObject data = parser.parse(new InputStreamReader(input)).getAsJsonObject();
-                input.close();
+                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, getJsonData(defID));
 
-                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, data);
-
-                synchronized (monitor) {
+                synchronized (bar) {
                     bar.step(stockDefinition.name());
                     definitions.put(stockDefinition.defID, stockDefinition);
                 }
@@ -180,8 +140,8 @@ public class DefinitionManager {
                 ImmersiveRailroading.error("Error loading model %s of type %s", defID, defType);
                 ImmersiveRailroading.catching(e);
 
-                // Important so that progress bar steps correctly.
-                synchronized (monitor) {
+                synchronized (bar) {
+                    // Important so that progress bar steps correctly.
                     bar.step("");
                 }
             }
@@ -260,8 +220,54 @@ public class DefinitionManager {
         }
     }
 
+    private static JsonObject getJsonData(String defID) throws IOException {
+        ImmersiveRailroading.debug("Loading stock " + defID);
+        Identifier resource = new Identifier(ImmersiveRailroading.MODID, defID);
+
+        InputStream input = resource.getResourceStream();
+
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+
+        input.close();
+
+        return result;
+    }
+
+    public static EntityRollingStockDefinition getDefinition(String defID) {
+        return definitions.get(defID);
+    }
+
+    public static Collection<EntityRollingStockDefinition> getDefinitions() {
+        return definitions.values();
+    }
+
+    public static Set<String> getDefinitionNames() {
+        return definitions.keySet();
+    }
+
+    public static Collection<TrackDefinition> getTracks() {
+        return tracks.values();
+    }
+
+    public static List<String> getTrackIDs() {
+        return new ArrayList<>(tracks.keySet());
+    }
+
+    public static TrackModel getTrack(String track, double value) {
+        return getTrack(track).getTrackForGauge(value);
+    }
+
+    public static TrackDefinition getTrack(String track) {
+        TrackDefinition def = tracks.get(track);
+        if (def == null) {
+            def = tracks.values().stream().findFirst().get();
+        }
+        return def;
+    }
+
     @FunctionalInterface
-    public interface JsonLoader {
+    private interface JsonLoader {
         EntityRollingStockDefinition apply(String defID, JsonObject data) throws Exception;
     }
 
