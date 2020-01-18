@@ -171,6 +171,12 @@ public class Config {
 		public static float machinePowerFactor = 1.0f;
 	}
 
+	@Name("performance")
+	public static class ConfigPerformance {
+		@Comment("Use multiple threads when loading stock. This is used on Minecraft's initial load or when manually reloading stocks.")
+		public static boolean multithreadedStockLoading = true;
+	}
+
 	@Name("debug")
 	public static class ConfigDebug {
 		

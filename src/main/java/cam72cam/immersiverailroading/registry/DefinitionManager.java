@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
@@ -16,8 +17,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 public class DefinitionManager {
+
+    /**
+     * How much memory in MiB does the loading of a stock take.
+     * This is used to determine whether loading stock in a multithreaded way is possible.
+     */
+    private static final int STOCK_LOAD_MEMORY_PER_PROCESSOR = 50;
 
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
@@ -125,7 +133,7 @@ public class DefinitionManager {
 
         Progress.Bar bar = Progress.push("Loading Models", definitionIDMap.size());
 
-        definitionList.parallelStream().forEach(tuple -> {
+        getStockLoadingStream(definitionList).forEach(tuple -> {
             String defID = tuple.getFirst();
             String defType = tuple.getSecond();
 
@@ -232,6 +240,41 @@ public class DefinitionManager {
         input.close();
 
         return result;
+    }
+
+    /**
+     * Get a stream for a collection that is used to load stocks in a singlethreaded or a multithreaded way.
+     *
+     * @param collection Collection of items.
+     * @param <E> Type of item.
+     * @return Singlethreaded or multithreaded stream.
+     */
+    private static <E> Stream<E> getStockLoadingStream(Collection<E> collection) {
+        if (!ConfigPerformance.multithreadedStockLoading) {
+            return collection.stream();
+        }
+
+        // Parallel streams use numCPUs-1 threads for stream workloads.
+        Runtime runtime = Runtime.getRuntime();
+        int processors = runtime.availableProcessors() - 1;
+        if (processors <= 1) {
+            return collection.stream();
+        }
+
+        // Manual garbage collection so we get an accurate quantity of free memory.
+        runtime.gc();
+
+        long maxMemory = runtime.maxMemory();
+        long totalMemory = runtime.totalMemory();
+        if (maxMemory == Long.MAX_VALUE) {
+            maxMemory = totalMemory;
+        }
+
+        long freeMemory = runtime.freeMemory();
+        freeMemory += maxMemory - totalMemory;
+
+        long usedMemory = processors * STOCK_LOAD_MEMORY_PER_PROCESSOR * 1024 * 1024;
+        return usedMemory < freeMemory ? collection.parallelStream() : collection.stream();
     }
 
     public static EntityRollingStockDefinition getDefinition(String defID) {
