@@ -1,16 +1,15 @@
 package cam72cam.immersiverailroading;
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Consumer;
-
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.text.Command;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
+
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class IRCommand extends Command {
 

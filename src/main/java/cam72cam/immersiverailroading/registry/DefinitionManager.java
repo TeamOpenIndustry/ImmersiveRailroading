@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
@@ -9,14 +10,22 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.util.Tuple;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 public class DefinitionManager {
+
+    /**
+     * How much memory in MiB does the loading of a stock take.
+     * This is used to determine whether loading stock in a multithreaded way is possible.
+     */
+    private static final int STOCK_LOAD_MEMORY_PER_PROCESSOR = 50;
 
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
@@ -78,10 +87,79 @@ public class DefinitionManager {
         definitions = new LinkedHashMap<>();
         tracks = new LinkedHashMap<>();
 
+        initModels();
+        initModelHeightMaps();
+        initTracks();
+    }
+
+    private static void initModels() throws IOException {
+        ImmersiveRailroading.info("Loading stock models.");
+
         Set<String> defTypes = jsonLoaders.keySet();
+        List<String> blacklist = getModelBlacklist(defTypes);
 
+        LinkedHashMap<String, String> definitionIDMap = new LinkedHashMap<>();
+        Identifier stock_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
+        List<InputStream> inputs = stock_json.getResourceStreamAll();
+        for (InputStream input : inputs) {
+
+            JsonParser parser = new JsonParser();
+            JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+            input.close();
+
+            for (String defType : defTypes) {
+                if (stock.has(defType)) {
+                    for (JsonElement defName : stock.get(defType).getAsJsonArray()) {
+                        if (blacklist.contains(defName.getAsString())) {
+                            ImmersiveRailroading.info("Skipping blacklisted %s", defName.getAsString());
+                            continue;
+                        }
+
+                        String defID = String.format("rolling_stock/%s/%s.json", defType, defName.getAsString());
+                        if (definitionIDMap.containsKey(defID)) {
+                            continue;
+                        }
+
+                        definitionIDMap.put(defID, defType);
+                    }
+                }
+            }
+        }
+
+        ArrayList<Tuple<String, String>> definitionList = new ArrayList<>(definitionIDMap.size());
+        for (Entry<String, String> entry : definitionIDMap.entrySet()) {
+            definitionList.add(new Tuple<>(entry.getKey(), entry.getValue()));
+        }
+
+        Progress.Bar bar = Progress.push("Loading Models", definitionIDMap.size());
+
+        getStockLoadingStream(definitionList).forEach(tuple -> {
+            String defID = tuple.getFirst();
+            String defType = tuple.getSecond();
+
+            try {
+                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, getJsonData(defID));
+
+                synchronized (bar) {
+                    bar.step(stockDefinition.name());
+                    definitions.put(stockDefinition.defID, stockDefinition);
+                }
+            } catch (Exception e) {
+                ImmersiveRailroading.error("Error loading model %s of type %s", defID, defType);
+                ImmersiveRailroading.catching(e);
+
+                synchronized (bar) {
+                    // Important so that progress bar steps correctly.
+                    bar.step("");
+                }
+            }
+        });
+
+        Progress.pop(bar);
+    }
+
+    private static List<String> getModelBlacklist(Set<String> defTypes) throws IOException {
         List<String> blacklist = new ArrayList<>();
-
         Identifier blacklist_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/blacklist.json");
 
         List<InputStream> inputs = blacklist_json.getResourceStreamAll();
@@ -99,64 +177,31 @@ public class DefinitionManager {
             }
         }
 
-        Identifier stock_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
+        return blacklist;
+    }
 
-        inputs = stock_json.getResourceStreamAll();
-        for (InputStream input : inputs) {
+    private static void initModelHeightMaps() {
+        ImmersiveRailroading.info("Generating height maps.");
 
-            JsonParser parser = new JsonParser();
-            JsonObject stock = parser.parse(new InputStreamReader(input)).getAsJsonObject();
-            input.close();
-
-            int steps = 0;
-
-            for (String defType : defTypes) {
-                if (stock.has(defType)) {
-                    steps += stock.get(defType).getAsJsonArray().size();
-                }
+        Collection<EntityRollingStockDefinition> stockDefinitions = definitions.values();
+        Progress.Bar bar = Progress.push("Generating Heightmap", stockDefinitions.size());
+        Object monitor = new Object();
+        stockDefinitions.parallelStream().forEach(stockDefinition -> {
+            synchronized (monitor) {
+                bar.step(stockDefinition.name());
             }
 
-            Progress.Bar bar = Progress.push("Loading Models", steps);
-
-
-            for (String defType : defTypes) {
-                if (stock.has(defType)) {
-                    for (JsonElement defName : stock.get(defType).getAsJsonArray()) {
-                        bar.step(defName.getAsString());
-
-                        if (blacklist.contains(defName.getAsString())) {
-                            ImmersiveRailroading.info("Skipping blacklisted %s", defName.getAsString());
-                            continue;
-                        }
-                        try {
-                            String defID = String.format("rolling_stock/%s/%s.json", defType, defName.getAsString());
-                            if (definitions.containsKey(defID)) {
-                                continue;
-                            }
-                            JsonObject data = getJsonData(defID);
-                            definitions.put(defID, jsonLoaders.get(defType).apply(defID, data));
-                        } catch (Exception ex) {
-                            ImmersiveRailroading.catching(ex);
-                        }
-                    }
-                }
-            }
-
-            Progress.pop(bar);
-        }
-        Progress.Bar bar = Progress.push("Generating Heightmap", definitions.size());
-
-        for (EntityRollingStockDefinition def : definitions.values()) {
-            bar.step(def.name());
-            def.initHeightMap();
-        }
+            stockDefinition.initHeightMap();
+        });
 
         Progress.pop(bar);
+    }
 
-        //Progress bar = ProgressManager.push("Loading tracks", )
+    private static void initTracks() throws IOException {
+        ImmersiveRailroading.info("Loading tracks.");
         Identifier track_json = new Identifier(ImmersiveRailroading.MODID, "track/track.json");
 
-        inputs = track_json.getResourceStreamAll();
+        List<InputStream> inputs = track_json.getResourceStreamAll();
         for (InputStream input : inputs) {
 
             JsonParser parser = new JsonParser();
@@ -164,12 +209,12 @@ public class DefinitionManager {
             input.close();
 
             JsonArray types = track.getAsJsonArray("types");
-            bar = Progress.push("Loading Tracks", types.size());
+            Progress.Bar bar = Progress.push("Loading Tracks", types.size());
 
             for (JsonElement def : types) {
                 bar.step(def.getAsString());
                 String trackID = String.format("immersiverailroading:track/%s.json", def.getAsString());
-                ImmersiveRailroading.info("Loading Track %s", trackID);
+                ImmersiveRailroading.debug("Loading Track %s", trackID);
                 JsonParser trackParser = new JsonParser();
                 JsonObject trackData = trackParser.parse(new InputStreamReader(new Identifier(trackID).getResourceStream())).getAsJsonObject();
                 try {
@@ -184,7 +229,7 @@ public class DefinitionManager {
     }
 
     private static JsonObject getJsonData(String defID) throws IOException {
-        ImmersiveRailroading.info("Loading stock " + defID);
+        ImmersiveRailroading.debug("Loading stock " + defID);
         Identifier resource = new Identifier(ImmersiveRailroading.MODID, defID);
 
         InputStream input = resource.getResourceStream();
@@ -195,6 +240,41 @@ public class DefinitionManager {
         input.close();
 
         return result;
+    }
+
+    /**
+     * Get a stream for a collection that is used to load stocks in a singlethreaded or a multithreaded way.
+     *
+     * @param collection Collection of items.
+     * @param <E> Type of item.
+     * @return Singlethreaded or multithreaded stream.
+     */
+    private static <E> Stream<E> getStockLoadingStream(Collection<E> collection) {
+        if (!ConfigPerformance.multithreadedStockLoading) {
+            return collection.stream();
+        }
+
+        // Parallel streams use numCPUs-1 threads for stream workloads.
+        Runtime runtime = Runtime.getRuntime();
+        int processors = runtime.availableProcessors() - 1;
+        if (processors <= 1) {
+            return collection.stream();
+        }
+
+        // Manual garbage collection so we get an accurate quantity of free memory.
+        runtime.gc();
+
+        long maxMemory = runtime.maxMemory();
+        long totalMemory = runtime.totalMemory();
+        if (maxMemory == Long.MAX_VALUE) {
+            maxMemory = totalMemory;
+        }
+
+        long freeMemory = runtime.freeMemory();
+        freeMemory += maxMemory - totalMemory;
+
+        long usedMemory = processors * STOCK_LOAD_MEMORY_PER_PROCESSOR * 1024 * 1024;
+        return usedMemory < freeMemory ? collection.parallelStream() : collection.stream();
     }
 
     public static EntityRollingStockDefinition getDefinition(String defID) {
