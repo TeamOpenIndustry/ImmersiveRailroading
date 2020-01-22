@@ -10,13 +10,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.util.Tuple;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefinitionManager {
@@ -126,24 +127,19 @@ public class DefinitionManager {
             }
         }
 
-        ArrayList<Tuple<String, String>> definitionList = new ArrayList<>(definitionIDMap.size());
-        for (Entry<String, String> entry : definitionIDMap.entrySet()) {
-            definitionList.add(new Tuple<>(entry.getKey(), entry.getValue()));
-        }
-
         Progress.Bar bar = Progress.push("Loading Models", definitionIDMap.size());
 
-        getStockLoadingStream(definitionList).forEach(tuple -> {
-            String defID = tuple.getFirst();
-            String defType = tuple.getSecond();
+        Map<String, EntityRollingStockDefinition> loaded = getStockLoadingStream(definitionIDMap.entrySet()).map(tuple -> {
+            String defID = tuple.getKey();
+            String defType = tuple.getValue();
 
             try {
                 EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, getJsonData(defID));
 
                 synchronized (bar) {
                     bar.step(stockDefinition.name());
-                    definitions.put(stockDefinition.defID, stockDefinition);
                 }
+                return Pair.of(stockDefinition.defID, stockDefinition);
             } catch (Exception e) {
                 ImmersiveRailroading.error("Error loading model %s of type %s", defID, defType);
                 ImmersiveRailroading.catching(e);
@@ -152,8 +148,11 @@ public class DefinitionManager {
                     // Important so that progress bar steps correctly.
                     bar.step("");
                 }
+                return null;
             }
-        });
+        }).filter(Objects::nonNull).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+
+        definitionIDMap.keySet().stream().filter(loaded::containsKey).forEach(x -> definitions.put(x, loaded.get(x)));
 
         Progress.pop(bar);
     }
