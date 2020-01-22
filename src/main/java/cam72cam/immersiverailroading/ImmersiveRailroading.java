@@ -105,14 +105,13 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				} catch (IOException e) {
 					throw new RuntimeException("Unable to load IR definitions", e);
 				}
-
-				CompatLoader.init();
 				break;
 			case FINALIZE:
-				CompatLoader.setup();
 				IRFuzzy.applyFallbacks();
 				break;
 		}
+
+		CompatLoader.common(event);
 	}
 
 	@Override
