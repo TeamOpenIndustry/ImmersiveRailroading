@@ -105,7 +105,7 @@ jobs:
         name: Immersive Railroading 1.14.4
         path: build/libs/ImmersiveRailroading-1.7.2_fabric_1.14.4.jar
 
-  fabric_1-15:
+  fabric_1-15-2:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -114,10 +114,10 @@ jobs:
     - name: Process images
       run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
-      run: ./setup.sh fabric_1.15 useHttps
+      run: ./setup.sh fabric_1.15.2 useHttps
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
       with:
-        name: Immersive Railroading 1.15
-        path: build/libs/ImmersiveRailroading-1.7.2_fabric_1.15.jar
+        name: Immersive Railroading 1.15.2
+        path: build/libs/ImmersiveRailroading-1.7.2_fabric_1.15.2.jar
