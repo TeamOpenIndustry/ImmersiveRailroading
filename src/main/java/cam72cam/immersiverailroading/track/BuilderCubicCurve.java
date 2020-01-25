@@ -2,12 +2,14 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,6 +79,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
+
+		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos).linearize(info.settings.smoothing);
+		ctrl1 = adjusted.ctrl1;
+		ctrl2 = adjusted.ctrl2;
 
 		if (info.placementInfo.control != null) {
 			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition);

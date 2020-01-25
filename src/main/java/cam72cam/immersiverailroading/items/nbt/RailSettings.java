@@ -1,9 +1,6 @@
 package cam72cam.immersiverailroading.items.nbt;
 
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.util.TagCompound;
 
@@ -13,6 +10,7 @@ public class RailSettings {
     public final int length;
     public final int quarters;
     public final TrackPositionType posType;
+    public final TrackSmoothing smoothing;
     public final TrackDirection direction;
     public final ItemStack railBed;
     public final ItemStack railBedFill;
@@ -20,13 +18,14 @@ public class RailSettings {
     public final boolean isGradeCrossing;
     public final String track;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, int quarters, TrackPositionType posType, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, int quarters, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
         this.length = length;
         this.quarters = quarters;
         this.posType = posType;
+        this.smoothing = smoothing;
         this.direction = direction;
         this.railBed = railBed;
         this.railBedFill = railBedFill;
@@ -42,6 +41,9 @@ public class RailSettings {
             length = nbt.getInteger("length");
             quarters = nbt.hasKey("quarters") ? nbt.getInteger("quarters") : 4;
             posType = TrackPositionType.values()[nbt.getInteger("pos_type")];
+            smoothing = nbt.hasKey("smoothing") ?
+                    TrackSmoothing.values()[nbt.getInteger("smoothing")] :
+                    type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH;
             direction = TrackDirection.values()[nbt.getInteger("direction")];
             railBed = new ItemStack(nbt.get("bedItem"));
             railBedFill = new ItemStack(nbt.get("bedFill"));
@@ -54,6 +56,7 @@ public class RailSettings {
             length = 10;
             quarters = 4;
             posType = TrackPositionType.FIXED;
+            smoothing = TrackSmoothing.BOTH;
             direction = TrackDirection.NONE;
             railBed = ItemStack.EMPTY;
             railBedFill = ItemStack.EMPTY;
@@ -70,6 +73,7 @@ public class RailSettings {
         nbt.setInteger("length", length);
         nbt.setInteger("quarters", quarters);
         nbt.setInteger("pos_type", posType.ordinal());
+        nbt.setInteger("smoothing", smoothing.ordinal());
         nbt.setInteger("direction", direction.ordinal());
         nbt.set("bedItem", railBed.toTag());
         nbt.set("bedFill", railBedFill.toTag());
@@ -86,7 +90,8 @@ public class RailSettings {
 				length,
 				quarters,
 				posType,
-				direction,
+                smoothing,
+                direction,
 				railBed,
 				railBedFill,
 				isPreview,
@@ -102,6 +107,7 @@ public class RailSettings {
                 length,
                 quarters,
                 posType,
+                smoothing,
                 direction,
                 railBed,
                 railBedFill,
@@ -118,6 +124,7 @@ public class RailSettings {
                 length,
                 quarters,
                 posType,
+                smoothing,
                 direction,
                 railBed,
                 railBedFill,

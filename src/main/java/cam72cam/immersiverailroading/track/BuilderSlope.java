@@ -11,11 +11,7 @@ public class BuilderSlope extends BuilderStraight {
 	@Override
 	public CubicCurve getCurve() {
 		CubicCurve curve = super.getCurve();
-		return new CubicCurve(
-				curve.p1,
-				curve.ctrl1.add(0, 0.25, 0),
-				curve.ctrl2.add(0, 0.75, 0),
-				curve.p2.add(0, 1, 0)
-		);
+		curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, 1, 0), curve.p2.add(0, 1, 0));
+		return curve.linearize(info.settings.smoothing);
 	}
 }

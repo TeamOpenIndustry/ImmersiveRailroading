@@ -63,6 +63,7 @@ gui.immersiverailroading:selector.quarters=%s Degree Turn
 gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
 gui.immersiverailroading:selector.position=Position: %s
+gui.immersiverailroading:selector.smoothing=Vertical Smoothing: %s
 gui.immersiverailroading:selector.direction=Direction: %s
 gui.immersiverailroading:selector.place_blueprint=Place Blueprint
 gui.immersiverailroading:selector.grade_crossing=Grade Crossing
@@ -80,6 +81,7 @@ gui.immersiverailroading:track.length=Length:    %s
 gui.immersiverailroading:track.gauge=Gauge:     %s
 gui.immersiverailroading:track.quarters=%s Degree Turn
 gui.immersiverailroading:track.position=Position:   %s
+gui.immersiverailroading:track.smoothing=Smoothing: %s
 gui.immersiverailroading:track.direction=Direction:  %s
 gui.immersiverailroading:track.rail_bed=Bed:        %s
 gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
@@ -123,6 +125,11 @@ track.immersiverailroading:position.pixels=Pixels
 track.immersiverailroading:position.pixels_locked=Pixels Locked
 track.immersiverailroading:position.smooth=Smooth
 track.immersiverailroading:position.smooth_locked=Smooth Locked
+
+track.immersiverailroading:smoothing.both=Both
+track.immersiverailroading:smoothing.near=Near
+track.immersiverailroading:smoothing.far=Far
+track.immersiverailroading:smoothing.neither=Neither
 
 track.immersiverailroading:direction.none=Flexible
 track.immersiverailroading:direction.left=Lock Right

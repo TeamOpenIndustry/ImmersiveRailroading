@@ -52,6 +52,7 @@ public class RailInfo {
 				this.settings.railBed,
 				this.settings.gauge,
 				this.settings.track,
+				this.settings.smoothing,
 				this.settings.isGradeCrossing,
 				this.switchState,
 				this.switchForced,
