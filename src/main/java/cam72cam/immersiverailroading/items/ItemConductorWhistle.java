@@ -35,7 +35,7 @@ public class ItemConductorWhistle extends ItemBase {
 		if (world.isServer) {
 			if (cooldown.containsKey(player.getUUID())) {
 				int newtime = cooldown.get(player.getUUID());
-				if (newtime < player.getTickCount() || newtime > world.getTicks()) {
+				if (newtime < player.getTickCount() || newtime > player.getTickCount() + 40) {
 					cooldown.remove(player.getUUID());
 				} else {
 					return;
