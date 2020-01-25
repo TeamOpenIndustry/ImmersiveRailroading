@@ -52,13 +52,16 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 
 	@Override
 	public String getSpriteKey(ItemStack stack) {
-		return ItemDefinition.getID(stack);
+		String defID = ItemDefinition.getID(stack);
+		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+		return defID + def.getVersion();
 	}
 
 	@Override
 	public StandardModel getSpriteModel(ItemStack stack) {
 		String defID = ItemDefinition.getID(stack);
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+		// We want to upload the model even if the sprite is cached
 		StockModel model = StockRenderCache.getRender(defID);
 
 		return new StandardModel().addCustom(() -> {

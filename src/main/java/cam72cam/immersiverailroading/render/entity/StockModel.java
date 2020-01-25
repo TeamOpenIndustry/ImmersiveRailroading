@@ -33,8 +33,8 @@ import cam72cam.immersiverailroading.util.VecUtil;
 public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
 
-	public StockModel(OBJModel objModel, Collection<String> textureNames) {
-		super(objModel, textureNames, ConfigGraphics.textureCacheSeconds);
+	public StockModel(OBJModel objModel, Collection<String> textureNames, String version) {
+		super(objModel, textureNames, version, ConfigGraphics.textureCacheSeconds);
 	}
 
 	private boolean isBuilt;
