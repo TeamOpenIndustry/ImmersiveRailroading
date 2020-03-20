@@ -163,9 +163,10 @@ public class CubicCurve {
         Vec3d c2 = ctrl2;
 
         double lengthGuess = p1.distanceTo(c1) + c1.distanceTo(c2) + c2.distanceTo(p2);
+        double height = p2.y - p1.y;
 
-        c1 = c1.add(0, p1.distanceTo(c1) / lengthGuess * p2.y, 0);
-        c2 = c2.add(0, -c2.distanceTo(p2) / lengthGuess * p2.y, 0);
+        c1 = c1.add(0, p1.distanceTo(c1) / (lengthGuess-c2.distanceTo(p2)) * height, 0);
+        c2 = c2.add(0, -c2.distanceTo(p2) / (lengthGuess-p1.distanceTo(c1)) * height, 0);
 
         switch (smoothing) {
             case NEITHER:
