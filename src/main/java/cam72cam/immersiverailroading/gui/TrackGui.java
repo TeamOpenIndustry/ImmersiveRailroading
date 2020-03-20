@@ -122,7 +122,7 @@ public class TrackGui implements IScreen {
 				type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
 				quartersSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
-				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE);
+				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN);
 			}
 		};
 
@@ -185,7 +185,7 @@ public class TrackGui implements IScreen {
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(smoothing));
 			}
 		};
-		smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE);
+		smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN);
 
 		directionButton = new Button(screen, 0 - 100, -24 + 8 * 22, GuiText.SELECTOR_DIRECTION.toString(direction)) {
 			@Override
