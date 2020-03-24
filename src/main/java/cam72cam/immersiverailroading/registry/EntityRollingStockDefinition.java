@@ -48,7 +48,6 @@ public abstract class EntityRollingStockDefinition {
     private String name = "Unknown";
     private String modelerName = "N/A";
     private String packName = "N/A";
-    private String packVersion = "";
     private OBJModel model;
     private Vec3d passengerCenter = new Vec3d(0, 0, 0);
     private float bogeyFront;
@@ -110,12 +109,6 @@ public abstract class EntityRollingStockDefinition {
         }
         if (data.has("pack")) {
             this.packName = data.get("pack").getAsString();
-        }
-        if (data.has("version")) {
-            this.packVersion = data.get("version").getAsString();
-            if (this.packVersion.equals("development")) {
-                this.packVersion = "" + System.nanoTime();
-            }
         }
         float darken = 0;
         if (data.has("darken_model")) {
@@ -547,11 +540,6 @@ public abstract class EntityRollingStockDefinition {
 
     public int getMaxPassengers() {
         return this.maxPassengers;
-    }
-
-
-    public String getVersion() {
-        return packVersion;
     }
 
     public boolean acceptsPassengers() {
