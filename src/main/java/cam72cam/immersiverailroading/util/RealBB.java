@@ -154,7 +154,8 @@ public class RealBB implements IBoundingBox {
 	public double calculateZOffset(IBoundingBox other, double offsetZ) {
 		return 0;
 	}
-	
+
+	private Area myArea;
 	public Pair<Boolean, Double> intersectsAt(Vec3d min, Vec3d max, boolean useHeightmap) {
 		if (!(this.min.x < max.x && this.max.x > min.x && this.min.y < max.y && this.max.y > min.y && this.min.z < max.z && this.max.z > min.z)) {
 			return Pair.of(false, min.y);
@@ -172,17 +173,19 @@ public class RealBB implements IBoundingBox {
 		} else {
 			otherRect.add(max.x, max.z);
 		}
-		
-		Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width/2, 0, 0);
-		myRect.add(this.front, this.width/2);
-		
+
+		if (myArea == null) {
+			Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width / 2, 0, 0);
+			myRect.add(this.front, this.width / 2);
+
+			myArea = new Area(myRect);
+			AffineTransform myTransform = new AffineTransform();
+			myTransform.translate(this.centerX, this.centerZ);
+			myArea.transform(myTransform);
+		}
+
 		Area otherArea = new Area(otherRect);
-		Area myArea = new Area(myRect);
-		
-		AffineTransform myTransform = new AffineTransform();
-		myTransform.translate(this.centerX, this.centerZ);
-		myArea.transform(myTransform);
-		
+
 		AffineTransform otherTransform = new AffineTransform();
 		otherTransform.rotate(Math.toRadians(180-yaw+90), this.centerX, this.centerZ);
 		otherArea.transform(otherTransform);
@@ -232,7 +235,7 @@ public class RealBB implements IBoundingBox {
 	public boolean intersects(Vec3d minIn, Vec3d maxIn) {
 		Vec3d min = minIn.min(maxIn);
 		Vec3d max = maxIn.max(minIn);
-		return intersectsAt(min, max, true).getLeft();
+		return intersectsAt(min, max, false).getLeft();
 	}
 
 	@Override
