@@ -42,6 +42,7 @@ public class LocomotiveSteam extends Locomotive {
 	private final static String BURN_TIME  = "BURN_TIME";
 	private final static String BURN_MAX  = "BURN_MAX";
 	private double driverDiameter;
+	private float drainRemainder;
 	
 	public LocomotiveSteam() {
         sync.setFloat(BOILER_PRESSURE, 0f);
@@ -642,7 +643,7 @@ public class LocomotiveSteam extends Locomotive {
 			int maxPSI = this.getDefinition().getMaxPSI(gauge);
 			sync.setBoolean(PRESSURE_VALVE, boilerPressure > maxPSI);
 			if (boilerPressure > maxPSI) {
-				waterUsed += boilerPressure - maxPSI; 
+				waterUsed += boilerPressure - maxPSI;
 				boilerPressure = maxPSI;
 			}
 		} else {
@@ -670,13 +671,10 @@ public class LocomotiveSteam extends Locomotive {
 		
 		if (waterUsed != 0) {
 			waterUsed *= Config.ConfigBalance.locoWaterUsage;
+			waterUsed += drainRemainder;
 			if (waterUsed > 0) {
-				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.ceil(waterUsed)), false);
-				waterUsed = waterUsed % 1;
-			}
-			// handle remainder
-			if (Math.random() <= waterUsed) {
-				theTank.drain(new FluidStack(Fluid.WATER, 1), false);
+				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.floor(waterUsed)), false);
+				drainRemainder = waterUsed % 1;
 			}
 		}
 		
