@@ -16,6 +16,9 @@
   <a href="">
      <img src="http://cf.way2muchnoise.eu/versions/For%20MC_immersive-railroading_all.svg">
   </a>
+  <a href="">
+    <img src="https://github.com/TeamOpenIndustry/ImmersiveRailroading/workflows/Immersive%20Railroading%20Build%20Pipeline/badge.svg">
+  </a>
   <!--<a href="https://files.minecraftforge.net/">
      <img src="https://img.shields.io/badge/forge-14.23.1.2555-orange.svg">
   </a>-->
