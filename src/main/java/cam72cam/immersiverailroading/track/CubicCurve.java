@@ -159,22 +159,35 @@ public class CubicCurve {
 
 
     public CubicCurve linearize(TrackSmoothing smoothing) {
-        Vec3d c1 = ctrl1;
-        Vec3d c2 = ctrl2;
+        double start = p1.distanceTo(ctrl1);
+        double middle = ctrl1.distanceTo(ctrl2);
+        double end = ctrl2.distanceTo(p2);
 
-        double lengthGuess = p1.distanceTo(c1) + c1.distanceTo(c2) + c2.distanceTo(p2);
+        double lengthGuess = start + middle + end;
         double height = p2.y - p1.y;
-
-        c1 = c1.add(0, p1.distanceTo(c1) / (lengthGuess-c2.distanceTo(p2)) * height, 0);
-        c2 = c2.add(0, -c2.distanceTo(p2) / (lengthGuess-p1.distanceTo(c1)) * height, 0);
 
         switch (smoothing) {
             case NEITHER:
-                return new CubicCurve(p1, c1, c2, p2);
+                return new CubicCurve(
+                        p1,
+                        ctrl1.add(0, (start / lengthGuess) * height, 0),
+                        ctrl2.add(0, -(end / lengthGuess) * height, 0),
+                        p2
+                );
             case NEAR:
-                return new CubicCurve(p1, ctrl1, c2, p2);
+                return new CubicCurve(
+                        p1,
+                        ctrl1,
+                        ctrl2.add(0, -(end / (middle + end)) * height, 0),
+                        p2
+                );
             case FAR:
-                return new CubicCurve(p1, c1, ctrl2, p2);
+                return new CubicCurve(
+                        p1,
+                        ctrl1.add(0, (start / (start + middle)) * height, 0),
+                        ctrl2,
+                        p2
+                );
             case BOTH: default:
                 return this;
         }
