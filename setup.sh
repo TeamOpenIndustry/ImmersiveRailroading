@@ -16,6 +16,6 @@ rm -rf ./ImmersiveRailroadingIntegration
 git clone --branch $branch ${gitPfx}TeamOpenIndustry/UniversalModCore.git
 git clone --branch $branch ${gitPfx}TeamOpenIndustry/ImmersiveRailroadingIntegration.git
 
-./UniversalModCore/template/setup.sh $branch immersiverailroading ImmersiveRailroading 1.7.2 cam72cam.immersiverailroading.ImmersiveRailroading
+./UniversalModCore/template/setup.sh $branch immersiverailroading ImmersiveRailroading 1.7.3 cam72cam.immersiverailroading.ImmersiveRailroading
 
 ./ImmersiveRailroadingIntegration/setup.sh $branch $useHttps
