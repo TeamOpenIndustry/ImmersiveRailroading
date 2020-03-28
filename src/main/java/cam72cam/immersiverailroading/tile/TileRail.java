@@ -98,7 +98,7 @@ public class TileRail extends TileRailBase {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false);
 			info = new RailInfo(world, settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}

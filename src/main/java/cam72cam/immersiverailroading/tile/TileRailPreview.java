@@ -51,7 +51,7 @@ public class TileRailPreview extends BlockEntityTickable {
 			switch (settings.type) {
 				case TURN:
 					length = (lx + lz )/2+1;
-					length *= 4d/settings.quarters;
+					length *= 90/settings.degrees;
 					settings = settings.withLength((int) Math.round(length));
 					break;
 				case STRAIGHT:

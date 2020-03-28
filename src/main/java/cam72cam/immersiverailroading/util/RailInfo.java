@@ -49,7 +49,7 @@ public class RailInfo {
 		Object[] props = new Object [] {
 				this.settings.type,
 				this.settings.length,
-				this.settings.quarters,
+				this.settings.degrees,
 				this.settings.railBed,
 				this.settings.gauge,
 				this.settings.track,

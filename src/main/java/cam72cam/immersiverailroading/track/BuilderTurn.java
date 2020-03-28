@@ -19,7 +19,7 @@ public class BuilderTurn extends BuilderCubicCurve {
         if (info.placementInfo.direction == TrackDirection.LEFT) {
             mat.scale(1, 1, -1);
         }
-        CubicCurve curve = CubicCurve.circle(radius, info.settings.quarters/4f*90).apply(mat);
+        CubicCurve curve = CubicCurve.circle(radius, info.settings.degrees).apply(mat);
 
         double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
         if (height != 0) {

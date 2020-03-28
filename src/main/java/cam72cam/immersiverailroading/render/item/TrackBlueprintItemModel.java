@@ -32,7 +32,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
 
 			if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
-				GL11.glTranslated(0, 0, -0.1 * info.settings.quarters);
+				GL11.glTranslated(0, 0, -0.1 * (info.settings.degrees / 90 * 4));
 			}
 
 			GL11.glTranslated(0.5, 0, 0.5);

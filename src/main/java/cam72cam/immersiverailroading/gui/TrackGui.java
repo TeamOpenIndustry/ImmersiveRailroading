@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
@@ -24,7 +25,7 @@ public class TrackGui implements IScreen {
 	private TileRailPreview te;
 	private Button typeButton;
 	private TextField lengthInput;
-	private Slider quartersSlider;
+	private Slider degreesSlider;
 	private CheckBox isPreviewCB;
 	private CheckBox isGradeCrossingCB;
 	private Button gaugeButton;
@@ -36,7 +37,7 @@ public class TrackGui implements IScreen {
 	private Button bedFillButton;
 
 	private int length;
-	private int quarters;
+	private float degrees;
 	private Gauge gauge;
 	private String track;
 	private boolean isPreview;
@@ -75,7 +76,7 @@ public class TrackGui implements IScreen {
 		stack = stack.copy();
 		RailSettings settings = ItemTrackBlueprint.settings(stack);
 		length = settings.length;
-		quarters = settings.quarters;
+		degrees = settings.degrees;
 		type = settings.type;
 		gauge = settings.gauge;
 		track = settings.track;
@@ -121,7 +122,7 @@ public class TrackGui implements IScreen {
 			public void onClick(Hand hand) {
 				type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
-				quartersSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+				degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
 				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN);
 			}
 		};
@@ -131,14 +132,14 @@ public class TrackGui implements IScreen {
 		this.lengthInput.setValidator(this.integerFilter);
 		this.lengthInput.setFocused(true);
 
-		this.quartersSlider = new Slider(screen, 0 - 75,  - 24 + 3 * 22+1, "", 1, 4, quarters, false) {
+		this.degreesSlider = new Slider(screen, 0 - 75,  - 24 + 3 * 22+1, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
-				quartersSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/4)));
+				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
-		quartersSlider.onSlider();
-		quartersSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+		degreesSlider.onSlider();
+		degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
 
 		bedTypeButton = new Button(screen, 0 - 100, -24 + 4 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed))) {
 			@Override
@@ -226,7 +227,7 @@ public class TrackGui implements IScreen {
 	@Override
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
-			RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
+			RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 			if (this.te != null) {
 				new ItemRailUpdatePacket(te.pos, settings).sendToServer();
 			} else {
@@ -243,7 +244,7 @@ public class TrackGui implements IScreen {
 		int scale = 8;
 
 		// This could be more efficient...
-		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), quartersSlider.getValueInt(),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
+		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		ItemTrackBlueprint.settings(stack, settings);
 		GL11.glPushMatrix();

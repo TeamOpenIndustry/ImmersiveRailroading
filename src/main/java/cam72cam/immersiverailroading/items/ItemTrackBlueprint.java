@@ -50,7 +50,7 @@ public class ItemTrackBlueprint extends ItemBase {
                     info.track,
                     info.type,
                     info.length,
-                    info.quarters,
+                    info.degrees,
                     info.posType,
                     info.smoothing,
                     info.direction,
@@ -65,7 +65,7 @@ public class ItemTrackBlueprint extends ItemBase {
                     info.track,
                     info.type,
                     info.length,
-                    info.quarters,
+                    info.degrees,
                     info.posType,
                     info.smoothing,
                     info.direction,
@@ -118,7 +118,7 @@ public class ItemTrackBlueprint extends ItemBase {
             GuiText.TRACK_RAIL_BED.toString(settings.railBed.getDisplayName()),
             GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName()),
             (settings.isPreview ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString(),
-            GuiText.TRACK_QUARTERS.toString(settings.quarters * 90.0/4 )
+            GuiText.TRACK_QUARTERS.toString(settings.degrees)
 		);
 	}
 
