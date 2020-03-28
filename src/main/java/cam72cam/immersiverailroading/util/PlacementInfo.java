@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
@@ -21,10 +22,14 @@ public class PlacementInfo {
 		this.yaw = yaw;
 		this.control = control;
 	}
+
+	public static int segmentation() {
+		return Math.min(32, Math.max(1, Config.ConfigBalance.AnglePlacementSegmentation));
+	}
 	
 	public PlacementInfo(ItemStack stack, float yawHead, Vec3i pos, Vec3d hit) {
 		yawHead = ((- yawHead % 360) + 360) % 360;
-		this.yaw = ((int)((yawHead + 90/8f) * 4)) / 90 * 90 / 4f;
+		this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
 
 		RailSettings settings = ItemTrackBlueprint.settings(stack);
 		TrackDirection direction = settings.direction;
@@ -144,7 +149,7 @@ public class PlacementInfo {
 	}
 
 	public int rotationQuarter() {
-		return (int)((yaw % 90) *4/90);
+		return (int)((yaw % 90) * segmentation() /90);
 	}
 
 	public float partialAngle() {
