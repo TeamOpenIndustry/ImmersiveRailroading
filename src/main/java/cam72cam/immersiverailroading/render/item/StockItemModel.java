@@ -54,6 +54,10 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 	public String getSpriteKey(ItemStack stack) {
 		String defID = ItemDefinition.getID(stack);
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+		if (def == null) {
+			// Stock pack removed
+			return null;
+		}
 		return defID + (def.getModel().hash + StockRenderCache.getRender(defID).textures.get(null).hash);
 	}
 
