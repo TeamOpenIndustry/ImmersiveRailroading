@@ -1,15 +1,19 @@
 package cam72cam.immersiverailroading.render.block;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.util.Hand;
 import org.lwjgl.opengl.GL11;
 
 public class RailBaseModel {
@@ -35,6 +39,12 @@ public class RailBaseModel {
                     //TODO render switch and don't render turn
                     info = info.withType(TrackItems.STRAIGHT);
                 }
+                if (info.settings.type == TrackItems.TURNTABLE) {
+                	if (MinecraftClient.getPlayer().getHeldItem(Hand.PRIMARY).is(IRItems.ITEM_TRACK_BLUEPRINT)) {
+						info = info.withItemHeld(true);
+					}
+				}
+
 
 				Vec3d pos = info.placementInfo.placementPosition.subtract(te.pos);
 				GL11.glTranslated(pos.x, pos.y, pos.z);

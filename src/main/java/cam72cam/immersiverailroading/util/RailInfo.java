@@ -31,9 +31,14 @@ public class RailInfo {
 	public final SwitchState switchForced;
 	public final double tablePos;
 	public final String uniqueID;
+	public final boolean itemHeld;
 
 
 	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
+		this(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, false);
+	}
+
+	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 		}
@@ -45,6 +50,7 @@ public class RailInfo {
 		this.switchState = switchState;
 		this.switchForced = switchForced;
 		this.tablePos = tablePos;
+		this.itemHeld = itemHeld;
 
 		Object[] props = new Object [] {
 				this.settings.type,
@@ -75,6 +81,7 @@ public class RailInfo {
 		}
 		if (settings.type == TrackItems.TURNTABLE) {
 			id += Config.ConfigBalance.AnglePlacementSegmentation;
+			id += this.itemHeld;
 		}
 		uniqueID = id;
 	}
@@ -113,17 +120,21 @@ public class RailInfo {
 
 	public RailInfo withLength(int length) {
 		RailSettings settings = this.settings.withLength(length);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 
 	public RailInfo withType(TrackItems type) {
 		RailSettings settings = this.settings.withType(type);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 	
 	public RailInfo withTrack(String track) {
 		RailSettings settings = this.settings.withTrack(track);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+	}
+
+	public RailInfo withItemHeld(boolean itemHeld) {
+		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 
 	public Map<Vec3i, BuilderBase> builders = new HashMap<>();
