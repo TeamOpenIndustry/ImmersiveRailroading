@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -76,13 +77,13 @@ public class BuilderTurnTable extends BuilderBase {
 	@Override
 	public List<VecYawPitch> getRenderData() {
 		List<VecYawPitch> data = new ArrayList<>();
-		
-		for (float angle = 0; angle < 360; angle +=22.5) {
+
+		for (float angle = 0; angle < 360; angle +=(90f / PlacementInfo.segmentation())) {
 			Vec3d gagPos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, info.settings.length), angle-90);
 			data.add(new VecYawPitch(gagPos.x + offset.x, gagPos.y + offset.y, gagPos.z + offset.z, -angle));
 		}
-		
-		float angle = 360/16.0f * (float)info.tablePos - info.placementInfo.facing().getHorizontalAngle();
+
+		float angle = (float)info.tablePos - info.placementInfo.facing().getHorizontalAngle();
 		data.add(new VecYawPitch(offset.x, offset.y, offset.z, -angle, 0, info.settings.length * 2, "RAIL_RIGHT", "RAIL_LEFT"));
 		
 		return data;

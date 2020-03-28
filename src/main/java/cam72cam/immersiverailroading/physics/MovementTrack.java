@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.world.World;
@@ -103,7 +104,7 @@ public class MovementTrack {
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			
-			float angle = 360/16.0f * (float)tablePos + rail.info.placementInfo.facing().getHorizontalAngle();
+			float angle = (float)tablePos + rail.info.placementInfo.facing().getHorizontalAngle();
 			
 			Vec3d forward = center.add(VecUtil.fromWrongYaw(fromCenter, angle));
 			Vec3d backward = center.add(VecUtil.fromWrongYaw(fromCenter, angle + 180));

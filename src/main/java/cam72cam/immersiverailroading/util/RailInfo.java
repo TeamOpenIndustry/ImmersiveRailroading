@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.ItemGauge;
@@ -71,6 +72,9 @@ public class RailInfo {
 		}
 		if (customInfo.control != null) {
 			id += customInfo.control;
+		}
+		if (settings.type == TrackItems.TURNTABLE) {
+			id += Config.ConfigBalance.AnglePlacementSegmentation;
 		}
 		uniqueID = id;
 	}

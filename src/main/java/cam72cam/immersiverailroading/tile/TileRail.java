@@ -45,7 +45,8 @@ public class TileRail extends TileRailBase {
 	}
 
 	public void nextTablePos(boolean back) {
-		double tablePos = (info.tablePos + 1.0/info.settings.length * (back ? 1 : -1)) % 8;
+		float delta = 360 / (64f);
+		double tablePos = ((int)(info.tablePos / delta)) * delta + (back ? delta : -delta);
 		info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
 		this.markDirty();
 		
