@@ -13,7 +13,7 @@ out
 .idea
 
 # gradle
-*gradle*
+.gradle
 build
 
 # other
@@ -30,3 +30,6 @@ TrackAPI
 ImmersiveRailroadingIntegration
 UniversalModCore
 src/main/java/cam72cam/immersiverailroading/Mod.java
+
+#UMC
+umc.gradle
