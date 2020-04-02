@@ -9,10 +9,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install deps
       run: sudo apt install -y pngquant findutils
-    - name: Process images
-      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
       run: ./gradlew umc -D umc.loader=1.7.10-forge -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
@@ -26,10 +28,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install deps
       run: sudo apt install -y pngquant findutils
-    - name: Process images
-      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
       run: ./gradlew umc -D umc.loader=1.10.2-forge -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
@@ -43,10 +47,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install deps
       run: sudo apt install -y pngquant findutils
-    - name: Process images
-      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
       run: ./gradlew umc -D umc.loader=1.11.2-forge -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
@@ -60,10 +66,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install deps
       run: sudo apt install -y pngquant findutils
-    - name: Process images
-      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
       run: ./gradlew umc -D umc.loader=1.12.2-forge -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
@@ -81,6 +89,10 @@ jobs:
       run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
       run: ./gradlew umc -D umc.loader=1.14.4-forge -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
@@ -94,10 +106,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install deps
       run: sudo apt install -y pngquant findutils
-    - name: Process images
-      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
       run: ./gradlew umc -D umc.loader=1.14.4-fabric -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
@@ -111,10 +125,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install deps
       run: sudo apt install -y pngquant findutils
-    - name: Process images
-      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
       run: ./gradlew umc -D umc.loader=1.15.2-fabric -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
