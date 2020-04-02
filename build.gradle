@@ -6,7 +6,7 @@ buildscript {
         maven { url uri(".umc") }
     }
 	dependencies {
-        classpath 'cam72cam.universalmodcore:UniversalModCoreGradle:0.1.1'
+        classpath 'cam72cam.universalmodcore:UniversalModCoreGradle:0.1.2'
 	}
 }
 
@@ -19,7 +19,6 @@ universalmodcore {
     modId = 'immersiverailroading'
     modVersion = '1.7.3'
     umcVersion = '0.1.0'
-    umcJar = '../UniversalModCore/build/libs/UniversalModCore-0.1.0-1.12.2-forge.jar'
 }
 
 task ('umcIntegration') {

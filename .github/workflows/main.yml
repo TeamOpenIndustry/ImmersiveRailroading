@@ -63,7 +63,7 @@ jobs:
     - name: Process images
       run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
     - name: Setup Universal Mod Core (and helpers)
-      run: ./setup.sh forge_1.12.2 useHttps
+      run: ./gradlew umc -D umc.loader=1.12.2-forge
     - name: Gradle build
       run: ./gradlew build
     - uses: actions/upload-artifact@master
