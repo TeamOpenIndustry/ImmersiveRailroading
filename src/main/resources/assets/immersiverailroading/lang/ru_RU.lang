@@ -18,6 +18,7 @@ item.immersiverailroading:item_conductor_whistle.name=Кондукторский
 item.immersiverailroading:item_golden_spike.name=Проходчик
 item.immersiverailroading:item_radio_control_card.name=Радиоконтроллер для поездов
 item.immersiverailroading:item_switch_key.name=Служебный ключ
+item.immersiverailroading:item_track_exchanger.name=Реконструктор рельс
 
 tile.immersiverailroading:block_rail.name=Железнодорожный путь
 tile.immersiverailroading:block_rail_gag.name=Подложка железнодорожного пути
@@ -62,6 +63,7 @@ gui.immersiverailroading:selector.quarters=%s градусов - радиус п
 gui.immersiverailroading:selector.rail_bed=Подложка полотна: %s
 gui.immersiverailroading:selector.rail_bed_fill=Насыпь: %s
 gui.immersiverailroading:selector.position=Фиксация: %s
+gui.immersiverailroading:selector.smoothing=Вертикальное Сглаживание: %s
 gui.immersiverailroading:selector.direction=Направление: %s
 gui.immersiverailroading:selector.place_blueprint=Включить предварительный режим
 gui.immersiverailroading:selector.grade_crossing=Включить встраивание (для переездов)
@@ -71,6 +73,7 @@ gui.immersiverailroading:selector.cast_single=Произвести единич�
 gui.immersiverailroading:selector.cast_repeat=Произвести повторно
 
 gui.immersiverailroading:item.switch_key=Используйте на стрелке чтобы переключиться между режимами (заблокировано в прямом положении, в поворотном положении или разблокировано). Если стрелка заблокирована, редстоун-сигнал игнорируется!
+gui.immersiverailroading:item.track_exchanger=Щелкните правой кнопкой мыши в воздухе, чтобы открыть графический интерфейс выбора. Щелкните правой кнопкой мыши на пути, чтобы изменить его тип на тот, который определен в графическом интерфейсе
 gui.immersiverailroading:none=Нет
 
 gui.immersiverailroading:track.type=Тип:      %s
@@ -78,6 +81,7 @@ gui.immersiverailroading:track.length=Длина:    %s
 gui.immersiverailroading:track.gauge=Колея:     %s
 gui.immersiverailroading:track.quarters=%s поворота
 gui.immersiverailroading:track.position=Фиксация:   %s
+gui.immersiverailroading:track.smoothing=Сглаживание: %s
 gui.immersiverailroading:track.direction=Направление:  %s
 gui.immersiverailroading:track.rail_bed=Подложка полотна:        %s
 gui.immersiverailroading:track.rail_bed_fill=Насыпь:    %s
@@ -114,13 +118,18 @@ track.immersiverailroading:class.slope=Подъем
 track.immersiverailroading:class.turn=Поворот
 track.immersiverailroading:class.turntable=Поворотный круг
 track.immersiverailroading:class.switch=Стрелка
-track.immersiverailroading:class.custom=Кривая
+track.immersiverailroading:class.custom=Настраиваемая
 
 track.immersiverailroading:position.fixed=Полная
 track.immersiverailroading:position.pixels=Нулевая пиксельная
 track.immersiverailroading:position.pixels_locked=Относительная пиксельная
 track.immersiverailroading:position.smooth=Нулевая мягкая
 track.immersiverailroading:position.smooth_locked=Относительная мягкая
+
+track.immersiverailroading:smoothing.both=Оба
+track.immersiverailroading:smoothing.near=Рядом
+track.immersiverailroading:smoothing.far=Далеко
+track.immersiverailroading:smoothing.neither=Никто
 
 track.immersiverailroading:direction.none=Гибкое
 track.immersiverailroading:direction.left=Заблокированное влево
@@ -217,4 +226,4 @@ ir_keys.horn=Гудок
 ir_keys.bell=Колокол
 ir_keys.dead_mans_switch=Переключатель питания ТСКБМ
 ir_keys.start_stop_engine=Запуск/остановка двигателя (для диз- или эл-поездов)
-ir_keys.config=Config
+ir_keys.config=Конфигурация
