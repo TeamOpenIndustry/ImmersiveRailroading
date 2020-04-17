@@ -1,15 +1,10 @@
 package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.nbt.ItemComponent;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.mod.render.GLBoolTracker;
@@ -28,22 +23,20 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
         return new StandardModel().addCustom(() -> StockItemComponentModel.render(stack));
     }
     public static void render(ItemStack stack) {
-        double itemScale = ItemGauge.get(stack).scale();
-        String defID = ItemDefinition.getID(stack);
-        ItemComponentType item = ItemComponent.getComponentType(stack);
-        EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+        ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(stack);
+        double itemScale = data.gauge.scale();
 
-        if (def == null) {
+        if (data.def == null) {
             ImmersiveRailroading.error("Item %s missing definition!", stack);
             stack.setCount(0);
             return;
         }
 
-        StockModel renderer = StockRenderCache.getRender(defID);
+        StockModel renderer = StockRenderCache.getRender(data.def.defID);
         ArrayList<String> groups = new ArrayList<>();
 
-        for (RenderComponentType r : item.render) {
-            RenderComponent comp = def.getComponent(r, Gauge.from(Gauge.STANDARD));
+        for (RenderComponentType r : data.componentType.render) {
+            RenderComponent comp = data.def.getComponent(r, Gauge.from(Gauge.STANDARD));
             if (comp == null || r == RenderComponentType.CARGO_FILL_X) {
                 continue;
             }
@@ -79,7 +72,5 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             light.restore();
         }
         GL11.glPopMatrix();
-
-        return;
     }
 }

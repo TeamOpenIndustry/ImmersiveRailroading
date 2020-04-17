@@ -16,7 +16,7 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;

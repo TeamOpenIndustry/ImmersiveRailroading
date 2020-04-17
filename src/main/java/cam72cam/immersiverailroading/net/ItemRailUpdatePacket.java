@@ -1,43 +1,40 @@
 package cam72cam.immersiverailroading.net;
 
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Hand;
 
 public class ItemRailUpdatePacket extends Packet {
-	public ItemRailUpdatePacket() {
-		// Forge Reflection
-	}
+	@TagField
+	private RailSettings settings;
+	@TagField
+	private Vec3i pos;
+
+	public ItemRailUpdatePacket() { }
 
 	public ItemRailUpdatePacket(RailSettings settings) {
-		super();
-		data.set("settings", settings.toNBT());
+		this.settings = settings;
 	}
 
 	public ItemRailUpdatePacket(Vec3i tilePreviewPos, RailSettings settings) {
-		super();
-		data.setVec3i("pos", tilePreviewPos);
-		data.set("settings", settings.toNBT());
+		this.pos = tilePreviewPos;
+		this.settings = settings;
 	}
 
 	@Override
 	public void handle() {
-		RailSettings settings = new RailSettings(data.get("settings"));
-		if (data.hasKey("pos")) {
-			Vec3i pos = data.getVec3i("pos");
+		if (pos != null) {
 			TileRailPreview tile = this.getWorld().getBlockEntity(pos, TileRailPreview.class);
-			ItemStack stack = tile.getItem();
-			ItemTrackBlueprint.settings(stack, settings);
-			tile.setItem(stack);
+			settings.write(tile.getItem());
 		} else {
 			Player player = this.getPlayer();
 			ItemStack stack = player.getHeldItem(Hand.PRIMARY);
-			ItemTrackBlueprint.settings(stack, settings);
+			settings.write(stack);
 			player.setHeldItem(Hand.PRIMARY, stack);
 		}
 	}

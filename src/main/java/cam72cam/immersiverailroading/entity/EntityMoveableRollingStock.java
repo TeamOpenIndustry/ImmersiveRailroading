@@ -18,7 +18,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 import java.util.ArrayList;
 import java.util.List;

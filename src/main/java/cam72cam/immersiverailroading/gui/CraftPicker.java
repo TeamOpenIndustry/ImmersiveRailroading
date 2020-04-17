@@ -1,13 +1,11 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemRollingStock;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemTabs;
-import cam72cam.immersiverailroading.items.nbt.ItemComponent;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.gui.IScreenBuilder;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.Fuzzy;
@@ -42,9 +40,9 @@ public class CraftPicker {
 
 		List<ItemStack> toRemove = new ArrayList<ItemStack>();
 		for (ItemStack item : items) {
-			ItemComponentType comp = ItemComponent.getComponentType(item);
-			EntityRollingStockDefinition def = ItemDefinition.get(item);
-			if (comp.isWooden(def)) {
+			ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(item);
+			ItemComponentType comp = data.componentType;
+			if (comp.isWooden(data.def)) {
 				toRemove.add(item);
 				continue;
 			}
@@ -111,7 +109,7 @@ public class CraftPicker {
     	if (!item.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
     		return false;
     	}
-    	return ItemDefinition.getID(item).equals(ItemDefinition.getID(stock));
+    	return new ItemRollingStockComponent.Data(item).def == new ItemRollingStock.Data(stock).def;
     }
 	
 	private void setupItemSelector() {

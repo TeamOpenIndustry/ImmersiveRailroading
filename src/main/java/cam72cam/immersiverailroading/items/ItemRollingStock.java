@@ -5,9 +5,6 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -39,8 +36,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	public List<ItemStack> getItemVariants(CreativeTab tab)
     {
 		List<ItemStack> items = new ArrayList<>();
-    	for (String defID : DefinitionManager.getDefinitionNames()) {
-    		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+    	for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
     		if (tab != null) {
 	    		if (def instanceof CarPassengerDefinition) {
 	    			if (!tab.equals(ItemTabs.PASSENGER_TAB)) {
@@ -57,7 +53,9 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	    		}
     		}
     		ItemStack stack = new ItemStack(this, 1);
-    		ItemDefinition.setID(stack, defID);
+    		Data data = new Data(stack);
+    		data.def = def;
+    		data.write();
     		applyCustomName(stack);
             /*if (def.textureNames.size() > 1) {
             	for (String texture : def.textureNames.keySet()) {
@@ -77,13 +75,16 @@ public class ItemRollingStock extends BaseItemRollingStock {
     public List<String> getTooltip(ItemStack stack)
     {
     	List<String> tooltip = new ArrayList<>();
-		Gauge gauge = ItemGauge.get(stack);
-        EntityRollingStockDefinition def = ItemDefinition.get(stack);
+
+    	Data data = new Data(stack);
+
+		Gauge gauge = data.gauge;
+        EntityRollingStockDefinition def = data.def;
         if (def != null) {
         	tooltip.addAll(def.getTooltip(gauge));
         }
         tooltip.add(GuiText.GAUGE_TOOLTIP.toString(gauge));
-        String texture = ItemTextureVariant.get(stack);
+        String texture = data.texture;
         if (texture != null && def != null && def.textureNames.get(texture) != null) {
 	        tooltip.add(GuiText.TEXTURE_TOOLTIP.toString(def.textureNames.get(texture)));
         }
@@ -103,9 +104,10 @@ public class ItemRollingStock extends BaseItemRollingStock {
 				case ITEM_LOADER:
 				case ITEM_UNLOADER:
 					if (world.isServer) {
-						boolean set = te.setAugmentFilter(ItemDefinition.getID(player.getHeldItem(hand)));
+						Data data = new Data(player.getHeldItem(hand));
+						boolean set = te.setAugmentFilter(data.def != null ? data.def.defID : null);
 						if (set) {
-							player.sendMessage(ChatText.SET_AUGMENT_FILTER.getMessage(ItemDefinition.get(player.getHeldItem(hand)).name()));
+							player.sendMessage(ChatText.SET_AUGMENT_FILTER.getMessage(data.def != null ? data.def.name() : "Unknown"));
 						} else {
 							player.sendMessage(ChatText.RESET_AUGMENT_FILTER.getMessage());
 						}
@@ -122,5 +124,11 @@ public class ItemRollingStock extends BaseItemRollingStock {
 	@Override
 	public boolean isValidArmor(ItemStack stack, ArmorSlot armorType, Entity entity) {
 		return armorType == ArmorSlot.HEAD && ConfigGraphics.trainsOnTheBrain;
+	}
+
+	public static class Data extends BaseItemRollingStock.Data {
+		public Data(ItemStack stack) {
+			super(stack);
+		}
 	}
 }

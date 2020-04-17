@@ -6,23 +6,26 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.serialization.TagField;
 
 public class MultiblockSelectCraftPacket extends Packet {
-	public MultiblockSelectCraftPacket() {
-		// Forge Reflection
-	}
+	@TagField
+	private Vec3i pos;
+	@TagField
+	private ItemStack stack;
+	@TagField
+	private CraftingMachineMode mode;
+
+	public MultiblockSelectCraftPacket() { }
+
 	public MultiblockSelectCraftPacket(Vec3i tilePreviewPos, ItemStack selected, CraftingMachineMode mode) {
-		data.setVec3i("pos", tilePreviewPos);
-		data.setStack("stack", selected);
-		data.setEnum("mode", mode);
+		this.pos = tilePreviewPos;
+		this.stack = selected;
+		this.mode = mode;
 	}
 
 	@Override
 	public void handle() {
-		Vec3i pos = data.getVec3i("pos");
-		ItemStack stack = data.getStack("stack");
-		CraftingMachineMode mode = data.getEnum("mode", CraftingMachineMode.class);
-
 		TileMultiblock tile = getWorld().getBlockEntity(pos, TileMultiblock.class);
 		if (tile == null) {
 			ImmersiveRailroading.warn("Got invalid craft update packet at %s", pos);

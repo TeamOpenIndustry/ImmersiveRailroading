@@ -1,14 +1,13 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 public class PlacementInfo {
 	public final Vec3d placementPosition; // relative
@@ -31,7 +30,7 @@ public class PlacementInfo {
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
 
-		RailSettings settings = ItemTrackBlueprint.settings(stack);
+		RailSettings settings = RailSettings.from(stack);
 		TrackDirection direction = settings.direction;
 		if (direction == TrackDirection.NONE) {
 			direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
@@ -119,10 +118,7 @@ public class PlacementInfo {
 			}
 			this.yaw = facingAngle + rotAngle;
 		}
-		if (nbt.hasKey("magnitude")) {
-			// TODO: LEGACY REMOVE in 1.6
-			this.control = placementPosition.add(VecUtil.fromYaw(nbt.getDouble("magnitude"), yaw));
-		} else if (nbt.hasKey("control")) {
+		if (nbt.hasKey("control")) {
 			this.control = nbt.getVec3d("control").add(offset);
 		} else {
 			this.control = null;

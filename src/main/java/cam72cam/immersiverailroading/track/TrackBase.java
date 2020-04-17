@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 public abstract class TrackBase {
 	public BuilderBase builder;

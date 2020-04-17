@@ -13,7 +13,7 @@ import cam72cam.mod.item.ItemStackHandler;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 import java.util.List;
 

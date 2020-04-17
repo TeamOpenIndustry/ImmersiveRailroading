@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import java.util.List;
 
-import cam72cam.immersiverailroading.items.nbt.ItemTrackExchangerType;
+import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.net.ItemTrackExchangerUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -21,9 +21,7 @@ public class TrackExchangerGui implements IScreen {
 	public TrackExchangerGui () {
 		Player player = MinecraftClient.getPlayer();
 		
-		String track = ItemTrackExchangerType.get(player.getHeldItem(Hand.PRIMARY));
-		if (track != null) this.track = track;
-		else this.track = DefinitionManager.getTrack("").name;
+		this.track = new ItemTrackExchanger.Data(player.getHeldItem(Hand.PRIMARY)).track;
 	}
 
 	@Override

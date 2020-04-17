@@ -2,10 +2,8 @@ package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.nbt.ItemComponent;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
+import cam72cam.immersiverailroading.items.ItemPlate;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -88,7 +86,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 
 						craftTe.getContainer().set(1, ItemStack.EMPTY);
 					}
-				} else if (held.is(IRItems.ITEM_PLATE) && ItemPlateType.get(held) == PlateType.BOILER) {
+				} else if (held.is(IRItems.ITEM_PLATE) && new ItemPlate.Data(held).type == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
 					if (craftTe == null) {
 						return false;
@@ -150,13 +148,13 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			float progress = craftTe.getCraftProgress();
 			
-			cam72cam.mod.item.ItemStack input = craftTe.getContainer().get(0);
-			cam72cam.mod.item.ItemStack output = craftTe.getContainer().get(1);
+			ItemStack input = craftTe.getContainer().get(0);
+			ItemStack output = craftTe.getContainer().get(1);
 			
 			
 			if (progress == 0) {
 				// Try to start crafting
-				if (input.is(IRItems.ITEM_PLATE) && ItemPlateType.get(input) == PlateType.BOILER && output.isEmpty()) {
+				if (input.is(IRItems.ITEM_PLATE) && new ItemPlate.Data(input).type == PlateType.BOILER && output.isEmpty()) {
 					progress = 100;
 					craftTe.setCraftProgress(100);
 				}
@@ -164,10 +162,13 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				cam72cam.mod.item.ItemStack out = new cam72cam.mod.item.ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
-				ItemGauge.set(out, ItemGauge.get(input));
-				ItemDefinition.setID(out, ItemDefinition.getID(input));
-				ItemComponent.setComponentType(out, ItemComponentType.BOILER_SEGMENT);
+				ItemStack out = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
+				ItemPlate.Data source = new ItemPlate.Data(input);
+				ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(out);
+				data.def = source.def;
+				data.gauge = source.gauge;
+				data.componentType = ItemComponentType.BOILER_SEGMENT;
+				data.write();
 				craftTe.getContainer().set(1, out);
 				input.shrink(1);
 				craftTe.getContainer().set(0, input);

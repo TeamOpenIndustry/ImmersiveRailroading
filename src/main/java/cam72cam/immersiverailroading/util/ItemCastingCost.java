@@ -1,10 +1,9 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.nbt.ItemComponent;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.items.ItemCastRail;
+import cam72cam.immersiverailroading.items.ItemRailAugment;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 
@@ -15,12 +14,12 @@ public class ItemCastingCost {
 		int cost = BAD_CAST_COST;
 		int count = 1;
 		if (item.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
-			ItemComponentType component = ItemComponent.getComponentType(item);
-			cost = component.getCastCost(ItemDefinition.get(item), ItemGauge.get(item));
+			ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(item);
+			cost = data.componentType.getCastCost(data.def, data.gauge);
 		} else if (item.is(IRItems.ITEM_CAST_RAIL)) {
-			cost = (int) Math.ceil(20 * ItemGauge.get(item).scale());
+			cost = (int) Math.ceil(20 * new ItemCastRail.Data(item).gauge.scale());
 		} else if (item.is(IRItems.ITEM_AUGMENT)) {
-			cost = (int) Math.ceil(8 * ItemGauge.get(item).scale());
+			cost = (int) Math.ceil(8 * new ItemRailAugment.Data(item).gauge.scale());
 			count = 8;
 		} else if (Fuzzy.STEEL_BLOCK.matches(item)) {
 			cost = 9;

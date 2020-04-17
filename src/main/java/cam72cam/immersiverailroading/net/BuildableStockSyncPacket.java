@@ -3,24 +3,30 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.serialization.TagField;
+
+import java.util.List;
 
 /*
  * Movable rolling stock sync packet
  */
 public class BuildableStockSyncPacket extends Packet {
-	public BuildableStockSyncPacket() {
-	}
+	@TagField
+	private EntityBuildableRollingStock stock;
+	@TagField(typeHint = ItemComponentType.class)
+	private List<ItemComponentType> items;
+
+	public BuildableStockSyncPacket() { }
 
 	public BuildableStockSyncPacket(EntityBuildableRollingStock stock) {
-		this.data.setEntity("entity", stock);
-		this.data.setEnumList("items", stock.getItemComponents());
+		this.stock = stock;
+		this.items = stock.getItemComponents();
 	}
 
 	@Override
 	public void handle() {
-		EntityBuildableRollingStock stock = data.getEntity("entity", getWorld(), EntityBuildableRollingStock.class);
 		if (stock != null) {
-			stock.setComponents(data.getEnumList("items", ItemComponentType.class));
+			stock.setComponents(items);
 		}
 	}
 }

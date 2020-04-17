@@ -2,9 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -44,7 +42,7 @@ public class CastingGUI implements IScreen {
 		this.tile = te;
 		currentItem = ((CastingInstance) te.getMultiblock()).getCraftItem();
 		
-		gauge = ItemGauge.get(currentItem);
+		gauge = new ItemRollingStockComponent.Data(currentItem).gauge;
 	}
 	
 	private void updatePickerButton() {
@@ -63,7 +61,7 @@ public class CastingGUI implements IScreen {
 				CraftPicker.showCraftPicker(screen, currentItem, CraftingType.CASTING, (ItemStack item) -> {
 					if (item != null) {
 						currentItem = item;
-						EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+						EntityRollingStockDefinition def = new ItemRollingStockComponent.Data(currentItem).def;
 						if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
 							gauge = def.recommended_gauge;
 							gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
@@ -80,7 +78,7 @@ public class CastingGUI implements IScreen {
 			@Override
 			public void onClick(Hand hand) {
 				if(!currentItem.isEmpty()) {
-					EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+					EntityRollingStockDefinition def = new ItemRollingStockComponent.Data(currentItem).def;
 					if (def != null && ConfigBalance.DesignGaugeLock) {
 						List<Gauge> validGauges = CollectionUtil.listOf(Gauge.from(def.recommended_gauge.value()));
 						gauge = gauge.next(validGauges);
@@ -157,8 +155,10 @@ public class CastingGUI implements IScreen {
 		currentItem.setCount(1);
 
         if (currentItem.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT) || currentItem.is(IRItems.ITEM_CAST_RAIL) || currentItem.is(IRItems.ITEM_AUGMENT)) {
-			ItemGauge.set(currentItem, gauge);
-			ItemRawCast.set(currentItem, true);
+			ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(currentItem);
+			data.gauge = gauge;
+			data.rawCast = true;
+			data.write();
 		} else {
         	currentItem.clearTagCompound();
 		}

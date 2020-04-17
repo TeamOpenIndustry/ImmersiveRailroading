@@ -2,9 +2,8 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
+import cam72cam.immersiverailroading.items.ItemPlate;
+import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -38,13 +37,14 @@ public class PlateRollerGUI implements IScreen {
 		if (currentItem == null || currentItem.isEmpty()) {
 			currentItem = new ItemStack(IRItems.ITEM_PLATE, 1);
 		}
-		
-		gauge = ItemGauge.get(currentItem);
-		plate = ItemPlateType.get(currentItem);
+
+		ItemPlate.Data data = new ItemPlate.Data(currentItem);
+		gauge = data.gauge;
+		plate = data.type;
 	}
 	
 	private void updatePickerButton() {
-		EntityRollingStockDefinition def = ItemDefinition.get(currentItem.copy());
+		EntityRollingStockDefinition def = new ItemPlate.Data(currentItem.copy()).def;
 		if (def != null) {
 			pickerButton.setText(GuiText.SELECTOR_PLATE_BOILER.toString(def.name()));
 		}
@@ -56,7 +56,7 @@ public class PlateRollerGUI implements IScreen {
 			@Override
 			public void onClick(Hand hand) {
 				if(!currentItem.isEmpty()) {
-					EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+					EntityRollingStockDefinition def = new ItemPlate.Data(currentItem).def;
 					if (def != null && plate == PlateType.BOILER && ConfigBalance.DesignGaugeLock) {
 						List<Gauge> validGauges = CollectionUtil.listOf(Gauge.from(def.recommended_gauge.value()));
 						gauge = gauge.next(validGauges);
@@ -84,13 +84,15 @@ public class PlateRollerGUI implements IScreen {
 			public void onClick(Hand hand) {
 				CraftPicker.showCraftPicker(screen, null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
 					if (item != null) {
-						String defID = ItemDefinition.getID(item);
-						ItemDefinition.setID(currentItem, defID);
-						EntityRollingStockDefinition def = ItemDefinition.get(currentItem);
+						ItemRollingStock.Data rs = new ItemRollingStock.Data(item);
+						ItemPlate.Data data = new ItemPlate.Data(currentItem);
+						data.def = rs.def;
+						EntityRollingStockDefinition def = rs.def;
 						if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
 							gauge = def.recommended_gauge;
 							gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
 						}
+						data.write();
 						updatePickerButton();
 						sendPacket();
 					}
@@ -118,8 +120,10 @@ public class PlateRollerGUI implements IScreen {
 	}
 
 	private void sendPacket() {
-		ItemGauge.set(currentItem, gauge);
-		ItemPlateType.set(currentItem, plate);
+		ItemPlate.Data data = new ItemPlate.Data(currentItem);
+		data.gauge = gauge;
+		data.type = plate;
+		data.write();
     	switch (plate) {
 		case BOILER:
 			currentItem.setCount(1);

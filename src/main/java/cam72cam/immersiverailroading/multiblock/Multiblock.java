@@ -186,6 +186,11 @@ public abstract class Multiblock {
 	}
 	
 	protected abstract MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot);
+
+	public String getName() {
+		return name;
+	}
+
 	public abstract class MultiblockInstance {
 		protected final World world;
 		protected final Vec3i origin;

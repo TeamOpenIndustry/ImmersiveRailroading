@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.items.nbt.ItemPlateType;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
@@ -16,6 +13,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.TextColor;
 import cam72cam.mod.util.CollectionUtil;
 
@@ -31,18 +29,22 @@ public class ItemPlate extends ItemBase {
         {
         	for (PlateType plate : PlateType.values()) {
         		ItemStack stack = new ItemStack(this, 1);
-        		ItemPlateType.set(stack, plate);
-        		ItemGauge.set(stack, Gauge.from(Gauge.STANDARD));
-        		
         		if (plate != PlateType.BOILER) {
-        			applyCustomName(stack);
+					Data data = new Data(stack);
+					data.type = plate;
+					data.gauge = Gauge.from(Gauge.STANDARD);
+					data.write();
+					applyCustomName(stack);
 	                items.add(stack);
         		} else {
-		        	for (String defID : DefinitionManager.getDefinitionNames()) {
-		        		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+		        	for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
 		        		if (def.getItemComponents().contains(ItemComponentType.BOILER_SEGMENT) ) {
 			        		stack = stack.copy();
-			        		ItemDefinition.setID(stack, defID);
+							Data data = new Data(stack);
+							data.type = plate;
+							data.gauge = Gauge.from(Gauge.STANDARD);
+							data.def = def;
+							data.write();
 							applyCustomName(stack);
 			                items.add(stack);
 		        		}
@@ -55,14 +57,13 @@ public class ItemPlate extends ItemBase {
 	
 	@Override
     public String getCustomName(ItemStack stack) {
-		PlateType plate = ItemPlateType.get(stack);
-		if (plate == PlateType.BOILER) {
-			EntityRollingStockDefinition def = ItemDefinition.get(stack);
-			if (def != null) {
-				return TextColor.RESET.wrap(plate.toString() + " " + def.name());
+		Data data = new Data(stack);
+		if (data.type == PlateType.BOILER) {
+			if (data.def != null) {
+				return TextColor.RESET.wrap(data.type.toString() + " " + data.def.name());
 			}
 		} else {
-			return TextColor.RESET.wrap(plate.toString());
+			return TextColor.RESET.wrap(data.type.toString());
 		}
 		return null;
 	}
@@ -70,7 +71,29 @@ public class ItemPlate extends ItemBase {
 	@Override
 	public List<String> getTooltip(ItemStack stack)
     {
-    	return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
+    	return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(new Data(stack).gauge));
     }
+
+    public static class Data extends ItemData {
+		@TagField("plate")
+		public PlateType type;
+
+		@TagField("defID")
+		public EntityRollingStockDefinition def;
+
+		@TagField("gauge")
+		public Gauge gauge;
+
+		public Data(ItemStack stack) {
+			super(stack);
+
+			if (gauge == null) {
+				gauge = def != null ? def.recommended_gauge : Gauge.from(Gauge.STANDARD);
+			}
+			if (type == null) {
+				type = PlateType.SMALL;
+			}
+		}
+	}
 }
 

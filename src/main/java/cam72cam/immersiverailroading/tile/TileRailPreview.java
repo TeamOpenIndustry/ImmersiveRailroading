@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
@@ -14,16 +13,20 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
 	private RailInfo info;
 
+	@TagField
 	private ItemStack item;
+	@TagField
 	private PlacementInfo placementInfo;
+	@TagField
 	private PlacementInfo customInfo;
 
 	public ItemStack getItem() {
@@ -44,7 +47,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setCustomInfo(PlacementInfo info) {
 		this.customInfo = info;
 		if (customInfo != null) {
-			RailSettings settings = ItemTrackBlueprint.settings(item);
+			RailSettings settings = RailSettings.from(item);
 			double lx = Math.abs(customInfo.placementPosition.x - placementInfo.placementPosition.x);
 			double lz = Math.abs(customInfo.placementPosition.z - placementInfo.placementPosition.z);
 			double length;
@@ -60,7 +63,7 @@ public class TileRailPreview extends BlockEntityTickable {
 					settings = settings.withLength((int) Math.round(length));
 			}
 
-			ItemTrackBlueprint.settings(item, settings);
+			settings.write(item);
 		}
 		this.markDirty();
 	}
@@ -73,14 +76,6 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public void load(TagCompound nbt) {
 		item = new ItemStack(nbt.get("item"));
-		//TODO nbt legacy
-		/*
-		yawHead = nbt.getFloat("yawHead");
-		hitX = nbt.getFloat("hitX");
-		hitY = nbt.getFloat("hitY");
-		hitZ = nbt.getFloat("hitZ");
-		 */
-		
 		placementInfo = new PlacementInfo(nbt.get("placementInfo"));
 		if (nbt.hasKey("customInfo")) {
 			customInfo = new PlacementInfo(nbt.get("customInfo"));

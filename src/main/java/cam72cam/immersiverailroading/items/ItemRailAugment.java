@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
@@ -36,13 +35,13 @@ public class ItemRailAugment extends ItemBase {
 			TileRailBase te = world.getBlockEntity(pos, TileRailBase.class);
 			if (te != null) {
 				ItemStack stack = player.getHeldItem(hand);
-				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == ItemGauge.get(stack))) {
-					Augment augment = ItemAugmentType.get(stack);
+				Data data = new Data(stack);
+				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == data.gauge)) {
 					TileRail parent = te.getParentTile();
 					if (parent == null) {
 						return ClickResult.REJECTED;
 					}
-					switch(augment) {
+					switch(data.augment) {
 					case WATER_TROUGH:
 						return ClickResult.REJECTED;
 						/*
@@ -67,9 +66,9 @@ public class ItemRailAugment extends ItemBase {
 					}
 
 					if(world.isServer) {
-						te.setAugment(augment);
+						te.setAugment(data.augment);
 						if (!player.isCreative()) {
-							stack.setCount(stack.getCount()-1);;
+							stack.setCount(stack.getCount()-1);
 						}
 					}
 					return ClickResult.ACCEPTED;
@@ -90,7 +89,9 @@ public class ItemRailAugment extends ItemBase {
         			continue;
         		}
         		ItemStack stack = new ItemStack(this, 1);
-        		ItemAugmentType.set(stack, augment);
+				Data data = new Data(stack);
+				data.augment = augment;
+				data.write();
         		applyCustomName(stack);
                 items.add(stack);
         	}
@@ -101,11 +102,28 @@ public class ItemRailAugment extends ItemBase {
 	@Override
 	public List<String> getTooltip(ItemStack stack)
     {
-        return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(ItemGauge.get(stack)));
+        return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(new Data(stack).gauge));
     }
 
 	@Override
 	public String getCustomName(ItemStack stack) {
-		return TextUtil.translate("item.immersiverailroading:item_augment." + ItemAugmentType.get(stack).name() + ".name");
+		return TextUtil.translate("item.immersiverailroading:item_augment." + new Data(stack).augment.name() + ".name");
+	}
+
+	public static class Data extends ItemData {
+		@TagField("gauge")
+		public Gauge gauge;
+		@TagField("augment")
+		public Augment augment;
+
+		public Data(ItemStack stack) {
+			super(stack);
+			if (gauge == null) {
+				gauge = Gauge.from(Gauge.STANDARD);
+			}
+			if (augment == null) {
+				augment = Augment.SPEED_RETARDER;
+			}
+		}
 	}
 }

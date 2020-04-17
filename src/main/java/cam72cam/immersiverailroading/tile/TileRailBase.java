@@ -8,8 +8,8 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.items.nbt.ItemTrackExchangerType;
+import cam72cam.immersiverailroading.items.ItemTrackExchanger;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
@@ -26,7 +26,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -852,8 +852,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER)) {
 			TileRail tileRail = this.getParentTile();
-			String track = ItemTrackExchangerType.get(stack);
-			if (track != null && !track.equals(tileRail.info.settings.track)) {
+			String track = new ItemTrackExchanger.Data(stack).track;
+			if (!track.equals(tileRail.info.settings.track)) {
 				if (!player.isCreative()) {
 					RailInfo info = tileRail.info.withTrack(track);
 					if (info.build(player, false)) { //cancel if player doesn't have all required items
@@ -917,7 +917,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (parent == null) {
 			return stack;
 		}
-		ItemTrackBlueprint.settings(stack, parent.info.settings);
+		parent.info.settings.write(stack);
 		return stack;
 	}
 

@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.items.nbt.ItemRawCast;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.entity.Player;
@@ -126,11 +126,10 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			ItemStack input = container.get(0);
 			ItemStack output = container.get(1);
-			
-			
+
 			if (progress == 0) {
 				// Try to start crafting
-				if (!input.isEmpty() && ItemRawCast.get(input) && output.isEmpty()) {
+				if (!input.isEmpty() && new ItemRollingStockComponent.Data(input).rawCast && output.isEmpty()) {
 					te.setCraftProgress(100);
 				}
 			}
@@ -139,17 +138,19 @@ public class SteamHammerMultiblock extends Multiblock {
 				// Stop crafting
 				ItemStack out = input.copy();
 				out.setCount(1);
-				ItemRawCast.set(out, false);
+				ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(out);
+				data.rawCast = false;
+				data.write();
 				container.set(1, out);
 				input.shrink(1);
-				container.set(0, input);;
+				container.set(0, input);
 				progress = 100;
 			}
 		}
 
 		@Override
 		public boolean canInsertItem(Vec3i offset, int slot, ItemStack stack) {
-			return slot == 0 && ItemRawCast.get(stack);
+			return slot == 0 && new ItemRollingStockComponent.Data(stack).rawCast;
 		}
 
 		@Override

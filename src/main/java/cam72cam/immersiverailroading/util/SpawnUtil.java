@@ -4,8 +4,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
+import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
@@ -26,6 +25,8 @@ import cam72cam.mod.util.Hand;
 
 public class SpawnUtil {
 	public static ClickResult placeStock(Player player, Hand hand, World worldIn, Vec3i pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
+		ItemRollingStock.Data data = new ItemRollingStock.Data(player.getHeldItem(hand));
+
 		ITrack initte = ITrack.get(worldIn, new Vec3d(pos).add(0, 0.7, 0), true);
 		if (initte == null) {
 			return ClickResult.REJECTED;
@@ -34,7 +35,7 @@ public class SpawnUtil {
 		Gauge gauge = Gauge.from(trackGauge);
 		
 		
-		if (!player.isCreative() && gauge != ItemGauge.get(player.getHeldItem(hand))) {
+		if (!player.isCreative() && gauge != data.gauge) {
 			player.sendMessage(ChatText.STOCK_WRONG_GAUGE.getMessage());
 			return ClickResult.REJECTED;
 		}
@@ -45,8 +46,7 @@ public class SpawnUtil {
 		
 		if (!tp.isOffTrack) {
 			if (worldIn.isServer) {
-				String texture = ItemTextureVariant.get(player.getHeldItem(hand));
-				EntityRollingStock stock = def.spawn(worldIn, tp.position, player.getYawHead(), gauge, texture);
+				EntityRollingStock stock = def.spawn(worldIn, tp.position, player.getYawHead(), gauge, data.texture);
 				
 				if (stock instanceof EntityBuildableRollingStock) {
 					((EntityBuildableRollingStock)stock).setComponents(list);

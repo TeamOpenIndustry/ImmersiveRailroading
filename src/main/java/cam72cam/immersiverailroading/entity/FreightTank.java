@@ -9,7 +9,7 @@ import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;

@@ -2,8 +2,6 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.nbt.ItemAugmentType;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -39,8 +37,10 @@ public class ItemLargeWrench extends ItemBase {
 
 					if(world.isServer) {
 						ItemStack stack = new ItemStack(IRItems.ITEM_AUGMENT, 1);
-						ItemAugmentType.set(stack, augment);
-						ItemGauge.set(stack, Gauge.from(te.getTrackGauge()));
+						ItemRailAugment.Data data = new ItemRailAugment.Data(stack);
+						data.augment = augment;
+						data.gauge = Gauge.from(te.getTrackGauge());
+						data.write();
 						world.dropItem(stack, pos);
 					}
 					return ClickResult.ACCEPTED;

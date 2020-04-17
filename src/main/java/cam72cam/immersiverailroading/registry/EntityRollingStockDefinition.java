@@ -15,6 +15,8 @@ import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
 import com.google.gson.JsonElement;
@@ -29,6 +31,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+@TagMapped(EntityRollingStockDefinition.TagMapper.class)
 public abstract class EntityRollingStockDefinition {
     private static Identifier default_wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
     private static Identifier default_clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
@@ -552,5 +555,15 @@ public abstract class EntityRollingStockDefinition {
 
     public void clearModel() {
         this.model = null;
+    }
+
+    static class TagMapper implements cam72cam.mod.serialization.TagMapper<EntityRollingStockDefinition> {
+        @Override
+        public TagAccessor<EntityRollingStockDefinition> apply(Class<EntityRollingStockDefinition> type, String fieldName, TagField tag) {
+            return new TagAccessor<>(
+                    (d, o) -> d.setString(fieldName, o == null ? null : o.defID),
+                    d -> DefinitionManager.getDefinition(d.getString(fieldName))
+            );
+        }
     }
 }

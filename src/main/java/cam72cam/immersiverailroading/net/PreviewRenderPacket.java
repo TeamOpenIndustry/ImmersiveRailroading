@@ -4,32 +4,32 @@ import cam72cam.immersiverailroading.render.tile.MultiPreviewRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 
-/*
- * Movable rolling stock sync packet
- */
 public class PreviewRenderPacket extends Packet {
+	@TagField
+	private TileRailPreview preview;
+	@TagField
+	private World world;
+	@TagField
+	private Vec3i removed;
 
-	public PreviewRenderPacket() {
-		// Forge Reflection
-	}
+	public PreviewRenderPacket() { }
 	public PreviewRenderPacket(TileRailPreview preview) {
-		data.setTile("preview", preview);
+		this.preview = preview;
 	}
 	public PreviewRenderPacket(World world, Vec3i removed) {
-		data.setVec3i("removed", removed);
-		data.setWorld("world", world);
+		this.world = world;
+		this.removed = removed;
 	}
 
 	@Override
 	public void handle() {
-		if (data.hasKey("removed")) {
-			MultiPreviewRender.remove(data.getWorld("world", true), data.getVec3i("removed"));
+		if (removed != null) {
+			MultiPreviewRender.remove(world, removed);
+			return;
 		}
-
-
-		TileRailPreview preview = data.getTile("preview", true);
 
 		if (preview == null || preview.world != getPlayer().getWorld()) {
 			return;

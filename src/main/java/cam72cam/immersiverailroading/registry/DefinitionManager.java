@@ -288,8 +288,8 @@ public class DefinitionManager {
         return definitions.keySet();
     }
 
-    public static Collection<TrackDefinition> getTracks() {
-        return tracks.values();
+    public static List<TrackDefinition> getTracks() {
+        return new ArrayList<>(tracks.values());
     }
 
     public static List<String> getTrackIDs() {

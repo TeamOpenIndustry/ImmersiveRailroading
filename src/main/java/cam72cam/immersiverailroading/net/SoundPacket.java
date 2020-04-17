@@ -8,29 +8,29 @@ import cam72cam.mod.net.Packet;
 import cam72cam.mod.resource.Identifier;
 
 public class SoundPacket extends Packet {
-	public SoundPacket() {
-		// Forge Reflection
-	}
+	private String file;
+	private Vec3d pos;
+	private Vec3d motion;
+	private float volume;
+	private float pitch;
+	private int distance;
+	private double gauge;
+
+	public SoundPacket() { }
 	public SoundPacket(String soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, Gauge gauge) {
-		data.setString("file", soundfile);
-		data.setVec3d("pos", pos);
-		data.setVec3d("motion", motion);
-		data.setFloat("volume", volume);
-		data.setFloat("pitch", pitch);
-		data.setInteger("distance", distance);
-		data.setDouble("gauge", gauge.value());
+		this.file = soundfile;
+		this.pos = pos;
+		this.motion = motion;
+		this.volume = volume;
+		this.pitch = pitch;
+		this.distance = distance;
+		this.gauge = gauge.value();
 	}
 
 	@Override
 	public void handle() {
-		String soundfile = data.getString("file");
-		Vec3d pos = data.getVec3d("pos");
-		Vec3d motion = data.getVec3d("motion");
-		float volume = data.getFloat("volume");
-		float pitch = data.getFloat("pitch");
-		int distance = data.getInteger("distance");
-		Gauge gauge = Gauge.from(data.getDouble("gauge"));
-		ISound snd = ImmersiveRailroading.newSound(new Identifier(soundfile), false, distance, gauge);
+		Gauge gauge = Gauge.from(this.gauge);
+		ISound snd = ImmersiveRailroading.newSound(new Identifier(file), false, distance, gauge);
 		snd.setVelocity(motion);
 		snd.setVolume(volume);
 		snd.setPitch(pitch);

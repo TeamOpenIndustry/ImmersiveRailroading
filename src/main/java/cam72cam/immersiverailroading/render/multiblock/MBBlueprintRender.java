@@ -1,8 +1,7 @@
 package cam72cam.immersiverailroading.render.multiblock;
 
-import cam72cam.immersiverailroading.items.nbt.ItemMultiblockType;
+import cam72cam.immersiverailroading.items.ItemManual;
 import cam72cam.immersiverailroading.multiblock.Multiblock;
-import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -15,12 +14,7 @@ import org.lwjgl.opengl.GL11;
 import java.util.Map;
 
 public class MBBlueprintRender {
-	public static void draw(String name) {
-		Multiblock mb = MultiblockRegistry.get(name);
-		if (mb == null) {
-			// Some wrappers (Akashic Tome) remove the metadata
-			return;
-		}
+	public static void draw(Multiblock mb) {
 		float scale = 0.8f;
 		Map<Vec3i, ItemStack> bp = mb.blueprint();
         StandardModel model = new StandardModel();
@@ -52,7 +46,7 @@ public class MBBlueprintRender {
 
             GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
 
-            MBBlueprintRender.draw(ItemMultiblockType.get(stack));
+            MBBlueprintRender.draw(new ItemManual.Data(stack).multiblock);
 
             transparency.restore();
         }

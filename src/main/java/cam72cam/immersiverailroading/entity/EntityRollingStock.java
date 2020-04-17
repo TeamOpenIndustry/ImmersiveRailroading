@@ -12,7 +12,7 @@ import cam72cam.mod.entity.*;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 import com.google.gson.JsonObject;
 
 import java.lang.reflect.InvocationTargetException;

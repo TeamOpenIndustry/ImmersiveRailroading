@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.render.item;
 
-import cam72cam.immersiverailroading.items.nbt.ItemDefinition;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
-import cam72cam.immersiverailroading.items.nbt.ItemTextureVariant;
+import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.entity.StockModel;
@@ -22,14 +19,14 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 	}
 
 	private void render(ItemStack stack) {
-		double scale = ItemGauge.get(stack).scale();
-		String defID = ItemDefinition.getID(stack);
-		StockModel model = StockRenderCache.getRender(defID);
+		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
+
+		double scale = data.gauge.scale();
+		StockModel model = StockRenderCache.getRender(data.def.defID);
 		if (model == null) {
 			stack.setCount(0);
 			return;
 		}
-		String texture = ItemTextureVariant.get(stack);
 
         GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
         GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
@@ -40,7 +37,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			GL11.glRotated(-90, 0, 1, 0);
 			scale = 0.2 * Math.sqrt(scale);
 			GL11.glScaled(scale, scale, scale);
-			model.bindTexture(texture, true);
+			model.bindTexture(data.texture, true);
 			model.draw();
 			model.restoreTexture();
 		}
@@ -52,21 +49,21 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 
 	@Override
 	public String getSpriteKey(ItemStack stack) {
-		String defID = ItemDefinition.getID(stack);
-		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
-		if (def == null) {
+		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
+		if (data.def == null) {
 			// Stock pack removed
+			System.out.println(stack.getTagCompound());
 			return null;
 		}
-		return defID + (def.getModel().hash + StockRenderCache.getRender(defID).textures.get(null).hash);
+		return data.def.defID + (data.def.getModel().hash + StockRenderCache.getRender(data.def.defID).textures.get(null).hash);
 	}
 
 	@Override
 	public StandardModel getSpriteModel(ItemStack stack) {
-		String defID = ItemDefinition.getID(stack);
-		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
+		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
+		EntityRollingStockDefinition def = data.def;
 		// We want to upload the model even if the sprite is cached
-		StockModel model = StockRenderCache.getRender(defID);
+		StockModel model = StockRenderCache.getRender(def.defID);
 
 		return new StandardModel().addCustom(() -> {
 			GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);

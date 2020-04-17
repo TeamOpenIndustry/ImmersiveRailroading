@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.TrackModel;
@@ -14,7 +14,7 @@ import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 import java.util.*;
 import java.util.function.Function;
@@ -87,7 +87,7 @@ public class RailInfo {
 	}
 
 	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(world, ItemTrackBlueprint.settings(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+		this(world, RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
 	public RailInfo(World world, Vec3i pos, TagCompound nbt) {
@@ -190,7 +190,7 @@ public class RailInfo {
 			int found = 0;
 			for (int i = 0; i < player.getInventory().getSlotCount(); i++) {
 				ItemStack stack = player.getInventory().get(i);
-				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+				if (material.apply(stack) && (!stack.is(IRItems.ITEM_RAIL) || new ItemRail.Data(stack).gauge == settings.gauge)) {
 					found += stack.getCount();
 				}
 			}
@@ -212,7 +212,7 @@ public class RailInfo {
 			int required = this.count;
 			for (int i = 0; i < player.getInventory().getSlotCount(); i++) {
 				ItemStack stack = player.getInventory().get(i);
-				if (material.apply(stack) && (!ItemGauge.has(stack) || ItemGauge.get(stack) == settings.gauge)) {
+				if (material.apply(stack) && (!stack.is(IRItems.ITEM_RAIL) || new ItemRail.Data(stack).gauge == settings.gauge)) {
 					if (required > stack.getCount()) {
 						required -= stack.getCount();
 						ItemStack copy = stack.copy();

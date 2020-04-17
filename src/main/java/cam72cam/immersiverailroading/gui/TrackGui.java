@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -74,7 +73,7 @@ public class TrackGui implements IScreen {
 
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
-		RailSettings settings = ItemTrackBlueprint.settings(stack);
+		RailSettings settings = RailSettings.from(stack);
 		length = settings.length;
 		degrees = settings.degrees;
 		type = settings.type;
@@ -246,7 +245,7 @@ public class TrackGui implements IScreen {
 		// This could be more efficient...
 		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
-		ItemTrackBlueprint.settings(stack, settings);
+		settings.write(stack);
 		GL11.glPushMatrix();
 		GL11.glTranslated(GUIHelpers.getScreenWidth()/2 + builder.getWidth()/4,  builder.getHeight() / 4, 0);
 		GL11.glScaled(scale, scale, 1);

@@ -1,21 +1,34 @@
 package cam72cam.immersiverailroading.items.nbt;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.*;
 
 public class RailSettings {
+    @TagField(value = "gauge")
     public final Gauge gauge;
+    @TagField("type")
     public final TrackItems type;
+    @TagField("length")
     public final int length;
+    @TagField(value = "degrees", mapper = DegreesMapper.class)
     public final float degrees;
+    @TagField("pos_type")
     public final TrackPositionType posType;
+    @TagField(value = "smoothing", mapper = SmoothingMapper.class)
     public final TrackSmoothing smoothing;
+    @TagField("direction")
     public final TrackDirection direction;
+    @TagField("bedItem")
     public final ItemStack railBed;
+    @TagField("bedFill")
     public final ItemStack railBedFill;
+    @TagField("isPreview")
     public final boolean isPreview;
+    @TagField("isGradeCrossing")
     public final boolean isGradeCrossing;
+    @TagField("track")
     public final String track;
 
     public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
@@ -33,57 +46,86 @@ public class RailSettings {
         this.isGradeCrossing = isGradeCrossing;
     }
 
+    private RailSettings() {
+        // Serialization
+        gauge = Gauge.from(Gauge.STANDARD);
+        type = TrackItems.STRAIGHT;
+        track = "default";
+        length = 10;
+        degrees = 90;
+        posType = TrackPositionType.FIXED;
+        smoothing = TrackSmoothing.BOTH;
+        direction = TrackDirection.NONE;
+        railBed = ItemStack.EMPTY;
+        railBedFill = ItemStack.EMPTY;
+        isPreview = false;
+        isGradeCrossing = false;
+    }
+
+    @Deprecated
     public RailSettings(TagCompound nbt) {
-        if (nbt.hasKey("gauge")) {
-            gauge = Gauge.from(nbt.getDouble("gauge"));
-            track = nbt.getString("track");
-            type = TrackItems.values()[nbt.getInteger("type")];
-            length = nbt.getInteger("length");
-            degrees = nbt.hasKey("degrees") ?
-                    nbt.getFloat("degrees") :
-                    nbt.hasKey("quarters") ?
-                            nbt.getInteger("quarters") /4F * 90:
-                            90;
-            posType = TrackPositionType.values()[nbt.getInteger("pos_type")];
-            smoothing = nbt.hasKey("smoothing") ?
-                    TrackSmoothing.values()[nbt.getInteger("smoothing")] :
-                    type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH;
-            direction = TrackDirection.values()[nbt.getInteger("direction")];
-            railBed = new ItemStack(nbt.get("bedItem"));
-            railBedFill = new ItemStack(nbt.get("bedFill"));
-            isPreview = nbt.getBoolean("isPreview");
-            isGradeCrossing = nbt.getBoolean("isGradeCrossing");
-        } else {
-            gauge = Gauge.from(Gauge.STANDARD);
-            type = TrackItems.STRAIGHT;
-            track = "default";
-            length = 10;
-            degrees = 4;
-            posType = TrackPositionType.FIXED;
-            smoothing = TrackSmoothing.BOTH;
-            direction = TrackDirection.NONE;
-            railBed = ItemStack.EMPTY;
-            railBedFill = ItemStack.EMPTY;
-            isPreview = false;
-            isGradeCrossing = false;
+        this();
+        try {
+            TagSerializer.deserialize(nbt, this);
+        } catch (SerializationException e) {
+            ImmersiveRailroading.catching(e);
         }
     }
 
+    public void write(ItemStack stack) {
+        stack.setTagCompound(toNBT());
+    }
+
+    public static RailSettings from(ItemStack stack) {
+        return new RailSettings(stack.getTagCompound());
+    }
+
+    @Deprecated
     public TagCompound toNBT() {
-        TagCompound nbt = new TagCompound();
-        nbt.setDouble("gauge", gauge.value());
-        nbt.setString("track", track);
-        nbt.setInteger("type", type.ordinal());
-        nbt.setInteger("length", length);
-        nbt.setFloat("degrees", degrees);
-        nbt.setInteger("pos_type", posType.ordinal());
-        nbt.setInteger("smoothing", smoothing.ordinal());
-        nbt.setInteger("direction", direction.ordinal());
-        nbt.set("bedItem", railBed.toTag());
-        nbt.set("bedFill", railBedFill.toTag());
-        nbt.setBoolean("isPreview", isPreview);
-        nbt.setBoolean("isGradeCrossing", isGradeCrossing);
-        return nbt;
+        TagCompound data = new TagCompound();
+        try {
+            TagSerializer.serialize(data, this);
+        } catch (SerializationException e) {
+            ImmersiveRailroading.catching(e);
+        }
+        return data;
+    }
+
+    private static class DegreesMapper implements TagMapper<Float> {
+        @Override
+        public TagAccessor<Float> apply(Class<Float> type, String fieldName, TagField tag) {
+            return new TagAccessor<Float>(
+                    (d, o) -> d.setFloat(fieldName, o),
+                    d -> d.hasKey(fieldName) ? d.getFloat(fieldName) :
+                            d.hasKey("quarters") ? d.getInteger("quarters") /4F * 90 : 90
+            ) {
+                @Override
+                public boolean applyIfMissing() {
+                    return true;
+                }
+            };
+        }
+    }
+
+    private static class SmoothingMapper implements TagMapper<TrackSmoothing> {
+        @Override
+        public TagAccessor<TrackSmoothing> apply(Class<TrackSmoothing> type, String fieldName, TagField tag) {
+            return new TagAccessor<TrackSmoothing>(
+                    (d, o) -> d.setEnum(fieldName, o),
+                    nbt -> {
+                        if (nbt.hasKey(fieldName)) {
+                            return nbt.getEnum(fieldName, type);
+                        }
+                        return nbt.getEnum("type", TrackItems.class) == TrackItems.SLOPE ?
+                                TrackSmoothing.NEITHER : TrackSmoothing.BOTH;
+                    }
+            ) {
+                @Override
+                public boolean applyIfMissing() {
+                    return true;
+                }
+            };
+        }
     }
 
     public RailSettings withLength(int length) {
@@ -121,6 +163,40 @@ public class RailSettings {
     }
     
     public RailSettings withTrack(String track) {
+        return new RailSettings(
+                gauge,
+                track,
+                type,
+                length,
+                degrees,
+                posType,
+                smoothing,
+                direction,
+                railBed,
+                railBedFill,
+                isPreview,
+                isGradeCrossing
+        );
+    }
+
+    public RailSettings withBed(ItemStack railBed) {
+        return new RailSettings(
+                gauge,
+                track,
+                type,
+                length,
+                degrees,
+                posType,
+                smoothing,
+                direction,
+                railBed,
+                railBedFill,
+                isPreview,
+                isGradeCrossing
+        );
+    }
+
+    public RailSettings withBedFill(ItemStack railBedFill) {
         return new RailSettings(
                 gauge,
                 track,

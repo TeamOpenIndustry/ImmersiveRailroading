@@ -18,7 +18,7 @@ import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 import java.util.List;
 

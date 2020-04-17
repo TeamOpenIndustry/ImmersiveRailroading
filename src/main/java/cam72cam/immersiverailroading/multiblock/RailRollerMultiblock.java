@@ -2,7 +2,8 @@ package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.nbt.ItemGauge;
+import cam72cam.immersiverailroading.items.ItemCastRail;
+import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
@@ -169,7 +170,9 @@ public class RailRollerMultiblock extends Multiblock {
 			if (progress == 1) {
 				// Stop crafting
 				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 12);
-				ItemGauge.set(out, ItemGauge.get(input));
+				ItemRail.Data data = new ItemRail.Data(out);
+				data.gauge = new ItemCastRail.Data(input).gauge;
+				data.write();
 				outputTe.getContainer().set(0, out);
 				input.shrink(1);
 				inputTe.getContainer().set(0, input);

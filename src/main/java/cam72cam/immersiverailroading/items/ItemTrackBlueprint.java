@@ -42,40 +42,14 @@ public class ItemTrackBlueprint extends ItemBase {
 		ItemStack stack = player.getHeldItem(hand);
 
 		if (world.isServer && hand == Hand.SECONDARY) {
-			RailSettings info = settings(stack);
+			RailSettings info = RailSettings.from(stack);
 			ItemStack blockinfo = world.getItemStack(pos);
 			if (player.isCrouching()) {
-				info = new RailSettings(
-                    info.gauge,
-                    info.track,
-                    info.type,
-                    info.length,
-                    info.degrees,
-                    info.posType,
-                    info.smoothing,
-                    info.direction,
-                    info.railBed,
-                    blockinfo,
-                    info.isPreview,
-                    info.isGradeCrossing
-                );
+				info = info.withBedFill(blockinfo);
 			} else {
-				info = new RailSettings(
-                    info.gauge,
-                    info.track,
-                    info.type,
-                    info.length,
-                    info.degrees,
-                    info.posType,
-                    info.smoothing,
-                    info.direction,
-                    blockinfo,
-                    info.railBedFill,
-                    info.isPreview,
-                    info.isGradeCrossing
-				);
+				info = info.withBed(blockinfo);
 			}
-			settings(stack, info);
+			info.write(stack);
 			return ClickResult.ACCEPTED;
 		}
 
@@ -88,7 +62,7 @@ public class ItemTrackBlueprint extends ItemBase {
 		}
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), pos, hit);
 		
-		if (settings(stack).isPreview) {
+		if (RailSettings.from(stack).isPreview) {
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
 				pos = pos.up();
 			}
@@ -107,7 +81,7 @@ public class ItemTrackBlueprint extends ItemBase {
 
 	@Override
 	public List<String> getTooltip(ItemStack stack) {
-        RailSettings settings = settings(stack);
+        RailSettings settings = RailSettings.from(stack);
         return CollectionUtil.listOf(
             GuiText.TRACK_TYPE.toString(settings.type),
             GuiText.TRACK_GAUGE.toString(settings.gauge),
@@ -122,11 +96,4 @@ public class ItemTrackBlueprint extends ItemBase {
 		);
 	}
 
-	public static void settings(ItemStack stack, RailSettings settings) {
-		stack.setTagCompound(settings.toNBT());
-	}
-	
-	public static RailSettings settings(ItemStack stack) {
-		return new RailSettings(stack.getTagCompound());
-	}
 }

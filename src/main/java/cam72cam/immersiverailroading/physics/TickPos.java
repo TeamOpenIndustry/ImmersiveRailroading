@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.TagCompound;
+import cam72cam.mod.serialization.TagCompound;
 
 public class TickPos {
 	public int tickID;

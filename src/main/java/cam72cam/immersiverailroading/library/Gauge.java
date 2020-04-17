@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.text.TextUtil;
 import trackapi.lib.Gauges;
 
+@TagMapped(Gauge.TagMapper.class)
 public class Gauge {
 	public static final double STANDARD = Gauges.STANDARD;
 	
@@ -107,5 +110,15 @@ public class Gauge {
 
 	public boolean shouldSit() {
 		return this.gauge <= Gauges.MINECRAFT;
+	}
+
+	static class TagMapper implements cam72cam.mod.serialization.TagMapper<Gauge> {
+		@Override
+		public TagAccessor<Gauge> apply(Class<Gauge> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(d, g) -> d.setDouble(fieldName, g == null ? null : g.value()),
+					d -> d.hasKey(fieldName) ? Gauge.from(d.getDouble(fieldName)) : null
+			);
+		}
 	}
 }

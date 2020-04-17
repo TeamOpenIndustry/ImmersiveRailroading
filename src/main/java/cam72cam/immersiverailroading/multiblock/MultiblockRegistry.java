@@ -1,12 +1,9 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MultiblockRegistry {
-	private static final Map<String, Multiblock> entries = new HashMap<String, Multiblock>(); 
+	private static final Map<String, Multiblock> entries = new HashMap<>();
 	
 	private MultiblockRegistry() {
 		
@@ -21,8 +18,10 @@ public class MultiblockRegistry {
 	}
 
 	public static List<String> keys() {
-		List<String> keys = new ArrayList<String>();
-		keys.addAll(entries.keySet());
-		return keys;
+		return new ArrayList<>(entries.keySet());
+	}
+
+	public static List<Multiblock> registered() {
+		return new ArrayList<>(entries.values());
 	}
 }
