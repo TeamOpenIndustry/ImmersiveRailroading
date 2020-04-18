@@ -459,13 +459,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			this.augmentTank = new FluidTank(null, 1000);
 			break;
 		case WATER_TROUGH:
-			this.augmentTank = new FluidTank(new FluidStack(Fluid.WATER, 0), 1000) {
+			this.augmentTank = new FluidTank(new FluidStack(Fluid.WATER, 0), 1000)/* {
 				@Override
 				public void onChanged() {
 					balanceTanks();
 					markDirty();
 				}
-			};
+			}*/;
 			break;
 		default:
 			break;

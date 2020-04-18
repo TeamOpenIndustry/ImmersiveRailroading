@@ -78,22 +78,19 @@ public class LocomotiveSteam extends Locomotive {
 		setBoilerPressure(data.getFloat("boiler_psi"));
 		sync.set(BURN_TIME, data.get("burn_time"));
 		sync.set(BURN_MAX, data.get("burn_max"));
-	}
-	
-	@Override
-	public void loadSpawn(TagCompound data) {
-		super.loadSpawn(data);
 
-		List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
-		if (driving != null) {
-			for (RenderComponent driver : driving) {
-				driverDiameter = Math.max(driverDiameter, driver.height());
+		if (getWorld().isClient) {
+			List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
+			if (driving != null) {
+				for (RenderComponent driver : driving) {
+					driverDiameter = Math.max(driverDiameter, driver.height());
+				}
 			}
-		}
-		driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
-		if (driving != null) {
-			for (RenderComponent driver : driving) {
-				driverDiameter = Math.max(driverDiameter, driver.height());
+			driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
+			if (driving != null) {
+				for (RenderComponent driver : driving) {
+					driverDiameter = Math.max(driverDiameter, driver.height());
+				}
 			}
 		}
 	}

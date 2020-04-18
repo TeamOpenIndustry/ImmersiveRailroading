@@ -3,6 +3,10 @@ package cam72cam.immersiverailroading.physics;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
+
+import java.util.List;
 
 public class TickPos {
 	public int tickID;
@@ -60,4 +64,14 @@ public class TickPos {
 	public TickPos clone() {
 		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, rotationPitch, isOffTrack);
 	}
+
+    public static class ListTagMapper implements TagMapper<List<TickPos>> {
+        @Override
+        public TagAccessor<List<TickPos>> apply(Class<List<TickPos>> type, String fieldName, TagField tag) {
+            return new TagAccessor<>(
+                    (data, positions) -> data.setList(fieldName, positions, TickPos::toTag),
+                    data -> data.getList(fieldName, TickPos::new)
+            );
+        }
+    }
 }

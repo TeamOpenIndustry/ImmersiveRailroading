@@ -25,7 +25,7 @@ import cam72cam.mod.serialization.TagCompound;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision, ISpawnData {
+public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
 
     public static final String DAMAGE_SOURCE_HIT = "immersiverailroading:hitByTrain";
 
@@ -35,11 +35,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private Float rearYaw;
     @TagField("distanceTraveled")
     public float distanceTraveled = 0;
+    @TagField("tickPosID")
     public double tickPosID = 0;
     private Speed currentSpeed;
+    @TagField(value = "positions", mapper = TickPos.ListTagMapper.class)
     public List<TickPos> positions = new ArrayList<>();
     private RealBB boundingBox;
     private double[][] heightMapCache;
+    @TagField("tickSkew")
     private double tickSkew = 1;
 
     private float sndRand;
@@ -60,25 +63,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (rearYaw == null) {
             rearYaw = getRotationYaw();
         }
-        initPositions();
-    }
-
-    @Override
-    public void loadSpawn(TagCompound data) {
-        tickPosID = data.getInteger("tickPosID");
-        tickSkew = data.getDouble("tickSkew");
-        positions = data.getList("positions", TickPos::new);
-    }
-
-    @Override
-    public void saveSpawn(TagCompound data) {
-        data.setInteger("tickPosID", (int) tickPosID);
-        data.setDouble("tickSkew", tickSkew);
-        data.setList("positions", positions, TickPos::toTag);
-    }
-
-    public void initPositions() {
-        initPositions(new TickPos((int) this.tickPosID, this.getCurrentSpeed(), getPosition(), getRotationYaw(), getRotationYaw(), getRotationYaw(), getRotationPitch(), false));
     }
 
     public void initPositions(TickPos tp) {

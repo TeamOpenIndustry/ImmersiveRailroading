@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapper;
 
 import java.util.List;
 
@@ -17,18 +16,8 @@ public class MRSSyncPacket extends Packet {
 	private EntityMoveableRollingStock stock;
 	@TagField
 	private double tps;
-	@TagField(mapper = TickPosMapper.class)
+	@TagField(mapper = TickPos.ListTagMapper.class)
 	private List<TickPos> positions;
-
-	public static class TickPosMapper implements TagMapper<List<TickPos>> {
-		@Override
-		public TagAccessor<List<TickPos>> apply(Class<List<TickPos>> type, String fieldName, TagField tag) {
-			return new TagAccessor<>(
-					(data, positions) -> data.setList(fieldName, positions, TickPos::toTag),
-					data -> data.getList(fieldName, TickPos::new)
-			);
-		}
-	}
 
 	public MRSSyncPacket() { }
 
