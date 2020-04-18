@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
-import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
@@ -23,6 +22,7 @@ import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
@@ -31,31 +31,37 @@ import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
+	@TagField("parent")
 	private Vec3i parent;
+	@TagField("height")
 	private float bedHeight = 0;
+	@TagField("railHeight")
 	private float railHeight = 0;
+	@TagField("augment")
 	private Augment augment;
+	@TagField("augmentFilterID")
 	private String augmentFilterID;
+	@TagField("snowLayers")
 	private int snowLayers = 0;
+	@TagField("flexible")
 	protected boolean flexible = false;
-	private boolean willBeReplaced = false; 
+	private boolean willBeReplaced = false;
+	@TagField("replaced")
 	private TagCompound replaced;
 	private boolean skipNextRefresh = false;
 	public ItemStack railBedCache = null;
 	private FluidTank augmentTank = null;
 	private int redstoneLevel = 0;
+	@TagField("redstoneMode")
 	private StockDetectorMode redstoneMode = StockDetectorMode.SIMPLE;
+	@TagField("controlMode")
 	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD;
+	@TagField("couplerMod")
 	private CouplerAugmentMode couplerMode = CouplerAugmentMode.ENGAGED;
 	private int clientLastTankAmount = 0;
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
-
-	public boolean isLoaded() {
-		// TODO removeme
-		return true;
-	}
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -210,21 +216,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (nbt.hasKey("version")) {
 			version = nbt.getInteger("version");
 		}
-
-
-		railHeight = bedHeight = nbt.getFloat("height");
-		snowLayers = nbt.getInteger("snowLayers");
-		flexible = nbt.getBoolean("flexible");
-		if (nbt.hasKey("replaced")) {
-			replaced = nbt.get("replaced");
-		}
-
-		if (nbt.hasKey("augment")) {
-			augment = Augment.values()[nbt.getInteger("augment")];
-		}
-
-		parent = nbt.getVec3i("parent");
-
 		switch(version) {
 		case 0:
 			//NOP
@@ -233,58 +224,24 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		case 2:
 			// Nothing in base
 		case 3:
-			// Nothing yet ...
+			if (!nbt.hasKey("railHeight")) {
+				railHeight = bedHeight;
+			}
 		}
 
 		if (nbt.hasKey("augmentTank")) {
 			createAugmentTank();
 			augmentTank.read(nbt.get("augmentTank"));
 		}
-		if (nbt.hasKey("augmentFilterID")) {
-			augmentFilterID = nbt.getString("augmentFilterID");
-		}
-		if (nbt.hasKey("redstoneMode")) {
-			redstoneMode = StockDetectorMode.values()[nbt.getInteger("redstoneMode")];
-		}
-		if (nbt.hasKey("controlMode")) {
-			controlMode = LocoControlMode.values()[nbt.getInteger("controlMode")];
-		}
-		if (nbt.hasKey("couplerMode")) {
-			couplerMode = CouplerAugmentMode.values()[nbt.getInteger("couplerMode")];
-		}
-		if (nbt.hasKey("railHeight")) {
-			railHeight = nbt.getFloat("railHeight");
-		}
 	}
 	@Override
 	public void save(TagCompound nbt) {
-		if (parent == null) {
-			ImmersiveRailroading.warn("Trying to save a tile at " + pos + " with no parent!");
-			return;
-		}
-		nbt.setVec3i("parent", parent);
-		nbt.setFloat("height", bedHeight);
-		nbt.setFloat("railHeight", railHeight);
-		nbt.setInteger("snowLayers", snowLayers);
-		nbt.setBoolean("flexible", flexible);
-		if (replaced != null) {
-			nbt.set("replaced", replaced);
-		}
-
 		if (augment != null) {
-			nbt.setInteger("augment", this.augment.ordinal());
 			if (augmentTank != null) {
 				nbt.set("augmentTank", augmentTank.write(new TagCompound()));
 			}
-			if (augmentFilterID != null) {
-				nbt.setString("augmentFilterID", augmentFilterID);
-			}
 		}
-		nbt.setInteger("redstoneMode", redstoneMode.ordinal());
-		nbt.setInteger("controlMode", controlMode.ordinal());
-		nbt.setInteger("couplerMode", couplerMode.ordinal());
-
-		nbt.setInteger("version", 3);
+		nbt.setInteger("version", 4);
 	}
 
 	public TileRail getParentTile() {
@@ -292,7 +249,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return null;
 		}
 		TileRail te = world.getBlockEntity(this.getParent(), TileRail.class);
-		if (te == null || !te.isLoaded() || te.info == null) {
+		if (te == null || te.info == null) {
 			return null;
 		}
 		return te;
@@ -395,13 +352,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 			Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
 			if (state == SwitchState.TURN) {
-				float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
-				double diff = MathUtil.trueModulus(other - rotationYaw, 360);
-				diff = Math.min(360-diff, diff);
-				if (diff < 30) {
+				//float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
+				//double diff = MathUtil.trueModulus(other - rotationYaw, 360);
+				//diff = Math.min(360-diff, diff);
+				//if (diff < 30) {
 					nextPos = potential;
-					break;
-				}
+					//break;
+				//}
 			} else {
 				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion)) ||
 						currentPosition == nextPos) {
@@ -770,7 +727,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (tileSwitch != null) {
 			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
-			tileSwitch.info = new RailInfo(world, tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
+			tileSwitch.info = new RailInfo(tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
 			tileSwitch.markDirty();
 			this.markDirty();
 			this.getParentTile().markDirty();
@@ -856,13 +813,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (!track.equals(tileRail.info.settings.track)) {
 				if (!player.isCreative()) {
 					RailInfo info = tileRail.info.withTrack(track);
-					if (info.build(player, false)) { //cancel if player doesn't have all required items
+					if (info.build(player, tileRail.pos, false)) { //cancel if player doesn't have all required items
 						//FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers( //we need to send the packet because this code is executed on the server side
 						//		new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
 						tileRail.info = info;
 
 						tileRail.spawnDrops(player.getPosition());
-						tileRail.setDrops(info.getBuilder(new Vec3i(info.placementInfo.placementPosition)).drops);
+						tileRail.setDrops(info.getBuilder(world, new Vec3i(info.placementInfo.placementPosition).add(tileRail.pos)).drops);
 						tileRail.markDirty();
 					}
 				} else {
@@ -909,9 +866,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public ItemStack onPick() {
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
-		if (!this.isLoaded()) {
-			return stack;
-		}
 
 		TileRail parent = this.getParentTile();
 		if (parent == null) {

@@ -34,7 +34,7 @@ public class ItemGoldenSpike extends ItemBase {
 			Audio.playSound(world, pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f);
 		} else {
 			pos = pos.up();
-			
+
 			Vec3i tepos = getPosition(held);
 			if (tepos != null) {
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
@@ -44,7 +44,10 @@ public class ItemGoldenSpike extends ItemBase {
 				}
 				TileRailPreview tr = world.getBlockEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
-					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), pos, hit));
+					if (tr.isAboveRails()) {
+						tepos = tepos.down();
+					}
+					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), hit.subtract(0, hit.y, 0).add(pos).subtract(tepos)));
 				}
 			}
 		}

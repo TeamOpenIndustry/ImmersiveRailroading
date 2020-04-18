@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
@@ -20,8 +20,8 @@ public class BuilderTurnTable extends BuilderBase {
 	protected HashSet<Pair<Integer, Integer>> positions;
 	private Vec3i offset;
 
-	public BuilderTurnTable(RailInfo info, Vec3i pos) {
-		super(info.withLength(Math.min(info.settings.length, (int)(30 * info.settings.gauge.scale()))), pos);
+	public BuilderTurnTable(RailInfo info, World world, Vec3i pos) {
+		super(info.withLength(Math.min(info.settings.length, (int)(30 * info.settings.gauge.scale()))), world, pos);
 
 		positions = new HashSet<>();
 		
@@ -111,7 +111,7 @@ public class BuilderTurnTable extends BuilderBase {
 			if (track.rel.y == 1) {
 				continue;
 			}
-			if (BlockUtil.canBeReplaced(info.world, track.getPos().down(), false)) {
+			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
 				fillCount += 1;
 			}
 		}

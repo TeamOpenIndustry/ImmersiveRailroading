@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
 public class RailBaseOverlayRender {
@@ -19,18 +20,18 @@ public class RailBaseOverlayRender {
 		}
 	};
 
-	private static void doDraw(RailInfo info) {
+	private static void doDraw(RailInfo info, World world, Vec3i pos) {
 		GL11.glColor4f(1, 0, 0, 1);
 
-		Vec3i placePos = new Vec3i(info.placementInfo.placementPosition);
+		Vec3i placePos = new Vec3i(info.placementInfo.placementPosition).add(pos);
 
-		for (TrackBase base : info.getBuilder(placePos).getTracksForRender()) {
+		for (TrackBase base : info.getBuilder(world, placePos).getTracksForRender()) {
 			boolean canPlace = base.canPlaceTrack();
 			if (! canPlace) {
 				GL11.glPushMatrix();
-				Vec3i pos = base.getPos();
-				pos = pos.subtract(placePos);
-				GL11.glTranslated(pos.x, pos.y, pos.z+1);
+				Vec3i tpos = base.getPos();
+				tpos = tpos.subtract(placePos);
+				GL11.glTranslated(tpos.x, tpos.y, tpos.z+1);
 				GL11.glScaled(1, base.getBedHeight() + 0.2f, 1);
 
 				GL11.glBegin(GL11.GL_QUADS);
@@ -71,8 +72,8 @@ public class RailBaseOverlayRender {
 		}
 	}
 
-	public static void draw(RailInfo info) {
-		String key = info.uniqueID + new Vec3i(info.placementInfo.placementPosition);
+	public static void draw(RailInfo info, World world, Vec3i pos) {
+		String key = info.uniqueID + pos.add(new Vec3i(info.placementInfo.placementPosition));
 		Integer displayList = cache.get(key);
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
@@ -81,7 +82,7 @@ public class RailBaseOverlayRender {
 				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, false);
 				GLBoolTracker color = new GLBoolTracker(GL11.GL_COLOR_MATERIAL, true);
 				GL11.glPushMatrix();
-				doDraw(info);
+				doDraw(info, world, pos);
 				GL11.glPopMatrix();
 				tex.restore();
 				color.restore();

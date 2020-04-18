@@ -37,8 +37,8 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	}
 
 	public static void render(ItemStack stack, World world) {
-		RailInfo info = new RailInfo(world,
-				new RailSettings(Gauge.from(Gauge.STANDARD), new ItemTrackExchanger.Data(stack).track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, ItemStack.EMPTY, ItemStack.EMPTY, false, false),
+		RailInfo info = new RailInfo(
+                new RailSettings(Gauge.from(Gauge.STANDARD), new ItemTrackExchanger.Data(stack).track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, ItemStack.EMPTY, ItemStack.EMPTY, false, false),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,
@@ -67,13 +67,13 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 		GL11.glRotated(90, 1, 0, 0);
 
 		GL11.glTranslated(-15.15, 0.75, -8.75);
-		RailBaseRender.draw(info);
-		RailBuilderRender.renderRailBuilder(info);
+		RailBaseRender.draw(info, world);
+		RailBuilderRender.renderRailBuilder(info, world);
 
 		if (lookInfo != null) {
 			GL11.glTranslated(-22.05, 0, 0);
-			RailBaseRender.draw(lookInfo);
-			RailBuilderRender.renderRailBuilder(lookInfo);
+			RailBaseRender.draw(lookInfo, world);
+			RailBuilderRender.renderRailBuilder(lookInfo, world);
 		}
 
 		GL11.glPopMatrix();

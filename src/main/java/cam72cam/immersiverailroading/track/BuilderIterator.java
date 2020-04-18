@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -19,14 +20,14 @@ import cam72cam.immersiverailroading.util.VecUtil;
 public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
 	protected HashSet<Pair<Integer, Integer>> positions;
 	
-	public BuilderIterator(RailInfo info, Vec3i pos) {
-		this(info, pos, false);
+	public BuilderIterator(RailInfo info, World world, Vec3i pos) {
+		this(info, world, pos, false);
 	}
 
 	public abstract List<PosStep> getPath(double stepSize);
 
-	public BuilderIterator(RailInfo info, Vec3i pos, boolean endOfTrack) {
-		super(info, pos);
+	public BuilderIterator(RailInfo info, World world, Vec3i pos, boolean endOfTrack) {
+		super(info, world, pos);
 		
 		positions = new HashSet<>();
 		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<>();

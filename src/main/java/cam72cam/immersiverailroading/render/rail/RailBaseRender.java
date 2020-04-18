@@ -5,17 +5,18 @@ import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
 public class RailBaseRender {
-	private static synchronized void drawSync(RailInfo info) {
+	private static synchronized void drawSync(RailInfo info, World world) {
 		if (info.settings.railBed.isEmpty()) {
 			return;
 		}
 
 		StandardModel model = new StandardModel();
 
-		for (TrackBase base : info.getBuilder().getTracksForRender()) {
+		for (TrackBase base : info.getBuilder(world).getTracksForRender()) {
 			model.addItemBlock(info.settings.railBed, new Vec3d(base.getPos()), new Vec3d(1, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale(), 1));
 		}
 
@@ -23,12 +24,12 @@ public class RailBaseRender {
 	}
 
 	private static DisplayListCache displayLists = new DisplayListCache();
-	public static void draw(RailInfo info) {
+	public static void draw(RailInfo info, World world) {
 		Integer displayList = displayLists.get(info.uniqueID);
 		if (displayList == null) {
 			displayList = GL11.glGenLists(1);
 			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			drawSync(info);
+			drawSync(info, world);
 			GL11.glEndList();
 
 			displayLists.put(info.uniqueID, displayList);

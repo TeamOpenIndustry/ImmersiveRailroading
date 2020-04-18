@@ -23,7 +23,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		return new StandardModel().addCustom(() -> TrackBlueprintItemModel.render(stack, world));
 	}
 	public static void render(ItemStack stack, World world) {
-		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, 1, Vec3i.ZERO, new Vec3d(0.5, 0.5, 0.5)), null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
 		info = info.withLength(10);
 
 		GL11.glPushMatrix();
@@ -54,10 +54,10 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			GL11.glPushMatrix();
 			{
 				GL11.glTranslated(-0.5, 0, -0.5);
-				RailBaseRender.draw(info);
+				RailBaseRender.draw(info, world);
 			}
 			GL11.glPopMatrix();
-			RailBuilderRender.renderRailBuilder(info);
+			RailBuilderRender.renderRailBuilder(info, world);
 
 			lighting.restore();
 			cull.restore();
@@ -78,7 +78,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			}
 		}
 
-		RailInfo info = new RailInfo(world, stack, new PlacementInfo(stack, player.getRotationYawHead(), pos, hit), null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null);
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {
@@ -92,10 +92,10 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.5f);
 
 			Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
-			Vec3d offPos = info.placementInfo.placementPosition.subtract(cameraPos);
+			Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);
 			GL11.glTranslated(offPos.x, offPos.y, offPos.z);
 
-			RailRenderUtil.render(info, true);
+			RailRenderUtil.render(info, world, pos, true);
 
 			transparency.restore();
 		}

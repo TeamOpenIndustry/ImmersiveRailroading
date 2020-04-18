@@ -2,14 +2,13 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import org.apache.commons.lang3.tuple.Pair;
+import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +18,8 @@ import java.util.stream.Collectors;
 public class BuilderCubicCurve extends BuilderIterator {
 	private List<BuilderBase> subBuilders;
 
-	public BuilderCubicCurve(RailInfo info, Vec3i pos) {
-		this(info, pos, false);
+	public BuilderCubicCurve(RailInfo info, World world, Vec3i pos) {
+		this(info, world, pos, false);
 	}
 
 	@Override
@@ -28,8 +27,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 		return subBuilders;
 	}
 
-	public BuilderCubicCurve(RailInfo info, Vec3i pos, boolean endOfTrack) {
-		super(info, pos, endOfTrack);
+	public BuilderCubicCurve(RailInfo info, World world, Vec3i pos, boolean endOfTrack) {
+		super(info, world, pos, endOfTrack);
 		CubicCurve curve = getCurve();
 		List<CubicCurve> subCurves = curve.subsplit((int) (101 * 2 * 3.1415f / 4));
 		if (subCurves.size() > 1) {
@@ -41,9 +40,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 				}
 				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), subCurve.ctrl1.add(delta));
 				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180, subCurve.ctrl2.add(delta));
-				RailInfo subInfo = new RailInfo(info.world, info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
+				RailInfo subInfo = new RailInfo(info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
 				Vec3i sPos = new Vec3i(startPos.placementPosition);
-				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, sPos);
+				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, world, sPos);
 				if (subBuilders.size() != 0) {
 					for (TrackBase track : subBuilder.tracks) {
 						if (track instanceof TrackRail) {

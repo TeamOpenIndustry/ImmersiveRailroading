@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -17,16 +18,16 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	private BuilderStraight realStraightBuilder;
 	private final BuilderStraight straightBuilderReal;
 
-	public BuilderSwitch(RailInfo info, Vec3i pos) {
-		super(info, pos);
+	public BuilderSwitch(RailInfo info, World world, Vec3i pos) {
+		super(info, world, pos);
 		
 		RailInfo turnInfo = info.withType(info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
 		RailInfo straightInfo = info.clone();
 
 		{
-			turnBuilder = (BuilderIterator) turnInfo.getBuilder(pos);
-			straightBuilder = new BuilderStraight(straightInfo, pos, true);
-			realStraightBuilder = new BuilderStraight(straightInfo, pos, true);
+			turnBuilder = (BuilderIterator) turnInfo.getBuilder(world, pos);
+			straightBuilder = new BuilderStraight(straightInfo, world, pos, true);
+			realStraightBuilder = new BuilderStraight(straightInfo, world, pos, true);
 			
 			double maxOverlap = 0;
 			
@@ -41,8 +42,8 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		}
 		
 
-		straightBuilder = new BuilderStraight(straightInfo, pos, true);
-		straightBuilderReal = new BuilderStraight(straightInfo.withType(TrackItems.STRAIGHT), pos, true);
+		straightBuilder = new BuilderStraight(straightInfo, world, pos, true);
+		straightBuilderReal = new BuilderStraight(straightInfo.withType(TrackItems.STRAIGHT), world, pos, true);
 		
 		turnBuilder.overrideFlexible = true;
 		

@@ -25,9 +25,9 @@ public class MultiPreviewRender {
         GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.7f);
 
         for (TileRailPreview preview : previews.values()) {
-            for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.pos)).getSubBuilders()) {
+            for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.world, preview.pos)).getSubBuilders()) {
                 RailInfo info = builder.info;
-                Vec3d placementPosition = info.placementInfo.placementPosition;
+                Vec3d placementPosition = info.placementInfo.placementPosition.add(preview.pos);
 
                 if (GlobalRender.isInRenderDistance(placementPosition)) {
                     placementPosition = placementPosition.subtract(GlobalRender.getCameraPos(partialTicks));
@@ -35,7 +35,7 @@ public class MultiPreviewRender {
                     {
                         GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
 
-                        RailRenderUtil.render(info, true);
+                        RailRenderUtil.render(info, preview.world, preview.pos, true);
                     }
                     GL11.glPopMatrix();
                 }

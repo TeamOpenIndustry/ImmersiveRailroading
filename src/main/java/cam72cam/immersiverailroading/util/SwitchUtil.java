@@ -18,11 +18,8 @@ public class SwitchUtil {
 		if (rail == null) {
 			return SwitchState.NONE;
 		}
-		if (!rail.isLoaded()) {
-			return SwitchState.NONE;
-		}
 		TileRail parent = rail.getParentTile();
-		if (parent == null || !parent.isLoaded()) {
+		if (parent == null) {
 			return SwitchState.NONE;
 		}
 		
@@ -34,16 +31,17 @@ public class SwitchUtil {
 		}
 
 		if (position != null && parent.info != null) {
-			IIterableTrack switchBuilder = (IIterableTrack) parent.info.getBuilder();
-			IIterableTrack turnBuilder = (IIterableTrack) rail.info.getBuilder();
-			boolean isOnStraight = switchBuilder.isOnTrack(parent.info, position);
-			boolean isOnTurn = turnBuilder.isOnTrack(rail.info, position);
+			IIterableTrack switchBuilder = (IIterableTrack) parent.info.getBuilder(rail.world);
+			IIterableTrack turnBuilder = (IIterableTrack) rail.info.getBuilder(rail.world);
+			double isOnStraight = switchBuilder.offsetFromTrack(parent.info, parent.pos, position);
+			double isOnTurn = turnBuilder.offsetFromTrack(rail.info, rail.pos, position);
 
-			if (isOnStraight && !isOnTurn) {
-				return SwitchState.STRAIGHT;
-			}
-			if (!isOnStraight && isOnTurn) {
-				return SwitchState.NONE;
+			if (Math.abs(isOnStraight - isOnTurn) > rail.info.settings.gauge.scale() / 16) {
+				if (isOnStraight > isOnTurn) {
+					return SwitchState.NONE;
+				} else {
+					return SwitchState.STRAIGHT;
+				}
 			}
 		}
 
@@ -59,7 +57,7 @@ public class SwitchUtil {
 	}
 
 	public static boolean isRailPowered(TileRail rail) {
-		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition;
+		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition.add(rail.pos);
 		double horiz = rail.info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
 			horiz = horiz/2;

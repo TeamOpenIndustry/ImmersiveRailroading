@@ -40,16 +40,16 @@ public class ItemTrackBlueprint extends ItemBase {
 	@Override
     public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
+		RailSettings stackInfo = RailSettings.from(stack);
 
 		if (world.isServer && hand == Hand.SECONDARY) {
-			RailSettings info = RailSettings.from(stack);
 			ItemStack blockinfo = world.getItemStack(pos);
 			if (player.isCrouching()) {
-				info = info.withBedFill(blockinfo);
+				stackInfo = stackInfo.withBedFill(blockinfo);
 			} else {
-				info = info.withBed(blockinfo);
+				stackInfo = stackInfo.withBed(blockinfo);
 			}
-			info.write(stack);
+			stackInfo.write(stack);
 			return ClickResult.ACCEPTED;
 		}
 
@@ -60,22 +60,23 @@ public class ItemTrackBlueprint extends ItemBase {
 				pos = pos.down();
 			}
 		}
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), pos, hit);
-		
-		if (RailSettings.from(stack).isPreview) {
+
+		if (stackInfo.isPreview) {
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
 				pos = pos.up();
 			}
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
+				PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
 				te.setup(stack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		RailInfo info = new RailInfo(world, stack, placementInfo, null);
-		info.build(player);
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
+		RailInfo info = new RailInfo(stack, placementInfo, null);
+		info.build(player, pos);
 		return ClickResult.ACCEPTED;
     }
 

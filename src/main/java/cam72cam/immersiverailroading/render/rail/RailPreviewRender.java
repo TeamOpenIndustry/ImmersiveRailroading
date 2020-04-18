@@ -1,8 +1,9 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.render.GLBoolTracker;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;
@@ -25,11 +26,14 @@ public class RailPreviewRender {
             GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.7f);
             GL11.glPushMatrix();
             {
+                if (te.isAboveRails()) {
+                    GL11.glTranslated(0, -1, 0);
+                }
                 // Move to specified position
-                Vec3d placementPosition = info.placementInfo.placementPosition.subtract(te.pos);
+                Vec3d placementPosition = info.placementInfo.placementPosition;
                 GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
                 if (!te.isMulti()) {
-                    RailRenderUtil.render(info, true);
+                    RailRenderUtil.render(info, te.world, te.pos, true);
                 }
             }
             GL11.glPopMatrix();

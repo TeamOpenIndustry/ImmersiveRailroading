@@ -15,7 +15,7 @@ public class TrackRail extends TrackBase {
 	public TileRailBase placeTrack(boolean actuallyPlace) {
 		TileRail tileRail = (TileRail) super.placeTrack(actuallyPlace);
 
-		tileRail.info = builder.info;
+		tileRail.info = builder.info.offset(builder.pos.subtract(tileRail.pos));
 		tileRail.setDrops(builder.drops);
 
 		return tileRail;

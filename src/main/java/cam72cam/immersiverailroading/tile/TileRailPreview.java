@@ -12,11 +12,11 @@ import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.SerializationException;
+import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.serialization.TagCompound;
 
 public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
@@ -42,6 +42,11 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setItem(ItemStack stack) {
 		this.item = stack.copy();
 		this.markDirty();
+	}
+
+	@Override
+	public void load(TagCompound nbt) {
+		info = null;
 	}
 
 	public void setCustomInfo(PlacementInfo info) {
@@ -74,49 +79,10 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 	
 	@Override
-	public void load(TagCompound nbt) {
-		item = new ItemStack(nbt.get("item"));
-		placementInfo = new PlacementInfo(nbt.get("placementInfo"));
-		if (nbt.hasKey("customInfo")) {
-			customInfo = new PlacementInfo(nbt.get("customInfo"));
-		}
-		info = new RailInfo(world, item, placementInfo, customInfo);
-	}
-	@Override
-	public void save(TagCompound nbt) {
-		nbt.set("item", item.toTag());
-		nbt.set("placementInfo", placementInfo.toNBT());
-		if (customInfo != null) {
-			nbt.set("customInfo", customInfo.toNBT());
-		}
-	}
-
-	@Override
-	public void writeUpdate(TagCompound nbt) {
-
-	}
-
-	@Override
-	public void readUpdate(TagCompound nbt) {
-
-	}
-
-	@Override
-	public void onBreak() {
-
-	}
-
-	@Override
 	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
 		if (player.isCrouching()) {
-			Vec3i pos = this.pos;
 			if (world.isServer) {
-				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
-						pos = pos.down();
-					}
-				}
-				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), pos, hit));
+				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), hit));
 			}
 			return false;
 		} else {
@@ -138,29 +104,25 @@ public class TileRailPreview extends BlockEntityTickable {
 		return 0.125;
 	}
 
-	@Override
-	public void onNeighborChange(Vec3i neighbor) {
-
-	}
-
 	public RailInfo getRailRenderInfo() {
-		if (world != null && item != null && (info == null || info.world == null)) {
-			info = new RailInfo(world, item, placementInfo, customInfo);
+		if (world != null && item != null && (info == null || info.settings == null)) {
+			info = new RailInfo(item, placementInfo, customInfo);
 		}
 		return info;
 	}
 
+	@Override
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(world, item, placementInfo, customInfo);
+        info = new RailInfo(item, placementInfo, customInfo);
         if (isMulti()) {
 			new PreviewRenderPacket(this).sendToAll();
 		}
 	}
 
 	public boolean isMulti() {
-		if (info.getBuilder() instanceof IIterableTrack) {
-			return ((IIterableTrack)info.getBuilder()).getSubBuilders() != null;
+		if (getRailRenderInfo().getBuilder(world) instanceof IIterableTrack) {
+			return ((IIterableTrack)getRailRenderInfo().getBuilder(world)).getSubBuilders() != null;
 		}
 		return false;
 	}
@@ -180,12 +142,20 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer)) {
+			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, isAboveRails() ? pos.down() : pos)) {
 				new PreviewRenderPacket(this.world, this.pos).sendToAll();
 			}
-			return false;
+			return isAboveRails();
 		}
 		new PreviewRenderPacket(this.world, this.pos).sendToAll();
 		return true;
+	}
+
+	private Boolean isAboveRails = null;
+	public boolean isAboveRails() {
+		if (isAboveRails == null) {
+			isAboveRails = BlockUtil.isIRRail(world, pos.down()) && world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5;
+		}
+		return isAboveRails;
 	}
 }

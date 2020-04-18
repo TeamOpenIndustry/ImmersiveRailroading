@@ -6,9 +6,13 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.SerializationException;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.serialization.TagCompound;
 
+@TagMapped(PlacementInfo.TagMapper.class)
 public class PlacementInfo {
 	public final Vec3d placementPosition; // relative
 	public final TrackDirection direction;
@@ -26,7 +30,7 @@ public class PlacementInfo {
 		return Math.min(32, Math.max(1, Config.ConfigBalance.AnglePlacementSegmentation));
 	}
 	
-	public PlacementInfo(ItemStack stack, float yawHead, Vec3i pos, Vec3d hit) {
+	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit) {
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
 
@@ -38,8 +42,9 @@ public class PlacementInfo {
 
 		int quarter = rotationQuarter();
 
-		double hitX = hit.x;
-		double hitZ = hit.z;
+
+		double hitX = hit.x % 1;
+		double hitZ = hit.z % 1;
 
 		switch(settings.posType) {
 		case FIXED:
@@ -94,17 +99,14 @@ public class PlacementInfo {
 			break;
 		}
 
-		this.placementPosition = new Vec3d(pos).add(hitX, 0, hitZ);
+		this.placementPosition = new Vec3d(new Vec3i(hit)).add(hitX, 0, hitZ);
 		this.direction = direction;
 		this.control = null;
 	}
 
+	@Deprecated
 	public PlacementInfo(TagCompound nbt) {
-		this(nbt, Vec3i.ZERO);
-	}
-	
-	public PlacementInfo(TagCompound nbt, Vec3i offset) {
-		this.placementPosition = nbt.getVec3d("placementPosition").add(offset);
+		this.placementPosition = nbt.getVec3d("placementPosition");
 		this.direction = TrackDirection.values()[nbt.getInteger("direction")];
 		if (nbt.hasKey("yaw")) {
 			this.yaw = nbt.getFloat("yaw");
@@ -119,23 +121,19 @@ public class PlacementInfo {
 			this.yaw = facingAngle + rotAngle;
 		}
 		if (nbt.hasKey("control")) {
-			this.control = nbt.getVec3d("control").add(offset);
+			this.control = nbt.getVec3d("control");
 		} else {
 			this.control = null;
 		}
 	}
 
 	public TagCompound toNBT() {
-		return toNBT(Vec3i.ZERO);
-	}
-	
-	public TagCompound toNBT(Vec3i offset) {
 		TagCompound nbt = new TagCompound();
-		nbt.setVec3d("placementPosition", placementPosition.subtract(offset));
+		nbt.setVec3d("placementPosition", placementPosition);
 		nbt.setFloat("yaw", yaw);
 		nbt.setInteger("direction", direction.ordinal());
 		if (control != null) {
-			nbt.setVec3d("control", control.subtract(offset));
+			nbt.setVec3d("control", control);
 		}
 		return nbt;
 	}
@@ -150,5 +148,25 @@ public class PlacementInfo {
 
 	public float partialAngle() {
 		return yaw % 90;
+	}
+
+	public PlacementInfo offset(Vec3i offset) {
+		return new PlacementInfo(placementPosition.add(offset), direction, yaw, control);
+	}
+
+	static class TagMapper implements cam72cam.mod.serialization.TagMapper<PlacementInfo> {
+		@Override
+		public TagAccessor<PlacementInfo> apply(Class<PlacementInfo> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(d, o) -> {
+						if (o == null) {
+							d.remove(fieldName);
+						} else {
+							d.set(fieldName, o.toNBT());
+						}
+					},
+					d -> d.hasKey(fieldName) ? new PlacementInfo(d.get(fieldName)) : null
+			);
+		}
 	}
 }

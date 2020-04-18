@@ -9,18 +9,18 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.world.World;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
-import javax.vecmath.SingularMatrixException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 public class RailBuilderRender {
 
     private static DisplayListCache displayLists = new DisplayListCache();
-    public static void renderRailBuilder(RailInfo info) {
+    public static void renderRailBuilder(RailInfo info, World world) {
 
         TrackModel model = DefinitionManager.getTrack(info.settings.track, info.settings.gauge.value());
         if (model == null) {
@@ -36,7 +36,7 @@ public class RailBuilderRender {
             GL11.glPushMatrix();
             {
 
-                for (VecYawPitch piece : info.getBuilder().getRenderData()) {
+                for (VecYawPitch piece : info.getBuilder(world).getRenderData()) {
                     Matrix4 m = new Matrix4();
                     //m.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
                     m.translate(piece.x, piece.y, piece.z);

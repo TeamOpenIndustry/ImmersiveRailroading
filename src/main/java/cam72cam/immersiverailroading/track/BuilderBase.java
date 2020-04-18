@@ -12,6 +12,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @SuppressWarnings("incomplete-switch")
 public abstract class BuilderBase {
+	protected final World world;
 	protected ArrayList<TrackBase> tracks = new ArrayList<TrackBase>();
 	
 	public RailInfo info;
@@ -32,8 +34,9 @@ public abstract class BuilderBase {
 
 	public List<ItemStack> drops;
 
-	public BuilderBase(RailInfo info, Vec3i pos) {
+	public BuilderBase(RailInfo info, World world, Vec3i pos) {
 		this.info = info;
+		this.world = world;
 		this.pos = pos;
 		parent_pos = pos;
 	}
@@ -98,10 +101,8 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
-				TileRail rail = info.world.getBlockEntity(track.getPos(), TileRail.class);
-				TagCompound data = new TagCompound();
-				track.placeTrack(false).save(data);
-				rail.setReplaced(data);
+				TileRail rail = world.getBlockEntity(track.getPos(), TileRail.class);
+				rail.setReplaced(track.placeTrack(false).getData());
 				rail.markDirty();
 			}
 		}
@@ -135,7 +136,7 @@ public abstract class BuilderBase {
 	public int costFill() {
 		int fillCount = 0;
 		for (TrackBase track : tracks) {
-			if (BlockUtil.canBeReplaced(info.world, track.getPos().down(), false)) {
+			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
 				fillCount += 1;
 			}
 		}
@@ -150,20 +151,20 @@ public abstract class BuilderBase {
 		for (TrackBase track : tracks) {
 			for (int i = 0; i < 6 * info.settings.gauge.scale(); i++) {
 				Vec3i main = track.getPos().up(i);
-				if (!ITrack.isRail(info.world, main)) {
-					info.world.setToAir(main);
+				if (!ITrack.isRail(world, main)) {
+					world.setToAir(main);
 				}
 				if (info.settings.gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.settings.type != TrackItems.SLOPE && info.settings.type != TrackItems.TURNTABLE) {
 					for (Facing facing : Facing.HORIZONTALS) {
 						Vec3i pos = main.offset(facing);
-						if (!ITrack.isRail(info.world, pos)) {
-							info.world.setToAir(pos);
+						if (!ITrack.isRail(world, pos)) {
+							world.setToAir(pos);
 						}
 					}
 				}
 			}
-			if (BlockUtil.canBeReplaced(info.world, track.getPos().down(), false)) {
-				info.world.setToAir(track.getPos().down());
+			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
+				world.setToAir(track.getPos().down());
 			}
 		}
 	}

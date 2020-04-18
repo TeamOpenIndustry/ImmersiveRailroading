@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.render.block;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -46,10 +45,10 @@ public class RailBaseModel {
 				}
 
 
-				Vec3d pos = info.placementInfo.placementPosition.subtract(te.pos);
+				Vec3d pos = info.placementInfo.placementPosition;
 				GL11.glTranslated(pos.x, pos.y, pos.z);
 
-                RailBuilderRender.renderRailBuilder(info);
+                RailBuilderRender.renderRailBuilder(info, te.world);
 			});
 		}
 

@@ -15,23 +15,31 @@ import cam72cam.mod.item.ItemStackHandler;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.world.BlockInfo;
 
 public class TileMultiblock extends BlockEntityTickable {
-	
+
+	@TagField("replaced")
 	private BlockInfo replaced;
+	@TagField("offset")
 	private Vec3i offset;
+	@TagField("rotation")
 	private Rotation rotation;
+	@TagField("name")
 	private String name;
+	@TagField("craftMode")
 	private CraftingMachineMode craftMode = CraftingMachineMode.STOPPED;
 	private long ticks;
 	private MultiblockInstance mb;
 	
 	//Crafting
+	@TagField("craftProgress")
 	private int craftProgress = 0;
+	@TagField("craftItem")
 	private ItemStack craftItem = ItemStack.EMPTY;
 	private ItemStackHandler container = new ItemStackHandler(0) {
         @Override
@@ -86,53 +94,20 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	@Override
 	public void save(TagCompound nbt) {
-		if (name != null) {
-			// Probably in some weird block break path
-
-            nbt.setString("name", name);
-            nbt.setInteger("rotation", rotation.ordinal());
-            nbt.setVec3i("offset", offset);
-            nbt.set("replaced", replaced.toNBT());
-
-            nbt.set("inventory", container.save());
-            nbt.set("craftItem", craftItem.toTag());
-            nbt.setInteger("craftProgress", craftProgress);
-            nbt.setInteger("craftMode", craftMode.ordinal());
-
+		if (container != null) {
+			nbt.set("inventory", container.save());
+		}
+		if (energy != null) {
             nbt.setInteger("energy", energy.getCurrent());
 		}
 	}
 
 	@Override
 	public void load(TagCompound nbt) {
-		rotation = Rotation.values()[nbt.getInteger("rotation")];
-		offset = nbt.getVec3i("offset");
-		replaced = new BlockInfo(nbt.get("replaced"));
-		
 		container.load(nbt.get("inventory"));
-		craftItem = new ItemStack(nbt.get("craftItem"));
-		craftProgress = nbt.getInteger("craftProgress");
-		
-		craftMode = CraftingMachineMode.STOPPED;
-		if (nbt.hasKey("craftMode")) {
-			craftMode = CraftingMachineMode.values()[nbt.getInteger("craftMode")];
-		}
-		
 		// Empty and then refill energy storage
 		energy.extract(energy.getCurrent(), false);
 		energy.receive(nbt.getInteger("energy"), false);
-
-		name = nbt.getString("name");
-	}
-
-	@Override
-	public void writeUpdate(TagCompound nbt) {
-
-	}
-
-	@Override
-	public void readUpdate(TagCompound nbt) {
-
 	}
 
 	/* TODO RENDER
@@ -349,9 +324,5 @@ public class TileMultiblock extends BlockEntityTickable {
 	@Override
 	public ItemStack onPick() {
 		return ItemStack.EMPTY;
-	}
-
-	@Override
-	public void onNeighborChange(Vec3i neighbor) {
 	}
 }

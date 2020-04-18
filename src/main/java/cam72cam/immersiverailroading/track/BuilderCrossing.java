@@ -7,14 +7,15 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.world.World;
 
 public class BuilderCrossing extends BuilderBase {
 	/*
 	 * This is terrible
 	 */
 
-	public BuilderCrossing(RailInfo info, Vec3i pos) {
-		super(info.withLength(3), pos);
+	public BuilderCrossing(RailInfo info, World world, Vec3i pos) {
+		super(info.withLength(3), world, pos);
 
 		this.setParentPos(Vec3i.ZERO);
 		

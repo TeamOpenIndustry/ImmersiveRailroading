@@ -10,40 +10,46 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.track.*;
-import cam72cam.mod.world.World;
+import cam72cam.mod.serialization.*;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.world.World;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@TagMapped(RailInfo.TagMapper.class)
 public class RailInfo {
-	public final World world;
+	@TagField("settings")
 	public final RailSettings settings;
+	@TagField("placement")
 	public final PlacementInfo placementInfo;
+	@TagField("custom")
 	public final PlacementInfo customInfo;
 
 	// Used for tile rendering only
+	@TagField("switchState")
 	public final SwitchState switchState;
+	@TagField("switchForced")
 	public final SwitchState switchForced;
+	@TagField("tablePos")
 	public final double tablePos;
+
 	public final String uniqueID;
 	public final boolean itemHeld;
 
 
-	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
-		this(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, false);
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false);
 	}
 
-	public RailInfo(World world, RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 		}
 
-		this.world = world;
 		this.settings = settings;
 		this.placementInfo = placementInfo;
 		this.customInfo = customInfo;
@@ -51,7 +57,9 @@ public class RailInfo {
 		this.switchForced = switchForced;
 		this.tablePos = tablePos;
 		this.itemHeld = itemHeld;
-
+		this.uniqueID = generateID();
+	}
+	private String generateID() {
 		Object[] props = new Object [] {
 				this.settings.type,
 				this.settings.length,
@@ -83,90 +91,86 @@ public class RailInfo {
 			id += Config.ConfigBalance.AnglePlacementSegmentation;
 			id += this.itemHeld;
 		}
-		uniqueID = id;
+		return id;
 	}
 
-	public RailInfo(World world, ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(world, RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
+		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
-	public RailInfo(World world, Vec3i pos, TagCompound nbt) {
-		this(
-				world,
-				new RailSettings(nbt.get("settings")),
-				new PlacementInfo(nbt.get("placement"), pos),
-				new PlacementInfo(nbt.get("custom"), pos),
-				SwitchState.values()[nbt.getInteger("switchState")],
-				SwitchState.values()[nbt.getInteger("switchForced")],
-				nbt.getDouble("tablePos")
-		);
-	}
+	private RailInfo(TagCompound nbt) throws SerializationException {
+		this.settings = null;
+		this.placementInfo = null;
+		this.customInfo = null;
+		this.switchState = null;
+		this.switchForced = null;
+		this.tablePos = 0;
+		this.itemHeld = false;
 
-	public TagCompound toNBT(Vec3i pos) {
-		TagCompound nbt = new TagCompound();
-		nbt.set("settings", settings.toNBT());
-		nbt.set("placement", placementInfo.toNBT(pos));
-		nbt.set("custom", customInfo.toNBT(pos));
-		nbt.setInteger("switchState", switchState.ordinal());
-		nbt.setInteger("switchForced", switchForced.ordinal());
-		nbt.setDouble("tablePos", tablePos);
-		return nbt;
+		TagSerializer.deserialize(nbt, this);
+
+		this.uniqueID = generateID();
 	}
 
 	@Override
 	public RailInfo clone() {
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos);
+		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos);
 	}
 
 	public RailInfo withLength(int length) {
 		RailSettings settings = this.settings.withLength(length);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 
 	public RailInfo withType(TrackItems type) {
 		RailSettings settings = this.settings.withType(type);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 	
 	public RailInfo withTrack(String track) {
 		RailSettings settings = this.settings.withTrack(track);
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 
 	public RailInfo withItemHeld(boolean itemHeld) {
-		return new RailInfo(world, settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+	}
+
+	public RailInfo offset(Vec3i offset) {
+		return new RailInfo(settings, placementInfo.offset(offset), customInfo != null ? customInfo.offset(offset) : null, switchState, switchForced, tablePos, itemHeld);
 	}
 
 	public Map<Vec3i, BuilderBase> builders = new HashMap<>();
-	public BuilderBase getBuilder(Vec3i pos) {
+	public BuilderBase getBuilder(World world, Vec3i pos) {
+		// TODO HOLY MEMORY LEAK BATMAN!
 		if (builders.containsKey(pos)) {
 			return builders.get(pos);
 		}
-		builders.put(pos, constructBuilder(pos));
+		builders.put(pos, constructBuilder(world, pos));
 		return builders.get(pos);
 	}
-	private BuilderBase constructBuilder(Vec3i pos) {
+	private BuilderBase constructBuilder(World world, Vec3i pos) {
 		switch (settings.type) {
 		case STRAIGHT:
-			return new BuilderStraight(this, pos);
+			return new BuilderStraight(this, world, pos);
 		case CROSSING:
-			return new BuilderCrossing(this, pos);
+			return new BuilderCrossing(this, world, pos);
 		case SLOPE:
-			return new BuilderSlope(this, pos);
+			return new BuilderSlope(this, world, pos);
 		case TURN:
-			return new BuilderTurn(this, pos);
+			return new BuilderTurn(this, world, pos);
 		case SWITCH:
-			return new BuilderSwitch(this, pos);
+			return new BuilderSwitch(this, world, pos);
 		case TURNTABLE:
-			return new BuilderTurnTable(this, pos);
+			return new BuilderTurnTable(this, world, pos);
 		case CUSTOM:
-			return new BuilderCubicCurve(this, pos);
+			return new BuilderCubicCurve(this, world, pos);
 		}
 		return null;
 	}
 
-	public BuilderBase getBuilder() {
-		return getBuilder(Vec3i.ZERO);
+	public BuilderBase getBuilder(World world) {
+		return getBuilder(world, Vec3i.ZERO);
 	}
 
 	private class MaterialManager {
@@ -234,21 +238,21 @@ public class RailInfo {
 		}
 	}
 
-	public boolean build(Player player) {
-		return this.build(player, true);
+	public boolean build(Player player, Vec3i pos) {
+		return this.build(player, pos, true);
 	}
 
-	public boolean build(Player player, boolean placeTrack) {
-		BuilderBase builder = getBuilder(new Vec3i(placementInfo.placementPosition));
+	public boolean build(Player player, Vec3i pos, boolean placeTrack) {
+		BuilderBase builder = getBuilder(player.getWorld(), pos);
 
 		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks && placeTrack) {
-			if (world.isServer) {
+			if (player.getWorld().isServer) {
 				builder.clearArea();
 			}
 		}
 
 		if (!placeTrack || (placeTrack && builder.canBuild())) {
-			if (world.isServer) {
+			if (player.getWorld().isServer) {
 				if (player.isCreative() && placeTrack) {
 					builder.build();
 					return true;
@@ -326,4 +330,56 @@ public class RailInfo {
 		return trackHeight;
 	}
 
+	public static class TagMapper implements cam72cam.mod.serialization.TagMapper<RailInfo> {
+		@Override
+		public TagAccessor<RailInfo> apply(Class<RailInfo> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(d, o) -> {
+						if (o == null) {
+							d.remove(fieldName);
+							return;
+						}
+						TagCompound info = new TagCompound();
+						TagSerializer.serialize(info, o);
+						d.set(fieldName, info);
+					},
+					(d, w) -> d.hasKey(fieldName) ? new RailInfo(d.get(fieldName)) : legacy(d)
+			);
+		}
+
+		private static RailInfo legacy(TagCompound nbt) {
+			// LEGACY
+			// TODO REMOVE 2.0
+
+			if (!nbt.hasKey("type") || !nbt.hasKey("turnQuarters")) {
+				return null;
+			}
+
+			TrackItems type = TrackItems.valueOf(nbt.getString("type"));
+			int length = nbt.getInteger("length");
+			int quarters = nbt.getInteger("turnQuarters");
+			ItemStack railBed = new ItemStack(nbt.get("railBed"));
+			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
+
+			if (type == TrackItems.SWITCH) {
+				quarters = 4;
+			}
+
+			TagCompound newPositionFormat = new TagCompound();
+			newPositionFormat.setDouble("x", nbt.getDouble("placementPositionX"));
+			newPositionFormat.setDouble("y", nbt.getDouble("placementPositionY"));
+			newPositionFormat.setDouble("z", nbt.getDouble("placementPositionZ"));
+			nbt.set("placementPosition", newPositionFormat);
+
+			PlacementInfo placementInfo = new PlacementInfo(nbt);
+			placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
+
+			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
+			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
+			double tablePos = nbt.getDouble("tablePos");
+
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false);
+			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
+		}
+	}
 }

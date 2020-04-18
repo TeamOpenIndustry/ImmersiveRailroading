@@ -1,23 +1,25 @@
 package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
-import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.TrackBase;
-import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TileRail extends TileRailBase {
-
+	@TagField("info")
 	public RailInfo info;
+	@TagField(value = "drops", typeHint = ItemStack.class, mapper = DropsMapper.class)
 	private List<ItemStack> drops;
 
 	@Override
@@ -39,7 +41,7 @@ public class TileRail extends TileRailBase {
 
 	public void setSwitchState(SwitchState state) {
 		if (state != info.switchState) {
-			info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, state, info.switchForced, info.tablePos);
+			info = new RailInfo(info.settings, info.placementInfo, info.customInfo, state, info.switchForced, info.tablePos);
 			this.markDirty();
 		}
 	}
@@ -47,7 +49,7 @@ public class TileRail extends TileRailBase {
 	public void nextTablePos(boolean back) {
 		float delta = 360 / (64f);
 		double tablePos = ((int)(info.tablePos / delta)) * delta + (back ? delta : -delta);
-		info = new RailInfo(info.world, info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
+		info = new RailInfo(info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
 		this.markDirty();
 		
 		List<EntityCoupleableRollingStock> ents = world.getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(pos)) < info.settings.length, EntityCoupleableRollingStock.class);
@@ -56,65 +58,34 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
-	@Override
-	public void load(TagCompound nbt) {
-		super.load(nbt);
-
-		this.drops = new ArrayList<>();
-		if (nbt.hasKey("drops")) {
-			TagCompound dropNBT = nbt.get("drops");
-			int count = dropNBT.getInteger("count");
-			for (int i = 0; i < count; i++) {
-				drops.add(new ItemStack(dropNBT.get("drop_" + i)));
-			}
+	private static class DropsMapper implements TagMapper<List<ItemStack>> {
+		@Override
+		public TagAccessor<List<ItemStack>> apply(Class<List<ItemStack>> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(nbt, drops) -> {
+						// TODO replace with standard List serializer
+						if (drops != null && !drops.isEmpty()) {
+							TagCompound dropNBT = new TagCompound();
+							dropNBT.setInteger("count", drops.size());
+							for (int i = 0; i < drops.size(); i++) {
+								dropNBT.set("drop_" + i, drops.get(i).toTag());
+							}
+							nbt.set("drops", dropNBT);
+						}
+					},
+					nbt -> {
+						List<ItemStack> drops = new ArrayList<>();
+						if (nbt.hasKey("drops")) {
+							TagCompound dropNBT = nbt.get("drops");
+							int count = dropNBT.getInteger("count");
+							for (int i = 0; i < count; i++) {
+								drops.add(new ItemStack(dropNBT.get("drop_" + i)));
+							}
+						}
+						return drops;
+					}
+			);
 		}
-
-		if (nbt.hasKey("info")) {
-			info = new RailInfo(world, pos, nbt.get("info"));
-		} else {
-			// LEGACY
-			// TODO REMOVE 2.0
-
-			TrackItems type = TrackItems.valueOf(nbt.getString("type"));
-			int length = nbt.getInteger("length");
-			int quarters = nbt.getInteger("turnQuarters");
-			ItemStack railBed = new ItemStack(nbt.get("railBed"));
-			Gauge gauge = Gauge.from(nbt.getDouble("gauge"));
-
-			if (type == TrackItems.SWITCH) {
-				quarters = 4;
-			}
-
-			TagCompound newPositionFormat = new TagCompound();
-			newPositionFormat.setDouble("x", nbt.getDouble("placementPositionX"));
-			newPositionFormat.setDouble("y", nbt.getDouble("placementPositionY"));
-			newPositionFormat.setDouble("z", nbt.getDouble("placementPositionZ"));
-			nbt.set("placementPosition", newPositionFormat);
-
-            PlacementInfo placementInfo = new PlacementInfo(nbt, pos);
-            placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
-
-			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];
-			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
-			double tablePos = nbt.getDouble("tablePos");
-
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false);
-			info = new RailInfo(world, settings, placementInfo, null, switchState, switchForced, tablePos);
-		}
-	}
-
-	@Override
-	public void save(TagCompound nbt) {
-		nbt.set("info", info.toNBT(pos));
-		if (drops != null && drops.size() != 0) {
-			TagCompound dropNBT = new TagCompound();
-			dropNBT.setInteger("count", drops.size());
-			for (int i = 0; i < drops.size(); i++) {
-				dropNBT.set("drop_" + i, drops.get(i).toTag());
-			}
-			nbt.set("drops", dropNBT);
-		}
-		super.save(nbt);
 	}
 
 	public void setDrops(List<ItemStack> drops) {
@@ -142,11 +113,11 @@ public class TileRail extends TileRailBase {
 		int floating = 0;
 		int total = 0;
 
-		if (info.world == null) {
+		if (info.settings == null) {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(new Vec3i(info.placementInfo.placementPosition)).getTracksForRender()) {
+		for (TrackBase track : info.getBuilder(world, new Vec3i(info.placementInfo.placementPosition).add(pos)).getTracksForRender()) {
 			Vec3i tpos = track.getPos();
 			total++;
 

@@ -39,29 +39,29 @@ public abstract class TrackBase {
             // Turn table override
             solidNotRequired ||
             // Valid block beneath
-            builder.info.world.isTopSolid(pos.down()) ||
+            builder.world.isTopSolid(pos.down()) ||
             // BlockType below is replaceable and we will replace it with something
-            countFill && (BlockUtil.canBeReplaced(builder.info.world, pos.down(), false) && !builder.info.settings.railBedFill.isEmpty()) ||
+            countFill && (BlockUtil.canBeReplaced(builder.world, pos.down(), false) && !builder.info.settings.railBedFill.isEmpty()) ||
             // BlockType below is an IR Rail
-            BlockUtil.isIRRail(builder.info.world, pos.down());
+            BlockUtil.isIRRail(builder.world, pos.down());
 	}
 
 	public boolean isOverTileRail() {
-		return builder.info.world.getBlockEntity(getPos(), TileRail.class) != null && this instanceof TrackGag;
+		return builder.world.getBlockEntity(getPos(), TileRail.class) != null && this instanceof TrackGag;
 	}
 
 	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		Vec3i pos = getPos();
 
-		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.info.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
+		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
 	public TileRailBase placeTrack(boolean actuallyPlace) {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			TileRailGag tr = (TileRailGag) IRBlocks.BLOCK_RAIL_GAG.createBlockEntity(builder.info.world, pos);
+			TileRailGag tr = (TileRailGag) IRBlocks.BLOCK_RAIL_GAG.createBlockEntity(builder.world, pos);
 			if (parent != null) {
 				tr.setParent(parent);
 			} else {
@@ -72,34 +72,34 @@ public abstract class TrackBase {
 			return tr;
 		}
 
-		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.info.world, pos.down(), false)) {
-			builder.info.world.setBlock(pos.down(), builder.info.settings.railBedFill);
+		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
+			builder.world.setBlock(pos.down(), builder.info.settings.railBedFill);
 		}
 
 
 		TagCompound replaced = null;
 		
 		TileRailBase te = null;
-		if (!builder.info.world.isAir(pos)) {
-			if (builder.info.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
-				te = builder.info.world.getBlockEntity(pos, TileRailBase.class);
+		if (!builder.world.isAir(pos)) {
+			if (builder.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
+				te = builder.world.getBlockEntity(pos, TileRailBase.class);
 				if (te != null) {
 					replaced = te.getData();
 				}
 			} else {
-				builder.info.world.breakBlock(pos);
+				builder.world.breakBlock(pos);
 			}
 		}
 		
         if (te != null) {
             te.setWillBeReplaced(true);
         }
-        builder.info.world.setBlock(pos, block);
+        builder.world.setBlock(pos, block);
         if (te != null) {
             te.setWillBeReplaced(false);
         }
 
-		TileRailBase tr = builder.info.world.getBlockEntity(pos, TileRailBase.class);
+		TileRailBase tr = builder.world.getBlockEntity(pos, TileRailBase.class);
 		tr.setReplaced(replaced);
 		if (parent != null) {
 			tr.setParent(parent);

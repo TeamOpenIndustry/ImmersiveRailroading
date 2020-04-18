@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
-import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.world.World;
@@ -114,9 +113,9 @@ public class MovementTrack {
 			} else {
 				return backward;
 			}
-		} else if (rail.info.getBuilder() instanceof IIterableTrack) {
-			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder()).getPath(0.25);
-			Vec3d center = rail.info.placementInfo.placementPosition;
+		} else if (rail.info.getBuilder(world) instanceof IIterableTrack) {
+			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25);
+			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.pos);
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
 			for (PosStep pos : positions) {
