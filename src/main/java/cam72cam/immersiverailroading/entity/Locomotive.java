@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.render.SmokeParticle.SmokeParticleData;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -34,7 +35,8 @@ public abstract class Locomotive extends FreightTank {
 
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
-	
+
+	@TagField("deadMansSwitch")
 	private boolean deadMansSwitch;
 	private int deadManChangeTimeout;
 
@@ -74,7 +76,6 @@ public abstract class Locomotive extends FreightTank {
 		super.save(data);
 		data.setFloat("throttle", getThrottle());
 		data.setFloat("brake", getAirBrake());
-		data.setBoolean("deadMansSwitch", deadMansSwitch);
 		data.setInteger("bell", getBell());
 	}
 
@@ -82,7 +83,6 @@ public abstract class Locomotive extends FreightTank {
 		super.load(data);
 		setThrottle(data.getFloat("throttle"));
 		setAirBrake(data.getFloat("brake"));
-		deadMansSwitch = data.getBoolean("deadMansSwitch");
 		setBell(data.getInteger("bell"));
 	}
 

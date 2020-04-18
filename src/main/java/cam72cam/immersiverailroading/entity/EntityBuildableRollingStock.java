@@ -19,47 +19,17 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.serialization.TagCompound;
 
 public class EntityBuildableRollingStock extends EntityRollingStock {
+	@TagField("isBuilt")
 	private boolean isBuilt = false;
+	@TagField(value = "builtItems", typeHint = ItemComponentType.class)
 	private List<ItemComponentType> builtItems = new ArrayList<>();
 
-	@Override
-	public void save(TagCompound data) {
-		super.save(data);
-		data.setBoolean("isBuilt", isBuilt);
-		data.setEnumList("builtItems", builtItems);
-	}
-	
-	@Override
-	public void load(TagCompound data) {
-		super.load(data);
-
-		isBuilt = data.getBoolean("isBuilt");
-		if (isBuilt) {
-			setComponents(this.getDefinition().getItemComponents());
-		} else {
-			setComponents(data.getEnumList("builtItems", ItemComponentType.class));
-		}
-	}
-
-	@Override
-	public void saveSpawn(TagCompound data) {
-		super.saveSpawn(data);
-		data.setBoolean("isBuilt", isBuilt);
-		data.setEnumList("builtItems", builtItems);
-	}
-
-	@Override
-	public void loadSpawn(TagCompound data) {
-		super.loadSpawn(data);
-		isBuilt = data.getBoolean("isBuilt");
-		setComponents(data.getEnumList("builtItems", ItemComponentType.class));
-	}
-	
 	public void setComponents(List<ItemComponentType> items) {
 		this.builtItems = new ArrayList<>(items);
 		this.isBuilt = false;
@@ -369,10 +339,20 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 		}
         return ClickResult.PASS;
 	}
-	
+
+	@Override
+	public void load(TagCompound tag) {
+		super.load(tag);
+		onAssemble();
+	}
+
 	@Override
     public void onDamage(DamageType type, Entity source, float amount) {
 		super.onDamage(type, source, amount);
+
+		if (isDead() && getWorld().isServer) {
+			onDissassemble();
+		}
 
 		if (this.isDead() && shouldDropItems(type, amount)) {
 			if (isBuilt) {

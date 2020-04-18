@@ -10,6 +10,7 @@ import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
@@ -19,19 +20,8 @@ public abstract class FreightTank extends Freight {
 	private static final String FLUID_AMOUNT = "FLUID_AMOUNT";
 	private static final String FLUID_TYPE = "FLUID_TYPE";
 
-	public final FluidTank theTank = new FluidTank(null, 0) {
-		@Override
-		public boolean allows(Fluid fluid) {
-			return (getFluidFilter() == null || getFluidFilter().contains(fluid));
-		}
-		
-		@Override
-		public void onChanged() {
-			if (getWorld().isServer) {
-				FreightTank.this.onTankContentsChanged();
-			}
-		}
-	};
+	@TagField("tank")
+	public final FluidTank theTank = new FluidTank(null, 0);
 
 	public FreightTank() {
 		sync.setInteger(FLUID_AMOUNT, 0);
@@ -44,10 +34,6 @@ public abstract class FreightTank extends Freight {
 	 */
 	public abstract FluidQuantity getTankCapacity();
 
-	/**
-	 * null == all
-	 * [] == none
-	 */
 	@Nullable
 	public abstract List<Fluid> getFluidFilter();
 
@@ -108,13 +94,14 @@ public abstract class FreightTank extends Freight {
 	public void onAssemble() {
 		super.onAssemble();
 		this.theTank.setCapacity(this.getTankCapacity().MilliBuckets());
+		this.theTank.setFilter(this::getFluidFilter);
+		this.theTank.onChanged(this::onTankContentsChanged);
 		onTankContentsChanged();
 	}
 	
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		this.theTank.drain(this.theTank.getContents(), true);
 		this.theTank.setCapacity(0);
 		onTankContentsChanged();
 	}
@@ -146,19 +133,6 @@ public abstract class FreightTank extends Freight {
 		return GuiTypes.TANK;
 	}
 
-	@Override
-	public void save(TagCompound data) {
-		super.save(data);
-		data.set("tank", this.theTank.write(new TagCompound()));
-	}
-
-	@Override
-	public void load(TagCompound data) {
-		super.load(data);
-		this.theTank.read(data.get("tank"));
-		onTankContentsChanged();
-	}
-	
 	@Override
 	public void onTick() {
 		super.onTick();

@@ -10,13 +10,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import cam72cam.immersiverailroading.util.RealBB;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.serialization.TagCompound;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
@@ -84,56 +84,21 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private boolean resimulate = false;
 	public boolean isAttaching = false;
 
+	@TagField("CoupledFront")
 	private UUID coupledFront = null;
+	@TagField("lastKnownFront")
 	private Vec3i lastKnownFront = null;
+	@TagField("frontCouplerEngaged")
 	private boolean frontCouplerEngaged = true;
 	private Vec3d couplerFrontPosition = null;
-	
+
+	@TagField("CoupledBack")
 	private UUID coupledBack = null;
+	@TagField("lastKnownRear")
 	private Vec3i lastKnownRear= null;
+	@TagField("backCouplerEngaged")
 	private boolean backCouplerEngaged = true;
 	private Vec3d couplerRearPosition = null;
-
-	/*
-	 * 
-	 * Data Read/Write
-	 * 
-	 */
-
-	@Override
-	public void save(TagCompound data) {
-		super.save(data);
-		if (coupledFront != null) {
-			data.setString("CoupledFront", coupledFront.toString());
-			if (lastKnownFront != null) {
-				data.setVec3i("lastKnownFront", lastKnownFront);
-			}
-		}
-		data.setBoolean("frontCouplerEngaged", frontCouplerEngaged);
-		if (coupledBack != null) {
-			data.setString("CoupledBack", coupledBack.toString());
-			if (lastKnownRear != null) {
-				data.setVec3i("lastKnownRear", lastKnownRear);
-			}
-		}
-		data.setBoolean("backCouplerEngaged", backCouplerEngaged);
-	}
-
-	@Override
-	public void load(TagCompound data) {
-		super.load(data);
-		if (data.hasKey("CoupledFront")) {
-			coupledFront = UUID.fromString(data.getString("CoupledFront"));
-            lastKnownFront = data.getVec3i("lastKnownFront");
-		}
-		frontCouplerEngaged = data.getBoolean("frontCouplerEngaged");
-
-		if (data.hasKey("CoupledBack")) {
-			coupledBack = UUID.fromString(data.getString("CoupledBack"));
-            lastKnownRear = data.getVec3i("lastKnownRear");
-		}
-		backCouplerEngaged = data.getBoolean("backCouplerEngaged");
-	}
 
 	/*
 	 * 

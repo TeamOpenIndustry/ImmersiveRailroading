@@ -1,46 +1,32 @@
 package cam72cam.immersiverailroading.entity;
+
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
-import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.entity.*;
+import cam72cam.mod.entity.DamageType;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Living;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.item.ItemStackHandler;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.serialization.TagCompound;
 
 import java.util.List;
 
 public abstract class Freight extends EntityCoupleableRollingStock {
-	public FilteredStackHandler cargoItems = new FilteredStackHandler(0) {
-        @Override
-        protected void onContentsChanged(int slot) {
-            // We need to tell the tile entity that something has changed so
-            // that the chest getContents is persisted
-        	Freight.this.onInventoryChanged();
-        }
-    };
-    
+	@TagField("items")
+	public FilteredStackHandler cargoItems = new FilteredStackHandler(0);
+
 	protected final static String CARGO_ITEMS = "CARGO_ITEMS";
 	protected final static String PERCENT_FULL = "PERCENT_FULL";
 
 	public Freight() {
 		this.sync.setInteger(CARGO_ITEMS, 0);
 		this.sync.setInteger(PERCENT_FULL, 0);
-
-		initContainerFilter();
-	}
-	
-	protected void onInventoryChanged() {
-		if (getWorld().isServer) {
-			handleMass();
-		}
 	}
 
 	public abstract int getInventorySize();
@@ -63,25 +49,23 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@Override
 	public void onAssemble() {
 		super.onAssemble();
-		this.cargoItems.setSize(this.getInventorySize());
+		List<ItemStack> extras = cargoItems.setSize(this.getInventorySize());
+		if (getWorld().isServer) {
+			extras.forEach(stack -> getWorld().dropItem(stack, getPosition()));
+			cargoItems.onChanged(slot -> handleMass());
+			handleMass();
+		}
+		initContainerFilter();
 	}
 	
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-		
+
+		List<ItemStack> extras = cargoItems.setSize(0);
 		if (getWorld().isServer) {
-			for (int slot = 0; slot < cargoItems.getSlotCount(); slot++) {
-				ItemStack itemstack = cargoItems.get(slot);
-				if (itemstack.getCount() != 0) {
-					Vec3d pos = getPosition().add(VecUtil.fromWrongYaw(4, this.getRotationYaw()+90));
-					getWorld().dropItem(itemstack.copy(), new Vec3i(pos));
-					itemstack.setCount(0);
-				}
-			}
+			extras.forEach(stack -> getWorld().dropItem(stack, getPosition()));
 		}
-		
-		this.cargoItems.setSize(0);
 	}
 
 	@Override
@@ -152,28 +136,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		return this.sync.getInteger(PERCENT_FULL);
 	}
 
-	@Override
-	public void save(TagCompound data) {
-		super.save(data);
-		data.set("items", cargoItems.save());
-	}
-
-	@Override
-	public void load(TagCompound data) {
-		super.load(data);
-		ItemStackHandler temp = new ItemStackHandler();
-		temp.load(data.get("items"));
-		cargoItems.setSize(this.getInventorySize());
-		for (int slot = 0; slot < temp.getSlotCount(); slot ++) {
-			if (slot < cargoItems.getSlotCount()) {
-				cargoItems.set(slot, temp.get(slot));
-			} else {
-				getWorld().dropItem(temp.get(slot), getPosition());
-			}
-		}
-		handleMass();
-	}
-	
 	protected void initContainerFilter() {
 		
 	}

@@ -41,40 +41,10 @@ public class TileMultiblock extends BlockEntityTickable {
 	private int craftProgress = 0;
 	@TagField("craftItem")
 	private ItemStack craftItem = ItemStack.EMPTY;
-	private ItemStackHandler container = new ItemStackHandler(0) {
-        @Override
-        protected void onContentsChanged(int slot) {
-        	markDirty();
-        }
-
-		@Override
-		public int getLimit(int slot) {
-			if (isLoaded()) {
-				return Math.min(super.getLimit(slot), getMultiblock().getSlotLimit(offset, slot));
-			}
-			return 0;
-		}
-    };
-    
-    private Energy energy = new Energy(1000) {
-    	@Override
-        public int receive(int maxReceive, boolean simulate) {
-    		int val = super.receive(maxReceive, simulate);
-    		if (!simulate && val != 0 && isLoaded()) {
-    			markDirty();
-    		}
-    		return val;
-    	}
-    	
-    	@Override
-        public int extract(int maxExtract, boolean simulate) {
-    		int val = super.extract(maxExtract, simulate);
-    		if (!simulate && val != 0 && isLoaded()) {
-    			markDirty();
-    		}
-    		return val;
-    	}
-    };
+	@TagField
+	private final ItemStackHandler container = new ItemStackHandler(0);
+	@TagField("energyStorage")
+    private final Energy energy = new Energy(0, 1000);
 
 	public boolean isLoaded() {
 			//TODO FIX ME bad init
@@ -93,21 +63,10 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 
 	@Override
-	public void save(TagCompound nbt) {
-		if (container != null) {
-			nbt.set("inventory", container.save());
-		}
-		if (energy != null) {
-            nbt.setInteger("energy", energy.getCurrent());
-		}
-	}
-
-	@Override
 	public void load(TagCompound nbt) {
-		container.load(nbt.get("inventory"));
-		// Empty and then refill energy storage
-		energy.extract(energy.getCurrent(), false);
-		energy.receive(nbt.getInteger("energy"), false);
+		container.onChanged(slot -> this.markDirty());
+		container.setSlotLimit(slot -> getMultiblock().getSlotLimit(offset, slot));
+		energy.onChanged(this::markDirty);
 	}
 
 	/* TODO RENDER

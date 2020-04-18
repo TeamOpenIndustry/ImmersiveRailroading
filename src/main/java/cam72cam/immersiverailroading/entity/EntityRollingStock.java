@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.*;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.serialization.TagCompound;
 import com.google.gson.JsonObject;
@@ -19,11 +20,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityRollingStock extends Entity implements IWorldData, ISpawnData, ITickable, IClickable, IKillable {
+public class EntityRollingStock extends Entity implements IWorldData, ITickable, IClickable, IKillable {
 	public static final EntitySettings settings = new EntitySettings().setCollisionReduction(1f).setImmuneToFire(true).setAttachedToPlayer(false).setDefaultMovement(false);
 
+	@TagField("defID")
     protected String defID;
+	@TagField("gauge")
 	public Gauge gauge;
+	@TagField("tag")
 	public String tag = "";
 
 	public void setup(String defID, Gauge gauge, String texture) {
@@ -85,39 +89,13 @@ public class EntityRollingStock extends Entity implements IWorldData, ISpawnData
 	 */
 
 	@Override
-	public void save(TagCompound nbttagcompound) {
-		nbttagcompound.setString("defID", defID);
-		nbttagcompound.setDouble("gauge", gauge.value());
-		nbttagcompound.setString("tag", tag);
-        nbttagcompound.setString("texture", sync.getString("texture"));
+	public void save(TagCompound tag) {
+        tag.setString("texture", sync.getString("texture"));
 	}
 
 	@Override
-	public void load(TagCompound nbttagcompound) {
-		defID = nbttagcompound.getString("defID");
-        gauge = Gauge.from(nbttagcompound.getDouble("gauge"));
-
-		tag = nbttagcompound.getString("tag");
-
-		sync.setString("texture", nbttagcompound.getString("texture"));
-	}
-
-
-	@Override
-	public void saveSpawn(TagCompound data) {
-		data.setString("defID", defID);
-		data.setDouble("gauge", gauge.value());
-		data.setString("tag", tag);
-
-        data.setString("texture", sync.getString("texture"));
-	}
-	@Override
-	public void loadSpawn(TagCompound data) {
-		defID = data.getString("defID");
-        gauge = Gauge.from(data.getDouble("gauge"));
-		tag = data.getString("tag");
-
-		sync.setString("texture", data.getString("texture"));
+	public void load(TagCompound tag) {
+		sync.setString("texture", tag.getString("texture"));
 	}
 
 

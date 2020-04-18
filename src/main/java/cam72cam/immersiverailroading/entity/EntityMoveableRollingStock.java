@@ -14,8 +14,10 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.custom.ICollision;
+import cam72cam.mod.entity.custom.ISpawnData;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.serialization.TagCompound;
@@ -23,14 +25,16 @@ import cam72cam.mod.serialization.TagCompound;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
+public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision, ISpawnData {
 
     public static final String DAMAGE_SOURCE_HIT = "immersiverailroading:hitByTrain";
 
+    @TagField("frontYaw")
     private Float frontYaw;
+    @TagField("rearYaw")
     private Float rearYaw;
+    @TagField("distanceTraveled")
     public float distanceTraveled = 0;
-    public float renderDistanceTraveled = 0;
     public double tickPosID = 0;
     private Speed currentSpeed;
     public List<TickPos> positions = new ArrayList<>();
@@ -47,27 +51,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private Vec3i clackRearPos;
 
     @Override
-    public void save(TagCompound data) {
-        super.save(data);
-        if (frontYaw != null) {
-            data.setFloat("frontYaw", frontYaw);
-        }
-        if (rearYaw != null) {
-            data.setFloat("rearYaw", rearYaw);
-        }
-        data.setFloat("distanceTraveled", distanceTraveled);
-    }
-
-    @Override
     public void load(TagCompound data) {
         super.load(data);
-        if (data.hasKey("frontYaw")) {
-            frontYaw = data.getFloat("frontYaw");
-        }
-        if (data.hasKey("rearYaw")) {
-            rearYaw = data.getFloat("rearYaw");
-        }
-        distanceTraveled = data.getFloat("distanceTraveled");
 
         if (frontYaw == null) {
             frontYaw = getRotationYaw();
@@ -80,9 +65,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     @Override
     public void loadSpawn(TagCompound data) {
-        super.loadSpawn(data);
-        frontYaw = data.getFloat("frontYaw");
-        rearYaw = data.getFloat("rearYaw");
         tickPosID = data.getInteger("tickPosID");
         tickSkew = data.getDouble("tickSkew");
         positions = data.getList("positions", TickPos::new);
@@ -90,9 +72,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     @Override
     public void saveSpawn(TagCompound data) {
-        super.saveSpawn(data);
-        data.setFloat("frontYaw", frontYaw != null ? frontYaw : getRotationYaw());
-        data.setFloat("rearYaw", rearYaw != null ? rearYaw : getRotationYaw());
         data.setInteger("tickPosID", (int) tickPosID);
         data.setDouble("tickSkew", tickSkew);
         data.setList("positions", positions, TickPos::toTag);
