@@ -16,6 +16,7 @@ import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.mod.entity.DamageType;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.custom.IWorldData;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
@@ -24,7 +25,7 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Hand;
 
-public class EntityBuildableRollingStock extends EntityRollingStock {
+public class EntityBuildableRollingStock extends EntityRollingStock implements IWorldData {
 	@TagField("isBuilt")
 	private boolean isBuilt = false;
 	@TagField(value = "builtItems", typeHint = ItemComponentType.class)
@@ -342,8 +343,12 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 
 	@Override
 	public void load(TagCompound tag) {
-		super.load(tag);
 		onAssemble();
+	}
+
+	@Override
+	public void save(TagCompound data) {
+		// NOP
 	}
 
 	@Override
@@ -360,7 +365,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock {
 				ItemRollingStock.Data data = new ItemRollingStock.Data(item);
 				data.def = getDefinition();
 				data.gauge = gauge;
-				data.texture = sync.getString("texture");
+				data.texture = getTexture();
 				data.write();
 				getWorld().dropItem(item, source.getBlockPosition());
 			} else {

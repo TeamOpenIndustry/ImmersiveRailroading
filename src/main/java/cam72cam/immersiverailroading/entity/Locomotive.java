@@ -4,8 +4,10 @@ import java.util.UUID;
 
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.render.SmokeParticle.SmokeParticleData;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
@@ -24,13 +26,6 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.sound.ISound;
 
 public abstract class Locomotive extends FreightTank {
-
-	protected final static String THROTTLE = "THROTTLE";
-	protected final static String AIR_BRAKE = "AIR_BRAKE";
-	protected final static String HORN = "HORN";
-	protected final static String HORN_PLAYER = "HORN_PLAYER";
-	protected final static String BELL = "BELL";
-
 	public ISound bell;
 
 	private static final float throttleNotch = 0.04f;
@@ -40,16 +35,28 @@ public abstract class Locomotive extends FreightTank {
 	private boolean deadMansSwitch;
 	private int deadManChangeTimeout;
 
+	@TagSync
+	@TagField("THROTTLE")
+	private float throttle = 0;
+
+	@TagSync
+	@TagField("AIR_BRAKE")
+	private float airBrake = 0;
+
+	@TagSync
+	@TagField("HORN")
+	protected int hornTime = 0;
+
+	@TagSync
+	@TagField(value = "HORN_PLAYER", mapper = StrictTagMapper.class)
+	protected UUID hornPlayer = null;
+
+	@TagSync
+	@TagField("BELL")
+	private int bellTime = 0;
+
 	private int bellKeyTimeout;
 
-	public Locomotive() {
-		sync.setFloat(THROTTLE, 0f);
-		sync.setFloat(AIR_BRAKE, 0f);
-		sync.setInteger(HORN, 0);
-		sync.setInteger(BELL, 0);
-		sync.setUUID(HORN_PLAYER, null);
-	}
-	
 	/*
 	 * 
 	 * Stock Definitions
@@ -72,21 +79,6 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	@Override
-	public void save(TagCompound data) {
-		super.save(data);
-		data.setFloat("throttle", getThrottle());
-		data.setFloat("brake", getAirBrake());
-		data.setInteger("bell", getBell());
-	}
-
-	public void load(TagCompound data) {
-		super.load(data);
-		setThrottle(data.getFloat("throttle"));
-		setAirBrake(data.getFloat("brake"));
-		setBell(data.getInteger("bell"));
-	}
-
-	@Override
 	public void handleKeyPress(Player source, KeyTypes key) {
 		switch(key) {
 		case HORN:
@@ -95,11 +87,7 @@ public abstract class Locomotive extends FreightTank {
         case BELL:
             if (this.getDefinition().toggleBell) {
             	if (bellKeyTimeout == 0) {
-					if (getBell() != 0) {
-						setBell(0);
-					} else {
-						setBell(10);
-					}
+					bellTime = bellTime != 0 ? 0 : 10;
 					bellKeyTimeout = 10;
 				}
             } else {
@@ -206,20 +194,20 @@ public abstract class Locomotive extends FreightTank {
 					this.setAirBrake(1);
 				}
 			}
-			if (sync.getInteger(HORN) > 0) {
-				sync.setInteger(HORN, sync.getInteger(HORN)-1);
-			} else if (sync.getUUID(HORN_PLAYER) != null) {
-				sync.setUUID(HORN_PLAYER, null);
+			if (hornTime > 0) {
+				hornTime--;
+			} else if (hornPlayer != null) {
+				hornPlayer = null;
 			}
-			if (getBell() > 0 && !this.getDefinition().toggleBell) {
-				setBell(getBell()-1);
+			if (bellTime > 0 && !this.getDefinition().toggleBell) {
+				bellTime--;
 			}
 		} else {
 			if (ConfigSound.soundEnabled && bell != null) {
-				if (getBell() != 0 && !bell.isPlaying()) {
+				if (bellTime != 0 && !bell.isPlaying()) {
 					bell.setVolume(0.8f);
 					bell.play(getPosition());
-				} else if (getBell() == 0 && bell.isPlaying()) {
+				} else if (bellTime == 0 && bell.isPlaying()) {
 					bell.stop();
 				}
 
@@ -285,44 +273,35 @@ public abstract class Locomotive extends FreightTank {
 	 */
 	
 	public float getThrottle() {
-		return sync.getFloat(THROTTLE);
+		return throttle;
 	}
 	public void setThrottle(float newThrottle) {
 		if (this.getThrottle() != newThrottle) {
-			sync.setFloat(THROTTLE, newThrottle);
-			sync.send();
+			throttle = newThrottle;
 			triggerResimulate();
 		}
 	}
 	
 	public void setHorn(int val, UUID uuid) {
-		UUID currentPlayer = sync.getUUID(HORN_PLAYER);
-		if (currentPlayer == null && uuid != null) {
-			currentPlayer = uuid;
-			sync.setUUID(HORN_PLAYER, uuid);
+		if (hornPlayer == null && uuid != null) {
+			hornPlayer = uuid;
 		}
-		if (currentPlayer == null || currentPlayer.equals(uuid)) {
-			sync.setInteger(HORN, val);
+		if (hornPlayer == null || hornPlayer.equals(uuid)) {
+			hornTime = val;
 		}
 	}
 
 	public float getAirBrake() {
-		return sync.getFloat(AIR_BRAKE);
+		return airBrake;
 	}
 	public void setAirBrake(float newAirBrake) {
 		if (this.getAirBrake() != newAirBrake) {
-			sync.setFloat(AIR_BRAKE, newAirBrake);
-			sync.send();
+			airBrake = newAirBrake;
 			triggerResimulate();
 		}
 	}
-	public int getBell() {
-		return sync.getInteger(BELL);
-	}
 	public void setBell(int newBell) {
-		if (this.getBell() != newBell) {
-			sync.setInteger(BELL, newBell);
-		}
+		this.bellTime = newBell;
 	}
 
 	public double slipCoefficient() {

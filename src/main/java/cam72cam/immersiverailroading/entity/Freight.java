@@ -8,6 +8,7 @@ import cam72cam.mod.entity.DamageType;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
@@ -21,21 +22,17 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@TagField("items")
 	public FilteredStackHandler cargoItems = new FilteredStackHandler(0);
 
-	protected final static String CARGO_ITEMS = "CARGO_ITEMS";
-	protected final static String PERCENT_FULL = "PERCENT_FULL";
+	@TagSync
+	@TagField("CARGO_ITEMS")
+	private int itemCount = 0;
 
-	public Freight() {
-		this.sync.setInteger(CARGO_ITEMS, 0);
-		this.sync.setInteger(PERCENT_FULL, 0);
-	}
+	@TagSync
+	@TagField("PERCENT_FULL")
+	private int percentFull = 0;
 
 	public abstract int getInventorySize();
 	public abstract int getInventoryWidth();
 
-	public boolean showCurrentLoadOnly() {
-		return this.getDefinition().shouldShowCurrentLoadOnly();
-	}
-	
 	@Override
 	public FreightDefinition getDefinition() {
 		return this.getDefinition(FreightDefinition.class);
@@ -128,12 +125,12 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 				stacksWithStuff += 1;
 			}
 		}
-		this.sync.setInteger(CARGO_ITEMS, itemInsideCount);
-		this.sync.setInteger(PERCENT_FULL, stacksWithStuff * 100 / this.getInventorySize());
+		itemCount = itemInsideCount;
+		percentFull = stacksWithStuff * 100 / this.getInventorySize();
 	}
 	
 	public int getPercentCargoFull() {
-		return this.sync.getInteger(PERCENT_FULL);
+		return percentFull;
 	}
 
 	protected void initContainerFilter() {
@@ -157,7 +154,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	
 	@Override
 	public double getWeight() {
-		double fLoad = ConfigBalance.blockWeight * this.sync.getInteger(CARGO_ITEMS);
+		double fLoad = ConfigBalance.blockWeight * itemCount;
 		fLoad = fLoad + super.getWeight();
 		return fLoad;
 	}

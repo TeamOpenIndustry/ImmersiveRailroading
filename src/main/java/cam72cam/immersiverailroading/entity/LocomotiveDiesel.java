@@ -13,10 +13,12 @@ import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.serialization.TagCompound;
 
@@ -31,15 +33,21 @@ public class LocomotiveDiesel extends Locomotive {
 	private int turnOnOffDelay = 0;
 	private float hornVolume = 0;
 	private static float hornStep = 0.25f;
-	
-	private final static String ENGINE_TEMPERATURE = "ENGINE_TEMPERATURE";
-	private final static String TURNED_ON = "TURNED_ON";
-	private final static String ENGINE_OVERHEATED = "ENGINE_OVERHEATED";
+
+	@TagSync
+	@TagField("ENGINE_TEMPERATURE")
+	private float engineTemperature;
+
+	@TagSync
+	@TagField("TURNED_ON")
+	private boolean turnedOn = false;
+
+	@TagSync
+	@TagField("ENGINE_OVERHEATED")
+	private boolean engineOverheated = false;
 
 	public LocomotiveDiesel() {
-		sync.setFloat(ENGINE_TEMPERATURE, ambientTemperature());
-		sync.setBoolean(TURNED_ON, false);
-		sync.setBoolean(ENGINE_OVERHEATED, false);
+		engineTemperature = ambientTemperature();
 	}
 
 	@Override
@@ -48,27 +56,27 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	public float getEngineTemperature() {
-		return sync.getFloat(ENGINE_TEMPERATURE);
+		return engineTemperature;
 	}
 	
 	private void setEngineTemperature(float temp) {
-		sync.setFloat(ENGINE_TEMPERATURE, temp);
+		engineTemperature = temp;
 	}
 	
 	public void setTurnedOn(boolean value) {
-		sync.setBoolean(TURNED_ON, value);
+		turnedOn = value;
 	}
 	
 	public boolean isTurnedOn() {
-		return sync.getBoolean(TURNED_ON);
+		return turnedOn;
 	}
 	
 	public void setEngineOverheated(boolean value) {
-		sync.setBoolean(ENGINE_OVERHEATED, value);
+		engineOverheated = value;
 	}
 	
 	public boolean isEngineOverheated() {
-		return sync.getBoolean(ENGINE_OVERHEATED) && Config.ConfigBalance.canDieselEnginesOverheat;
+		return engineOverheated && Config.ConfigBalance.canDieselEnginesOverheat;
 	}
 	
 	public boolean isRunning() {
@@ -185,14 +193,14 @@ public class LocomotiveDiesel extends Locomotive {
 					}
 				}
 
-				if (sync.getInteger(HORN) != 0 && !horn.isPlaying() && isRunning()) {
+				if (hornTime != 0 && !horn.isPlaying() && isRunning()) {
 					if (this.getDefinition().getHornSus()) {
 						hornVolume = 0.5f;
 						horn.setVolume(hornVolume);
 					}
 					horn.play(getPosition());
 				}
-				else if(sync.getInteger(HORN) == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
+				else if(hornTime == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
                     if (hornVolume > 0.5) {
 						hornVolume -= 0.25;
 						horn.setVolume(hornVolume);
@@ -201,7 +209,7 @@ public class LocomotiveDiesel extends Locomotive {
 					}
 				}
 
-				if (this.getDefinition().getHornSus() && sync.getInteger(HORN) != 0 && hornVolume < 1) {
+				if (this.getDefinition().getHornSus() && hornTime != 0 && hornVolume < 1) {
 					hornVolume += 0.25;
 					horn.setVolume(hornVolume);
 				}

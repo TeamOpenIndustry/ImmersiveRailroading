@@ -12,7 +12,9 @@ import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.registry.Quilling.Chime;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -32,11 +34,18 @@ import java.util.Map;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
-	private final static String BOILER_PRESSURE  = "BOILER_PRESSURE";
-	// Celsius
-	private final static String BOILER_TEMPERATURE  = "BOILER_TEMPERATURE";
+	@TagSync
+	@TagField("BOILER_PRESSURE")
+	private float boilerPressure = 0;
 
-	private final static String PRESSURE_VALVE  = "PRESSURE_VALVE";
+	// Celsius
+	@TagSync
+	@TagField("BOILER_TEMPERATURE")
+	private float boilerTemperature;
+
+	@TagSync
+	@TagField("PRESSURE_VALVE")
+	private boolean pressureValve = false;
 	
 	// Map<Slot, TicksToBurn>
 	private final static String BURN_TIME  = "BURN_TIME";
@@ -45,9 +54,7 @@ public class LocomotiveSteam extends Locomotive {
 	private float drainRemainder;
 	
 	public LocomotiveSteam() {
-        sync.setFloat(BOILER_PRESSURE, 0f);
-        sync.setFloat(BOILER_TEMPERATURE, ambientTemperature());
-        sync.setBoolean(PRESSURE_VALVE, false);
+		boilerTemperature = ambientTemperature();
         sync.set(BURN_TIME, new TagCompound());
         sync.set(BURN_MAX, new TagCompound());
 	}
@@ -96,17 +103,17 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	public float getBoilerTemperature() {
-		return this.sync.getFloat(BOILER_TEMPERATURE);
+		return boilerTemperature;
 	}
 	private void setBoilerTemperature(float temp) {
-		this.sync.setFloat(BOILER_TEMPERATURE, temp);
+		boilerTemperature = temp;
 	}
 	
 	public float getBoilerPressure() {
-		return this.sync.getFloat(BOILER_PRESSURE);
+		return boilerPressure;
 	}
 	private void setBoilerPressure(float temp) {
-		this.sync.setFloat(BOILER_PRESSURE, temp);
+		boilerPressure = temp;
 	}
 
 	public Map<Integer, Integer> getBurnTime() {
@@ -219,7 +226,7 @@ public class LocomotiveSteam extends Locomotive {
 					pressure.setVolume(0.3f);
 				}
 				
-				if (sync.getInteger(HORN) < 1) {
+				if (hornTime < 1) {
 					pullString = 0;
 					soundDampener = 0;
 					for (ISound chime : chimes) {
@@ -236,16 +243,16 @@ public class LocomotiveSteam extends Locomotive {
 						} else {
 							float maxDelta = 1/20f;
 							float delta = 0;
-							if (sync.getInteger(HORN) > 5) {
+							if (hornTime > 5) {
 								if (soundDampener < 0.4) {
 									soundDampener = 0.4f;
 								}
 								if (soundDampener < 1) {
 									soundDampener += 0.1;
 								}
-								if (sync.getUUID(HORN_PLAYER) != null) {
+								if (hornPlayer != null) {
 									for (Entity pass : this.getPassengers()) {
-										if (!pass.getUUID().equals(sync.getUUID(HORN_PLAYER))) {
+										if (!pass.getUUID().equals(hornPlayer)) {
 											continue;
 										}
 										
@@ -358,7 +365,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			List<RenderComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE, gauge);
 			if (	whistles != null &&
-					(sync.getInteger(HORN) != 0 || whistle != null && whistle.isPlaying()) &&
+					(hornTime != 0 || whistle != null && whistle.isPlaying()) &&
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
 				) {
 				for (RenderComponent whistle : whistles) {
@@ -476,7 +483,7 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
-			if (steams != null && (sync.getBoolean(PRESSURE_VALVE) && Config.isFuelRequired(gauge))) {
+			if (steams != null && (pressureValve && Config.isFuelRequired(gauge))) {
 				if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
 					if (!pressure.isPlaying()) {
 						pressure.play(getPosition());
@@ -638,7 +645,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			// Pressure relief valve
 			int maxPSI = this.getDefinition().getMaxPSI(gauge);
-			sync.setBoolean(PRESSURE_VALVE, boilerPressure > maxPSI);
+			pressureValve = boilerPressure > maxPSI;
 			if (boilerPressure > maxPSI) {
 				waterUsed += boilerPressure - maxPSI;
 				boilerPressure = maxPSI;
@@ -650,7 +657,7 @@ public class LocomotiveSteam extends Locomotive {
 				boilerTemperature = 100;
 			}
 
-			sync.setBoolean(PRESSURE_VALVE, false);
+			pressureValve = false;
 		}
 		
 		float throttle = Math.abs(getThrottle());

@@ -4,12 +4,13 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -17,16 +18,16 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public abstract class FreightTank extends Freight {
-	private static final String FLUID_AMOUNT = "FLUID_AMOUNT";
-	private static final String FLUID_TYPE = "FLUID_TYPE";
-
 	@TagField("tank")
 	public final FluidTank theTank = new FluidTank(null, 0);
 
-	public FreightTank() {
-		sync.setInteger(FLUID_AMOUNT, 0);
-		sync.setString(FLUID_TYPE, "EMPTY");
-	}
+	@TagSync
+	@TagField("FLUID_AMOUNT")
+	private int fluidAmount = 0;
+
+	@TagSync
+	@TagField(value = "FLUID_TYPE", mapper = StrictTagMapper.class)
+	private String fluidType = null;
 
 	/*
 	 * 
@@ -64,15 +65,14 @@ public abstract class FreightTank extends Freight {
 	}
 	
 	public int getLiquidAmount() {
-		return sync.getInteger(FLUID_AMOUNT);
+		return fluidAmount;
 	}
 	
 	public Fluid getLiquid() {
-		String type = sync.getString(FLUID_TYPE);
-		if (type.equals("EMPTY")) {
+		if (fluidType == null) {
 			return null;
 		}
-		return Fluid.getFluid(type);
+		return Fluid.getFluid(fluidType);
 	}
 	
 	@Override
@@ -111,11 +111,11 @@ public abstract class FreightTank extends Freight {
 			return;
 		}
 		
-		sync.setInteger(FLUID_AMOUNT, theTank.getContents().getAmount());
+		fluidAmount =  theTank.getContents().getAmount();
 		if (theTank.getContents().getFluid() == null) {
-			sync.setString(FLUID_TYPE, "EMPTY");
+			fluidType = null;
 		} else {
-			sync.setString(FLUID_TYPE, theTank.getContents().getFluid().ident);
+			fluidType = theTank.getContents().getFluid().ident;
 		}
 	}
 	

@@ -9,18 +9,19 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.*;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Hand;
-import cam72cam.mod.serialization.TagCompound;
 import com.google.gson.JsonObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityRollingStock extends Entity implements IWorldData, ITickable, IClickable, IKillable {
+public class EntityRollingStock extends Entity implements ITickable, IClickable, IKillable {
 	public static final EntitySettings settings = new EntitySettings().setCollisionReduction(1f).setImmuneToFire(true).setAttachedToPlayer(false).setDefaultMovement(false);
 
 	@TagField("defID")
@@ -30,10 +31,14 @@ public class EntityRollingStock extends Entity implements IWorldData, ITickable,
 	@TagField("tag")
 	public String tag = "";
 
+	@TagSync
+	@TagField(value = "texture", mapper = StrictTagMapper.class)
+	private String texture = null;
+
 	public void setup(String defID, Gauge gauge, String texture) {
 		this.defID = defID;
 		this.gauge = gauge;
-		this.sync.setString("texture", texture);
+		this.texture = texture;
 	}
 
 	/* TODO?
@@ -84,22 +89,6 @@ public class EntityRollingStock extends Entity implements IWorldData, ITickable,
 	}
 
 	/*
-	 * 
-	 * Data RW for Spawn and Entity Load
-	 */
-
-	@Override
-	public void save(TagCompound tag) {
-        tag.setString("texture", sync.getString("texture"));
-	}
-
-	@Override
-	public void load(TagCompound tag) {
-		sync.setString("texture", tag.getString("texture"));
-	}
-
-
-	/*
 	 * Player Interactions
 	 */
 	
@@ -108,10 +97,9 @@ public class EntityRollingStock extends Entity implements IWorldData, ITickable,
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH)) {
 			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
 			if (texNames.size() > 1) {
-				int idx = texNames.indexOf(sync.getString("texture"));
+				int idx = texNames.indexOf(texture);
 				idx = (idx + (player.isCrouching() ? -1 : 1) + texNames.size()) % (texNames.size());
-				sync.setString("texture", texNames.get(idx));
-                sync.send();
+				texture = texNames.get(idx);
 				return ClickResult.ACCEPTED;
 			} else {
 				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
@@ -188,6 +176,6 @@ public class EntityRollingStock extends Entity implements IWorldData, ITickable,
 	}
 
 	public String getTexture() {
-		return sync.getString("texture");
+		return texture;
 	}
 }
