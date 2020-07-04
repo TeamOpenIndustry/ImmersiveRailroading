@@ -6,9 +6,8 @@ import cam72cam.mod.block.*;
 import java.util.function.Supplier;
 
 public abstract class BlockRailBase extends BlockTypeEntity {
-	@Override
-	public String getModID() {
-		return ImmersiveRailroading.MODID;
+	public BlockRailBase(String name) {
+		super(ImmersiveRailroading.MODID, name);
 	}
 
 	@Override

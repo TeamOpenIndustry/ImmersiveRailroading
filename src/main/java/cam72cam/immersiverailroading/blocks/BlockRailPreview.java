@@ -7,14 +7,8 @@ import cam72cam.mod.block.BlockTypeEntity;
 import cam72cam.mod.block.Material;
 
 public class BlockRailPreview extends BlockTypeEntity {
-	@Override
-	public String getModID() {
-		return ImmersiveRailroading.MODID;
-	}
-
-	@Override
-	public String getName() {
-		return "block_rail_preview";
+	public BlockRailPreview() {
+		super(ImmersiveRailroading.MODID, "block_rail_preview");
 	}
 
 	@Override

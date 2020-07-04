@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemBase;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.item.Recipes;
+import cam72cam.mod.item.*;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.CollectionUtil;
 
@@ -13,7 +10,7 @@ import java.util.UUID;
 
 public class ItemRadioCtrlCard extends ItemBase {
     public ItemRadioCtrlCard() {
-        super(ImmersiveRailroading.MODID, "item_radio_control_card", 1, ItemTabs.MAIN_TAB);
+        super(ImmersiveRailroading.MODID, "item_radio_control_card");
         Fuzzy transistor = new Fuzzy("oc:materialTransistor");
         Fuzzy dataCard = new Fuzzy("oc:dataCard1");
         Recipes.register(this, 3,
@@ -22,6 +19,17 @@ public class ItemRadioCtrlCard extends ItemBase {
                 null, dataCard, null
         );
     }
+
+    @Override
+    public int getStackSize() {
+        return 1;
+    }
+
+    @Override
+    public List<CreativeTab> getCreativeTabs() {
+        return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+    }
+
 
     @Override
     public List<String> getTooltip(ItemStack stack) {

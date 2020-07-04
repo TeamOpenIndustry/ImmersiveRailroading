@@ -23,13 +23,23 @@ import java.util.List;
 
 public class ItemTrackBlueprint extends ItemBase {
 	public ItemTrackBlueprint() {
-		super(ImmersiveRailroading.MODID, "item_rail", 1, ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_rail");
 
 		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
 		Recipes.register(this, 3,
 				steel, null, steel, steel, Fuzzy.PAPER, steel, steel, null, steel);
 	}
-	
+
+	@Override
+	public int getStackSize() {
+		return 1;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+	}
+
 	@Override
 	public void onClickAir(Player player, World world, Hand hand) {
 		if (world.isClient && hand == Hand.PRIMARY) {

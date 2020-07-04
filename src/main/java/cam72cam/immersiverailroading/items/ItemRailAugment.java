@@ -26,9 +26,20 @@ import cam72cam.mod.util.Hand;
 
 public class ItemRailAugment extends ItemBase {
 	public ItemRailAugment() {
-		super(ImmersiveRailroading.MODID, "item_augment", 16, ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_augment");
 	}
-	
+
+	@Override
+	public int getStackSize() {
+		return 16;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+	}
+
+
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {

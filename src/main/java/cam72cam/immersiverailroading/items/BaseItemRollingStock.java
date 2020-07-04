@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
@@ -17,10 +16,10 @@ import cam72cam.mod.world.World;
 
 import java.util.List;
 
-public class BaseItemRollingStock extends ItemBase {
+public abstract class BaseItemRollingStock extends ItemBase {
 
-	public BaseItemRollingStock(String modID, String name, int stackSize, CreativeTab ... tabs) {
-		super(modID, name, stackSize, tabs);
+	public BaseItemRollingStock(String modID, String name) {
+		super(modID, name);
 	}
 
 	@Override

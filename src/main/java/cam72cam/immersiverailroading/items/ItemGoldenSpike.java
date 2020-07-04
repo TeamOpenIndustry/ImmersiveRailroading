@@ -11,6 +11,7 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.sound.StandardSound;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
@@ -18,13 +19,25 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 
+import java.util.List;
+
 public class ItemGoldenSpike extends ItemBase {
 	public ItemGoldenSpike() {
-		super(ImmersiveRailroading.MODID, "item_golden_spike", 1, ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_golden_spike");
 
 		Fuzzy gold = Fuzzy.GOLD_INGOT;
 		Recipes.register(this, 2,
 				gold, gold, gold, null, gold, null);
+	}
+
+	@Override
+	public int getStackSize() {
+		return 1;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
 	}
 
 	@Override

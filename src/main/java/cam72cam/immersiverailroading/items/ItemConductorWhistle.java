@@ -8,10 +8,12 @@ import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
@@ -23,15 +25,25 @@ public class ItemConductorWhistle extends ItemBase {
 	private static HashMap<UUID, Integer> cooldown = new HashMap<>();
 
 	public ItemConductorWhistle() {
-		super(ImmersiveRailroading.MODID, "item_conductor_whistle", 1, ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_conductor_whistle");
 
 		Fuzzy gold = Fuzzy.GOLD_INGOT;
 		Recipes.register(this, 2,
 				gold, gold, gold, gold, gold, gold);
 	}
-	
+
 	@Override
-    public void onClickAir(Player player, World world, Hand hand) {
+	public int getStackSize() {
+		return 1;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+	}
+
+	@Override
+	public void onClickAir(Player player, World world, Hand hand) {
 		if (world.isServer) {
 			if (cooldown.containsKey(player.getUUID())) {
 				int newtime = cooldown.get(player.getUUID());

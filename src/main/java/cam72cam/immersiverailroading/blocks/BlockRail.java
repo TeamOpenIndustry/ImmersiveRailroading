@@ -4,9 +4,8 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.mod.block.BlockEntity;
 
 public class BlockRail extends BlockRailBase {
-	@Override
-	public String getName() {
-		return "block_rail";
+	public BlockRail() {
+		super("block_rail");
 	}
 
 	@Override

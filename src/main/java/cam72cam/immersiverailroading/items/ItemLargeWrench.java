@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.item.*;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
@@ -17,14 +18,27 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 
+import java.util.List;
+
 public class ItemLargeWrench extends ItemBase {
 	public ItemLargeWrench() {
-		super(ImmersiveRailroading.MODID, "item_large_wrench", 1, ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_large_wrench");
 
 		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
 		Recipes.register(this, 3,
 				null, steel, null, steel, steel, steel, steel, null, steel);
 	}
+
+	@Override
+	public int getStackSize() {
+		return 1;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+	}
+
 
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {

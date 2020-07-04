@@ -7,14 +7,8 @@ import cam72cam.mod.block.BlockTypeEntity;
 import cam72cam.mod.block.Material;
 
 public class BlockMultiblock extends BlockTypeEntity {
-	@Override
-	public String getModID() {
-		return ImmersiveRailroading.MODID;
-	}
-
-	@Override
-	public String getName() {
-		return "multiblock";
+	public BlockMultiblock() {
+		super(ImmersiveRailroading.MODID, "multiblock");
 	}
 
 	@Override

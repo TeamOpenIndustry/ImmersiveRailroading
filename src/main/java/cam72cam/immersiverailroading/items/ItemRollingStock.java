@@ -16,6 +16,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.item.ArmorSlot;
 import cam72cam.mod.item.ClickResult;
@@ -29,9 +30,19 @@ import cam72cam.mod.util.Hand;
 public class ItemRollingStock extends BaseItemRollingStock {
 
 	public ItemRollingStock() {
-		super(ImmersiveRailroading.MODID, "item_rolling_stock", 1, ItemTabs.STOCK_TAB, ItemTabs.LOCOMOTIVE_TAB, ItemTabs.PASSENGER_TAB);
+		super(ImmersiveRailroading.MODID, "item_rolling_stock");
 	}
-	
+
+	@Override
+	public int getStackSize() {
+		return 1;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.STOCK_TAB, ItemTabs.LOCOMOTIVE_TAB, ItemTabs.PASSENGER_TAB);
+	}
+
 	@Override
 	public List<ItemStack> getItemVariants(CreativeTab tab)
     {

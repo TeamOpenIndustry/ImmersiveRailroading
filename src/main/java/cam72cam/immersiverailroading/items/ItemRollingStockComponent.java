@@ -26,9 +26,19 @@ import cam72cam.mod.text.TextColor;
 public class ItemRollingStockComponent extends BaseItemRollingStock {
 
 	public ItemRollingStockComponent() {
-		super(ImmersiveRailroading.MODID, "item_rolling_stock_component", 64, ItemTabs.COMPONENT_TAB);
+		super(ImmersiveRailroading.MODID, "item_rolling_stock_component");
 	}
-	
+
+	@Override
+	public int getStackSize() {
+		return 64;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.COMPONENT_TAB);
+	}
+
 	@Override
 	public String getCustomName(ItemStack stack) {
 		return super.getCustomName(stack) + " " + new Data(stack).componentType.toString();

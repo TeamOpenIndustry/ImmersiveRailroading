@@ -19,9 +19,20 @@ import cam72cam.mod.util.CollectionUtil;
 
 public class ItemPlate extends ItemBase {
 	public ItemPlate() {
-		super(ImmersiveRailroading.MODID, "item_plate", 64, ItemTabs.MAIN_TAB);
+		super(ImmersiveRailroading.MODID, "item_plate");
 	}
-	
+
+	@Override
+	public int getStackSize() {
+		return 64;
+	}
+
+	@Override
+	public List<CreativeTab> getCreativeTabs() {
+		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+	}
+
+
 	@Override
 	public List<ItemStack> getItemVariants(CreativeTab tab) {
 		List<ItemStack> items = new ArrayList<>();
