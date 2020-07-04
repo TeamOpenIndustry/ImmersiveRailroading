@@ -30,6 +30,8 @@ import cam72cam.mod.serialization.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.List;
+
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	@TagField("parent")
 	private Vec3i parent;
@@ -563,9 +565,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 				augmentTank.tryFill(stock.theTank, 100, false);
                 for (Facing side : Facing.values()) {
-                	ITank tank = world.getTank(pos.offset(side));
-                	if (tank != null) {
-						stock.theTank.tryDrain(tank, 100, false);
+                	List<ITank> tanks = world.getTank(pos.offset(side));
+                	if (tanks != null) {
+                		tanks.forEach(tank -> stock.theTank.tryDrain(tank, 100, false));
 					}
 				}
 			}
@@ -582,9 +584,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 				augmentTank.tryDrain(stock.theTank, 100, false);
                 for (Facing side : Facing.values()) {
-                    ITank tank = world.getTank(pos.offset(side));
-                    if (tank != null) {
-						stock.theTank.tryFill(tank, 100, false);
+                    List<ITank> tanks = world.getTank(pos.offset(side));
+                    if (tanks != null) {
+						tanks.forEach(tank -> stock.theTank.tryFill(tank, 100, false));
 					}
 				}
 			}
