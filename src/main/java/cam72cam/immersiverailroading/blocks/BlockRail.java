@@ -1,11 +1,16 @@
 package cam72cam.immersiverailroading.blocks;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.mod.block.BlockSettings;
+import cam72cam.mod.block.BlockEntity;
 
 public class BlockRail extends BlockRailBase {
-	public BlockRail() {
-		super(new BlockSettings(ImmersiveRailroading.MODID, "block_rail"), TileRail::new);
+	@Override
+	public String getName() {
+		return "block_rail";
+	}
+
+	@Override
+	public BlockEntity constructBlockEntity() {
+		return new TileRail();
 	}
 }
