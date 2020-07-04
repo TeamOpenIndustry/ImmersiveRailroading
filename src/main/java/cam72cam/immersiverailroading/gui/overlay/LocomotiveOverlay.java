@@ -113,16 +113,13 @@ public class LocomotiveOverlay {
 	
 	public void drawBackground(Locomotive loco) {
 		if(loco instanceof LocomotiveSteam) {
-			GUIHelpers.bindTexture(OVERLAY_STEAM_TEXTURE);
-			GUIHelpers.texturedRect(bgPosX, bgPosY, 105, 85);
+			GUIHelpers.texturedRect(OVERLAY_STEAM_TEXTURE, bgPosX, bgPosY, 105, 85);
 		}
 		if(loco instanceof LocomotiveDiesel) {
-			GUIHelpers.bindTexture(OVERLAY_DIESEL_TEXTURE);
-			GUIHelpers.texturedRect(bgPosX, bgPosY, 85, 85);
+			GUIHelpers.texturedRect(OVERLAY_DIESEL_TEXTURE, bgPosX, bgPosY, 85, 85);
 		}
 		if(loco instanceof HandCar) {
-			GUIHelpers.bindTexture(OVERLAY_HANDCAR_TEXTURE);
-			GUIHelpers.texturedRect(bgPosX, bgPosY, 60, 85);
+			GUIHelpers.texturedRect(OVERLAY_HANDCAR_TEXTURE, bgPosX, bgPosY, 60, 85);
 		}
 	}
 	
