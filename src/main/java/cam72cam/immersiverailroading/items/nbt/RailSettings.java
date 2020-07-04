@@ -62,33 +62,24 @@ public class RailSettings {
         isGradeCrossing = false;
     }
 
-    @Deprecated
-    public RailSettings(TagCompound nbt) {
-        this();
-        try {
-            TagSerializer.deserialize(nbt, this);
-        } catch (SerializationException e) {
-            ImmersiveRailroading.catching(e);
-        }
-    }
-
     public void write(ItemStack stack) {
-        stack.setTagCompound(toNBT());
-    }
-
-    public static RailSettings from(ItemStack stack) {
-        return new RailSettings(stack.getTagCompound());
-    }
-
-    @Deprecated
-    public TagCompound toNBT() {
         TagCompound data = new TagCompound();
         try {
             TagSerializer.serialize(data, this);
         } catch (SerializationException e) {
             ImmersiveRailroading.catching(e);
         }
-        return data;
+        stack.setTagCompound(data);
+    }
+
+    public static RailSettings from(ItemStack stack) {
+        RailSettings res = new RailSettings();
+        try {
+            TagSerializer.deserialize(stack.getTagCompound(), res);
+        } catch (SerializationException e) {
+            ImmersiveRailroading.catching(e);
+        }
+        return res;
     }
 
     private static class DegreesMapper implements TagMapper<Float> {

@@ -95,23 +95,7 @@ public class LocomotiveDiesel extends Locomotive {
 	public GuiRegistry.EntityGUI guiType() {
 		return GuiTypes.DIESEL_LOCOMOTIVE;
 	}
-	
-	@Override
-	public void save(TagCompound data) {
-		super.save(data);
-		data.setFloat("engine_temperature", getEngineTemperature());
-		data.setBoolean("turned_on", isTurnedOn());
-		data.setBoolean("engine_overheated", isEngineOverheated());
-	}
-	
-	@Override
-	public void load(TagCompound data) {
-		setEngineTemperature(data.getFloat("engine_temperature"));
-		setTurnedOn(data.getBoolean("turned_on"));
-		setEngineOverheated(data.getBoolean("engine_overheated"));
-		super.load(data);
-	}
-	
+
 	/*
 	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
 	 */

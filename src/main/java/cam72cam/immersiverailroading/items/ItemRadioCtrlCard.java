@@ -5,9 +5,11 @@ import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemBase;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.Recipes;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.CollectionUtil;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ItemRadioCtrlCard extends ItemBase {
     public ItemRadioCtrlCard() {
@@ -23,10 +25,16 @@ public class ItemRadioCtrlCard extends ItemBase {
 
     @Override
     public List<String> getTooltip(ItemStack stack) {
-        if (!stack.getTagCompound().hasKey("linked_uuid")) {
-            return CollectionUtil.listOf("Not linked to any locomotive");
-        } else {
-            return CollectionUtil.listOf("Linked to: " + stack.getTagCompound().getString("linked_uuid"));
+        Data d = new Data(stack);
+        return CollectionUtil.listOf(d.linked == null ? "Not linked to any locomotive" : "Linked to: " + d.linked);
+    }
+
+    public static class Data extends ItemData {
+        @TagField("linked")
+        public UUID linked;
+
+        public Data(ItemStack stack) {
+            super(stack);
         }
     }
 }

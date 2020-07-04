@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import java.util.UUID;
 
+import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.render.SmokeParticle.SmokeParticleData;
 import cam72cam.mod.entity.sync.TagSync;
@@ -139,27 +140,15 @@ public abstract class Locomotive extends FreightTank {
     public ClickResult onClick(Player player, Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
-				TagCompound cardNBT = player.getHeldItem(hand).getTagCompound();
-				if(cardNBT == null) { 
-					player.getHeldItem(hand).setTagCompound(new TagCompound());
-					cardNBT = player.getHeldItem(hand).getTagCompound();
-				}
+				ItemRadioCtrlCard.Data data = new ItemRadioCtrlCard.Data(player.getHeldItem(hand));
 				if (player.isCrouching()) {
-					if (!cardNBT.hasKey("linked_uuid")) {
-						player.sendMessage(ChatText.RADIO_NOLINK.getMessage());
-					} else {
-						cardNBT.remove("linked_uuid");
-						player.sendMessage(ChatText.RADIO_UNLINK.getMessage());
-					}
+					player.sendMessage(data.linked == null ? ChatText.RADIO_NOLINK.getMessage() : ChatText.RADIO_UNLINK.getMessage());
+					data.linked = null;
 				} else {
-					if (!cardNBT.hasKey("linked_uuid")) {
-						cardNBT.setString("linked_uuid",this.getUUID().toString());
-						player.sendMessage(ChatText.RADIO_LINK.getMessage());
-					} else {
-						cardNBT.setString("linked_uuid",this.getUUID().toString());
-						player.sendMessage(ChatText.RADIO_RELINK.getMessage());
-					}
+					player.sendMessage(data.linked == null ? ChatText.RADIO_LINK.getMessage() : ChatText.RADIO_RELINK.getMessage());
+					data.linked = this.getUUID();
 				}
+				data.write();
 			}
 			else {
 				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getDefinition().name()));;

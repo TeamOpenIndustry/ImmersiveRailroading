@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.mod.item.*;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.sound.StandardSound;
@@ -30,12 +31,14 @@ public class ItemGoldenSpike extends ItemBase {
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
 		ItemStack held = player.getHeldItem(hand);
 		if (world.isBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW)) {
-			setPosition(held, pos);
+			Data d = new Data(held);
+			d.pos = pos;
+			d.write();
 			Audio.playSound(world, pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.5f, 0.2f);
 		} else {
 			pos = pos.up();
 
-			Vec3i tepos = getPosition(held);
+			Vec3i tepos = new Data(held).pos;
 			if (tepos != null) {
 				if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
 					if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
@@ -54,15 +57,12 @@ public class ItemGoldenSpike extends ItemBase {
 		return ClickResult.PASS;
 	}
 
-	public static Vec3i getPosition(ItemStack stack) {
-		if (stack.getTagCompound().hasKey("pos")) {
-			return stack.getTagCompound().getVec3i("pos");
-		} else {
-			return null;
+	public static class Data extends ItemData {
+		@TagField("pos")
+		public Vec3i pos;
+
+		protected Data(ItemStack stack) {
+			super(stack);
 		}
-	}
-	
-	public static void setPosition(ItemStack stack, Vec3i pos) {
-		stack.getTagCompound().setVec3i("pos", pos);
 	}
 }

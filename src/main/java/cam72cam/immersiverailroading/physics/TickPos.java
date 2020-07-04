@@ -1,25 +1,31 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapper;
+import cam72cam.mod.serialization.*;
 
 import java.util.List;
 
 public class TickPos {
+	@TagField("tickID")
 	public int tickID;
+	@TagField("speed")
 	public Speed speed;
+	@TagField("offTrack")
 	public boolean isOffTrack;
 	
 	//Vec3d frontPosition;
 	//Vec3d backPosition;
+	@TagField("pos")
 	public Vec3d position;
-	
+	@TagField("frontYaw")
 	public float frontYaw;
+	@TagField("rearYaw")
 	public float rearYaw;
+	@TagField("rotationYaw")
 	public float rotationYaw;
+	@TagField("rotationPitch")
 	public float rotationPitch;
 
 	public TickPos(int tickPosID, Speed speed, Vec3d position, float frontYaw, float rearYaw, float rotationYaw, float rotationPitch, boolean isOffTrack) {
@@ -33,30 +39,21 @@ public class TickPos {
 		this.rotationPitch = rotationPitch;
 	}
 
-	public TickPos(TagCompound tag) {
-		tickID = tag.getInteger("tickID");
-		speed = Speed.fromMetric(tag.getDouble("speed"));
-		isOffTrack = tag.getBoolean("offTrack");
-		position = tag.getVec3d("pos");
-
-		frontYaw = tag.getFloat("frontYaw");
-		rearYaw = tag.getFloat("rearYaw");
-		rotationYaw = tag.getFloat("rotationYaw");
-		rotationPitch = tag.getFloat("rotationPitch");
+	private TickPos(TagCompound tag) {
+		try {
+			TagSerializer.deserialize(tag, this);
+		} catch (SerializationException e) {
+			ImmersiveRailroading.catching(e);
+		}
 	}
 
-	public TagCompound toTag() {
+	private TagCompound toTag() {
 		TagCompound tag = new TagCompound();
-
-		tag.setInteger("tickID", tickID);
-		tag.setDouble("speed", speed.metric());
-		tag.setBoolean("offTrack", isOffTrack);
-		tag.setVec3d("pos", position);
-		tag.setFloat("frontYaw", frontYaw);
-		tag.setFloat("rearYaw", rearYaw);
-		tag.setFloat("rotationYaw", rotationYaw);
-		tag.setFloat("rotationPitch", rotationPitch);
-
+		try {
+			TagSerializer.serialize(tag, this);
+		} catch (SerializationException e) {
+			ImmersiveRailroading.catching(e);
+		}
 		return tag;
 	}
 
