@@ -1,12 +1,12 @@
 package cam72cam.immersiverailroading.render.multiblock;
 
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.render.GLBoolTracker;
 
 public class PlateRollerRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -20,17 +20,11 @@ public class PlateRollerRender implements IMultiblockRender {
 				e.printStackTrace();
 			}
 		}
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-		this.renderer.bindTexture();
-		
-		GL11.glPushMatrix();
-		GL11.glTranslated(0.5, 0, 0.5);
-		GL11.glRotated(te.getRotation()-90, 0, 1, 0);
-		GL11.glTranslated(-2.25, 0, 0.5);
-		renderer.draw();
-		GL11.glPopMatrix();
-		
-		this.renderer.restoreTexture();
-		tex.restore();
+		try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With tex = renderer.bindTexture()) {
+			GL11.glTranslated(0.5, 0, 0.5);
+			GL11.glRotated(te.getRotation() - 90, 0, 1, 0);
+			GL11.glTranslated(-2.25, 0, 0.5);
+			renderer.draw();
+		}
 	}
 }

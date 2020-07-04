@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.render.GLBoolTracker;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import org.lwjgl.opengl.GL11;
 
@@ -26,9 +26,9 @@ public class TileMultiblockRender {
 			IMultiblockRender renderer = renderers.get(te.getName());
 			if (renderer != null) {
 				return new StandardModel().addCustom((partialTicks) -> {
-                    GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
-                    renderer.render(te, partialTicks);
-                    blend.restore();
+					try (OpenGL.With blend = OpenGL.bool(GL11.GL_BLEND, false)) {
+						renderer.render(te, partialTicks);
+					}
 				});
 			}
 		}

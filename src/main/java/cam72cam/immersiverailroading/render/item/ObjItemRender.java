@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.item;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.ItemRender;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.resource.Identifier;
@@ -28,18 +29,14 @@ public class ObjItemRender {
                 }
             }
             OBJRender renderer = cache.get(id);
-            GL11.glPushMatrix();
-            {
-                renderer.bindTexture();
+            try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With tex = renderer.bindTexture()) {
                 GL11.glTranslated(translate.x, translate.y, translate.z);
                 GL11.glRotated(rotation.x, 1, 0, 0);
                 GL11.glRotated(rotation.y, 0, 1, 0);
                 GL11.glRotated(rotation.z, 0, 0, 1);
                 GL11.glScaled(scale, scale, scale);
                 renderer.draw();
-                renderer.restoreTexture();
             }
-            GL11.glPopMatrix();
         });
     }
 }

@@ -6,8 +6,8 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.GLTransparencyHelper;
 import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import org.lwjgl.opengl.GL11;
 
@@ -34,10 +34,7 @@ public class MBBlueprintRender {
     public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d hit, float partialTicks) {
         pos = pos.up();
 
-        GL11.glPushMatrix();
-        {
-            GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.3f);
-
+        try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.3f)) {
             Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
             Vec3d playerPos = player.getPosition();
             Vec3d lastPos = player.getLastTickPos();
@@ -47,9 +44,6 @@ public class MBBlueprintRender {
             GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
 
             MBBlueprintRender.draw(new ItemManual.Data(stack).multiblock);
-
-            transparency.restore();
         }
-        GL11.glPopMatrix();
     }
 }

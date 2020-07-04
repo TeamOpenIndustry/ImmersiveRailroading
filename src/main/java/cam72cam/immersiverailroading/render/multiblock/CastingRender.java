@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
@@ -10,7 +11,6 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstance;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.render.GLBoolTracker;
 
 public class CastingRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -20,7 +20,6 @@ public class CastingRender implements IMultiblockRender {
 
 	@Override
 	public void render(TileMultiblock te, float partialTicks) {
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
 		if (renderer == null) {
 			try {
 				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/casting_machine.obj"), 0.1f));
@@ -41,27 +40,22 @@ public class CastingRender implements IMultiblockRender {
 			}
 		}
 
-		this.renderer.bindTexture();
-		
-		GL11.glPushMatrix();
-		GL11.glTranslated(0.5, 0, 0.5);
-		GL11.glRotated(te.getRotation()-90, 0, 1, 0);
-		GL11.glTranslated(-2.5, -3, 6.5);
-		CastingInstance tmb = (CastingInstance) te.getMultiblock();
-		if (tmb.isPouring()) {
-			renderer.drawGroups(flowing_steel);
+		try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With tex = renderer.bindTexture()) {
+			GL11.glTranslated(0.5, 0, 0.5);
+			GL11.glRotated(te.getRotation() - 90, 0, 1, 0);
+			GL11.glTranslated(-2.5, -3, 6.5);
+			CastingInstance tmb = (CastingInstance) te.getMultiblock();
+			if (tmb.isPouring()) {
+				renderer.drawGroups(flowing_steel);
+			}
+			double steelLevel = tmb.getSteelLevel() * 4.5;
+			if (steelLevel != 0) {
+				try (OpenGL.With m = OpenGL.matrix()) {
+					GL11.glTranslated(0, steelLevel, 0);
+					renderer.drawGroups(steel_level);
+				}
+			}
+			renderer.drawGroups(rest);
 		}
-		double steelLevel = tmb.getSteelLevel() * 4.5;
-		if (steelLevel != 0) {
-			GL11.glPushMatrix();
-			GL11.glTranslated(0, steelLevel, 0);
-			renderer.drawGroups(steel_level);
-			GL11.glPopMatrix();
-		}
-		renderer.drawGroups(rest);
-		GL11.glPopMatrix();
-		
-		this.renderer.restoreTexture();
-		tex.restore();
 	}
 }

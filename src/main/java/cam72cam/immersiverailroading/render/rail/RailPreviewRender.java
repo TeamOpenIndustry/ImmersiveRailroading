@@ -1,14 +1,12 @@
 package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.render.GLTransparencyHelper;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import org.lwjgl.opengl.GL11;
 
@@ -22,10 +20,7 @@ public class RailPreviewRender {
 		StandardModel model = new StandardModel();
         model.addCustom(() -> {
             MinecraftClient.startProfiler("tile_rail_preview");
-
-            GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.7f);
-            GL11.glPushMatrix();
-            {
+            try (OpenGL.With transparency = OpenGL.transparency(1, 1, 1, 0.7f); OpenGL.With matrix = OpenGL.matrix()) {
                 if (te.isAboveRails()) {
                     GL11.glTranslated(0, -1, 0);
                 }
@@ -36,8 +31,6 @@ public class RailPreviewRender {
                     RailRenderUtil.render(info, te.world, te.pos, true);
                 }
             }
-            GL11.glPopMatrix();
-            transparency.restore();
             MinecraftClient.endProfiler();
 		});
 

@@ -26,11 +26,11 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
 		info = info.withLength(10);
 
-		GL11.glPushMatrix();
-		{
-			GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-			GLBoolTracker lighting = new GLBoolTracker(GL11.GL_LIGHTING, false);
-
+		try (
+			OpenGL.With matrix = OpenGL.matrix();
+			OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
+			OpenGL.With ligh = OpenGL.bool(GL11.GL_LIGHTING, false);
+		) {
 			if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
 				GL11.glTranslated(0, 0, -0.1 * (info.settings.degrees / 90 * 4));
 			}
@@ -51,18 +51,12 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 			GL11.glTranslated(0.5, 0, 0.5);
 
-			GL11.glPushMatrix();
-			{
+			try (OpenGL.With m = OpenGL.matrix()) {
 				GL11.glTranslated(-0.5, 0, -0.5);
 				RailBaseRender.draw(info, world);
 			}
-			GL11.glPopMatrix();
 			RailBuilderRender.renderRailBuilder(info, world);
-
-			lighting.restore();
-			cull.restore();
 		}
-		GL11.glPopMatrix();
 	}
 
 	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
@@ -87,19 +81,12 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			infoCache.put(key, info);
 		}
 
-		GL11.glPushMatrix();
-		{
-			GLTransparencyHelper transparency = new GLTransparencyHelper(1,1,1, 0.5f);
-
+		try (OpenGL.With with = OpenGL.matrix(); OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.5f)) {
 			Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
 			Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);
 			GL11.glTranslated(offPos.x, offPos.y, offPos.z);
 
 			RailRenderUtil.render(info, world, pos, true);
-
-			transparency.restore();
 		}
-		GL11.glPopMatrix();
-
 	}
 }

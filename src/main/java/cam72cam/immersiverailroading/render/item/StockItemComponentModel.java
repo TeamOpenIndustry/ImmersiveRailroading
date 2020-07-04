@@ -7,10 +7,10 @@ import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.entity.StockModel;
-import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.ItemRender;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
@@ -52,25 +52,17 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
         }
         scale *= Math.sqrt(itemScale);
 
-        GL11.glPushMatrix();
-        {
+        try (
+            OpenGL.With matrix = OpenGL.matrix();
+            OpenGL.With tex = renderer.bindTexture(true);
+            OpenGL.With blend = OpenGL.bool(GL11.GL_BLEND, false);
+            OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
+            OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false)
+        ) {
             GL11.glTranslated(0.5, 0.5, 0.5);
             GL11.glScaled(scale, scale, scale);
             GL11.glTranslated(-center.x, -center.y, -center.z);
-
-            GLBoolTracker blend = new GLBoolTracker(GL11.GL_BLEND, false);
-            GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-            GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-            GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, false);
-            renderer.bindTexture(null, true);
             renderer.drawGroups(groups);
-            renderer.restoreTexture();
-
-            blend.restore();
-            cull.restore();
-            tex.restore();
-            light.restore();
         }
-        GL11.glPopMatrix();
     }
 }

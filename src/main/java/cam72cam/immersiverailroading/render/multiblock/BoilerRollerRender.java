@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
@@ -10,7 +11,6 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.BoilerRollerMultiblock.BoilerRollerInstance;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.render.GLBoolTracker;
 
 public class BoilerRollerRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -40,27 +40,21 @@ public class BoilerRollerRender implements IMultiblockRender {
 			}
 		}
 
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-		this.renderer.bindTexture();
-		
-		BoilerRollerInstance tmb = (BoilerRollerInstance) te.getMultiblock();
-		
-		GL11.glPushMatrix();
-		GL11.glTranslated(0.5, 0, 0.5);
-		GL11.glRotated(te.getRotation()-90, 0, 1, 0);
-		GL11.glTranslated(-3.35, 0, -2.5);
-		
-		//TODO better animation
-		if (tmb.hasOutput()) {
-			renderer.drawGroups(product);
-		} else if (tmb.hasInput()) {
-			renderer.drawGroups(segments);
+		try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With tex = renderer.bindTexture()) {
+			BoilerRollerInstance tmb = (BoilerRollerInstance) te.getMultiblock();
+
+			GL11.glTranslated(0.5, 0, 0.5);
+			GL11.glRotated(te.getRotation() - 90, 0, 1, 0);
+			GL11.glTranslated(-3.35, 0, -2.5);
+
+			//TODO better animation
+			if (tmb.hasOutput()) {
+				renderer.drawGroups(product);
+			} else if (tmb.hasInput()) {
+				renderer.drawGroups(segments);
+			}
+
+			renderer.drawGroups(rest);
 		}
-		
-		renderer.drawGroups(rest);
-		GL11.glPopMatrix();
-		
-		this.renderer.restoreTexture();
-		tex.restore();
 	}
 }

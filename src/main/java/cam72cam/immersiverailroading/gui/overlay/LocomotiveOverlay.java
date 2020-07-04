@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
 import cam72cam.mod.gui.helpers.GUIHelpers;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
@@ -53,22 +54,18 @@ public class LocomotiveOverlay {
 		//drawRect(currPosX, currPosY, currPosX + gaugeWidth, currPosY + gaugeHeight, 0xFF4d4d4d);
 		int quantHeight = (int)(gaugeHeight * (liquidAmount / tankCapacity));
 		GUIHelpers.drawRect(currPosX, currPosY + gaugeHeight - quantHeight, gaugeWidth, quantHeight, color);
-		GL11.glPushMatrix();
-		{
+		try (OpenGL.With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(currPosX + gaugeWidth/2, currPosY-6, 0);
 			double scale = 0.5;
 			GL11.glScaled(scale, scale, scale);
 			GUIHelpers.drawCenteredString(amount, 0, 0, 0xFFFFFF);
 		}
-		GL11.glPopMatrix();
-		GL11.glPushMatrix();
-		{
+		try (OpenGL.With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(currPosX + gaugeWidth/2, currPosY + gaugeHeight + 2, 0);
 			double scale = 0.5;
 			GL11.glScaled(scale, scale, scale);
 			GUIHelpers.drawCenteredString(capacity, 0, 0, 0xFFFFFF);
 		}
-		GL11.glPopMatrix();
 		currPosX += gaugeWidth + gaugeSpacer;
 	}
 
@@ -80,14 +77,12 @@ public class LocomotiveOverlay {
 		GUIHelpers.drawRect(currPosX, currPosY + quantHeight, scalarWidth,  5, 0xFF999999);
 		//GUIHelpers.drawCenteredString(mc.fontRenderer, minStr, currPosX + scalarWidth/2, currPosY + scalarHeight + 2, 0xFFFFFF);
 		//GUIHelpers.drawCenteredString(mc.fontRenderer, maxStr, currPosX + scalarWidth/2, currPosY-12, 0xFFFFFF);
-		GL11.glPushMatrix();
-		{
+		try (OpenGL.With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(currPosX + scalarWidth/2, currPosY-6, 0);
 			double scale = 0.5;
 			GL11.glScaled(scale, scale, scale);
 			GUIHelpers.drawCenteredString(string, 0, 0, 0xFFFFFF);
 		}
-		GL11.glPopMatrix();
 		currPosX += scalarWidth + scalarSpacer;
 	}
 	
@@ -108,14 +103,12 @@ public class LocomotiveOverlay {
 		}
 		
 		GUIHelpers.drawRect(currSpeedPosX + offset, currPosY - 19, 50, 9, 0xFF4d4d4d);//drawRect(12, 265, 80, 248, 0xFF4d4d4d);
-		GL11.glPushMatrix();
-		{
+		try (OpenGL.With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(currSpeedPosX + 25 + offset, currPosY - 17, 0);
 			double scale = 0.75;
 			GL11.glScaled(scale, scale, scale);
 			GUIHelpers.drawCenteredString(text, 0, 0, 0xFFFFFF);
 		}
-		GL11.glPopMatrix();
 	}
 	
 	public void drawBackground(Locomotive loco) {

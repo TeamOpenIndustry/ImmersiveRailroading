@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
@@ -33,9 +34,7 @@ public class RailBuilderRender {
             displayList = GL11.glGenLists(1);
             GL11.glNewList(displayList, GL11.GL_COMPILE);
 
-            GL11.glPushMatrix();
-            {
-
+            try (OpenGL.With matrix = OpenGL.matrix()) {
                 for (VecYawPitch piece : info.getBuilder(world).getRenderData()) {
                     Matrix4 m = new Matrix4();
                     //m.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
@@ -96,15 +95,14 @@ public class RailBuilderRender {
                     }
                 }
             }
-            GL11.glPopMatrix();
             GL11.glEndList();
             displayLists.put(info.uniqueID, displayList);
         }
 
-        trackRenderer.bindTexture();
-        MinecraftClient.startProfiler("dl");
-        GL11.glCallList(displayList);
-        MinecraftClient.endProfiler();
-        trackRenderer.restoreTexture();
+        try (OpenGL.With tex = trackRenderer.bindTexture()) {
+            MinecraftClient.startProfiler("dl");
+            GL11.glCallList(displayList);
+            MinecraftClient.endProfiler();
+        }
     }
 }

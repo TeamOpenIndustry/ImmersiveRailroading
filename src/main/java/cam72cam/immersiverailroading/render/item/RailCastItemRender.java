@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.render.item;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.ItemRender;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.resource.Identifier;
@@ -37,18 +37,12 @@ public class RailCastItemRender implements ItemRender.IItemModel {
 
 
 		return new StandardModel().addCustom(() -> {
-			GL11.glPushMatrix();
-			{
-				GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-				model.bindTexture();
+			try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With tex = model.bindTexture()) {
 				GL11.glRotated(90, 1, 0, 0);
 				GL11.glTranslated(0, -1, 1);
 				GL11.glTranslated(-0.5, 0.6, 0.6);
 				model.drawGroups(groups);
-				model.restoreTexture();
-				tex.restore();
 			}
-			GL11.glPopMatrix();
 		});
 	}
 

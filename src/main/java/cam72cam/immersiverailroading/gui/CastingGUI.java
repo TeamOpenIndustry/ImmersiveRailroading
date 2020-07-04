@@ -20,7 +20,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.util.Hand;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -131,8 +130,6 @@ public class CastingGUI implements IScreen {
 
 	@Override
 	public void draw(IScreenBuilder builder) {
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
 		double fluidPercent = ((CastingInstance) tile.getMultiblock()).getSteelLevel();
 		int progress = this.tile.getCraftProgress();
 		float cost = ItemCastingCost.getCastCost(currentItem);

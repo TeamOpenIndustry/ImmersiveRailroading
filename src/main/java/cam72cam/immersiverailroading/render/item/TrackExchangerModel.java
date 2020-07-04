@@ -13,8 +13,8 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
-import cam72cam.mod.render.GLBoolTracker;
 import cam72cam.mod.render.ItemRender;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.resource.Identifier;
@@ -55,31 +55,24 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			}
 		}
 
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-		GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-
-		GL11.glPushMatrix();
-		RENDERER.bindTexture();
-		RENDERER.draw();
-		RENDERER.restoreTexture();
-
-		GL11.glScaled(0.01, 0.01, 0.01);
-		GL11.glRotated(90, 1, 0, 0);
-
-		GL11.glTranslated(-15.15, 0.75, -8.75);
-		RailBaseRender.draw(info, world);
-		RailBuilderRender.renderRailBuilder(info, world);
-
-		if (lookInfo != null) {
-			GL11.glTranslated(-22.05, 0, 0);
-			RailBaseRender.draw(lookInfo, world);
-			RailBuilderRender.renderRailBuilder(lookInfo, world);
+		try (OpenGL.With tex = RENDERER.bindTexture()) {
+			RENDERER.draw();
 		}
 
-		GL11.glPopMatrix();
+		try (OpenGL.With matrix = OpenGL.matrix()) {
+			GL11.glScaled(0.01, 0.01, 0.01);
+			GL11.glRotated(90, 1, 0, 0);
 
-		tex.restore();
-		cull.restore();
+			GL11.glTranslated(-15.15, 0.75, -8.75);
+			RailBaseRender.draw(info, world);
+			RailBuilderRender.renderRailBuilder(info, world);
+
+			if (lookInfo != null) {
+				GL11.glTranslated(-22.05, 0, 0);
+				RailBaseRender.draw(lookInfo, world);
+				RailBuilderRender.renderRailBuilder(lookInfo, world);
+			}
+		}
 	}
 
 	@Override

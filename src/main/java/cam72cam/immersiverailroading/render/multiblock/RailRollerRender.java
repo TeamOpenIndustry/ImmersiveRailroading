@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
@@ -11,7 +12,6 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock.RailRollerInstance;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.render.GLBoolTracker;
 
 public class RailRollerRender implements IMultiblockRender {
 	private OBJRender renderer;
@@ -40,41 +40,31 @@ public class RailRollerRender implements IMultiblockRender {
 				e.printStackTrace();
 			}
 		}
-		GLBoolTracker tex = new GLBoolTracker(GL11.GL_TEXTURE_2D, true);
-		this.renderer.bindTexture();
-		
-		GL11.glPushMatrix();
-		GL11.glTranslated(0.5, 0, 0.5);
-		GL11.glRotated(te.getRotation()-90, 0, 1, 0);
-		GL11.glTranslated(-1.5, 0, 0.5);
+		try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With tex = renderer.bindTexture()) {
+			GL11.glTranslated(0.5, 0, 0.5);
+			GL11.glRotated(te.getRotation() - 90, 0, 1, 0);
+			GL11.glTranslated(-1.5, 0, 0.5);
 
-		RailRollerInstance tmb = (RailRollerInstance) te.getMultiblock();
-		int progress = tmb.getCraftProgress();
-		
-		if (progress != 0) {
-			GL11.glPushMatrix();
-			{
-				GL11.glTranslated(0, 0, - (100 - progress) / 10.0);
-				GL11.glScaled(1, 1, Math.max(0.25, Math.sqrt(progress / 100.0)));
-				renderer.drawGroups(input);
-			}
-			GL11.glPopMatrix();
-		}
-		GL11.glPushMatrix();
-		{
+			RailRollerInstance tmb = (RailRollerInstance) te.getMultiblock();
+			int progress = tmb.getCraftProgress();
+
 			if (progress != 0) {
-				GL11.glTranslated(0, 0, (progress) / 10.0);
-				renderer.drawGroups(output);
-			} else if (tmb.outputFull()) {
-				renderer.drawGroups(output);
+				try (OpenGL.With m = OpenGL.matrix()) {
+					GL11.glTranslated(0, 0, -(100 - progress) / 10.0);
+					GL11.glScaled(1, 1, Math.max(0.25, Math.sqrt(progress / 100.0)));
+					renderer.drawGroups(input);
+				}
 			}
+			try (OpenGL.With m = OpenGL.matrix()) {
+				if (progress != 0) {
+					GL11.glTranslated(0, 0, (progress) / 10.0);
+					renderer.drawGroups(output);
+				} else if (tmb.outputFull()) {
+					renderer.drawGroups(output);
+				}
+			}
+
+			renderer.drawGroups(rest);
 		}
-		GL11.glPopMatrix();
-		
-		renderer.drawGroups(rest);
-		GL11.glPopMatrix();
-		
-		this.renderer.restoreTexture();
-		tex.restore();
 	}
 }

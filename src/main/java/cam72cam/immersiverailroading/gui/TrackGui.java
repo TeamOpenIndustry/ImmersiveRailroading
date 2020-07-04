@@ -13,6 +13,7 @@ import cam72cam.mod.gui.*;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.util.Hand;
 import com.google.common.base.Predicate;
 import org.lwjgl.opengl.GL11;
@@ -246,16 +247,16 @@ public class TrackGui implements IScreen {
 		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);
-		GL11.glPushMatrix();
-		GL11.glTranslated(GUIHelpers.getScreenWidth()/2 + builder.getWidth()/4,  builder.getHeight() / 4, 0);
-		GL11.glScaled(scale, scale, 1);
-		GUIHelpers.drawItem(stack, 0, 0);
-		GL11.glPopMatrix();
-		GL11.glPushMatrix();
-		GL11.glTranslated(GUIHelpers.getScreenWidth()/2 - builder.getWidth()/4,  builder.getHeight() / 4, 0);
-		GL11.glScaled(-scale, scale, 1);
-		GUIHelpers.drawItem(stack, 0, 0);
-		GL11.glPopMatrix();
+		try (OpenGL.With matrix = OpenGL.matrix()) {
+			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
+			GL11.glScaled(scale, scale, 1);
+			GUIHelpers.drawItem(stack, 0, 0);
+		}
+		try (OpenGL.With matrix = OpenGL.matrix()) {
+			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
+			GL11.glScaled(-scale, scale, 1);
+			GUIHelpers.drawItem(stack, 0, 0);
+		}
 	}
 
 }

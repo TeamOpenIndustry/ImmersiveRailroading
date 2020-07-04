@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.registry.Quilling.Chime;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
 import cam72cam.mod.sound.ISound;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -27,36 +28,36 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagCompound;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
 	@TagSync
-	@TagField("BOILER_PRESSURE")
+	@TagField("boiler_psi")
 	private float boilerPressure = 0;
 
 	// Celsius
 	@TagSync
-	@TagField("BOILER_TEMPERATURE")
+	@TagField("boiler_temperature")
 	private float boilerTemperature;
 
 	@TagSync
-	@TagField("PRESSURE_VALVE")
+	@TagField("pressure_valve")
 	private boolean pressureValve = false;
 	
 	// Map<Slot, TicksToBurn>
-	private final static String BURN_TIME  = "BURN_TIME";
-	private final static String BURN_MAX  = "BURN_MAX";
-	private double driverDiameter;
+	@TagSync
+	@TagField(value = "burn_time", mapper = LocomotiveSteam.SlotTagMapper.class)
+	private Map<Integer, Integer> burnTime = new HashMap<>();
+	@TagSync
+	@TagField(value = "burn_max", mapper = LocomotiveSteam.SlotTagMapper.class)
+	private Map<Integer, Integer> burnMax = new HashMap<>();
+
+	private Double driverDiameter;
 	private float drainRemainder;
 	
 	public LocomotiveSteam() {
 		boilerTemperature = ambientTemperature();
-        sync.set(BURN_TIME, new TagCompound());
-        sync.set(BURN_MAX, new TagCompound());
 	}
 
 	@Override
@@ -68,25 +69,10 @@ public class LocomotiveSteam extends Locomotive {
 	public GuiRegistry.EntityGUI guiType() {
 		return GuiTypes.STEAM_LOCOMOTIVE;
 	}
-	
-	@Override
-	public void save(TagCompound data) {
-		super.save(data);
-		data.setFloat("boiler_temperature", getBoilerTemperature());
-		data.setFloat("boiler_psi", getBoilerPressure());
-		data.set("burn_time", sync.get(BURN_TIME));
-		data.set("burn_max", sync.get(BURN_MAX));
-	}
 
-	@Override
-	public void load(TagCompound data) {
-		super.load(data);
-		setBoilerTemperature(data.getFloat("boiler_temperature"));
-		setBoilerPressure(data.getFloat("boiler_psi"));
-		sync.set(BURN_TIME, data.get("burn_time"));
-		sync.set(BURN_MAX, data.get("burn_max"));
-
-		if (getWorld().isClient) {
+	private double getDriverDiameter() {
+		if (driverDiameter == null) {
+			driverDiameter = 0d;
 			List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
 			if (driving != null) {
 				for (RenderComponent driver : driving) {
@@ -100,6 +86,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 			}
 		}
+		return driverDiameter;
 	}
 	
 	public float getBoilerTemperature() {
@@ -117,27 +104,12 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	public Map<Integer, Integer> getBurnTime() {
-		return sync.getMap(BURN_TIME, Integer::parseInt, (TagCompound tag) -> tag.getInteger("val"));
-	}
-	private void setBurnTime(Map<Integer, Integer> burnTime) {
-		sync.setMap(BURN_TIME, burnTime, Object::toString, (Integer i) -> {
-			TagCompound tag = new TagCompound();
-			tag.setInteger("val", i);
-			return tag;
-		});
+		return burnTime;
 	}
 	public Map<Integer, Integer> getBurnMax() {
-		return sync.getMap(BURN_MAX, Integer::parseInt, (TagCompound tag) -> tag.getInteger("val"));
+		return burnMax;
 	}
-	private void setBurnMax(Map<Integer, Integer> burnMax) {
-		sync.setMap(BURN_MAX, burnMax, Object::toString, (Integer i) -> {
-			TagCompound tag = new TagCompound();
-			tag.setInteger("val", i);
-			return tag;
-		});
-	}
-	
-	
+
 	@Override
 	protected int getAvailableHP() {
 		if (!Config.isFuelRequired(gauge)) {
@@ -153,18 +125,16 @@ public class LocomotiveSteam extends Locomotive {
 		this.setBoilerTemperature(ambientTemperature());
 		this.setBoilerPressure(0);
 		
-		Map<Integer, Integer> burnTime = getBurnTime();
 		for (Integer slot : burnTime.keySet()) {
 			burnTime.put(slot, 0);
 		}
-		setBurnTime(burnTime);
 	}
 
 	private double getPhase(int spikes, float offsetDegrees, double perc) {
-		if (driverDiameter == 0) {
+		if (getDriverDiameter() == 0) {
 			return 0;
 		}
-		double circumference = (driverDiameter * Math.PI);
+		double circumference = (getDriverDiameter() * Math.PI);
 		double skewDistance = this.distanceTraveled - this.getCurrentSpeed().minecraft() * perc;
 		double phase = (skewDistance % circumference)/circumference;
 		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
@@ -172,10 +142,10 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	private double getPhase(int spikes, float offsetDegrees) {
-		if (driverDiameter == 0) {
+		if (getDriverDiameter() == 0) {
 			return 0;
 		}
-		double circumference = (driverDiameter * Math.PI);
+		double circumference = (getDriverDiameter() * Math.PI);
 		double phase = (this.distanceTraveled % circumference)/circumference;
 		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
 		return phase;
@@ -333,7 +303,7 @@ public class LocomotiveSteam extends Locomotive {
 					if (this.getTickCount() % 1 == 0 ) {
 						float darken = 0;
 						float thickness = Math.abs(this.getThrottle())/2;
-						for (int i : this.getBurnTime().values()) {
+						for (int i : burnTime.values()) {
 							darken += i >= 1 ? 1 : 0;
 						}
 						if (darken == 0 && Config.isFuelRequired(gauge)) {
@@ -571,10 +541,6 @@ public class LocomotiveSteam extends Locomotive {
 		float boilerTemperature = getBoilerTemperature();
 		float boilerPressure = getBoilerPressure();
 		float waterLevelMB = this.getLiquidAmount();
-		Map<Integer, Integer> burnTime = getBurnTime();
-		Map<Integer, Integer> burnMax = getBurnMax();
-		boolean changedBurnTime = false;
-		boolean changedBurnMax = false;
 		int burningSlots = 0;
 		float waterUsed = 0;
 
@@ -595,11 +561,9 @@ public class LocomotiveSteam extends Locomotive {
 					burnMax.put(slot, remainingTime);
 					stack.setCount(stack.getCount()-1);
 					this.cargoItems.set(slot, stack);
-					changedBurnMax = true;
 				} else {
 					burnTime.put(slot, remainingTime - 1);
 				}
-				changedBurnTime = true;
 				burningSlots += 1;
 			}
 		}
@@ -684,13 +648,7 @@ public class LocomotiveSteam extends Locomotive {
 		
 		setBoilerPressure(boilerPressure);
 		setBoilerTemperature(Math.max(boilerTemperature, ambientTemperature()));
-		if (changedBurnTime) {
-			setBurnTime(burnTime);
-		}
-		if (changedBurnMax) {
-			setBurnMax(burnMax);
-		}
-		
+
 		if (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 1.1 || (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 0.5 && boilerTemperature > 150)) {
 			// 10% over max pressure OR
 			// Half max pressure and high boiler temperature
@@ -764,5 +722,15 @@ public class LocomotiveSteam extends Locomotive {
 		double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
+	}
+
+	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {
+		@Override
+		public TagAccessor<Map<Integer, Integer>> apply(Class<Map<Integer, Integer>> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(d, o) -> d.setMap(fieldName, o, Objects::toString, i -> new TagCompound().setInteger("val", i)),
+					d -> d.getMap(fieldName, Integer::parseInt, t -> t.getInteger("val"))
+			);
+		}
 	}
 }

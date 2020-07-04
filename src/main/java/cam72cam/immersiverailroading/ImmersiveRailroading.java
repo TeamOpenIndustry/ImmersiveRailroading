@@ -141,15 +141,12 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, new TrackExchangerModel());
 
 				IEntityRender<EntityRollingStock> stockRender = (entity, partialTicks) -> {
-					GLBoolTracker light = new GLBoolTracker(GL11.GL_LIGHTING, true);
-					GLBoolTracker cull = new GLBoolTracker(GL11.GL_CULL_FACE, false);
-
-					String def = entity.getDefinitionID();
-
-					StockRenderCache.getRender(def).draw(entity, partialTicks);
-
-					cull.restore();
-					light.restore();
+					try (
+						OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, true);
+						OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
+					) {
+						StockRenderCache.getRender(entity.getDefinitionID()).draw(entity, partialTicks);
+					}
 				};
 				EntityRenderer.register(LocomotiveSteam.class, stockRender);
 				EntityRenderer.register(LocomotiveDiesel.class, stockRender);

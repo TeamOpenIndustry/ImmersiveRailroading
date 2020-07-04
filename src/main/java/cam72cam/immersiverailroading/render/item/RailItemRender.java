@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.render.item;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.render.ItemRender;
+import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.mod.item.ItemStack;
@@ -33,14 +33,10 @@ public class RailItemRender implements ItemRender.IItemModel {
 
 
 		return new StandardModel().addCustom(() -> {
-            GL11.glPushMatrix();
-            {
+			try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With tex = baseRailModel.bindTexture()) {
                 GL11.glTranslated(0.5, 0.2, -0.3);
-                baseRailModel.bindTexture();
                 baseRailModel.drawGroups(left);
-                baseRailModel.restoreTexture();
             }
-            GL11.glPopMatrix();
 		});
 	}
 }
