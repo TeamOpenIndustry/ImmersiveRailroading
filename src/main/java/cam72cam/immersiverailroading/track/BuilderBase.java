@@ -101,6 +101,7 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
+				//TODO BUG BUG BUG This does NOT work when there are more than 1 tracks overlapping a TileRail
 				TileRail rail = world.getBlockEntity(track.getPos(), TileRail.class);
 				rail.setReplaced(track.placeTrack(false).getData());
 				rail.markDirty();
