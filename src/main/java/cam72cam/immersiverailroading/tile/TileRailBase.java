@@ -81,8 +81,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (parent != null && parent.info != null) {
 			gauge = parent.info.settings.gauge.value();
 		}
-		if (this.getParentReplaced() != null && world != null) {
-			parent = world.getBlockEntity(this.getParentReplaced(), TileRail.class);
+		if (this.getParentReplaced() != null && getWorld() != null) {
+			parent = getWorld().getBlockEntity(this.getParentReplaced(), TileRail.class);
             if (parent != null && parent.info != null) {
                 gauge = Math.min(gauge, parent.info.settings.gauge.value());
             }
@@ -153,17 +153,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	public Vec3i getParent() {
 		if (parent == null) {
-			if (ticksExisted > 1 && world.isServer) {
+			if (ticksExisted > 1 && getWorld().isServer) {
 				ImmersiveRailroading.warn("Invalid block without parent");
 				// Might be null during init
-				world.setToAir(pos);
+				getWorld().setToAir(getPos());
 			}
 			return null;
 		}
-		return parent.add(pos);
+		return parent.add(getPos());
 	}
 	public void setParent(Vec3i pos) {
-		this.parent = pos.subtract(this.pos);
+		this.parent = pos.subtract(this.getPos());
 	}
 	
 	public boolean isFlexible() {
@@ -222,7 +222,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		case 0:
 			//NOP
 		case 1:
-			parent = parent.subtract(pos);
+			parent = parent.subtract(getPos());
 		case 2:
 			// Nothing in base
 		case 3:
@@ -250,7 +250,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (this.getParent() == null) {
 			return null;
 		}
-		TileRail te = world.getBlockEntity(this.getParent(), TileRail.class);
+		TileRail te = getWorld().getBlockEntity(this.getParent(), TileRail.class);
 		if (te == null || te.info == null) {
 			return null;
 		}
@@ -296,24 +296,24 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					ArrayUtils.reverse(horiz);
 				}
 				for (Facing facing : horiz) {
-					Vec3i ph = world.getPrecipitationHeight(pos.offset(facing, i));
+					Vec3i ph = getWorld().getPrecipitationHeight(getPos().offset(facing, i));
 					for (int j = 0; j < 3; j ++) {
-						if (world.isAir(ph) && !ITrack.isRail(world, ph.down())) {
-							world.setSnowLevel(ph, snowDown);
+						if (getWorld().isAir(ph) && !ITrack.isRail(getWorld(), ph.down())) {
+							getWorld().setSnowLevel(ph, snowDown);
 							return;
 						}
-						if (world.isSnowBlock(ph)) {
+						if (getWorld().isSnowBlock(ph)) {
 							ph = ph.up();
 							continue;
 						}
-						int currSnow = world.getSnowLevel(ph);
+						int currSnow = getWorld().getSnowLevel(ph);
 						if (currSnow != 0) {
 							if (currSnow == 8) {
 								ph = ph.up();
 								continue;
 							}
 							int toAdd = Math.min(8 - currSnow, snowDown);
-							world.setSnowLevel(ph, currSnow + toAdd);
+							getWorld().setSnowLevel(ph, currSnow + toAdd);
 							snowDown -= toAdd;
 							if (snowDown <= 0) {
 								return;
@@ -352,7 +352,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 
 
-			Vec3d potential = MovementTrack.nextPosition(world, currentPosition, tile, rotationYaw, distanceMeters);
+			Vec3d potential = MovementTrack.nextPosition(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
 			if (state == SwitchState.TURN) {
 				//float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 				//double diff = MathUtil.trueModulus(other - rotationYaw, 360);
@@ -377,7 +377,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
             tile = null;
 			Vec3i currentParent = self.getParentTile().getParent();
 			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
-				self = (TileRailBase) world.reconstituteBlockEntity(data);
+				self = (TileRailBase) getWorld().reconstituteBlockEntity(data);
 				if (self == null) {
 					break;
 				}
@@ -397,13 +397,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private Vec3d bbMin;
 	private Vec3d bbMax;
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type){
-		return world.getEntities((T stock) -> {
+		return getWorld().getEntities((T stock) -> {
 			if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
 				if (bbMin == null) {
-					bbMax = new Vec3d(this.pos.up(3).east().north()).max(new Vec3d(this.pos.south().west()));
-					bbMin = new Vec3d(this.pos.up(3).east().north()).min(new Vec3d(this.pos.south().west()));
+					bbMax = new Vec3d(this.getPos().up(3).east().north()).max(new Vec3d(this.getPos().south().west()));
+					bbMin = new Vec3d(this.getPos().up(3).east().north()).min(new Vec3d(this.getPos().south().west()));
 				}
-				return stock.getPosition().distanceTo(new Vec3d(this.pos)) < 32 && stock.getBounds().intersects(bbMin, bbMax);
+				return stock.getPosition().distanceTo(new Vec3d(this.getPos())) < 32 && stock.getBounds().intersects(bbMin, bbMax);
 			}
 			return false;
 		}, type).stream().findFirst().orElse(null);
@@ -476,7 +476,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public void update() {
-		if (this.world.isClient) {
+		if (this.getWorld().isClient) {
 			return;
 		}
 		
@@ -484,7 +484,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		
 		if (ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
 			if ((int)(Math.random() * ConfigDebug.snowMeltRate * 10) == 0) {
-				if (!world.isPrecipitating()) {
+				if (!getWorld().isPrecipitating()) {
 					this.setSnowLayers(this.snowLayers -= 1);
 				}
 			}
@@ -496,14 +496,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			blockUpdate = false;
 			
 
-			if (this.getParent() == null || !world.isBlockLoaded(this.getParent())) {
+			if (this.getParent() == null || !getWorld().isBlockLoaded(this.getParent())) {
 				return;
 			}
 
 			if (this.getParentTile() == null) {
 				// Fire update event
-				if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(world, pos, null)) {
-					world.breakBlock(pos);
+				if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(getWorld(), getPos(), null)) {
+					getWorld().breakBlock(getPos());
 				}
 				return;
 			}
@@ -511,8 +511,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
 				double floating = ((TileRail)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
-					if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(world, pos, null)) {
-						world.breakBlock(pos);
+					if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(getWorld(), getPos(), null)) {
+						getWorld().breakBlock(getPos());
 					}
 					return;
 				}
@@ -533,7 +533,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 				ItemStackHandler freight_items = freight.cargoItems;
 				for (Facing side : Facing.values()) {
-					IInventory inventory = world.getInventory(pos.offset(side));
+					IInventory inventory = getWorld().getInventory(getPos().offset(side));
 					if (inventory != null) {
 						inventory.transferAllTo(freight_items);
 					}
@@ -547,7 +547,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 				ItemStackHandler freight_items = freight.cargoItems;
 				for (Facing side : Facing.values()) {
-					IInventory inventory = world.getInventory(pos.offset(side));
+					IInventory inventory = getWorld().getInventory(getPos().offset(side));
 					if (inventory != null) {
 						inventory.transferAllFrom(freight_items);
 					}
@@ -563,11 +563,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				if (stock == null) {
 					break;
 				}
-				augmentTank.tryFill(stock.theTank, 100, false);
+				augmentTank.fill(stock.theTank, 100, false);
                 for (Facing side : Facing.values()) {
-                	List<ITank> tanks = world.getTank(pos.offset(side));
+                	List<ITank> tanks = getWorld().getTank(getPos().offset(side));
                 	if (tanks != null) {
-                		tanks.forEach(tank -> stock.theTank.tryDrain(tank, 100, false));
+                		tanks.forEach(tank -> stock.theTank.drain(tank, 100, false));
 					}
 				}
 			}
@@ -582,11 +582,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 				}
 
-				augmentTank.tryDrain(stock.theTank, 100, false);
+				augmentTank.drain(stock.theTank, 100, false);
                 for (Facing side : Facing.values()) {
-                    List<ITank> tanks = world.getTank(pos.offset(side));
+                    List<ITank> tanks = getWorld().getTank(getPos().offset(side));
                     if (tanks != null) {
-						tanks.forEach(tank -> stock.theTank.tryFill(tank, 100, false));
+						tanks.forEach(tank -> stock.theTank.fill(tank, 100, false));
 					}
 				}
 			}
@@ -608,7 +608,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			case LOCO_CONTROL: {
 				Locomotive loco = this.getStockNearBy(Locomotive.class);
 				if (loco != null) {
-					int power = world.getRedstone(pos);
+					int power = getWorld().getRedstone(getPos());
 
 					switch (controlMode) {
 						case THROTTLE_FORWARD:
@@ -720,7 +720,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (!this.replaced.hasKey("parent")) {
 			return null;
 		}
-		return new Vec3i(this.replaced.getLong("parent")).add(pos);
+		return new Vec3i(this.replaced.getLong("parent")).add(getPos());
 	}
 
 	public SwitchState cycleSwitchForced() {
@@ -771,7 +771,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 		// Prevent infinite recursion
-		if (cur.pos.equals(cur.getParentTile().pos)) {
+		if (cur.getPos().equals(cur.getParentTile().getPos())) {
 			return null;
 		}
 
@@ -804,7 +804,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			TileRail tileSwitch = this.findSwitchParent();
 			if (tileSwitch != null) {
 				SwitchState switchForced = this.cycleSwitchForced();
-				if (this.world.isServer) {
+				if (this.getWorld().isServer) {
 					player.sendMessage(switchForced.equals(SwitchState.NONE) ? ChatText.SWITCH_UNLOCKED.getMessage() : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
 				}
 			}
@@ -815,13 +815,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (!track.equals(tileRail.info.settings.track)) {
 				if (!player.isCreative()) {
 					RailInfo info = tileRail.info.withTrack(track);
-					if (info.build(player, tileRail.pos, false)) { //cancel if player doesn't have all required items
+					if (info.build(player, tileRail.getPos(), false)) { //cancel if player doesn't have all required items
 						//FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers( //we need to send the packet because this code is executed on the server side
 						//		new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
 						tileRail.info = info;
 
 						tileRail.spawnDrops(player.getPosition());
-						tileRail.setDrops(info.getBuilder(world, new Vec3i(info.placementInfo.placementPosition).add(tileRail.pos)).drops);
+						tileRail.setDrops(info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(tileRail.getPos())).drops);
 						tileRail.markDirty();
 					}
 				} else {
@@ -834,20 +834,20 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (stack.is(Fuzzy.REDSTONE_TORCH)) {
 			String next = this.nextAugmentRedstoneMode();
 			if (next != null) {
-				if (this.world.isServer) {
+				if (this.getWorld().isServer) {
 					player.sendMessage(PlayerMessage.direct(next));
 				}
 				return true;
 			}
 		}
 		if (stack.is(Fuzzy.SNOW_LAYER)) {
-			if (this.world.isServer) {
+			if (this.getWorld().isServer) {
 				this.handleSnowTick();
 			}
 			return true;
 		}
 		if (stack.is(Fuzzy.SNOW_BLOCK)) {
-			if (this.world.isServer) {
+			if (this.getWorld().isServer) {
 				for (int i = 0; i < 8; i ++) {
 					this.handleSnowTick();
 				}
@@ -855,7 +855,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return true;
 		}
 		if (stack.isValidTool(ToolType.SHOVEL)) {
-			if (this.world.isServer) {
+			if (this.getWorld().isServer) {
 				this.cleanSnow();
 				this.setSnowLayers(0);
 				stack.damageItem(1, player);
@@ -881,15 +881,15 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void onNeighborChange(Vec3i neighbor) {
 		TileRailBase te = this;
 
-		if (world.isClient) {
+		if (getWorld().isClient) {
 			return;
 		}
 
 		blockUpdate = true;
 
-		if (world.getItemStack(pos.up()).is(Fuzzy.SNOW_LAYER)) {
+		if (getWorld().getItemStack(getPos().up()).is(Fuzzy.SNOW_LAYER)) {
 			if (handleSnowTick()) {
-				world.setToAir(pos.up());
+				getWorld().setToAir(getPos().up());
 			}
 		}
 
@@ -908,7 +908,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (data == null) {
 				break;
 			}
-			te = (TileRailBase) world.reconstituteBlockEntity(data);
+			te = (TileRailBase) getWorld().reconstituteBlockEntity(data);
 			if (te == null) {
 				break;
 			}
@@ -921,7 +921,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (parent != null && !getWillBeReplaced()) {
 			parent.spawnDrops();
 			//if (tryBreak(getWorld(), te.getPos())) {
-			world.setToAir(parent.pos);
+			getWorld().setToAir(parent.getPos());
 			//}
 		}
 	}
@@ -932,14 +932,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			TileRailBase rail = this;
 			if (rail.getReplaced() != null) {
 				// new object here is important
-				TileRailGag newGag = (TileRailGag) world.reconstituteBlockEntity(rail.getReplaced());
+				TileRailGag newGag = (TileRailGag) getWorld().reconstituteBlockEntity(rail.getReplaced());
 				if (newGag == null) {
 					return true;
 				}
 
 				while(true) {
-					if (newGag.getParent() != null && world.hasBlockEntity(newGag.getParent(), TileRail.class)) {
-						world.setBlockEntity(pos, newGag);
+					if (newGag.getParent() != null && getWorld().hasBlockEntity(newGag.getParent(), TileRail.class)) {
+						getWorld().setBlockEntity(getPos(), newGag);
 						rail.breakParentIfExists();
 						return false;
 					}
@@ -950,16 +950,16 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						break;
 					}
 
-					newGag = (TileRailGag) world.reconstituteBlockEntity(data);
+					newGag = (TileRailGag) getWorld().reconstituteBlockEntity(data);
 					if (newGag == null) {
 						break;
 					}
 				}
 			}
 		} catch (StackOverflowError ex) {
-			ImmersiveRailroading.error("Invalid recursive rail block at %s", pos);
+			ImmersiveRailroading.error("Invalid recursive rail block at %s", getPos());
 			ImmersiveRailroading.catching(ex);
-			world.setToAir(pos);
+			getWorld().setToAir(getPos());
 		}
 		return true;
 	}

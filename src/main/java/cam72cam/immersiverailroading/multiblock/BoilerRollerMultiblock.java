@@ -134,7 +134,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (craftTe.getRenderTicks() % 10 == 0 && craftTe.getCraftProgress() != 0) {
-					Audio.playSound(world, craftTe.pos, StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
+					Audio.playSound(world, craftTe.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
 				}
 				return;
 			}

@@ -55,7 +55,6 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 					data.def = def;
 					data.componentType = item;
 					data.write();
-					applyCustomName(stack);
 					items.add(stack);
 				}
 			}

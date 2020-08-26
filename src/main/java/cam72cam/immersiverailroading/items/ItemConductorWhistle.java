@@ -10,7 +10,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.CollectionUtil;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class ItemConductorWhistle extends ItemBase {
+public class ItemConductorWhistle extends CustomItem {
 	private static HashMap<UUID, Integer> cooldown = new HashMap<>();
 
 	public ItemConductorWhistle() {

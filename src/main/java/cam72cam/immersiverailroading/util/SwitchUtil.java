@@ -31,10 +31,10 @@ public class SwitchUtil {
 		}
 
 		if (position != null && parent.info != null) {
-			IIterableTrack switchBuilder = (IIterableTrack) parent.info.getBuilder(rail.world);
-			IIterableTrack turnBuilder = (IIterableTrack) rail.info.getBuilder(rail.world);
-			double isOnStraight = switchBuilder.offsetFromTrack(parent.info, parent.pos, position);
-			double isOnTurn = turnBuilder.offsetFromTrack(rail.info, rail.pos, position);
+			IIterableTrack switchBuilder = (IIterableTrack) parent.info.getBuilder(rail.getWorld());
+			IIterableTrack turnBuilder = (IIterableTrack) rail.info.getBuilder(rail.getWorld());
+			double isOnStraight = switchBuilder.offsetFromTrack(parent.info, parent.getPos(), position);
+			double isOnTurn = turnBuilder.offsetFromTrack(rail.info, rail.getPos(), position);
 
 			if (Math.abs(isOnStraight - isOnTurn) > rail.info.settings.gauge.scale() / 16) {
 				if (isOnStraight > isOnTurn) {
@@ -57,7 +57,7 @@ public class SwitchUtil {
 	}
 
 	public static boolean isRailPowered(TileRail rail) {
-		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition.add(rail.pos);
+		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition.add(rail.getPos());
 		double horiz = rail.info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
 			horiz = horiz/2;
@@ -66,9 +66,9 @@ public class SwitchUtil {
 		for (int x = -scale; x <= scale; x++) {
 			for (int z = -scale; z <= scale; z++) {
 				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
-				TileRailBase gagRail = rail.world.getBlockEntity(gagPos, TileRailBase.class);
-				if (gagRail != null && (rail.pos.equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
-					if (rail.world.getRedstone(gagPos) > 0) {
+				TileRailBase gagRail = rail.getWorld().getBlockEntity(gagPos, TileRailBase.class);
+				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
+					if (rail.getWorld().getRedstone(gagPos) > 0) {
 						return true;
 					}
 				}

@@ -217,7 +217,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				this.setCoupledUUID(coupler, stock.getUUID());
 				stock.setCoupledUUID(otherCoupler, this.getUUID());
 				if (stock.isCouplerEngaged(otherCoupler) && this.isCouplerEngaged(coupler)) {
-					this.sendToObserving(new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge));
+					new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge)
+						.sendToObserving(this);
 				}
 			}
 		}
@@ -342,7 +343,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		
 		for (DirectionalStock entity : train) {
-			entity.stock.sendToObserving(new MRSSyncPacket(entity.stock, entity.stock.positions));
+			new MRSSyncPacket(entity.stock, entity.stock.positions).sendToObserving(entity.stock);
 			entity.stock.resimulate = false;
 		}
 	}

@@ -229,7 +229,7 @@ public class TrackGui implements IScreen {
 		if (!this.lengthInput.getText().isEmpty()) {
 			RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.pos, settings).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings).sendToServer();
 			} else {
 				new ItemRailUpdatePacket(settings).sendToServer();
 			}

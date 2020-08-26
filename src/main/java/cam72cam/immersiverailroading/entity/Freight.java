@@ -138,8 +138,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 	
 	@Override
-	public void onDamage(DamageType type, Entity source, float amount) {
-		super.onDamage(type, source, amount);
+	public void onDamage(DamageType type, Entity source, float amount, boolean bypassArmor) {
+		super.onDamage(type, source, amount, bypassArmor);
 
 		if (this.isDead() && getWorld().isServer) {
 			for (int slot = 0; slot < cargoItems.getSlotCount(); slot++) {

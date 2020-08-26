@@ -7,7 +7,7 @@ import cam72cam.mod.util.CollectionUtil;
 
 import java.util.List;
 
-public class ItemSwitchKey extends ItemBase {
+public class ItemSwitchKey extends CustomItem {
 	public ItemSwitchKey() {
 		super(ImmersiveRailroading.MODID, "item_switch_key");
 

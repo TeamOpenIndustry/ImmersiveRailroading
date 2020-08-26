@@ -48,7 +48,7 @@ public class RailBaseModel {
 				Vec3d pos = info.placementInfo.placementPosition;
 				GL11.glTranslated(pos.x, pos.y, pos.z);
 
-                RailBuilderRender.renderRailBuilder(info, te.world);
+                RailBuilderRender.renderRailBuilder(info, te.getWorld());
 			});
 		}
 

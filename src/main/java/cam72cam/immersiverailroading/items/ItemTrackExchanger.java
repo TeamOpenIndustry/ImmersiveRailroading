@@ -14,7 +14,7 @@ import cam72cam.mod.world.World;
 
 import java.util.List;
 
-public class ItemTrackExchanger extends ItemBase {
+public class ItemTrackExchanger extends CustomItem {
 	public ItemTrackExchanger() {
 		super(ImmersiveRailroading.MODID, "item_track_exchanger");
 		Fuzzy largeWrench = new Fuzzy("item_large_wrench").add(new ItemStack(IRItems.ITEM_LARGE_WRENCH, 1));
@@ -47,7 +47,7 @@ public class ItemTrackExchanger extends ItemBase {
 		}
 	}
 
-	public static class Data extends ItemData {
+	public static class Data extends ItemDataSerializer {
 		@TagField("track")
 		public String track;
 

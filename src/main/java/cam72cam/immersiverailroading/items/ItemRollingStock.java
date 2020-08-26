@@ -67,7 +67,6 @@ public class ItemRollingStock extends BaseItemRollingStock {
     		Data data = new Data(stack);
     		data.def = def;
     		data.write();
-    		applyCustomName(stack);
             /*if (def.textureNames.size() > 1) {
             	for (String texture : def.textureNames.keySet()) {
 	            	ItemStack textured = stack.copy();

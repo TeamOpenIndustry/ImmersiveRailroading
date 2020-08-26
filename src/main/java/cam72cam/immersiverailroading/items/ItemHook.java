@@ -3,13 +3,13 @@ package cam72cam.immersiverailroading.items;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.Recipes;
 import cam72cam.mod.util.CollectionUtil;
 
 import java.util.List;
 
-public class ItemHook extends ItemBase {
+public class ItemHook extends CustomItem {
 	public ItemHook() {
 		super(ImmersiveRailroading.MODID, "item_hook");
 

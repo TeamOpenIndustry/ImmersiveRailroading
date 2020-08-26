@@ -37,7 +37,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		this.isBuilt = getMissingItemComponents().isEmpty();
 		
 		if (getWorld().isServer) {
-			this.sendToObserving(new BuildableStockSyncPacket(this));
+			new BuildableStockSyncPacket(this).sendToObserving(this);
 		}
 
 		if (this.isBuilt()) {
@@ -98,7 +98,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		if (this instanceof EntityMoveableRollingStock) {
 			((EntityMoveableRollingStock)this).clearHeightMap();
 		}
-		this.sendToObserving(new BuildableStockSyncPacket(this));
+		new BuildableStockSyncPacket(this).sendToObserving(this);
 	}
 	
 	public void addNextComponent(Player player) {
@@ -302,7 +302,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		}
 		
 		this.builtItems.remove(toRemove);
-		this.sendToObserving(new BuildableStockSyncPacket(this));
+		new BuildableStockSyncPacket(this).sendToObserving(this);
 		
 		
 		ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
@@ -352,8 +352,8 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 	}
 
 	@Override
-    public void onDamage(DamageType type, Entity source, float amount) {
-		super.onDamage(type, source, amount);
+    public void onDamage(DamageType type, Entity source, float amount, boolean bypassArmor) {
+		super.onDamage(type, source, amount, bypassArmor);
 
 		if (isDead() && getWorld().isServer) {
 			onDissassemble();

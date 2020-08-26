@@ -31,7 +31,7 @@ public class PreviewRenderPacket extends Packet {
 			return;
 		}
 
-		if (preview == null || preview.world != getPlayer().getWorld()) {
+		if (preview == null || preview.getWorld() != getPlayer().getWorld()) {
 			return;
 		}
 

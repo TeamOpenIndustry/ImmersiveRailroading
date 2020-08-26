@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
@@ -16,7 +16,7 @@ import cam72cam.mod.world.World;
 
 import java.util.List;
 
-public abstract class BaseItemRollingStock extends ItemBase {
+public abstract class BaseItemRollingStock extends CustomItem {
 
 	public BaseItemRollingStock(String modID, String name) {
 		super(modID, name);
@@ -44,7 +44,7 @@ public abstract class BaseItemRollingStock extends ItemBase {
 		return SpawnUtil.placeStock(player, hand, worldIn, pos, def, parts);
 	}
 
-	protected static class Data extends ItemData {
+	protected static class Data extends ItemDataSerializer {
 		@TagField(value = "defID")
 		public EntityRollingStockDefinition def;
 

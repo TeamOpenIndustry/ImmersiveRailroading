@@ -20,7 +20,7 @@ import cam72cam.mod.world.World;
 
 import java.util.List;
 
-public class ItemManual extends ItemBase {
+public class ItemManual extends CustomItem {
 	public ItemManual() {
 		super(ImmersiveRailroading.MODID, "item_manual");
 
@@ -82,7 +82,7 @@ public class ItemManual extends ItemBase {
 		return ClickResult.ACCEPTED;
 	}
 
-	public static class Data extends ItemData {
+	public static class Data extends ItemDataSerializer {
 		@TagField(value = "name", mapper = MBTagMapper.class)
 		public Multiblock multiblock;
 

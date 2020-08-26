@@ -518,7 +518,7 @@ public class LocomotiveSteam extends Locomotive {
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
-				theTank.tryDrain(tender.theTank, desiredDrain, false);
+				theTank.drain(tender.theTank, desiredDrain, false);
 			}
 			
 			if (this.getTickCount() % 20 == 0) {

@@ -21,7 +21,7 @@ import cam72cam.mod.util.Hand;
 
 import java.util.List;
 
-public class ItemGoldenSpike extends ItemBase {
+public class ItemGoldenSpike extends CustomItem {
 	public ItemGoldenSpike() {
 		super(ImmersiveRailroading.MODID, "item_golden_spike");
 
@@ -70,7 +70,7 @@ public class ItemGoldenSpike extends ItemBase {
 		return ClickResult.PASS;
 	}
 
-	public static class Data extends ItemData {
+	public static class Data extends ItemDataSerializer {
 		@TagField("pos")
 		public Vec3i pos;
 

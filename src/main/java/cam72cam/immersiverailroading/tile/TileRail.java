@@ -31,7 +31,7 @@ public class TileRail extends TileRailBase {
 		if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 		}
-		return IBoundingBox.from(pos).grow(new Vec3d(length, length, length));
+		return IBoundingBox.from(getPos()).grow(new Vec3d(length, length, length));
 	}
 	
 	@Override
@@ -52,7 +52,7 @@ public class TileRail extends TileRailBase {
 		info = new RailInfo(info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
 		this.markDirty();
 		
-		List<EntityCoupleableRollingStock> ents = world.getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(pos)) < info.settings.length, EntityCoupleableRollingStock.class);
+		List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
 		for(EntityCoupleableRollingStock stock : ents) {
 			stock.triggerResimulate();
 		}
@@ -95,14 +95,14 @@ public class TileRail extends TileRailBase {
 		return this.drops;
 	}
 	public void spawnDrops() {
-		spawnDrops(new Vec3d(this.pos));
+		spawnDrops(new Vec3d(this.getPos()));
 	}
 
 	public void spawnDrops(Vec3d pos) {
-		if (world.isServer) {
+		if (getWorld().isServer) {
 			if (drops != null && drops.size() != 0) {
 				for(ItemStack drop : drops) {
-					world.dropItem(drop, pos);
+					getWorld().dropItem(drop, pos);
 				}
 				drops = new ArrayList<>();
 			}
@@ -117,11 +117,11 @@ public class TileRail extends TileRailBase {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(world, new Vec3i(info.placementInfo.placementPosition).add(pos)).getTracksForRender()) {
+		for (TrackBase track : info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForRender()) {
 			Vec3i tpos = track.getPos();
 			total++;
 
-			if (!world.isBlockLoaded(tpos)) {
+			if (!getWorld().isBlockLoaded(tpos)) {
 				return 0;
 			}
 			if (!track.isDownSolid(false)) {

@@ -20,7 +20,7 @@ import cam72cam.mod.util.Hand;
 
 import java.util.List;
 
-public class ItemLargeWrench extends ItemBase {
+public class ItemLargeWrench extends CustomItem {
 	public ItemLargeWrench() {
 		super(ImmersiveRailroading.MODID, "item_large_wrench");
 

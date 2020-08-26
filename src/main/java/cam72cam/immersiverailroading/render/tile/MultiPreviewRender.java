@@ -24,15 +24,15 @@ public class MultiPreviewRender {
     private static void render(float partialTicks) {
         try (OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.7f)) {
             for (TileRailPreview preview : previews.values()) {
-                for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.world, preview.pos)).getSubBuilders()) {
+                for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getWorld(), preview.getPos())).getSubBuilders()) {
                     RailInfo info = builder.info;
-                    Vec3d placementPosition = info.placementInfo.placementPosition.add(preview.pos);
+                    Vec3d placementPosition = info.placementInfo.placementPosition.add(preview.getPos());
 
                     if (GlobalRender.isInRenderDistance(placementPosition)) {
                         placementPosition = placementPosition.subtract(GlobalRender.getCameraPos(partialTicks));
                         try (OpenGL.With matrix = OpenGL.matrix()) {
                             GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
-                            RailRenderUtil.render(info, preview.world, preview.pos, true);
+                            RailRenderUtil.render(info, preview.getWorld(), preview.getPos(), true);
                         }
                     }
                 }
@@ -41,7 +41,7 @@ public class MultiPreviewRender {
     }
 
     public static void add(TileRailPreview preview) {
-        previews.put(Pair.of(preview.world, preview.pos), preview);
+        previews.put(Pair.of(preview.getWorld(), preview.getPos()), preview);
     }
 
     public static void remove(World world, Vec3i removed) {

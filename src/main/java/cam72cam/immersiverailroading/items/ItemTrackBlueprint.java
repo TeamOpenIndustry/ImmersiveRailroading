@@ -21,7 +21,7 @@ import cam72cam.mod.util.Hand;
 
 import java.util.List;
 
-public class ItemTrackBlueprint extends ItemBase {
+public class ItemTrackBlueprint extends CustomItem {
 	public ItemTrackBlueprint() {
 		super(ImmersiveRailroading.MODID, "item_rail");
 

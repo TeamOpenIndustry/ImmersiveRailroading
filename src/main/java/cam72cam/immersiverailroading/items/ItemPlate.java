@@ -11,13 +11,13 @@ import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.item.CreativeTab;
-import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.TextColor;
 import cam72cam.mod.util.CollectionUtil;
 
-public class ItemPlate extends ItemBase {
+public class ItemPlate extends CustomItem {
 	public ItemPlate() {
 		super(ImmersiveRailroading.MODID, "item_plate");
 	}
@@ -45,7 +45,6 @@ public class ItemPlate extends ItemBase {
 					data.type = plate;
 					data.gauge = Gauge.from(Gauge.STANDARD);
 					data.write();
-					applyCustomName(stack);
 	                items.add(stack);
         		} else {
 		        	for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
@@ -56,7 +55,6 @@ public class ItemPlate extends ItemBase {
 							data.gauge = Gauge.from(Gauge.STANDARD);
 							data.def = def;
 							data.write();
-							applyCustomName(stack);
 			                items.add(stack);
 		        		}
 		        	}
@@ -85,7 +83,7 @@ public class ItemPlate extends ItemBase {
     	return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(new Data(stack).gauge));
     }
 
-    public static class Data extends ItemData {
+    public static class Data extends ItemDataSerializer {
 		@TagField("plate")
 		public PlateType type;
 

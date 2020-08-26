@@ -98,12 +98,12 @@ public class TileMultiblock extends BlockEntityTickable {
     */
 	
 	public Vec3i getOrigin() {
-		return pos.subtract(offset.rotate(rotation));
+		return getPos().subtract(offset.rotate(rotation));
 	}
 	
 	public MultiblockInstance getMultiblock() {
 		if (this.mb == null && this.isLoaded()) {
-			this.mb = MultiblockRegistry.get(name).instance(world, getOrigin(), rotation);
+			this.mb = MultiblockRegistry.get(name).instance(getWorld(), getOrigin(), rotation);
 		}
 		return this.mb;
 	}
@@ -144,11 +144,11 @@ public class TileMultiblock extends BlockEntityTickable {
 		for (int slot = 0; slot < container.getSlotCount(); slot ++) {
 			ItemStack item = container.get(slot);
 			if (!item.isEmpty()) {
-				world.dropItem(item, pos);
+				getWorld().dropItem(item, getPos());
 			}
 		}
 
-		world.setBlock(pos, replaced);
+		getWorld().setBlock(getPos(), replaced);
 	}
 
 	public boolean isRender() {
@@ -178,13 +178,13 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 	
 	public void setCraftMode(CraftingMachineMode mode) {
-		if (world.isServer) {
+		if (getWorld().isServer) {
 			if (craftMode != mode) {
 				craftMode = mode;
 				this.markDirty();
 			}
 		} else {
-			new MultiblockSelectCraftPacket(pos, craftItem, mode).sendToServer();
+			new MultiblockSelectCraftPacket(getPos(), craftItem, mode).sendToServer();
 		}
 	}
 	
@@ -193,14 +193,14 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 
 	public void setCraftItem(ItemStack selected) {
-		if (world.isServer) {
+		if (getWorld().isServer) {
 			if (craftItem == null || selected == null || !(selected.equals(craftItem) && selected.getTagCompound().equals(craftItem.getTagCompound()))) {
 				this.craftItem = selected == null ? null : selected.copy();
 				this.craftProgress = 0;
 				this.markDirty();
 			}
 		} else {
-			new MultiblockSelectCraftPacket(pos, selected, craftMode).sendToServer();
+			new MultiblockSelectCraftPacket(getPos(), selected, craftMode).sendToServer();
 		}
 	}
 	
@@ -271,7 +271,7 @@ public class TileMultiblock extends BlockEntityTickable {
 			ImmersiveRailroading.catching(ex);
 			// Something broke
 			// TODO figure out why
-			world.setToAir(pos);
+			getWorld().setToAir(getPos());
 		}
 	}
 

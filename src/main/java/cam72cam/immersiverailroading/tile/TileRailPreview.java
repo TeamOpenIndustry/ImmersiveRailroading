@@ -81,12 +81,12 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
 		if (player.isCrouching()) {
-			if (world.isServer) {
+			if (getWorld().isServer) {
 				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), hit));
 			}
 			return false;
 		} else {
-			GuiTypes.RAIL_PREVIEW.open(player, pos);
+			GuiTypes.RAIL_PREVIEW.open(player, getPos());
 			return !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE);
 		}
 	}
@@ -105,7 +105,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	public RailInfo getRailRenderInfo() {
-		if (world != null && item != null && (info == null || info.settings == null)) {
+		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
 			info = new RailInfo(item, placementInfo, customInfo);
 		}
 		return info;
@@ -121,16 +121,16 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	public boolean isMulti() {
-		if (getRailRenderInfo().getBuilder(world) instanceof IIterableTrack) {
-			return ((IIterableTrack)getRailRenderInfo().getBuilder(world)).getSubBuilders() != null;
+		if (getRailRenderInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
+			return ((IIterableTrack)getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
 		}
 		return false;
 	}
 
 	@Override
 	public void update() {
-		if (world.isServer && isMulti()) {
-			world.keepLoaded(pos);
+		if (getWorld().isServer && isMulti()) {
+			getWorld().keepLoaded(getPos());
 
 			if (this.ticksAlive % 20 == 0) {
 				new PreviewRenderPacket(this).sendToAll();
@@ -142,19 +142,19 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, isAboveRails() ? pos.down() : pos)) {
-				new PreviewRenderPacket(this.world, this.pos).sendToAll();
+			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, isAboveRails() ? getPos().down() : getPos())) {
+				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 			}
 			return isAboveRails();
 		}
-		new PreviewRenderPacket(this.world, this.pos).sendToAll();
+		new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 		return true;
 	}
 
 	private Boolean isAboveRails = null;
 	public boolean isAboveRails() {
 		if (isAboveRails == null) {
-			isAboveRails = BlockUtil.isIRRail(world, pos.down()) && world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5;
+			isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
 		}
 		return isAboveRails;
 	}

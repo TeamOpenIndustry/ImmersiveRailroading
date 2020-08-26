@@ -71,7 +71,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	private Vec3d playerMovement(Player source, Vec3d offset) {
-		Vec3d movement = Keyboard.getMovement(source);
+		Vec3d movement = source.getMovementInput();
         /*
         if (sprinting) {
             movement = movement.scale(3);

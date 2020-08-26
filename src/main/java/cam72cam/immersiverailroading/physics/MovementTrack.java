@@ -99,7 +99,7 @@ public class MovementTrack {
 			
 			currentPosition = currentPosition.add(delta);
 			
-			Vec3d center = new Vec3d(rail.getParentTile().pos).add(0.5, 1 + heightOffset, 0.5);
+			Vec3d center = new Vec3d(rail.getParentTile().getPos()).add(0.5, 1 + heightOffset, 0.5);
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			
@@ -115,7 +115,7 @@ public class MovementTrack {
 			}
 		} else if (rail.info.getBuilder(world) instanceof IIterableTrack) {
 			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25);
-			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.pos);
+			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos());
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
 			for (PosStep pos : positions) {

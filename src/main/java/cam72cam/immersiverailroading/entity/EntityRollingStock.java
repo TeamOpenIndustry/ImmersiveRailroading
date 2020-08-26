@@ -21,9 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityRollingStock extends Entity implements ITickable, IClickable, IKillable {
-	public static final EntitySettings settings = new EntitySettings().setCollisionReduction(1f).setImmuneToFire(true).setAttachedToPlayer(false).setDefaultMovement(false);
-
+public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
 	@TagField("defID")
     protected String defID;
 	@TagField("gauge")
@@ -40,6 +38,23 @@ public class EntityRollingStock extends Entity implements ITickable, IClickable,
 		this.gauge = gauge;
 		this.texture = texture;
 	}
+
+	public boolean isImmuneToFire() {
+		return true;
+	}
+
+	public float getCollisionReduction() {
+		return 1;
+	}
+
+	public boolean canBePushed() {
+		return false;
+	}
+
+	public boolean allowsDefaultMovement() {
+		return false;
+	}
+
 
 	/* TODO?
 	@Override
@@ -110,22 +125,24 @@ public class EntityRollingStock extends Entity implements ITickable, IClickable,
 	}
 
 	@Override
-	public void onDamage(DamageType type, Entity source, float amount) {
+	public void onDamage(DamageType type, Entity source, float amount, boolean bypassesArmor) {
 		if (getWorld().isClient) {
 			return;
 		}
 
-		switch (type) {
-			case EXPLOSION:
+		if (type == DamageType.EXPLOSION) {
+			if (!source.isMob()) {
 				if (amount > 5 && ConfigDamage.trainMobExplosionDamage) {
 					this.kill();
 				}
-				break;
-			case PLAYER:
-				Player player = source.asPlayer();
-				if (player.isCrouching()) {
-					this.kill();
-				}
+			}
+		}
+
+		if (type == DamageType.OTHER) {
+			Player player = source.asPlayer();
+			if (player.isCrouching()) {
+				this.kill();
+			}
 		}
 	}
 

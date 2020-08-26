@@ -6,12 +6,12 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.item.CreativeTab;
-import cam72cam.mod.item.ItemBase;
+import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.CollectionUtil;
 
-public class ItemRail extends ItemBase {
+public class ItemRail extends CustomItem {
 	public ItemRail() {
 		super(ImmersiveRailroading.MODID, "item_rail_part");
 	}
@@ -31,7 +31,7 @@ public class ItemRail extends ItemBase {
         return CollectionUtil.listOf(GuiText.GAUGE_TOOLTIP.toString(new Data(stack).gauge));
     }
 
-	public static class Data extends ItemData {
+	public static class Data extends ItemDataSerializer {
 		@TagField("gauge")
 		public Gauge gauge;
 

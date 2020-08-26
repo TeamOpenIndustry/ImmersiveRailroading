@@ -10,21 +10,18 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.item.*;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.CreativeTab;
-import cam72cam.mod.item.ItemBase;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.Hand;
 
-public class ItemRailAugment extends ItemBase {
+public class ItemRailAugment extends CustomItem {
 	public ItemRailAugment() {
 		super(ImmersiveRailroading.MODID, "item_augment");
 	}
@@ -103,7 +100,6 @@ public class ItemRailAugment extends ItemBase {
 				Data data = new Data(stack);
 				data.augment = augment;
 				data.write();
-        		applyCustomName(stack);
                 items.add(stack);
         	}
         }
@@ -121,7 +117,7 @@ public class ItemRailAugment extends ItemBase {
 		return TextUtil.translate("item.immersiverailroading:item_augment." + new Data(stack).augment.name() + ".name");
 	}
 
-	public static class Data extends ItemData {
+	public static class Data extends ItemDataSerializer {
 		@TagField("gauge")
 		public Gauge gauge;
 		@TagField("augment")

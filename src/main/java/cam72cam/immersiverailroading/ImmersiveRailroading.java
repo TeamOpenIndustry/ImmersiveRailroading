@@ -66,13 +66,13 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	public void commonEvent(ModEvent event) {
 		switch (event) {
 			case CONSTRUCT:
-				EntityRegistry.register(ImmersiveRailroading.instance, CarFreight::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
-				EntityRegistry.register(ImmersiveRailroading.instance, CarPassenger::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
-				EntityRegistry.register(ImmersiveRailroading.instance, CarTank::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
-				EntityRegistry.register(ImmersiveRailroading.instance, HandCar::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
-				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveDiesel::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
-				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveSteam::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
-				EntityRegistry.register(ImmersiveRailroading.instance, Tender::new, EntityRollingStock.settings, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, CarFreight::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, CarPassenger::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, CarTank::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, HandCar::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveDiesel::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveSteam::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, Tender::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 
 				MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
 				MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());

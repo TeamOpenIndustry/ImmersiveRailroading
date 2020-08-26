@@ -173,9 +173,9 @@ public abstract class FreightTank extends Freight {
 				for (Boolean doFill : new Boolean[] { false, true }) {
 					boolean success;
 					if (doFill) {
-						success = theTank.tryDrain(inputTank, theTank.getCapacity(), true);
+						success = theTank.drain(inputTank, theTank.getCapacity(), true);
 					} else {
-						success = theTank.tryFill(inputTank, theTank.getCapacity(), true);
+						success = theTank.fill(inputTank, theTank.getCapacity(), true);
 					}
 
 					if (success) {
@@ -187,9 +187,9 @@ public abstract class FreightTank extends Freight {
 							if (this.cargoItems.insert(slot, out, true).getCount() == 0) {
 								// Move Liquid
 								if (doFill) {
-									theTank.tryDrain(inputTank, theTank.getCapacity(), false);
+									theTank.drain(inputTank, theTank.getCapacity(), false);
 								} else {
-									theTank.tryFill(inputTank, theTank.getCapacity(), false);
+									theTank.fill(inputTank, theTank.getCapacity(), false);
 								}
 								if (!ConfigDebug.debugInfiniteLiquids) {
 									// Decrease input

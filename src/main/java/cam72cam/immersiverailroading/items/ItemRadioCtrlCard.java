@@ -8,7 +8,7 @@ import cam72cam.mod.util.CollectionUtil;
 import java.util.List;
 import java.util.UUID;
 
-public class ItemRadioCtrlCard extends ItemBase {
+public class ItemRadioCtrlCard extends CustomItem {
     public ItemRadioCtrlCard() {
         super(ImmersiveRailroading.MODID, "item_radio_control_card");
         Fuzzy transistor = new Fuzzy("oc:materialTransistor");
@@ -37,7 +37,7 @@ public class ItemRadioCtrlCard extends ItemBase {
         return CollectionUtil.listOf(d.linked == null ? "Not linked to any locomotive" : "Linked to: " + d.linked);
     }
 
-    public static class Data extends ItemData {
+    public static class Data extends ItemDataSerializer {
         @TagField("linked")
         public UUID linked;
 
