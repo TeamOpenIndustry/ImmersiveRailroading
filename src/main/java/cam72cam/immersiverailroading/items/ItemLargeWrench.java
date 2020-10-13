@@ -9,15 +9,14 @@ import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.mod.item.*;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.World;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ItemLargeWrench extends CustomItem {
@@ -36,12 +35,12 @@ public class ItemLargeWrench extends CustomItem {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
 
 	@Override
-	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
 			TileRailBase te = world.getBlockEntity(pos, TileRailBase.class);
 			if (te != null) {

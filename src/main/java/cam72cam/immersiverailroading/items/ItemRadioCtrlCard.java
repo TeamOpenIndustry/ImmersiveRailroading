@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.items;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.item.*;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.util.CollectionUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,14 +27,14 @@ public class ItemRadioCtrlCard extends CustomItem {
 
     @Override
     public List<CreativeTab> getCreativeTabs() {
-        return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+        return Collections.singletonList(ItemTabs.MAIN_TAB);
     }
 
 
     @Override
     public List<String> getTooltip(ItemStack stack) {
         Data d = new Data(stack);
-        return CollectionUtil.listOf(d.linked == null ? "Not linked to any locomotive" : "Linked to: " + d.linked);
+        return Collections.singletonList(d.linked == null ? "Not linked to any locomotive" : "Linked to: " + d.linked);
     }
 
     public static class Data extends ItemDataSerializer {

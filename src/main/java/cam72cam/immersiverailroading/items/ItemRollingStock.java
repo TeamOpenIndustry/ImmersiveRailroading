@@ -1,13 +1,10 @@
 package cam72cam.immersiverailroading.items;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.registry.CarPassengerDefinition;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -16,8 +13,6 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.world.World;
 import cam72cam.mod.item.ArmorSlot;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.CreativeTab;
@@ -25,7 +20,11 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.Hand;
+import cam72cam.mod.world.World;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ItemRollingStock extends BaseItemRollingStock {
 
@@ -40,7 +39,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.STOCK_TAB, ItemTabs.LOCOMOTIVE_TAB, ItemTabs.PASSENGER_TAB);
+		return Arrays.asList(ItemTabs.STOCK_TAB, ItemTabs.LOCOMOTIVE_TAB, ItemTabs.PASSENGER_TAB);
 	}
 
 	@Override
@@ -102,7 +101,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
     }
 	
 	@Override
-	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (BlockUtil.isIRRail(world, pos)) {
 			TileRailBase te = world.getBlockEntity(pos, TileRailBase.class);
 			if (te.getAugment() != null) {

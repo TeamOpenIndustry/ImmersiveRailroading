@@ -9,12 +9,12 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.*;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.OpenGL;
-import cam72cam.mod.util.Hand;
 import com.google.common.base.Predicate;
 import org.lwjgl.opengl.GL11;
 
@@ -64,7 +64,7 @@ public class TrackGui implements IScreen {
 	};
 
 	public TrackGui() {
-		this(MinecraftClient.getPlayer().getHeldItem(Hand.PRIMARY));
+		this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY));
 	}
 
 	public TrackGui(TileRailPreview te) {
@@ -108,7 +108,7 @@ public class TrackGui implements IScreen {
 	public void init(IScreenBuilder screen) {
 		trackButton = new Button(screen, 0 - 100, -24 + 0 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				List<String> defs = DefinitionManager.getTrackIDs();
 				int idx = defs.indexOf(track);
 				idx = (idx + 1) % defs.size();
@@ -119,7 +119,7 @@ public class TrackGui implements IScreen {
 
 		typeButton = new Button(screen, 0 - 100, -24 + 1 * 22 - 1, GuiText.SELECTOR_TYPE.toString(type)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
 				degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
@@ -143,7 +143,7 @@ public class TrackGui implements IScreen {
 
 		bedTypeButton = new Button(screen, 0 - 100, -24 + 4 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed))) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
 					if (bed != null) {
 						TrackGui.this.bed = bed;
@@ -158,7 +158,7 @@ public class TrackGui implements IScreen {
 
 		bedFillButton = new Button(screen, 0 - 100, -24 + 5 * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill))) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
 					if (bed != null) {
 						TrackGui.this.bedFill = bed;
@@ -173,7 +173,7 @@ public class TrackGui implements IScreen {
 
 		posTypeButton = new Button(screen, 0 - 100, -24 + 6 * 22, GuiText.SELECTOR_POSITION.toString(posType)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
 				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(posType));
 			}
@@ -181,7 +181,7 @@ public class TrackGui implements IScreen {
 
 		smoothingButton = new Button(screen, 0 - 100, -24 + 7 * 22, GuiText.SELECTOR_SMOOTHING.toString(smoothing)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				smoothing = TrackSmoothing.values()[((smoothing.ordinal() + 1) % TrackSmoothing.values().length)];
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(smoothing));
 			}
@@ -190,7 +190,7 @@ public class TrackGui implements IScreen {
 
 		directionButton = new Button(screen, 0 - 100, -24 + 8 * 22, GuiText.SELECTOR_DIRECTION.toString(direction)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				direction = TrackDirection.values()[((direction.ordinal() + 1) % (TrackDirection.values().length))];
 				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(direction));
 			}
@@ -198,7 +198,7 @@ public class TrackGui implements IScreen {
 
 		gaugeButton = new Button(screen, 0 - 100, -24 + 9 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				gauge = gauge.next();
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
 			}
@@ -206,14 +206,14 @@ public class TrackGui implements IScreen {
 
 		isPreviewCB = new CheckBox(screen, -75, -24 + 10 * 22 + 4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				isPreview = isPreviewCB.isChecked();
 			}
 		};
 
 		isGradeCrossingCB = new CheckBox(screen, 0 - 75, -24 + 11 * 22 + 4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				isGradeCrossing = isGradeCrossingCB.isChecked();
 			}
 		};

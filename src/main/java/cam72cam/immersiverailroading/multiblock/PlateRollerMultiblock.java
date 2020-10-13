@@ -12,7 +12,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.sound.StandardSound;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
 public class PlateRollerMultiblock extends Multiblock {
@@ -74,7 +73,7 @@ public class PlateRollerMultiblock extends Multiblock {
 		}
 
 		@Override
-		public boolean onBlockActivated(Player player, Hand hand, Vec3i offset) {
+		public boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset) {
 			if (!player.isCrouching()) {
 				ItemStack held = player.getHeldItem(hand);
 				if (held.isEmpty()) {

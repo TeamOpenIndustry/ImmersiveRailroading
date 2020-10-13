@@ -14,8 +14,6 @@ import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.util.Hand;
-import cam72cam.mod.serialization.TagCompound;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
@@ -137,7 +135,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-    public ClickResult onClick(Player player, Hand hand) {
+    public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
 				ItemRadioCtrlCard.Data data = new ItemRadioCtrlCard.Data(player.getHeldItem(hand));

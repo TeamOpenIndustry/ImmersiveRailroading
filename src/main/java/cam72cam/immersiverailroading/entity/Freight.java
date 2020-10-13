@@ -14,7 +14,6 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.util.Hand;
 
 import java.util.List;
 
@@ -66,7 +65,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 
 	@Override
-	public ClickResult onClick(Player player, Hand hand) {
+	public ClickResult onClick(Player player, Player.Hand hand) {
 		ClickResult clickRes = super.onClick(player, hand);
 		if (clickRes != ClickResult.PASS) {
 			return clickRes;
@@ -88,14 +87,14 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			}
 		}
 
-		if (player.getHeldItem(Hand.PRIMARY).is(Fuzzy.LEAD)) {
+		if (player.getHeldItem(Player.Hand.PRIMARY).is(Fuzzy.LEAD)) {
 			for (Entity passenger : this.getPassengers()) {
 				if (passenger instanceof Living && !passenger.isVillager()) {
 					Living living = (Living) passenger;
 					if (living.canBeLeashedTo(player)) {
 						this.removePassenger(living);
 						living.setLeashHolder(player);
-						player.getHeldItem(Hand.PRIMARY).shrink(1);
+						player.getHeldItem(Player.Hand.PRIMARY).shrink(1);
 					}
 					return ClickResult.ACCEPTED;
 				}

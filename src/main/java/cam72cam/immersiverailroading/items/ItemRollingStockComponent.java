@@ -1,27 +1,26 @@
 package cam72cam.immersiverailroading.items;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.Hand;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.TextColor;
+import cam72cam.mod.util.Facing;
+import cam72cam.mod.world.World;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 public class ItemRollingStockComponent extends BaseItemRollingStock {
 
@@ -36,7 +35,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.COMPONENT_TAB);
+		return Collections.singletonList(ItemTabs.COMPONENT_TAB);
 	}
 
 	@Override
@@ -74,12 +73,12 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 	}
 
 	@Override
-	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (new Data(player.getHeldItem(hand)).componentType != ItemComponentType.FRAME) {
 			return ClickResult.REJECTED;
 		}
 		
-		return tryPlaceStock(player, world, pos, hand, CollectionUtil.listOf(ItemComponentType.FRAME));
+		return tryPlaceStock(player, world, pos, hand, Collections.singletonList(ItemComponentType.FRAME));
 	}
 
 	public static class Data extends BaseItemRollingStock.Data {

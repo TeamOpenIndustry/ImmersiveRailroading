@@ -14,7 +14,6 @@ import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.util.Hand;
 import com.google.gson.JsonObject;
 
 import java.lang.reflect.InvocationTargetException;
@@ -108,7 +107,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	 */
 	
 	@Override
-	public ClickResult onClick(Player player, Hand hand) {
+	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH)) {
 			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
 			if (texNames.size() > 1) {

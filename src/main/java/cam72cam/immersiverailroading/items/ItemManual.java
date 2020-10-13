@@ -13,11 +13,10 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ItemManual extends CustomItem {
@@ -36,17 +35,17 @@ public class ItemManual extends CustomItem {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
 
 	@Override
 	public List<String> getTooltip(ItemStack stack) {
-		return CollectionUtil.listOf(GuiText.SELECTOR_TYPE.toString(new Data(stack).multiblock.getName()));
+		return Collections.singletonList(GuiText.SELECTOR_TYPE.toString(new Data(stack).multiblock.getName()));
 	}
 
 	@Override
-	public void onClickAir(Player player, World world, Hand hand) {
+	public void onClickAir(Player player, World world, Player.Hand hand) {
 		if (player.isCrouching()) {
 			if (world.isServer) {
 				ItemStack item = player.getHeldItem(hand);
@@ -66,7 +65,7 @@ public class ItemManual extends CustomItem {
 	}
 	
 	@Override
-	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Hand hand, Facing facing, Vec3d hit) {
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (world.isServer) {
 			ItemStack item = player.getHeldItem(hand);
 			Multiblock current = new Data(item).multiblock;

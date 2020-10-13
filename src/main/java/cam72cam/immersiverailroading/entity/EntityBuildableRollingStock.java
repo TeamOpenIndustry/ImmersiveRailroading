@@ -23,7 +23,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.util.Hand;
 
 public class EntityBuildableRollingStock extends EntityRollingStock implements IWorldData {
 	@TagField("isBuilt")
@@ -321,7 +320,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 	}
 	
 	@Override
-	public ClickResult onClick(Player player, Hand hand) {
+	public ClickResult onClick(Player player, Player.Hand hand) {
 		ClickResult clickRes = super.onClick(player, hand);
 		if (clickRes != ClickResult.PASS) {
 			return clickRes;

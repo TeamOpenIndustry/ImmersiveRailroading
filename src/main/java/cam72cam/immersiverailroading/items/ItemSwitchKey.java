@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.items;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.item.*;
-import cam72cam.mod.util.CollectionUtil;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ItemSwitchKey extends CustomItem {
@@ -23,12 +23,12 @@ public class ItemSwitchKey extends CustomItem {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
 	@Override
 	public List<String> getTooltip(ItemStack stack)
 	{
-		return CollectionUtil.listOf(GuiText.SWITCH_HAMMER_TOOLTIP.toString());
+		return Collections.singletonList(GuiText.SWITCH_HAMMER_TOOLTIP.toString());
 	}
 }

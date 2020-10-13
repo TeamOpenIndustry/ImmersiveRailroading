@@ -7,7 +7,7 @@ import cam72cam.mod.world.World;
 
 public class BlockUtil {
 	public static boolean canBeReplaced(World world, Vec3i pos, boolean allowFlex) {
-		if (world.isReplacable(pos)) {
+		if (world.isReplaceable(pos)) {
 			return true;
 		}
 		

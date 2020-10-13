@@ -11,7 +11,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.Button;
 import cam72cam.mod.gui.IScreen;
 import cam72cam.mod.gui.IScreenBuilder;
-import cam72cam.mod.util.Hand;
 
 public class TrackExchangerGui implements IScreen {
 	private Button trackSelector;
@@ -21,14 +20,14 @@ public class TrackExchangerGui implements IScreen {
 	public TrackExchangerGui () {
 		Player player = MinecraftClient.getPlayer();
 		
-		this.track = new ItemTrackExchanger.Data(player.getHeldItem(Hand.PRIMARY)).track;
+		this.track = new ItemTrackExchanger.Data(player.getHeldItem(Player.Hand.PRIMARY)).track;
 	}
 
 	@Override
 	public void init(IScreenBuilder screen) {
 		trackSelector = new Button(screen, -100, -10, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				List<String> defs = DefinitionManager.getTrackIDs();
 				int idx = defs.indexOf(TrackExchangerGui.this.track);
 				idx = (idx + 1) % defs.size();

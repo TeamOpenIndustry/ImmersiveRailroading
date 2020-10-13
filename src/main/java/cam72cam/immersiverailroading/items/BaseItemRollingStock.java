@@ -11,7 +11,6 @@ import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
 import java.util.List;
@@ -28,7 +27,7 @@ public abstract class BaseItemRollingStock extends CustomItem {
         return def == null ? null : def.name();
 	}
 
-	public static ClickResult tryPlaceStock(Player player, World worldIn, Vec3i pos, Hand hand, List<ItemComponentType> parts) {
+	public static ClickResult tryPlaceStock(Player player, World worldIn, Vec3i pos, Player.Hand hand, List<ItemComponentType> parts) {
 		ItemStack stack = player.getHeldItem(hand);
 		
 		EntityRollingStockDefinition def = new Data(stack).def;

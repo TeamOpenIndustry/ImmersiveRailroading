@@ -25,7 +25,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import org.apache.commons.lang3.ArrayUtils;
@@ -302,16 +301,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							getWorld().setSnowLevel(ph, snowDown);
 							return;
 						}
-						if (getWorld().isSnowBlock(ph)) {
-							ph = ph.up();
-							continue;
-						}
 						int currSnow = getWorld().getSnowLevel(ph);
-						if (currSnow != 0) {
-							if (currSnow == 8) {
-								ph = ph.up();
-								continue;
-							}
+						if (currSnow > 0 && currSnow < 8) {
 							int toAdd = Math.min(8 - currSnow, snowDown);
 							getWorld().setSnowLevel(ph, currSnow + toAdd);
 							snowDown -= toAdd;
@@ -798,7 +789,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	@Override
-	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
+	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
 		if (stack.is(IRItems.ITEM_SWITCH_KEY)) {
 			TileRail tileSwitch = this.findSwitchParent();

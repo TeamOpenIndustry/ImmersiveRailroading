@@ -7,7 +7,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.util.Hand;
 
 public class ItemRailUpdatePacket extends Packet {
 	@TagField
@@ -35,9 +34,9 @@ public class ItemRailUpdatePacket extends Packet {
 			tile.setItem(item);
 		} else {
 			Player player = this.getPlayer();
-			ItemStack stack = player.getHeldItem(Hand.PRIMARY);
+			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
 			settings.write(stack);
-			player.setHeldItem(Hand.PRIMARY, stack);
+			player.setHeldItem(Player.Hand.PRIMARY, stack);
 		}
 	}
 }

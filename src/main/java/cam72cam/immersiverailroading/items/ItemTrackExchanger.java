@@ -8,10 +8,9 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ItemTrackExchanger extends CustomItem {
@@ -32,17 +31,17 @@ public class ItemTrackExchanger extends CustomItem {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
 	@Override
 	public List<String> getTooltip(ItemStack stack) {
-		return CollectionUtil.listOf(GuiText.TRACK_SWITCHER_TOOLTIP.toString());
+		return Collections.singletonList(GuiText.TRACK_SWITCHER_TOOLTIP.toString());
 	}
 
 	@Override
-	public void onClickAir(Player player, World world, Hand hand) {
-		if (world.isClient && hand == Hand.PRIMARY) {
+	public void onClickAir(Player player, World world, Player.Hand hand) {
+		if (world.isClient && hand == Player.Hand.PRIMARY) {
 			GuiTypes.TRACK_EXCHANGER.open(player);
 		}
 	}

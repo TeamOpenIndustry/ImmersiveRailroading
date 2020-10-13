@@ -2,11 +2,11 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.item.CreativeTab;
-import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.CustomItem;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.Recipes;
-import cam72cam.mod.util.CollectionUtil;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ItemPaintBrush extends CustomItem {
@@ -24,7 +24,7 @@ public class ItemPaintBrush extends CustomItem {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
 }

@@ -13,10 +13,9 @@ import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.World;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -39,11 +38,11 @@ public class ItemConductorWhistle extends CustomItem {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return CollectionUtil.listOf(ItemTabs.MAIN_TAB);
+		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
 	@Override
-	public void onClickAir(Player player, World world, Hand hand) {
+	public void onClickAir(Player player, World world, Player.Hand hand) {
 		if (world.isServer) {
 			if (cooldown.containsKey(player.getUUID())) {
 				int newtime = cooldown.get(player.getUUID());

@@ -92,7 +92,7 @@ public class MovementTrack {
 		double heightOffset = railHeight * rail.info.settings.gauge.scale();
 
 		if (rail.info.settings.type == TrackItems.CROSSING) {
-			delta = VecUtil.fromWrongYaw(distance, Facing.fromAngle(trainYaw).getHorizontalAngle());
+			delta = VecUtil.fromWrongYaw(distance, Facing.fromAngle(trainYaw).getAngle());
 			return currentPosition.add(delta);
 		} else if (rail.info.settings.type == TrackItems.TURNTABLE) {
 			double tablePos = rail.getParentTile().info.tablePos;
@@ -103,7 +103,7 @@ public class MovementTrack {
 			
 			double fromCenter = currentPosition.distanceTo(center);
 			
-			float angle = (float)tablePos + rail.info.placementInfo.facing().getHorizontalAngle();
+			float angle = (float)tablePos + rail.info.placementInfo.facing().getAngle();
 			
 			Vec3d forward = center.add(VecUtil.fromWrongYaw(fromCenter, angle));
 			Vec3d backward = center.add(VecUtil.fromWrongYaw(fromCenter, angle + 180));

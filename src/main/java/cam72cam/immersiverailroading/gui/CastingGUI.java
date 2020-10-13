@@ -12,15 +12,15 @@ import cam72cam.immersiverailroading.multiblock.CastingMultiblock.CastingInstanc
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.gui.Button;
 import cam72cam.mod.gui.IScreen;
 import cam72cam.mod.gui.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.util.Hand;
 
+import java.util.Collections;
 import java.util.List;
 
 public class CastingGUI implements IScreen {
@@ -56,7 +56,7 @@ public class CastingGUI implements IScreen {
 	public void init(IScreenBuilder screen) {
 		pickerButton = new Button(screen, -100, -20 - 10, GuiText.SELECTOR_TYPE.toString("")) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				CraftPicker.showCraftPicker(screen, currentItem, CraftingType.CASTING, (ItemStack item) -> {
 					if (item != null) {
 						currentItem = item;
@@ -75,11 +75,11 @@ public class CastingGUI implements IScreen {
 
 		gaugeButton = new Button(screen, 0, -10, 100, 20, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				if(!currentItem.isEmpty()) {
 					EntityRollingStockDefinition def = new ItemRollingStockComponent.Data(currentItem).def;
 					if (def != null && ConfigBalance.DesignGaugeLock) {
-						List<Gauge> validGauges = CollectionUtil.listOf(Gauge.from(def.recommended_gauge.value()));
+						List<Gauge> validGauges = Collections.singletonList(Gauge.from(def.recommended_gauge.value()));
 						gauge = gauge.next(validGauges);
 					} else {
 						gauge = gauge.next();
@@ -91,7 +91,7 @@ public class CastingGUI implements IScreen {
 		};
 		singleCastButton = new Button(screen, 0, +20 - 10, 100, 20, GuiText.SELECTOR_CAST_SINGLE.toString()) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				if (tile.getCraftMode() != CraftingMachineMode.SINGLE) {
 					tile.setCraftMode(CraftingMachineMode.SINGLE);
 				} else {
@@ -105,7 +105,7 @@ public class CastingGUI implements IScreen {
 		};
 		repeatCastButton = new Button(screen, 0, +40 - 10, 100, 20, GuiText.SELECTOR_CAST_REPEAT.toString()) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				if (tile.getCraftMode() != CraftingMachineMode.REPEAT) {
 					tile.setCraftMode(CraftingMachineMode.REPEAT);
 				} else {

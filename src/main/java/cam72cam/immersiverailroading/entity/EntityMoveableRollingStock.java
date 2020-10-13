@@ -18,10 +18,10 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
-import cam72cam.mod.util.CollectionUtil;
 import cam72cam.mod.serialization.TagCompound;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
@@ -65,7 +65,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public void initPositions(TickPos tp) {
-        this.positions = CollectionUtil.listOf(tp);
+        this.positions = Arrays.asList(tp);
     }
 
     /*

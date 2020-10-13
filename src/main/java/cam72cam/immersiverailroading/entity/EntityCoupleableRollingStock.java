@@ -16,7 +16,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.Hand;
 import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
@@ -107,7 +106,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 */
 	
 	@Override
-    public ClickResult onClick(Player player, Hand hand) {
+    public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_HOOK) && getWorld().isServer) {
 			CouplerType coupler = CouplerType.FRONT;
 			if (this.getCouplerPosition(CouplerType.FRONT).distanceTo(player.getPosition()) > this.getCouplerPosition(CouplerType.BACK).distanceTo(player.getPosition())) {

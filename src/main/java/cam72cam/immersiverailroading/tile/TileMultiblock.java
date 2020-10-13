@@ -17,7 +17,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.world.BlockInfo;
 
@@ -132,7 +131,7 @@ public class TileMultiblock extends BlockEntityTickable {
 		}
 	}
 
-	public boolean onBlockActivated(Player player, Hand hand) {
+	public boolean onBlockActivated(Player player, Player.Hand hand) {
 		return getMultiblock().onBlockActivated(player, hand, offset);
 	}
 	
@@ -156,7 +155,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 
 	public double getRotation() {
-		return 180 - Facing.EAST.rotate(rotation).getHorizontalAngle();
+		return 180 - Facing.EAST.rotate(rotation).getAngle();
 	}
 	
 	/*
@@ -276,7 +275,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	}
 
 	@Override
-	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
+	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		return onBlockActivated(player, hand);
 	}
 

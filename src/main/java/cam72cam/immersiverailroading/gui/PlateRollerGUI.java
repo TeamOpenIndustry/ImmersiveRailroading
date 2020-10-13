@@ -10,13 +10,13 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.Button;
 import cam72cam.mod.gui.IScreen;
 import cam72cam.mod.gui.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.util.CollectionUtil;
-import cam72cam.mod.util.Hand;
 
+import java.util.Collections;
 import java.util.List;
 
 public class PlateRollerGUI implements IScreen {
@@ -54,11 +54,11 @@ public class PlateRollerGUI implements IScreen {
 	public void init(IScreenBuilder screen) {
 		gaugeButton = new Button(screen, 0 - 100, -24 + 0 * 30, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				if(!currentItem.isEmpty()) {
 					EntityRollingStockDefinition def = new ItemPlate.Data(currentItem).def;
 					if (def != null && plate == PlateType.BOILER && ConfigBalance.DesignGaugeLock) {
-						List<Gauge> validGauges = CollectionUtil.listOf(Gauge.from(def.recommended_gauge.value()));
+						List<Gauge> validGauges = Collections.singletonList(Gauge.from(def.recommended_gauge.value()));
 						gauge = gauge.next(validGauges);
 					} else {
 						gauge = gauge.next();
@@ -71,7 +71,7 @@ public class PlateRollerGUI implements IScreen {
 
 		plateButton = new Button(screen, 0 - 100, -24 + 1 * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate)) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				plate = PlateType.values()[((plate.ordinal() + 1) % (PlateType.values().length))];
 				plateButton.setText(GuiText.SELECTOR_PLATE_TYPE.toString(plate));
 				pickerButton.setVisible(plate == PlateType.BOILER);
@@ -81,7 +81,7 @@ public class PlateRollerGUI implements IScreen {
 
 		pickerButton = new Button(screen, 0 - 100, -24 + 2 * 30, GuiText.SELECTOR_PLATE_BOILER.toString("")) {
 			@Override
-			public void onClick(Hand hand) {
+			public void onClick(Player.Hand hand) {
 				CraftPicker.showCraftPicker(screen, null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
 					if (item != null) {
 						ItemRollingStock.Data rs = new ItemRollingStock.Data(item);

@@ -12,11 +12,9 @@ import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.util.Hand;
 
 public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
@@ -79,7 +77,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 	
 	@Override
-	public boolean onClick(Player player, Hand hand, Facing facing, Vec3d hit) {
+	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (player.isCrouching()) {
 			if (getWorld().isServer) {
 				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), hit));

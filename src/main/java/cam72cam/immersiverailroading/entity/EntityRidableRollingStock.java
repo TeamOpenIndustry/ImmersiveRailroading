@@ -10,7 +10,6 @@ import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.Hand;
 
 import java.util.List;
 
@@ -20,7 +19,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	@Override
-	public ClickResult onClick(Player player, Hand hand) {
+	public ClickResult onClick(Player player, Player.Hand hand) {
 		ClickResult clickRes = super.onClick(player, hand);
 		if (clickRes != ClickResult.PASS) {
 			return clickRes;

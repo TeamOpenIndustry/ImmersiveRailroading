@@ -19,7 +19,6 @@ import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.util.Hand;
 import cam72cam.mod.world.BlockInfo;
 import cam72cam.mod.world.World;
 
@@ -152,10 +151,10 @@ public abstract class Multiblock {
 
 					int count = stack.getCount();
 
-					ItemStack backup = player.getHeldItem(Hand.PRIMARY).copy();
-					player.setHeldItem(Hand.PRIMARY, stack.copy());
-					ClickResult result = player.clickBlock(Hand.PRIMARY, pos, new Vec3d(0.5, 0, 0.5));
-					player.setHeldItem(Hand.PRIMARY, backup);
+					ItemStack backup = player.getHeldItem(Player.Hand.PRIMARY).copy();
+					player.setHeldItem(Player.Hand.PRIMARY, stack.copy());
+					ClickResult result = player.clickBlock(Player.Hand.PRIMARY, pos, new Vec3d(0.5, 0, 0.5));
+					player.setHeldItem(Player.Hand.PRIMARY, backup);
 
 					if (result == ClickResult.ACCEPTED) {
 						if (inv.get(slot).getCount() == count) {
@@ -214,7 +213,7 @@ public abstract class Multiblock {
 				te.configure(name, rot, offset, origState);
 			}
 		}
-		public abstract boolean onBlockActivated(Player player, Hand hand, Vec3i offset);
+		public abstract boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset);
 		public abstract int getInvSize(Vec3i offset);
 		public abstract boolean isRender(Vec3i offset);
 		public abstract void tick(Vec3i offset);

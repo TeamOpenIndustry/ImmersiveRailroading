@@ -113,7 +113,7 @@ public class PlacementInfo {
 		} else {
 			int rotationQuarter = nbt.getInteger("rotationQuarter");
 			Facing facing = Facing.from(nbt.getByte("facing"));
-			float facingAngle = 180 - facing.getHorizontalAngle();
+			float facingAngle = 180 - facing.getAngle();
 			float rotAngle = rotationQuarter/4f*90;
 			if (direction != TrackDirection.RIGHT) {
 				rotAngle = -rotAngle;
