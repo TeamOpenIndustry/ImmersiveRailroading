@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.mod.gui.IScreenBuilder;
+import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;

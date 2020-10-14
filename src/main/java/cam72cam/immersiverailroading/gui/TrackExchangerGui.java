@@ -8,9 +8,9 @@ import cam72cam.immersiverailroading.net.ItemTrackExchangerUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.Button;
-import cam72cam.mod.gui.IScreen;
-import cam72cam.mod.gui.IScreenBuilder;
+import cam72cam.mod.gui.screen.Button;
+import cam72cam.mod.gui.screen.IScreen;
+import cam72cam.mod.gui.screen.IScreenBuilder;
 
 public class TrackExchangerGui implements IScreen {
 	private Button trackSelector;

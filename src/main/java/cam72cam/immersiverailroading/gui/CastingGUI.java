@@ -14,9 +14,9 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.gui.Button;
-import cam72cam.mod.gui.IScreen;
-import cam72cam.mod.gui.IScreenBuilder;
+import cam72cam.mod.gui.screen.Button;
+import cam72cam.mod.gui.screen.IScreen;
+import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.resource.Identifier;
 
@@ -139,8 +139,8 @@ public class CastingGUI implements IScreen {
 
 		builder.drawImage(CASTING_GUI_TEXTURE, -100, 0, 200, 100);
 
-		builder.drawTank(- 94.5, 3, 56.7, 60, Fluid.LAVA, (float) fluidPercent, false, 0x99fb7e15);
-		builder.drawTank(- 28.5, 67, 125.2, 30, Fluid.LAVA, progress/cost, false, 0x998c1919);
+		builder.drawTank(- 95, 3, 57, 60, Fluid.LAVA, (float) fluidPercent, false, 0x99fb7e15);
+		builder.drawTank(- 29, 67, 126, 30, Fluid.LAVA, progress/cost, false, 0x998c1919);
 		
 		String fillStr = String.format("%s/%s", (int)(fluidPercent * CastingMultiblock.max_volume), (int)CastingMultiblock.max_volume);
 		String castStr = String.format("%s/%s", progress, (int)cost);

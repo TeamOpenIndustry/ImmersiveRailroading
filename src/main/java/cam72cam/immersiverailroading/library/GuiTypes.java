@@ -19,7 +19,7 @@ import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.gui.GuiRegistry.BlockGUI;
 import cam72cam.mod.gui.GuiRegistry.EntityGUI;
 import cam72cam.mod.gui.GuiRegistry.GUI;
-import cam72cam.mod.gui.IScreen;
+import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.resource.Identifier;
 
 public class GuiTypes {

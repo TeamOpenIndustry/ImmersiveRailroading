@@ -10,7 +10,7 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.*;
+import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;

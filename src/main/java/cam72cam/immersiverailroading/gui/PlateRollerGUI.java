@@ -11,9 +11,9 @@ import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.Button;
-import cam72cam.mod.gui.IScreen;
-import cam72cam.mod.gui.IScreenBuilder;
+import cam72cam.mod.gui.screen.Button;
+import cam72cam.mod.gui.screen.IScreen;
+import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
 
 import java.util.Collections;
