@@ -184,7 +184,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					new HandCarOverlay().draw();
 				});
 
-				Particles.SMOKE = IParticle.register(SmokeParticle::new, SmokeParticle::renderAll);
+				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
 				break;
 			case RELOAD:
 				try {

@@ -1,18 +1,20 @@
 package cam72cam.immersiverailroading.render;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.GLSLShader;
-import cam72cam.mod.render.IParticle;
+import cam72cam.mod.render.Particle;
 import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SmokeParticle extends IParticle {
+public class SmokeParticle extends Particle {
 
 	public static class SmokeParticleData extends ParticleData {
 		private final float darken;
@@ -51,7 +53,10 @@ public class SmokeParticle extends IParticle {
 
 	public static void renderAll(List<SmokeParticle> particles, Consumer<SmokeParticle> setPos, float partialTicks) {
 		if (shader == null) {
-			shader =new GLSLShader("immersiverailroading:particles/smoke_vert.c", "immersiverailroading:particles/smoke_frag.c");
+			shader = new GLSLShader(
+					new Identifier(ImmersiveRailroading.MODID, "particles/smoke_vert.c"),
+					new Identifier(ImmersiveRailroading.MODID, "particles/smoke_frag.c")
+			);
 			dl = GL11.glGenLists(1);
 			GL11.glNewList(dl, GL11.GL_COMPILE);
 			{
@@ -70,8 +75,8 @@ public class SmokeParticle extends IParticle {
 			}
 			GL11.glEndList();
 		}
-		shader.bind();
 		try (
+			OpenGL.With sb = shader.bind();
 			OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
 			OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
 			OpenGL.With tex = OpenGL.bool(GL11.GL_TEXTURE_2D, false);
@@ -116,6 +121,5 @@ public class SmokeParticle extends IParticle {
 				}
 			}
 		}
-		shader.unbind();
 	}
 }

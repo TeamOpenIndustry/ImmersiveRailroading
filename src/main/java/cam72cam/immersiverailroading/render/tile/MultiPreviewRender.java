@@ -28,7 +28,7 @@ public class MultiPreviewRender {
                     RailInfo info = builder.info;
                     Vec3d placementPosition = info.placementInfo.placementPosition.add(preview.getPos());
 
-                    if (GlobalRender.isInRenderDistance(placementPosition)) {
+                    if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
                         placementPosition = placementPosition.subtract(GlobalRender.getCameraPos(partialTicks));
                         try (OpenGL.With matrix = OpenGL.matrix()) {
                             GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);

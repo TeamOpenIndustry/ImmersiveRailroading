@@ -58,7 +58,7 @@ public class RailBuilderRender {
                             (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
                     });
                     fbm.flip();
-                    GlobalRender.mulMatrix(fbm);
+                    OpenGL.multMatrix(fbm);
 
 
                     if (piece.getGroups().size() != 0) {
@@ -87,7 +87,7 @@ public class RailBuilderRender {
                                 (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
                         });
                         fbm.flip();
-                        GlobalRender.mulMatrix(fbm);
+                        OpenGL.multMatrix(fbm);
                     } catch (Exception | Error e) {
                         // Some weird math happened.  Do this the slow way and reset the matrix
                         GL11.glPopMatrix();
