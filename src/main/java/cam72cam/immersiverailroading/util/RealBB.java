@@ -140,15 +140,11 @@ public class RealBB implements IBoundingBox {
 	}
 	@Override
     public double calculateYOffset(IBoundingBox other, double offsetY) {
-		double hack = 0.04;
+		double hack = 0.05;
 		other = other.grow(new Vec3d(hack, 0, hack));
 		Double intersect = intersectsAt(other.min(), other.max(), true).getRight();
 		double minY = other.min().y;
-		if (minY < intersect) {
-			return Math.min(0.1, intersect - minY);
-		} else {
-			return 0;
-		}
+		return Math.max(-0.1, Math.min(0.1, intersect - minY));
 	}
 	@Override
 	public double calculateZOffset(IBoundingBox other, double offsetZ) {
@@ -235,7 +231,7 @@ public class RealBB implements IBoundingBox {
 	public boolean intersects(Vec3d minIn, Vec3d maxIn) {
 		Vec3d min = minIn.min(maxIn);
 		Vec3d max = maxIn.max(minIn);
-		return intersectsAt(min, max, false).getLeft();
+		return intersectsAt(min, max, true).getLeft();
 	}
 
 	@Override
