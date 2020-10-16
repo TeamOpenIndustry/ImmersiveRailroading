@@ -495,21 +495,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	public EntityCoupleableRollingStock getCoupled(CouplerType coupler) {
-		EntityCoupleableRollingStock stock = null;
-
-		if (stock == null && this.getCoupledUUID(coupler) != null) {
-			EntityCoupleableRollingStock coupledStockFront;
-			EntityCoupleableRollingStock coupledStockBack;
-			switch (coupler) {
-			case FRONT:
-				coupledStockFront = findByUUID(this.getCoupledUUID(coupler));
-				return coupledStockFront;
-			case BACK:
-				coupledStockBack = findByUUID(this.getCoupledUUID(coupler));
-				return coupledStockBack;
-			}
+		if (this.getCoupledUUID(coupler) != null) {
+			return findByUUID(this.getCoupledUUID(coupler));
 		}
-		return stock;
+		return null;
 	}
 
 	public CouplerType getCouplerFor(EntityCoupleableRollingStock stock) {
