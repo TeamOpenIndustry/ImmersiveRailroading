@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
@@ -11,7 +12,10 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
 	public float getRidingSoundModifier() {
@@ -69,6 +73,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
+	private static final Map<UUID, Integer> cooldown = new HashMap<>();
 	private Vec3d playerMovement(Player source, Vec3d offset) {
 		Vec3d movement = source.getMovementInput();
         /*
@@ -84,15 +89,31 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
         offset = offset.add(movement);
 
-        if (this instanceof EntityCoupleableRollingStock) {
-            if (this.getDefinition().isAtFront(gauge, offset) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.FRONT)) {
-                ((EntityCoupleableRollingStock)this).getCoupled(CouplerType.FRONT).addPassenger(source);
-                return offset;
-            }
-            if (this.getDefinition().isAtRear(gauge, offset) && ((EntityCoupleableRollingStock)this).isCoupled(CouplerType.BACK)) {
-                ((EntityCoupleableRollingStock)this).getCoupled(CouplerType.BACK).addPassenger(source);
-                return offset;
-            }
+        if (this instanceof EntityCoupleableRollingStock && cooldown.getOrDefault(source.getUUID(), 0) < source.getTickCount()) {
+			EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock) this;
+
+			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
+			boolean atBack = this.getDefinition().isAtRear(gauge, offset);
+
+			for (CouplerType coupler : CouplerType.values()) {
+				boolean atCoupler = coupler == CouplerType.FRONT ? atFront : atBack;
+				if (atCoupler && couplable.isCoupled(coupler)) {
+					EntityCoupleableRollingStock coupled = ((EntityCoupleableRollingStock) this).getCoupled(coupler);
+					if (coupled != null) {
+						cooldown.put(source.getUUID(), source.getTickCount() + 10);
+						coupled.addPassenger(source);
+					} else if (this.getTickCount() > 20) {
+						ImmersiveRailroading.info(
+								"Tried to move between cars (%s, %s), but %s was not found",
+								this.getUUID(),
+								couplable.getCoupledUUID(coupler),
+								couplable.getCoupledUUID(coupler)
+						);
+						((EntityCoupleableRollingStock) this).decouple(coupler);
+					}
+					return offset;
+				}
+			}
         }
 		return offset;
 	}
