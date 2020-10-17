@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickabl
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.fluid.FluidTank;
@@ -771,12 +772,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	/* NEW STUFF */
 
-
-
-
 	@Override
-	public double getHeight() {
-		return getFullHeight() +0.1 * (getTrackGauge() / Gauge.STANDARD);
+	public IBoundingBox getBoundingBox() {
+		return IBoundingBox.ORIGIN.expand(new Vec3d(1, getFullHeight() +0.1 * (getTrackGauge() / Gauge.STANDARD), 1));
 	}
 
 	@Override

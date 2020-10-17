@@ -31,7 +31,7 @@ public class TileRail extends TileRailBase {
 		if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 			length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 		}
-		return IBoundingBox.from(getPos()).grow(new Vec3d(length, length, length));
+		return IBoundingBox.ORIGIN.grow(new Vec3d(length, length, length));
 	}
 	
 	@Override

@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagCompound;
@@ -98,8 +99,13 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	@Override
-	public double getHeight() {
-		return 0.125;
+	public IBoundingBox getBoundingBox() {
+		return IBoundingBox.ORIGIN.expand(new Vec3d(1, 0.125, 1));
+	}
+
+	@Override
+	public IBoundingBox getRenderBoundingBox() {
+		return IBoundingBox.INFINITE;
 	}
 
 	public RailInfo getRailRenderInfo() {

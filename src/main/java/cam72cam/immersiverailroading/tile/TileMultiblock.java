@@ -9,6 +9,7 @@ import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.energy.Energy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.IInventory;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.ItemStackHandler;
@@ -68,14 +69,6 @@ public class TileMultiblock extends BlockEntityTickable {
 		energy.onChanged(this::markDirty);
 	}
 
-	/* TODO RENDER
-	@Override
-	@SideOnly(Side.CLIENT)
-	public double getMaxRenderDistanceSquared() {
-		return Math.pow(ImmersiveRailroading.proxy.getRenderDistance()*16, 2);
-	}
-	*/
-
 	@Override
 	public void update() {
 		if (offset == null) {
@@ -88,14 +81,11 @@ public class TileMultiblock extends BlockEntityTickable {
 		}
 	}
 
-	/* TODO RENDER
-    @SideOnly(Side.CLIENT)
-    @Override
-    public AxisAlignedBB getRenderBoundingBox() {
-    	return INFINITE_EXTENT_AABB;
-    }
-    */
-	
+	@Override
+	public IBoundingBox getRenderBoundingBox() {
+		return IBoundingBox.INFINITE;
+	}
+
 	public Vec3i getOrigin() {
 		return getPos().subtract(offset.rotate(rotation));
 	}
