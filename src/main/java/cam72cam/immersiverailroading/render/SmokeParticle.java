@@ -51,7 +51,7 @@ public class SmokeParticle extends Particle {
 	public void render(float partialTicks) {
 	}
 
-	public static void renderAll(List<SmokeParticle> particles, Consumer<SmokeParticle> setPos, float partialTicks) {
+	public static void renderAll(List<SmokeParticle> particles, float partialTicks) {
 		if (shader == null) {
 			shader = new GLSLShader(
 					new Identifier(ImmersiveRailroading.MODID, "particles/smoke_vert.c"),
@@ -98,7 +98,8 @@ public class SmokeParticle extends Particle {
 					shader.paramFloat("ALPHA", alpha);
 					shader.paramFloat("DARKEN", darken, darken, darken);
 
-					setPos.accept(particle);
+					//setPos.accept(particle);
+					GL11.glTranslated(particle.renderX, particle.renderY, particle.renderZ);
 
 					// Rotate to look at internal
 					Vec3d offsetForRot = eyes.subtract(particle.pos);
