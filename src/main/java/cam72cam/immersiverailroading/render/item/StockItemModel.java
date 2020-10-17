@@ -59,6 +59,10 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 		// We want to upload the model even if the sprite is cached
 		StockModel model = StockRenderCache.getRender(def.defID);
 
+		// Force upload the VBA here so it's cleared from memory
+		// This slows down the loading process a touch, but dramatically improves memory usage
+		model.createVBA();
+
 		return new StandardModel().addCustom(() -> {
 			try (
 					OpenGL.With matrix = OpenGL.matrix();
