@@ -75,6 +75,7 @@ public class SmokeParticle extends Particle {
 			}
 			GL11.glEndList();
 		}
+		Vec3d eyes = MinecraftClient.getPlayer().getPositionEyes(partialTicks);
 		try (
 			OpenGL.With sb = shader.bind();
 			OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
@@ -100,7 +101,7 @@ public class SmokeParticle extends Particle {
 					setPos.accept(particle);
 
 					// Rotate to look at internal
-					Vec3d offsetForRot = MinecraftClient.getPlayer().getPositionEyes(partialTicks).subtract(particle.pos);
+					Vec3d offsetForRot = eyes.subtract(particle.pos);
 					GL11.glRotated(180 - VecUtil.toWrongYaw(offsetForRot), 0, 1, 0);
 					GL11.glRotated(180 - VecUtil.toPitch(offsetForRot) + 90, 1, 0, 0);
 
