@@ -32,6 +32,8 @@ public class CastingMultiblock extends Multiblock {
 	private static final Vec3i power = new Vec3i(3,7,0);
 	public static final double max_volume = 5 * 4 * 4.5 * 9;
 
+	private IBoundingBox meltBounds;
+
 	private static Fuzzy[][][] cast_blueprint() {
 		Fuzzy[][][] bp = new Fuzzy[7+16][][];
 		for (int z = 0; z < 7; z++) {
@@ -180,7 +182,10 @@ public class CastingMultiblock extends Multiblock {
 					return;
 				}
 
-				List<ItemStack> dropped = world.getDroppedItems(IBoundingBox.from(getPos(offset.add(0, 1, 0))).grow(new Vec3d(3, 0, 3)));
+				if (meltBounds == null) {
+					meltBounds = IBoundingBox.from(getPos(offset.add(0, 1, 0))).grow(new Vec3d(3, 0, 3));
+				}
+				List<ItemStack> dropped = world.getDroppedItems(meltBounds);
 				for (ItemStack stack : dropped) {
 					ItemStack craftStack = stack.copy();
 					int cost = ItemCastingCost.getCastCost(craftStack);

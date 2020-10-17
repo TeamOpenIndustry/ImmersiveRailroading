@@ -28,6 +28,7 @@ import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.List;
@@ -772,9 +773,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	/* NEW STUFF */
 
+	private final SingleCache<Double, IBoundingBox> boundingBox =
+			new SingleCache<>(height -> IBoundingBox.ORIGIN.expand(new Vec3d(1, height, 1)));
 	@Override
 	public IBoundingBox getBoundingBox() {
-		return IBoundingBox.ORIGIN.expand(new Vec3d(1, getFullHeight() +0.1 * (getTrackGauge() / Gauge.STANDARD), 1));
+		return boundingBox.get(getFullHeight() + 0.1 * (getTrackGauge() / Gauge.STANDARD));
 	}
 
 	@Override

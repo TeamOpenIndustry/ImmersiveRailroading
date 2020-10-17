@@ -100,6 +100,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	@Override
 	public IBoundingBox getBoundingBox() {
+		// Won't be a lot of these in world, extra allocations are fine
 		return IBoundingBox.ORIGIN.expand(new Vec3d(1, 0.125, 1));
 	}
 
