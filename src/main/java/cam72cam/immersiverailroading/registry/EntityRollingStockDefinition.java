@@ -68,7 +68,7 @@ public abstract class EntityRollingStockDefinition {
     private int maxPassengers;
     private Map<RenderComponentType, List<RenderComponent>> renderComponents;
     private ArrayList<ItemComponentType> itemComponents;
-    private Map<RenderComponent, double[][]> partMapCache = new HashMap<>();
+    private Map<RenderComponent, float[][]> partMapCache = new HashMap<>();
     private int xRes;
     private int zRes;
     private List<Vec3d> blocksInBounds = null;
@@ -404,12 +404,12 @@ public abstract class EntityRollingStockDefinition {
                 if (!rc.type.collisionsEnabled) {
                     continue;
                 }
-                double[][] heightMap = new double[xRes][zRes];
+                float[][] heightMap = new float[xRes][zRes];
                 for (String group : rc.modelIDs) {
                     int[] faces = model.groups.get(group);
                     for (int face : faces) {
                         Path2D path = new Path2D.Double();
-                        double fheight = 0;
+                        float fheight = 0;
                         boolean first = true;
                         for (int[] point : model.points(face)) {
                             Vec3d vert = model.vertices(point[0]);
@@ -428,11 +428,11 @@ public abstract class EntityRollingStockDefinition {
                         }
                         for (int x = 0; x < xRes; x++) {
                             for (int z = 0; z < zRes; z++) {
-                                double relX = ((xRes - 1) - x);
-                                double relZ = z;
+                                float relX = ((xRes - 1) - x);
+                                float relZ = z;
                                 if (bounds.contains(relX, relZ) && path.contains(relX, relZ)) {
-                                    double relHeight = fheight / heightBounds;
-                                    relHeight = ((int) Math.ceil(relHeight * precision)) / (double) precision;
+                                    float relHeight = fheight / (float)heightBounds;
+                                    relHeight = ((int) Math.ceil(relHeight * precision)) / (float) precision;
                                     heightMap[x][z] = Math.max(heightMap[x][z], relHeight);
                                 }
                             }
@@ -445,8 +445,8 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public double[][] createHeightMap(EntityBuildableRollingStock stock) {
-        double[][] heightMap = new double[xRes][zRes];
+    public float[][] createHeightMap(EntityBuildableRollingStock stock) {
+        float[][] heightMap = new float[xRes][zRes];
 
 
         List<RenderComponentType> availComponents = new ArrayList<>();
@@ -467,7 +467,7 @@ public abstract class EntityRollingStockDefinition {
                 } else {
                     continue;
                 }
-                double[][] pm = partMapCache.get(rc);
+                float[][] pm = partMapCache.get(rc);
                 for (int x = 0; x < xRes; x++) {
                     for (int z = 0; z < zRes; z++) {
                         heightMap[x][z] = Math.max(heightMap[x][z], pm[x][z]);

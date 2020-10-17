@@ -24,17 +24,17 @@ public class RealBB implements IBoundingBox {
 	private final double centerX;
 	private final double centerY;
 	private final double centerZ;
-	private final double[][] heightMap;
+	private final float[][] heightMap;
 	
 	public RealBB(double front, double rear, double width, double height, float yaw) {
 		this(front, rear, width, height, yaw, null);		
 	}
 	
-	public RealBB(double front, double rear, double width, double height, float yaw, double[][] heightMap) {
+	public RealBB(double front, double rear, double width, double height, float yaw, float[][] heightMap) {
 		this(front, rear, width, height, yaw, 0, 0, 0, heightMap);
 	}
 	
-	private RealBB(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ, double[][] heightMap) {
+	private RealBB(double front, double rear, double width, double height, float yaw, double centerX, double centerY, double centerZ, float[][] heightMap) {
 		this.front = front;
 		this.rear = rear;
 		this.width = width;
@@ -237,7 +237,7 @@ public class RealBB implements IBoundingBox {
 	public boolean contains(Vec3d vec) {
 		return this.intersectsAt(vec, vec, false).getLeft();
 	}
-	public RealBB withHeightMap(double[][] heightMap) {
+	public RealBB withHeightMap(float[][] heightMap) {
 		return new RealBB(front, rear, width, height, yaw, centerX, centerY, centerZ, heightMap);
 	}
 }

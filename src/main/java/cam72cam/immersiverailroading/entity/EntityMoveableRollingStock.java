@@ -40,7 +40,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @TagField(value = "positions", mapper = TickPos.ListTagMapper.class)
     public List<TickPos> positions = new ArrayList<>();
     private RealBB boundingBox;
-    private double[][] heightMapCache;
+    private float[][] heightMapCache;
     @TagField("tickSkew")
     private double tickSkew = 1;
 
@@ -77,7 +77,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.boundingBox = null;
     }
 
-    private double[][] getHeightMap() {
+    private float[][] getHeightMap() {
         if (this.heightMapCache == null) {
             this.heightMapCache = this.getDefinition().createHeightMap(this);
         }
