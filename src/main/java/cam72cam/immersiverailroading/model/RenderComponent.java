@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -16,10 +18,15 @@ public class RenderComponent {
 	public final Set<String> modelIDs;
 	public final String pos;
 	public final double scale;
-	private boolean wooden;
 	public final Vec3d min;
 	public final Vec3d max;
-	
+
+	private final boolean wooden;
+	private final Vec3d minScaled;
+	private final Vec3d maxScaled;
+	private final Vec3d centerScaled;
+	private final Map<Double, RenderComponent> scaleCache = new HashMap<>();
+
 	public static RenderComponent parse(RenderComponentType name, EntityRollingStockDefinition def, Set<String> groups) {
 		return parse(name, def, groups, -1, "", "");
 	}
@@ -78,34 +85,29 @@ public class RenderComponent {
 		this.wooden = wooden;
 		this.min = min;
 		this.max = max;
+		this.minScaled = min.scale(scale);
+		this.maxScaled = max.scale(scale);
+		this.centerScaled = new Vec3d((minScaled.x + maxScaled.x)/2, (minScaled.y + maxScaled.y)/2, (minScaled.z + maxScaled.z)/2);
 	}
 
 	public Vec3d min() {
-		return min.scale(scale);
+		return minScaled;
 	}
 	public Vec3d max() {
-		return max.scale(scale);
+		return maxScaled;
 	}
 	public Vec3d center() {
-		Vec3d min = min();
-		Vec3d max = max();
-		return new Vec3d((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
+		return centerScaled;
 	}
 	public double height() {
-		Vec3d min = min();
-		Vec3d max = max();
-		return max.y - min.y;
+		return maxScaled.y - minScaled.y;
 	}
 	public double length() {
-		Vec3d min = min();
-		Vec3d max = max();
-		return max.x - min.x;
+		return maxScaled.x - minScaled.x;
 	}
 
 	public double width() {
-		Vec3d min = min();
-		Vec3d max = max();
-		return max.z - min.z;
+		return maxScaled.z - minScaled.z;
 	}
 	
 	public boolean isWooden() {
@@ -113,7 +115,10 @@ public class RenderComponent {
 	}
 
 	public RenderComponent scale(Gauge gauge) {
-		return new RenderComponent(modelIDs, type, id, side, pos, gauge.scale(), wooden, min, max);
+		if (!scaleCache.containsKey(gauge.scale())) {
+			scaleCache.put(gauge.scale(), new RenderComponent(modelIDs, type, id, side, pos, gauge.scale(), wooden, min, max));
+		}
+		return scaleCache.get(gauge.scale());
 	}
 	
 	@Override
