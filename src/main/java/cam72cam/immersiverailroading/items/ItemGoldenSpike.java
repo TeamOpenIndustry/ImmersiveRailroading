@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -67,6 +68,17 @@ public class ItemGoldenSpike extends CustomItem {
 			}
 		}
 		return ClickResult.ACCEPTED;
+	}
+
+	@Override
+	public void onClickAir(Player player, World world, Player.Hand hand) {
+		if (world.isClient) {
+			Data d = new Data(player.getHeldItem(hand));
+			TileRailPreview te = world.getBlockEntity(d.pos, TileRailPreview.class);
+			if (te != null) {
+				GuiTypes.RAIL_PREVIEW.open(player, d.pos);
+			}
+		}
 	}
 
 	public static class Data extends ItemDataSerializer {

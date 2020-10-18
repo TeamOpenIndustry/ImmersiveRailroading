@@ -38,8 +38,14 @@ public class TileRailPreview extends BlockEntityTickable {
 		this.markDirty();
 	}
 
-	public void setItem(ItemStack stack) {
+	public void setItem(ItemStack stack, Player player) {
 		this.item = stack.copy();
+		if (!RailSettings.from(item).isPreview) {
+			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(player, isAboveRails() ? getPos().down() : getPos())) {
+				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
+			}
+			return;
+		}
 		this.markDirty();
 	}
 
