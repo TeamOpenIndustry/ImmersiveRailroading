@@ -19,6 +19,7 @@ import com.google.common.base.Predicate;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class TrackGui implements IScreen {
@@ -105,14 +106,20 @@ public class TrackGui implements IScreen {
 		return stack.getDisplayName();
 	}
 
+	private static <E> E next(List<E> values, E value, Player.Hand hand) {
+		return values.get((values.indexOf(value) + values.size() + (hand == Player.Hand.PRIMARY ? 1 : -1)) % values.size());
+	}
+
+	private static <E extends Enum> E next(E value, Player.Hand hand) {
+		E[] values = (E[]) value.getClass().getEnumConstants();
+		return values[(value.ordinal() + values.length + (hand == Player.Hand.PRIMARY ? 1 : -1)) % values.length];
+	}
+
 	public void init(IScreenBuilder screen) {
 		trackButton = new Button(screen, 0 - 100, -24 + 0 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				List<String> defs = DefinitionManager.getTrackIDs();
-				int idx = defs.indexOf(track);
-				idx = (idx + 1) % defs.size();
-				track = defs.get(idx);
+				track = next(DefinitionManager.getTrackIDs(), track, hand);
 				trackButton.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
 			}
 		};
@@ -120,7 +127,7 @@ public class TrackGui implements IScreen {
 		typeButton = new Button(screen, 0 - 100, -24 + 1 * 22 - 1, GuiText.SELECTOR_TYPE.toString(type)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				type =  TrackItems.values()[((type.ordinal() + 1) % (TrackItems.values().length))];
+				type = next(type, hand);
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
 				degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
 				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN);
@@ -174,7 +181,7 @@ public class TrackGui implements IScreen {
 		posTypeButton = new Button(screen, 0 - 100, -24 + 6 * 22, GuiText.SELECTOR_POSITION.toString(posType)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				posType = TrackPositionType.values()[((posType.ordinal() + 1) % (TrackPositionType.values().length))];
+				posType = next(posType, hand);
 				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(posType));
 			}
 		};
@@ -182,7 +189,7 @@ public class TrackGui implements IScreen {
 		smoothingButton = new Button(screen, 0 - 100, -24 + 7 * 22, GuiText.SELECTOR_SMOOTHING.toString(smoothing)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				smoothing = TrackSmoothing.values()[((smoothing.ordinal() + 1) % TrackSmoothing.values().length)];
+				smoothing = next(smoothing, hand);
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(smoothing));
 			}
 		};
@@ -191,7 +198,7 @@ public class TrackGui implements IScreen {
 		directionButton = new Button(screen, 0 - 100, -24 + 8 * 22, GuiText.SELECTOR_DIRECTION.toString(direction)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				direction = TrackDirection.values()[((direction.ordinal() + 1) % (TrackDirection.values().length))];
+				direction = next(direction, hand);
 				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(direction));
 			}
 		};
