@@ -66,7 +66,7 @@ public class ItemGoldenSpike extends CustomItem {
 				}
 			}
 		}
-		return ClickResult.PASS;
+		return ClickResult.ACCEPTED;
 	}
 
 	public static class Data extends ItemDataSerializer {
