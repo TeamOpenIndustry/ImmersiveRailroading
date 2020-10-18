@@ -61,7 +61,7 @@ public abstract class TrackBase {
 		Vec3i pos = getPos();
 
 		if (!actuallyPlace) {
-			TileRailGag tr = (TileRailGag) IRBlocks.BLOCK_RAIL_GAG.constructBlockEntity();
+			TileRailGag tr = (TileRailGag) IRBlocks.BLOCK_RAIL_GAG.createBlockEntity(builder.world, pos);
 			if (parent != null) {
 				tr.setParent(parent);
 			} else {

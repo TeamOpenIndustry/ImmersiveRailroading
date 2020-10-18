@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
@@ -101,9 +102,14 @@ public abstract class BuilderBase {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {
-				//TODO BUG BUG BUG This does NOT work when there are more than 1 tracks overlapping a TileRail
+				// Track -> Base?
+				// To
+				// Track -> Placed -> Base?
+
 				TileRail rail = world.getBlockEntity(track.getPos(), TileRail.class);
-				rail.setReplaced(track.placeTrack(false).getData());
+				TileRailBase placed = track.placeTrack(false);
+				placed.setReplaced(rail.getReplaced());
+				rail.setReplaced(placed.getData());
 				rail.markDirty();
 			}
 		}
