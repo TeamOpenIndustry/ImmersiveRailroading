@@ -316,7 +316,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		try {
 			train = this.getDirectionalTrain(true, true);
 		} catch (StockNotLoadedYetException ex) {
-			ImmersiveRailroading.warn("Train not loaded, can't simulate...");
 			return;
 		}
 
