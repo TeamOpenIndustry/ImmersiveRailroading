@@ -130,14 +130,14 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		}
 
 		if (type == DamageType.EXPLOSION) {
-			if (!source.isMob()) {
+			if (source == null || !source.isMob()) {
 				if (amount > 5 && ConfigDamage.trainMobExplosionDamage) {
 					this.kill();
 				}
 			}
 		}
 
-		if (type == DamageType.OTHER) {
+		if (type == DamageType.OTHER && source != null && source.isPlayer()) {
 			Player player = source.asPlayer();
 			if (player.isCrouching()) {
 				this.kill();

@@ -366,7 +366,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 				data.gauge = gauge;
 				data.texture = getTexture();
 				data.write();
-				getWorld().dropItem(item, source.getBlockPosition());
+				getWorld().dropItem(item, source != null ? source.getBlockPosition() : getBlockPosition());
 			} else {
 				for (ItemComponentType component : this.builtItems) {
 					ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
@@ -377,7 +377,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 					data.write();
 					System.out.println(component);
 					System.out.println(item.getTagCompound());
-					getWorld().dropItem(item, source.getBlockPosition());
+					getWorld().dropItem(item, source != null ? source.getBlockPosition() : getBlockPosition());
 				}
 			}
 		}
