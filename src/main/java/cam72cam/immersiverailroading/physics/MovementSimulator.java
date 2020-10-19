@@ -55,6 +55,10 @@ public class MovementSimulator {
 
 		boolean isReverse = moveDistance < 0;
 
+		if (position.frontYaw % 360 == (position.rearYaw + 180 + 360) % 360) {
+			position.rearYaw += 180;
+		}
+
 		
 		if (isReverse) {
 			moveDistance = -moveDistance;
