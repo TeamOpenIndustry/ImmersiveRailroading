@@ -333,6 +333,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		float rotationYaw = VecUtil.toWrongYaw(motion);
 		Vec3d nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.add(motion);
+		boolean hasSwitchSet = false;
 
 		TileRailBase self = this;
 		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
@@ -352,16 +353,21 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
 			if (potential != null) {
-				if (potential.distanceTo(predictedPos) < nextPos.distanceTo(predictedPos) ||
-						currentPosition == nextPos) {
-					nextPos = potential;
-				} else if (state == SwitchState.TURN) {
+				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
+				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
+				if (state == SwitchState.TURN) {
 					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 					double diff = MathUtil.trueModulus(other - rotationYaw, 360);
 					diff = Math.min(360-diff, diff);
 					if (diff < 2.5) {
+						hasSwitchSet = true;
 						nextPos = potential;
 					}
+				}
+				// If we are not on a switch curve and closer to our target (or are on the first iteration)
+				if (!hasSwitchSet && potential.distanceTo(predictedPos) < nextPos.distanceTo(predictedPos) ||
+						currentPosition == nextPos) {
+					nextPos = potential;
 				}
 			}
 
