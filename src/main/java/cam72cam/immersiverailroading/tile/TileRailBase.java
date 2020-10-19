@@ -355,6 +355,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				if (potential.distanceTo(predictedPos) < nextPos.distanceTo(predictedPos) ||
 						currentPosition == nextPos) {
 					nextPos = potential;
+				} else if (state == SwitchState.TURN) {
+					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
+					double diff = MathUtil.trueModulus(other - rotationYaw, 360);
+					diff = Math.min(360-diff, diff);
+					if (diff < 2.5) {
+						nextPos = potential;
+					}
 				}
 			}
 
