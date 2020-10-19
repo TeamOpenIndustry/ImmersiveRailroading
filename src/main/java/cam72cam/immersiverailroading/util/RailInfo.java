@@ -265,10 +265,10 @@ public class RailInfo {
 				List<MaterialManager> materials = new ArrayList<>();
 
 				if (!settings.railBed.isEmpty()) {
-					materials.add(new MaterialManager(true, builder.costBed(), settings.railBed::equals, settings.railBed));
+					materials.add(new MaterialManager(true, builder.costBed(), settings.railBed::is, settings.railBed));
 				}
 				if (!settings.railBedFill.isEmpty()) {
-					materials.add(new MaterialManager(false, builder.costFill(), settings.railBedFill::equals, settings.railBedFill));
+					materials.add(new MaterialManager(false, builder.costFill(), settings.railBedFill::is, settings.railBedFill));
 				}
 
 				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);

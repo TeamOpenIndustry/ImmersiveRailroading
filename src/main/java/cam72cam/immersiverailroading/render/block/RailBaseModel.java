@@ -39,7 +39,8 @@ public class RailBaseModel {
                     info = info.withType(TrackItems.STRAIGHT);
                 }
                 if (info.settings.type == TrackItems.TURNTABLE) {
-                	if (MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_TRACK_BLUEPRINT)) {
+					ItemStack held = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
+                	if (held.is(IRItems.ITEM_TRACK_BLUEPRINT) || held.is(IRItems.ITEM_GOLDEN_SPIKE)) {
 						info = info.withItemHeld(true);
 					}
 				}
