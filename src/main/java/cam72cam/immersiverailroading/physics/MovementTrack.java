@@ -49,20 +49,20 @@ public class MovementTrack {
 		}
 		return null;
 	}
-	
+
+	public static final double maxDistance = 0.5;
 
 	public static Vec3d nextPosition(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
-		double maxDelta = 0.5;
-		if (distanceMeters > maxDelta) {
+		if (distanceMeters > maxDistance) {
 			double dist = 0;
-			while (dist < distanceMeters - maxDelta) {
-				dist += maxDelta;
+			while (dist < distanceMeters - maxDistance) {
+				dist += maxDistance;
 				ITrack te = findTrack(world, currentPosition, trainYaw, rail.getTrackGauge());
 				if (te == null) {
 					return currentPosition;
 				}
 				Vec3d pastPos = currentPosition;
-				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(maxDelta, trainYaw));
+				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(maxDistance, trainYaw));
 				trainYaw = VecUtil.toWrongYaw(currentPosition.subtract(pastPos));
 			}
 
@@ -70,13 +70,13 @@ public class MovementTrack {
 			if (te == null) {
 				return currentPosition;
 			}
-			return te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distanceMeters % maxDelta, trainYaw));
+			return te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distanceMeters % maxDistance, trainYaw));
 		} else {
-			return nextPositionInner(world, currentPosition, rail, trainYaw, distanceMeters);
+			return nextPositionDirect(world, currentPosition, rail, trainYaw, distanceMeters);
 		}
 	}
 
-	public static Vec3d nextPositionInner(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
+	public static Vec3d nextPositionDirect(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
 		Vec3d delta = VecUtil.fromWrongYaw(distanceMeters, trainYaw);
 		
 		if (rail == null) {
@@ -114,6 +114,12 @@ public class MovementTrack {
 				return backward;
 			}
 		} else if (rail.info.getBuilder(world) instanceof IIterableTrack) {
+			/*
+			 * Discovery: This is not accurate for distances less than 0.1m
+			 * Since we snap to the line, small distances are snapped to a tangent that's further than they are
+			 * trying to move.  Instead we should probably calculate the vector between the closest pos
+			 * and the current pos and move distance along that.  How would that work for slopes at the ends? just fine?
+			 */
 			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25);
 			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos());
 			Vec3d relative = currentPosition.subtract(center);

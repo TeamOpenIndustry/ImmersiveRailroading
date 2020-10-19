@@ -330,12 +330,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
-		double distanceMeters = motion.length();
 		float rotationYaw = VecUtil.toWrongYaw(motion);
 		Vec3d nextPos = currentPosition;
+		Vec3d predictedPos = currentPosition.add(motion);
 
 		TileRailBase self = this;
 		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
+
+		double distanceMeters = motion.length();
+		if (distanceMeters > MovementTrack.maxDistance) {
+			return MovementTrack.nextPosition(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
+		}
 
 		while(tile != null) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
@@ -345,17 +350,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 
 
-			Vec3d potential = MovementTrack.nextPosition(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
-			if (state == SwitchState.TURN) {
-				//float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
-				//double diff = MathUtil.trueModulus(other - rotationYaw, 360);
-				//diff = Math.min(360-diff, diff);
-				//if (diff < 30) {
-					nextPos = potential;
-					//break;
-				//}
-			} else {
-				if (potential.distanceTo(currentPosition.add(motion)) < nextPos.distanceTo(currentPosition.add(motion)) ||
+			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
+			if (potential != null) {
+				if (potential.distanceTo(predictedPos) < nextPos.distanceTo(predictedPos) ||
 						currentPosition == nextPos) {
 					nextPos = potential;
 				}
