@@ -309,10 +309,16 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		TickPos lastPos = this.getCurrentTickPosAndPrune();
 		this.positions = new ArrayList<TickPos>();
 		positions.add(lastPos);
-		
-		
-		
-		Collection<DirectionalStock> train = this.getDirectionalTrain(true);
+
+
+
+		Collection<DirectionalStock> train;
+		try {
+			train = this.getDirectionalTrain(true, true);
+		} catch (StockNotLoadedYetException ex) {
+			ImmersiveRailroading.warn("Train not loaded, can't simulate...");
+			return;
+		}
 
 		Speed simSpeed = this.getCurrentSpeed();
 		boolean isStuck = false;
@@ -760,7 +766,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	public final void mapTrain(EntityCoupleableRollingStock prev, boolean direction, boolean followDisengaged, BiConsumer<EntityCoupleableRollingStock, Boolean> fn) {
-		for (DirectionalStock stock : getDirectionalTrain(followDisengaged)) {
+		for (DirectionalStock stock : getDirectionalTrain(followDisengaged, false)) {
 			fn.accept(stock.stock, stock.direction);
 		}
 	}
@@ -777,8 +783,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			this.direction = direction;
 		}
 	}
-	
-	public Collection<DirectionalStock> getDirectionalTrain(boolean followDisengaged) {
+
+	private class StockNotLoadedYetException extends RuntimeException {
+
+	}
+
+	public Collection<DirectionalStock> getDirectionalTrain(boolean followDisengaged, boolean requireLoaded) {
 		HashSet<UUID> trainMap = new HashSet<UUID>();
 		List<DirectionalStock> trainList = new ArrayList<DirectionalStock>();
 		
@@ -802,6 +812,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				EntityCoupleableRollingStock coupled = stock.getCoupled(coupler);
 				
 				if (coupled == null) {
+					if (requireLoaded) {
+						throw new StockNotLoadedYetException();
+					}
 					continue;
 				}
 				
