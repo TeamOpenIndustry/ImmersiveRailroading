@@ -125,7 +125,7 @@ public class MovementSimulator {
 			return currentPosition;
 		}
 		// Not using bogey yaw here, is that OK?
-		Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, rotationYaw));
+		Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw));
 		if (result == null) {
 			position.isOffTrack = true;
 			return currentPosition;
