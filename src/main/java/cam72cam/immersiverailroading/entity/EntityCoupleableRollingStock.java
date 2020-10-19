@@ -81,6 +81,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	
 	private boolean resimulate = false;
+	private int resimulateCooldown = 0;
 	public boolean isAttaching = false;
 
 	@TagField("CoupledFront")
@@ -156,7 +157,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			
 			return;
 		}
-		
+
+		if (this.resimulateCooldown > 0) {
+			this.resimulateCooldown -= 1;
+		}
+
 		if (this.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
 			world.keepLoaded(getBlockPosition());
 			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
@@ -851,6 +856,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 	@Override
 	public void triggerResimulate() {
-		resimulate = true;
+		if (resimulateCooldown <= 0) {
+			resimulate = true;
+			resimulateCooldown = 5;
+		}
 	}
 }
