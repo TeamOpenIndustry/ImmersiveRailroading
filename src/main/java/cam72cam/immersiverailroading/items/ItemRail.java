@@ -18,7 +18,7 @@ public class ItemRail extends CustomItem {
 
 	@Override
 	public int getStackSize() {
-		return 1;
+		return 64;
 	}
 
 	@Override
