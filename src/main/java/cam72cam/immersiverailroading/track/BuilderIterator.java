@@ -11,6 +11,10 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.SerializationException;
+import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagSerializer;
+import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -96,6 +100,27 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				mainX = (int) Math.floor(gagPos.x+placeOff.x);
 				mainZ = (int) Math.floor(gagPos.z+placeOff.z);
 			}
+		}
+
+		if (!yOffset.containsKey(Pair.of(mainX, mainZ))) {
+			// Try a few different offsets
+			for (Facing value : Facing.values()) {
+				if (yOffset.containsKey(Pair.of(mainX + value.getXMultiplier(), mainZ + value.getZMultiplier()))) {
+					mainX += value.getXMultiplier();
+					mainZ += value .getZMultiplier();
+					break;
+				}
+			}
+		}
+		if (!yOffset.containsKey(Pair.of(mainX, mainZ))) {
+			// No luck, code is really borked now.  Throw an exception to help track this.
+			TagCompound debug = new TagCompound();
+			try {
+				TagSerializer.serialize(debug, info);
+			} catch (SerializationException e) {
+				throw new RuntimeException("Invalid track builder", e);
+			}
+			throw new RuntimeException("Invalid track builder " + debug.toString());
 		}
 
 		Vec3i mainPos = new Vec3i(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
