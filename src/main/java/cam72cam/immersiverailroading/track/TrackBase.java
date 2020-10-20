@@ -32,18 +32,18 @@ public abstract class TrackBase {
 	}
 
 	public boolean isDownSolid(boolean countFill) {
-		Vec3i pos = getPos();
+		Vec3i pos = getPos().down();
 		return
             // Config to bypass solid block requirement
             !Config.ConfigDamage.requireSolidBlocks ||
             // Turn table override
             solidNotRequired ||
             // Valid block beneath
-            builder.world.isTopSolid(pos.down()) ||
+            builder.world.isTopSolid(pos) ||
             // BlockType below is replaceable and we will replace it with something
-            countFill && (BlockUtil.canBeReplaced(builder.world, pos.down(), false) && !builder.info.settings.railBedFill.isEmpty()) ||
+            countFill && (BlockUtil.canBeReplaced(builder.world, pos, false) && !builder.info.settings.railBedFill.isEmpty()) ||
             // BlockType below is an IR Rail
-            BlockUtil.isIRRail(builder.world, pos.down());
+            BlockUtil.isIRRail(builder.world, pos);
 	}
 
 	public boolean isOverTileRail() {
