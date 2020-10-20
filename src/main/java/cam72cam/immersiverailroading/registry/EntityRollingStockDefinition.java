@@ -412,15 +412,18 @@ public abstract class EntityRollingStockDefinition {
                         float fheight = 0;
                         boolean first = true;
                         for (int[] point : model.points(face)) {
-                            Vec3d vert = model.vertices(point[0]);
-                            vert = vert.add(this.frontBounds, 0, this.widthBounds / 2);
+                            float vertX = model.vertex(point[0], OBJModel.Vert.X);
+                            float vertY = model.vertex(point[0], OBJModel.Vert.Y);
+                            float vertZ = model.vertex(point[0], OBJModel.Vert.Z);
+                            vertX += this.frontBounds;
+                            vertZ += this.widthBounds / 2;
                             if (first) {
-                                path.moveTo(vert.x * ratio, vert.z * ratio);
+                                path.moveTo(vertX * ratio, vertZ * ratio);
                                 first = false;
                             } else {
-                                path.lineTo(vert.x * ratio, vert.z * ratio);
+                                path.lineTo(vertX * ratio, vertZ * ratio);
                             }
-                            fheight += vert.y / 3; // We know we are using tris
+                            fheight += vertY / 3; // We know we are using tris
                         }
                         Rectangle2D bounds = path.getBounds2D();
                         if (bounds.getWidth() * bounds.getHeight() < 1) {
