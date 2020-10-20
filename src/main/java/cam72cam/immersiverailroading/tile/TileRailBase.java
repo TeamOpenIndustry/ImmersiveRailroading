@@ -152,6 +152,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return !ConfigDebug.deepSnow;
 	}
 
+	private final SingleCache<Vec3i, Vec3i> parentCache = new SingleCache<>(parent -> parent.add(getPos()));
 	public Vec3i getParent() {
 		if (parent == null) {
 			if (ticksExisted > 1 && getWorld().isServer) {
@@ -161,7 +162,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			return null;
 		}
-		return parent.add(getPos());
+		// Assume if pos changes (piston? WE?) the TE is re-initialized
+		return parentCache.get(parent);
 	}
 	public void setParent(Vec3i pos) {
 		this.parent = pos.subtract(this.getPos());
