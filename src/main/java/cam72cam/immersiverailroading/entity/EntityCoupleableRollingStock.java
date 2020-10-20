@@ -651,7 +651,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				return false;
 			}
 
-			if (entity.getPosition().subtract(this.getPosition()).length() > 64) {
+			if (entity.getPosition().distanceTo(this.getPosition()) > 64) {
 				return false;
 			}
 
