@@ -71,7 +71,6 @@ public abstract class EntityRollingStockDefinition {
     private Map<RenderComponent, float[][]> partMapCache = new HashMap<>();
     private int xRes;
     private int zRes;
-    private List<Vec3d> blocksInBounds = null;
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
@@ -485,26 +484,6 @@ public abstract class EntityRollingStockDefinition {
     public RealBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {
         return new RealBB(gauge.scale() * frontBounds, gauge.scale() * -rearBounds, gauge.scale() * widthBounds,
                 gauge.scale() * heightBounds, stock.getRotationYaw()).offset(stock.getPosition());
-    }
-
-    public List<Vec3d> getBlocksInBounds(Gauge gauge) {
-        if (blocksInBounds == null) {
-            blocksInBounds = new ArrayList<>();
-            double minX = gauge.scale() * -rearBounds;
-            double maxX = gauge.scale() * frontBounds;
-            double minY = gauge.scale() * 0;
-            double maxY = gauge.scale() * heightBounds;
-            double minZ = gauge.scale() * -widthBounds / 2;
-            double maxZ = gauge.scale() * widthBounds / 2;
-            for (double x = minX; x <= maxX + 1; x++) {
-                for (double y = minY; y <= maxY + 1; y++) {
-                    for (double z = minZ; z <= maxZ + 1; z++) {
-                        blocksInBounds.add(new Vec3d(x, y, z));
-                    }
-                }
-            }
-        }
-        return blocksInBounds;
     }
 
     public String name() {
