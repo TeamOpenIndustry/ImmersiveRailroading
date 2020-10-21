@@ -51,12 +51,34 @@ public class RealBB implements IBoundingBox {
 		// width
 		Vec3d offsetRight = VecUtil.fromWrongYaw(width / 2, yaw + 90);
 		Vec3d offsetLeft = VecUtil.fromWrongYaw(width / 2, yaw - 90);
-		Vec3d v1 = frontPos.add(offsetRight);
-		Vec3d v2 = rearPos.add(offsetRight);
-		Vec3d v3 = frontPos.add(offsetLeft);
-		Vec3d v4 = rearPos.add(offsetLeft);
-		this.min = v1.min(v2.min(v3).min(v4)).add(centerX, centerY, centerZ);
-		this.max = v1.max(v2.max(v3).max(v4)).add(0, height, 0).add(centerX, centerY, centerZ);
+
+		double[] x = new double[] {
+				frontPos.x + offsetRight.x,
+				rearPos.x + offsetRight.x,
+				frontPos.x + offsetLeft.x,
+				rearPos.x + offsetLeft.x,
+		};
+		double[] z = new double[] {
+				frontPos.z + offsetRight.z,
+				rearPos.z + offsetRight.z,
+				frontPos.z + offsetLeft.z,
+				rearPos.z + offsetLeft.z,
+		};
+
+		double xMin = x[0];
+		double xMax = x[0];
+		double zMin = z[0];
+		double zMax = z[0];
+
+		for (int i = 1; i < x.length; i++) {
+			xMin = Math.min(xMin, x[i]);
+			xMax = Math.max(xMax, x[i]);
+			zMin = Math.min(zMin, z[i]);
+			zMax = Math.max(zMax, z[i]);
+		}
+
+		this.min = new Vec3d(xMin + centerX, centerY, zMin + centerZ);
+		this.max = new Vec3d(xMax + centerX, centerY + height, zMax + centerZ);
 	}
 
 	@Override
