@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.boundingbox.BoundingBox;
 import cam72cam.mod.entity.custom.ICollision;
@@ -225,7 +226,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
                 float volume = 0.01f + adjust;
 
-                if (Math.abs(this.getCurrentSpeed().metric()) > 5) {
+                if (Math.abs(this.getCurrentSpeed().metric()) > 5 && MinecraftClient.getPlayer().getPosition().distanceTo(getPosition()) < 40) {
                     if (!wheel_sound.isPlaying()) {
                         wheel_sound.play(getPosition());
                     }

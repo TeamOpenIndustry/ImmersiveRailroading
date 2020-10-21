@@ -186,7 +186,7 @@ public class LocomotiveSteam extends Locomotive {
 						}
 					}
 	
-					for (int i = 0; i < 32; i ++) {
+					for (int i = 0; i < 8; i ++) {
 						sndCache.add(ImmersiveRailroading.newSound(this.getDefinition().chuff, false, 80, this.soundGauge()));
 					}
 					
