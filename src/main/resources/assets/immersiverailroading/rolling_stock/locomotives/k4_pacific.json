@@ -44,7 +44,7 @@
 				"pull_end": 0.55,
 				"pitch_start": 0.9,
 				"pitch_end": 1,
-				"sample": "sounds/steam/whistles/prr_5chime_low.ogg"
+				"sample": "sounds/steam/k4_sounds/whistle.ogg"
 			}
 		]
 	}
