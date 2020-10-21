@@ -1,10 +1,12 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.thirdparty.trackapi.TileEntityTickableTrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.util.DegreeFuncs;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -55,20 +57,22 @@ public class MovementSimulator {
 
 		boolean isReverse = moveDistance < 0;
 
-		if (position.frontYaw % 360 == (position.rearYaw + 180 + 360) % 360) {
-			position.rearYaw += 180;
+		if (DegreeFuncs.delta(position.frontYaw, position.rotationYaw) > 90) {
+			position.frontYaw = position.rotationYaw; // TODO +180?
+		}
+		if (DegreeFuncs.delta(position.rearYaw, position.rotationYaw) > 90) {
+			position.rearYaw = position.rotationYaw; // TODO +180?
 		}
 
-		
 		if (isReverse) {
 			moveDistance = -moveDistance;
 			position.frontYaw += 180;
 			position.rearYaw += 180;
 			position.rotationYaw += 180;
 			//position.rotationPitch = -position.rotationPitch;
-			position.rotationYaw = (position.rotationYaw + 360f) % 360f;
-			position.frontYaw = (position.frontYaw + 360f) % 360f;
-			position.rearYaw = (position.rearYaw + 360f) % 360f;
+			position.rotationYaw = DegreeFuncs.normalize(position.rotationYaw);
+			position.frontYaw = DegreeFuncs.normalize(position.frontYaw);
+			position.rearYaw = DegreeFuncs.normalize(position.rearYaw);
 		}
 
 		
@@ -104,9 +108,9 @@ public class MovementSimulator {
 			//rotationYaw += 180;
 			//position.rotationPitch = -position.rotationPitch;
 			if (position.speed != Speed.ZERO) {
-				position.rotationYaw = (position.rotationYaw + 360f) % 360f;
-				position.frontYaw = (position.frontYaw + 360f) % 360f;
-				position.rearYaw = (position.rearYaw + 360f) % 360f;
+				position.rotationYaw = DegreeFuncs.normalize(position.rotationYaw);
+				position.frontYaw = DegreeFuncs.normalize(position.frontYaw);
+				position.rearYaw = DegreeFuncs.normalize(position.rearYaw);
 			}
 		}
 		
@@ -128,7 +132,6 @@ public class MovementSimulator {
 			position.isOffTrack = true;
 			return currentPosition;
 		}
-		// Not using bogey yaw here, is that OK?
 		Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw));
 		if (result == null) {
 			position.isOffTrack = true;
