@@ -59,6 +59,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public void load(TagCompound data) {
         super.load(data);
 
+        if (positions.isEmpty()) {
+            this.tickPosID = 0;
+            positions.add(getCurrentTickPosOrFake());
+        }
+
         if (frontYaw == null) {
             frontYaw = getRotationYaw();
         }
