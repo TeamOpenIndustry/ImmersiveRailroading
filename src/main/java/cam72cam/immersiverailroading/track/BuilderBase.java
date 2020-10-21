@@ -77,10 +77,6 @@ public abstract class BuilderBase {
 	
 	public abstract List<VecYawPitch> getRenderData();
 
-	public Vec3i convertRelativePositions(Vec3i rel) {
-		return pos.add(rel);
-	}
-	
 	public boolean canBuild() {
 		for(TrackBase track : tracks) {
 			if (!track.canPlaceTrack()) {
@@ -121,7 +117,7 @@ public abstract class BuilderBase {
 
 	
 	public void setParentPos(Vec3i pos) {
-		parent_pos = convertRelativePositions(pos);
+		parent_pos = this.pos.add(pos);
 	}
 	public Vec3i getParentPos() {
 		return parent_pos;

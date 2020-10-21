@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.util.SingleCache;
 
 public abstract class TrackBase {
 	public BuilderBase builder;
@@ -31,8 +32,9 @@ public abstract class TrackBase {
 		this.block = block;
 	}
 
+	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(Vec3i::down);
 	public boolean isDownSolid(boolean countFill) {
-		Vec3i pos = getPos().down();
+		Vec3i pos = downCache.get(getPos());
 		return
             // Config to bypass solid block requirement
             !Config.ConfigDamage.requireSolidBlocks ||
@@ -111,8 +113,9 @@ public abstract class TrackBase {
 		return tr;
 	}
 
+	private final SingleCache<Vec3i, Vec3i> posCache = new SingleCache<>(pos -> pos.add(rel));
 	public Vec3i getPos() {
-		return builder.convertRelativePositions(rel);
+		return posCache.get(builder.pos);
 	}
 
 	public void setHeight(float height) {

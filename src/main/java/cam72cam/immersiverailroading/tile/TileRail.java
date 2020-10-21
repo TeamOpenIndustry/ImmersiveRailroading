@@ -12,9 +12,11 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TileRail extends TileRailBase {
 	@TagField("info")
@@ -113,6 +115,7 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
+	private List<TrackBase> tracks;
 	public double percentFloating() {
 		int floating = 0;
 		int total = 0;
@@ -121,7 +124,11 @@ public class TileRail extends TileRailBase {
 			return 0;
 		}
 
-		for (TrackBase track : info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForRender()) {
+		if (tracks == null) {
+			tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForRender();
+		}
+
+		for (TrackBase track : tracks) {
 			Vec3i tpos = track.getPos();
 			total++;
 
