@@ -13,12 +13,14 @@ import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.boundingbox.BoundingBox;
 import cam72cam.mod.entity.custom.ICollision;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.serialization.TagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -379,35 +381,21 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	    }
 		if (getWorld().isServer && this.getTickCount() % 5 == 0 && Config.ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
             RealBB bb = this.getCollision().grow(new Vec3d(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale()));
-			
-			for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
-				if (pos.length() < this.getDefinition().getLength(gauge) / 2) {
-					continue;
-				}
-				pos = VecUtil.rotateWrongYaw(pos, this.getRotationYaw());
-				pos = pos.add(this.getPosition());
-				Vec3i bp = new Vec3i(pos);
-				
-				if (!getWorld().isBlockLoaded(bp)) {
-					continue;
-				}
-				
-				if (!getWorld().isAir(bp)) {
-					if (!BlockUtil.isIRRail(getWorld(), bp)) {
-					    if (getWorld().doesBlockCollideWith(bp, bb) && getWorld().canEntityCollideWith(bp, DAMAGE_SOURCE_HIT)) {
-							if (!BlockUtil.isIRRail(getWorld(), bp.up())) {
-								getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(getWorld().isSnow(bp)));
-							}
-						}
-					} else {
-						TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
-						if (te != null) {
-							te.cleanSnow();
-							continue;
-						}
-					}
-				}
-			}
+
+            for (Vec3i bp : getWorld().blocksInBounds(bb)) {
+                if (!BlockUtil.isIRRail(getWorld(), bp)) {
+                    if (getWorld().canEntityCollideWith(bp, DAMAGE_SOURCE_HIT)) {
+                        if (!BlockUtil.isIRRail(getWorld(), bp.up())) {
+                            getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(getWorld().isSnow(bp)));
+                        }
+                    }
+                } else {
+                    TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
+                    if (te != null) {
+                        te.cleanSnow();
+                    }
+                }
+            }
         }
     }
 
@@ -490,30 +478,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         int over = 0;
         int max = 0;
-        for (Vec3d pos : this.getDefinition().getBlocksInBounds(gauge)) {
-            if (pos.y != 0) {
-                continue;
-            }
-            pos = VecUtil.rotateWrongYaw(pos, latest.rotationYaw);
-            pos = pos.add(latest.position);
-            Vec3i bp = new Vec3i(pos);
-
-            if (!getWorld().isBlockLoaded(bp)) {
-                continue;
-            }
-
-            try {
-                TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class); // , false
-                if (te != null) {
-                    if (te.getAugment() == Augment.SPEED_RETARDER) {
-                        max = Math.max(max, getWorld().getRedstone(bp));
-                        over += 1;
-                    }
+        for (Vec3i bp : getWorld().blocksInBounds(this.getCollision().offset(new Vec3d(0, gauge.scale(), 0)))) {
+            TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
+            if (te != null) {
+                if (te.getAugment() == Augment.SPEED_RETARDER) {
+                    max = Math.max(max, getWorld().getRedstone(bp));
+                    over += 1;
                 }
-            } catch (Exception ex) {
-                // eat this exception
-                // Faster than calling isOutsideBuildHeight
-                ImmersiveRailroading.catching(ex);
             }
         }
         lastRetarderPos = new Vec3i(latest.position);
