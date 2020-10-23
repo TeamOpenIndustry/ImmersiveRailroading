@@ -14,14 +14,12 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.boundingbox.BoundingBox;
 import cam72cam.mod.entity.custom.ICollision;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
-import cam72cam.mod.serialization.TagCompound;
-import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
 import java.util.Arrays;
