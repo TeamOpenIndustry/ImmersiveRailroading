@@ -183,7 +183,7 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	public void setCraftItem(ItemStack selected) {
 		if (getWorld().isServer) {
-			if (craftItem == null || selected == null || !(selected.equals(craftItem) && selected.getTagCompound().equals(craftItem.getTagCompound()))) {
+			if (selected == null || !selected.equals(craftItem)) {
 				this.craftItem = selected == null ? null : selected.copy();
 				this.craftProgress = 0;
 				this.markDirty();
