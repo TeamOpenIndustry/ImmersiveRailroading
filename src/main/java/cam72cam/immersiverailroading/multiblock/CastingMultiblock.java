@@ -257,7 +257,7 @@ public class CastingMultiblock extends Multiblock {
 						craftTe.setCraftMode(CraftingMachineMode.STOPPED);
 					}
 					ItemStack outputItem = item.copy();
-					if (outputItem.getTagCompound().internal.hasNoTags()) {
+					if (outputItem.getTagCompound().isEmpty()) {
 						outputItem.clearTagCompound();
 					}
 					outTe.getContainer().set(0, outputItem);
