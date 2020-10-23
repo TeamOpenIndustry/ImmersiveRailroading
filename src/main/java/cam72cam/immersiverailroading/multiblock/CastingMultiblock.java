@@ -252,7 +252,11 @@ public class CastingMultiblock extends Multiblock {
 					if (mode == CraftingMachineMode.SINGLE) {
 						craftTe.setCraftMode(CraftingMachineMode.STOPPED);
 					}
-					outTe.getContainer().set(0, item.copy());
+					ItemStack outputItem = item.copy();
+					if (outputItem.getTagCompound().internal.hasNoTags()) {
+						outputItem.clearTagCompound();
+					}
+					outTe.getContainer().set(0, outputItem);
 				} else {
 					if (craftTe.getRenderTicks() % 10 == 0) {
 						if (fluidTe.getCraftProgress() > 0) {
