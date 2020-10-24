@@ -32,7 +32,7 @@ public class MultiPreviewRender {
                         placementPosition = placementPosition.subtract(GlobalRender.getCameraPos(partialTicks));
                         try (OpenGL.With matrix = OpenGL.matrix()) {
                             GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
-                            RailRenderUtil.render(info, preview.getWorld(), preview.getPos(), true);
+                            RailRenderUtil.render(info, preview.getWorld(), builder.pos, true);
                         }
                     }
                 }
