@@ -34,14 +34,17 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subCurves.size() > 1) {
 			subBuilders = new ArrayList<>();
 			for (CubicCurve subCurve : subCurves) {
-				Vec3d delta = info.placementInfo.placementPosition;
-				if (pos.equals(Vec3i.ZERO)) {
-					delta = delta.subtract(new Vec3d(new Vec3i(info.placementInfo.placementPosition)));
-				}
+				// main pos -> subCurve's start pos
+				Vec3d relOff = info.placementInfo.placementPosition.add(subCurve.p1);
+				Vec3i relPos = new Vec3i(relOff);
+				Vec3i sPos = pos.add(relPos);
+				// The block remainder of curve position, with the subCurve move to origin block included
+				Vec3d delta = relOff.subtract(relPos).subtract(subCurve.p1);
+				//delta = delta.subtract(new Vec3i(delta)); // Relative position within the block
 				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), subCurve.ctrl1.add(delta));
-				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop()+180, subCurve.ctrl2.add(delta));
+				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop(), subCurve.ctrl2.add(delta));
 				RailInfo subInfo = new RailInfo(info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
-				Vec3i sPos = new Vec3i(startPos.placementPosition);
+
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, world, sPos);
 				if (subBuilders.size() != 0) {
 					for (TrackBase track : subBuilder.tracks) {

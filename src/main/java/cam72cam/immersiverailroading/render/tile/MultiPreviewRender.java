@@ -26,7 +26,7 @@ public class MultiPreviewRender {
             for (TileRailPreview preview : previews.values()) {
                 for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getWorld(), preview.getPos())).getSubBuilders()) {
                     RailInfo info = builder.info;
-                    Vec3d placementPosition = info.placementInfo.placementPosition.add(preview.getPos());
+                    Vec3d placementPosition = info.placementInfo.placementPosition.add(builder.pos);
 
                     if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
                         placementPosition = placementPosition.subtract(GlobalRender.getCameraPos(partialTicks));
