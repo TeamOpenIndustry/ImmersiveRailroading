@@ -74,9 +74,11 @@ public class ItemGoldenSpike extends CustomItem {
 	public void onClickAir(Player player, World world, Player.Hand hand) {
 		if (world.isClient) {
 			Data d = new Data(player.getHeldItem(hand));
-			TileRailPreview te = world.getBlockEntity(d.pos, TileRailPreview.class);
-			if (te != null) {
-				GuiTypes.RAIL_PREVIEW.open(player, d.pos);
+			if (d.pos != null) {
+				TileRailPreview te = world.getBlockEntity(d.pos, TileRailPreview.class);
+				if (te != null) {
+					GuiTypes.RAIL_PREVIEW.open(player, d.pos);
+				}
 			}
 		}
 	}
