@@ -640,8 +640,8 @@ public class LocomotiveSteam extends Locomotive {
 		if (waterUsed != 0) {
 			waterUsed *= Config.ConfigBalance.locoWaterUsage;
 			waterUsed += drainRemainder;
-			if (waterUsed > 0) {
-				theTank.drain(new FluidStack(Fluid.WATER, (int) Math.floor(waterUsed)), false);
+			if (waterUsed > 0 && theTank.getContents() != null) {
+				theTank.drain(new FluidStack(theTank.getContents().getFluid(), (int) Math.floor(waterUsed)), false);
 				drainRemainder = waterUsed % 1;
 			}
 		}
