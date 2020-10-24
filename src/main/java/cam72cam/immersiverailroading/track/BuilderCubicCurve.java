@@ -87,10 +87,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 		ctrl2 = adjusted.ctrl2;
 
 		if (info.placementInfo.control != null) {
-			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition);
+			ctrl1= info.placementInfo.control.subtract(info.placementInfo.placementPosition).add(new Vec3i(info.placementInfo.placementPosition));
 		}
 		if (info.customInfo.control != null && !isDefault) {
-            ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition);
+            ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition).add(new Vec3i(info.placementInfo.placementPosition));
 		}
 
 		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos);
