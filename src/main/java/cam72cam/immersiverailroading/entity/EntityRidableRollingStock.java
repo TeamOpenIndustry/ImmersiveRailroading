@@ -73,7 +73,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
-	private static final Map<UUID, Integer> cooldown = new HashMap<>();
+	private final Map<UUID, Integer> cooldown = new HashMap<>();
 	private Vec3d playerMovement(Player source, Vec3d offset) {
 		Vec3d movement = source.getMovementInput();
         /*
