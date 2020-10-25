@@ -151,7 +151,7 @@ public class PlacementInfo {
 	}
 
 	public PlacementInfo offset(Vec3i offset) {
-		return new PlacementInfo(placementPosition.add(offset), direction, yaw, control);
+		return new PlacementInfo(placementPosition.add(offset), direction, yaw, control != null ? control.add(offset) : null);
 	}
 
 	static class TagMapper implements cam72cam.mod.serialization.TagMapper<PlacementInfo> {
