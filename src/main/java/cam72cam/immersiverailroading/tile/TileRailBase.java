@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.physics.MovementTrack;
@@ -65,6 +66,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
+	private Gauge augmentGauge;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -516,6 +518,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					getWorld().breakBlock(getPos());
 				}
 				return;
+			} else {
+				augmentGauge = getParentTile().info.settings.gauge;
 			}
 			
 			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
@@ -801,6 +805,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void onBreak() {
 		if (this instanceof TileRail) {
 			((TileRail) this).spawnDrops();
+		}
+		if (this.augment != null && this.augmentGauge != null) {
+			ItemStack stack = new ItemStack(IRItems.ITEM_AUGMENT, 1);
+			ItemRailAugment.Data data = new ItemRailAugment.Data(stack);
+			data.augment = this.augment;
+			data.gauge = this.augmentGauge;
+			data.write();
+			getWorld().dropItem(stack, getPos());
 		}
 
 		breakParentIfExists();
