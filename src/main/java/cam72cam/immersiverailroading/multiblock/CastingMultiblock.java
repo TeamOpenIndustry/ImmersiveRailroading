@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.energy.IEnergy;
+import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.Fuzzy;
@@ -31,8 +32,6 @@ public class CastingMultiblock extends Multiblock {
 	private static final Vec3i output = new Vec3i(3,2,14);
 	private static final Vec3i power = new Vec3i(3,7,0);
 	public static final double max_volume = 5 * 4 * 4.5 * 9;
-
-	private IBoundingBox meltBounds;
 
 	private static Fuzzy[][][] cast_blueprint() {
 		Fuzzy[][][] bp = new Fuzzy[7+16][][];
@@ -182,9 +181,8 @@ public class CastingMultiblock extends Multiblock {
 					return;
 				}
 
-				if (meltBounds == null) {
-					meltBounds = IBoundingBox.from(getPos(offset.add(0, 1, 0))).grow(new Vec3d(3, 0, 3));
-				}
+				IBoundingBox meltBounds = IBoundingBox.from(getPos(offset.add(0, 1, 0))).grow(new Vec3d(2, 0, 2));
+				IBoundingBox damageBounds = meltBounds.expand(new Vec3d(0, 2.5, 0));
 				List<ItemStack> dropped = world.getDroppedItems(meltBounds);
 				for (ItemStack stack : dropped) {
 					ItemStack craftStack = stack.copy();
@@ -206,12 +204,10 @@ public class CastingMultiblock extends Multiblock {
 						}
 					}
 				}
-                /* TODO
-				List<EntityLivingBase> living = world.getEntitiesWithinAABB(EntityLivingBase.class, bb.expand(0,2.5,0));
-				for (EntityLivingBase alive : living) {
-					alive.attackEntityFrom(new DamageSource("immersiverailroading:casting"), 5);
+				List<Entity> living = world.getEntities(ent -> (ent.isPlayer() || ent.isLiving()) && ent.getBounds().intersects(damageBounds), Entity.class);
+				for (Entity alive : living) {
+					alive.directDamage("immersiverailroading:casting", 5);
 				}
-				*/
 			}
 			
 			if (offset.equals(craft)) {
