@@ -73,7 +73,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
-	private final Map<UUID, Integer> cooldown = new HashMap<>();
 	private Vec3d playerMovement(Player source, Vec3d offset) {
 		Vec3d movement = source.getMovementInput();
         /*
@@ -89,7 +88,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
         offset = offset.add(movement);
 
-        if (this instanceof EntityCoupleableRollingStock && cooldown.getOrDefault(source.getUUID(), 0) < source.getTickCount()) {
+        if (this instanceof EntityCoupleableRollingStock) {
 			EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock) this;
 
 			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
@@ -100,7 +99,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				if (atCoupler && couplable.isCoupled(coupler)) {
 					EntityCoupleableRollingStock coupled = ((EntityCoupleableRollingStock) this).getCoupled(coupler);
 					if (coupled != null) {
-						cooldown.put(source.getUUID(), source.getTickCount() + 10);
 						coupled.addPassenger(source);
 					} else if (this.getTickCount() > 20) {
 						ImmersiveRailroading.info(
