@@ -32,6 +32,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private ValveGearType valveGear;
     private int numSlots;
     private int width;
+    public boolean tender_auto_feed;
 
     public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveSteam.class, defID, data);
@@ -52,6 +53,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         JsonObject firebox = data.get("firebox").getAsJsonObject();
         this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
         this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
+        this.tender_auto_feed = properties.has("tender_auto_feed") ? properties.get("tender_auto_feed").getAsBoolean() : true;
 
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 

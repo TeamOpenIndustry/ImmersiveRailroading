@@ -511,22 +511,23 @@ public class LocomotiveSteam extends Locomotive {
 		if (!this.isBuilt()) {
 			return;
 		}
-		
-		if (this.getCoupled(CouplerType.BACK) instanceof Tender) {
-			Tender tender = (Tender) getCoupled(CouplerType.BACK);
+
+		EntityCoupleableRollingStock stock = this;
+		while (stock.getCoupled(CouplerType.BACK) instanceof Tender) {
+			Tender tender = (Tender) stock.getCoupled(CouplerType.BACK);
 
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
 				theTank.drain(tender.theTank, desiredDrain, false);
 			}
-			
-			if (this.getTickCount() % 20 == 0) {
+
+			if (this.getTickCount() % 20 == 0 && this.getDefinition().tender_auto_feed) {
 				// Top off stacks
 				for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
 					if (BurnUtil.getBurnTime(this.cargoItems.get(slot)) != 0) {
 						for (int tenderSlot = 0; tenderSlot < tender.cargoItems.getSlotCount(); tenderSlot ++) {
-							if (this.cargoItems.get(slot).equals(tender.cargoItems.get(tenderSlot))) {
+							if (this.cargoItems.get(slot).is(tender.cargoItems.get(tenderSlot))) {
 								if (this.cargoItems.get(slot).getLimit() > this.cargoItems.get(slot).getCount()) {
 									ItemStack extracted = tender.cargoItems.extract(tenderSlot, 1, false);
 									this.cargoItems.insert(slot, extracted, false);
@@ -536,6 +537,7 @@ public class LocomotiveSteam extends Locomotive {
 					}
 				}
 			}
+			stock = tender;
 		}
 		
 		float boilerTemperature = getBoilerTemperature();
