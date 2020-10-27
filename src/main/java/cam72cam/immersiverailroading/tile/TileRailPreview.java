@@ -156,8 +156,9 @@ public class TileRailPreview extends BlockEntityTickable {
 		if (entityPlayer.isCrouching()) {
 			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, isAboveRails() ? getPos().down() : getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
+				return isAboveRails();
 			}
-			return isAboveRails();
+			return false;
 		}
 		new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 		return true;
