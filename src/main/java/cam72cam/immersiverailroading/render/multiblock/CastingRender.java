@@ -22,7 +22,7 @@ public class CastingRender implements IMultiblockRender {
 	public void render(TileMultiblock te, float partialTicks) {
 		if (renderer == null) {
 			try {
-				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/casting_machine.obj"), 0.1f));
+				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/casting_machine.obj"), 0));
 				flowing_steel = new ArrayList<>();
 				steel_level = new ArrayList<>();
 				rest = new ArrayList<>();
