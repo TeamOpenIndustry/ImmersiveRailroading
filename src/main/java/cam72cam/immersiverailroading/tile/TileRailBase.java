@@ -340,6 +340,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		TileRailBase self = this;
 		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 
+		if (tile == null) {
+			// Can happen due to track in progress of breaking
+			return currentPosition;
+		}
+
 		double distanceMeters = motion.length();
 		if (distanceMeters > MovementTrack.maxDistance) {
 			return MovementTrack.nextPosition(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
