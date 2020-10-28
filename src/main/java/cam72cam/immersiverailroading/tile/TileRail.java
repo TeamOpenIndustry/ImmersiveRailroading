@@ -28,7 +28,7 @@ public class TileRail extends TileRailBase {
 	@Override
     public IBoundingBox getRenderBoundingBox() {
 		if (info == null) {
-			return null;
+			return IBoundingBox.ORIGIN;
 		}
 		if (boundingBox == null) {
 			int length = info.settings.length;
