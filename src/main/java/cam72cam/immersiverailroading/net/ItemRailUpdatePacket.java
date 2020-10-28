@@ -29,9 +29,11 @@ public class ItemRailUpdatePacket extends Packet {
 	public void handle() {
 		if (pos != null) {
 			TileRailPreview tile = this.getWorld().getBlockEntity(pos, TileRailPreview.class);
-			ItemStack item = tile.getItem();
-			settings.write(item);
-			tile.setItem(item, getPlayer());
+			if (tile != null) {
+				ItemStack item = tile.getItem();
+				settings.write(item);
+				tile.setItem(item, getPlayer());
+			}
 		} else {
 			Player player = this.getPlayer();
 			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
