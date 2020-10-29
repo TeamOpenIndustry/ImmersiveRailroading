@@ -58,9 +58,14 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	public void onDissassemble() {
 		super.onDissassemble();
 
-		List<ItemStack> extras = cargoItems.setSize(0);
 		if (getWorld().isServer) {
-			extras.forEach(stack -> getWorld().dropItem(stack, getPosition()));
+			for (int i = 0; i < cargoItems.getSlotCount(); i++) {
+				ItemStack stack = cargoItems.get(i);
+				if (!stack.isEmpty()) {
+					getWorld().dropItem(stack.copy(), getPosition());
+					stack.setCount(0);
+				}
+			}
 		}
 	}
 
@@ -135,22 +140,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	protected void initContainerFilter() {
 		
 	}
-	
-	@Override
-	public void onDamage(DamageType type, Entity source, float amount, boolean bypassArmor) {
-		super.onDamage(type, source, amount, bypassArmor);
 
-		if (this.isDead() && getWorld().isServer) {
-			for (int slot = 0; slot < cargoItems.getSlotCount(); slot++) {
-				ItemStack itemstack = cargoItems.get(slot);
-				if (itemstack.getCount() != 0) {
-					getWorld().dropItem(itemstack.copy(), getPosition());
-					itemstack.setCount(0);
-				}
-			}
-		}
-	}
-	
 	@Override
 	public double getWeight() {
 		double fLoad = ConfigBalance.blockWeight * itemCount;
