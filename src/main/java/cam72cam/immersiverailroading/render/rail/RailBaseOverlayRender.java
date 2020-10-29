@@ -30,7 +30,8 @@ public class RailBaseOverlayRender {
 					Vec3i tpos = base.getPos();
 					tpos = tpos.subtract(placePos);
 					GL11.glTranslated(tpos.x, tpos.y, tpos.z + 1);
-					GL11.glScaled(1, base.getBedHeight() + 0.2f, 1);
+					GL11.glScaled(1.002, base.getBedHeight() + 0.2f, 1.002);
+					GL11.glTranslated(-0.001, 0, 0.001);
 
 					GL11.glBegin(GL11.GL_QUADS);
 					// front
@@ -39,20 +40,20 @@ public class RailBaseOverlayRender {
 					GL11.glVertex3f(1.0f, 1.0f, 0.0f);
 					GL11.glVertex3f(0.0f, 1.0f, 0.0f);
 					// back
-					GL11.glVertex3f(0.0f, 0.0f, -1.0f);
-					GL11.glVertex3f(1.0f, 0.0f, -1.0f);
-					GL11.glVertex3f(1.0f, 1.0f, -1.0f);
 					GL11.glVertex3f(0.0f, 1.0f, -1.0f);
+					GL11.glVertex3f(1.0f, 1.0f, -1.0f);
+					GL11.glVertex3f(1.0f, 0.0f, -1.0f);
+					GL11.glVertex3f(0.0f, 0.0f, -1.0f);
 					// right
 					GL11.glVertex3f(1.0f, 0.0f, 0.0f);
 					GL11.glVertex3f(1.0f, 0.0f, -1.0f);
 					GL11.glVertex3f(1.0f, 1.0f, -1.0f);
 					GL11.glVertex3f(1.0f, 1.0f, 0.0f);
 					// left
-					GL11.glVertex3f(0.0f, 0.0f, 0.0f);
-					GL11.glVertex3f(0.0f, 0.0f, -1.0f);
-					GL11.glVertex3f(0.0f, 1.0f, -1.0f);
 					GL11.glVertex3f(0.0f, 1.0f, 0.0f);
+					GL11.glVertex3f(0.0f, 1.0f, -1.0f);
+					GL11.glVertex3f(0.0f, 0.0f, -1.0f);
+					GL11.glVertex3f(0.0f, 0.0f, 0.0f);
 					// top
 					GL11.glVertex3f(0.0f, 1.0f, 0.0f);
 					GL11.glVertex3f(1.0f, 1.0f, 0.0f);
