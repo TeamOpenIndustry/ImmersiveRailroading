@@ -87,7 +87,7 @@ public class TrackDefinition {
                 String oreName = item.replace("ore:", "");
                 return new Fuzzy(oreName).matches(stack);
             }
-            return stack.equals(new ItemStack(item, 1, meta));
+            return stack.is(new ItemStack(item, 1, meta));
         }
     }
 }
