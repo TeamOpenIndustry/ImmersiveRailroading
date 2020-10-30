@@ -15,12 +15,12 @@ import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.OpenGL;
-import com.google.common.base.Predicate;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class TrackGui implements IScreen {
 	private TileRailPreview te;
