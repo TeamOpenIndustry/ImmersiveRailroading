@@ -27,6 +27,8 @@ public class TileRailPreview extends BlockEntityTickable {
 	private PlacementInfo placementInfo;
 	@TagField
 	private PlacementInfo customInfo;
+	@TagField
+	private Boolean isAboveRails = null;
 
 	public ItemStack getItem() {
 		return this.item;
@@ -35,6 +37,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setup(ItemStack stack, PlacementInfo info) {
 		this.item = stack.copy();
 		this.placementInfo = info;
+		this.isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
 		this.markDirty();
 	}
 
@@ -43,6 +46,9 @@ public class TileRailPreview extends BlockEntityTickable {
 		if (!RailSettings.from(item).isPreview) {
 			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(player, isAboveRails() ? getPos().down() : getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
+				if (isAboveRails()) {
+					getWorld().breakBlock(this.getPos());
+				}
 			}
 			return;
 		}
@@ -164,11 +170,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return true;
 	}
 
-	private Boolean isAboveRails = null;
 	public boolean isAboveRails() {
-		if (isAboveRails == null) {
-			isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
-		}
 		return isAboveRails;
 	}
 }

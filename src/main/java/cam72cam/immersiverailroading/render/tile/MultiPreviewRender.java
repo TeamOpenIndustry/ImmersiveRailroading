@@ -24,7 +24,7 @@ public class MultiPreviewRender {
     private static void render(float partialTicks) {
         try (OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.7f)) {
             for (TileRailPreview preview : previews.values()) {
-                for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getWorld(), preview.getPos())).getSubBuilders()) {
+                for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getWorld(), preview.isAboveRails() ? preview.getPos().down() :preview.getPos())).getSubBuilders()) {
                     RailInfo info = builder.info;
                     Vec3d placementPosition = info.placementInfo.placementPosition.add(builder.pos);
 
