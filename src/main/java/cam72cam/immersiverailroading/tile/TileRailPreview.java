@@ -28,7 +28,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@TagField
 	private PlacementInfo customInfo;
 	@TagField
-	private Boolean isAboveRails = null;
+	private boolean isAboveRails = false;
 
 	public ItemStack getItem() {
 		return this.item;
