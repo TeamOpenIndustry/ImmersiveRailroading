@@ -513,8 +513,9 @@ public class LocomotiveSteam extends Locomotive {
 		}
 
 		EntityCoupleableRollingStock stock = this;
-		while (stock.getCoupled(CouplerType.BACK) instanceof Tender) {
-			Tender tender = (Tender) stock.getCoupled(CouplerType.BACK);
+		CouplerType coupler = CouplerType.BACK;
+		while (coupler != null && stock.getCoupled(coupler) instanceof Tender) {
+			Tender tender = (Tender) stock.getCoupled(coupler);
 
 			// Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
@@ -537,6 +538,7 @@ public class LocomotiveSteam extends Locomotive {
 					}
 				}
 			}
+			coupler = tender.getCouplerFor(stock).opposite();
 			stock = tender;
 		}
 		
