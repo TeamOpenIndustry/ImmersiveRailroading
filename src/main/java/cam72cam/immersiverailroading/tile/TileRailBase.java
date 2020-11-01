@@ -241,7 +241,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (nbt.hasKey("augmentTank")) {
 			createAugmentTank();
-			augmentTank.read(nbt.get("augmentTank"));
+			if (augmentTank != null) {
+				augmentTank.read(nbt.get("augmentTank"));
+			}
 		}
 	}
 	@Override
