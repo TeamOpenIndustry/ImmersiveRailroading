@@ -525,10 +525,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				augmentGauge = getParentTile().info.settings.gauge;
 			}
 			
-			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail) {
+			if (Config.ConfigDamage.requireSolidBlocks && this instanceof TileRail && getWorld().isBlock(getPos(), IRBlocks.BLOCK_RAIL)) {
 				double floating = ((TileRail)this).percentFloating();
 				if (floating > ConfigBalance.trackFloatingPercent) {
-					if (IRBlocks.BLOCK_RAIL_GAG.tryBreak(getWorld(), getPos(), null)) {
+					if (this.tryBreak(null)) {
 						getWorld().breakBlock(getPos());
 					}
 					return;
