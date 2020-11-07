@@ -17,8 +17,6 @@ import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.*;
@@ -54,7 +52,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private TagCompound replaced;
 	private boolean skipNextRefresh = false;
 	public ItemStack railBedCache = null;
-	private FluidTank augmentTank = null;
+	private final FluidTank emptyTank = new FluidTank(null, 0);
+	private final IInventory emptyInventory = new ItemStackHandler(0);
 	private int redstoneLevel = 0;
 	@TagField("redstoneMode")
 	private StockDetectorMode redstoneMode = StockDetectorMode.SIMPLE;
@@ -62,8 +61,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD;
 	@TagField("couplerMod")
 	private CouplerAugmentMode couplerMode = CouplerAugmentMode.ENGAGED;
-	private int clientLastTankAmount = 0;
-	private long clientSoundTimeout = 0;
 	private int ticksExisted;
 	public boolean blockUpdate;
 	private Gauge augmentGauge;
@@ -199,25 +196,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (nbt.hasKey("renderBed")) {
 			this.railBedCache = new ItemStack(nbt.get("renderBed"));
 		}
-		if (this.augmentTank != null && this.augment == Augment.WATER_TROUGH) {
-            /*
-			int delta = clientLastTankAmount - this.augmentTank.getContents().getAmount();
-			if (delta > 0) {
-				// We lost water, do spray
-				// TODO, this fires during rebalance which is not correct
-				for (int i = 0; i < delta/10; i ++) {
-					for (Facing facing : Facing.values()) {
-						world.createParticle(ParticleType.WATER_SPLASH, pos.offset(facing).addVector(0.5, 0.5, 0.5));
-					}
-				}
-				if (clientSoundTimeout < world.getTime()) {
-					world.internal.playSound(pos.x, pos.y, pos.z, SoundEvents.ITEM_BUCKET_FILL, SoundCategory.BLOCKS, 1, 1, false);
-					clientSoundTimeout = world.getTime() + 10;
-				}
-			}
-            */
-			clientLastTankAmount = this.augmentTank.getContents().getAmount();
-		}
 	}
 	
 	@Override
@@ -238,21 +216,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				railHeight = bedHeight;
 			}
 		}
-
-		if (nbt.hasKey("augmentTank")) {
-			createAugmentTank();
-			if (augmentTank != null) {
-				augmentTank.read(nbt.get("augmentTank"));
-			}
-		}
 	}
 	@Override
 	public void save(TagCompound nbt) {
-		if (augment != null) {
-			if (augmentTank != null) {
-				nbt.set("augmentTank", augmentTank.write(new TagCompound()));
-			}
-		}
 		nbt.setInteger("version", 4);
 	}
 
@@ -436,7 +402,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					if (stock != null) {
 						return stock.cargoItems;
 					}
-					return new ItemStackHandler(0);
+					// placeholder for connections
+					return this.emptyInventory;
 			}
 		}
 		return null;
@@ -448,47 +415,15 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			switch (this.getAugment()) {
 				case FLUID_LOADER:
 				case FLUID_UNLOADER:
-                    if (this.augmentTank == null) {
-                        this.createAugmentTank();
-                    }
-                    return this.augmentTank;
+					FreightTank stock = getStockNearBy(FreightTank.class);
+					if (stock != null) {
+						return stock.theTank;
+					}
+					// placeholder for connections
+                    return this.emptyTank;
 			}
 		}
 		return null;
-	}
-
-	private void balanceTanks() {
-		/*
-		for (Facing facing : Facing.values()) {
-			RailBase neighbor = world.getTileEntity(pos.offset(facing), RailBase.class);
-			if (neighbor != null && neighbor.augmentTank != null) {
-				if (neighbor.augmentTank.getContents().getAmount() + 1 < augmentTank.getContents().getAmount()) {
-					transferAllFluid(augmentTank, neighbor.augmentTank, (augmentTank.getContents().getAmount() - neighbor.augmentTank.getContents().getAmount())/2);
-					this.markDirty();
-				}
-			}
-		}
-		*/
-	}
-
-	private void createAugmentTank() {
-		switch(this.augment) {
-		case FLUID_LOADER:
-		case FLUID_UNLOADER:
-			this.augmentTank = new FluidTank(null, 1000);
-			break;
-		case WATER_TROUGH:
-			this.augmentTank = new FluidTank(new FluidStack(Fluid.WATER, 0), 1000)/* {
-				@Override
-				public void onChanged() {
-					balanceTanks();
-					markDirty();
-				}
-			}*/;
-			break;
-		default:
-			break;
-		}
 	}
 
 	@Override
@@ -511,7 +446,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			// Double check every 5 seconds that the master is not gone
 			// Wont fire on first due to incr above
 			blockUpdate = false;
-			
 
 			if (this.getParent() == null || !getWorld().isBlockLoaded(this.getParent())) {
 				return;
@@ -542,6 +476,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return;
 		}
 
+		if (this.ticksExisted % 20 == 0) {
+			switch (augment) {
+				case ITEM_LOADER:
+				case ITEM_UNLOADER:
+				case FLUID_LOADER:
+				case FLUID_UNLOADER:
+					// Fire off update event (looking at you ImmersiveEngineering)
+					this.markDirty();
+			}
+		}
+
 		try {
 			switch (this.augment) {
             case ITEM_LOADER:
@@ -550,11 +495,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				if (freight == null) {
 					break;
 				}
-				ItemStackHandler freight_items = freight.cargoItems;
 				for (Facing side : Facing.values()) {
 					IInventory inventory = getWorld().getInventory(getPos().offset(side));
 					if (inventory != null) {
-						inventory.transferAllTo(freight_items);
+						inventory.transferAllTo(freight.cargoItems);
 					}
 				}
 			}
@@ -564,25 +508,19 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				if (freight == null) {
 					break;
 				}
-				ItemStackHandler freight_items = freight.cargoItems;
 				for (Facing side : Facing.values()) {
 					IInventory inventory = getWorld().getInventory(getPos().offset(side));
 					if (inventory != null) {
-						inventory.transferAllFrom(freight_items);
+						inventory.transferAllFrom(freight.cargoItems);
 					}
 				}
 			}
 			break;
 			case FLUID_LOADER: {
-				if (this.augmentTank == null) {
-					this.createAugmentTank();
-				}
-
 				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
 				}
-				augmentTank.fill(stock.theTank, 100, false);
                 for (Facing side : Facing.values()) {
                 	List<ITank> tanks = getWorld().getTank(getPos().offset(side));
                 	if (tanks != null) {
@@ -592,16 +530,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 				break;
 			case FLUID_UNLOADER: {
-				if (this.augmentTank == null) {
-					this.createAugmentTank();
-				}
-
 				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
 				}
-
-				augmentTank.drain(stock.theTank, 100, false);
                 for (Facing side : Facing.values()) {
                     List<ITank> tanks = getWorld().getTank(getPos().offset(side));
                     if (tanks != null) {
@@ -621,7 +553,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					transferAllFluid(this.augmentTank, tender.getCapability(fluid_cap, null), waterPressureFromSpeed(tender.getCurrentSpeed().metric()));
 				} else if (this.ticksExisted % 20 == 0) {
 					balanceTanks();
-				}
+				freight.cargoItems}
                 */
 				break;
 			case LOCO_CONTROL: {
@@ -719,17 +651,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public int getWeakPower(Facing facing) {
 		return getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
-	}
-
-	public double getTankLevel() {
-		return this.augmentTank == null ? 0 : (double)this.augmentTank.getContents().getAmount() / this.augmentTank.getCapacity();
-	}
-	
-	private static int waterPressureFromSpeed(double speed) {
-		if (speed < 0) {
-			return 0;
-		}
-		return (int) ((speed * speed) / 200);
 	}
 
 	public Vec3i getParentReplaced() {
