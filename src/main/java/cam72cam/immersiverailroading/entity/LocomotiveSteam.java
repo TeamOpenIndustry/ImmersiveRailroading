@@ -538,7 +538,11 @@ public class LocomotiveSteam extends Locomotive {
 					}
 				}
 			}
-			coupler = tender.getCouplerFor(stock).opposite();
+			coupler = tender.getCouplerFor(stock);
+			if (coupler == null) {
+				break;
+			}
+			coupler = coupler.opposite();
 			stock = tender;
 		}
 		
