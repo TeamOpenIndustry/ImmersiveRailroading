@@ -23,11 +23,11 @@ import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.resource.Identifier;
 
 public class GuiTypes {
-    public static final EntityGUI FREIGHT = GuiRegistry.registerEntityContainer(Freight.class, FreightContainer::new);
-    public static final EntityGUI TANK = GuiRegistry.registerEntityContainer(FreightTank.class, TankContainer::new);
-    public static final EntityGUI TENDER = GuiRegistry.registerEntityContainer(Tender.class, TenderContainer::new);
-    public static final EntityGUI STEAM_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveSteam.class, SteamLocomotiveContainer::new);
-    public static final EntityGUI DIESEL_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
+    public static final EntityGUI<Freight> FREIGHT = GuiRegistry.registerEntityContainer(Freight.class, FreightContainer::new);
+    public static final EntityGUI<FreightTank> TANK = GuiRegistry.registerEntityContainer(FreightTank.class, TankContainer::new);
+    public static final EntityGUI<Tender> TENDER = GuiRegistry.registerEntityContainer(Tender.class, TenderContainer::new);
+    public static final EntityGUI<LocomotiveSteam> STEAM_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveSteam.class, SteamLocomotiveContainer::new);
+    public static final EntityGUI<LocomotiveDiesel> DIESEL_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
 
     public static final GUI RAIL = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "RAIL"), TrackGui::new);
     public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, TrackGui::new);
