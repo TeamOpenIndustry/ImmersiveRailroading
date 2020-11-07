@@ -154,6 +154,10 @@ public class PlacementInfo {
 		return new PlacementInfo(placementPosition.add(offset), direction, yaw, control != null ? control.add(offset) : null);
 	}
 
+	public PlacementInfo withDirection(TrackDirection direction) {
+		return new PlacementInfo(placementPosition, direction, yaw, control);
+	}
+
 	static class TagMapper implements cam72cam.mod.serialization.TagMapper<PlacementInfo> {
 		@Override
 		public TagAccessor<PlacementInfo> apply(Class<PlacementInfo> type, String fieldName, TagField tag) {

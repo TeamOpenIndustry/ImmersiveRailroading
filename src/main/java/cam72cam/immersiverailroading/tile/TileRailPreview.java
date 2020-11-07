@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -43,14 +44,20 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public void setItem(ItemStack stack, Player player) {
 		this.item = stack.copy();
-		if (!RailSettings.from(item).isPreview) {
+		RailSettings settings = RailSettings.from(item);
+
+		if (settings.direction != TrackDirection.NONE) {
+			this.placementInfo = this.placementInfo.withDirection(settings.direction);
+		}
+
+		if (!settings.isPreview) {
 			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(player, isAboveRails() ? getPos().down() : getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 				if (isAboveRails()) {
 					getWorld().breakBlock(this.getPos());
 				}
+				return;
 			}
-			return;
 		}
 		this.markDirty();
 	}
