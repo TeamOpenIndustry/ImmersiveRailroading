@@ -23,6 +23,8 @@ import cam72cam.mod.resource.Identifier;
 import java.util.Collections;
 import java.util.List;
 
+import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
+
 public class CastingGUI implements IScreen {
     public static final Identifier CASTING_GUI_TEXTURE = new Identifier("immersiverailroading:gui/casting_gui.png");
     
@@ -80,9 +82,9 @@ public class CastingGUI implements IScreen {
 					EntityRollingStockDefinition def = new ItemRollingStockComponent.Data(currentItem).def;
 					if (def != null && ConfigBalance.DesignGaugeLock) {
 						List<Gauge> validGauges = Collections.singletonList(Gauge.from(def.recommended_gauge.value()));
-						gauge = gauge.next(validGauges);
+						gauge = next(validGauges, gauge, hand);
 					} else {
-						gauge = gauge.next();
+						gauge = next(Gauge.values(), gauge, hand);
 					}
 				}
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));

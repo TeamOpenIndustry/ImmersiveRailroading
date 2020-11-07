@@ -19,6 +19,8 @@ import cam72cam.mod.item.ItemStack;
 import java.util.Collections;
 import java.util.List;
 
+import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
+
 public class PlateRollerGUI implements IScreen {
 	private Button gaugeButton;
 	private Gauge gauge;
@@ -59,9 +61,9 @@ public class PlateRollerGUI implements IScreen {
 					EntityRollingStockDefinition def = new ItemPlate.Data(currentItem).def;
 					if (def != null && plate == PlateType.BOILER && ConfigBalance.DesignGaugeLock) {
 						List<Gauge> validGauges = Collections.singletonList(Gauge.from(def.recommended_gauge.value()));
-						gauge = gauge.next(validGauges);
+						gauge = next(validGauges, gauge, hand);
 					} else {
-						gauge = gauge.next();
+						gauge = next(Gauge.values(), gauge, hand);
 					}
 				}
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
@@ -72,7 +74,7 @@ public class PlateRollerGUI implements IScreen {
 		plateButton = new Button(screen, 0 - 100, -24 + 1 * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				plate = PlateType.values()[((plate.ordinal() + 1) % (PlateType.values().length))];
+				plate = next(plate, hand);
 				plateButton.setText(GuiText.SELECTOR_PLATE_TYPE.toString(plate));
 				pickerButton.setVisible(plate == PlateType.BOILER);
 				sendPacket();

@@ -20,7 +20,7 @@ public class Gauge {
 		this.gauge = gauge;
 		this.name = name;
 	}
-	
+
 	public double value() {
 		return gauge;
 	}
@@ -38,31 +38,11 @@ public class Gauge {
 		return value() < 0.3;
 	}
 
-	public Gauge next() {
-		boolean useNext = false;
-		for (Gauge g : gauges) {
-			if (useNext) {
-				return g;
-			}
-			if (g.gauge == gauge) {
-				useNext = true;
-			}
-		}
-		return gauges.get(0);
-	}	
-	
-	public Gauge next(List<Gauge> valid) {
-		if (valid == null) return this;
-		for (Gauge g : gauges) {
-			if ((valid.contains(g) || g.isModel()) && g.gauge != gauge) {
-				return g;
-			}
-		}
-		return this;
-	}	
-	
-	
-	
+	public static List<Gauge> values() {
+		return new ArrayList<>(gauges);
+	}
+
+
 	private static List<Gauge> gauges = new ArrayList<Gauge>();
 	
 	public static void reset() {

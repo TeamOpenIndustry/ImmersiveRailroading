@@ -18,9 +18,10 @@ import cam72cam.mod.render.OpenGL;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
+
+import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
 
 public class TrackGui implements IScreen {
 	private TileRailPreview te;
@@ -104,15 +105,6 @@ public class TrackGui implements IScreen {
 			return GuiText.NONE.toString();
 		}
 		return stack.getDisplayName();
-	}
-
-	private static <E> E next(List<E> values, E value, Player.Hand hand) {
-		return values.get((values.indexOf(value) + values.size() + (hand == Player.Hand.PRIMARY ? 1 : -1)) % values.size());
-	}
-
-	private static <E extends Enum> E next(E value, Player.Hand hand) {
-		E[] values = (E[]) value.getClass().getEnumConstants();
-		return values[(value.ordinal() + values.length + (hand == Player.Hand.PRIMARY ? 1 : -1)) % values.length];
 	}
 
 	public void init(IScreenBuilder screen) {
@@ -206,7 +198,7 @@ public class TrackGui implements IScreen {
 		gaugeButton = new Button(screen, 0 - 100, -24 + 9 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				gauge = gauge.next();
+				gauge = next(Gauge.values(), gauge, hand);
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
 			}
 		};
