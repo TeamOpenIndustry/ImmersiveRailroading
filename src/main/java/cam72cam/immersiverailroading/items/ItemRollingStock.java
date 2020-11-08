@@ -65,6 +65,7 @@ public class ItemRollingStock extends BaseItemRollingStock {
     		ItemStack stack = new ItemStack(this, 1);
     		Data data = new Data(stack);
     		data.def = def;
+    		data.gauge = def.recommended_gauge;
     		data.write();
             /*if (def.textureNames.size() > 1) {
             	for (String texture : def.textureNames.keySet()) {

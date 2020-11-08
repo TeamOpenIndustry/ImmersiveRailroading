@@ -52,6 +52,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 					ItemStack stack = new ItemStack(this, 1);
 					Data data = new Data(stack);
 					data.def = def;
+					data.gauge = def.recommended_gauge;
 					data.componentType = item;
 					data.write();
 					items.add(stack);
