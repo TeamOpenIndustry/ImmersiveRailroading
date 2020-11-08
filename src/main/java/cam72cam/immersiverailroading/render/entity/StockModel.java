@@ -314,9 +314,9 @@ public class StockModel extends OBJRender {
 		case STEPHENSON:
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
+				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawDrivingWheels(stock, wheels);
 				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
-				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawStephenson(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
 				drawStephenson(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
 			}
@@ -368,14 +368,15 @@ public class StockModel extends OBJRender {
 
 
 	private void drawDrivingWheels(LocomotiveSteam stock, List<RenderComponent> wheels) {
+		RenderComponent center = wheels.get(wheels.size() / 2);
+		double circumference = center.height() * (float) Math.PI;
+		double relDist = distanceTraveled % circumference;
+		double wheelAngle = 360 * relDist / circumference;
+		if (center.type == RenderComponentType.WHEEL_DRIVER_REAR_X) {
+			//MALLET HACK
+			wheelAngle += MALLET_ANGLE_REAR;
+		}
 		for (RenderComponent wheel : wheels) {
-			double circumference = wheel.height() * (float) Math.PI;
-			double relDist = distanceTraveled % circumference;
-			double wheelAngle = 360 * relDist / circumference;
-			if (wheel.type == RenderComponentType.WHEEL_DRIVER_REAR_X) {
-				//MALLET HACK
-				wheelAngle += MALLET_ANGLE_REAR;
-			}
 			Vec3d wheelPos = wheel.center();
 			try (OpenGL.With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(wheelPos.x, wheelPos.y, wheelPos.z);
