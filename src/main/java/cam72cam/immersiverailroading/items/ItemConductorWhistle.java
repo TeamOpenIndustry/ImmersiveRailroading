@@ -27,7 +27,7 @@ public class ItemConductorWhistle extends CustomItem {
 		super(ImmersiveRailroading.MODID, "item_conductor_whistle");
 
 		Fuzzy gold = Fuzzy.GOLD_INGOT;
-		Recipes.register(this, 2,
+		Recipes.shapedRecipe(this, 2,
 				gold, gold, gold, gold, gold, gold);
 	}
 

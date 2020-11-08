@@ -11,9 +11,9 @@ import java.util.UUID;
 public class ItemRadioCtrlCard extends CustomItem {
     public ItemRadioCtrlCard() {
         super(ImmersiveRailroading.MODID, "item_radio_control_card");
-        Fuzzy transistor = new Fuzzy("oc:materialTransistor");
-        Fuzzy dataCard = new Fuzzy("oc:dataCard1");
-        Recipes.register(this, 3,
+        Fuzzy transistor = Fuzzy.get("oc:materialTransistor");
+        Fuzzy dataCard = Fuzzy.get("oc:dataCard1");
+        Recipes.shapedRecipe(this, 3,
                 null, Fuzzy.IRON_BARS, null,
                 transistor, Fuzzy.IRON_INGOT, transistor,
                 null, dataCard, null

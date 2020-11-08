@@ -74,12 +74,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveSteam::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, Tender::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 
-				MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
-				MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
-				MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
-				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
-				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
-
 				Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
 				Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
@@ -107,6 +101,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				}
 				break;
 			case FINALIZE:
+				MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
+				MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
+				MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
+				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
+				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
 				IRFuzzy.applyFallbacks();
 				break;
 		}

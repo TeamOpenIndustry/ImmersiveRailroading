@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.Player;
@@ -25,9 +26,11 @@ public class ItemTrackBlueprint extends CustomItem {
 	public ItemTrackBlueprint() {
 		super(ImmersiveRailroading.MODID, "item_rail");
 
-		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
-		Recipes.register(this, 3,
-				steel, null, steel, steel, Fuzzy.PAPER, steel, steel, null, steel);
+		Fuzzy steel = Fuzzy.STEEL_INGOT;
+		IRFuzzy.registerSteelRecipe(this, 3,
+				steel, null, steel,
+				steel, Fuzzy.PAPER, steel,
+				steel, null, steel);
 	}
 
 	@Override

@@ -33,6 +33,10 @@ public class MBBlueprintRender {
 
     public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d hit, float partialTicks) {
         pos = pos.up();
+        Multiblock mb = new ItemManual.Data(stack).multiblock;
+        if (mb == null) {
+            return;
+        }
 
         try (OpenGL.With matrix = OpenGL.matrix(); OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.3f)) {
             Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
@@ -43,7 +47,7 @@ public class MBBlueprintRender {
 
             GL11.glRotated(-(int)(((player.getRotationYawHead()%360+360)%360+45) / 90) * 90, 0, 1, 0);
 
-            MBBlueprintRender.draw(new ItemManual.Data(stack).multiblock);
+            MBBlueprintRender.draw(mb);
         }
     }
 }

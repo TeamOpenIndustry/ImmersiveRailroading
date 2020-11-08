@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.CustomItem;
@@ -14,9 +15,11 @@ public class ItemHook extends CustomItem {
 		super(ImmersiveRailroading.MODID, "item_hook");
 
 
-		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
-		Recipes.register(this, 2,
-				steel, steel, steel, null, steel, null);
+		Fuzzy steel = Fuzzy.STEEL_INGOT;
+		IRFuzzy.registerSteelRecipe(this, 2,
+				steel, steel,
+				steel, null,
+				steel, null);
 	}
 
 	@Override

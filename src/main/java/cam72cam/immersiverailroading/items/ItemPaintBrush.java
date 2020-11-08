@@ -13,7 +13,7 @@ public class ItemPaintBrush extends CustomItem {
 	public ItemPaintBrush() {
 		super(ImmersiveRailroading.MODID, "item_paint_brush");
 
-		Recipes.register(this, 1,
+		Recipes.shapedRecipe(this, 1,
 				Fuzzy.WOOL_BLOCK, Fuzzy.IRON_INGOT, Fuzzy.WOOD_STICK);
 	}
 

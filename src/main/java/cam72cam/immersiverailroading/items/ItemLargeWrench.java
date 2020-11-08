@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
@@ -23,9 +24,11 @@ public class ItemLargeWrench extends CustomItem {
 	public ItemLargeWrench() {
 		super(ImmersiveRailroading.MODID, "item_large_wrench");
 
-		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
-		Recipes.register(this, 3,
-				null, steel, null, steel, steel, steel, steel, null, steel);
+		Fuzzy steel = Fuzzy.STEEL_INGOT;
+		IRFuzzy.registerSteelRecipe(this, 3,
+				null, steel, null,
+				steel, steel, steel,
+				steel, null, steel);
 	}
 
 	@Override

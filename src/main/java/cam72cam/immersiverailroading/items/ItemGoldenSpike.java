@@ -26,7 +26,7 @@ public class ItemGoldenSpike extends CustomItem {
 		super(ImmersiveRailroading.MODID, "item_golden_spike");
 
 		Fuzzy gold = Fuzzy.GOLD_INGOT;
-		Recipes.register(this, 2,
+		Recipes.shapedRecipe(this, 2,
 				gold, gold, gold, null, gold, null);
 	}
 

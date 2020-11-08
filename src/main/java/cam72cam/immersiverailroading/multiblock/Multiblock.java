@@ -30,21 +30,21 @@ public abstract class Multiblock {
 	
 	protected static final Fuzzy AIR = null;
 	protected static Fuzzy STEEL() {
-		return Fuzzy.STEEL_BLOCK;
+		return IRFuzzy.steelBlockOrFallback();
 	}
 	
 	protected static Fuzzy CASING() {
-		return IRFuzzy.IR_CASTING_CASING;
+		return IRFuzzy.IR_CASTING_CASING.isEmpty() ? Fuzzy.NETHER_BRICK : IRFuzzy.IR_CASTING_CASING;
 	}
 	
 	protected static Fuzzy L_ENG() {
-		return IRFuzzy.IR_LIGHT_ENG;
+		return IRFuzzy.IR_LIGHT_ENG.isEmpty() ? Fuzzy.IRON_BLOCK : IRFuzzy.IR_LIGHT_ENG;
 	}
 	protected static Fuzzy H_ENG() {
-		return IRFuzzy.IR_HEAVY_ENG;
+		return IRFuzzy.IR_HEAVY_ENG.isEmpty() ? Fuzzy.IRON_BLOCK : IRFuzzy.IR_HEAVY_ENG;
 	}
 	protected static Fuzzy S_SCAF() {
-		return IRFuzzy.IR_SCAFFOLDING;
+		return IRFuzzy.IR_SCAFFOLDING.isEmpty() ? Fuzzy.IRON_BARS : IRFuzzy.IR_SCAFFOLDING;
 	}
 
 	protected Multiblock(String name, Fuzzy[][][] components) {

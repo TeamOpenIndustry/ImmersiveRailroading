@@ -75,7 +75,7 @@ public class TrackDefinition {
 
             if (item.startsWith("ore:")) {
                 String oreName = item.replace("ore:", "");
-                examples.addAll(new Fuzzy(oreName).enumerate());
+                examples.addAll(Fuzzy.get(oreName).enumerate());
             } else {
                 examples.add(new ItemStack(this.item, 1, meta));
             }
@@ -85,7 +85,7 @@ public class TrackDefinition {
         public boolean matches(ItemStack stack) {
             if (item.startsWith("ore:")) {
                 String oreName = item.replace("ore:", "");
-                return new Fuzzy(oreName).matches(stack);
+                return Fuzzy.get(oreName).matches(stack);
             }
             return stack.is(new ItemStack(item, 1, meta));
         }

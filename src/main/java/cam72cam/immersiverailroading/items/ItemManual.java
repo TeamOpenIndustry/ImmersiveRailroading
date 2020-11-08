@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.multiblock.Multiblock;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Rotation;
@@ -23,9 +24,11 @@ public class ItemManual extends CustomItem {
 	public ItemManual() {
 		super(ImmersiveRailroading.MODID, "item_manual");
 
-		Fuzzy steel = Fuzzy.STEEL_INGOT.example() != null ? Fuzzy.STEEL_INGOT : Fuzzy.IRON_INGOT;
-		Recipes.register(this, 3,
-				steel, null, steel, steel, Fuzzy.BOOK, steel, steel, null, steel);
+		Fuzzy steel = Fuzzy.STEEL_INGOT;
+		IRFuzzy.registerSteelRecipe(this, 3,
+				steel, null, steel,
+				steel, Fuzzy.BOOK, steel,
+				steel, null, steel);
 	}
 
 	@Override
@@ -41,7 +44,11 @@ public class ItemManual extends CustomItem {
 
 	@Override
 	public List<String> getTooltip(ItemStack stack) {
-		return Collections.singletonList(GuiText.SELECTOR_TYPE.toString(new Data(stack).multiblock.getName()));
+		Multiblock mb = new Data(stack).multiblock;
+		if (mb == null) {
+			return super.getTooltip(stack);
+		}
+		return Collections.singletonList(GuiText.SELECTOR_TYPE.toString(mb.getName()));
 	}
 
 	@Override
@@ -69,6 +76,9 @@ public class ItemManual extends CustomItem {
 		if (world.isServer) {
 			ItemStack item = player.getHeldItem(hand);
 			Multiblock current = new Data(item).multiblock;
+			if (current == null) {
+				return ClickResult.ACCEPTED;
+			}
 			Vec3i realPos = pos;
 			if (facing == Facing.DOWN) {
 				realPos = realPos.down();
@@ -102,7 +112,7 @@ public class ItemManual extends CustomItem {
 			super(stack);
 
 			if (multiblock == null) {
-				multiblock = MultiblockRegistry.registered().get(0);
+				multiblock = MultiblockRegistry.registered().isEmpty() ? null : MultiblockRegistry.registered().get(0);
 			}
 		}
 	}

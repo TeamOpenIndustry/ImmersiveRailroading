@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.Fuzzy;
@@ -76,8 +77,8 @@ public class CraftPicker {
 		
 		if (craftType == CraftingType.CASTING) {
         	stock.add(new ItemStack(IRItems.ITEM_CAST_RAIL, 1));
-        	stock.add(Fuzzy.STEEL_INGOT.example());
-        	stock.add(Fuzzy.STEEL_BLOCK.example());
+        	stock.add(IRFuzzy.steelIngotOrFallback().example());
+        	stock.add(IRFuzzy.steelBlockOrFallback().example());
 	        stock.addAll(IRItems.ITEM_AUGMENT.getItemVariants(ItemTabs.MAIN_TAB));
 		}
 		stockSelector.setItems(stock);
