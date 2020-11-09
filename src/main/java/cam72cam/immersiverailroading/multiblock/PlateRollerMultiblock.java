@@ -23,31 +23,31 @@ public class PlateRollerMultiblock extends Multiblock {
 	private static final Vec3i output = new Vec3i(2,0,29);
 	private static final Vec3i power = new Vec3i(1,4,14);
 	
-	private static Fuzzy[][][] componentGenerator() {
-		Fuzzy[][][] result = new Fuzzy[30][][];
+	private static FuzzyProvider[][][] componentGenerator() {
+		FuzzyProvider[][][] result = new FuzzyProvider[30][][];
 		
-		Fuzzy[] bed = new Fuzzy[] {
+		FuzzyProvider[] bed = new FuzzyProvider[] {
 				L_ENG(), S_SCAF(), S_SCAF(), S_SCAF(), L_ENG()
 		};
-		Fuzzy[] mid = new Fuzzy[] {
+		FuzzyProvider[] mid = new FuzzyProvider[] {
 				L_ENG(), AIR, AIR, AIR, L_ENG()
 		};
-		Fuzzy[] top = new Fuzzy[] {
+		FuzzyProvider[] top = new FuzzyProvider[] {
 				H_ENG(), H_ENG(), H_ENG(), H_ENG(), H_ENG()
 		};
 		for (int i = 0; i < 30; i ++) {
 			if (i >= 11 && i <= 18) {
 				if (i >= 13 && i <=16) {
 					if (i == 14) {
-						result[i] = new Fuzzy[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR}, { AIR, H_ENG(), AIR, AIR, AIR } };
+						result[i] = new FuzzyProvider[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR}, { AIR, H_ENG(), AIR, AIR, AIR } };
 					} else {
-						result[i] = new Fuzzy[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR} };
+						result[i] = new FuzzyProvider[][] { bed, mid, top, { AIR, L_ENG(), L_ENG(), L_ENG(), AIR} };
 					}
 				} else {
-					result[i] = new Fuzzy[][] { bed, mid, top };
+					result[i] = new FuzzyProvider[][] { bed, mid, top };
 				}
 			} else {
-				result[i] = new Fuzzy[][] { bed };
+				result[i] = new FuzzyProvider[][] { bed };
 			}
 		}
 		

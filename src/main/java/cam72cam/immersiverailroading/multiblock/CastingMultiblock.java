@@ -23,8 +23,8 @@ import cam72cam.mod.world.World.ParticleType;
 import java.util.List;
 
 public class CastingMultiblock extends Multiblock {
-	private static Fuzzy STONE = Fuzzy.STONE_BRICK;
-	private static Fuzzy SAND = Fuzzy.SAND;
+	private static FuzzyProvider STONE = () -> Fuzzy.STONE_BRICK;
+	private static FuzzyProvider SAND = () -> Fuzzy.SAND;
 	public static final String NAME = "CASTING";
 	private static final Vec3i render = new Vec3i(3,3,7);
 	private static final Vec3i fluid = new Vec3i(3,3,3);
@@ -33,32 +33,32 @@ public class CastingMultiblock extends Multiblock {
 	private static final Vec3i power = new Vec3i(3,7,0);
 	public static final double max_volume = 5 * 4 * 4.5 * 9;
 
-	private static Fuzzy[][][] cast_blueprint() {
-		Fuzzy[][][] bp = new Fuzzy[7+16][][];
+	private static FuzzyProvider[][][] cast_blueprint() {
+		FuzzyProvider[][][] bp = new FuzzyProvider[7+16][][];
 		for (int z = 0; z < 7; z++) {
-			Fuzzy[] base = new Fuzzy[] { AIR, AIR, AIR, AIR, AIR, AIR, AIR };
+			FuzzyProvider[] base = new FuzzyProvider[] { AIR, AIR, AIR, AIR, AIR, AIR, AIR };
 			if (z > 0 && z < 6) {
 				if (z > 1 && z < 5) {
-					base = new Fuzzy[] { AIR, S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), AIR };
+					base = new FuzzyProvider[] { AIR, S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), S_SCAF(), AIR };
 				} else {
-					base = new Fuzzy[] { AIR, AIR, S_SCAF(), S_SCAF(), S_SCAF(), AIR, AIR };
+					base = new FuzzyProvider[] { AIR, AIR, S_SCAF(), S_SCAF(), S_SCAF(), AIR, AIR };
 				}
 			}
 			
 
-			Fuzzy[] top = new Fuzzy[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
-			Fuzzy[] topfirst = new Fuzzy[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
+			FuzzyProvider[] top = new FuzzyProvider[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
+			FuzzyProvider[] topfirst = new FuzzyProvider[] { AIR, AIR, CASING(), H_ENG(), CASING(), AIR, AIR };
 			if (z > 0 && z < 6) {
 				if (z > 1 && z < 5) {
-					top = new Fuzzy[] { CASING(), AIR, AIR, AIR, AIR, AIR, CASING() };
-					topfirst = new Fuzzy[] { CASING(), CASING(), CASING(), H_ENG(), CASING(), CASING(), CASING() };
+					top = new FuzzyProvider[] { CASING(), AIR, AIR, AIR, AIR, AIR, CASING() };
+					topfirst = new FuzzyProvider[] { CASING(), CASING(), CASING(), H_ENG(), CASING(), CASING(), CASING() };
 				} else {
-					top = new Fuzzy[] { AIR, CASING(), AIR, AIR, AIR, CASING(), AIR };
-					topfirst = new Fuzzy[] { AIR, CASING(), CASING(), H_ENG(), CASING(), CASING(), AIR };
+					top = new FuzzyProvider[] { AIR, CASING(), AIR, AIR, AIR, CASING(), AIR };
+					topfirst = new FuzzyProvider[] { AIR, CASING(), CASING(), H_ENG(), CASING(), CASING(), AIR };
 				}
 			}
 
-			bp[z] = new Fuzzy[8][];
+			bp[z] = new FuzzyProvider[8][];
 			for (int y = 0; y < 8; y++) {
 				if (y < 3) {
 					bp[z][y] = base;
@@ -72,20 +72,20 @@ public class CastingMultiblock extends Multiblock {
 		
 		for (int z = 7; z < 7+16; z++) {
 			if (z == 7) {
-				bp[z] = new Fuzzy[][] {
+				bp[z] = new FuzzyProvider[][] {
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, AIR, AIR, STEEL(), AIR, AIR, AIR },
 				};
 			} else if (z == 7+16-1) {
-				bp[z] = new Fuzzy[][] {
+				bp[z] = new FuzzyProvider[][] {
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 					{ AIR, STONE, STONE, STONE, STONE, STONE, AIR },
 				};
 			} else {
-				bp[z] = new Fuzzy[][] {
+				bp[z] = new FuzzyProvider[][] {
 					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
 					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },
 					{ AIR, STONE, SAND, SAND, SAND, STONE, AIR },

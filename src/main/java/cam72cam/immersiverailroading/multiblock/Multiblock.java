@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import cam72cam.immersiverailroading.IRBlocks;
@@ -24,39 +25,44 @@ import cam72cam.mod.world.World;
 
 public abstract class Multiblock {
 	// z y x
-	private final Fuzzy[][][] components;
+	private final FuzzyProvider[][][] components;
 	private final String name;
 	protected final List<Vec3i> componentPositions;
-	
-	protected static final Fuzzy AIR = null;
-	protected static Fuzzy STEEL() {
-		return IRFuzzy.steelBlockOrFallback();
+
+	@FunctionalInterface
+	public interface FuzzyProvider {
+		Fuzzy get();
 	}
 	
-	protected static Fuzzy CASING() {
-		return IRFuzzy.IR_CASTING_CASING.isEmpty() ? Fuzzy.NETHER_BRICK : IRFuzzy.IR_CASTING_CASING;
+	protected static final FuzzyProvider AIR = null;
+	protected static FuzzyProvider STEEL() {
+		return IRFuzzy::steelBlockOrFallback;
 	}
 	
-	protected static Fuzzy L_ENG() {
-		return IRFuzzy.IR_LIGHT_ENG.isEmpty() ? Fuzzy.IRON_BLOCK : IRFuzzy.IR_LIGHT_ENG;
+	protected static FuzzyProvider CASING() {
+		return () -> IRFuzzy.IR_CASTING_CASING.isEmpty() ? Fuzzy.NETHER_BRICK : IRFuzzy.IR_CASTING_CASING;
 	}
-	protected static Fuzzy H_ENG() {
-		return IRFuzzy.IR_HEAVY_ENG.isEmpty() ? Fuzzy.IRON_BLOCK : IRFuzzy.IR_HEAVY_ENG;
+	
+	protected static FuzzyProvider L_ENG() {
+		return () -> IRFuzzy.IR_LIGHT_ENG.isEmpty() ? Fuzzy.IRON_BLOCK : IRFuzzy.IR_LIGHT_ENG;
 	}
-	protected static Fuzzy S_SCAF() {
-		return IRFuzzy.IR_SCAFFOLDING.isEmpty() ? Fuzzy.IRON_BARS : IRFuzzy.IR_SCAFFOLDING;
+	protected static FuzzyProvider H_ENG() {
+		return () -> IRFuzzy.IR_HEAVY_ENG.isEmpty() ? Fuzzy.IRON_BLOCK : IRFuzzy.IR_HEAVY_ENG;
+	}
+	protected static FuzzyProvider S_SCAF() {
+		return () -> IRFuzzy.IR_SCAFFOLDING.isEmpty() ? Fuzzy.IRON_BARS : IRFuzzy.IR_SCAFFOLDING;
 	}
 
-	protected Multiblock(String name, Fuzzy[][][] components) {
+	protected Multiblock(String name, FuzzyProvider[][][] components) {
 		this.name = name;
 		this.components = components;
 		componentPositions = new ArrayList<>();
 		for (int z = 0; z < components.length; z++) {
-			Fuzzy[][] zcomp = components[z];
+			FuzzyProvider[][] zcomp = components[z];
 			for (int y = 0; y < components[z].length; y++) {
-				Fuzzy[] ycomp = zcomp[y];
+				FuzzyProvider[] ycomp = zcomp[y];
 				for (int x = 0; x < ycomp.length; x++) {
-					if (lookup(new Vec3i(x, y, z)) != null) {
+					if (components[z][y][x] != null) {
 						componentPositions.add(new Vec3i(x, y, z));
                     }
 				}
@@ -65,7 +71,7 @@ public abstract class Multiblock {
 	}
 	
 	private Fuzzy lookup(Vec3i offset) {
-		return components[offset.z][offset.y][offset.x];
+		return components[offset.z][offset.y][offset.x].get();
 	}
 	
 	private boolean checkValid(World world, Vec3i origin, Vec3i offset, Rotation rot) {
