@@ -173,9 +173,9 @@ public abstract class FreightTank extends Freight {
 				for (Boolean doFill : new Boolean[] { false, true }) {
 					boolean success;
 					if (doFill) {
-						success = theTank.drain(inputTank, theTank.getCapacity(), true);
+						success = theTank.drain(inputTank, theTank.getCapacity(), true) > 0;
 					} else {
-						success = theTank.fill(inputTank, theTank.getCapacity(), true);
+						success = theTank.fill(inputTank, theTank.getCapacity(), true) > 0;
 					}
 
 					if (success) {
