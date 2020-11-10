@@ -71,13 +71,13 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	@Override
 	public void update() {
-		if (offset == null) {
-			// Not formed yet.  World may onTick before configure is called
-			return;
-		}
 		this.ticks += 1;
-		if (getMultiblock() != null) {
+
+		if (offset != null && getMultiblock() != null) {
 			this.getMultiblock().tick(offset);
+		} else if (ticks > 20) {
+			System.out.println("Error in multiblock, reverting");
+			getWorld().breakBlock(getPos());
 		}
 	}
 
@@ -137,7 +137,9 @@ public class TileMultiblock extends BlockEntityTickable {
 			}
 		}
 
-		getWorld().setBlock(getPos(), replaced);
+		if (replaced != null) {
+			getWorld().setBlock(getPos(), replaced);
+		}
 	}
 
 	public boolean isRender() {
