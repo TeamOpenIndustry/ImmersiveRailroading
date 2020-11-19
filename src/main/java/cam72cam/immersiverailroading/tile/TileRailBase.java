@@ -176,7 +176,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 	
 	public ItemStack getRenderRailBed() {
-		if (railBedCache == null) {
+		if (railBedCache == null && getParent() != null && getWorld().isBlockLoaded(getParent())) {
 			TileRail pt = this.getParentTile();
 			if (pt != null) {
 				railBedCache = pt.info.settings.railBed;
