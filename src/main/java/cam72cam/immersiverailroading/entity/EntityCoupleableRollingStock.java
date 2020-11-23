@@ -39,6 +39,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			// if we did this in the onUpdate method
 			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class);
 
+			for (EntityCoupleableRollingStock stock : entities) {
+				if (stock.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
+					world.keepLoaded(stock.getBlockPosition());
+				}
+			}
+
 			// Try locomotives first
 			for (EntityCoupleableRollingStock stock : entities) {
 				if (stock instanceof Locomotive) {
