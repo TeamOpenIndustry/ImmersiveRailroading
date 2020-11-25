@@ -156,4 +156,12 @@ public class TileRail extends TileRailBase {
 		this.spawnDrops();
 		super.onBreak();
 	}
+
+	@Override
+	public ItemStack getRenderRailBed() {
+		if (info == null) {
+			return null;
+		}
+		return info.settings.railBed;
+	}
 }
