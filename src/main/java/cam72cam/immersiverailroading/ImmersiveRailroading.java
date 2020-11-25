@@ -64,6 +64,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 	@Override
 	public void commonEvent(ModEvent event) {
+		CompatLoader.common(event);
+
 		switch (event) {
 			case CONSTRUCT:
 				EntityRegistry.register(ImmersiveRailroading.instance, CarFreight::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
@@ -106,12 +108,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
 				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
 				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
-				break;
-			case START:
 				IRFuzzy.applyFallbacks();
+				break;
 		}
 
-		CompatLoader.common(event);
 	}
 
 	@Override
