@@ -115,6 +115,10 @@ public abstract class BuilderBase {
 		return this.tracks;
 	}
 
+	public List<TrackBase> getTracksForFloating() {
+		return this.tracks;
+	}
+
 	
 	public void setParentPos(Vec3i pos) {
 		parent_pos = this.pos.add(pos);

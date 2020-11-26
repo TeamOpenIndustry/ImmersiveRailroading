@@ -11,6 +11,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -223,6 +224,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 		} else {
 			return subBuilders.subList(0, Math.min(subBuilders.size(), 3)).stream().map(BuilderBase::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
 		}
+	}
+
+	@Override
+	public List<TrackBase> getTracksForFloating() {
+		if (subBuilders == null) {
+			return super.getTracksForFloating();
+		}
+		return Collections.emptyList();
 	}
 
 	@Override

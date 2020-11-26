@@ -125,7 +125,7 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (tracks == null) {
-			tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForRender();
+			tracks = (info.settings.type == TrackItems.SWITCH ? info.withType(TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
 		}
 
 		for (TrackBase track : tracks) {
