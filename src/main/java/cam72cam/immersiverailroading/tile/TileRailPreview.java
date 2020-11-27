@@ -140,7 +140,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void markDirty() {
 		super.markDirty();
         info = new RailInfo(item, placementInfo, customInfo);
-        if (isMulti()) {
+        if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();
 		}
 	}
