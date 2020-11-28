@@ -419,6 +419,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		double distance = myOffset.distanceTo(otherOffset);
 
+		if (distance - Math.abs(currentPos.speed.minecraft()) > gauge.scale() * 20) {
+			ImmersiveRailroading.warn("Decoupling stock that are too far apart!");
+			this.decouple();
+			distance = Math.abs(parentPos.speed.minecraft());
+		}
+
 		// Figure out which direction to move the next stock
 		Vec3d nextPosForward = myOffset.add(VecUtil.fromWrongYaw(distance, currentPos.rotationYaw));
 		Vec3d nextPosReverse = myOffset.add(VecUtil.fromWrongYaw(-distance, currentPos.rotationYaw));

@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.thirdparty.trackapi.TileEntityTickableTrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -25,11 +24,17 @@ public class MovementSimulator {
 		this.bogeyRearOffset = bogeyRearOffset;
 		this.gauge = gauge;
 	}
+
+	public static final int MAX_MOVE_DISTANCE = 23;
 	
 	public TickPos nextPosition(double moveDistance) {
 		position.tickID += 1;
 		position.isOffTrack = false;
 		TickPos origPosition = position.clone();
+
+		if (moveDistance > MAX_MOVE_DISTANCE) {
+			return position;
+		}
 
 		Vec3d front = frontBogeyPosition();
 		Vec3d rear = rearBogeyPosition();

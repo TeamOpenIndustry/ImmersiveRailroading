@@ -409,6 +409,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     public TickPos moveRollingStock(double moveDistance, int lastTickID) {
         TickPos lastPos = this.getTickPos(lastTickID);
+        if (moveDistance > MovementSimulator.MAX_MOVE_DISTANCE) { // over 1000 mph
+            ImmersiveRailroading.warn("Trying to move %s at over 1000 mph, cam72cam's physics really sucks", getUUID());
+        }
         return new MovementSimulator(getWorld(), lastPos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value()).nextPosition(moveDistance);
     }
 
