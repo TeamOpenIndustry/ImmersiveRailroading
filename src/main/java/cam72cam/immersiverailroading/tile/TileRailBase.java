@@ -145,13 +145,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return this.bedHeight + this.snowLayers / 8.0f;
 	}
 	
-	public boolean handleSnowTick() {
+	public void handleSnowTick() {
 		if (this.snowLayers < (ConfigDebug.deepSnow ? 8 : 1)) {
 			this.snowLayers += 1;
 			this.markDirty();
-			return true;
 		}
-		return !ConfigDebug.deepSnow;
 	}
 
 	private final SingleCache<Vec3i, Vec3i> parentCache = new SingleCache<>(parent -> parent.add(getPos()));
@@ -433,15 +431,20 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		
 		ticksExisted += 1;
-		
+
+		if (((int) (Math.random() * ConfigDebug.snowAccumulateRate * 10) == 0)) {
+			if (getWorld().isSnowing(getPos())) {
+				this.handleSnowTick();
+			}
+		}
 		if (ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
-			if ((int)(Math.random() * ConfigDebug.snowMeltRate * 10) == 0) {
-				if (!getWorld().isPrecipitating()) {
+			if ((int) (Math.random() * ConfigDebug.snowMeltRate * 10) == 0) {
+				if (!getWorld().isSnowing(getPos())) {
 					this.setSnowLayers(this.snowLayers -= 1);
 				}
 			}
 		}
-		
+
 		if (ticksExisted > 1 && (ticksExisted % (20 * 5) == 0 || blockUpdate)) {
 			// Double check every 5 seconds that the master is not gone
 			// Wont fire on first due to incr above
@@ -833,12 +836,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 		blockUpdate = true;
-
-		if (getWorld().getItemStack(getPos().up()).is(Fuzzy.SNOW_LAYER)) {
-			if (handleSnowTick()) {
-				getWorld().setToAir(getPos().up());
-			}
-		}
 
 		TagCompound data = te.getReplaced();
 		while (true) {

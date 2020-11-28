@@ -80,7 +80,7 @@ public abstract class TrackBase {
 
 
 		TagCompound replaced = null;
-		
+		int hasSnow = 0;
 		TileRailBase te = null;
 		if (!builder.world.isAir(pos)) {
 			if (builder.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
@@ -89,6 +89,7 @@ public abstract class TrackBase {
 					replaced = te.getData();
 				}
 			} else {
+				hasSnow = builder.world.getSnowLevel(pos);
 				builder.world.breakBlock(pos);
 			}
 		}
@@ -110,6 +111,9 @@ public abstract class TrackBase {
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());
+		for (int i = 0; i < hasSnow; i++) {
+			tr.handleSnowTick();
+		}
 		return tr;
 	}
 
