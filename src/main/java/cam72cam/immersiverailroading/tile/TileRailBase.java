@@ -445,7 +445,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 		}
 
-		if (ticksExisted > 1 && (ticksExisted % (20 * 5) == 0 || blockUpdate)) {
+		if (ticksExisted > 5 && blockUpdate || (ticksExisted % (20 * 5) == 0 && ticksExisted > (20 * 20))) {
 			// Double check every 5 seconds that the master is not gone
 			// Wont fire on first due to incr above
 			blockUpdate = false;
