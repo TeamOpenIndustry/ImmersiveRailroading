@@ -22,6 +22,10 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
 
 		double scale = data.gauge.scale();
+		if (data.def == null) {
+			stack.setCount(0);
+			return;
+		}
 		StockModel model = StockRenderCache.getRender(data.def.defID);
 		if (model == null) {
 			stack.setCount(0);
