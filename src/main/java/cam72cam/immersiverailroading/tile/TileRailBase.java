@@ -155,7 +155,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private final SingleCache<Vec3i, Vec3i> parentCache = new SingleCache<>(parent -> parent.add(getPos()));
 	public Vec3i getParent() {
 		if (parent == null) {
-			if (ticksExisted > 1 && getWorld().isServer) {
+			if (ticksExisted > 5 && getWorld().isServer) {
 				ImmersiveRailroading.warn("Invalid block without parent");
 				// Might be null during init
 				getWorld().setToAir(getPos());
@@ -294,9 +294,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public double getTrackGauge() {
-		TileRail parent = this.getParentTile();
-		if (parent != null) {
-			return parent.info.settings.gauge.value();
+		if (getWorld().isBlockLoaded(getParent())) { // Accessing TEs in chunks that are currently loading can cause problems
+			TileRail parent = this.getParentTile();
+			if (parent != null) {
+				return parent.info.settings.gauge.value();
+			}
 		}
 		return 0;
 	}
@@ -839,7 +841,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		TagCompound data = te.getReplaced();
 		while (true) {
-			if (te.getParentTile() != null && te.getParentTile().getParentTile() != null) {
+			TileRail teParent = te.getParentTile();
+			if (teParent != null && teParent.getParentTile() != null) {
 				TileRail switchTile = te.getParentTile();
 				if (te instanceof TileRail) {
 					switchTile = (TileRail) te;
