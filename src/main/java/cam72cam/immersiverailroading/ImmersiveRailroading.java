@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
+import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
@@ -145,7 +146,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, true);
 						OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
 					) {
-						StockRenderCache.getRender(entity.getDefinitionID()).draw(entity, partialTicks);
+						StockModel renderer = StockRenderCache.getRender(entity.getDefinitionID());
+						if (renderer != null) {
+							renderer.draw(entity, partialTicks);
+						}
 					}
 				};
 				EntityRenderer.register(LocomotiveSteam.class, stockRender);
