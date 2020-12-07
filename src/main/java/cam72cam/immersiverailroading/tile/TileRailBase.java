@@ -294,7 +294,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public double getTrackGauge() {
-		if (getWorld().isBlockLoaded(getParent())) { // Accessing TEs in chunks that are currently loading can cause problems
+		if (getParent() != null && getWorld().isBlockLoaded(getParent())) { // Accessing TEs in chunks that are currently loading can cause problems
 			TileRail parent = this.getParentTile();
 			if (parent != null) {
 				return parent.info.settings.gauge.value();
