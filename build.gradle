@@ -3,10 +3,10 @@ import cam72cam.universalmodcore.Util;
 buildscript {
     repositories {
         jcenter()
-        maven { url uri(".umc") }
+        maven { url = 'https://teamopenindustry.cc/maven/'  }
     }
 	dependencies {
-        classpath 'cam72cam.universalmodcore:UniversalModCoreGradle:0.1.2'
+        classpath 'cam72cam.universalmodcore:UniversalModCoreGradle:0.1.3'
 	}
 }
 
