@@ -30,7 +30,7 @@ jobs:
       run: ./gradlew uploadArchives
     - name: cleanup
       run: rm publish_key
-    - uses: actions/upload-artifact@master
+    - uses: actions/upload-artifact@v2
       with:
         name: Immersive Railroading ${{matrix.branch}}
-        path: build/libs/ImmersiveRailroading-1.7.3-${{matrix.branch}}-forge.jar
+        path: build/libs/ImmersiveRailroading-${{matrix.branch}}-*
