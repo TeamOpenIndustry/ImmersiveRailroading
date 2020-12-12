@@ -3,14 +3,15 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
-import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	public float getRidingSoundModifier() {
 		return getDefinition().dampeningAmount;
 	}
+
+	@TagField(value = "payingPassengerPositions", mapper = PassengerMapper.class)
+	private final Map<UUID, Vec3d> payingPassengerPositions = new HashMap<>();
 
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
@@ -43,6 +47,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	@Override
 	public Vec3d getMountOffset(Entity passenger, Vec3d off) {
+		if (passenger.isVillager() && !payingPassengerPositions.containsKey(passenger.getUUID())) {
+			payingPassengerPositions.put(passenger.getUUID(), passenger.getPosition());
+		}
+
 		int wiggle = passenger.isVillager() ? 10 : 2;
 		off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
 		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger));
@@ -120,7 +128,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		//TODO calculate better dismount offset
 		offset = new Vec3d(Math.copySign(getDefinition().getWidth(gauge)/2 + 1, offset.x), 0, offset.z);
 
-		if (passenger.isVillager()) {
+		if (getWorld().isServer && passenger.isVillager() && payingPassengerPositions.containsKey(passenger.getUUID())) {
 			double distanceMoved = passenger.getPosition().distanceTo(getPosition());
 
 			int payout = (int) Math.floor(distanceMoved * Config.ConfigBalance.villagerPayoutPerMeter);
@@ -136,5 +144,15 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 
 		return offset;
+	}
+
+	private static class PassengerMapper implements TagMapper<Map<UUID, Vec3d>> {
+		@Override
+		public TagAccessor<Map<UUID, Vec3d>> apply(Class<Map<UUID, Vec3d>> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(d, o) -> d.setMap(fieldName, o, UUID::toString, (Vec3d pos) -> new TagCompound().setVec3d("pos", pos)),
+					d -> d.getMap(fieldName, UUID::fromString, t -> t.getVec3d("pos"))
+			);
+		}
 	}
 }
