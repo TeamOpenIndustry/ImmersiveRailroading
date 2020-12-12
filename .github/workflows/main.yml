@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: [1.7.10-forge, 1.10.2-forge, 1.11.2-forge, 1.12.2-forge, 1.14.4-forge]
+        branch: [1.7.10-forge, 1.10.2-forge, 1.11.2-forge, 1.12.2-forge, 1.14.4-forge, 1.15.2-forge, 1.16.4-forge]
     steps:
     - uses: actions/checkout@v2
     - name: keyscan
@@ -17,7 +17,7 @@ jobs:
         MAVENCI: ${{ secrets.MAVENCI }}
       run: echo "${MAVENCI}" >> publish_key
     - name: Install deps
-      run: sudo apt install -y pngquant findutils
+      run: sudo apt install -y pngquant findutils xvfb
     - name: Setup Universal Mod Core (and helpers)
       env:
         BRANCH: ${{ matrix.branch }}
@@ -26,6 +26,10 @@ jobs:
       run: ./gradlew classes
     - name: Process images
       run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
+    - name: Run Data (optionalish)
+      run: xvfb-run --auto-servernum ./gradlew runData || xvfb-run --auto-servernum ./gradlew runData || true
+    - name: Gradle build
+      run: ./gradlew build
     - name: Gradle uploadArchives
       run: ./gradlew uploadArchives
     - name: cleanup
