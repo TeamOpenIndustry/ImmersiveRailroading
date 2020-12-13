@@ -1,0 +1,40 @@
+name: Immersive Railroading Release Pipeline
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch: [1.7.10-forge, 1.10.2-forge, 1.11.2-forge, 1.12.2-forge, 1.14.4-forge, 1.15.2-forge, 1.16.4-forge]
+    steps:
+    - uses: actions/checkout@v2
+    - name: keyscan
+      run: mkdir -p ~/.ssh/ && ssh-keyscan -t rsa teamopenindustry.cc >> ~/.ssh/known_hosts
+    - name: secrets
+      env:
+        MAVENCI: ${{ secrets.MAVENCI }}
+      run: echo "${MAVENCI}" >> publish_key
+    - name: Install deps
+      run: sudo apt install -y pngquant findutils xvfb
+    - name: Setup Universal Mod Core (and helpers)
+      env:
+        BRANCH: ${{ matrix.branch }}
+      run: ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true
+    - name: Gradle compile
+      run: ./gradlew classes
+    - name: Process images
+      run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
+    - name: Run Data (optionalish)
+      run: xvfb-run --auto-servernum ./gradlew runData || xvfb-run --auto-servernum ./gradlew runData || true
+    - name: Gradle build
+      run: ./gradlew build -Dtarget=release
+    - name: Gradle uploadArchives
+      run: ./gradlew uploadArchives -Dtarget=release
+    - name: cleanup
+      run: rm publish_key
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Immersive Railroading ${{matrix.branch}}
+        path: build/libs/ImmersiveRailroading-${{matrix.branch}}-*
