@@ -53,6 +53,7 @@ dependencies {
 }
 
 uploadArchives {
+    tasks.uploadArchives.dependsOn build
     repositories.mavenDeployer {
         configuration = configurations.deployerJars
         repository(url: "scp://teamopenindustry.cc/var/www/html/maven/") {
