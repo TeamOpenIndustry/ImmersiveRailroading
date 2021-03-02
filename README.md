@@ -6,7 +6,7 @@
     <br>
 </h1>
 <h4 align="center">
-    Immersive Railroading is a Minecraft mod for 1.12.  It adds a new transport system (item and players) to the game.  It is based in real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
+    Immersive Railroading is a Minecraft mod for 1.16, 1.15, 1.14, 1.12, 1.11, 1.10, and 1.7.  It adds a new transport system (item and players) to the game.  It is based in real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
 </h4>
 
 <p align="center">
@@ -44,6 +44,7 @@ You can download the latest version of Immersive Railroading on [Curseforge](htt
 ### Dependencies
 To get the mod to work you need to add the dependencies to your Mod Folder:
  - [Track API](https://minecraft.curseforge.com/projects/track-api)
+ - [Universal Mod Core](https://www.curseforge.com/minecraft/mc-mods/universal-mod-core)
  
 We also recommend to add these mods for full functionality of Immersive Railroading:
  - [Immersive Engineering](https://minecraft.curseforge.com/projects/immersive-engineering)
