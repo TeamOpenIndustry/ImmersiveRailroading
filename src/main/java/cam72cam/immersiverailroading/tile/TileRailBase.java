@@ -294,7 +294,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public double getTrackGauge() {
-		if (getParent() != null && getWorld().isBlockLoaded(getParent())) { // Accessing TEs in chunks that are currently loading can cause problems
+		if (getParent() != null) {
 			TileRail parent = this.getParentTile();
 			if (parent != null) {
 				return parent.info.settings.gauge.value();
@@ -729,6 +729,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			new SingleCache<>(height -> IBoundingBox.ORIGIN.expand(new Vec3d(1, height, 1)));
 	@Override
 	public IBoundingBox getBoundingBox() {
+		if (this instanceof TileRailGag && !getWorld().isBlockLoaded(getParent())) {
+			// Accessing TEs (parent) in chunks that are currently loading can cause problems
+			return boundingBox.get(getFullHeight() + 0.1);
+		}
 		return boundingBox.get(getFullHeight() + 0.1 * (getTrackGauge() / Gauge.STANDARD));
 	}
 
