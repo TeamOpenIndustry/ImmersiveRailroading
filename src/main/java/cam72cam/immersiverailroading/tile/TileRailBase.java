@@ -729,7 +729,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			new SingleCache<>(height -> IBoundingBox.ORIGIN.expand(new Vec3d(1, height, 1)));
 	@Override
 	public IBoundingBox getBoundingBox() {
-		if (this instanceof TileRailGag && !getWorld().isBlockLoaded(getParent())) {
+		if (this instanceof TileRailGag && (getParent() == null || !getWorld().isBlockLoaded(getParent()))) {
 			// Accessing TEs (parent) in chunks that are currently loading can cause problems
 			return boundingBox.get(getFullHeight() + 0.1);
 		}
