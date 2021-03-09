@@ -206,7 +206,7 @@ public abstract class Locomotive extends FreightTank {
 			}
 		}
 
-		simulateWheelSlip();
+		this.distanceTraveled += simulateWheelSlip();
 	}
 	
 	protected abstract int getAvailableHP();
@@ -219,14 +219,15 @@ public abstract class Locomotive extends FreightTank {
 		return tractiveEffortNewtons;
 	}
 	
-	private void simulateWheelSlip() {
+	protected double simulateWheelSlip() {
 		double tractiveEffortNewtons = getAppliedTractiveEffort(getCurrentSpeed());
 		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
 		staticTractiveEffort *= 1.5; // Fudge factor
 		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
 		if (adhesionFactor > 1) {
-			this.distanceTraveled += Math.copySign(Math.min((adhesionFactor-1)/10, 1), getThrottle());
+			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getThrottle());
 		}
+		return 0;
 	}
 	
 	public double getTractiveEffortNewtons(Speed speed) {	
