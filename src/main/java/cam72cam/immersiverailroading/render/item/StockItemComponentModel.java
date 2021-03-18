@@ -36,7 +36,7 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
         ArrayList<String> groups = new ArrayList<>();
 
         for (RenderComponentType r : data.componentType.render) {
-            RenderComponent comp = data.def.getComponent(r, Gauge.from(Gauge.STANDARD));
+            RenderComponent comp = data.def.getComponent(r);
             if (comp == null || r == RenderComponentType.CARGO_FILL_X) {
                 continue;
             }

@@ -70,13 +70,13 @@ public class LocomotiveSteam extends Locomotive {
 	private double getDriverDiameter() {
 		if (driverDiameter == null) {
 			driverDiameter = 0d;
-			List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
+			List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X);
 			if (driving != null) {
 				for (RenderComponent driver : driving) {
 					driverDiameter = Math.max(driverDiameter, driver.height() * gauge.scale());
 				}
 			}
-			driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
+			driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X);
 			if (driving != null) {
 				for (RenderComponent driver : driving) {
 					driverDiameter = Math.max(driverDiameter, driver.height() * gauge.scale());
@@ -301,7 +301,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			Vec3d fakeMotion = this.getVelocity();
 			
-			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X, gauge);
+			List<RenderComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X);
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
 				for (RenderComponent smoke : smokes) {
@@ -340,7 +340,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 			}
 			
-			List<RenderComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE, gauge);
+			List<RenderComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE);
 			if (	whistles != null &&
 					(hornTime != 0 || whistle != null && whistle.isPlaying()) &&
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
@@ -361,7 +361,7 @@ public class LocomotiveSteam extends Locomotive {
 					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
 				}
 			}
-			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE, gauge);
+			List<RenderComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE);
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
 			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 				for (RenderComponent piston : pistons) {
@@ -459,7 +459,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 			}
 			
-			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X, gauge);
+			List<RenderComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X);
 			if (steams != null && (pressureValve && Config.isFuelRequired(gauge))) {
 				if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
 					if (!pressure.isPlaying()) {

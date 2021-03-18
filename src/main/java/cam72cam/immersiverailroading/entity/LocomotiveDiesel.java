@@ -228,7 +228,7 @@ public class LocomotiveDiesel extends Locomotive {
 			
 			Vec3d fakeMotion = this.getVelocity();
 			
-			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
+			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X);
 			float throttle = Math.abs(this.getThrottle()) + 0.05f;
 			if (exhausts != null && isRunning()) {
 				for (RenderComponent exhaust : exhausts) {

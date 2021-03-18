@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @TagMapped(EntityRollingStockDefinition.TagMapper.class)
 public abstract class EntityRollingStockDefinition {
@@ -289,14 +290,14 @@ public abstract class EntityRollingStockDefinition {
         return groups;
     }
 
-    public RenderComponent getComponent(RenderComponentType name, Gauge gauge) {
+    public RenderComponent getComponent(RenderComponentType name) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
         return renderComponents.get(name).get(0);
     }
 
-    public RenderComponent getComponent(RenderComponentType name, String pos, Gauge gauge) {
+    public RenderComponent getComponent(RenderComponentType name, String pos) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
@@ -311,14 +312,18 @@ public abstract class EntityRollingStockDefinition {
         return null;
     }
 
-    public List<RenderComponent> getComponents(RenderComponentType name, Gauge gauge) {
+    public List<RenderComponent> getComponents() {
+        return renderComponents.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    public List<RenderComponent> getComponents(RenderComponentType name) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
         return renderComponents.get(name);
     }
 
-    public List<RenderComponent> getComponents(RenderComponentType name, String pos, Gauge gauge) {
+    public List<RenderComponent> getComponents(RenderComponentType name, String pos) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
