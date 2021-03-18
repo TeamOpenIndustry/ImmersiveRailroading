@@ -65,14 +65,7 @@ public class StockModel extends OBJRender {
 				availComponents.remove(component.type);
 			}
 			MinecraftClient.startProfiler("render");
-			if (component.scale != 1) {
-				try (OpenGL.With matrix = OpenGL.matrix()) {
-					GL11.glScaled(component.scale, component.scale, component.scale);
-					bound.draw(component.modelIDs);
-				}
-			} else {
-				bound.draw(component.modelIDs);
-			}
+			bound.draw(component.modelIDs);
 			MinecraftClient.endProfiler();
 		}
 	}
@@ -87,13 +80,16 @@ public class StockModel extends OBJRender {
 	}
 
 	public void draw(EntityRollingStock stock, float partialTicks) {
-		try (VBO.BoundVBO bound = super.bind()){
+		try (VBO.BoundVBO bound = super.bind(); OpenGL.With matrix = OpenGL.matrix()){
+			GL11.glScaled(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
+
 			this.bound = bound;
 			boolean isFarAway = MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > 100;
 
 			if (stock instanceof EntityMoveableRollingStock) {
 				EntityMoveableRollingStock mstock = (EntityMoveableRollingStock) stock;
 				this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * mstock.getTickSkew() * partialTicks * 1.1;
+				this.distanceTraveled /= stock.gauge.scale();
 			} else {
 				this.distanceTraveled = 0;
 			}
@@ -253,7 +249,7 @@ public class StockModel extends OBJRender {
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
 				drawDrivingWheels(stock, wheels);
-				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				MultiRenderComponent center = new MultiRenderComponent(wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center(), false);
 				drawWalschaerts(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center(), false);
@@ -262,7 +258,7 @@ public class StockModel extends OBJRender {
 		case TRI_WALSCHAERTS:{
 			List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
 			drawDrivingWheels(stock, wheels);
-			MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+			MultiRenderComponent center = new MultiRenderComponent(wheels);
 			RenderComponent wheel = wheels.get(wheels.size() / 2);
 			drawWalschaerts(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center(), false);
 			drawWalschaerts(stock, "RIGHT", -240, wheel.height(), center.center(), wheel.center(), false);
@@ -291,7 +287,7 @@ public class StockModel extends OBJRender {
 				}
 
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
-				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				MultiRenderComponent center = new MultiRenderComponent(wheels);
 				drawComponent(def.getComponent(RenderComponentType.STEAM_CHEST_FRONT, stock.gauge));
 				drawComponent(frontLocomotive);
 				drawDrivingWheels(stock, wheels);
@@ -302,7 +298,7 @@ public class StockModel extends OBJRender {
 			}
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, stock.gauge);
-				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				MultiRenderComponent center = new MultiRenderComponent(wheels);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(), false);
@@ -324,7 +320,7 @@ public class StockModel extends OBJRender {
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_X, stock.gauge);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawDrivingWheels(stock, wheels);
-				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				MultiRenderComponent center = new MultiRenderComponent(wheels);
 				drawStephenson(stock, "LEFT", 0, wheel.height(), center.center(), wheel.center());
 				drawStephenson(stock, "RIGHT", -90, wheel.height(), center.center(), wheel.center());
 			}
@@ -334,7 +330,7 @@ public class StockModel extends OBJRender {
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_FRONT_X, stock.gauge);
 				drawDrivingWheels(stock, wheels);
-				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				MultiRenderComponent center = new MultiRenderComponent(wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				drawT1(stock, "LEFT_FRONT", 0, wheel.height(), center.center(), wheel.center());
 				drawT1(stock, "RIGHT_FRONT", -90, wheel.height(), center.center(), wheel.center());
@@ -342,7 +338,7 @@ public class StockModel extends OBJRender {
 			{
 				List<RenderComponent> wheels = def.getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, stock.gauge);
 				drawDrivingWheels(stock, wheels);
-				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
+				MultiRenderComponent center = new MultiRenderComponent(wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
 				
 				drawT1(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, wheel.height(), center.center(), wheel.center());

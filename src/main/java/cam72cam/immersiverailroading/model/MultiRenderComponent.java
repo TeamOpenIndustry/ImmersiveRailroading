@@ -8,7 +8,6 @@ import cam72cam.mod.math.Vec3d;
 public class MultiRenderComponent {
 	private final Vec3d min;
 	private final Vec3d max;
-	public final double scale;
 
 	public MultiRenderComponent(List<RenderComponent> subComponents) {
 		double minX = subComponents.get(0).min.x;
@@ -28,28 +27,18 @@ public class MultiRenderComponent {
 		}
 		min = new Vec3d(minX, minY, minZ);
 		max = new Vec3d(maxX, maxY, maxZ);
-		scale = subComponents.get(0).scale;
 	}
 
-	private MultiRenderComponent(Vec3d min, Vec3d max, double scale) {
+	private MultiRenderComponent(Vec3d min, Vec3d max) {
 		this.min = min;
 		this.max = max;
-		this.scale = scale;
-	}
-
-	public MultiRenderComponent scale(Gauge gauge) {
-		return new MultiRenderComponent(min, max, gauge.scale());
 	}
 
 	public Vec3d center() {
-		Vec3d min = this.min.scale(scale);
-		Vec3d max = this.max.scale(scale);
 		return new Vec3d((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
 	}
 
 	public double height() {
-		Vec3d min = this.min.scale(scale);
-		Vec3d max = this.max.scale(scale);
 		return max.y - min.y;
 	}
 }

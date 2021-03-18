@@ -73,13 +73,13 @@ public class LocomotiveSteam extends Locomotive {
 			List<RenderComponent> driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_X, gauge);
 			if (driving != null) {
 				for (RenderComponent driver : driving) {
-					driverDiameter = Math.max(driverDiameter, driver.height());
+					driverDiameter = Math.max(driverDiameter, driver.height() * gauge.scale());
 				}
 			}
 			driving = this.getDefinition().getComponents(RenderComponentType.WHEEL_DRIVER_REAR_X, gauge);
 			if (driving != null) {
 				for (RenderComponent driver : driving) {
-					driverDiameter = Math.max(driverDiameter, driver.height());
+					driverDiameter = Math.max(driverDiameter, driver.height() * gauge.scale());
 				}
 			}
 		}
@@ -305,7 +305,7 @@ public class LocomotiveSteam extends Locomotive {
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
 				for (RenderComponent smoke : smokes) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(smoke.center(), this.getRotationYaw() + 180));
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(smoke.center().scale(gauge.scale()), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 					if (this.getTickCount() % 1 == 0 ) {
 						float darken = 0;
@@ -326,7 +326,7 @@ public class LocomotiveSteam extends Locomotive {
 						
 						float verticalSpeed = 0.5f;//(0.5f + Math.abs(this.getThrottle())) * (float)gauge.scale();
 						
-						double size = smoke.width() * (0.8 + smokeMod);
+						double size = smoke.width() * gauge.scale() * (0.8 + smokeMod);
 						if (phase != 0 && Math.abs(this.getThrottle()) > 0.01 && Math.abs(this.getCurrentSpeed().metric()) / gauge.scale() < 30) {
 							double phaseSpike = Math.pow(phase, 8);
 							size *= 1 + phaseSpike*1.5;
@@ -346,7 +346,7 @@ public class LocomotiveSteam extends Locomotive {
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
 				) {
 				for (RenderComponent whistle : whistles) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(whistle.center(), this.getRotationYaw() + 180));
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(whistle.center().scale(gauge.scale()), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 					
 					float darken = 0;
@@ -404,7 +404,7 @@ public class LocomotiveSteam extends Locomotive {
 					double phaseSpike = Math.pow(phase, 4);
 					
 					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
-						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(piston.min(), this.getRotationYaw() + 180));
+						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(piston.min().scale(gauge.scale()), this.getRotationYaw() + 180));
 						double accell = 0.3 * gauge.scale();
 						if (piston.side.contains("LEFT")) {
 							accell = -accell;
@@ -468,9 +468,9 @@ public class LocomotiveSteam extends Locomotive {
 				}
 				if (ConfigGraphics.particlesEnabled) {
 					for (RenderComponent steam : steams) {
-						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(steam.center(), this.getRotationYaw() + 180));
+						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(steam.center().scale(gauge.scale()), this.getRotationYaw() + 180));
 						particlePos = particlePos.subtract(fakeMotion);
-						addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z),40, 0, 0.2f, steam.width());
+						addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z),40, 0, 0.2f, steam.width() * gauge.scale());
 					}
 				}
 			} else {

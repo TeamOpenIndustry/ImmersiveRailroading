@@ -156,6 +156,7 @@ public enum ItemComponentType {
 		
 		// Approximate
 		double size = comp.width() * comp.height() * 2 + comp.length() * comp.height() * 2 + comp.width() * comp.height() * 2;
+		size *= gauge.scale();
 		size /= 4;
 		
 		return (int) Math.ceil(size * mult);
@@ -180,13 +181,13 @@ public enum ItemComponentType {
 		}
 		RenderComponent comp = definition.getComponent(this.render.get(0), gauge);
 		double densityGues = 0.6;
-		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues);
+		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * gauge.scale());
 	}
 
 	public int getWoodCost(Gauge gauge, EntityRollingStockDefinition definition) {
 		RenderComponent comp = definition.getComponent(this.render.get(0), gauge);
 		double densityGues = 4;
-		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues);
+		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * gauge.scale());
 	}
 	
 	public boolean isWooden(EntityRollingStockDefinition definition) {

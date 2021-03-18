@@ -293,7 +293,7 @@ public abstract class EntityRollingStockDefinition {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
-        return renderComponents.get(name).get(0).scale(gauge);
+        return renderComponents.get(name).get(0);
     }
 
     public RenderComponent getComponent(RenderComponentType name, String pos, Gauge gauge) {
@@ -302,10 +302,10 @@ public abstract class EntityRollingStockDefinition {
         }
         for (RenderComponent c : renderComponents.get(name)) {
             if (c.pos.equals(pos)) {
-                return c.scale(gauge);
+                return c;
             }
             if (c.side.equals(pos)) {
-                return c.scale(gauge);
+                return c;
             }
         }
         return null;
@@ -315,11 +315,7 @@ public abstract class EntityRollingStockDefinition {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
-        List<RenderComponent> components = new ArrayList<>();
-        for (RenderComponent c : renderComponents.get(name)) {
-            components.add(c.scale(gauge));
-        }
-        return components;
+        return renderComponents.get(name);
     }
 
     public List<RenderComponent> getComponents(RenderComponentType name, String pos, Gauge gauge) {
@@ -329,7 +325,7 @@ public abstract class EntityRollingStockDefinition {
         List<RenderComponent> components = new ArrayList<>();
         for (RenderComponent c : renderComponents.get(name)) {
             if (c.pos.equals(pos)) {
-                components.add(c.scale(gauge));
+                components.add(c);
             }
         }
         return components;
