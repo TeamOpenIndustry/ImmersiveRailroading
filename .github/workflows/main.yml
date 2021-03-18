@@ -1,6 +1,6 @@
 name: Immersive Railroading Build Pipeline
 
-on: [push]
+on: []
 
 jobs:
   build:
