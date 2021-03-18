@@ -15,7 +15,7 @@ public class PlateRollerRender implements IMultiblockRender {
 	public void render(TileMultiblock te, float partialTicks) {
 		if (renderer == null) {
 			try {
-				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/plate_rolling_machine.obj"), 0.1f));
+				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/plate_rolling_machine.obj"), 0.1f, null));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

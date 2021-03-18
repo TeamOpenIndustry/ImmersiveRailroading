@@ -28,7 +28,7 @@ public class StockRenderCache {
 		if (!render_cache.containsKey(defID)) {
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 			if (def != null) {
-				render_cache.put(defID, new StockModel(def.getModel(), def.textureNames.keySet()));
+				render_cache.put(defID, new StockModel(def.getModel()));
 			}
 		}
 		return render_cache.get(defID);

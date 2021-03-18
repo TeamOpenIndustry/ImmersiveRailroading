@@ -2,107 +2,70 @@ package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.render.DisplayListCache;
+import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.render.VBO;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.world.World;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
-import java.nio.FloatBuffer;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class RailBuilderRender {
+    private static final ExpireableList<String, VBO> cache = new ExpireableList<String, VBO>() {
+        @Override
+        public void onRemove(String key, VBO value) {
+            value.free();
+        }
+    };
 
-    private static DisplayListCache displayLists = new DisplayListCache();
     public static void renderRailBuilder(RailInfo info, World world) {
-
         TrackModel model = DefinitionManager.getTrack(info.settings.track, info.settings.gauge.value());
         if (model == null) {
             return;
         }
         OBJRender trackRenderer = StockRenderCache.getTrackRenderer(model);
 
-        Integer displayList = displayLists.get(info.uniqueID);
-        if (displayList == null) {
-            displayList = GL11.glGenLists(1);
-            GL11.glNewList(displayList, GL11.GL_COMPILE);
+        VBO cached = cache.get(info.uniqueID);
+        if (cached == null) {
+            VBO.Builder builder = new VBO.Builder(trackRenderer.model);
 
-            try (OpenGL.With matrix = OpenGL.matrix()) {
-                for (VecYawPitch piece : info.getBuilder(world).getRenderData()) {
-                    Matrix4 m = new Matrix4();
-                    //m.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
-                    m.translate(piece.x, piece.y, piece.z);
-                    m.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
-                    m.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
-                    m.rotate(Math.toRadians(-90), 0, 1, 0);
+            for (VecYawPitch piece : info.getBuilder(world).getRenderData()) {
+                Matrix4 m = new Matrix4();
+                //m.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
+                m.translate(piece.x, piece.y, piece.z);
+                m.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
+                m.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
+                m.rotate(Math.toRadians(-90), 0, 1, 0);
 
-                    if (piece.getLength() != -1) {
-                        m.scale(piece.getLength() / info.settings.gauge.scale(), 1, 1);
-                    }
-                    double scale = info.settings.gauge.scale();
-                    m.scale(scale, scale, scale);
+                if (piece.getLength() != -1) {
+                    m.scale(piece.getLength() / info.settings.gauge.scale(), 1, 1);
+                }
+                double scale = info.settings.gauge.scale();
+                m.scale(scale, scale, scale);
 
-                    m.transpose();
-                    FloatBuffer fbm = BufferUtils.createFloatBuffer(16);
-                    fbm.put(new float[]{
-                            (float) m.m00, (float) m.m01, (float) m.m02, (float) m.m03,
-                            (float) m.m10, (float) m.m11, (float) m.m12, (float) m.m13,
-                            (float) m.m20, (float) m.m21, (float) m.m22, (float) m.m23,
-                            (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
-                    });
-                    fbm.flip();
-                    OpenGL.multMatrix(fbm);
-
-
-                    if (piece.getGroups().size() != 0) {
-                        // TODO static
-                        ArrayList<String> groups = new ArrayList<String>();
-                        for (String baseGroup : piece.getGroups()) {
-                            for (String groupName : trackRenderer.model.groups()) {
-                                if (groupName.contains(baseGroup)) {
-                                    groups.add(groupName);
-                                }
-                            }
-                        }
-
-
-                        trackRenderer.drawGroups(groups);
-                    } else {
-                        trackRenderer.draw();
-                    }
-                    try {
-                        m.invert();
-                        fbm = BufferUtils.createFloatBuffer(16);
-                        fbm.put(new float[]{
-                                (float) m.m00, (float) m.m01, (float) m.m02, (float) m.m03,
-                                (float) m.m10, (float) m.m11, (float) m.m12, (float) m.m13,
-                                (float) m.m20, (float) m.m21, (float) m.m22, (float) m.m23,
-                                (float) m.m30, (float) m.m31, (float) m.m32, (float) m.m33
-                        });
-                        fbm.flip();
-                        OpenGL.multMatrix(fbm);
-                    } catch (Exception | Error e) {
-                        // Some weird math happened.  Do this the slow way and reset the matrix
-                        GL11.glPopMatrix();
-                        GL11.glPushMatrix();
-                    }
+                if (piece.getGroups().size() != 0) {
+                    List<String> groups = trackRenderer.model.groups().stream()
+                            .filter(group -> piece.getGroups().stream().anyMatch(group::contains))
+                            .collect(Collectors.toList());
+                    builder.draw(groups, m);
+                } else {
+                    builder.draw(m);
                 }
             }
-            GL11.glEndList();
-            displayLists.put(info.uniqueID, displayList);
+            cached = builder.build();
+            cache.put(info.uniqueID, cached);
         }
 
-        try (OpenGL.With tex = trackRenderer.bindTexture()) {
-            MinecraftClient.startProfiler("dl");
-            GL11.glCallList(displayList);
-            MinecraftClient.endProfiler();
+        MinecraftClient.startProfiler("irTrackModel");
+        try (OpenGL.With tex = trackRenderer.bindTexture(); VBO.BoundVBO vbo = cached.bind()) {
+            vbo.draw();
         }
+        MinecraftClient.endProfiler();
     }
 }

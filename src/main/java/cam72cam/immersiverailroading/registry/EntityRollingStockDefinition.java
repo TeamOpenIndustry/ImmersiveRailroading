@@ -131,15 +131,15 @@ public abstract class EntityRollingStockDefinition {
             internal_inv_scale = Gauge.STANDARD / recommended_gauge.value();
         }
 
-        model = new OBJModel(new Identifier(data.get("model").getAsString()), darken, internal_model_scale);
         textureNames = new LinkedHashMap<>();
-        textureNames.put(null, "Default");
+        textureNames.put("", "Default");
         if (data.has("tex_variants")) {
             JsonElement variants = data.get("tex_variants");
             for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
                 textureNames.put(variant.getValue().getAsString(), variant.getKey());
             }
         }
+        model = new OBJModel(new Identifier(data.get("model").getAsString()), darken, internal_model_scale, textureNames.keySet());
 
         Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
         try {
@@ -391,7 +391,7 @@ public abstract class EntityRollingStockDefinition {
 
     void initHeightMap() {
         ImmersiveRailroading.debug("Generating heightmap %s", defID);
-
+/* TODO
         double ratio = 8;
         xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
         zRes = (int) Math.ceil(this.widthBounds * ratio);
@@ -444,10 +444,13 @@ public abstract class EntityRollingStockDefinition {
 
                 partMapCache.put(rc, heightMap);
             }
-        }
+        }*/
     }
 
     public float[][] createHeightMap(EntityBuildableRollingStock stock) {
+        if (1 == 1) {
+            return null;
+        }
         float[][] heightMap = new float[xRes][zRes];
 
 

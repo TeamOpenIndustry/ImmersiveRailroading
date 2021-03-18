@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.render.VBO;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -32,9 +33,10 @@ import cam72cam.immersiverailroading.util.VecUtil;
 
 public class StockModel extends OBJRender {
 	private static final int MALLET_ANGLE_REAR = -45;
+	private VBO.BoundVBO bound = null; // TODO this kinda sucks
 
-	public StockModel(OBJModel objModel, Collection<String> textureNames) {
-		super(objModel, textureNames, ConfigGraphics.textureCacheSeconds);
+	public StockModel(OBJModel objModel) {
+		super(objModel, ConfigGraphics.textureCacheSeconds);
 	}
 
 	private boolean isBuilt;
@@ -63,9 +65,13 @@ public class StockModel extends OBJRender {
 				availComponents.remove(component.type);
 			}
 			MinecraftClient.startProfiler("render");
-			try (OpenGL.With matrix = OpenGL.matrix()) {
-			GL11.glScaled(component.scale, component.scale, component.scale);
-			drawGroups(component.modelIDs);
+			if (component.scale != 1) {
+				try (OpenGL.With matrix = OpenGL.matrix()) {
+					GL11.glScaled(component.scale, component.scale, component.scale);
+					bound.draw(component.modelIDs);
+				}
+			} else {
+				bound.draw(component.modelIDs);
 			}
 			MinecraftClient.endProfiler();
 		}
@@ -81,28 +87,30 @@ public class StockModel extends OBJRender {
 	}
 
 	public void draw(EntityRollingStock stock, float partialTicks) {
+		try (VBO.BoundVBO bound = super.bind()){
+			this.bound = bound;
+			boolean isFarAway = MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > 100;
 
-		boolean isFarAway = MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > 100;
-
-		if (stock instanceof EntityMoveableRollingStock) {
-			EntityMoveableRollingStock mstock = (EntityMoveableRollingStock) stock;
-			this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * mstock.getTickSkew() * partialTicks * 1.1; 
-		} else {
-			this.distanceTraveled = 0;
-		}
-
-		try (OpenGL.With tex = this.bindTexture(stock.getTexture(), isFarAway)) {
-			if (stock instanceof LocomotiveSteam) {
-				drawSteamLocomotive((LocomotiveSteam) stock);
-			} else if (stock instanceof LocomotiveDiesel) {
-				drawDieselLocomotive((LocomotiveDiesel) stock);
-			} else if (stock instanceof EntityMoveableRollingStock) {
-				drawStandardStock((EntityMoveableRollingStock) stock);
+			if (stock instanceof EntityMoveableRollingStock) {
+				EntityMoveableRollingStock mstock = (EntityMoveableRollingStock) stock;
+				this.distanceTraveled = mstock.distanceTraveled + mstock.getCurrentSpeed().minecraft() * mstock.getTickSkew() * partialTicks * 1.1;
 			} else {
-				draw();
+				this.distanceTraveled = 0;
 			}
 
-			drawCargo(stock);
+			try (OpenGL.With tex = this.bindTexture(stock.getTexture(), isFarAway)) {
+				if (stock instanceof LocomotiveSteam) {
+					drawSteamLocomotive((LocomotiveSteam) stock);
+				} else if (stock instanceof LocomotiveDiesel) {
+					drawDieselLocomotive((LocomotiveDiesel) stock);
+				} else if (stock instanceof EntityMoveableRollingStock) {
+					drawStandardStock((EntityMoveableRollingStock) stock);
+				} else {
+					bound.draw();
+				}
+
+				drawCargo(stock);
+			}
 		}
 	}
 	

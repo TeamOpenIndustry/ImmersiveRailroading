@@ -22,7 +22,7 @@ public class RailCastItemRender implements ItemRender.IItemModel {
 	public StandardModel getModel(World world, ItemStack stack) {
 		if (model == null) {
 			try {
-				model = new OBJRender(new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.05f));
+				model = new OBJRender(new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.05f, null));
 				groups = new ArrayList<>();
 
 				for (String groupName : model.model.groups())  {

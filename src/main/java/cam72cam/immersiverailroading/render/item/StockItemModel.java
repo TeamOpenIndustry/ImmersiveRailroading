@@ -53,7 +53,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			System.out.println(stack.getTagCompound());
 			return null;
 		}
-		return data.def.defID + (data.def.getModel().hash + StockRenderCache.getRender(data.def.defID).textures.get(null).hash);
+		return data.def.defID + data.def.getModel().hash;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 
 		// Force upload the VBA here so it's cleared from memory
 		// This slows down the loading process a touch, but dramatically improves memory usage
-		model.createVBA();
+		//REMOVE PROBABLY model.createVBA();
 
 		return new StandardModel().addCustom(() -> {
 			try (

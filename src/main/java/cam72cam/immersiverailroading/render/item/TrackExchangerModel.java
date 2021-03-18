@@ -28,7 +28,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	public StandardModel getModel(World world, ItemStack stack) {
 		if(RENDERER == null){
 			try {
-				RENDERER = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), -0.05f));
+				RENDERER = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), -0.05f, null));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
