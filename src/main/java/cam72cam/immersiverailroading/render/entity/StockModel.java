@@ -297,8 +297,8 @@ public class StockModel extends OBJRender {
 				MultiRenderComponent center = new MultiRenderComponent(wheels).scale(stock.gauge);
 				drawDrivingWheels(stock, wheels);
 				RenderComponent wheel = wheels.get(wheels.size() / 2);
-				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(), false);
-				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR, center.height(), center.center(), wheel.center(), false);
+				drawWalschaerts(stock, "LEFT_REAR", 0 + MALLET_ANGLE_REAR, wheel.height(), center.center(), wheel.center(), false);
+				drawWalschaerts(stock, "RIGHT_REAR", -90 + MALLET_ANGLE_REAR, wheel.height(), center.center(), wheel.center(), false);
 			}
 			break;
 		case CLIMAX:
