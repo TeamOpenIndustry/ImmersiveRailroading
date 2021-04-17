@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -30,24 +30,24 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        frameFront = provider.parse(RenderComponentType.FRONT_FRAME);
-        frameRear = provider.parse(RenderComponentType.REAR_FRAME);
+        frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
+        frameRear = provider.parse(ModelComponentType.REAR_FRAME);
 
         super.parseComponents(provider, def);
 
         components = provider.parse(
-                RenderComponentType.FIREBOX,
-                RenderComponentType.SMOKEBOX,
-                RenderComponentType.PIPING,
-                RenderComponentType.WHISTLE
+                ModelComponentType.FIREBOX,
+                ModelComponentType.SMOKEBOX,
+                ModelComponentType.PIPING,
+                ModelComponentType.WHISTLE
         );
 
         components.addAll(provider.parseAll(
-                RenderComponentType.BOILER_SEGMENT_X
+                ModelComponentType.BOILER_SEGMENT_X
         ));
 
-        provider.parseAll(RenderComponentType.PARTICLE_CHIMNEY_X);
-        provider.parseAll(RenderComponentType.PRESSURE_VALVE_X);
+        provider.parseAll(ModelComponentType.PARTICLE_CHIMNEY_X);
+        provider.parseAll(ModelComponentType.PRESSURE_VALVE_X);
 
         ValveGearType type = ((LocomotiveSteamDefinition) def).getValveGear();
         drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT");

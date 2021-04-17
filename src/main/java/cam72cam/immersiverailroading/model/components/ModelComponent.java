@@ -1,13 +1,13 @@
 package cam72cam.immersiverailroading.model.components;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
 
 import java.util.Set;
 
 public class ModelComponent {
-    public final RenderComponentType type;
+    public final ModelComponentType type;
     public final String pos;
     public final Integer id;
 
@@ -17,7 +17,7 @@ public class ModelComponent {
     public final Vec3d center;
     public final boolean wooden;
 
-    public ModelComponent(RenderComponentType type, String pos, Integer id, OBJModel model, Set<String> modelIDs) {
+    public ModelComponent(ModelComponentType type, String pos, Integer id, OBJModel model, Set<String> modelIDs) {
         this.type = type;
         this.pos = pos;
         this.id = id;

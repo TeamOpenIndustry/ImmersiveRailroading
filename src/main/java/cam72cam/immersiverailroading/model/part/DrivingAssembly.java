@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -24,8 +24,8 @@ public class DrivingAssembly {
         ValveGear left = ValveGear.get(wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)));
 
         ModelComponent steamChest = pos == null ?
-                provider.parse(RenderComponentType.STEAM_CHEST) :
-                provider.parse(RenderComponentType.STEAM_CHEST_POS, pos);
+                provider.parse(ModelComponentType.STEAM_CHEST) :
+                provider.parse(ModelComponentType.STEAM_CHEST_POS, pos);
 
         return new DrivingAssembly(wheels, right, center, left, steamChest);
     }

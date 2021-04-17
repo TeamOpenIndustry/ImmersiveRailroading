@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -11,7 +11,7 @@ public class Cargo {
     private final List<ModelComponent> cargoLoads;
 
     public static Cargo get(ComponentProvider provider) {
-        List<ModelComponent> cargoLoads = provider.parseAll(RenderComponentType.CARGO_FILL_X);
+        List<ModelComponent> cargoLoads = provider.parseAll(ModelComponentType.CARGO_FILL_X);
         return cargoLoads.isEmpty() ? null : new Cargo(cargoLoads);
     }
 

@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.RealBB;
@@ -23,13 +23,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -70,7 +67,7 @@ public abstract class EntityRollingStockDefinition {
     private double passengerCompartmentWidth;
     private int weight;
     private int maxPassengers;
-    private Map<RenderComponentType, List<ModelComponent>> renderComponents;
+    private Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private List<ItemComponentType> itemComponents;
     private Map<ModelComponent, float[][]> partMapCache = new HashMap<>();
     private int xRes;
@@ -109,7 +106,7 @@ public abstract class EntityRollingStockDefinition {
         ArrayList<String> heightGroups = new ArrayList<>();
         for (String group : model.groups()) {
             boolean ignore = false;
-            for (RenderComponentType rct : RenderComponentType.values()) {
+            for (ModelComponentType rct : ModelComponentType.values()) {
                 if (rct.collisionsEnabled) {
                     continue;
                 }
@@ -251,14 +248,14 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public ModelComponent getComponent(RenderComponentType name) {
+    public ModelComponent getComponent(ModelComponentType name) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
         return renderComponents.get(name).get(0);
     }
 
-    public List<ModelComponent> getComponents(RenderComponentType name) {
+    public List<ModelComponent> getComponents(ModelComponentType name) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
@@ -384,7 +381,7 @@ public abstract class EntityRollingStockDefinition {
         float[][] heightMap = new float[xRes][zRes];
 
 
-        List<RenderComponentType> availComponents = new ArrayList<>();
+        List<ModelComponentType> availComponents = new ArrayList<>();
         for (ItemComponentType item : stock.getItemComponents()) {
             availComponents.addAll(item.render);
         }
@@ -397,7 +394,7 @@ public abstract class EntityRollingStockDefinition {
 
                 if (availComponents.contains(rc.type)) {
                     availComponents.remove(rc.type);
-                } else if (rc.type == RenderComponentType.REMAINING && stock.isBuilt()) {
+                } else if (rc.type == ModelComponentType.REMAINING && stock.isBuilt()) {
                     //pass
                 } else {
                     continue;

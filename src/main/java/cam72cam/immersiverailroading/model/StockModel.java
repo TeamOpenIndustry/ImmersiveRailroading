@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.model.part.Bogey;
 import cam72cam.immersiverailroading.model.part.Frame;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.part.TrackFollower;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
@@ -38,13 +38,13 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
         ComponentProvider provider = new ComponentProvider(this);
         parseComponents(provider, def);
-        this.remaining = provider.parse(RenderComponentType.REMAINING);
+        this.remaining = provider.parse(ModelComponentType.REMAINING);
         this.allComponents = provider.components();
     }
 
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         this.frame = new Frame(provider);
-        this.shell = provider.parse(RenderComponentType.SHELL);
+        this.shell = provider.parse(ModelComponentType.SHELL);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
 
@@ -63,7 +63,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     public final void render(EntityMoveableRollingStock stock, float partialTicks) {
         OBJRender render = StockRenderCache.getRender(def.defID);
 
-        List<RenderComponentType> available = stock.isBuilt() ? null : stock.getItemComponents()
+        List<ModelComponentType> available = stock.isBuilt() ? null : stock.getItemComponents()
                 .stream().flatMap(x -> x.render.stream())
                 .collect(Collectors.toList());
 

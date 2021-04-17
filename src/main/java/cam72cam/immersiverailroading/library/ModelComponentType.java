@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.library;
 
-public enum RenderComponentType {
+public enum ModelComponentType {
 	// STANDARD
 	BOGEY_POS_WHEEL_X("BOGEY_#POS#_WHEEL_#ID#"),
 	BOGEY_POS("BOGEY_#POS#"),
@@ -82,10 +82,10 @@ public enum RenderComponentType {
 	public final String regex;
 	public final boolean collisionsEnabled;
 	
-	RenderComponentType(String regex) {
+	ModelComponentType(String regex) {
 		this(regex, true);
 	}
-	RenderComponentType(String regex, boolean collide) {
+	ModelComponentType(String regex, boolean collide) {
 		this.regex = ".*" + regex + ".*";
 		this.collisionsEnabled = collide;
 	}

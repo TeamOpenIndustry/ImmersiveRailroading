@@ -9,90 +9,90 @@ import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.text.TextUtil;
 
 public enum ItemComponentType {
-	FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRAME),
+	FRAME(AssemblyStep.FRAME, CraftingType.CASTING, ModelComponentType.FRAME),
 	
 	// MALLET
-	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRONT_FRAME),
-	REAR_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.REAR_FRAME),
+	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, ModelComponentType.FRONT_FRAME),
+	REAR_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, ModelComponentType.REAR_FRAME),
 
 	// STANDARD
-	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS_WHEEL_X),
-	BOGEY(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS),
-	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_FRONT_WHEEL_X),
-	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_FRONT),
-	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_REAR_WHEEL_X),
-	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_REAR),
-	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.FRAME_WHEEL_X),
+	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.BOGEY_POS_WHEEL_X),
+	BOGEY(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.BOGEY_POS),
+	BOGEY_FRONT_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.BOGEY_FRONT_WHEEL_X),
+	BOGEY_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.BOGEY_FRONT),
+	BOGEY_REAR_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.BOGEY_REAR_WHEEL_X),
+	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.BOGEY_REAR),
+	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.FRAME_WHEEL_X),
 	
-	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, RenderComponentType.SHELL),
+	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.SHELL),
 	
 	// LOCOMOTIVE
-	CAB(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, RenderComponentType.CAB),
-	BELL(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, RenderComponentType.BELL),
-	WHISTLE(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, RenderComponentType.WHISTLE),
-	HORN(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, RenderComponentType.HORN),
+	CAB(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.CAB),
+	BELL(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, ModelComponentType.BELL),
+	WHISTLE(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, ModelComponentType.WHISTLE),
+	HORN(AssemblyStep.SHELL, CraftingType.PLATE_SMALL, ModelComponentType.HORN),
 	
 	// DIESEL
-	FUEL_TANK(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FUEL_TANK),
-	ALTERNATOR(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ALTERNATOR),
-	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.ENGINE_BLOCK),
-	CRANKSHAFT(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.CRANKSHAFT),
-	PISTON(AssemblyStep.SHELL, CraftingType.CASTING_HAMMER, RenderComponentType.PISTON_X),
-	FAN(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FAN_X),
-	DRIVE_SHAFT(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.DRIVE_SHAFT_X),
-	GEARBOX(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.GEARBOX),
-	FLUID_COUPLING(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FLUID_COUPLING),
-	FINAL_DRIVE(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, RenderComponentType.FINAL_DRIVE),
-	TORQUE_CONVERTER(AssemblyStep.SHELL, CraftingType.CASTING, RenderComponentType.TORQUE_CONVERTER),
+	FUEL_TANK(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, ModelComponentType.FUEL_TANK),
+	ALTERNATOR(AssemblyStep.SHELL, CraftingType.CASTING, ModelComponentType.ALTERNATOR),
+	ENGINE_BLOCK(AssemblyStep.SHELL, CraftingType.CASTING, ModelComponentType.ENGINE_BLOCK),
+	CRANKSHAFT(AssemblyStep.SHELL, CraftingType.CASTING, ModelComponentType.CRANKSHAFT),
+	PISTON(AssemblyStep.SHELL, CraftingType.CASTING_HAMMER, ModelComponentType.PISTON_X),
+	FAN(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, ModelComponentType.FAN_X),
+	DRIVE_SHAFT(AssemblyStep.SHELL, CraftingType.CASTING, ModelComponentType.DRIVE_SHAFT_X),
+	GEARBOX(AssemblyStep.SHELL, CraftingType.CASTING, ModelComponentType.GEARBOX),
+	FLUID_COUPLING(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, ModelComponentType.FLUID_COUPLING),
+	FINAL_DRIVE(AssemblyStep.SHELL, CraftingType.PLATE_MEDIUM, ModelComponentType.FINAL_DRIVE),
+	TORQUE_CONVERTER(AssemblyStep.SHELL, CraftingType.CASTING, ModelComponentType.TORQUE_CONVERTER),
 	
 	//STEAM
-	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
-	SMOKEBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.SMOKEBOX),
-	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST),
-	STEAM_CHEST_POS(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_POS),
-	BOILER_SEGMENT(AssemblyStep.BOILER, CraftingType.PLATE_BOILER, RenderComponentType.BOILER_SEGMENT_X),
-	PIPING(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.PIPING),
+	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, ModelComponentType.FIREBOX),
+	SMOKEBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, ModelComponentType.SMOKEBOX),
+	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.CASTING, ModelComponentType.STEAM_CHEST),
+	STEAM_CHEST_POS(AssemblyStep.FRAME, CraftingType.CASTING, ModelComponentType.STEAM_CHEST_POS),
+	BOILER_SEGMENT(AssemblyStep.BOILER, CraftingType.PLATE_BOILER, ModelComponentType.BOILER_SEGMENT_X),
+	PIPING(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, ModelComponentType.PIPING),
 	
 	// WALCHERTS
-	WHEEL_DRIVER(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_X),
-	WHEEL_DRIVER_POS(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_POS_X), // MALLET
+	WHEEL_DRIVER(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.WHEEL_DRIVER_X),
+	WHEEL_DRIVER_POS(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.WHEEL_DRIVER_POS_X), // MALLET
 
-	CYLINDER(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, RenderComponentType.CYLINDER_SIDE),
-	SIDE_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.SIDE_ROD_SIDE),
-	MAIN_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.MAIN_ROD_SIDE),
-	PISTON_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.PISTON_ROD_SIDE),
+	CYLINDER(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, ModelComponentType.CYLINDER_SIDE),
+	SIDE_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.SIDE_ROD_SIDE),
+	MAIN_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.MAIN_ROD_SIDE),
+	PISTON_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.PISTON_ROD_SIDE),
 	
-	UNION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.UNION_LINK_SIDE),
-	COMBINATION_LEVER(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.COMBINATION_LEVER_SIDE),
-	VALVE_STEM(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.VALVE_STEM_SIDE),
-	RADIUS_BAR(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.RADIUS_BAR_SIDE),
-	EXPANSION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.EXPANSION_LINK_SIDE),
-	ECCENTRIC_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.ECCENTRIC_ROD_SIDE),
-	ECCENTRIC_CRANK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.ECCENTRIC_CRANK_SIDE),
-	REVERSING_ARM(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.REVERSING_ARM_SIDE),
-	LIFTING_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.LIFTING_LINK_SIDE),
-	REACH_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.REACH_ROD_SIDE),
+	UNION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.UNION_LINK_SIDE),
+	COMBINATION_LEVER(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.COMBINATION_LEVER_SIDE),
+	VALVE_STEM(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.VALVE_STEM_SIDE),
+	RADIUS_BAR(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.RADIUS_BAR_SIDE),
+	EXPANSION_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.EXPANSION_LINK_SIDE),
+	ECCENTRIC_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.ECCENTRIC_ROD_SIDE),
+	ECCENTRIC_CRANK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.ECCENTRIC_CRANK_SIDE),
+	REVERSING_ARM(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.REVERSING_ARM_SIDE),
+	LIFTING_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.LIFTING_LINK_SIDE),
+	REACH_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.REACH_ROD_SIDE),
 	
 	// LEGACY, how do we depricate this??
 	WALCHERTS_LINKAGE(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, 
-			RenderComponentType.UNION_LINK_SIDE,
-			RenderComponentType.COMBINATION_LEVER_SIDE,
-			RenderComponentType.VALVE_STEM_SIDE,
-			RenderComponentType.RADIUS_BAR_SIDE,
-			RenderComponentType.EXPANSION_LINK_SIDE,
-			RenderComponentType.ECCENTRIC_ROD_SIDE,
-			RenderComponentType.ECCENTRIC_CRANK_SIDE,
-			RenderComponentType.REVERSING_ARM_SIDE,
-			RenderComponentType.LIFTING_LINK_SIDE,
-			RenderComponentType.REACH_ROD_SIDE
+			ModelComponentType.UNION_LINK_SIDE,
+			ModelComponentType.COMBINATION_LEVER_SIDE,
+			ModelComponentType.VALVE_STEM_SIDE,
+			ModelComponentType.RADIUS_BAR_SIDE,
+			ModelComponentType.EXPANSION_LINK_SIDE,
+			ModelComponentType.ECCENTRIC_ROD_SIDE,
+			ModelComponentType.ECCENTRIC_CRANK_SIDE,
+			ModelComponentType.REVERSING_ARM_SIDE,
+			ModelComponentType.LIFTING_LINK_SIDE,
+			ModelComponentType.REACH_ROD_SIDE
 	),
 	;
 	
 	public final AssemblyStep step;
-	public final List<RenderComponentType> render;
+	public final List<ModelComponentType> render;
 	public final CraftingType crafting;
 
-	ItemComponentType(AssemblyStep step, CraftingType crafting, RenderComponentType ... render) {
+	ItemComponentType(AssemblyStep step, CraftingType crafting, ModelComponentType... render) {
 		this.crafting = crafting;
 		this.step = step;
 		this.render = Arrays.asList(render);
@@ -113,9 +113,9 @@ public enum ItemComponentType {
 		}
 	}
 
-	public static ItemComponentType from(RenderComponentType renderComponent) {
+	public static ItemComponentType from(ModelComponentType renderComponent) {
 		for (ItemComponentType item : values()) {
-			for (RenderComponentType render : item.render) {
+			for (ModelComponentType render : item.render) {
 				if (render == renderComponent) {
 					return item;
 				}

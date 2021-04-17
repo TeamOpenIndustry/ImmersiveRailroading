@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.mod.math.Vec3d;
@@ -14,8 +14,8 @@ public class DrivingWheels {
 
     public static DrivingWheels get(ComponentProvider provider, String pos) {
         List<Wheel> wheels = (pos == null ?
-                provider.parseAll(RenderComponentType.WHEEL_DRIVER_X) :
-                provider.parseAll(RenderComponentType.WHEEL_DRIVER_POS_X, pos)
+                provider.parseAll(ModelComponentType.WHEEL_DRIVER_X) :
+                provider.parseAll(ModelComponentType.WHEEL_DRIVER_POS_X, pos)
         ).stream().map(Wheel::new).collect(Collectors.toList());
 
         return wheels.isEmpty() ? null : new DrivingWheels(wheels);

@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -26,18 +26,18 @@ public class WalschaertsValveGear implements ValveGear {
             return null;
         }
 
-        ModelComponent crossHead = provider.parse(RenderComponentType.UNION_LINK_SIDE, pos);
-        ModelComponent combinationLever = provider.parse(RenderComponentType.COMBINATION_LEVER_SIDE, pos);
-        ModelComponent returnCrank = provider.parse(RenderComponentType.ECCENTRIC_CRANK_SIDE, pos);
-        ModelComponent returnCrankRod = provider.parse(RenderComponentType.ECCENTRIC_ROD_SIDE, pos);
-        ModelComponent slottedLink = provider.parse(RenderComponentType.EXPANSION_LINK_SIDE, pos);
-        ModelComponent radiusBar = provider.parse(RenderComponentType.RADIUS_BAR_SIDE, pos);
+        ModelComponent crossHead = provider.parse(ModelComponentType.UNION_LINK_SIDE, pos);
+        ModelComponent combinationLever = provider.parse(ModelComponentType.COMBINATION_LEVER_SIDE, pos);
+        ModelComponent returnCrank = provider.parse(ModelComponentType.ECCENTRIC_CRANK_SIDE, pos);
+        ModelComponent returnCrankRod = provider.parse(ModelComponentType.ECCENTRIC_ROD_SIDE, pos);
+        ModelComponent slottedLink = provider.parse(ModelComponentType.EXPANSION_LINK_SIDE, pos);
+        ModelComponent radiusBar = provider.parse(ModelComponentType.RADIUS_BAR_SIDE, pos);
 
         List<ModelComponent> todo = provider.parse(pos,
-                RenderComponentType.VALVE_STEM_SIDE,
-                RenderComponentType.REVERSING_ARM_SIDE,
-                RenderComponentType.LIFTING_LINK_SIDE,
-                RenderComponentType.REACH_ROD_SIDE
+                ModelComponentType.VALVE_STEM_SIDE,
+                ModelComponentType.REVERSING_ARM_SIDE,
+                ModelComponentType.LIFTING_LINK_SIDE,
+                ModelComponentType.REACH_ROD_SIDE
         );
 
         return crossHead != null && combinationLever != null && returnCrank != null && returnCrankRod != null && slottedLink != null && radiusBar != null ?

@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -21,10 +21,10 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         super.parseComponents(provider, def);
 
         components = provider.parse(
-                RenderComponentType.CAB,
-                RenderComponentType.BELL,
-                RenderComponentType.WHISTLE,
-                RenderComponentType.HORN
+                ModelComponentType.CAB,
+                ModelComponentType.BELL,
+                ModelComponentType.WHISTLE,
+                ModelComponentType.HORN
         );
     }
 

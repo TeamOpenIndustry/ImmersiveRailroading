@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.model.components;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.mod.model.obj.OBJModel;
 
 import java.util.*;
@@ -28,7 +28,7 @@ public class ComponentProvider {
         return modelIDs;
     }
 
-    public ModelComponent parse(RenderComponentType type) {
+    public ModelComponent parse(ModelComponentType type) {
         Set<String> ids = modelIDs(type.regex);
         if (!ids.isEmpty()) {
             ModelComponent component = new ModelComponent(type, null, null, model, ids);
@@ -38,11 +38,11 @@ public class ComponentProvider {
         return null;
     }
 
-    public List<ModelComponent> parse(RenderComponentType... types) {
+    public List<ModelComponent> parse(ModelComponentType... types) {
         return Arrays.stream(types).map(this::parse).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public ModelComponent parse(RenderComponentType type, String pos) {
+    public ModelComponent parse(ModelComponentType type, String pos) {
         Set<String> ids = modelIDs(type.regex.replace("#POS#", pos).replace("#SIDE#", pos));
         if (!ids.isEmpty()) {
             ModelComponent component = new ModelComponent(type, pos, null, model, ids);
@@ -52,11 +52,11 @@ public class ComponentProvider {
         return null;
     }
 
-    public List<ModelComponent> parse(String pos, RenderComponentType... types) {
+    public List<ModelComponent> parse(String pos, ModelComponentType... types) {
         return Arrays.stream(types).map(type -> parse(type, pos)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public List<ModelComponent> parseAll(RenderComponentType type) {
+    public List<ModelComponent> parseAll(ModelComponentType type) {
         List<ModelComponent> components = new ArrayList<>();
         for (int i = 100; i >= 0; i--) {
             Set<String> ids = modelIDs(type.regex.replace("#ID#", i + ""));
@@ -69,11 +69,11 @@ public class ComponentProvider {
         return components;
     }
 
-    public List<ModelComponent> parseAll(RenderComponentType... types) {
+    public List<ModelComponent> parseAll(ModelComponentType... types) {
         return Arrays.stream(types).flatMap(type -> parseAll(type).stream()).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public List<ModelComponent> parseAll(RenderComponentType type, String pos) {
+    public List<ModelComponent> parseAll(ModelComponentType type, String pos) {
         List<ModelComponent> components = new ArrayList<>();
         for (int i = 100; i >= 0; i--) {
             Set<String> ids = modelIDs(type.regex.replace("#ID#", i + "").replace("#POS#", pos).replace("#SIDE#", pos));

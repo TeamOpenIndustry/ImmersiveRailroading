@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -13,10 +13,10 @@ public class Frame {
     private final List<Wheel> wheels;
 
     public Frame(ComponentProvider provider) {
-        this.wheels = provider.parseAll(RenderComponentType.FRAME_WHEEL_X)
+        this.wheels = provider.parseAll(ModelComponentType.FRAME_WHEEL_X)
                 .stream().map(Wheel::new).collect(Collectors.toList());
 
-        this.frame = provider.parse(RenderComponentType.FRAME);
+        this.frame = provider.parse(ModelComponentType.FRAME);
         if (frame == null) {
             throw new RuntimeException("Invalid model: Missing FRAME!");
         }

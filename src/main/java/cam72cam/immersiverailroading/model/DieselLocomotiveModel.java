@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -22,25 +22,25 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         super.parseComponents(provider, def);
 
         components = provider.parse(
-                RenderComponentType.FUEL_TANK,
-                RenderComponentType.ALTERNATOR,
-                RenderComponentType.ENGINE_BLOCK,
-                RenderComponentType.CRANKSHAFT,
-                RenderComponentType.GEARBOX,
-                RenderComponentType.FLUID_COUPLING,
-                RenderComponentType.FINAL_DRIVE,
-                RenderComponentType.TORQUE_CONVERTER
+                ModelComponentType.FUEL_TANK,
+                ModelComponentType.ALTERNATOR,
+                ModelComponentType.ENGINE_BLOCK,
+                ModelComponentType.CRANKSHAFT,
+                ModelComponentType.GEARBOX,
+                ModelComponentType.FLUID_COUPLING,
+                ModelComponentType.FINAL_DRIVE,
+                ModelComponentType.TORQUE_CONVERTER
         );
 
         components.addAll(
                 provider.parseAll(
-                        RenderComponentType.PISTON_X,
-                        RenderComponentType.FAN_X,
-                        RenderComponentType.DRIVE_SHAFT_X
+                        ModelComponentType.PISTON_X,
+                        ModelComponentType.FAN_X,
+                        ModelComponentType.DRIVE_SHAFT_X
                 )
         );
 
-        exhaust = provider.parseAll(RenderComponentType.DIESEL_EXHAUST_X);
+        exhaust = provider.parseAll(ModelComponentType.DIESEL_EXHAUST_X);
     }
 
     @Override

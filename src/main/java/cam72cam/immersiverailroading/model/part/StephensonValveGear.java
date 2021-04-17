@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -16,10 +16,10 @@ public class StephensonValveGear implements ValveGear {
     protected final ModelComponent cylinder;
 
     public static StephensonValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos) {
-        ModelComponent drivingRod = provider.parse(RenderComponentType.MAIN_ROD_SIDE, pos);
-        ModelComponent connectingRod = provider.parse(RenderComponentType.SIDE_ROD_SIDE, pos);
-        ModelComponent pistonRod = provider.parse(RenderComponentType.PISTON_ROD_SIDE, pos);
-        ModelComponent cylinder = provider.parse(RenderComponentType.CYLINDER_SIDE, pos);
+        ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
+        ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
+        ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
+        ModelComponent cylinder = provider.parse(ModelComponentType.CYLINDER_SIDE, pos);
         return drivingRod != null && connectingRod != null && pistonRod != null ?
                 new StephensonValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder) : null;
     }

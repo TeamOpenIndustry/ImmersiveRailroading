@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.mod.item.ItemStack;
@@ -34,9 +34,9 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
         OBJRender renderer = StockRenderCache.getRender(data.def.defID);
         ArrayList<String> groups = new ArrayList<>();
 
-        for (RenderComponentType r : data.componentType.render) {
+        for (ModelComponentType r : data.componentType.render) {
             ModelComponent comp = data.def.getComponent(r);
-            if (comp == null || r == RenderComponentType.CARGO_FILL_X) {
+            if (comp == null || r == ModelComponentType.CARGO_FILL_X) {
                 continue;
             }
             groups.addAll(comp.modelIDs);

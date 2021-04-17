@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.RenderComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
@@ -283,7 +283,7 @@ public class LocomotiveSteam extends Locomotive {
 			
 			Vec3d fakeMotion = this.getVelocity();
 			
-			List<ModelComponent> smokes = this.getDefinition().getComponents(RenderComponentType.PARTICLE_CHIMNEY_X);
+			List<ModelComponent> smokes = this.getDefinition().getComponents(ModelComponentType.PARTICLE_CHIMNEY_X);
 			if (smokes != null && ConfigGraphics.particlesEnabled) {
 				phase = getPhase(4, 0);
 				for (ModelComponent smoke : smokes) {
@@ -322,7 +322,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 			}
 			
-			List<ModelComponent> whistles = this.getDefinition().getComponents(RenderComponentType.WHISTLE);
+			List<ModelComponent> whistles = this.getDefinition().getComponents(ModelComponentType.WHISTLE);
 			if (	whistles != null &&
 					(hornTime != 0 || whistle != null && whistle.isPlaying()) &&
 					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
@@ -343,7 +343,7 @@ public class LocomotiveSteam extends Locomotive {
 					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
 				}
 			}
-			List<ModelComponent> pistons = this.getDefinition().getComponents(RenderComponentType.PISTON_ROD_SIDE);
+			List<ModelComponent> pistons = this.getDefinition().getComponents(ModelComponentType.PISTON_ROD_SIDE);
 			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
 			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
 				for (ModelComponent piston : pistons) {
@@ -441,7 +441,7 @@ public class LocomotiveSteam extends Locomotive {
 				}
 			}
 			
-			List<ModelComponent> steams = this.getDefinition().getComponents(RenderComponentType.PRESSURE_VALVE_X);
+			List<ModelComponent> steams = this.getDefinition().getComponents(ModelComponentType.PRESSURE_VALVE_X);
 			if (steams != null && (pressureValve && Config.isFuelRequired(gauge))) {
 				if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
 					if (!pressure.isPlaying()) {
