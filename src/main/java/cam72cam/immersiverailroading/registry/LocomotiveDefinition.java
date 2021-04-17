@@ -3,13 +3,12 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.library.RenderComponentType;
-import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.model.LocomotiveModel;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.Speed;
 import com.google.gson.JsonObject;
 
 import java.util.List;
-import java.util.Set;
 
 public abstract class LocomotiveDefinition extends FreightDefinition {
     public boolean toggleBell;
@@ -52,15 +51,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     }
 
     @Override
-    protected Set<String> parseComponents() {
-        Set<String> groups = super.parseComponents();
-
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.CAB, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.BELL, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.WHISTLE, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.HORN, this, groups), true);
-
-        return groups;
+    protected StockModel<?> createModel() throws Exception {
+        return new LocomotiveModel<>(this);
     }
 
     @Override

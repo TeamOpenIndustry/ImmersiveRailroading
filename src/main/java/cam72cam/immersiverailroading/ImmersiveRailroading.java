@@ -8,14 +8,13 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
-import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
@@ -139,15 +138,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ItemRender.register(IRItems.ITEM_MANUAL, new Identifier(MODID, "items/engineerslexicon"));
 				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, new TrackExchangerModel());
 
-				IEntityRender<EntityRollingStock> stockRender = (entity, partialTicks) -> {
-					try (
-						OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, true);
-						OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
-					) {
-						StockModel renderer = StockRenderCache.getRender(entity.getDefinitionID());
-						if (renderer != null) {
-							renderer.draw(entity, partialTicks);
-						}
+				IEntityRender<EntityMoveableRollingStock> stockRender = (entity, partialTicks) -> {
+					StockModel<?> renderer = entity.getDefinition().getModel();
+					if (renderer != null) {
+						renderer.render(entity, partialTicks);
 					}
 				};
 				EntityRenderer.register(LocomotiveSteam.class, stockRender);
@@ -202,13 +196,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 	@Override
 	public void serverEvent(ModEvent event) {
-		switch (event) {
-			case SETUP:
-				for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
-					def.clearModel();
-				}
-				break;
-		}
 	}
 
 	public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {

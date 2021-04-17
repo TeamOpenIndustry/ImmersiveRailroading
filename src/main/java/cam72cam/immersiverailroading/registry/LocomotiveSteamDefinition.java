@@ -3,16 +3,12 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.RenderComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
-import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.model.SteamLocomotiveModel;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private static Identifier default_whistle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
@@ -102,107 +98,13 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected boolean unifiedBogies() {
-        return false;
+    protected StockModel<?> createModel() throws Exception {
+        return new SteamLocomotiveModel(this);
     }
 
     @Override
-    protected Set<String> parseComponents() {
-        Set<String> groups = super.parseComponents();
-
-        switch (this.valveGear) {
-            case STEPHENSON:
-            case WALSCHAERTS:
-            case TRI_WALSCHAERTS:
-            case HIDDEN:
-                for (int i = 100; i >= 0; i--) {
-                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_X, this, groups, i), true);
-                }
-                break;
-            case T1:
-            case GARRAT:
-            case MALLET_WALSCHAERTS:
-                for (int i = 100; i >= 0; i--) {
-                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_FRONT_X, this, groups, i), true);
-                    addComponentIfExists(RenderComponent.parseID(RenderComponentType.WHEEL_DRIVER_REAR_X, this, groups, i), true);
-                }
-                addComponentIfExists(RenderComponent.parse(RenderComponentType.FRONT_LOCOMOTIVE, this, groups), true);
-                break;
-            case CLIMAX:
-                break;
-            case SHAY:
-                break;
-        }
-
-
-        for (int i = 100; i >= 0; i--) {
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOILER_SEGMENT_X, this, groups, i), true);
-        }
-
-        for (int i = 100; i >= 0; i--) {
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.PARTICLE_CHIMNEY_X, this, groups, i), false);
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.PRESSURE_VALVE_X, this, groups, i), false);
-        }
-
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.FIREBOX, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.SMOKEBOX, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST_FRONT, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST_REAR, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.STEAM_CHEST, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.PIPING, this, groups), true);
-
-
-        List<String> sides = new ArrayList<>();
-
-        switch (this.valveGear) {
-            case TRI_WALSCHAERTS:
-                sides.add("CENTER");
-            case STEPHENSON:
-            case WALSCHAERTS:
-                sides.add("RIGHT");
-                sides.add("LEFT");
-            case T1:
-            case GARRAT:
-            case MALLET_WALSCHAERTS:
-                if (sides.size() == 0) {
-                    sides.add("LEFT_FRONT");
-                    sides.add("RIGHT_FRONT");
-                    sides.add("LEFT_REAR");
-                    sides.add("RIGHT_REAR");
-                }
-
-                RenderComponentType[] components = new RenderComponentType[]{
-                        RenderComponentType.SIDE_ROD_SIDE,
-                        RenderComponentType.MAIN_ROD_SIDE,
-                        RenderComponentType.PISTON_ROD_SIDE,
-                        RenderComponentType.CYLINDER_SIDE,
-
-                        RenderComponentType.UNION_LINK_SIDE,
-                        RenderComponentType.COMBINATION_LEVER_SIDE,
-                        RenderComponentType.VALVE_STEM_SIDE,
-                        RenderComponentType.RADIUS_BAR_SIDE,
-                        RenderComponentType.EXPANSION_LINK_SIDE,
-                        RenderComponentType.ECCENTRIC_ROD_SIDE,
-                        RenderComponentType.ECCENTRIC_CRANK_SIDE,
-                        RenderComponentType.REVERSING_ARM_SIDE,
-                        RenderComponentType.LIFTING_LINK_SIDE,
-                        RenderComponentType.REACH_ROD_SIDE,
-                };
-
-                for (String side : sides) {
-                    for (RenderComponentType name : components) {
-                        addComponentIfExists(RenderComponent.parseSide(name, this, groups, side), true);
-                    }
-                }
-            case CLIMAX:
-                break;
-            case SHAY:
-                break;
-            case HIDDEN:
-                break;
-        }
-
-        return groups;
+    public SteamLocomotiveModel getModel() {
+        return (SteamLocomotiveModel) super.getModel();
     }
 
     public FluidQuantity getTankCapacity(Gauge gauge) {

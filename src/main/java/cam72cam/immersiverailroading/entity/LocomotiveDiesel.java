@@ -6,8 +6,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.RenderComponentType;
-import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -20,7 +19,6 @@ import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
-import cam72cam.mod.serialization.TagCompound;
 
 import java.util.List;
 
@@ -227,12 +225,12 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 			
 			Vec3d fakeMotion = this.getVelocity();
-			
-			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X);
+
+			List<ModelComponent> exhausts = this.getDefinition().getModel().getExhaust();
 			float throttle = Math.abs(this.getThrottle()) + 0.05f;
 			if (exhausts != null && isRunning()) {
-				for (RenderComponent exhaust : exhausts) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(exhaust.center().scale(gauge.scale()), this.getRotationYaw() + 180));
+				for (ModelComponent exhaust : exhausts) {
+					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(exhaust.center.scale(gauge.scale()), this.getRotationYaw() + 180));
 					particlePos = particlePos.subtract(fakeMotion);
 
 					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;

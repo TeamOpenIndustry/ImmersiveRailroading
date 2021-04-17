@@ -9,11 +9,11 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.RenderComponentType;
-import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.model.StockModel;
+import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapped;
@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -47,12 +48,14 @@ public abstract class EntityRollingStockDefinition {
     public Identifier wheel_sound;
     public Identifier clackFront;
     public Identifier clackRear;
-    double internal_model_scale;
+    public double internal_model_scale;
     double internal_inv_scale;
     private String name = "Unknown";
     private String modelerName = "N/A";
     private String packName = "N/A";
-    private OBJModel model;
+    public float darken;
+    public Identifier modelLoc;
+    private StockModel<?> model;
     private Vec3d passengerCenter = new Vec3d(0, 0, 0);
     private float bogeyFront;
     private float bogeyRear;
@@ -67,27 +70,64 @@ public abstract class EntityRollingStockDefinition {
     private double passengerCompartmentWidth;
     private int weight;
     private int maxPassengers;
-    private Map<RenderComponentType, List<RenderComponent>> renderComponents;
-    private ArrayList<ItemComponentType> itemComponents;
-    private Map<RenderComponent, float[][]> partMapCache = new HashMap<>();
+    private Map<RenderComponentType, List<ModelComponent>> renderComponents;
+    private List<ItemComponentType> itemComponents;
+    private Map<ModelComponent, float[][]> partMapCache = new HashMap<>();
     private int xRes;
     private int zRes;
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
         this.defID = defID;
+
+        this.renderComponents = new HashMap<>();
+        this.itemComponents = new ArrayList<>();
+
         if (data == null) {
-            // USED ONLY RIGHT BEFORE REMOVING UNKNOWN STOCK
-
-            renderComponents = new HashMap<>();
-            itemComponents = new ArrayList<>();
-
             return;
         }
 
         parseJson(data);
 
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.REMAINING, this, parseComponents()), true);
+        this.model = createModel();
+        for (ModelComponent component : model.allComponents) {
+            renderComponents.computeIfAbsent(component.type, v -> new ArrayList<>())
+                    .add(0, component);
+        }
+
+        itemComponents = model.allComponents.stream()
+                .map(component -> component.type)
+                .map(ItemComponentType::from)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        frontBounds = -model.minOfGroup(model.groups()).x + couplerOffsetFront;
+        rearBounds = model.maxOfGroup(model.groups()).x + couplerOffsetRear;
+        widthBounds = model.widthOfGroups(model.groups());
+
+        // Bad hack for height bounds
+        ArrayList<String> heightGroups = new ArrayList<>();
+        for (String group : model.groups()) {
+            boolean ignore = false;
+            for (RenderComponentType rct : RenderComponentType.values()) {
+                if (rct.collisionsEnabled) {
+                    continue;
+                }
+                for (int i = 0; i < 10; i++) {
+                    if (Pattern.matches(rct.regex.replace("#ID#", "" + i), group)) {
+                        ignore = true;
+                        break;
+                    }
+                }
+                if (ignore) {
+                    break;
+                }
+            }
+            if (!ignore) {
+                heightGroups.add(group);
+            }
+        }
+        heightBounds = model.heightOfGroups(heightGroups);
     }
 
     public final EntityRollingStock spawn(World world, Vec3d pos, float yaw, Gauge gauge, String texture) {
@@ -113,7 +153,7 @@ public abstract class EntityRollingStockDefinition {
         if (data.has("pack")) {
             this.packName = data.get("pack").getAsString();
         }
-        float darken = 0;
+        darken = 0;
         if (data.has("darken_model")) {
             darken = data.get("darken_model").getAsFloat();
         }
@@ -140,7 +180,6 @@ public abstract class EntityRollingStockDefinition {
                 textureNames.put(variant.getValue().getAsString(), variant.getKey());
             }
         }
-        model = new OBJModel(new Identifier(data.get("model").getAsString()), darken, internal_model_scale, textureNames.keySet());
 
         Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
         try {
@@ -155,6 +194,8 @@ public abstract class EntityRollingStockDefinition {
         } catch (java.io.FileNotFoundException ex) {
             //ignore
         }
+
+        modelLoc = new Identifier(data.get("model").getAsString());
 
         JsonObject passenger = data.get("passenger").getAsJsonObject();
         passengerCenter = new Vec3d(0, passenger.get("center_y").getAsDouble() - 0.35, passenger.get("center_x").getAsDouble()).scale(internal_model_scale);
@@ -185,34 +226,6 @@ public abstract class EntityRollingStockDefinition {
             couplerOffsetRear = (float) (data.get("couplers").getAsJsonObject().get("rear_offset").getAsFloat() * internal_model_scale);
         }
 
-        frontBounds = -model.minOfGroup(model.groups()).x + couplerOffsetFront;
-        rearBounds = model.maxOfGroup(model.groups()).x + couplerOffsetRear;
-        widthBounds = model.widthOfGroups(model.groups());
-
-        // Bad hack for height bounds
-        ArrayList<String> heightGroups = new ArrayList<>();
-        for (String group : model.groups()) {
-            boolean ignore = false;
-            for (RenderComponentType rct : RenderComponentType.values()) {
-                if (rct.collisionsEnabled) {
-                    continue;
-                }
-                for (int i = 0; i < 10; i++) {
-                    if (Pattern.matches(rct.regex.replace("#ID#", "" + i), group)) {
-                        ignore = true;
-                        break;
-                    }
-                }
-                if (ignore) {
-                    break;
-                }
-            }
-            if (!ignore) {
-                heightGroups.add(group);
-            }
-        }
-        heightBounds = model.heightOfGroups(heightGroups);
-
         weight = (int) Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_inv_scale);
 
         wheel_sound = default_wheel_sound;
@@ -238,102 +251,18 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    protected void addComponentIfExists(RenderComponent renderComponent, boolean itemComponent) {
-        if (renderComponent != null) {
-            if (!renderComponents.containsKey(renderComponent.type)) {
-                renderComponents.put(renderComponent.type, new ArrayList<>());
-            }
-            renderComponents.get(renderComponent.type).add(0, renderComponent);
-
-            if (itemComponent && renderComponent.type != RenderComponentType.REMAINING) {
-                itemComponents.add(0, ItemComponentType.from(renderComponent.type));
-            }
-        }
-    }
-
-    protected boolean unifiedBogies() {
-        return true;
-    }
-
-
-
-    protected Set<String> parseComponents() {
-        renderComponents = new HashMap<>();
-        itemComponents = new ArrayList<>();
-
-        Set<String> groups = new HashSet<>(model.groups());
-
-        for (int i = 100; i >= 0; i--) {
-            if (unifiedBogies()) {
-                addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "FRONT", i), true);
-                addComponentIfExists(RenderComponent.parsePosID(RenderComponentType.BOGEY_POS_WHEEL_X, this, groups, "REAR", i), true);
-            } else {
-                addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_FRONT_WHEEL_X, this, groups, i), true);
-                addComponentIfExists(RenderComponent.parseID(RenderComponentType.BOGEY_REAR_WHEEL_X, this, groups, i), true);
-            }
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.FRAME_WHEEL_X, this, groups, i), true);
-        }
-        if (unifiedBogies()) {
-            addComponentIfExists(RenderComponent.parsePos(RenderComponentType.BOGEY_POS, this, groups, "FRONT"), true);
-            addComponentIfExists(RenderComponent.parsePos(RenderComponentType.BOGEY_POS, this, groups, "REAR"), true);
-        } else {
-            addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_FRONT, this, groups), true);
-            addComponentIfExists(RenderComponent.parse(RenderComponentType.BOGEY_REAR, this, groups), true);
-        }
-
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.FRAME, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.SHELL, this, groups), true);
-        for (int i = 100; i >= 1; i--) {
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.CARGO_FILL_X, this, groups, i), false);
-        }
-
-        return groups;
-    }
-
-    public RenderComponent getComponent(RenderComponentType name) {
+    public ModelComponent getComponent(RenderComponentType name) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
         return renderComponents.get(name).get(0);
     }
 
-    public RenderComponent getComponent(RenderComponentType name, String pos) {
-        if (!renderComponents.containsKey(name)) {
-            return null;
-        }
-        for (RenderComponent c : renderComponents.get(name)) {
-            if (c.pos.equals(pos)) {
-                return c;
-            }
-            if (c.side.equals(pos)) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public List<RenderComponent> getComponents() {
-        return renderComponents.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
-    }
-
-    public List<RenderComponent> getComponents(RenderComponentType name) {
+    public List<ModelComponent> getComponents(RenderComponentType name) {
         if (!renderComponents.containsKey(name)) {
             return null;
         }
         return renderComponents.get(name);
-    }
-
-    public List<RenderComponent> getComponents(RenderComponentType name, String pos) {
-        if (!renderComponents.containsKey(name)) {
-            return null;
-        }
-        List<RenderComponent> components = new ArrayList<>();
-        for (RenderComponent c : renderComponents.get(name)) {
-            if (c.pos.equals(pos)) {
-                components.add(c);
-            }
-        }
-        return components;
     }
 
     public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos, boolean shouldSit) {
@@ -399,8 +328,8 @@ public abstract class EntityRollingStockDefinition {
 
         int precision = (int) Math.ceil(this.heightBounds * 4);
 
-        for (List<RenderComponent> rcl : this.renderComponents.values()) {
-            for (RenderComponent rc : rcl) {
+        for (List<ModelComponent> rcl : this.renderComponents.values()) {
+            for (ModelComponent rc : rcl) {
                 if (!rc.type.collisionsEnabled) {
                     continue;
                 }
@@ -460,8 +389,8 @@ public abstract class EntityRollingStockDefinition {
             availComponents.addAll(item.render);
         }
 
-        for (List<RenderComponent> rcl : this.renderComponents.values()) {
-            for (RenderComponent rc : rcl) {
+        for (List<ModelComponent> rcl : this.renderComponents.values()) {
+            for (ModelComponent rc : rcl) {
                 if (!rc.type.collisionsEnabled) {
                     continue;
                 }
@@ -504,8 +433,12 @@ public abstract class EntityRollingStockDefinition {
         tips.add(GuiText.PACK_TOOLTIP.toString(packName));
         return tips;
     }
-    public OBJModel getModel() {
-        return model;
+
+    protected StockModel<?> createModel() throws Exception {
+        return new StockModel<>(this);
+    }
+    public StockModel<?> getModel() {
+        return this.model;
     }
 
     /**
@@ -537,10 +470,6 @@ public abstract class EntityRollingStockDefinition {
 
     public boolean acceptsLivestock() {
         return false;
-    }
-
-    public void clearModel() {
-        this.model = null;
     }
 
     static class TagMapper implements cam72cam.mod.serialization.TagMapper<EntityRollingStockDefinition> {

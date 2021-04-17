@@ -3,18 +3,17 @@ package cam72cam.immersiverailroading.render;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.mod.render.obj.OBJRender;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class StockRenderCache {
-	private static Map<String, StockModel> render_cache = new HashMap<>();
+	private static Map<String, OBJRender> render_cache = new HashMap<>();
 	private static Map<TrackModel, OBJRender> track_cache = new HashMap<>();
 
 	public static void clearRenderCache() {
-		for (StockModel model : render_cache.values()) {
+		for (OBJRender model : render_cache.values()) {
 			model.free();
 		}
 		for (OBJRender model : track_cache.values()) {
@@ -24,11 +23,11 @@ public class StockRenderCache {
 		track_cache = new HashMap<>();
 	}
 
-	public static StockModel getRender(String defID) {
+	public static OBJRender getRender(String defID) {
 		if (!render_cache.containsKey(defID)) {
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 			if (def != null) {
-				render_cache.put(defID, new StockModel(def.getModel()));
+				render_cache.put(defID, new OBJRender(def.getModel()));
 			}
 		}
 		return render_cache.get(defID);

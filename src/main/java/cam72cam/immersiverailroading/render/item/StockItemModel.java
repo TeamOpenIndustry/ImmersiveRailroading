@@ -4,11 +4,11 @@ import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.StockRenderCache;
-import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -26,7 +26,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			stack.setCount(0);
 			return;
 		}
-		StockModel model = StockRenderCache.getRender(data.def.defID);
+		OBJRender model = StockRenderCache.getRender(data.def.defID);
 		if (model == null) {
 			stack.setCount(0);
 			return;
@@ -61,7 +61,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
 		EntityRollingStockDefinition def = data.def;
 		// We want to upload the model even if the sprite is cached
-		StockModel model = StockRenderCache.getRender(def.defID);
+		OBJRender model = StockRenderCache.getRender(def.defID);
 
 		// Force upload the VBA here so it's cleared from memory
 		// This slows down the loading process a touch, but dramatically improves memory usage

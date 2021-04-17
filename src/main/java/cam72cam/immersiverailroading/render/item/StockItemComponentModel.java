@@ -2,16 +2,15 @@ package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.RenderComponentType;
-import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.StockRenderCache;
-import cam72cam.immersiverailroading.render.entity.StockModel;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -32,11 +31,11 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             return;
         }
 
-        StockModel renderer = StockRenderCache.getRender(data.def.defID);
+        OBJRender renderer = StockRenderCache.getRender(data.def.defID);
         ArrayList<String> groups = new ArrayList<>();
 
         for (RenderComponentType r : data.componentType.render) {
-            RenderComponent comp = data.def.getComponent(r);
+            ModelComponent comp = data.def.getComponent(r);
             if (comp == null || r == RenderComponentType.CARGO_FILL_X) {
                 continue;
             }

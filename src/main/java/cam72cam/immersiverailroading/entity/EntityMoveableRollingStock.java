@@ -451,7 +451,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return this.getRotationYaw();
     }
 
-    protected TickPos getCurrentTickPosOrFake() {
+    public TickPos getCurrentTickPosOrFake() {
         return new TickPos(0, Speed.fromMetric(0), getPosition(), this.getFrontYaw(), this.getRearYaw(), this.getRotationYaw(), this.getRotationPitch(), false);
     }
 
@@ -465,11 +465,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return new PosRot(pos.position.subtract(nextFront), VecUtil.toYaw(pos.position.subtract(nextFront)));
     }
 
-    public PosRot predictRearBogeyPosition(float offset) {
+    public Vec3d predictRearBogeyPosition(float offset) {
         return predictRearBogeyPosition(getCurrentTickPosOrFake(), offset);
     }
 
-    public PosRot predictRearBogeyPosition(TickPos pos, float offset) {
+    public Vec3d predictRearBogeyPosition(TickPos pos, float offset) {
         MovementSimulator sim = new MovementSimulator(getWorld(), pos, this.getDefinition().getBogeyRear(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
         Vec3d nextRear = sim.nextPosition(sim.rearBogeyPosition(), pos.rotationYaw, pos.rearYaw, offset);
         return new PosRot(pos.position.subtract(nextRear), VecUtil.toYaw(pos.position.subtract(nextRear)));

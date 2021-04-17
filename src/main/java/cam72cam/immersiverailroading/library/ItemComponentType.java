@@ -1,19 +1,20 @@
 package cam72cam.immersiverailroading.library;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.text.TextUtil;
 
 public enum ItemComponentType {
-	FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRAME), //TODO
+	FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRAME),
 	
 	// MALLET
-	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRONT_LOCOMOTIVE),
-	
+	FRONT_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.FRONT_FRAME),
+	REAR_FRAME(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.REAR_FRAME),
+
 	// STANDARD
 	BOGEY_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS_WHEEL_X),
 	BOGEY(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.BOGEY_POS),
@@ -48,16 +49,14 @@ public enum ItemComponentType {
 	FIREBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.FIREBOX),
 	SMOKEBOX(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.SMOKEBOX),
 	STEAM_CHEST(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST),
-	STEAM_CHEST_FRONT(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_FRONT),
-	STEAM_CHEST_REAR(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_REAR),
+	STEAM_CHEST_POS(AssemblyStep.FRAME, CraftingType.CASTING, RenderComponentType.STEAM_CHEST_POS),
 	BOILER_SEGMENT(AssemblyStep.BOILER, CraftingType.PLATE_BOILER, RenderComponentType.BOILER_SEGMENT_X),
 	PIPING(AssemblyStep.BOILER, CraftingType.PLATE_LARGE, RenderComponentType.PIPING),
 	
 	// WALCHERTS
 	WHEEL_DRIVER(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_X),
-	WHEEL_DRIVER_FRONT(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_FRONT_X), // MALLET
-	WHEEL_DRIVER_REAR(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_REAR_X), // MALLET
-	
+	WHEEL_DRIVER_POS(AssemblyStep.WHEELS, CraftingType.CASTING, RenderComponentType.WHEEL_DRIVER_POS_X), // MALLET
+
 	CYLINDER(AssemblyStep.FRAME, CraftingType.CASTING_HAMMER, RenderComponentType.CYLINDER_SIDE),
 	SIDE_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.SIDE_ROD_SIDE),
 	MAIN_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, RenderComponentType.MAIN_ROD_SIDE),
@@ -96,11 +95,7 @@ public enum ItemComponentType {
 	ItemComponentType(AssemblyStep step, CraftingType crafting, RenderComponentType ... render) {
 		this.crafting = crafting;
 		this.step = step;
-		this.render = new ArrayList<RenderComponentType>();
-		
-		for (RenderComponentType r : render) {
-			this.render.add(r);
-		}
+		this.render = Arrays.asList(render);
 	}
 	
 	public boolean isWheelPart() {
@@ -110,8 +105,7 @@ public enum ItemComponentType {
 		case BOGEY_REAR_WHEEL:
 		case BOGEY_REAR:
 		case WHEEL_DRIVER:
-		case WHEEL_DRIVER_FRONT:
-		case WHEEL_DRIVER_REAR:
+		case WHEEL_DRIVER_POS:
 		case FRAME_WHEEL:
 			return true;
 		default:
@@ -137,7 +131,7 @@ public enum ItemComponentType {
 	}
 
 	public int getPlateCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		RenderComponent comp = definition.getComponent(this.render.get(0));
+		ModelComponent comp = definition.getComponent(this.render.get(0));
 		
 		double mult = 0;
 		switch(this.crafting) {
@@ -179,19 +173,19 @@ public enum ItemComponentType {
 		if (definition == null) {
 			return ItemCastingCost.BAD_CAST_COST;
 		}
-		RenderComponent comp = definition.getComponent(this.render.get(0));
+		ModelComponent comp = definition.getComponent(this.render.get(0));
 		double densityGues = 0.6;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * gauge.scale());
 	}
 
 	public int getWoodCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		RenderComponent comp = definition.getComponent(this.render.get(0));
+		ModelComponent comp = definition.getComponent(this.render.get(0));
 		double densityGues = 4;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * gauge.scale());
 	}
 	
 	public boolean isWooden(EntityRollingStockDefinition definition) {
-		RenderComponent component = definition.getComponent(this.render.get(0));
-		return component.isWooden();
+		ModelComponent component = definition.getComponent(this.render.get(0));
+		return component.wooden;
 	}
 }
