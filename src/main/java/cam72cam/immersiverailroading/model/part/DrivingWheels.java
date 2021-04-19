@@ -11,18 +11,20 @@ import java.util.stream.Collectors;
 public class DrivingWheels {
     protected final List<Wheel> wheels;
     private final Vec3d center;
+    private final float angleOffset;
 
-    public static DrivingWheels get(ComponentProvider provider, String pos) {
+    public static DrivingWheels get(ComponentProvider provider, String pos, float angleOffset) {
         List<Wheel> wheels = (pos == null ?
                 provider.parseAll(ModelComponentType.WHEEL_DRIVER_X) :
                 provider.parseAll(ModelComponentType.WHEEL_DRIVER_POS_X, pos)
         ).stream().map(Wheel::new).collect(Collectors.toList());
 
-        return wheels.isEmpty() ? null : new DrivingWheels(wheels);
+        return wheels.isEmpty() ? null : new DrivingWheels(wheels, angleOffset);
     }
 
-    public DrivingWheels(List<Wheel> wheels) {
+    public DrivingWheels(List<Wheel> wheels, float angleOffset) {
         this.wheels = wheels;
+        this.angleOffset = angleOffset;
 
         double minX = wheels.get(0).wheel.min.x;
         double minY = wheels.get(0).wheel.min.y;
@@ -48,7 +50,7 @@ public class DrivingWheels {
         return wheels.get(wheels.size() / 2).diameter();
     }
     public float angle(double distance) {
-        return wheels.get(wheels.size() / 2).angle(distance);
+        return wheels.get(wheels.size() / 2).angle(distance) + angleOffset;
     }
 
     public Vec3d center() {

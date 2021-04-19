@@ -50,9 +50,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         provider.parseAll(ModelComponentType.PRESSURE_VALVE_X);
 
         ValveGearType type = ((LocomotiveSteamDefinition) def).getValveGear();
-        drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT");
-        drivingWheelsRear = DrivingAssembly.get(type, provider, "REAR");
-        drivingWheels = DrivingAssembly.get(type, provider, null);
+        drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT", 0);
+        drivingWheelsRear = DrivingAssembly.get(type, provider, "REAR", 45);
+        drivingWheels = DrivingAssembly.get(type, provider, null, 0);
     }
 
     @Override

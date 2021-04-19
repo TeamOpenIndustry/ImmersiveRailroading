@@ -14,25 +14,33 @@ public class StephensonValveGear implements ValveGear {
     protected final ModelComponent connectingRod;
     protected final ModelComponent pistonRod;
     protected final ModelComponent cylinder;
+    protected final float angleOffset;
+    protected final boolean reverse;
 
-    public static StephensonValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos) {
+    public static StephensonValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
         ModelComponent cylinder = provider.parse(ModelComponentType.CYLINDER_SIDE, pos);
         return drivingRod != null && connectingRod != null && pistonRod != null ?
-                new StephensonValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder) : null;
+                new StephensonValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset) : null;
     }
-    public StephensonValveGear(DrivingWheels wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder) {
+    public StephensonValveGear(DrivingWheels wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
         this.wheels = wheels;
         this.drivingRod = drivingRod;
         this.connectingRod = connectingRod;
         this.pistonRod = pistonRod;
         this.cylinder = cylinder;
+        this.angleOffset = angleOffset;
+        this.reverse = false; // TODO detect reverse condition (Garrat)
     }
 
-    public void render(double distance, float throttle, boolean reverse, ComponentRenderer draw) {
-        float wheelAngle = wheels.angle(distance);
+    public float angle(double distance) {
+        return wheels.angle(distance) + angleOffset;
+    }
+
+    public void render(double distance, float throttle, ComponentRenderer draw) {
+        float wheelAngle = angle(distance);
         if (reverse) {
             wheelAngle -= 90;
         }

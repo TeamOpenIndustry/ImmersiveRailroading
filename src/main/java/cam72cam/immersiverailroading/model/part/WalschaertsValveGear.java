@@ -20,8 +20,8 @@ public class WalschaertsValveGear implements ValveGear {
     protected final ModelComponent radiusBar;
     protected final List<ModelComponent> todo;
 
-    public static WalschaertsValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos) {
-        StephensonValveGear stephenson = StephensonValveGear.get(wheels, provider, pos);
+    public static WalschaertsValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos, float angleOffset) {
+        StephensonValveGear stephenson = StephensonValveGear.get(wheels, provider, pos, angleOffset);
         if (stephenson == null) {
             return null;
         }
@@ -62,11 +62,12 @@ public class WalschaertsValveGear implements ValveGear {
         this.todo = todo;
     }
 
-    public void render(double distance, float throttle, boolean reverse, ComponentRenderer draw) {
+    public void render(double distance, float throttle, ComponentRenderer draw) {
+        boolean reverse = stephenson.reverse;
 
-        stephenson.render(distance, throttle, reverse, draw);
+        stephenson.render(distance, throttle, draw);
 
-        float wheelAngle = stephenson.wheels.angle(distance);
+        float wheelAngle = stephenson.angle(distance);
         if (reverse) {
             wheelAngle -= 90;
         }

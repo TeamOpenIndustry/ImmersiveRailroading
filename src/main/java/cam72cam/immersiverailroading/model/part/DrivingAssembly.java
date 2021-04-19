@@ -13,15 +13,15 @@ public class DrivingAssembly {
     private final ValveGear left;
     private final ModelComponent steamChest;
 
-    public static DrivingAssembly get(ValveGearType type, ComponentProvider provider, String pos) {
-        DrivingWheels wheels = DrivingWheels.get(provider, pos);
+    public static DrivingAssembly get(ValveGearType type, ComponentProvider provider, String pos, float angleOffset) {
+        DrivingWheels wheels = DrivingWheels.get(provider, pos, angleOffset);
         if (wheels == null) {
             return null;
         }
 
-        ValveGear right = ValveGear.get(wheels, type, provider, "RIGHT" + (pos == null ? "" : ("_" + pos)));
-        ValveGear center = ValveGear.get(wheels, type, provider, "CENTER" + (pos == null ? "" : ("_" + pos)));
-        ValveGear left = ValveGear.get(wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)));
+        ValveGear left = ValveGear.get(wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)), 0);
+        ValveGear center = ValveGear.get(wheels, type, provider, "CENTER" + (pos == null ? "" : ("_" + pos)), -120);
+        ValveGear right = ValveGear.get(wheels, type, provider, "RIGHT" + (pos == null ? "" : ("_" + pos)), center == null ? -90 : -240);
 
         ModelComponent steamChest = pos == null ?
                 provider.parse(ModelComponentType.STEAM_CHEST) :
@@ -40,13 +40,13 @@ public class DrivingAssembly {
     public void render(double distance, float throttle, ComponentRenderer draw) {
         wheels.render(distance, draw);
         if (right != null) {
-            right.render(distance, throttle, false, draw);
+            right.render(distance, throttle, draw);
         }
         if (center != null) {
-            center.render(distance, throttle, false, draw);
+            center.render(distance, throttle, draw);
         }
         if (left != null) {
-            left.render(distance, throttle, false, draw);
+            left.render(distance, throttle, draw);
         }
         draw.render(steamChest);
     }
