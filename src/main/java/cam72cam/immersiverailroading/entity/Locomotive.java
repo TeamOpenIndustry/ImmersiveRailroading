@@ -18,15 +18,11 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.sound.ISound;
 
 public abstract class Locomotive extends FreightTank {
-	public ISound bell;
-
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
 
@@ -189,21 +185,6 @@ public abstract class Locomotive extends FreightTank {
 			if (bellTime > 0 && !this.getDefinition().toggleBell) {
 				bellTime--;
 			}
-		} else {
-			if (ConfigSound.soundEnabled && bell != null) {
-				if (bellTime != 0 && !bell.isPlaying()) {
-					bell.setVolume(0.8f);
-					bell.play(getPosition());
-				} else if (bellTime == 0 && bell.isPlaying()) {
-					bell.stop();
-				}
-
-				if (bell.isPlaying()) {
-					bell.setPosition(getPosition());
-					bell.setVelocity(getVelocity());
-					bell.update();
-				}
-			}
 		}
 
 		this.distanceTraveled += simulateWheelSlip();
@@ -301,6 +282,9 @@ public abstract class Locomotive extends FreightTank {
 			triggerResimulate();
 		}
 	}
+	public int getBell() {
+		return bellTime;
+	}
 	public void setBell(int newBell) {
 		this.bellTime = newBell;
 	}
@@ -332,13 +316,5 @@ public abstract class Locomotive extends FreightTank {
 	protected void addSmoke(Vec3d particlePos, Vec3d motion, int lifespan, float darken, float thickness, double diameter) {
 		assert getWorld().isClient;
 		Particles.SMOKE.accept(new SmokeParticleData(getWorld(), particlePos, motion, lifespan, darken, thickness, diameter));
-	}
-
-	@Override
-	public void onRemoved() {
-		super.onRemoved();
-		if (this.bell != null) {
-			bell.stop();
-		}
 	}
 }

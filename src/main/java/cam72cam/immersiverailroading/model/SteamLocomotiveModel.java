@@ -74,7 +74,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         return false;
     }
 
-    public void effects(LocomotiveSteam stock) {
+    @Override
+    protected void effects(LocomotiveSteam stock) {
+        super.effects(stock);
+
         float throttle = stock.getThrottle();
         if (drivingWheels != null) {
             drivingWheels.effects(stock, throttle);
@@ -116,7 +119,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.getHornPlayer());
     }
 
-    public void removed(LocomotiveSteam stock) {
+    @Override
+    protected void removed(LocomotiveSteam stock) {
+        super.removed(stock);
+
         frontTrackers.put(stock.getUUID(), null);
         rearTrackers.put(stock.getUUID(), null);
         pressureValve.removed(stock);

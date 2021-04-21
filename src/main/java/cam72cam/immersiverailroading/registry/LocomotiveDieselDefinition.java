@@ -16,7 +16,6 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public Identifier idle;
     public Identifier horn;
-    public Identifier bell;
     public boolean muliUnitCapable;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;

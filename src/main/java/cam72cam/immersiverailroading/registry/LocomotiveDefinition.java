@@ -6,12 +6,14 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.LocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
 
 import java.util.List;
 
 public abstract class LocomotiveDefinition extends FreightDefinition {
     public boolean toggleBell;
+    public Identifier bell;
     private String works;
     private int power;
     private int traction;

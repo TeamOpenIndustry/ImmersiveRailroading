@@ -119,21 +119,16 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	public void onTick() {
 		super.onTick();
-		
+
+		if (getWorld().isClient) {
+			return;
+		}
+
 		if (this.getTickCount() < 2) {
 			// Prevent explosions
 			return;
 		}
 
-		if (getWorld().isClient) {
-			if (this.bell == null) {
-				this.bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
-			}
-			this.getDefinition().getModel().effects(this);
-
-			return;
-		}
-		
 		if (!this.isBuilt()) {
 			return;
 		}
@@ -294,13 +289,6 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			getWorld().removeEntity(this);
 		}
-	}
-
-	@Override
-	public void onRemoved() {
-		super.onRemoved();
-
-		this.getDefinition().getModel().removed(this);
 	}
 
 	@Override

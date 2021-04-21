@@ -22,7 +22,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public Identifier idle;
     public Identifier chuff;
     public Identifier pressure;
-    public Identifier bell;
     private FluidQuantity tankCapacity;
     private int maxPSI;
     private ValveGearType valveGear;

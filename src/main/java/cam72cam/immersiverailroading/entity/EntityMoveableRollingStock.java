@@ -211,6 +211,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         }
 
         if (getWorld().isClient) {
+            getDefinition().getModel().onClientTick(this);
+
+
             if (ConfigSound.soundEnabled) {
                 if (this.wheel_sound == null) {
                     wheel_sound = ImmersiveRailroading.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
@@ -506,6 +509,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @Override
     public void onRemoved() {
         super.onRemoved();
+
+        if (getWorld().isClient) {
+            this.getDefinition().getModel().onClientRemoved(this);
+        }
+
         if (this.wheel_sound != null) {
             wheel_sound.stop();
         }

@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.Bogey;
@@ -58,6 +59,23 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
     protected boolean unifiedBogies() {
         return true;
+    }
+
+
+    public final void onClientTick(EntityMoveableRollingStock stock) {
+        effects((T) stock);
+    }
+
+    protected void effects(T stock) {
+
+    }
+
+    public final void onClientRemoved(EntityMoveableRollingStock stock) {
+        removed((T) stock);
+    }
+
+    protected void removed(T stock) {
+
     }
 
     public final void render(EntityMoveableRollingStock stock, float partialTicks) {

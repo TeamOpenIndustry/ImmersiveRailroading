@@ -159,7 +159,6 @@ public class LocomotiveDiesel extends Locomotive {
 		if (getWorld().isClient) {
 			if (ConfigSound.soundEnabled) {
 				if (this.horn == null) {
-                    bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 					this.horn = ImmersiveRailroading.newSound(this.getDefinition().horn, this.getDefinition().getHornSus(), 100, this.soundGauge());
 					this.idle = ImmersiveRailroading.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
 
