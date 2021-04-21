@@ -115,10 +115,6 @@ public class LocomotiveSteam extends Locomotive {
 		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();
 	}
 
-	private ISound whistle;
-	private List<ISound> chimes = new ArrayList<>();
-	private float pullString = 0;
-	private float soundDampener = 0;
 
 	@Override
 	public void onTick() {
@@ -130,147 +126,11 @@ public class LocomotiveSteam extends Locomotive {
 		}
 
 		if (getWorld().isClient) {
-			// Particles and Sound
-			
-			if (ConfigSound.soundEnabled) {
-				if (this.whistle == null) {
-					this.whistle = ImmersiveRailroading.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
-					this.bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
-					whistle.setPitch(1);
-					
-					if (this.getDefinition().quill != null) {
-						for (Chime chime : this.getDefinition().quill.chimes) {
-							this.chimes.add(ImmersiveRailroading.newSound(chime.sample, true, 150, this.soundGauge()));
-						}
-					}
-				}
-				
-				if (hornTime < 1) {
-					pullString = 0;
-					soundDampener = 0;
-					for (ISound chime : chimes) {
-						if (chime.isPlaying()) {
-							chime.stop();
-						}
-					}
-				} else {
-					if (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge)) {
-						if (this.getDefinition().quill == null) {
-							if (!this.whistle.isPlaying()) {
-								this.whistle.play(getPosition());
-							}
-						} else {
-							float maxDelta = 1/20f;
-							float delta = 0;
-							if (hornTime > 5) {
-								if (soundDampener < 0.4) {
-									soundDampener = 0.4f;
-								}
-								if (soundDampener < 1) {
-									soundDampener += 0.1;
-								}
-								if (hornPlayer != null) {
-									for (Entity pass : this.getPassengers()) {
-										if (!pass.getUUID().equals(hornPlayer)) {
-											continue;
-										}
-										
-										float newString = (pass.getRotationPitch()+90) / 180;
-										delta = newString - pullString;
-									}
-								} else {
-									delta = (float)this.getDefinition().quill.maxPull-pullString;
-								}
-							} else {
-								if (soundDampener > 0) {
-									soundDampener -= 0.07;
-								}
-								// Player probably released key or has net lag
-								delta = -pullString; 
-							}
-							
-							if (pullString == 0) {
-								pullString += delta*0.55;
-							} else {
-								pullString += Math.max(Math.min(delta, maxDelta), -maxDelta);
-							}
-							pullString = Math.min(pullString, (float)this.getDefinition().quill.maxPull);
-							
-							for (int i = 0; i < this.getDefinition().quill.chimes.size(); i++) {
-								ISound sound = this.chimes.get(i);
-								Chime chime = this.getDefinition().quill.chimes.get(i);
-								
-								double perc = pullString;
-								// Clamp to start/end
-								perc = Math.min(perc, chime.pull_end);
-								perc -= chime.pull_start;
-								
-								//Scale to clamped range
-								perc /= chime.pull_end - chime.pull_start;
-								
-								if (perc > 0) {
-									
-									double pitch = (chime.pitch_end - chime.pitch_start) * perc + chime.pitch_start;
-	
-									sound.setPitch((float) pitch);
-									sound.setVolume((float) (perc * soundDampener));
-									
-									if (!sound.isPlaying()) {
-										sound.play(getPosition());
-									}
-								} else {
-									if (sound.isPlaying()) {
-										sound.stop();
-									}
-								}
-							}
-						}
-					}
-				}
+			if (this.bell == null) {
+				this.bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 			}
-			
-			Vec3d fakeMotion = this.getVelocity();
-			
-			List<ModelComponent> whistles = this.getDefinition().getComponents(ModelComponentType.WHISTLE);
-			if (	whistles != null &&
-					(hornTime != 0 || whistle != null && whistle.isPlaying()) &&
-					(this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))
-				) {
-				for (ModelComponent whistle : whistles) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(whistle.center.scale(gauge.scale()), this.getRotationYaw() + 180));
-					particlePos = particlePos.subtract(fakeMotion);
-					
-					float darken = 0;
-					float thickness = 1;
-					double smokeMod = Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2));
-					int lifespan = (int) (40 * (1 + smokeMod * gauge.scale()));
-					float verticalSpeed = 0.8f;
-					double size = 0.3 * (0.8 + smokeMod);
-
-					particlePos = particlePos.subtract(fakeMotion);
-
-					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
-				}
-			}
-
 			this.getDefinition().getModel().effects(this);
 
-			if (ConfigSound.soundEnabled) {
-				// Update sound positions
-				if (whistle.isPlaying()) {
-					whistle.setPosition(getPosition());
-					whistle.setVelocity(getVelocity());
-					whistle.update();
-				}
-				for (ISound chime : chimes) {
-					if (chime.isPlaying()) {
-						chime.setPosition(getPosition());
-						chime.setVelocity(getVelocity());
-						chime.update();
-					}
-				}
-			}
-			
 			return;
 		}
 		
@@ -440,10 +300,6 @@ public class LocomotiveSteam extends Locomotive {
 	public void onRemoved() {
 		super.onRemoved();
 
-		for (ISound chime : chimes) {
-			chime.stop();
-		}
-		
 		this.getDefinition().getModel().removed(this);
 	}
 

@@ -279,6 +279,19 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
+	public int getHornTime() {
+		return hornTime;
+	}
+
+	public Entity getHornPlayer() {
+		for (Entity pass : getPassengers()) {
+			if (pass.getUUID().equals(hornPlayer)) {
+				return pass;
+			}
+		}
+		return null;
+	}
+
 	public float getAirBrake() {
 		return airBrake;
 	}

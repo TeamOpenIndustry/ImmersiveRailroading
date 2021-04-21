@@ -7,10 +7,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.model.part.DrivingAssembly;
-import cam72cam.immersiverailroading.model.part.PressureValve;
-import cam72cam.immersiverailroading.model.part.SteamChimney;
-import cam72cam.immersiverailroading.model.part.TrackFollower;
+import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
@@ -27,7 +24,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private DrivingAssembly drivingWheelsFront;
     private DrivingAssembly drivingWheelsRear;
 
-    private ModelComponent whistle;
+    private Whistle whistle;
     private SteamChimney chimney;
     private PressureValve pressureValve;
 
@@ -61,7 +58,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
-        whistle = provider.parse(ModelComponentType.WHISTLE);
+        whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
 
         chimney = SteamChimney.get(provider);
         pressureValve = PressureValve.get(provider, ((LocomotiveSteamDefinition) def).pressure);
@@ -115,6 +112,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 idle.stop();
             }
         }
+
+        whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.getHornPlayer());
     }
 
     public void removed(LocomotiveSteam stock) {
@@ -131,7 +130,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     protected void render(LocomotiveSteam stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
-        draw.render(whistle);
+
+        whistle.render(draw);
 
         if (drivingWheels != null) {
             drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
