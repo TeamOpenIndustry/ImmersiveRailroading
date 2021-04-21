@@ -737,7 +737,13 @@ public class LocomotiveSteam extends Locomotive {
 		public TagAccessor<Map<Integer, Integer>> apply(Class<Map<Integer, Integer>> type, String fieldName, TagField tag) {
 			return new TagAccessor<>(
 					(d, o) -> d.setMap(fieldName, o, Objects::toString, i -> new TagCompound().setInteger("val", i)),
-					d -> d.getMap(fieldName, Integer::parseInt, t -> t.getInteger("val"))
+					d -> {
+						Map<Integer, Integer> found = d.getMap(fieldName, Integer::parseInt, t -> t.getInteger("val"));
+						if (found == null) {
+							found = new HashMap<Integer, Integer>();
+						}
+						return found;
+					}
 			);
 		}
 	}
