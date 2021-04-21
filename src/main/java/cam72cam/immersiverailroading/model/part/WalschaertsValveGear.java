@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -210,6 +211,16 @@ public class WalschaertsValveGear implements ValveGear {
             GL11.glTranslated(-combinationLeverRotPos.x, -combinationLeverRotPos.y, 0);
             matrix.render(combinationLever);
         }
+    }
+
+    @Override
+    public void effects(EntityMoveableRollingStock stock, float throttle) {
+        stephenson.effects(stock, throttle);
+    }
+
+    @Override
+    public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
+        return stephenson.isEndStroke(stock, throttle);
     }
 
 }

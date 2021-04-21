@@ -1,12 +1,23 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.sound.ISound;
 import org.lwjgl.opengl.GL11;
+
+import java.util.*;
 
 public class StephensonValveGear implements ValveGear {
     protected final DrivingWheels wheels;
@@ -33,6 +44,113 @@ public class StephensonValveGear implements ValveGear {
         this.cylinder = cylinder;
         this.angleOffset = angleOffset;
         this.reverse = false; // TODO detect reverse condition (Garrat)
+    }
+
+    protected double getStroke(EntityMoveableRollingStock stock, float throttle, int shift, boolean speedLimit) {
+        double csm = Math.abs(stock.getCurrentSpeed().metric()) / stock.gauge.scale();
+        if ((csm > 0.1 || throttle > 0) && (csm < 20 || !speedLimit)) {
+            float currentAngle = angle(stock.distanceTraveled / stock.gauge.scale()) + shift;
+            return Math.abs(Math.sin(Math.toRadians(currentAngle)));
+        }
+        return 0;
+    }
+
+    public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
+        return getStroke(stock, throttle, 0, true) > 0.97;
+    }
+
+    private static class ChuffSound {
+        private final LocomotiveSteam stock;
+        private final float pitchOffset;
+        private boolean pitchStroke;
+        private boolean chuffOn;
+        private final List<ISound> chuffs;
+        private int chuffId;
+
+        ChuffSound(LocomotiveSteam stock) {
+            chuffOn = false;
+            chuffId = 0;
+            chuffs = new ArrayList<>();
+            for (int i = 0; i < 6; i++) {
+                chuffs.add(ImmersiveRailroading.newSound(stock.getDefinition().chuff, false, 80, stock.soundGauge()));
+            }
+            this.stock = stock;
+            this.pitchOffset = (float) (Math.random() / 50);
+            this.pitchStroke = false;
+        }
+
+        void update(boolean enteredStroke) {
+            if (!chuffOn) {
+                if (enteredStroke) {
+                    chuffOn = true;
+                    pitchStroke = !pitchStroke;
+
+                    double speed = Math.abs(stock.getCurrentSpeed().minecraft());
+                    double maxSpeed = Math.abs(stock.getDefinition().getMaxSpeed(stock.gauge).minecraft());
+                    float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(stock.getThrottle());
+                    volume = (float) Math.sqrt(volume);
+                    double fraction = 3;
+                    float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
+                    float delta = pitchOffset - (pitchStroke ? -0.02f : 0);
+                    ISound chuff = chuffs.get(chuffId);
+                    chuff.setPitch(pitch + delta);
+                    chuff.setVolume(volume + delta);
+                    chuff.play(stock.getPosition());
+
+                    chuffId = (chuffId + 1) % chuffs.size();
+                }
+            } else {
+                if (!enteredStroke) {
+                    // Reset for next stroke
+                    chuffOn = false;
+                }
+            }
+            for (ISound chuff : chuffs) {
+                if (chuff.isPlaying()) {
+                    chuff.setPosition(stock.getPosition());
+                    chuff.setVelocity(stock.getVelocity());
+                    chuff.update();
+                }
+            }
+        }
+
+        void free() {
+            for (ISound chuff : chuffs) {
+                chuff.terminate();
+            }
+        }
+    }
+
+    ExpireableList<String, ChuffSound> chuffSounds = new ExpireableList<String, ChuffSound>() {
+        @Override
+        public void onRemove(String key, ChuffSound value) {
+            value.free();
+        }
+    };
+
+    public void effects(EntityMoveableRollingStock stock, float throttle) {
+        if (ConfigGraphics.particlesEnabled && isEndStroke(stock, throttle)) {
+            Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(pistonRod.min.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
+            double accell = 0.3 * stock.gauge.scale();
+            if (pistonRod.pos.contains("LEFT")) {
+                accell = -accell;
+            }
+            if (pistonRod.pos.contains("CENTER") ) {
+                accell = 0;
+            }
+            Vec3d sideMotion = stock.getVelocity().add(VecUtil.fromWrongYaw(accell, stock.getRotationYaw()+90));
+            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01, sideMotion.z), 80, 0, 0.6f, 0.2));
+        }
+
+        if (ConfigSound.soundEnabled && stock instanceof LocomotiveSteam) {
+            String key = String.format("%s-%s", stock.getUUID(), pistonRod.pos);
+            ChuffSound sound = chuffSounds.get(key);
+            if (sound == null) {
+                sound = new ChuffSound((LocomotiveSteam) stock);
+                chuffSounds.put(key, sound);
+            }
+            sound.update(getStroke(stock, throttle, -45, false) > 0.5);
+        }
     }
 
     public float angle(double distance) {

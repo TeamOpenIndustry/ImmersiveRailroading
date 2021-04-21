@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
@@ -7,7 +8,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 
 public class DrivingAssembly {
-    public final DrivingWheels wheels;
+    private final DrivingWheels wheels;
     private final ValveGear right;
     private final ValveGear center;
     private final ValveGear left;
@@ -35,6 +36,32 @@ public class DrivingAssembly {
         this.center = center;
         this.left = left;
         this.steamChest = steamChest;
+    }
+
+    public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
+        boolean isEndStroke = false;
+        if (right != null) {
+            isEndStroke |= right.isEndStroke(stock, throttle);
+        }
+        if (left != null) {
+            isEndStroke |= left.isEndStroke(stock, throttle);
+        }
+        if (center != null) {
+            isEndStroke |= center.isEndStroke(stock, throttle);
+        }
+        return isEndStroke;
+    }
+
+    public void effects(EntityMoveableRollingStock stock, float throttle) {
+        if (right != null) {
+            right.effects(stock, throttle);
+        }
+        if (left != null) {
+            left.effects(stock, throttle);
+        }
+        if (center != null) {
+            center.effects(stock, throttle);
+        }
     }
 
     public void render(double distance, float throttle, ComponentRenderer draw) {

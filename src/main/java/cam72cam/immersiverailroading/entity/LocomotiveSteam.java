@@ -2,13 +2,11 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
-import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.registry.Quilling.Chime;
@@ -107,29 +105,6 @@ public class LocomotiveSteam extends Locomotive {
 		}
 	}
 
-	private double getPhase(int spikes, float offsetDegrees, double perc) {
-		double diameter = getDefinition().getModel().getDriverDiameter();
-		if (diameter == 0) {
-			return 0;
-		}
-		double circumference = (diameter * Math.PI);
-		double skewDistance = this.distanceTraveled - this.getCurrentSpeed().minecraft() * perc;
-		double phase = (skewDistance % circumference)/circumference;
-		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
-		return phase;
-	}
-	
-	private double getPhase(int spikes, float offsetDegrees) {
-		double diameter = getDefinition().getModel().getDriverDiameter();
-		if (diameter == 0) {
-			return 0;
-		}
-		double circumference = (diameter * Math.PI);
-		double phase = (this.distanceTraveled % circumference)/circumference;
-		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
-		return phase;
-	}
-
 	@Override
 	public double getTractiveEffortNewtons(Speed speed) {
 		return (getDefinition().cab_forward ? -1 : 1) * super.getTractiveEffortNewtons(speed);
@@ -140,17 +115,11 @@ public class LocomotiveSteam extends Locomotive {
 		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();
 	}
 
-	private Map<String, Boolean> phaseOn = new HashMap<>();
-	private List<ISound> sndCache = new ArrayList<>();
-	private int sndCacheId = 0;
 	private ISound whistle;
 	private List<ISound> chimes = new ArrayList<>();
 	private float pullString = 0;
 	private float soundDampener = 0;
-	private ISound idle;
-	private ISound pressure;
 
-	private int tickMod = 0;
 	@Override
 	public void onTick() {
 		super.onTick();
@@ -164,7 +133,7 @@ public class LocomotiveSteam extends Locomotive {
 			// Particles and Sound
 			
 			if (ConfigSound.soundEnabled) {
-				if (this.sndCache.size() == 0) {
+				if (this.whistle == null) {
 					this.whistle = ImmersiveRailroading.newSound(this.getDefinition().whistle, false, 150, this.soundGauge());
 					this.bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
 					whistle.setPitch(1);
@@ -174,15 +143,6 @@ public class LocomotiveSteam extends Locomotive {
 							this.chimes.add(ImmersiveRailroading.newSound(chime.sample, true, 150, this.soundGauge()));
 						}
 					}
-	
-					for (int i = 0; i < 8; i ++) {
-						sndCache.add(ImmersiveRailroading.newSound(this.getDefinition().chuff, false, 80, this.soundGauge()));
-					}
-					
-					this.idle = ImmersiveRailroading.newSound(this.getDefinition().idle, true, 40, this.soundGauge());
-					idle.setVolume(0.1f);
-					this.pressure = ImmersiveRailroading.newSound(this.getDefinition().pressure, true, 40, this.soundGauge());
-					pressure.setVolume(0.3f);
 				}
 				
 				if (hornTime < 1) {
@@ -267,60 +227,9 @@ public class LocomotiveSteam extends Locomotive {
 						}
 					}
 				}
-				
-				if (this.getBoilerTemperature() > this.ambientTemperature() + 5) {
-					if (!idle.isPlaying()) {
-						idle.play(getPosition());
-					}
-				} else {
-					if (idle.isPlaying()) {
-						idle.stop();
-					}
-				}
 			}
-			
-			double phase;
 			
 			Vec3d fakeMotion = this.getVelocity();
-			
-			List<ModelComponent> smokes = this.getDefinition().getComponents(ModelComponentType.PARTICLE_CHIMNEY_X);
-			if (smokes != null && ConfigGraphics.particlesEnabled) {
-				phase = getPhase(4, 0);
-				for (ModelComponent smoke : smokes) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(smoke.center.scale(gauge.scale()), this.getRotationYaw() + 180));
-					particlePos = particlePos.subtract(fakeMotion);
-					if (this.getTickCount() % 1 == 0 ) {
-						float darken = 0;
-						float thickness = Math.abs(this.getThrottle())/2;
-						for (int i : burnTime.values()) {
-							darken += i >= 1 ? 1 : 0;
-						}
-						if (darken == 0 && Config.isFuelRequired(gauge)) {
-							break;
-						}
-						darken /= this.getInventorySize() - 2.0;
-						darken *= 0.5;
-						
-						double smokeMod = Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2));
-						
-						int lifespan = (int) (200 * (1 + Math.abs(this.getThrottle())) * smokeMod * gauge.scale());
-						//lifespan *= size;
-						
-						float verticalSpeed = 0.5f;//(0.5f + Math.abs(this.getThrottle())) * (float)gauge.scale();
-						
-						double size = smoke.width() * gauge.scale() * (0.8 + smokeMod);
-						if (phase != 0 && Math.abs(this.getThrottle()) > 0.01 && Math.abs(this.getCurrentSpeed().metric()) / gauge.scale() < 30) {
-							double phaseSpike = Math.pow(phase, 8);
-							size *= 1 + phaseSpike*1.5;
-							verticalSpeed *= 1 + phaseSpike/2;
-						}
-						
-						particlePos = particlePos.subtract(fakeMotion);
-
-						addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
-					}
-				}
-			}
 			
 			List<ModelComponent> whistles = this.getDefinition().getComponents(ModelComponentType.WHISTLE);
 			if (	whistles != null &&
@@ -343,124 +252,9 @@ public class LocomotiveSteam extends Locomotive {
 					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size);
 				}
 			}
-			List<ModelComponent> pistons = this.getDefinition().getComponents(ModelComponentType.PISTON_ROD_SIDE);
-			double csm = Math.abs(this.getCurrentSpeed().metric()) / gauge.scale();
-			if (pistons != null && (this.getBoilerPressure() > 0 || !Config.isFuelRequired(gauge))) {
-				for (ModelComponent piston : pistons) {
-					float phaseOffset;
-					double tickDelt;
-					switch (piston.pos) {
-					case "LEFT":
-						tickDelt = 2;
-						phaseOffset = 45+90;
-						break;
-					case "RIGHT":
-						tickDelt = 2;
-						phaseOffset = this.getDefinition().getValveGear() != ValveGearType.TRI_WALSCHAERTS ? -45+90 : 45+90-240;
-						break;
-					case "CENTER":
-						tickDelt = 2;
-						phaseOffset = 45+90-120;
-						break;
-					case "LEFT_FRONT":
-						tickDelt = 1;
-						phaseOffset = 45+90;
-						break;
-					case "RIGHT_FRONT":
-						tickDelt = 1;
-						phaseOffset = -45+90;
-						break;
-					case "LEFT_REAR":
-						tickDelt = 1;
-						phaseOffset = 90;
-						break;
-					case "RIGHT_REAR":
-						tickDelt = 1;
-						phaseOffset = 0;
-						break;
-					default:
-						continue;
-					}
-					
-					phase = this.getPhase(2, phaseOffset);
-					double phaseSpike = Math.pow(phase, 4);
-					
-					if (phaseSpike >= 0.6 && csm > 0.1 && csm  < 20 && ConfigGraphics.particlesEnabled) {
-						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(piston.min.scale(gauge.scale()), this.getRotationYaw() + 180));
-						double accell = 0.3 * gauge.scale();
-						if (piston.pos.contains("LEFT")) {
-							accell = -accell;
-						}
-						if (piston.pos.contains("CENTER") ) {
-							accell = 0;
-						}
-						Vec3d sideMotion = fakeMotion.add(VecUtil.fromWrongYaw(accell, this.getRotationYaw()+90));
-						addSmoke(particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01, sideMotion.z), 80, 0, 0.6f, 0.2);
-					}
-					
-					if (!ConfigSound.soundEnabled) {
-						continue;
-					}
-					
-					String key = piston.pos;
-					if (!phaseOn.containsKey(key)) {
-						phaseOn.put(key, false);
-					}
-					
-					for (int i = 0; i < 10; i++) {
-						phase = this.getPhase(2, phaseOffset + 45, 1-i/10.0);
-						
-						if (!phaseOn.get(key)) {
-							if (phase > 0.5) {
-						    	double speed = Math.abs(getCurrentSpeed().minecraft());
-						    	double maxSpeed = Math.abs(getDefinition().getMaxSpeed(gauge).minecraft());
-						    	float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(this.getThrottle());
-						    	volume = (float) Math.sqrt(volume);
-						    	double fraction = 3;
-						    	float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
-						    	float delta = (8-tickMod) / 200.0f;
-						    	ISound snd = sndCache.get(sndCacheId);
-						    	snd.setPitch(pitch + delta);
-						    	snd.setVolume(volume + delta);
-						    	snd.play(getPosition());
-						    	sndCacheId++;
-						    	sndCacheId = sndCacheId % sndCache.size();
-								phaseOn.put(key, true);
 
-								tickMod += tickDelt;
-								if (tickMod > 8) {
-									tickMod = 0;
-								}
-							}
-						} else {
-							if (phase < 0.5) {
-								phaseOn.put(key, false);
-							}
-						}
-					}
-				}
-			}
-			
-			List<ModelComponent> steams = this.getDefinition().getComponents(ModelComponentType.PRESSURE_VALVE_X);
-			if (steams != null && (pressureValve && Config.isFuelRequired(gauge))) {
-				if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
-					if (!pressure.isPlaying()) {
-						pressure.play(getPosition());
-					}
-				}
-				if (ConfigGraphics.particlesEnabled) {
-					for (ModelComponent steam : steams) {
-						Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(steam.center.scale(gauge.scale()), this.getRotationYaw() + 180));
-						particlePos = particlePos.subtract(fakeMotion);
-						addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * gauge.scale(), fakeMotion.z),40, 0, 0.2f, steam.width() * gauge.scale());
-					}
-				}
-			} else {
-				if (ConfigSound.soundEnabled && pressure.isPlaying()) {
-					pressure.stop();
-				}
-			}
-			
+			this.getDefinition().getModel().effects(this);
+
 			if (ConfigSound.soundEnabled) {
 				// Update sound positions
 				if (whistle.isPlaying()) {
@@ -473,23 +267,6 @@ public class LocomotiveSteam extends Locomotive {
 						chime.setPosition(getPosition());
 						chime.setVelocity(getVelocity());
 						chime.update();
-					}
-				}
-				if (idle.isPlaying()) {
-					idle.setPosition(getPosition());
-					idle.setVelocity(getVelocity());
-					idle.update();
-				}
-				if (pressure.isPlaying()) {
-					pressure.setPosition(getPosition());
-					pressure.setVelocity(getVelocity());
-					pressure.update();
-				}
-				for (ISound snd : sndCache) {
-					if (snd.isPlaying()) {
-						snd.setPosition(getPosition());
-						snd.setVelocity(getVelocity());
-						snd.update();
 					}
 				}
 			}
@@ -667,12 +444,7 @@ public class LocomotiveSteam extends Locomotive {
 			chime.stop();
 		}
 		
-		if (idle != null) {
-			idle.stop();
-		}
-		if (pressure != null) {
-			pressure.stop();
-		}
+		this.getDefinition().getModel().removed(this);
 	}
 
 	@Override
@@ -687,7 +459,8 @@ public class LocomotiveSteam extends Locomotive {
 	public int getInventorySize() {
 		return this.getDefinition().getInventorySize(gauge) + 2;
 	}
-	
+
+	@Override
 	public int getInventoryWidth() {
 		return this.getDefinition().getInventoryWidth(gauge);
 	}
@@ -709,6 +482,10 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	public List<Fluid> getFluidFilter() {
 		return LiquidUtil.getWater();
+	}
+
+	public boolean isOverpressure() {
+		return pressureValve;
 	}
 
 	private double coalEnergyKCalTick() {

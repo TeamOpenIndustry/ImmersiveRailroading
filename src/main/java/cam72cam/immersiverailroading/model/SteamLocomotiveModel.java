@@ -1,17 +1,23 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.DrivingAssembly;
+import cam72cam.immersiverailroading.model.part.PressureValve;
+import cam72cam.immersiverailroading.model.part.SteamChimney;
 import cam72cam.immersiverailroading.model.part.TrackFollower;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.mod.sound.ISound;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private List<ModelComponent> components;
@@ -21,8 +27,18 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private DrivingAssembly drivingWheelsFront;
     private DrivingAssembly drivingWheelsRear;
 
+    private ModelComponent whistle;
+    private SteamChimney chimney;
+    private PressureValve pressureValve;
+
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
+    private final ExpireableList<UUID, ISound> idleSounds = new ExpireableList<UUID, ISound>() {
+        @Override
+        public void onRemove(UUID key, ISound value) {
+            value.terminate();
+        }
+    };
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
@@ -38,16 +54,17 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         components = provider.parse(
                 ModelComponentType.FIREBOX,
                 ModelComponentType.SMOKEBOX,
-                ModelComponentType.PIPING,
-                ModelComponentType.WHISTLE
+                ModelComponentType.PIPING
         );
 
         components.addAll(provider.parseAll(
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
-        provider.parseAll(ModelComponentType.PARTICLE_CHIMNEY_X);
-        provider.parseAll(ModelComponentType.PRESSURE_VALVE_X);
+        whistle = provider.parse(ModelComponentType.WHISTLE);
+
+        chimney = SteamChimney.get(provider);
+        pressureValve = PressureValve.get(provider, ((LocomotiveSteamDefinition) def).pressure);
 
         ValveGearType type = ((LocomotiveSteamDefinition) def).getValveGear();
         drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT", 0);
@@ -60,22 +77,61 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         return false;
     }
 
-    public double getDriverDiameter() {
-        // TODO deeper integration with when sound / particles start
-        double driverDiameter = drivingWheels != null ? drivingWheels.wheels.diameter() : 0;
+    public void effects(LocomotiveSteam stock) {
+        float throttle = stock.getThrottle();
+        if (drivingWheels != null) {
+            drivingWheels.effects(stock, throttle);
+        }
         if (drivingWheelsFront != null) {
-            driverDiameter = Math.max(driverDiameter, drivingWheelsFront.wheels.diameter());
+            drivingWheelsFront.effects(stock, throttle);
         }
         if (drivingWheelsRear != null) {
-            driverDiameter = Math.max(driverDiameter, drivingWheelsRear.wheels.diameter());
+            drivingWheelsRear.effects(stock, throttle);
         }
-        return driverDiameter;
+        if (chimney != null) {
+            chimney.effects(stock,
+                    (drivingWheels != null && drivingWheels.isEndStroke(stock, throttle)) ||
+                            (drivingWheelsFront != null && drivingWheelsFront.isEndStroke(stock, throttle)) ||
+                            (drivingWheelsRear != null && drivingWheelsRear.isEndStroke(stock, throttle)));
+        }
+        pressureValve.effects(stock, stock.isOverpressure() && Config.isFuelRequired(stock.gauge));
+
+        ISound idle = idleSounds.get(stock.getUUID());
+        if (idle == null) {
+            idle = ImmersiveRailroading.newSound(stock.getDefinition().idle, true, 40, stock.soundGauge());
+            idle.setVolume(0.1f);
+            idleSounds.put(stock.getUUID(), idle);
+        }
+
+        if (stock.getBoilerTemperature() > stock.ambientTemperature() + 5) {
+            if (!idle.isPlaying()) {
+                idle.play(stock.getPosition());
+            }
+            idle.setPosition(stock.getPosition());
+            idle.setVelocity(stock.getVelocity());
+            idle.update();
+        } else {
+            if (idle.isPlaying()) {
+                idle.stop();
+            }
+        }
+    }
+
+    public void removed(LocomotiveSteam stock) {
+        frontTrackers.put(stock.getUUID(), null);
+        rearTrackers.put(stock.getUUID(), null);
+        pressureValve.removed(stock);
+        ISound idle = idleSounds.get(stock.getUUID());
+        if (idle != null) {
+            idle.terminate();
+        }
     }
 
     @Override
     protected void render(LocomotiveSteam stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
+        draw.render(whistle);
 
         if (drivingWheels != null) {
             drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
@@ -91,7 +147,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     data.apply();
                     matrix.render(frameFront);
                 }
-                drivingWheelsFront.render(distanceTraveled+1, stock.getThrottle(), matrix);
+                drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
             }
         }
         if (drivingWheelsRear != null) {
@@ -105,7 +161,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     data.apply();
                     matrix.render(frameRear);
                 }
-                drivingWheelsRear.render(distanceTraveled+2, stock.getThrottle(), matrix);
+                drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
             }
         }
     }
