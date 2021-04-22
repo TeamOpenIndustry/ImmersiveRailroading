@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.mod.sound.ISound;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,15 +29,11 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
-    private final ExpireableList<UUID, ISound> idleSounds = new ExpireableList<UUID, ISound>() {
-        @Override
-        public void onRemove(UUID key, ISound value) {
-            value.terminate();
-        }
-    };
+    private final PartSound idleSounds;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
+        idleSounds = new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 40, stock.soundGauge()));
     }
 
     @Override
@@ -96,26 +91,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         }
         pressureValve.effects(stock, stock.isOverpressure() && Config.isFuelRequired(stock.gauge));
 
-        ISound idle = idleSounds.get(stock.getUUID());
-        if (idle == null) {
-            idle = ImmersiveRailroading.newSound(stock.getDefinition().idle, true, 40, stock.soundGauge());
-            idle.setVolume(0.1f);
-            idleSounds.put(stock.getUUID(), idle);
-        }
-
-        if (stock.getBoilerTemperature() > stock.ambientTemperature() + 5) {
-            if (!idle.isPlaying()) {
-                idle.play(stock.getPosition());
-            }
-            idle.setPosition(stock.getPosition());
-            idle.setVelocity(stock.getVelocity());
-            idle.update();
-        } else {
-            if (idle.isPlaying()) {
-                idle.stop();
-            }
-        }
-
+        idleSounds.effects(stock, stock.getBoilerTemperature() > stock.ambientTemperature() + 5 ? 0.1f : 0);
         whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.getHornPlayer());
     }
 
@@ -126,10 +102,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         frontTrackers.put(stock.getUUID(), null);
         rearTrackers.put(stock.getUUID(), null);
         pressureValve.removed(stock);
-        ISound idle = idleSounds.get(stock.getUUID());
-        if (idle != null) {
-            idle.terminate();
-        }
+        idleSounds.removed(stock);
+        whistle.removed(stock);
     }
 
     @Override

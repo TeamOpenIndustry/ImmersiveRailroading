@@ -1,26 +1,22 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.UUID;
-
-import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
-import cam72cam.immersiverailroading.library.Particles;
-import cam72cam.immersiverailroading.render.SmokeParticle.SmokeParticleData;
-import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.gui.GuiRegistry;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.serialization.StrictTagMapper;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.sync.TagSync;
+import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.serialization.StrictTagMapper;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.world.World;
+
+import java.util.UUID;
 
 public abstract class Locomotive extends FreightTank {
 	private static final float throttleNotch = 0.04f;
@@ -311,10 +307,5 @@ public abstract class Locomotive extends FreightTank {
 	public float ambientTemperature() {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;
-	}
-
-	protected void addSmoke(Vec3d particlePos, Vec3d motion, int lifespan, float darken, float thickness, double diameter) {
-		assert getWorld().isClient;
-		Particles.SMOKE.accept(new SmokeParticleData(getWorld(), particlePos, motion, lifespan, darken, thickness, diameter));
 	}
 }

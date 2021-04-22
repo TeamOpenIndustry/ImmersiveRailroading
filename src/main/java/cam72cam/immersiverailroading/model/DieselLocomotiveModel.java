@@ -1,9 +1,13 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.model.part.DieselExhaust;
+import cam72cam.immersiverailroading.model.part.Horn;
+import cam72cam.immersiverailroading.model.part.PartSound;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 
@@ -11,10 +15,13 @@ import java.util.List;
 
 public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private List<ModelComponent> components;
-    private List<ModelComponent> exhaust;
+    private DieselExhaust exhaust;
+    private Horn horn;
+    private final PartSound idle;
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
+        idle = new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 80, stock.soundGauge()));
     }
 
     @Override
@@ -40,16 +47,33 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                 )
         );
 
-        exhaust = provider.parseAll(ModelComponentType.DIESEL_EXHAUST_X);
+        exhaust = DieselExhaust.get(provider);
+        horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
+    }
+
+    @Override
+    protected void effects(LocomotiveDiesel stock) {
+        super.effects(stock);
+        exhaust.effects(stock);
+        horn.effects(stock,
+                stock.getHornTime() > 0 && stock.isRunning()
+                        ? stock.getDefinition().getHornSus() ? stock.getHornTime() / 10f : 1
+                        : 0);
+        idle.effects(stock, stock.isRunning() ? Math.max(0.1f, stock.getSoundThrottle()) : 0, 0.7f+stock.getSoundThrottle()/4);
+    }
+
+    @Override
+    protected void removed(LocomotiveDiesel stock) {
+        super.removed(stock);
+        horn.removed(stock);
+        idle.removed(stock);
     }
 
     @Override
     protected void render(LocomotiveDiesel stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
-    }
-
-    public List<ModelComponent> getExhaust() {
-        return exhaust;
+        exhaust.render(draw);
+        horn.render(draw);
     }
 }

@@ -2,28 +2,27 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
-import cam72cam.immersiverailroading.registry.Quilling.Chime;
-import cam72cam.immersiverailroading.util.*;
+import cam72cam.immersiverailroading.util.BurnUtil;
+import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.LiquidUtil;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.gui.GuiRegistry;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapper;
-import cam72cam.mod.sound.ISound;
-import cam72cam.mod.entity.Entity;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
+import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI

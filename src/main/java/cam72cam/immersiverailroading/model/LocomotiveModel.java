@@ -23,8 +23,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         super.parseComponents(provider, def);
 
         components = provider.parse(
-                ModelComponentType.CAB,
-                ModelComponentType.HORN
+                new ModelComponentType[]{ModelComponentType.CAB}
         );
         bell = Bell.get(
                 provider,
@@ -35,7 +34,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     @Override
     protected void effects(T stock) {
         super.effects(stock);
-        bell.effects(stock, stock.getBell() > 0);
+        bell.effects(stock, stock.getBell() > 0 ? 0.8f : 0);
     }
 
     @Override
