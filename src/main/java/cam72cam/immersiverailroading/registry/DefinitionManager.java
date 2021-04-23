@@ -17,16 +17,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefinitionManager {
 
     /**
-     * How much memory in MiB does the loading of a stock take.
+     * How much memory in bytes does the loading of a stock take.
      * This is used to determine whether loading stock in a multithreaded way is possible.
      */
-    private static final int STOCK_LOAD_MEMORY_PER_PROCESSOR = 50;
+    private static final long STOCK_LOAD_MEMORY_PER_PROCESSOR = 1024 * 1024 * 1024;
 
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
@@ -88,7 +90,34 @@ public class DefinitionManager {
         definitions = new LinkedHashMap<>();
         tracks = new LinkedHashMap<>();
 
-        initModels();
+
+        // Parallel streams use numCPUs-1 threads for stream workloads.
+        Runtime runtime = Runtime.getRuntime();
+        int processors = runtime.availableProcessors() - 1;
+
+        // Manual garbage collection so we get an accurate quantity of free memory.
+        runtime.gc();
+
+        long maxMemory = runtime.maxMemory();
+        long totalMemory = runtime.totalMemory();
+        if (maxMemory == Long.MAX_VALUE) {
+            maxMemory = totalMemory;
+        }
+
+        ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(1, Math.min(processors, (int)(maxMemory / STOCK_LOAD_MEMORY_PER_PROCESSOR))));
+        try {
+            forkJoinPool.submit(() -> {
+                try {
+                    initModels();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            forkJoinPool.shutdown();
+        }
         initTracks();
     }
 
@@ -234,28 +263,7 @@ public class DefinitionManager {
         if (!ConfigPerformance.multithreadedStockLoading) {
             return collection.stream();
         }
-
-        // Parallel streams use numCPUs-1 threads for stream workloads.
-        Runtime runtime = Runtime.getRuntime();
-        int processors = runtime.availableProcessors() - 1;
-        if (processors <= 1) {
-            return collection.stream();
-        }
-
-        // Manual garbage collection so we get an accurate quantity of free memory.
-        runtime.gc();
-
-        long maxMemory = runtime.maxMemory();
-        long totalMemory = runtime.totalMemory();
-        if (maxMemory == Long.MAX_VALUE) {
-            maxMemory = totalMemory;
-        }
-
-        long freeMemory = runtime.freeMemory();
-        freeMemory += maxMemory - totalMemory;
-
-        long usedMemory = processors * STOCK_LOAD_MEMORY_PER_PROCESSOR * 1024 * 1024;
-        return usedMemory < freeMemory ? collection.parallelStream() : collection.stream();
+        return collection.parallelStream();
     }
 
     public static EntityRollingStockDefinition getDefinition(String defID) {
