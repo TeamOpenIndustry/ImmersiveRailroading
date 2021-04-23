@@ -376,7 +376,7 @@ public abstract class EntityRollingStockDefinition {
                             fheight += vertY / 3; // We know we are using tris
                         }
                         Rectangle2D bounds = path.getBounds2D();
-                        if (bounds.getWidth() * bounds.getHeight() < 0.5) {
+                        if (bounds.getWidth() * bounds.getHeight() < 1) {
                             continue;
                         }
                         for (int x = 0; x < xRes; x++) {
