@@ -60,14 +60,9 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 	public StandardModel getSpriteModel(ItemStack stack) {
 		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
 		EntityRollingStockDefinition def = data.def;
-		// We want to upload the model even if the sprite is cached
-		OBJRender model = StockRenderCache.getRender(def.defID);
-
-		// Force upload the VBA here so it's cleared from memory
-		// This slows down the loading process a touch, but dramatically improves memory usage
-		//REMOVE PROBABLY model.createVBA();
-
 		return new StandardModel().addCustom(() -> {
+			OBJRender model = StockRenderCache.getRender(def.defID);
+
 			try (
 					OpenGL.With matrix = OpenGL.matrix();
 					OpenGL.With tex = model.bindTexture(true);
