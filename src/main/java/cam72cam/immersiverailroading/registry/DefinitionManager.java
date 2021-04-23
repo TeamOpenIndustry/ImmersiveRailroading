@@ -89,7 +89,6 @@ public class DefinitionManager {
         tracks = new LinkedHashMap<>();
 
         initModels();
-        initModelHeightMaps();
         initTracks();
     }
 
@@ -177,23 +176,6 @@ public class DefinitionManager {
         }
 
         return blacklist;
-    }
-
-    private static void initModelHeightMaps() {
-        ImmersiveRailroading.info("Generating height maps.");
-
-        Collection<EntityRollingStockDefinition> stockDefinitions = definitions.values();
-        Progress.Bar bar = Progress.push("Generating Heightmap", stockDefinitions.size());
-        Object monitor = new Object();
-        stockDefinitions.parallelStream().forEach(stockDefinition -> {
-            synchronized (monitor) {
-                bar.step(stockDefinition.name());
-            }
-
-            stockDefinition.initHeightMap();
-        });
-
-        Progress.pop(bar);
     }
 
     private static void initTracks() throws IOException {

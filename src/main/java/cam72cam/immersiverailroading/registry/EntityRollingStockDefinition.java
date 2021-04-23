@@ -14,7 +14,11 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.serialization.ResourceCache;
+import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
+import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.text.TextUtil;
@@ -23,10 +27,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -69,9 +78,7 @@ public abstract class EntityRollingStockDefinition {
     private int maxPassengers;
     private Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private List<ItemComponentType> itemComponents;
-    private Map<ModelComponent, float[][]> partMapCache = new HashMap<>();
-    private int xRes;
-    private int zRes;
+    private Function<EntityBuildableRollingStock, float[][]> heightmap;
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
@@ -125,6 +132,8 @@ public abstract class EntityRollingStockDefinition {
             }
         }
         heightBounds = model.heightOfGroups(heightGroups);
+
+        this.heightmap = initHeightmap();
     }
 
     public final EntityRollingStock spawn(World world, Vec3d pos, float yaw, Gauge gauge, String texture) {
@@ -316,33 +325,48 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    void initHeightMap() {
-        ImmersiveRailroading.debug("Generating heightmap %s", defID);
-/* TODO
-        double ratio = 8;
-        xRes = (int) Math.ceil((this.frontBounds + this.rearBounds) * ratio);
-        zRes = (int) Math.ceil(this.widthBounds * ratio);
+    private static class HeightMapData {
+        final int xRes;
+        final int zRes;
+        final List<ModelComponent> components;
+        final float[] data;
 
-        int precision = (int) Math.ceil(this.heightBounds * 4);
+        HeightMapData(EntityRollingStockDefinition def) {
+            ImmersiveRailroading.info("Generating heightmap %s", def.defID);
 
-        for (List<ModelComponent> rcl : this.renderComponents.values()) {
-            for (ModelComponent rc : rcl) {
-                if (!rc.type.collisionsEnabled) {
-                    continue;
-                }
-                float[][] heightMap = new float[xRes][zRes];
+            double ratio = 8;
+            int precision = (int) Math.ceil(def.heightBounds * 4);
+
+            xRes = (int) Math.ceil((def.frontBounds + def.rearBounds) * ratio);
+            zRes = (int) Math.ceil(def.widthBounds * ratio);
+            components = def.renderComponents.values().stream()
+                    .flatMap(Collection::stream)
+                    .filter(rc -> rc.type.collisionsEnabled)
+                    .collect(Collectors.toList());
+            data = new float[components.size() * xRes * zRes];
+
+            // TODO vbo iteration helpers in UMC
+            int vpf = 3;
+            int stride = (def.model.hasVertexNormals ? 12 : 9);
+            float[] modelData = def.model.vbo.get().floats();
+
+            for (int i = 0; i < components.size(); i++) {
+                ModelComponent rc = components.get(i);
+                int idx = i * xRes * zRes;
                 for (String group : rc.modelIDs) {
-                    int[] faces = model.groups.get(group);
-                    for (int face : faces) {
-                        Path2D path = new Path2D.Double();
+                    OBJGroup faces = def.model.groups.get(group);
+
+                    for (int face = faces.faceStart; face <= faces.faceStop; face++) {
+                        Path2D path = new Path2D.Float();
                         float fheight = 0;
                         boolean first = true;
-                        for (int[] point : model.points(face)) {
-                            float vertX = model.vertex(point[0], OBJModel.Vert.X);
-                            float vertY = model.vertex(point[0], OBJModel.Vert.Y);
-                            float vertZ = model.vertex(point[0], OBJModel.Vert.Z);
-                            vertX += this.frontBounds;
-                            vertZ += this.widthBounds / 2;
+                        for (int point = 0; point < vpf; point++) {
+                            int vertex = face * vpf * stride + point * stride;
+                            float vertX = modelData[vertex + 0];
+                            float vertY = modelData[vertex + 1];
+                            float vertZ = modelData[vertex + 2];
+                            vertX += def.frontBounds;
+                            vertZ += def.widthBounds / 2;
                             if (first) {
                                 path.moveTo(vertX * ratio, vertZ * ratio);
                                 first = false;
@@ -352,7 +376,7 @@ public abstract class EntityRollingStockDefinition {
                             fheight += vertY / 3; // We know we are using tris
                         }
                         Rectangle2D bounds = path.getBounds2D();
-                        if (bounds.getWidth() * bounds.getHeight() < 1) {
+                        if (bounds.getWidth() * bounds.getHeight() < 0.5) {
                             continue;
                         }
                         for (int x = 0; x < xRes; x++) {
@@ -360,55 +384,88 @@ public abstract class EntityRollingStockDefinition {
                                 float relX = ((xRes - 1) - x);
                                 float relZ = z;
                                 if (bounds.contains(relX, relZ) && path.contains(relX, relZ)) {
-                                    float relHeight = fheight / (float)heightBounds;
+                                    float relHeight = fheight / (float) def.heightBounds;
                                     relHeight = ((int) Math.ceil(relHeight * precision)) / (float) precision;
-                                    heightMap[x][z] = Math.max(heightMap[x][z], relHeight);
+                                    data[idx + x * zRes + z] = Math.max(data[idx + x * zRes + z], relHeight);
                                 }
                             }
                         }
                     }
                 }
-
-                partMapCache.put(rc, heightMap);
             }
-        }*/
+        }
+    }
+
+    private Function<EntityBuildableRollingStock, float[][]> initHeightmap() {
+        String key = String.format(
+                "heightmap-%s-%s-%s-%s-%s-%s",
+                model.hash, frontBounds, rearBounds, widthBounds, heightBounds, renderComponents.size());
+        try (ResourceCache<HeightMapData> cache = new ResourceCache<>(modelLoc, key, provider -> new HeightMapData(this))) {
+            Supplier<GenericByteBuffer> data = cache.getResource("data.bin", builder -> new GenericByteBuffer(builder.data));
+            Supplier<GenericByteBuffer> meta = cache.getResource("meta.nbt", builder -> {
+                try {
+                    return new GenericByteBuffer(new TagCompound()
+                            .setInteger("xRes", builder.xRes)
+                            .setInteger("zRes", builder.zRes)
+                            .setList("components", builder.components, v -> new TagCompound().setString("key", v.key))
+                            .toBytes()
+                    );
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            return (stock) -> {
+                try {
+                    float[] raw = data.get().floats();
+                    TagCompound tc = new TagCompound(meta.get().bytes());
+
+                    int xRes = tc.getInteger("xRes");
+                    int zRes = tc.getInteger("zRes");
+                    List<String> componentKeys = tc.getList("components", v -> v.getString("key"));
+
+                    float[][] heightMap = new float[xRes][zRes];
+
+                    List<ModelComponentType> availComponents = new ArrayList<>();
+                    for (ItemComponentType item : stock.getItemComponents()) {
+                        availComponents.addAll(item.render);
+                    }
+
+                    for (List<ModelComponent> rcl : this.renderComponents.values()) {
+                        for (ModelComponent rc : rcl) {
+                            if (!rc.type.collisionsEnabled) {
+                                continue;
+                            }
+
+                            if (availComponents.contains(rc.type)) {
+                                availComponents.remove(rc.type);
+                            } else if (rc.type == ModelComponentType.REMAINING && stock.isBuilt()) {
+                                //pass
+                            } else {
+                                continue;
+                            }
+
+                            int idx = componentKeys.indexOf(rc.key) * xRes * zRes;
+                            for (int x = 0; x < xRes; x++) {
+                                for (int z = 0; z < zRes; z++) {
+                                    heightMap[x][z] = Math.max(heightMap[x][z], raw[idx + x * zRes + z]);
+                                }
+                            }
+                        }
+                    }
+
+                    return heightMap;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public float[][] createHeightMap(EntityBuildableRollingStock stock) {
-        if (1 == 1) {
-            return null;
-        }
-        float[][] heightMap = new float[xRes][zRes];
-
-
-        List<ModelComponentType> availComponents = new ArrayList<>();
-        for (ItemComponentType item : stock.getItemComponents()) {
-            availComponents.addAll(item.render);
-        }
-
-        for (List<ModelComponent> rcl : this.renderComponents.values()) {
-            for (ModelComponent rc : rcl) {
-                if (!rc.type.collisionsEnabled) {
-                    continue;
-                }
-
-                if (availComponents.contains(rc.type)) {
-                    availComponents.remove(rc.type);
-                } else if (rc.type == ModelComponentType.REMAINING && stock.isBuilt()) {
-                    //pass
-                } else {
-                    continue;
-                }
-                float[][] pm = partMapCache.get(rc);
-                for (int x = 0; x < xRes; x++) {
-                    for (int z = 0; z < zRes; z++) {
-                        heightMap[x][z] = Math.max(heightMap[x][z], pm[x][z]);
-                    }
-                }
-            }
-        }
-
-        return heightMap;
+        return heightmap.apply(stock);
     }
 
     public RealBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {

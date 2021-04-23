@@ -10,6 +10,7 @@ public class ModelComponent {
     public final ModelComponentType type;
     public final String pos;
     public final Integer id;
+    public final String key;
 
     public final Set<String> modelIDs;
     public final Vec3d min;
@@ -22,6 +23,7 @@ public class ModelComponent {
         this.pos = pos;
         this.id = id;
         this.modelIDs = modelIDs;
+        this.key = String.join(" ", modelIDs);
         min = model.minOfGroup(this.modelIDs);
         max = model.maxOfGroup(this.modelIDs);
         center = new Vec3d((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
