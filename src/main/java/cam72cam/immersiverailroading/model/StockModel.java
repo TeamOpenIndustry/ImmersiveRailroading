@@ -43,7 +43,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        this.frame = new Frame(provider);
+        this.frame = new Frame(provider, def.defID);
         this.shell = provider.parse(ModelComponentType.SHELL);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
@@ -89,6 +89,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 OpenGL.With tex = render.bindTexture(stock.getTexture());
                 OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, true);
                 OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
+                OpenGL.With normals = OpenGL.bool(GL11.GL_NORMALIZE, true);
         ) {
             double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
