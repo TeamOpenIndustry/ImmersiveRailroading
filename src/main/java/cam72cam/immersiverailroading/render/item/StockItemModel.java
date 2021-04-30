@@ -34,7 +34,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 
 		try (
 				OpenGL.With matrix = OpenGL.matrix();
-				OpenGL.With tex = model.bindTexture(data.texture, true);
+				OpenGL.With tex = model.bindTexture(data.texture, false);
 				OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false)
 		) {
 				GL11.glTranslated(0.5, 0, 0);
@@ -77,6 +77,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 				model.draw();
 			}
 			model.textures.forEach((k, ts) -> ts.dealloc());
+			model.icons.forEach((k, ts) -> ts.dealloc());
 		});
 	}
 }

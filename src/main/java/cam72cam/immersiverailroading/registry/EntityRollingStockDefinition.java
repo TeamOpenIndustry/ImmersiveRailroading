@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
+import cam72cam.mod.model.obj.VertexBuffer;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.ResourceCache;
 import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
@@ -345,10 +346,7 @@ public abstract class EntityRollingStockDefinition {
                     .collect(Collectors.toList());
             data = new float[components.size() * xRes * zRes];
 
-            // TODO vbo iteration helpers in UMC
-            int vpf = 3;
-            int stride = (def.model.hasVertexNormals ? 12 : 9);
-            float[] modelData = def.model.vbo.get().floats();
+            VertexBuffer vb = def.model.vbo.get();
 
             for (int i = 0; i < components.size(); i++) {
                 ModelComponent rc = components.get(i);
@@ -360,11 +358,11 @@ public abstract class EntityRollingStockDefinition {
                         Path2D path = new Path2D.Float();
                         float fheight = 0;
                         boolean first = true;
-                        for (int point = 0; point < vpf; point++) {
-                            int vertex = face * vpf * stride + point * stride;
-                            float vertX = modelData[vertex + 0];
-                            float vertY = modelData[vertex + 1];
-                            float vertZ = modelData[vertex + 2];
+                        for (int point = 0; point < vb.vertsPerFace; point++) {
+                            int vertex = face * vb.vertsPerFace * vb.stride + point * vb.stride;
+                            float vertX = vb.data[vertex + 0];
+                            float vertY = vb.data[vertex + 1];
+                            float vertZ = vb.data[vertex + 2];
                             vertX += def.frontBounds;
                             vertZ += def.widthBounds / 2;
                             if (first) {
@@ -373,7 +371,7 @@ public abstract class EntityRollingStockDefinition {
                             } else {
                                 path.lineTo(vertX * ratio, vertZ * ratio);
                             }
-                            fheight += vertY / 3; // We know we are using tris
+                            fheight += vertY / vb.vertsPerFace;
                         }
                         Rectangle2D bounds = path.getBounds2D();
                         if (bounds.getWidth() * bounds.getHeight() < 1) {
