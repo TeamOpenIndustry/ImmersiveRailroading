@@ -12,15 +12,12 @@ import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.registry.Quilling.Chime;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 import cam72cam.mod.sound.ISound;
-import cam72cam.immersiverailroading.util.BurnUtil;
-import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.immersiverailroading.util.LiquidUtil;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
@@ -150,7 +147,17 @@ public class LocomotiveSteam extends Locomotive {
 		phase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));
 		return phase;
 	}
-	
+
+	@Override
+	public double getTractiveEffortNewtons(Speed speed) {
+		return (getDefinition().cab_forward ? -1 : 1) * super.getTractiveEffortNewtons(speed);
+	}
+
+	@Override
+	protected double simulateWheelSlip() {
+		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();
+	}
+
 	private Map<String, Boolean> phaseOn = new HashMap<>();
 	private List<ISound> sndCache = new ArrayList<>();
 	private int sndCacheId = 0;
@@ -513,7 +520,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 
 		EntityCoupleableRollingStock stock = this;
-		CouplerType coupler = CouplerType.BACK;
+		CouplerType coupler = getDefinition().cab_forward ? CouplerType.FRONT : CouplerType.BACK;
 		while (coupler != null && stock.getCoupled(coupler) instanceof Tender) {
 			Tender tender = (Tender) stock.getCoupled(coupler);
 

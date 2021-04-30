@@ -33,6 +33,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private int numSlots;
     private int width;
     public boolean tender_auto_feed;
+    public boolean cab_forward;
 
     public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveSteam.class, defID, data);
@@ -54,6 +55,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
         this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
         this.tender_auto_feed = properties.has("tender_auto_feed") ? properties.get("tender_auto_feed").getAsBoolean() : true;
+        this.cab_forward = properties.has("cab_forward") && properties.get("cab_forward").getAsBoolean();
 
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
