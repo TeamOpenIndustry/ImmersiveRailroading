@@ -116,7 +116,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		this.markDirty();
 		return this.augmentFilterID != null;
 	}
-	public PlayerMessage nextAugmentRedstoneMode() {
+	public PlayerMessage nextAugmentRedstoneMode(boolean crouching) {
 		if (this.augment == null) {
 			return null;
 		}
@@ -128,8 +128,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				controlMode = LocoControlMode.values()[((controlMode.ordinal() + 1) % (LocoControlMode.values().length))];
 				return PlayerMessage.translate(controlMode.toString());
 			case COUPLER:
-				couplerMode = CouplerAugmentMode.values()[((couplerMode.ordinal() + 1) % (CouplerAugmentMode.values().length))];
-				return PlayerMessage.translate(couplerMode.toString());
+				if (! crouching) {
+					couplerMode = CouplerAugmentMode.values()[((couplerMode.ordinal() + 1) % (CouplerAugmentMode.values().length))];
+					return PlayerMessage.translate(couplerMode.toString());
+				}
+				// Fall through to redstone control setting
 			case ITEM_LOADER:
 			case ITEM_UNLOADER:
 			case FLUID_LOADER:
@@ -818,8 +821,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 		}
-		if (stack.is(Fuzzy.REDSTONE_TORCH)) {
-			PlayerMessage next = this.nextAugmentRedstoneMode();
+		if (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST)) {
+			PlayerMessage next = this.nextAugmentRedstoneMode(stack.is(Fuzzy.REDSTONE_DUST));
 			if (next != null) {
 				if (this.getWorld().isServer) {
 					player.sendMessage(next);
