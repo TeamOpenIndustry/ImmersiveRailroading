@@ -40,6 +40,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     @Override
     protected void removed(T stock) {
         super.removed(stock);
+        bell.removed(stock);
     }
 
     @Override
