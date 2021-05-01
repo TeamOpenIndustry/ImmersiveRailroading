@@ -77,22 +77,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	public <T extends EntityRollingStockDefinition> T getDefinition(Class<T> type) {
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		if (def == null) {
-			ImmersiveRailroading.error("Definition %s has been removed!  This stock will not function!", defID);
-			try {
-				return type.getConstructor(String.class, JsonObject.class).newInstance(defID, null);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-					| SecurityException e) {
-				try {
-					return type.getConstructor(Class.class, String.class, JsonObject.class).newInstance(null, defID, null);
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-						| SecurityException ex) {
-					ImmersiveRailroading.catching(ex);
-					return null;
-				}
-			}
-		} else {
-			return type.cast(def);
+			// This should not be hit, entity should be removed handled by tryJoinWorld
+			throw new RuntimeException(String.format("Definition %s has been removed!  This stock will not function!", defID));
 		}
+		return (T) def;
 	}
 	public String getDefinitionID() {
 		return this.defID;

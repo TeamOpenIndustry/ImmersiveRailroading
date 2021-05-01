@@ -77,24 +77,20 @@ public abstract class EntityRollingStockDefinition {
     private double passengerCompartmentWidth;
     private int weight;
     private int maxPassengers;
-    private Map<ModelComponentType, List<ModelComponent>> renderComponents;
-    private List<ItemComponentType> itemComponents;
-    private Function<EntityBuildableRollingStock, float[][]> heightmap;
+    private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
+    private final List<ItemComponentType> itemComponents;
+    private final Function<EntityBuildableRollingStock, float[][]> heightmap;
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
         this.defID = defID;
 
-        this.renderComponents = new HashMap<>();
-        this.itemComponents = new ArrayList<>();
-
-        if (data == null) {
-            return;
-        }
 
         parseJson(data);
 
         this.model = createModel();
+
+        this.renderComponents = new HashMap<>();
         for (ModelComponent component : model.allComponents) {
             renderComponents.computeIfAbsent(component.type, v -> new ArrayList<>())
                     .add(0, component);
@@ -463,10 +459,6 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public float[][] createHeightMap(EntityBuildableRollingStock stock) {
-        if (heightmap == null) {
-            // Entity exists within a chunk, but has refused to load into the world...
-            return new float[0][0];
-        }
         return heightmap.apply(stock);
     }
 
