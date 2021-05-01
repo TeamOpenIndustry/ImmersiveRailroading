@@ -174,7 +174,11 @@ public enum ItemComponentType {
 		if (definition == null) {
 			return ItemCastingCost.BAD_CAST_COST;
 		}
-		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
+		List<ModelComponent> components = definition.getComponents(this.render.get(0));
+		if (components == null) {
+			return ItemCastingCost.BAD_CAST_COST;
+		}
+		ModelComponent comp = components.get(0);
 		double densityGues = 0.6;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * Math.pow(gauge.scale(), 3));
 	}
