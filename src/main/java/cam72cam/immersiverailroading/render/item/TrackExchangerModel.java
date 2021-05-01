@@ -39,7 +39,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	public static void render(ItemStack stack, World world) {
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		RailInfo info = new RailInfo(
-                new RailSettings(Gauge.from(Gauge.STANDARD), data.track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false),
+                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,
@@ -51,7 +51,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			if (railSlave != null) {
 				TileRail rail = railSlave.getParentTile();
 				if (rail != null) {
-					lookInfo = info.withTrack(rail.info.settings.track).withRailBed(rail.info.settings.railBed);
+					lookInfo = info.withTrack(rail.info.settings.track).withRailBed(rail.info.settings.railBed).withGauge(rail.info.settings.gauge);
 				}
 			}
 		}

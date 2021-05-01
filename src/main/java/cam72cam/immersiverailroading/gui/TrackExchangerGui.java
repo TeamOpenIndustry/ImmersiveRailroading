@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.gui;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
@@ -28,9 +27,11 @@ import static cam72cam.immersiverailroading.gui.TrackGui.getStackName;
 public class TrackExchangerGui implements IScreen {
 	private Button trackSelector;
 	private Button bedTypeButton;
+	private Button gaugeButton;
 
 	private String track;
 	private ItemStack railBed;
+	private Gauge gauge;
 
 	List<ItemStack> oreDict;
 
@@ -40,6 +41,7 @@ public class TrackExchangerGui implements IScreen {
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(player.getHeldItem(Player.Hand.PRIMARY));
 		this.track = data.track;
 		this.railBed = data.railBed;
+		this.gauge = data.gauge;
 
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
@@ -48,14 +50,14 @@ public class TrackExchangerGui implements IScreen {
 
 	@Override
 	public void init(IScreenBuilder screen) {
-		trackSelector = new Button(screen, -100, -10, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name)) {
+		trackSelector = new Button(screen, -100, 1 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				track = next(DefinitionManager.getTrackIDs(), track, hand);
 				trackSelector.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
 			}
 		};
-		bedTypeButton = new Button(screen, 0 - 100, -24 + 2 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(railBed))) {
+		bedTypeButton = new Button(screen, -100, 2 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(railBed))) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
@@ -69,6 +71,13 @@ public class TrackExchangerGui implements IScreen {
 				ip.show();
 			}
 		};
+		gaugeButton = new Button(screen, -100, 3 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				gauge = next(Gauge.values(), gauge, hand);
+				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
+			}
+		};
 	}
 
 	@Override
@@ -78,14 +87,14 @@ public class TrackExchangerGui implements IScreen {
 
 	@Override
 	public void onClose() {
-		new ItemTrackExchangerUpdatePacket(this.track, this.railBed).sendToServer();
+		new ItemTrackExchangerUpdatePacket(this.track, this.railBed, this.gauge).sendToServer();
 	}
 
 	@Override
 	public void draw(IScreenBuilder builder) {
 		int scale = 8;
 		// This could be more efficient...
-		RailSettings settings = new RailSettings(Gauge.from(Gauge.STANDARD),
+		RailSettings settings = new RailSettings(gauge,
 				track,
 				TrackItems.STRAIGHT,
 				10,

@@ -126,7 +126,7 @@ public class RailInfo {
 		RailSettings settings = this.settings.withType(type);
 		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
-	
+
 	public RailInfo withTrack(String track) {
 		RailSettings settings = this.settings.withTrack(track);
 		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
@@ -134,6 +134,11 @@ public class RailInfo {
 
 	public RailInfo withRailBed(ItemStack railBed) {
 		RailSettings settings = this.settings.withBed(railBed);
+		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+	}
+
+	public RailInfo withGauge(Gauge gauge) {
+		RailSettings settings = this.settings.withGauge(gauge);
 		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 
@@ -178,7 +183,7 @@ public class RailInfo {
 		return getBuilder(world, Vec3i.ZERO);
 	}
 
-	private class MaterialManager {
+    private class MaterialManager {
 		private final Function<ItemStack, Boolean> material;
 		private final int count;
 		private final ItemStack[] examples;

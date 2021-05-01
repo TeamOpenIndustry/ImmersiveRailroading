@@ -807,8 +807,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			ItemTrackExchanger.Data stackData = new ItemTrackExchanger.Data(stack);
 			String track = stackData.track;
 			ItemStack railBed = stackData.railBed;
-			if (!track.equals(tileRail.info.settings.track) || !railBed.equals(tileRail.info.settings.railBed)) {
-				RailInfo info = tileRail.info.withTrack(track).withRailBed(railBed);
+			Gauge gauge = stackData.gauge;
+			if (!track.equals(tileRail.info.settings.track) || !railBed.equals(tileRail.info.settings.railBed) || !gauge.equals(tileRail.info.settings.gauge)) {
+				RailInfo info = tileRail.info.withTrack(track).withRailBed(railBed).withGauge(gauge);
 				Audio.playSound(getWorld(), getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.3f, 0.2f);
 				if (!player.isCreative()) {
 					List<ItemStack> drops = tileRail.getDrops();

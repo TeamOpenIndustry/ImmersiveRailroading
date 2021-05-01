@@ -203,4 +203,22 @@ public class RailSettings {
                 isGradeCrossing
         );
     }
+
+
+    public RailSettings withGauge(Gauge gauge) {
+        return new RailSettings(
+                gauge,
+                track,
+                type,
+                length,
+                degrees,
+                posType,
+                smoothing,
+                direction,
+                railBed,
+                railBedFill,
+                isPreview,
+                isGradeCrossing
+        );
+    }
 }
