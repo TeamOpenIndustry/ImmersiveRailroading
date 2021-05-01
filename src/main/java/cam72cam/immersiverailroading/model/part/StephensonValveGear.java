@@ -158,6 +158,8 @@ public class StephensonValveGear implements ValveGear {
     }
 
     public void render(double distance, float throttle, ComponentRenderer draw) {
+        draw.render(cylinder);
+
         float wheelAngle = angle(distance);
         if (reverse) {
             wheelAngle -= 90;
