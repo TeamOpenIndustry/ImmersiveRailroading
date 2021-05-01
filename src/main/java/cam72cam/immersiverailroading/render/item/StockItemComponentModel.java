@@ -43,6 +43,11 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             groups.addAll(comp.get(0).modelIDs);
         }
 
+        if (groups.isEmpty()) {
+            ImmersiveRailroading.error("Invalid item %s", stack.toTag());
+            return;
+        }
+
         Vec3d center = renderer.model.centerOfGroups(groups);
         double width = renderer.model.heightOfGroups(groups);
         double length = renderer.model.lengthOfGroups(groups);
