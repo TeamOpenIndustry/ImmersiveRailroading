@@ -121,10 +121,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 if (frameFront != null) {
                     TrackFollower data = frontTrackers.get(stock.getUUID());
                     if (data == null) {
-                        data = new TrackFollower(stock, frameFront.center);
+                        data = new TrackFollower(frameFront.center);
                         frontTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply();
+                    data.apply(stock);
                     matrix.render(frameFront);
                 }
                 drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
@@ -135,10 +135,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 if (frameRear != null) {
                     TrackFollower data = rearTrackers.get(stock.getUUID());
                     if (data == null) {
-                        data = new TrackFollower(stock, frameRear.center);
+                        data = new TrackFollower(frameRear.center);
                         rearTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply();
+                    data.apply(stock);
                     matrix.render(frameRear);
                 }
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);

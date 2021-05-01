@@ -113,10 +113,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 if (frontTrackers != null) {
                     TrackFollower data = frontTrackers.get(stock.getUUID());
                     if (data == null) {
-                        data = new TrackFollower(stock, bogeyFront.center());
+                        data = new TrackFollower(bogeyFront.center());
                         frontTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply();
+                    data.apply(stock);
                 } else {
                     GL11.glTranslated(-def.getBogeyFront(stock.gauge), 0, 0);
                     GL11.glRotated(stock.getRotationYaw() - stock.getFrontYaw(), 0, 1, 0);
@@ -131,10 +131,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 if (rearTrackers != null) {
                     TrackFollower data = rearTrackers.get(stock.getUUID());
                     if (data == null) {
-                        data = new TrackFollower(stock, bogeyRear.center());
+                        data = new TrackFollower(bogeyRear.center());
                         rearTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply();
+                    data.apply(stock);
                 } else {
                     GL11.glTranslated(-def.getBogeyRear(stock.gauge), 0, 0);
                     GL11.glRotated(stock.getRotationYaw() - stock.getRearYaw(), 0, 1, 0);
