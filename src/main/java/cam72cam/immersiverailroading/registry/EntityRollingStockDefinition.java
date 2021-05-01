@@ -254,13 +254,6 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public ModelComponent getComponent(ModelComponentType name) {
-        if (!renderComponents.containsKey(name)) {
-            return null;
-        }
-        return renderComponents.get(name).get(0);
-    }
-
     public List<ModelComponent> getComponents(ModelComponentType name) {
         if (!renderComponents.containsKey(name)) {
             return null;

@@ -169,23 +169,24 @@ public enum ItemComponentType {
 		}
 	}
 
+	// TODO average the component sizes instead of just looking at the first element
 	public int getCastCost(EntityRollingStockDefinition definition, Gauge gauge) {
 		if (definition == null) {
 			return ItemCastingCost.BAD_CAST_COST;
 		}
-		ModelComponent comp = definition.getComponent(this.render.get(0));
+		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
 		double densityGues = 0.6;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * Math.pow(gauge.scale(), 3));
 	}
 
 	public int getWoodCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		ModelComponent comp = definition.getComponent(this.render.get(0));
+		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
 		double densityGues = 4;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * Math.pow(gauge.scale(), 3));
 	}
 	
 	public boolean isWooden(EntityRollingStockDefinition definition) {
-		ModelComponent component = definition.getComponent(this.render.get(0));
+		ModelComponent component = definition.getComponents(this.render.get(0)).get(0);
 		return component.wooden;
 	}
 }
