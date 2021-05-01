@@ -17,8 +17,7 @@ public class DieselExhaust {
     private final List<ModelComponent> components;
 
     public static DieselExhaust get(ComponentProvider provider) {
-        List<ModelComponent> components = provider.parseAll(ModelComponentType.DIESEL_EXHAUST_X);
-        return components.isEmpty() ? null : new DieselExhaust(components);
+        return new DieselExhaust(provider.parseAll(ModelComponentType.DIESEL_EXHAUST_X));
     }
 
     public DieselExhaust(List<ModelComponent> components) {
