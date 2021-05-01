@@ -274,6 +274,9 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 	
 	public ItemComponentType removeNextComponent(Player player) {
 		if (this.isBuilt) {
+			// Handle changes to model / part detection
+			this.builtItems = getDefinition().getItemComponents();
+
 			this.onDissassemble();
 		}
 		
