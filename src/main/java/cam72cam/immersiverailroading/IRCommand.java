@@ -37,12 +37,7 @@ public class IRCommand extends Command {
 		}
 		if (args[0].equals("reload")) {
 			ImmersiveRailroading.warn("Reloading Immersive Railroading definitions");
-			try {
-				DefinitionManager.initDefinitions();
-			} catch (IOException e) {
-				ImmersiveRailroading.catching(e);
-				// Might want to stop the server here...
-			}
+			DefinitionManager.initDefinitions();
 			ImmersiveRailroading.info("Done reloading Immersive Railroading definitions");
 			return true;
 		}

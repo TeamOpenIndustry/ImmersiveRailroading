@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,6 +58,10 @@ public class DefinitionManager {
     }
 
     private static void initGauges() throws IOException {
+        for (Gauge value : new ArrayList<>(Gauge.values())) {
+            Gauge.remove(value.value());
+        }
+
         Identifier gauges_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/gauges.json");
 
         List<Double> toRemove = new ArrayList<>();
@@ -84,12 +89,12 @@ public class DefinitionManager {
         }
     }
 
-    public static void initDefinitions() throws IOException {
-        initGauges();
-
-        definitions = new LinkedHashMap<>();
-        tracks = new LinkedHashMap<>();
-
+    public static void initDefinitions() {
+        try {
+            initGauges();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load gauges, do you have a broken pack?", e);
+        }
 
         // Parallel streams use numCPUs-1 threads for stream workloads.
         Runtime runtime = Runtime.getRuntime();
@@ -104,21 +109,31 @@ public class DefinitionManager {
             maxMemory = totalMemory;
         }
 
-        ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(1, Math.min(processors, (int)(maxMemory / STOCK_LOAD_MEMORY_PER_PROCESSOR))));
+        int loadingThreads = Math.max(1, Math.min(processors, (int) (maxMemory / STOCK_LOAD_MEMORY_PER_PROCESSOR)));
+        ForkJoinPool stockLoadingPool = new ForkJoinPool(loadingThreads, pool -> {
+            final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+            worker.setName("ImmersiveRailroading-" + worker.getPoolIndex());
+            return worker;
+        }, null, false);
         try {
-            forkJoinPool.submit(() -> {
+            stockLoadingPool.submit(() -> {
                 try {
                     initModels();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Unable to load rolling stock, do you have a broken pack?", e);
                 }
             }).get();
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            // the pool broke in unexpected ways or was killed
+            throw new RuntimeException(e);
         } finally {
-            forkJoinPool.shutdown();
+            stockLoadingPool.shutdown();
         }
-        initTracks();
+        try {
+            initTracks();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load tracks, do you have a broken pack?", e);
+        }
     }
 
     private static void initModels() throws IOException {
@@ -161,25 +176,30 @@ public class DefinitionManager {
             String defID = tuple.getKey();
             String defType = tuple.getValue();
 
-            try {
-                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, getJsonData(defID));
+            ImmersiveRailroading.debug("Loading stock " + defID);
+            Identifier resource = new Identifier(ImmersiveRailroading.MODID, defID);
 
-                synchronized (bar) {
-                    bar.step(stockDefinition.name());
-                }
+            try (InputStream input = resource.getResourceStream()) {
+                JsonParser parser = new JsonParser();
+                JsonObject jsonData = parser.parse(new InputStreamReader(input)).getAsJsonObject();
+                input.close();
+
+                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, jsonData);
+
                 return Pair.of(stockDefinition.defID, stockDefinition);
             } catch (Exception e) {
                 ImmersiveRailroading.error("Error loading model %s of type %s", defID, defType);
                 ImmersiveRailroading.catching(e);
 
-                synchronized (bar) {
-                    // Important so that progress bar steps correctly.
-                    bar.step("");
-                }
                 return null;
+            } finally {
+                synchronized (bar) {
+                    bar.step(defID);
+                }
             }
         }).filter(Objects::nonNull).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
+        definitions = new LinkedHashMap<>();
         definitionIDMap.keySet().stream().filter(loaded::containsKey).forEach(x -> definitions.put(x, loaded.get(x)));
 
         Progress.pop(bar);
@@ -208,6 +228,8 @@ public class DefinitionManager {
     }
 
     private static void initTracks() throws IOException {
+        tracks = new LinkedHashMap<>();
+
         ImmersiveRailroading.info("Loading tracks.");
         Identifier track_json = new Identifier(ImmersiveRailroading.MODID, "track/track.json");
 
@@ -236,20 +258,6 @@ public class DefinitionManager {
 
             Progress.pop(bar);
         }
-    }
-
-    private static JsonObject getJsonData(String defID) throws IOException {
-        ImmersiveRailroading.debug("Loading stock " + defID);
-        Identifier resource = new Identifier(ImmersiveRailroading.MODID, defID);
-
-        InputStream input = resource.getResourceStream();
-
-        JsonParser parser = new JsonParser();
-        JsonObject result = parser.parse(new InputStreamReader(input)).getAsJsonObject();
-
-        input.close();
-
-        return result;
     }
 
     /**

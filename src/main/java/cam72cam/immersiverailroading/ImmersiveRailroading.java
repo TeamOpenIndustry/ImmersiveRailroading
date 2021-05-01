@@ -94,11 +94,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ConfigFile.sync(ConfigGraphics.class);
 				ConfigFile.sync(ConfigSound.class);
 
-				try {
-					DefinitionManager.initDefinitions();
-				} catch (IOException e) {
-					throw new RuntimeException("Unable to load IR definitions", e);
-				}
+				DefinitionManager.initDefinitions();
 				break;
 			case FINALIZE:
 				MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
@@ -183,12 +179,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
 				break;
 			case RELOAD:
-				try {
-					DefinitionManager.initDefinitions();
-				} catch (IOException e) {
-					throw new RuntimeException("Unable to load IR definitions", e);
-				}
-
+				DefinitionManager.initDefinitions();
 				StockRenderCache.clearRenderCache();
 				break;
 		}
