@@ -1,17 +1,23 @@
 package cam72cam.immersiverailroading.gui;
 
+import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
-import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemTrackExchangerUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.render.OpenGL;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,5 +82,32 @@ public class TrackExchangerGui implements IScreen {
 	}
 
 	@Override
-	public void draw(IScreenBuilder builder) {}
+	public void draw(IScreenBuilder builder) {
+		int scale = 8;
+		// This could be more efficient...
+		RailSettings settings = new RailSettings(Gauge.from(Gauge.STANDARD),
+				track,
+				TrackItems.STRAIGHT,
+				10,
+				0,
+				TrackPositionType.FIXED,
+				TrackSmoothing.BOTH,
+				TrackDirection.NONE,
+				railBed,
+				ItemStack.EMPTY,
+				false,
+				false);
+		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
+		settings.write(stack);
+		try (OpenGL.With matrix = OpenGL.matrix()) {
+			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
+			GL11.glScaled(scale, scale, 1);
+			GUIHelpers.drawItem(stack, 0, 0);
+		}
+		try (OpenGL.With matrix = OpenGL.matrix()) {
+			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
+			GL11.glScaled(-scale, scale, 1);
+			GUIHelpers.drawItem(stack, 0, 0);
+		}
+	}
 }
