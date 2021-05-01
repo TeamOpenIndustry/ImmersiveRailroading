@@ -73,7 +73,6 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     protected void render(LocomotiveDiesel stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
-        exhaust.render(draw);
         horn.render(draw);
     }
 }

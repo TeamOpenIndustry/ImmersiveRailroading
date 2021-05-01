@@ -39,8 +39,4 @@ public class DieselExhaust {
             }
         }
     }
-
-    public void render(ComponentRenderer draw) {
-        draw.render(components);
-    }
 }
