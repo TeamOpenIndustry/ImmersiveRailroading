@@ -463,6 +463,10 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public float[][] createHeightMap(EntityBuildableRollingStock stock) {
+        if (heightmap == null) {
+            // Entity exists within a chunk, but has refused to load into the world...
+            return new float[0][0];
+        }
         return heightmap.apply(stock);
     }
 
