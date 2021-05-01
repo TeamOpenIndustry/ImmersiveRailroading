@@ -89,4 +89,8 @@ public enum ModelComponentType {
 		this.regex = ".*" + regex + ".*";
 		this.collisionsEnabled = collide;
 	}
+
+	public static boolean isParticle(String group) {
+		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_");
+	}
 }

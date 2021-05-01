@@ -8,6 +8,7 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.VBO;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
@@ -35,13 +36,14 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 		try (
 				OpenGL.With matrix = OpenGL.matrix();
 				OpenGL.With tex = model.bindTexture(data.texture, false);
-				OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false)
+				OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
+				VBO.BoundVBO vbo = StockRenderCache.getVBO(data.def.defID).bind();
 		) {
 				GL11.glTranslated(0.5, 0, 0);
 				GL11.glRotated(-90, 0, 1, 0);
 				scale = 0.2 * Math.sqrt(scale);
 				GL11.glScaled(scale, scale, scale);
-				model.draw();
+				vbo.draw();
 		}
 	}
 
@@ -66,6 +68,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			try (
 					OpenGL.With matrix = OpenGL.matrix();
 					OpenGL.With tex = model.bindTexture(true);
+					VBO.BoundVBO vbo = StockRenderCache.getVBO(data.def.defID).bind();
 			) {
 				Gauge std = Gauge.from(Gauge.STANDARD);
 				double modelLength = def.getLength(std);
@@ -74,7 +77,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 				GL11.glTranslated(0, 0.85, -0.5);
 				GL11.glScaled(scale, scale, scale / (modelLength / 2));
 				GL11.glRotated(85, 0, 1, 0);
-				model.draw();
+				vbo.draw();
 			}
 			model.textures.forEach((k, ts) -> ts.dealloc());
 			model.icons.forEach((k, ts) -> ts.dealloc());
