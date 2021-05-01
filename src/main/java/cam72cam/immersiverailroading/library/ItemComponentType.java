@@ -131,7 +131,7 @@ public enum ItemComponentType {
 	}
 
 	public int getPlateCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		ModelComponent comp = definition.getComponent(this.render.get(0));
+		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
 		
 		double mult = 0;
 		switch(this.crafting) {

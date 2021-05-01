@@ -15,6 +15,7 @@ import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class StockItemComponentModel implements ItemRender.IItemModel {
     @Override
@@ -35,11 +36,11 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
         ArrayList<String> groups = new ArrayList<>();
 
         for (ModelComponentType r : data.componentType.render) {
-            ModelComponent comp = data.def.getComponent(r);
+            List<ModelComponent> comp = data.def.getComponents(r);
             if (comp == null || r == ModelComponentType.CARGO_FILL_X) {
                 continue;
             }
-            groups.addAll(comp.modelIDs);
+            groups.addAll(comp.get(0).modelIDs);
         }
 
         Vec3d center = renderer.model.centerOfGroups(groups);
