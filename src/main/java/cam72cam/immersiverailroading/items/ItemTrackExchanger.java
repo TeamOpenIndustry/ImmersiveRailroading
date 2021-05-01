@@ -49,11 +49,16 @@ public class ItemTrackExchanger extends CustomItem {
 	public static class Data extends ItemDataSerializer {
 		@TagField("track")
 		public String track;
+		@TagField("railBed")
+		public ItemStack railBed;
 
 		public Data(ItemStack stack) {
 			super(stack);
 			if (track == null) {
 				track = DefinitionManager.getTracks().get(0).name;
+			}
+			if (railBed == null) {
+				railBed = ItemStack.EMPTY;
 			}
 		}
 	}

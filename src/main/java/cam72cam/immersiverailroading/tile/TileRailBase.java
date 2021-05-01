@@ -801,25 +801,35 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER)) {
 			TileRail tileRail = this.getParentTile();
-			String track = new ItemTrackExchanger.Data(stack).track;
-			if (!track.equals(tileRail.info.settings.track)) {
+			ItemTrackExchanger.Data stackData = new ItemTrackExchanger.Data(stack);
+			String track = stackData.track;
+			ItemStack railBed = stackData.railBed;
+			if (!track.equals(tileRail.info.settings.track) || !railBed.equals(tileRail.info.settings.railBed)) {
+				RailInfo info = tileRail.info.withTrack(track).withRailBed(railBed);
 				if (!player.isCreative()) {
-					RailInfo info = tileRail.info.withTrack(track);
-					if (info.build(player, tileRail.getPos(), false)) { //cancel if player doesn't have all required items
+					List<ItemStack> drops = tileRail.getDrops();
+					List<ItemStack> newDrops = info.build(player, tileRail.getPos(), false);
+					if (newDrops != null) { //cancel if player doesn't have all required items
 						//FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers( //we need to send the packet because this code is executed on the server side
 						//		new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
 						tileRail.info = info;
 
-						tileRail.spawnDrops(player.getPosition());
-						tileRail.setDrops(info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(tileRail.getPos())).drops);
-						tileRail.markDirty();
+						if (drops != null) {
+							for (ItemStack drop : drops) {
+								getWorld().dropItem(drop, player.getPosition());
+							}
+						}
+						tileRail.setDrops(newDrops);
+						tileRail.markAllDirty();
 					}
 				} else {
 					//FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayers(
 					//		new SPacketSoundEffect(SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,pos.getX(), pos.getY(), pos.getZ(), 1.0f, 0.2f));
-					tileRail.info = tileRail.info.withTrack(track);
+					tileRail.info = info;
+					tileRail.markAllDirty();
 				}
 			}
+			return true;
 		}
 		if (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST)) {
 			PlayerMessage next = this.nextAugmentRedstoneMode(stack.is(Fuzzy.REDSTONE_DUST));

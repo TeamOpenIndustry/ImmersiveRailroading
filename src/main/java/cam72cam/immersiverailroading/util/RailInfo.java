@@ -132,6 +132,11 @@ public class RailInfo {
 		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
 
+	public RailInfo withRailBed(ItemStack railBed) {
+		RailSettings settings = this.settings.withBed(railBed);
+		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+	}
+
 	public RailInfo withItemHeld(boolean itemHeld) {
 		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
 	}
@@ -239,10 +244,10 @@ public class RailInfo {
 	}
 
 	public boolean build(Player player, Vec3i pos) {
-		return this.build(player, pos, true);
+		return this.build(player, pos, true) != null;
 	}
 
-	public boolean build(Player player, Vec3i pos, boolean placeTrack) {
+	public List<ItemStack> build(Player player, Vec3i pos, boolean placeTrack) {
 		BuilderBase builder = getBuilder(player.getWorld(), pos);
 
 		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks && placeTrack) {
@@ -255,7 +260,7 @@ public class RailInfo {
 			if (player.getWorld().isServer) {
 				if (player.isCreative() && placeTrack) {
 					builder.build();
-					return true;
+					return Collections.emptyList();
 				}
 
 				// Survival check
@@ -296,7 +301,7 @@ public class RailInfo {
 					isOk = isOk & material.checkMaterials(player);
 				}
 				if (!isOk) {
-					return false;
+					return null;
 				}
 
 				List<ItemStack> drops = new ArrayList<>();
@@ -307,10 +312,10 @@ public class RailInfo {
 
 				builder.setDrops(drops);
 				if (placeTrack) builder.build();
-				return true;
+				return drops;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public TrackDefinition getDefinition() {

@@ -10,10 +10,14 @@ public class ItemTrackExchangerUpdatePacket extends Packet {
 	@TagField
 	private String track;
 
+	@TagField
+	private ItemStack railBed;
+
 	public ItemTrackExchangerUpdatePacket() {}
 
-	public ItemTrackExchangerUpdatePacket(String track) {
+	public ItemTrackExchangerUpdatePacket(String track, ItemStack railBed) {
 		this.track = track;
+		this.railBed = railBed;
 	}
 
 	@Override
@@ -21,6 +25,7 @@ public class ItemTrackExchangerUpdatePacket extends Packet {
 		ItemStack stack = getPlayer().getHeldItem(Player.Hand.PRIMARY);
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		data.track = track;
+		data.railBed = railBed;
 		data.write();
 		getPlayer().setHeldItem(Player.Hand.PRIMARY, stack);
 	}
