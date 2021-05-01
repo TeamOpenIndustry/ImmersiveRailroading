@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.render.VBO;
 import cam72cam.mod.render.obj.OBJRender;
+import cam72cam.mod.render.obj.OBJVBO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class StockRenderCache {
 			if (renderer == null) {
 				return null;
 			}
-			VBO.Builder builder = new VBO.Builder(renderer.model);
+			OBJVBO.Builder builder = renderer.getVBO().subModel();
 			builder.draw(renderer.model.groups.keySet().stream().filter(x -> !ModelComponentType.isParticle(x)).collect(Collectors.toList()));
 			vbo_cache.put(defID, builder.build());
 		}

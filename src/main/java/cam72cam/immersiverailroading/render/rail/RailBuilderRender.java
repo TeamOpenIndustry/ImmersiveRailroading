@@ -10,6 +10,7 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.render.obj.OBJVBO;
 import cam72cam.mod.world.World;
 import util.Matrix4;
 
@@ -33,7 +34,7 @@ public class RailBuilderRender {
 
         VBO cached = cache.get(info.uniqueID);
         if (cached == null) {
-            VBO.Builder builder = new VBO.Builder(trackRenderer.model);
+            OBJVBO.Builder builder = trackRenderer.getVBO().subModel();
 
             for (VecYawPitch piece : info.getBuilder(world).getRenderData()) {
                 Matrix4 m = new Matrix4();

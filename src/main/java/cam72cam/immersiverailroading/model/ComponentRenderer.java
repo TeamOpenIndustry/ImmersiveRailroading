@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.model;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.render.OpenGL;
-import cam72cam.mod.render.VBO;
+import cam72cam.mod.render.obj.OBJVBO.BoundOBJVBO;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ComponentRenderer implements Closeable {
-    private final VBO.BoundVBO vbo;
+    private final BoundOBJVBO vbo;
     private final List<ModelComponent> buffer = new ArrayList<>();
     private final List<ModelComponentType> available;
     private final OpenGL.With matrix;
 
-    public ComponentRenderer(VBO.BoundVBO vbo, List<ModelComponentType> available) {
+    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available) {
         this.vbo = vbo;
         this.available = available;
         matrix = OpenGL.matrix();

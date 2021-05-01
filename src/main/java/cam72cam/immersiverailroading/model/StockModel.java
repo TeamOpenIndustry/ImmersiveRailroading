@@ -13,8 +13,8 @@ import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OpenGL;
-import cam72cam.mod.render.VBO;
 import cam72cam.mod.render.obj.OBJRender;
+import cam72cam.mod.render.obj.OBJVBO;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -85,7 +85,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 .collect(Collectors.toList());
 
         try (
-                VBO.BoundVBO bound = render.bind();
+                OBJVBO.BoundOBJVBO bound = render.bind();
                 OpenGL.With tex = render.bindTexture(stock.getTexture());
                 OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, true);
                 OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
