@@ -211,6 +211,8 @@ public class WalschaertsValveGear implements ValveGear {
             GL11.glTranslated(-combinationLeverRotPos.x, -combinationLeverRotPos.y, 0);
             matrix.render(combinationLever);
         }
+
+        draw.render(todo);
     }
 
     @Override
