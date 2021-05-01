@@ -25,15 +25,16 @@ public class TrackFollower {
         if (!stock.getPosition().equals(pos)) {
             pos = stock.getPosition();
 
-            // TODO atPointYaw instead of getRotationYaw(second)?
+            // TODO tight turns
             Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, pos, stock.getRotationYaw(), stock.getRotationYaw(), -point.x);
             Vec3d pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), stock.getRotationYaw(), 0.5 * stock.gauge.scale());
             Vec3d delta = pos.subtract(pointPos).scale(-point.x); // Scale copies sign
-            toPointYaw = VecUtil.toYaw(delta) + stock.getRotationYaw() + 180;
-            toPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(delta, stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch();
             if (pointPos.distanceTo(pointPosNext) > 0.1 * stock.gauge.scale()) {
                 atPointYaw = VecUtil.toYaw(pointPos.subtract(pointPosNext)) + stock.getRotationYaw() - toPointYaw + 180;
+                toPointYaw = VecUtil.toYaw(delta) + stock.getRotationYaw() + 180;
+                toPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(delta, stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch();
             } else {
+                pos = null; // Mark for re-compute
                 atPointYaw = 0;
             }
         }
