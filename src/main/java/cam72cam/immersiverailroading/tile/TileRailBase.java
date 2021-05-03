@@ -64,7 +64,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD;
 	@TagField("couplerMod")
 	private CouplerAugmentMode couplerMode = CouplerAugmentMode.ENGAGED;
-	@TagField("redstoneMode")
+	@TagField("redstoneSensitivity")
 	private RedstoneMode redstoneMode = RedstoneMode.ENABLED;
 	private int ticksExisted;
 	public boolean blockUpdate;
