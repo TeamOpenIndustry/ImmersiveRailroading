@@ -387,7 +387,8 @@ public abstract class EntityRollingStockDefinition {
         String key = String.format(
                 "heightmap-%s-%s-%s-%s-%s-%s",
                 model.hash, frontBounds, rearBounds, widthBounds, heightBounds, renderComponents.size());
-        try (ResourceCache<HeightMapData> cache = new ResourceCache<>(modelLoc, key, provider -> new HeightMapData(this))) {
+        try {
+            ResourceCache<HeightMapData> cache = new ResourceCache<>(modelLoc, key, provider -> new HeightMapData(this));
             Supplier<GenericByteBuffer> data = cache.getResource("data.bin", builder -> new GenericByteBuffer(builder.data));
             Supplier<GenericByteBuffer> meta = cache.getResource("meta.nbt", builder -> {
                 try {
@@ -401,6 +402,7 @@ public abstract class EntityRollingStockDefinition {
                     throw new RuntimeException(e);
                 }
             });
+            cache.close();
 
             return (stock) -> {
                 try {
