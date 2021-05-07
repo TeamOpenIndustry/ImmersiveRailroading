@@ -44,12 +44,25 @@ public class DefinitionManager {
                     return new LocomotiveSteamDefinition(defID, data);
                 case "diesel":
                     return new LocomotiveDieselDefinition(defID, data);
+                case "cable":
+                    return new LocomotiveDieselDefinition(defID, data);
                 default:
                     ImmersiveRailroading.warn("Invalid era %s in %s", era, defID);
                     return null;
             }
         });
-
+        jsonLoaders.put("control", (String defID, JsonObject data) -> {
+            String type = data.get("type").getAsString();
+            switch (type) {
+                case "cabcar":
+                    return new CarPassengerDefinition(defID, data);
+                case "brakevan":
+                    return new CarPassengerDefinition(defID, data);
+                default:
+                    ImmersiveRailroading.warn("Invalid type %s in %s", type, defID);
+                    return null;
+            }
+        });
         jsonLoaders.put("tender", TenderDefinition::new);
         jsonLoaders.put("passenger", CarPassengerDefinition::new);
         jsonLoaders.put("freight", CarFreightDefinition::new);

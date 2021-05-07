@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.entity.ControllableStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
@@ -45,11 +46,14 @@ public class PhysicsAccummulator {
 		// lbs * 1%gradeResistance * grade multiplier
 		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
 		
-		if (stock instanceof Locomotive) {
-			Locomotive loco = (Locomotive) stock;
-			tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
-			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient();
-			brakeAdhesionNewtons += loco.getDefinition().getStartingTractionNewtons(stock.gauge); 
+		if (stock instanceof ControllableStock) {
+			ControllableStock controllable = (ControllableStock) stock;
+			airBrake += Math.min(1, Math.pow(controllable.getAirBrake() * controllable.getDefinition().getBrakePower(), 2)) * controllable.slipCoefficient();
+			brakeAdhesionNewtons += controllable.getDefinition().getStartingTractionNewtons(stock.gauge);
+			if (controllable instanceof Locomotive) {
+				Locomotive loco = (Locomotive) controllable;
+				tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
+			}
 		} else {
 			// Air brake only applies 1/4th
 			// 0.25 = steel wheel on steel rail	

@@ -3,21 +3,22 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.model.LocomotiveModel;
+import cam72cam.immersiverailroading.model.ControllableStockModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
 
 import java.util.List;
 
-public abstract class LocomotiveDefinition extends ControllableStockDefinition {
+public abstract class ControllableStockDefinition extends FreightDefinition {
     public boolean toggleBell;
+    public Identifier bell;
     private String works;
-    private int power;
+    private int traction;
     private Speed maxSpeed;
-    private boolean hasRadioEquipment;
 
-    LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
+    ControllableStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);
 
         // Handle null data
@@ -32,48 +33,44 @@ public abstract class LocomotiveDefinition extends ControllableStockDefinition {
     @Override
     public void parseJson(JsonObject data) throws Exception {
         super.parseJson(data);
+
+        works = data.get("works").getAsString();
+
         JsonObject properties = data.get("properties").getAsJsonObject();
-        power = (int) Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
-        maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
-        if (properties.has("radio_equipped")) {
-            hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
+
+        traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
+        toggleBell = true;
+        if (properties.has("toggle_bell")) {
+            toggleBell = properties.get("toggle_bell").getAsBoolean();
         }
     }
 
     @Override
     protected StockModel<?> createModel() throws Exception {
-        return new LocomotiveModel<>(this);
+        return new ControllableStockModel<>(this);
     }
 
     @Override
     public List<String> getTooltip(Gauge gauge) {
         List<String> tips = super.getTooltip(gauge);
-        tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower(gauge)));
-        tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed(gauge).metricString()));
-        return tips;
+        tips.add(GuiText.LOCO_WORKS.toString(this.works));
+        tips.add(GuiText.LOCO_TRACTION.toString(this.getStartingTractionNewtons(gauge)));
+       return tips;
     }
 
-    @Override
     public int getHorsePower(Gauge gauge) {
-        return (int) Math.ceil(gauge.scale() * this.power);
+        return 0;
     }
 
     /**
      * @return tractive effort in newtons
      */
     public int getStartingTractionNewtons(Gauge gauge) {
-        return super.getStartingTractionNewtons(gauge);
-    }
-
-    public Speed getMaxSpeed(Gauge gauge) {
-        return Speed.fromMinecraft(gauge.scale() * this.maxSpeed.minecraft());
+        return (int) Math.ceil(gauge.scale() * this.traction * 4.44822);
     }
 
     public double getBrakePower() {
         return 1;
     }
 
-    public boolean getRadioCapability() {
-        return this.hasRadioEquipment;
-    }
 }
