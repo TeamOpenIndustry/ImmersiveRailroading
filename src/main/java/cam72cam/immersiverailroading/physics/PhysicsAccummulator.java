@@ -42,10 +42,12 @@ public class PhysicsAccummulator {
 		rollingResistanceNewtons += 0.0015 * stockMassLb * 4.44822f;
 		
 		// SHOULD THIS HAVE DIRECTION MULT?
-		double grade = -Math.tan(Math.toRadians(pos.rotationPitch % 90)) * Config.ConfigBalance.slopeMultiplier;
-		// lbs * 1%gradeResistance * grade multiplier
-		gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
-		
+		if(!movable.ignoreSlope()) {
+			double grade = -Math.tan(Math.toRadians(pos.rotationPitch % 90)) * Config.ConfigBalance.slopeMultiplier;
+			// lbs * 1%gradeResistance * grade multiplier
+			gradeForceNewtons += (stockMassLb / 100) * (grade * 100)  * 4.44822f;
+		}
+
 		if (stock instanceof ControllableStock) {
 			ControllableStock controllable = (ControllableStock) stock;
 			airBrake += Math.min(1, Math.pow(controllable.getAirBrake() * controllable.getDefinition().getBrakePower(), 2)) * controllable.slipCoefficient();

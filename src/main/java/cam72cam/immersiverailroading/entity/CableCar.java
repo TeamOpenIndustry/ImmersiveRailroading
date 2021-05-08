@@ -1,13 +1,12 @@
 package cam72cam.immersiverailroading.entity;
 
-import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.CableCarDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.math.Vec3d;
 
 import java.util.List;
 
@@ -17,6 +16,7 @@ public class CableCar extends LocomotiveUnfueled {
 
 	public CableCar() {
 		super();
+		this.setIgnoreSlope(true);
 	}
 
 	@Override
@@ -29,6 +29,11 @@ public class CableCar extends LocomotiveUnfueled {
 		return super.getDefinition(CableCarDefinition.class);
 	}
 
+	@Override
+	protected void createExplosion(Vec3d pos, float size, boolean damageTerrain) {
+		super.createExplosion(pos, size, damageTerrain);
+	}
+
 	/*
 	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
 	 */
@@ -36,11 +41,14 @@ public class CableCar extends LocomotiveUnfueled {
 	public void handleKeyPress(Player source, KeyTypes key) {
 		super.handleKeyPress(source, key);
 	}
-	
-	private void realSetThrottle(float newThrottle) {
+
+	@Override
+	protected void realSetThrottle(float newThrottle) {
 		super.setThrottle(newThrottle);
 	}
-	private void realAirBrake(float newAirBrake) {
+
+	@Override
+	protected void realAirBrake(float newAirBrake) {
 		super.setAirBrake(newAirBrake);
 	}
 	
@@ -62,16 +70,6 @@ public class CableCar extends LocomotiveUnfueled {
 	@Override
 	public void onTick() {
 		super.onTick();
-		
-		if (getWorld().isClient) {
-			float absThrottle = Math.abs(this.getThrottle());
-			if (this.soundThrottle > absThrottle) {
-				this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle);
-			} else if (this.soundThrottle < absThrottle) {
-				this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
-			}
-			return;
-		}
 	}
 	
 	@Override
@@ -87,9 +85,5 @@ public class CableCar extends LocomotiveUnfueled {
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
-	}
-
-	public float getSoundThrottle() {
-		return soundThrottle;
 	}
 }

@@ -1,9 +1,6 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
-import cam72cam.immersiverailroading.entity.HandCar;
-import cam72cam.immersiverailroading.entity.CableCar;
-import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.entity.LocomotiveUnfueled;
+import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
@@ -14,10 +11,10 @@ public class BrakeThrottleOverlay extends ControlPanelOverlay {
 		if (riding == null) {
 			return;
 		}
-		if (!(riding instanceof LocomotiveUnfueled)) {
+		if (!(riding instanceof LocomotiveUnfueled || riding instanceof ControlCar)) {
 			return;
 		}
-		Locomotive loco = (Locomotive) riding;
+		ControllableStock loco = (ControllableStock) riding;
 		drawBackground(loco);
 		addSpace(10);
 		

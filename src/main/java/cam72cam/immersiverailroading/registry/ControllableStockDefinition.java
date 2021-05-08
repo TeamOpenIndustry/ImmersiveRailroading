@@ -16,6 +16,7 @@ public abstract class ControllableStockDefinition extends FreightDefinition {
     public Identifier bell;
     private String works;
     private int traction;
+    public boolean multiUnitCapable;
 
     ControllableStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);

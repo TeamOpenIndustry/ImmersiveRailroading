@@ -99,28 +99,24 @@ public class LocomotiveDiesel extends Locomotive {
 				super.handleKeyPress(source, key);
 		}
 	}
-	
-	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
-		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
-			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
-			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());
-		}
-	}
-	
-	private void realSetThrottle(float newThrottle) {
+
+	@Override
+	protected void realSetThrottle(float newThrottle) {
 		if (Config.isFuelRequired(gauge)) {
 			newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
 		}
 		super.setThrottle(newThrottle);
 	}
-	private void realAirBrake(float newAirBrake) {
-		super.setAirBrake(newAirBrake);;
+
+	@Override
+	protected void realAirBrake(float newAirBrake) {
+		super.setAirBrake(newAirBrake);
 	}
 	
 	@Override
 	public void setThrottle(float newThrottle) {
 		realSetThrottle(newThrottle);
-		if (this.getDefinition().muliUnitCapable) {
+		if (this.getDefinition().multiUnitCapable) {
 			this.mapTrain(this, true, false, this::setThrottleMap);
 		}
 	}

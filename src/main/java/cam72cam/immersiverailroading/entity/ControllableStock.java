@@ -164,7 +164,16 @@ public abstract class ControllableStock extends FreightTank {
 
 		this.distanceTraveled += simulateWheelSlip();
 	}
-	
+
+	// Throttle logic for MU'ed stock
+	protected void setThrottleMap(EntityRollingStock stock, boolean direction) {
+		if (stock instanceof ControllableStock && ((ControllableStock)stock).getDefinition().multiUnitCapable) {
+			((ControllableStock) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
+			((ControllableStock) stock).realAirBrake(this.getAirBrake());
+		}
+	}
+
+
 	protected double simulateWheelSlip() {
 		return 0;
 	}
@@ -173,7 +182,15 @@ public abstract class ControllableStock extends FreightTank {
 	 * 
 	 * Misc Helper functions
 	 */
-	
+
+	protected void realSetThrottle(float newThrottle) {
+		setThrottle(newThrottle);
+	}
+
+	protected void realAirBrake(float newAirBrake) {
+
+	}
+
 	public float getThrottle() {
 		return throttle;
 	}

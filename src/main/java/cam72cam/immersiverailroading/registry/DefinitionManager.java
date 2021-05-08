@@ -55,7 +55,7 @@ public class DefinitionManager {
             String type = data.get("type").getAsString();
             switch (type) {
                 case "cabcar":
-                    return new CarPassengerDefinition(defID, data);
+                    return new ControlCarDefinition(defID, data);
                 case "brakevan":
                     return new CarPassengerDefinition(defID, data);
                 default:

@@ -83,7 +83,7 @@ public class ControlPanelOverlay {
 		currPosX += scalarWidth + scalarSpacer;
 	}
 	
-	public void drawSpeedDisplay(Locomotive loco, int offset) {
+	public void drawSpeedDisplay(ControllableStock loco, int offset) {
 		double speed = Math.abs(loco.getCurrentSpeed().metric());
 		String text = "";
 		switch (ConfigGraphics.speedUnit) {
@@ -115,7 +115,7 @@ public class ControlPanelOverlay {
 		if(controllable instanceof LocomotiveDiesel) {
 			GUIHelpers.texturedRect(OVERLAY_DIESEL_TEXTURE, bgPosX, bgPosY, 85, 85);
 		}
-		if(controllable instanceof HandCar || controllable instanceof CableCar) {
+		if(controllable instanceof HandCar || controllable instanceof CableCar || controllable instanceof ControlCar) {
 			GUIHelpers.texturedRect(OVERLAY_HANDCAR_TEXTURE, bgPosX, bgPosY, 60, 85);
 		}
 	}
