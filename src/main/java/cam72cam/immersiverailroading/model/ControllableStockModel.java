@@ -2,11 +2,9 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.ControllableStock;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
-import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.Bell;
 import cam72cam.immersiverailroading.registry.ControllableStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 
 import java.util.List;
 
@@ -22,7 +20,7 @@ public class ControllableStockModel<T extends ControllableStock> extends Freight
         super.parseComponents(provider, def);
         bell = Bell.get(
                 provider,
-                ((LocomotiveDefinition)def).bell
+                ((ControllableStockDefinition)def).bell
         );
     }
 

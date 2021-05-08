@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
-import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
+import cam72cam.immersiverailroading.gui.overlay.FluidTempBrakeThrottleOverlay;
+import cam72cam.immersiverailroading.gui.overlay.BrakeThrottleOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -40,9 +40,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.Command;
-import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 public class ImmersiveRailroading extends ModCore.Mod {
@@ -72,6 +70,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRegistry.register(ImmersiveRailroading.instance, HandCar::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveDiesel::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveSteam::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, CableCar::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, Tender::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 
 				Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
@@ -142,6 +141,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				};
 				EntityRenderer.register(LocomotiveSteam.class, stockRender);
 				EntityRenderer.register(LocomotiveDiesel.class, stockRender);
+				EntityRenderer.register(CableCar.class, stockRender);
 				EntityRenderer.register(CarPassenger.class, stockRender);
 				EntityRenderer.register(CarFreight.class, stockRender);
 				EntityRenderer.register(CarTank.class, stockRender);
@@ -172,8 +172,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				GlobalRender.registerOverlay(pt -> {
 					new SteamLocomotiveOverlay().draw();
-					new DieselLocomotiveOverlay().draw();
-					new HandCarOverlay().draw();
+					new FluidTempBrakeThrottleOverlay().draw();
+					new BrakeThrottleOverlay().draw();
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);

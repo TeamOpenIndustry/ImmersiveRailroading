@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.registry.ControllableStockDefinition;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
@@ -51,8 +51,8 @@ public abstract class ControllableStock extends FreightTank {
 	 */
 	
 	@Override
-	public LocomotiveDefinition getDefinition() {
-		return super.getDefinition(LocomotiveDefinition.class);
+	public ControllableStockDefinition getDefinition() {
+		return super.getDefinition(ControllableStockDefinition.class);
 	}
 
 	/*
@@ -165,8 +165,6 @@ public abstract class ControllableStock extends FreightTank {
 		this.distanceTraveled += simulateWheelSlip();
 	}
 	
-	protected abstract int getAvailableHP();
-
 	protected double simulateWheelSlip() {
 		return 0;
 	}

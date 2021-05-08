@@ -16,7 +16,6 @@ public abstract class ControllableStockDefinition extends FreightDefinition {
     public Identifier bell;
     private String works;
     private int traction;
-    private Speed maxSpeed;
 
     ControllableStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);
@@ -24,9 +23,6 @@ public abstract class ControllableStockDefinition extends FreightDefinition {
         // Handle null data
         if (works == null) {
             works = "Unknown";
-        }
-        if (maxSpeed == null) {
-            maxSpeed = Speed.ZERO;
         }
     }
 
