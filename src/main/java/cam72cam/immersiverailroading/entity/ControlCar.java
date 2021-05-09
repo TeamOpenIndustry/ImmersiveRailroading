@@ -21,28 +21,9 @@ public class ControlCar extends ControllableStock {
         return super.getDefinition(ControlCarDefinition.class);
     }
 
-    @Override
-    public void onTick() {
-        super.onTick();
-    }
-
     /*
      * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
      */
-    @Override
-    public void handleKeyPress(Player source, KeyTypes key) {
-        super.handleKeyPress(source, key);
-    }
-
-    @Override
-    protected void realSetThrottle(float newThrottle) {
-        super.setThrottle(newThrottle);
-    }
-
-    @Override
-    protected void realAirBrake(float newAirBrake) {
-        super.setAirBrake(newAirBrake);
-    }
 
     @Override
     public void setThrottle(float newThrottle) {

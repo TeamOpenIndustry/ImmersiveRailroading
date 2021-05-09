@@ -7,11 +7,9 @@ import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.world.World;
 
 import java.util.UUID;
 
@@ -38,11 +36,6 @@ public abstract class Locomotive extends ControllableStock {
 		return null;
 	}
 
-	@Override
-	public void handleKeyPress(Player source, KeyTypes key) {
-		super.handleKeyPress(source, key);
-	}
-
     public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
@@ -62,11 +55,6 @@ public abstract class Locomotive extends ControllableStock {
 			return ClickResult.ACCEPTED;
 		}
 		return super.onClick(player, hand);
-	}
-	
-	@Override
-	public void onTick() {
-		super.onTick();
 	}
 	
 	protected abstract int getAvailableHP();
@@ -120,74 +108,6 @@ public abstract class Locomotive extends ControllableStock {
 	 * 
 	 * Misc Helper functions
 	 */
-	@Override
-	public float getThrottle() {
-		return super.getThrottle();
-	}
-
-	@Override
-	public void setThrottle(float newThrottle) {
-		super.setThrottle(newThrottle);
-	}
-	
-	public void setHorn(int val, UUID uuid) {
-		if (hornPlayer == null && uuid != null) {
-			hornPlayer = uuid;
-		}
-		if (hornPlayer == null || hornPlayer.equals(uuid)) {
-			hornTime = val;
-		}
-	}
-
-	public int getHornTime() {
-		return hornTime;
-	}
-
-	public Entity getHornPlayer() {
-		for (Entity pass : getPassengers()) {
-			if (pass.getUUID().equals(hornPlayer)) {
-				return pass;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public float getAirBrake() {
-		return super.getAirBrake();
-	}
-	@Override
-	public void setAirBrake(float newAirBrake) {
-		super.setAirBrake(newAirBrake);
-	}
-	@Override
-	public int getBell() {
-		return super.getBell();
-	}
-	@Override
-	public void setBell(int newBell) {
-		super.setBell(newBell);
-	}
-
-	public double slipCoefficient() {
-		double slipMult = 1.0;
-		World world = getWorld();
-		if (world.isPrecipitating() && world.canSeeSky(getBlockPosition())) {
-			if (world.isRaining(getBlockPosition())) {
-				slipMult = 0.6;
-			}
-			if (world.isSnowing(getBlockPosition())) {
-				slipMult = 0.4;
-			}
-		}
-		// Wheel balance messing with friction
-		if (this.getCurrentSpeed().metric() != 0) {
-			double balance = 1 - 0.004 * Math.abs(this.getCurrentSpeed().metric());
-			slipMult *= balance;
-		}
-		return slipMult;
-	}
-	
 	public float ambientTemperature() {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;

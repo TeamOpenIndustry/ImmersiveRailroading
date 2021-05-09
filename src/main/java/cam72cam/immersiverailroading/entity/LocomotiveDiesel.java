@@ -109,11 +109,6 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-	protected void realAirBrake(float newAirBrake) {
-		super.setAirBrake(newAirBrake);
-	}
-	
-	@Override
 	public void setThrottle(float newThrottle) {
 		realSetThrottle(newThrottle);
 		if (this.getDefinition().multiUnitCapable) {
@@ -134,8 +129,6 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 		return 0;
 	}
-
-
 
 	@Override
 	public void onTick() {
