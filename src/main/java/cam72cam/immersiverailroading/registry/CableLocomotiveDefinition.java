@@ -1,15 +1,15 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.CableCar;
+import cam72cam.immersiverailroading.entity.LocomotiveCable;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.model.ControllableStockModel;
+import cam72cam.immersiverailroading.model.CableLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
 
-public class CableCarDefinition extends LocomotiveDefinition {
+public class CableLocomotiveDefinition extends LocomotiveDefinition {
     private static Identifier default_horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 
@@ -17,8 +17,8 @@ public class CableCarDefinition extends LocomotiveDefinition {
     public Identifier horn;
     private boolean hornSus;
 
-    public CableCarDefinition(String defID, JsonObject data) throws Exception {
-        super(CableCar.class, defID, data);
+    public CableLocomotiveDefinition(String defID, JsonObject data) throws Exception {
+        super(LocomotiveCable.class, defID, data);
     }
 
     @Override
@@ -49,12 +49,12 @@ public class CableCarDefinition extends LocomotiveDefinition {
 
     @Override
     protected StockModel<?> createModel() throws Exception {
-        return new ControllableStockModel<>(this);
+        return new CableLocomotiveModel(this);
     }
 
     @Override
-    public ControllableStockModel getModel() {
-        return (ControllableStockModel) super.getModel();
+    public CableLocomotiveModel getModel() {
+        return (CableLocomotiveModel) super.getModel();
     }
 
     //checks to see if horn is sustained, on by default

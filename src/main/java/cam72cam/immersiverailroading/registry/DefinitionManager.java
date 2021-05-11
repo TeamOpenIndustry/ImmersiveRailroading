@@ -45,7 +45,7 @@ public class DefinitionManager {
                 case "diesel":
                     return new LocomotiveDieselDefinition(defID, data);
                 case "cable":
-                    return new CableCarDefinition(defID, data);
+                    return new CableLocomotiveDefinition(defID, data);
                 default:
                     ImmersiveRailroading.warn("Invalid era %s in %s", era, defID);
                     return null;

@@ -115,7 +115,7 @@ public class ControlPanelOverlay {
 		if(controllable instanceof LocomotiveDiesel) {
 			GUIHelpers.texturedRect(OVERLAY_DIESEL_TEXTURE, bgPosX, bgPosY, 85, 85);
 		}
-		if(controllable instanceof HandCar || controllable instanceof CableCar || controllable instanceof ControlCar) {
+		if(controllable instanceof HandCar || controllable instanceof LocomotiveCable || controllable instanceof ControlCar) {
 			GUIHelpers.texturedRect(OVERLAY_HANDCAR_TEXTURE, bgPosX, bgPosY, 60, 85);
 		}
 	}

@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.registry.CableCarDefinition;
+import cam72cam.immersiverailroading.registry.CableLocomotiveDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.entity.Player;
@@ -10,11 +10,11 @@ import cam72cam.mod.math.Vec3d;
 
 import java.util.List;
 
-public class CableCar extends LocomotiveUnfueled {
+public class LocomotiveCable extends LocomotiveUnfueled {
 
 	private float soundThrottle;
 
-	public CableCar() {
+	public LocomotiveCable() {
 		super();
 		this.setIgnoreSlope(true);
 	}
@@ -25,8 +25,8 @@ public class CableCar extends LocomotiveUnfueled {
 	}
 
 	@Override
-	public CableCarDefinition getDefinition() {
-		return super.getDefinition(CableCarDefinition.class);
+	public CableLocomotiveDefinition getDefinition() {
+		return super.getDefinition(CableLocomotiveDefinition.class);
 	}
 
 	@Override

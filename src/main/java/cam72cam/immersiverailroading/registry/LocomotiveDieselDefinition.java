@@ -16,7 +16,6 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public Identifier idle;
     public Identifier horn;
-    public boolean multiUnitCapable;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
     private boolean hornSus;
@@ -25,7 +24,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         super(LocomotiveDiesel.class, defID, data);
 
         //diesels allow MU by default
-        super.multiUnitCapable = true;
+        multiUnitCapable = true;
         // Handle null data
         if (fuelCapacity == null) {
             fuelCapacity = FluidQuantity.ZERO;
