@@ -123,6 +123,10 @@ public abstract class ControllableStock extends FreightTank {
 		}
 	}
 
+    public ClickResult onClick(Player player, Player.Hand hand) {
+		return super.onClick(player, hand);
+	}
+	
 	@Override
 	public void onTick() {
 		super.onTick();
@@ -184,7 +188,7 @@ public abstract class ControllableStock extends FreightTank {
 	}
 
 	protected void realAirBrake(float newAirBrake) {
-		setAirBrake(newAirBrake);
+
 	}
 
 	public float getThrottle() {

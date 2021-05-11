@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CableCar;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.model.CableCarLocomotiveModel;
+import cam72cam.immersiverailroading.model.ControllableStockModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
@@ -13,6 +13,7 @@ public class CableCarDefinition extends LocomotiveDefinition {
     private static Identifier default_horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 
+    public Identifier idle;
     public Identifier horn;
     private boolean hornSus;
 
@@ -48,12 +49,12 @@ public class CableCarDefinition extends LocomotiveDefinition {
 
     @Override
     protected StockModel<?> createModel() throws Exception {
-        return new CableCarLocomotiveModel(this);
+        return new ControllableStockModel<>(this);
     }
 
     @Override
-    public CableCarLocomotiveModel getModel() {
-        return (CableCarLocomotiveModel) super.getModel();
+    public ControllableStockModel getModel() {
+        return (ControllableStockModel) super.getModel();
     }
 
     //checks to see if horn is sustained, on by default
