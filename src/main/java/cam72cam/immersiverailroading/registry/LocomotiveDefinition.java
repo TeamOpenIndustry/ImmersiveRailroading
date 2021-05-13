@@ -11,10 +11,10 @@ import com.google.gson.JsonObject;
 import java.util.List;
 
 public abstract class LocomotiveDefinition extends ControllableStockDefinition {
-    public boolean toggleBell;
     private String works;
     private int power;
     private Speed maxSpeed;
+    private int traction;
     private boolean hasRadioEquipment;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
@@ -35,6 +35,7 @@ public abstract class LocomotiveDefinition extends ControllableStockDefinition {
         JsonObject properties = data.get("properties").getAsJsonObject();
         power = (int) Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
         maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
+        traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
         if (properties.has("radio_equipped")) {
             hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
         }
@@ -48,12 +49,12 @@ public abstract class LocomotiveDefinition extends ControllableStockDefinition {
     @Override
     public List<String> getTooltip(Gauge gauge) {
         List<String> tips = super.getTooltip(gauge);
+        tips.add(GuiText.LOCO_TRACTION.toString(this.getStartingTractionNewtons(gauge)));
         tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower(gauge)));
         tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed(gauge).metricString()));
         return tips;
     }
 
-    @Override
     public int getHorsePower(Gauge gauge) {
         return (int) Math.ceil(gauge.scale() * this.power);
     }
@@ -61,10 +62,10 @@ public abstract class LocomotiveDefinition extends ControllableStockDefinition {
     /**
      * @return tractive effort in newtons
      */
+    @Override
     public int getStartingTractionNewtons(Gauge gauge) {
-        return super.getStartingTractionNewtons(gauge);
+        return (int) Math.ceil(gauge.scale() * this.traction * 4.44822);
     }
-
     public Speed getMaxSpeed(Gauge gauge) {
         return Speed.fromMinecraft(gauge.scale() * this.maxSpeed.minecraft());
     }

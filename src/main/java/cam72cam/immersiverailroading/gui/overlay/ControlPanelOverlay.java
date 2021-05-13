@@ -29,6 +29,7 @@ public class ControlPanelOverlay {
 	public static final Identifier OVERLAY_STEAM_TEXTURE = new Identifier("immersiverailroading:gui/overlay_steam.png");
 	public static final Identifier OVERLAY_DIESEL_TEXTURE = new Identifier("immersiverailroading:gui/overlay_diesel.png");
 	public static final Identifier OVERLAY_HANDCAR_TEXTURE = new Identifier("immersiverailroading:gui/overlay_handcar.png");
+	public static final Identifier OVERLAY_BRAKEVAN_TEXTURE = new Identifier("immersiverailroading:gui/overlay_brakevan.png");
 	
 	/*private static final int textHeight = 20;
 	private static final int textVerticalSpacing = 5;*/
@@ -117,6 +118,9 @@ public class ControlPanelOverlay {
 		}
 		if(controllable instanceof HandCar || controllable instanceof LocomotiveCable || controllable instanceof ControlCar) {
 			GUIHelpers.texturedRect(OVERLAY_HANDCAR_TEXTURE, bgPosX, bgPosY, 60, 85);
+		}
+		if(controllable instanceof BrakeVan) {
+			GUIHelpers.texturedRect(OVERLAY_BRAKEVAN_TEXTURE, bgPosX, bgPosY, 60, 85);
 		}
 	}
 	

@@ -2,10 +2,8 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.ControlCar;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.model.ControllableStockModel;
+import cam72cam.immersiverailroading.model.ControlCarModel;
 import cam72cam.immersiverailroading.model.StockModel;
-import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
 
@@ -45,20 +43,16 @@ public class ControlCarDefinition extends ControllableStockDefinition {
 
     @Override
     protected StockModel<?> createModel() throws Exception {
-        return new ControllableStockModel<>(this);
+        return new ControlCarModel(this);
     }
 
     @Override
-    public ControllableStockModel getModel() {
-        return (ControllableStockModel) super.getModel();
+    public ControlCarModel getModel() {
+        return (ControlCarModel) super.getModel();
     }
 
     //checks to see if horn is sustained, on by default
     public boolean getHornSus() {
         return hornSus;
-    }
-
-    public FluidQuantity getFuelCapacity(Gauge gauge) {
-        return FluidQuantity.ZERO;
     }
 }

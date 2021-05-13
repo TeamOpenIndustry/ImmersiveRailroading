@@ -57,7 +57,7 @@ public class DefinitionManager {
                 case "cabcar":
                     return new ControlCarDefinition(defID, data);
                 case "brakevan":
-                    return new CarPassengerDefinition(defID, data);
+                    return new BrakeVanDefinition(defID, data);
                 default:
                     ImmersiveRailroading.warn("Invalid type %s in %s", type, defID);
                     return null;

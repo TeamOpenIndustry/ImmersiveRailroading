@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.ControllableStockModel;
 import cam72cam.immersiverailroading.model.StockModel;
-import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
 
@@ -15,7 +14,6 @@ public abstract class ControllableStockDefinition extends FreightDefinition {
     public boolean toggleBell;
     public Identifier bell;
     private String works;
-    private int traction;
     public boolean multiUnitCapable;
 
     ControllableStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
@@ -35,7 +33,6 @@ public abstract class ControllableStockDefinition extends FreightDefinition {
 
         JsonObject properties = data.get("properties").getAsJsonObject();
 
-        traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
         toggleBell = true;
         if (properties.has("toggle_bell")) {
             toggleBell = properties.get("toggle_bell").getAsBoolean();
@@ -51,19 +48,11 @@ public abstract class ControllableStockDefinition extends FreightDefinition {
     public List<String> getTooltip(Gauge gauge) {
         List<String> tips = super.getTooltip(gauge);
         tips.add(GuiText.LOCO_WORKS.toString(this.works));
-        tips.add(GuiText.LOCO_TRACTION.toString(this.getStartingTractionNewtons(gauge)));
-       return tips;
+        return tips;
     }
 
-    public int getHorsePower(Gauge gauge) {
-        return 0;
-    }
-
-    /**
-     * @return tractive effort in newtons
-     */
     public int getStartingTractionNewtons(Gauge gauge) {
-        return (int) Math.ceil(gauge.scale() * this.traction * 4.44822);
+        return 0;
     }
 
     public double getBrakePower() {
