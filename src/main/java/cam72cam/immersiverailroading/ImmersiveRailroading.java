@@ -107,7 +107,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
 				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
 				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
-				MultiblockRegistry.register(SmallRailRollerMultiblock.NAME, new SmallRailRollerMultiblock());
 				IRFuzzy.applyFallbacks();
 				break;
 		}

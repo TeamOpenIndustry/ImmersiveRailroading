@@ -22,7 +22,7 @@ public class RailRollerMultiblock extends Multiblock {
 	private static final Vec3i input = new Vec3i(1,0,0);
 	private static final Vec3i output = new Vec3i(1,0,29);
 	private static final Vec3i power = new Vec3i(1,2,15);
-
+	
 	private static FuzzyProvider[][][] componentGenerator() {
 		FuzzyProvider[][][] result = new FuzzyProvider[30][][];
 		
@@ -49,8 +49,6 @@ public class RailRollerMultiblock extends Multiblock {
 	public RailRollerMultiblock() {
 		super(NAME, componentGenerator());
 	}
-
-	public RailRollerMultiblock(String name, FuzzyProvider[][][] components) { super(name, components); }
 	
 	@Override
 	public Vec3i placementPos() {
