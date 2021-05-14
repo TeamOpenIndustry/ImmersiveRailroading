@@ -22,37 +22,6 @@ public class BrakeVan extends ControllableStock {
     }
 
     @Override
-    public void onTick() {
-        super.onTick();
-    }
-
-    /*
-     * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
-     */
-    @Override
-    public void handleKeyPress(Player source, KeyTypes key) {
-        super.handleKeyPress(source, key);
-    }
-
-    @Override
-    protected void realSetThrottle(float newThrottle) { }
-
-    @Override
-    protected void realAirBrake(float newAirBrake) {
-        super.setAirBrake(newAirBrake);
-    }
-
-    @Override
-    public void setThrottle(float newThrottle) {
-        realSetThrottle(newThrottle);
-    }
-
-    @Override
-    public void setAirBrake(float newAirBrake) {
-        realAirBrake(newAirBrake);
-    }
-
-    @Override
     public List<Fluid> getFluidFilter() {
         return BurnUtil.burnableFluids();
     }
@@ -60,5 +29,13 @@ public class BrakeVan extends ControllableStock {
     @Override
     public FluidQuantity getTankCapacity() {
         return FluidQuantity.ZERO;
+    }
+
+    @Override
+    protected void realAirBrake(float newAirBrake) { }
+
+    @Override
+    public void setAirBrake(float newAirBrake) {
+        super.realAirBrake(newAirBrake);
     }
 }

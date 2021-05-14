@@ -101,33 +101,6 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-	protected void realSetThrottle(float newThrottle) {
-		if (Config.isFuelRequired(gauge)) {
-			newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
-		}
-		super.setThrottle(newThrottle);
-	}
-
-	@Override
-	protected void realAirBrake(float newAirBrake) {
-		super.setAirBrake(newAirBrake);
-	}
-	
-	@Override
-	public void setThrottle(float newThrottle) {
-		realSetThrottle(newThrottle);
-		if (this.getDefinition().multiUnitCapable) {
-			this.mapTrain(this, true, false, this::setThrottleMap);
-		}
-	}
-	
-	@Override
-	public void setAirBrake(float newAirBrake) {
-		realAirBrake(newAirBrake);
-		this.mapTrain(this, true, false, this::setThrottleMap);
-	}
-	
-	@Override
 	protected int getAvailableHP() {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
 			return this.getDefinition().getHorsePower(gauge);

@@ -183,24 +183,36 @@ public abstract class ControllableStock extends FreightTank {
 	 * Misc Helper functions
 	 */
 
+
+	/*
+	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
+	 */
 	protected void realSetThrottle(float newThrottle) {
-		setThrottle(newThrottle);
-	}
-
-	protected void realAirBrake(float newAirBrake) {
-
-	}
-
-	public float getThrottle() {
-		return throttle;
-	}
-	public void setThrottle(float newThrottle) {
 		if (this.getThrottle() != newThrottle) {
 			throttle = newThrottle;
 			triggerResimulate();
 		}
 	}
-	
+
+	protected void realAirBrake(float newAirBrake) {
+		if (this.getAirBrake() != newAirBrake) {
+			airBrake = newAirBrake;
+			triggerResimulate();
+		}
+	}
+
+	public void setThrottle(float newThrottle) {
+		realSetThrottle(newThrottle);
+		if (this.getDefinition().multiUnitCapable) {
+			this.mapTrain(this, true, false, this::setThrottleMap);
+		}
+	}
+
+	public void setAirBrake(float newAirBrake) {
+		realAirBrake(newAirBrake);
+		this.mapTrain(this, true, false, this::setThrottleMap);
+	}
+
 	public void setHorn(int val, UUID uuid) {
 		if (hornPlayer == null && uuid != null) {
 			hornPlayer = uuid;
@@ -226,12 +238,11 @@ public abstract class ControllableStock extends FreightTank {
 	public float getAirBrake() {
 		return airBrake;
 	}
-	public void setAirBrake(float newAirBrake) {
-		if (this.getAirBrake() != newAirBrake) {
-			airBrake = newAirBrake;
-			triggerResimulate();
-		}
+
+	public float getThrottle() {
+		return throttle;
 	}
+
 	public int getBell() {
 		return bellTime;
 	}

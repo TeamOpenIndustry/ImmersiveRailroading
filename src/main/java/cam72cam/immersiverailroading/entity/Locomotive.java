@@ -63,12 +63,7 @@ public abstract class Locomotive extends ControllableStock {
 		}
 		return super.onClick(player, hand);
 	}
-	
-	@Override
-	public void onTick() {
-		super.onTick();
-	}
-	
+
 	protected abstract int getAvailableHP();
 
 	private double getAppliedTractiveEffort(Speed speed) {
@@ -120,16 +115,6 @@ public abstract class Locomotive extends ControllableStock {
 	 * 
 	 * Misc Helper functions
 	 */
-	@Override
-	public float getThrottle() {
-		return super.getThrottle();
-	}
-
-	@Override
-	public void setThrottle(float newThrottle) {
-		super.setThrottle(newThrottle);
-	}
-	
 	public void setHorn(int val, UUID uuid) {
 		if (hornPlayer == null && uuid != null) {
 			hornPlayer = uuid;
@@ -150,23 +135,6 @@ public abstract class Locomotive extends ControllableStock {
 			}
 		}
 		return null;
-	}
-
-	@Override
-	public float getAirBrake() {
-		return super.getAirBrake();
-	}
-	@Override
-	public void setAirBrake(float newAirBrake) {
-		super.setAirBrake(newAirBrake);
-	}
-	@Override
-	public int getBell() {
-		return super.getBell();
-	}
-	@Override
-	public void setBell(int newBell) {
-		super.setBell(newBell);
 	}
 
 	public double slipCoefficient() {
