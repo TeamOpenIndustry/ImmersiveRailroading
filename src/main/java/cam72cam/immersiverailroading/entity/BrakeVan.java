@@ -32,7 +32,11 @@ public class BrakeVan extends ControllableStock {
     }
 
     @Override
-    protected void realAirBrake(float newAirBrake) { }
+    protected void realAirBrake(float newAirBrake) {
+        if(this.getDefinition().multiUnitCapable) {
+            super.realAirBrake(newAirBrake);
+        }
+    }
 
     @Override
     public void setAirBrake(float newAirBrake) {
