@@ -29,7 +29,7 @@ public class CastingMultiblock extends Multiblock {
 	private static final Vec3i render = new Vec3i(3,3,7);
 	private static final Vec3i fluid = new Vec3i(3,3,3);
 	private static final Vec3i craft = new Vec3i(3,2,3);
-	private static final Vec3i output = new Vec3i(3,2,14);
+	private static final Vec3i output = new Vec3i(1,0,14);
 	private static final Vec3i power = new Vec3i(3,7,0);
 	public static final double max_volume = 5 * 4 * 4.5 * 9;
 
@@ -280,7 +280,7 @@ public class CastingMultiblock extends Multiblock {
 
 		@Override
 		public boolean isOutputSlot(Vec3i offset, int slot) {
-			return false;
+			return offset.equals(output);
 		}
 
 		@Override
