@@ -23,7 +23,7 @@ public class ObjItemRender {
         return (stack, world) -> new StandardModel().addCustom(() -> {
             if (!cache.containsKey(id)) {
                 try {
-                    cache.put(id, new OBJRender(new OBJModel(id, 0)));
+                    cache.put(id, new OBJRender(new OBJModel(id, 0, null)));
                 } catch (Exception e) {
                     throw new RuntimeException("Error loading item model...", e);
                 }

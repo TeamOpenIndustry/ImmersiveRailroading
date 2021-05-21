@@ -11,7 +11,7 @@ public class TrackModel extends OBJModel {
     private final double height;
 
     public TrackModel(String condition, String resource) throws Exception {
-        super(new Identifier(resource), 0);
+        super(new Identifier(resource), 0, null);
         this.compare = condition.substring(0, 1);
         this.size = Double.parseDouble(condition.substring(1));
         ArrayList<String> groups = new ArrayList<>();

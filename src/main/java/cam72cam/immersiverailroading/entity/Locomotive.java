@@ -1,32 +1,24 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.UUID;
-
-import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
-import cam72cam.immersiverailroading.library.Particles;
-import cam72cam.immersiverailroading.render.SmokeParticle.SmokeParticleData;
-import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.gui.GuiRegistry;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.serialization.StrictTagMapper;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.sound.ISound;
+import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.sync.TagSync;
+import cam72cam.mod.gui.GuiRegistry;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.serialization.StrictTagMapper;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.world.World;
+
+import java.util.UUID;
 
 public abstract class Locomotive extends FreightTank {
-	public ISound bell;
-
 	private static final float throttleNotch = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
 
@@ -189,21 +181,6 @@ public abstract class Locomotive extends FreightTank {
 			if (bellTime > 0 && !this.getDefinition().toggleBell) {
 				bellTime--;
 			}
-		} else {
-			if (ConfigSound.soundEnabled && bell != null) {
-				if (bellTime != 0 && !bell.isPlaying()) {
-					bell.setVolume(0.8f);
-					bell.play(getPosition());
-				} else if (bellTime == 0 && bell.isPlaying()) {
-					bell.stop();
-				}
-
-				if (bell.isPlaying()) {
-					bell.setPosition(getPosition());
-					bell.setVelocity(getVelocity());
-					bell.update();
-				}
-			}
 		}
 
 		this.distanceTraveled += simulateWheelSlip();
@@ -279,6 +256,19 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
+	public int getHornTime() {
+		return hornTime;
+	}
+
+	public Entity getHornPlayer() {
+		for (Entity pass : getPassengers()) {
+			if (pass.getUUID().equals(hornPlayer)) {
+				return pass;
+			}
+		}
+		return null;
+	}
+
 	public float getAirBrake() {
 		return airBrake;
 	}
@@ -287,6 +277,9 @@ public abstract class Locomotive extends FreightTank {
 			airBrake = newAirBrake;
 			triggerResimulate();
 		}
+	}
+	public int getBell() {
+		return bellTime;
 	}
 	public void setBell(int newBell) {
 		this.bellTime = newBell;
@@ -314,18 +307,5 @@ public abstract class Locomotive extends FreightTank {
 	public float ambientTemperature() {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;
-	}
-
-	protected void addSmoke(Vec3d particlePos, Vec3d motion, int lifespan, float darken, float thickness, double diameter) {
-		assert getWorld().isClient;
-		Particles.SMOKE.accept(new SmokeParticleData(getWorld(), particlePos, motion, lifespan, darken, thickness, diameter));
-	}
-
-	@Override
-	public void onRemoved() {
-		super.onRemoved();
-		if (this.bell != null) {
-			bell.stop();
-		}
 	}
 }

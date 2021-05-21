@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.model.FreightModel;
+import cam72cam.immersiverailroading.model.StockModel;
 import com.google.gson.JsonObject;
 
 public abstract class FreightDefinition extends EntityRollingStockDefinition {
@@ -18,6 +20,11 @@ public abstract class FreightDefinition extends EntityRollingStockDefinition {
         } else {
             this.showCurrentLoadOnly = false;
         }
+    }
+
+    @Override
+    protected StockModel<?> createModel() throws Exception {
+        return new FreightModel<>(this);
     }
 
     public boolean shouldShowCurrentLoadOnly() {

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -49,11 +50,21 @@ public class ItemTrackExchanger extends CustomItem {
 	public static class Data extends ItemDataSerializer {
 		@TagField("track")
 		public String track;
+		@TagField("railBed")
+		public ItemStack railBed;
+		@TagField("gauge")
+		public Gauge gauge;
 
 		public Data(ItemStack stack) {
 			super(stack);
 			if (track == null) {
 				track = DefinitionManager.getTracks().get(0).name;
+			}
+			if (railBed == null) {
+				railBed = ItemStack.EMPTY;
+			}
+			if (gauge == null) {
+				gauge = Gauge.from(Gauge.STANDARD);
 			}
 		}
 	}

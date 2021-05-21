@@ -1,38 +1,25 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.RenderComponentType;
-import cam72cam.immersiverailroading.model.RenderComponent;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.gui.GuiRegistry;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.sound.ISound;
-import cam72cam.mod.serialization.TagCompound;
 
 import java.util.List;
 
 public class LocomotiveDiesel extends Locomotive {
 
-	private ISound horn;
-	private ISound idle;
 	private float soundThrottle;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
-	private float hornVolume = 0;
-	private static float hornStep = 0.25f;
 
 	@TagSync
 	@TagField("ENGINE_TEMPERATURE")
@@ -159,85 +146,11 @@ public class LocomotiveDiesel extends Locomotive {
 		super.onTick();
 		
 		if (getWorld().isClient) {
-			if (ConfigSound.soundEnabled) {
-				if (this.horn == null) {
-                    bell = ImmersiveRailroading.newSound(this.getDefinition().bell, true, 150, this.soundGauge());
-					this.horn = ImmersiveRailroading.newSound(this.getDefinition().horn, this.getDefinition().getHornSus(), 100, this.soundGauge());
-					this.idle = ImmersiveRailroading.newSound(this.getDefinition().idle, true, 80, this.soundGauge());
-
-
-				}
-				if (isRunning()) {
-					if (!idle.isPlaying()) {
-						this.idle.play(getPosition());
-					}
-				} else {
-					if (idle.isPlaying()) {
-						idle.stop();
-					}
-				}
-
-				if (hornTime != 0 && !horn.isPlaying() && isRunning()) {
-					if (this.getDefinition().getHornSus()) {
-						hornVolume = 0.5f;
-						horn.setVolume(hornVolume);
-					}
-					horn.play(getPosition());
-				}
-				else if(hornTime == 0 && horn.isPlaying() && this.getDefinition().getHornSus()){
-                    if (hornVolume > 0.5) {
-						hornVolume -= 0.25;
-						horn.setVolume(hornVolume);
-					} else {
-						horn.stop();
-					}
-				}
-
-				if (this.getDefinition().getHornSus() && hornTime != 0 && hornVolume < 1) {
-					hornVolume += 0.25;
-					horn.setVolume(hornVolume);
-				}
-				
-				float absThrottle = Math.abs(this.getThrottle());
-				if (this.soundThrottle > absThrottle) {
-					this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle); 
-				} else if (this.soundThrottle < absThrottle) {
-					this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
-				}
-	
-				if (horn.isPlaying()) {
-					horn.setPosition(getPosition());
-					horn.setVelocity(getVelocity());
-					horn.update();
-				}
-
-				
-				if (idle.isPlaying()) {
-					idle.setPitch(0.7f+this.soundThrottle/4);
-					idle.setVolume(Math.max(0.1f, this.soundThrottle));
-					idle.setPosition(getPosition());
-					idle.setVelocity(getVelocity());
-					idle.update();
-				}
-			}
-			
-			
-			if (!ConfigGraphics.particlesEnabled) {
-				return;
-			}
-			
-			Vec3d fakeMotion = this.getVelocity();
-			
-			List<RenderComponent> exhausts = this.getDefinition().getComponents(RenderComponentType.DIESEL_EXHAUST_X, gauge);
-			float throttle = Math.abs(this.getThrottle()) + 0.05f;
-			if (exhausts != null && isRunning()) {
-				for (RenderComponent exhaust : exhausts) {
-					Vec3d particlePos = this.getPosition().add(VecUtil.rotateWrongYaw(exhaust.center(), this.getRotationYaw() + 180));
-					particlePos = particlePos.subtract(fakeMotion);
-
-					double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(this.getCurrentSpeed().minecraft())*2)))/2;
-					addSmoke(particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width());
-				}
+			float absThrottle = Math.abs(this.getThrottle());
+			if (this.soundThrottle > absThrottle) {
+				this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle);
+			} else if (this.soundThrottle < absThrottle) {
+				this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 			}
 			return;
 		}
@@ -288,18 +201,6 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
-	public void onRemoved() {
-		super.onRemoved();
-
-		if (idle != null) {
-			idle.stop();
-		}
-		if (horn != null) {
-			horn.stop();
-		}
-	}
-
-	@Override
 	public List<Fluid> getFluidFilter() {
 		return BurnUtil.burnableFluids();
 	}
@@ -315,5 +216,9 @@ public class LocomotiveDiesel extends Locomotive {
 		setEngineTemperature(ambientTemperature());
 		setEngineOverheated(false);
 		setTurnedOn(false);
+	}
+
+	public float getSoundThrottle() {
+		return soundThrottle;
 	}
 }

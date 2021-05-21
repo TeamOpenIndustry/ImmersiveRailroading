@@ -142,6 +142,22 @@ public class TileRail extends TileRailBase {
 		return floating / (double)total;
 	}
 
+	public void markAllDirty() {
+		if (info.settings == null) {
+			return;
+		}
+		percentFloating(); // initialize track cache
+
+		for (TrackBase track : tracks) {
+			Vec3i tpos = track.getPos();
+			TileRailBase be = getWorld().getBlockEntity(tpos, TileRailBase.class);
+			if (be != null) {
+				be.railBedCache = info.settings.railBed;
+				be.markDirty();
+			}
+		}
+	}
+
 	@Override
 	public double getTrackGauge() {
 		if (info == null) {

@@ -20,7 +20,7 @@ public class SteamHammerRender implements IMultiblockRender {
 	public void render(TileMultiblock te, float partialTicks) {
 		if (renderer == null) {
 			try {
-				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f));
+				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f, null));
 				this.hammer = new ArrayList<>();
 				this.rest = new ArrayList<>();
 				for (String group : renderer.model.groups()) {

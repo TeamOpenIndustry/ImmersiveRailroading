@@ -23,7 +23,7 @@ public class RailRollerRender implements IMultiblockRender {
 	public void render(TileMultiblock te, float partialTicks) {
 		if (renderer == null) {
 			try {
-				this.renderer = new OBJRender(new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.1f));
+				this.renderer = new OBJRender(new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.1f, null));
 				input = new ArrayList<>();
 				output = new ArrayList<>();
 				rest = new ArrayList<>();

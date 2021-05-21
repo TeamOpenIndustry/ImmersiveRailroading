@@ -22,7 +22,7 @@ public class BoilerRollerRender implements IMultiblockRender {
 	public void render(TileMultiblock te, float partialTicks) {
 		if (renderer == null) {
 			try {
-				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/boiler_rolling_machine.obj"), 0));
+				this.renderer = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/multiblocks/boiler_rolling_machine.obj"), 0, null));
 				segments = new ArrayList<>();
 				product = new ArrayList<>();
 				rest = new ArrayList<>();

@@ -33,7 +33,12 @@ public class Gauge {
 	public String toString() {
 	    return TextUtil.translate("immersiverailroading:gauge." + name.toLowerCase()); 
 	}
-	
+
+	@Override
+	public boolean equals(Object o) {
+		return o instanceof Gauge && ((Gauge) o).gauge == this.gauge;
+	}
+
 	public boolean isModel() {
 		return value() < 0.3;
 	}

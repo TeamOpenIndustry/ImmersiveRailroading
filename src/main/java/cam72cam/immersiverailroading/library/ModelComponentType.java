@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.library;
 
-public enum RenderComponentType {
+public enum ModelComponentType {
 	// STANDARD
 	BOGEY_POS_WHEEL_X("BOGEY_#POS#_WHEEL_#ID#"),
 	BOGEY_POS("BOGEY_#POS#"),
@@ -37,17 +37,15 @@ public enum RenderComponentType {
 	FIREBOX("FIREBOX"),
 	SMOKEBOX("SMOKEBOX"),
 	STEAM_CHEST("STEAM_CHEST"),
-	STEAM_CHEST_FRONT("STEAM_CHEST_FRONT"),
-	STEAM_CHEST_REAR("STEAM_CHEST_REAR"),
+	STEAM_CHEST_POS("STEAM_CHEST_#POS#"),
 	BOILER_SEGMENT_X("BOILER_SEG[E]*MENT_#ID#"),
 	PIPING("PIPING"),
 	
 	
 	// WALCHERTS
 	WHEEL_DRIVER_X("WHEEL_DRIVER_#ID#"),
-	WHEEL_DRIVER_FRONT_X("WHEEL_DRIVER_FRONT_#ID#"), // MALLET
-	WHEEL_DRIVER_REAR_X("WHEEL_DRIVER_REAR_#ID#"), // MALLET
-	
+	WHEEL_DRIVER_POS_X("WHEEL_DRIVER_#POS#_#ID#"), // MALLET
+
 	CYLINDER_SIDE("CYLINDER_#SIDE#"),
 	SIDE_ROD_SIDE("(CONNECTING|SIDE)_ROD_#SIDE#"),
 	MAIN_ROD_SIDE("(DRIVING|MAIN)_ROD_#SIDE#"),
@@ -65,8 +63,9 @@ public enum RenderComponentType {
 	REACH_ROD_SIDE("REACH_ROD_#SIDE#"),
 	
 	// MALLET
-	FRONT_LOCOMOTIVE("FRONT_LOCOMOTIVE"),
-	
+	FRONT_FRAME("FRONT_(LOCOMOTIVE|FRAME)"),
+	REAR_FRAME("REAR_(LOCOMOTIVE|FRAME)"),
+
 	
 	// PARTICLES
 	PARTICLE_CHIMNEY_X("CHIM[I]*NEY_#ID#", false),
@@ -83,11 +82,15 @@ public enum RenderComponentType {
 	public final String regex;
 	public final boolean collisionsEnabled;
 	
-	RenderComponentType(String regex) {
+	ModelComponentType(String regex) {
 		this(regex, true);
 	}
-	RenderComponentType(String regex, boolean collide) {
+	ModelComponentType(String regex, boolean collide) {
 		this.regex = ".*" + regex + ".*";
 		this.collisionsEnabled = collide;
+	}
+
+	public static boolean isParticle(String group) {
+		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_");
 	}
 }

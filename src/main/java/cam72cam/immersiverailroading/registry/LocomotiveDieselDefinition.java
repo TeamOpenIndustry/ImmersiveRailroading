@@ -3,13 +3,11 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.RenderComponentType;
-import cam72cam.immersiverailroading.model.RenderComponent;
+import cam72cam.immersiverailroading.model.DieselLocomotiveModel;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
-
-import java.util.Set;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
@@ -18,7 +16,6 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public Identifier idle;
     public Identifier horn;
-    public Identifier bell;
     public boolean muliUnitCapable;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
@@ -31,28 +28,6 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         if (fuelCapacity == null) {
             fuelCapacity = FluidQuantity.ZERO;
         }
-    }
-
-    @Override
-    protected Set<String> parseComponents() {
-        Set<String> groups = super.parseComponents();
-
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.FUEL_TANK, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.ALTERNATOR, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.ENGINE_BLOCK, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.CRANKSHAFT, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.GEARBOX, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.FLUID_COUPLING, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.FINAL_DRIVE, this, groups), true);
-        addComponentIfExists(RenderComponent.parse(RenderComponentType.TORQUE_CONVERTER, this, groups), true);
-        for (int i = 100; i >= 0; i--) {
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.PISTON_X, this, groups, i), true);
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.DIESEL_EXHAUST_X, this, groups, i), false);
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.FAN_X, this, groups, i), true);
-            addComponentIfExists(RenderComponent.parseID(RenderComponentType.DRIVE_SHAFT_X, this, groups, i), true);
-        }
-
-        return groups;
     }
 
     @Override
@@ -87,6 +62,16 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
                 bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
             }
         }
+    }
+
+    @Override
+    protected StockModel<?> createModel() throws Exception {
+        return new DieselLocomotiveModel(this);
+    }
+
+    @Override
+    public DieselLocomotiveModel getModel() {
+        return (DieselLocomotiveModel) super.getModel();
     }
 
     //checks to see if horn is sustained, on by default

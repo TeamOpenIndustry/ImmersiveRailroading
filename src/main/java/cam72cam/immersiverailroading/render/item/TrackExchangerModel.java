@@ -28,7 +28,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	public StandardModel getModel(World world, ItemStack stack) {
 		if(RENDERER == null){
 			try {
-				RENDERER = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), -0.05f));
+				RENDERER = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), -0.05f, null));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -37,8 +37,9 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	}
 
 	public static void render(ItemStack stack, World world) {
+		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		RailInfo info = new RailInfo(
-                new RailSettings(Gauge.from(Gauge.STANDARD), new ItemTrackExchanger.Data(stack).track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, ItemStack.EMPTY, ItemStack.EMPTY, false, false),
+                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,
@@ -50,7 +51,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			if (railSlave != null) {
 				TileRail rail = railSlave.getParentTile();
 				if (rail != null) {
-					lookInfo = info.withTrack(rail.info.settings.track);
+					lookInfo = info.withTrack(rail.info.settings.track).withRailBed(rail.info.settings.railBed).withGauge(rail.info.settings.gauge);
 				}
 			}
 		}
@@ -59,7 +60,10 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			RENDERER.draw();
 		}
 
-		try (OpenGL.With matrix = OpenGL.matrix()) {
+		try (
+				OpenGL.With matrix = OpenGL.matrix();
+				OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
+		) {
 			GL11.glScaled(0.01, 0.01, 0.01);
 			GL11.glRotated(90, 1, 0, 0);
 

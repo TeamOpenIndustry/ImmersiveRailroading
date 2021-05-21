@@ -100,7 +100,7 @@ public class TrackGui implements IScreen {
 		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
 	}
 
-	public String getStackName(ItemStack stack) {
+	public static String getStackName(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return GuiText.NONE.toString();
 		}
