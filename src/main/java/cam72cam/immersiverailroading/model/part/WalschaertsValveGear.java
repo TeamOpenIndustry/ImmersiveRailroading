@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -11,8 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 
-public class WalschaertsValveGear implements ValveGear {
-    protected final StephensonValveGear stephenson;
+public class WalschaertsValveGear extends StephensonValveGear {
     protected final ModelComponent crossHead;
     protected final ModelComponent combinationLever;
     protected final ModelComponent returnCrank;
@@ -22,11 +20,10 @@ public class WalschaertsValveGear implements ValveGear {
     protected final List<ModelComponent> todo;
 
     public static WalschaertsValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos, float angleOffset) {
-        StephensonValveGear stephenson = StephensonValveGear.get(wheels, provider, pos, angleOffset);
-        if (stephenson == null) {
-            return null;
-        }
-
+        ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
+        ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
+        ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
+        ModelComponent cylinder = provider.parse(ModelComponentType.CYLINDER_SIDE, pos);
         ModelComponent crossHead = provider.parse(ModelComponentType.UNION_LINK_SIDE, pos);
         ModelComponent combinationLever = provider.parse(ModelComponentType.COMBINATION_LEVER_SIDE, pos);
         ModelComponent returnCrank = provider.parse(ModelComponentType.ECCENTRIC_CRANK_SIDE, pos);
@@ -41,11 +38,17 @@ public class WalschaertsValveGear implements ValveGear {
                 ModelComponentType.REACH_ROD_SIDE
         );
 
-        return crossHead != null && combinationLever != null && returnCrank != null && returnCrankRod != null && slottedLink != null && radiusBar != null ?
-                new WalschaertsValveGear(stephenson, crossHead, combinationLever, returnCrank, returnCrankRod, slottedLink, radiusBar, todo) : null;
+        return drivingRod != null && connectingRod != null && pistonRod != null &&
+                crossHead != null && combinationLever != null && returnCrank != null && returnCrankRod != null && slottedLink != null && radiusBar != null ?
+                new WalschaertsValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset, crossHead, combinationLever, returnCrank, returnCrankRod, slottedLink, radiusBar, todo) : null;
     }
 
-    public WalschaertsValveGear(StephensonValveGear stephenson,
+    public WalschaertsValveGear(DrivingWheels wheels,
+                                ModelComponent drivingRod,
+                                ModelComponent connectingRod,
+                                ModelComponent pistonRod,
+                                ModelComponent cylinder,
+                                float angleOffset,
                                 ModelComponent crossHead,
                                 ModelComponent combinationLever,
                                 ModelComponent returnCrank,
@@ -53,7 +56,7 @@ public class WalschaertsValveGear implements ValveGear {
                                 ModelComponent slottedLink,
                                 ModelComponent radiusBar,
                                 List<ModelComponent> todo) {
-        this.stephenson = stephenson;
+        super(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset);
         this.crossHead = crossHead;
         this.combinationLever = combinationLever;
         this.returnCrank = returnCrank;
@@ -64,24 +67,15 @@ public class WalschaertsValveGear implements ValveGear {
     }
 
     public void render(double distance, float throttle, ComponentRenderer draw) {
-        boolean reverse = stephenson.reverse;
+        super.render(distance, throttle, draw);
 
-        stephenson.render(distance, throttle, draw);
-
-        float wheelAngle = stephenson.angle(distance);
-        if (reverse) {
-            wheelAngle -= 90;
-        }
-
-        //TODO replace this with better detection based on eccentric crank
-        //Vec3d wheelPos = stephenson.wheels.wheels.get(stephenson.wheels.wheels.size() / 2).wheel.center();
-        Vec3d wheelPos = stephenson.wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(returnCrank.center))).get();
+        float wheelAngle = super.angle(distance);
 
         // Center of the connecting rod, may not line up with a wheel directly
-        Vec3d connRodPos = stephenson.connectingRod.center;
+        Vec3d connRodPos = super.connectingRod.center;
         // Wheel Center is the center of all wheels, may not line up with a wheel directly
         // The difference between these centers is the radius of the connecting rod movement
-        double connRodRadius = connRodPos.x - stephenson.wheels.center().x;
+        double connRodRadius = connRodPos.x - centerOfWheels.x;
         // Find new connecting rod pos based on the connecting rod rod radius
         Vec3d connRodMovment = VecUtil.fromWrongYaw(connRodRadius, (float) wheelAngle);
 
@@ -100,9 +94,9 @@ public class WalschaertsValveGear implements ValveGear {
                 returnCrank.min.add(returnCrank.height()/2, returnCrank.height()/2, 0) :
                 returnCrank.max.add(-returnCrank.height()/2, -returnCrank.height()/2, 0);
         Vec3d wheelRotationOffset = reverse ?
-                VecUtil.fromWrongYaw(returnCrankRotPoint.x - wheelPos.x, (float) wheelAngle) :
-                VecUtil.fromWrongYaw(returnCrankRotPoint.x - wheelPos.x, (float) wheelAngle);
-        Vec3d returnCrankOriginOffset = wheelPos.add(wheelRotationOffset.x, wheelRotationOffset.z, 0);
+                VecUtil.fromWrongYaw(returnCrankRotPoint.x - drivenWheel.x, (float) wheelAngle) :
+                VecUtil.fromWrongYaw(returnCrankRotPoint.x - drivenWheel.x, (float) wheelAngle);
+        Vec3d returnCrankOriginOffset = drivenWheel.add(wheelRotationOffset.x, wheelRotationOffset.z, 0);
         double returnCrankAngle = wheelAngle + 90 + 30;
         try (ComponentRenderer matrix = draw.push()) {
             // Move to crank offset from origin
@@ -214,15 +208,4 @@ public class WalschaertsValveGear implements ValveGear {
 
         draw.render(todo);
     }
-
-    @Override
-    public void effects(EntityMoveableRollingStock stock, float throttle) {
-        stephenson.effects(stock, throttle);
-    }
-
-    @Override
-    public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
-        return stephenson.isEndStroke(stock, throttle);
-    }
-
 }
