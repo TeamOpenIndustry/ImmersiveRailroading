@@ -41,8 +41,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
 
-        super.parseComponents(provider, def);
-
         components = provider.parse(
                 ModelComponentType.FIREBOX,
                 ModelComponentType.SMOKEBOX,
@@ -62,6 +60,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT", 0);
         drivingWheelsRear = DrivingAssembly.get(type, provider, "REAR", 45);
         drivingWheels = DrivingAssembly.get(type, provider, null, 0);
+
+        super.parseComponents(provider, def);
     }
 
     @Override

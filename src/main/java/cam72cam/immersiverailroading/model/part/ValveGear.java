@@ -5,12 +5,14 @@ import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 
+import java.util.List;
+
 public interface ValveGear {
     void render(double distance, float throttle, ComponentRenderer draw);
 
     void effects(EntityMoveableRollingStock stock, float throttle);
 
-    static ValveGear get(DrivingWheels wheels, ValveGearType type, ComponentProvider provider, String pos, float angleOffset) {
+    static ValveGear get(List<Wheel> wheels, ValveGearType type, ComponentProvider provider, String pos, float angleOffset) {
         switch (type) {
             case WALSCHAERTS:
             case TRI_WALSCHAERTS:
