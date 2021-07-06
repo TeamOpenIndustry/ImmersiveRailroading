@@ -13,6 +13,9 @@ public interface ValveGear {
     void effects(EntityMoveableRollingStock stock, float throttle);
 
     static ValveGear get(List<Wheel> wheels, ValveGearType type, ComponentProvider provider, String pos, float angleOffset) {
+        if (type == null) {
+            return null;
+        }
         switch (type) {
             case WALSCHAERTS:
             case TRI_WALSCHAERTS:
