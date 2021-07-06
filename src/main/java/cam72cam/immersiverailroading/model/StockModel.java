@@ -38,6 +38,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
         ComponentProvider provider = new ComponentProvider(this);
         parseComponents(provider, def);
+        provider.parse(ModelComponentType.IMMERSIVERAILROADING_BASE_COMPONENT);
         this.remaining = provider.parse(ModelComponentType.REMAINING);
         this.allComponents = provider.components();
     }
