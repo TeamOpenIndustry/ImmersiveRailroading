@@ -30,7 +30,12 @@ public class Frame {
     public void render(double distance, ComponentRenderer draw) {
         draw.render(frame);
         for (Wheel wheel : wheels) {
-            wheel.render(wheel.angle(distance), draw);
+            wheel.render(valveGearRight != null ?
+                    valveGearRight.angle(distance) :
+                    valveGearLeft != null ?
+                            valveGearLeft.angle(distance) :
+                            wheel.angle(distance),
+                    draw);
         }
         if (valveGearRight != null) {
             valveGearRight.render(distance, 0, draw);
