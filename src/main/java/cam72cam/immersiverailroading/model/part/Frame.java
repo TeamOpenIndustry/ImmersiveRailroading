@@ -31,9 +31,9 @@ public class Frame {
         draw.render(frame);
         for (Wheel wheel : wheels) {
             wheel.render(valveGearRight != null ?
-                    valveGearRight.angle(distance) :
+                    valveGearRight.angle(distance) - valveGearRight.angleOffset :
                     valveGearLeft != null ?
-                            valveGearLeft.angle(distance) :
+                            valveGearLeft.angle(distance) - valveGearLeft.angleOffset :
                             wheel.angle(distance),
                     draw);
         }
