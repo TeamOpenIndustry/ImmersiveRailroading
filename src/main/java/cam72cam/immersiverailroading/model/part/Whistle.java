@@ -186,8 +186,8 @@ public class Whistle {
             float thickness = 1;
             double smokeMod = Math.min(1, Math.max(0.2, Math.abs(stock.getCurrentSpeed().minecraft()) * 2));
             int lifespan = (int) (40 * (1 + smokeMod * stock.gauge.scale()));
-            float verticalSpeed = 0.8f;
-            double size = 0.3 * (0.8 + smokeMod);
+            double verticalSpeed = 0.8f * stock.gauge.scale();
+            double size = 0.3 * (0.8 + smokeMod) * stock.gauge.scale();
 
             Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan, darken, thickness, size));
         }
