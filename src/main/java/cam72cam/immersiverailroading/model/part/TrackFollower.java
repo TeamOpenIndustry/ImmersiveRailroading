@@ -22,6 +22,8 @@ public class TrackFollower {
     }
 
     public void apply(EntityMoveableRollingStock stock) {
+        Vec3d point = this.point.scale(stock.gauge.scale());
+
         if (!stock.getPosition().equals(pos)) {
             pos = stock.getPosition();
 
