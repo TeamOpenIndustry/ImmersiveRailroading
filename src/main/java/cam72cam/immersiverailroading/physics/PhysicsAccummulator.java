@@ -48,7 +48,7 @@ public class PhysicsAccummulator {
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
-			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient();
+			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient(pos.speed);
 			brakeAdhesionNewtons += loco.getDefinition().getStartingTractionNewtons(stock.gauge); 
 		} else {
 			// Air brake only applies 1/4th

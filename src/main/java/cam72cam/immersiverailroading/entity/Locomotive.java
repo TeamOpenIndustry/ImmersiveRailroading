@@ -198,7 +198,7 @@ public abstract class Locomotive extends FreightTank {
 	
 	protected double simulateWheelSlip() {
 		double tractiveEffortNewtons = getAppliedTractiveEffort(getCurrentSpeed());
-		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
+		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient(getCurrentSpeed()) * Config.ConfigBalance.tractionMultiplier;
 		staticTractiveEffort *= 1.5; // Fudge factor
 		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
 		if (adhesionFactor > 1) {
@@ -213,7 +213,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 		
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
-		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;
+		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient(speed) * Config.ConfigBalance.tractionMultiplier;
 		staticTractiveEffort *= 1.5; // Fudge factor
 		
 		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
@@ -285,7 +285,7 @@ public abstract class Locomotive extends FreightTank {
 		this.bellTime = newBell;
 	}
 
-	public double slipCoefficient() {
+	public double slipCoefficient(Speed speed) {
 		double slipMult = 1.0;
 		World world = getWorld();
 		if (world.isPrecipitating() && world.canSeeSky(getBlockPosition())) {
@@ -297,8 +297,8 @@ public abstract class Locomotive extends FreightTank {
 			}
 		}
 		// Wheel balance messing with friction
-		if (this.getCurrentSpeed().metric() != 0) {
-			double balance = 1 - 0.004 * Math.abs(this.getCurrentSpeed().metric());
+		if (speed.metric() != 0) {
+			double balance = 1d/(Math.abs(speed.metric())+100) / (1d/100);
 			slipMult *= balance;
 		}
 		return slipMult;
