@@ -27,7 +27,6 @@ public class StephensonValveGear extends ConnectingRodValveGear {
     protected final boolean reverse;
 
     protected final Vec3d drivenWheel;
-    protected final Vec3d centerOfWheels;
 
     public static StephensonValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
@@ -172,16 +171,6 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         double connRodRadius = connRodPos.x - centerOfWheels.x;
         // Find new connecting rod pos based on the connecting rod rod radius
         Vec3d connRodMovment = VecUtil.fromWrongYaw(connRodRadius, (float) wheelAngle);
-
-        // Draw Connecting Rod
-        try (ComponentRenderer matrix = draw.push()) {
-            // Move to origin
-            GL11.glTranslated(-connRodRadius, 0, 0);
-            // Apply connection rod movement
-            GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
-
-            matrix.render(connectingRod);
-        }
 
         // X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
         // Y: Center of the rod

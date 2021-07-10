@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class ConnectingRodValveGear implements ValveGear {
     protected final List<Wheel> wheels;
-    protected final Vec3d centerOfWheels;
+    protected Vec3d centerOfWheels;
     protected final ModelComponent connectingRod;
     protected float angleOffset;
 
