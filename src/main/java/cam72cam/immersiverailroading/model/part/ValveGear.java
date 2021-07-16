@@ -18,13 +18,11 @@ public interface ValveGear {
         }
         switch (type) {
             case WALSCHAERTS:
-            case TRI_WALSCHAERTS:
-            case MALLET_WALSCHAERTS:
-            case GARRAT:
                 return WalschaertsValveGear.get(wheels, provider, pos, angleOffset);
             case STEPHENSON:
-            case T1:
                 return StephensonValveGear.get(wheels, provider, pos, angleOffset);
+            case CONNECTING:
+                return ConnectingRodValveGear.get(wheels, provider, pos, angleOffset);
             case SHAY:
             case CLIMAX:
             case HIDDEN:
@@ -34,4 +32,6 @@ public interface ValveGear {
     }
 
     boolean isEndStroke(EntityMoveableRollingStock stock, float throttle);
+
+    float angle(double distance);
 }

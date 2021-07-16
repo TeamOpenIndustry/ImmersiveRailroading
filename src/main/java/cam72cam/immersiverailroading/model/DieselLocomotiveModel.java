@@ -61,7 +61,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
 
-        ValveGearType type = ((LocomotiveDieselDefinition) def).getValveGear();
+        ValveGearType type = def.getValveGear();
         drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT", 0);
         drivingWheelsRear = DrivingAssembly.get(type, provider, "REAR", 45);
         drivingWheels = DrivingAssembly.get(type, provider, null, 0);

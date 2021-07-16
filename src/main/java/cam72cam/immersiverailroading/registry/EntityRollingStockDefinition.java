@@ -5,10 +5,7 @@ import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.RealBB;
@@ -60,6 +57,7 @@ public abstract class EntityRollingStockDefinition {
     private String name = "Unknown";
     private String modelerName = "N/A";
     private String packName = "N/A";
+    private ValveGearType valveGear;
     public float darken;
     public Identifier modelLoc;
     private StockModel<?> model;
@@ -229,7 +227,9 @@ public abstract class EntityRollingStockDefinition {
             couplerOffsetRear = (float) (data.get("couplers").getAsJsonObject().get("rear_offset").getAsFloat() * internal_model_scale);
         }
 
-        weight = (int) Math.ceil(data.get("properties").getAsJsonObject().get("weight_kg").getAsInt() * internal_inv_scale);
+        JsonObject properties = data.get("properties").getAsJsonObject();
+        weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
+        valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase()) : null;
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
@@ -527,5 +527,9 @@ public abstract class EntityRollingStockDefinition {
                     d -> DefinitionManager.getDefinition(d.getString(fieldName))
             );
         }
+    }
+
+    public ValveGearType getValveGear() {
+        return valveGear;
     }
 }

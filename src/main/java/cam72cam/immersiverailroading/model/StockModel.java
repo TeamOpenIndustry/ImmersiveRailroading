@@ -44,7 +44,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        this.frame = new Frame(provider, def.defID);
+        this.frame = new Frame(provider, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");

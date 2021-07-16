@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.SteamLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -24,7 +23,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public Identifier pressure;
     private FluidQuantity tankCapacity;
     private int maxPSI;
-    private ValveGearType valveGear;
     private int numSlots;
     private int width;
     public boolean tender_auto_feed;
@@ -45,7 +43,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         JsonObject properties = data.get("properties").getAsJsonObject();
         tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_inv_scale));
         maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_inv_scale);
-        valveGear = ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase());
         JsonObject firebox = data.get("firebox").getAsJsonObject();
         this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
         this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
@@ -112,10 +109,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 
     public int getMaxPSI(Gauge gauge) {
         return (int) Math.ceil(this.maxPSI * gauge.scale());
-    }
-
-    public ValveGearType getValveGear() {
-        return valveGear;
     }
 
     public int getInventorySize(Gauge gauge) {

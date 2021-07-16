@@ -56,7 +56,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         chimney = SteamChimney.get(provider);
         pressureValve = PressureValve.get(provider, ((LocomotiveSteamDefinition) def).pressure);
 
-        ValveGearType type = ((LocomotiveSteamDefinition) def).getValveGear();
+        ValveGearType type = def.getValveGear();
         drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT", 0);
         drivingWheelsRear = DrivingAssembly.get(type, provider, "REAR", 45);
         drivingWheels = DrivingAssembly.get(type, provider, null, 0);

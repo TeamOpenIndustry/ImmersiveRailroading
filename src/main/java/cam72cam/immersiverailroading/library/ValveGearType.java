@@ -1,13 +1,28 @@
 package cam72cam.immersiverailroading.library;
 
 public enum ValveGearType {
+	CONNECTING,
 	STEPHENSON,
 	WALSCHAERTS,
-	TRI_WALSCHAERTS,
-	GARRAT,
-	MALLET_WALSCHAERTS,
+	HIDDEN,
+	// TODO
 	SHAY,
 	CLIMAX,
-	T1,
-	HIDDEN
+	;
+
+	public static ValveGearType from(String valveGear) {
+		if (valveGear == null) {
+			return null;
+		}
+		switch (valveGear) {
+			case "TRI_WALSCHAERTS":
+			case "GARRAT":
+			case "MALLET_WALSCHAERTS":
+				return WALSCHAERTS;
+			case "T1":
+				return STEPHENSON;
+			default:
+				return ValveGearType.valueOf(valveGear);
+		}
+	}
 }

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -12,10 +13,10 @@ import java.util.stream.Collectors;
 public class Frame {
     private final ModelComponent frame;
     private final List<Wheel> wheels;
-    private final ConnectingRodValveGear valveGearRight;
-    private final ConnectingRodValveGear valveGearLeft;
+    private final ValveGear valveGearRight;
+    private final ValveGear valveGearLeft;
 
-    public Frame(ComponentProvider provider, String blame) {
+    public Frame(ComponentProvider provider, String blame, ValveGearType type) {
         this.wheels = provider.parseAll(ModelComponentType.FRAME_WHEEL_X)
                 .stream().map(Wheel::new).collect(Collectors.toList());
 
@@ -23,17 +24,17 @@ public class Frame {
         if (frame == null) {
             ImmersiveRailroading.warn("Invalid model: Missing FRAME for %s!  (this will fail in future versions of IR)", blame);
         }
-        valveGearRight = ConnectingRodValveGear.get(wheels, provider, "RIGHT", -90);
-        valveGearLeft = ConnectingRodValveGear.get(wheels, provider, "LEFT", 0);
+        valveGearRight = ValveGear.get(wheels, type, provider, "RIGHT", -90);
+        valveGearLeft = ValveGear.get(wheels, type, provider, "LEFT", 0);
     }
 
     public void render(double distance, ComponentRenderer draw) {
         draw.render(frame);
         for (Wheel wheel : wheels) {
             wheel.render(valveGearRight != null ?
-                    valveGearRight.angle(distance) - valveGearRight.angleOffset :
+                    valveGearRight.angle(distance) + 90 :
                     valveGearLeft != null ?
-                            valveGearLeft.angle(distance) - valveGearLeft.angleOffset :
+                            valveGearLeft.angle(distance) + 0 :
                             wheel.angle(distance),
                     draw);
         }
