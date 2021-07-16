@@ -7,8 +7,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #branch: [1.7.10-forge, 1.10.2-forge, 1.11.2-forge, 1.12.2-forge, 1.14.4-forge, 1.15.2-forge, 1.16.4-forge]
-        branch: [1.12.2-forge]
+        branch: [1.7.10-forge, 1.10.2-forge, 1.11.2-forge, 1.12.2-forge, 1.14.4-forge, 1.15.2-forge, 1.16.5-forge]
+        include:
+          - branch: 1.7.10-forge
+            umc: latest
+          - branch: 1.10.2-forge
+            umc: latest
+          - branch: 1.11.2-forge
+            umc: latest
+          - branch: 1.10.2-forge
+            umc: latest
+          - branch: 1.12.2-forge
+            umc: latest
+          - branch: 1.14.4-forge
+            umc: latest
+          - branch: 1.15.2-forge
+            umc: latest
+          - branch: 1.16.5-forge
+            umc: latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
@@ -26,7 +42,8 @@ jobs:
     - name: Setup Universal Mod Core (and helpers)
       env:
         BRANCH: ${{ matrix.branch }}
-      run: ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true
+        UMC: ${{ matrix.umc }}
+      run: .github/workflows/umc.sh ${BRANCH} 1.0.1 ${UMC} && ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true
     - name: Gradle compile
       run: ./gradlew classes
     - name: Process images
