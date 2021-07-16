@@ -77,6 +77,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 
 		offset = this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(passenger));
+		offset = offset.add(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0);
 
 		return offset;
 	}
