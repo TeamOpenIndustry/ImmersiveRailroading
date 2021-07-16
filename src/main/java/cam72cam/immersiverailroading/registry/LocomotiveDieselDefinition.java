@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.DieselLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -20,6 +21,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
     private boolean hornSus;
+    private ValveGearType valveGear;
 
     public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
@@ -38,6 +40,8 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
         fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
         muliUnitCapable = !properties.has("multi_unit_capable") || properties.get("multi_unit_capable").getAsBoolean();
+
+        valveGear = properties.has("valve_gear") ? ValveGearType.valueOf(properties.get("valve_gear").getAsString().toUpperCase()) : null;
 
         hornSus = false;
         if (properties.has("horn_sustained")) {
@@ -85,5 +89,9 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public int getFuelEfficiency() {
         return this.fuelEfficiency;
+    }
+
+    public ValveGearType getValveGear() {
+        return valveGear;
     }
 }

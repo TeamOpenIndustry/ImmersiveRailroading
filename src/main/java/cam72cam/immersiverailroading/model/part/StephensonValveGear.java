@@ -18,20 +18,17 @@ import cam72cam.mod.sound.ISound;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class StephensonValveGear implements ValveGear {
-    protected final DrivingWheels wheels;
+public class StephensonValveGear extends ConnectingRodValveGear {
     protected final ModelComponent drivingRod;
-    protected final ModelComponent connectingRod;
     protected final ModelComponent pistonRod;
     protected final ModelComponent cylinder;
-    protected final float angleOffset;
     protected final boolean reverse;
 
     protected final Vec3d drivenWheel;
-    protected final Vec3d centerOfWheels;
 
-    public static StephensonValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static StephensonValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
@@ -39,18 +36,18 @@ public class StephensonValveGear implements ValveGear {
         return drivingRod != null && connectingRod != null && pistonRod != null ?
                 new StephensonValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset) : null;
     }
-    public StephensonValveGear(DrivingWheels wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
-        this.wheels = wheels;
+    public StephensonValveGear(List<Wheel> wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
+        super(wheels, connectingRod, angleOffset);
         this.drivingRod = drivingRod;
-        this.connectingRod = connectingRod;
         this.pistonRod = pistonRod;
         this.cylinder = cylinder;
-        this.reverse = pistonRod.center.x > wheels.center().x;
+        Vec3d center = ModelComponent.center(wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
+        this.reverse = pistonRod.center.x > center.x;
         this.angleOffset = angleOffset + (reverse ? -90 : 0);
 
 
-        drivenWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
-        centerOfWheels = drivingRod.pos.equals("CENTER") ? drivenWheel : wheels.center(); // Bad hack for old TRI_WALSCHERTS code
+        drivenWheel = wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
+        centerOfWheels = drivingRod.pos.equals("CENTER") ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
     }
 
     protected double getStroke(EntityMoveableRollingStock stock, float throttle, int shift, boolean speedLimit) {
@@ -146,7 +143,7 @@ public class StephensonValveGear implements ValveGear {
                 accell = 0;
             }
             Vec3d sideMotion = stock.getVelocity().add(VecUtil.fromWrongYaw(accell, stock.getRotationYaw()+90));
-            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01, sideMotion.z), 80, 0, 0.6f, 0.2));
+            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale()));
         }
 
         if (ConfigSound.soundEnabled && stock instanceof LocomotiveSteam) {
@@ -160,11 +157,9 @@ public class StephensonValveGear implements ValveGear {
         }
     }
 
-    public float angle(double distance) {
-        return wheels.angle(distance) + angleOffset;
-    }
-
     public void render(double distance, float throttle, ComponentRenderer draw) {
+        super.render(distance, throttle, draw);
+
         draw.render(cylinder);
 
         float wheelAngle = angle(distance);
@@ -176,16 +171,6 @@ public class StephensonValveGear implements ValveGear {
         double connRodRadius = connRodPos.x - centerOfWheels.x;
         // Find new connecting rod pos based on the connecting rod rod radius
         Vec3d connRodMovment = VecUtil.fromWrongYaw(connRodRadius, (float) wheelAngle);
-
-        // Draw Connecting Rod
-        try (ComponentRenderer matrix = draw.push()) {
-            // Move to origin
-            GL11.glTranslated(-connRodRadius, 0, 0);
-            // Apply connection rod movement
-            GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
-
-            matrix.render(connectingRod);
-        }
 
         // X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
         // Y: Center of the rod

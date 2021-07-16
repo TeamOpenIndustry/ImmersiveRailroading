@@ -1,9 +1,11 @@
 package cam72cam.immersiverailroading.model.components;
 
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Wheel;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
 
+import java.util.List;
 import java.util.Set;
 
 public class ModelComponent {
@@ -38,5 +40,26 @@ public class ModelComponent {
     }
     public double width() {
         return max.z - min.z;
+    }
+
+    public static Vec3d center(List<ModelComponent> components) {
+        double minX = components.get(0).min.x;
+        double minY = components.get(0).min.y;
+        double minZ = components.get(0).min.z;
+        double maxX = components.get(0).max.x;
+        double maxY = components.get(0).max.y;
+        double maxZ = components.get(0).max.z;
+
+        for (ModelComponent rc : components) {
+            minX = Math.min(minX, rc.min.x);
+            minY = Math.min(minY, rc.min.y);
+            minZ = Math.min(minZ, rc.min.z);
+            maxX = Math.max(maxX, rc.max.x);
+            maxY = Math.max(maxY, rc.max.y);
+            maxZ = Math.max(maxZ, rc.max.z);
+        }
+        Vec3d min = new Vec3d(minX, minY, minZ);
+        Vec3d max = new Vec3d(maxX, maxY, maxZ);
+        return min.add(max).scale(.5);
     }
 }

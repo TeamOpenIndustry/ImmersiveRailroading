@@ -46,7 +46,7 @@ public class SteamChimney {
 
                 int lifespan = (int) (200 * (1 + Math.abs(stock.getThrottle())) * smokeMod * stock.gauge.scale());
 
-                float verticalSpeed = 0.5f;
+                double verticalSpeed = 0.5 * stock.gauge.scale();
                 double size = smoke.width() * stock.gauge.scale() * (0.8 + smokeMod);
 
                 if (isEndStroke) {

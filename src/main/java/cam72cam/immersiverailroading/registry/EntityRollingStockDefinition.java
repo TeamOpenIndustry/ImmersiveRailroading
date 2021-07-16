@@ -435,6 +435,10 @@ public abstract class EntityRollingStockDefinition {
                             }
 
                             int idx = componentKeys.indexOf(rc.key) * xRes * zRes;
+                            if (idx < 0) {
+                                // Code changed, we should probably invalidate this cache key...
+                                continue;
+                            }
                             for (int x = 0; x < xRes; x++) {
                                 for (int z = 0; z < zRes; z++) {
                                     heightMap[x][z] = Math.max(heightMap[x][z], raw[idx + x * zRes + z]);

@@ -3,21 +3,31 @@ package cam72cam.immersiverailroading.model;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.model.part.DieselExhaust;
-import cam72cam.immersiverailroading.model.part.Horn;
-import cam72cam.immersiverailroading.model.part.PartSound;
+import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
+import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
+import cam72cam.immersiverailroading.render.ExpireableList;
 
 import java.util.List;
+import java.util.UUID;
 
 public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private List<ModelComponent> components;
     private DieselExhaust exhaust;
     private Horn horn;
     private final PartSound idle;
+    private DrivingAssembly drivingWheels;
+    private ModelComponent frameFront;
+    private ModelComponent frameRear;
+    private DrivingAssembly drivingWheelsFront;
+    private DrivingAssembly drivingWheelsRear;
+
+    private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
+    private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
@@ -26,7 +36,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        super.parseComponents(provider, def);
+        frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
+        frameRear = provider.parse(ModelComponentType.REAR_FRAME);
 
         components = provider.parse(
                 ModelComponentType.FUEL_TANK,
@@ -49,6 +60,13 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
+
+        ValveGearType type = ((LocomotiveDieselDefinition) def).getValveGear();
+        drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT", 0);
+        drivingWheelsRear = DrivingAssembly.get(type, provider, "REAR", 45);
+        drivingWheels = DrivingAssembly.get(type, provider, null, 0);
+
+        super.parseComponents(provider, def);
     }
 
     @Override
@@ -65,6 +83,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     @Override
     protected void removed(LocomotiveDiesel stock) {
         super.removed(stock);
+        frontTrackers.put(stock.getUUID(), null);
+        rearTrackers.put(stock.getUUID(), null);
         horn.removed(stock);
         idle.removed(stock);
     }
@@ -74,5 +94,37 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
         horn.render(draw);
+
+        if (drivingWheels != null) {
+            drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
+        }
+        if (drivingWheelsFront != null) {
+            try (ComponentRenderer matrix = draw.push()) {
+                if (frameFront != null) {
+                    TrackFollower data = frontTrackers.get(stock.getUUID());
+                    if (data == null) {
+                        data = new TrackFollower(frameFront.center);
+                        frontTrackers.put(stock.getUUID(), data);
+                    }
+                    data.apply(stock);
+                    matrix.render(frameFront);
+                }
+                drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
+            }
+        }
+        if (drivingWheelsRear != null) {
+            try (ComponentRenderer matrix = draw.push()) {
+                if (frameRear != null) {
+                    TrackFollower data = rearTrackers.get(stock.getUUID());
+                    if (data == null) {
+                        data = new TrackFollower(frameRear.center);
+                        rearTrackers.put(stock.getUUID(), data);
+                    }
+                    data.apply(stock);
+                    matrix.render(frameRear);
+                }
+                drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
+            }
+        }
     }
 }

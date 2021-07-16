@@ -20,9 +20,9 @@ public class DrivingAssembly {
             return null;
         }
 
-        ValveGear left = ValveGear.get(wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)), 0);
-        ValveGear center = ValveGear.get(wheels, type, provider, "CENTER" + (pos == null ? "" : ("_" + pos)), -120);
-        ValveGear right = ValveGear.get(wheels, type, provider, "RIGHT" + (pos == null ? "" : ("_" + pos)), center == null ? -90 : -240);
+        ValveGear left = ValveGear.get(wheels.wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)), 0);
+        ValveGear center = ValveGear.get(wheels.wheels, type, provider, "CENTER" + (pos == null ? "" : ("_" + pos)), -120);
+        ValveGear right = ValveGear.get(wheels.wheels, type, provider, "RIGHT" + (pos == null ? "" : ("_" + pos)), center == null ? -90 : -240);
 
         ModelComponent steamChest = pos == null ?
                 provider.parse(ModelComponentType.STEAM_CHEST) :

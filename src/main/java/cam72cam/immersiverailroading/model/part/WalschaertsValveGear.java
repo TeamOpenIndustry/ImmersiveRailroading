@@ -19,7 +19,7 @@ public class WalschaertsValveGear extends StephensonValveGear {
     protected final ModelComponent radiusBar;
     protected final List<ModelComponent> todo;
 
-    public static WalschaertsValveGear get(DrivingWheels wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static WalschaertsValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
@@ -43,7 +43,7 @@ public class WalschaertsValveGear extends StephensonValveGear {
                 new WalschaertsValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset, crossHead, combinationLever, returnCrank, returnCrankRod, slottedLink, radiusBar, todo) : null;
     }
 
-    public WalschaertsValveGear(DrivingWheels wheels,
+    public WalschaertsValveGear(List<Wheel> wheels,
                                 ModelComponent drivingRod,
                                 ModelComponent connectingRod,
                                 ModelComponent pistonRod,
