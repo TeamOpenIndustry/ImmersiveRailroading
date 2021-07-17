@@ -64,6 +64,7 @@ uploadArchives {
 }
 
 task ('showBuildInfo') {
+    System.out.println(version)
     String minecraftString = version.split('-')[0]
     String minecraftLoader = version.split('-')[1]
     String umcVersionString = "${minecraftString}-${minecraftLoader}-${universalmodcore.umcVersion}"
