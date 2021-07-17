@@ -64,13 +64,14 @@ uploadArchives {
 }
 
 task ('showBuildInfo') {
-    System.out.println(version)
-    String minecraftString = version.split('-')[0]
-    String minecraftLoader = version.split('-')[1]
-    String umcVersionString = "${minecraftString}-${minecraftLoader}-${universalmodcore.umcVersion}"
-    System.out.println("Build for MC ${minecraftString} (${minecraftLoader})")
-    System.out.println("https://teamopenindustry.cc/maven/cam72cam/immersiverailroading/ImmersiveRailroading/${version}/ImmersiveRailroading-${version}.jar")
-    System.out.println("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/${umcVersionString}/UniversalModCore-${umcVersionString}.jar")
+    doLast {
+        String minecraftString = version.split('-')[0]
+        String minecraftLoader = version.split('-')[1]
+        String umcVersionString = "${minecraftString}-${minecraftLoader}-${universalmodcore.umcVersion}"
+        System.out.println("Build for MC ${minecraftString} (${minecraftLoader})")
+        System.out.println("https://teamopenindustry.cc/maven/cam72cam/immersiverailroading/ImmersiveRailroading/${version}/ImmersiveRailroading-${version}.jar")
+        System.out.println("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/${umcVersionString}/UniversalModCore-${umcVersionString}.jar")
+    }
 }
 
 uploadArchives.finalizedBy showBuildInfo
