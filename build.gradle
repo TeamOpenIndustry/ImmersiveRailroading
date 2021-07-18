@@ -13,9 +13,9 @@ buildscript {
 apply plugin: 'cam72cam.universalmodcore'
 apply plugin: 'maven'
 
-String modVersion = '1.8.0'
+String irVersion = '1.8.0'
 if (!"release".equalsIgnoreCase(System.getProperty("target"))) {
-    modVersion += "-" + Util.GitRevision()
+    irVersion += "-" + Util.GitRevision()
 }
 
 universalmodcore {
@@ -23,7 +23,7 @@ universalmodcore {
     modClass = 'ImmersiveRailroading'
     modName = 'Immersive Railroading'
     modId = 'immersiverailroading'
-    modVersion = modVersion
+    modVersion = irVersion
     umcVersion = '1.0.1-23f8a0'
     //umcPath = '../UMC-forge-1.16.4/build/libs/'
 }
