@@ -27,7 +27,7 @@ jobs:
         BRANCH: ${{ matrix.branch }}
       run: ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true -Dtarget=release
     - name: Hack date
-      run: sudo date -s '2021-07-30 00:00:00'
+      run: sudo date -s '2021-07-30 23:00:00'
     - name: Gradle compile
       run: ./gradlew classes
     - name: Process images

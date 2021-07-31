@@ -43,9 +43,9 @@ jobs:
       env:
         BRANCH: ${{ matrix.branch }}
         UMC: ${{ matrix.umc }}
-      run: .github/workflows/umc.sh ${BRANCH} 1.0.1 ${UMC} && ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true
+      run: .github/workflows/umc.sh ${BRANCH} 1.1.0 ${UMC} && ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true
     - name: Hack date
-      run: sudo date -s '2021-07-30 00:00:00'
+      run: sudo date -s '2021-07-30 23:00:00'
     - name: Gradle compile
       run: ./gradlew classes
     - name: Process images
