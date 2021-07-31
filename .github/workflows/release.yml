@@ -26,8 +26,8 @@ jobs:
       env:
         BRANCH: ${{ matrix.branch }}
       run: ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true -Dtarget=release
-    - name: Hack date
-      run: sudo date -s '2021-07-30 23:00:00'
+    - name: Hack Forge Gradle
+      run: mkdir -p ~/.gradle/caches/minecraft/; wget 'https://teamopenindustry.cc/maven/hack/ForgeGradleVersion.json' -o ~/.gradle/caches/minecraft/ForgeGradleVersion.json
     - name: Gradle compile
       run: ./gradlew classes
     - name: Process images
