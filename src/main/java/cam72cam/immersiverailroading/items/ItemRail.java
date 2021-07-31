@@ -10,6 +10,7 @@ import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.text.TextUtil;
 
 public class ItemRail extends CustomItem {
 	public ItemRail() {
@@ -26,10 +27,9 @@ public class ItemRail extends CustomItem {
 		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
-	@Override
-	public List<String> getTooltip(ItemStack stack) {
-        return Collections.singletonList(GuiText.GAUGE_TOOLTIP.toString(new Data(stack).gauge));
-    }
+	public String getCustomName(ItemStack stack) {
+		return String.format("%s (%s)", TextUtil.translate("item.immersiverailroading:item_rail_part.name"), new Data(stack).gauge.toString());
+	}
 
 	public static class Data extends ItemDataSerializer {
 		@TagField("gauge")
