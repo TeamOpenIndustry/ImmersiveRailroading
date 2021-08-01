@@ -181,7 +181,7 @@ public class CastingMultiblock extends Multiblock {
 					return;
 				}
 
-				IBoundingBox meltBounds = IBoundingBox.from(getPos(offset.add(0, 1, 0))).grow(new Vec3d(2, 0, 2));
+				IBoundingBox meltBounds = IBoundingBox.from(getPos(offset.add(0, 1, 0))).grow(new Vec3d(2, 0.5, 2));
 				IBoundingBox damageBounds = meltBounds.expand(new Vec3d(0, 2.5, 0));
 				List<ItemStack> dropped = world.getDroppedItems(meltBounds);
 				for (ItemStack stack : dropped) {
