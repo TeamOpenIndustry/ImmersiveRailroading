@@ -386,12 +386,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				entity.setVelocity(this.getVelocity().add(0, entity.getVelocity().y, 0));
 			}
 	    }
-		if (getWorld().isServer && this.getTickCount() % 5 == 0 && Config.ConfigDamage.TrainsBreakBlocks && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
+		if (getWorld().isServer && this.getTickCount() % 5 == 0 && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
             RealBB bb = this.getCollision().grow(new Vec3d(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale()));
 
             for (Vec3i bp : getWorld().blocksInBounds(bb)) {
                 if (!BlockUtil.isIRRail(getWorld(), bp)) {
-                    if (getWorld().canEntityCollideWith(bp, DAMAGE_SOURCE_HIT)) {
+                    if (Config.ConfigDamage.TrainsBreakBlocks && getWorld().canEntityCollideWith(bp, DAMAGE_SOURCE_HIT)) {
                         if (!BlockUtil.isIRRail(getWorld(), bp.up())) {
                             getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(getWorld().isSnow(bp)));
                         }
