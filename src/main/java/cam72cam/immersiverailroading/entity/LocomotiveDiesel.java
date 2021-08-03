@@ -33,6 +33,8 @@ public class LocomotiveDiesel extends Locomotive {
 	@TagField("ENGINE_OVERHEATED")
 	private boolean engineOverheated = false;
 
+	private int throttleCooldown;
+
 	public LocomotiveDiesel() {
 		engineTemperature = ambientTemperature();
 	}
@@ -102,29 +104,52 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
 		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
-			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
+			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle());
+			((LocomotiveDiesel) stock).realSetReverser(this.getReverser() * (direction ? 1 : -1));
 			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());
 		}
 	}
-	
+
 	private void realSetThrottle(float newThrottle) {
-		if (Config.isFuelRequired(gauge)) {
-			newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
-		}
 		super.setThrottle(newThrottle);
+	}
+	private void realSetReverser(float newReverser) {
+		super.setReverser(newReverser);
 	}
 	private void realAirBrake(float newAirBrake) {
 		super.setAirBrake(newAirBrake);;
 	}
-	
+
 	@Override
 	public void setThrottle(float newThrottle) {
-		realSetThrottle(newThrottle);
-		if (this.getDefinition().muliUnitCapable) {
+		if (this.throttleCooldown <= 0) {
+			this.throttleCooldown = 3;
+			if (newThrottle > getThrottle()) {
+				realSetThrottle((float) (Math.ceil(newThrottle * 8) / 8));
+			} else {
+				realSetThrottle((float) (Math.floor(newThrottle * 8) / 8));
+			}
 			this.mapTrain(this, true, false, this::setThrottleMap);
 		}
 	}
-	
+
+	@Override
+	public void setReverser(float newReverser) {
+		if (getThrottle() > 0) {
+			return;
+		}
+		float value = newReverser;
+		if (newReverser == 0) {
+			value = 0;
+		} else if (newReverser > getReverser()) {
+			value = 1;
+		} else if (newReverser < getReverser()) {
+			value = -1;
+		}
+		super.setReverser(value);
+		this.mapTrain(this, true, false, this::setThrottleMap);
+	}
+
 	@Override
 	public void setAirBrake(float newAirBrake) {
 		realAirBrake(newAirBrake);
@@ -138,8 +163,6 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 		return 0;
 	}
-
-
 
 	@Override
 	public void onTick() {
@@ -159,7 +182,11 @@ public class LocomotiveDiesel extends Locomotive {
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
 		float ambientDelta = engineTemperature - ambientTemperature();
 		float coolDownSpeed = heatUpSpeed * Math.copySign((float)Math.pow(ambientDelta / 130, 2), ambientDelta);
-		
+
+		if (throttleCooldown > 0) {
+			throttleCooldown--;
+		}
+
 		engineTemperature -= coolDownSpeed;
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
