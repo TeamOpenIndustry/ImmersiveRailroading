@@ -61,7 +61,12 @@ public class StephensonValveGear extends ConnectingRodValveGear {
     }
 
     public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
-        return getStroke(stock, throttle, 0, true) > (stock instanceof LocomotiveSteam ? 1-Math.abs(((LocomotiveSteam) stock).getReverser()) : 0.97);
+        double stroke = getStroke(stock, throttle, 0, true);
+        if (stock instanceof LocomotiveSteam) {
+            LocomotiveSteam loco = (LocomotiveSteam) stock;
+            return Math.abs(loco.getThrottle() * loco.getReverser()) > 0 && stroke > 1.05 - Math.abs(loco.getReverser());
+        }
+        return stroke > 0.97;
     }
 
     private static class ChuffSound {
@@ -86,7 +91,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
         void update(boolean enteredStroke) {
             if (!chuffOn) {
-                if (enteredStroke) {
+                if (enteredStroke && Math.abs(stock.getThrottle() * stock.getReverser()) > 0) {
                     chuffOn = true;
                     pitchStroke = !pitchStroke;
 

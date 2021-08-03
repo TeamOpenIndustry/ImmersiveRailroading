@@ -252,7 +252,7 @@ public class LocomotiveSteam extends Locomotive {
 			pressureValve = false;
 		}
 		
-		float throttle = Math.abs(getThrottle());
+		float throttle = getThrottle() * Math.abs(getReverser());
 		if (throttle != 0 && boilerPressure > 0) {
 			double burnableSlots = this.cargoItems.getSlotCount()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
