@@ -40,7 +40,7 @@ public class PressureValve {
     };
 
     public void effects(EntityMoveableRollingStock stock, boolean isBlowingOff) {
-        if (ConfigSound.soundEnabled) {
+        if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
             ISound sound = sounds.get(stock.getUUID());
             if (sound == null) {
                 sound = ImmersiveRailroading.newSound(sndFile, true, 40, stock.soundGauge());
