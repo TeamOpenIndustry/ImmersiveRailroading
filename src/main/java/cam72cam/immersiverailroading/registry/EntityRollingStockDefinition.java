@@ -229,7 +229,7 @@ public abstract class EntityRollingStockDefinition {
 
         JsonObject properties = data.get("properties").getAsJsonObject();
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
-        valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase()) : null;
+        valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase(Locale.ROOT)) : null;
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;

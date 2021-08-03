@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.library;
 
 import cam72cam.mod.text.TextUtil;
 
+import java.util.Locale;
+
 public enum TrackSmoothing {
 	BOTH,
 	NEAR,
@@ -10,6 +12,6 @@ public enum TrackSmoothing {
 
 	@Override
 	public String toString() {
-	    return TextUtil.translate("track.immersiverailroading:smoothing." + super.toString().toLowerCase());
+	    return TextUtil.translate("track.immersiverailroading:smoothing." + super.toString().toLowerCase(Locale.ROOT));
 	}
 }

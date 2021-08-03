@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.library;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -127,7 +128,7 @@ public enum ItemComponentType {
 
 	@Override
 	public String toString() {
-		return TextUtil.translate("part.immersiverailroading:component." + super.toString().toLowerCase());
+		return TextUtil.translate("part.immersiverailroading:component." + super.toString().toLowerCase(Locale.ROOT));
 	}
 
 	public int getPlateCost(Gauge gauge, EntityRollingStockDefinition definition) {

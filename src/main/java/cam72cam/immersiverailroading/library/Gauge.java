@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.library;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapped;
@@ -31,7 +32,7 @@ public class Gauge {
 	
 	@Override
 	public String toString() {
-	    return TextUtil.translate("immersiverailroading:gauge." + name.toLowerCase()); 
+	    return TextUtil.translate("immersiverailroading:gauge." + name.toLowerCase(Locale.ROOT));
 	}
 
 	@Override

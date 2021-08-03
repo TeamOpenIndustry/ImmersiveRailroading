@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.library;
 
 import cam72cam.mod.text.TextUtil;
 
+import java.util.Locale;
+
 public enum CraftingType {
 	CASTING,
 	CASTING_HAMMER,
@@ -17,7 +19,7 @@ public enum CraftingType {
 	
 	@Override
 	public String toString() {
-		return TextUtil.translate("immersiverailroading:crafting_type." + super.toString().toLowerCase());
+		return TextUtil.translate("immersiverailroading:crafting_type." + super.toString().toLowerCase(Locale.ROOT));
 	}
 }
 
