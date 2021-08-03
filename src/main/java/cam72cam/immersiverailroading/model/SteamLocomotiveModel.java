@@ -73,7 +73,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     protected void effects(LocomotiveSteam stock) {
         super.effects(stock);
 
-        float throttle = stock.getThrottle();
+        float throttle = stock.getThrottle() * stock.getReverser();
         if (drivingWheels != null) {
             drivingWheels.effects(stock, throttle);
         }
@@ -114,7 +114,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         whistle.render(draw);
 
         if (drivingWheels != null) {
-            drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
+            drivingWheels.render(distanceTraveled, stock.getReverser(), draw);
         }
         if (drivingWheelsFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
@@ -127,7 +127,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     data.apply(stock);
                     matrix.render(frameFront);
                 }
-                drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
+                drivingWheelsFront.render(distanceTraveled, stock.getReverser(), matrix);
             }
         }
         if (drivingWheelsRear != null) {
@@ -141,7 +141,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     data.apply(stock);
                     matrix.render(frameRear);
                 }
-                drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
+                drivingWheelsRear.render(distanceTraveled, stock.getReverser(), matrix);
             }
         }
     }

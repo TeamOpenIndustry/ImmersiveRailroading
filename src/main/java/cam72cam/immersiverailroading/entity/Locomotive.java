@@ -31,6 +31,10 @@ public abstract class Locomotive extends FreightTank {
 	private float throttle = 0;
 
 	@TagSync
+	@TagField("REVERSER")
+	private float reverser = 0;
+
+	@TagSync
 	@TagField("AIR_BRAKE")
 	private float airBrake = 0;
 
@@ -94,8 +98,21 @@ public abstract class Locomotive extends FreightTank {
 			setThrottle(0f);
 			break;
 		case THROTTLE_DOWN:
-			if (getThrottle() > -1) {
+			if (getThrottle() > 0) {
 				setThrottle(getThrottle() - throttleNotch);
+			}
+			break;
+		case REVERSER_UP:
+			if (getReverser() < 1) {
+				setReverser(getReverser() + throttleNotch);
+			}
+			break;
+		case REVERSER_ZERO:
+			setReverser(0f);
+			break;
+		case REVERSER_DOWN:
+			if (getReverser() > -1) {
+				setReverser(getReverser() - throttleNotch);
 			}
 			break;
 		case AIR_BRAKE_UP:
@@ -161,13 +178,7 @@ public abstract class Locomotive extends FreightTank {
 			}
 			
 			if (deadMansSwitch && !this.getCurrentSpeed().isZero()) {
-				boolean hasDriver = false;
-				for (Entity entity : this.getPassengers()) {
-					if (entity.isPlayer()) {
-						hasDriver = true;
-						break;
-					}
-				}
+				boolean hasDriver = this.getPassengers().stream().anyMatch(Entity::isPlayer);
 				if (!hasDriver) {
 					this.setThrottle(0);
 					this.setAirBrake(1);
@@ -190,7 +201,7 @@ public abstract class Locomotive extends FreightTank {
 	
 	private double getAppliedTractiveEffort(Speed speed) {
 		double locoEfficiency = 0.7f; //TODO config
-		double outputHorsepower = Math.abs(Math.pow(getThrottle(), 3) * getAvailableHP());
+		double outputHorsepower = Math.abs(Math.pow(getThrottle() * getReverser(), 3) * getAvailableHP());
 		
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
 		return tractiveEffortNewtons;
@@ -202,7 +213,7 @@ public abstract class Locomotive extends FreightTank {
 		staticTractiveEffort *= 1.5; // Fudge factor
 		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
 		if (adhesionFactor > 1) {
-			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getThrottle());
+			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getReverser());
 		}
 		return 0;
 	}
@@ -229,7 +240,7 @@ public abstract class Locomotive extends FreightTank {
 			tractiveEffortNewtons = 0;
 		}
 		
-		return Math.copySign(tractiveEffortNewtons, getThrottle());
+		return Math.copySign(tractiveEffortNewtons, getReverser());
 	}
 
 	/*
@@ -246,7 +257,17 @@ public abstract class Locomotive extends FreightTank {
 			triggerResimulate();
 		}
 	}
-	
+
+	public float getReverser() {
+		return reverser;
+	}
+	public void setReverser(float newReverser) {
+		if (this.getReverser() != newReverser) {
+			reverser = newReverser;
+			triggerResimulate();
+		}
+	}
+
 	public void setHorn(int val, UUID uuid) {
 		if (hornPlayer == null && uuid != null) {
 			hornPlayer = uuid;

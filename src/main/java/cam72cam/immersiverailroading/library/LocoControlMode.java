@@ -8,6 +8,8 @@ public enum LocoControlMode {
 	BRAKE,
 	HORN,
 	COMPUTER,
+	REVERSER_FORWARD,
+	REVERSER_REVERSE,
 	;
 	
 	@Override

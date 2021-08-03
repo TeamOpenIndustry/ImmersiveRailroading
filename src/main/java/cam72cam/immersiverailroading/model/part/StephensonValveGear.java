@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
+import cam72cam.immersiverailroading.model.SteamLocomotiveModel;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.ExpireableList;
@@ -60,7 +61,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
     }
 
     public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
-        return getStroke(stock, throttle, 0, true) > 0.97;
+        return getStroke(stock, throttle, 0, true) > (stock instanceof LocomotiveSteam ? 1-Math.abs(((LocomotiveSteam) stock).getReverser()) : 0.97);
     }
 
     private static class ChuffSound {
@@ -91,7 +92,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
                     double speed = Math.abs(stock.getCurrentSpeed().minecraft());
                     double maxSpeed = Math.abs(stock.getDefinition().getMaxSpeed(stock.gauge).minecraft());
-                    float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(stock.getThrottle());
+                    float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(stock.getThrottle() * stock.getReverser());
                     volume = (float) Math.sqrt(volume);
                     double fraction = 3;
                     float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
