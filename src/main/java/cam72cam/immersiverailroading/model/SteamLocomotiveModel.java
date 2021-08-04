@@ -115,13 +115,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
 
-        if (cargoFront != null) {
-            cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), draw);
-        }
-        if (cargoRear != null) {
-            cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), draw);
-        }
-
         whistle.render(draw);
 
         if (drivingWheels != null) {
@@ -139,6 +132,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     matrix.render(frameFront);
                 }
                 drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
+                if (cargoFront != null) {
+                    cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), draw);
+                }
             }
         }
         if (drivingWheelsRear != null) {
@@ -153,6 +149,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     matrix.render(frameRear);
                 }
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
+                if (cargoRear != null) {
+                    cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), draw);
+                }
             }
         }
     }
