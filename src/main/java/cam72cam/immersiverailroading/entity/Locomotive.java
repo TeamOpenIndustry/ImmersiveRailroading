@@ -149,13 +149,13 @@ public abstract class Locomotive extends FreightTank {
 		System.out.println("DRAG " + component + ": "+ deltaX + deltaY);
 		switch (component) {
 			case THROTTLE:
-				setThrottle(Math.min(1, Math.max(-1, (float) -deltaY + getThrottle())));
+				setThrottle(Math.min(1, Math.max(0, (float) -deltaY + getThrottle())));
 				break;
 			case TRAIN_BRAKE:
 				setAirBrake(Math.min(1, Math.max(0, (float) -deltaY + getAirBrake())));
 				break;
 			case REVERSER:
-				setThrottle(Math.min(1, Math.max(-1, (float) -deltaY + getThrottle())));
+				setReverser(Math.min(1, Math.max(-1, (float) -deltaY + getReverser())));
 				break;
 		}
 	}

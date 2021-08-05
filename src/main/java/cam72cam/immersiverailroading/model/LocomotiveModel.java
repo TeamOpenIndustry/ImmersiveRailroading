@@ -76,7 +76,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
             throttle.render(Math.abs(stock.getThrottle()), draw);
         }
         if (reverser != null) {
-            reverser.render(stock.getThrottle() / 2, draw);
+            reverser.render(stock.getReverser() / 2, draw);
         }
         if (train_brake != null) {
             train_brake.render(stock.getAirBrake(), draw);
