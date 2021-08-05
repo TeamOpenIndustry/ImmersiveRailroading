@@ -147,4 +147,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
         draw.render(remaining);
     }
+
+    public List<ModelComponent> getDraggableComponents() {
+        return Collections.EMPTY_LIST;
+    }
 }

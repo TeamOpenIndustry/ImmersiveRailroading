@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
@@ -124,6 +125,21 @@ public abstract class Locomotive extends FreightTank {
 			break;
 			default:
 				super.handleKeyPress(source, key);
+		}
+	}
+
+	public void onDrag(ModelComponentType component, double deltaX, double deltaY) {
+		System.out.println("DRAG " + component + ": "+ deltaX + deltaY);
+		switch (component) {
+			case THROTTLE:
+				setThrottle(Math.min(1, Math.max(-1, (float) -deltaY + getThrottle())));
+				break;
+			case TRAIN_BRAKE:
+				setAirBrake(Math.min(1, Math.max(0, (float) -deltaY + getAirBrake())));
+				break;
+			case REVERSER:
+				setThrottle(Math.min(1, Math.max(-1, (float) -deltaY + getThrottle())));
+				break;
 		}
 	}
 

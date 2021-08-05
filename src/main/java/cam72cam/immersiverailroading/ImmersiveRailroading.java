@@ -177,6 +177,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
+
+				ClientPartDragging.register();
 				break;
 			case RELOAD:
 				DefinitionManager.initDefinitions();
