@@ -619,6 +619,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						case COMPUTER:
 							//NOP
 							break;
+						case REVERSER_FORWARD:
+							loco.setReverser(power / 15f);
+							break;
+						case REVERSER_REVERSE:
+							loco.setReverser(-power / 15f);
+							break;
 					}
 				}
 			}
