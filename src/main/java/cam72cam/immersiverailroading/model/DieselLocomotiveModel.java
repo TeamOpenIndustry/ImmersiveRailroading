@@ -23,6 +23,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private DrivingAssembly drivingWheels;
     private ModelComponent frameFront;
     private ModelComponent frameRear;
+    private ModelComponent shellFront;
+    private ModelComponent shellRear;
     private DrivingAssembly drivingWheelsFront;
     private DrivingAssembly drivingWheelsRear;
 
@@ -38,6 +40,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
+        shellFront = provider.parse(ModelComponentType.FRONT_SHELL);
+        shellRear = provider.parse(ModelComponentType.REAR_SHELL);
 
         components = provider.parse(
                 ModelComponentType.FUEL_TANK,
@@ -109,6 +113,9 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                     data.apply(stock);
                     matrix.render(frameFront);
                 }
+                if (shellFront != null) {
+                    matrix.render(shellFront);
+                }
                 drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
             }
         }
@@ -122,6 +129,9 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                     }
                     data.apply(stock);
                     matrix.render(frameRear);
+                }
+                if (shellRear != null) {
+                    matrix.render(shellRear);
                 }
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
             }

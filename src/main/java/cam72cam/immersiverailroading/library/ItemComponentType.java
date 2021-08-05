@@ -87,6 +87,9 @@ public enum ItemComponentType {
 			ModelComponentType.LIFTING_LINK_SIDE,
 			ModelComponentType.REACH_ROD_SIDE
 	),
+
+	FRONT_SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.FRONT_SHELL),
+	REAR_SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.REAR_SHELL),
 	;
 	
 	public final AssemblyStep step;
