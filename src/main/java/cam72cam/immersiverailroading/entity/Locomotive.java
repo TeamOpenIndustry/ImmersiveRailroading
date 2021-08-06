@@ -147,15 +147,16 @@ public abstract class Locomotive extends FreightTank {
 
 	public void onDrag(ModelComponentType component, double deltaX, double deltaY) {
 		System.out.println("DRAG " + component + ": "+ deltaX + deltaY);
+		int factor = 4;
 		switch (component) {
 			case THROTTLE:
-				setThrottle(Math.min(1, Math.max(0, (float) -deltaY + getThrottle())));
+				setThrottle(Math.min(1, Math.max(0, (float) -(deltaY+deltaX) * factor + getThrottle())));
 				break;
 			case TRAIN_BRAKE:
-				setAirBrake(Math.min(1, Math.max(0, (float) -deltaY + getAirBrake())));
+				setAirBrake(Math.min(1, Math.max(0, (float) -deltaY * factor + getAirBrake())));
 				break;
 			case REVERSER:
-				setReverser(Math.min(1, Math.max(-1, (float) -deltaY + getReverser())));
+				setReverser(Math.min(1, Math.max(-1, (float) (deltaY + deltaX) * factor + getReverser())));
 				break;
 		}
 	}
