@@ -23,8 +23,6 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
 
-        //diesels allow MU by default
-        multiUnitCapable = true;
         // Handle null data
         if (fuelCapacity == null) {
             fuelCapacity = FluidQuantity.ZERO;
@@ -38,6 +36,9 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         JsonObject properties = data.get("properties").getAsJsonObject();
         fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
         fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
+        //diesels allow MU by default
+        multiUnitCapable = true;
+        //check props for non-MU diesels
         multiUnitCapable = !properties.has("multi_unit_capable") || properties.get("multi_unit_capable").getAsBoolean();
 
         hornSus = false;
