@@ -9,6 +9,11 @@ public class HandCarDefinition extends LocomotiveDefinition {
     }
 
     @Override
+    protected boolean multiUnitDefault() {
+        return false;
+    }
+
+    @Override
     public double getBrakePower() {
         return 0.1;
     }

@@ -94,6 +94,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
+    protected boolean multiUnitDefault() {
+        return false;
+    }
+
+    @Override
     protected StockModel<?> createModel() throws Exception {
         return new SteamLocomotiveModel(this);
     }

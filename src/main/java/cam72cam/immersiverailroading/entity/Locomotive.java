@@ -236,11 +236,24 @@ public abstract class Locomotive extends FreightTank {
 	 * 
 	 * Misc Helper functions
 	 */
+
+	private void copySettings(EntityRollingStock stock, boolean direction) {
+		if (stock instanceof Locomotive && ((Locomotive)stock).getDefinition().muliUnitCapable) {
+			((Locomotive) stock).setInternalThrottle(this.getThrottle() * (direction ? 1 : -1));
+			((Locomotive) stock).setInternalAirBrake(this.getAirBrake());
+		}
+	}
 	
 	public float getThrottle() {
 		return throttle;
 	}
 	public void setThrottle(float newThrottle) {
+		setInternalThrottle(newThrottle);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::copySettings);
+		}
+	}
+	private void setInternalThrottle(float newThrottle) {
 		if (this.getThrottle() != newThrottle) {
 			throttle = newThrottle;
 			triggerResimulate();
@@ -273,6 +286,12 @@ public abstract class Locomotive extends FreightTank {
 		return airBrake;
 	}
 	public void setAirBrake(float newAirBrake) {
+		setInternalAirBrake(newAirBrake);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::copySettings);
+		}
+	}
+	private void setInternalAirBrake(float newAirBrake) {
 		if (this.getAirBrake() != newAirBrake) {
 			airBrake = newAirBrake;
 			triggerResimulate();

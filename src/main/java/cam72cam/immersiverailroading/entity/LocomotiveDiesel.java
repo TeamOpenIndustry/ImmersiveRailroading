@@ -39,7 +39,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public int getInventoryWidth() {
-		return 2;
+		return getDefinition().isCabCar ? 0 : 2;
 	}
 
 	public float getEngineTemperature() {
@@ -80,7 +80,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	public GuiRegistry.EntityGUI guiType() {
-		return GuiTypes.DIESEL_LOCOMOTIVE;
+		return getDefinition().isCabCar ? null : GuiTypes.DIESEL_LOCOMOTIVE;
 	}
 
 	/*
@@ -99,41 +99,10 @@ public class LocomotiveDiesel extends Locomotive {
 				super.handleKeyPress(source, key);
 		}
 	}
-	
-	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
-		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
-			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
-			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());
-		}
-	}
-	
-	private void realSetThrottle(float newThrottle) {
-		if (Config.isFuelRequired(gauge)) {
-			newThrottle = Math.copySign(Math.min(Math.abs(newThrottle), this.getEngineTemperature()/100), newThrottle);
-		}
-		super.setThrottle(newThrottle);
-	}
-	private void realAirBrake(float newAirBrake) {
-		super.setAirBrake(newAirBrake);;
-	}
-	
-	@Override
-	public void setThrottle(float newThrottle) {
-		realSetThrottle(newThrottle);
-		if (this.getDefinition().muliUnitCapable) {
-			this.mapTrain(this, true, false, this::setThrottleMap);
-		}
-	}
-	
-	@Override
-	public void setAirBrake(float newAirBrake) {
-		realAirBrake(newAirBrake);
-		this.mapTrain(this, true, false, this::setThrottleMap);
-	}
-	
+
 	@Override
 	protected int getAvailableHP() {
-		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
+		if (!getDefinition().isCabCar && isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -144,7 +113,15 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onTick() {
 		super.onTick();
-		
+
+		if (turnOnOffDelay > 0) {
+			turnOnOffDelay -= 1;
+		}
+
+		if (getDefinition().isCabCar) {
+			return;
+		}
+
 		if (getWorld().isClient) {
 			float absThrottle = Math.abs(this.getThrottle());
 			if (this.soundThrottle > absThrottle) {
@@ -154,7 +131,7 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 			return;
 		}
-		
+
 		float engineTemperature = getEngineTemperature();
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
 		float ambientDelta = engineTemperature - ambientTemperature();
@@ -192,11 +169,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (engineTemperature < 100 && isEngineOverheated()) {
 			setEngineOverheated(false);
 		}
-		
-		if (turnOnOffDelay > 0) {
-			turnOnOffDelay -= 1;
-		}
-		
+
 		setEngineTemperature(engineTemperature);
 	}
 	
@@ -207,7 +180,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public FluidQuantity getTankCapacity() {
-		return this.getDefinition().getFuelCapacity(gauge);
+		return getDefinition().isCabCar ? FluidQuantity.ZERO : this.getDefinition().getFuelCapacity(gauge);
 	}
 	
 	@Override
