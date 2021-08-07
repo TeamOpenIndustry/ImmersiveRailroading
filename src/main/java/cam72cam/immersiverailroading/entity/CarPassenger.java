@@ -1,4 +1,4 @@
 package cam72cam.immersiverailroading.entity;
 
-public class CarPassenger extends EntityControllableRollingStock {
+public class CarPassenger extends EntityCoupleableRollingStock {
 }

@@ -17,7 +17,7 @@ import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
 
-public abstract class Freight extends EntityControllableRollingStock {
+public abstract class Freight extends EntityCoupleableRollingStock {
 	@TagField("items")
 	public FilteredStackHandler cargoItems = new FilteredStackHandler(0);
 
