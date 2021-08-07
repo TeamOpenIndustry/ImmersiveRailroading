@@ -13,6 +13,7 @@ public class PhysicsAccummulator {
 
 	public double tractiveEffortNewtons = 0;
 	public double airBrake = 0;
+	public double independentBrakeNewtons = 0;
 	//lbs
 	public double rollingResistanceNewtons = 0;
 	public double gradeForceNewtons = 0;
@@ -49,11 +50,18 @@ public class PhysicsAccummulator {
 			Locomotive loco = (Locomotive) stock;
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
 			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient(pos.speed);
-			brakeAdhesionNewtons += loco.getDefinition().getStartingTractionNewtons(stock.gauge); 
+			//Independent brake brakeAdhesionNewtons += loco.getDefinition().getStartingTractionNewtons(stock.gauge);
 		} else {
 			// Air brake only applies 1/4th
 			// 0.25 = steel wheel on steel rail	
 			brakeAdhesionNewtons += stock.getWeight() * 0.25 * 0.25 * 4.44822f;
+		}
+
+		if (stock.getDefinition().hasIndependentBrake()) {
+			independentBrakeNewtons += ((EntityMoveableRollingStock) stock).getIndependentBrake() * stock.getWeight() * 0.25 * 4.44822f;
+			System.out.println(grade);
+			System.out.println(gradeForceNewtons);
+			System.out.println(independentBrakeNewtons);
 		}
 		
 		int slowdown = movable.getSpeedRetarderSlowdown(pos);
@@ -61,13 +69,13 @@ public class PhysicsAccummulator {
 	}
 	
 	public Speed getVelocity() {
-		double airBrakeNewtons = brakeAdhesionNewtons * Math.min(airBrake, 1) * Config.ConfigBalance.brakeMultiplier;
+		double brakeNewtons = (independentBrakeNewtons + brakeAdhesionNewtons * Math.min(airBrake, 1)) * Config.ConfigBalance.brakeMultiplier;
 		
 		// a = f (to newtons) * m (to newtons)
 		double tractiveAccell = tractiveEffortNewtons / massToMoveKg;
 		double resistanceAccell = rollingResistanceNewtons / massToMoveKg;
 		double gradeAccell = gradeForceNewtons / massToMoveKg;
-		double brakeAccell = airBrakeNewtons / massToMoveKg;
+		double brakeAccell = brakeNewtons / massToMoveKg;
 		
 		double currentMCVelocity = pos.speed.minecraft();
 		double deltaAccellTractiveMCVelocity = Speed.fromMetric(tractiveAccell).minecraft();

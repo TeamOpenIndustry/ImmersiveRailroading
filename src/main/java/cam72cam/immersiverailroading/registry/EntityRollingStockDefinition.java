@@ -78,6 +78,7 @@ public abstract class EntityRollingStockDefinition {
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
+    private boolean hasIndependentBrake;
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
@@ -230,6 +231,7 @@ public abstract class EntityRollingStockDefinition {
         JsonObject properties = data.get("properties").getAsJsonObject();
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
         valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase(Locale.ROOT)) : null;
+        hasIndependentBrake = properties.has("independent_brake") ? properties.get("independent_brake").getAsBoolean() : independentBrakeDefault();
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
@@ -252,6 +254,10 @@ public abstract class EntityRollingStockDefinition {
                 clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(default_clackRear);
             }
         }
+    }
+
+    protected boolean independentBrakeDefault() {
+        return false;
     }
 
     public List<ModelComponent> getComponents(ModelComponentType name) {
@@ -313,6 +319,10 @@ public abstract class EntityRollingStockDefinition {
             default:
                 return 0;
         }
+    }
+
+    public boolean hasIndependentBrake() {
+        return hasIndependentBrake;
     }
 
     private static class HeightMapData {

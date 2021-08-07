@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -14,7 +15,9 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.ICollision;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
@@ -44,6 +47,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private float[][] heightMapCache;
     @TagField("tickSkew")
     private double tickSkew = 1;
+    @TagSync
+    @TagField("IND_BRAKE")
+    private float independentBrake = 0;
 
     private float sndRand;
 
@@ -519,6 +525,40 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         }
         if (this.clackFront != null) {
             clackFront.stop();
+        }
+    }
+
+    @Override
+    public void handleKeyPress(Player source, KeyTypes key) {
+        float independentBrakeNotch = 0.04f;
+
+        switch (key) {
+            case AIR_BRAKE_UP:
+                if (getIndependentBrake() < 1) {
+                    setIndependentBrake(getIndependentBrake() + independentBrakeNotch);
+                    System.out.println(getIndependentBrake());
+                }
+                break;
+            case AIR_BRAKE_ZERO:
+                setIndependentBrake(0f);
+                break;
+            case AIR_BRAKE_DOWN:
+                if (getIndependentBrake() > 0) {
+                    setIndependentBrake(getIndependentBrake() - independentBrakeNotch);
+                }
+                break;
+            default:
+                super.handleKeyPress(source, key);
+        }
+    }
+
+    public float getIndependentBrake() {
+        return independentBrake;
+    }
+    public void setIndependentBrake(float newIndependentBrake) {
+        if (this.getIndependentBrake() != newIndependentBrake) {
+            independentBrake = newIndependentBrake;
+            triggerResimulate();
         }
     }
 }

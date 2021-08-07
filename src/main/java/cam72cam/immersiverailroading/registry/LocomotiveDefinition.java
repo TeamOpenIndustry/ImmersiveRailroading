@@ -89,4 +89,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public boolean getRadioCapability() {
         return this.hasRadioEquipment;
     }
+
+    @Override
+    protected boolean independentBrakeDefault() {
+        return true;
+    }
 }
