@@ -74,13 +74,16 @@ public enum ModelComponentType {
 	
 	// Cargo
 	CARGO_FILL_X("CARGO_FILL_#ID#"),
-	
+
+	// Lights
+	HEADLIGHT_X("HEADLIGHT_#ID#"),
+
 	// REST
 	IMMERSIVERAILROADING_BASE_COMPONENT("IMMERSIVERAILROADING_BASE_COMPNOENT"),
 	REMAINING(""),
 	;
-	
-	public final String regex;
+
+    public final String regex;
 	public final boolean collisionsEnabled;
 	
 	ModelComponentType(String regex) {

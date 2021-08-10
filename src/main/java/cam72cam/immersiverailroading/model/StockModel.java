@@ -95,7 +95,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
 
-            try (ComponentRenderer draw = new ComponentRenderer(bound, available)) {
+            try (ComponentRenderer draw = new ComponentRenderer(bound, available, false)) {
                 GL11.glScaled(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
                 //noinspection unchecked
                 render((T) stock, draw, distanceTraveled);
@@ -103,11 +103,20 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
     }
 
+    public void postRender(EntityMoveableRollingStock stock, float partialTicks) {
+        postRender((T) stock, null, 0);
+    }
+
+    void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
+    }
+
     protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
         frame.render(distanceTraveled, draw);
 
-        draw.render(shell);
-
+        try (ComponentRenderer light = draw.withBrightGroups(true)) {
+            light.render(shell);
+            light.render(remaining);
+        }
 
         if (bogeyFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
@@ -144,7 +153,5 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 bogeyRear.render(distanceTraveled, matrix);
             }
         }
-
-        draw.render(remaining);
     }
 }

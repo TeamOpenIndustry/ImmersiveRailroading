@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.obj.OBJVBO.BoundOBJVBO;
+import org.lwjgl.opengl.GL11;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -16,10 +17,12 @@ public class ComponentRenderer implements Closeable {
     private final List<ModelComponent> buffer = new ArrayList<>();
     private final List<ModelComponentType> available;
     private final OpenGL.With matrix;
+    private boolean fullbright;
 
-    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available) {
+    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available, boolean fullbright) {
         this.vbo = vbo;
         this.available = available;
+        this.fullbright = fullbright;
         matrix = OpenGL.matrix();
     }
 
@@ -41,16 +44,42 @@ public class ComponentRenderer implements Closeable {
         }
     }
 
+    public ComponentRenderer withBrightGroups(boolean fullbright) {
+        return new ComponentRenderer(vbo, available, fullbright);
+    }
+
     public ComponentRenderer push() {
-        return new ComponentRenderer(vbo, available);
+        return new ComponentRenderer(vbo, available, fullbright);
+    }
+
+    private void draw(Collection<String> groups, boolean fullbright) {
+        if (fullbright) {
+            // Is partitioning faster?
+            List<String> std = groups.stream().filter(x -> !x.contains("FULLBRIGHT")).collect(Collectors.toList());
+            List<String> bright = groups.stream().filter(x -> x.contains("FULLBRIGHT")).collect(Collectors.toList());
+            if (!std.isEmpty()) {
+                vbo.draw(std);
+            }
+            if (!bright.isEmpty()) {
+                try (
+                        OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
+                        OpenGL.With shader = OpenGL.shader(0);
+                        OpenGL.With lightMap = OpenGL.lightmap(false);
+                ) {
+                    vbo.draw(bright);
+                }
+            }
+        } else {
+            vbo.draw(groups);
+        }
     }
 
     @Override
     public void close() {
         if (buffer.size() == 1) {
-            vbo.draw(buffer.get(0).modelIDs);
+            draw(buffer.get(0).modelIDs, fullbright);
         } else if (buffer.size() > 1) {
-            vbo.draw(buffer.stream().flatMap(x -> x.modelIDs.stream()).collect(Collectors.toList()));
+            draw(buffer.stream().flatMap(x -> x.modelIDs.stream()).collect(Collectors.toList()), fullbright);
         }
         matrix.restore();
     }

@@ -42,6 +42,7 @@ public abstract class EntityRollingStockDefinition {
     private static Identifier default_wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
     private static Identifier default_clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
     private static Identifier default_clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
+    private static Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
 
     public final String defID;
     private final Class<? extends EntityRollingStock> type;
@@ -52,6 +53,7 @@ public abstract class EntityRollingStockDefinition {
     public Identifier wheel_sound;
     public Identifier clackFront;
     public Identifier clackRear;
+    public Identifier light_tex;
     public double internal_model_scale;
     double internal_inv_scale;
     private String name = "Unknown";
@@ -230,6 +232,8 @@ public abstract class EntityRollingStockDefinition {
         JsonObject properties = data.get("properties").getAsJsonObject();
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
         valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase(Locale.ROOT)) : null;
+
+        light_tex = properties.has("light_texture") ? new Identifier(properties.get("light_texture").getAsString()) : default_light_tex;
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;

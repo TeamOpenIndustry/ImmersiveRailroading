@@ -26,6 +26,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private Whistle whistle;
     private SteamChimney chimney;
     private PressureValve pressureValve;
+    private ModelComponent firebox;
 
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
@@ -41,8 +42,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
 
+        firebox = provider.parse(ModelComponentType.FIREBOX);
         components = provider.parse(
-                ModelComponentType.FIREBOX,
                 ModelComponentType.SMOKEBOX,
                 ModelComponentType.PIPING
         );
@@ -109,6 +110,14 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     @Override
     protected void render(LocomotiveSteam stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
+
+        if (!Config.isFuelRequired(stock.gauge) || stock.getBurnTime().values().stream().anyMatch(x -> x > 1)) {
+            try (ComponentRenderer light = draw.withBrightGroups(true)) {
+                light.render(firebox);
+            }
+        } else {
+            draw.render(firebox);
+        }
         draw.render(components);
 
         whistle.render(draw);
