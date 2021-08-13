@@ -30,6 +30,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
     private final PartSound idleSounds;
+    private Cargo cargoFront;
+    private Cargo cargoRear;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
@@ -39,7 +41,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
+        cargoFront = Cargo.get(provider, "FRONT");
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
+        cargoRear = Cargo.get(provider, "REAR");
 
         components = provider.parse(
                 ModelComponentType.FIREBOX,
@@ -128,6 +132,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     matrix.render(frameFront);
                 }
                 drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
+                if (cargoFront != null) {
+                    cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
+                }
             }
         }
         if (drivingWheelsRear != null) {
@@ -142,6 +149,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     matrix.render(frameRear);
                 }
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
+                if (cargoRear != null) {
+                    cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
+                }
             }
         }
     }

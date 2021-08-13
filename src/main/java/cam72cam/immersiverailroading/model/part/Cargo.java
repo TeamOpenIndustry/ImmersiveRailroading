@@ -10,8 +10,8 @@ import java.util.List;
 public class Cargo {
     private final List<ModelComponent> cargoLoads;
 
-    public static Cargo get(ComponentProvider provider) {
-        List<ModelComponent> cargoLoads = provider.parseAll(ModelComponentType.CARGO_FILL_X);
+    public static Cargo get(ComponentProvider provider, String pos) {
+        List<ModelComponent> cargoLoads = pos == null ? provider.parseAll(ModelComponentType.CARGO_FILL_X) : provider.parseAll(ModelComponentType.CARGO_FILL_POS_X, pos);
         return cargoLoads.isEmpty() ? null : new Cargo(cargoLoads);
     }
 
