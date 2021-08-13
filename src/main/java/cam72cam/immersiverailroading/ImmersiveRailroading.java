@@ -150,12 +150,12 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 
 				Function<KeyTypes, Runnable> onKeyPress = type -> () -> new KeyPressPacket(type).sendToServer();
-				Keyboard.registerKey("ir_keys.increase_throttle", KeyCode.NUMPAD9, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
-				Keyboard.registerKey("ir_keys.zero_throttle", KeyCode.NUMPAD6, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
-				Keyboard.registerKey("ir_keys.decrease_throttle", KeyCode.NUMPAD3, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
-				Keyboard.registerKey("ir_keys.increase_reverser", KeyCode.NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_UP));
-				Keyboard.registerKey("ir_keys.zero_reverser", KeyCode.NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_ZERO));
-				Keyboard.registerKey("ir_keys.decrease_reverser", KeyCode.NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_DOWN));
+				Keyboard.registerKey("ir_keys.increase_throttle", KeyCode.NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
+				Keyboard.registerKey("ir_keys.zero_throttle", KeyCode.NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
+				Keyboard.registerKey("ir_keys.decrease_throttle", KeyCode.NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
+				Keyboard.registerKey("ir_keys.increase_reverser", KeyCode.NUMPAD9, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_UP));
+				Keyboard.registerKey("ir_keys.zero_reverser", KeyCode.NUMPAD6, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_ZERO));
+				Keyboard.registerKey("ir_keys.decrease_reverser", KeyCode.NUMPAD3, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_DOWN));
 				Keyboard.registerKey("ir_keys.increase_brake", KeyCode.NUMPAD7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_UP));
 				Keyboard.registerKey("ir_keys.zero_brake", KeyCode.NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_ZERO));
 				Keyboard.registerKey("ir_keys.decrease_brake", KeyCode.NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_DOWN));
