@@ -1,12 +1,13 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.entity.CarPassenger;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.Bogey;
 import cam72cam.immersiverailroading.model.part.Frame;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.part.TrackFollower;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
@@ -17,7 +18,8 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.obj.OBJVBO;
 import org.lwjgl.opengl.GL11;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
@@ -113,9 +115,15 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
         frame.render(distanceTraveled, draw);
 
-        try (ComponentRenderer light = draw.withBrightGroups(true)) {
-            light.render(shell);
-            light.render(remaining);
+        try(OpenGL.With lm = stock instanceof CarPassenger ?
+                OpenGL.lightmap(
+                        Math.max(stock.getWorld().getBlockLightLevel(stock.getBlockPosition()), 6/15f),
+                        stock.getWorld().getSkyLightLevel(stock.getBlockPosition())
+                ) : () -> {}) {
+            try (ComponentRenderer light = draw.withBrightGroups(true)) {
+                light.render(shell);
+                light.render(remaining);
+            }
         }
 
         if (bogeyFront != null) {
