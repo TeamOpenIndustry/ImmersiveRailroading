@@ -188,4 +188,8 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	public String getTexture() {
 		return texture;
 	}
+
+    public boolean internalLightsEnabled() {
+		return false;
+    }
 }

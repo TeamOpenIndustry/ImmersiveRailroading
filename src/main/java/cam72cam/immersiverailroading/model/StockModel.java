@@ -112,14 +112,17 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
     }
 
+    protected OpenGL.With internalLighting(T stock) {
+        float blockLight = 6 / 15f;
+        return stock.getWorld().getBlockLightLevel(stock.getBlockPosition()) < blockLight ?
+                OpenGL.lightmap(blockLight, stock.getWorld().getSkyLightLevel(stock.getBlockPosition())
+                ) : () -> {};
+    }
+
     protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
         frame.render(distanceTraveled, draw);
 
-        try(OpenGL.With lm = stock instanceof CarPassenger ?
-                OpenGL.lightmap(
-                        Math.max(stock.getWorld().getBlockLightLevel(stock.getBlockPosition()), 6/15f),
-                        stock.getWorld().getSkyLightLevel(stock.getBlockPosition())
-                ) : () -> {}) {
+        try(OpenGL.With lm = stock.internalLightsEnabled() ? internalLighting(stock) : () -> {}) {
             try (ComponentRenderer light = draw.withBrightGroups(true)) {
                 light.render(shell);
                 light.render(remaining);
