@@ -65,6 +65,8 @@ public enum ModelComponentType {
 	// MALLET
 	FRONT_FRAME("FRONT_(LOCOMOTIVE|FRAME)"),
 	REAR_FRAME("REAR_(LOCOMOTIVE|FRAME)"),
+	FRONT_SHELL("FRONT_SHELL"),
+	REAR_SHELL("REAR_SHELL"),
 
 	
 	// PARTICLES
@@ -74,6 +76,7 @@ public enum ModelComponentType {
 	
 	// Cargo
 	CARGO_FILL_X("CARGO_FILL_#ID#"),
+	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#"),
 
 	// Lights
 	HEADLIGHT_X("HEADLIGHT_#ID#"),
