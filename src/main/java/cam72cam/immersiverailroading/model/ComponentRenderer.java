@@ -62,9 +62,9 @@ public class ComponentRenderer implements Closeable {
             }
             if (!bright.isEmpty()) {
                 try (
-                        OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
-                        OpenGL.With shader = OpenGL.shader(0);
-                        OpenGL.With lightMap = OpenGL.lightmap(false);
+                        OpenGL.With light = OpenGL.shaderActive() ?
+                                OpenGL.lightmap(1, 1) :
+                                OpenGL.bool(GL11.GL_LIGHTING, false).and(OpenGL.lightmap(false));
                 ) {
                     vbo.draw(bright);
                 }

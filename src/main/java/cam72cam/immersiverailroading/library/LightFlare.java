@@ -97,9 +97,9 @@ public class LightFlare {
 
         try (
                 OpenGL.With tex = OpenGL.texture(textures.get(stock.getDefinition().light_tex));
-                OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
-                OpenGL.With shader = OpenGL.shader(0);
-                OpenGL.With lightMap = OpenGL.lightmap(false);
+                OpenGL.With light = OpenGL.shaderActive() ?
+                        OpenGL.lightmap(1, 1) :
+                        OpenGL.bool(GL11.GL_LIGHTING, false).and(OpenGL.lightmap(false));
                 OpenGL.With depth = OpenGL.depth(false);
                 OpenGL.With alpha = OpenGL.bool(GL11.GL_ALPHA_TEST, false);
                 OpenGL.With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)) {
