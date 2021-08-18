@@ -63,4 +63,8 @@ public class TrackFollower {
         }
         return result;
     }
+
+    public float getYaw() {
+        return toPointYaw + atPointYaw;
+    }
 }

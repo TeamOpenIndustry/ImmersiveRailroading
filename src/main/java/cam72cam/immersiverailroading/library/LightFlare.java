@@ -38,6 +38,10 @@ public class LightFlare {
         return provider.parseAll(type).stream().map(LightFlare::new).collect(Collectors.toList());
     }
 
+    public static List<LightFlare> get(ComponentProvider provider, ModelComponentType type, String pos) {
+        return provider.parseAll(type, pos).stream().map(LightFlare::new).collect(Collectors.toList());
+    }
+
     public LightFlare(ModelComponent component) {
         this.component = component;
         this.forward = component.center.x > 0;  // Is this right?
@@ -60,7 +64,7 @@ public class LightFlare {
         draw.render(component);
     }
 
-    public void postRender(EntityMoveableRollingStock stock) {
+    public void postRender(EntityMoveableRollingStock stock, float offset) {
         if (!textures.containsKey(stock.getDefinition().light_tex)) {
             BufferedImage image = null;
             try {
@@ -87,7 +91,7 @@ public class LightFlare {
         }
         Vec3d flareOffset = new Vec3d(component.min.x-0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
 
-        Vec3d playerOffset = VecUtil.rotateWrongYaw(stock.getPosition().subtract(MinecraftClient.getPlayer().getPosition()), 180-stock.getRotationYaw()).
+        Vec3d playerOffset = VecUtil.rotateWrongYaw(stock.getPosition().subtract(MinecraftClient.getPlayer().getPosition()), 180-(stock.getRotationYaw()-offset)).
                 subtract(flareOffset);
 
         int viewAngle = 45;
@@ -106,7 +110,7 @@ public class LightFlare {
 
             if (intensity > 0.1) {
                 try (OpenGL.With matrix = OpenGL.matrix()) {
-                    GL11.glTranslated(flareOffset.x - (intensity / 2 * stock.gauge.scale()), flareOffset.y, flareOffset.z);
+                    GL11.glTranslated(flareOffset.x - (intensity / 2 * stock.gauge.scale())*3, flareOffset.y, flareOffset.z);
                     GL11.glRotated(90, 0, 1, 0);
                     double scale = Math.max((component.max.z - component.min.z) * 0.5, intensity * 2) * stock.gauge.scale();
                     GL11.glColor4f(red, green, blue, 1 - (intensity/3f));
