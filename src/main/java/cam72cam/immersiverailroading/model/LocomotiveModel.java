@@ -34,7 +34,6 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
 
-    private Map<UUID, List<Light>> lights = new HashMap<>();
     private List<LightFlare> headlights;
     private List<LightFlare> headlightsFront;
     private List<LightFlare> headlightsRear;
@@ -75,18 +74,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     protected void effects(T stock) {
         super.effects(stock);
         bell.effects(stock, stock.getBell() > 0 ? 0.8f : 0);
-
-        Vec3d lightPos = stock.getPosition().add(VecUtil.rotateWrongYaw(new Vec3d(stock.getDefinition().getLength(stock.gauge), 0, 0), stock.getRotationYaw()));
-        Vec3d lightOff = VecUtil.rotateWrongYaw(new Vec3d(1, 0, 0), stock.getRotationYaw());
-        if (!lights.containsKey(stock.getUUID())) {
-            lights.put(stock.getUUID(), new ArrayList<>());
-            for (int i = 0; i < 15; i++) {
-                lights.get(stock.getUUID()).add(new Light(stock.getWorld(), lightPos.add(lightOff.scale(i*2)), 1 - i/15f));
-            }
-        }
-        for (int i = 0; i < lights.get(stock.getUUID()).size(); i++) {
-            lights.get(stock.getUUID()).get(i).setPosition(lightPos.add(lightOff.scale(i*2)));
-        }
+        headlights.forEach(x -> x.effects(stock));
     }
 
     @Override
@@ -97,8 +85,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         rearTrackers.put(stock.getUUID(), null);
 
         bell.removed(stock);
-        lights.get(stock.getUUID()).forEach(Light::remove);
-        lights.remove(stock.getUUID());
+        headlights.forEach(x -> x.removed(stock));
     }
 
     @Override

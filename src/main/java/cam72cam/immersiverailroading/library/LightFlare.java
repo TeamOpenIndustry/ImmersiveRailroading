@@ -7,7 +7,9 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.ImageUtils;
+import cam72cam.mod.render.Light;
 import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
@@ -17,9 +19,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,6 +28,8 @@ public class LightFlare {
     private final ModelComponent component;
     private final boolean forward;
     private static final Map<Identifier, Integer> textures = new HashMap<>();
+    private static Map<UUID, List<Light>> castLights = new HashMap<>();
+    private static Map<UUID, List<Vec3d>> castPositions = new HashMap<>();
     private final float red;
     private final float green;
     private final float blue;
@@ -146,6 +148,58 @@ public class LightFlare {
                 GL11.glVertex3d(1, -1, 0);
                 GL11.glEnd();
             }
+        }
+    }
+
+    public <T extends EntityMoveableRollingStock> void effects(T stock) {
+        if (!Light.enabled()) {
+            this.removed(stock);
+            return;
+        }
+
+        int lightDistance = (int) (15 * stock.gauge.scale());
+        if (!castLights.containsKey(stock.getUUID())) {
+            Vec3d flareOffset = new Vec3d(-component.min.x, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
+
+            castLights.put(stock.getUUID(), new ArrayList<>());
+            castPositions.put(stock.getUUID(), new ArrayList<>());
+            for (int i = 0; i < lightDistance; i++) {
+                for (int j = 0; j < 5; j++) {
+                    castLights.get(stock.getUUID()).add(new Light(stock.getWorld(), stock.getPosition(), 1 - i / (float)lightDistance));
+                }
+                double xOff = 4;
+                double yOff = -(i / (float) lightDistance) * flareOffset.y;
+                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, 0+yOff, 0));
+                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, i/2f+yOff, 0));
+                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, -i/2f+yOff, 0));
+                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, 0+yOff, i/2f));
+                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, 0+yOff, -i/2f));
+            }
+        }
+        Vec3d[] collided = new Vec3d[5];
+        Vec3d nop = null;
+        for (int i = 0; i < castLights.get(stock.getUUID()).size(); i++) {
+            if (collided[i%5] != null) {
+                castLights.get(stock.getUUID()).get(i).setPosition(collided[i%5]);
+            } else {
+                Vec3d pos = stock.getPosition().add(VecUtil.rotateWrongYaw(castPositions.get(stock.getUUID()).get(i), stock.getRotationYaw()));
+                if (nop == null) {
+                    nop = pos;
+                }
+                if (!stock.getWorld().isReplaceable(new Vec3i(pos).up())) {
+                    collided[i%5] = nop;
+                } else {
+                    castLights.get(stock.getUUID()).get(i).setPosition(pos);
+                }
+            }
+        }
+    }
+
+    public <T extends EntityMoveableRollingStock> void removed(T stock) {
+        if (castLights.containsKey(stock.getUUID())) {
+            castLights.get(stock.getUUID()).forEach(Light::remove);
+            castLights.remove(stock.getUUID());
+            castPositions.remove(stock.getUUID());
         }
     }
 }
