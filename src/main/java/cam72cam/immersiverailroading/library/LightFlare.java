@@ -28,8 +28,8 @@ public class LightFlare {
     private final ModelComponent component;
     private final boolean forward;
     private static final Map<Identifier, Integer> textures = new HashMap<>();
-    private static Map<UUID, List<Light>> castLights = new HashMap<>();
-    private static Map<UUID, List<Vec3d>> castPositions = new HashMap<>();
+    private final Map<UUID, List<Light>> castLights = new HashMap<>();
+    private final Map<UUID, List<Vec3d>> castPositions = new HashMap<>();
     private final float red;
     private final float green;
     private final float blue;
@@ -46,7 +46,7 @@ public class LightFlare {
 
     public LightFlare(ModelComponent component) {
         this.component = component;
-        this.forward = component.center.x > 0;  // Is this right?
+        this.forward = component.center.x < 0;
         Matcher rgbValues = component.modelIDs.stream()
                 .map(rgb::matcher)
                 .filter(Matcher::matches)
@@ -91,10 +91,10 @@ public class LightFlare {
             }
             textures.put(stock.getDefinition().light_tex, texId);
         }
-        Vec3d flareOffset = new Vec3d(component.min.x-0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
+        Vec3d flareOffset = new Vec3d(forward ? component.min.x-0.01 : component.max.x+0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
 
         Vec3d playerOffset = VecUtil.rotateWrongYaw(stock.getPosition().subtract(MinecraftClient.getPlayer().getPosition()), 180-(stock.getRotationYaw()-offset)).
-                subtract(flareOffset);
+                subtract(flareOffset).scale(forward ? 1 : -1);
 
         int viewAngle = 45;
         float intensity = 1 - Math.abs(Math.max(-viewAngle, Math.min(viewAngle, VecUtil.toWrongYaw(playerOffset) - 90))) / viewAngle;
@@ -112,11 +112,14 @@ public class LightFlare {
 
             if (intensity > 0.1) {
                 try (OpenGL.With matrix = OpenGL.matrix()) {
-                    GL11.glTranslated(flareOffset.x - (intensity / 2 * stock.gauge.scale())*3, flareOffset.y, flareOffset.z);
+                    GL11.glTranslated(flareOffset.x - (intensity / 2 * stock.gauge.scale())*(forward ? 3 : -3), flareOffset.y, flareOffset.z);
                     GL11.glRotated(90, 0, 1, 0);
                     double scale = Math.max((component.max.z - component.min.z) * 0.5, intensity * 2) * stock.gauge.scale();
                     GL11.glColor4f(red, green, blue, 1 - (intensity/3f));
                     GL11.glScaled(scale, scale, scale);
+                    if (!forward) {
+                        GL11.glRotated(180, 0, 1, 0);
+                    }
 
                     GL11.glBegin(GL11.GL_QUADS);
                     GL11.glTexCoord2d(0, 0);
@@ -136,6 +139,9 @@ public class LightFlare {
                 GL11.glColor4d(Math.sqrt(red), Math.sqrt(green), Math.sqrt(blue), 1 - (intensity/3f));
                 double scale = (component.max.z - component.min.z) / 1.5 * stock.gauge.scale();
                 GL11.glScaled(scale, scale, scale);
+                if (!forward) {
+                    GL11.glRotated(180, 0, 1, 0);
+                }
 
                 GL11.glBegin(GL11.GL_QUADS);
                 GL11.glTexCoord2d(0, 0);
@@ -151,7 +157,7 @@ public class LightFlare {
         }
     }
 
-    public <T extends EntityMoveableRollingStock> void effects(T stock) {
+    public <T extends EntityMoveableRollingStock> void effects(T stock, float offset) {
         if (!Light.enabled()) {
             this.removed(stock);
             return;
@@ -169,11 +175,12 @@ public class LightFlare {
                 }
                 double xOff = 4;
                 double yOff = -(i / (float) lightDistance) * flareOffset.y;
-                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, 0+yOff, 0));
-                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, i/2f+yOff, 0));
-                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, -i/2f+yOff, 0));
-                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, 0+yOff, i/2f));
-                castPositions.get(stock.getUUID()).add(flareOffset.add(i * 2 + xOff, 0+yOff, -i/2f));
+                int sign = forward ? 1 : -1;
+                castPositions.get(stock.getUUID()).add(flareOffset.add((i * 2 + xOff) * sign, 0+yOff, 0));
+                castPositions.get(stock.getUUID()).add(flareOffset.add((i * 2 + xOff) * sign, i/2f+yOff, 0));
+                castPositions.get(stock.getUUID()).add(flareOffset.add((i * 2 + xOff) * sign, -i/2f+yOff, 0));
+                castPositions.get(stock.getUUID()).add(flareOffset.add((i * 2 + xOff) * sign, 0+yOff, i/2f));
+                castPositions.get(stock.getUUID()).add(flareOffset.add((i * 2 + xOff) * sign, 0+yOff, -i/2f));
             }
         }
         Vec3d[] collided = new Vec3d[5];
@@ -182,12 +189,13 @@ public class LightFlare {
             if (collided[i%5] != null) {
                 castLights.get(stock.getUUID()).get(i).setPosition(collided[i%5]);
             } else {
-                Vec3d pos = stock.getPosition().add(VecUtil.rotateWrongYaw(castPositions.get(stock.getUUID()).get(i), stock.getRotationYaw()));
+                Vec3d pos = stock.getPosition().add(VecUtil.rotateWrongYaw(castPositions.get(stock.getUUID()).get(i), stock.getRotationYaw()-offset));
                 if (nop == null) {
                     nop = pos;
                 }
                 if (!stock.getWorld().isReplaceable(new Vec3i(pos).up())) {
                     collided[i%5] = nop;
+                    castLights.get(stock.getUUID()).get(i).setPosition(nop);
                 } else {
                     castLights.get(stock.getUUID()).get(i).setPosition(pos);
                 }

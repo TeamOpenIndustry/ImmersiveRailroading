@@ -34,7 +34,6 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
 
-    private List<LightFlare> headlights;
     private List<LightFlare> headlightsFront;
     private List<LightFlare> headlightsRear;
 
@@ -63,7 +62,6 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                 provider,
                 ((LocomotiveDefinition)def).bell
         );
-        headlights = LightFlare.get(provider, ModelComponentType.HEADLIGHT_X);
         headlightsFront = LightFlare.get(provider, ModelComponentType.HEADLIGHT_POS_X, "FRONT");
         headlightsRear = LightFlare.get(provider, ModelComponentType.HEADLIGHT_POS_X, "REAR");
 
@@ -74,7 +72,24 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     protected void effects(T stock) {
         super.effects(stock);
         bell.effects(stock, stock.getBell() > 0 ? 0.8f : 0);
-        headlights.forEach(x -> x.effects(stock));
+        if (drivingWheelsFront != null) {
+            float offset = 0;
+            if (frameFront != null && frontTrackers.get(stock.getUUID()) != null) {
+                offset = frontTrackers.get(stock.getUUID()).getYaw();
+            }
+            for (LightFlare flare : headlightsFront) {
+                flare.effects(stock, offset);
+            }
+        }
+        if (drivingWheelsRear != null && rearTrackers.get(stock.getUUID()) != null) {
+            float offset = 0;
+            if (frameRear != null) {
+                offset = rearTrackers.get(stock.getUUID()).getYaw();
+            }
+            for (LightFlare flare : headlightsRear) {
+                flare.effects(stock, offset);
+            }
+        }
     }
 
     @Override
@@ -85,7 +100,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         rearTrackers.put(stock.getUUID(), null);
 
         bell.removed(stock);
-        headlights.forEach(x -> x.removed(stock));
+        headlightsFront.forEach(x -> x.removed(stock));
+        headlightsRear.forEach(x -> x.removed(stock));
     }
 
     @Override
@@ -93,7 +109,6 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         super.render(stock, draw, distanceTraveled);
         try (ComponentRenderer light = draw.withBrightGroups(true)) {
             light.render(components);
-            headlights.forEach(x -> x.render(light));
         }
         bell.render(draw);
 
@@ -147,8 +162,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     }
 
     @Override
-    void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
-        headlights.forEach(x -> x.postRender(stock, 0));
+    protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
+        super.postRender(stock, draw, distanceTraveled);
         if (drivingWheelsFront != null) {
             float offset = 0;
             if (frameFront != null) {
