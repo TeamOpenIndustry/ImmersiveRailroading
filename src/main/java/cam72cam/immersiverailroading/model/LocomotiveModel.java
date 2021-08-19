@@ -41,7 +41,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
 
     @Override
     public List<Control> getDraggableComponents() {
-        List<Control> draggable = new ArrayList<>();
+        List<Control> draggable = super.getDraggableComponents();
         draggable.addAll(throttles);
         draggable.addAll(reversers);
         draggable.addAll(train_brakes);
