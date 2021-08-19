@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -204,6 +205,9 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	public void setControlPosition(Control component, float val) {
 		controlPositions.put(component.part.key, Math.min(1, Math.max(0, val)));
+	}
+	public void setControlPositions(ModelComponentType type, float val) {
+		getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
 	}
 
 	private static class ControlPositionMapper implements TagMapper<Map<String, Float>> {

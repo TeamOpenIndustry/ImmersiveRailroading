@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
@@ -270,6 +271,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public void setThrottle(float newThrottle) {
 		if (this.getThrottle() != newThrottle) {
+			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
 			throttle = newThrottle;
 			triggerResimulate();
 		}
@@ -280,6 +282,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public void setReverser(float newReverser) {
 		if (this.getReverser() != newReverser) {
+			setControlPositions(ModelComponentType.REVERSER_X, newReverser/-2 + 0.5f);
 			reverser = newReverser;
 			triggerResimulate();
 		}
@@ -312,6 +315,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public void setAirBrake(float newAirBrake) {
 		if (this.getAirBrake() != newAirBrake) {
+			setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newAirBrake);
 			airBrake = newAirBrake;
 			triggerResimulate();
 		}
