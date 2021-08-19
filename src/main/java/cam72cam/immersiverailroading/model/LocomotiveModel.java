@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.model.part.Bell;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
-import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +15,9 @@ import java.util.List;
 public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     private List<ModelComponent> components;
     private Bell bell;
-    private Control throttle;
-    private Control reverser;
-    private Control train_brake;
+    private List<Control> throttles;
+    private List<Control> reversers;
+    private List<Control> train_brakes;
 
     public LocomotiveModel(LocomotiveDefinition def) throws Exception {
         super(def);
@@ -35,23 +34,17 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                 provider,
                 ((LocomotiveDefinition)def).bell
         );
-        throttle = Control.get(this, provider, ModelComponentType.THROTTLE);
-        reverser = Control.get(this, provider, ModelComponentType.REVERSER);
-        train_brake = Control.get(this, provider, ModelComponentType.TRAIN_BRAKE);
+        throttles = Control.get(this, provider, ModelComponentType.THROTTLE_X);
+        reversers = Control.get(this, provider, ModelComponentType.REVERSER_X);
+        train_brakes = Control.get(this, provider, ModelComponentType.TRAIN_BRAKE_X);
     }
 
     @Override
-    public List<ModelComponent> getDraggableComponents() {
-        List<ModelComponent> draggable = new ArrayList<>();
-        if (throttle != null) {
-            draggable.add(throttle.part);
-        }
-        if (reverser != null) {
-            draggable.add(reverser.part);
-        }
-        if (train_brake != null) {
-            draggable.add(train_brake.part);
-        }
+    public List<Control> getDraggableComponents() {
+        List<Control> draggable = new ArrayList<>();
+        draggable.addAll(throttles);
+        draggable.addAll(reversers);
+        draggable.addAll(train_brakes);
         return draggable;
     }
 
@@ -72,14 +65,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
         bell.render(draw);
-        if (throttle != null) {
-            throttle.render(Math.abs(stock.getThrottle()), draw);
-        }
-        if (reverser != null) {
-            reverser.render(-stock.getReverser() / 2, draw);
-        }
-        if (train_brake != null) {
-            train_brake.render(stock.getAirBrake(), draw);
-        }
+        throttles.forEach(throttle -> throttle.render(stock.getControlPosition(throttle), draw));
+        reversers.forEach(reverser -> reverser.render((stock.getControlPosition(reverser)-0.5f), draw));
+        train_brakes.forEach(train_brake -> train_brake.render(stock.getControlPosition(train_brake), draw));
     }
 }

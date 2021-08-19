@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.model;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.Bogey;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.model.part.Frame;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -148,7 +149,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         draw.render(remaining);
     }
 
-    public List<ModelComponent> getDraggableComponents() {
+    public List<Control> getDraggableComponents() {
         return Collections.EMPTY_LIST;
     }
 }

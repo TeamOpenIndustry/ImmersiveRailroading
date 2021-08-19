@@ -6,18 +6,20 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.*;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.serialization.StrictTagMapper;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
 	@TagField("defID")
@@ -188,6 +190,29 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return texture;
 	}
 
-	public void onDrag(ModelComponentType component, double deltaX, double deltaY) {
+	@TagSync
+	@TagField(value="controlPositions", mapper = ControlPositionMapper.class)
+	protected Map<String, Float> controlPositions = new HashMap<>();
+
+	public void onDrag(Control component, double deltaX, double deltaY) {
+		setControlPosition(component, (float)-(deltaY+deltaX) * 4 + getControlPosition(component));
+	}
+
+	public float getControlPosition(Control component) {
+		return controlPositions.getOrDefault(component.part.key, 0f);
+	}
+
+	public void setControlPosition(Control component, float val) {
+		controlPositions.put(component.part.key, Math.min(1, Math.max(0, val)));
+	}
+
+	private static class ControlPositionMapper implements TagMapper<Map<String, Float>> {
+		@Override
+		public TagAccessor<Map<String, Float>> apply(Class<Map<String, Float>> type, String fieldName, TagField tag) throws SerializationException {
+			return new TagAccessor<>(
+					(d, o) -> d.setMap(fieldName, o, Function.identity(), x -> new TagCompound().setFloat("pos", x)),
+					d -> d.getMap(fieldName, Function.identity(), x -> x.getFloat("pos"))
+			);
+		}
 	}
 }
