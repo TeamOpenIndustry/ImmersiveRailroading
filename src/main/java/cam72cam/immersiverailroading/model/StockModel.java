@@ -30,6 +30,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private Bogey bogeyFront;
     private Bogey bogeyRear;
     private ModelComponent shell;
+    private ModelComponent interior;
     private ModelComponent remaining;
 
     private List<LightFlare> headlights;
@@ -51,6 +52,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         this.frame = new Frame(provider, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);
+        this.interior = provider.parse(ModelComponentType.INTERIOR);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
         this.headlights = LightFlare.get(provider, ModelComponentType.HEADLIGHT_X);
@@ -126,6 +128,17 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         try(OpenGL.With lm = stock.internalLightsEnabled() ? internalLighting(stock) : () -> {}) {
             try (ComponentRenderer light = draw.withBrightGroups(true)) {
                 headlights.forEach(x -> x.render(light));
+                if (interior != null) {
+                    light.render(interior);
+                } else {
+                    // fallback
+                    light.render(shell);
+                    light.render(remaining);
+                }
+            }
+        }
+        if (interior != null) {
+            try (ComponentRenderer light = draw.withBrightGroups(true)) {
                 light.render(shell);
                 light.render(remaining);
             }
