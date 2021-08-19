@@ -44,7 +44,7 @@ jobs:
       env:
         BRANCH: ${{ matrix.branch }}
         UMC: ${{ matrix.umc }}
-      run: .github/workflows/umc.sh 1.12.2-forge-advanced_controls_support 1.1.2 ${UMC} && ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true
+      run: .github/workflows/umc.sh 1.12.2-forge-advanced_controls_support 1.1.3 ${UMC} && ./gradlew umc -D umc.loader=${BRANCH} -D ssh.http=true
     - name: Hack Forge Gradle
       run: mkdir -p ~/.gradle/caches/minecraft/; wget 'https://teamopenindustry.cc/maven/hack/ForgeGradleVersion.json' -O ~/.gradle/caches/minecraft/ForgeGradleVersion.json
     - name: Gradle compile

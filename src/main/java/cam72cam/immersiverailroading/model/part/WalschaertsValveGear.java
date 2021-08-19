@@ -18,6 +18,7 @@ public class WalschaertsValveGear extends StephensonValveGear {
     protected final ModelComponent slottedLink;
     protected final ModelComponent radiusBar;
     protected final List<ModelComponent> todo;
+    private final Vec3d crankWheel;
 
     public static WalschaertsValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
@@ -64,6 +65,8 @@ public class WalschaertsValveGear extends StephensonValveGear {
         this.slottedLink = slottedLink;
         this.radiusBar = radiusBar;
         this.todo = todo;
+
+        crankWheel = wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? returnCrank.min : returnCrank.max))).get();
     }
 
     public void render(double distance, float throttle, ComponentRenderer draw) {
@@ -94,9 +97,10 @@ public class WalschaertsValveGear extends StephensonValveGear {
                 returnCrank.min.add(returnCrank.height()/2, returnCrank.height()/2, 0) :
                 returnCrank.max.add(-returnCrank.height()/2, -returnCrank.height()/2, 0);
         Vec3d wheelRotationOffset = reverse ?
-                VecUtil.fromWrongYaw(returnCrankRotPoint.x - drivenWheel.x, (float) wheelAngle) :
-                VecUtil.fromWrongYaw(returnCrankRotPoint.x - drivenWheel.x, (float) wheelAngle);
-        Vec3d returnCrankOriginOffset = drivenWheel.add(wheelRotationOffset.x, wheelRotationOffset.z, 0);
+                VecUtil.fromWrongYaw(returnCrankRotPoint.x - crankWheel.x, (float) wheelAngle) :
+                VecUtil.fromWrongYaw(returnCrankRotPoint.x - crankWheel.x, (float) wheelAngle);
+
+        Vec3d returnCrankOriginOffset = crankWheel.add(wheelRotationOffset.x, wheelRotationOffset.z, 0);
         double returnCrankAngle = wheelAngle + 90 + 30;
         try (ComponentRenderer matrix = draw.push()) {
             // Move to crank offset from origin

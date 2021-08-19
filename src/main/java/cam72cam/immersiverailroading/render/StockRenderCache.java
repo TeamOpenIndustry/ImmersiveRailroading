@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -33,7 +34,7 @@ public class StockRenderCache {
 		if (!render_cache.containsKey(defID)) {
 			EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 			if (def != null) {
-				render_cache.put(defID, new OBJRender(def.getModel(), 10));
+				render_cache.put(defID, new OBJRender(def.getModel(), ConfigGraphics.textureCacheSeconds));
 			}
 		}
 		return render_cache.get(defID);

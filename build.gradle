@@ -24,7 +24,7 @@ universalmodcore {
     modName = 'Immersive Railroading'
     modId = 'immersiverailroading'
     modVersion = irVersion
-    umcVersion = '1.1.2-7d5240'
+    umcVersion = '1.1.3'
     //umcPath = '../UMC-forge-1.12.2/build/libs/'
 }
 
