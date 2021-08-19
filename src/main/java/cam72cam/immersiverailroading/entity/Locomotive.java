@@ -153,7 +153,7 @@ public abstract class Locomotive extends FreightTank {
 				setThrottle(Math.min(1, Math.max(0, (float) -(deltaY+deltaX) * factor + getThrottle())));
 				break;
 			case TRAIN_BRAKE:
-				setAirBrake(Math.min(1, Math.max(0, (float) -deltaY * factor + getAirBrake())));
+				setAirBrake(Math.min(1, Math.max(0, (float) -(deltaY+deltaX) * factor + getAirBrake())));
 				break;
 			case REVERSER:
 				setReverser(Math.min(1, Math.max(-1, (float) (deltaY + deltaX) * factor + getReverser())));
