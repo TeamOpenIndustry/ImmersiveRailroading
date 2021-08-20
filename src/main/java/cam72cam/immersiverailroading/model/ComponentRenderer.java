@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.render.OpenGL;
@@ -17,13 +18,21 @@ public class ComponentRenderer implements Closeable {
     private final List<ModelComponent> buffer = new ArrayList<>();
     private final List<ModelComponentType> available;
     private final OpenGL.With matrix;
-    private boolean fullbright;
+    private final Float interiorLight;
+    private final Float skyLight;
+    private final boolean fullbright;
 
-    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available, boolean fullbright) {
+    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available) {
+        this(vbo, available, false, false, null, null);
+    }
+
+    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available, boolean newMatrix, boolean fullbright, Float interiorLight, Float skyLight) {
         this.vbo = vbo;
         this.available = available;
         this.fullbright = fullbright;
-        matrix = OpenGL.matrix();
+        this.interiorLight = interiorLight;
+        this.skyLight = skyLight;
+        matrix = newMatrix ? OpenGL.matrix() : () -> {};
     }
 
     public void render(ModelComponent component) {
@@ -45,11 +54,18 @@ public class ComponentRenderer implements Closeable {
     }
 
     public ComponentRenderer withBrightGroups(boolean fullbright) {
-        return new ComponentRenderer(vbo, available, fullbright);
+        return new ComponentRenderer(vbo, available, false, fullbright, interiorLight, skyLight);
+    }
+
+    public ComponentRenderer withInteriorLight(EntityRollingStock stock) {
+        float interiorLight = 6 / 15f;
+        float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
+        float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
+        return blockLight < interiorLight ? new ComponentRenderer(vbo, available, false, fullbright, interiorLight, skyLight) : this;
     }
 
     public ComponentRenderer push() {
-        return new ComponentRenderer(vbo, available, fullbright);
+        return new ComponentRenderer(vbo, available, true, fullbright, interiorLight, skyLight);
     }
 
     private void draw(Collection<String> groups, boolean fullbright) {
@@ -58,7 +74,24 @@ public class ComponentRenderer implements Closeable {
             List<String> std = groups.stream().filter(x -> !x.contains("FULLBRIGHT")).collect(Collectors.toList());
             List<String> bright = groups.stream().filter(x -> x.contains("FULLBRIGHT")).collect(Collectors.toList());
             if (!std.isEmpty()) {
-                vbo.draw(std);
+                if (interiorLight != null) {
+                    List<String> exterior = groups.stream().filter(x -> !x.contains("INTERIOR")).collect(Collectors.toList());
+                    List<String> interior = groups.stream().filter(x -> x.contains("INTERIOR")).collect(Collectors.toList());
+                    if (!interior.isEmpty()) {
+                        if (!exterior.isEmpty()) {
+                            vbo.draw(exterior);
+                        }
+                        try (OpenGL.With lm = OpenGL.lightmap(interiorLight, skyLight)) {
+                            vbo.draw(interior);
+                        }
+                    } else if (!exterior.isEmpty()) {
+                        try (OpenGL.With lm = OpenGL.lightmap(interiorLight, skyLight)) {
+                            vbo.draw(exterior);
+                        }
+                    }
+                } else {
+                    vbo.draw(std);
+                }
             }
             if (!bright.isEmpty()) {
                 try (

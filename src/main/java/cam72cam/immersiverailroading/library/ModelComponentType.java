@@ -12,8 +12,7 @@ public enum ModelComponentType {
 	FRAME_WHEEL_X("FRAME_WHEEL_#ID#"),
 	
 	SHELL("SHELL"),
-	INTERIOR("INTERIOR"),
-	
+
 	// LOCOMOTIVE
 	CAB("CAB"),
 	BELL("BELL"),

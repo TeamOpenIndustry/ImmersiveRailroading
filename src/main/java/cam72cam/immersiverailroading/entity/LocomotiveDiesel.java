@@ -99,8 +99,13 @@ public class LocomotiveDiesel extends Locomotive {
 				super.handleKeyPress(source, key);
 		}
 	}
-	
-	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
+
+    @Override
+    public boolean internalLightsEnabled() {
+		return this.isRunning();
+    }
+
+    private void setThrottleMap(EntityRollingStock stock, boolean direction) {
 		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
 			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle() * (direction ? 1 : -1));
 			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());

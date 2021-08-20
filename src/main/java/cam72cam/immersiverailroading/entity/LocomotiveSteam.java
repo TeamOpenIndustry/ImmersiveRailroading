@@ -290,7 +290,12 @@ public class LocomotiveSteam extends Locomotive {
 		}
 	}
 
-	@Override
+    @Override
+    public boolean internalLightsEnabled() {
+		return getAvailableHP() > 0;
+    }
+
+    @Override
 	protected void initContainerFilter() {
 		cargoItems.filter.clear();
 		this.cargoItems.filter.put(0, SlotFilter.FLUID_CONTAINER);

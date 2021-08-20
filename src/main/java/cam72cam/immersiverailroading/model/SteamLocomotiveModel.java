@@ -95,14 +95,18 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         super.render(stock, draw, distanceTraveled);
 
         if (!Config.isFuelRequired(stock.gauge) || stock.getBurnTime().values().stream().anyMatch(x -> x > 1)) {
-            try (ComponentRenderer light = draw.withBrightGroups(true)) {
+            try (ComponentRenderer light = draw.withBrightGroups(true).withInteriorLight(stock)) {
                 light.render(firebox);
             }
         } else {
             draw.render(firebox);
         }
-        draw.render(components);
-
         whistle.render(draw);
+    }
+
+    @Override
+    protected void renderWithInteriorLighting(LocomotiveSteam stock, ComponentRenderer draw) {
+        super.renderWithInteriorLighting(stock, draw);
+        draw.render(components);
     }
 }

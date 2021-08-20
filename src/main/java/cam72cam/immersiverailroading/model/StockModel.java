@@ -30,7 +30,6 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private Bogey bogeyFront;
     private Bogey bogeyRear;
     private ModelComponent shell;
-    private ModelComponent interior;
     private ModelComponent remaining;
 
     private List<LightFlare> headlights;
@@ -52,7 +51,6 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         this.frame = new Frame(provider, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);
-        this.interior = provider.parse(ModelComponentType.INTERIOR);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
         this.headlights = LightFlare.get(provider, ModelComponentType.HEADLIGHT_X);
@@ -103,7 +101,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
 
-            try (ComponentRenderer draw = new ComponentRenderer(bound, available, false)) {
+            try (ComponentRenderer draw = new ComponentRenderer(bound, available)) {
                 GL11.glScaled(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
                 //noinspection unchecked
                 render((T) stock, draw, distanceTraveled);
@@ -115,33 +113,15 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         postRender((T) stock, null, 0);
     }
 
-    protected OpenGL.With internalLighting(T stock) {
-        float blockLight = 6 / 15f;
-        return stock.getWorld().getBlockLightLevel(stock.getBlockPosition()) < blockLight ?
-                OpenGL.lightmap(blockLight, stock.getWorld().getSkyLightLevel(stock.getBlockPosition())
-                ) : () -> {};
-    }
-
     protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
         frame.render(distanceTraveled, draw);
 
-        try(OpenGL.With lm = stock.internalLightsEnabled() ? internalLighting(stock) : () -> {}) {
-            try (ComponentRenderer light = draw.withBrightGroups(true)) {
-                headlights.forEach(x -> x.render(light));
-                if (interior != null) {
-                    light.render(interior);
-                } else {
-                    // fallback
-                    light.render(shell);
-                    light.render(remaining);
-                }
-            }
+        try (ComponentRenderer light = draw.withBrightGroups(true)) {
+            headlights.forEach(x -> x.render(light));
         }
-        if (interior != null) {
-            try (ComponentRenderer light = draw.withBrightGroups(true)) {
-                light.render(shell);
-                light.render(remaining);
-            }
+
+        try (ComponentRenderer light = stock.internalLightsEnabled() ? draw.withBrightGroups(true).withInteriorLight(stock) : draw) {
+            renderWithInteriorLighting(stock, light);
         }
 
         if (bogeyFront != null) {
@@ -180,6 +160,12 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             }
         }
     }
+
+    protected void renderWithInteriorLighting(T stock, ComponentRenderer draw) {
+        draw.render(shell);
+        draw.render(remaining);
+    }
+
     protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
         headlights.forEach(x -> x.postRender(stock, 0));
     }
