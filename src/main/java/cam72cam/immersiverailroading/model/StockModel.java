@@ -31,6 +31,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private ModelComponent remaining;
     private List<Control> doors;
     private List<Control> windows;
+    private List<Control> widgets;
 
     private ExpireableList<UUID, TrackFollower> frontTrackers = null;
     private ExpireableList<UUID, TrackFollower> rearTrackers = null;
@@ -53,6 +54,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
         this.doors = Control.get(this, provider, ModelComponentType.DOOR_X);
         this.windows = Control.get(this, provider, ModelComponentType.WINDOW_X);
+        this.widgets = Control.get(this, provider, ModelComponentType.WIDGET_X);
 
         if (bogeyFront != null && Math.abs(def.getBogeyFront(Gauge.from(Gauge.STANDARD)) + bogeyFront.center().x) > 0.5) {
             frontTrackers = new ExpireableList<>();
@@ -114,6 +116,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         draw.render(shell);
 
         doors.forEach(c -> c.render(stock.getControlPosition(c), draw));
+        windows.forEach(c -> c.render(stock.getControlPosition(c), draw));
+        widgets.forEach(c -> c.render(stock.getControlPosition(c), draw));
 
         if (bogeyFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
@@ -158,6 +162,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         List<Control> components = new ArrayList<>();
         components.addAll(doors);
         components.addAll(windows);
+        components.addAll(widgets);
         return components;
     }
 }
