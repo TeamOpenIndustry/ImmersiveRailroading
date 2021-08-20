@@ -21,15 +21,17 @@ public class ComponentRenderer implements Closeable {
     private final Float interiorLight;
     private final Float skyLight;
     private final boolean fullbright;
+    private final boolean useInteriorFallback;
 
-    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available) {
-        this(vbo, available, false, false, null, null);
+    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available, boolean useInteriorFallback) {
+        this(vbo, available, false, useInteriorFallback, false, null, null);
     }
 
-    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available, boolean newMatrix, boolean fullbright, Float interiorLight, Float skyLight) {
+    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available, boolean newMatrix, boolean useInteriorFallback, boolean fullbright, Float interiorLight, Float skyLight) {
         this.vbo = vbo;
         this.available = available;
         this.fullbright = fullbright;
+        this.useInteriorFallback = useInteriorFallback;
         this.interiorLight = interiorLight;
         this.skyLight = skyLight;
         matrix = newMatrix ? OpenGL.matrix() : () -> {};
@@ -54,18 +56,18 @@ public class ComponentRenderer implements Closeable {
     }
 
     public ComponentRenderer withBrightGroups(boolean fullbright) {
-        return new ComponentRenderer(vbo, available, false, fullbright, interiorLight, skyLight);
+        return new ComponentRenderer(vbo, available, false, useInteriorFallback, fullbright, interiorLight, skyLight);
     }
 
     public ComponentRenderer withInteriorLight(EntityRollingStock stock) {
         float interiorLight = 6 / 15f;
         float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
         float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
-        return blockLight < interiorLight ? new ComponentRenderer(vbo, available, false, fullbright, interiorLight, skyLight) : this;
+        return blockLight < interiorLight ? new ComponentRenderer(vbo, available, false, useInteriorFallback, fullbright, interiorLight, skyLight) : this;
     }
 
     public ComponentRenderer push() {
-        return new ComponentRenderer(vbo, available, true, fullbright, interiorLight, skyLight);
+        return new ComponentRenderer(vbo, available, true, useInteriorFallback, fullbright, interiorLight, skyLight);
     }
 
     private void draw(Collection<String> groups, boolean fullbright) {
@@ -78,14 +80,12 @@ public class ComponentRenderer implements Closeable {
                     List<String> exterior = groups.stream().filter(x -> !x.contains("INTERIOR")).collect(Collectors.toList());
                     List<String> interior = groups.stream().filter(x -> x.contains("INTERIOR")).collect(Collectors.toList());
                     if (!interior.isEmpty()) {
-                        if (!exterior.isEmpty()) {
-                            vbo.draw(exterior);
-                        }
                         try (OpenGL.With lm = OpenGL.lightmap(interiorLight, skyLight)) {
                             vbo.draw(interior);
                         }
-                    } else if (!exterior.isEmpty()) {
-                        try (OpenGL.With lm = OpenGL.lightmap(interiorLight, skyLight)) {
+                    }
+                    if (!exterior.isEmpty()) {
+                        try (OpenGL.With lm = interior.isEmpty() && useInteriorFallback ? OpenGL.lightmap(interiorLight, skyLight) : () -> {}) {
                             vbo.draw(exterior);
                         }
                     }

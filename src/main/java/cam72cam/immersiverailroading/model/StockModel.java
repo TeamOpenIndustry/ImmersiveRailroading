@@ -36,10 +36,12 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
     private ExpireableList<UUID, TrackFollower> frontTrackers = null;
     private ExpireableList<UUID, TrackFollower> rearTrackers = null;
+    private final boolean hasInterior;
 
     public StockModel(EntityRollingStockDefinition def) throws Exception {
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet());
         this.def = def;
+        this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
         ComponentProvider provider = new ComponentProvider(this);
         parseComponents(provider, def);
@@ -101,7 +103,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
 
-            try (ComponentRenderer draw = new ComponentRenderer(bound, available)) {
+            try (ComponentRenderer draw = new ComponentRenderer(bound, available, !hasInterior)) {
                 GL11.glScaled(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
                 //noinspection unchecked
                 render((T) stock, draw, distanceTraveled);
