@@ -112,6 +112,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private boolean backCouplerEngaged = true;
 	private Vec3d couplerRearPosition = null;
 
+	@TagSync
+	@TagField("hasElectricalPower")
+	private boolean hasElectricalPower;
+
 	/*
 	 * 
 	 * Overrides
@@ -169,6 +173,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			
 			return;
 		}
+
+		hasElectricalPower = false;
+		this.mapTrain(this, false, stock -> {
+			if (stock instanceof Locomotive && stock.hasElectricalPower()) {
+				hasElectricalPower = true;
+			}
+		});
 
 		if (this.resimulateCooldown > 0) {
 			this.resimulateCooldown -= 1;
@@ -866,5 +877,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			resimulate = true;
 			resimulateCooldown = 5;
 		}
+	}
+
+	public boolean hasElectricalPower() {
+		return this.hasElectricalPower;
 	}
 }

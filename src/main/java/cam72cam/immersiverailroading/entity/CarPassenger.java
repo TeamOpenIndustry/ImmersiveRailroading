@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.registry.CarPassengerDefinition;
 
 public class CarPassenger extends EntityCoupleableRollingStock {
-    private boolean hasLocomotivePower;
-    private int gotLocomotiveTick = -1;
+    private boolean hadElectricalPower = false;
+    private int gotElectricalPowerTick = -1;
 
     @Override
     public CarPassengerDefinition getDefinition() {
@@ -15,25 +15,19 @@ public class CarPassenger extends EntityCoupleableRollingStock {
     public void onTick() {
         super.onTick();
         if (getWorld().isClient) {
-            boolean hadLocomotive = hasLocomotivePower;
-            hasLocomotivePower = false;
-            this.mapTrain(this, false, stock -> {
-                if (stock instanceof Locomotive && stock.internalLightsEnabled()) {
-                    hasLocomotivePower = true;
-                    if (!hadLocomotive) {
-                        gotLocomotiveTick = getTickCount();
-                    }
-                }
-            });
+            if (!hadElectricalPower && hasElectricalPower()) {
+                gotElectricalPowerTick = getTickCount();
+            }
         }
+        hadElectricalPower = hasElectricalPower();
     }
 
     @Override
     public boolean internalLightsEnabled() {
-        return getDefinition().hasInternalLighting() && hasLocomotivePower && (
-                        gotLocomotiveTick == -1 ||
-                        getTickCount() - gotLocomotiveTick > 15 ||
-                        ((getTickCount() - gotLocomotiveTick)/(int)((Math.random()+2) * 4)) % 2 == 0
+        return getDefinition().hasInternalLighting() && hasElectricalPower() && (
+                        gotElectricalPowerTick == -1 ||
+                        getTickCount() - gotElectricalPowerTick > 15 ||
+                        ((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0
                 );
     }
 }

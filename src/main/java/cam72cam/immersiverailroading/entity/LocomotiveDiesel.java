@@ -100,9 +100,14 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 	}
 
-    @Override
-    public boolean internalLightsEnabled() {
+	@Override
+	public boolean hasElectricalPower() {
 		return this.isRunning();
+	}
+
+	@Override
+    public boolean internalLightsEnabled() {
+		return this.hasElectricalPower();
     }
 
     private void setThrottleMap(EntityRollingStock stock, boolean direction) {
