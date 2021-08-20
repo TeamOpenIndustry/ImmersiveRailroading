@@ -55,7 +55,7 @@ public class Control {
             }
         }
 
-        Pattern pattern = Pattern.compile(".*TL_([^_]*)_([^_]*).*");
+        Pattern pattern = Pattern.compile("TL_([^_]*)_([^_]*)");
         for (String modelID : part.modelIDs) {
             Matcher matcher = pattern.matcher(modelID);
             while (matcher.find()) {
