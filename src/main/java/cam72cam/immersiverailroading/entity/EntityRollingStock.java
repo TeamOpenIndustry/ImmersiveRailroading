@@ -204,11 +204,11 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public float getControlPosition(Control component) {
-		return controlPositions.getOrDefault(component.part.key, 0f);
+		return controlPositions.getOrDefault(component.controlGroup, 0f);
 	}
 
 	public void setControlPosition(Control component, float val) {
-		controlPositions.put(component.part.key, Math.min(1, Math.max(0, val)));
+		controlPositions.put(component.controlGroup, Math.min(1, Math.max(0, val)));
 	}
 	public void setControlPositions(ModelComponentType type, float val) {
 		getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
