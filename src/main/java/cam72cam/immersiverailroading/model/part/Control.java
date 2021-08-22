@@ -5,12 +5,14 @@ import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.ModCore;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
+import util.Matrix4;
 
 import java.util.HashMap;
 import java.util.List;
@@ -89,5 +91,34 @@ public class Control {
             }
             matrix.render(part);
         }
+    }
+
+    private Vec3d transform(Vec3d point, float valuePercent) {
+        Matrix4 m = new Matrix4();
+        for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
+            Axis axis = entry.getKey();
+            Float val = entry.getValue();
+            m = m.translate(
+                    axis == Axis.X ? val * valuePercent : 0,
+                    axis == Axis.Y ? val * valuePercent : 0,
+                    axis == Axis.Z ? val * valuePercent : 0
+            );
+        }
+
+        if (rotationPoint != null) {
+            m = m.translate(rotationPoint.x, rotationPoint.y, rotationPoint.z);
+            m = m.rotate(
+                    valuePercent * rotationDegrees,
+                    rotationAxis == Axis.X ? 1 : 0,
+                    rotationAxis == Axis.Y ? 1 : 0,
+                    rotationAxis == Axis.Z ? 1 : 0
+            );
+            m = m.translate(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
+        }
+        return m.apply(point);
+    }
+
+    public IBoundingBox getBoundingBox(float controlPosition) {
+        return IBoundingBox.from(transform(part.min, controlPosition), transform(part.max, controlPosition));
     }
 }
