@@ -148,7 +148,7 @@ public abstract class Locomotive extends FreightTank {
 
 	public void onDrag(Control component, double deltaX, double deltaY) {
 		super.onDrag(component, deltaX, deltaY);
-		System.out.println("DRAG " + component + ": "+ deltaX + deltaY);
+		System.out.println("DRAG " + component + ": "+ getControlPosition(component));
 		switch (component.part.type) {
 			case THROTTLE_X:
 				setThrottle(getControlPosition(component));

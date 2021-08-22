@@ -20,7 +20,9 @@ import cam72cam.mod.sound.ISound;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Whistle {
     private final ModelComponent whistle;
@@ -81,7 +83,15 @@ public class Whistle {
                             float newString = (hornPlayer.getRotationPitch() + 90) / 180;
                             delta = newString - pullString;
                         } else {
-                            delta = (float) quilling.maxPull - pullString;
+                            OptionalDouble control = stock.getDefinition().getModel().getDraggableComponents().stream()
+                                    .filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
+                                    .mapToDouble(stock::getControlPosition)
+                                    .max();
+                            if (control.isPresent()) {
+                                delta = (float) control.getAsDouble() - pullString;
+                            } else {
+                                delta = (float) quilling.maxPull - pullString;
+                            }
                         }
                     } else {
                         if (soundDampener > 0) {

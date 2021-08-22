@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.entity;
 
-import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
@@ -81,6 +80,8 @@ public class ClientPartDragging {
         private double x;
         @TagField
         private double y;
+        @TagField
+        private boolean released;
 
         public DragPacket() {
             super(); // Reflection
@@ -91,10 +92,18 @@ public class ClientPartDragging {
             this.x = x;
             this.y = y;
         }
+        public DragPacket(EntityRollingStock stock, Control type) {
+            this(stock, type, 0, 0);
+            this.released = true;
+        }
         @Override
         protected void handle() {
             EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
-            stock.onDrag(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get(), x, y);
+            if (released) {
+                stock.onDragRelease(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get());
+            } else {
+                stock.onDrag(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get(), x, y);
+            }
         }
     }
 
@@ -102,6 +111,7 @@ public class ClientPartDragging {
         if (stock != null) {
             Vec3d delta = Mouse.getDrag();
             if (delta == null) {
+                new DragPacket(stock, component).sendToServer();
                 stock = null;
                 component = null;
                 lastDelta = null;

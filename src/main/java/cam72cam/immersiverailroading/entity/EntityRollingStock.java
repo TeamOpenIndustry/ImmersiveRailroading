@@ -199,6 +199,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		setControlPosition(component, (float)-(deltaY+deltaX) * 4 + getControlPosition(component));
 	}
 
+	public void onDragRelease(Control component) {
+
+	}
+
 	public float getControlPosition(Control component) {
 		return controlPositions.getOrDefault(component.part.key, 0f);
 	}

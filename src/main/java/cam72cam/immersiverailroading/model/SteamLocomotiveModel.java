@@ -32,6 +32,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private final PartSound idleSounds;
     private Cargo cargoFront;
     private Cargo cargoRear;
+    private List<Control> whistleControls;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
@@ -55,6 +56,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
+        whistleControls = Control.get(this, provider, ModelComponentType.WHISTLE_CONTROL_X);
         whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
 
         chimney = SteamChimney.get(provider);
@@ -111,11 +113,19 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     }
 
     @Override
+    public List<Control> getDraggableComponents() {
+        List<Control> draggable = super.getDraggableComponents();
+        draggable.addAll(whistleControls);
+        return draggable;
+    }
+
+    @Override
     protected void render(LocomotiveSteam stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
 
         whistle.render(draw);
+        whistleControls.forEach(c -> c.render(stock.getControlPosition(c), draw));
 
         if (drivingWheels != null) {
             drivingWheels.render(distanceTraveled, stock.getReverser(), draw);
