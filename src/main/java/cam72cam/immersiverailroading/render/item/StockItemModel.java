@@ -67,7 +67,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 
 			try (
 					OpenGL.With matrix = OpenGL.matrix();
-					OpenGL.With tex = model.bindTexture(true);
+					OpenGL.With tex = model.bindTexture(null, true, true);
 					VBO.BoundVBO vbo = StockRenderCache.getVBO(data.def.defID).bind();
 			) {
 				Gauge std = Gauge.from(Gauge.STANDARD);
