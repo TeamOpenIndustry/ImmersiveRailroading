@@ -37,7 +37,7 @@ public class ClientPartDragging {
                 List<Control> targets = stock.getDefinition().getModel().getDraggableComponents();
                 Player player = MinecraftClient.getPlayer();
 
-                float yaw = player.getRotationYaw() - stock.getRotationYaw();
+                float yaw = player.getRotationYawHead() - stock.getRotationYaw();
                 float pitch = player.getRotationPitch();
                 double f = Math.cos(-yaw * 0.017453292F - (float)Math.PI);
                 double f1 = Math.sin(-yaw * 0.017453292F - (float)Math.PI);
@@ -77,7 +77,7 @@ public class ClientPartDragging {
         @TagField
         private String typeKey;
         @TagField
-        private double x;
+        private double delta;
         @TagField
         private double y;
         @TagField
@@ -86,14 +86,13 @@ public class ClientPartDragging {
         public DragPacket() {
             super(); // Reflection
         }
-        public DragPacket(EntityRollingStock stock, Control type, double x, double y) {
+        public DragPacket(EntityRollingStock stock, Control type, double delta) {
             this.stockUUID = stock.getUUID();
             this.typeKey = type.part.key;
-            this.x = x;
-            this.y = y;
+            this.delta = delta;
         }
         public DragPacket(EntityRollingStock stock, Control type) {
-            this(stock, type, 0, 0);
+            this(stock, type, 0);
             this.released = true;
         }
         @Override
@@ -102,7 +101,7 @@ public class ClientPartDragging {
             if (released) {
                 stock.onDragRelease(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get());
             } else {
-                stock.onDrag(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get(), x, y);
+                stock.onDrag(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get(), delta);
             }
         }
     }
@@ -125,7 +124,7 @@ public class ClientPartDragging {
                 return;
             }
             //stock.onDrag(component, delta.x / 1000, delta.y / 1000);
-            new DragPacket(stock, component, (delta.x - lastDelta.x) / 1000, (delta.y - lastDelta.y) / 1000).sendToServer();
+            new DragPacket(stock, component, component.movementDelta((delta.x - lastDelta.x) / 1000, (delta.y - lastDelta.y) / 1000, stock)).sendToServer();
             lastDelta = delta;
         }
     }

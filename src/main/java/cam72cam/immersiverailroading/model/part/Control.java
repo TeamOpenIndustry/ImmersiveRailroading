@@ -1,12 +1,17 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.util.MathUtil;
+import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.util.Axis;
@@ -108,7 +113,7 @@ public class Control {
         if (rotationPoint != null) {
             m = m.translate(rotationPoint.x, rotationPoint.y, rotationPoint.z);
             m = m.rotate(
-                    valuePercent * rotationDegrees,
+                    Math.toRadians(valuePercent * rotationDegrees),
                     rotationAxis == Axis.X ? 1 : 0,
                     rotationAxis == Axis.Y ? 1 : 0,
                     rotationAxis == Axis.Z ? 1 : 0
@@ -120,5 +125,66 @@ public class Control {
 
     public IBoundingBox getBoundingBox(float controlPosition) {
         return IBoundingBox.from(transform(part.min, controlPosition), transform(part.max, controlPosition));
+    }
+
+    public float movementDelta(double x, double y, EntityRollingStock stock) {
+        /*
+          -X
+        -Z * +Z
+          +X
+         */
+        Vec3d movement = new Vec3d(x * 2, y * 2, 0);
+        movement = new Matrix4()
+                .rotate(
+                        Math.toRadians(MinecraftClient.getPlayer().getRotationPitch()),
+                        1, 0, 0
+                )
+                .rotate(
+                        Math.toRadians(MinecraftClient.getPlayer().getRotationYawHead() - stock.getRotationYaw() - 90),
+                        0, 1, 0
+                )
+                .apply(movement);
+
+        float delta = 0;
+        for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
+            Axis axis = entry.getKey();
+            Float val = entry.getValue();
+
+            switch (axis) {
+                case X:
+                    delta += movement.x / val;
+                    break;
+                case Y:
+                    delta += movement.y / val;
+                    break;
+                case Z:
+                    delta += movement.z / val;
+                    break;
+            }
+        }
+
+        if (rotationPoint != null) {
+            switch (rotationAxis) {
+                case X:
+                    movement = new Vec3d(0, movement.y, movement.z);
+                    break;
+                case Y:
+                    movement = new Vec3d(movement.x, 0, movement.z);
+                    break;
+                case Z:
+                    movement = new Vec3d(movement.x, movement.y, 0);
+                    break;
+            }
+            Vec3d grabComponent = transform(part.center, stock.getControlPosition(this)).subtract(rotationPoint).add(movement);
+            Vec3d grabComponentNext = transform(part.center, stock.getControlPosition(this) + 0.1f).subtract(rotationPoint);
+            Vec3d grabComponentPrev = transform(part.center, stock.getControlPosition(this) - 0.1f).subtract(rotationPoint);
+            if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
+                delta += movement.length();
+            } else {
+                delta -= movement.length();
+            }
+        }
+
+        return delta;
     }
 }
