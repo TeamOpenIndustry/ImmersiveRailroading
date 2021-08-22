@@ -193,4 +193,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
     public boolean internalLightsEnabled() {
 		return false;
     }
+    public boolean externalLightsEnabled() {
+		return internalLightsEnabled();
+	}
 }
