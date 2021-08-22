@@ -5,13 +5,10 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.util.Axis;
@@ -98,8 +95,9 @@ public class Control {
         }
     }
 
-    private Vec3d transform(Vec3d point, float valuePercent) {
+    private Vec3d transform(Vec3d point, float valuePercent, double scale) {
         Matrix4 m = new Matrix4();
+        m = m.scale(scale, scale, scale);
         for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
             Axis axis = entry.getKey();
             Float val = entry.getValue();
@@ -123,8 +121,12 @@ public class Control {
         return m.apply(point);
     }
 
-    public IBoundingBox getBoundingBox(float controlPosition) {
-        return IBoundingBox.from(transform(part.min, controlPosition), transform(part.max, controlPosition));
+    public IBoundingBox getBoundingBox(EntityRollingStock stock) {
+        float controlPosition = stock.getControlPosition(this);
+        return IBoundingBox.from(
+                transform(part.min, controlPosition, stock.gauge.scale()),
+                transform(part.max, controlPosition, stock.gauge.scale())
+        );
     }
 
     public float movementDelta(double x, double y, EntityRollingStock stock) {
@@ -175,9 +177,11 @@ public class Control {
                     movement = new Vec3d(movement.x, movement.y, 0);
                     break;
             }
-            Vec3d grabComponent = transform(part.center, stock.getControlPosition(this)).subtract(rotationPoint).add(movement);
-            Vec3d grabComponentNext = transform(part.center, stock.getControlPosition(this) + 0.1f).subtract(rotationPoint);
-            Vec3d grabComponentPrev = transform(part.center, stock.getControlPosition(this) - 0.1f).subtract(rotationPoint);
+            Vec3d partPos = part.center;
+            Vec3d rotPoint = rotationPoint.scale(stock.gauge.scale());
+            Vec3d grabComponent = transform(partPos, stock.getControlPosition(this), stock.gauge.scale()).subtract(rotPoint).add(movement);
+            Vec3d grabComponentNext = transform(partPos, stock.getControlPosition(this) + 0.1f, stock.gauge.scale()).subtract(rotPoint);
+            Vec3d grabComponentPrev = transform(partPos, stock.getControlPosition(this) - 0.1f, stock.gauge.scale()).subtract(rotPoint);
             if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
                 delta += movement.length();
             } else {

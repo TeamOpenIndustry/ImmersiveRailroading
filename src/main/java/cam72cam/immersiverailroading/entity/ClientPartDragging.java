@@ -49,7 +49,7 @@ public class ClientPartDragging {
                 Vec3d start = starta.add(0, -starta.y + player.getPositionEyes().y - stock.getPosition().y, 0);
                 double padding = 0.05 * stock.gauge.scale();
                 List<Control> found = targets.stream().filter(g -> {
-                    IBoundingBox bb = g.getBoundingBox(stock.getControlPosition(g)).grow(new Vec3d(padding, padding, padding));
+                    IBoundingBox bb = g.getBoundingBox(stock).grow(new Vec3d(padding, padding, padding));
                     for (double i = 0; i < 3; i+=0.1) {
                         if (bb.contains(start.add(look.scale(i * stock.gauge.scale())))) {
                             return true;
