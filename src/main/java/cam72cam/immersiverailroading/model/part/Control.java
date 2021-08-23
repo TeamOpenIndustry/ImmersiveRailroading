@@ -99,7 +99,7 @@ public class Control {
         }
     }
 
-    private Vec3d transform(Vec3d point, float valuePercent, double scale) {
+    public Vec3d transform(Vec3d point, float valuePercent, double scale) {
         Matrix4 m = new Matrix4();
         m = m.scale(scale, scale, scale);
         for (Map.Entry<Axis, Float> entry : translations.entrySet()) {

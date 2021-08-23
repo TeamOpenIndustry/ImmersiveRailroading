@@ -56,7 +56,11 @@ public class ClientPartDragging {
                         }
                     }
                     return false;
-                }).sorted(Comparator.comparingDouble(g -> g.part.min.add(g.part.max).scale(0.5f).distanceTo(start))).collect(Collectors.toList());
+                }).sorted(Comparator.comparingDouble(g -> g.transform(
+                        g.part.min.add(g.part.max).scale(0.5f),
+                        stock.getControlPosition(g),
+                        stock.gauge.scale()
+                ).distanceTo(start))).collect(Collectors.toList());
                 for (Control objGroup : found) {
                     player.sendMessage(PlayerMessage.direct(objGroup.part.type.name()));
                 }
