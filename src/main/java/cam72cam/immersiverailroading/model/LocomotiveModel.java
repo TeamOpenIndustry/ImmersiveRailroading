@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.library.LightFlare;
+import cam72cam.immersiverailroading.model.part.LightFlare;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -13,8 +13,6 @@ import cam72cam.immersiverailroading.model.part.TrackFollower;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.Light;
 
 import java.util.*;

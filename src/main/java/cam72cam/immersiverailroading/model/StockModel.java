@@ -1,9 +1,8 @@
 package cam72cam.immersiverailroading.model;
 
-import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.LightFlare;
+import cam72cam.immersiverailroading.model.part.LightFlare;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
