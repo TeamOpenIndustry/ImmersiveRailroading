@@ -51,7 +51,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			payingPassengerPositions.put(passenger.getUUID(), passenger.getPosition());
 		}
 
-		int wiggle = passenger.isVillager() ? 10 : 2;
+		int wiggle = passenger.isVillager() ? 10 : 0;
 		off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
 		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger));
 		return off;
@@ -122,7 +122,28 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				}
 			}
         }
+
+        if (getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x.isAtOpenDoor(source, this)) &&
+				getWorld().isServer &&
+				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source)).equals(offset)
+		) {
+        	this.removePassenger(source);
+		}
+
 		return offset;
+	}
+
+	@Override
+	public void onTick() {
+		super.onTick();
+
+		if (getWorld().isServer) {
+			for (Player source : getWorld().getEntities(Player.class)) {
+				if (source.getRiding() == null && getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x.isAtOpenDoor(source, this))) {
+					this.addPassenger(source);
+				}
+			}
+		}
 	}
 
 	public Vec3d onDismountPassenger(Entity passenger, Vec3d offset) {

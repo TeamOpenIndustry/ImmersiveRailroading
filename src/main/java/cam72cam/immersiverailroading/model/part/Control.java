@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
@@ -16,10 +17,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -197,4 +195,30 @@ public class Control {
 
         return delta;
     }
+
+    private static final Map<UUID, Integer> cooldown = new HashMap<>();
+
+    public boolean isAtOpenDoor(Player player, EntityRollingStock stock) {
+        if (this.part.type != ModelComponentType.DOOR_X) {
+            return false;
+        }
+        int cool = cooldown.getOrDefault(player.getUUID(), 0);
+        if (player.getTickCount() < cool + 10 && player.getTickCount() > cool) {
+            return false;
+        }
+        if (stock.getControlPosition(this) < 0.75 || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
+            return false;
+        }
+        Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(player.getPosition().add(0, 0.5, 0).subtract(stock.getPosition()));
+        IBoundingBox bb = IBoundingBox.from(
+                transform(part.min, 0, stock.gauge.scale()),
+                transform(part.max, 0, stock.gauge.scale())
+        ).grow(new Vec3d(0.5, 0.5, 0.5));
+        if (!bb.contains(playerPos)) {
+            return false;
+        }
+        cooldown.put(player.getUUID(), player.getTickCount());
+        return true;
+    }
+
 }
