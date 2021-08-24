@@ -19,7 +19,7 @@ public class DrivingAssembly {
     }
 
     public static DrivingAssembly get(ValveGearType type, ComponentProvider provider, String pos, float angleOffset) {
-        WheelSet wheels = WheelSet.get(provider, ModelComponentType.WHEEL_DRIVER_POS_X, pos, angleOffset);
+        WheelSet wheels = WheelSet.get(provider, pos == null ? ModelComponentType.WHEEL_DRIVER_X : ModelComponentType.WHEEL_DRIVER_POS_X, pos, angleOffset);
         if (wheels == null) {
             return null;
         }
