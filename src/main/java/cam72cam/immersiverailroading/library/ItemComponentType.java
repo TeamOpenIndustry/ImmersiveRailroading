@@ -25,7 +25,7 @@ public enum ItemComponentType {
 	BOGEY_REAR(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.BOGEY_REAR),
 	FRAME_WHEEL(AssemblyStep.WHEELS, CraftingType.CASTING, ModelComponentType.FRAME_WHEEL_X),
 	
-	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.SHELL),
+	SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.SHELL, ModelComponentType.FRONT_SHELL, ModelComponentType.REAR_SHELL),
 	
 	// LOCOMOTIVE
 	CAB(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.CAB),
