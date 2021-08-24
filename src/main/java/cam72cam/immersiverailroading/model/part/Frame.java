@@ -12,31 +12,24 @@ import java.util.stream.Collectors;
 
 public class Frame {
     private final ModelComponent frame;
-    private final List<Wheel> wheels;
+    private final WheelSet wheels;
     private final ValveGear valveGearRight;
     private final ValveGear valveGearLeft;
 
     public Frame(ComponentProvider provider, String blame, ValveGearType type) {
-        this.wheels = provider.parseAll(ModelComponentType.FRAME_WHEEL_X)
-                .stream().map(Wheel::new).collect(Collectors.toList());
-
+        this.wheels = WheelSet.get(provider, ModelComponentType.FRAME_WHEEL_X, 0);
         this.frame = provider.parse(ModelComponentType.FRAME);
         if (frame == null) {
             ImmersiveRailroading.warn("Invalid model: Missing FRAME for %s!  (this will fail in future versions of IR)", blame);
         }
-        valveGearRight = ValveGear.get(wheels, type, provider, "RIGHT", -90);
-        valveGearLeft = ValveGear.get(wheels, type, provider, "LEFT", 0);
+        valveGearRight = wheels != null ? ValveGear.get(wheels, type, provider, "RIGHT", -90) : null;
+        valveGearLeft = wheels != null ? ValveGear.get(wheels, type, provider, "LEFT", 0) : null;
     }
 
     public void render(double distance, ComponentRenderer draw) {
         draw.render(frame);
-        for (Wheel wheel : wheels) {
-            wheel.render(valveGearRight != null ?
-                    valveGearRight.angle(distance) + 90 :
-                    valveGearLeft != null ?
-                            valveGearLeft.angle(distance) + 0 :
-                            wheel.angle(distance),
-                    draw);
+        if (wheels != null) {
+            wheels.render(distance, draw);
         }
         if (valveGearRight != null) {
             valveGearRight.render(distance, 0, draw);
