@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
@@ -123,7 +124,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
         }
 
-        if (getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x.isAtOpenDoor(source, this)) &&
+        if (getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x instanceof Door && ((Door)x).isAtOpenDoor(source, this)) &&
 				getWorld().isServer &&
 				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source)).equals(offset)
 		) {
@@ -139,7 +140,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 		if (getWorld().isServer) {
 			for (Player source : getWorld().getEntities(Player.class)) {
-				if (source.getRiding() == null && getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x.isAtOpenDoor(source, this))) {
+				if (source.getRiding() == null && getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x instanceof Door && ((Door)x).isAtOpenDoor(source, this))) {
 					this.addPassenger(source);
 				}
 			}

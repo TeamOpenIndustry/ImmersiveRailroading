@@ -131,7 +131,7 @@ public class Control {
         return transform(point, getValue(stock), stock.gauge.scale());
     }
 
-    private Vec3d transform(Vec3d point, float valuePercent, double scale) {
+    protected Vec3d transform(Vec3d point, float valuePercent, double scale) {
         Matrix4 m = new Matrix4();
         m = m.scale(scale, scale, scale);
         for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
@@ -203,30 +203,5 @@ public class Control {
 
     public void stopClientDragging() {
         lastClientLook = null;
-    }
-
-    private static final Map<UUID, Integer> cooldown = new HashMap<>();
-
-    public boolean isAtOpenDoor(Player player, EntityRollingStock stock) {
-        if (this.part.type != ModelComponentType.DOOR_X) {
-            return false;
-        }
-        int cool = cooldown.getOrDefault(player.getUUID(), 0);
-        if (player.getTickCount() < cool + 10 && player.getTickCount() > cool) {
-            return false;
-        }
-        if (stock.getControlPosition(this) < 0.75 || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
-            return false;
-        }
-        Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(player.getPosition().add(0, 0.5, 0).subtract(stock.getPosition()));
-        IBoundingBox bb = IBoundingBox.from(
-                transform(part.min, 0, stock.gauge.scale()),
-                transform(part.max, 0, stock.gauge.scale())
-        ).grow(new Vec3d(0.5, 0.5, 0.5));
-        if (!bb.contains(playerPos)) {
-            return false;
-        }
-        cooldown.put(player.getUUID(), player.getTickCount());
-        return true;
     }
 }

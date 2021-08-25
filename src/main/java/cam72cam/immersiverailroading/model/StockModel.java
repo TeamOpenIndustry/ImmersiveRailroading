@@ -2,13 +2,10 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.model.part.Bogey;
-import cam72cam.immersiverailroading.model.part.Control;
-import cam72cam.immersiverailroading.model.part.Frame;
+import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.model.part.TrackFollower;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.StockRenderCache;
@@ -29,7 +26,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private Bogey bogeyRear;
     private ModelComponent shell;
     private ModelComponent remaining;
-    private List<Control> doors;
+    private List<Door> doors;
     private List<Control> windows;
     private List<Control> widgets;
 
@@ -52,7 +49,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         this.shell = provider.parse(ModelComponentType.SHELL);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
-        this.doors = Control.get(this, provider, ModelComponentType.DOOR_X);
+        this.doors = Door.get(this, provider);
         this.windows = Control.get(this, provider, ModelComponentType.WINDOW_X);
         this.widgets = Control.get(this, provider, ModelComponentType.WIDGET_X);
 
