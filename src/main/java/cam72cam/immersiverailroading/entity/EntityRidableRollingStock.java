@@ -142,6 +142,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				getWorld().dropItem(stack, getBlockPosition());
 				// TODO drop by player or new pos?
 			}
+			payingPassengerPositions.remove(passenger.getUUID());
 		}
 
 		return offset;
