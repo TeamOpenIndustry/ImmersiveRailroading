@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
@@ -65,9 +64,9 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
         bell.render(draw);
-        throttles.forEach(throttle -> throttle.render(stock.getControlPosition(throttle), draw));
-        reversers.forEach(reverser -> reverser.render((stock.getControlPosition(reverser)-0.5f), draw));
-        train_brakes.forEach(train_brake -> train_brake.render(stock.getControlPosition(train_brake), draw));
+        throttles.forEach(throttle -> throttle.render(stock, draw));
+        reversers.forEach(reverser -> reverser.render(stock, draw));
+        train_brakes.forEach(train_brake -> train_brake.render(stock, draw));
     }
 
     @Override

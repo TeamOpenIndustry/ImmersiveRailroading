@@ -51,8 +51,7 @@ public class ClientPartDragging {
                     return false;
                 }).min(Comparator.comparingDouble(g -> g.transform(
                         g.part.min.add(g.part.max).scale(0.5f),
-                        stock.getControlPosition(g),
-                        stock.gauge.scale()
+                        stock
                 ).distanceTo(start)));
                 if (found.isPresent()) {
                     component = found.get();

@@ -75,11 +75,13 @@ public class Control {
         }
     }
 
-    public void render(float valuePercent, ComponentRenderer draw) {
+    public void render(EntityRollingStock stock, ComponentRenderer draw) {
         if (rotationPoint == null && translations.isEmpty()) {
             draw.render(part);
             return;
         }
+
+        float valuePercent = getValue(stock);
 
         try (ComponentRenderer matrix = draw.push()) {
             translations.forEach((axis, val) -> {
@@ -112,7 +114,7 @@ public class Control {
             return;
         }
 
-        Vec3d pos = transform(part.center, stock.getControlPosition(this), stock.gauge.scale());
+        Vec3d pos = transform(part.center, stock);
         Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(MinecraftClient.getPlayer().getPositionEyes().add(MinecraftClient.getPlayer().getLookVector()).subtract(stock.getPosition()));
         if (playerPos.distanceTo(pos) > 0.5) {
             return;
@@ -121,7 +123,15 @@ public class Control {
         GlobalRender.drawText(part.type.name().replace("_X", ""), pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
-    public Vec3d transform(Vec3d point, float valuePercent, double scale) {
+    public float getValue(EntityRollingStock stock) {
+        return stock.getControlPosition(this) - (part.type == ModelComponentType.REVERSER_X ? 0.5f : 0);
+    }
+
+    public Vec3d transform(Vec3d point, EntityRollingStock stock) {
+        return transform(point, getValue(stock), stock.gauge.scale());
+    }
+
+    private Vec3d transform(Vec3d point, float valuePercent, double scale) {
         Matrix4 m = new Matrix4();
         m = m.scale(scale, scale, scale);
         for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
@@ -148,10 +158,9 @@ public class Control {
     }
 
     public IBoundingBox getBoundingBox(EntityRollingStock stock) {
-        float controlPosition = stock.getControlPosition(this);
         return IBoundingBox.from(
-                transform(part.min, controlPosition, stock.gauge.scale()),
-                transform(part.max, controlPosition, stock.gauge.scale())
+                transform(part.min, stock),
+                transform(part.max, stock)
         );
     }
 
@@ -177,9 +186,10 @@ public class Control {
             Vec3d movement = current.subtract(lastClientLook);
             Vec3d partPos = part.center;
             float applied = (float) (movement.length());
-            Vec3d grabComponent = transform(partPos, stock.getControlPosition(this), stock.gauge.scale()).add(movement);
-            Vec3d grabComponentNext = transform(partPos, stock.getControlPosition(this) + applied, stock.gauge.scale());
-            Vec3d grabComponentPrev = transform(partPos, stock.getControlPosition(this) - applied, stock.gauge.scale());
+            float value = getValue(stock);
+            Vec3d grabComponent = transform(partPos, value, stock.gauge.scale()).add(movement);
+            Vec3d grabComponentNext = transform(partPos, value + applied, stock.gauge.scale());
+            Vec3d grabComponentPrev = transform(partPos, value - applied, stock.gauge.scale());
             if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
                 delta += applied;
             } else {

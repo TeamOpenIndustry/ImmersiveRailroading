@@ -119,9 +119,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
         draw.render(shell);
 
-        doors.forEach(c -> c.render(stock.getControlPosition(c), draw));
-        windows.forEach(c -> c.render(stock.getControlPosition(c), draw));
-        widgets.forEach(c -> c.render(stock.getControlPosition(c), draw));
+        doors.forEach(c -> c.render(stock, draw));
+        windows.forEach(c -> c.render(stock, draw));
+        widgets.forEach(c -> c.render(stock, draw));
 
         if (bogeyFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
