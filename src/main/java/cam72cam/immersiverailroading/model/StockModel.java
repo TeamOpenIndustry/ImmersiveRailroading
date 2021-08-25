@@ -110,6 +110,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
     }
 
+    public void postRender(EntityMoveableRollingStock stock, float partialTicks) {
+        postRender((T) stock, null, 0);
+    }
+
     protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
         frame.render(distanceTraveled, draw);
 
@@ -156,6 +160,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
 
         draw.render(remaining);
+    }
+
+    protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
+
     }
 
     public List<Control> getDraggableComponents() {

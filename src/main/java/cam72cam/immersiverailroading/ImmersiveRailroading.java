@@ -134,10 +134,21 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ItemRender.register(IRItems.ITEM_MANUAL, new Identifier(MODID, "items/engineerslexicon"));
 				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, new TrackExchangerModel());
 
-				IEntityRender<EntityMoveableRollingStock> stockRender = (entity, partialTicks) -> {
-					StockModel<?> renderer = entity.getDefinition().getModel();
-					if (renderer != null) {
-						renderer.render(entity, partialTicks);
+				IEntityRender<EntityMoveableRollingStock> stockRender = new IEntityRender<EntityMoveableRollingStock>() {
+					@Override
+					public void render(EntityMoveableRollingStock entity, float partialTicks) {
+						StockModel<?> renderer = entity.getDefinition().getModel();
+						if (renderer != null) {
+							renderer.render(entity, partialTicks);
+						}
+					}
+
+					@Override
+					public void postRender(EntityMoveableRollingStock entity, float partialTicks) {
+						StockModel<?> renderer = entity.getDefinition().getModel();
+						if (renderer != null) {
+							renderer.postRender(entity, partialTicks);
+						}
 					}
 				};
 				EntityRenderer.register(LocomotiveSteam.class, stockRender);
