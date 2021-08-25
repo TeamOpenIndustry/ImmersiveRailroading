@@ -114,6 +114,7 @@ public class ClientPartDragging {
         if (stock != null) {
             Vec3d delta = Mouse.getDrag();
             if (delta == null) {
+                component.stopClientDragging();
                 new DragPacket(stock, component).sendToServer();
                 stock = null;
                 component = null;
@@ -128,7 +129,7 @@ public class ClientPartDragging {
                 return;
             }
             //stock.onDrag(component, delta.x / 1000, delta.y / 1000);
-            new DragPacket(stock, component, component.movementDelta((delta.x - lastDelta.x) / 1000, (delta.y - lastDelta.y) / 1000, stock)).sendToServer();
+            new DragPacket(stock, component, component.clientMovementDelta((delta.x - lastDelta.x) / 1000, (delta.y - lastDelta.y) / 1000, stock)).sendToServer();
             lastDelta = delta;
         }
     }

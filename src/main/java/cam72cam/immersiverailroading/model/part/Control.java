@@ -5,11 +5,13 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.util.Axis;
@@ -133,67 +135,44 @@ public class Control {
         );
     }
 
-    public float movementDelta(double x, double y, EntityRollingStock stock) {
+    /** Client only! */
+    private Vec3d lastClientLook = null;
+    public float clientMovementDelta(double x, double y, EntityRollingStock stock) {
         /*
           -X
         -Z * +Z
           +X
          */
-        Vec3d movement = new Vec3d(x * 2, y * 2, 0);
-        movement = new Matrix4()
-                .rotate(
-                        Math.toRadians(MinecraftClient.getPlayer().getRotationPitch()),
-                        1, 0, 0
-                )
-                .rotate(
-                        Math.toRadians(MinecraftClient.getPlayer().getRotationYawHead() - stock.getRotationYaw() - 90),
-                        0, 1, 0
-                )
-                .apply(movement);
 
+        Player player = MinecraftClient.getPlayer();
         float delta = 0;
-        for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
-            Axis axis = entry.getKey();
-            Float val = entry.getValue();
 
-            switch (axis) {
-                case X:
-                    delta += movement.x / val;
-                    break;
-                case Y:
-                    delta += movement.y / val;
-                    break;
-                case Z:
-                    delta += movement.z / val;
-                    break;
-            }
-        }
+        Vec3d current = VecUtil.rotateWrongYaw(player.getPositionEyes().subtract(stock.getPosition()), -stock.getRotationYaw());
+        Vec3d look = VecUtil.rotateWrongYaw(player.getLookVector(), -stock.getRotationYaw());
+        // Rescale along look vector
+        double len = 1 + current.add(look).distanceTo(part.center);
+        current = current.add(look.scale(len));
 
-        if (rotationPoint != null) {
-            switch (rotationAxis) {
-                case X:
-                    movement = new Vec3d(0, movement.y, movement.z);
-                    break;
-                case Y:
-                    movement = new Vec3d(movement.x, 0, movement.z);
-                    break;
-                case Z:
-                    movement = new Vec3d(movement.x, movement.y, 0);
-                    break;
-            }
+        if (lastClientLook != null) {
+            Vec3d movement = current.subtract(lastClientLook);
             Vec3d partPos = part.center;
-            Vec3d rotPoint = rotationPoint.scale(stock.gauge.scale());
-            Vec3d grabComponent = transform(partPos, stock.getControlPosition(this), stock.gauge.scale()).subtract(rotPoint).add(movement);
-            Vec3d grabComponentNext = transform(partPos, stock.getControlPosition(this) + 0.1f, stock.gauge.scale()).subtract(rotPoint);
-            Vec3d grabComponentPrev = transform(partPos, stock.getControlPosition(this) - 0.1f, stock.gauge.scale()).subtract(rotPoint);
+            float applied = (float) (movement.length());
+            Vec3d grabComponent = transform(partPos, stock.getControlPosition(this), stock.gauge.scale()).add(movement);
+            Vec3d grabComponentNext = transform(partPos, stock.getControlPosition(this) + applied, stock.gauge.scale());
+            Vec3d grabComponentPrev = transform(partPos, stock.getControlPosition(this) - applied, stock.gauge.scale());
             if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
-                delta += movement.length();
+                delta += applied;
             } else {
-                delta -= movement.length();
+                delta -= applied;
             }
         }
+        lastClientLook = current;
 
         return delta;
+    }
+
+    public void stopClientDragging() {
+        lastClientLook = null;
     }
 
     private static final Map<UUID, Integer> cooldown = new HashMap<>();
@@ -220,5 +199,4 @@ public class Control {
         cooldown.put(player.getUUID(), player.getTickCount());
         return true;
     }
-
 }
