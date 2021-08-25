@@ -118,7 +118,7 @@ public class LightFlare {
                 throw new RuntimeException(lightTex.toString(), e);
             }
             int[] texData = ImageUtils.toRGBA(image);
-            int texId = GL11.glGenTextures();
+            int texId = OpenGL.allocateTexture();
             try (OpenGL.With tex = OpenGL.texture(texId)) {
                 int width = image.getWidth();
                 int height = image.getHeight();
