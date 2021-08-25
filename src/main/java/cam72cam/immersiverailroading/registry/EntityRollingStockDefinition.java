@@ -42,7 +42,6 @@ public abstract class EntityRollingStockDefinition {
     private static Identifier default_wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
     private static Identifier default_clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
     private static Identifier default_clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
-    private static Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
 
     public final String defID;
     private final Class<? extends EntityRollingStock> type;
@@ -53,7 +52,6 @@ public abstract class EntityRollingStockDefinition {
     public Identifier wheel_sound;
     public Identifier clackFront;
     public Identifier clackRear;
-    public Identifier light_tex;
     public double internal_model_scale;
     double internal_inv_scale;
     private String name = "Unknown";
@@ -80,6 +78,25 @@ public abstract class EntityRollingStockDefinition {
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
+    private static final Map<String, LightDefinition> lights = new HashMap<>();
+
+    public static class LightDefinition {
+        public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
+
+        public final float blinkIntervalSeconds;
+        public final float blinkOffsetSeconds;
+        public final String reverseColor;
+        public final Identifier lightTex;
+        public final boolean castsLight;
+
+        private LightDefinition(JsonObject data) {
+            blinkIntervalSeconds = data.has("blinkIntervalSeconds") ? data.get("blinkIntervalSeconds").getAsFloat() : 0;
+            blinkOffsetSeconds = data.has("blinkOffsetSeconds") ? data.get("blinkOffsetSeconds").getAsFloat() : 0;
+            reverseColor = data.has("reverseColor") ? data.get("reverseColor").getAsString() : null;
+            lightTex = data.has("texture") ? new Identifier(data.get("texture").getAsString()) : default_light_tex;
+            castsLight = !data.has("castsLight") || data.get("castsLight").getAsBoolean();
+        }
+    }
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
@@ -233,7 +250,11 @@ public abstract class EntityRollingStockDefinition {
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
         valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase(Locale.ROOT)) : null;
 
-        light_tex = properties.has("light_texture") ? new Identifier(properties.get("light_texture").getAsString()) : default_light_tex;
+        if (data.has("lights")) {
+            for (Entry<String, JsonElement> entry : data.get("lights").getAsJsonObject().entrySet()) {
+                lights.put(entry.getKey(), new LightDefinition(entry.getValue().getAsJsonObject()));
+            }
+        }
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
@@ -535,5 +556,9 @@ public abstract class EntityRollingStockDefinition {
 
     public ValveGearType getValveGear() {
         return valveGear;
+    }
+
+    public LightDefinition getLight(String name) {
+        return lights.get(name);
     }
 }

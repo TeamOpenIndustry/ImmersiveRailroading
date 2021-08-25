@@ -5,6 +5,8 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.LightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
@@ -34,18 +36,25 @@ public class LightFlare {
     private final float red;
     private final float green;
     private final float blue;
+    private final Identifier lightTex;
+    private final int blinkIntervalTicks;
+    private final int blinkOffsetTicks;
+    private final boolean castsLights;
+    private float redReverse;
+    private float greenReverse;
+    private float blueReverse;
 
     private static final Pattern rgb = Pattern.compile(String.format(".*_0X(%s%<s)(%<s%<s)(%<s%<s).*", "[0-9A-Fa-f]"));
 
-    public static List<LightFlare> get(ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(LightFlare::new).collect(Collectors.toList());
+    public static List<LightFlare> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type) {
+        return provider.parseAll(type).stream().map(component1 -> new LightFlare(def, component1)).collect(Collectors.toList());
     }
 
-    public static List<LightFlare> get(ComponentProvider provider, ModelComponentType type, String pos) {
-        return provider.parseAll(type, pos).stream().map(LightFlare::new).collect(Collectors.toList());
+    public static List<LightFlare> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type, String pos) {
+        return provider.parseAll(type, pos).stream().map(component1 -> new LightFlare(def, component1)).collect(Collectors.toList());
     }
 
-    public LightFlare(ModelComponent component) {
+    private LightFlare(EntityRollingStockDefinition def, ModelComponent component) {
         this.component = component;
         this.forward = component.center.x < 0;
         Matcher rgbValues = component.modelIDs.stream()
@@ -61,25 +70,59 @@ public class LightFlare {
             this.green = 1;
             this.blue = 1;
         }
+        this.redReverse = this.red;
+        this.greenReverse = this.green;
+        this.blueReverse = this.blue;
+
+        // This is bad...
+        LightDefinition config = def.getLight(component.type.toString()
+                .replace("_X", "_" + component.id)
+                .replace("_POS_", "_" + component.pos + "_")
+        );
+
+        if (config != null) {
+            this.lightTex = config.lightTex;
+            this.blinkIntervalTicks = (int)(config.blinkIntervalSeconds * 20);
+            this.blinkOffsetTicks = (int)(config.blinkOffsetSeconds * 20);
+            this.castsLights = config.castsLight;
+            if (config.reverseColor != null) {
+                rgbValues = rgb.matcher("_" + config.reverseColor);
+                if (rgbValues.matches()) {
+                    this.redReverse = Integer.parseInt(rgbValues.group(1), 16) / 255f;
+                    this.greenReverse = Integer.parseInt(rgbValues.group(2), 16) / 255f;
+                    this.blueReverse = Integer.parseInt(rgbValues.group(3), 16) / 255f;
+                }
+            }
+        } else {
+            this.lightTex = LightDefinition.default_light_tex;
+            this.blinkIntervalTicks = 0;
+            this.blinkOffsetTicks = 0;
+            this.castsLights = true;
+        }
     }
 
     public void render(ComponentRenderer draw) {
         draw.render(component);
     }
 
+    private boolean isBlinkOff(EntityMoveableRollingStock stock) {
+        return blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;
+    }
+
     public void postRender(EntityMoveableRollingStock stock, float offset) {
-        if (!textures.containsKey(stock.getDefinition().light_tex)) {
-            BufferedImage image = null;
+        if (!textures.containsKey(lightTex)) {
+            BufferedImage image;
             try {
-                image = ImageIO.read(stock.getDefinition().light_tex.getLastResourceStream());
+                image = ImageIO.read(lightTex.getLastResourceStream());
             } catch (IOException e) {
-                throw new RuntimeException(stock.getDefinition().light_tex.toString(), e);
+                throw new RuntimeException(lightTex.toString(), e);
             }
             int[] texData = ImageUtils.toRGBA(image);
             int texId = GL11.glGenTextures();
             try (OpenGL.With tex = OpenGL.texture(texId)) {
                 int width = image.getWidth();
                 int height = image.getHeight();
+                //TODO!!!
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
@@ -90,8 +133,21 @@ public class LightFlare {
 
                 GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
             }
-            textures.put(stock.getDefinition().light_tex, texId);
+            textures.put(lightTex, texId);
         }
+        boolean reverse = stock.getCurrentSpeed().minecraft() < 0;
+        float red = reverse ? this.redReverse : this.red;
+        float green = reverse ? this.greenReverse : this.green;
+        float blue = reverse ? this.blueReverse : this.blue;
+
+        if (red == 0 && green == 0 && blue == 0) {
+            return;
+        }
+
+        if (isBlinkOff(stock)) {
+            return;
+        }
+
         Vec3d flareOffset = new Vec3d(forward ? component.min.x-0.01 : component.max.x+0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
 
         Vec3d playerOffset = VecUtil.rotateWrongYaw(stock.getPosition().subtract(MinecraftClient.getPlayer().getPosition()), 180-(stock.getRotationYaw()-offset)).
@@ -103,7 +159,7 @@ public class LightFlare {
         intensity = Math.min(intensity, 1.5f);
 
         try (
-                OpenGL.With tex = OpenGL.texture(textures.get(stock.getDefinition().light_tex));
+                OpenGL.With tex = OpenGL.texture(textures.get(lightTex));
                 OpenGL.With light = OpenGL.shaderActive() ?
                         OpenGL.lightmap(1, 1) :
                         OpenGL.bool(GL11.GL_LIGHTING, false).and(OpenGL.lightmap(false));
@@ -159,7 +215,11 @@ public class LightFlare {
     }
 
     public <T extends EntityMoveableRollingStock> void effects(T stock, float offset) {
-        if (!Light.enabled()) {
+        if (!castsLights) {
+            return;
+        }
+
+        if (!Light.enabled() || isBlinkOff(stock)) {
             this.removed(stock);
             return;
         }

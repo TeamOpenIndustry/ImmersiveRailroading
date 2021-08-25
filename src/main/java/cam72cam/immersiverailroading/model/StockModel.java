@@ -54,7 +54,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         this.shell = provider.parse(ModelComponentType.SHELL);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
-        this.headlights = LightFlare.get(provider, ModelComponentType.HEADLIGHT_X);
+        this.headlights = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_X);
 
         if (bogeyFront != null && Math.abs(def.getBogeyFront(Gauge.from(Gauge.STANDARD)) + bogeyFront.center().x) > 0.5) {
             frontTrackers = new ExpireableList<>();

@@ -13,7 +13,6 @@ import cam72cam.immersiverailroading.model.part.TrackFollower;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
-import cam72cam.mod.render.Light;
 
 import java.util.*;
 
@@ -60,8 +59,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                 provider,
                 ((LocomotiveDefinition)def).bell
         );
-        headlightsFront = LightFlare.get(provider, ModelComponentType.HEADLIGHT_POS_X, "FRONT");
-        headlightsRear = LightFlare.get(provider, ModelComponentType.HEADLIGHT_POS_X, "REAR");
+        headlightsFront = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "FRONT");
+        headlightsRear = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "REAR");
 
         super.parseComponents(provider, def);
     }
