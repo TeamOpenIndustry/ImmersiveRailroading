@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
@@ -11,7 +12,6 @@ import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.GlobalRender;
@@ -104,12 +104,15 @@ public class Control {
     }
 
     public void postRender(EntityRollingStock stock) {
-        Vec3d pos = transform(part.center, stock.getControlPosition(this), stock.gauge.scale());
+        if (!ConfigGraphics.interactiveComponentsOverlay) {
+            return;
+        }
 
         if (MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
             return;
         }
 
+        Vec3d pos = transform(part.center, stock.getControlPosition(this), stock.gauge.scale());
         Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(MinecraftClient.getPlayer().getPositionEyes().add(MinecraftClient.getPlayer().getLookVector()).subtract(stock.getPosition()));
         if (playerPos.distanceTo(pos) > 0.5) {
             return;
