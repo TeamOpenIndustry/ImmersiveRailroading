@@ -69,4 +69,12 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         reversers.forEach(reverser -> reverser.render((stock.getControlPosition(reverser)-0.5f), draw));
         train_brakes.forEach(train_brake -> train_brake.render(stock.getControlPosition(train_brake), draw));
     }
+
+    @Override
+    protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
+        super.postRender(stock, draw, distanceTraveled);
+        throttles.forEach(throttle -> throttle.postRender(stock));
+        reversers.forEach(reverser -> reverser.postRender(stock));
+        train_brakes.forEach(train_brake -> train_brake.postRender(stock));
+    }
 }

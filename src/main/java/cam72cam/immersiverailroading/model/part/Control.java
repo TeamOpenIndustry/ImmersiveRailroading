@@ -14,6 +14,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
@@ -79,6 +80,7 @@ public class Control {
             draw.render(part);
             return;
         }
+
         try (ComponentRenderer matrix = draw.push()) {
             translations.forEach((axis, val) -> {
                 GL11.glTranslated(
@@ -99,6 +101,21 @@ public class Control {
             }
             matrix.render(part);
         }
+    }
+
+    public void postRender(EntityRollingStock stock) {
+        Vec3d pos = transform(part.center, stock.getControlPosition(this), stock.gauge.scale());
+
+        if (MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
+            return;
+        }
+
+        Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(MinecraftClient.getPlayer().getPositionEyes().add(MinecraftClient.getPlayer().getLookVector()).subtract(stock.getPosition()));
+        if (playerPos.distanceTo(pos) > 0.5) {
+            return;
+        }
+
+        GlobalRender.drawText(part.type.name().replace("_X", ""), pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public Vec3d transform(Vec3d point, float valuePercent, double scale) {

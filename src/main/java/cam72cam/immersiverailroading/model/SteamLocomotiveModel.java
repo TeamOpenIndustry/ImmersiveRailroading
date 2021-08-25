@@ -12,8 +12,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private List<ModelComponent> components;

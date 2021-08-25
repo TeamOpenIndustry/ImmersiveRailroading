@@ -163,7 +163,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
-
+        doors.forEach(c -> c.postRender(stock));
+        windows.forEach(c -> c.postRender(stock));
+        widgets.forEach(c -> c.postRender(stock));
     }
 
     public List<Control> getDraggableComponents() {

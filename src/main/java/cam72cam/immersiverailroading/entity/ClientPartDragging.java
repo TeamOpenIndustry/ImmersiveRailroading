@@ -11,12 +11,11 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.text.PlayerMessage;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class ClientPartDragging {
     private EntityRollingStock stock = null;
@@ -37,35 +36,26 @@ public class ClientPartDragging {
                 List<Control> targets = stock.getDefinition().getModel().getDraggableComponents();
                 Player player = MinecraftClient.getPlayer();
 
-                float yaw = player.getRotationYawHead() - stock.getRotationYaw();
-                float pitch = player.getRotationPitch();
-                double f = Math.cos(-yaw * 0.017453292F - (float)Math.PI);
-                double f1 = Math.sin(-yaw * 0.017453292F - (float)Math.PI);
-                double f2 = -Math.cos(-pitch * 0.017453292F);
-                double f3 = Math.sin(-pitch * 0.017453292F);
-                Vec3d look = VecUtil.rotateWrongYaw(new Vec3d(f1 * f2, f3, f * f2), 0);
+                Vec3d look = VecUtil.rotateWrongYaw(player.getLookVector(), - stock.getRotationYaw());
 
                 Vec3d starta = VecUtil.rotateWrongYaw(stock.getPosition().subtract(player.getPositionEyes()), 180-stock.getRotationYaw());
                 Vec3d start = starta.add(0, -starta.y + player.getPositionEyes().y - stock.getPosition().y, 0);
                 double padding = 0.05 * stock.gauge.scale();
-                List<Control> found = targets.stream().filter(g -> {
+                Optional<Control> found = targets.stream().filter(g -> {
                     IBoundingBox bb = g.getBoundingBox(stock).grow(new Vec3d(padding, padding, padding));
-                    for (double i = 0; i < 3; i+=0.1) {
+                    for (double i = 0; i < 3; i += 0.1) {
                         if (bb.contains(start.add(look.scale(i * stock.gauge.scale())))) {
                             return true;
                         }
                     }
                     return false;
-                }).sorted(Comparator.comparingDouble(g -> g.transform(
+                }).min(Comparator.comparingDouble(g -> g.transform(
                         g.part.min.add(g.part.max).scale(0.5f),
                         stock.getControlPosition(g),
                         stock.gauge.scale()
-                ).distanceTo(start))).collect(Collectors.toList());
-                for (Control objGroup : found) {
-                    player.sendMessage(PlayerMessage.direct(objGroup.part.type.name()));
-                }
-                if (!found.isEmpty()) {
-                    component = found.get(0);
+                ).distanceTo(start)));
+                if (found.isPresent()) {
+                    component = found.get();
                     return false;
                 } else {
                     stock = null;
