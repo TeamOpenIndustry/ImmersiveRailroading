@@ -69,28 +69,23 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     protected void effects(T stock) {
         super.effects(stock);
         bell.effects(stock, stock.getBell() > 0 ? 0.8f : 0);
-        if (stock.externalLightsEnabled()) {
-            if (drivingWheelsFront != null) {
-                float offset = 0;
-                if (frameFront != null && frontTrackers.get(stock.getUUID()) != null) {
-                    offset = frontTrackers.get(stock.getUUID()).getYaw();
-                }
-                for (LightFlare flare : headlightsFront) {
-                    flare.effects(stock, offset);
-                }
+        if (drivingWheelsFront != null) {
+            float offset = 0;
+            if (frameFront != null && frontTrackers.get(stock.getUUID()) != null) {
+                offset = frontTrackers.get(stock.getUUID()).getYaw();
             }
-            if (drivingWheelsRear != null && rearTrackers.get(stock.getUUID()) != null) {
-                float offset = 0;
-                if (frameRear != null) {
-                    offset = rearTrackers.get(stock.getUUID()).getYaw();
-                }
-                for (LightFlare flare : headlightsRear) {
-                    flare.effects(stock, offset);
-                }
+            for (LightFlare flare : headlightsFront) {
+                flare.effects(stock, offset);
             }
-        } else {
-            headlightsFront.forEach(x -> x.removed(stock));
-            headlightsRear.forEach(x -> x.removed(stock));
+        }
+        if (drivingWheelsRear != null && rearTrackers.get(stock.getUUID()) != null) {
+            float offset = 0;
+            if (frameRear != null) {
+                offset = rearTrackers.get(stock.getUUID()).getYaw();
+            }
+            for (LightFlare flare : headlightsRear) {
+                flare.effects(stock, offset);
+            }
         }
     }
 
@@ -131,7 +126,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                 }
                 if (!headlightsFront.isEmpty()) {
                     try (ComponentRenderer light = matrix.withBrightGroups(true)) {
-                        headlightsFront.forEach(x -> x.render(light));
+                        headlightsFront.forEach(x -> x.render(light, stock));
                     }
                 }
             }
@@ -153,7 +148,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                 }
                 if (!headlightsRear.isEmpty()) {
                     try (ComponentRenderer light = matrix.withBrightGroups(true)) {
-                        headlightsRear.forEach(x -> x.render(light));
+                        headlightsRear.forEach(x -> x.render(light, stock));
                     }
                 }
             }
@@ -169,26 +164,24 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     @Override
     protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
         super.postRender(stock, draw, distanceTraveled);
-        if (stock.externalLightsEnabled()) {
-            if (drivingWheelsFront != null) {
-                float offset = 0;
-                if (frameFront != null) {
-                    frontTrackers.get(stock.getUUID()).apply(stock);
-                    offset = frontTrackers.get(stock.getUUID()).getYaw();
-                }
-                for (LightFlare flare : headlightsFront) {
-                    flare.postRender(stock, offset);
-                }
+        if (drivingWheelsFront != null) {
+            float offset = 0;
+            if (frameFront != null) {
+                frontTrackers.get(stock.getUUID()).apply(stock);
+                offset = frontTrackers.get(stock.getUUID()).getYaw();
             }
-            if (drivingWheelsRear != null) {
-                float offset = 0;
-                if (frameRear != null) {
-                    rearTrackers.get(stock.getUUID()).apply(stock);
-                    offset = rearTrackers.get(stock.getUUID()).getYaw();
-                }
-                for (LightFlare flare : headlightsRear) {
-                    flare.postRender(stock, offset);
-                }
+            for (LightFlare flare : headlightsFront) {
+                flare.postRender(stock, offset);
+            }
+        }
+        if (drivingWheelsRear != null) {
+            float offset = 0;
+            if (frameRear != null) {
+                rearTrackers.get(stock.getUUID()).apply(stock);
+                offset = rearTrackers.get(stock.getUUID()).getYaw();
+            }
+            for (LightFlare flare : headlightsRear) {
+                flare.postRender(stock, offset);
             }
         }
     }

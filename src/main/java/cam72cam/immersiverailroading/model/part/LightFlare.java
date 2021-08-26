@@ -40,6 +40,7 @@ public class LightFlare {
     private final int blinkIntervalTicks;
     private final int blinkOffsetTicks;
     private final boolean castsLights;
+    private final boolean blinkFullBright;
     private float redReverse;
     private float greenReverse;
     private float blueReverse;
@@ -84,6 +85,7 @@ public class LightFlare {
             this.lightTex = config.lightTex;
             this.blinkIntervalTicks = (int)(config.blinkIntervalSeconds * 20);
             this.blinkOffsetTicks = (int)(config.blinkOffsetSeconds * 20);
+            this.blinkFullBright = config.blinkFullBright;
             this.castsLights = config.castsLight;
             if (config.reverseColor != null) {
                 rgbValues = rgb.matcher("_" + config.reverseColor);
@@ -97,16 +99,22 @@ public class LightFlare {
             this.lightTex = LightDefinition.default_light_tex;
             this.blinkIntervalTicks = 0;
             this.blinkOffsetTicks = 0;
+            this.blinkFullBright = true;
             this.castsLights = true;
         }
     }
 
-    public void render(ComponentRenderer draw) {
-        draw.render(component);
+    public void render(ComponentRenderer draw, EntityMoveableRollingStock stock) {
+        try (ComponentRenderer light = draw.withBrightGroups(blinkFullBright ? !isBlinkOff(stock) : !isLightOff(stock))) {
+            light.render(component);
+        }
     }
 
+    private boolean isLightOff(EntityMoveableRollingStock stock) {
+        return !stock.externalLightsEnabled();
+    }
     private boolean isBlinkOff(EntityMoveableRollingStock stock) {
-        return blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;
+        return isLightOff(stock) || blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;
     }
 
     public void postRender(EntityMoveableRollingStock stock, float offset) {
@@ -122,7 +130,6 @@ public class LightFlare {
             try (OpenGL.With tex = OpenGL.texture(texId)) {
                 int width = image.getWidth();
                 int height = image.getHeight();
-                //TODO!!!
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);

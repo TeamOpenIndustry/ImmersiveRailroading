@@ -85,6 +85,7 @@ public abstract class EntityRollingStockDefinition {
 
         public final float blinkIntervalSeconds;
         public final float blinkOffsetSeconds;
+        public final boolean blinkFullBright;
         public final String reverseColor;
         public final Identifier lightTex;
         public final boolean castsLight;
@@ -92,6 +93,7 @@ public abstract class EntityRollingStockDefinition {
         private LightDefinition(JsonObject data) {
             blinkIntervalSeconds = data.has("blinkIntervalSeconds") ? data.get("blinkIntervalSeconds").getAsFloat() : 0;
             blinkOffsetSeconds = data.has("blinkOffsetSeconds") ? data.get("blinkOffsetSeconds").getAsFloat() : 0;
+            blinkFullBright = !data.has("blinkFullBright") || data.get("blinkFullBright").getAsBoolean();
             reverseColor = data.has("reverseColor") ? data.get("reverseColor").getAsString() : null;
             lightTex = data.has("texture") ? new Identifier(data.get("texture").getAsString()) : default_light_tex;
             castsLight = !data.has("castsLight") || data.get("castsLight").getAsBoolean();
