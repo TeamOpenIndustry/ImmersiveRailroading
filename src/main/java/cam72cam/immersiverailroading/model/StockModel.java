@@ -172,4 +172,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         components.addAll(widgets);
         return components;
     }
+
+    public List<Door> getDoors() {
+        return new ArrayList<>(doors);
+    }
 }

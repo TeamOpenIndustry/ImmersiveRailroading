@@ -21,6 +21,14 @@ import java.util.stream.Collectors;
 public class Door extends Control {
     private static final Map<UUID, Integer> cooldown = new HashMap<>();
 
+    public enum Types {
+        INTERNAL,
+        CONNECTING,
+        EXTERNAL
+    }
+
+    public final Types type;
+
     public static List<Door> get(OBJModel model, ComponentProvider provider) {
         ModelComponentType type = ModelComponentType.DOOR_X;
         return provider.parseAll(type).stream().map(part -> {
@@ -31,10 +39,13 @@ public class Door extends Control {
 
     public Door(ModelComponent part, OBJGroup rot) {
         super(part, rot);
+        type = part.modelIDs.stream().anyMatch(g -> g.contains("EXTERNAL")) ? Types.EXTERNAL :
+                part.modelIDs.stream().anyMatch(g -> g.contains("CONNECTING")) ? Types.CONNECTING :
+                Types.INTERNAL;
     }
 
-    public boolean isAtOpenDoor(Player player, EntityRollingStock stock) {
-        if (this.part.type != ModelComponentType.DOOR_X) {
+    public boolean isAtOpenDoor(Player player, EntityRollingStock stock, Types type) {
+        if (this.type != type) {
             return false;
         }
         int cool = cooldown.getOrDefault(player.getUUID(), 0);
@@ -42,9 +53,6 @@ public class Door extends Control {
             return false;
         }
         if (stock.getControlPosition(this) < 0.75 || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
-            return false;
-        }
-        if (part.modelIDs.stream().allMatch(x -> x.contains("INTERNAL"))) {
             return false;
         }
         Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(player.getPosition().add(0, 0.5, 0).subtract(stock.getPosition()));

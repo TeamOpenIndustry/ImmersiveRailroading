@@ -103,6 +103,13 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
 			boolean atBack = this.getDefinition().isAtRear(gauge, offset);
+			// TODO config for strict doors
+			boolean hasConnectingDoors = this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.type == Door.Types.CONNECTING);
+			boolean atDoor = hasConnectingDoors &&
+					this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.CONNECTING));
+
+			atFront &= !hasConnectingDoors || atDoor;
+			atBack &= !hasConnectingDoors || atDoor;
 
 			for (CouplerType coupler : CouplerType.values()) {
 				boolean atCoupler = coupler == CouplerType.FRONT ? atFront : atBack;
@@ -124,7 +131,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
         }
 
-        if (getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x instanceof Door && ((Door)x).isAtOpenDoor(source, this)) &&
+        if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
 				getWorld().isServer &&
 				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source)).equals(offset)
 		) {
@@ -140,7 +147,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 		if (getWorld().isServer) {
 			for (Player source : getWorld().getEntities(Player.class)) {
-				if (source.getRiding() == null && getDefinition().getModel().getDraggableComponents().stream().anyMatch(x -> x instanceof Door && ((Door)x).isAtOpenDoor(source, this))) {
+				if (source.getRiding() == null && getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL))) {
 					this.addPassenger(source);
 				}
 			}
