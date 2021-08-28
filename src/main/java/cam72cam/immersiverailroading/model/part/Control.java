@@ -160,6 +160,10 @@ public class Control {
         return m.apply(point);
     }
 
+    public Vec3d center(EntityRollingStock stock) {
+        return transform(part.center, stock);
+    }
+
     public IBoundingBox getBoundingBox(EntityRollingStock stock) {
         return IBoundingBox.from(
                 transform(part.min, stock),

@@ -14,10 +14,7 @@ import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
 	public float getRidingSoundModifier() {
@@ -83,6 +80,22 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
+	private boolean hasConnectingDoors() {
+		// TODO cache this value
+		return this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.type == Door.Types.CONNECTING);
+	}
+
+	private boolean isNearestDoorOpen(Player source) {
+		return !hasConnectingDoors() || this.getDefinition().getModel().getDoors().stream()
+				.filter(d -> d.type == Door.Types.CONNECTING)
+				.min(Comparator.comparingDouble(d -> d.center(this).distanceTo(source.getPosition())))
+				.filter(x -> x.isOpen(this)).isPresent();
+	}
+
+	private boolean isDoorOpenAt(Player source) {
+		return !hasConnectingDoors() || this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.CONNECTING));
+	}
+
 	private Vec3d playerMovement(Player source, Vec3d offset) {
 		Vec3d movement = source.getMovementInput();
         /*
@@ -104,19 +117,19 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
 			boolean atBack = this.getDefinition().isAtRear(gauge, offset);
 			// TODO config for strict doors
-			boolean hasConnectingDoors = this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.type == Door.Types.CONNECTING);
-			boolean atDoor = hasConnectingDoors &&
-					this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.CONNECTING));
+			boolean atDoor = isDoorOpenAt(source);
 
-			atFront &= !hasConnectingDoors || atDoor;
-			atBack &= !hasConnectingDoors || atDoor;
+			atFront &= atDoor;
+			atBack &= atDoor;
 
 			for (CouplerType coupler : CouplerType.values()) {
 				boolean atCoupler = coupler == CouplerType.FRONT ? atFront : atBack;
 				if (atCoupler && couplable.isCoupled(coupler)) {
 					EntityCoupleableRollingStock coupled = ((EntityCoupleableRollingStock) this).getCoupled(coupler);
 					if (coupled != null) {
-						coupled.addPassenger(source);
+						if (((EntityRidableRollingStock)coupled).isNearestDoorOpen(source)) {
+							coupled.addPassenger(source);
+						}
 					} else if (this.getTickCount() > 20) {
 						ImmersiveRailroading.info(
 								"Tried to move between cars (%s, %s), but %s was not found",

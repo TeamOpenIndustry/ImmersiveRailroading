@@ -43,6 +43,11 @@ public class Door extends Control {
                 Types.INTERNAL;
     }
 
+
+    public boolean isOpen(EntityRollingStock stock) {
+        return stock.getControlPosition(this) > 0.75;
+    }
+
     public boolean isAtOpenDoor(Player player, EntityRollingStock stock, Types type) {
         if (this.type != type) {
             return false;
@@ -51,7 +56,7 @@ public class Door extends Control {
         if (player.getTickCount() < cool + 10 && player.getTickCount() > cool) {
             return false;
         }
-        if (stock.getControlPosition(this) < 0.75 || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
+        if (!isOpen(stock) || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
             return false;
         }
         IBoundingBox bb = IBoundingBox.from(
