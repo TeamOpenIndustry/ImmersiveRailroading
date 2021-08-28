@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
@@ -132,7 +133,7 @@ public class Control {
     }
 
     protected Vec3d transform(Vec3d point, float valuePercent, EntityRollingStock stock) {
-        return transform(point, valuePercent, ModelComponent.worldMatrix(stock));
+        return transform(point, valuePercent, stock.getModelMatrix());
     }
 
     protected Vec3d transform(Vec3d point, float valuePercent, Matrix4 m) {
@@ -168,14 +169,13 @@ public class Control {
 
     /** Client only! */
     private Vec3d lastClientLook = null;
-    public float clientMovementDelta(double x, double y, EntityRollingStock stock) {
+    public float clientMovementDelta(Player player, EntityRollingStock stock) {
         /*
           -X
         -Z * +Z
           +X
          */
 
-        Player player = MinecraftClient.getPlayer();
         float delta = 0;
 
         Vec3d partPos = transform(part.center, stock).subtract(stock.getPosition());
@@ -184,9 +184,11 @@ public class Control {
         // Rescale along look vector
         double len = 1 + current.add(look).distanceTo(partPos);
         current = current.add(look.scale(len));
+        current = current.rotateYaw(stock.getRotationYaw());
 
         if (lastClientLook != null) {
             Vec3d movement = current.subtract(lastClientLook);
+            movement = movement.rotateYaw(-stock.getRotationYaw());
             float applied = (float) (movement.length());
             float value = getValue(stock);
             Vec3d grabComponent = transform(part.center, value, stock).add(movement);

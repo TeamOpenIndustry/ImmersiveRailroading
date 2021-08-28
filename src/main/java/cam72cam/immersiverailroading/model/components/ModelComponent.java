@@ -76,16 +76,6 @@ public class ModelComponent {
     }
 
     public static Vec3d worldPosition(Vec3d pos, EntityRollingStock stock) {
-        return worldMatrix(stock).apply(pos);
-    }
-
-    public static Matrix4 worldMatrix(EntityRollingStock stock) {
-        // TODO put this matrix in stock and update every tick
-        return new Matrix4()
-                .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())
-                .translate(stock.getPosition().x, stock.getPosition().y, stock.getPosition().z)
-                .rotate(Math.toRadians(180 - stock.getRotationYaw()), 0, 1, 0)
-                .rotate(Math.toRadians(stock.getRotationPitch()), 1, 0, 0)
-                .rotate(Math.toRadians(-90), 0, 1, 0);
+        return stock.getModelMatrix().apply(pos);
     }
 }

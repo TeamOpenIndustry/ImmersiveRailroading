@@ -14,7 +14,10 @@ import cam72cam.mod.entity.*;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
+import cam72cam.mod.util.SingleCache;
+import util.Matrix4;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +36,12 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@TagSync
 	@TagField(value = "texture", mapper = StrictTagMapper.class)
 	private String texture = null;
+	private SingleCache<Vec3d, Matrix4> modelMatrix = new SingleCache<>(v -> new Matrix4()
+			.scale(this.gauge.scale(), this.gauge.scale(), this.gauge.scale())
+			.translate(this.getPosition().x, this.getPosition().y, this.getPosition().z)
+			.rotate(Math.toRadians(180 - this.getRotationYaw()), 0, 1, 0)
+			.rotate(Math.toRadians(this.getRotationPitch()), 1, 0, 0)
+			.rotate(Math.toRadians(-90), 0, 1, 0));
 
 	public void setup(String defID, Gauge gauge, String texture) {
 		this.defID = defID;
@@ -201,6 +210,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	public void onDragRelease(Control component) {
 
+	}
+
+	public Matrix4 getModelMatrix() {
+		return this.modelMatrix.get(getPosition()).copy();
 	}
 
 	public float getControlPosition(Control component) {

@@ -9,7 +9,6 @@ import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
-import util.Matrix4;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +58,10 @@ public class Door extends Control {
                 transform(part.min, 0, stock),
                 transform(part.max, 0, stock)
         ).grow(new Vec3d(0.5, 0.5, 0.5));
-        if (!bb.contains(player.getPositionEyes())) {
+        // The added velocity is due to a bug where the player may tick before or after the stock.
+        // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
+        // or at least expose a "tick order" function as crappy as that would be...
+        if (!bb.contains(player.getPositionEyes().add(stock.getVelocity()))) {
             return false;
         }
         cooldown.put(player.getUUID(), player.getTickCount());

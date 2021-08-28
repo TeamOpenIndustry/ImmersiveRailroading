@@ -94,7 +94,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
             return offset;
         }
 
-        movement = new Vec3d(movement.x, 0, movement.z).rotateMinecraftYaw(source.getRotationYawHead()-this.getRotationYaw());
+        movement = new Vec3d(movement.x, 0, movement.z).rotateYaw(this.getRotationYaw() - source.getRotationYawHead());
 
         offset = offset.add(movement);
 
