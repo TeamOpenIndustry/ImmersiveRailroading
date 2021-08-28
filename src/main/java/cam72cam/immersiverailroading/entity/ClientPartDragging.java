@@ -31,15 +31,14 @@ public class ClientPartDragging {
 
     private boolean capture(Player.Hand hand) {
         if (hand == Player.Hand.SECONDARY) {
+            this.stock = null;
             if (MinecraftClient.getEntityMouseOver() instanceof EntityRollingStock) {
-                stock = (EntityRollingStock) MinecraftClient.getEntityMouseOver();
+                EntityRollingStock stock = (EntityRollingStock) MinecraftClient.getEntityMouseOver();
                 List<Control> targets = stock.getDefinition().getModel().getDraggableComponents();
                 Player player = MinecraftClient.getPlayer();
 
-                Vec3d look = VecUtil.rotateWrongYaw(player.getLookVector(), - stock.getRotationYaw());
-
-                Vec3d starta = VecUtil.rotateWrongYaw(stock.getPosition().subtract(player.getPositionEyes()), 180-stock.getRotationYaw());
-                Vec3d start = starta.add(0, -starta.y + player.getPositionEyes().y - stock.getPosition().y, 0);
+                Vec3d look = player.getLookVector();
+                Vec3d start = player.getPositionEyes();
                 double padding = 0.05 * stock.gauge.scale();
                 Optional<Control> found = targets.stream().filter(g -> {
                     IBoundingBox bb = g.getBoundingBox(stock).grow(new Vec3d(padding, padding, padding));
@@ -50,14 +49,13 @@ public class ClientPartDragging {
                     }
                     return false;
                 }).min(Comparator.comparingDouble(g -> g.transform(
-                        g.part.min.add(g.part.max).scale(0.5f),
+                        g.part.center,
                         stock
                 ).distanceTo(start)));
                 if (found.isPresent()) {
+                    this.stock = stock;
                     component = found.get();
                     return false;
-                } else {
-                    stock = null;
                 }
             }
         }

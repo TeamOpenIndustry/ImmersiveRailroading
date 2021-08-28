@@ -1,9 +1,11 @@
 package cam72cam.immersiverailroading.model.components;
 
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.part.Wheel;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
+import util.Matrix4;
 
 import java.util.List;
 import java.util.Set;
@@ -42,6 +44,18 @@ public class ModelComponent {
         return max.z - min.z;
     }
 
+    public Vec3d min(EntityRollingStock stock) {
+        return worldPosition(min, stock);
+    }
+
+    public Vec3d center(EntityRollingStock stock) {
+        return worldPosition(center, stock);
+    }
+
+    public Vec3d max(EntityRollingStock stock) {
+        return worldPosition(max, stock);
+    }
+
     public static Vec3d center(List<ModelComponent> components) {
         double minX = components.get(0).min.x;
         double minY = components.get(0).min.y;
@@ -58,8 +72,20 @@ public class ModelComponent {
             maxY = Math.max(maxY, rc.max.y);
             maxZ = Math.max(maxZ, rc.max.z);
         }
-        Vec3d min = new Vec3d(minX, minY, minZ);
-        Vec3d max = new Vec3d(maxX, maxY, maxZ);
-        return min.add(max).scale(.5);
+        return new Vec3d((minX + maxX)/2, (minY + maxY)/2, (minZ + maxZ)/2);
+    }
+
+    public static Vec3d worldPosition(Vec3d pos, EntityRollingStock stock) {
+        return worldMatrix(stock).apply(pos);
+    }
+
+    public static Matrix4 worldMatrix(EntityRollingStock stock) {
+        // TODO put this matrix in stock and update every tick
+        return new Matrix4()
+                .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())
+                .translate(stock.getPosition().x, stock.getPosition().y, stock.getPosition().z)
+                .rotate(Math.toRadians(180 - stock.getRotationYaw()), 0, 1, 0)
+                .rotate(Math.toRadians(stock.getRotationPitch()), 1, 0, 0)
+                .rotate(Math.toRadians(-90), 0, 1, 0);
     }
 }

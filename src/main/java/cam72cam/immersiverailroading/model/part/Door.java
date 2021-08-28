@@ -55,12 +55,11 @@ public class Door extends Control {
         if (stock.getControlPosition(this) < 0.75 || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
             return false;
         }
-        Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(player.getPosition().add(0, 0.5, 0).subtract(stock.getPosition()));
         IBoundingBox bb = IBoundingBox.from(
-                transform(part.min, 0, stock.gauge.scale()),
-                transform(part.max, 0, stock.gauge.scale())
+                transform(part.min, 0, stock),
+                transform(part.max, 0, stock)
         ).grow(new Vec3d(0.5, 0.5, 0.5));
-        if (!bb.contains(playerPos)) {
+        if (!bb.contains(player.getPositionEyes())) {
             return false;
         }
         cooldown.put(player.getUUID(), player.getTickCount());

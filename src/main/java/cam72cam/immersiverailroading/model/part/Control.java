@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
@@ -114,12 +113,13 @@ public class Control {
             return;
         }
 
-        Vec3d pos = transform(part.center, stock);
-        Vec3d playerPos = new Matrix4().rotate(Math.toRadians(stock.getRotationYaw() - 90), 0, 1, 0).apply(MinecraftClient.getPlayer().getPositionEyes().add(MinecraftClient.getPlayer().getLookVector()).subtract(stock.getPosition()));
+        Vec3d pos = transform(part.center, getValue(stock), stock);
+        Vec3d playerPos = MinecraftClient.getPlayer().getPositionEyes().add(MinecraftClient.getPlayer().getLookVector());
         if (playerPos.distanceTo(pos) > 0.5) {
             return;
         }
 
+        pos = transform(part.center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
         GlobalRender.drawText(part.type.name().replace("_X", ""), pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
@@ -128,12 +128,14 @@ public class Control {
     }
 
     public Vec3d transform(Vec3d point, EntityRollingStock stock) {
-        return transform(point, getValue(stock), stock.gauge.scale());
+        return transform(point, getValue(stock), stock);
     }
 
-    protected Vec3d transform(Vec3d point, float valuePercent, double scale) {
-        Matrix4 m = new Matrix4();
-        m = m.scale(scale, scale, scale);
+    protected Vec3d transform(Vec3d point, float valuePercent, EntityRollingStock stock) {
+        return transform(point, valuePercent, ModelComponent.worldMatrix(stock));
+    }
+
+    protected Vec3d transform(Vec3d point, float valuePercent, Matrix4 m) {
         for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
             Axis axis = entry.getKey();
             Float val = entry.getValue();
@@ -176,20 +178,20 @@ public class Control {
         Player player = MinecraftClient.getPlayer();
         float delta = 0;
 
-        Vec3d current = VecUtil.rotateWrongYaw(player.getPositionEyes().subtract(stock.getPosition()), -stock.getRotationYaw());
-        Vec3d look = VecUtil.rotateWrongYaw(player.getLookVector(), -stock.getRotationYaw());
+        Vec3d partPos = transform(part.center, stock).subtract(stock.getPosition());
+        Vec3d current = player.getPositionEyes().subtract(stock.getPosition());
+        Vec3d look = player.getLookVector();
         // Rescale along look vector
-        double len = 1 + current.add(look).distanceTo(part.center);
+        double len = 1 + current.add(look).distanceTo(partPos);
         current = current.add(look.scale(len));
 
         if (lastClientLook != null) {
             Vec3d movement = current.subtract(lastClientLook);
-            Vec3d partPos = part.center;
             float applied = (float) (movement.length());
             float value = getValue(stock);
-            Vec3d grabComponent = transform(partPos, value, stock.gauge.scale()).add(movement);
-            Vec3d grabComponentNext = transform(partPos, value + applied, stock.gauge.scale());
-            Vec3d grabComponentPrev = transform(partPos, value - applied, stock.gauge.scale());
+            Vec3d grabComponent = transform(part.center, value, stock).add(movement);
+            Vec3d grabComponentNext = transform(part.center, value + applied, stock);
+            Vec3d grabComponentPrev = transform(part.center, value - applied, stock);
             if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
                 delta += applied;
             } else {
