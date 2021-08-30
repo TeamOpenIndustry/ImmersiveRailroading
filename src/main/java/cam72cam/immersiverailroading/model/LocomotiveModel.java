@@ -61,7 +61,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     protected void effects(T stock) {
         super.effects(stock);
         bell.effects(stock, stock.getBell() > 0 ? 0.8f : 0);
-        speed_gauges.forEach(g -> g.setValue(stock, (float) (stock.getCurrentSpeed().metric() / stock.getDefinition().getMaxSpeed(stock.gauge).metric())));
+        speed_gauges.forEach(g -> g.setValue(stock, (float) (Math.abs(stock.getCurrentSpeed().metric()) / stock.getDefinition().getMaxSpeed(stock.gauge).metric())));
     }
 
     @Override
