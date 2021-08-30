@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -54,6 +56,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	public void setTurnedOn(boolean value) {
 		turnedOn = value;
+		setControlPositions(ModelComponentType.ENGINE_START_X, turnedOn ? 1 : 0);
 	}
 	
 	public boolean isTurnedOn() {
@@ -247,5 +250,13 @@ public class LocomotiveDiesel extends Locomotive {
 
 	public float getSoundThrottle() {
 		return soundThrottle;
+	}
+
+	@Override
+	public void onDragRelease(Control component) {
+		super.onDragRelease(component);
+		if (component.part.type == ModelComponentType.ENGINE_START_X) {
+			setTurnedOn(getControlPosition(component) == 1);
+		}
 	}
 }

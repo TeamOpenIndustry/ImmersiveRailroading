@@ -107,6 +107,10 @@ public class ClientPartDragging {
                 return;
             }
 
+            if (component.toggle) {
+                return;
+            }
+
             float delta = component.clientMovementDelta(MinecraftClient.getPlayer(), stock);
             if (lastDelta != null && Math.abs(lastDelta - delta) < 0.001) {
                 return;

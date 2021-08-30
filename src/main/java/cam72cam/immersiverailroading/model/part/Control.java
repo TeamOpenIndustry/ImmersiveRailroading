@@ -28,7 +28,8 @@ import java.util.stream.Collectors;
 public class Control {
     public final ModelComponent part;
     public final String controlGroup;
-    private final String label;
+    public final String label;
+    public final boolean toggle;
     private Vec3d rotationPoint = null;
     private int rotationDegrees = 0;
     private Axis rotationAxis = null;
@@ -51,6 +52,8 @@ public class Control {
             Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
             return matcher.find() ? matcher.group(1) : null;
         }).filter(Objects::nonNull).findFirst().orElse(part.type.name().replace("_X", ""));
+        this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
+
         if (rot != null) {
             this.rotationPoint = rot.max.add(rot.min).scale(0.5);
             String[] split = rot.name.split("_");

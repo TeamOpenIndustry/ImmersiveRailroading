@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
-import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 
 import java.util.List;
@@ -27,6 +26,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private ModelComponent shellRear;
     private DrivingAssembly drivingWheelsFront;
     private DrivingAssembly drivingWheelsRear;
+    private List<Control> engineStarters;
 
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
@@ -62,6 +62,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                 )
         );
 
+        engineStarters = Control.get(this, provider, ModelComponentType.ENGINE_START_X);
+
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
 
@@ -94,10 +96,19 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     }
 
     @Override
+    public List<Control> getDraggableComponents() {
+        List<Control> controls = super.getDraggableComponents();
+        controls.addAll(engineStarters);
+        return controls;
+    }
+
+    @Override
     protected void render(LocomotiveDiesel stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
         horn.render(draw);
+
+        engineStarters.forEach(c -> c.render(stock, draw));
 
         if (drivingWheels != null) {
             drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
@@ -136,5 +147,12 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
             }
         }
+    }
+
+    @Override
+    protected void postRender(LocomotiveDiesel stock, ComponentRenderer draw, double distanceTraveled) {
+        super.postRender(stock, draw, distanceTraveled);
+
+        engineStarters.forEach(c -> c.postRender(stock));
     }
 }
