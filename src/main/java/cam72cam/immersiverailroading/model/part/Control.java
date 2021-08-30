@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class Control {
     public final ModelComponent part;
     public final String controlGroup;
+    private final String label;
     private Vec3d rotationPoint = null;
     private int rotationDegrees = 0;
     private Axis rotationAxis = null;
@@ -46,6 +47,10 @@ public class Control {
             Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
             return matcher.find() ? matcher.group(1) : null;
         }).filter(Objects::nonNull).findFirst().orElse(part.key);
+        this.label = part.modelIDs.stream().map(group -> {
+            Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
+            return matcher.find() ? matcher.group(1) : null;
+        }).filter(Objects::nonNull).findFirst().orElse(part.type.name().replace("_X", ""));
         if (rot != null) {
             this.rotationPoint = rot.max.add(rot.min).scale(0.5);
             String[] split = rot.name.split("_");
@@ -121,7 +126,7 @@ public class Control {
         }
 
         pos = transform(part.center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
-        GlobalRender.drawText(part.type.name().replace("_X", ""), pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        GlobalRender.drawText(label, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public float getValue(EntityRollingStock stock) {
