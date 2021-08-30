@@ -27,6 +27,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private DrivingAssembly drivingWheelsFront;
     private DrivingAssembly drivingWheelsRear;
     private List<Control> engineStarters;
+    private List<Control> hornControls;
 
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
@@ -63,6 +64,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         );
 
         engineStarters = Control.get(this, provider, ModelComponentType.ENGINE_START_X);
+        hornControls = Control.get(this, provider, ModelComponentType.HORN_CONTROL_X);
 
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
@@ -99,6 +101,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     public List<Control> getDraggableComponents() {
         List<Control> controls = super.getDraggableComponents();
         controls.addAll(engineStarters);
+        controls.addAll(hornControls);
         return controls;
     }
 
@@ -109,6 +112,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         horn.render(draw);
 
         engineStarters.forEach(c -> c.render(stock, draw));
+        hornControls.forEach(c -> c.render(stock, draw));
 
         if (drivingWheels != null) {
             drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
@@ -154,5 +158,6 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         super.postRender(stock, draw, distanceTraveled);
 
         engineStarters.forEach(c -> c.postRender(stock));
+        hornControls.forEach(c -> c.postRender(stock));
     }
 }

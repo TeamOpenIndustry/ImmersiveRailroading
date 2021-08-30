@@ -16,6 +16,7 @@ import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
+import java.util.OptionalDouble;
 
 public class LocomotiveDiesel extends Locomotive {
 
@@ -180,7 +181,15 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 			return;
 		}
-		
+
+		OptionalDouble control = this.getDefinition().getModel().getDraggableComponents().stream()
+				.filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X)
+				.mapToDouble(this::getControlPosition)
+				.max();
+		if (control.isPresent() && control.getAsDouble() > 0) {
+			this.setHorn(10, hornPlayer);
+		}
+
 		float engineTemperature = getEngineTemperature();
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
 		float ambientDelta = engineTemperature - ambientTemperature();

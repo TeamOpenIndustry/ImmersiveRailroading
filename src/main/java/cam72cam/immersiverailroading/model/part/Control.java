@@ -30,6 +30,7 @@ public class Control {
     public final String controlGroup;
     public final String label;
     public final boolean toggle;
+    public final boolean press;
     private Vec3d rotationPoint = null;
     private int rotationDegrees = 0;
     private Axis rotationAxis = null;
@@ -53,6 +54,7 @@ public class Control {
             return matcher.find() ? matcher.group(1) : null;
         }).filter(Objects::nonNull).findFirst().orElse(part.type.name().replace("_X", ""));
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
+        this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
 
         if (rot != null) {
             this.rotationPoint = rot.max.add(rot.min).scale(0.5);
@@ -187,6 +189,10 @@ public class Control {
         -Z * +Z
           +X
          */
+
+        if (press) {
+            return 1;
+        }
 
         float delta = 0;
 
