@@ -101,7 +101,7 @@ public class Control {
     }
 
     public void render(EntityRollingStock stock, ComponentRenderer draw) {
-        if (rotationPoint == null && translations.isEmpty()) {
+        if (rotationPoint == null && translations.isEmpty() && scales.isEmpty()) {
             draw.render(part);
             return;
         }
@@ -127,11 +127,13 @@ public class Control {
                 GL11.glTranslated(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
             }
             if (!scales.isEmpty()) {
+                GL11.glTranslated(part.center.x, part.center.y, part.center.z);
                 GL11.glScalef(
                         scales.containsKey(Axis.X) ? scales.get(Axis.X) * valuePercent : 1,
                         scales.containsKey(Axis.Y) ? scales.get(Axis.Y) * valuePercent : 1,
                         scales.containsKey(Axis.Z) ? scales.get(Axis.Z) * valuePercent : 1
                 );
+                GL11.glTranslated(-part.center.x, -part.center.y, -part.center.z);
             }
             matrix.render(part);
         }
@@ -194,6 +196,15 @@ public class Control {
                     rotations.getOrDefault(Axis.Z, 0f)
             );
             m = m.translate(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
+        }
+        if (!scales.isEmpty()) {
+            m = m.translate(part.center.x, part.center.y, part.center.z);
+            m = m.scale(
+                    scales.containsKey(Axis.X) ? scales.get(Axis.X) * valuePercent : 1,
+                    scales.containsKey(Axis.Y) ? scales.get(Axis.Y) * valuePercent : 1,
+                    scales.containsKey(Axis.Z) ? scales.get(Axis.Z) * valuePercent : 1
+            );
+            m = m.translate(-part.center.x, -part.center.y, -part.center.z);
         }
         return m.apply(point);
     }
