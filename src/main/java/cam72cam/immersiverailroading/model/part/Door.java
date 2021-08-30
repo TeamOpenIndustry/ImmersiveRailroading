@@ -32,12 +32,12 @@ public class Door extends Control {
         ModelComponentType type = ModelComponentType.DOOR_X;
         return provider.parseAll(type).stream().map(part -> {
             OBJGroup rot = model.groups.values().stream().filter(g -> Pattern.matches(type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name)).findFirst().orElse(null);
-            return new Door(part, rot);
+            return new Door(part, rot, model);
         }).collect(Collectors.toList());
     }
 
-    public Door(ModelComponent part, OBJGroup rot) {
-        super(part, rot);
+    public Door(ModelComponent part, OBJGroup rot, OBJModel model) {
+        super(part, model, rot);
         type = part.modelIDs.stream().anyMatch(g -> g.contains("EXTERNAL")) ? Types.EXTERNAL :
                 part.modelIDs.stream().anyMatch(g -> g.contains("CONNECTING")) ? Types.CONNECTING :
                 Types.INTERNAL;

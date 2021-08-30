@@ -155,6 +155,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
 
         draw.render(remaining);
+
+        getReadouts().forEach(r -> r.render(stock, draw));
     }
 
     protected void postRender(T stock) {
@@ -167,6 +169,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         components.addAll(windows);
         components.addAll(widgets);
         return components;
+    }
+
+    public List<Readout> getReadouts() {
+        return new ArrayList<>();
     }
 
     public List<Door> getDoors() {

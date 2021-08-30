@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.Bell;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.model.part.Readout;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 
@@ -17,6 +18,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     private List<Control> throttles;
     private List<Control> reversers;
     private List<Control> train_brakes;
+    private List<Readout> speed_gauges;
 
     public LocomotiveModel(LocomotiveDefinition def) throws Exception {
         super(def);
@@ -36,6 +38,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         throttles = Control.get(this, provider, ModelComponentType.THROTTLE_X);
         reversers = Control.get(this, provider, ModelComponentType.REVERSER_X);
         train_brakes = Control.get(this, provider, ModelComponentType.TRAIN_BRAKE_X);
+        speed_gauges = Readout.getReadouts(this, provider, ModelComponentType.GAUGE_SPEED_X);
     }
 
     @Override
@@ -48,9 +51,17 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     }
 
     @Override
+    public List<Readout> getReadouts() {
+        List<Readout> readouts = super.getReadouts();
+        readouts.addAll(speed_gauges);
+        return readouts;
+    }
+
+    @Override
     protected void effects(T stock) {
         super.effects(stock);
         bell.effects(stock, stock.getBell() > 0 ? 0.8f : 0);
+        speed_gauges.forEach(g -> g.setValue(stock, (float) (stock.getCurrentSpeed().metric() / stock.getDefinition().getMaxSpeed(stock.gauge).metric())));
     }
 
     @Override
