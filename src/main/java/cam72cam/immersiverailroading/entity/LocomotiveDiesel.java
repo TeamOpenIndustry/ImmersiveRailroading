@@ -37,6 +37,7 @@ public class LocomotiveDiesel extends Locomotive {
 	private boolean engineOverheated = false;
 
 	private int throttleCooldown;
+	private int reverserCooldown;
 
 	public LocomotiveDiesel() {
 		engineTemperature = ambientTemperature();
@@ -105,7 +106,12 @@ public class LocomotiveDiesel extends Locomotive {
 				super.handleKeyPress(source, key);
 		}
 	}
-	
+
+	@Override
+	protected float getReverserDelta() {
+		return 0.51f;
+	}
+
 	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
 		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
 			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle());
@@ -139,19 +145,17 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public void setReverser(float newReverser) {
-		if (getThrottle() > 0) {
-			return;
+		if (this.reverserCooldown <= 0) {
+			reverserCooldown = 3;
+			float value;
+			if (getThrottle() > 0) {
+				value = 0;
+			} else {
+				value = Math.round(newReverser);
+			}
+			super.setReverser(Math.max(-1, Math.min(1, value)));
+			this.mapTrain(this, true, false, this::setThrottleMap);
 		}
-		float value = newReverser;
-		if (newReverser == 0) {
-			value = 0;
-		} else if (newReverser > getReverser()) {
-			value = 1;
-		} else if (newReverser < getReverser()) {
-			value = -1;
-		}
-		super.setReverser(value);
-		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 
 	@Override
@@ -197,6 +201,10 @@ public class LocomotiveDiesel extends Locomotive {
 
 		if (throttleCooldown > 0) {
 			throttleCooldown--;
+		}
+
+		if (reverserCooldown > 0) {
+			reverserCooldown--;
 		}
 
 		engineTemperature -= coolDownSpeed;
@@ -266,6 +274,10 @@ public class LocomotiveDiesel extends Locomotive {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.ENGINE_START_X) {
 			setTurnedOn(getControlPosition(component) == 1);
+		}
+		if (component.part.type == ModelComponentType.REVERSER_X) {
+			// Make sure reverser is sync'd
+			setControlPositions(ModelComponentType.REVERSER_X, getReverser()/-2 + 0.5f);
 		}
 	}
 }

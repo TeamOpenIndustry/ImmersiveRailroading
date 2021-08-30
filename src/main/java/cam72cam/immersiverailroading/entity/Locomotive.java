@@ -21,7 +21,7 @@ import cam72cam.mod.world.World;
 import java.util.UUID;
 
 public abstract class Locomotive extends FreightTank {
-	private static final float throttleNotch = 0.04f;
+	private static final float throttleDelta = 0.04f;
 	private static final float airBrakeNotch = 0.04f;
 
 	@TagField("deadMansSwitch")
@@ -93,7 +93,7 @@ public abstract class Locomotive extends FreightTank {
             break;
 		case THROTTLE_UP:
 			if (getThrottle() < 1) {
-				setThrottle(getThrottle() + throttleNotch);
+				setThrottle(getThrottle() + throttleDelta);
 			}
 			break;
 		case THROTTLE_ZERO:
@@ -101,12 +101,12 @@ public abstract class Locomotive extends FreightTank {
 			break;
 		case THROTTLE_DOWN:
 			if (getThrottle() > 0) {
-				setThrottle(getThrottle() - throttleNotch);
+				setThrottle(getThrottle() - throttleDelta);
 			}
 			break;
 		case REVERSER_UP:
 			if (getReverser() < 1) {
-				setReverser(getReverser() + throttleNotch);
+				setReverser(getReverser() + getReverserDelta());
 			}
 			break;
 		case REVERSER_ZERO:
@@ -114,7 +114,7 @@ public abstract class Locomotive extends FreightTank {
 			break;
 		case REVERSER_DOWN:
 			if (getReverser() > -1) {
-				setReverser(getReverser() - throttleNotch);
+				setReverser(getReverser() - getReverserDelta());
 			}
 			break;
 		case AIR_BRAKE_UP:
@@ -144,6 +144,10 @@ public abstract class Locomotive extends FreightTank {
 			default:
 				super.handleKeyPress(source, key);
 		}
+	}
+
+	protected float getReverserDelta() {
+		return throttleDelta;
 	}
 
 	public void onDrag(Control component, double delta) {
