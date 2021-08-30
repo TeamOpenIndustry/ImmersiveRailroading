@@ -74,14 +74,14 @@ public class Control {
             rotations.put(Axis.Z, (float) rot.normal.z);
         }
 
-        Pattern pattern = Pattern.compile("TL_([^_]*)_([^_]*)");
+        Pattern pattern = Pattern.compile("TL_([^_]*)_([^_])");
         for (String modelID : part.modelIDs) {
             Matcher matcher = pattern.matcher(modelID);
             while (matcher.find()) {
                 translations.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
             }
         }
-        pattern = Pattern.compile("SCALE_([^_]*)_([^_]*)");
+        pattern = Pattern.compile("SCALE_([^_]*)_([^_])");
         for (String modelID : part.modelIDs) {
             Matcher matcher = pattern.matcher(modelID);
             while (matcher.find()) {
