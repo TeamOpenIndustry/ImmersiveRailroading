@@ -4,6 +4,9 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.model.FreightModel;
+import cam72cam.immersiverailroading.model.FreightTankModel;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.fluid.Fluid;
 import com.google.gson.JsonElement;
@@ -61,5 +64,10 @@ public class CarTankDefinition extends FreightDefinition {
 
     public List<Fluid> getFluidFilter() {
         return this.fluidFilter;
+    }
+
+    @Override
+    protected StockModel<?> createModel() throws Exception {
+        return new FreightTankModel<>(this);
     }
 }

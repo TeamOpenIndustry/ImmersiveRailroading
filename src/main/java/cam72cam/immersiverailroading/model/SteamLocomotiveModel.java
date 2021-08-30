@@ -32,6 +32,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private Cargo cargoFront;
     private Cargo cargoRear;
     private List<Control> whistleControls;
+    private List<Readout> temperatureGauges;
+    private List<Readout> pressureGauges;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
@@ -40,6 +42,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+        temperatureGauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X);
+        pressureGauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X);
+
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         cargoFront = Cargo.get(provider, "FRONT");
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
@@ -98,6 +103,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
         idleSounds.effects(stock, stock.getBoilerTemperature() > stock.ambientTemperature() + 5 ? 0.1f : 0);
         whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.getHornPlayer());
+
+        temperatureGauges.forEach(g -> g.setValue(stock, stock.getBoilerTemperature() / 100f));
+        pressureGauges.forEach(g -> g.setValue(stock, stock.getBoilerPressure() / stock.getDefinition().getMaxPSI(stock.gauge)));
     }
 
     @Override
@@ -116,6 +124,14 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         List<Control> draggable = super.getDraggableComponents();
         draggable.addAll(whistleControls);
         return draggable;
+    }
+
+    @Override
+    public List<Readout> getReadouts() {
+        List<Readout> readouts = super.getReadouts();
+        readouts.addAll(pressureGauges);
+        readouts.addAll(temperatureGauges);
+        return readouts;
     }
 
     @Override

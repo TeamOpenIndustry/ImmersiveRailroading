@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 
 import java.util.List;
 
-public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
+public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     private List<ModelComponent> components;
     private Bell bell;
     private List<Control> throttles;
