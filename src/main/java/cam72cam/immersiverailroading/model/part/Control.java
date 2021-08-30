@@ -34,6 +34,7 @@ public class Control {
     private int rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
     private final Map<Axis, Float> translations = new HashMap<>();
+    private final Map<Axis, Float> scales = new HashMap<>();
 
     public static List<Control> get(ComponentProvider provider, ModelComponentType type) {
         return provider.parseAll(type).stream().map(Control::new).collect(Collectors.toList());
@@ -80,6 +81,13 @@ public class Control {
                 translations.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
             }
         }
+        pattern = Pattern.compile("SCALE_([^_]*)_([^_]*)");
+        for (String modelID : part.modelIDs) {
+            Matcher matcher = pattern.matcher(modelID);
+            while (matcher.find()) {
+                scales.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
+            }
+        }
     }
 
     public void render(EntityRollingStock stock, ComponentRenderer draw) {
@@ -107,6 +115,13 @@ public class Control {
                         rotations.getOrDefault(Axis.Z, 0f)
                 );
                 GL11.glTranslated(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
+            }
+            if (!scales.isEmpty()) {
+                GL11.glScalef(
+                        scales.containsKey(Axis.X) ? scales.get(Axis.X) * valuePercent : 1,
+                        scales.containsKey(Axis.Y) ? scales.get(Axis.Y) * valuePercent : 1,
+                        scales.containsKey(Axis.Z) ? scales.get(Axis.Z) * valuePercent : 1
+                );
             }
             matrix.render(part);
         }
