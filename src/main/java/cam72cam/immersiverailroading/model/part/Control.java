@@ -136,13 +136,19 @@ public class Control {
             return;
         }
 
-        Vec3d pos = transform(part.center, getValue(stock), stock);
-        Vec3d playerPos = MinecraftClient.getPlayer().getPositionEyes().add(MinecraftClient.getPlayer().getLookVector());
-        if (playerPos.distanceTo(pos) > 0.5) {
+
+        IBoundingBox bb = IBoundingBox.from(
+                transform(part.min, stock),
+                transform(part.max, stock)
+        ).grow(new Vec3d(0.125, 0.125, 0.125));
+        // The added velocity is due to a bug where the player may tick before or after the stock.
+        // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
+        // or at least expose a "tick order" function as crappy as that would be...
+        Player player = MinecraftClient.getPlayer();
+        if (!bb.contains(player.getPositionEyes().add(player.getLookVector()).add(stock.getVelocity()))) {
             return;
         }
-
-        pos = transform(part.center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
+        Vec3d pos = transform(part.center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
         GlobalRender.drawText(label, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
