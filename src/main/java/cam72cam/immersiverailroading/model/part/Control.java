@@ -32,17 +32,14 @@ public class Control {
     public final boolean press;
     private Vec3d rotationPoint = null;
     private int rotationDegrees = 0;
-    private Map<Axis, Float> rotations = new HashMap<>();
-    private Map<Axis, Float> translations = new HashMap<>();
+    private final Map<Axis, Float> rotations = new HashMap<>();
+    private final Map<Axis, Float> translations = new HashMap<>();
 
-    public static List<Control> get(OBJModel model, ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(part -> {
-            OBJGroup rot = model.groups.values().stream().filter(g -> Pattern.matches(type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name)).findFirst().orElse(null);
-            return new Control(part, model, rot);
-        }).collect(Collectors.toList());
+    public static List<Control> get(ComponentProvider provider, ModelComponentType type) {
+        return provider.parseAll(type).stream().map(Control::new).collect(Collectors.toList());
     }
 
-    public Control(ModelComponent part, OBJModel model, OBJGroup rot) {
+    public Control(ModelComponent part) {
         this.part = part;
         this.controlGroup = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
@@ -55,6 +52,9 @@ public class Control {
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
 
+        OBJGroup rot = part.groups().stream()
+                .filter(g -> Pattern.matches(part.type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name))
+                .findFirst().orElse(null);
         if (rot != null && rot.normal != null) {
             this.rotationPoint = rot.max.add(rot.min).scale(0.5);
             String[] split = rot.name.split("_");

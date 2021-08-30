@@ -35,10 +35,10 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                 provider,
                 ((LocomotiveDefinition)def).bell
         );
-        throttles = Control.get(this, provider, ModelComponentType.THROTTLE_X);
-        reversers = Control.get(this, provider, ModelComponentType.REVERSER_X);
-        train_brakes = Control.get(this, provider, ModelComponentType.TRAIN_BRAKE_X);
-        speed_gauges = Readout.getReadouts(this, provider, ModelComponentType.GAUGE_SPEED_X);
+        throttles = Control.get(provider, ModelComponentType.THROTTLE_X);
+        reversers = Control.get(provider, ModelComponentType.REVERSER_X);
+        train_brakes = Control.get(provider, ModelComponentType.TRAIN_BRAKE_X);
+        speed_gauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_SPEED_X);
     }
 
     @Override

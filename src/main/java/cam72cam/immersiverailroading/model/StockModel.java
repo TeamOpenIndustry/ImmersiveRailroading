@@ -49,9 +49,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         this.shell = provider.parse(ModelComponentType.SHELL);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
-        this.doors = Door.get(this, provider);
-        this.windows = Control.get(this, provider, ModelComponentType.WINDOW_X);
-        this.widgets = Control.get(this, provider, ModelComponentType.WIDGET_X);
+        this.doors = Door.get(provider);
+        this.windows = Control.get(provider, ModelComponentType.WINDOW_X);
+        this.widgets = Control.get(provider, ModelComponentType.WIDGET_X);
 
         if (bogeyFront != null && Math.abs(def.getBogeyFront(Gauge.from(Gauge.STANDARD)) + bogeyFront.center().x) > 0.5) {
             frontTrackers = new ExpireableList<>();

@@ -7,14 +7,11 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJGroup;
-import cam72cam.mod.model.obj.OBJModel;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Door extends Control {
@@ -28,16 +25,12 @@ public class Door extends Control {
 
     public final Types type;
 
-    public static List<Door> get(OBJModel model, ComponentProvider provider) {
-        ModelComponentType type = ModelComponentType.DOOR_X;
-        return provider.parseAll(type).stream().map(part -> {
-            OBJGroup rot = model.groups.values().stream().filter(g -> Pattern.matches(type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name)).findFirst().orElse(null);
-            return new Door(part, rot, model);
-        }).collect(Collectors.toList());
+    public static List<Door> get(ComponentProvider provider) {
+        return provider.parseAll(ModelComponentType.DOOR_X).stream().map(Door::new).collect(Collectors.toList());
     }
 
-    public Door(ModelComponent part, OBJGroup rot, OBJModel model) {
-        super(part, model, rot);
+    public Door(ModelComponent part) {
+        super(part);
         type = part.modelIDs.stream().anyMatch(g -> g.contains("EXTERNAL")) ? Types.EXTERNAL :
                 part.modelIDs.stream().anyMatch(g -> g.contains("CONNECTING")) ? Types.CONNECTING :
                 Types.INTERNAL;

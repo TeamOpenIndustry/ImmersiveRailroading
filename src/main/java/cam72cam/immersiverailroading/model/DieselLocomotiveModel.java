@@ -63,8 +63,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                 )
         );
 
-        engineStarters = Control.get(this, provider, ModelComponentType.ENGINE_START_X);
-        hornControls = Control.get(this, provider, ModelComponentType.HORN_CONTROL_X);
+        engineStarters = Control.get(provider, ModelComponentType.ENGINE_START_X);
+        hornControls = Control.get(provider, ModelComponentType.HORN_CONTROL_X);
 
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());

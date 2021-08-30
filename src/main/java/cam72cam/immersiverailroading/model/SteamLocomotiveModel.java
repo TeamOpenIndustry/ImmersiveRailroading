@@ -55,7 +55,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
-        whistleControls = Control.get(this, provider, ModelComponentType.WHISTLE_CONTROL_X);
+        whistleControls = Control.get(provider, ModelComponentType.WHISTLE_CONTROL_X);
         whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
 
         chimney = SteamChimney.get(provider);
