@@ -111,9 +111,6 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         draw.render(components);
         horn.render(draw);
 
-        engineStarters.forEach(c -> c.render(stock, draw));
-        hornControls.forEach(c -> c.render(stock, draw));
-
         if (drivingWheels != null) {
             drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
         }
@@ -151,13 +148,5 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
             }
         }
-    }
-
-    @Override
-    protected void postRender(LocomotiveDiesel stock, ComponentRenderer draw, double distanceTraveled) {
-        super.postRender(stock, draw, distanceTraveled);
-
-        engineStarters.forEach(c -> c.postRender(stock));
-        hornControls.forEach(c -> c.postRender(stock));
     }
 }

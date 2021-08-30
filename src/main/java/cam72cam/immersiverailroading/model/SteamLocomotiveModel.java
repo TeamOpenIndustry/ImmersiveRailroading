@@ -124,7 +124,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         draw.render(components);
 
         whistle.render(draw);
-        whistleControls.forEach(c -> c.render(stock, draw));
 
         if (drivingWheels != null) {
             drivingWheels.render(distanceTraveled, stock.getReverser(), draw);

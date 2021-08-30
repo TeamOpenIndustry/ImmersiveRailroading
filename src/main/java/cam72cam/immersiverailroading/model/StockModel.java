@@ -108,7 +108,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     public void postRender(EntityMoveableRollingStock stock, float partialTicks) {
-        postRender((T) stock, null, 0);
+        postRender((T) stock);
     }
 
     protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
@@ -116,9 +116,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
         draw.render(shell);
 
-        doors.forEach(c -> c.render(stock, draw));
-        windows.forEach(c -> c.render(stock, draw));
-        widgets.forEach(c -> c.render(stock, draw));
+        getDraggableComponents().forEach(c -> c.render(stock, draw));
 
         if (bogeyFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
@@ -159,10 +157,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         draw.render(remaining);
     }
 
-    protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
-        doors.forEach(c -> c.postRender(stock));
-        windows.forEach(c -> c.postRender(stock));
-        widgets.forEach(c -> c.postRender(stock));
+    protected void postRender(T stock) {
+        getDraggableComponents().forEach(c -> c.postRender(stock));
     }
 
     public List<Control> getDraggableComponents() {
