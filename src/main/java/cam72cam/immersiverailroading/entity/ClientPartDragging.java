@@ -10,10 +10,9 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.serialization.TagField;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class ClientPartDragging {
@@ -31,32 +30,33 @@ public class ClientPartDragging {
     private boolean capture(Player.Hand hand) {
         if (hand == Player.Hand.SECONDARY) {
             this.stock = null;
-            if (MinecraftClient.getEntityMouseOver() instanceof EntityRollingStock) {
-                EntityRollingStock stock = (EntityRollingStock) MinecraftClient.getEntityMouseOver();
-                List<Control> targets = stock.getDefinition().getModel().getDraggableComponents();
-                Player player = MinecraftClient.getPlayer();
+            Player player = MinecraftClient.getPlayer();
+            Vec3d look = player.getLookVector();
+            Vec3d start = player.getPositionEyes();
 
-                Vec3d look = player.getLookVector();
-                Vec3d start = player.getPositionEyes();
-                double padding = 0.05 * stock.gauge.scale();
-                Optional<Control> found = targets.stream().filter(g -> {
-                    IBoundingBox bb = g.getBoundingBox(stock).grow(new Vec3d(padding, padding, padding));
-                    for (double i = 0; i < 3; i += 0.1) {
-                        if (bb.contains(start.add(look.scale(i * stock.gauge.scale())))) {
-                            return true;
+            MinecraftClient.getPlayer().getWorld().getEntities(EntityRollingStock.class).stream()
+                    .filter(stock ->
+                            stock.getPosition().distanceTo(player.getPositionEyes()) < stock.getDefinition().getLength(stock.gauge)
+                    )
+                    .flatMap(stock ->
+                            stock.getDefinition().getModel().getDraggableComponents().stream().map(c -> Pair.of(stock, c))
+                    ).filter(p -> {
+                        double padding = 0.05 * p.getLeft().gauge.scale();
+                        IBoundingBox bb = p.getRight().getBoundingBox(p.getLeft()).grow(new Vec3d(padding, padding, padding));
+                        for (double i = 0; i < 3; i += 0.1) {
+                            if (bb.contains(start.add(look.scale(i * p.getLeft().gauge.scale())))) {
+                                return true;
+                            }
                         }
-                    }
-                    return false;
-                }).min(Comparator.comparingDouble(g -> g.transform(
-                        g.part.center,
-                        stock
-                ).distanceTo(start)));
-                if (found.isPresent()) {
-                    this.stock = stock;
-                    component = found.get();
-                    return false;
-                }
-            }
+                        return false;
+                    }).min(Comparator.comparingDouble(p -> p.getRight().transform(
+                            p.getRight().part.center,
+                            p.getLeft()
+                    ).distanceTo(start.add(look)))).ifPresent(found -> {
+                        this.stock = found.getLeft();
+                        this.component = found.getRight();
+                    });
+            return stock == null;
         }
         return true;
     }
