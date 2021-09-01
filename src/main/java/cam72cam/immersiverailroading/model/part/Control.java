@@ -30,6 +30,7 @@ public class Control {
     public final String label;
     public final boolean toggle;
     public final boolean press;
+    public final boolean global;
     private Vec3d rotationPoint = null;
     private int rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
@@ -52,6 +53,7 @@ public class Control {
         }).filter(Objects::nonNull).findFirst().orElse(part.type.name().replace("_X", ""));
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
+        this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
 
         OBJGroup rot = part.groups().stream()
                 .filter(g -> Pattern.matches(part.type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name))
