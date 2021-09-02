@@ -37,7 +37,7 @@ public class Control {
     public final boolean press;
     public final boolean global;
     private Vec3d rotationPoint = null;
-    private int rotationDegrees = 0;
+    private float rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
     private final Map<Axis, Float> translations = new HashMap<>();
     private final Map<Axis, Float> scales = new HashMap<>();
@@ -73,7 +73,7 @@ public class Control {
             if (idx != ArrayUtils.INDEX_NOT_FOUND) {
                 String degrees = split[idx + 1];
                 try {
-                    rotationDegrees = Integer.parseInt(degrees);
+                    rotationDegrees = Float.parseFloat(degrees);
                 } catch (NumberFormatException e) {
                     ModCore.error("Unable to parse rotation point '%s': %s", rot.name, e);
                 }
