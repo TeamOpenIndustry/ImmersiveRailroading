@@ -210,7 +210,6 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	protected Map<String, Pair<Boolean, Float>> controlPositions = new HashMap<>();
 
 	public void onDragStart(Control control) {
-		System.out.println("PRESSED");
 		setControlPressed(control, true);
 	}
 
@@ -220,7 +219,6 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public void onDragRelease(Control control) {
-		System.out.println("RELEASED");
 		setControlPressed(control, false);
 
 		if (control.toggle) {
