@@ -158,7 +158,9 @@ public abstract class Locomotive extends FreightTank {
 				setThrottle(getControlPosition(component));
 				break;
 			case TRAIN_BRAKE_X:
-				setAirBrake(getControlPosition(component));
+				if (getDefinition().isLinearBrakeControl()) {
+					setAirBrake(getControlPosition(component));
+				}
 				break;
 			case REVERSER_X:
 				setReverser((0.5f-getControlPosition(component))*2);
@@ -166,7 +168,15 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-    public ClickResult onClick(Player player, Player.Hand hand) {
+	@Override
+	public void onDragRelease(Control control) {
+		super.onDragRelease(control);
+		if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
+			setControlPosition(control, 0.5f);
+		}
+	}
+
+	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
 				ItemRadioCtrlCard.Data data = new ItemRadioCtrlCard.Data(player.getHeldItem(hand));
@@ -192,6 +202,12 @@ public abstract class Locomotive extends FreightTank {
 		super.onTick();
 		
 		if (getWorld().isServer) {
+			for (Control control : getDefinition().getModel().getDraggableComponents()) {
+				if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
+					setAirBrake(Math.max(0, Math.min(1, getAirBrake() + (getControlPosition(control) - 0.5f) / 8)));
+				}
+			}
+
 			if (deadManChangeTimeout > 0) {
 				deadManChangeTimeout -= 1;
 			}
@@ -319,7 +335,9 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public void setAirBrake(float newAirBrake) {
 		if (this.getAirBrake() != newAirBrake) {
-			setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newAirBrake);
+			if (getDefinition().isLinearBrakeControl()) {
+				setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newAirBrake);
+			}
 			airBrake = newAirBrake;
 			triggerResimulate();
 		}
