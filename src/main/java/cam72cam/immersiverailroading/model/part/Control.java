@@ -1,19 +1,24 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.net.SoundPacket;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
-import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
@@ -36,6 +41,9 @@ public class Control {
     private final Map<Axis, Float> rotations = new HashMap<>();
     private final Map<Axis, Float> translations = new HashMap<>();
     private final Map<Axis, Float> scales = new HashMap<>();
+    private final Map<UUID, Float> lastMoveSoundValue = new HashMap<>();
+    private final Map<UUID, Boolean> wasSoundPressed = new HashMap<>();
+    private final Map<UUID, List<ISound>> sounds = new HashMap<>();
 
     public static List<Control> get(ComponentProvider provider, ModelComponentType type) {
         return provider.parseAll(type).stream().map(Control::new).collect(Collectors.toList());
@@ -245,5 +253,64 @@ public class Control {
 
     public void stopClientDragging() {
         lastClientLook = null;
+    }
+
+    public ControlSoundsDefinition getSounds(EntityRollingStock stock) {
+        return stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
+    }
+
+    private void createSound(EntityRollingStock stock, Identifier sound, boolean repeats) {
+        if (sound == null) {
+            return;
+        }
+        ISound snd = ImmersiveRailroading.newSound(sound, repeats, 10, stock.gauge);
+        snd.setVelocity(stock.getVelocity());
+        snd.setVolume(1);
+        snd.setPitch(1f);
+        snd.disposable();
+        snd.play(stock.getPosition());
+        sounds.computeIfAbsent(stock.getUUID(), k -> new ArrayList<>()).add(snd);
+    }
+
+    public void effects(EntityRollingStock stock) {
+        ControlSoundsDefinition sounds = getSounds(stock);
+        if (sounds != null) {
+            if (this.sounds.containsKey(stock.getUUID())) {
+                for (ISound snd : this.sounds.get(stock.getUUID())) {
+                    snd.setVelocity(stock.getVelocity());
+                    snd.setPosition(stock.getPosition());
+                }
+            }
+
+            boolean isPressed = stock.getControlPressed(this);
+            Boolean wasPressed = wasSoundPressed.getOrDefault(stock.getUUID(), isPressed);
+            wasSoundPressed.put(stock.getUUID(), isPressed);
+
+            float value = stock.getControlPosition(this);
+            float lastValue = lastMoveSoundValue.computeIfAbsent(stock.getUUID(), k -> value);
+
+            if (!wasPressed && isPressed) {
+                // Start
+                createSound(stock, sounds.engage, false);
+                if (sounds.move != null && sounds.movePercent == null) {
+                    // Start move repeat
+                    createSound(stock, sounds.move, true);
+                }
+            } else if (wasPressed && !isPressed) {
+                // Release
+                if (this.sounds.containsKey(stock.getUUID())) {
+                    for (ISound snd : this.sounds.get(stock.getUUID())) {
+                        snd.terminate();
+                    }
+                }
+                createSound(stock, sounds.disengage, false);
+            } else if (sounds.move != null && sounds.movePercent != null){
+                // Move
+                if (Math.abs(lastValue - value) > sounds.movePercent) {
+                    createSound(stock, sounds.move, false);
+                    lastMoveSoundValue.put(stock.getUUID(), value);
+                }
+            }
+        }
     }
 }

@@ -55,6 +55,7 @@ public class ClientPartDragging {
                     ).distanceTo(start.add(look)))).ifPresent(found -> {
                         this.stock = found.getLeft();
                         this.component = found.getRight();
+                        new DragPacket(stock, component, true, 0, false).sendToServer();
                     });
             return stock == null;
         }
@@ -69,29 +70,30 @@ public class ClientPartDragging {
         @TagField
         private double delta;
         @TagField
-        private double y;
+        private boolean start;
         @TagField
         private boolean released;
 
         public DragPacket() {
             super(); // Reflection
         }
-        public DragPacket(EntityRollingStock stock, Control type, double delta) {
+        public DragPacket(EntityRollingStock stock, Control type, boolean start, double delta, boolean released) {
             this.stockUUID = stock.getUUID();
             this.typeKey = type.part.key;
+            this.start = start;
             this.delta = delta;
-        }
-        public DragPacket(EntityRollingStock stock, Control type) {
-            this(stock, type, 0);
-            this.released = true;
+            this.released = released;
         }
         @Override
         protected void handle() {
             EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
-            if (released) {
-                stock.onDragRelease(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get());
+            Control control = stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
+            if (start) {
+                stock.onDragStart(control);
+            } else if (released) {
+                stock.onDragRelease(control);
             } else {
-                stock.onDrag(stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get(), delta);
+                stock.onDrag(control, delta);
             }
         }
     }
@@ -100,7 +102,7 @@ public class ClientPartDragging {
         if (stock != null) {
             if (Mouse.getDrag() == null) {
                 component.stopClientDragging();
-                new DragPacket(stock, component).sendToServer();
+                new DragPacket(stock, component, false, 0, true).sendToServer();
                 stock = null;
                 component = null;
                 lastDelta = null;
@@ -116,7 +118,7 @@ public class ClientPartDragging {
                 return;
             }
             //stock.onDrag(component, delta.x / 1000, delta.y / 1000);
-            new DragPacket(stock, component, delta).sendToServer();
+            new DragPacket(stock, component, false, delta, false).sendToServer();
             lastDelta = delta;
         }
     }

@@ -868,7 +868,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
         super.setControlPosition(component, val);
         if (component.global) {
 			this.mapTrain(this, false, stock -> {
-				stock.controlPositions.put(component.controlGroup, this.getControlPosition(component));
+				stock.controlPositions.put(component.controlGroup, this.getControlData(component));
 			});
 		}
     }

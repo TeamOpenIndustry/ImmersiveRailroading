@@ -17,6 +17,7 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.util.SingleCache;
+import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.util.ArrayList;
@@ -200,44 +201,70 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return texture;
 	}
 
-	@TagSync
-	@TagField(value="controlPositions", mapper = ControlPositionMapper.class)
-	protected Map<String, Float> controlPositions = new HashMap<>();
-
-	public void onDrag(Control component, double delta) {
-		setControlPosition(component, (float)delta + getControlPosition(component));
-	}
-
-	public void onDragRelease(Control component) {
-		if (component.toggle) {
-			setControlPosition(component, Math.abs(getControlPosition(component) - 1));
-		}
-		if (component.press) {
-			setControlPosition(component, 0);
-		}
-	}
-
 	public Matrix4 getModelMatrix() {
 		return this.modelMatrix.get(getPosition()).copy();
 	}
 
-	public float getControlPosition(Control component) {
-		return controlPositions.getOrDefault(component.controlGroup, 0f);
+	@TagSync
+	@TagField(value="controlPositions", mapper = ControlPositionMapper.class)
+	protected Map<String, Pair<Boolean, Float>> controlPositions = new HashMap<>();
+
+	public void onDragStart(Control control) {
+		System.out.println("PRESSED");
+		setControlPressed(control, true);
 	}
 
-	public void setControlPosition(Control component, float val) {
-		controlPositions.put(component.controlGroup, Math.min(1, Math.max(0, val)));
+	public void onDrag(Control control, double delta) {
+		setControlPressed(control, true);
+		setControlPosition(control, (float)delta + getControlPosition(control));
 	}
+
+	public void onDragRelease(Control control) {
+		System.out.println("RELEASED");
+		setControlPressed(control, false);
+
+		if (control.toggle) {
+			setControlPosition(control, Math.abs(getControlPosition(control) - 1));
+		}
+		if (control.press) {
+			setControlPosition(control, 0);
+		}
+	}
+
+	public Pair<Boolean, Float> getControlData(Control control) {
+		return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, 0f));
+	}
+
+	public boolean getControlPressed(Control control) {
+		return getControlData(control).getLeft();
+	}
+
+	public void setControlPressed(Control control, boolean pressed) {
+		controlPositions.put(control.controlGroup, Pair.of(pressed, getControlPosition(control)));
+	}
+
+	public float getControlPosition(Control control) {
+		return getControlData(control).getRight();
+	}
+
+	public void setControlPosition(Control control, float val) {
+		val = Math.min(1, Math.max(0, val));
+		controlPositions.put(control.controlGroup, Pair.of(getControlPressed(control), val));
+	}
+
 	public void setControlPositions(ModelComponentType type, float val) {
 		getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
 	}
 
-	private static class ControlPositionMapper implements TagMapper<Map<String, Float>> {
+	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {
 		@Override
-		public TagAccessor<Map<String, Float>> apply(Class<Map<String, Float>> type, String fieldName, TagField tag) throws SerializationException {
+		public TagAccessor<Map<String, Pair<Boolean, Float>>> apply(
+				Class<Map<String, Pair<Boolean, Float>>> type,
+				String fieldName,
+				TagField tag) throws SerializationException {
 			return new TagAccessor<>(
-					(d, o) -> d.setMap(fieldName, o, Function.identity(), x -> new TagCompound().setFloat("pos", x)),
-					d -> d.getMap(fieldName, Function.identity(), x -> x.getFloat("pos"))
+					(d, o) -> d.setMap(fieldName, o, Function.identity(), x -> new TagCompound().setBoolean("pressed", x.getLeft()).setFloat("pos", x.getRight())),
+					d -> d.getMap(fieldName, Function.identity(), x -> Pair.of(x.hasKey("pressed") && x.getBoolean("pressed"), x.getFloat("pos")))
 			);
 		}
 	}

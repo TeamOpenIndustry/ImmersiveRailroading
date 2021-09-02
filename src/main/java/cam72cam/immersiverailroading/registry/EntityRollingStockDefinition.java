@@ -78,6 +78,28 @@ public abstract class EntityRollingStockDefinition {
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
+    protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
+
+    public static class ControlSoundsDefinition {
+        public final Identifier engage;
+        public final Identifier move;
+        public final Float movePercent;
+        public final Identifier disengage;
+
+        protected ControlSoundsDefinition(Identifier engage, Identifier move, Float movePercent, Identifier disengage) {
+            this.engage = engage;
+            this.move = move;
+            this.movePercent = movePercent;
+            this.disengage = disengage;
+        }
+
+        private ControlSoundsDefinition(JsonObject data) {
+            engage = data.has("engage") ? new Identifier(ImmersiveRailroading.MODID, data.get("engage").getAsString()) : null;
+            move = data.has("move") ? new Identifier(ImmersiveRailroading.MODID, data.get("move").getAsString()) : null;
+            movePercent = data.has("movePercent") ? data.get("movePercent").getAsFloat() : null;
+            disengage = data.has("disengage") ? new Identifier(ImmersiveRailroading.MODID, data.get("disengage").getAsString()) : null;
+        }
+    }
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
@@ -250,6 +272,11 @@ public abstract class EntityRollingStockDefinition {
             }
             if (sounds.has("clack_rear")) {
                 clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(default_clackRear);
+            }
+            if (sounds.has("controls")) {
+                for (Entry<String, JsonElement> entry : sounds.entrySet()) {
+                    controlSounds.put(entry.getKey(), new ControlSoundsDefinition(entry.getValue().getAsJsonObject()));
+                }
             }
         }
     }
@@ -531,5 +558,9 @@ public abstract class EntityRollingStockDefinition {
 
     public ValveGearType getValveGear() {
         return valveGear;
+    }
+
+    public ControlSoundsDefinition getControlSound(String name) {
+        return controlSounds.get(name);
     }
 }
