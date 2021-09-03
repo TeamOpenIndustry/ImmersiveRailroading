@@ -273,10 +273,9 @@ public class LocomotiveDiesel extends Locomotive {
 	public void onDragRelease(Control component) {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.ENGINE_START_X) {
-			setTurnedOn(getDefinition().getModel().getDraggableComponents().stream()
+			turnedOn = getDefinition().getModel().getDraggableComponents().stream()
 					.filter(c -> c.part.type == ModelComponentType.ENGINE_START_X)
-					.allMatch(c -> getControlPosition(c) == 1)
-			);
+					.allMatch(c -> getControlPosition(c) == 1);
 		}
 		if (component.part.type == ModelComponentType.REVERSER_X) {
 			// Make sure reverser is sync'd
