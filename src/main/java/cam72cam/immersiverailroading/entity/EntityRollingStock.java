@@ -229,8 +229,13 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		}
 	}
 
+	protected float defaultControlPosition(Control control) {
+		return 0;
+	}
+
+
 	public Pair<Boolean, Float> getControlData(Control control) {
-		return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, 0f));
+		return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, defaultControlPosition(control)));
 	}
 
 	public boolean getControlPressed(Control control) {

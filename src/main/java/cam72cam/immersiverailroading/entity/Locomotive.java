@@ -178,6 +178,15 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
+	protected float defaultControlPosition(Control control) {
+		switch (control.part.type) {
+			case TRAIN_BRAKE_X:
+			case REVERSER_X:
+				return 0.5f;
+		}
+		return super.defaultControlPosition(control);
+	}
+
 	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
