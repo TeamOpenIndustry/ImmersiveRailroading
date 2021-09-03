@@ -318,7 +318,10 @@ public abstract class Locomotive extends FreightTank {
 		if (this.getReverser() != newReverser) {
 			if (Config.ImmersionConfig.disableIndependentThrottle) {
 				// Slave throttle to reverser position
-				setThrottle(Math.abs(newReverser));
+				//setThrottle(Math.abs(newReverser));
+				float newThrottle = Math.abs(newReverser);
+				setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
+				throttle = newThrottle;
 			}
 			setControlPositions(ModelComponentType.REVERSER_X, newReverser/-2 + 0.5f);
 			reverser = newReverser;
