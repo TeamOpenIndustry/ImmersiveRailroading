@@ -141,9 +141,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                     }
                     data.apply(stock);
                 } else {
-                    GL11.glTranslated(-def.getBogeyFront(stock.gauge), 0, 0);
+                    GL11.glTranslated(-def.getBogeyFront(Gauge.standard()), 0, 0);
                     GL11.glRotated(stock.getRotationYaw() - stock.getFrontYaw(), 0, 1, 0);
-                    GL11.glTranslated(def.getBogeyFront(stock.gauge), 0, 0);
+                    GL11.glTranslated(def.getBogeyFront(Gauge.standard()), 0, 0);
                 }
                 bogeyFront.render(distanceTraveled, matrix);
             }
@@ -159,9 +159,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                     }
                     data.apply(stock);
                 } else {
-                    GL11.glTranslated(-def.getBogeyRear(stock.gauge), 0, 0);
+                    GL11.glTranslated(-def.getBogeyRear(Gauge.standard()), 0, 0);
                     GL11.glRotated(stock.getRotationYaw() - stock.getRearYaw(), 0, 1, 0);
-                    GL11.glTranslated(def.getBogeyRear(stock.gauge), 0, 0);
+                    GL11.glTranslated(def.getBogeyRear(Gauge.standard()), 0, 0);
                 }
                 bogeyRear.render(distanceTraveled, matrix);
             }

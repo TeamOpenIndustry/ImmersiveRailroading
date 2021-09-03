@@ -46,10 +46,10 @@ public class TrackFollower {
 
         GL11.glRotated(toPointYaw, 0, 1, 0);
         GL11.glRotated(toPointPitch, 0, 0, 1);
-        GL11.glTranslated(point.x, point.y, point.z);
+        GL11.glTranslated(this.point.x, this.point.y, this.point.z);
         GL11.glRotated(atPointYaw, 0, 1, 0);
         // TODO pitch
-        GL11.glTranslated(-point.x, -point.y, -point.z);
+        GL11.glTranslated(-this.point.x, -this.point.y, -this.point.z);
     }
 
     public Vec3d nextPosition(World world, Gauge gauge, Vec3d currentPosition, float rotationYaw, float bogeyYaw, double distance) {
