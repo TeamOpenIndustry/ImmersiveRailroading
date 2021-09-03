@@ -109,7 +109,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	protected float getReverserDelta() {
-		return 0.51f;
+		return Config.ImmersionConfig.disableIndependentThrottle ? super.getReverserDelta() : 0.51f;
 	}
 
 	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
@@ -134,10 +134,14 @@ public class LocomotiveDiesel extends Locomotive {
 	public void setThrottle(float newThrottle) {
 		if (this.throttleCooldown <= 0) {
 			this.throttleCooldown = 3;
-			if (newThrottle > getThrottle()) {
-				realSetThrottle((float) (Math.ceil(newThrottle * 8) / 8));
+			if (!Config.ImmersionConfig.disableIndependentThrottle) {
+				if (newThrottle > getThrottle()) {
+					realSetThrottle((float) (Math.ceil(newThrottle * 8) / 8));
+				} else {
+					realSetThrottle((float) (Math.floor(newThrottle * 8) / 8));
+				}
 			} else {
-				realSetThrottle((float) (Math.floor(newThrottle * 8) / 8));
+				realSetThrottle(newThrottle);
 			}
 			this.mapTrain(this, true, false, this::setThrottleMap);
 		}
@@ -147,13 +151,15 @@ public class LocomotiveDiesel extends Locomotive {
 	public void setReverser(float newReverser) {
 		if (this.reverserCooldown <= 0) {
 			reverserCooldown = 3;
-			float value;
-			if (getThrottle() > 0) {
-				value = 0;
-			} else {
-				value = Math.round(newReverser);
+			float value = newReverser;
+			if (!Config.ImmersionConfig.disableIndependentThrottle) {
+				if (getThrottle() > 0) {
+					value = 0;
+				} else {
+					value = Math.round(newReverser);
+				}
 			}
-			super.setReverser(Math.max(-1, Math.min(1, value)));
+			super.setReverser(value);
 			this.mapTrain(this, true, false, this::setThrottleMap);
 		}
 	}

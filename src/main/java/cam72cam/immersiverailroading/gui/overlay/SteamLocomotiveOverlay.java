@@ -31,8 +31,8 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		drawGauge(boilerColor, loco.getBoilerTemperature(), 150, "C");
 		
 		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
-		drawScalar(GuiText.LABEL_REVERSER.toString(), loco.getReverser()*10, -10, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, 0, 10);
+		drawScalar(GuiText.LABEL_REVERSER.toString(), loco.getReverser()*10, -10, 10);
 
 		drawSpeedDisplay(loco, 20);
 	}
