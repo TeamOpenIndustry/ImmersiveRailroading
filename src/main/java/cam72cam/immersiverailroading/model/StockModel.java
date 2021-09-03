@@ -72,6 +72,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
     protected void effects(T stock) {
         getDraggableComponents().forEach(c -> c.effects(stock));
+        getReadouts().forEach(c -> c.effects(stock));
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
@@ -171,7 +172,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         return components;
     }
 
-    public List<Readout> getReadouts() {
+    public List<Readout<T>> getReadouts() {
         return new ArrayList<>();
     }
 

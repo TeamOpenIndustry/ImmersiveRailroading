@@ -28,7 +28,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private DrivingAssembly drivingWheelsRear;
     private List<Control> engineStarters;
     private List<Control> hornControls;
-    private List<Readout> temperatureGauges;
+    private List<Readout<LocomotiveDiesel>> gauges;
 
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
@@ -40,7 +40,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        temperatureGauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X);
+        gauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getEngineTemperature() / 150f);
 
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
@@ -89,8 +89,6 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                         ? stock.getDefinition().getHornSus() ? stock.getHornTime() / 10f : 1
                         : 0);
         idle.effects(stock, stock.isRunning() ? Math.max(0.1f, stock.getSoundThrottle()) : 0, 0.7f+stock.getSoundThrottle()/4);
-
-        temperatureGauges.forEach(g -> g.setValue(stock, stock.getEngineTemperature() / 150f));
     }
 
     @Override
@@ -111,9 +109,9 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     }
 
     @Override
-    public List<Readout> getReadouts() {
-        List<Readout> readouts = super.getReadouts();
-        readouts.addAll(temperatureGauges);
+    public List<Readout<LocomotiveDiesel>> getReadouts() {
+        List<Readout<LocomotiveDiesel>> readouts = super.getReadouts();
+        readouts.addAll(gauges);
         return readouts;
     }
 

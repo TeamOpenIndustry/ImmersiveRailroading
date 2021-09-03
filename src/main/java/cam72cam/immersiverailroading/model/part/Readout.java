@@ -9,21 +9,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Readout extends Control {
+public class Readout<T extends EntityRollingStock> extends Control {
     private final Map<UUID, Float> positions = new HashMap<>();
+    private final Function<T, Float> position;
 
-    public static List<Readout> getReadouts(ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(Readout::new).collect(Collectors.toList());
+    public static <T extends EntityRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, Function<T, Float> position) {
+        return provider.parseAll(type).stream().map(p -> new Readout<>(p, position)).collect(Collectors.toList());
     }
 
-    public Readout(ModelComponent part) {
+    public Readout(ModelComponent part, Function<T, Float> position) {
         super(part);
+        this.position = position;
     }
 
-    public void setValue(EntityRollingStock stock, float value) {
-        positions.put(stock.getUUID(), value);
+    @Override
+    public void effects(EntityRollingStock stock) {
+        super.effects(stock);
+        positions.put(stock.getUUID(), position.apply((T) stock));
     }
 
     @Override

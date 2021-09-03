@@ -10,7 +10,7 @@ import cam72cam.immersiverailroading.registry.FreightDefinition;
 import java.util.List;
 
 public class FreightTankModel<T extends FreightTank> extends FreightModel<T> {
-    private List<Readout> fluidGauges;
+    private List<Readout<T>> gauges;
 
     public FreightTankModel(FreightDefinition def) throws Exception {
         super(def);
@@ -19,19 +19,13 @@ public class FreightTankModel<T extends FreightTank> extends FreightModel<T> {
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         super.parseComponents(provider, def);
-        fluidGauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_LIQUID_X);
+        gauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_LIQUID_X, stock -> stock.getPercentLiquidFull() / 100f);
     }
 
     @Override
-    protected void effects(T stock) {
-        super.effects(stock);
-        fluidGauges.forEach(g -> g.setValue(stock, stock.getPercentLiquidFull() / 100f));
-    }
-
-    @Override
-    public List<Readout> getReadouts() {
-        List<Readout> readouts = super.getReadouts();
-        readouts.addAll(fluidGauges);
+    public List<Readout<T>> getReadouts() {
+        List<Readout<T>> readouts = super.getReadouts();
+        readouts.addAll(gauges);
         return readouts;
     }
 }
