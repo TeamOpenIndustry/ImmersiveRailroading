@@ -43,8 +43,8 @@ public class ClientPartDragging {
                     ).filter(p -> {
                         double padding = 0.05 * p.getLeft().gauge.scale();
                         IBoundingBox bb = p.getRight().getBoundingBox(p.getLeft()).grow(new Vec3d(padding, padding, padding));
-                        for (double i = 0; i < 3; i += 0.1) {
-                            if (bb.contains(start.add(look.scale(i * p.getLeft().gauge.scale())))) {
+                        for (double i = 0; i < 3; i += 0.1 * p.getLeft().gauge.scale()) {
+                            if (bb.contains(start.add(look.scale(i)))) {
                                 return true;
                             }
                         }
