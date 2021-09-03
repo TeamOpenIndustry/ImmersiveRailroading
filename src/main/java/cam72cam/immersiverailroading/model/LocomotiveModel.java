@@ -19,6 +19,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     private List<Control> throttles;
     private List<Control> reversers;
     private List<Control> train_brakes;
+    private List<Control> throttle_brakes;
     private List<Readout<T>> gauges;
 
     public LocomotiveModel(LocomotiveDefinition def) throws Exception {
@@ -36,6 +37,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                 provider,
                 ((LocomotiveDefinition)def).bell
         );
+        throttle_brakes = Control.get(provider, ModelComponentType.THROTTLE_BRAKE_X);
         throttles = Control.get(provider, ModelComponentType.THROTTLE_X);
         reversers = Control.get(provider, ModelComponentType.REVERSER_X);
         train_brakes = Control.get(provider, ModelComponentType.TRAIN_BRAKE_X);
@@ -51,6 +53,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     @Override
     public List<Control> getDraggableComponents() {
         List<Control> draggable = super.getDraggableComponents();
+        draggable.addAll(throttle_brakes);
         draggable.addAll(throttles);
         draggable.addAll(reversers);
         draggable.addAll(train_brakes);

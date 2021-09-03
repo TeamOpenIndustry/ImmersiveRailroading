@@ -77,6 +77,7 @@ public abstract class Locomotive extends FreightTank {
 
 	@Override
 	public void handleKeyPress(Player source, KeyTypes key) {
+
 		if (Config.ImmersionConfig.disableIndependentThrottle) {
 			switch (key) {
 				case THROTTLE_UP:
@@ -88,6 +89,30 @@ public abstract class Locomotive extends FreightTank {
 				case THROTTLE_DOWN:
 					key = KeyTypes.REVERSER_DOWN;
 					break;
+				case REVERSER_UP:
+				case REVERSER_ZERO:
+				case REVERSER_DOWN:
+					return;
+			}
+		} else if (getDefinition().isLinkedBrakeThrottle()) {
+			switch (key) {
+				case THROTTLE_UP:
+					if (getAirBrake() > 0) {
+						key = KeyTypes.AIR_BRAKE_DOWN;
+					}
+					break;
+				case THROTTLE_ZERO:
+					setAirBrake(0);
+					break;
+				case THROTTLE_DOWN:
+					if (getThrottle() == 0) {
+						key = KeyTypes.AIR_BRAKE_UP;
+					}
+					break;
+				case AIR_BRAKE_UP:
+				case AIR_BRAKE_ZERO:
+				case AIR_BRAKE_DOWN:
+					return;
 			}
 		}
 
@@ -98,12 +123,12 @@ public abstract class Locomotive extends FreightTank {
 			case BELL:
 				if (this.getDefinition().toggleBell) {
 					if (bellKeyTimeout == 0) {
-					bellTime = bellTime != 0 ? 0 : 10;
-					bellKeyTimeout = 10;
+						bellTime = bellTime != 0 ? 0 : 10;
+						bellKeyTimeout = 10;
+					}
+				} else {
+					setBell(10);
 				}
-            } else {
-                setBell(10);
-            }
             break;
 		case THROTTLE_UP:
 			setThrottle(getThrottle() + throttleDelta);
@@ -167,6 +192,13 @@ public abstract class Locomotive extends FreightTank {
 			case REVERSER_X:
 				setReverser((0.5f-getControlPosition(component))*2);
 				break;
+			case THROTTLE_BRAKE_X:
+				// value 0     0.5     1
+				// throt 0      0      1
+				// brake 1      0      0
+				setAirBrake(1 - getControlPosition(component)*2);
+				setThrottle(getControlPosition(component)*2 - 1);
+				break;
 		}
 	}
 
@@ -181,6 +213,7 @@ public abstract class Locomotive extends FreightTank {
 	protected float defaultControlPosition(Control control) {
 		switch (control.part.type) {
 			case TRAIN_BRAKE_X:
+			case THROTTLE_BRAKE_X:
 			case REVERSER_X:
 				return 0.5f;
 		}
@@ -306,6 +339,8 @@ public abstract class Locomotive extends FreightTank {
 			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
 			throttle = newThrottle;
 			triggerResimulate();
+
+			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1-getAirBrake())/2);
 		}
 	}
 
@@ -355,12 +390,15 @@ public abstract class Locomotive extends FreightTank {
 		return airBrake;
 	}
 	public void setAirBrake(float newAirBrake) {
+		newAirBrake = Math.min(1, Math.max(0, newAirBrake));
 		if (this.getAirBrake() != newAirBrake) {
 			if (getDefinition().isLinearBrakeControl()) {
 				setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newAirBrake);
 			}
 			airBrake = newAirBrake;
 			triggerResimulate();
+
+			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1-getAirBrake())/2);
 		}
 	}
 	public int getBell() {
