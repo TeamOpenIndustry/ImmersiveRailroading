@@ -52,7 +52,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
 		if (data.def == null) {
 			// Stock pack removed
-			System.out.println(stack.getTagCompound());
+			//System.out.println(stack.getTagCompound());
 			return null;
 		}
 		return data.def.defID + data.def.getModel().hash;
