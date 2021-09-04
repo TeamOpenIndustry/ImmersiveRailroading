@@ -163,7 +163,7 @@ public class Control {
     }
 
     public float getValue(EntityRollingStock stock) {
-        return stock.getControlPosition(this) - (part.type == ModelComponentType.REVERSER_X ? 0.5f : 0);
+        return stock.getControlPosition(this) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
     }
 
     public Vec3d transform(Vec3d point, EntityRollingStock stock) {
