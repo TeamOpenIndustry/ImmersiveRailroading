@@ -268,7 +268,7 @@ public class Control {
         snd.setVolume(1);
         snd.setPitch(1f);
         snd.disposable();
-        snd.play(stock.getPosition());
+        snd.play(center(stock));
         sounds.computeIfAbsent(stock.getUUID(), k -> new ArrayList<>()).add(snd);
     }
 
@@ -276,9 +276,13 @@ public class Control {
         ControlSoundsDefinition sounds = getSounds(stock);
         if (sounds != null) {
             if (this.sounds.containsKey(stock.getUUID())) {
-                for (ISound snd : this.sounds.get(stock.getUUID())) {
-                    snd.setVelocity(stock.getVelocity());
-                    snd.setPosition(stock.getPosition());
+                for (ISound snd : new ArrayList<>(this.sounds.get(stock.getUUID()))) {
+                    if (snd.isPlaying()) {
+                        snd.setVelocity(stock.getVelocity());
+                        snd.setPosition(center(stock));
+                    } else {
+                        this.sounds.get(stock.getUUID()).remove(snd);
+                    }
                 }
             }
 
