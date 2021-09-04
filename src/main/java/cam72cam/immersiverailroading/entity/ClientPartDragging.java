@@ -13,6 +13,7 @@ import cam72cam.mod.serialization.TagField;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.UUID;
 
 public class ClientPartDragging {
@@ -40,19 +41,23 @@ public class ClientPartDragging {
                     )
                     .flatMap(stock ->
                             stock.getDefinition().getModel().getDraggableComponents().stream().map(c -> Pair.of(stock, c))
-                    ).filter(p -> {
+                    ).map(p -> {
                         double padding = 0.05 * p.getLeft().gauge.scale();
+                        Double min = null;
+                        Vec3d center = p.getRight().center(p.getLeft());
                         IBoundingBox bb = p.getRight().getBoundingBox(p.getLeft()).grow(new Vec3d(padding, padding, padding));
                         for (double i = 0; i < 3; i += 0.1 * p.getLeft().gauge.scale()) {
-                            if (bb.contains(start.add(look.scale(i)))) {
-                                return true;
+                            Vec3d cast = start.add(look.scale(i));
+                            if (bb.contains(cast)) {
+                                double dist = cast.distanceTo(center);
+                                min = min == null ? dist : Math.min(dist, min);
                             }
                         }
-                        return false;
-                    }).min(Comparator.comparingDouble(p -> p.getRight().transform(
-                            p.getRight().part.center,
-                            p.getLeft()
-                    ).distanceTo(start.add(look)))).ifPresent(found -> {
+                        return min != null ? Pair.of(min, p) : null;
+                    }).filter(Objects::nonNull)
+                    .min(Comparator.comparingDouble(Pair::getLeft))
+                    .map(Pair::getRight)
+                    .ifPresent(found -> {
                         this.stock = found.getLeft();
                         this.component = found.getRight();
                         new DragPacket(stock, component, true, 0, false).sendToServer();
