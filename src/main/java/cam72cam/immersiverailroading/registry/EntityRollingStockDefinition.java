@@ -274,7 +274,7 @@ public abstract class EntityRollingStockDefinition {
                 clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(default_clackRear);
             }
             if (sounds.has("controls")) {
-                for (Entry<String, JsonElement> entry : sounds.entrySet()) {
+                for (Entry<String, JsonElement> entry : sounds.get("controls").getAsJsonObject().entrySet()) {
                     controlSounds.put(entry.getKey(), new ControlSoundsDefinition(entry.getValue().getAsJsonObject()));
                 }
             }
