@@ -57,7 +57,7 @@ public class Control {
         }).filter(Objects::nonNull).findFirst().orElse(part.key);
         this.label = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
-            return matcher.find() ? matcher.group(1) : null;
+            return matcher.find() ? matcher.group(1).replaceAll("\\^", " ") : null;
         }).filter(Objects::nonNull).findFirst().orElse(part.type.name().replace("_X", ""));
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
