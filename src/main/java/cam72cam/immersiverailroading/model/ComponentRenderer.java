@@ -111,7 +111,7 @@ public class ComponentRenderer implements Closeable {
         }
 
         if (!exteriorNormal.isEmpty()) {
-            try (OpenGL.With lm = interiorLight != null && interiorNormal.isEmpty() ? OpenGL.lightmap(interiorLight, skyLight) : () -> {}) {
+            try (OpenGL.With lm = interiorLight != null && !hasInterior ? OpenGL.lightmap(interiorLight, skyLight) : () -> {}) {
                 vbo.draw(exteriorNormal);
             }
         }
