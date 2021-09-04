@@ -29,7 +29,7 @@ public class ClientPartDragging {
     }
 
     private boolean capture(Player.Hand hand) {
-        if (hand == Player.Hand.SECONDARY) {
+        if (hand == Player.Hand.SECONDARY && MinecraftClient.isReady()) {
             this.stock = null;
             Player player = MinecraftClient.getPlayer();
             Vec3d look = player.getLookVector();
@@ -104,7 +104,7 @@ public class ClientPartDragging {
     }
 
     private void tick() {
-        if (stock != null) {
+        if (stock != null && MinecraftClient.isReady()) {
             if (Mouse.getDrag() == null) {
                 component.stopClientDragging();
                 new DragPacket(stock, component, false, 0, true).sendToServer();
