@@ -45,7 +45,7 @@ public class LightFlare {
     private float greenReverse;
     private float blueReverse;
 
-    private static final Pattern rgb = Pattern.compile(String.format(".*_0X(%s%<s)(%<s%<s)(%<s%<s).*", "[0-9A-Fa-f]"));
+    private static final Pattern rgb = Pattern.compile(String.format(".*_0[xX](%s%<s)(%<s%<s)(%<s%<s).*", "[0-9A-Fa-f]"));
 
     public static List<LightFlare> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type) {
         return provider.parseAll(type).stream().map(component1 -> new LightFlare(def, component1)).collect(Collectors.toList());
