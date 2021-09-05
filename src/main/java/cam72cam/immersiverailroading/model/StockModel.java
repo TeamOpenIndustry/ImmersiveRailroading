@@ -139,11 +139,11 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                         data = new TrackFollower(bogeyFront.center());
                         frontTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply(stock);
+                    data.apply(stock, matrix);
                 } else {
-                    GL11.glTranslated(-def.getBogeyFront(Gauge.standard()), 0, 0);
-                    GL11.glRotated(stock.getRotationYaw() - stock.getFrontYaw(), 0, 1, 0);
-                    GL11.glTranslated(def.getBogeyFront(Gauge.standard()), 0, 0);
+                    matrix.translate(-def.getBogeyFront(Gauge.standard()), 0, 0);
+                    matrix.rotate(stock.getRotationYaw() - stock.getFrontYaw(), 0, 1, 0);
+                    matrix.translate(def.getBogeyFront(Gauge.standard()), 0, 0);
                 }
                 bogeyFront.render(distanceTraveled, matrix);
             }
@@ -157,11 +157,11 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                         data = new TrackFollower(bogeyRear.center());
                         rearTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply(stock);
+                    data.apply(stock, matrix);
                 } else {
-                    GL11.glTranslated(-def.getBogeyRear(Gauge.standard()), 0, 0);
-                    GL11.glRotated(stock.getRotationYaw() - stock.getRearYaw(), 0, 1, 0);
-                    GL11.glTranslated(def.getBogeyRear(Gauge.standard()), 0, 0);
+                    matrix.translate(-def.getBogeyRear(Gauge.standard()), 0, 0);
+                    matrix.rotate(stock.getRotationYaw() - stock.getRearYaw(), 0, 1, 0);
+                    matrix.translate(def.getBogeyRear(Gauge.standard()), 0, 0);
                 }
                 bogeyRear.render(distanceTraveled, matrix);
             }

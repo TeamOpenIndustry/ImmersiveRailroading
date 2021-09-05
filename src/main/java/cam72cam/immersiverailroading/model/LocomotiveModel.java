@@ -159,7 +159,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                         data = new TrackFollower(frameFront.center);
                         frontTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply(stock);
+                    data.apply(stock, matrix);
                     matrix.render(frameFront);
                 }
                 drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
@@ -182,7 +182,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                         data = new TrackFollower(frameRear.center);
                         rearTrackers.put(stock.getUUID(), data);
                     }
-                    data.apply(stock);
+                    data.apply(stock, matrix);
                     matrix.render(frameRear);
                 }
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
@@ -211,7 +211,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         if (drivingWheelsFront != null) {
             float offset = 0;
             if (frameFront != null) {
-                frontTrackers.get(stock.getUUID()).apply(stock);
+                frontTrackers.get(stock.getUUID()).apply(stock, null);
                 offset = frontTrackers.get(stock.getUUID()).getYaw();
             }
             for (LightFlare flare : headlightsFront) {
@@ -221,7 +221,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         if (drivingWheelsRear != null) {
             float offset = 0;
             if (frameRear != null) {
-                rearTrackers.get(stock.getUUID()).apply(stock);
+                rearTrackers.get(stock.getUUID()).apply(stock, null);
                 offset = rearTrackers.get(stock.getUUID()).getYaw();
             }
             for (LightFlare flare : headlightsRear) {

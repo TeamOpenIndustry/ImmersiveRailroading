@@ -3,12 +3,10 @@ package cam72cam.immersiverailroading.model.part;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
@@ -21,7 +19,6 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.*;
@@ -110,30 +107,30 @@ public class Control {
 
         try (ComponentRenderer matrix = draw.push()) {
             translations.forEach((axis, val) -> {
-                GL11.glTranslated(
+                matrix.translate(
                         axis == Axis.X ? val * valuePercent : 0,
                         axis == Axis.Y ? val * valuePercent : 0,
                         axis == Axis.Z ? val * valuePercent : 0
                 );
             });
             if (rotationPoint != null) {
-                GL11.glTranslated(rotationPoint.x, rotationPoint.y, rotationPoint.z);
-                GL11.glRotated(
+                matrix.translate(rotationPoint.x, rotationPoint.y, rotationPoint.z);
+                matrix.rotate(
                         valuePercent * rotationDegrees,
                         rotations.getOrDefault(Axis.X, 0f),
                         rotations.getOrDefault(Axis.Y, 0f),
                         rotations.getOrDefault(Axis.Z, 0f)
                 );
-                GL11.glTranslated(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
+                matrix.translate(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
             }
             if (!scales.isEmpty()) {
-                GL11.glTranslated(part.center.x, part.center.y, part.center.z);
-                GL11.glScalef(
+                matrix.translate(part.center.x, part.center.y, part.center.z);
+                matrix.scale(
                         scales.containsKey(Axis.X) ? scales.get(Axis.X) * valuePercent : 1,
                         scales.containsKey(Axis.Y) ? scales.get(Axis.Y) * valuePercent : 1,
                         scales.containsKey(Axis.Z) ? scales.get(Axis.Z) * valuePercent : 1
                 );
-                GL11.glTranslated(-part.center.x, -part.center.y, -part.center.z);
+                matrix.translate(-part.center.x, -part.center.y, -part.center.z);
             }
             matrix.render(part);
         }

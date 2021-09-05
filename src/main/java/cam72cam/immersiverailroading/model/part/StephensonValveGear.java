@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
-import cam72cam.immersiverailroading.model.SteamLocomotiveModel;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.ExpireableList;
@@ -16,7 +15,6 @@ import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
-import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -188,16 +186,16 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         // Draw driving rod
         try (ComponentRenderer matrix = draw.push()) {
             // Move to conn rod center
-            GL11.glTranslated(-connRodRadius, 0, 0);
+            matrix.translate(-connRodRadius, 0, 0);
             // Apply conn rod movement
-            GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+            matrix.translate(connRodMovment.x, connRodMovment.z, 0);
 
             // Move to rot point center
-            GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+            matrix.translate(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
             // Rotate rod angle
-            GL11.glRotated(drivingRodAngle, 0, 0, 1);
+            matrix.rotate(drivingRodAngle, 0, 0, 1);
             // Move back from rot point center
-            GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+            matrix.translate(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
 
             matrix.render(drivingRod);
         }
@@ -208,7 +206,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
         // Draw piston rod and cross head
         try (ComponentRenderer matrix = draw.push()) {
-            GL11.glTranslated(pistonDelta, 0, 0);
+            matrix.translate(pistonDelta, 0, 0);
             matrix.render(pistonRod);
         }
 

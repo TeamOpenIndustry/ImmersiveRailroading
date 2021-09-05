@@ -7,9 +7,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
-import org.lwjgl.opengl.GL11;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConnectingRodValveGear implements ValveGear {
@@ -49,9 +47,9 @@ public class ConnectingRodValveGear implements ValveGear {
         // Draw Connecting Rod
         try (ComponentRenderer matrix = draw.push()) {
             // Move to origin
-            GL11.glTranslated(-connRodRadius, 0, 0);
+            matrix.translate(-connRodRadius, 0, 0);
             // Apply connection rod movement
-            GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+            matrix.translate(connRodMovment.x, connRodMovment.z, 0);
 
             matrix.render(connectingRod);
         }
