@@ -977,4 +977,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		return true;
 	}
+
+    public boolean clacks() {
+		return getParent() != null && getParentTile().clacks();
+    }
 }

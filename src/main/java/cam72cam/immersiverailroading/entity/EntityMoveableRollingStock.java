@@ -254,7 +254,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 if (BlockUtil.isIRRail(getWorld(), posFront)) {
                     TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
                     rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackFrontPos)) {
+                    if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
                         clackFront.setPitch(pitch);
                         clackFront.setVolume(volume);
                         clackFront.play(new Vec3d(posFront));
@@ -265,7 +265,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 if (BlockUtil.isIRRail(getWorld(), posRear)) {
                     TileRailBase rb = getWorld().getBlockEntity(posRear, TileRailBase.class);
                     rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackRearPos)) {
+                    if (rb != null && !rb.getPos().equals(clackRearPos) && rb.clacks()) {
                         clackRear.setPitch(pitch);
                         clackRear.setVolume(volume);
                         clackRear.play(new Vec3d(posRear));
