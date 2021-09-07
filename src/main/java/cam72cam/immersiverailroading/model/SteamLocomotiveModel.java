@@ -12,8 +12,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private List<ModelComponent> components;
@@ -30,6 +29,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
     private final PartSound idleSounds;
+    private Cargo cargoFront;
+    private Cargo cargoRear;
+    private List<Control> whistleControls;
+    private List<Readout<LocomotiveSteam>> gauges;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
@@ -38,8 +41,14 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+        gauges = new ArrayList<>();
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getBoilerTemperature() / 100f));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, stock -> stock.getBoilerPressure() / stock.getDefinition().getMaxPSI(stock.gauge)));
+
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
+        cargoFront = Cargo.get(provider, "FRONT");
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
+        cargoRear = Cargo.get(provider, "REAR");
 
         components = provider.parse(
                 ModelComponentType.FIREBOX,
@@ -51,6 +60,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
+        whistleControls = Control.get(provider, ModelComponentType.WHISTLE_CONTROL_X);
         whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
 
         chimney = SteamChimney.get(provider);
@@ -107,6 +117,20 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     }
 
     @Override
+    public List<Control> getDraggableComponents() {
+        List<Control> draggable = super.getDraggableComponents();
+        draggable.addAll(whistleControls);
+        return draggable;
+    }
+
+    @Override
+    public List<Readout<LocomotiveSteam>> getReadouts() {
+        List<Readout<LocomotiveSteam>> readouts = super.getReadouts();
+        readouts.addAll(gauges);
+        return readouts;
+    }
+
+    @Override
     protected void render(LocomotiveSteam stock, ComponentRenderer draw, double distanceTraveled) {
         super.render(stock, draw, distanceTraveled);
         draw.render(components);
@@ -128,6 +152,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     matrix.render(frameFront);
                 }
                 drivingWheelsFront.render(distanceTraveled, stock.getReverser(), matrix);
+                if (cargoFront != null) {
+                    cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
+                }
             }
         }
         if (drivingWheelsRear != null) {
@@ -142,6 +169,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                     matrix.render(frameRear);
                 }
                 drivingWheelsRear.render(distanceTraveled, stock.getReverser(), matrix);
+                if (cargoRear != null) {
+                    cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
+                }
             }
         }
     }

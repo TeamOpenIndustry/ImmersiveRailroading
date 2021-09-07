@@ -91,6 +91,27 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         if (!whistleSet && (quill == null || !quill.canLoad())) {
             quill = new Quilling(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
         }
+
+        if (controlSounds.isEmpty()) {
+            controlSounds.put("REVERSER_1", new ControlSoundsDefinition(
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_move.ogg"),
+                    0.1f,
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
+            ));
+            controlSounds.put("THROTTLE_1", new ControlSoundsDefinition(
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    null,
+                    null,
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
+            ));
+            controlSounds.put("TRAIN_BRAKE_1", new ControlSoundsDefinition(
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/pressure.ogg"),
+                    null,
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
+            ));
+        }
     }
 
     @Override
