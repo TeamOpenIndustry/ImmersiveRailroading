@@ -29,7 +29,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
     protected final Vec3d drivenWheel;
 
-    public static StephensonValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static StephensonValveGear get(WheelSet wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
@@ -37,17 +37,17 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         return drivingRod != null && connectingRod != null && pistonRod != null ?
                 new StephensonValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset) : null;
     }
-    public StephensonValveGear(List<Wheel> wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
+    public StephensonValveGear(WheelSet wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
         super(wheels, connectingRod, angleOffset);
         this.drivingRod = drivingRod;
         this.pistonRod = pistonRod;
         this.cylinder = cylinder;
-        Vec3d center = ModelComponent.center(wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
+        Vec3d center = ModelComponent.center(wheels.wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
         this.reverse = pistonRod.center.x > center.x;
         this.angleOffset = angleOffset + (reverse ? -90 : 0);
 
 
-        drivenWheel = wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
+        drivenWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
         centerOfWheels = drivingRod.pos.equals("CENTER") ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
     }
 

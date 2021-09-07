@@ -172,7 +172,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		offset = new Vec3d(Math.copySign(getDefinition().getWidth(gauge)/2 + 1, offset.x), 0, offset.z);
 
 		if (getWorld().isServer && passenger.isVillager() && payingPassengerPositions.containsKey(passenger.getUUID())) {
-			double distanceMoved = passenger.getPosition().distanceTo(getPosition());
+			double distanceMoved = passenger.getPosition().distanceTo(payingPassengerPositions.get(passenger.getUUID()));
 
 			int payout = (int) Math.floor(distanceMoved * Config.ConfigBalance.villagerPayoutPerMeter);
 
@@ -184,6 +184,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				getWorld().dropItem(stack, getBlockPosition());
 				// TODO drop by player or new pos?
 			}
+			payingPassengerPositions.remove(passenger.getUUID());
 		}
 
 		return offset;
