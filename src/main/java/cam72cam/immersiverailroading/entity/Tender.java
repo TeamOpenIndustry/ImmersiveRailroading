@@ -41,7 +41,12 @@ public class Tender extends CarTank {
 		cargoItems.filter.put(1, SlotFilter.FLUID_CONTAINER);
 		cargoItems.defaultFilter = SlotFilter.BURNABLE;
 	}
-	
+
+	@Override
+	public boolean internalLightsEnabled() {
+		return hasElectricalPower();
+	}
+
 	@Override
 	protected int[] getContainerInputSlots() {
 		return new int[] { 0 };

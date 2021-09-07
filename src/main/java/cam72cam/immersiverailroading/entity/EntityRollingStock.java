@@ -202,6 +202,12 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return texture;
 	}
 
+    public boolean internalLightsEnabled() {
+		return false;
+    }
+    public boolean externalLightsEnabled() {
+		return internalLightsEnabled();
+	}
 	public Matrix4 getModelMatrix() {
 		return this.modelMatrix.get(getPosition()).copy();
 	}

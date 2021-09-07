@@ -12,7 +12,7 @@ public enum ModelComponentType {
 	FRAME_WHEEL_X("FRAME_WHEEL_#ID#"),
 	
 	SHELL("SHELL"),
-	
+
 	// LOCOMOTIVE
 	CAB("CAB"),
 	BELL("BELL"),
@@ -78,6 +78,10 @@ public enum ModelComponentType {
 	CARGO_FILL_X("CARGO_FILL_#ID#"),
 	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#"),
 
+	// Lights
+	HEADLIGHT_X("HEADLIGHT_#ID#"),
+	HEADLIGHT_POS_X("HEADLIGHT_#POS#_#ID#"),
+
 	// Controls
 	THROTTLE_X("THROTTLE_#ID#"),
 	REVERSER_X("REVERSER_#ID#"),
@@ -105,8 +109,8 @@ public enum ModelComponentType {
 	IMMERSIVERAILROADING_BASE_COMPONENT("IMMERSIVERAILROADING_BASE_COMPNOENT"),
 	REMAINING(""),
 	;
-	
-	public final String regex;
+
+    public final String regex;
 	public final boolean collisionsEnabled;
 	
 	ModelComponentType(String regex) {

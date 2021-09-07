@@ -126,6 +126,16 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
+	public boolean hasElectricalPower() {
+		return this.isRunning();
+	}
+
+	@Override
+    public boolean internalLightsEnabled() {
+		return this.hasElectricalPower();
+    }
+
+    @Override
 	protected float getReverserDelta() {
 		return Config.ImmersionConfig.disableIndependentThrottle ? super.getReverserDelta() : 0.51f;
 	}

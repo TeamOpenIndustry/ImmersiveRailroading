@@ -299,6 +299,16 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
+	public boolean hasElectricalPower() {
+		return getAvailableHP() > 0;
+	}
+
+	@Override
+    public boolean internalLightsEnabled() {
+		return hasElectricalPower();
+    }
+
+    @Override
 	public void onDrag(Control component, double delta) {
 		super.onDrag(component, delta);
 
