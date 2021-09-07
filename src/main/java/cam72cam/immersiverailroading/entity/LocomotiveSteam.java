@@ -4,6 +4,8 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -19,10 +21,7 @@ import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
@@ -126,6 +125,15 @@ public class LocomotiveSteam extends Locomotive {
 		if (this.getTickCount() < 2) {
 			// Prevent explosions
 			return;
+		}
+
+
+		OptionalDouble control = this.getDefinition().getModel().getDraggableComponents().stream()
+				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
+				.mapToDouble(this::getControlPosition)
+				.max();
+		if (control.isPresent() && control.getAsDouble() > 0) {
+			this.setHorn(10, hornPlayer);
 		}
 
 		if (!this.isBuilt()) {
@@ -252,7 +260,7 @@ public class LocomotiveSteam extends Locomotive {
 			pressureValve = false;
 		}
 		
-		float throttle = Math.abs(getThrottle());
+		float throttle = getThrottle() * Math.abs(getReverser());
 		if (throttle != 0 && boilerPressure > 0) {
 			double burnableSlots = this.cargoItems.getSlotCount()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
@@ -287,6 +295,23 @@ public class LocomotiveSteam extends Locomotive {
 				this.createExplosion(pos, boilerPressure/5, Config.ConfigDamage.explosionEnvDamageEnabled);
 			}
 			getWorld().removeEntity(this);
+		}
+	}
+
+	@Override
+	public void onDrag(Control component, double delta) {
+		super.onDrag(component, delta);
+
+		if (component.part.type == ModelComponentType.WHISTLE_CONTROL_X) {
+			this.setHorn(10, null);
+		}
+	}
+
+	@Override
+	public void onDragRelease(Control component) {
+		super.onDragRelease(component);
+		if (component.part.type == ModelComponentType.WHISTLE_CONTROL_X) {
+			this.setControlPosition(component, 0);
 		}
 	}
 

@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.model.FreightTankModel;
+import cam72cam.immersiverailroading.model.StockModel;
 import com.google.gson.JsonObject;
 
 import java.util.List;
@@ -46,5 +48,10 @@ public class TenderDefinition extends CarTankDefinition {
 
     public boolean shouldShowCurrentLoadOnly() {
         return this.showCurrentLoadOnly;
+    }
+
+    @Override
+    protected StockModel<?> createModel() throws Exception {
+        return new FreightTankModel<>(this);
     }
 }

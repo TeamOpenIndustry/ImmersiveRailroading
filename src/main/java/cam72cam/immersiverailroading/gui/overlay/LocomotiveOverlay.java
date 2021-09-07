@@ -27,7 +27,7 @@ public class LocomotiveOverlay {
 	
 	private static final int scalarWidth = 10;
 	private static final int scalarHeight = 50;
-	private static final int scalarSpacer = 10;
+	private static final int scalarSpacer = 15;
 	
 	public static final Identifier OVERLAY_STEAM_TEXTURE = new Identifier("immersiverailroading:gui/overlay_steam.png");
 	public static final Identifier OVERLAY_DIESEL_TEXTURE = new Identifier("immersiverailroading:gui/overlay_diesel.png");

@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
@@ -861,4 +862,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			resimulateCooldown = 5;
 		}
 	}
+
+    @Override
+    public void setControlPosition(Control component, float val) {
+        super.setControlPosition(component, val);
+        if (component.global) {
+			this.mapTrain(this, false, stock -> {
+				stock.controlPositions.put(component.controlGroup, this.getControlData(component));
+			});
+		}
+    }
 }

@@ -74,6 +74,13 @@ public class Config {
 		public static boolean trainMobExplosionDamage = true;
 	}
 
+	@Name("Immersion Level")
+	public static class ImmersionConfig {
+		@Comment("Old style throttle/reverser control which uses the throttle as the reverser")
+		@Name("Disable Independent Throttle")
+		public static boolean disableIndependentThrottle = true;
+	}
+
 	@Name("balance")
 	public static class ConfigBalance {
 		

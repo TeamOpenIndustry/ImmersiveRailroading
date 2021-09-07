@@ -27,4 +27,7 @@ public class ConfigGraphics {
 
 	@Comment( "How long to keep textures in memory after they have left the screen (higher numbers = smoother game play, lower numbers = less GPU memory used)")
     public static int textureCacheSeconds = 30;
+
+	@Comment( "Show text tooltips over interactable components" )
+	public static boolean interactiveComponentsOverlay = true;
 }

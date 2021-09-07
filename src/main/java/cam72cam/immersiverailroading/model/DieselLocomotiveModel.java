@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
-import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 
 import java.util.List;
@@ -27,6 +26,9 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private ModelComponent shellRear;
     private DrivingAssembly drivingWheelsFront;
     private DrivingAssembly drivingWheelsRear;
+    private List<Control> engineStarters;
+    private List<Control> hornControls;
+    private List<Readout<LocomotiveDiesel>> gauges;
 
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
@@ -38,6 +40,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+        gauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getEngineTemperature() / 150f);
+
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
         shellFront = provider.parse(ModelComponentType.FRONT_SHELL);
@@ -61,6 +65,9 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                         ModelComponentType.DRIVE_SHAFT_X
                 )
         );
+
+        engineStarters = Control.get(provider, ModelComponentType.ENGINE_START_X);
+        hornControls = Control.get(provider, ModelComponentType.HORN_CONTROL_X);
 
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
@@ -91,6 +98,21 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         rearTrackers.put(stock.getUUID(), null);
         horn.removed(stock);
         idle.removed(stock);
+    }
+
+    @Override
+    public List<Control> getDraggableComponents() {
+        List<Control> controls = super.getDraggableComponents();
+        controls.addAll(engineStarters);
+        controls.addAll(hornControls);
+        return controls;
+    }
+
+    @Override
+    public List<Readout<LocomotiveDiesel>> getReadouts() {
+        List<Readout<LocomotiveDiesel>> readouts = super.getReadouts();
+        readouts.addAll(gauges);
+        return readouts;
     }
 
     @Override

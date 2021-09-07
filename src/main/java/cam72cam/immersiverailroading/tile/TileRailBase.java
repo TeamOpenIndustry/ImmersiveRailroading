@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
 import cam72cam.immersiverailroading.util.*;
@@ -619,6 +620,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						case COMPUTER:
 							//NOP
 							break;
+						case REVERSER_FORWARD:
+							loco.setReverser(power / 15f);
+							break;
+						case REVERSER_REVERSE:
+							loco.setReverser(-power / 15f);
+							break;
 					}
 				}
 			}
@@ -675,6 +682,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							break;
 					}
 					break;
+				}
+			}
+			case ACTUATOR: {
+				EntityRollingStock stock = this.getStockNearBy(EntityRollingStock.class);
+				if (stock != null) {
+					float value = getWorld().getRedstone(getPos())/15f;
+					for (Door d : stock.getDefinition().getModel().getDoors()) {
+						if (d.type == Door.Types.EXTERNAL) {
+							stock.setControlPosition(d, value);
+						}
+					}
 				}
 			}
 			default:
