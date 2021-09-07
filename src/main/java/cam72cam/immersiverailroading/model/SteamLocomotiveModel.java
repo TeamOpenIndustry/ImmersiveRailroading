@@ -66,6 +66,15 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         super.effects(stock);
 
         float throttle = stock.getThrottle() * stock.getReverser();
+        if (drivingWheels != null) {
+            drivingWheels.effects(stock, throttle);
+        }
+        if (drivingWheelsFront != null) {
+            drivingWheelsFront.effects(stock, throttle);
+        }
+        if (drivingWheelsRear != null) {
+            drivingWheelsRear.effects(stock, throttle);
+        }
         if (chimney != null) {
             chimney.effects(stock,
                     (drivingWheels != null && drivingWheels.isEndStroke(stock, throttle)) ||
