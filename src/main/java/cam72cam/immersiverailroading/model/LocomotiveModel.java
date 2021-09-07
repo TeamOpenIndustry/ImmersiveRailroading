@@ -10,23 +10,34 @@ import cam72cam.immersiverailroading.model.part.Bell;
 import cam72cam.immersiverailroading.model.part.Cargo;
 import cam72cam.immersiverailroading.model.part.DrivingAssembly;
 import cam72cam.immersiverailroading.model.part.TrackFollower;
+import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.model.part.Readout;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 
 import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
+public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     private List<ModelComponent> components;
     private Bell bell;
+    private List<Control> throttles;
+    private List<Control> reversers;
+    private List<Control> train_brakes;
+    private List<Control> throttle_brakes;
+    private List<Readout<T>> gauges;
 
     protected DrivingAssembly drivingWheels;
-    protected ModelComponent frameFront;
-    protected ModelComponent frameRear;
+    private ModelComponent frameFront;
+    private ModelComponent frameRear;
     protected DrivingAssembly drivingWheelsFront;
     protected DrivingAssembly drivingWheelsRear;
-    protected Cargo cargoFront;
-    protected Cargo cargoRear;
+    private Cargo cargoFront;
+    private Cargo cargoRear;
+    private ModelComponent shellFront;
+    private ModelComponent shellRear;
 
     private final ExpireableList<UUID, TrackFollower> frontTrackers = new ExpireableList<>();
     private final ExpireableList<UUID, TrackFollower> rearTrackers = new ExpireableList<>();
@@ -46,10 +57,12 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
 
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         cargoFront = Cargo.get(provider, "FRONT");
+        shellFront = provider.parse(ModelComponentType.FRONT_SHELL);
         drivingWheelsFront = DrivingAssembly.get(type,provider, "FRONT", 0);
 
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
         cargoRear = Cargo.get(provider, "REAR");
+        shellRear = provider.parse(ModelComponentType.REAR_SHELL);
         drivingWheelsRear = DrivingAssembly.get(type, provider, "REAR", 45);
 
         components = provider.parse(
@@ -62,7 +75,36 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
         headlightsFront = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "FRONT");
         headlightsRear = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "REAR");
 
+        throttle_brakes = Control.get(provider, ModelComponentType.THROTTLE_BRAKE_X);
+        throttles = Control.get(provider, ModelComponentType.THROTTLE_X);
+        reversers = Control.get(provider, ModelComponentType.REVERSER_X);
+        train_brakes = Control.get(provider, ModelComponentType.TRAIN_BRAKE_X);
+        gauges = new ArrayList<>();
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_SPEED_X,
+                stock -> (float) (Math.abs(stock.getCurrentSpeed().metric()) / stock.getDefinition().getMaxSpeed(stock.gauge).metric()))
+        );
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_THROTTLE_X, Locomotive::getThrottle));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_REVERSER_X, Locomotive::getReverser));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TRAIN_BRAKE_X, Locomotive::getAirBrake));
+
         super.parseComponents(provider, def);
+    }
+
+    @Override
+    public List<Control> getDraggableComponents() {
+        List<Control> draggable = super.getDraggableComponents();
+        draggable.addAll(throttle_brakes);
+        draggable.addAll(throttles);
+        draggable.addAll(reversers);
+        draggable.addAll(train_brakes);
+        return draggable;
+    }
+
+    @Override
+    public List<Readout<T>> getReadouts() {
+        List<Readout<T>> readouts = super.getReadouts();
+        readouts.addAll(gauges);
+        return readouts;
     }
 
     @Override
@@ -121,6 +163,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                     matrix.render(frameFront);
                 }
                 drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
+                matrix.render(shellFront);
                 if (cargoFront != null) {
                     cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
                 }
@@ -143,6 +186,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
                     matrix.render(frameRear);
                 }
                 drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
+                matrix.render(shellRear);
                 if (cargoRear != null) {
                     cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
                 }
@@ -162,8 +206,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightModel<T> {
     }
 
     @Override
-    protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
-        super.postRender(stock, draw, distanceTraveled);
+    protected void postRender(T stock) {
+        super.postRender(stock);
         if (drivingWheelsFront != null) {
             float offset = 0;
             if (frameFront != null) {

@@ -27,12 +27,13 @@ public class SteamChimney {
 
     public void effects(LocomotiveSteam stock, boolean isEndStroke) {
         Vec3d fakeMotion = stock.getVelocity();
+        float exhaust = stock.getThrottle() * Math.abs(stock.getReverser());
         if (emitter != null && ConfigGraphics.particlesEnabled) {
             for (ModelComponent smoke : emitter) {
                 Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(smoke.center.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
                 particlePos = particlePos.subtract(fakeMotion);
                 float darken = 0;
-                float thickness = Math.abs(stock.getThrottle())/2;
+                float thickness = exhaust/2;
                 for (int i : stock.getBurnTime().values()) {
                     darken += i >= 1 ? 1 : 0;
                 }
@@ -44,7 +45,7 @@ public class SteamChimney {
 
                 double smokeMod = Math.min(1, Math.max(0.2, Math.abs(stock.getCurrentSpeed().minecraft())*2));
 
-                int lifespan = (int) (200 * (1 + Math.abs(stock.getThrottle())) * smokeMod * stock.gauge.scale());
+                int lifespan = (int) (200 * (1 + exhaust) * smokeMod * stock.gauge.scale());
 
                 double verticalSpeed = 0.5 * stock.gauge.scale();
                 double size = smoke.width() * stock.gauge.scale() * (0.8 + smokeMod);

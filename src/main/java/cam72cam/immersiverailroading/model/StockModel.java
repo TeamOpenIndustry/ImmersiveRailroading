@@ -2,13 +2,10 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.model.part.LightFlare;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.model.part.Bogey;
-import cam72cam.immersiverailroading.model.part.Frame;
-import cam72cam.immersiverailroading.model.part.TrackFollower;
+import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.render.StockRenderCache;
@@ -18,6 +15,7 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.obj.OBJVBO;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +28,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private Bogey bogeyRear;
     private ModelComponent shell;
     private ModelComponent remaining;
+    private List<Door> doors;
+    private List<Control> windows;
+    private List<Control> widgets;
 
     private List<LightFlare> headlights;
 
@@ -55,6 +56,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
         this.bogeyRear = Bogey.get(provider, unifiedBogies(), "REAR");
         this.headlights = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_X);
+        this.doors = Door.get(provider);
+        this.windows = Control.get(provider, ModelComponentType.WINDOW_X);
+        this.widgets = Control.get(provider, ModelComponentType.WIDGET_X);
 
         if (bogeyFront != null && Math.abs(def.getBogeyFront(Gauge.from(Gauge.STANDARD)) + bogeyFront.center().x) > 0.5) {
             frontTrackers = new ExpireableList<>();
@@ -75,6 +79,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
     protected void effects(T stock) {
         headlights.forEach(x -> x.effects(stock, 0));
+        getDraggableComponents().forEach(c -> c.effects(stock));
+        getReadouts().forEach(c -> c.effects(stock));
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
@@ -111,7 +117,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     public void postRender(EntityMoveableRollingStock stock, float partialTicks) {
-        postRender((T) stock, null, 0);
+        postRender((T) stock);
     }
 
     protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
@@ -165,9 +171,30 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     protected void renderWithInteriorLighting(T stock, ComponentRenderer draw) {
         draw.render(shell);
         draw.render(remaining);
+
+        getReadouts().forEach(r -> r.render(stock, draw));
+
+        getDraggableComponents().forEach(c -> c.render(stock, draw));
     }
 
-    protected void postRender(T stock, ComponentRenderer draw, double distanceTraveled) {
+    protected void postRender(T stock) {
+        getDraggableComponents().forEach(c -> c.postRender(stock));
         headlights.forEach(x -> x.postRender(stock, 0));
+    }
+
+    public List<Control> getDraggableComponents() {
+        List<Control> components = new ArrayList<>();
+        components.addAll(doors);
+        components.addAll(windows);
+        components.addAll(widgets);
+        return components;
+    }
+
+    public List<Readout<T>> getReadouts() {
+        return new ArrayList<>();
+    }
+
+    public List<Door> getDoors() {
+        return new ArrayList<>(doors);
     }
 }

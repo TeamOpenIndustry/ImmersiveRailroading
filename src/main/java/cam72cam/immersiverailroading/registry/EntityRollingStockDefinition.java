@@ -79,6 +79,7 @@ public abstract class EntityRollingStockDefinition {
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
     private static final Map<String, LightDefinition> lights = new HashMap<>();
+    protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
 
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
@@ -97,6 +98,27 @@ public abstract class EntityRollingStockDefinition {
             reverseColor = data.has("reverseColor") ? data.get("reverseColor").getAsString() : null;
             lightTex = data.has("texture") ? new Identifier(data.get("texture").getAsString()) : default_light_tex;
             castsLight = !data.has("castsLight") || data.get("castsLight").getAsBoolean();
+        }
+    }
+
+    public static class ControlSoundsDefinition {
+        public final Identifier engage;
+        public final Identifier move;
+        public final Float movePercent;
+        public final Identifier disengage;
+
+        protected ControlSoundsDefinition(Identifier engage, Identifier move, Float movePercent, Identifier disengage) {
+            this.engage = engage;
+            this.move = move;
+            this.movePercent = movePercent;
+            this.disengage = disengage;
+        }
+
+        private ControlSoundsDefinition(JsonObject data) {
+            engage = data.has("engage") ? new Identifier(ImmersiveRailroading.MODID, data.get("engage").getAsString()) : null;
+            move = data.has("move") ? new Identifier(ImmersiveRailroading.MODID, data.get("move").getAsString()) : null;
+            movePercent = data.has("movePercent") ? data.get("movePercent").getAsFloat() : null;
+            disengage = data.has("disengage") ? new Identifier(ImmersiveRailroading.MODID, data.get("disengage").getAsString()) : null;
         }
     }
 
@@ -277,6 +299,11 @@ public abstract class EntityRollingStockDefinition {
             }
             if (sounds.has("clack_rear")) {
                 clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(default_clackRear);
+            }
+            if (sounds.has("controls")) {
+                for (Entry<String, JsonElement> entry : sounds.get("controls").getAsJsonObject().entrySet()) {
+                    controlSounds.put(entry.getKey(), new ControlSoundsDefinition(entry.getValue().getAsJsonObject()));
+                }
             }
         }
     }
@@ -562,5 +589,8 @@ public abstract class EntityRollingStockDefinition {
 
     public LightDefinition getLight(String name) {
         return lights.get(name);
+    }
+    public ControlSoundsDefinition getControlSound(String name) {
+        return controlSounds.get(name);
     }
 }
