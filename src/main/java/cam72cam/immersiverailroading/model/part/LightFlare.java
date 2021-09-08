@@ -23,9 +23,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static cam72cam.immersiverailroading.model.ComponentRenderer.lcgPattern;
 
 public class LightFlare {
     private final ModelComponent component;
@@ -41,6 +44,7 @@ public class LightFlare {
     private final int blinkOffsetTicks;
     private final boolean castsLights;
     private final boolean blinkFullBright;
+    private final String controlGroup;
     private float redReverse;
     private float greenReverse;
     private float blueReverse;
@@ -74,6 +78,8 @@ public class LightFlare {
         this.redReverse = this.red;
         this.greenReverse = this.green;
         this.blueReverse = this.blue;
+        this.controlGroup = component.modelIDs.stream()
+                .map(lcgPattern::matcher).filter(Matcher::find).map(m -> m.group(1)).findFirst().orElse(null);
 
         // This is bad...
         LightDefinition config = def.getLight(component.type.toString()
@@ -111,7 +117,7 @@ public class LightFlare {
     }
 
     private boolean isLightOff(EntityMoveableRollingStock stock) {
-        return !stock.externalLightsEnabled();
+        return !stock.externalLightsEnabled() || (controlGroup != null && stock.getControlPosition(controlGroup) == 0);
     }
     private boolean isBlinkOff(EntityMoveableRollingStock stock) {
         return isLightOff(stock) || blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;

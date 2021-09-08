@@ -240,6 +240,9 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return 0;
 	}
 
+	public Pair<Boolean, Float> getControlData(String control) {
+		return controlPositions.getOrDefault(control, Pair.of(false, 0f));
+	}
 
 	public Pair<Boolean, Float> getControlData(Control control) {
 		return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, defaultControlPosition(control)));
@@ -254,6 +257,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public float getControlPosition(Control control) {
+		return getControlData(control).getRight();
+	}
+
+	public float getControlPosition(String control) {
 		return getControlData(control).getRight();
 	}
 

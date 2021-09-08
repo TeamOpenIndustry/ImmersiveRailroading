@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ComponentRenderer implements Closeable {
@@ -28,12 +30,13 @@ public class ComponentRenderer implements Closeable {
     private final Float skyLight;
     private final boolean fullbright;
     private final boolean hasInterior;
+    private final EntityRollingStock stock;
 
-    public ComponentRenderer(BoundOBJVBO vbo, List<ModelComponentType> available, boolean hasInterior) {
-        this(new Matrix4(), vbo, available, hasInterior, false, null, null);
+    public ComponentRenderer(EntityRollingStock stock, BoundOBJVBO vbo, List<ModelComponentType> available, boolean hasInterior) {
+        this(stock, new Matrix4(), vbo, available, hasInterior, false, null, null);
     }
 
-    public ComponentRenderer(Matrix4 matrix, BoundOBJVBO vbo, List<ModelComponentType> available, boolean hasInterior, boolean fullbright, Float interiorLight, Float skyLight) {
+    public ComponentRenderer(EntityRollingStock stock, Matrix4 matrix, BoundOBJVBO vbo, List<ModelComponentType> available, boolean hasInterior, boolean fullbright, Float interiorLight, Float skyLight) {
         this.vbo = vbo;
         this.available = available;
         this.fullbright = fullbright;
@@ -41,6 +44,7 @@ public class ComponentRenderer implements Closeable {
         this.interiorLight = interiorLight;
         this.skyLight = skyLight;
         this.matrix = matrix;
+        this.stock = stock;
     }
 
     public void render(ModelComponent component) {
@@ -62,18 +66,18 @@ public class ComponentRenderer implements Closeable {
     }
 
     public ComponentRenderer withBrightGroups(boolean fullbright) {
-        return new ComponentRenderer(matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight);
+        return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight);
     }
 
     public ComponentRenderer withInteriorLight(EntityRollingStock stock) {
         float interiorLight = 6 / 15f;
         float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
         float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
-        return blockLight < interiorLight ? new ComponentRenderer(matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight) : this;
+        return blockLight < interiorLight ? new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight) : this;
     }
 
     public ComponentRenderer push() {
-        return new ComponentRenderer(matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight);
+        return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight);
     }
 
     public void translate(double x, double y, double z) {
@@ -86,6 +90,7 @@ public class ComponentRenderer implements Closeable {
         matrix.scale(x, y, z);
     }
 
+    public static final Pattern lcgPattern = Pattern.compile("_LCG_([^_]+)");
     private void draw(Collection<String> groups) {
         try (OpenGL.With mtx = OpenGL.matrix()) {
             matrix.transpose();
@@ -107,18 +112,26 @@ public class ComponentRenderer implements Closeable {
             }
 
             List<String> noop = Collections.EMPTY_LIST;
+            List<String> dark = new ArrayList<>();
             List<String> interiorNormal = hasInterior ? new ArrayList<>() : noop;
             List<String> interiorFullbright = hasInterior && interiorLight != null && fullbright ? new ArrayList<>() : noop;
             List<String> exteriorNormal = new ArrayList<>();
             List<String> exteriorFullbright = fullbright ? new ArrayList<>() : noop;
 
             for (String group : groups) {
+                Matcher matcher = lcgPattern.matcher(group);
+                if (matcher.find() && stock.getControlPosition(matcher.group(1)) == 0) {
+                    dark.add(group);
+                    continue;
+                }
                 if (hasInterior && group.contains("INTERIOR")) {
                     (fullbright && interiorLight != null && group.contains("FULLBRIGHT") ? interiorFullbright : interiorNormal).add(group);
                 } else {
                     (fullbright && group.contains("FULLBRIGHT") ? exteriorFullbright : exteriorNormal).add(group);
                 }
             }
+
+            vbo.draw(dark);
 
             if (!interiorFullbright.isEmpty() || !exteriorFullbright.isEmpty()) {
                 try (

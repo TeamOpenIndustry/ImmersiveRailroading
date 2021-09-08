@@ -108,7 +108,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
 
-            try (ComponentRenderer draw = new ComponentRenderer(bound, available, hasInterior)) {
+            try (ComponentRenderer draw = new ComponentRenderer(stock, bound, available, hasInterior)) {
                 GL11.glScaled(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
                 //noinspection unchecked
                 render((T) stock, draw, distanceTraveled);
