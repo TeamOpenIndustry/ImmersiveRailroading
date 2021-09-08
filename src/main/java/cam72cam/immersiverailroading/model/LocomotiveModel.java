@@ -75,10 +75,6 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         headlightsFront = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "FRONT");
         headlightsRear = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "REAR");
 
-        throttle_brakes = Control.get(provider, ModelComponentType.THROTTLE_BRAKE_X);
-        throttles = Control.get(provider, ModelComponentType.THROTTLE_X);
-        reversers = Control.get(provider, ModelComponentType.REVERSER_X);
-        train_brakes = Control.get(provider, ModelComponentType.TRAIN_BRAKE_X);
         gauges = new ArrayList<>();
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_SPEED_X,
                 stock -> (float) (Math.abs(stock.getCurrentSpeed().metric()) / stock.getDefinition().getMaxSpeed(stock.gauge).metric()))
@@ -86,6 +82,11 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_THROTTLE_X, Locomotive::getThrottle));
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_REVERSER_X, Locomotive::getReverser));
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TRAIN_BRAKE_X, Locomotive::getAirBrake));
+
+        throttle_brakes = Control.get(provider, ModelComponentType.THROTTLE_BRAKE_X);
+        throttles = Control.get(provider, ModelComponentType.THROTTLE_X);
+        reversers = Control.get(provider, ModelComponentType.REVERSER_X);
+        train_brakes = Control.get(provider, ModelComponentType.TRAIN_BRAKE_X);
 
         super.parseComponents(provider, def);
     }
