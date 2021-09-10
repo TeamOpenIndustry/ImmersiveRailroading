@@ -33,6 +33,7 @@ public class Control {
     public final boolean toggle;
     public final boolean press;
     public final boolean global;
+    private final boolean invert;
     private Vec3d rotationPoint = null;
     private float rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
@@ -59,6 +60,7 @@ public class Control {
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
         this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
+        this.invert = part.modelIDs.stream().anyMatch(g -> g.contains("_INVERT_") || g.startsWith("INVERT_") || g.endsWith("_INVERT"));
 
         OBJGroup rot = part.groups().stream()
                 .filter(g -> Pattern.matches(part.type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name))
@@ -162,7 +164,8 @@ public class Control {
     }
 
     public float getValue(EntityRollingStock stock) {
-        return stock.getControlPosition(this) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
+        float pos = stock.getControlPosition(this);
+        return (invert ? 1 - pos : pos) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
     }
 
     public Vec3d transform(Vec3d point, EntityRollingStock stock) {
