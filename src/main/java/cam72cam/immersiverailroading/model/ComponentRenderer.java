@@ -120,9 +120,12 @@ public class ComponentRenderer implements Closeable {
 
             for (String group : groups) {
                 Matcher matcher = lcgPattern.matcher(group);
-                if (matcher.find() && stock.getControlPosition(matcher.group(1)) == 0) {
-                    dark.add(group);
-                    continue;
+                if (matcher.find()) {
+                    boolean invert = group.contains("_INVERT_") || group.startsWith("INVERT_") || group.endsWith("_INVERT");
+                    if (stock.getControlPosition(matcher.group(1)) == (invert ? 1 : 0)) {
+                        dark.add(group);
+                        continue;
+                    }
                 }
                 if (hasInterior && group.contains("INTERIOR")) {
                     (fullbright && interiorLight != null && group.contains("FULLBRIGHT") ? interiorFullbright : interiorNormal).add(group);
