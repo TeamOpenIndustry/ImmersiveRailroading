@@ -45,6 +45,7 @@ public class LightFlare {
     private final boolean castsLights;
     private final boolean blinkFullBright;
     private final String controlGroup;
+    private final boolean invert;
     private float redReverse;
     private float greenReverse;
     private float blueReverse;
@@ -80,6 +81,8 @@ public class LightFlare {
         this.blueReverse = this.blue;
         this.controlGroup = component.modelIDs.stream()
                 .map(lcgPattern::matcher).filter(Matcher::find).map(m -> m.group(1)).findFirst().orElse(null);
+
+        this.invert = component.modelIDs.stream().anyMatch(g -> g.contains("_INVERT_") || g.startsWith("INVERT_") || g.endsWith("_INVERT"));
 
         // This is bad...
         LightDefinition config = def.getLight(component.type.toString()
@@ -117,7 +120,7 @@ public class LightFlare {
     }
 
     private boolean isLightOff(EntityMoveableRollingStock stock) {
-        return !stock.externalLightsEnabled() || (controlGroup != null && stock.getControlPosition(controlGroup) == 0);
+        return !stock.externalLightsEnabled() || (controlGroup != null && stock.getControlPosition(controlGroup) == (invert ? 1 : 0));
     }
     private boolean isBlinkOff(EntityMoveableRollingStock stock) {
         return isLightOff(stock) || blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;

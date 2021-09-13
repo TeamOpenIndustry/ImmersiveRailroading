@@ -34,6 +34,7 @@ public class Control {
     public final boolean press;
     public final boolean global;
     private final boolean invert;
+    private final boolean hide;
     private Vec3d rotationPoint = null;
     private float rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
@@ -61,6 +62,7 @@ public class Control {
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
         this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
         this.invert = part.modelIDs.stream().anyMatch(g -> g.contains("_INVERT_") || g.startsWith("INVERT_") || g.endsWith("_INVERT"));
+        this.hide = part.modelIDs.stream().anyMatch(g -> g.contains("_HIDE_") || g.startsWith("HIDE_") || g.endsWith("_HIDE"));
 
         OBJGroup rot = part.groups().stream()
                 .filter(g -> Pattern.matches(part.type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name))
@@ -100,12 +102,16 @@ public class Control {
     }
 
     public void render(EntityRollingStock stock, ComponentRenderer draw) {
+        float valuePercent = getValue(stock);
+        if (hide && valuePercent == 1) {
+            return;
+        }
+
+
         if (rotationPoint == null && translations.isEmpty() && scales.isEmpty()) {
             draw.render(part);
             return;
         }
-
-        float valuePercent = getValue(stock);
 
         try (ComponentRenderer matrix = draw.push()) {
             translations.forEach((axis, val) -> {
