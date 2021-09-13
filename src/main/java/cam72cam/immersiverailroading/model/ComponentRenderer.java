@@ -70,7 +70,7 @@ public class ComponentRenderer implements Closeable {
     }
 
     public ComponentRenderer withInteriorLight(EntityRollingStock stock) {
-        float interiorLight = 6 / 15f;
+        float interiorLight = stock.getDefinition().interiorLightLevel();
         float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
         float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
         return blockLight < interiorLight ? new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight) : this;

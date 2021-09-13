@@ -75,6 +75,7 @@ public abstract class EntityRollingStockDefinition {
     private double passengerCompartmentWidth;
     private int weight;
     private int maxPassengers;
+    private float interiorLightLevel;
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
@@ -279,6 +280,7 @@ public abstract class EntityRollingStockDefinition {
                 lights.put(entry.getKey(), new LightDefinition(entry.getValue().getAsJsonObject()));
             }
         }
+        interiorLightLevel = properties.has("interior_light_level") ? properties.get("interior_light_level").getAsFloat() : 6 / 15f;
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
@@ -593,4 +595,9 @@ public abstract class EntityRollingStockDefinition {
     public ControlSoundsDefinition getControlSound(String name) {
         return controlSounds.get(name);
     }
+
+    public float interiorLightLevel() {
+        return interiorLightLevel;
+    }
+
 }
