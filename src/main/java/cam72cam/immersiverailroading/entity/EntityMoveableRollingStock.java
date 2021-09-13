@@ -320,7 +320,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             this.clearPositionCache();
         }
 
-        if (this.getCurrentSpeed().metric() > 1) {
+        if (Math.abs(this.getCurrentSpeed().metric()) > 1) {
 			List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> entity.isLiving() || entity.isPlayer() && this.getCollision().intersects(entity.getBounds()), Entity.class);
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
@@ -355,7 +355,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				// Force update
 				//TODO entity.onUpdate();
 	
-				double speedDamage = this.getCurrentSpeed().metric() / Config.ConfigDamage.entitySpeedDamage;
+				double speedDamage = Math.abs(this.getCurrentSpeed().metric()) / Config.ConfigDamage.entitySpeedDamage;
 				if (speedDamage > 1) {
 				    entity.directDamage(DAMAGE_SOURCE_HIT, speedDamage);
 				}
