@@ -404,6 +404,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
             }
         }
+
+        if (getWorld().isClient) {
+            setControlPosition("MOVINGFORWARD", getCurrentSpeed().minecraft() > 0 ? 1 : 0);
+            setControlPosition("NOTMOVING", getCurrentSpeed().minecraft() == 0 ? 1 : 0);
+            setControlPosition("MOVINGBACKWARD", getCurrentSpeed().minecraft() < 0 ? 1 : 0);
+        }
     }
 
     protected void clearPositionCache() {
