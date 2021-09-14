@@ -150,15 +150,15 @@ public abstract class Locomotive extends FreightTank {
 			break;
 		case AIR_BRAKE_UP:
 			setAirBrake(getAirBrake() + airBrakeNotch);
-			//super.handleKeyPress(source, key);
+			super.handleKeyPress(source, key);
 			break;
 		case AIR_BRAKE_ZERO:
 			setAirBrake(0f);
-			//super.handleKeyPress(source, key);
+			super.handleKeyPress(source, key);
 			break;
 		case AIR_BRAKE_DOWN:
 			setAirBrake(getAirBrake() - airBrakeNotch);
-			//super.handleKeyPress(source, key);
+			super.handleKeyPress(source, key);
 			break;
 		case DEAD_MANS_SWITCH:
 			if (deadManChangeTimeout == 0) { 

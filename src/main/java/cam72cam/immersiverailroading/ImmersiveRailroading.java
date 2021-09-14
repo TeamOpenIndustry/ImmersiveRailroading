@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
+import cam72cam.immersiverailroading.gui.overlay.IndependentBrakeOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -186,9 +187,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 
 				GlobalRender.registerOverlay(pt -> {
+					// This is bad and should be redesigned
 					new SteamLocomotiveOverlay().draw();
 					new DieselLocomotiveOverlay().draw();
 					new HandCarOverlay().draw();
+					new IndependentBrakeOverlay().draw();
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);

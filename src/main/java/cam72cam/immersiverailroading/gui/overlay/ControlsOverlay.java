@@ -1,17 +1,14 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import cam72cam.immersiverailroading.entity.*;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.entity.HandCar;
-import cam72cam.immersiverailroading.entity.Locomotive;
-import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
-import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 
-public class LocomotiveOverlay {
+public class ControlsOverlay {
 	
 	private int screenWidth;
 	private int screenHeight;
@@ -32,11 +29,8 @@ public class LocomotiveOverlay {
 	public static final Identifier OVERLAY_STEAM_TEXTURE = new Identifier("immersiverailroading:gui/overlay_steam.png");
 	public static final Identifier OVERLAY_DIESEL_TEXTURE = new Identifier("immersiverailroading:gui/overlay_diesel.png");
 	public static final Identifier OVERLAY_HANDCAR_TEXTURE = new Identifier("immersiverailroading:gui/overlay_handcar.png");
-	
-	/*private static final int textHeight = 20;
-	private static final int textVerticalSpacing = 5;*/
 
-	public LocomotiveOverlay() {
+	public ControlsOverlay() {
 		screenWidth = GUIHelpers.getScreenWidth();
 		screenHeight = GUIHelpers.getScreenHeight();
 
@@ -111,14 +105,14 @@ public class LocomotiveOverlay {
 		}
 	}
 	
-	public void drawBackground(Locomotive loco) {
+	public void drawBackground(EntityRollingStock loco) {
 		if(loco instanceof LocomotiveSteam) {
 			GUIHelpers.texturedRect(OVERLAY_STEAM_TEXTURE, bgPosX, bgPosY, 105, 85);
 		}
-		if(loco instanceof LocomotiveDiesel) {
+		else if(loco instanceof LocomotiveDiesel) {
 			GUIHelpers.texturedRect(OVERLAY_DIESEL_TEXTURE, bgPosX, bgPosY, 85, 85);
 		}
-		if(loco instanceof HandCar) {
+		else if(loco instanceof HandCar || loco.getDefinition().hasIndependentBrake()) {
 			GUIHelpers.texturedRect(OVERLAY_HANDCAR_TEXTURE, bgPosX, bgPosY, 60, 85);
 		}
 	}
