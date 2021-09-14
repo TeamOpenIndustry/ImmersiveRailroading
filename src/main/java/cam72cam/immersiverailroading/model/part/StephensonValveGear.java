@@ -15,7 +15,6 @@ import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
-import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +27,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
     protected final Vec3d drivenWheel;
 
-    public static StephensonValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static StephensonValveGear get(WheelSet wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
@@ -36,17 +35,17 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         return drivingRod != null && connectingRod != null && pistonRod != null ?
                 new StephensonValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset) : null;
     }
-    public StephensonValveGear(List<Wheel> wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
+    public StephensonValveGear(WheelSet wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
         super(wheels, connectingRod, angleOffset);
         this.drivingRod = drivingRod;
         this.pistonRod = pistonRod;
         this.cylinder = cylinder;
-        Vec3d center = ModelComponent.center(wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
+        Vec3d center = ModelComponent.center(wheels.wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
         this.reverse = pistonRod.center.x > center.x;
         this.angleOffset = angleOffset + (reverse ? -90 : 0);
 
 
-        drivenWheel = wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
+        drivenWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
         centerOfWheels = drivingRod.pos.equals("CENTER") ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
     }
 
@@ -60,7 +59,12 @@ public class StephensonValveGear extends ConnectingRodValveGear {
     }
 
     public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
-        return getStroke(stock, throttle, 0, true) > 0.97;
+        double stroke = getStroke(stock, throttle, 0, true);
+        if (stock instanceof LocomotiveSteam) {
+            LocomotiveSteam loco = (LocomotiveSteam) stock;
+            return Math.abs(loco.getThrottle() * loco.getReverser()) > 0 && stroke > 1.05 - Math.abs(loco.getReverser());
+        }
+        return stroke > 0.97;
     }
 
     private static class ChuffSound {
@@ -85,13 +89,13 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
         void update(boolean enteredStroke) {
             if (!chuffOn) {
-                if (enteredStroke) {
+                if (enteredStroke && Math.abs(stock.getThrottle() * stock.getReverser()) > 0) {
                     chuffOn = true;
                     pitchStroke = !pitchStroke;
 
                     double speed = Math.abs(stock.getCurrentSpeed().minecraft());
                     double maxSpeed = Math.abs(stock.getDefinition().getMaxSpeed(stock.gauge).minecraft());
-                    float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(stock.getThrottle());
+                    float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(stock.getThrottle() * stock.getReverser());
                     volume = (float) Math.sqrt(volume);
                     double fraction = 3;
                     float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
@@ -182,16 +186,16 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         // Draw driving rod
         try (ComponentRenderer matrix = draw.push()) {
             // Move to conn rod center
-            GL11.glTranslated(-connRodRadius, 0, 0);
+            matrix.translate(-connRodRadius, 0, 0);
             // Apply conn rod movement
-            GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+            matrix.translate(connRodMovment.x, connRodMovment.z, 0);
 
             // Move to rot point center
-            GL11.glTranslated(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+            matrix.translate(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
             // Rotate rod angle
-            GL11.glRotated(drivingRodAngle, 0, 0, 1);
+            matrix.rotate(drivingRodAngle, 0, 0, 1);
             // Move back from rot point center
-            GL11.glTranslated(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+            matrix.translate(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
 
             matrix.render(drivingRod);
         }
@@ -202,7 +206,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
         // Draw piston rod and cross head
         try (ComponentRenderer matrix = draw.push()) {
-            GL11.glTranslated(pistonDelta, 0, 0);
+            matrix.translate(pistonDelta, 0, 0);
             matrix.render(pistonRod);
         }
 

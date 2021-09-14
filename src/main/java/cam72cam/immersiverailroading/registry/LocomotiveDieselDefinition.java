@@ -63,6 +63,27 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
                 bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
             }
         }
+
+        if (controlSounds.isEmpty()) {
+            controlSounds.put("REVERSER_1", new ControlSoundsDefinition(
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_move.ogg"),
+                    0.45f,
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
+            ));
+            controlSounds.put("THROTTLE_1", new ControlSoundsDefinition(
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_move.ogg"),
+                    1/8f,
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
+            ));
+            controlSounds.put("BRAKE_1", new ControlSoundsDefinition(
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    null,
+                    null,
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
+            ));
+        }
     }
 
     @Override

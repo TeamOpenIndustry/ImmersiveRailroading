@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.mod.model.obj.OBJModel;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -19,12 +20,25 @@ public class ComponentProvider {
     }
 
     private Set<String> modelIDs(String pattern) {
-        Set<String> modelIDs;
-
         Pattern regex = Pattern.compile(pattern);
-        modelIDs = groups.stream().filter(group -> regex.matcher(group).matches()).collect(Collectors.toSet());
+        Set<String> modelIDs = groups.stream().filter(group -> regex.matcher(group).matches()).collect(Collectors.toSet());
         groups.removeAll(modelIDs);
 
+        return modelIDs;
+    }
+
+    private Map<String, Set<String>> modelIDMap(String pattern) {
+        Pattern rgx = Pattern.compile(pattern);
+        Map<String, Set<String>> modelIDs = groups.stream()
+                .map(rgx::matcher)
+                .filter(Matcher::matches)
+                .collect(
+                        Collectors.groupingBy(
+                                m -> m.group(1),
+                                Collectors.mapping(m -> m.group(0), Collectors.toSet())
+                        )
+                );
+        modelIDs.forEach((k, v) -> groups.removeAll(v));
         return modelIDs;
     }
 
@@ -57,16 +71,13 @@ public class ComponentProvider {
     }
 
     public List<ModelComponent> parseAll(ModelComponentType type) {
-        List<ModelComponent> components = new ArrayList<>();
-        for (int i = 100; i >= 0; i--) {
-            Set<String> ids = modelIDs(type.regex.replace("#ID#", i + ""));
-            if (!ids.isEmpty()) {
-                ModelComponent component = new ModelComponent(type, null, i, model, ids);
-                this.components.add(component);
-                components.add(component);
-            }
-        }
-        return components;
+        return modelIDMap(
+                type.regex.replace("#ID#", "([\\d]+)")
+        ).entrySet().stream().map(e -> {
+            ModelComponent component = new ModelComponent(type, null, Integer.parseInt(e.getKey()), model, e.getValue());
+            this.components.add(component);
+            return component;
+        }).collect(Collectors.toList());
     }
 
     public List<ModelComponent> parseAll(ModelComponentType... types) {
@@ -74,16 +85,16 @@ public class ComponentProvider {
     }
 
     public List<ModelComponent> parseAll(ModelComponentType type, String pos) {
-        List<ModelComponent> components = new ArrayList<>();
-        for (int i = 100; i >= 0; i--) {
-            Set<String> ids = modelIDs(type.regex.replace("#ID#", i + "").replace("#POS#", pos).replace("#SIDE#", pos));
-            if (!ids.isEmpty()) {
-                ModelComponent component = new ModelComponent(type, pos, i, model, ids);
-                this.components.add(component);
-                components.add(component);
-            }
-        }
-        return components;
+        return modelIDMap(
+                type.regex
+                        .replace("#ID#", "([\\d]+)")
+                        .replace("#POS#", pos)
+                        .replace("#SIDE#", pos)
+        ).entrySet().stream().map(e -> {
+            ModelComponent component = new ModelComponent(type, pos, Integer.parseInt(e.getKey()), model, e.getValue());
+            this.components.add(component);
+            return component;
+        }).collect(Collectors.toList());
     }
 
     public List<ModelComponent> components() {

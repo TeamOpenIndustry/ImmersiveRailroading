@@ -7,31 +7,29 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
-import org.lwjgl.opengl.GL11;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConnectingRodValveGear implements ValveGear {
-    protected final List<Wheel> wheels;
+    protected final WheelSet wheels;
     protected Vec3d centerOfWheels;
     protected final ModelComponent connectingRod;
     protected float angleOffset;
 
-    public static ConnectingRodValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static ConnectingRodValveGear get(WheelSet wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         return connectingRod != null ? new ConnectingRodValveGear(wheels, connectingRod, angleOffset) : null;
     }
 
-    public ConnectingRodValveGear(List<Wheel> wheels, ModelComponent connectingRod, float angleOffset) {
+    public ConnectingRodValveGear(WheelSet wheels, ModelComponent connectingRod, float angleOffset) {
         this.wheels = wheels;
         this.connectingRod = connectingRod;
         this.angleOffset = angleOffset;
-        this.centerOfWheels = ModelComponent.center(wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
+        this.centerOfWheels = ModelComponent.center(wheels.wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
     }
 
     public float angle(double distance) {
-        return wheels.get(0).angle(distance) + angleOffset;
+        return wheels.angle(distance) + angleOffset;
     }
 
     @Override
@@ -49,9 +47,9 @@ public class ConnectingRodValveGear implements ValveGear {
         // Draw Connecting Rod
         try (ComponentRenderer matrix = draw.push()) {
             // Move to origin
-            GL11.glTranslated(-connRodRadius, 0, 0);
+            matrix.translate(-connRodRadius, 0, 0);
             // Apply connection rod movement
-            GL11.glTranslated(connRodMovment.x, connRodMovment.z, 0);
+            matrix.translate(connRodMovment.x, connRodMovment.z, 0);
 
             matrix.render(connectingRod);
         }

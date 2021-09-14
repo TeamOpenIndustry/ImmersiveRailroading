@@ -94,6 +94,10 @@ public class Gauge {
 		return closest;
 	}
 
+	public static Gauge standard() {
+		return from(STANDARD);
+	}
+
 	public boolean shouldSit() {
 		return this.gauge <= Gauges.MINECRAFT;
 	}

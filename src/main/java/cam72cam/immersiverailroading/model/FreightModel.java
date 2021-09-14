@@ -18,7 +18,7 @@ public class FreightModel<T extends Freight> extends StockModel<T> {
 
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         super.parseComponents(provider, def);
-        this.cargo = Cargo.get(provider);
+        this.cargo = Cargo.get(provider, null);
     }
 
     @Override

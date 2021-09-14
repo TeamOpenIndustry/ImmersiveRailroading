@@ -59,9 +59,6 @@ public class PhysicsAccummulator {
 
 		if (stock.getDefinition().hasIndependentBrake()) {
 			independentBrakeNewtons += ((EntityMoveableRollingStock) stock).getIndependentBrake() * stock.getWeight() * 0.25 * 4.44822f;
-			System.out.println(grade);
-			System.out.println(gradeForceNewtons);
-			System.out.println(independentBrakeNewtons);
 		}
 		
 		int slowdown = movable.getSpeedRetarderSlowdown(pos);

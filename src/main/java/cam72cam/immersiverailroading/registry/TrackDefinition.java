@@ -17,11 +17,13 @@ public class TrackDefinition {
     public final String trackID;
     public final String name;
     public final List<TrackModel> models;
+    public final boolean clack;
     public final Map<TrackComponent, List<TrackMaterial>> materials = new HashMap<>();
 
     TrackDefinition(String trackID, JsonObject object) throws Exception {
         this.trackID = trackID;
         this.name = object.get("name").getAsString();
+        this.clack = !object.has("clack") || object.get("clack").getAsBoolean();
         this.models = new ArrayList<>();
         for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("models").entrySet()) {
             models.add(new TrackModel(entry.getKey(), entry.getValue().getAsString()));

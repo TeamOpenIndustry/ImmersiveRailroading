@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.model.part;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.math.Vec3d;
-import org.lwjgl.opengl.GL11;
 
 public class Wheel {
     protected final ModelComponent wheel;
@@ -24,9 +23,9 @@ public class Wheel {
     public void render(float angle, ComponentRenderer draw) {
         Vec3d wheelPos = wheel.center;
         try (ComponentRenderer matrix = draw.push()) {
-            GL11.glTranslated(wheelPos.x, wheelPos.y, wheelPos.z);
-            GL11.glRotated(angle, 0, 0, 1);
-            GL11.glTranslated(-wheelPos.x, -wheelPos.y, -wheelPos.z);
+            matrix.translate(wheelPos.x, wheelPos.y, wheelPos.z);
+            matrix.rotate(angle, 0, 0, 1);
+            matrix.translate(-wheelPos.x, -wheelPos.y, -wheelPos.z);
             matrix.render(wheel);
         }
     }

@@ -260,7 +260,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 if (BlockUtil.isIRRail(getWorld(), posFront)) {
                     TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
                     rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackFrontPos)) {
+                    if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
                         clackFront.setPitch(pitch);
                         clackFront.setVolume(volume);
                         clackFront.play(new Vec3d(posFront));
@@ -271,7 +271,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 if (BlockUtil.isIRRail(getWorld(), posRear)) {
                     TileRailBase rb = getWorld().getBlockEntity(posRear, TileRailBase.class);
                     rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackRearPos)) {
+                    if (rb != null && !rb.getPos().equals(clackRearPos) && rb.clacks()) {
                         clackRear.setPitch(pitch);
                         clackRear.setVolume(volume);
                         clackRear.play(new Vec3d(posRear));
@@ -326,7 +326,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             this.clearPositionCache();
         }
 
-        if (this.getCurrentSpeed().metric() > 1) {
+        if (Math.abs(this.getCurrentSpeed().metric()) > 1) {
 			List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> entity.isLiving() || entity.isPlayer() && this.getCollision().intersects(entity.getBounds()), Entity.class);
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
@@ -361,7 +361,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				// Force update
 				//TODO entity.onUpdate();
 	
-				double speedDamage = this.getCurrentSpeed().metric() / Config.ConfigDamage.entitySpeedDamage;
+				double speedDamage = Math.abs(this.getCurrentSpeed().metric()) / Config.ConfigDamage.entitySpeedDamage;
 				if (speedDamage > 1) {
 				    entity.directDamage(DAMAGE_SOURCE_HIT, speedDamage);
 				}
@@ -409,6 +409,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
             }
+        }
+
+        if (getWorld().isClient) {
+            setControlPosition("MOVINGFORWARD", getCurrentSpeed().minecraft() > 0 ? 1 : 0);
+            setControlPosition("NOTMOVING", getCurrentSpeed().minecraft() == 0 ? 1 : 0);
+            setControlPosition("MOVINGBACKWARD", getCurrentSpeed().minecraft() < 0 ? 1 : 0);
         }
     }
 
@@ -536,7 +542,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             case AIR_BRAKE_UP:
                 if (getIndependentBrake() < 1) {
                     setIndependentBrake(getIndependentBrake() + independentBrakeNotch);
-                    System.out.println(getIndependentBrake());
                 }
                 break;
             case AIR_BRAKE_ZERO:

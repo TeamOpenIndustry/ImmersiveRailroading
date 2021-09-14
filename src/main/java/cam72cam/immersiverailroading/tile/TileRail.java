@@ -3,6 +3,9 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -173,7 +176,15 @@ public class TileRail extends TileRailBase {
 		super.onBreak();
 	}
 
-	@Override
+    @Override
+    public boolean clacks() {
+		if (info == null) {
+			return false;
+		}
+		return DefinitionManager.getTrack(info.settings.track).clack;
+    }
+
+    @Override
 	public ItemStack getRenderRailBed() {
 		if (info == null) {
 			return null;
