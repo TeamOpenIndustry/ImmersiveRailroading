@@ -32,6 +32,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private List<Door> doors;
     private List<Control> windows;
     private List<Control> widgets;
+    private List<Control> independent_brakes;
     private List<Readout<T>> gauges;
 
     private List<LightFlare> headlights;
@@ -68,6 +69,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         if (bogeyRear != null && Math.abs(def.getBogeyRear(Gauge.from(Gauge.STANDARD)) + bogeyRear.center().x) > 0.5) {
             rearTrackers = new ExpireableList<>();
         }
+
+        independent_brakes = def.hasIndependentBrake() ?
+                Control.get(provider, ModelComponentType.INDEPENDENT_BRAKE_X) :
+                Collections.emptyList();
 
         gauges = def.hasIndependentBrake() ?
                 Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, EntityMoveableRollingStock::getIndependentBrake) :
@@ -193,6 +198,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         components.addAll(doors);
         components.addAll(windows);
         components.addAll(widgets);
+        components.addAll(independent_brakes);
         return components;
     }
 
