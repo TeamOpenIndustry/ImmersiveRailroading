@@ -49,7 +49,9 @@ public class PhysicsAccummulator {
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
-			trainBrake += Math.min(1, Math.pow(loco.getTrainBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient(pos.speed);
+			trainBrake = Math.max(trainBrake,
+					Math.min(1, Math.pow(loco.getTrainBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient(pos.speed)
+			);
 		}
 		// Possible brake applied from trainBrake pressure
 		double totalAdhesionNewtons = stock.getWeight() * 0.25 * 0.25 * 4.44822f;
