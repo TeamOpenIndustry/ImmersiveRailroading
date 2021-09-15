@@ -174,14 +174,40 @@ public class Control {
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
         // or at least expose a "tick order" function as crappy as that would be...
         boolean inRange = false;
-        for (double i = 0; i < 2; i+=0.1) {
+        Vec3d delta = bb.max().subtract(bb.min());
+        double step = Math.min(delta.x, Math.min(delta.y, delta.z))/2;
+        for (double i = 0; i < 2; i+=step) {
             inRange = inRange || bb.contains(player.getPositionEyes().add(player.getLookVector().scale(i)).add(stock.getVelocity()));
         }
         if (!inRange) {
             return;
         }
         Vec3d pos = transform(center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
-        GlobalRender.drawText(label, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        String state = "";
+        switch (part.type) {
+            case TRAIN_BRAKE_X:
+            case INDEPENDENT_BRAKE_X:
+                if (!stock.getDefinition().isLinearBrakeControl()) {
+                     break;
+                }
+                // Fallthrough
+            case THROTTLE_X:
+            case REVERSER_X:
+            case THROTTLE_BRAKE_X:
+            case WHISTLE_CONTROL_X:
+            case HORN_CONTROL_X:
+            case ENGINE_START_X:
+                float percent = getValue(stock);
+                if (part.type == ModelComponentType.REVERSER_X) {
+                    percent *= -2;
+                }
+                if (toggle || press) {
+                    state = percent == 1 ? " (On)" : " (Off)";
+                } else {
+                    state = String.format(" (%d%%)", (int)(percent * 100));
+                }
+        }
+        GlobalRender.drawText(label + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public float getValue(EntityRollingStock stock) {
