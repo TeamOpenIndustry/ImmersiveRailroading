@@ -63,10 +63,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             gauges.addAll(
                     Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, EntityMoveableRollingStock::getTotalBrake)
             );
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_X, EntityMoveableRollingStock::getTotalBrake));
-            front_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_FRONT", EntityMoveableRollingStock::getTotalBrake));
-            rear_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_REAR", EntityMoveableRollingStock::getTotalBrake));
         }
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_X, EntityMoveableRollingStock::getTotalBrake));
+        front_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_FRONT", EntityMoveableRollingStock::getTotalBrake));
+        rear_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_REAR", EntityMoveableRollingStock::getTotalBrake));
 
         this.frame = new Frame(provider, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);
