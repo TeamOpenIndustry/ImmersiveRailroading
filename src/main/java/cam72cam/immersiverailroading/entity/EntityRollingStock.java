@@ -265,7 +265,6 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public void setControlPosition(Control control, float val) {
-		System.out.println(control.part.type.toString() + val);
 		val = Math.min(1, Math.max(0, val));
 		controlPositions.put(control.controlGroup, Pair.of(getControlPressed(control), val));
 	}
