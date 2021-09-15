@@ -144,7 +144,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
 			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle());
 			((LocomotiveDiesel) stock).realSetReverser(this.getReverser() * (direction ? 1 : -1));
-			((LocomotiveDiesel) stock).realAirBrake(this.getAirBrake());
+			((LocomotiveDiesel) stock).realTrainBrake(this.getTrainBrake());
 		}
 	}
 
@@ -154,8 +154,8 @@ public class LocomotiveDiesel extends Locomotive {
 	private void realSetReverser(float newReverser) {
 		super.setReverser(newReverser);
 	}
-	private void realAirBrake(float newAirBrake) {
-		super.setAirBrake(newAirBrake);;
+	private void realTrainBrake(float newTrainBrake) {
+		super.setTrainBrake(newTrainBrake);;
 	}
 
 	@Override
@@ -188,8 +188,8 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-	public void setAirBrake(float newAirBrake) {
-		realAirBrake(newAirBrake);
+	public void setTrainBrake(float newTrainBrake) {
+		realTrainBrake(newTrainBrake);
 		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 	

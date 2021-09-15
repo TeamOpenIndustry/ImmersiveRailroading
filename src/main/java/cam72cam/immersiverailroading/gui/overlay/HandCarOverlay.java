@@ -21,7 +21,7 @@ public class HandCarOverlay extends ControlsOverlay {
 		if (loco.getDefinition().hasIndependentBrake()) {
 			drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getIndependentBrake() * 10, 0, 10);
 		}
-		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
+		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getTrainBrake()*10, 0, 10);
 		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
 
 		drawSpeedDisplay(loco, 0);

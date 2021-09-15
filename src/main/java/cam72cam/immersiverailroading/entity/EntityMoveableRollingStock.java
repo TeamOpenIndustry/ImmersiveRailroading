@@ -6,6 +6,8 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -197,10 +199,48 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return curr;
     }
 
+
+    @Override
+    public void onDrag(Control control, double delta) {
+        super.onDrag(control, delta);
+        switch (control.part.type) {
+            case INDEPENDENT_BRAKE_X:
+                if (getDefinition().isLinearBrakeControl()) {
+                    setIndependentBrake(getControlPosition(control));
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onDragRelease(Control control) {
+        super.onDragRelease(control);
+        if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
+            setControlPosition(control, 0.5f);
+        }
+    }
+
+    @Override
+    protected float defaultControlPosition(Control control) {
+        switch (control.part.type) {
+            case INDEPENDENT_BRAKE_X:
+                return getDefinition().isLinearBrakeControl() ? 0 : 0.5f;
+            default:
+                return super.defaultControlPosition(control);
+        }
+    }
+
     @Override
     public void onTick() {
         super.onTick();
 
+        if (getDefinition().hasIndependentBrake()) {
+            for (Control control : getDefinition().getModel().getDraggableComponents()) {
+                if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
+                    setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
+                }
+            }
+        }
 
         if (getWorld().isServer) {
             if (ConfigDebug.serverTickCompensation) {
@@ -539,18 +579,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         float independentBrakeNotch = 0.04f;
 
         switch (key) {
-            case AIR_BRAKE_UP:
-                if (getIndependentBrake() < 1) {
-                    setIndependentBrake(getIndependentBrake() + independentBrakeNotch);
-                }
+            case INDEPENDENT_BRAKE_UP:
+                setIndependentBrake(getIndependentBrake() + independentBrakeNotch);
                 break;
-            case AIR_BRAKE_ZERO:
+            case INDEPENDENT_BRAKE_ZERO:
                 setIndependentBrake(0f);
                 break;
-            case AIR_BRAKE_DOWN:
-                if (getIndependentBrake() > 0) {
-                    setIndependentBrake(getIndependentBrake() - independentBrakeNotch);
-                }
+            case INDEPENDENT_BRAKE_DOWN:
+                setIndependentBrake(getIndependentBrake() - independentBrakeNotch);
                 break;
             default:
                 super.handleKeyPress(source, key);
@@ -561,7 +597,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return independentBrake;
     }
     public void setIndependentBrake(float newIndependentBrake) {
+        newIndependentBrake = Math.min(1, Math.max(0, newIndependentBrake));
         if (this.getIndependentBrake() != newIndependentBrake) {
+            if (getDefinition().isLinearBrakeControl()) {
+                setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);
+            }
             independentBrake = newIndependentBrake;
             triggerResimulate();
         }

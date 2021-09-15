@@ -16,6 +16,7 @@ import cam72cam.mod.render.obj.OBJVBO;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private List<Door> doors;
     private List<Control> windows;
     private List<Control> widgets;
+    private List<Readout<T>> gauges;
 
     private List<LightFlare> headlights;
 
@@ -66,6 +68,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         if (bogeyRear != null && Math.abs(def.getBogeyRear(Gauge.from(Gauge.STANDARD)) + bogeyRear.center().x) > 0.5) {
             rearTrackers = new ExpireableList<>();
         }
+
+        gauges = def.hasIndependentBrake() ?
+                Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, EntityMoveableRollingStock::getIndependentBrake) :
+                Collections.emptyList();
     }
 
     protected boolean unifiedBogies() {
@@ -191,7 +197,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     public List<Readout<T>> getReadouts() {
-        return new ArrayList<>();
+        return gauges;
     }
 
     public List<Door> getDoors() {

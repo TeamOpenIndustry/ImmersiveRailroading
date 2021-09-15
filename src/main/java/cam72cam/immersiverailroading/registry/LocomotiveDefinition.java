@@ -19,7 +19,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private int traction;
     private Speed maxSpeed;
     private boolean hasRadioEquipment;
-    private boolean isLinearBrakeControl;
     private boolean isLinkedBrakeThrottle;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
@@ -48,7 +47,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         if (properties.has("radio_equipped")) {
             hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
         }
-        isLinearBrakeControl = properties.has("linear_brake_control") && properties.get("linear_brake_control").getAsBoolean();
         isLinkedBrakeThrottle = properties.has("isLinkedBrakeThrottle") && properties.get("linked_brake_throttle").getAsBoolean();
         toggleBell = true;
         if (properties.has("toggle_bell")) {
@@ -95,7 +93,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     }
 
     public boolean isLinearBrakeControl() {
-        return isLinkedBrakeThrottle() || isLinearBrakeControl;
+        return isLinkedBrakeThrottle() || super.isLinearBrakeControl();
     }
 
     public boolean isLinkedBrakeThrottle() {

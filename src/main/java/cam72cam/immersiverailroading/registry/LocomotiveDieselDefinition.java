@@ -77,9 +77,15 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
                     1/8f,
                     new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
             ));
-            controlSounds.put("BRAKE_1", new ControlSoundsDefinition(
+            controlSounds.put("TRAIN_BRAKE_1", new ControlSoundsDefinition(
                     new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/pressure.ogg"),
                     null,
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
+            ));
+            controlSounds.put("INDEPENDENT_BRAKE_1", new ControlSoundsDefinition(
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
+                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/pressure.ogg"),
                     null,
                     new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
             ));

@@ -41,7 +41,7 @@ public class DieselLocomotiveOverlay extends ControlsOverlay {
 		if (loco.getDefinition().hasIndependentBrake()) {
 			drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getIndependentBrake() * 10, 0, 10);
 		}
-		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
+		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getTrainBrake()*10, 0, 10);
 		if (Config.ImmersionConfig.disableIndependentThrottle) {
 			drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getReverser() * 10, -10, 10);
 		} else {

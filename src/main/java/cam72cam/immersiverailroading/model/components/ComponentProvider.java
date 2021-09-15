@@ -34,7 +34,7 @@ public class ComponentProvider {
                 .filter(Matcher::matches)
                 .collect(
                         Collectors.groupingBy(
-                                m -> m.group(1),
+                                m -> m.group(m.groupCount()),
                                 Collectors.mapping(m -> m.group(0), Collectors.toSet())
                         )
                 );

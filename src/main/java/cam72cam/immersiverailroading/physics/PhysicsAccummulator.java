@@ -12,7 +12,7 @@ public class PhysicsAccummulator {
 	//http://www.wplives.org/forms_and_documents/Air_Brake_Principles.pdf
 
 	public double tractiveEffortNewtons = 0;
-	public double airBrake = 0;
+	public double trainBrake = 0;
 	public double independentBrakeNewtons = 0;
 	//lbs
 	public double rollingResistanceNewtons = 0;
@@ -49,16 +49,18 @@ public class PhysicsAccummulator {
 		if (stock instanceof Locomotive) {
 			Locomotive loco = (Locomotive) stock;
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
-			airBrake += Math.min(1, Math.pow(loco.getAirBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient(pos.speed);
-			//Independent brake brakeAdhesionNewtons += loco.getDefinition().getStartingTractionNewtons(stock.gauge);
-		} else {
-			// Air brake only applies 1/4th
-			// 0.25 = steel wheel on steel rail	
-			brakeAdhesionNewtons += stock.getWeight() * 0.25 * 0.25 * 4.44822f;
+			trainBrake += Math.min(1, Math.pow(loco.getTrainBrake() * loco.getDefinition().getBrakePower(), 2)) * loco.slipCoefficient(pos.speed);
 		}
+		// Possible brake applied from trainBrake pressure
+		double totalAdhesionNewtons = stock.getWeight() * 0.25 * 0.25 * 4.44822f;
+		brakeAdhesionNewtons += totalAdhesionNewtons;
 
+		// Independent brake applied on a given piece of stock
 		if (stock.getDefinition().hasIndependentBrake()) {
-			independentBrakeNewtons += ((EntityMoveableRollingStock) stock).getIndependentBrake() * stock.getWeight() * 0.25 * 4.44822f;
+			double independentAdhesionNewtons = ((EntityMoveableRollingStock) stock).getIndependentBrake() * totalAdhesionNewtons;
+			independentBrakeNewtons += independentAdhesionNewtons;
+			// This train brake force has already been independently applied, don't double count it
+			brakeAdhesionNewtons -= independentAdhesionNewtons;
 		}
 		
 		int slowdown = movable.getSpeedRetarderSlowdown(pos);
@@ -66,7 +68,7 @@ public class PhysicsAccummulator {
 	}
 	
 	public Speed getVelocity() {
-		double brakeNewtons = (independentBrakeNewtons + brakeAdhesionNewtons * Math.min(airBrake, 1)) * Config.ConfigBalance.brakeMultiplier;
+		double brakeNewtons = (independentBrakeNewtons + brakeAdhesionNewtons * Math.min(trainBrake, 1)) * Config.ConfigBalance.brakeMultiplier;
 		
 		// a = f (to newtons) * m (to newtons)
 		double tractiveAccell = tractiveEffortNewtons / massToMoveKg;
