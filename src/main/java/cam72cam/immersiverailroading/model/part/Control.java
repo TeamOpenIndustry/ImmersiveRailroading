@@ -35,6 +35,7 @@ public class Control {
     public final boolean global;
     private final boolean invert;
     private final boolean hide;
+    private final Vec3d center;
     private Vec3d rotationPoint = null;
     private float rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
@@ -83,6 +84,11 @@ public class Control {
             rotations.put(Axis.X, (float) rot.normal.x);
             rotations.put(Axis.Y, (float) rot.normal.y);
             rotations.put(Axis.Z, (float) rot.normal.z);
+
+            List<Vec3d> nonRotGroups = part.groups().stream().filter(g -> !g.name.contains("_ROT")).map(g -> g.max.add(g.min).scale(0.5)).collect(Collectors.toList());
+            this.center = nonRotGroups.stream().reduce(Vec3d.ZERO, Vec3d::add).scale(1.0/nonRotGroups.size());
+        } else {
+            this.center = part.center;
         }
 
         Pattern pattern = Pattern.compile("TL_([^_]*)_([^_])");
@@ -153,19 +159,28 @@ public class Control {
             return;
         }
 
+        Player player = MinecraftClient.getPlayer();
+
+        if (transform(center, stock).distanceTo(player.getPositionEyes().add(stock.getVelocity())) > 4) {
+            return;
+        }
+
 
         IBoundingBox bb = IBoundingBox.from(
                 transform(part.min, stock),
                 transform(part.max, stock)
-        ).grow(new Vec3d(0.125, 0.125, 0.125));
+        );
         // The added velocity is due to a bug where the player may tick before or after the stock.
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
         // or at least expose a "tick order" function as crappy as that would be...
-        Player player = MinecraftClient.getPlayer();
-        if (!bb.contains(player.getPositionEyes().add(player.getLookVector()).add(stock.getVelocity()))) {
+        boolean inRange = false;
+        for (double i = 0; i < 2; i+=0.1) {
+            inRange = inRange || bb.contains(player.getPositionEyes().add(player.getLookVector().scale(i)).add(stock.getVelocity()));
+        }
+        if (!inRange) {
             return;
         }
-        Vec3d pos = transform(part.center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
+        Vec3d pos = transform(center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
         GlobalRender.drawText(label, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
@@ -241,7 +256,7 @@ public class Control {
 
         float delta = 0;
 
-        Vec3d partPos = transform(part.center, stock).subtract(stock.getPosition());
+        Vec3d partPos = transform(center, stock).subtract(stock.getPosition());
         Vec3d current = player.getPositionEyes().subtract(stock.getPosition());
         Vec3d look = player.getLookVector();
         // Rescale along look vector
@@ -254,9 +269,9 @@ public class Control {
             movement = movement.rotateYaw(-stock.getRotationYaw());
             float applied = (float) (movement.length());
             float value = getValue(stock);
-            Vec3d grabComponent = transform(part.center, value, stock).add(movement);
-            Vec3d grabComponentNext = transform(part.center, value + applied, stock);
-            Vec3d grabComponentPrev = transform(part.center, value - applied, stock);
+            Vec3d grabComponent = transform(center, value, stock).add(movement);
+            Vec3d grabComponentNext = transform(center, value + applied, stock);
+            Vec3d grabComponentPrev = transform(center, value - applied, stock);
             if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
                 delta += applied;
             } else {
