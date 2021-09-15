@@ -19,6 +19,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import util.Matrix4;
 
 import java.util.*;
@@ -58,7 +59,7 @@ public class Control {
         this.label = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
             return matcher.find() ? matcher.group(1).replaceAll("\\^", " ") : null;
-        }).filter(Objects::nonNull).findFirst().orElse(part.type.name().replace("_X", ""));
+        }).filter(Objects::nonNull).findFirst().orElse(formatLabel(part.type.name().replace("_X", "")));
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
         this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
@@ -105,6 +106,10 @@ public class Control {
                 scales.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
             }
         }
+    }
+
+    private static String formatLabel(String label) {
+        return WordUtils.capitalizeFully(label.replaceAll("_", " ").toLowerCase(Locale.ROOT));
     }
 
     public void render(EntityRollingStock stock, ComponentRenderer draw) {
