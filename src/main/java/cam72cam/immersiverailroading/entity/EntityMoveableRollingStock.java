@@ -29,6 +29,7 @@ import cam72cam.mod.sound.ISound;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
 
@@ -52,6 +53,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @TagSync
     @TagField("IND_BRAKE")
     private float independentBrake = 0;
+
+    @TagSync
+    @TagField("TOTAL_BRAKE")
+    private float totalBrake = 0;
 
     private float sndRand;
 
@@ -254,6 +259,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 // Could also be implemented as a wipe from the track rail base (might be more efficient?)
                 lastRetarderPos = null;
             }
+
+            float trainBrake = 0;
+            if (this instanceof EntityCoupleableRollingStock) {
+                // This could be slow, but I don't want to do this properly till the next despaghettification
+                trainBrake = (float) ((EntityCoupleableRollingStock) this).getDirectionalTrain(false).stream()
+                        .map(m -> m.stock)
+                        .map(s -> s instanceof Locomotive ? (Locomotive) s : null)
+                        .filter(Objects::nonNull)
+                        .mapToDouble(Locomotive::getTrainBrake)
+                        .max().orElse(0);
+
+            }
+            this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrake));
         }
 
         if (getWorld().isClient) {
@@ -605,5 +623,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             independentBrake = newIndependentBrake;
             triggerResimulate();
         }
+    }
+    public float getTotalBrake() {
+        return totalBrake;
     }
 }

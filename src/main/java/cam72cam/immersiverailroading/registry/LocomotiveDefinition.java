@@ -85,6 +85,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     }
 
     public double getBrakePower() {
+        // TODO
         return 1;
     }
 

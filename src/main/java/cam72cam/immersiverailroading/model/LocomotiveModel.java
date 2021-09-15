@@ -46,6 +46,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     private List<LightFlare> headlightsFront;
     private List<LightFlare> headlightsRear;
     private List<Control> independent_brakes;
+    private List<Readout<T>> front_gauges;
+    private List<Readout<T>> rear_gauges;
 
     public LocomotiveModel(LocomotiveDefinition def) throws Exception {
         super(def);
@@ -53,6 +55,9 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+        front_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_FRONT", EntityMoveableRollingStock::getTotalBrake);
+        rear_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_REAR", EntityMoveableRollingStock::getTotalBrake);
+
         ValveGearType type = def.getValveGear();
 
         drivingWheels = DrivingAssembly.get(type, provider, null, 0);
@@ -139,6 +144,9 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                 flare.effects(stock, offset);
             }
         }
+
+        front_gauges.forEach(c -> c.effects(stock));
+        rear_gauges.forEach(c -> c.effects(stock));
     }
 
     @Override
@@ -182,6 +190,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                         headlightsFront.forEach(x -> x.render(light, stock));
                     }
                 }
+
+                front_gauges.forEach(r -> r.render(stock, matrix));
             }
         }
         if (drivingWheelsRear != null) {
@@ -205,6 +215,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                         headlightsRear.forEach(x -> x.render(light, stock));
                     }
                 }
+
+                rear_gauges.forEach(r -> r.render(stock, matrix));
             }
         }
     }
