@@ -395,8 +395,16 @@ public abstract class Locomotive extends FreightTank {
 		return null;
 	}
 
+	@Deprecated
+	public float getAirBrake() {
+		return getTrainBrake();
+	}
 	public float getTrainBrake() {
 		return trainBrake;
+	}
+	@Deprecated
+	public void setAirBrake(float value) {
+		setTrainBrake(value);
 	}
 	public void setTrainBrake(float newTrainBrake) {
 		newTrainBrake = Math.min(1, Math.max(0, newTrainBrake));
