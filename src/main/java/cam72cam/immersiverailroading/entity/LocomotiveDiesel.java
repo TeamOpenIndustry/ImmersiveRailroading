@@ -169,7 +169,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	protected int getAvailableHP() {
-		if (!getDefinition().isCabCar && isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
+		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
@@ -181,10 +181,6 @@ public class LocomotiveDiesel extends Locomotive {
 
 		if (turnOnOffDelay > 0) {
 			turnOnOffDelay -= 1;
-		}
-
-		if (getDefinition().isCabCar) {
-			return;
 		}
 
 		if (getWorld().isClient) {
@@ -261,7 +257,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public FluidQuantity getTankCapacity() {
-		return getDefinition().isCabCar ? FluidQuantity.ZERO : this.getDefinition().getFuelCapacity(gauge);
+		return this.getDefinition().getFuelCapacity(gauge);
 	}
 	
 	@Override
