@@ -8,21 +8,25 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 
 public class DrivingAssembly {
-    private final DrivingWheels wheels;
+    private final WheelSet wheels;
     private final ValveGear right;
     private final ValveGear center;
     private final ValveGear left;
     private final ModelComponent steamChest;
 
+    public static DrivingAssembly get(ValveGearType type, ComponentProvider provider, float angleOffset) {
+        return get(type, provider, null, angleOffset);
+    }
+
     public static DrivingAssembly get(ValveGearType type, ComponentProvider provider, String pos, float angleOffset) {
-        DrivingWheels wheels = DrivingWheels.get(provider, pos, angleOffset);
+        WheelSet wheels = WheelSet.get(provider, pos == null ? ModelComponentType.WHEEL_DRIVER_X : ModelComponentType.WHEEL_DRIVER_POS_X, pos, angleOffset);
         if (wheels == null) {
             return null;
         }
 
-        ValveGear left = ValveGear.get(wheels.wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)), 0);
-        ValveGear center = ValveGear.get(wheels.wheels, type, provider, "CENTER" + (pos == null ? "" : ("_" + pos)), -120);
-        ValveGear right = ValveGear.get(wheels.wheels, type, provider, "RIGHT" + (pos == null ? "" : ("_" + pos)), center == null ? -90 : -240);
+        ValveGear left = ValveGear.get(wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)), 0);
+        ValveGear center = ValveGear.get(wheels, type, provider, "CENTER" + (pos == null ? "" : ("_" + pos)), -120);
+        ValveGear right = ValveGear.get(wheels, type, provider, "RIGHT" + (pos == null ? "" : ("_" + pos)), center == null ? -90 : -240);
 
         ModelComponent steamChest = pos == null ?
                 provider.parse(ModelComponentType.STEAM_CHEST) :
@@ -30,7 +34,7 @@ public class DrivingAssembly {
 
         return new DrivingAssembly(wheels, right, center, left, steamChest);
     }
-    public DrivingAssembly(DrivingWheels wheels, ValveGear right, ValveGear center, ValveGear left, ModelComponent steamChest) {
+    public DrivingAssembly(WheelSet wheels, ValveGear right, ValveGear center, ValveGear left, ModelComponent steamChest) {
         this.wheels = wheels;
         this.right = right;
         this.center = center;

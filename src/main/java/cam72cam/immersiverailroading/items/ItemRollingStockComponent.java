@@ -35,7 +35,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
-		return Collections.singletonList(ItemTabs.COMPONENT_TAB);
+		return Collections.EMPTY_LIST;
 	}
 
 	@Override
@@ -45,18 +45,19 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 
 	@Override
 	public List<ItemStack> getItemVariants(CreativeTab tab) {
+		return Collections.EMPTY_LIST;
+	}
+	public List<ItemStack> getItemVariants() {
 		List<ItemStack> items = new ArrayList<>();
-		if (tab == null || tab.equals(ItemTabs.COMPONENT_TAB)) {
-			for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
-				for (ItemComponentType item : new LinkedHashSet<>(def.getItemComponents())) {
-					ItemStack stack = new ItemStack(this, 1);
-					Data data = new Data(stack);
-					data.def = def;
-					data.gauge = def.recommended_gauge;
-					data.componentType = item;
-					data.write();
-					items.add(stack);
-				}
+		for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
+			for (ItemComponentType item : new LinkedHashSet<>(def.getItemComponents())) {
+				ItemStack stack = new ItemStack(this, 1);
+				Data data = new Data(stack);
+				data.def = def;
+				data.gauge = def.recommended_gauge;
+				data.componentType = item;
+				data.write();
+				items.add(stack);
 			}
 		}
 		return items;

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -21,7 +22,7 @@ public class TrackFollower {
         this.point = point;
     }
 
-    public void apply(EntityMoveableRollingStock stock) {
+    public void apply(EntityMoveableRollingStock stock, ComponentRenderer matrix) {
         Vec3d point = this.point.scale(stock.gauge.scale());
 
         if (!stock.getPosition().equals(pos)) {
@@ -44,12 +45,21 @@ public class TrackFollower {
             }
         }
 
-        GL11.glRotated(toPointYaw, 0, 1, 0);
-        GL11.glRotated(toPointPitch, 0, 0, 1);
-        GL11.glTranslated(point.x, point.y, point.z);
-        GL11.glRotated(atPointYaw, 0, 1, 0);
-        // TODO pitch
-        GL11.glTranslated(-point.x, -point.y, -point.z);
+        if (matrix != null) {
+            matrix.rotate(toPointYaw, 0, 1, 0);
+            matrix.rotate(toPointPitch, 0, 0, 1);
+            matrix.translate(this.point.x, this.point.y, this.point.z);
+            matrix.rotate(atPointYaw, 0, 1, 0);
+            // TODO pitch
+            matrix.translate(-this.point.x, -this.point.y, -this.point.z);
+        } else {
+            GL11.glRotated(toPointYaw, 0, 1, 0);
+            GL11.glRotated(toPointPitch, 0, 0, 1);
+            GL11.glTranslated(this.point.x, this.point.y, this.point.z);
+            GL11.glRotated(atPointYaw, 0, 1, 0);
+            // TODO pitch
+            GL11.glTranslated(-this.point.x, -this.point.y, -this.point.z);
+        }
     }
 
     public Vec3d nextPosition(World world, Gauge gauge, Vec3d currentPosition, float rotationYaw, float bogeyYaw, double distance) {
@@ -62,5 +72,9 @@ public class TrackFollower {
             return currentPosition;
         }
         return result;
+    }
+
+    public float getYaw() {
+        return toPointYaw + atPointYaw;
     }
 }

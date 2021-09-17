@@ -75,9 +75,55 @@ public abstract class EntityRollingStockDefinition {
     private double passengerCompartmentWidth;
     private int weight;
     private int maxPassengers;
+    private float interiorLightLevel;
+    private boolean hasIndependentBrake;
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
+    private static final Map<String, LightDefinition> lights = new HashMap<>();
+    protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
+    private boolean isLinearBrakeControl;
+
+    public static class LightDefinition {
+        public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
+
+        public final float blinkIntervalSeconds;
+        public final float blinkOffsetSeconds;
+        public final boolean blinkFullBright;
+        public final String reverseColor;
+        public final Identifier lightTex;
+        public final boolean castsLight;
+
+        private LightDefinition(JsonObject data) {
+            blinkIntervalSeconds = data.has("blinkIntervalSeconds") ? data.get("blinkIntervalSeconds").getAsFloat() : 0;
+            blinkOffsetSeconds = data.has("blinkOffsetSeconds") ? data.get("blinkOffsetSeconds").getAsFloat() : 0;
+            blinkFullBright = !data.has("blinkFullBright") || data.get("blinkFullBright").getAsBoolean();
+            reverseColor = data.has("reverseColor") ? data.get("reverseColor").getAsString() : null;
+            lightTex = data.has("texture") ? new Identifier(data.get("texture").getAsString()) : default_light_tex;
+            castsLight = !data.has("castsLight") || data.get("castsLight").getAsBoolean();
+        }
+    }
+
+    public static class ControlSoundsDefinition {
+        public final Identifier engage;
+        public final Identifier move;
+        public final Float movePercent;
+        public final Identifier disengage;
+
+        protected ControlSoundsDefinition(Identifier engage, Identifier move, Float movePercent, Identifier disengage) {
+            this.engage = engage;
+            this.move = move;
+            this.movePercent = movePercent;
+            this.disengage = disengage;
+        }
+
+        private ControlSoundsDefinition(JsonObject data) {
+            engage = data.has("engage") ? new Identifier(ImmersiveRailroading.MODID, data.get("engage").getAsString()) : null;
+            move = data.has("move") ? new Identifier(ImmersiveRailroading.MODID, data.get("move").getAsString()) : null;
+            movePercent = data.has("movePercent") ? data.get("movePercent").getAsFloat() : null;
+            disengage = data.has("disengage") ? new Identifier(ImmersiveRailroading.MODID, data.get("disengage").getAsString()) : null;
+        }
+    }
 
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         this.type = type;
@@ -230,6 +276,16 @@ public abstract class EntityRollingStockDefinition {
         JsonObject properties = data.get("properties").getAsJsonObject();
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
         valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase(Locale.ROOT)) : null;
+        hasIndependentBrake = properties.has("independent_brake") ? properties.get("independent_brake").getAsBoolean() : independentBrakeDefault();
+        // Locomotives default to linear brake control
+        isLinearBrakeControl = properties.has("linear_brake_control") ? properties.get("linear_brake_control").getAsBoolean() : !(this instanceof LocomotiveDefinition);
+
+        if (data.has("lights")) {
+            for (Entry<String, JsonElement> entry : data.get("lights").getAsJsonObject().entrySet()) {
+                lights.put(entry.getKey(), new LightDefinition(entry.getValue().getAsJsonObject()));
+            }
+        }
+        interiorLightLevel = properties.has("interior_light_level") ? properties.get("interior_light_level").getAsFloat() : 6 / 15f;
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
@@ -250,6 +306,11 @@ public abstract class EntityRollingStockDefinition {
             }
             if (sounds.has("clack_rear")) {
                 clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(default_clackRear);
+            }
+            if (sounds.has("controls")) {
+                for (Entry<String, JsonElement> entry : sounds.get("controls").getAsJsonObject().entrySet()) {
+                    controlSounds.put(entry.getKey(), new ControlSoundsDefinition(entry.getValue().getAsJsonObject()));
+                }
             }
         }
     }
@@ -313,6 +374,10 @@ public abstract class EntityRollingStockDefinition {
             default:
                 return 0;
         }
+    }
+
+    public boolean hasIndependentBrake() {
+        return hasIndependentBrake;
     }
 
     private static class HeightMapData {
@@ -531,5 +596,25 @@ public abstract class EntityRollingStockDefinition {
 
     public ValveGearType getValveGear() {
         return valveGear;
+    }
+
+    public LightDefinition getLight(String name) {
+        return lights.get(name);
+    }
+    public ControlSoundsDefinition getControlSound(String name) {
+        return controlSounds.get(name);
+    }
+
+    public float interiorLightLevel() {
+        return interiorLightLevel;
+    }
+
+
+    protected boolean independentBrakeDefault() {
+        return false;
+    }
+
+    public boolean isLinearBrakeControl() {
+        return isLinearBrakeControl;
     }
 }

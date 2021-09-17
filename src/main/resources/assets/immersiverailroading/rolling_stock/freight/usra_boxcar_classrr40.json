@@ -3,7 +3,8 @@
 	"model": "immersiverailroading:models/rolling_stock/freight/usra_boxcar_classrr40/usra_boxcar_classrr40.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 18500
+		"weight_kg": 18500,
+		"independent_brake": true
 	},
 	"passenger": {
 		"slots": 6,

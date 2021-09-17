@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -14,6 +16,7 @@ import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
+import java.util.OptionalDouble;
 
 public class LocomotiveDiesel extends Locomotive {
 
@@ -32,6 +35,9 @@ public class LocomotiveDiesel extends Locomotive {
 	@TagSync
 	@TagField("ENGINE_OVERHEATED")
 	private boolean engineOverheated = false;
+
+	private int throttleCooldown;
+	private int reverserCooldown;
 
 	public LocomotiveDiesel() {
 		engineTemperature = ambientTemperature();
@@ -52,6 +58,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	public void setTurnedOn(boolean value) {
 		turnedOn = value;
+		setControlPositions(ModelComponentType.ENGINE_START_X, turnedOn ? 1 : 0);
 	}
 	
 	public boolean isTurnedOn() {
@@ -95,9 +102,69 @@ public class LocomotiveDiesel extends Locomotive {
 					setTurnedOn(!isTurnedOn());
 				}
 				break;
+			case REVERSER_UP:
+			case REVERSER_ZERO:
+			case REVERSER_DOWN:
+				if (this.reverserCooldown <= 0) {
+					reverserCooldown = 3;
+					return;
+				}
+				super.handleKeyPress(source, key);
+				break;
+			case THROTTLE_UP:
+			case THROTTLE_ZERO:
+			case THROTTLE_DOWN:
+				if (this.throttleCooldown <= 0) {
+					throttleCooldown = 3;
+					return;
+				}
+				super.handleKeyPress(source, key);
+				break;
 			default:
 				super.handleKeyPress(source, key);
 		}
+	}
+
+	@Override
+	public boolean hasElectricalPower() {
+		return this.isRunning();
+	}
+
+	@Override
+    public boolean internalLightsEnabled() {
+		return this.hasElectricalPower();
+    }
+
+    @Override
+	protected float getReverserDelta() {
+		return Config.ImmersionConfig.disableIndependentThrottle ? super.getReverserDelta() : 0.51f;
+	}
+
+	@Override
+	public void setThrottle(float newThrottle) {
+		if (!Config.ImmersionConfig.disableIndependentThrottle) {
+			if (newThrottle > getThrottle()) {
+				super.setThrottle((float) (Math.ceil(newThrottle * 8) / 8));
+			} else {
+				super.setThrottle((float) (Math.floor(newThrottle * 8) / 8));
+			}
+		} else {
+			super.setThrottle(newThrottle);
+		}
+	}
+
+	@Override
+	public void setReverser(float newReverser) {
+		float value = newReverser;
+		if (!Config.ImmersionConfig.disableIndependentThrottle) {
+			if (getThrottle() > 0) {
+				value = 0;
+			} else {
+				value = Math.round(newReverser);
+			}
+		}
+		super.setReverser(value);
+
 	}
 
 	@Override
@@ -107,8 +174,6 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 		return 0;
 	}
-
-
 
 	@Override
 	public void onTick() {
@@ -132,11 +197,27 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 
+		OptionalDouble control = this.getDefinition().getModel().getDraggableComponents().stream()
+				.filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X)
+				.mapToDouble(this::getControlPosition)
+				.max();
+		if (control.isPresent() && control.getAsDouble() > 0) {
+			this.setHorn(10, hornPlayer);
+		}
+
 		float engineTemperature = getEngineTemperature();
 		float heatUpSpeed = 0.0029167f * Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7f;
 		float ambientDelta = engineTemperature - ambientTemperature();
 		float coolDownSpeed = heatUpSpeed * Math.copySign((float)Math.pow(ambientDelta / 130, 2), ambientDelta);
-		
+
+		if (throttleCooldown > 0) {
+			throttleCooldown--;
+		}
+
+		if (reverserCooldown > 0) {
+			reverserCooldown--;
+		}
+
 		engineTemperature -= coolDownSpeed;
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
@@ -193,5 +274,19 @@ public class LocomotiveDiesel extends Locomotive {
 
 	public float getSoundThrottle() {
 		return soundThrottle;
+	}
+
+	@Override
+	public void onDragRelease(Control component) {
+		super.onDragRelease(component);
+		if (component.part.type == ModelComponentType.ENGINE_START_X) {
+			turnedOn = getDefinition().getModel().getDraggableComponents().stream()
+					.filter(c -> c.part.type == ModelComponentType.ENGINE_START_X)
+					.allMatch(c -> getControlPosition(c) == 1);
+		}
+		if (component.part.type == ModelComponentType.REVERSER_X) {
+			// Make sure reverser is sync'd
+			setControlPositions(ModelComponentType.REVERSER_X, getReverser()/-2 + 0.5f);
+		}
 	}
 }

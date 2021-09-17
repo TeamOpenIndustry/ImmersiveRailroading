@@ -31,7 +31,7 @@ public class CraftPicker {
 			screen.show();
 			onChoose.accept(stack);
 		};
-		this.items = new ArrayList<>(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getItemVariants(ItemTabs.COMPONENT_TAB));
+		this.items = new ArrayList<>(IRItems.ITEM_ROLLING_STOCK_COMPONENT.getItemVariants());
 
         List<ItemStack> stock = new ArrayList<>();
 

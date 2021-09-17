@@ -1,12 +1,13 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.fluid.Fluid;
 
-public class SteamLocomotiveOverlay extends LocomotiveOverlay {
+public class SteamLocomotiveOverlay extends ControlsOverlay {
 	public void draw() {
 		Entity riding = MinecraftClient.getPlayer().getRiding();
 		if (riding == null) {
@@ -29,10 +30,18 @@ public class SteamLocomotiveOverlay extends LocomotiveOverlay {
 		}
 		
 		drawGauge(boilerColor, loco.getBoilerTemperature(), 150, "C");
-		
-		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
-		drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, -10, 10);
-		
+
+		if (loco.getDefinition().hasIndependentBrake()) {
+			drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getIndependentBrake() * 10, 0, 10);
+		}
+		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getTrainBrake()*10, 0, 10);
+		if (Config.ImmersionConfig.disableIndependentThrottle) {
+			drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getReverser() * 10, -10, 10);
+		} else {
+			drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getThrottle()*10, 0, 10);
+			drawScalar(GuiText.LABEL_REVERSER.toString(), loco.getReverser()*10, -10, 10);
+		}
+
 		drawSpeedDisplay(loco, 20);
 	}
 }

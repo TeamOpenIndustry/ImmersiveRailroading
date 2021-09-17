@@ -21,6 +21,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private boolean hasRadioEquipment;
     public boolean muliUnitCapable;
     public boolean isCabCar;
+    private boolean isLinkedBrakeThrottle;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);
@@ -53,6 +54,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
             muliUnitCapable = !properties.has("multi_unit_capable") ? this.multiUnitDefault() : properties.get("multi_unit_capable").getAsBoolean();
         }
+        isLinkedBrakeThrottle = properties.has("isLinkedBrakeThrottle") && properties.get("linked_brake_throttle").getAsBoolean();
         toggleBell = !properties.has("toggle_bell") || properties.get("toggle_bell").getAsBoolean();
     }
 
@@ -91,10 +93,24 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     }
 
     public double getBrakePower() {
+        // TODO
         return 1;
     }
 
     public boolean getRadioCapability() {
         return this.hasRadioEquipment;
+    }
+
+    public boolean isLinearBrakeControl() {
+        return isLinkedBrakeThrottle() || super.isLinearBrakeControl();
+    }
+
+    public boolean isLinkedBrakeThrottle() {
+        return isLinkedBrakeThrottle;
+    }
+
+    @Override
+    protected boolean independentBrakeDefault() {
+        return true;
     }
 }

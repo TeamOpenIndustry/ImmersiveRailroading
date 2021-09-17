@@ -9,7 +9,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.util.RealBB;
+import cam72cam.mod.entity.sync.TagSync;
+import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
@@ -90,21 +93,29 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	private int resimulateCooldown = 0;
 	public boolean isAttaching = false;
 
-	@TagField("CoupledFront")
+	@TagSync
+	@TagField(value = "CoupledFront", mapper = StrictTagMapper.class)
 	private UUID coupledFront = null;
 	@TagField("lastKnownFront")
 	private Vec3i lastKnownFront = null;
+	@TagSync
 	@TagField("frontCouplerEngaged")
 	private boolean frontCouplerEngaged = true;
 	private Vec3d couplerFrontPosition = null;
 
-	@TagField("CoupledBack")
+	@TagSync
+	@TagField(value = "CoupledBack", mapper = StrictTagMapper.class)
 	private UUID coupledBack = null;
 	@TagField("lastKnownRear")
 	private Vec3i lastKnownRear= null;
+	@TagSync
 	@TagField("backCouplerEngaged")
 	private boolean backCouplerEngaged = true;
 	private Vec3d couplerRearPosition = null;
+
+	@TagSync
+	@TagField("hasElectricalPower")
+	private boolean hasElectricalPower;
 
 	/*
 	 * 
@@ -163,6 +174,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			
 			return;
 		}
+
+		hasElectricalPower = false;
+		this.mapTrain(this, false, stock -> {
+			if (stock instanceof Locomotive && stock.hasElectricalPower()) {
+				hasElectricalPower = true;
+			}
+		});
 
 		if (this.resimulateCooldown > 0) {
 			this.resimulateCooldown -= 1;
@@ -861,4 +879,18 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			resimulateCooldown = 5;
 		}
 	}
+
+	public boolean hasElectricalPower() {
+		return this.hasElectricalPower;
+	}
+
+    @Override
+    public void setControlPosition(Control component, float val) {
+        super.setControlPosition(component, val);
+        if (component.global) {
+			this.mapTrain(this, false, stock -> {
+				stock.controlPositions.put(component.controlGroup, this.getControlData(component));
+			});
+		}
+    }
 }

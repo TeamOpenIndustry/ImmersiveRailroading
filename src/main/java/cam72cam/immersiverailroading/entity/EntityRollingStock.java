@@ -6,19 +6,25 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.*;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.serialization.StrictTagMapper;
-import cam72cam.mod.serialization.TagField;
-import com.google.gson.JsonObject;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.serialization.*;
+import cam72cam.mod.util.SingleCache;
+import org.apache.commons.lang3.tuple.Pair;
+import util.Matrix4;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
 	@TagField("defID")
@@ -31,6 +37,13 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@TagSync
 	@TagField(value = "texture", mapper = StrictTagMapper.class)
 	private String texture = null;
+	private SingleCache<Vec3d, Matrix4> modelMatrix = new SingleCache<>(v -> new Matrix4()
+			.translate(this.getPosition().x, this.getPosition().y, this.getPosition().z)
+			.rotate(Math.toRadians(180 - this.getRotationYaw()), 0, 1, 0)
+			.rotate(Math.toRadians(this.getRotationPitch()), 1, 0, 0)
+			.rotate(Math.toRadians(-90), 0, 1, 0)
+			.scale(this.gauge.scale(), this.gauge.scale(), this.gauge.scale())
+	);
 
 	public void setup(String defID, Gauge gauge, String texture) {
 		this.defID = defID;
@@ -187,5 +200,94 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	public String getTexture() {
 		return texture;
+	}
+
+    public boolean internalLightsEnabled() {
+		return false;
+    }
+    public boolean externalLightsEnabled() {
+		return internalLightsEnabled();
+	}
+	public Matrix4 getModelMatrix() {
+		return this.modelMatrix.get(getPosition()).copy();
+	}
+
+	@TagSync
+	@TagField(value="controlPositions", mapper = ControlPositionMapper.class)
+	protected Map<String, Pair<Boolean, Float>> controlPositions = new HashMap<>();
+
+	public void onDragStart(Control control) {
+		setControlPressed(control, true);
+	}
+
+	public void onDrag(Control control, double delta) {
+		setControlPressed(control, true);
+		setControlPosition(control, (float)delta + getControlPosition(control));
+	}
+
+	public void onDragRelease(Control control) {
+		setControlPressed(control, false);
+
+		if (control.toggle) {
+			setControlPosition(control, Math.abs(getControlPosition(control) - 1));
+		}
+		if (control.press) {
+			setControlPosition(control, 0);
+		}
+	}
+
+	protected float defaultControlPosition(Control control) {
+		return 0;
+	}
+
+	public Pair<Boolean, Float> getControlData(String control) {
+		return controlPositions.getOrDefault(control, Pair.of(false, 0f));
+	}
+
+	public Pair<Boolean, Float> getControlData(Control control) {
+		return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, defaultControlPosition(control)));
+	}
+
+	public boolean getControlPressed(Control control) {
+		return getControlData(control).getLeft();
+	}
+
+	public void setControlPressed(Control control, boolean pressed) {
+		controlPositions.put(control.controlGroup, Pair.of(pressed, getControlPosition(control)));
+	}
+
+	public float getControlPosition(Control control) {
+		return getControlData(control).getRight();
+	}
+
+	public float getControlPosition(String control) {
+		return getControlData(control).getRight();
+	}
+
+	public void setControlPosition(Control control, float val) {
+		val = Math.min(1, Math.max(0, val));
+		controlPositions.put(control.controlGroup, Pair.of(getControlPressed(control), val));
+	}
+
+	public void setControlPosition(String control, float val) {
+		val = Math.min(1, Math.max(0, val));
+		controlPositions.put(control, Pair.of(false, val));
+	}
+
+	public void setControlPositions(ModelComponentType type, float val) {
+		getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
+	}
+
+	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {
+		@Override
+		public TagAccessor<Map<String, Pair<Boolean, Float>>> apply(
+				Class<Map<String, Pair<Boolean, Float>>> type,
+				String fieldName,
+				TagField tag) throws SerializationException {
+			return new TagAccessor<>(
+					(d, o) -> d.setMap(fieldName, o, Function.identity(), x -> new TagCompound().setBoolean("pressed", x.getLeft()).setFloat("pos", x.getRight())),
+					d -> d.getMap(fieldName, Function.identity(), x -> Pair.of(x.hasKey("pressed") && x.getBoolean("pressed"), x.getFloat("pos")))
+			);
+		}
 	}
 }

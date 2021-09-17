@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
-import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 
@@ -18,8 +17,9 @@ public class WalschaertsValveGear extends StephensonValveGear {
     protected final ModelComponent slottedLink;
     protected final ModelComponent radiusBar;
     protected final List<ModelComponent> todo;
+    private final Vec3d crankWheel;
 
-    public static WalschaertsValveGear get(List<Wheel> wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static WalschaertsValveGear get(WheelSet wheels, ComponentProvider provider, String pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
@@ -43,7 +43,7 @@ public class WalschaertsValveGear extends StephensonValveGear {
                 new WalschaertsValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset, crossHead, combinationLever, returnCrank, returnCrankRod, slottedLink, radiusBar, todo) : null;
     }
 
-    public WalschaertsValveGear(List<Wheel> wheels,
+    public WalschaertsValveGear(WheelSet wheels,
                                 ModelComponent drivingRod,
                                 ModelComponent connectingRod,
                                 ModelComponent pistonRod,
@@ -64,6 +64,8 @@ public class WalschaertsValveGear extends StephensonValveGear {
         this.slottedLink = slottedLink;
         this.radiusBar = radiusBar;
         this.todo = todo;
+
+        crankWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? returnCrank.min : returnCrank.max))).get();
     }
 
     public void render(double distance, float throttle, ComponentRenderer draw) {
@@ -86,7 +88,7 @@ public class WalschaertsValveGear extends StephensonValveGear {
 
         // Draw piston rod and cross head
         try (ComponentRenderer matrix = draw.push()) {
-            GL11.glTranslated(pistonDelta, 0, 0);
+            matrix.translate(pistonDelta, 0, 0);
             matrix.render(crossHead);
         }
 
@@ -94,17 +96,18 @@ public class WalschaertsValveGear extends StephensonValveGear {
                 returnCrank.min.add(returnCrank.height()/2, returnCrank.height()/2, 0) :
                 returnCrank.max.add(-returnCrank.height()/2, -returnCrank.height()/2, 0);
         Vec3d wheelRotationOffset = reverse ?
-                VecUtil.fromWrongYaw(returnCrankRotPoint.x - drivenWheel.x, (float) wheelAngle) :
-                VecUtil.fromWrongYaw(returnCrankRotPoint.x - drivenWheel.x, (float) wheelAngle);
-        Vec3d returnCrankOriginOffset = drivenWheel.add(wheelRotationOffset.x, wheelRotationOffset.z, 0);
+                VecUtil.fromWrongYaw(returnCrankRotPoint.x - crankWheel.x, (float) wheelAngle) :
+                VecUtil.fromWrongYaw(returnCrankRotPoint.x - crankWheel.x, (float) wheelAngle);
+
+        Vec3d returnCrankOriginOffset = crankWheel.add(wheelRotationOffset.x, wheelRotationOffset.z, 0);
         double returnCrankAngle = wheelAngle + 90 + 30;
         try (ComponentRenderer matrix = draw.push()) {
             // Move to crank offset from origin
-            GL11.glTranslated(returnCrankOriginOffset.x, returnCrankOriginOffset.y, 0);
+            matrix.translate(returnCrankOriginOffset.x, returnCrankOriginOffset.y, 0);
             // Rotate crank
-            GL11.glRotated(returnCrankAngle, 0, 0, 1);
+            matrix.rotate(returnCrankAngle, 0, 0, 1);
             // Draw return crank at current position
-            GL11.glTranslated(-returnCrankRotPoint.x, -returnCrankRotPoint.y, 0);
+            matrix.translate(-returnCrankRotPoint.x, -returnCrankRotPoint.y, 0);
             matrix.render(returnCrank);
         }
 
@@ -133,12 +136,12 @@ public class WalschaertsValveGear extends StephensonValveGear {
         // Angle the return crank rod should be at to hit the slotted link
         try (ComponentRenderer matrix = draw.push()) {
             // Move to crank rod offset from origin
-            GL11.glTranslated(returnCrankRodOriginOffset.x, returnCrankRodOriginOffset.y, 0);
+            matrix.translate(returnCrankRodOriginOffset.x, returnCrankRodOriginOffset.y, 0);
 
-            GL11.glRotated(returnCrankRodRot, 0, 0, 1);
+            matrix.rotate(returnCrankRodRot, 0, 0, 1);
 
             // Draw return crank rod at current position
-            GL11.glTranslated(-returnCrankRodRotPoint.x, -returnCrankRodRotPoint.y, 0);
+            matrix.translate(-returnCrankRodRotPoint.x, -returnCrankRodRotPoint.y, 0);
             matrix.render(returnCrankRod);
         }
 
@@ -149,13 +152,13 @@ public class WalschaertsValveGear extends StephensonValveGear {
         double slottedLinkRot = Math.toDegrees(Math.atan2(-slottedLinkRotPoint.x + returnCrankRodFarPoint.x, slottedLinkRotPoint.y - returnCrankRodFarPoint.y));
         try (ComponentRenderer matrix = draw.push()) {
             // Move to origin
-            GL11.glTranslated(slottedLinkRotPoint.x, slottedLinkRotPoint.y, 0);
+            matrix.translate(slottedLinkRotPoint.x, slottedLinkRotPoint.y, 0);
 
             // Rotate around center point
-            GL11.glRotated(slottedLinkRot, 0, 0, 1);
+            matrix.rotate(slottedLinkRot, 0, 0, 1);
 
             // Draw slotted link at current position
-            GL11.glTranslated(-slottedLinkRotPoint.x, -slottedLinkRotPoint.y, 0);
+            matrix.translate(-slottedLinkRotPoint.x, -slottedLinkRotPoint.y, 0);
             matrix.render(slottedLink);
         }
 
@@ -178,13 +181,13 @@ public class WalschaertsValveGear extends StephensonValveGear {
                 VecUtil.toWrongYaw(new Vec3d(radiusBar.length(), 0, throttleSlotPos))+90;
 
         try (ComponentRenderer matrix = draw.push()) {
-            GL11.glTranslated(0, throttleSlotPos, 0);
+            matrix.translate(0, throttleSlotPos, 0);
 
-            GL11.glTranslated(radiusBarSliding, 0, 0);
+            matrix.translate(radiusBarSliding, 0, 0);
 
-            GL11.glTranslated(radiusBarClose.x, radiusBarClose.y, 0);
-            GL11.glRotated(raidiusBarAngle, 0, 0, 1);
-            GL11.glTranslated(-radiusBarClose.x, -radiusBarClose.y, 0);
+            matrix.translate(radiusBarClose.x, radiusBarClose.y, 0);
+            matrix.rotate(raidiusBarAngle, 0, 0, 1);
+            matrix.translate(-radiusBarClose.x, -radiusBarClose.y, 0);
             matrix.render(radiusBar);
         }
 
@@ -199,10 +202,10 @@ public class WalschaertsValveGear extends StephensonValveGear {
         float combinationLeverAngle = VecUtil.toWrongYaw(new Vec3d(delta.x, 0, delta.y));
 
         try (ComponentRenderer matrix = draw.push()) {
-            GL11.glTranslated(pistonDelta, 0, 0);
-            GL11.glTranslated(combinationLeverRotPos.x, combinationLeverRotPos.y, 0);
-            GL11.glRotated(combinationLeverAngle, 0, 0, 1);
-            GL11.glTranslated(-combinationLeverRotPos.x, -combinationLeverRotPos.y, 0);
+            matrix.translate(pistonDelta, 0, 0);
+            matrix.translate(combinationLeverRotPos.x, combinationLeverRotPos.y, 0);
+            matrix.rotate(combinationLeverAngle, 0, 0, 1);
+            matrix.translate(-combinationLeverRotPos.x, -combinationLeverRotPos.y, 0);
             matrix.render(combinationLever);
         }
 

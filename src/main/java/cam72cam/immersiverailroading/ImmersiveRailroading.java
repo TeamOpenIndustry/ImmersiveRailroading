@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
 import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
+import cam72cam.immersiverailroading.gui.overlay.IndependentBrakeOverlay;
 import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -40,9 +41,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.Command;
-import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 public class ImmersiveRailroading extends ModCore.Mod {
@@ -82,6 +81,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
 				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
 				Packet.register(ItemTrackExchangerUpdatePacket::new, PacketDirection.ClientToServer);
+				Packet.register(ClientPartDragging.DragPacket::new, PacketDirection.ClientToServer);
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
@@ -134,10 +134,21 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ItemRender.register(IRItems.ITEM_MANUAL, new Identifier(MODID, "items/engineerslexicon"));
 				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, new TrackExchangerModel());
 
-				IEntityRender<EntityMoveableRollingStock> stockRender = (entity, partialTicks) -> {
-					StockModel<?> renderer = entity.getDefinition().getModel();
-					if (renderer != null) {
-						renderer.render(entity, partialTicks);
+				IEntityRender<EntityMoveableRollingStock> stockRender = new IEntityRender<EntityMoveableRollingStock>() {
+					@Override
+					public void render(EntityMoveableRollingStock entity, float partialTicks) {
+						StockModel<?> renderer = entity.getDefinition().getModel();
+						if (renderer != null) {
+							renderer.render(entity, partialTicks);
+						}
+					}
+
+					@Override
+					public void postRender(EntityMoveableRollingStock entity, float partialTicks) {
+						StockModel<?> renderer = entity.getDefinition().getModel();
+						if (renderer != null) {
+							renderer.postRender(entity, partialTicks);
+						}
 					}
 				};
 				EntityRenderer.register(LocomotiveSteam.class, stockRender);
@@ -153,9 +164,15 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Keyboard.registerKey("ir_keys.increase_throttle", KeyCode.NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
 				Keyboard.registerKey("ir_keys.zero_throttle", KeyCode.NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
 				Keyboard.registerKey("ir_keys.decrease_throttle", KeyCode.NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
-				Keyboard.registerKey("ir_keys.increase_brake", KeyCode.NUMPAD7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_UP));
-				Keyboard.registerKey("ir_keys.zero_brake", KeyCode.NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_ZERO));
-				Keyboard.registerKey("ir_keys.decrease_brake", KeyCode.NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.AIR_BRAKE_DOWN));
+				Keyboard.registerKey("ir_keys.increase_reverser", KeyCode.NUMPAD9, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_UP));
+				Keyboard.registerKey("ir_keys.zero_reverser", KeyCode.NUMPAD6, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_ZERO));
+				Keyboard.registerKey("ir_keys.decrease_reverser", KeyCode.NUMPAD3, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.REVERSER_DOWN));
+				Keyboard.registerKey("ir_keys.increase_brake", KeyCode.NUMPAD7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.TRAIN_BRAKE_UP));
+				Keyboard.registerKey("ir_keys.zero_brake", KeyCode.NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.TRAIN_BRAKE_ZERO));
+				Keyboard.registerKey("ir_keys.decrease_brake", KeyCode.NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.TRAIN_BRAKE_DOWN));
+				Keyboard.registerKey("ir_keys.increase_independent_brake", KeyCode.NUMPAD7, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.INDEPENDENT_BRAKE_UP));
+				Keyboard.registerKey("ir_keys.zero_independent_brake", KeyCode.NUMPAD4, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.INDEPENDENT_BRAKE_ZERO));
+				Keyboard.registerKey("ir_keys.decrease_independent_brake", KeyCode.NUMPAD1, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.INDEPENDENT_BRAKE_DOWN));
 				Keyboard.registerKey("ir_keys.horn", KeyCode.NUMPADENTER, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.HORN));
 				Keyboard.registerKey("ir_keys.dead_mans_switch", KeyCode.MULTIPLY, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.DEAD_MANS_SWITCH));
 				Keyboard.registerKey("ir_keys.start_stop_engine", KeyCode.ADD, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.START_STOP_ENGINE));
@@ -171,12 +188,16 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 
 				GlobalRender.registerOverlay(pt -> {
+					// This is bad and should be redesigned
 					new SteamLocomotiveOverlay().draw();
 					new DieselLocomotiveOverlay().draw();
 					new HandCarOverlay().draw();
+					new IndependentBrakeOverlay().draw();
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
+
+				ClientPartDragging.register();
 				break;
 			case RELOAD:
 				DefinitionManager.initDefinitions();
@@ -190,6 +211,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	}
 
 	public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
-		return Audio.newSound(oggLocation, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
+		return Audio.newSound(oggLocation, Identifier::getResourceStream, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
 }
