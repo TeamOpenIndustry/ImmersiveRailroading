@@ -59,7 +59,7 @@ public class LocomotiveSteam extends Locomotive {
 
 	@Override
 	public GuiRegistry.EntityGUI guiType() {
-		return GuiTypes.STEAM_LOCOMOTIVE;
+		return getDefinition().isCabCar() ? null : GuiTypes.STEAM_LOCOMOTIVE;
 	}
 
 	public float getBoilerTemperature() {
@@ -87,6 +87,9 @@ public class LocomotiveSteam extends Locomotive {
 	protected int getAvailableHP() {
 		if (!Config.isFuelRequired(gauge)) {
 			return this.getDefinition().getHorsePower(gauge);
+		}
+		if (getDefinition().isCabCar()) {
+			return 0;
 		}
 		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
 	}
@@ -136,7 +139,7 @@ public class LocomotiveSteam extends Locomotive {
 			this.setHorn(10, hornPlayer);
 		}
 
-		if (!this.isBuilt()) {
+		if (!this.isBuilt() || getDefinition().isCabCar()) {
 			return;
 		}
 

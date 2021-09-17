@@ -41,12 +41,20 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public void parseJson(JsonObject data) throws Exception {
         super.parseJson(data);
         JsonObject properties = data.get("properties").getAsJsonObject();
-        tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_inv_scale));
-        maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_inv_scale);
-        JsonObject firebox = data.get("firebox").getAsJsonObject();
-        this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
-        this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
-        this.tender_auto_feed = properties.has("tender_auto_feed") ? properties.get("tender_auto_feed").getAsBoolean() : true;
+        if (isCabCar()) {
+            tankCapacity = FluidQuantity.ZERO;
+            maxPSI = 0;
+            this.numSlots = 0;
+            this.width = 0;
+            this.tender_auto_feed = false;
+        } else {
+            tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_inv_scale));
+            maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_inv_scale);
+            JsonObject firebox = data.get("firebox").getAsJsonObject();
+            this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
+            this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
+            this.tender_auto_feed = properties.has("tender_auto_feed") ? properties.get("tender_auto_feed").getAsBoolean() : true;
+        }
         this.cab_forward = properties.has("cab_forward") && properties.get("cab_forward").getAsBoolean();
 
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;

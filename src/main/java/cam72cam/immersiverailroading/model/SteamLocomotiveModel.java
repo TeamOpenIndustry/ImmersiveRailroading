@@ -34,8 +34,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         gauges = new ArrayList<>();
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getBoilerTemperature() / 100f));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, stock -> stock.getBoilerPressure() / stock.getDefinition().getMaxPSI(stock.gauge)));
+        if (!((LocomotiveSteamDefinition)def).isCabCar()) {
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getBoilerTemperature() / 100f));
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, stock -> stock.getBoilerPressure() / stock.getDefinition().getMaxPSI(stock.gauge)));
+        }
 
         firebox = provider.parse(ModelComponentType.FIREBOX);
         components = provider.parse(

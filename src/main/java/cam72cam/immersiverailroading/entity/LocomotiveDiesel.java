@@ -45,7 +45,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public int getInventoryWidth() {
-		return getDefinition().isCabCar ? 0 : 2;
+		return getDefinition().isCabCar() ? 0 : 2;
 	}
 
 	public float getEngineTemperature() {
@@ -87,7 +87,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	public GuiRegistry.EntityGUI guiType() {
-		return getDefinition().isCabCar ? null : GuiTypes.DIESEL_LOCOMOTIVE;
+		return getDefinition().isCabCar() ? null : GuiTypes.DIESEL_LOCOMOTIVE;
 	}
 
 	/*

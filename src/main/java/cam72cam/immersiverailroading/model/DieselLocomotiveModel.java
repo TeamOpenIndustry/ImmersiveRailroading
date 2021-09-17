@@ -22,7 +22,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
-        idle = def.isCabCar ? null : new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 80, stock.soundGauge()));
+        idle = def.isCabCar() ? null : new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 80, stock.soundGauge()));
     }
 
     @Override
@@ -62,7 +62,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         super.effects(stock);
         exhaust.effects(stock);
         horn.effects(stock,
-                stock.getHornTime() > 0 && (stock.isRunning() || stock.getDefinition().isCabCar)
+                stock.getHornTime() > 0 && (stock.isRunning() || stock.getDefinition().isCabCar())
                         ? stock.getDefinition().getHornSus() ? stock.getHornTime() / 10f : 1
                         : 0);
         if (idle != null) {

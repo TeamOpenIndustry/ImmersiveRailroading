@@ -20,7 +20,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private Speed maxSpeed;
     private boolean hasRadioEquipment;
     public boolean muliUnitCapable;
-    public boolean isCabCar;
+    private boolean isCabCar;
     private boolean isLinkedBrakeThrottle;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
@@ -112,5 +112,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     @Override
     protected boolean independentBrakeDefault() {
         return true;
+    }
+
+    public boolean isCabCar() {
+        return isCabCar;
     }
 }
