@@ -239,15 +239,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public void onTick() {
         super.onTick();
 
-        if (getDefinition().hasIndependentBrake()) {
-            for (Control control : getDefinition().getModel().getDraggableComponents()) {
-                if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
-                    setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
+        if (getWorld().isServer) {
+            if (getDefinition().hasIndependentBrake()) {
+                for (Control control : getDefinition().getModel().getDraggableComponents()) {
+                    if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
+                        setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
+                    }
                 }
             }
-        }
 
-        if (getWorld().isServer) {
             if (ConfigDebug.serverTickCompensation) {
                 this.tickSkew = 20 / getWorld().getTPS(1);
             } else {
