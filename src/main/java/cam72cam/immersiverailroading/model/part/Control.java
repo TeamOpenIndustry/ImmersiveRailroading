@@ -67,7 +67,7 @@ public class Control {
         this.hide = part.modelIDs.stream().anyMatch(g -> g.contains("_HIDE_") || g.startsWith("HIDE_") || g.endsWith("_HIDE"));
 
         OBJGroup rot = part.groups().stream()
-                .filter(g -> Pattern.matches(part.type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name))
+                .filter(g -> Pattern.matches(part.type.regex.replaceAll("#POS#", part.pos).replaceAll("#ID#",  part.id + "_ROT"), g.name))
                 .findFirst().orElse(null);
         if (rot != null && rot.normal != null) {
             this.rotationPoint = rot.max.add(rot.min).scale(0.5);
