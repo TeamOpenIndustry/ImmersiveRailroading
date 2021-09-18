@@ -1,9 +1,6 @@
 package cam72cam.immersiverailroading.library;
 
-import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.*;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.CastingGUI;
 import cam72cam.immersiverailroading.gui.PlateRollerGUI;
@@ -49,7 +46,7 @@ public class GuiTypes {
         return null;
     }
 
-    public static final GUI CONFIG = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "config"), () -> new ConfigGui(Config.class, ConfigGraphics.class, ConfigSound.class));
+    public static final GUI CONFIG = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "config"), () -> new ConfigGui(Config.class, ConfigGraphics.class, ConfigSound.class, ConfigPermissions.class));
 
     public static void register() {
         // loads static classes and ctrs

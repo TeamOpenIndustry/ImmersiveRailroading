@@ -93,6 +93,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ConfigFile.sync(Config.class);
 				ConfigFile.sync(ConfigGraphics.class);
 				ConfigFile.sync(ConfigSound.class);
+				ConfigFile.sync(ConfigPermissions.class);
 
 				DefinitionManager.initDefinitions();
 				break;

@@ -278,6 +278,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
 	}
 
+	public boolean playerCanDrag(Player player, Control control) {
+		return true;
+	}
+
 	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {
 		@Override
 		public TagAccessor<Map<String, Pair<Boolean, Float>>> apply(

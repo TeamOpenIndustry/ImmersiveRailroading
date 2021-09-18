@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
@@ -223,7 +224,27 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	public ClickResult onClick(Player player, Player.Hand hand) {
+    @Override
+    public boolean playerCanDrag(Player player, Control control) {
+        if (!super.playerCanDrag(player, control)) {
+        	return false;
+		}
+        switch (control.part.type) {
+			case THROTTLE_X:
+			case REVERSER_X:
+			case TRAIN_BRAKE_X:
+			case INDEPENDENT_BRAKE_X:
+			case THROTTLE_BRAKE_X:
+			case WHISTLE_CONTROL_X:
+			case HORN_CONTROL_X:
+			case ENGINE_START_X:
+				return player.hasPermission(Permissions.LOCOMOTIVE_CONTROL);
+			default:
+				return true;
+		}
+    }
+
+    public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
 				ItemRadioCtrlCard.Data data = new ItemRadioCtrlCard.Data(player.getHeldItem(hand));
