@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ComponentRenderer implements Closeable {
-    private static final FloatBuffer fbm = BufferUtils.createFloatBuffer(16);
+    private static FloatBuffer fbm = null;
 
     private final BoundOBJVBO vbo;
     private final List<ModelComponent> buffer = new ArrayList<>();
@@ -94,6 +94,10 @@ public class ComponentRenderer implements Closeable {
     private void draw(Collection<String> groups) {
         try (OpenGL.With mtx = OpenGL.matrix()) {
             matrix.transpose();
+            if (fbm == null) {
+                // Can't static init since class is loaded server side
+                fbm = BufferUtils.createFloatBuffer(16);
+            }
             fbm.position(0);
             fbm.put(new float[]{
                     (float) matrix.m00, (float) matrix.m01, (float) matrix.m02, (float) matrix.m03,
