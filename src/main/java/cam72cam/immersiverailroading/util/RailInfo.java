@@ -255,6 +255,10 @@ public class RailInfo {
 	public List<ItemStack> build(Player player, Vec3i pos, boolean placeTrack) {
 		BuilderBase builder = getBuilder(player.getWorld(), pos);
 
+		if (!player.hasPermission(Permissions.BUILD_TRACK)) {
+			return null;
+		}
+
 		if (player.isCreative() && ConfigDamage.creativePlacementClearsBlocks && placeTrack) {
 			if (player.getWorld().isServer) {
 				builder.clearArea();

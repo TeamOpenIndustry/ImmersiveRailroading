@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
@@ -268,6 +269,9 @@ public class TileMultiblock extends BlockEntityTickable {
 
 	@Override
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
+		if (!player.hasPermission(Permissions.MACHINIST)) {
+			return false;
+		}
 		return onBlockActivated(player, hand);
 	}
 

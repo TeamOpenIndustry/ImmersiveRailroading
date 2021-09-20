@@ -263,7 +263,15 @@ public abstract class Locomotive extends FreightTank {
 		}
 		return super.onClick(player, hand);
 	}
-	
+
+	@Override
+	public boolean canFitPassenger(Entity passenger) {
+		if (passenger instanceof Player && !((Player) passenger).hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+			return false;
+		}
+		return super.canFitPassenger(passenger);
+	}
+
 	@Override
 	public void onTick() {
 		super.onTick();

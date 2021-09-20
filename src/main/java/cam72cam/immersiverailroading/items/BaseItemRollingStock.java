@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.items;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
 import cam72cam.mod.entity.Player;
@@ -28,6 +29,10 @@ public abstract class BaseItemRollingStock extends CustomItem {
 	}
 
 	public static ClickResult tryPlaceStock(Player player, World worldIn, Vec3i pos, Player.Hand hand, List<ItemComponentType> parts) {
+		if (!player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
+			return ClickResult.REJECTED;
+		}
+
 		ItemStack stack = player.getHeldItem(hand);
 		
 		EntityRollingStockDefinition def = new Data(stack).def;

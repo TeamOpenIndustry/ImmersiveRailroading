@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -51,7 +52,7 @@ public class ItemLargeWrench extends CustomItem {
 				if (augment != null) {
 					te.setAugment(null);
 
-					if(world.isServer) {
+					if(world.isServer && player.hasPermission(Permissions.AUGMENT_TRACK)) {
 						ItemStack stack = new ItemStack(IRItems.ITEM_AUGMENT, 1);
 						ItemRailAugment.Data data = new ItemRailAugment.Data(stack);
 						data.augment = augment;
@@ -68,7 +69,7 @@ public class ItemLargeWrench extends CustomItem {
 					}
 				}
 			}
-		} else {
+		} else if (player.hasPermission(Permissions.MACHINIST)) {
 			for (String key : MultiblockRegistry.keys()) {
 				if (MultiblockRegistry.get(key).tryCreate(world, pos)) {
 					return ClickResult.ACCEPTED;

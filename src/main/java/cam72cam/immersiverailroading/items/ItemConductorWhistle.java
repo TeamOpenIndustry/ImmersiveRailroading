@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -43,7 +44,7 @@ public class ItemConductorWhistle extends CustomItem {
 
 	@Override
 	public void onClickAir(Player player, World world, Player.Hand hand) {
-		if (world.isServer) {
+		if (world.isServer && player.hasPermission(Permissions.CONDUCTOR)) {
 			if (cooldown.containsKey(player.getUUID())) {
 				int newtime = cooldown.get(player.getUUID());
 				if (newtime < player.getTickCount() || newtime > player.getTickCount() + 40) {

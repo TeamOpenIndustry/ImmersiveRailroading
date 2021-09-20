@@ -4,6 +4,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
 import cam72cam.immersiverailroading.util.LiquidUtil;
 import cam72cam.mod.entity.Player;
@@ -17,7 +18,10 @@ public class Tender extends CarTank {
 	
 	@Override
 	public boolean openGui(Player player) {
-		return GuiTypes.TENDER;
+		if (player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+			GuiTypes.TENDER.open(player, this);
+		}
+		return true;
 	}
 
 	@Override
