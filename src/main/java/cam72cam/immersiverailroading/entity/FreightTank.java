@@ -4,11 +4,11 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidTank;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
@@ -129,7 +129,7 @@ public abstract class FreightTank extends Freight {
 	 */
 
 	@Override
-	public GuiRegistry.EntityGUI guiType() {
+	public boolean openGui(Player player) {
 		return GuiTypes.TANK;
 	}
 

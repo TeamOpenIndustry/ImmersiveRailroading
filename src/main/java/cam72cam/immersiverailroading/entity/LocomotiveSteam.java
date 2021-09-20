@@ -5,16 +5,17 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.LiquidUtil;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagCompound;
@@ -58,8 +59,12 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public GuiRegistry.EntityGUI guiType() {
-		return getDefinition().isCabCar() ? null : GuiTypes.STEAM_LOCOMOTIVE;
+	public boolean openGui(Player player) {
+		if (!getDefinition().isCabCar() && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+			GuiTypes.STEAM_LOCOMOTIVE.open(player, this);
+			return true;
+		}
+		return false;
 	}
 
 	public float getBoilerTemperature() {

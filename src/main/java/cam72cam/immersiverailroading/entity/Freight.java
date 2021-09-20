@@ -4,12 +4,10 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
-import cam72cam.mod.entity.DamageType;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
@@ -106,15 +104,15 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			}
 		}
 		
-		if (guiType() != null) {
-			guiType().open(player, this);
+		if (openGui(player)) {
 			return ClickResult.ACCEPTED;
 		}
 		return ClickResult.PASS;
 	}
 
-	protected GuiRegistry.EntityGUI guiType() {
-		return GuiTypes.FREIGHT;
+	protected boolean openGui(Player player) {
+		GuiTypes.FREIGHT.open(player, this);
+		return true;
 	}
 
 	/**

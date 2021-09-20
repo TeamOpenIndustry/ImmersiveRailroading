@@ -13,7 +13,6 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
@@ -72,8 +71,8 @@ public abstract class Locomotive extends FreightTank {
 	 */
 
 	@Override
-	public GuiRegistry.EntityGUI guiType() {
-		return null;
+	public boolean openGui(Player player) {
+		return false;
 	}
 
 	@Override
@@ -245,7 +244,7 @@ public abstract class Locomotive extends FreightTank {
     }
 
     public ClickResult onClick(Player player, Player.Hand hand) {
-		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
 				ItemRadioCtrlCard.Data data = new ItemRadioCtrlCard.Data(player.getHeldItem(hand));
 				if (player.isCrouching()) {
