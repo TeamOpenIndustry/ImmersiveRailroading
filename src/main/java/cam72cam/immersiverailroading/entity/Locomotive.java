@@ -281,7 +281,7 @@ public abstract class Locomotive extends FreightTank {
 
 		this.distanceTraveled += simulateWheelSlip();
 
-		if (getWorld().isClient) {
+		if (getWorld().isServer) {
 			setControlPosition("REVERSERFORWARD", getReverser() > 0 ? 1 : 0);
 			setControlPosition("REVERSERNEUTRAL", getReverser() == 0 ? 1 : 0);
 			setControlPosition("REVERSERBACKWARD", getReverser() < 0 ? 1 : 0);
