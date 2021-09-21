@@ -30,4 +30,7 @@ public class ConfigGraphics {
 
 	@Comment( "Show text tooltips over interactable components" )
 	public static boolean interactiveComponentsOverlay = true;
+
+	@Comment("Show stock variants in JEI/NEI/Creative search")
+	public static boolean stockItemVariants = false;
 }
