@@ -82,7 +82,7 @@ public class LightFlare {
         this.controlGroup = component.modelIDs.stream()
                 .map(lcgPattern::matcher).filter(Matcher::find).map(m -> m.group(1)).findFirst().orElse(null);
 
-        this.invert = component.modelIDs.stream().anyMatch(g -> g.contains("_INVERT_") || g.startsWith("INVERT_") || g.endsWith("_INVERT"));
+        this.invert = component.modelIDs.stream().anyMatch(g -> g.contains("_LINVERT_") || g.startsWith("LINVERT_") || g.endsWith("_LINVERT"));
 
         // This is bad...
         LightDefinition config = def.getLight(component.type.toString()
