@@ -48,11 +48,12 @@ public class ItemRollingStock extends BaseItemRollingStock {
 		List<ItemStack> items = new ArrayList<>();
     	for (EntityRollingStockDefinition def : DefinitionManager.getDefinitions()) {
     		if (tab != null) {
-	    		if (def instanceof CarPassengerDefinition) {
+				boolean isCabCar = (def instanceof LocomotiveDefinition && ((LocomotiveDefinition) def).isCabCar());
+	    		if (def instanceof CarPassengerDefinition || isCabCar) {
 	    			if (!tab.equals(ItemTabs.PASSENGER_TAB)) {
 	    				continue;
 	    			}
-	    		} else if (def instanceof LocomotiveDefinition) {
+	    		} else if (def instanceof LocomotiveDefinition && !isCabCar) {
 	    			if (!tab.equals(ItemTabs.LOCOMOTIVE_TAB)) {
 	    				continue;
 	    			}
