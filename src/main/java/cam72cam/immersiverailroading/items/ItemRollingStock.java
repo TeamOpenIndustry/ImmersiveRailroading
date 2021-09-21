@@ -68,16 +68,17 @@ public class ItemRollingStock extends BaseItemRollingStock {
     		data.def = def;
     		data.gauge = def.recommended_gauge;
     		data.write();
-            /*if (def.textureNames.size() > 1) {
+            if (tab == null && def.textureNames.size() > 1 && ConfigGraphics.stockItemVariants) {
             	for (String texture : def.textureNames.keySet()) {
 	            	ItemStack textured = stack.copy();
-	            	ItemTextureVariant.set(textured, texture);
+	            	data = new Data(textured);
+	            	data.texture = texture;
+	            	data.write();
 	            	items.add(textured);
             	}
             } else {
                 items.add(stack);
-            }*/
-			items.add(stack);
+            }
     	}
     	return items;
     }

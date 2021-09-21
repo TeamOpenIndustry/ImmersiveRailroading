@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.item;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -55,7 +56,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			//System.out.println(stack.getTagCompound());
 			return null;
 		}
-		return data.def.defID + data.def.getModel().hash;
+		return data.def.defID + data.def.getModel().hash + (!ConfigGraphics.stockItemVariants || data.texture == null ? "" : data.texture);
 	}
 
 	@Override
@@ -67,7 +68,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 
 			try (
 					OpenGL.With matrix = OpenGL.matrix();
-					OpenGL.With tex = model.bindTexture(null, true, true);
+					OpenGL.With tex = model.bindTexture(ConfigGraphics.stockItemVariants ? data.texture : null, true, true);
 					VBO.BoundVBO vbo = StockRenderCache.getVBO(data.def.defID).bind();
 			) {
 				Gauge std = Gauge.from(Gauge.STANDARD);
