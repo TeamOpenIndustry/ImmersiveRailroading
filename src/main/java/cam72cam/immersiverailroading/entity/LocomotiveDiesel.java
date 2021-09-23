@@ -45,7 +45,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public int getInventoryWidth() {
-		return 2;
+		return getDefinition().isCabCar() ? 0 : 2;
 	}
 
 	public float getEngineTemperature() {
@@ -87,7 +87,7 @@ public class LocomotiveDiesel extends Locomotive {
 	
 	@Override
 	public GuiRegistry.EntityGUI guiType() {
-		return GuiTypes.DIESEL_LOCOMOTIVE;
+		return getDefinition().isCabCar() ? null : GuiTypes.DIESEL_LOCOMOTIVE;
 	}
 
 	/*
@@ -140,36 +140,17 @@ public class LocomotiveDiesel extends Locomotive {
 		return Config.ImmersionConfig.disableIndependentThrottle ? super.getReverserDelta() : 0.51f;
 	}
 
-	private void setThrottleMap(EntityRollingStock stock, boolean direction) {
-		if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel)stock).getDefinition().muliUnitCapable) {
-			((LocomotiveDiesel) stock).realSetThrottle(this.getThrottle());
-			((LocomotiveDiesel) stock).realSetReverser(this.getReverser() * (direction ? 1 : -1));
-			((LocomotiveDiesel) stock).realTrainBrake(this.getTrainBrake());
-		}
-	}
-
-	private void realSetThrottle(float newThrottle) {
-		super.setThrottle(newThrottle);
-	}
-	private void realSetReverser(float newReverser) {
-		super.setReverser(newReverser);
-	}
-	private void realTrainBrake(float newTrainBrake) {
-		super.setTrainBrake(newTrainBrake);;
-	}
-
 	@Override
 	public void setThrottle(float newThrottle) {
 		if (!Config.ImmersionConfig.disableIndependentThrottle) {
 			if (newThrottle > getThrottle()) {
-				realSetThrottle((float) (Math.ceil(newThrottle * 8) / 8));
+				super.setThrottle((float) (Math.ceil(newThrottle * 8) / 8));
 			} else {
-				realSetThrottle((float) (Math.floor(newThrottle * 8) / 8));
+				super.setThrottle((float) (Math.floor(newThrottle * 8) / 8));
 			}
 		} else {
-			realSetThrottle(newThrottle);
+			super.setThrottle(newThrottle);
 		}
-		this.mapTrain(this, true, false, this::setThrottleMap);
 	}
 
 	@Override
@@ -183,16 +164,9 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 		}
 		super.setReverser(value);
-		this.mapTrain(this, true, false, this::setThrottleMap);
 
 	}
 
-	@Override
-	public void setTrainBrake(float newTrainBrake) {
-		realTrainBrake(newTrainBrake);
-		this.mapTrain(this, true, false, this::setThrottleMap);
-	}
-	
 	@Override
 	protected int getAvailableHP() {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
@@ -204,7 +178,11 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onTick() {
 		super.onTick();
-		
+
+		if (turnOnOffDelay > 0) {
+			turnOnOffDelay -= 1;
+		}
+
 		if (getWorld().isClient) {
 			float absThrottle = Math.abs(this.getThrottle());
 			if (this.soundThrottle > absThrottle) {
@@ -268,11 +246,7 @@ public class LocomotiveDiesel extends Locomotive {
 		if (engineTemperature < 100 && isEngineOverheated()) {
 			setEngineOverheated(false);
 		}
-		
-		if (turnOnOffDelay > 0) {
-			turnOnOffDelay -= 1;
-		}
-		
+
 		setEngineTemperature(engineTemperature);
 	}
 	

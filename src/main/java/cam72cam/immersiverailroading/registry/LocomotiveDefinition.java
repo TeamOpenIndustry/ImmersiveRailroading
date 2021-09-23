@@ -19,6 +19,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private int traction;
     private Speed maxSpeed;
     private boolean hasRadioEquipment;
+    public boolean muliUnitCapable;
+    private boolean isCabCar;
     private boolean isLinkedBrakeThrottle;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
@@ -41,18 +43,22 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
         JsonObject properties = data.get("properties").getAsJsonObject();
 
-        power = (int) Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
-        traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
-        maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
-        if (properties.has("radio_equipped")) {
-            hasRadioEquipment = properties.get("radio_equipped").getAsBoolean();
+        hasRadioEquipment = properties.has("radio_equipped") && properties.get("radio_equipped").getAsBoolean();
+
+        isCabCar = properties.has("cab_car") && properties.get("cab_car").getAsBoolean();
+        if (isCabCar) {
+            muliUnitCapable = true;
+        } else {
+            power = (int) Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
+            traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
+            maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
+            muliUnitCapable = !properties.has("multi_unit_capable") ? this.multiUnitDefault() : properties.get("multi_unit_capable").getAsBoolean();
         }
         isLinkedBrakeThrottle = properties.has("isLinkedBrakeThrottle") && properties.get("linked_brake_throttle").getAsBoolean();
-        toggleBell = true;
-        if (properties.has("toggle_bell")) {
-            toggleBell = properties.get("toggle_bell").getAsBoolean();
-        }
+        toggleBell = !properties.has("toggle_bell") || properties.get("toggle_bell").getAsBoolean();
     }
+
+    protected abstract boolean multiUnitDefault();
 
     @Override
     protected StockModel<?> createModel() throws Exception {
@@ -63,9 +69,11 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public List<String> getTooltip(Gauge gauge) {
         List<String> tips = super.getTooltip(gauge);
         tips.add(GuiText.LOCO_WORKS.toString(this.works));
-        tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower(gauge)));
-        tips.add(GuiText.LOCO_TRACTION.toString(this.getStartingTractionNewtons(gauge)));
-        tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed(gauge).metricString()));
+        if (!isCabCar) {
+            tips.add(GuiText.LOCO_HORSE_POWER.toString(this.getHorsePower(gauge)));
+            tips.add(GuiText.LOCO_TRACTION.toString(this.getStartingTractionNewtons(gauge)));
+            tips.add(GuiText.LOCO_MAX_SPEED.toString(this.getMaxSpeed(gauge).metricString()));
+        }
         return tips;
     }
 
@@ -104,5 +112,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     @Override
     protected boolean independentBrakeDefault() {
         return true;
+    }
+
+    public boolean isCabCar() {
+        return isCabCar;
     }
 }

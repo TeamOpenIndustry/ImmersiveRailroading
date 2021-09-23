@@ -17,7 +17,6 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public Identifier idle;
     public Identifier horn;
-    public boolean muliUnitCapable;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
     private boolean hornSus;
@@ -36,9 +35,12 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         super.parseJson(data);
 
         JsonObject properties = data.get("properties").getAsJsonObject();
-        fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
-        fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
-        muliUnitCapable = !properties.has("multi_unit_capable") || properties.get("multi_unit_capable").getAsBoolean();
+        if (!isCabCar()) {
+            fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
+            fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
+        } else {
+            fuelCapacity = FluidQuantity.ZERO;
+        }
 
         hornSus = false;
         if (properties.has("horn_sustained")) {
@@ -90,6 +92,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
                     new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
             ));
         }
+    }
+
+    @Override
+    protected boolean multiUnitDefault() {
+        return true;
     }
 
     @Override

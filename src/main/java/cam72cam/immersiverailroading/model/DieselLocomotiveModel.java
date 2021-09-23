@@ -22,7 +22,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
-        idle = new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 80, stock.soundGauge()));
+        idle = def.isCabCar() ? null : new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 80, stock.soundGauge()));
     }
 
     @Override
@@ -62,17 +62,21 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         super.effects(stock);
         exhaust.effects(stock);
         horn.effects(stock,
-                stock.getHornTime() > 0 && stock.isRunning()
+                stock.getHornTime() > 0 && (stock.isRunning() || stock.getDefinition().isCabCar())
                         ? stock.getDefinition().getHornSus() ? stock.getHornTime() / 10f : 1
                         : 0);
-        idle.effects(stock, stock.isRunning() ? Math.max(0.1f, stock.getSoundThrottle()) : 0, 0.7f+stock.getSoundThrottle()/4);
+        if (idle != null) {
+            idle.effects(stock, stock.isRunning() ? Math.max(0.1f, stock.getSoundThrottle()) : 0, 0.7f + stock.getSoundThrottle() / 4);
+        }
     }
 
     @Override
     protected void removed(LocomotiveDiesel stock) {
         super.removed(stock);
         horn.removed(stock);
-        idle.removed(stock);
+        if (idle != null) {
+            idle.removed(stock);
+        }
     }
 
     @Override

@@ -338,11 +338,26 @@ public abstract class Locomotive extends FreightTank {
 	 * 
 	 * Misc Helper functions
 	 */
+
+	private void copySettings(EntityRollingStock stock, boolean direction) {
+		if (stock instanceof Locomotive && ((Locomotive)stock).getDefinition().muliUnitCapable) {
+			((Locomotive) stock).setRealThrottle(this.getThrottle());
+			((Locomotive) stock).setRealReverser(this.getReverser() * (direction ? 1 : -1));
+			((Locomotive) stock).setRealTrainBrake(this.getTrainBrake());
+			((Locomotive) stock).setRealIndependentBrake(this.getIndependentBrake());
+		}
+	}
 	
 	public float getThrottle() {
 		return throttle;
 	}
 	public void setThrottle(float newThrottle) {
+		setRealThrottle(newThrottle);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::copySettings);
+		}
+	}
+	private void setRealThrottle(float newThrottle) {
 		newThrottle = Math.min(1, Math.max(0, newThrottle));
 		if (this.getThrottle() != newThrottle) {
 			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
@@ -357,6 +372,12 @@ public abstract class Locomotive extends FreightTank {
 		return reverser;
 	}
 	public void setReverser(float newReverser) {
+		setRealReverser(newReverser);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::copySettings);
+		}
+	}
+	private void setRealReverser(float newReverser){
 		newReverser = Math.min(1, Math.max(-1, newReverser));
 
 		if (this.getReverser() != newReverser) {
@@ -407,6 +428,12 @@ public abstract class Locomotive extends FreightTank {
 		setTrainBrake(value);
 	}
 	public void setTrainBrake(float newTrainBrake) {
+		setRealTrainBrake(newTrainBrake);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::copySettings);
+		}
+	}
+	private void setRealTrainBrake(float newTrainBrake) {
 		newTrainBrake = Math.min(1, Math.max(0, newTrainBrake));
 		if (this.getTrainBrake() != newTrainBrake) {
 			if (getDefinition().isLinearBrakeControl()) {
@@ -418,6 +445,19 @@ public abstract class Locomotive extends FreightTank {
 			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrake())/2);
 		}
 	}
+
+	@Override
+	public void setIndependentBrake(float newIndependentBrake) {
+		setRealIndependentBrake(newIndependentBrake);
+		if (this.getDefinition().muliUnitCapable) {
+			this.mapTrain(this, true, false, this::copySettings);
+		}
+	}
+	private void setRealIndependentBrake(float newIndependentBrake) {
+		super.setIndependentBrake(newIndependentBrake);
+	}
+
+
 	public int getBell() {
 		return bellTime;
 	}
