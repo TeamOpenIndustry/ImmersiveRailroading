@@ -76,11 +76,13 @@ public abstract class EntityRollingStockDefinition {
     private int weight;
     private int maxPassengers;
     private float interiorLightLevel;
+    private boolean hasIndependentBrake;
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
     private static final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
+    private boolean isLinearBrakeControl;
 
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
@@ -274,6 +276,9 @@ public abstract class EntityRollingStockDefinition {
         JsonObject properties = data.get("properties").getAsJsonObject();
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
         valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase(Locale.ROOT)) : null;
+        hasIndependentBrake = properties.has("independent_brake") ? properties.get("independent_brake").getAsBoolean() : independentBrakeDefault();
+        // Locomotives default to linear brake control
+        isLinearBrakeControl = properties.has("linear_brake_control") ? properties.get("linear_brake_control").getAsBoolean() : !(this instanceof LocomotiveDefinition);
 
         if (data.has("lights")) {
             for (Entry<String, JsonElement> entry : data.get("lights").getAsJsonObject().entrySet()) {
@@ -369,6 +374,10 @@ public abstract class EntityRollingStockDefinition {
             default:
                 return 0;
         }
+    }
+
+    public boolean hasIndependentBrake() {
+        return hasIndependentBrake;
     }
 
     private static class HeightMapData {
@@ -600,4 +609,12 @@ public abstract class EntityRollingStockDefinition {
         return interiorLightLevel;
     }
 
+
+    protected boolean independentBrakeDefault() {
+        return false;
+    }
+
+    public boolean isLinearBrakeControl() {
+        return isLinearBrakeControl;
+    }
 }

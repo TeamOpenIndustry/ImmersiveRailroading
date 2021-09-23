@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.model.part.LightFlare;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -44,6 +45,9 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     private List<LightFlare> headlightsFront;
     private List<LightFlare> headlightsRear;
+    private List<Control> independent_brakes;
+    private List<Readout<T>> front_gauges;
+    private List<Readout<T>> rear_gauges;
 
     public LocomotiveModel(LocomotiveDefinition def) throws Exception {
         super(def);
@@ -51,6 +55,9 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+        front_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_FRONT", EntityMoveableRollingStock::getTotalBrake);
+        rear_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_REAR", EntityMoveableRollingStock::getTotalBrake);
+
         ValveGearType type = def.getValveGear();
 
         drivingWheels = DrivingAssembly.get(type, provider, null, 0);
@@ -81,12 +88,18 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         );
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_THROTTLE_X, Locomotive::getThrottle));
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_REVERSER_X, Locomotive::getReverser));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TRAIN_BRAKE_X, Locomotive::getAirBrake));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TRAIN_BRAKE_X, Locomotive::getTrainBrake));
+        if (def.hasIndependentBrake()) {
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, EntityMoveableRollingStock::getIndependentBrake));
+        }
 
         throttle_brakes = Control.get(provider, ModelComponentType.THROTTLE_BRAKE_X);
         throttles = Control.get(provider, ModelComponentType.THROTTLE_X);
         reversers = Control.get(provider, ModelComponentType.REVERSER_X);
         train_brakes = Control.get(provider, ModelComponentType.TRAIN_BRAKE_X);
+        independent_brakes = def.hasIndependentBrake() ?
+                Control.get(provider, ModelComponentType.INDEPENDENT_BRAKE_X) :
+                Collections.emptyList();
 
         super.parseComponents(provider, def);
     }
@@ -98,6 +111,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         draggable.addAll(throttles);
         draggable.addAll(reversers);
         draggable.addAll(train_brakes);
+        draggable.addAll(independent_brakes);
         return draggable;
     }
 
@@ -130,6 +144,9 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                 flare.effects(stock, offset);
             }
         }
+
+        front_gauges.forEach(c -> c.effects(stock));
+        rear_gauges.forEach(c -> c.effects(stock));
     }
 
     @Override
@@ -173,6 +190,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                         headlightsFront.forEach(x -> x.render(light, stock));
                     }
                 }
+
+                front_gauges.forEach(r -> r.render(stock, matrix));
             }
         }
         if (drivingWheelsRear != null) {
@@ -196,6 +215,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                         headlightsRear.forEach(x -> x.render(light, stock));
                     }
                 }
+
+                rear_gauges.forEach(r -> r.render(stock, matrix));
             }
         }
     }

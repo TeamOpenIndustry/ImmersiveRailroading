@@ -20,6 +20,10 @@ public class Readout<T extends EntityRollingStock> extends Control {
         return provider.parseAll(type).stream().map(p -> new Readout<>(p, position)).collect(Collectors.toList());
     }
 
+    public static <T extends EntityRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, String pos, Function<T, Float> position) {
+        return provider.parseAll(type, pos).stream().map(p -> new Readout<>(p, position)).collect(Collectors.toList());
+    }
+
     public Readout(ModelComponent part, Function<T, Float> position) {
         super(part);
         this.position = position;

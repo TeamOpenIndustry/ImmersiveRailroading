@@ -5,6 +5,9 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -14,7 +17,9 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.ICollision;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
@@ -24,6 +29,7 @@ import cam72cam.mod.sound.ISound;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
 
@@ -44,6 +50,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private float[][] heightMapCache;
     @TagField("tickSkew")
     private double tickSkew = 1;
+    @TagSync
+    @TagField("IND_BRAKE")
+    private float independentBrake = 0;
+
+    @TagSync
+    @TagField("TOTAL_BRAKE")
+    private float totalBrake = 0;
 
     private float sndRand;
 
@@ -191,12 +204,50 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return curr;
     }
 
+
+    @Override
+    public void onDrag(Control control, double delta) {
+        super.onDrag(control, delta);
+        switch (control.part.type) {
+            case INDEPENDENT_BRAKE_X:
+                if (getDefinition().isLinearBrakeControl()) {
+                    setIndependentBrake(getControlPosition(control));
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onDragRelease(Control control) {
+        super.onDragRelease(control);
+        if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
+            setControlPosition(control, 0.5f);
+        }
+    }
+
+    @Override
+    protected float defaultControlPosition(Control control) {
+        switch (control.part.type) {
+            case INDEPENDENT_BRAKE_X:
+                return getDefinition().isLinearBrakeControl() ? 0 : 0.5f;
+            default:
+                return super.defaultControlPosition(control);
+        }
+    }
+
     @Override
     public void onTick() {
         super.onTick();
 
-
         if (getWorld().isServer) {
+            if (getDefinition().hasIndependentBrake()) {
+                for (Control control : getDefinition().getModel().getDraggableComponents()) {
+                    if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
+                        setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
+                    }
+                }
+            }
+
             if (ConfigDebug.serverTickCompensation) {
                 this.tickSkew = 20 / getWorld().getTPS(1);
             } else {
@@ -208,6 +259,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 // Could also be implemented as a wipe from the track rail base (might be more efficient?)
                 lastRetarderPos = null;
             }
+
+            float trainBrake = 0;
+            if (this instanceof EntityCoupleableRollingStock) {
+                // This could be slow, but I don't want to do this properly till the next despaghettification
+                trainBrake = (float) ((EntityCoupleableRollingStock) this).getDirectionalTrain(false).stream()
+                        .map(m -> m.stock)
+                        .map(s -> s instanceof Locomotive ? (Locomotive) s : null)
+                        .filter(Objects::nonNull)
+                        .mapToDouble(Locomotive::getTrainBrake)
+                        .max().orElse(0);
+
+            }
+            this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrake));
         }
 
         if (getWorld().isClient) {
@@ -526,5 +590,41 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (this.clackFront != null) {
             clackFront.stop();
         }
+    }
+
+    @Override
+    public void handleKeyPress(Player source, KeyTypes key) {
+        float independentBrakeNotch = 0.04f;
+
+        switch (key) {
+            case INDEPENDENT_BRAKE_UP:
+                setIndependentBrake(getIndependentBrake() + independentBrakeNotch);
+                break;
+            case INDEPENDENT_BRAKE_ZERO:
+                setIndependentBrake(0f);
+                break;
+            case INDEPENDENT_BRAKE_DOWN:
+                setIndependentBrake(getIndependentBrake() - independentBrakeNotch);
+                break;
+            default:
+                super.handleKeyPress(source, key);
+        }
+    }
+
+    public float getIndependentBrake() {
+        return independentBrake;
+    }
+    public void setIndependentBrake(float newIndependentBrake) {
+        newIndependentBrake = Math.min(1, Math.max(0, newIndependentBrake));
+        if (this.getIndependentBrake() != newIndependentBrake) {
+            if (getDefinition().isLinearBrakeControl()) {
+                setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);
+            }
+            independentBrake = newIndependentBrake;
+            triggerResimulate();
+        }
+    }
+    public float getTotalBrake() {
+        return totalBrake;
     }
 }

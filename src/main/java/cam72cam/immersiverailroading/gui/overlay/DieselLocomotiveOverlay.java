@@ -7,7 +7,7 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.fluid.Fluid;
 
-public class DieselLocomotiveOverlay extends LocomotiveOverlay {
+public class DieselLocomotiveOverlay extends ControlsOverlay {
 	private final static int cold = 0x992a81af;
 	private final static int warm = 0x992a933a;
 	private final static int hot = 0x99d16c15;
@@ -37,8 +37,11 @@ public class DieselLocomotiveOverlay extends LocomotiveOverlay {
 			heatColor = danger;
 		}
 		drawGauge(heatColor, loco.getEngineTemperature(), 150, "C");
-		
-		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getAirBrake()*10, 0, 10);
+
+		if (loco.getDefinition().hasIndependentBrake()) {
+			drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getIndependentBrake() * 10, 0, 10);
+		}
+		drawScalar(GuiText.LABEL_BRAKE.toString(), loco.getTrainBrake()*10, 0, 10);
 		if (Config.ImmersionConfig.disableIndependentThrottle) {
 			drawScalar(GuiText.LABEL_THROTTLE.toString(), loco.getReverser() * 10, -10, 10);
 		} else {

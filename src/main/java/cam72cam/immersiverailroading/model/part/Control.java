@@ -19,6 +19,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import util.Matrix4;
 
 import java.util.*;
@@ -35,6 +36,7 @@ public class Control {
     public final boolean global;
     private final boolean invert;
     private final boolean hide;
+    private final Vec3d center;
     private Vec3d rotationPoint = null;
     private float rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
@@ -57,7 +59,7 @@ public class Control {
         this.label = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
             return matcher.find() ? matcher.group(1).replaceAll("\\^", " ") : null;
-        }).filter(Objects::nonNull).findFirst().orElse(part.type.name().replace("_X", ""));
+        }).filter(Objects::nonNull).findFirst().orElse(formatLabel(part.type.name().replace("_X", "")));
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
         this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
@@ -65,7 +67,7 @@ public class Control {
         this.hide = part.modelIDs.stream().anyMatch(g -> g.contains("_HIDE_") || g.startsWith("HIDE_") || g.endsWith("_HIDE"));
 
         OBJGroup rot = part.groups().stream()
-                .filter(g -> Pattern.matches(part.type.regex.replaceAll("#ID#",  part.id + "_ROT"), g.name))
+                .filter(g -> Pattern.matches(part.type.regex.replaceAll("#POS#", part.pos).replaceAll("#ID#",  part.id + "_ROT"), g.name))
                 .findFirst().orElse(null);
         if (rot != null && rot.normal != null) {
             this.rotationPoint = rot.max.add(rot.min).scale(0.5);
@@ -83,6 +85,11 @@ public class Control {
             rotations.put(Axis.X, (float) rot.normal.x);
             rotations.put(Axis.Y, (float) rot.normal.y);
             rotations.put(Axis.Z, (float) rot.normal.z);
+
+            List<Vec3d> nonRotGroups = part.groups().stream().filter(g -> !g.name.contains("_ROT")).map(g -> g.max.add(g.min).scale(0.5)).collect(Collectors.toList());
+            this.center = nonRotGroups.stream().reduce(Vec3d.ZERO, Vec3d::add).scale(1.0/nonRotGroups.size());
+        } else {
+            this.center = part.center;
         }
 
         Pattern pattern = Pattern.compile("TL_([^_]*)_([^_])");
@@ -99,6 +106,10 @@ public class Control {
                 scales.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
             }
         }
+    }
+
+    private static String formatLabel(String label) {
+        return WordUtils.capitalizeFully(label.replaceAll("_", " ").toLowerCase(Locale.ROOT));
     }
 
     public void render(EntityRollingStock stock, ComponentRenderer draw) {
@@ -153,20 +164,55 @@ public class Control {
             return;
         }
 
+        Player player = MinecraftClient.getPlayer();
+
+        if (transform(center, stock).distanceTo(player.getPositionEyes().add(stock.getVelocity())) > 4) {
+            return;
+        }
+
 
         IBoundingBox bb = IBoundingBox.from(
                 transform(part.min, stock),
                 transform(part.max, stock)
-        ).grow(new Vec3d(0.125, 0.125, 0.125));
+        );
         // The added velocity is due to a bug where the player may tick before or after the stock.
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
         // or at least expose a "tick order" function as crappy as that would be...
-        Player player = MinecraftClient.getPlayer();
-        if (!bb.contains(player.getPositionEyes().add(player.getLookVector()).add(stock.getVelocity()))) {
+        boolean inRange = false;
+        Vec3d delta = bb.max().subtract(bb.min());
+        double step = Math.min(delta.x, Math.min(delta.y, delta.z))/2;
+        for (double i = 0; i < 2; i+=step) {
+            inRange = inRange || bb.contains(player.getPositionEyes().add(player.getLookVector().scale(i)).add(stock.getVelocity()));
+        }
+        if (!inRange) {
             return;
         }
-        Vec3d pos = transform(part.center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
-        GlobalRender.drawText(label, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        Vec3d pos = transform(center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
+        String state = "";
+        switch (part.type) {
+            case TRAIN_BRAKE_X:
+            case INDEPENDENT_BRAKE_X:
+                if (!stock.getDefinition().isLinearBrakeControl()) {
+                     break;
+                }
+                // Fallthrough
+            case THROTTLE_X:
+            case REVERSER_X:
+            case THROTTLE_BRAKE_X:
+            case WHISTLE_CONTROL_X:
+            case HORN_CONTROL_X:
+            case ENGINE_START_X:
+                float percent = getValue(stock);
+                if (part.type == ModelComponentType.REVERSER_X) {
+                    percent *= -2;
+                }
+                if (toggle || press) {
+                    state = percent == 1 ? " (On)" : " (Off)";
+                } else {
+                    state = String.format(" (%d%%)", (int)(percent * 100));
+                }
+        }
+        GlobalRender.drawText(label + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public float getValue(EntityRollingStock stock) {
@@ -241,7 +287,7 @@ public class Control {
 
         float delta = 0;
 
-        Vec3d partPos = transform(part.center, stock).subtract(stock.getPosition());
+        Vec3d partPos = transform(center, stock).subtract(stock.getPosition());
         Vec3d current = player.getPositionEyes().subtract(stock.getPosition());
         Vec3d look = player.getLookVector();
         // Rescale along look vector
@@ -254,9 +300,9 @@ public class Control {
             movement = movement.rotateYaw(-stock.getRotationYaw());
             float applied = (float) (movement.length());
             float value = getValue(stock);
-            Vec3d grabComponent = transform(part.center, value, stock).add(movement);
-            Vec3d grabComponentNext = transform(part.center, value + applied, stock);
-            Vec3d grabComponentPrev = transform(part.center, value - applied, stock);
+            Vec3d grabComponent = transform(center, value, stock).add(movement);
+            Vec3d grabComponentNext = transform(center, value + applied, stock);
+            Vec3d grabComponentPrev = transform(center, value - applied, stock);
             if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
                 delta += applied;
             } else {

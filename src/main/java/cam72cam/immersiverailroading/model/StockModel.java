@@ -16,6 +16,7 @@ import cam72cam.mod.render.obj.OBJVBO;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,12 +32,16 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private List<Door> doors;
     private List<Control> windows;
     private List<Control> widgets;
+    private List<Control> independent_brakes;
+    private List<Readout<T>> gauges;
 
     private List<LightFlare> headlights;
 
     private ExpireableList<UUID, TrackFollower> frontTrackers = null;
     private ExpireableList<UUID, TrackFollower> rearTrackers = null;
     private final boolean hasInterior;
+    private List<Readout<T>> front_gauges;
+    private List<Readout<T>> rear_gauges;
 
     public StockModel(EntityRollingStockDefinition def) throws Exception {
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet());
@@ -51,6 +56,18 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+        gauges = new ArrayList<>();
+        front_gauges = new ArrayList<>();
+        rear_gauges = new ArrayList<>();
+        if (def.hasIndependentBrake()) {
+            gauges.addAll(
+                    Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, EntityMoveableRollingStock::getTotalBrake)
+            );
+        }
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_X, EntityMoveableRollingStock::getTotalBrake));
+        front_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_FRONT", EntityMoveableRollingStock::getTotalBrake));
+        rear_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_REAR", EntityMoveableRollingStock::getTotalBrake));
+
         this.frame = new Frame(provider, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);
         this.bogeyFront = Bogey.get(provider, unifiedBogies(), "FRONT");
@@ -66,6 +83,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         if (bogeyRear != null && Math.abs(def.getBogeyRear(Gauge.from(Gauge.STANDARD)) + bogeyRear.center().x) > 0.5) {
             rearTrackers = new ExpireableList<>();
         }
+
+        independent_brakes = def.hasIndependentBrake() ?
+                Control.get(provider, ModelComponentType.INDEPENDENT_BRAKE_X) :
+                Collections.emptyList();
     }
 
     protected boolean unifiedBogies() {
@@ -81,6 +102,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         headlights.forEach(x -> x.effects(stock, 0));
         getDraggableComponents().forEach(c -> c.effects(stock));
         getReadouts().forEach(c -> c.effects(stock));
+        front_gauges.forEach(c -> c.effects(stock));
+        rear_gauges.forEach(c -> c.effects(stock));
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
@@ -146,6 +169,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                     matrix.translate(def.getBogeyFront(Gauge.standard()), 0, 0);
                 }
                 bogeyFront.render(distanceTraveled, matrix);
+                front_gauges.forEach(r -> r.render(stock, matrix));
             }
         }
 
@@ -164,6 +188,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                     matrix.translate(def.getBogeyRear(Gauge.standard()), 0, 0);
                 }
                 bogeyRear.render(distanceTraveled, matrix);
+                rear_gauges.forEach(r -> r.render(stock, matrix));
             }
         }
     }
@@ -187,11 +212,12 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         components.addAll(doors);
         components.addAll(windows);
         components.addAll(widgets);
+        components.addAll(independent_brakes);
         return components;
     }
 
     public List<Readout<T>> getReadouts() {
-        return new ArrayList<>();
+        return gauges;
     }
 
     public List<Door> getDoors() {

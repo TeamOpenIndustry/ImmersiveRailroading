@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.model.part.Readout;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FreightTankModel<T extends FreightTank> extends FreightModel<T> {
@@ -24,7 +25,7 @@ public class FreightTankModel<T extends FreightTank> extends FreightModel<T> {
 
     @Override
     public List<Readout<T>> getReadouts() {
-        List<Readout<T>> readouts = super.getReadouts();
+        List<Readout<T>> readouts = new ArrayList<>(super.getReadouts());
         readouts.addAll(gauges);
         return readouts;
     }

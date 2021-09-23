@@ -612,7 +612,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							loco.setThrottle(-power / 15f);
 							break;
 						case BRAKE:
-							loco.setAirBrake(power / 15f);
+							loco.setTrainBrake(power / 15f);
 							break;
 						case HORN:
 							loco.setHorn(40, null);
