@@ -49,7 +49,7 @@ public class PhysicsAccummulator {
 			tractiveEffortNewtons += loco.getTractiveEffortNewtons(pos.speed) * (direction ? 1 : -1);
 		}
 		// Possible brake applied from trainBrake pressure
-		double totalAdhesionNewtons = stock.getWeight() * 0.25 * 0.25 * 4.44822f;
+		double totalAdhesionNewtons = stock.getWeight() * 0.25 * 0.75 * 4.44822f;
 		brakeAdhesionNewtons += totalAdhesionNewtons * movable.getTotalBrake();
 
 		int slowdown = movable.getSpeedRetarderSlowdown(pos);
