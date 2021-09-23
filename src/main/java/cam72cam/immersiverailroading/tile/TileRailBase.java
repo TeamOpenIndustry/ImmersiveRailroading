@@ -811,7 +811,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
-		if (stack.is(IRItems.ITEM_SWITCH_KEY)) {
+		if (stack.is(IRItems.ITEM_SWITCH_KEY) && player.hasPermission(Permissions.SWITCH_CONTROL)) {
 			TileRail tileSwitch = this.findSwitchParent();
 			if (tileSwitch != null) {
 				SwitchState switchForced = this.cycleSwitchForced();
@@ -820,7 +820,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 		}
-		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER)) {
+		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER) && player.hasPermission(Permissions.EXCHANGE_TRACK)) {
 			TileRail tileRail = this.getParentTile();
 			ItemTrackExchanger.Data stackData = new ItemTrackExchanger.Data(stack);
 			String track = stackData.track;
@@ -850,7 +850,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			return true;
 		}
-		if (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST)) {
+		if (player.hasPermission(Permissions.AUGMENT_TRACK) && (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST))) {
 			PlayerMessage next = this.nextAugmentRedstoneMode(stack.is(Fuzzy.REDSTONE_DUST));
 			if (next != null) {
 				if (this.getWorld().isServer) {
@@ -942,6 +942,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public boolean tryBreak(Player player) {
+		if (player != null && !player.hasPermission(Permissions.BREAK_TRACK)) {
+			return false;
+		}
 		try {
 			TileRailBase rail = this;
 			if (rail.getReplaced() != null) {

@@ -93,6 +93,9 @@ public class ClientPartDragging {
         protected void handle() {
             EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
             Control control = stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
+            if (!stock.playerCanDrag(getPlayer(), control)) {
+                return;
+            }
             if (start) {
                 stock.onDragStart(control);
             } else if (released) {

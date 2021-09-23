@@ -160,6 +160,10 @@ public class Control {
             return;
         }
 
+        if (!stock.playerCanDrag(MinecraftClient.getPlayer(), this)) {
+            return;
+        }
+
         if (MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
             return;
         }

@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
@@ -596,18 +597,22 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public void handleKeyPress(Player source, KeyTypes key) {
         float independentBrakeNotch = 0.04f;
 
-        switch (key) {
-            case INDEPENDENT_BRAKE_UP:
-                setIndependentBrake(getIndependentBrake() + independentBrakeNotch);
-                break;
-            case INDEPENDENT_BRAKE_ZERO:
-                setIndependentBrake(0f);
-                break;
-            case INDEPENDENT_BRAKE_DOWN:
-                setIndependentBrake(getIndependentBrake() - independentBrakeNotch);
-                break;
-            default:
-                super.handleKeyPress(source, key);
+        if (source.hasPermission(Permissions.BRAKE_CONTROL)) {
+            switch (key) {
+                case INDEPENDENT_BRAKE_UP:
+                    setIndependentBrake(getIndependentBrake() + independentBrakeNotch);
+                    break;
+                case INDEPENDENT_BRAKE_ZERO:
+                    setIndependentBrake(0f);
+                    break;
+                case INDEPENDENT_BRAKE_DOWN:
+                    setIndependentBrake(getIndependentBrake() - independentBrakeNotch);
+                    break;
+                default:
+                    super.handleKeyPress(source, key);
+            }
+        } else {
+            super.handleKeyPress(source, key);
         }
     }
 

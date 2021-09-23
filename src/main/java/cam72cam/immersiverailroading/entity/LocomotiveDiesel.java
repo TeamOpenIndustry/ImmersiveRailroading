@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
@@ -12,7 +13,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
@@ -86,8 +86,12 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
-	public GuiRegistry.EntityGUI guiType() {
-		return getDefinition().isCabCar() ? null : GuiTypes.DIESEL_LOCOMOTIVE;
+	public boolean openGui(Player player) {
+		if (!getDefinition().isCabCar() && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+			GuiTypes.DIESEL_LOCOMOTIVE.open(player, this);
+			return true;
+		}
+		return false;
 	}
 
 	/*

@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.AssemblyStep;
 import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
 import cam72cam.mod.entity.DamageType;
 import cam72cam.mod.entity.Entity;
@@ -327,6 +328,9 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		}
 
 		if (getWorld().isClient) {
+			return ClickResult.PASS;
+		}
+		if (!player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
 			return ClickResult.PASS;
 		}
 		if (player.getHeldItem(hand).is(IRItems.ITEM_LARGE_WRENCH) || player.getHeldItem(hand).is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {

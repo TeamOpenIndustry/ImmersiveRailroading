@@ -6,13 +6,13 @@ import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
@@ -71,8 +71,8 @@ public abstract class Locomotive extends FreightTank {
 	 */
 
 	@Override
-	public GuiRegistry.EntityGUI guiType() {
-		return null;
+	public boolean openGui(Player player) {
+		return false;
 	}
 
 	@Override
@@ -223,8 +223,28 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	public ClickResult onClick(Player player, Player.Hand hand) {
-		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD)) {
+    @Override
+    public boolean playerCanDrag(Player player, Control control) {
+        if (!super.playerCanDrag(player, control)) {
+        	return false;
+		}
+        switch (control.part.type) {
+			case THROTTLE_X:
+			case REVERSER_X:
+			case TRAIN_BRAKE_X:
+			case INDEPENDENT_BRAKE_X:
+			case THROTTLE_BRAKE_X:
+			case WHISTLE_CONTROL_X:
+			case HORN_CONTROL_X:
+			case ENGINE_START_X:
+				return player.hasPermission(Permissions.LOCOMOTIVE_CONTROL);
+			default:
+				return true;
+		}
+    }
+
+    public ClickResult onClick(Player player, Player.Hand hand) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
 				ItemRadioCtrlCard.Data data = new ItemRadioCtrlCard.Data(player.getHeldItem(hand));
 				if (player.isCrouching()) {
@@ -243,7 +263,15 @@ public abstract class Locomotive extends FreightTank {
 		}
 		return super.onClick(player, hand);
 	}
-	
+
+	@Override
+	public boolean canFitPassenger(Entity passenger) {
+		if (passenger instanceof Player && !((Player) passenger).hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+			return false;
+		}
+		return super.canFitPassenger(passenger);
+	}
+
 	@Override
 	public void onTick() {
 		super.onTick();

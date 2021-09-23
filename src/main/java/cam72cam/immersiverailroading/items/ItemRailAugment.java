@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -41,7 +42,7 @@ public class ItemRailAugment extends CustomItem {
 
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
-		if (BlockUtil.isIRRail(world, pos)) {
+		if (BlockUtil.isIRRail(world, pos) && player.hasPermission(Permissions.AUGMENT_TRACK)) {
 			TileRailBase te = world.getBlockEntity(pos, TileRailBase.class);
 			if (te != null) {
 				ItemStack stack = player.getHeldItem(hand);

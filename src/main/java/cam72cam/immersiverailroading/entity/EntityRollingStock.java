@@ -3,10 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -115,7 +112,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
-		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH)) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
 			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
 			if (texNames.size() > 1) {
 				int idx = texNames.indexOf(texture);
@@ -276,6 +273,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	public void setControlPositions(ModelComponentType type, float val) {
 		getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
+	}
+
+	public boolean playerCanDrag(Player player, Control control) {
+		return control.part.type != ModelComponentType.INDEPENDENT_BRAKE_X || player.hasPermission(Permissions.BRAKE_CONTROL);
 	}
 
 	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {

@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.sync.TagSync;
@@ -125,7 +126,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 	@Override
     public ClickResult onClick(Player player, Player.Hand hand) {
-		if (player.getHeldItem(hand).is(IRItems.ITEM_HOOK) && getWorld().isServer) {
+		if (player.getHeldItem(hand).is(IRItems.ITEM_HOOK) && getWorld().isServer && player.hasPermission(Permissions.COUPLING_HOOK)) {
 			CouplerType coupler = CouplerType.FRONT;
 			if (this.getCouplerPosition(CouplerType.FRONT).distanceTo(player.getPosition()) > this.getCouplerPosition(CouplerType.BACK).distanceTo(player.getPosition())) {
 				coupler = CouplerType.BACK;
