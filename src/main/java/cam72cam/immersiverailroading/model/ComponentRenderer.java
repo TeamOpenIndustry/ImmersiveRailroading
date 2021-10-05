@@ -80,6 +80,10 @@ public class ComponentRenderer implements Closeable {
         return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight);
     }
 
+    public void mult(Matrix4 transform) {
+        this.matrix.multiply(transform);
+    }
+
     public void translate(double x, double y, double z) {
         matrix.translate(x, y, z);
     }

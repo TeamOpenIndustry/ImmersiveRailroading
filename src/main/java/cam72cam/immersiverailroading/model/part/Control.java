@@ -125,32 +125,7 @@ public class Control {
         }
 
         try (ComponentRenderer matrix = draw.push()) {
-            translations.forEach((axis, val) -> {
-                matrix.translate(
-                        axis == Axis.X ? val * valuePercent : 0,
-                        axis == Axis.Y ? val * valuePercent : 0,
-                        axis == Axis.Z ? val * valuePercent : 0
-                );
-            });
-            if (rotationPoint != null) {
-                matrix.translate(rotationPoint.x, rotationPoint.y, rotationPoint.z);
-                matrix.rotate(
-                        valuePercent * rotationDegrees,
-                        rotations.getOrDefault(Axis.X, 0f),
-                        rotations.getOrDefault(Axis.Y, 0f),
-                        rotations.getOrDefault(Axis.Z, 0f)
-                );
-                matrix.translate(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
-            }
-            if (!scales.isEmpty()) {
-                matrix.translate(part.center.x, part.center.y, part.center.z);
-                matrix.scale(
-                        scales.containsKey(Axis.X) ? scales.get(Axis.X) * valuePercent : 1,
-                        scales.containsKey(Axis.Y) ? scales.get(Axis.Y) * valuePercent : 1,
-                        scales.containsKey(Axis.Z) ? scales.get(Axis.Z) * valuePercent : 1
-                );
-                matrix.translate(-part.center.x, -part.center.y, -part.center.z);
-            }
+            matrix.mult(transform(getValue(stock), new Matrix4()));
             matrix.render(part);
         }
     }
@@ -191,7 +166,7 @@ public class Control {
         if (!inRange) {
             return;
         }
-        Vec3d pos = transform(center, getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()));
+        Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())).apply(center);
         String state = "";
         switch (part.type) {
             case TRAIN_BRAKE_X:
@@ -229,10 +204,10 @@ public class Control {
     }
 
     protected Vec3d transform(Vec3d point, float valuePercent, EntityRollingStock stock) {
-        return transform(point, valuePercent, stock.getModelMatrix());
+        return transform(valuePercent, stock.getModelMatrix()).apply(point);
     }
 
-    protected Vec3d transform(Vec3d point, float valuePercent, Matrix4 m) {
+    protected Matrix4 transform(float valuePercent, Matrix4 m) {
         for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
             Axis axis = entry.getKey();
             Float val = entry.getValue();
@@ -262,7 +237,7 @@ public class Control {
             );
             m = m.translate(-part.center.x, -part.center.y, -part.center.z);
         }
-        return m.apply(point);
+        return m;
     }
 
     public Vec3d center(EntityRollingStock stock) {
