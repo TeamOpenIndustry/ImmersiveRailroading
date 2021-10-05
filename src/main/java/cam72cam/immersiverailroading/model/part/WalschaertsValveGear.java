@@ -68,8 +68,8 @@ public class WalschaertsValveGear extends StephensonValveGear {
         crankWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? returnCrank.min : returnCrank.max))).get();
     }
 
-    public void render(double distance, float throttle, ComponentRenderer draw) {
-        super.render(distance, throttle, draw);
+    public void render(double distance, float reverser, ComponentRenderer draw) {
+        super.render(distance, reverser, draw);
 
         float wheelAngle = super.angle(distance);
 
@@ -165,10 +165,10 @@ public class WalschaertsValveGear extends StephensonValveGear {
         double forwardMax = (slottedLink.min.y - slottedLinkRotPoint.y) * 0.4;
         double forwardMin = (slottedLink.max.y - slottedLinkRotPoint.y) * 0.65;
         double throttleSlotPos = 0;
-        if (throttle > 0) {
-            throttleSlotPos = forwardMax * throttle;
+        if (reverser > 0) {
+            throttleSlotPos = forwardMax * reverser;
         } else {
-            throttleSlotPos = forwardMin * -throttle;
+            throttleSlotPos = forwardMin * -reverser;
         }
 
         double radiusBarSliding = Math.sin(Math.toRadians(-slottedLinkRot)) * (throttleSlotPos);

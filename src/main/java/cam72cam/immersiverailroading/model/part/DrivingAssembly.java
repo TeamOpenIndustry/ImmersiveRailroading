@@ -68,16 +68,16 @@ public class DrivingAssembly {
         }
     }
 
-    public void render(double distance, float throttle, ComponentRenderer draw) {
+    public void render(double distance, float reverser, ComponentRenderer draw) {
         wheels.render(distance, draw);
         if (right != null) {
-            right.render(distance, throttle, draw);
+            right.render(distance, reverser, draw);
         }
         if (center != null) {
-            center.render(distance, throttle, draw);
+            center.render(distance, reverser, draw);
         }
         if (left != null) {
-            left.render(distance, throttle, draw);
+            left.render(distance, reverser, draw);
         }
         draw.render(steamChest);
     }

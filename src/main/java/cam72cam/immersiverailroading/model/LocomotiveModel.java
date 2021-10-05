@@ -167,7 +167,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         bell.render(draw);
 
         if (drivingWheels != null) {
-            drivingWheels.render(distanceTraveled, stock.getThrottle(), draw);
+            drivingWheels.render(distanceTraveled, stock.getReverser(), draw);
         }
         if (drivingWheelsFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
@@ -180,7 +180,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                     data.apply(stock, matrix);
                     matrix.render(frameFront);
                 }
-                drivingWheelsFront.render(distanceTraveled, stock.getThrottle(), matrix);
+                drivingWheelsFront.render(distanceTraveled, stock.getReverser(), matrix);
                 matrix.render(shellFront);
                 if (cargoFront != null) {
                     cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
@@ -205,7 +205,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                     data.apply(stock, matrix);
                     matrix.render(frameRear);
                 }
-                drivingWheelsRear.render(distanceTraveled, stock.getThrottle(), matrix);
+                drivingWheelsRear.render(distanceTraveled, stock.getReverser(), matrix);
                 matrix.render(shellRear);
                 if (cargoRear != null) {
                     cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);

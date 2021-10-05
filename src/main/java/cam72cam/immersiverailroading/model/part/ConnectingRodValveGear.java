@@ -33,7 +33,7 @@ public class ConnectingRodValveGear implements ValveGear {
     }
 
     @Override
-    public void render(double distance, float throttle, ComponentRenderer draw) {
+    public void render(double distance, float reverser, ComponentRenderer draw) {
         float wheelAngle = angle(distance);
 
         // Center of the connecting rod, may not line up with a wheel directly

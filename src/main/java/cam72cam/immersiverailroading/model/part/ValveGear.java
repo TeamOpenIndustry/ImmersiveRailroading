@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 
 public interface ValveGear {
-    void render(double distance, float throttle, ComponentRenderer draw);
+    void render(double distance, float reverser, ComponentRenderer draw);
 
     void effects(EntityMoveableRollingStock stock, float throttle);
 

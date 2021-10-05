@@ -161,8 +161,8 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         }
     }
 
-    public void render(double distance, float throttle, ComponentRenderer draw) {
-        super.render(distance, throttle, draw);
+    public void render(double distance, float reverser, ComponentRenderer draw) {
+        super.render(distance, reverser, draw);
 
         draw.render(cylinder);
 
