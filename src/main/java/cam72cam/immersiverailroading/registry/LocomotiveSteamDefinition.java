@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.SteamLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
@@ -9,12 +10,23 @@ import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
 
+import java.io.IOException;
+
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private static Identifier default_whistle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
     private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
     private static Identifier default_chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
     private static Identifier default_pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
+    private static GuiBuilder default_overlay;
+
+    static {
+        try {
+            default_overlay = GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/steam.json"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Quilling quill;
     public Identifier whistle;
@@ -141,6 +153,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     @Override
     public SteamLocomotiveModel getModel() {
         return (SteamLocomotiveModel) super.getModel();
+    }
+
+    @Override
+    public GuiBuilder getOverlay() {
+        GuiBuilder overlay = super.getOverlay();
+        return overlay == null ? default_overlay : overlay;
     }
 
     public FluidQuantity getTankCapacity(Gauge gauge) {

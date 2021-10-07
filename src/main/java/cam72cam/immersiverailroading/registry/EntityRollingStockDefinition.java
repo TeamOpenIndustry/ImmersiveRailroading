@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -83,6 +84,7 @@ public abstract class EntityRollingStockDefinition {
     private static final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
     private boolean isLinearBrakeControl;
+    private GuiBuilder overlay;
 
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
@@ -313,6 +315,8 @@ public abstract class EntityRollingStockDefinition {
                 }
             }
         }
+
+        overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : null;
     }
 
     public List<ModelComponent> getComponents(ModelComponentType name) {
@@ -617,4 +621,9 @@ public abstract class EntityRollingStockDefinition {
     public boolean isLinearBrakeControl() {
         return isLinearBrakeControl;
     }
+
+    public GuiBuilder getOverlay() {
+        return overlay;
+    }
+
 }
