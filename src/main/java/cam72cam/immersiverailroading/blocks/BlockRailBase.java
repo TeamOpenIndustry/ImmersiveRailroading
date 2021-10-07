@@ -300,6 +300,7 @@ public abstract class BlockRailBase extends Block {
 				TileRail tileSwitch = te.findSwitchParent();
 				if (tileSwitch != null) {
 					SwitchState switchForced = te.cycleSwitchForced();
+					IRItems.ITEM_SWITCH_KEY.setLastUsedOn(te);
 					if (!worldIn.isRemote) {
 						playerIn.sendMessage(switchForced.equals(SwitchState.NONE) ? new TextComponentString(ChatText.SWITCH_UNLOCKED.toString()) : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
 					}

@@ -52,6 +52,8 @@ chat.immersiverailroading:radio.cant_link=Locomotive %s does not have radio cont
 chat.immersiverailroading:brush.no.variants=This stock has no livery variants
 chat.immersiverailroading:switch_state.unlocked=Switch unlocked
 chat.immersiverailroading:switch_state.locked=Switch locked to %s
+chat.immersiverailroading:switch_state.reset=Switch wirelessly reset
+chat.immersiverailroading:switch_state.cant_reset=No switch to wirelessly reset
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
