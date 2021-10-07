@@ -1,0 +1,25 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersiverailroading:item_chaos_brush"
+  },
+  "pattern": [
+    "o",
+    "g",
+    "s"
+  ],
+  "key": {
+    "g": {
+      "type": "forge:ore_dict",
+      "ore": "ingotGold"
+    },
+    "s": {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    },
+    "o": {
+      "type": "forge:ore_dict",
+      "ore": "blockObsidian"
+    }
+  }
+}

@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.google.gson.JsonObject;
 
@@ -33,6 +34,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 public abstract class EntityRollingStock extends Entity implements IEntityAdditionalSpawnData {
+	private static final Random rand = new Random(System.currentTimeMillis());
 	
 	protected String defID;
 	public Gauge gauge;
@@ -155,6 +157,22 @@ public abstract class EntityRollingStock extends Entity implements IEntityAdditi
 				int idx = texNames.indexOf(this.texture);
 				idx = (idx + (player.isSneaking() ? -1 : 1) + texNames.size()) % (texNames.size());
 				this.texture = texNames.get(idx);
+				this.sendToObserving(new PaintSyncPacket(this));
+				return true;
+			} else {
+				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
+			}
+		} else if (player.getHeldItem(hand).getItem() == IRItems.ITEM_CHAOS_BRUSH) {
+			List<String> texNames = new ArrayList<String>(this.getDefinition().textureNames.keySet());
+			if (texNames.size() > 1) {
+				int idx = rand.nextInt(texNames.size());
+				this.texture = texNames.get(idx);
+
+				//debug code
+				if (!world.isRemote) {
+					player.sendMessage(ChatText.BRUSH_CHAOS.getMessage(this.texture));
+				}
+
 				this.sendToObserving(new PaintSyncPacket(this));
 				return true;
 			} else {

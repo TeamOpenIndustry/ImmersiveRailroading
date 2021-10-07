@@ -16,7 +16,8 @@ public class IRItems {
 	public static ItemPlate ITEM_PLATE = new ItemPlate();
 	public static ItemCastRail ITEM_CAST_RAIL = new ItemCastRail();
 	public static ItemConductorWhistle ITEM_CONDUCTOR_WHISTLE = new ItemConductorWhistle();
-	public static ItemPaintBrush ITEM_PAINT_BRUSH = new ItemPaintBrush(); 
+	public static ItemPaintBrush ITEM_PAINT_BRUSH = new ItemPaintBrush();
+	public static ItemChaosBrush ITEM_CHAOS_BRUSH = new ItemChaosBrush();
 	public static ItemGoldenSpike ITEM_GOLDEN_SPIKE = new ItemGoldenSpike();
 	public static ItemRadioCtrlCard ITEM_RADIO_CONTROL_CARD = new ItemRadioCtrlCard();
 	public static ItemSwitchKey ITEM_SWITCH_KEY = new ItemSwitchKey();
