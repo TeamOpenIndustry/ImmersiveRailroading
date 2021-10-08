@@ -23,6 +23,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
     private boolean hornSus;
+    private int notches;
 
     public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
@@ -44,6 +45,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         } else {
             fuelCapacity = FluidQuantity.ZERO;
         }
+        notches = properties.has("throttle_notches") ? properties.get("throttle_notches").getAsInt() : 8;
 
         hornSus = false;
         if (properties.has("horn_sustained")) {
@@ -133,5 +135,9 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public ValveGearType getValveGear() {
         return super.getValveGear() == null ? ValveGearType.CONNECTING : super.getValveGear();
+    }
+
+    public int getThrottleNotches() {
+        return notches;
     }
 }
