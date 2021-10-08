@@ -54,7 +54,7 @@ chat.immersiverailroading:brush.no.variants=This stock has no livery variants
 chat.immersiverailroading:brush.chaos=BEHOLD THE CHAOS! This stock's livery has been set to %s
 chat.immersiverailroading:switch_state.unlocked=Switch unlocked
 chat.immersiverailroading:switch_state.locked=Switch locked to %s
-chat.immersiverailroading:switch_state.reset=Switch wirelessly reset
+chat.immersiverailroading:switch_state.reset=Wirelessly reset the switch
 chat.immersiverailroading:switch_state.cant_reset=No switch to wirelessly reset
 
 gui.immersiverailroading:label.brake=Brake
