@@ -146,11 +146,12 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public void setThrottle(float newThrottle) {
+		int notches = getDefinition().getThrottleNotches();
 		if (!Config.ImmersionConfig.disableIndependentThrottle) {
 			if (newThrottle > getThrottle()) {
-				super.setThrottle((float) (Math.ceil(newThrottle * 8) / 8));
+				super.setThrottle((float) (Math.ceil(newThrottle * notches) / notches));
 			} else {
-				super.setThrottle((float) (Math.floor(newThrottle * 8) / 8));
+				super.setThrottle((float) (Math.floor(newThrottle * notches) / notches));
 			}
 		} else {
 			super.setThrottle(newThrottle);
