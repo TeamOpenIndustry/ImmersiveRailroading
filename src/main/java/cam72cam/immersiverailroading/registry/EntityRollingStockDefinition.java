@@ -623,7 +623,7 @@ public abstract class EntityRollingStockDefinition {
     }
 
     protected GuiBuilder getDefaultOverlay() throws IOException {
-        return null;
+        return hasIndependentBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.json")) : null;
     }
 
     public GuiBuilder getOverlay() {
