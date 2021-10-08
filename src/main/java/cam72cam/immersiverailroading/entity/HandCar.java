@@ -28,16 +28,26 @@ public class HandCar extends Locomotive {
 		}
 		return this.getDefinition().getHorsePower(gauge) * passengers;
 	}
-	
+
+	@Override
+	protected boolean linkThrottleReverser() {
+		// Always linked
+		return true;
+	}
+
 	@Override
 	public void onTick() {
 		super.onTick();
-		
+
 		if (getWorld().isClient) {
 			return;
 		}
-		
-		if (this.getThrottle() != 0 && this.getTickCount() % (int)(200 * (1.1-Math.abs(this.getThrottle()))) == 0) {
+
+		if (getTrainBrake() > 0) {
+			this.setTrainBrake(0);
+		}
+
+		if (this.getThrottle() != 0 && this.getTickCount() % (int)(600 * (1.1-this.getThrottle())) == 0) {
 			for (Entity passenger : this.getPassengers()) {
 				if (passenger.isPlayer()) {
 					Player player = passenger.asPlayer();

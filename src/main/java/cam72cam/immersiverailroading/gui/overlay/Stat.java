@@ -20,15 +20,15 @@ public enum Stat {
         switch (this) {
             case SPEED:
                 if (stock instanceof EntityMoveableRollingStock) {
-                    Speed current = ((EntityMoveableRollingStock) stock).getCurrentSpeed();
+                    double current = Math.abs(((EntityMoveableRollingStock) stock).getCurrentSpeed().metric());
                     switch (ConfigGraphics.speedUnit) {
                         case mph:
-                            return String.format("%.2f mph", current.metric() * 0.621371);
+                            return String.format("%.2f mph", current * 0.621371);
                         case ms:
-                            return String.format("%.2f m/s", current.metric() / 3.6);
+                            return String.format("%.2f m/s", current / 3.6);
                         case kmh:
                         default:
-                            return String.format("%.2f km/h", current.metric());
+                            return String.format("%.2f km/h", current);
                     }
                 }
                 return "";

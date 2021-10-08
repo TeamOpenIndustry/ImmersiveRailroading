@@ -78,7 +78,7 @@ public abstract class Locomotive extends FreightTank {
 	@Override
 	public void handleKeyPress(Player source, KeyTypes key) {
 
-		if (Config.ImmersionConfig.disableIndependentThrottle) {
+		if (this.linkThrottleReverser()) {
 			switch (key) {
 				case THROTTLE_UP:
 					key = KeyTypes.REVERSER_UP;
@@ -171,6 +171,10 @@ public abstract class Locomotive extends FreightTank {
 			default:
 				super.handleKeyPress(source, key);
 		}
+	}
+
+	protected boolean linkThrottleReverser() {
+		return Config.ImmersionConfig.disableIndependentThrottle;
 	}
 
 	protected float getReverserDelta() {
@@ -409,7 +413,7 @@ public abstract class Locomotive extends FreightTank {
 		newReverser = Math.min(1, Math.max(-1, newReverser));
 
 		if (this.getReverser() != newReverser) {
-			if (Config.ImmersionConfig.disableIndependentThrottle) {
+			if (linkThrottleReverser()) {
 				// Slave throttle to reverser position
 				//setThrottle(Math.abs(newReverser));
 				float newThrottle = Math.abs(newReverser);
