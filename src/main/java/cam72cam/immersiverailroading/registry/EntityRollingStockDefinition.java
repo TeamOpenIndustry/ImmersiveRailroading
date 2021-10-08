@@ -316,7 +316,7 @@ public abstract class EntityRollingStockDefinition {
             }
         }
 
-        overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : null;
+        overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : getDefaultOverlay();
     }
 
     public List<ModelComponent> getComponents(ModelComponentType name) {
@@ -620,6 +620,10 @@ public abstract class EntityRollingStockDefinition {
 
     public boolean isLinearBrakeControl() {
         return isLinearBrakeControl;
+    }
+
+    protected GuiBuilder getDefaultOverlay() throws IOException {
+        return null;
     }
 
     public GuiBuilder getOverlay() {

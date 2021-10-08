@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
+import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.DieselLocomotiveModel;
@@ -9,6 +10,8 @@ import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
+
+import java.io.IOException;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
@@ -102,6 +105,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     @Override
     protected StockModel<?> createModel() throws Exception {
         return new DieselLocomotiveModel(this);
+    }
+
+    @Override
+    protected GuiBuilder getDefaultOverlay() throws IOException {
+        return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/diesel.json"));
     }
 
     @Override

@@ -18,15 +18,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private static Identifier default_chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
     private static Identifier default_pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
-    private static GuiBuilder default_overlay;
-
-    static {
-        try {
-            default_overlay = GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/steam.json"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public Quilling quill;
     public Identifier whistle;
@@ -156,9 +147,8 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    public GuiBuilder getOverlay() {
-        GuiBuilder overlay = super.getOverlay();
-        return overlay == null ? default_overlay : overlay;
+    protected GuiBuilder getDefaultOverlay() throws IOException {
+        return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/steam.json"));
     }
 
     public FluidQuantity getTankCapacity(Gauge gauge) {
