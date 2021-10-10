@@ -71,11 +71,7 @@ public class ItemSwitchKey extends CustomItem {
 
 		PlayerMessage message = null;
 
-		if (!data.isEmpty()) {
-			if (data.isInClickCooldown()) {
-				return;
-			}
-
+		if (!data.isEmpty() && !data.isInClickCooldown()) {
 			TileRailBase lastUsedOn = data.getLastUsedOnSwitch(world);
 			if (lastUsedOn != null) {
 				if (lastUsedOn.isSwitchForced()) {

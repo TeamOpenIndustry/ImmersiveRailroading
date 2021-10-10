@@ -747,6 +747,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			tileSwitch.markDirty();
 			this.markDirty();
 			this.getParentTile().markDirty();
+
+			// debug logging showed this is being called on both the client and server side, weird that markDirty isn't working
+			//System.out.println("SetSwitchedForced isOnClient=" + getWorld().isClient + " newState=" + newForcedState.toString());
 		}
 	}
 
@@ -839,9 +842,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							player.sendMessage(ChatText.SWITCH_LOCKED.getMessage(newSwitchForcedState.toString()));
 						}
 					} else {
-						data.clear();
-						data.write();
-
 						if (getWorld().isClient) {
 							player.sendMessage(ChatText.SWITCH_UNLOCKED.getMessage());
 						}
