@@ -44,7 +44,7 @@ public enum GuiText {
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
 	WEIGHT_TOOLTIP("stock.weight"),
 	TEXTURE_TOOLTIP("stock.texture"),
-	SWITCH_HAMMER_TOOLTIP("item.switch_hammer"),
+	SWITCH_HAMMER_TOOLTIP("item.switch_key"),
 	MODELER_TOOLTIP("stock.modeler"),
 	PACK_TOOLTIP("stock.pack"),
 	TRACK_SWITCHER_TOOLTIP("item.track_exchanger"),

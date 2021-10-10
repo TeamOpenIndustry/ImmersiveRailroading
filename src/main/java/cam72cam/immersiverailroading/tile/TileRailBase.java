@@ -729,6 +729,16 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (tileSwitch != null) {
 			newForcedState = SwitchState.values()[( tileSwitch.info.switchForced.ordinal() + 1 ) % SwitchState.values().length];
+			setSwitchForced(newForcedState);
+		}
+
+		return newForcedState;
+	}
+
+	public SwitchState setSwitchForced(SwitchState newForcedState) {
+		TileRail tileSwitch = this.findSwitchParent();
+
+		if (tileSwitch != null && newForcedState != tileSwitch.info.switchForced) {
 			tileSwitch.info = new RailInfo(tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
 			tileSwitch.markDirty();
 			this.markDirty();
@@ -737,7 +747,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		return newForcedState;
 	}
-
 	public boolean isSwitchForced() {
 		TileRail tileSwitch = this.findSwitchParent();
 		if (tileSwitch != null) {
@@ -815,6 +824,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			TileRail tileSwitch = this.findSwitchParent();
 			if (tileSwitch != null) {
 				SwitchState switchForced = this.cycleSwitchForced();
+				IRItems.ITEM_SWITCH_KEY.setLastUsedOn(tileSwitch);
 				if (this.getWorld().isServer) {
 					player.sendMessage(switchForced.equals(SwitchState.NONE) ? ChatText.SWITCH_UNLOCKED.getMessage() : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
 				}
