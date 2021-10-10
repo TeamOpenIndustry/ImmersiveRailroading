@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
+import cam72cam.immersiverailroading.items.ItemSwitchKey;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Door;
@@ -723,6 +724,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return new Vec3i(this.replaced.getLong("parent")).add(getPos());
 	}
 
+	/**
+	 * @return the newly applied state
+	 */
 	public SwitchState cycleSwitchForced() {
 		TileRail tileSwitch = this.findSwitchParent();
 		SwitchState newForcedState = SwitchState.NONE;
@@ -823,10 +827,21 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (stack.is(IRItems.ITEM_SWITCH_KEY) && player.hasPermission(Permissions.SWITCH_CONTROL)) {
 			TileRail tileSwitch = this.findSwitchParent();
 			if (tileSwitch != null) {
-				SwitchState switchForced = this.cycleSwitchForced();
-				IRItems.ITEM_SWITCH_KEY.setLastUsedOn(tileSwitch);
-				if (this.getWorld().isServer) {
-					player.sendMessage(switchForced.equals(SwitchState.NONE) ? ChatText.SWITCH_UNLOCKED.getMessage() : ChatText.SWITCH_LOCKED.getMessage(switchForced.toString()));
+				SwitchState newSwitchForcedState = this.cycleSwitchForced();
+				ItemSwitchKey.Data data = new ItemSwitchKey.Data(stack);
+
+				if (tileSwitch.isSwitchForced()) {
+					data.lastUsedOn = tileSwitch.getPos();
+					data.forcedIntoState = newSwitchForcedState;
+					data.lastUsedAt = System.currentTimeMillis();
+					data.write();
+
+					player.sendMessage(ChatText.SWITCH_LOCKED.getMessage(newSwitchForcedState.toString()));
+				} else {
+					data.clear();
+					data.write();
+
+					player.sendMessage(ChatText.SWITCH_UNLOCKED.getMessage());
 				}
 			}
 		}

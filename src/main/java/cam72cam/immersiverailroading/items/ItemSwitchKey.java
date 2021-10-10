@@ -3,22 +3,26 @@ package cam72cam.immersiverailroading.items;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.text.TextComponentString;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class ItemSwitchKey extends CustomItem {
-	private TileRailBase lastUsedOn = null;
+	public static final long CLICK_COOLDOWN_MILLIS = 100L;
+	public static final String LAST_USED_ON_KEY = "lastUsedOn";
+	public static final String FORCED_INTO_STATE_KEY = "forcedIntoState";
+	public static final String LAST_USED_AT_KEY = "lastUsedAt";
 
 	public ItemSwitchKey() {
 		super(ImmersiveRailroading.MODID, "item_switch_key");
@@ -43,36 +47,84 @@ public class ItemSwitchKey extends CustomItem {
 	@Override
 	public List<String> getTooltip(ItemStack stack)
 	{
-		return Collections.singletonList(GuiText.SWITCH_HAMMER_TOOLTIP.toString(lastUsedOn != null && lastUsedOn.isSwitchForced() ? "\nCoordinates of the last locked switch: " + lastUsedOn.findSwitchParent().info.placementInfo.placementPosition.toString() + "\nLocked to: " + lastUsedOn.findSwitchParent().info.switchForced : ""));
-	}
-
-	public TileRailBase getLastUsedOn() {
-		return lastUsedOn;
-	}
-
-	public void setLastUsedOn(TileRailBase lastUsedOn) {
-		this.lastUsedOn = lastUsedOn;
+		Data data = new Data(stack);
+		if (data.isEmpty()) {
+			return Collections.singletonList(GuiText.SWITCH_KEY_TOOLTIP.toString());
+		} else {
+			return Arrays.asList(
+					GuiText.SWITCH_KEY_TOOLTIP.toString(),
+					GuiText.SWITCH_KEY_DATA_TOOLTIP.toString(
+							data.lastUsedOn.toString(),
+							data.forcedIntoState.toString())
+			);
+		}
 	}
 
 	@Override
 	public void onClickAir(Player player, World world, Player.Hand hand) {
-		if (lastUsedOn != null) {
-			if (lastUsedOn.isSwitchForced()) {
-				lastUsedOn.setSwitchForced(SwitchState.NONE);
-				if (world.isServer) {
+		if (!player.hasPermission(Permissions.SWITCH_CONTROL)) {
+			return;
+		}
+
+		ItemStack stack = player.getHeldItem(hand);
+		Data data = new Data(stack);
+
+		if (!data.isEmpty()) {
+			if (System.currentTimeMillis() < data.lastUsedAt + CLICK_COOLDOWN_MILLIS) {
+				return;
+			}
+
+			TileRailBase lastUsedOn = data.getLastUsedOnSwitch(world);
+			if (lastUsedOn != null) {
+				if (lastUsedOn.isSwitchForced()) {
+					lastUsedOn.setSwitchForced(SwitchState.NONE);
 					player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_RESET.toString()));
-				}
-			} else {
-				if (world.isServer) {
+				} else {
 					player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_ALREADY_RESET.toString()));
 				}
 			}
 
-			lastUsedOn = null;
+			data.clear();
+			data.write();
 		} else {
-			if (world.isServer) {
-				player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString()));
+			player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString()));
+		}
+	}
+
+	public static class Data extends ItemDataSerializer {
+		@TagField(value = LAST_USED_ON_KEY)
+		public Vec3i lastUsedOn;
+
+		@TagField(value = FORCED_INTO_STATE_KEY)
+		public SwitchState forcedIntoState;
+
+		@TagField(value = LAST_USED_AT_KEY)
+		public Long lastUsedAt;
+
+		public Data(ItemStack stack) {
+			super(stack);
+
+			if (lastUsedAt == null) {
+				lastUsedAt = 0L;
 			}
+		}
+
+		public boolean isEmpty() {
+			return lastUsedOn == null && lastUsedAt == null;
+		}
+
+		public TileRailBase getLastUsedOnSwitch(World world) {
+			if (isEmpty()) {
+				return null;
+			}
+
+			return world.getBlockEntity(lastUsedOn, TileRailBase.class);
+		}
+
+		public void clear() {
+			lastUsedOn = null;
+			forcedIntoState = null;
+			lastUsedAt = 0L;
 		}
 	}
 }
