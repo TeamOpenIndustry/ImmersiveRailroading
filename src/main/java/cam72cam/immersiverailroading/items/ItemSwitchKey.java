@@ -69,8 +69,10 @@ public class ItemSwitchKey extends CustomItem {
 		ItemStack stack = player.getHeldItem(hand);
 		Data data = new Data(stack);
 
+		PlayerMessage message = null;
+
 		if (!data.isEmpty()) {
-			if (System.currentTimeMillis() < data.lastUsedAt + CLICK_COOLDOWN_MILLIS) {
+			if (data.isInClickCooldown()) {
 				return;
 			}
 
@@ -78,16 +80,21 @@ public class ItemSwitchKey extends CustomItem {
 			if (lastUsedOn != null) {
 				if (lastUsedOn.isSwitchForced()) {
 					lastUsedOn.setSwitchForced(SwitchState.NONE);
-					player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_RESET.toString()));
+					message = PlayerMessage.translate(ChatText.SWITCH_RESET.toString());
 				} else {
-					player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_ALREADY_RESET.toString()));
+					message = PlayerMessage.translate(ChatText.SWITCH_ALREADY_RESET.toString());
 				}
 			}
 
 			data.clear();
 			data.write();
 		} else {
-			player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString()));
+			message = PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString());
+		}
+
+		// Only send client-side to avoid spamming the chat for other players
+		if (message != null && world.isClient) {
+			player.sendMessage(message);
 		}
 	}
 
@@ -105,12 +112,16 @@ public class ItemSwitchKey extends CustomItem {
 			super(stack);
 
 			if (lastUsedAt == null) {
-				lastUsedAt = 0L;
+				lastUsedAt = System.currentTimeMillis();
 			}
 		}
 
 		public boolean isEmpty() {
-			return lastUsedOn == null && lastUsedAt == null;
+			return lastUsedOn == null;
+		}
+
+		public boolean isInClickCooldown() {
+			return System.currentTimeMillis() < this.lastUsedAt + CLICK_COOLDOWN_MILLIS;
 		}
 
 		public TileRailBase getLastUsedOnSwitch(World world) {
@@ -124,7 +135,7 @@ public class ItemSwitchKey extends CustomItem {
 		public void clear() {
 			lastUsedOn = null;
 			forcedIntoState = null;
-			lastUsedAt = 0L;
+			lastUsedAt = System.currentTimeMillis();
 		}
 	}
 }
