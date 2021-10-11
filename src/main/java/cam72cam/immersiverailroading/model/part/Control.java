@@ -290,7 +290,7 @@ public class Control {
         }
         lastClientLook = current;
 
-        return delta;
+        return Float.isNaN(delta) ? 0 : delta;
     }
 
     public void stopClientDragging() {
