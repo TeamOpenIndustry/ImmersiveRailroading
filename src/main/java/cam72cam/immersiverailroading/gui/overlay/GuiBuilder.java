@@ -19,8 +19,8 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class GuiBuilder {
-    private final int x;
-    private final int y;
+    private final float x;
+    private final float y;
     private final boolean centerx;
     private final boolean centery;
 
@@ -29,16 +29,16 @@ public class GuiBuilder {
     private final int imageHeight;
 
     private final String text;
-    private final int textHeight;
+    private final float textHeight;
 
     private final Readout readout;
     private final String control;
     private final boolean invert;
     private final boolean hide;
-    private final int tlx;
-    private final int tly;
-    private final int rotx;
-    private final int roty;
+    private final float tlx;
+    private final float tly;
+    private final float rotx;
+    private final float roty;
     private final float rotdeg;
     private final float rotoff;
     private final Float scalex;
@@ -50,8 +50,8 @@ public class GuiBuilder {
 
     protected GuiBuilder(JsonObject data) throws IOException {
         // common stuff
-        this.x = data.has("x") ? data.get("x").getAsInt() : 0;
-        this.y = data.has("y") ? data.get("y").getAsInt() : 0;
+        this.x = data.has("x") ? data.get("x").getAsFloat() : 0;
+        this.y = data.has("y") ? data.get("y").getAsFloat() : 0;
         if (data.has("centered")) {
             JsonObject centered = data.get("centered").getAsJsonObject();
             this.centerx = centered.has("x") && centered.get("x").getAsBoolean();
@@ -75,7 +75,7 @@ public class GuiBuilder {
         if (data.has("text")) {
             JsonObject txt = data.get("text").getAsJsonObject();
             text = txt.get("value").getAsString();
-            textHeight = txt.has("height") ? txt.get("height").getAsInt() : 8;
+            textHeight = txt.has("height") ? txt.get("height").getAsFloat() : 8;
         } else {
             text = null;
             textHeight = 0;
@@ -89,16 +89,16 @@ public class GuiBuilder {
 
         if (data.has("translate")) {
             JsonObject tl = data.get("translate").getAsJsonObject();
-            this.tlx = tl.has("x") ? tl.get("x").getAsInt() : 0;
-            this.tly = tl.has("y") ? tl.get("y").getAsInt() : 0;
+            this.tlx = tl.has("x") ? tl.get("x").getAsFloat() : 0;
+            this.tly = tl.has("y") ? tl.get("y").getAsFloat() : 0;
         } else {
             tlx = tly = 0;
         }
 
         if (data.has("rotate")) {
             JsonObject rot = data.get("rotate").getAsJsonObject();
-            this.rotx = rot.has("x") ? rot.get("x").getAsInt() : 0;
-            this.roty = rot.has("y") ? rot.get("y").getAsInt() : 0;
+            this.rotx = rot.has("x") ? rot.get("x").getAsFloat() : 0;
+            this.roty = rot.has("y") ? rot.get("y").getAsFloat() : 0;
             this.rotdeg = rot.has("degrees") ? rot.get("degrees").getAsFloat() : 360;
             this.rotoff = rot.has("offset") ? rot.get("offset").getAsFloat() : 0;
         } else {
@@ -151,10 +151,10 @@ public class GuiBuilder {
         m = m.copy(); // TODO mem opt?
         m.translate(x, y, 0);
         if (centerx) {
-            m.translate(maxx/2, 0, 0);
+            m.translate(maxx/2f, 0, 0);
         }
         if (centery) {
-            m.translate(0, maxy/2, 0);
+            m.translate(0, maxy/2f, 0);
         }
 
         float value = 0;
