@@ -72,7 +72,7 @@ public class GuiBuilder {
         }
 
         // Controls
-        this.readout = data.has("readout") ? Readout.valueOf(data.get("readout").getAsString()) : null;
+        this.readout = data.has("readout") ? Readout.valueOf(data.get("readout").getAsString().toUpperCase(Locale.ROOT)) : null;
         this.control = data.has("control") ? data.get("control").getAsString() : null;
         this.invert = data.has("invert") && data.get("invert").getAsBoolean();
         this.hide = data.has("hide") && data.get("hide").getAsBoolean();
