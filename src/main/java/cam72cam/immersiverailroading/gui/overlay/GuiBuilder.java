@@ -21,6 +21,9 @@ import java.util.*;
 public class GuiBuilder {
     private final int x;
     private final int y;
+    private final boolean centerx;
+    private final boolean centery;
+
     private final Identifier image;
     private final int imageWidth;
     private final int imageHeight;
@@ -49,6 +52,13 @@ public class GuiBuilder {
         // common stuff
         this.x = data.has("x") ? data.get("x").getAsInt() : 0;
         this.y = data.has("y") ? data.get("y").getAsInt() : 0;
+        if (data.has("centered")) {
+            JsonObject centered = data.get("centered").getAsJsonObject();
+            this.centerx = centered.has("x") && centered.get("x").getAsBoolean();
+            this.centery = centered.has("y") && centered.get("y").getAsBoolean();
+        } else {
+            this.centerx = this.centery = false;
+        }
 
         // Image stuff
         this.image = data.has("image") ? new Identifier(data.get("image").getAsString()) : null;
@@ -140,6 +150,12 @@ public class GuiBuilder {
     private void render(EntityRollingStock stock, Matrix4 m, int maxx, int maxy) {
         m = m.copy(); // TODO mem opt?
         m.translate(x, y, 0);
+        if (centerx) {
+            m.translate(maxx/2, 0, 0);
+        }
+        if (centery) {
+            m.translate(0, maxy/2, 0);
+        }
 
         float value = 0;
         if (readout != null) {
