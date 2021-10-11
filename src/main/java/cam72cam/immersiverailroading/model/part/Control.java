@@ -159,7 +159,7 @@ public class Control {
         // or at least expose a "tick order" function as crappy as that would be...
         boolean inRange = false;
         Vec3d delta = bb.max().subtract(bb.min());
-        double step = Math.min(delta.x, Math.min(delta.y, delta.z))/2;
+        double step = Math.max(0.01, Math.min(delta.x, Math.min(delta.y, delta.z))/2);
         for (double i = 0; i < 2; i+=step) {
             inRange = inRange || bb.contains(player.getPositionEyes().add(player.getLookVector().scale(i)).add(stock.getVelocity()));
         }
