@@ -744,7 +744,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (tileSwitch != null && newForcedState != tileSwitch.info.switchForced) {
 			tileSwitch.info = new RailInfo(tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
-			tileSwitch.getParentTile().markAllDirty();
 		}
 	}
 
@@ -821,38 +820,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
-		if (stack.is(IRItems.ITEM_SWITCH_KEY) && player.hasPermission(Permissions.SWITCH_CONTROL)) {
-			TileRail tileSwitch = this.findSwitchParent();
-			if (tileSwitch != null) {
-				ItemSwitchKey.Data data = new ItemSwitchKey.Data(stack);
-				if (!data.isInClickCooldown()) {
-					SwitchState newSwitchForcedState = this.cycleSwitchForced();
-					if (tileSwitch.isSwitchForced()) {
-						if (getWorld().isServer) {
-							data.lastUsedOn = tileSwitch.getPos();
-							data.forcedIntoState = newSwitchForcedState;
-							data.lastUsedAt = System.currentTimeMillis();
-							data.write();
-						}
-
-						if (getWorld().isClient) {
-							player.sendMessage(ChatText.SWITCH_LOCKED.getMessage(newSwitchForcedState.toString()));
-						}
-					} else {
-						if (getWorld().isServer) {
-							data.clear();
-							data.write();
-						}
-
-						if (getWorld().isClient) {
-							player.sendMessage(ChatText.SWITCH_UNLOCKED.getMessage());
-						}
-					}
-				}
-			}
-
-			return true;
-		}
 		if (stack.is(IRItems.ITEM_TRACK_EXCHANGER) && player.hasPermission(Permissions.EXCHANGE_TRACK)) {
 			TileRail tileRail = this.getParentTile();
 			ItemTrackExchanger.Data stackData = new ItemTrackExchanger.Data(stack);

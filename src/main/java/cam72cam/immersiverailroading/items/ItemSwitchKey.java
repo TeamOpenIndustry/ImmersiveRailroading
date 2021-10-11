@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
@@ -70,8 +71,22 @@ public class ItemSwitchKey extends CustomItem {
 
 	@Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d inBlockPos) {
-		if (BlockUtil.isIRRail(world, pos) || world.isAir(pos)) {
+		if (world.isAir(pos)) {
 			return ClickResult.PASS;
+		}
+
+		if (BlockUtil.isIRRail(world, pos)) {
+			TileRailBase tileRail = world.getBlockEntity(pos, TileRailBase.class);
+			if (tileRail == null) {
+				return ClickResult.PASS;
+			}
+
+			TileRail tileSwitch = tileRail.findSwitchParent();
+			if (tileSwitch == null) {
+				return ClickResult.PASS;
+			}
+
+			return lockSwitch(player, world, player.getHeldItem(hand), tileRail, tileSwitch);
 		}
 
 		return resetSwitchFromNbt(player, world, hand);
@@ -86,7 +101,9 @@ public class ItemSwitchKey extends CustomItem {
 		}
 
 		if (data.isEmpty()) {
-			player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString()));
+			if (world.isClient) {
+				player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString()));
+			}
 			return ClickResult.REJECTED;
 		}
 
@@ -104,6 +121,8 @@ public class ItemSwitchKey extends CustomItem {
 		if (lastUsedOn.isSwitchForced()) {
 			if (world.isServer) {
 				lastUsedOn.setSwitchForced(SwitchState.NONE);
+				data.getLastUsedOnSwitch(world).markDirty();
+
 				data.clear();
 				data.write();
 			}
@@ -125,6 +144,42 @@ public class ItemSwitchKey extends CustomItem {
 			}
 
 			return ClickResult.REJECTED;
+		}
+	}
+
+	private ClickResult lockSwitch(Player player, World world, ItemStack stack, TileRailBase clickedTileRail, TileRail tileSwitch) {
+		Data data = new Data(stack);
+		if (data.isInClickCooldown()) {
+			return ClickResult.REJECTED;
+		}
+
+		SwitchState newSwitchForcedState = tileSwitch.cycleSwitchForced();
+		clickedTileRail.markDirty();
+
+		if (tileSwitch.isSwitchForced()) {
+			if (world.isServer) {
+				data.lastUsedOn = clickedTileRail.getPos();
+				data.forcedIntoState = newSwitchForcedState;
+				data.lastUsedAt = System.currentTimeMillis();
+				data.write();
+			}
+
+			if (world.isClient) {
+				player.sendMessage(ChatText.SWITCH_LOCKED.getMessage(newSwitchForcedState.toString()));
+			}
+
+			return ClickResult.ACCEPTED;
+		} else {
+			if (world.isServer) {
+				data.clear();
+				data.write();
+			}
+
+			if (world.isClient) {
+				player.sendMessage(ChatText.SWITCH_UNLOCKED.getMessage());
+			}
+
+			return ClickResult.ACCEPTED;
 		}
 	}
 
