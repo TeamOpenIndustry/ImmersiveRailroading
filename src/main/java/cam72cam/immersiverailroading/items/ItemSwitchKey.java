@@ -6,12 +6,15 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
+import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 
 import java.util.Arrays;
@@ -19,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ItemSwitchKey extends CustomItem {
-	public static final long CLICK_COOLDOWN_MILLIS = 100L;
+	public static final long CLICK_COOLDOWN_MILLIS = 250L;
 	public static final String LAST_USED_ON_KEY = "lastUsedOn";
 	public static final String FORCED_INTO_STATE_KEY = "forcedIntoState";
 	public static final String LAST_USED_AT_KEY = "lastUsedAt";
@@ -62,35 +65,66 @@ public class ItemSwitchKey extends CustomItem {
 
 	@Override
 	public void onClickAir(Player player, World world, Player.Hand hand) {
-		if (!player.hasPermission(Permissions.SWITCH_CONTROL)) {
-			return;
+		resetSwitchFromNbt(player, world, hand);
+	}
+
+	@Override
+	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d inBlockPos) {
+		if (BlockUtil.isIRRail(world, pos) || world.isAir(pos)) {
+			return ClickResult.PASS;
 		}
 
+		return resetSwitchFromNbt(player, world, hand);
+	}
+
+	private ClickResult resetSwitchFromNbt(Player player, World world, Player.Hand hand) {
 		ItemStack stack = player.getHeldItem(hand);
 		Data data = new Data(stack);
 
-		PlayerMessage message = null;
-
-		if (!data.isEmpty() && !data.isInClickCooldown()) {
-			TileRailBase lastUsedOn = data.getLastUsedOnSwitch(world);
-			if (lastUsedOn != null) {
-				if (lastUsedOn.isSwitchForced()) {
-					lastUsedOn.setSwitchForced(SwitchState.NONE);
-					message = PlayerMessage.translate(ChatText.SWITCH_RESET.toString());
-				} else {
-					message = PlayerMessage.translate(ChatText.SWITCH_ALREADY_RESET.toString());
-				}
-			}
-
-			data.clear();
-			data.write();
-		} else {
-			message = PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString());
+		if (!player.hasPermission(Permissions.SWITCH_CONTROL) || data.isInClickCooldown()) {
+			return ClickResult.REJECTED;
 		}
 
-		// Only send client-side to avoid spamming the chat for other players
-		if (message != null && world.isClient) {
-			player.sendMessage(message);
+		if (data.isEmpty()) {
+			player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_CANT_RESET.toString()));
+			return ClickResult.REJECTED;
+		}
+
+		TileRailBase lastUsedOn = data.getLastUsedOnSwitch(world);
+		if (lastUsedOn == null) {
+			// Clear out invalid data
+			if (world.isServer) {
+				data.clear();
+				data.write();
+			}
+			return ClickResult.REJECTED;
+		}
+
+
+		if (lastUsedOn.isSwitchForced()) {
+			if (world.isServer) {
+				lastUsedOn.setSwitchForced(SwitchState.NONE);
+				data.clear();
+				data.write();
+			}
+
+			if (world.isClient) {
+				player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_RESET.toString()));
+			}
+
+			return ClickResult.ACCEPTED;
+		} else {
+			// Clear out invalid data
+			if(world.isServer) {
+				data.clear();
+				data.write();
+			}
+
+			if (world.isClient) {
+				player.sendMessage(PlayerMessage.translate(ChatText.SWITCH_ALREADY_RESET.toString()));
+			}
+
+			return ClickResult.REJECTED;
 		}
 	}
 
