@@ -182,7 +182,7 @@ public class GuiBuilder {
             }
         }
 
-        int col = colors.getOrDefault(colorKey, 0);
+        int col = colors.getOrDefault(colorKey, 0xFFFFFFFF);
         try (OpenGL.With c = colorKey == null ?
                 () -> {} :
                 OpenGL.color((col >> 16 & 255) / 255.0f, (col >> 8 & 255) / 255.0f, (col & 255) / 255.0f, (col >> 24 & 255) / 255.0f)
@@ -224,7 +224,7 @@ public class GuiBuilder {
                     try (OpenGL.With textmatrix = OpenGL.matrix()) {
                         float scale = textHeight / 8f;
                         GL11.glScalef(scale, scale, scale);
-                        GUIHelpers.drawCenteredString(out, 0, 0, 0xAAFFFFFF);
+                        GUIHelpers.drawCenteredString(out, 0, 0, col);
                     }
                 }
             }
