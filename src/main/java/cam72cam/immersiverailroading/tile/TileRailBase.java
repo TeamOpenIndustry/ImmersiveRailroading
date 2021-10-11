@@ -609,7 +609,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							loco.setThrottle(power / 15f);
 							break;
 						case REVERSER:
-							loco.setReverser((power / 15f - 0.5f) * 2);
+							loco.setReverser((power / 14f - 0.5f) * 2);
 							break;
 						case BRAKE:
 							loco.setTrainBrake(power / 15f);
