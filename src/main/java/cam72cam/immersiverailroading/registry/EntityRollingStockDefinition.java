@@ -83,6 +83,7 @@ public abstract class EntityRollingStockDefinition {
     private static final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
     private boolean isLinearBrakeControl;
+    private List<String> extraTooltipInfo;
 
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
@@ -312,6 +313,13 @@ public abstract class EntityRollingStockDefinition {
                     controlSounds.put(entry.getKey(), new ControlSoundsDefinition(entry.getValue().getAsJsonObject()));
                 }
             }
+        }
+
+        if (data.has("extra_tooltip_info")) {
+            extraTooltipInfo = new ArrayList<>();
+            data.getAsJsonArray("extra_tooltip_info").forEach(jsonElement -> extraTooltipInfo.add(jsonElement.getAsString()));
+        } else {
+            extraTooltipInfo = Collections.emptyList();
         }
     }
 
@@ -616,5 +624,9 @@ public abstract class EntityRollingStockDefinition {
 
     public boolean isLinearBrakeControl() {
         return isLinearBrakeControl;
+    }
+
+    public List<String> getExtraTooltipInfo() {
+        return extraTooltipInfo;
     }
 }
