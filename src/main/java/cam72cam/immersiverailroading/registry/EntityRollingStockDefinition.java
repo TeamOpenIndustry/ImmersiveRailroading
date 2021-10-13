@@ -318,6 +318,8 @@ public abstract class EntityRollingStockDefinition {
         if (data.has("extra_tooltip_info")) {
             extraTooltipInfo = new ArrayList<>();
             data.getAsJsonArray("extra_tooltip_info").forEach(jsonElement -> extraTooltipInfo.add(jsonElement.getAsString()));
+        } else {
+            extraTooltipInfo = Collections.emptyList();
         }
     }
 
@@ -549,7 +551,6 @@ public abstract class EntityRollingStockDefinition {
         tips.add(GuiText.WEIGHT_TOOLTIP.toString(this.getWeight(gauge)));
         tips.add(GuiText.MODELER_TOOLTIP.toString(modelerName));
         tips.add(GuiText.PACK_TOOLTIP.toString(packName));
-        tips.addAll(extraTooltipInfo);
         return tips;
     }
 
@@ -623,5 +624,9 @@ public abstract class EntityRollingStockDefinition {
 
     public boolean isLinearBrakeControl() {
         return isLinearBrakeControl;
+    }
+
+    public List<String> getExtraTooltipInfo() {
+        return extraTooltipInfo;
     }
 }

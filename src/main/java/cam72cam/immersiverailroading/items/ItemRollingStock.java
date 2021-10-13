@@ -99,6 +99,9 @@ public class ItemRollingStock extends BaseItemRollingStock {
         if (texture != null && def != null && def.textureNames.get(texture) != null) {
 	        tooltip.add(GuiText.TEXTURE_TOOLTIP.toString(def.textureNames.get(texture)));
         }
+
+        tooltip.addAll(def.getExtraTooltipInfo());
+
         return tooltip;
     }
 	
