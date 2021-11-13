@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Whistle {
     private final ModelComponent whistle;
@@ -83,7 +82,7 @@ public class Whistle {
                             float newString = (hornPlayer.getRotationPitch() + 90) / 180;
                             delta = newString - pullString;
                         } else {
-                            OptionalDouble control = stock.getDefinition().getModel().getDraggableComponents().stream()
+                            OptionalDouble control = stock.getDefinition().getModel().getControls().stream()
                                     .filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
                                     .mapToDouble(stock::getControlPosition)
                                     .max();

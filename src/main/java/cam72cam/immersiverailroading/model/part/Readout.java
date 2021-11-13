@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -16,12 +17,12 @@ public class Readout<T extends EntityRollingStock> extends Control {
     private final Map<UUID, Float> positions = new HashMap<>();
     private final Function<T, Float> position;
 
-    public static <T extends EntityRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, Function<T, Float> position) {
-        return provider.parseAll(type).stream().map(p -> new Readout<>(p, position)).collect(Collectors.toList());
+    public static <T extends EntityRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, Readouts value) {
+        return provider.parseAll(type).stream().map(p -> new Readout<>(p, (Function<T, Float>) value::getValue)).collect(Collectors.toList());
     }
 
-    public static <T extends EntityRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, String pos, Function<T, Float> position) {
-        return provider.parseAll(type, pos).stream().map(p -> new Readout<>(p, position)).collect(Collectors.toList());
+    public static <T extends EntityRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, String pos, Readouts value) {
+        return provider.parseAll(type, pos).stream().map(p -> new Readout<>(p, (Function<T, Float>) value::getValue)).collect(Collectors.toList());
     }
 
     public Readout(ModelComponent part, Function<T, Float> position) {

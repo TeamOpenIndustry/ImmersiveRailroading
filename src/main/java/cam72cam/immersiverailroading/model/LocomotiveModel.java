@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.model.part.LightFlare;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ValveGearType;
@@ -18,17 +18,11 @@ import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 
 import java.util.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     private List<ModelComponent> components;
     private Bell bell;
-    private List<Control> throttles;
-    private List<Control> reversers;
-    private List<Control> train_brakes;
-    private List<Control> throttle_brakes;
-    private List<Readout<T>> gauges;
 
     protected DrivingAssembly drivingWheels;
     private ModelComponent frameFront;
@@ -45,7 +39,6 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     private List<LightFlare> headlightsFront;
     private List<LightFlare> headlightsRear;
-    private List<Control> independent_brakes;
     private List<Readout<T>> front_gauges;
     private List<Readout<T>> rear_gauges;
 
@@ -55,8 +48,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        front_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_FRONT", EntityMoveableRollingStock::getTotalBrake);
-        rear_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_REAR", EntityMoveableRollingStock::getTotalBrake);
+        front_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_FRONT", Readouts.BRAKE_PRESSURE);
+        rear_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_REAR", Readouts.BRAKE_PRESSURE);
 
         ValveGearType type = def.getValveGear();
 
@@ -82,44 +75,23 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         headlightsFront = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "FRONT");
         headlightsRear = LightFlare.get(def, provider, ModelComponentType.HEADLIGHT_POS_X, "REAR");
 
-        gauges = new ArrayList<>();
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_SPEED_X,
-                stock -> (float) (Math.abs(stock.getCurrentSpeed().metric()) / stock.getDefinition().getMaxSpeed(stock.gauge).metric()))
-        );
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_THROTTLE_X, Locomotive::getThrottle));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_REVERSER_X, Locomotive::getReverser));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TRAIN_BRAKE_X, Locomotive::getTrainBrake));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_SPEED_X, Readouts.SPEED));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_THROTTLE_X, Readouts.THROTTLE));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_REVERSER_X, Readouts.REVERSER));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TRAIN_BRAKE_X, Readouts.TRAIN_BRAKE));
         if (def.hasIndependentBrake()) {
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, EntityMoveableRollingStock::getIndependentBrake));
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, Readouts.INDEPENDENT_BRAKE));
         }
 
-        throttle_brakes = Control.get(provider, ModelComponentType.THROTTLE_BRAKE_X);
-        throttles = Control.get(provider, ModelComponentType.THROTTLE_X);
-        reversers = Control.get(provider, ModelComponentType.REVERSER_X);
-        train_brakes = Control.get(provider, ModelComponentType.TRAIN_BRAKE_X);
-        independent_brakes = def.hasIndependentBrake() ?
-                Control.get(provider, ModelComponentType.INDEPENDENT_BRAKE_X) :
-                Collections.emptyList();
+        controls.addAll(Control.get(provider, ModelComponentType.THROTTLE_BRAKE_X));
+        controls.addAll(Control.get(provider, ModelComponentType.THROTTLE_X));
+        controls.addAll(Control.get(provider, ModelComponentType.REVERSER_X));
+        controls.addAll(Control.get(provider, ModelComponentType.TRAIN_BRAKE_X));
+        if (def.hasIndependentBrake()) {
+            controls.addAll(Control.get(provider, ModelComponentType.INDEPENDENT_BRAKE_X));
+        }
 
         super.parseComponents(provider, def);
-    }
-
-    @Override
-    public List<Control> getDraggableComponents() {
-        List<Control> draggable = super.getDraggableComponents();
-        draggable.addAll(throttle_brakes);
-        draggable.addAll(throttles);
-        draggable.addAll(reversers);
-        draggable.addAll(train_brakes);
-        draggable.addAll(independent_brakes);
-        return draggable;
-    }
-
-    @Override
-    public List<Readout<T>> getReadouts() {
-        List<Readout<T>> readouts = super.getReadouts();
-        readouts.addAll(gauges);
-        return readouts;
     }
 
     @Override

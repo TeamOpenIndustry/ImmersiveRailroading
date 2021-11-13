@@ -3,16 +3,15 @@ package cam72cam.immersiverailroading.model;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
-import cam72cam.immersiverailroading.render.ExpireableList;
 
-import java.util.*;
+import java.util.List;
 
 public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private List<ModelComponent> components;
@@ -23,8 +22,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private ModelComponent firebox;
 
     private final PartSound idleSounds;
-    private List<Control> whistleControls;
-    private List<Readout<LocomotiveSteam>> gauges;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
@@ -33,10 +30,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        gauges = new ArrayList<>();
         if (!((LocomotiveSteamDefinition)def).isCabCar()) {
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getBoilerTemperature() / 100f));
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, stock -> stock.getBoilerPressure() / stock.getDefinition().getMaxPSI(stock.gauge)));
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE));
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, Readouts.BOILER_PRESSURE));
         }
 
         firebox = provider.parse(ModelComponentType.FIREBOX);
@@ -49,7 +45,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
-        whistleControls = Control.get(provider, ModelComponentType.WHISTLE_CONTROL_X);
+        controls.addAll(Control.get(provider, ModelComponentType.WHISTLE_CONTROL_X));
         whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
 
         chimney = SteamChimney.get(provider);
@@ -96,20 +92,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         pressureValve.removed(stock);
         idleSounds.removed(stock);
         whistle.removed(stock);
-    }
-
-    @Override
-    public List<Control> getDraggableComponents() {
-        List<Control> draggable = super.getDraggableComponents();
-        draggable.addAll(whistleControls);
-        return draggable;
-    }
-
-    @Override
-    public List<Readout<LocomotiveSteam>> getReadouts() {
-        List<Readout<LocomotiveSteam>> readouts = super.getReadouts();
-        readouts.addAll(gauges);
-        return readouts;
     }
 
     @Override

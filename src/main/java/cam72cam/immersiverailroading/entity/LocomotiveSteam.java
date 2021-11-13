@@ -136,7 +136,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 
 
-		OptionalDouble control = this.getDefinition().getModel().getDraggableComponents().stream()
+		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
 				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
 				.mapToDouble(this::getControlPosition)
 				.max();
