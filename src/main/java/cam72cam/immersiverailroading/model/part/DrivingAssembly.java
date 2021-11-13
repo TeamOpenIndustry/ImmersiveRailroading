@@ -10,7 +10,9 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 public class DrivingAssembly {
     private final WheelSet wheels;
     private final ValveGear right;
+    private final ValveGear inner_right;
     private final ValveGear center;
+    private final ValveGear inner_left;
     private final ValveGear left;
     private final ModelComponent steamChest;
 
@@ -25,34 +27,33 @@ public class DrivingAssembly {
         }
 
         ValveGear left = ValveGear.get(wheels, type, provider, "LEFT" + (pos == null ? "" : ("_" + pos)), 0);
+        ValveGear inner_left = ValveGear.get(wheels, type, provider, "INNER_LEFT" + (pos == null ? "" : ("_" + pos)), 180);
         ValveGear center = ValveGear.get(wheels, type, provider, "CENTER" + (pos == null ? "" : ("_" + pos)), -120);
+        ValveGear inner_right = ValveGear.get(wheels, type, provider, "INNER_RIGHT" + (pos == null ? "" : ("_" + pos)), 90);
         ValveGear right = ValveGear.get(wheels, type, provider, "RIGHT" + (pos == null ? "" : ("_" + pos)), center == null ? -90 : -240);
 
         ModelComponent steamChest = pos == null ?
                 provider.parse(ModelComponentType.STEAM_CHEST) :
                 provider.parse(ModelComponentType.STEAM_CHEST_POS, pos);
 
-        return new DrivingAssembly(wheels, right, center, left, steamChest);
+        return new DrivingAssembly(wheels, right, inner_right, center, inner_left, left, steamChest);
     }
-    public DrivingAssembly(WheelSet wheels, ValveGear right, ValveGear center, ValveGear left, ModelComponent steamChest) {
+    public DrivingAssembly(WheelSet wheels, ValveGear right, ValveGear inner_right, ValveGear center, ValveGear inner_left, ValveGear left, ModelComponent steamChest) {
         this.wheels = wheels;
         this.right = right;
+        this.inner_right = inner_right;
         this.center = center;
+        this.inner_left = inner_left;
         this.left = left;
         this.steamChest = steamChest;
     }
 
     public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
-        boolean isEndStroke = false;
-        if (right != null) {
-            isEndStroke |= right.isEndStroke(stock, throttle);
-        }
-        if (left != null) {
-            isEndStroke |= left.isEndStroke(stock, throttle);
-        }
-        if (center != null) {
-            isEndStroke |= center.isEndStroke(stock, throttle);
-        }
+        boolean isEndStroke = right != null && right.isEndStroke(stock, throttle);
+        isEndStroke |= inner_right != null && inner_right.isEndStroke(stock, throttle);
+        isEndStroke |= center != null && center.isEndStroke(stock, throttle);
+        isEndStroke |= inner_left != null && inner_left.isEndStroke(stock, throttle);
+        isEndStroke |= inner_left != null && left.isEndStroke(stock, throttle);
         return isEndStroke;
     }
 
@@ -60,11 +61,17 @@ public class DrivingAssembly {
         if (right != null) {
             right.effects(stock, throttle);
         }
-        if (left != null) {
-            left.effects(stock, throttle);
+        if (inner_right != null) {
+            inner_right.effects(stock, throttle);
         }
         if (center != null) {
             center.effects(stock, throttle);
+        }
+        if (inner_left != null) {
+            inner_left.effects(stock, throttle);
+        }
+        if (left != null) {
+            left.effects(stock, throttle);
         }
     }
 
@@ -73,8 +80,14 @@ public class DrivingAssembly {
         if (right != null) {
             right.render(distance, reverser, draw);
         }
+        if (inner_right != null) {
+            inner_right.render(distance, reverser, draw);
+        }
         if (center != null) {
             center.render(distance, reverser, draw);
+        }
+        if (inner_left != null) {
+            inner_left.render(distance, reverser, draw);
         }
         if (left != null) {
             left.render(distance, reverser, draw);
