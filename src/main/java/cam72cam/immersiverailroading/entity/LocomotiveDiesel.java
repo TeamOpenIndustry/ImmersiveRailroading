@@ -141,13 +141,13 @@ public class LocomotiveDiesel extends Locomotive {
 
     @Override
 	protected float getReverserDelta() {
-		return Config.ImmersionConfig.disableIndependentThrottle ? super.getReverserDelta() : 0.51f;
+		return linkThrottleReverser() ? super.getReverserDelta() : 0.51f;
 	}
 
 	@Override
 	public void setThrottle(float newThrottle) {
 		int notches = getDefinition().getThrottleNotches();
-		if (!Config.ImmersionConfig.disableIndependentThrottle) {
+		if (!linkThrottleReverser()) {
 			if (newThrottle > getThrottle()) {
 				super.setThrottle((float) (Math.ceil(newThrottle * notches) / notches));
 			} else {
@@ -161,7 +161,7 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void setReverser(float newReverser) {
 		float value = newReverser;
-		if (!Config.ImmersionConfig.disableIndependentThrottle) {
+		if (!linkThrottleReverser()) {
 			if (getThrottle() > 0) {
 				value = 0;
 			} else {

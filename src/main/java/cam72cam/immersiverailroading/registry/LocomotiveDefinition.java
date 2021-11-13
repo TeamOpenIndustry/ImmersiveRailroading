@@ -92,11 +92,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         return Speed.fromMinecraft(gauge.scale() * this.maxSpeed.minecraft());
     }
 
-    public double getBrakePower() {
-        // TODO
-        return 1;
-    }
-
     public boolean getRadioCapability() {
         return this.hasRadioEquipment;
     }

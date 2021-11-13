@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -83,6 +84,7 @@ public abstract class EntityRollingStockDefinition {
     private static final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
     private boolean isLinearBrakeControl;
+    private GuiBuilder overlay;
     private List<String> extraTooltipInfo;
 
     public static class LightDefinition {
@@ -315,6 +317,7 @@ public abstract class EntityRollingStockDefinition {
             }
         }
 
+        overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : getDefaultOverlay();
         if (data.has("extra_tooltip_info")) {
             extraTooltipInfo = new ArrayList<>();
             data.getAsJsonArray("extra_tooltip_info").forEach(jsonElement -> extraTooltipInfo.add(jsonElement.getAsString()));
@@ -624,6 +627,14 @@ public abstract class EntityRollingStockDefinition {
 
     public boolean isLinearBrakeControl() {
         return isLinearBrakeControl;
+    }
+
+    protected GuiBuilder getDefaultOverlay() throws IOException {
+        return hasIndependentBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.json")) : null;
+    }
+
+    public GuiBuilder getOverlay() {
+        return overlay;
     }
 
     public List<String> getExtraTooltipInfo() {

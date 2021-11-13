@@ -1,0 +1,201 @@
+{
+  "elements": [
+    {
+      "comment": "left panel",
+      "x": 10,
+      "y": -95,
+      "image": "immersiverailroading:gui/overlay_steam.png",
+      "elements": [
+        {
+          "comment": "water level",
+          "x": 5,
+          "y": 75,
+          "image": "immersiverailroading:gui/fluid.png",
+          "readout": "LIQUID",
+          "translate": {
+            "x": 0,
+            "y": -50
+          },
+          "scale": {
+            "y": 1
+          },
+          "color": {
+            "0": "0xAA0F0FFF"
+          }
+        },
+        {
+          "comment": "steam level",
+          "x": 25,
+          "y": 75,
+          "image": "immersiverailroading:gui/fluid.png",
+          "readout": "BOILER_PRESSURE",
+          "translate": {
+            "x": 0,
+            "y": -50
+          },
+          "scale": {
+            "y": 1
+          },
+          "color": {
+            "0": "0x99DDDDDD"
+          }
+        },
+        {
+          "comment": "boiler temp",
+          "x": 45,
+          "y": 75,
+          "image": "immersiverailroading:gui/fluid.png",
+          "readout": "TEMPERATURE",
+          "translate": {
+            "x": 0,
+            "y": -40
+          },
+          "scale": {
+            "y": 0.8
+          },
+          "color": {
+            "0": "0x99d1c715",
+            "0.95": "0x99d16c15",
+            "1.05": "0x99a21010"
+          }
+        },
+        {
+          "comment": "train brake",
+          "x": 61,
+          "y": 74,
+          "image": "immersiverailroading:gui/indicator.png",
+          "readout": "TRAIN_BRAKE",
+          "translate": {
+            "x": 0,
+            "y": -50
+          }
+        },
+        {
+          "comment": "ind brake",
+          "x": 67,
+          "y": 74,
+          "image": "immersiverailroading:gui/indicator.png",
+          "readout": "INDEPENDENT_BRAKE",
+          "translate": {
+            "x": 0,
+            "y": -50
+          }
+        },
+        {
+          "comment": "throttle",
+          "x": 81,
+          "y": 74,
+          "image": "immersiverailroading:gui/indicator.png",
+          "readout": "THROTTLE",
+          "translate": {
+            "x": 0,
+            "y": -50
+          }
+        },
+        {
+          "comment": "reverser",
+          "x": 87,
+          "y": 74,
+          "image": "immersiverailroading:gui/indicator.png",
+          "readout": "REVERSER",
+          "translate": {
+            "x": 0,
+            "y": -50
+          }
+        },
+        {
+          "comment": "speed readout",
+          "text": {
+            "value": "stat.speed",
+            "height": 6
+          },
+          "x": 50,
+          "y": 8
+        },
+        {
+          "comment": "top labels",
+          "y": 19,
+          "elements": [
+            {
+              "x": 10,
+              "text": {
+                "value": "stat.liquid",
+                "height": 4
+              }
+            },
+            {
+              "x": 30,
+              "text": {
+                "value": "stat.boiler_psi",
+                "height": 4
+              }
+            },
+            {
+              "x": 50,
+              "text": {
+                "value": "stat.temperature",
+                "height": 4
+              }
+            },
+            {
+              "x": 68,
+              "text": {
+                "value": "label.brake",
+                "height": 4
+              }
+            },
+            {
+              "x": 89,
+              "text": {
+                "value": "label.throttle",
+                "height": 4
+              }
+            }
+          ]
+        },
+        {
+          "comment": "bottom labels",
+          "y": 78,
+          "elements": [
+            {
+              "x": 10,
+              "text": {
+                "value": "stat.max_liquid",
+                "height": 4
+              }
+            },
+            {
+              "x": 30,
+              "text": {
+                "value": "stat.max_boiler_psi",
+                "height": 4
+              }
+            },
+            {
+              "x": 50,
+              "y": 0,
+              "text": {
+                "value": "stat.max_temperature",
+                "height": 4
+              }
+            },
+            {
+              "x": 68,
+              "text": {
+                "value": "",
+                "height": 4
+              }
+            },
+            {
+              "x": 89,
+              "text": {
+                "value": "label.reverser",
+                "height": 4
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

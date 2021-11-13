@@ -2,12 +2,15 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.SteamLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonObject;
+
+import java.io.IOException;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private static Identifier default_whistle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
@@ -141,6 +144,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     @Override
     public SteamLocomotiveModel getModel() {
         return (SteamLocomotiveModel) super.getModel();
+    }
+
+    @Override
+    protected GuiBuilder getDefaultOverlay() throws IOException {
+        return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/steam.json"));
     }
 
     public FluidQuantity getTankCapacity(Gauge gauge) {

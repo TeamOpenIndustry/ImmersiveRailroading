@@ -1,10 +1,6 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.overlay.DieselLocomotiveOverlay;
-import cam72cam.immersiverailroading.gui.overlay.HandCarOverlay;
-import cam72cam.immersiverailroading.gui.overlay.IndependentBrakeOverlay;
-import cam72cam.immersiverailroading.gui.overlay.SteamLocomotiveOverlay;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -30,6 +26,7 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.ModEvent;
 import cam72cam.mod.config.ConfigFile;
+import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.input.Keyboard.KeyCode;
@@ -189,11 +186,14 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 
 				GlobalRender.registerOverlay(pt -> {
-					// This is bad and should be redesigned
-					new SteamLocomotiveOverlay().draw();
-					new DieselLocomotiveOverlay().draw();
-					new HandCarOverlay().draw();
-					new IndependentBrakeOverlay().draw();
+					Entity riding = MinecraftClient.getPlayer().getRiding();
+					if (!(riding instanceof EntityRollingStock)) {
+						return;
+					}
+					EntityRollingStock stock = (EntityRollingStock) riding;
+					if (stock.getDefinition().getOverlay() != null) {
+						stock.getDefinition().getOverlay().render(stock);
+					}
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);

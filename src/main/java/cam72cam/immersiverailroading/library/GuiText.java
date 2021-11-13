@@ -60,6 +60,10 @@ public enum GuiText {
 		return "gui.immersiverailroading:" + value;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	@Override
 	public String toString() {
 		return TextUtil.translate(getRaw());
