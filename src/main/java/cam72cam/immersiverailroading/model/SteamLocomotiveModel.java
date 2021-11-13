@@ -3,16 +3,16 @@ package cam72cam.immersiverailroading.model;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
-import cam72cam.immersiverailroading.render.ExpireableList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private List<ModelComponent> components;
@@ -35,8 +35,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         gauges = new ArrayList<>();
         if (!((LocomotiveSteamDefinition)def).isCabCar()) {
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getBoilerTemperature() / 100f));
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, stock -> stock.getBoilerPressure() / stock.getDefinition().getMaxPSI(stock.gauge)));
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE));
+            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, Readouts.BOILER_PRESSURE));
         }
 
         firebox = provider.parse(ModelComponentType.FIREBOX);

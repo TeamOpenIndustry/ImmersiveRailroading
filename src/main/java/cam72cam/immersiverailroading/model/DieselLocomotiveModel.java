@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
+import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -27,7 +28,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        gauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, stock -> stock.getEngineTemperature() / 150f);
+        gauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE);
 
         components = provider.parse(
                 ModelComponentType.FUEL_TANK,

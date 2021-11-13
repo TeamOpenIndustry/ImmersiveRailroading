@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -61,12 +62,12 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         rear_gauges = new ArrayList<>();
         if (def.hasIndependentBrake()) {
             gauges.addAll(
-                    Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, EntityMoveableRollingStock::getTotalBrake)
+                    Readout.getReadouts(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, Readouts.INDEPENDENT_BRAKE)
             );
         }
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_X, EntityMoveableRollingStock::getTotalBrake));
-        front_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_FRONT", EntityMoveableRollingStock::getTotalBrake));
-        rear_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_REAR", EntityMoveableRollingStock::getTotalBrake));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_X, Readouts.BRAKE_PRESSURE));
+        front_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_FRONT", Readouts.BRAKE_PRESSURE));
+        rear_gauges.addAll(Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "BOGEY_REAR", Readouts.BRAKE_PRESSURE));
 
         this.frame = new Frame(provider, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);

@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.gui.overlay;
 
 import cam72cam.immersiverailroading.entity.*;
 
-public enum Readout {
+public enum Readouts {
     LIQUID,
     SPEED,
     TEMPERATURE,
