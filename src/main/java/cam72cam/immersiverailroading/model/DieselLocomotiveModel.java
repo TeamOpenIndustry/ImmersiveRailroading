@@ -17,9 +17,6 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private DieselExhaust exhaust;
     private Horn horn;
     private final PartSound idle;
-    private List<Control> engineStarters;
-    private List<Control> hornControls;
-    private List<Readout<LocomotiveDiesel>> gauges;
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
@@ -28,7 +25,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        gauges = Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE);
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE));
 
         components = provider.parse(
                 ModelComponentType.FUEL_TANK,
@@ -49,8 +46,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                 )
         );
 
-        engineStarters = Control.get(provider, ModelComponentType.ENGINE_START_X);
-        hornControls = Control.get(provider, ModelComponentType.HORN_CONTROL_X);
+        controls.addAll(Control.get(provider, ModelComponentType.ENGINE_START_X));
+        controls.addAll(Control.get(provider, ModelComponentType.HORN_CONTROL_X));
 
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
@@ -78,21 +75,6 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         if (idle != null) {
             idle.removed(stock);
         }
-    }
-
-    @Override
-    public List<Control> getDraggableComponents() {
-        List<Control> controls = super.getDraggableComponents();
-        controls.addAll(engineStarters);
-        controls.addAll(hornControls);
-        return controls;
-    }
-
-    @Override
-    public List<Readout<LocomotiveDiesel>> getReadouts() {
-        List<Readout<LocomotiveDiesel>> readouts = super.getReadouts();
-        readouts.addAll(gauges);
-        return readouts;
     }
 
     @Override

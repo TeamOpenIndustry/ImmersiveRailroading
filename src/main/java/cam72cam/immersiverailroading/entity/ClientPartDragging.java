@@ -40,7 +40,7 @@ public class ClientPartDragging {
                             stock.getPosition().distanceTo(player.getPositionEyes()) < stock.getDefinition().getLength(stock.gauge)
                     )
                     .flatMap(stock ->
-                            stock.getDefinition().getModel().getDraggableComponents().stream().map(c -> Pair.of(stock, c))
+                            stock.getDefinition().getModel().getDraggable().stream().map(c -> Pair.of(stock, c))
                     ).map(p -> {
                         double padding = 0.05 * p.getLeft().gauge.scale();
                         Double min = null;
@@ -92,7 +92,7 @@ public class ClientPartDragging {
         @Override
         protected void handle() {
             EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
-            Control control = stock.getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
+            Control control = stock.getDefinition().getModel().getDraggable().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
             if (!stock.playerCanDrag(getPlayer(), control)) {
                 return;
             }

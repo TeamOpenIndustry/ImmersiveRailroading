@@ -242,7 +242,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         if (getWorld().isServer) {
             if (getDefinition().hasIndependentBrake()) {
-                for (Control control : getDefinition().getModel().getDraggableComponents()) {
+                for (Control control : getDefinition().getModel().getControls()) {
                     if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
                         setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
                     }

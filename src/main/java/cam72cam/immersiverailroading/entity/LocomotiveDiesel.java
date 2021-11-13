@@ -198,7 +198,7 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 
-		OptionalDouble control = this.getDefinition().getModel().getDraggableComponents().stream()
+		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
 				.filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X)
 				.mapToDouble(this::getControlPosition)
 				.max();
@@ -281,7 +281,7 @@ public class LocomotiveDiesel extends Locomotive {
 	public void onDragRelease(Control component) {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.ENGINE_START_X) {
-			turnedOn = getDefinition().getModel().getDraggableComponents().stream()
+			turnedOn = getDefinition().getModel().getControls().stream()
 					.filter(c -> c.part.type == ModelComponentType.ENGINE_START_X)
 					.allMatch(c -> getControlPosition(c) == 1);
 		}

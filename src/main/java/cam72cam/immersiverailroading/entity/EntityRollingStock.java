@@ -272,7 +272,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public void setControlPositions(ModelComponentType type, float val) {
-		getDefinition().getModel().getDraggableComponents().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
+		getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
 	}
 
 	public boolean playerCanDrag(Player player, Control control) {

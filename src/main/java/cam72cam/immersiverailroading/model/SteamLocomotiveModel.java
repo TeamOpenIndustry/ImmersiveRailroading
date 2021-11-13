@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
@@ -23,8 +22,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     private ModelComponent firebox;
 
     private final PartSound idleSounds;
-    private List<Control> whistleControls;
-    private List<Readout<LocomotiveSteam>> gauges;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
@@ -33,7 +30,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        gauges = new ArrayList<>();
         if (!((LocomotiveSteamDefinition)def).isCabCar()) {
             gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE));
             gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, Readouts.BOILER_PRESSURE));
@@ -49,7 +45,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
-        whistleControls = Control.get(provider, ModelComponentType.WHISTLE_CONTROL_X);
+        controls.addAll(Control.get(provider, ModelComponentType.WHISTLE_CONTROL_X));
         whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
 
         chimney = SteamChimney.get(provider);
@@ -96,20 +92,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         pressureValve.removed(stock);
         idleSounds.removed(stock);
         whistle.removed(stock);
-    }
-
-    @Override
-    public List<Control> getDraggableComponents() {
-        List<Control> draggable = super.getDraggableComponents();
-        draggable.addAll(whistleControls);
-        return draggable;
-    }
-
-    @Override
-    public List<Readout<LocomotiveSteam>> getReadouts() {
-        List<Readout<LocomotiveSteam>> readouts = super.getReadouts();
-        readouts.addAll(gauges);
-        return readouts;
     }
 
     @Override
