@@ -469,7 +469,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		ticksExisted += 1;
 
 		if (((int) (Math.random() * ConfigDebug.snowAccumulateRate * 10) == 0)) {
-			if (getWorld().isSnowing(getPos())) {
+			if (getWorld().isSnowing(getPos()) && getWorld().canSeeSky(getPos().up())) {
 				this.handleSnowTick();
 			}
 		}

@@ -85,6 +85,7 @@ public abstract class EntityRollingStockDefinition {
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
     private boolean isLinearBrakeControl;
     private GuiBuilder overlay;
+    private List<String> extraTooltipInfo;
 
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
@@ -317,6 +318,12 @@ public abstract class EntityRollingStockDefinition {
         }
 
         overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : getDefaultOverlay();
+        if (data.has("extra_tooltip_info")) {
+            extraTooltipInfo = new ArrayList<>();
+            data.getAsJsonArray("extra_tooltip_info").forEach(jsonElement -> extraTooltipInfo.add(jsonElement.getAsString()));
+        } else {
+            extraTooltipInfo = Collections.emptyList();
+        }
     }
 
     public List<ModelComponent> getComponents(ModelComponentType name) {
@@ -630,4 +637,7 @@ public abstract class EntityRollingStockDefinition {
         return overlay;
     }
 
+    public List<String> getExtraTooltipInfo() {
+        return extraTooltipInfo;
+    }
 }
