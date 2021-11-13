@@ -22,7 +22,9 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ItemRollingStock extends BaseItemRollingStock {
 
@@ -78,7 +80,6 @@ public class ItemRollingStock extends BaseItemRollingStock {
                 items.add(stack);
             }
     	}
-    	items.sort(Comparator.comparing(itemStack -> itemStack.getDisplayName().toUpperCase(Locale.ROOT)));
     	return items;
     }
 
