@@ -42,6 +42,7 @@ public class Control {
     private final Map<Axis, Float> rotations = new HashMap<>();
     private final Map<Axis, Float> translations = new HashMap<>();
     private final Map<Axis, Float> scales = new HashMap<>();
+    private final Map<Axis, Float> scaleRot = new HashMap<>();
     private final Map<UUID, Float> lastMoveSoundValue = new HashMap<>();
     private final Map<UUID, Boolean> wasSoundPressed = new HashMap<>();
     private final Map<UUID, List<ISound>> sounds = new HashMap<>();
@@ -59,7 +60,7 @@ public class Control {
         this.label = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
             return matcher.find() ? matcher.group(1).replaceAll("\\^", " ") : null;
-        }).filter(Objects::nonNull).findFirst().orElse(formatLabel(part.type.name().replace("_X", "")));
+        }).filter(Objects::nonNull).findFirst().orElse(null);
         this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
         this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
         this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
@@ -99,11 +100,15 @@ public class Control {
                 translations.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
             }
         }
-        pattern = Pattern.compile("SCALE_([^_]*)_([^_])");
+        pattern = Pattern.compile("SCALE_([^_]*)_([^_]+)");
         for (String modelID : part.modelIDs) {
             Matcher matcher = pattern.matcher(modelID);
             while (matcher.find()) {
-                scales.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
+                if (matcher.group(2).startsWith("R")) {
+                    scaleRot.put(Axis.valueOf(matcher.group(2).substring(1)), Float.parseFloat(matcher.group(1)));
+                } else {
+                    scales.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
+                }
             }
         }
     }
@@ -153,7 +158,7 @@ public class Control {
         IBoundingBox bb = IBoundingBox.from(
                 transform(part.min, stock),
                 transform(part.max, stock)
-        );
+        ).grow(new Vec3d(0.05, 0.05, 0.05));
         // The added velocity is due to a bug where the player may tick before or after the stock.
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
         // or at least expose a "tick order" function as crappy as that would be...
@@ -168,6 +173,7 @@ public class Control {
         }
         Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())).apply(center);
         String state = "";
+        float percent = getValue(stock);
         switch (part.type) {
             case TRAIN_BRAKE_X:
             case INDEPENDENT_BRAKE_X:
@@ -181,7 +187,6 @@ public class Control {
             case WHISTLE_CONTROL_X:
             case HORN_CONTROL_X:
             case ENGINE_START_X:
-                float percent = getValue(stock);
                 if (part.type == ModelComponentType.REVERSER_X) {
                     percent *= -2;
                 }
@@ -190,8 +195,14 @@ public class Control {
                 } else {
                     state = String.format(" (%d%%)", (int)(percent * 100));
                 }
+                break;
+            default:
+                if (label == null) {
+                    return;
+                }
+                state = String.format(" (%d%%)", (int)(percent * 100));
         }
-        GlobalRender.drawText(label + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        GlobalRender.drawText((label != null ? label : formatLabel(part.type.name().replace("_X", ""))) + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public float getValue(EntityRollingStock stock) {
@@ -230,11 +241,29 @@ public class Control {
         }
         if (!scales.isEmpty()) {
             m = m.translate(part.center.x, part.center.y, part.center.z);
+            for (Map.Entry<Axis, Float> entry : scaleRot.entrySet()) {
+                Axis axis = entry.getKey();
+                m = m.rotate(Math.toRadians(
+                        entry.getValue()),
+                        axis == Axis.X ? 1 : 0,
+                        axis == Axis.Y ? 1 : 0,
+                        axis == Axis.Z ? 1 : 0
+                );
+            }
             m = m.scale(
-                    scales.containsKey(Axis.X) ? scales.get(Axis.X) * valuePercent : 1,
-                    scales.containsKey(Axis.Y) ? scales.get(Axis.Y) * valuePercent : 1,
-                    scales.containsKey(Axis.Z) ? scales.get(Axis.Z) * valuePercent : 1
+                    scales.containsKey(Axis.X) ? (1 - scales.get(Axis.X)) + (scales.get(Axis.X) * valuePercent) : 1,
+                    scales.containsKey(Axis.Y) ? (1 - scales.get(Axis.Y)) + (scales.get(Axis.Y) * valuePercent) : 1,
+                    scales.containsKey(Axis.Z) ? (1 - scales.get(Axis.Z)) + (scales.get(Axis.Z) * valuePercent) : 1
             );
+            for (Map.Entry<Axis, Float> entry : scaleRot.entrySet()) {
+                Axis axis = entry.getKey();
+                m = m.rotate(Math.toRadians(
+                        -entry.getValue()),
+                        axis == Axis.X ? 1 : 0,
+                        axis == Axis.Y ? 1 : 0,
+                        axis == Axis.Z ? 1 : 0
+                );
+            }
             m = m.translate(-part.center.x, -part.center.y, -part.center.z);
         }
         return m;
@@ -278,14 +307,23 @@ public class Control {
             Vec3d movement = current.subtract(lastClientLook);
             movement = movement.rotateYaw(-stock.getRotationYaw());
             float applied = (float) (movement.length());
-            float value = getValue(stock);
-            Vec3d grabComponent = transform(center, value, stock).add(movement);
-            Vec3d grabComponentNext = transform(center, value + applied, stock);
-            Vec3d grabComponentPrev = transform(center, value - applied, stock);
-            if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
-                delta += applied;
+            if (rotationDegrees <= 180) {
+                float value = getValue(stock);
+                Vec3d grabComponent = transform(center, value, stock).add(movement);
+                Vec3d grabComponentNext = transform(center, value + applied, stock);
+                Vec3d grabComponentPrev = transform(center, value - applied, stock);
+                if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
+                    delta += applied;
+                } else {
+                    delta -= applied;
+                }
             } else {
-                delta -= applied;
+                // hack spinning wheels
+                if (movement.x * (1-rotationPoint.x) + movement.y * (1-rotationPoint.y) + movement.z * (1-rotationPoint.z) > 0) {
+                    delta += applied;
+                } else {
+                    delta -= applied;
+                }
             }
         }
         lastClientLook = current;

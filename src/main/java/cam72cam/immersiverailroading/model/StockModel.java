@@ -204,6 +204,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
     protected void postRender(T stock) {
         getDraggableComponents().forEach(c -> c.postRender(stock));
+        getReadouts().forEach(c -> c.postRender(stock));
         headlights.forEach(x -> x.postRender(stock, 0));
     }
 
