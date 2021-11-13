@@ -617,11 +617,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public float getIndependentBrake() {
-        return independentBrake;
+        return getDefinition().hasIndependentBrake() ? independentBrake : 0;
     }
     public void setIndependentBrake(float newIndependentBrake) {
         newIndependentBrake = Math.min(1, Math.max(0, newIndependentBrake));
-        if (this.getIndependentBrake() != newIndependentBrake) {
+        if (this.getIndependentBrake() != newIndependentBrake && getDefinition().hasIndependentBrake()) {
             if (getDefinition().isLinearBrakeControl()) {
                 setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);
             }

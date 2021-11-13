@@ -62,7 +62,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@TagField("redstoneMode")
 	private StockDetectorMode detectorMode = StockDetectorMode.SIMPLE;
 	@TagField("controlMode")
-	private LocoControlMode controlMode = LocoControlMode.THROTTLE_FORWARD;
+	private LocoControlMode controlMode = LocoControlMode.THROTTLE;
 	@TagField("couplerMod")
 	private CouplerAugmentMode couplerMode = CouplerAugmentMode.ENGAGED;
 	@TagField("redstoneSensitivity")
@@ -605,11 +605,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					int power = getWorld().getRedstone(getPos());
 
 					switch (controlMode) {
-						case THROTTLE_FORWARD:
+						case THROTTLE:
 							loco.setThrottle(power / 15f);
 							break;
-						case THROTTLE_REVERSE:
-							loco.setThrottle(-power / 15f);
+						case REVERSER:
+							loco.setReverser((power / 14f - 0.5f) * 2);
 							break;
 						case BRAKE:
 							loco.setTrainBrake(power / 15f);
@@ -619,12 +619,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							break;
 						case COMPUTER:
 							//NOP
-							break;
-						case REVERSER_FORWARD:
-							loco.setReverser(power / 15f);
-							break;
-						case REVERSER_REVERSE:
-							loco.setReverser(-power / 15f);
 							break;
 					}
 				}

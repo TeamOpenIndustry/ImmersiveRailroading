@@ -3,13 +3,11 @@ package cam72cam.immersiverailroading.library;
 import java.util.Locale;
 
 public enum LocoControlMode {
-	THROTTLE_FORWARD,
-	THROTTLE_REVERSE,
+	THROTTLE,
+	REVERSER,
 	BRAKE,
 	HORN,
 	COMPUTER,
-	REVERSER_FORWARD,
-	REVERSER_REVERSE,
 	;
 	
 	@Override
