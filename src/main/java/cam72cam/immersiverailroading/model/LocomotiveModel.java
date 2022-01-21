@@ -48,8 +48,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        front_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_FRONT", Readouts.BRAKE_PRESSURE);
-        rear_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "LOCOMOTIVE_REAR", Readouts.BRAKE_PRESSURE);
+        front_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "FRONT_LOCOMOTIVE", Readouts.BRAKE_PRESSURE);
+        rear_gauges = Readout.getReadouts(provider, ModelComponentType.BRAKE_PRESSURE_POS_X, "REAR_LOCOMOTIVE", Readouts.BRAKE_PRESSURE);
 
         ValveGearType type = def.getValveGear();
 
@@ -68,6 +68,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         components = provider.parse(
                 new ModelComponentType[]{ModelComponentType.CAB}
         );
+        controls.addAll(Control.get(provider, ModelComponentType.BELL_CONTROL_X));
         bell = Bell.get(
                 provider,
                 ((LocomotiveDefinition)def).bell

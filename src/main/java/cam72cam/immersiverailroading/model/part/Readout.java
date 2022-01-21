@@ -38,6 +38,7 @@ public class Readout<T extends EntityRollingStock> extends Control {
 
     @Override
     public float getValue(EntityRollingStock stock) {
-        return positions.getOrDefault(stock.getUUID(), 0f);
+        float pos = positions.getOrDefault(stock.getUUID(), 0f) + offset;
+        return invert ? 1 - pos : pos;
     }
 }

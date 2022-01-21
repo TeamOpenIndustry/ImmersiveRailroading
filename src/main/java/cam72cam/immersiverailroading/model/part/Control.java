@@ -34,7 +34,8 @@ public class Control {
     public final boolean toggle;
     public final boolean press;
     public final boolean global;
-    private final boolean invert;
+    protected final boolean invert;
+    protected final float offset;
     private final boolean hide;
     private final Vec3d center;
     private Vec3d rotationPoint = null;
@@ -66,6 +67,10 @@ public class Control {
         this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
         this.invert = part.modelIDs.stream().anyMatch(g -> g.contains("_INVERT_") || g.startsWith("INVERT_") || g.endsWith("_INVERT"));
         this.hide = part.modelIDs.stream().anyMatch(g -> g.contains("_HIDE_") || g.startsWith("HIDE_") || g.endsWith("_HIDE"));
+        this.offset = part.modelIDs.stream().map(group -> {
+            Matcher matcher = Pattern.compile("_OFFSET_([^_]+)").matcher(group);
+            return matcher.find() ? Float.parseFloat(matcher.group(1)) : null;
+        }).filter(Objects::nonNull).findFirst().orElse(0f);
 
         OBJGroup rot = part.groups().stream()
                 .filter(g -> Pattern.matches(part.type.regex.replaceAll("#POS#", part.pos).replaceAll("#ID#",  part.id + "_ROT"), g.name))
@@ -88,7 +93,7 @@ public class Control {
             rotations.put(Axis.Z, (float) rot.normal.z);
 
             List<Vec3d> nonRotGroups = part.groups().stream().filter(g -> !g.name.contains("_ROT")).map(g -> g.max.add(g.min).scale(0.5)).collect(Collectors.toList());
-            this.center = nonRotGroups.stream().reduce(Vec3d.ZERO, Vec3d::add).scale(1.0/nonRotGroups.size());
+            this.center = nonRotGroups.isEmpty() ? part.center : nonRotGroups.stream().reduce(Vec3d.ZERO, Vec3d::add).scale(1.0/nonRotGroups.size());
         } else {
             this.center = part.center;
         }
@@ -173,7 +178,7 @@ public class Control {
         }
         Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())).apply(center);
         String state = "";
-        float percent = getValue(stock);
+        float percent = getValue(stock) - offset;
         switch (part.type) {
             case TRAIN_BRAKE_X:
             case INDEPENDENT_BRAKE_X:
@@ -184,6 +189,7 @@ public class Control {
             case THROTTLE_X:
             case REVERSER_X:
             case THROTTLE_BRAKE_X:
+            case BELL_CONTROL_X:
             case WHISTLE_CONTROL_X:
             case HORN_CONTROL_X:
             case ENGINE_START_X:
@@ -197,7 +203,7 @@ public class Control {
                 }
                 break;
             default:
-                if (label == null) {
+                if (label == null || label.trim().isEmpty()) {
                     return;
                 }
                 state = String.format(" (%d%%)", (int)(percent * 100));
@@ -206,7 +212,7 @@ public class Control {
     }
 
     public float getValue(EntityRollingStock stock) {
-        float pos = stock.getControlPosition(this);
+        float pos = stock.getControlPosition(this) + offset;
         return (invert ? 1 - pos : pos) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
     }
 

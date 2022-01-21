@@ -18,6 +18,7 @@ import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 
+import java.util.OptionalDouble;
 import java.util.UUID;
 
 public abstract class Locomotive extends FreightTank {
@@ -238,6 +239,7 @@ public abstract class Locomotive extends FreightTank {
 			case TRAIN_BRAKE_X:
 			case INDEPENDENT_BRAKE_X:
 			case THROTTLE_BRAKE_X:
+			case BELL_CONTROL_X:
 			case WHISTLE_CONTROL_X:
 			case HORN_CONTROL_X:
 			case ENGINE_START_X:
@@ -305,6 +307,13 @@ public abstract class Locomotive extends FreightTank {
 				hornTime--;
 			} else if (hornPlayer != null) {
 				hornPlayer = null;
+			}
+			OptionalDouble control = this.getDefinition().getModel().getControls().stream()
+					.filter(x -> x.part.type == ModelComponentType.BELL_CONTROL_X)
+					.mapToDouble(this::getControlPosition)
+					.max();
+			if (control.isPresent() && control.getAsDouble() > 0) {
+				bellTime = 10;
 			}
 			if (bellTime > 0 && !this.getDefinition().toggleBell) {
 				bellTime--;
