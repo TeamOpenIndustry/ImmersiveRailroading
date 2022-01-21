@@ -117,6 +117,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagSync
 	@TagField("hasElectricalPower")
 	private boolean hasElectricalPower;
+	private boolean hadElectricalPower = false;
+	private int gotElectricalPowerTick = -1;
 
 	/*
 	 * 
@@ -172,7 +174,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			
 			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
 			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
-			
+
+			if (!hadElectricalPower && hasElectricalPower()) {
+				gotElectricalPowerTick = getTickCount();
+			}
+
 			return;
 		}
 
@@ -182,6 +188,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				hasElectricalPower = true;
 			}
 		});
+
+		hadElectricalPower = hasElectricalPower();
 
 		if (this.resimulateCooldown > 0) {
 			this.resimulateCooldown -= 1;
@@ -894,4 +902,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			});
 		}
     }
+
+	@Override
+	public boolean internalLightsEnabled() {
+		return getDefinition().hasInternalLighting() && hasElectricalPower() && (
+				gotElectricalPowerTick == -1 ||
+						getTickCount() - gotElectricalPowerTick > 15 ||
+						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0
+		);
+	}
 }
