@@ -98,7 +98,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
                     float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(stock.getThrottle() * stock.getReverser());
                     volume = (float) Math.sqrt(volume);
                     double fraction = 3;
-                    float pitch = 0.8f + (float) (speed/maxSpeed/fraction);
+                    float pitch = 0.8f + (float) (speed/maxSpeed/fraction * 0.2);
                     float delta = pitchOffset - (pitchStroke ? -0.02f : 0);
                     ISound chuff = chuffs.get(chuffId);
                     chuff.setPitch(pitch + delta);
