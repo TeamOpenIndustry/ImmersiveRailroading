@@ -118,8 +118,8 @@ public class Control {
         }
     }
 
-    private static String formatLabel(String label) {
-        return WordUtils.capitalizeFully(label.replaceAll("_", " ").toLowerCase(Locale.ROOT));
+    private static String formatLabel(ModelComponentType label) {
+        return WordUtils.capitalizeFully(label.name().replace("_X", "").replaceAll("_CONTROL", "").replaceAll("_", " ").toLowerCase(Locale.ROOT));
     }
 
     public void render(EntityRollingStock stock, ComponentRenderer draw) {
@@ -206,9 +206,13 @@ public class Control {
                 if (label == null || label.trim().isEmpty()) {
                     return;
                 }
-                state = String.format(" (%d%%)", (int)(percent * 100));
+                if (toggle || press) {
+                    state = percent == 1 ? " (On)" : " (Off)";
+                } else {
+                    state = String.format(" (%d%%)", (int)(percent * 100));
+                }
         }
-        GlobalRender.drawText((label != null ? label : formatLabel(part.type.name().replace("_X", ""))) + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        GlobalRender.drawText((label != null ? label : formatLabel(part.type)) + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public float getValue(EntityRollingStock stock) {

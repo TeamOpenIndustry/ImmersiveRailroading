@@ -52,6 +52,7 @@ public abstract class Locomotive extends FreightTank {
 	@TagSync
 	@TagField("BELL")
 	private int bellTime = 0;
+	private boolean bellControl = false;
 
 	private int bellKeyTimeout;
 
@@ -314,9 +315,13 @@ public abstract class Locomotive extends FreightTank {
 					.max();
 			if (control.isPresent() && control.getAsDouble() > 0) {
 				bellTime = 10;
+				bellControl = true;
 			}
-			if (bellTime > 0 && !this.getDefinition().toggleBell) {
+			if (bellTime > 0 && (!this.getDefinition().toggleBell || bellControl)) {
 				bellTime--;
+				if (bellTime == 0) {
+					bellControl = false;
+				}
 			}
 		}
 
