@@ -1,7 +1,6 @@
 {
 	"name": "Slag Car 1",
 	"model": "immersiverailroading:models/rolling_stock/tank/slag_car_1/slag_car_1.obj",
-	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 41060
 	},

@@ -1,7 +1,6 @@
 {
 	"name": "Box Car X26",
 	"model": "immersiverailroading:models/rolling_stock/freight/boxcar_x26/boxcar_x26.obj",
-	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 21318,
 		"independent_brake": true
@@ -10,7 +9,7 @@
 		"slots": 10,
 		"center_x": 0,
 		"center_y": 1.2,
-		"length": 6,
+		"length": 5.5,
 		"width": 2
 	},
 	"freight": {

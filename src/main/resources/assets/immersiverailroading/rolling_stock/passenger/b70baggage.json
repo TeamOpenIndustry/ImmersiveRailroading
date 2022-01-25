@@ -1,9 +1,9 @@
 {
 	"name": "PRR B70 Baggage",
 	"model": "immersiverailroading:models/rolling_stock/passenger/b70baggage/b70baggage.obj",
-	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 18143
+		"weight_kg": 18143,
+		"independent_brake": true
 	},
 	"passenger": {
 		"slots": 6,

@@ -1,7 +1,6 @@
 {
 	"name": "USRA Boxcar Class RR-40",
 	"model": "immersiverailroading:models/rolling_stock/freight/usra_boxcar_classrr40/usra_boxcar_classrr40.obj",
-	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 18500,
 		"independent_brake": true

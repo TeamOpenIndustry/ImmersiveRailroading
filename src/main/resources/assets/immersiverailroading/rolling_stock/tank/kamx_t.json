@@ -1,9 +1,9 @@
 {
 	"name": "Kamx T",
 	"model": "immersiverailroading:models/rolling_stock/tank/kamx_t/kamx_t.obj",
-	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 21060
+		"weight_kg": 21060,
+		"independent_brake": true
 	},
 	"passenger": {
 		"slots": 1,

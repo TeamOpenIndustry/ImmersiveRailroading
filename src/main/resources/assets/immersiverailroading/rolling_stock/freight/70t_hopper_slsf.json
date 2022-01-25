@@ -1,9 +1,9 @@
 {
 	"name": "70T Hopper SLSF",
 	"model": "immersiverailroading:models/rolling_stock/freight/70t_hopper_slsf/70t_hopper_slsf.obj",
-	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 21318
+		"weight_kg": 21318,
+		"independent_brake": true
 	},
 	"passenger": {
 		"slots": 2,

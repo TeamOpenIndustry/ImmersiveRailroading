@@ -1,8 +1,8 @@
-# Blender MTL File: 'MK1 Coach Paint 1.blend'
+# Blender MTL File: 'BR_MK1.blend'
 # Material Count: 3
 
 newmtl glass
-Ns 96.078431
+Ns 96.078443
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -13,7 +13,7 @@ illum 2
 map_Kd glass.png
 
 newmtl metal
-Ns 96.078431
+Ns 96.078443
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
@@ -24,7 +24,7 @@ illum 2
 map_Kd metal.png
 
 newmtl metal_NONE
-Ns 96.078431
+Ns 96.078443
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000

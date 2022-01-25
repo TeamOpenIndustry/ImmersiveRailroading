@@ -1,15 +1,15 @@
 {
 	"name": "USRA Hopper 55T",
 	"model": "immersiverailroading:models/rolling_stock/freight/usra_hopper_55t/usra_hopper_55t.obj",
-	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 25000
+		"weight_kg": 25000,
+		"independent_brake": true
 	},
 	"passenger": {
 		"slots": 1,
 		"center_x": 4,
 		"center_y": 1.2,
-		"length": 2,
+		"length": 1.5,
 		"width": 2
 	},
 	"freight": {

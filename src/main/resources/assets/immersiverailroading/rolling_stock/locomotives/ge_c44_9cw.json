@@ -33,5 +33,25 @@
 	"sounds": {
 		"horn": "sounds/diesel/c44_9w/horn.ogg",
 		"idle": "sounds/diesel/c44_9w/notch6.ogg"
+	},
+	"lights": {
+		"HEADLIGHT_1": {
+			"castsLight": false
+		},
+		"HEADLIGHT_2": {
+			"castsLight": false
+		},
+		"HEADLIGHT_3": {
+			"castsLight": true
+		},
+		"HEADLIGHT_4": {
+			"castsLight": true
+		},
+		"HEADLIGHT_5": {
+			"castsLight": false
+		},
+		"HEADLIGHT_6": {
+			"castsLight": true
+		}
 	}
 }

@@ -1,16 +1,17 @@
 {
 	"name": "N5c Caboose",
 	"model": "immersiverailroading:models/rolling_stock/caboose/n5c_cabin_car/n5c_cabin_car.obj",
-	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 19595
+		"weight_kg": 19595,
+		"independent_brake": true,
+		"internalLighting": true
 	},
 	"passenger": {
 		"slots": 12,
 		"center_x": 0,
 		"center_y": 1.2,
 		"length": 3,
-		"width": 2.4
+		"width": 0.4
 	},
 	"freight": {
 		"slots": 6,

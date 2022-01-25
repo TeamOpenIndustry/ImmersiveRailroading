@@ -27,5 +27,19 @@
 	"couplers": {
 		"front_offset": -0.08,
 		"rear_offset": -0.08
+	},
+	"lights": {
+		"HEADLIGHT_1": {
+			"castsLight": false
+		},
+		"HEADLIGHT_2": {
+			"castsLight": false
+		},
+		"HEADLIGHT_3": {
+			"castsLight": true
+		},
+		"HEADLIGHT_4": {
+			"castsLight": true
+		}
 	}
 }

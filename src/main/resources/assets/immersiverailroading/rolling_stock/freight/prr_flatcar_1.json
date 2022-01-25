@@ -1,15 +1,15 @@
 {
 	"name": "PRR Flatcar 1",
 	"model": "immersiverailroading:models/rolling_stock/freight/prr_flatcar_1/prr_flatcar_1.obj",
-	"darken_model": "-0.05",
 	"properties": {
-		"weight_kg": 32000
+		"weight_kg": 32000,
+		"independent_brake": true
 	},
 	"passenger": {
 		"slots": 10,
 		"center_x": 0,
 		"center_y": 1.4,
-		"length": 2,
+		"length": 4.5,
 		"width": 2
 	},
 	"freight": {
