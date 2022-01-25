@@ -45,7 +45,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
         hasRadioEquipment = properties.has("radio_equipped") && properties.get("radio_equipped").getAsBoolean();
 
-        isCabCar = properties.has("cab_car") && properties.get("cab_car").getAsBoolean();
+        isCabCar = readCabCarFlag(data);
         if (isCabCar) {
             muliUnitCapable = true;
         } else {
@@ -56,6 +56,11 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         }
         isLinkedBrakeThrottle = properties.has("isLinkedBrakeThrottle") && properties.get("linked_brake_throttle").getAsBoolean();
         toggleBell = !properties.has("toggle_bell") || properties.get("toggle_bell").getAsBoolean();
+    }
+
+    protected boolean readCabCarFlag(JsonObject data) {
+        JsonObject properties = data.get("properties").getAsJsonObject();
+        return properties.has("cab_car") && properties.get("cab_car").getAsBoolean();
     }
 
     protected abstract boolean multiUnitDefault();

@@ -183,7 +183,7 @@ public class LightFlare {
                 OpenGL.With alpha = OpenGL.bool(GL11.GL_ALPHA_TEST, false);
                 OpenGL.With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)) {
 
-            if (intensity > 0.1) {
+            if (intensity > 0.01) {
                 try (OpenGL.With matrix = OpenGL.matrix()) {
                     GL11.glTranslated(flareOffset.x - (intensity / 2 * stock.gauge.scale())*(forward ? 3 : -3), flareOffset.y, flareOffset.z);
                     GL11.glRotated(90, 0, 1, 0);

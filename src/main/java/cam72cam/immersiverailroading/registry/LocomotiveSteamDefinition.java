@@ -147,8 +147,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected GuiBuilder getDefaultOverlay() throws IOException {
-        return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/steam.json"));
+    protected GuiBuilder getDefaultOverlay(JsonObject data) throws IOException {
+        return readCabCarFlag(data) ?
+                GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/cab_car.json")) :
+                GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/steam.json"));
     }
 
     public FluidQuantity getTankCapacity(Gauge gauge) {

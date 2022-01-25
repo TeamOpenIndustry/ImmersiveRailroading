@@ -319,7 +319,7 @@ public abstract class EntityRollingStockDefinition {
             }
         }
 
-        overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : getDefaultOverlay();
+        overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : getDefaultOverlay(data);
         if (data.has("extra_tooltip_info")) {
             extraTooltipInfo = new ArrayList<>();
             data.getAsJsonArray("extra_tooltip_info").forEach(jsonElement -> extraTooltipInfo.add(jsonElement.getAsString()));
@@ -631,7 +631,7 @@ public abstract class EntityRollingStockDefinition {
         return isLinearBrakeControl;
     }
 
-    protected GuiBuilder getDefaultOverlay() throws IOException {
+    protected GuiBuilder getDefaultOverlay(JsonObject data) throws IOException {
         return hasIndependentBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.json")) : null;
     }
 

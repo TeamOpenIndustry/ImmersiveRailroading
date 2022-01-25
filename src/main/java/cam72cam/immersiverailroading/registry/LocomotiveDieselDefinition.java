@@ -110,8 +110,10 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected GuiBuilder getDefaultOverlay() throws IOException {
-        return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/diesel.json"));
+    protected GuiBuilder getDefaultOverlay(JsonObject data) throws IOException {
+        return readCabCarFlag(data) ?
+                GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/cab_car.json")) :
+                GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/diesel.json"));
     }
 
     @Override

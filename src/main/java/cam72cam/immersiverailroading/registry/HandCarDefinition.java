@@ -14,7 +14,7 @@ public class HandCarDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected GuiBuilder getDefaultOverlay() throws IOException {
+    protected GuiBuilder getDefaultOverlay(JsonObject data) throws IOException {
         return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/handcar.json"));
     }
 
