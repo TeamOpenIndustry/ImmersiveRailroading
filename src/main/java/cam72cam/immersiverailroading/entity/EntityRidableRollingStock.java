@@ -84,20 +84,14 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
-	private boolean hasConnectingDoors() {
-		// TODO cache this value
-		return this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.type == Door.Types.CONNECTING);
-	}
-
 	private boolean isNearestDoorOpen(Player source) {
-		return !hasConnectingDoors() || this.getDefinition().getModel().getDoors().stream()
+		// Find any doors that are close enough that are closed (and then negate)
+		return !this.getDefinition().getModel().getDoors().stream()
 				.filter(d -> d.type == Door.Types.CONNECTING)
+				.filter(d -> d.center(this).distanceTo(source.getPosition()) < getDefinition().getLength(this.gauge)/3)
 				.min(Comparator.comparingDouble(d -> d.center(this).distanceTo(source.getPosition())))
-				.filter(x -> x.isOpen(this)).isPresent();
-	}
-
-	private boolean isDoorOpenAt(Player source) {
-		return !hasConnectingDoors() || this.getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.CONNECTING));
+				.filter(x -> !x.isOpen(this))
+				.isPresent();
 	}
 
 	private Vec3d playerMovement(Player source, Vec3d offset) {
@@ -121,7 +115,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
 			boolean atBack = this.getDefinition().isAtRear(gauge, offset);
 			// TODO config for strict doors
-			boolean atDoor = isDoorOpenAt(source);
+			boolean atDoor = isNearestDoorOpen(source);
 
 			atFront &= atDoor;
 			atBack &= atDoor;
