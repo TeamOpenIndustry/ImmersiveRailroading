@@ -278,7 +278,7 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-	public void onDragRelease(Control component) {
+	public void onDragRelease(Control<?> component) {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.ENGINE_START_X) {
 			turnedOn = getDefinition().getModel().getControls().stream()

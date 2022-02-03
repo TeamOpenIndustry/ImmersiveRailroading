@@ -924,7 +924,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
     @Override
-    public void setControlPosition(Control component, float val) {
+    public void setControlPosition(Control<?> component, float val) {
         super.setControlPosition(component, val);
         if (component.global) {
 			this.mapTrain(this, false, stock -> {

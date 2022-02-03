@@ -183,7 +183,7 @@ public abstract class Locomotive extends FreightTank {
 		return throttleDelta;
 	}
 
-	public void onDrag(Control component, double delta) {
+	public void onDrag(Control<?> component, double delta) {
 		super.onDrag(component, delta);
 		//System.out.println("DRAG " + component + ": "+ getControlPosition(component));
 		switch (component.part.type) {
@@ -209,7 +209,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	@Override
-	public void onDragRelease(Control control) {
+	public void onDragRelease(Control<?> control) {
 		super.onDragRelease(control);
 		if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
 			setControlPosition(control, 0.5f);
@@ -217,7 +217,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	@Override
-	protected float defaultControlPosition(Control control) {
+	protected float defaultControlPosition(Control<?> control) {
 		switch (control.part.type) {
 			case THROTTLE_BRAKE_X:
 			case REVERSER_X:
@@ -230,7 +230,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
     @Override
-    public boolean playerCanDrag(Player player, Control control) {
+    public boolean playerCanDrag(Player player, Control<?> control) {
         if (!super.playerCanDrag(player, control)) {
         	return false;
 		}
@@ -284,7 +284,7 @@ public abstract class Locomotive extends FreightTank {
 		super.onTick();
 		
 		if (getWorld().isServer) {
-			for (Control control : getDefinition().getModel().getControls()) {
+			for (Control<?> control : getDefinition().getModel().getControls()) {
 				if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
 					setTrainBrake(Math.max(0, Math.min(1, getTrainBrake() + (getControlPosition(control) - 0.5f) / 8)));
 				}

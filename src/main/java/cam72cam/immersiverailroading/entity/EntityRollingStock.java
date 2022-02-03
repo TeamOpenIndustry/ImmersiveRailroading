@@ -213,16 +213,16 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@TagField(value="controlPositions", mapper = ControlPositionMapper.class)
 	protected Map<String, Pair<Boolean, Float>> controlPositions = new HashMap<>();
 
-	public void onDragStart(Control control) {
+	public void onDragStart(Control<?> control) {
 		setControlPressed(control, true);
 	}
 
-	public void onDrag(Control control, double delta) {
+	public void onDrag(Control<?> control, double delta) {
 		setControlPressed(control, true);
 		setControlPosition(control, (float)delta + getControlPosition(control));
 	}
 
-	public void onDragRelease(Control control) {
+	public void onDragRelease(Control<?> control) {
 		setControlPressed(control, false);
 
 		if (control.toggle) {
@@ -233,7 +233,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		}
 	}
 
-	protected float defaultControlPosition(Control control) {
+	protected float defaultControlPosition(Control<?> control) {
 		return 0;
 	}
 
@@ -241,19 +241,19 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return controlPositions.getOrDefault(control, Pair.of(false, 0f));
 	}
 
-	public Pair<Boolean, Float> getControlData(Control control) {
+	public Pair<Boolean, Float> getControlData(Control<?> control) {
 		return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, defaultControlPosition(control)));
 	}
 
-	public boolean getControlPressed(Control control) {
+	public boolean getControlPressed(Control<?> control) {
 		return getControlData(control).getLeft();
 	}
 
-	public void setControlPressed(Control control, boolean pressed) {
+	public void setControlPressed(Control<?> control, boolean pressed) {
 		controlPositions.put(control.controlGroup, Pair.of(pressed, getControlPosition(control)));
 	}
 
-	public float getControlPosition(Control control) {
+	public float getControlPosition(Control<?> control) {
 		return getControlData(control).getRight();
 	}
 
@@ -261,7 +261,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return getControlData(control).getRight();
 	}
 
-	public void setControlPosition(Control control, float val) {
+	public void setControlPosition(Control<?> control, float val) {
 		val = Math.min(1, Math.max(0, val));
 		controlPositions.put(control.controlGroup, Pair.of(getControlPressed(control), val));
 	}
@@ -275,7 +275,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
 	}
 
-	public boolean playerCanDrag(Player player, Control control) {
+	public boolean playerCanDrag(Player player, Control<?> control) {
 		return control.part.type != ModelComponentType.INDEPENDENT_BRAKE_X || player.hasPermission(Permissions.BRAKE_CONTROL);
 	}
 

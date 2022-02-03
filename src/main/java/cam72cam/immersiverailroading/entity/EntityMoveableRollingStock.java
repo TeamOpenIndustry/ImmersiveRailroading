@@ -207,7 +207,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 
     @Override
-    public void onDrag(Control control, double delta) {
+    public void onDrag(Control<?> control, double delta) {
         super.onDrag(control, delta);
         switch (control.part.type) {
             case INDEPENDENT_BRAKE_X:
@@ -219,7 +219,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     @Override
-    public void onDragRelease(Control control) {
+    public void onDragRelease(Control<?> control) {
         super.onDragRelease(control);
         if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
             setControlPosition(control, 0.5f);
@@ -227,7 +227,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     @Override
-    protected float defaultControlPosition(Control control) {
+    protected float defaultControlPosition(Control<?> control) {
         switch (control.part.type) {
             case INDEPENDENT_BRAKE_X:
                 return getDefinition().isLinearBrakeControl() ? 0 : 0.5f;
@@ -242,7 +242,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         if (getWorld().isServer) {
             if (getDefinition().hasIndependentBrake()) {
-                for (Control control : getDefinition().getModel().getControls()) {
+                for (Control<?> control : getDefinition().getModel().getControls()) {
                     if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
                         setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
                     }

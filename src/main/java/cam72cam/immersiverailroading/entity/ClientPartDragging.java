@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class ClientPartDragging {
     private EntityRollingStock stock = null;
-    private Control component = null;
+    private Control<?> component = null;
     private Float lastDelta = null;
 
     public static void register() {
@@ -29,6 +29,7 @@ public class ClientPartDragging {
     }
 
     private boolean capture(Player.Hand hand) {
+
         if (hand == Player.Hand.SECONDARY && MinecraftClient.isReady()) {
             this.stock = null;
             Player player = MinecraftClient.getPlayer();
@@ -82,7 +83,7 @@ public class ClientPartDragging {
         public DragPacket() {
             super(); // Reflection
         }
-        public DragPacket(EntityRollingStock stock, Control type, boolean start, double delta, boolean released) {
+        public DragPacket(EntityRollingStock stock, Control<?> type, boolean start, double delta, boolean released) {
             this.stockUUID = stock.getUUID();
             this.typeKey = type.part.key;
             this.start = start;
@@ -92,7 +93,7 @@ public class ClientPartDragging {
         @Override
         protected void handle() {
             EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
-            Control control = stock.getDefinition().getModel().getDraggable().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
+            Control<?> control = stock.getDefinition().getModel().getDraggable().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
             if (!stock.playerCanDrag(getPlayer(), control)) {
                 return;
             }

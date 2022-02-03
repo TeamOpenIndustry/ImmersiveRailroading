@@ -317,7 +317,7 @@ public class LocomotiveSteam extends Locomotive {
     }
 
     @Override
-	public void onDrag(Control component, double delta) {
+	public void onDrag(Control<?> component, double delta) {
 		super.onDrag(component, delta);
 
 		if (component.part.type == ModelComponentType.WHISTLE_CONTROL_X) {
@@ -326,7 +326,7 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public void onDragRelease(Control component) {
+	public void onDragRelease(Control<?> component) {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.WHISTLE_CONTROL_X) {
 			this.setControlPosition(component, 0);

@@ -15,7 +15,6 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.obj.OBJVBO;
-import cam72cam.mod.util.SingleCache;
 import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
