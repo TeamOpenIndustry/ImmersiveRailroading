@@ -16,6 +16,6 @@ public class FreightTankModel<T extends FreightTank> extends FreightModel<T> {
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         super.parseComponents(provider, def);
-        super.gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_LIQUID_X, Readouts.LIQUID));
+        addGauge(provider, ModelComponentType.GAUGE_LIQUID_X, Readouts.LIQUID);
     }
 }

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model.components;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class ModelComponent {
     public final ModelComponentType type;
-    public final String pos;
+    public final ModelPosition pos;
     public final Integer id;
     public final String key;
 
@@ -23,7 +24,7 @@ public class ModelComponent {
     public final boolean wooden;
     private final OBJModel model;
 
-    public ModelComponent(ModelComponentType type, String pos, Integer id, OBJModel model, Set<String> modelIDs) {
+    public ModelComponent(ModelComponentType type, ModelPosition pos, Integer id, OBJModel model, Set<String> modelIDs) {
         this.type = type;
         this.pos = pos;
         this.id = id;

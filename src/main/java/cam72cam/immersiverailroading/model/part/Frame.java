@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -22,8 +23,8 @@ public class Frame {
         if (frame == null) {
             ImmersiveRailroading.warn("Invalid model: Missing FRAME for %s!  (this will fail in future versions of IR)", blame);
         }
-        valveGearRight = wheels != null ? ValveGear.get(wheels, type, provider, "RIGHT", -90) : null;
-        valveGearLeft = wheels != null ? ValveGear.get(wheels, type, provider, "LEFT", 0) : null;
+        valveGearRight = wheels != null ? ValveGear.get(wheels, type, provider, ModelPosition.RIGHT, -90) : null;
+        valveGearLeft = wheels != null ? ValveGear.get(wheels, type, provider, ModelPosition.LEFT, 0) : null;
     }
 
     public void render(double distance, ComponentRenderer draw) {

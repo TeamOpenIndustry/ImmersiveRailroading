@@ -2,8 +2,10 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -23,11 +25,12 @@ import org.apache.commons.lang3.text.WordUtils;
 import util.Matrix4;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Control {
+public class Control<T extends EntityMoveableRollingStock>  {
     public final ModelComponent part;
     public final String controlGroup;
     public final String label;
@@ -47,13 +50,19 @@ public class Control {
     private final Map<UUID, Float> lastMoveSoundValue = new HashMap<>();
     private final Map<UUID, Boolean> wasSoundPressed = new HashMap<>();
     private final Map<UUID, List<ISound>> sounds = new HashMap<>();
+    private final Function<T, Matrix4> location;
 
-    public static List<Control> get(ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(Control::new).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelComponentType type) {
+        return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, null)).collect(Collectors.toList());
     }
 
-    public Control(ModelComponent part) {
+    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelComponentType type, ModelPosition pos, Function<T, Matrix4> loc) {
+        return provider.parseAll(type, pos).stream().map(part1 -> new Control<>(part1, loc)).collect(Collectors.toList());
+    }
+
+    public Control(ModelComponent part, Function<T, Matrix4> loc) {
         this.part = part;
+        this.location = loc;
         this.controlGroup = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
             return matcher.find() ? matcher.group(1) : null;
@@ -72,8 +81,14 @@ public class Control {
             return matcher.find() ? Float.parseFloat(matcher.group(1)) : null;
         }).filter(Objects::nonNull).findFirst().orElse(0f);
 
+        // This is terrible
+        String rotpat = part.pos != null && !part.type.regex.contains("#POS#") ?
+                part.type.regex.replaceAll("#ID#", part.pos + "_" + part.id + "_ROT") :
+                part.pos != null ?
+                        part.type.regex.replaceAll("#POS#", part.pos.toString()).replaceAll("#ID#", part.id + "_ROT") :
+                        part.type.regex.replaceAll("#ID#", part.id + "_ROT");
         OBJGroup rot = part.groups().stream()
-                .filter(g -> Pattern.matches(part.type.regex.replaceAll("#POS#", part.pos).replaceAll("#ID#",  part.id + "_ROT"), g.name))
+                .filter(g -> Pattern.matches(rotpat, g.name))
                 .findFirst().orElse(null);
         if (rot != null && rot.normal != null) {
             this.rotationPoint = rot.max.add(rot.min).scale(0.5);
@@ -122,7 +137,7 @@ public class Control {
         return WordUtils.capitalizeFully(label.name().replace("_X", "").replaceAll("_CONTROL", "").replaceAll("_", " ").toLowerCase(Locale.ROOT));
     }
 
-    public void render(EntityRollingStock stock, ComponentRenderer draw) {
+    public void render(T stock, ComponentRenderer draw) {
         float valuePercent = getValue(stock);
         if (hide && valuePercent == 1) {
             return;
@@ -135,12 +150,12 @@ public class Control {
         }
 
         try (ComponentRenderer matrix = draw.push()) {
-            matrix.mult(transform(getValue(stock), new Matrix4()));
+            matrix.mult(transform(getValue(stock), new Matrix4(), stock));
             matrix.render(part);
         }
     }
 
-    public void postRender(EntityRollingStock stock) {
+    public void postRender(T stock) {
         if (!ConfigGraphics.interactiveComponentsOverlay) {
             return;
         }
@@ -176,7 +191,7 @@ public class Control {
         if (!inRange) {
             return;
         }
-        Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())).apply(center);
+        Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()), stock).apply(center);
         String state = "";
         float percent = getValue(stock) - offset;
         switch (part.type) {
@@ -215,20 +230,24 @@ public class Control {
         GlobalRender.drawText((label != null ? label : formatLabel(part.type)) + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
-    public float getValue(EntityRollingStock stock) {
+    public float getValue(T stock) {
         float pos = stock.getControlPosition(this) + offset;
         return (invert ? 1 - pos : pos) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
     }
 
-    public Vec3d transform(Vec3d point, EntityRollingStock stock) {
+    public Vec3d transform(Vec3d point, T stock) {
         return transform(point, getValue(stock), stock);
     }
 
-    protected Vec3d transform(Vec3d point, float valuePercent, EntityRollingStock stock) {
-        return transform(valuePercent, stock.getModelMatrix()).apply(point);
+    protected Vec3d transform(Vec3d point, float valuePercent, T stock) {
+        return transform(valuePercent, stock.getModelMatrix(), stock).apply(point);
     }
 
-    protected Matrix4 transform(float valuePercent, Matrix4 m) {
+    protected Matrix4 transform(float valuePercent, Matrix4 m, T stock) {
+        if (location != null) {
+            m.multiply(location.apply(stock));
+        }
+
         for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
             Axis axis = entry.getKey();
             Float val = entry.getValue();
@@ -280,19 +299,19 @@ public class Control {
     }
 
     public Vec3d center(EntityRollingStock stock) {
-        return transform(part.center, stock);
+        return transform(part.center, (T)stock);
     }
 
     public IBoundingBox getBoundingBox(EntityRollingStock stock) {
         return IBoundingBox.from(
-                transform(part.min, stock),
-                transform(part.max, stock)
+                transform(part.min, (T)stock),
+                transform(part.max, (T)stock)
         );
     }
 
     /** Client only! */
     private Vec3d lastClientLook = null;
-    public float clientMovementDelta(Player player, EntityRollingStock stock) {
+    public float clientMovementDelta(Player player, EntityRollingStock stockRaw) {
         /*
           -X
         -Z * +Z
@@ -302,6 +321,8 @@ public class Control {
         if (press) {
             return 1;
         }
+
+        T stock = (T)stockRaw;
 
         float delta = 0;
 
@@ -345,11 +366,11 @@ public class Control {
         lastClientLook = null;
     }
 
-    public ControlSoundsDefinition getSounds(EntityRollingStock stock) {
+    public ControlSoundsDefinition getSounds(T stock) {
         return stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
     }
 
-    private void createSound(EntityRollingStock stock, Identifier sound, boolean repeats) {
+    private void createSound(T stock, Identifier sound, boolean repeats) {
         if (sound == null) {
             return;
         }
@@ -362,7 +383,7 @@ public class Control {
         sounds.computeIfAbsent(stock.getUUID(), k -> new ArrayList<>()).add(snd);
     }
 
-    public void effects(EntityRollingStock stock) {
+    public void effects(T stock) {
         ControlSoundsDefinition sounds = getSounds(stock);
         if (sounds != null) {
             if (this.sounds.containsKey(stock.getUUID())) {

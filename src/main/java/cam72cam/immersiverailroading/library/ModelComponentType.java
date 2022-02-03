@@ -80,7 +80,6 @@ public enum ModelComponentType {
 
 	// Lights
 	HEADLIGHT_X("HEADLIGHT_#ID#"),
-	HEADLIGHT_POS_X("HEADLIGHT_#POS#_#ID#"),
 
 	// Controls
 	THROTTLE_X("THROTTLE_#ID#"),
@@ -95,6 +94,7 @@ public enum ModelComponentType {
 	WHISTLE_CONTROL_X("WHISTLE_CONTROL_#ID#"),
 	HORN_CONTROL_X("HORN_CONTROL_#ID#"),
 	ENGINE_START_X("ENGINE_START_#ID#"),
+	COUPLER_ENGAGED_X("COUPLER_ENGAGED_#ID#"),
 
 	// Gauges
 	GAUGE_LIQUID_X("GAUGE_LIQUID_#ID#"),
@@ -106,7 +106,7 @@ public enum ModelComponentType {
 	GAUGE_TRAIN_BRAKE_X("GAUGE_TRAIN_BRAKE_#ID#"),
 	GAUGE_INDEPENDENT_BRAKE_X("GAUGE_(INDEPENDENT|IND)_BRAKE_#ID#"),
 	BRAKE_PRESSURE_X("BRAKE_PRESSURE_#ID#"),
-	BRAKE_PRESSURE_POS_X("BRAKE_PRESSURE_#POS#_#ID#"),
+	COUPLED_X("COUPLED_#ID#"),
 
 	// REST
 	IMMERSIVERAILROADING_BASE_COMPONENT("IMMERSIVERAILROADING_BASE_COMPNOENT"),
@@ -126,5 +126,51 @@ public enum ModelComponentType {
 
 	public static boolean isParticle(String group) {
 		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_");
+	}
+
+    public static class ModelPosition {
+		private static final ModelPosition INNER = new ModelPosition("INNER");
+		public static final ModelPosition LEFT = new ModelPosition("LEFT");
+		public static final ModelPosition INNER_LEFT = INNER.and(LEFT);
+		public static final ModelPosition CENTER = new ModelPosition("CENTER");
+		public static final ModelPosition RIGHT = new ModelPosition("RIGHT");
+		public static final ModelPosition INNER_RIGHT = INNER.and(RIGHT);
+
+		private static final ModelPosition BOGEY = new ModelPosition("BOGEY");
+		private static final ModelPosition LOCOMOTIVE = new ModelPosition("LOCOMOTIVE");
+		public static final ModelPosition FRONT = new ModelPosition("FRONT");
+		public static final ModelPosition REAR = new ModelPosition("REAR");
+		public static final ModelPosition BOGEY_FRONT = BOGEY.and(FRONT);
+		public static final ModelPosition BOGEY_REAR = BOGEY.and(REAR);
+		public static final ModelPosition FRONT_LOCOMOTIVE = FRONT.and(LOCOMOTIVE);
+		public static final ModelPosition REAR_LOCOMOTIVE = REAR.and(LOCOMOTIVE);
+		private final String pos;
+
+		public ModelPosition(String pos) {
+			this.pos = pos;
+		}
+
+		public ModelPosition and(ModelPosition other) {
+			return other == null ? this : new ModelPosition(this.pos + "_" + other.pos);
+		}
+
+		public boolean contains(ModelPosition other) {
+			return pos.contains(other.pos);
+		}
+
+		@Override
+		public String toString() {
+			return pos;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return o instanceof ModelPosition && pos.equals(((ModelPosition) o).pos);
+		}
+
+		@Override
+		public int hashCode() {
+			return pos.hashCode();
+		}
 	}
 }

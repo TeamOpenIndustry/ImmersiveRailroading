@@ -42,7 +42,7 @@ public class ClientPartDragging {
                     .flatMap(stock ->
                             stock.getDefinition().getModel().getDraggable().stream().map(c -> Pair.of(stock, c))
                     ).map(p -> {
-                        double padding = 0.05 * p.getLeft().gauge.scale();
+                        double padding = 0.2 * p.getLeft().gauge.scale();
                         Double min = null;
                         Vec3d center = p.getRight().center(p.getLeft());
                         IBoundingBox bb = p.getRight().getBoundingBox(p.getLeft()).grow(new Vec3d(padding, padding, padding));

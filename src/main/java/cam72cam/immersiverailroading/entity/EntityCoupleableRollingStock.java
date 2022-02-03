@@ -9,6 +9,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.util.RealBB;
@@ -181,6 +183,24 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 			return;
 		}
+
+		if (getWorld().isServer) {
+			for (Control<?> control : getDefinition().getModel().getControls()) {
+				if (control.part.type == ModelComponentType.COUPLER_ENGAGED_X) {
+					if (control.part.pos.contains(ModelPosition.FRONT)) {
+						if (isCouplerEngaged(CouplerType.FRONT) ^ (getControlPosition(control) < 0.5)) {
+							setCouplerEngaged(CouplerType.FRONT, getControlPosition(control) < 0.5);
+						}
+					}
+					if (control.part.pos.contains(ModelPosition.REAR)) {
+						if (isCouplerEngaged(CouplerType.BACK) ^ (getControlPosition(control) < 0.5)) {
+							setCouplerEngaged(CouplerType.BACK, getControlPosition(control) < 0.5);
+						}
+					}
+				}
+			}
+		}
+
 
 		hasElectricalPower = false;
 		this.mapTrain(this, false, stock -> {
@@ -575,9 +595,19 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		switch (coupler) {
 		case FRONT:
 			frontCouplerEngaged = engaged;
+			for (Control<?> control : getDefinition().getModel().getControls()) {
+				if (control.part.type == ModelComponentType.COUPLER_ENGAGED_X && control.part.pos.contains(ModelPosition.FRONT)) {
+					setControlPosition(control, engaged ? 0 : 1);
+				}
+			}
 			break;
 		case BACK:
 			backCouplerEngaged = engaged;
+			for (Control<?> control : getDefinition().getModel().getControls()) {
+				if (control.part.type == ModelComponentType.COUPLER_ENGAGED_X && control.part.pos.contains(ModelPosition.REAR)) {
+					setControlPosition(control, engaged ? 0 : 1);
+				}
+			}
 			break;
 		}
 	}

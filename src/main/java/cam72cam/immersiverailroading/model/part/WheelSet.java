@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 
@@ -15,7 +16,7 @@ public class WheelSet {
         return get(provider, type, null, angleOffset);
     }
 
-    public static WheelSet get(ComponentProvider provider, ModelComponentType type, String pos, float angleOffset) {
+    public static WheelSet get(ComponentProvider provider, ModelComponentType type, ModelPosition pos, float angleOffset) {
         List<Wheel> wheels = (pos == null ?
                 provider.parseAll(type) :
                 provider.parseAll(type, pos)

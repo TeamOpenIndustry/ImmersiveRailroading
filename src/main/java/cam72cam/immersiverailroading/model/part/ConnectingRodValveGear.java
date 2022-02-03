@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -16,7 +17,7 @@ public class ConnectingRodValveGear implements ValveGear {
     protected final ModelComponent connectingRod;
     protected float angleOffset;
 
-    public static ConnectingRodValveGear get(WheelSet wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static ConnectingRodValveGear get(WheelSet wheels, ComponentProvider provider, ModelPosition pos, float angleOffset) {
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         return connectingRod != null ? new ConnectingRodValveGear(wheels, connectingRod, angleOffset) : null;
     }

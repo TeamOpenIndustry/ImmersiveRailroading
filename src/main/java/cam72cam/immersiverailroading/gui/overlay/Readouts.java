@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 
 public enum Readouts {
     LIQUID,
@@ -12,6 +13,10 @@ public enum Readouts {
     TRAIN_BRAKE,
     INDEPENDENT_BRAKE,
     BRAKE_PRESSURE,
+    COUPLER_FRONT,
+    COUPLER_REAR,
+    COUPLED_FRONT,
+    COUPLED_REAR,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -43,6 +48,14 @@ public enum Readouts {
                 return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getIndependentBrake() : 0;
             case BRAKE_PRESSURE:
                 return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getTotalBrake() : 0;
+            case COUPLER_FRONT:
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.FRONT) ? 0 : 1 : 0;
+            case COUPLER_REAR:
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.BACK) ? 0 : 1 : 0;
+            case COUPLED_FRONT:
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.FRONT) ? 0 : 1 : 0;
+            case COUPLED_REAR:
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.BACK) ? 0 : 1 : 0;
         }
         return 0;
     }

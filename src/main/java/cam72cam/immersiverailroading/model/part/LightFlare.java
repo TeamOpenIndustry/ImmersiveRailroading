@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -17,6 +18,7 @@ import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import util.Matrix4;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
 
 import static cam72cam.immersiverailroading.model.ComponentRenderer.lcgPattern;
 
-public class LightFlare {
+public class LightFlare<T extends EntityMoveableRollingStock> {
     private final ModelComponent component;
     private final boolean forward;
     private static final Map<Identifier, Integer> textures = new HashMap<>();
@@ -46,22 +48,24 @@ public class LightFlare {
     private final boolean blinkFullBright;
     private final String controlGroup;
     private final boolean invert;
+    private final Function<T, Matrix4> location;
     private float redReverse;
     private float greenReverse;
     private float blueReverse;
 
     private static final Pattern rgb = Pattern.compile(String.format(".*_0[xX](%s%<s)(%<s%<s)(%<s%<s).*", "[0-9A-Fa-f]"));
 
-    public static List<LightFlare> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(component1 -> new LightFlare(def, component1)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<LightFlare<T>> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type) {
+        return provider.parseAll(type).stream().map(c -> new LightFlare<T>(def, c, null)).collect(Collectors.toList());
     }
 
-    public static List<LightFlare> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type, String pos) {
-        return provider.parseAll(type, pos).stream().map(component1 -> new LightFlare(def, component1)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<LightFlare<T>> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type, ModelPosition pos, Function<T, Matrix4> loc) {
+        return provider.parseAll(type, pos).stream().map(c -> new LightFlare<>(def, c, loc)).collect(Collectors.toList());
     }
 
-    private LightFlare(EntityRollingStockDefinition def, ModelComponent component) {
+    private LightFlare(EntityRollingStockDefinition def, ModelComponent component, Function<T, Matrix4> loc) {
         this.component = component;
+        this.location = loc;
         this.forward = component.center.x < 0;
         Matcher rgbValues = component.modelIDs.stream()
                 .map(rgb::matcher)
@@ -113,20 +117,23 @@ public class LightFlare {
         }
     }
 
-    public void render(ComponentRenderer draw, EntityMoveableRollingStock stock) {
+    public void render(ComponentRenderer draw, T stock) {
         try (ComponentRenderer light = draw.withBrightGroups(blinkFullBright ? !isBlinkOff(stock) : !isLightOff(stock))) {
+            if (location != null) {
+                light.mult(location.apply(stock));
+            }
             light.render(component);
         }
     }
 
-    private boolean isLightOff(EntityMoveableRollingStock stock) {
+    private boolean isLightOff(T stock) {
         return !stock.externalLightsEnabled() || (controlGroup != null && stock.getControlPosition(controlGroup) == (invert ? 1 : 0));
     }
-    private boolean isBlinkOff(EntityMoveableRollingStock stock) {
+    private boolean isBlinkOff(T stock) {
         return isLightOff(stock) || blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;
     }
 
-    public void postRender(EntityMoveableRollingStock stock, float offset) {
+    public void postRender(T stock) {
         if (!textures.containsKey(lightTex)) {
             BufferedImage image;
             try {
@@ -164,9 +171,13 @@ public class LightFlare {
             return;
         }
 
-        Vec3d flareOffset = new Vec3d(forward ? component.min.x-0.01 : component.max.x+0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
+        Vec3d flareOffset = new Vec3d(forward ? component.min.x - 0.01 : component.max.x + 0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
+        if (location != null) {
+            // TODO this does not actually work
+            flareOffset = location.apply(stock).apply(flareOffset);
+        }
 
-        Vec3d playerOffset = VecUtil.rotateWrongYaw(stock.getPosition().subtract(MinecraftClient.getPlayer().getPosition()), 180-(stock.getRotationYaw()-offset)).
+        Vec3d playerOffset = VecUtil.rotateWrongYaw(stock.getPosition().subtract(MinecraftClient.getPlayer().getPosition()), 180 - (stock.getRotationYaw())).
                 subtract(flareOffset).scale(forward ? 1 : -1);
 
         int viewAngle = 45;
@@ -209,6 +220,13 @@ public class LightFlare {
             try (OpenGL.With matrix = OpenGL.matrix()) {
                 GL11.glTranslated(flareOffset.x, flareOffset.y, flareOffset.z);
                 GL11.glRotated(90, 0, 1, 0);
+                if (location != null) {
+                    // TODO: This is a shitty hack...
+                    // I'm tired and don't want to fix the headlight code properly at this point
+                    Matrix4 m = location.apply(stock).copy();
+                    m.invert();
+                    OpenGL.multMatrix(m);
+                }
                 GL11.glColor4d(Math.sqrt(red), Math.sqrt(green), Math.sqrt(blue), 1 - (intensity/3f));
                 double scale = (component.max.z - component.min.z) / 1.5 * stock.gauge.scale();
                 GL11.glScaled(scale, scale, scale);
@@ -230,7 +248,7 @@ public class LightFlare {
         }
     }
 
-    public <T extends EntityMoveableRollingStock> void effects(T stock, float offset) {
+    public void effects(T stock) {
         if (!castsLights) {
             return;
         }
@@ -266,7 +284,11 @@ public class LightFlare {
             if (collided[i%5] != null) {
                 castLights.get(stock.getUUID()).get(i).setPosition(collided[i%5]);
             } else {
-                Vec3d pos = stock.getPosition().add(VecUtil.rotateWrongYaw(castPositions.get(stock.getUUID()).get(i), stock.getRotationYaw()-offset));
+                Vec3d cpos = castPositions.get(stock.getUUID()).get(i);
+                if (location != null) {
+                    cpos = location.apply(stock).apply(cpos);
+                }
+                Vec3d pos = stock.getPosition().add(VecUtil.rotateWrongYaw(cpos, stock.getRotationYaw()));
                 if (nop == null) {
                     nop = pos;
                 }

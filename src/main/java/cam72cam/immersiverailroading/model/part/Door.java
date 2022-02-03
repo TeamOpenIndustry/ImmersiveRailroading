@@ -1,20 +1,24 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
+import util.Matrix4;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Door extends Control {
+public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
     private static final Map<UUID, Integer> cooldown = new HashMap<>();
 
     public enum Types {
@@ -25,12 +29,16 @@ public class Door extends Control {
 
     public final Types type;
 
-    public static List<Door> get(ComponentProvider provider) {
-        return provider.parseAll(ModelComponentType.DOOR_X).stream().map(Door::new).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider) {
+        return provider.parseAll(ModelComponentType.DOOR_X).stream().map(p -> new Door<T>(p, null)).collect(Collectors.toList());
     }
 
-    public Door(ModelComponent part) {
-        super(part);
+    public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider, ModelPosition pos, Function<T, Matrix4> loc) {
+        return provider.parseAll(ModelComponentType.DOOR_X, pos).stream().map(p -> new Door<T>(p, loc)).collect(Collectors.toList());
+    }
+
+    public Door(ModelComponent part, Function<T, Matrix4> loc) {
+        super(part, loc);
         type = part.modelIDs.stream().anyMatch(g -> g.contains("EXTERNAL")) ? Types.EXTERNAL :
                 part.modelIDs.stream().anyMatch(g -> g.contains("CONNECTING")) ? Types.CONNECTING :
                 Types.INTERNAL;
@@ -53,8 +61,8 @@ public class Door extends Control {
             return false;
         }
         IBoundingBox bb = IBoundingBox.from(
-                transform(part.min, 0, stock),
-                transform(part.max, 0, stock)
+                transform(part.min, 0, (T)stock),
+                transform(part.max, 0, (T)stock)
         ).grow(new Vec3d(0.5, 0.5, 0.5));
         // The added velocity is due to a bug where the player may tick before or after the stock.
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities

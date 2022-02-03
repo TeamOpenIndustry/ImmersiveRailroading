@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -19,7 +20,7 @@ public class WalschaertsValveGear extends StephensonValveGear {
     protected final List<ModelComponent> todo;
     private final Vec3d crankWheel;
 
-    public static WalschaertsValveGear get(WheelSet wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static WalschaertsValveGear get(WheelSet wheels, ComponentProvider provider, ModelPosition pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);

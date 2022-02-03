@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model.components;
 
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.mod.model.obj.OBJModel;
 
 import java.util.*;
@@ -56,8 +57,8 @@ public class ComponentProvider {
         return Arrays.stream(types).map(this::parse).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public ModelComponent parse(ModelComponentType type, String pos) {
-        Set<String> ids = modelIDs(type.regex.replace("#POS#", pos).replace("#SIDE#", pos));
+    public ModelComponent parse(ModelComponentType type, ModelPosition pos) {
+        Set<String> ids = modelIDs(type.regex.replace("#POS#", pos.toString()).replace("#SIDE#", pos.toString()));
         if (!ids.isEmpty()) {
             ModelComponent component = new ModelComponent(type, pos, null, model, ids);
             this.components.add(component);
@@ -66,7 +67,7 @@ public class ComponentProvider {
         return null;
     }
 
-    public List<ModelComponent> parse(String pos, ModelComponentType... types) {
+    public List<ModelComponent> parse(ModelPosition pos, ModelComponentType... types) {
         return Arrays.stream(types).map(type -> parse(type, pos)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -84,13 +85,17 @@ public class ComponentProvider {
         return Arrays.stream(types).flatMap(type -> parseAll(type).stream()).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public List<ModelComponent> parseAll(ModelComponentType type, String pos) {
-        return modelIDMap(
-                type.regex
-                        .replace("#ID#", "([\\d]+)")
-                        .replace("#POS#", pos)
-                        .replace("#SIDE#", pos)
-        ).entrySet().stream().map(e -> {
+    public List<ModelComponent> parseAll(ModelComponentType type, ModelPosition pos) {
+        String re = type.regex;
+        re = re.replace("#POS#", pos.toString()).replace("#SIDE#", pos.toString());
+        if (!re.equals(type.regex)) {
+            // POS or SIDE found
+            re = re.replace("#ID#", "([\\d]+)");
+        } else {
+            // Hack pos into #ID# slot
+            re = re.replace("#ID#", pos + "_([\\d]+)");
+        }
+        return modelIDMap(re).entrySet().stream().map(e -> {
             ModelComponent component = new ModelComponent(type, pos, Integer.parseInt(e.getKey()), model, e.getValue());
             this.components.add(component);
             return component;
@@ -100,4 +105,5 @@ public class ComponentProvider {
     public List<ModelComponent> components() {
         return components;
     }
+
 }

@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -13,15 +14,15 @@ public class Bogey {
     private final ModelComponent bogey;
     private final List<Wheel> wheels;
 
-    public static Bogey get(ComponentProvider provider, boolean unified, String pos) {
+    public static Bogey get(ComponentProvider provider, boolean unified, ModelPosition pos) {
         List<Wheel> wheels = (unified ?
                 provider.parseAll(ModelComponentType.BOGEY_POS_WHEEL_X, pos) :
-                provider.parseAll(pos.equals("FRONT") ? ModelComponentType.BOGEY_FRONT_WHEEL_X : ModelComponentType.BOGEY_REAR_WHEEL_X)
+                provider.parseAll(pos == ModelPosition.FRONT ? ModelComponentType.BOGEY_FRONT_WHEEL_X : ModelComponentType.BOGEY_REAR_WHEEL_X)
         ).stream().map(Wheel::new).collect(Collectors.toList());
 
         ModelComponent bogey = unified ?
                 provider.parse(ModelComponentType.BOGEY_POS, pos) :
-                provider.parse(pos.equals("FRONT") ? ModelComponentType.BOGEY_FRONT : ModelComponentType.BOGEY_REAR);
+                provider.parse(pos == ModelPosition.FRONT ? ModelComponentType.BOGEY_FRONT : ModelComponentType.BOGEY_REAR);
 
         return bogey == null ? null : new Bogey(bogey, wheels);
     }

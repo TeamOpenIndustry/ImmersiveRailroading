@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -27,7 +28,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
     protected final Vec3d drivenWheel;
 
-    public static StephensonValveGear get(WheelSet wheels, ComponentProvider provider, String pos, float angleOffset) {
+    public static StephensonValveGear get(WheelSet wheels, ComponentProvider provider, ModelPosition pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
@@ -140,10 +141,10 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         if (ConfigGraphics.particlesEnabled && isEndStroke(stock, throttle)) {
             Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(pistonRod.min.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
             double accell = 0.3 * stock.gauge.scale();
-            if (pistonRod.pos.contains("LEFT")) {
+            if (pistonRod.pos.contains(ModelPosition.LEFT)) {
                 accell = -accell;
             }
-            if (pistonRod.pos.contains("CENTER") ) {
+            if (pistonRod.pos.contains(ModelPosition.CENTER)) {
                 accell = 0;
             }
             Vec3d sideMotion = stock.getVelocity().add(VecUtil.fromWrongYaw(accell, stock.getRotationYaw()+90));

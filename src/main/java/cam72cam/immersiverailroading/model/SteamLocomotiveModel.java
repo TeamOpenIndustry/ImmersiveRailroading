@@ -29,12 +29,18 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     }
 
     @Override
-    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+    protected void parseControllable(ComponentProvider provider, EntityRollingStockDefinition def) {
+        super.parseControllable(provider, def);
         if (!((LocomotiveSteamDefinition)def).isCabCar()) {
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE));
-            gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, Readouts.BOILER_PRESSURE));
+            addGauge(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE);
+            addGauge(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, Readouts.BOILER_PRESSURE);
         }
 
+        addControl(provider, ModelComponentType.WHISTLE_CONTROL_X);
+    }
+
+    @Override
+    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         firebox = provider.parse(ModelComponentType.FIREBOX);
         components = provider.parse(
                 ModelComponentType.SMOKEBOX,
@@ -45,7 +51,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
                 ModelComponentType.BOILER_SEGMENT_X
         ));
 
-        controls.addAll(Control.get(provider, ModelComponentType.WHISTLE_CONTROL_X));
         whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
 
         chimney = SteamChimney.get(provider);

@@ -24,9 +24,15 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     }
 
     @Override
-    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE));
+    protected void parseControllable(ComponentProvider provider, EntityRollingStockDefinition def) {
+        super.parseControllable(provider, def);
+        addGauge(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE);
+        addControl(provider, ModelComponentType.ENGINE_START_X);
+        addControl(provider, ModelComponentType.HORN_CONTROL_X);
+    }
 
+    @Override
+    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         components = provider.parse(
                 ModelComponentType.FUEL_TANK,
                 ModelComponentType.ALTERNATOR,
@@ -45,9 +51,6 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                         ModelComponentType.DRIVE_SHAFT_X
                 )
         );
-
-        controls.addAll(Control.get(provider, ModelComponentType.ENGINE_START_X));
-        controls.addAll(Control.get(provider, ModelComponentType.HORN_CONTROL_X));
 
         exhaust = DieselExhaust.get(provider);
         horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());

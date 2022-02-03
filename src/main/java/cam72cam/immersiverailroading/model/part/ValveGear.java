@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.ValveGearType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -10,7 +12,7 @@ public interface ValveGear {
 
     void effects(EntityMoveableRollingStock stock, float throttle);
 
-    static ValveGear get(WheelSet wheels, ValveGearType type, ComponentProvider provider, String pos, float angleOffset) {
+    static ValveGear get(WheelSet wheels, ValveGearType type, ComponentProvider provider, ModelPosition pos, float angleOffset) {
         if (type == null) {
             return null;
         }
