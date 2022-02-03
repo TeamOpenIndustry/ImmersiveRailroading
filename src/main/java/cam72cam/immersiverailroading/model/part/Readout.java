@@ -13,11 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     private final Map<UUID, Float> positions = new HashMap<>();
     private final Function<T, Float> position;
+    private final float rangeMin;
+    private final float rangeMax;
 
     public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, Readouts value) {
         return provider.parseAll(type).stream().map(p -> new Readout<>(p, (Function<T, Float>) value::getValue, null)).collect(Collectors.toList());
@@ -30,6 +34,19 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     public Readout(ModelComponent part, Function<T, Float> position, Function<T, Matrix4> loc) {
         super(part, loc);
         this.position = position;
+
+        float min = 0;
+        float max = 1;
+        Pattern pattern = Pattern.compile("_RANGE_([^_]*)_([^_]*)");
+        for (String modelID : part.modelIDs) {
+            Matcher matcher = pattern.matcher(modelID);
+            while (matcher.find()) {
+                min = Float.parseFloat(matcher.group(1));
+                max = Float.parseFloat(matcher.group(2));
+            }
+        }
+        rangeMin = min;
+        rangeMax = max;
     }
 
     @Override
@@ -41,6 +58,7 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     @Override
     public float getValue(T stock) {
         float pos = positions.getOrDefault(stock.getUUID(), 0f) + offset;
+        pos = Math.min(1, Math.max(0, (pos - rangeMin) / (rangeMax - rangeMin)));
         return invert ? 1 - pos : pos;
     }
 }
