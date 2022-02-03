@@ -72,12 +72,16 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     protected void addGauge(ComponentProvider provider, ModelComponentType type, Readouts value) {
         gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.BOGEY_FRONT, value, this::getFrontBogeyMatrix));
         gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.BOGEY_REAR, value, this::getRearBogeyMatrix));
+        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.FRONT, value, null));
+        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.REAR, value, null));
         gauges.addAll(Readout.getReadouts(provider, type, value));
     }
 
     protected void addControl(ComponentProvider provider, ModelComponentType type) {
         controls.addAll(Control.get(provider, type, ModelPosition.BOGEY_FRONT, this::getFrontBogeyMatrix));
         controls.addAll(Control.get(provider, type, ModelPosition.BOGEY_REAR, this::getRearBogeyMatrix));
+        controls.addAll(Control.get(provider, type, ModelPosition.FRONT, null));
+        controls.addAll(Control.get(provider, type, ModelPosition.REAR, null));
         controls.addAll(Control.get(provider, type));
     }
 
