@@ -144,7 +144,7 @@ public class Control<T extends EntityMoveableRollingStock>  {
         }
 
 
-        if (rotationPoint == null && translations.isEmpty() && scales.isEmpty()) {
+        if (rotationPoint == null && translations.isEmpty() && scales.isEmpty() && location == null) {
             draw.render(part);
             return;
         }
