@@ -57,8 +57,9 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
 
     @Override
     public float getValue(T stock) {
-        float pos = positions.getOrDefault(stock.getUUID(), 0f) + offset;
+        float pos = positions.getOrDefault(stock.getUUID(), 0f);
         pos = Math.min(1, Math.max(0, (pos - rangeMin) / (rangeMax - rangeMin)));
+        pos = pos + offset;
         return invert ? 1 - pos : pos;
     }
 }
