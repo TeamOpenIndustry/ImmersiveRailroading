@@ -100,6 +100,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     protected void parseControllable(ComponentProvider provider, EntityRollingStockDefinition def) {
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.BOGEY_FRONT, Readouts.COUPLED_FRONT, this::getFrontBogeyMatrix));
         gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.BOGEY_REAR, Readouts.COUPLED_REAR, this::getRearBogeyMatrix));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.FRONT, Readouts.COUPLED_FRONT, null));
+        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.REAR, Readouts.COUPLED_REAR, null));
+
         addControl(provider, ModelComponentType.COUPLER_ENGAGED_X);
 
         if (def.hasIndependentBrake()) {
