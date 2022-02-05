@@ -1,16 +1,16 @@
 package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.registry.CarPassengerDefinition;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ArmorSlot;
@@ -24,7 +24,9 @@ import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItemRollingStock extends BaseItemRollingStock {
 
@@ -83,7 +85,30 @@ public class ItemRollingStock extends BaseItemRollingStock {
     	return items;
     }
 
-    @Override
+	public List<ItemStack> getCastableComponents(ItemStack stock) {
+		if (!stock.is(IRItems.ITEM_ROLLING_STOCK)) {
+			return Collections.emptyList();
+		}
+		EntityRollingStockDefinition def = new ItemRollingStockComponent.Data(stock).def;
+		Gauge gauge = new ItemRollingStockComponent.Data(stock).gauge;
+		return def.getItemComponents().stream()
+				.filter(c -> !c.isWooden(def) &&
+						(c.crafting == CraftingType.CASTING || c.crafting == CraftingType.CASTING_HAMMER) &&
+						c.getCastCost(def, gauge) != ItemCastingCost.BAD_CAST_COST
+				).map(c -> {
+					ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK_COMPONENT, 1);
+					ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(item);
+					data.def = def;
+					data.gauge = gauge;
+					data.componentType = c;
+					data.rawCast = true;
+					data.write();
+					return item;
+				})
+				.collect(Collectors.toList());
+	}
+
+	@Override
     public List<String> getTooltip(ItemStack stack)
     {
     	List<String> tooltip = new ArrayList<>();

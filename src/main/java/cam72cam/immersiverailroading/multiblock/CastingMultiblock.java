@@ -1,8 +1,13 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemRollingStock;
+import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
+import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.energy.IEnergy;
@@ -20,7 +25,9 @@ import cam72cam.mod.sound.StandardSound;
 import cam72cam.mod.world.World;
 import cam72cam.mod.world.World.ParticleType;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CastingMultiblock extends Multiblock {
 	private static FuzzyProvider STONE = () -> Fuzzy.STONE_BRICK;
@@ -125,16 +132,23 @@ public class CastingMultiblock extends Multiblock {
 			if (craftTe == null) {
 				return false;
 			}
-			if (!outTe.getContainer().get(0).isEmpty()) {
-				if (world.isServer) {
-					world.dropItem(outTe.getContainer().get(0), player.getPosition());
-					outTe.getContainer().set(0, ItemStack.EMPTY);
+			boolean hadItems = false;
+			for (int i = 0; i < outTe.getContainer().getSlotCount(); i++) {
+				if (!outTe.getContainer().get(i).isEmpty()) {
+					hadItems = true;
+					if (world.isServer) {
+						world.dropItem(outTe.getContainer().get(i), player.getPosition());
+						outTe.getContainer().set(i, ItemStack.EMPTY);
+					}
 				}
-			} else {
-				if (world.isClient) {
-					Vec3i pos = getPos(craft);
-					GuiTypes.CASTING.open(player, pos);
-				}
+			}
+			if (hadItems) {
+				return true;
+			}
+
+			if (world.isClient) {
+				Vec3i pos = getPos(craft);
+				GuiTypes.CASTING.open(player, pos);
 			}
 			return true;
 		}
@@ -146,7 +160,7 @@ public class CastingMultiblock extends Multiblock {
 
 		@Override
 		public int getInvSize(Vec3i offset) {
-			return output.equals(offset) ? 1 : 0;
+			return output.equals(offset) ? 128 : 0;
 		}
 
 		@Override
@@ -238,25 +252,37 @@ public class CastingMultiblock extends Multiblock {
 					return;
 				}
 
-				if (! outTe.getContainer().get(0).isEmpty()) {
-					return;
+				for (int i = 0; i < outTe.getContainer().getSlotCount(); i++) {
+					if (!outTe.getContainer().get(i).isEmpty()) {
+						return;
+					}
+				}
+
+				List<ItemStack> items;
+				if (item.is(IRItems.ITEM_ROLLING_STOCK)) {
+					items = IRItems.ITEM_ROLLING_STOCK.getCastableComponents(item);
+				} else {
+					if (ItemCastingCost.getCastCost(item) == ItemCastingCost.BAD_CAST_COST) {
+						return;
+					}
+					items = new ArrayList<>();
+					items.add(item);
 				}
 				
-				int cost = ItemCastingCost.getCastCost(item);
-				if (cost == ItemCastingCost.BAD_CAST_COST) {
-					return;
-				}
-				
+				int cost = items.stream().mapToInt(ItemCastingCost::getCastCost).sum();
+
 				if (craftTe.getCraftProgress() >= cost) {
 					craftTe.setCraftProgress(0);
 					if (mode == CraftingMachineMode.SINGLE) {
 						craftTe.setCraftMode(CraftingMachineMode.STOPPED);
 					}
-					ItemStack outputItem = item.copy();
-					if (outputItem.getTagCompound().isEmpty()) {
-						outputItem.clearTagCompound();
+					for (int i = 0; i < items.size(); i++) {
+						ItemStack outputItem = items.get(i).copy();
+						if (outputItem.getTagCompound().isEmpty()) {
+							outputItem.clearTagCompound();
+						}
+						outTe.getContainer().set(i, outputItem);
 					}
-					outTe.getContainer().set(0, outputItem);
 				} else {
 					if (craftTe.getRenderTicks() % 10 == 0) {
 						if (fluidTe.getCraftProgress() > 0) {

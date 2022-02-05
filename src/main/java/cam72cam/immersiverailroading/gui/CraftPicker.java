@@ -84,7 +84,7 @@ public class CraftPicker {
 		stockSelector.setItems(stock);
 		
 		itemSelector = new ItemPickerGUI(new ArrayList<>(), this::onItemExit);
-		if (current != null && current.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
+		if (current != null && (current.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT) || current.is(IRItems.ITEM_ROLLING_STOCK))) {
 			itemSelector.choosenItem = current;
 		}
 
@@ -115,6 +115,7 @@ public class CraftPicker {
 	
 	private void setupItemSelector() {
 		List<ItemStack> filteredItems = new ArrayList<>();
+		filteredItems.add(stockSelector.choosenItem);
 		for (ItemStack item : items) {
 			if (isPartOf(stockSelector.choosenItem, item)) {
 				filteredItems.add(item);

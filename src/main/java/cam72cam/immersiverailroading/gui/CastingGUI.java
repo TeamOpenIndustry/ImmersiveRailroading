@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.CraftingType;
@@ -62,7 +63,10 @@ public class CastingGUI implements IScreen {
 				CraftPicker.showCraftPicker(screen, currentItem, CraftingType.CASTING, (ItemStack item) -> {
 					if (item != null) {
 						currentItem = item;
-						EntityRollingStockDefinition def = new ItemRollingStockComponent.Data(currentItem).def;
+						EntityRollingStockDefinition def =
+								currentItem.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT) ?
+										new ItemRollingStockComponent.Data(currentItem).def :
+										new ItemRollingStock.Data(currentItem).def;
 						if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
 							gauge = def.recommended_gauge;
 							gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
@@ -134,9 +138,14 @@ public class CastingGUI implements IScreen {
 	public void draw(IScreenBuilder builder) {
 		double fluidPercent = ((CastingInstance) tile.getMultiblock()).getSteelLevel();
 		int progress = this.tile.getCraftProgress();
-		float cost = ItemCastingCost.getCastCost(currentItem);
-		if(cost == ItemCastingCost.BAD_CAST_COST) {
-			cost = 0;
+		float cost;
+		if (currentItem.is(IRItems.ITEM_ROLLING_STOCK)) {
+			cost = IRItems.ITEM_ROLLING_STOCK.getCastableComponents(currentItem).stream().mapToInt(ItemCastingCost::getCastCost).sum();
+		} else {
+			cost = ItemCastingCost.getCastCost(currentItem);
+			if(cost == ItemCastingCost.BAD_CAST_COST) {
+				cost = 0;
+			}
 		}
 
 		builder.drawImage(CASTING_GUI_TEXTURE, -100, 0, 200, 100);
@@ -157,6 +166,10 @@ public class CastingGUI implements IScreen {
 			ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(currentItem);
 			data.gauge = gauge;
 			data.rawCast = true;
+			data.write();
+		} else if (currentItem.is(IRItems.ITEM_ROLLING_STOCK)) {
+			ItemRollingStock.Data data = new ItemRollingStock.Data(currentItem);
+			data.gauge = gauge;
 			data.write();
 		} else {
         	currentItem.clearTagCompound();
