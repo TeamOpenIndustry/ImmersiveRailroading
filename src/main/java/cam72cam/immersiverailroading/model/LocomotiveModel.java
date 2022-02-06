@@ -97,8 +97,6 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
         ValveGearType type = def.getValveGear();
 
-        drivingWheels = DrivingAssembly.get(type, provider, null, 0);
-
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         cargoFront = Cargo.get(provider, ModelPosition.FRONT);
         shellFront = provider.parse(ModelComponentType.FRONT_SHELL);
@@ -108,6 +106,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         cargoRear = Cargo.get(provider, ModelPosition.REAR);
         shellRear = provider.parse(ModelComponentType.REAR_SHELL);
         drivingWheelsRear = DrivingAssembly.get(type, provider, ModelPosition.REAR, 45);
+
+        drivingWheels = DrivingAssembly.get(type, provider, null, 0);
 
         components = provider.parse(
                 new ModelComponentType[]{ModelComponentType.CAB}
