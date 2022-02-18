@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -129,13 +130,17 @@ public class TileRail extends TileRailBase {
 
 		if (tracks == null) {
 			tracks = (info.settings.type == TrackItems.SWITCH ? info.withType(TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			// This is just terrible
+			Vec3i offset = getPos().subtract(tracks.get(0).getPos());
+			tracks = (info.settings.type == TrackItems.SWITCH ? info.withType(TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
 		}
+
 
 		for (TrackBase track : tracks) {
 			Vec3i tpos = track.getPos();
 			total++;
 
-			if (!getWorld().isBlockLoaded(tpos)) {
+			if (!getWorld().isBlockLoaded(tpos) || !(getWorld().isBlock(tpos, IRBlocks.BLOCK_RAIL) || getWorld().isBlock(tpos, IRBlocks.BLOCK_RAIL_GAG))) {
 				return 0;
 			}
 			if (!track.isDownSolid(false)) {
