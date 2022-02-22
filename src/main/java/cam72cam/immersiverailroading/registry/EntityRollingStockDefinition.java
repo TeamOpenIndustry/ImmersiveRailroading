@@ -81,7 +81,7 @@ public abstract class EntityRollingStockDefinition {
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
-    private static final Map<String, LightDefinition> lights = new HashMap<>();
+    private final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
     private boolean isLinearBrakeControl;
     private GuiBuilder overlay;
