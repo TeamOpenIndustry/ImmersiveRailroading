@@ -34,6 +34,7 @@ import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
@@ -70,6 +71,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private int ticksExisted;
 	public boolean blockUpdate;
 	private Gauge augmentGauge;
+	private List<TickableAugment> tickableAugments = new ArrayList<>();
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -526,6 +528,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 		}
 
+		if (this.ticksExisted % Math.max(Config.ConfigDebug.ocPollDelayTicks, 1) == 0 && this.tickableAugments.size() > 0) {
+			for (TickableAugment tickableAugment : tickableAugments) {
+				tickableAugment.update();
+			}
+		}
+
 		if (!canOperate()) {
 			return;
 		}
@@ -978,4 +986,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
     public boolean clacks() {
 		return getParent() != null && getParentTile().clacks();
     }
+
+	public void registerTickableAugments(TickableAugment tickableAugment) {
+		this.tickableAugments.add(tickableAugment);
+	}
+
+	public void unregisterTickableAugments(TickableAugment tickableAugment) {
+		this.tickableAugments.remove(tickableAugment);
+	}
+
 }
