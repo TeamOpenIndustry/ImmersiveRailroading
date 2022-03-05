@@ -9,14 +9,11 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.render.OpenGL;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,6 +105,7 @@ public class TrackExchangerGui implements IScreen {
 				false);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);
+		/*
 		try (OpenGL.With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
 			GL11.glScaled(scale, scale, 1);
@@ -117,6 +115,6 @@ public class TrackExchangerGui implements IScreen {
 			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
 			GL11.glScaled(-scale, scale, 1);
 			GUIHelpers.drawItem(stack, 0, 0);
-		}
+		}*/
 	}
 }

@@ -46,6 +46,7 @@ public abstract class EntityRollingStockDefinition {
 
     public final String defID;
     private final Class<? extends EntityRollingStock> type;
+    public final List<String> itemGroups;
     public Map<String, String> textureNames = null;
     public float dampeningAmount;
     public Gauge recommended_gauge;
@@ -61,7 +62,7 @@ public abstract class EntityRollingStockDefinition {
     private ValveGearType valveGear;
     public float darken;
     public Identifier modelLoc;
-    private StockModel<?> model;
+    protected StockModel<?> model;
     private Vec3d passengerCenter = new Vec3d(0, 0, 0);
     private float bogeyFront;
     private float bogeyRear;
@@ -137,6 +138,7 @@ public abstract class EntityRollingStockDefinition {
         parseJson(data);
 
         this.model = createModel();
+        this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.isParticle(x)).collect(Collectors.toList());
 
         this.renderComponents = new HashMap<>();
         for (ModelComponent component : model.allComponents) {
@@ -413,7 +415,7 @@ public abstract class EntityRollingStockDefinition {
                     .collect(Collectors.toList());
             data = new float[components.size() * xRes * zRes];
 
-            VertexBuffer vb = def.model.vbo.get();
+            VertexBuffer vb = def.model.vbo.buffer.get();
 
             for (int i = 0; i < components.size(); i++) {
                 ModelComponent rc = components.get(i);

@@ -13,7 +13,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
-import org.lwjgl.opengl.GL11;
 
 public class RailBaseModel {
 	public static StandardModel getModel(TileRailBase te) {
@@ -32,7 +31,7 @@ public class RailBaseModel {
 
 		StandardModel model = new StandardModel();
 		if (te instanceof TileRail && ((TileRail) te).info != null) {
-			model.addCustom(() -> {
+			model.addCustom((state, pt) -> {
 				RailInfo info = ((TileRail) te).info;
                 if (info.settings.type == TrackItems.SWITCH) {
                     //TODO render switch and don't render turn
@@ -45,11 +44,7 @@ public class RailBaseModel {
 					}
 				}
 
-
-				Vec3d pos = info.placementInfo.placementPosition;
-				GL11.glTranslated(pos.x, pos.y, pos.z);
-
-                RailBuilderRender.renderRailBuilder(info, te.getWorld());
+                RailBuilderRender.renderRailBuilder(info, te.getWorld(), state.translate(info.placementInfo.placementPosition));
 			});
 		}
 

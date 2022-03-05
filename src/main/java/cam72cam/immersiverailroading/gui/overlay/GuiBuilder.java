@@ -1,16 +1,20 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
-import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.mod.render.opengl.LegacyRenderContext;
+import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
-import util.Matrix4;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -144,17 +148,16 @@ public class GuiBuilder {
     }
 
     public void render(EntityRollingStock stock) {
-        GL11.glColor4f(1, 1, 1, 1);
-        render(stock, new Matrix4(), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight());
+        render(stock, new RenderState().color(1, 1, 1, 1), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight());
     }
-    private void render(EntityRollingStock stock, Matrix4 m, int maxx, int maxy) {
-        m = m.copy(); // TODO mem opt?
-        m.translate(x, y, 0);
+    private void render(EntityRollingStock stock, RenderState state, int maxx, int maxy) {
+        state = state.clone(); // TODO mem opt?
+        state.model_view().translate(x, y, 0);
         if (centerx) {
-            m.translate(maxx/2f, 0, 0);
+            state.model_view().translate(maxx/2f, 0, 0);
         }
         if (centery) {
-            m.translate(0, maxy/2f, 0);
+            state.model_view().translate(0, maxy/2f, 0);
         }
 
         float value = 0;
@@ -172,23 +175,23 @@ public class GuiBuilder {
         }
 
         if (tlx != 0 || tly != 0) {
-            m.translate(tlx * value, tly * value, 0);
+            state.model_view().translate(tlx * value, tly * value, 0);
         }
         if (rotdeg != 0) {
-            m.translate(rotx, roty, 0);
-            m.rotate(Math.toRadians(rotdeg * value + rotoff), 0, 0, 1);
-            m.translate(-rotx, -roty, 0);
+            state.model_view().translate(rotx, roty, 0);
+            state.model_view().rotate(Math.toRadians(rotdeg * value + rotoff), 0, 0, 1);
+            state.model_view().translate(-rotx, -roty, 0);
         }
         if (scalex != null || scaley != null) {
-            m.scale(scalex != null ? scalex * value : 1, scaley != null ? scaley * value : 1, 1);
+            state.model_view().scale(scalex != null ? scalex * value : 1, scaley != null ? scaley * value : 1, 1);
         }
 
-        Vec3d offset = m.apply(Vec3d.ZERO);
+        Vec3d offset = state.model_view().apply(Vec3d.ZERO);
         if (offset.x < 0) {
-            m.translate(maxx, 0, 0);
+            state.model_view().translate(maxx, 0, 0);
         }
         if (offset.y < 0) {
-            m.translate(0, maxy, 0);
+            state.model_view().translate(0, maxy, 0);
         }
 
         Float colorKey = null;
@@ -199,54 +202,46 @@ public class GuiBuilder {
         }
 
         int col = colors.getOrDefault(colorKey, 0xFFFFFFFF);
-        try (OpenGL.With c = colorKey == null ?
-                () -> {} :
-                OpenGL.color((col >> 16 & 255) / 255.0f, (col >> 8 & 255) / 255.0f, (col & 255) / 255.0f, (col >> 24 & 255) / 255.0f)
-        ) {
-            try (OpenGL.With matrix = OpenGL.matrix()) {
-                m.transpose();
-                OpenGL.multMatrix(m);
-                m.transpose();
+        if (colorKey != null) {
+            state.color((col >> 16 & 255) / 255.0f, (col >> 8 & 255) / 255.0f, (col & 255) / 255.0f, (col >> 24 & 255) / 255.0f);
+        }
 
-                if (image != null) {
-                    try (
-                            OpenGL.With tex = OpenGL.texture(image);
-                            OpenGL.With alpha = OpenGL.bool(GL11.GL_ALPHA_TEST, false);
-                            OpenGL.With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
-                    ) {
-                        GL11.glBegin(GL11.GL_QUADS);
-                        GL11.glTexCoord2d(0, 0);
-                        GL11.glVertex3d(0, 0, 0);
-                        GL11.glTexCoord2d(0, 1);
-                        GL11.glVertex3d(0, imageHeight, 0);
-                        GL11.glTexCoord2d(1, 1);
-                        GL11.glVertex3d(imageWidth, imageHeight, 0);
-                        GL11.glTexCoord2d(1, 0);
-                        GL11.glVertex3d(imageWidth, 0, 0);
-                        GL11.glEnd();
-                    }
-                }
-                if (text != null) {
-                    String out = text;
-                    for (Stat stat : Stat.values()) {
-                        if (out.contains(stat.toString())) {
-                            out = out.replace(stat.toString(), stat.getValue(stock));
-                        }
-                    }
-                    for (GuiText label : new GuiText[]{GuiText.LABEL_THROTTLE, GuiText.LABEL_REVERSER, GuiText.LABEL_BRAKE}) {
-                        out = out.replace(label.getValue(), label.toString());
-                    }
-                    // Text is 8px tall
-                    try (OpenGL.With textmatrix = OpenGL.matrix()) {
-                        float scale = textHeight / 8f;
-                        GL11.glScalef(scale, scale, scale);
-                        GUIHelpers.drawCenteredString(out, 0, 0, col);
-                    }
+        if (image != null) {
+            try (OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state.clone()
+                            .texture(new Texture(image))
+                            .alpha_test(false)
+                            .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA))
+            )) {
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glTexCoord2d(0, 0);
+                GL11.glVertex3d(0, 0, 0);
+                GL11.glTexCoord2d(0, 1);
+                GL11.glVertex3d(0, imageHeight, 0);
+                GL11.glTexCoord2d(1, 1);
+                GL11.glVertex3d(imageWidth, imageHeight, 0);
+                GL11.glTexCoord2d(1, 0);
+                GL11.glVertex3d(imageWidth, 0, 0);
+                GL11.glEnd();
+            }
+        }
+        if (text != null) {
+            String out = text;
+            for (Stat stat : Stat.values()) {
+                if (out.contains(stat.toString())) {
+                    out = out.replace(stat.toString(), stat.getValue(stock));
                 }
             }
-            for (GuiBuilder element : elements) {
-                element.render(stock, m, maxx, maxy);
+            for (GuiText label : new GuiText[]{GuiText.LABEL_THROTTLE, GuiText.LABEL_REVERSER, GuiText.LABEL_BRAKE}) {
+                out = out.replace(label.getValue(), label.toString());
             }
+            // Text is 8px tall
+            float scale = textHeight / 8f;
+            try (OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state.clone().scale(scale, scale, scale))) {
+                GUIHelpers.drawCenteredString(out, 0, 0, col);
+            }
+        }
+        for (GuiBuilder element : elements) {
+            element.render(stock, state, maxx, maxy);
         }
     }
 }

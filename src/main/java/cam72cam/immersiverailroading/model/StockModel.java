@@ -10,12 +10,9 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.mod.model.obj.OBJModel;
-import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.mod.render.obj.OBJVBO;
-import org.lwjgl.opengl.GL11;
+import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
 import java.util.ArrayList;
@@ -41,6 +38,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private final boolean hasInterior;
 
     public StockModel(EntityRollingStockDefinition def) throws Exception {
+        //TODO BORK BORK BORK ConfigGraphics.textureCacheSeconds
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet());
         this.def = def;
         this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
@@ -152,33 +150,33 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         headlights.forEach(x -> x.removed(stock));
     }
 
-    public final void render(EntityMoveableRollingStock stock, float partialTicks) {
-        OBJRender render = StockRenderCache.getRender(def.defID);
-
+    public final void render(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
         List<ModelComponentType> available = stock.isBuilt() ? null : stock.getItemComponents()
                 .stream().flatMap(x -> x.render.stream())
                 .collect(Collectors.toList());
 
+        state.lighting(true)
+                .cull_face(false)
+                .rescale_normal(true)
+                .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
+
         try (
-                OBJVBO.BoundOBJVBO bound = render.bind();
-                OpenGL.With tex = render.bindTexture(stock.getTexture());
-                OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, true);
-                OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
-                OpenGL.With normals = OpenGL.bool(GL11.GL_NORMALIZE, true);
+                OBJRender.Binding bound = binder().texture(stock.getTexture()).bind(state);
         ) {
             double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
 
-            try (ComponentRenderer draw = new ComponentRenderer(stock, bound, available, hasInterior)) {
-                GL11.glScaled(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
+            try (
+                    ComponentRenderer draw = new ComponentRenderer(stock, bound, available, hasInterior)
+            ) {
                 //noinspection unchecked
                 render((T) stock, draw, distanceTraveled);
             }
         }
     }
 
-    public void postRender(EntityMoveableRollingStock stock, float partialTicks) {
-        postRender((T) stock);
+    public void postRender(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
+        postRender((T) stock, state);
     }
 
     private Matrix4 getFrontBogeyMatrix(T stock) {
@@ -239,11 +237,11 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         gauges.forEach(r -> r.render(stock, draw));
     }
 
-    protected void postRender(T stock) {
-        controls.forEach(c -> c.postRender(stock));
-        doors.forEach(c -> c.postRender(stock));
-        gauges.forEach(c -> c.postRender(stock));
-        headlights.forEach(x -> x.postRender(stock));
+    protected void postRender(T stock, RenderState state) {
+        controls.forEach(c -> c.postRender(stock, state));
+        doors.forEach(c -> c.postRender(stock, state));
+        gauges.forEach(c -> c.postRender(stock, state));
+        headlights.forEach(x -> x.postRender(stock, state));
     }
 
     public List<Control<T>> getControls() {

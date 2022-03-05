@@ -14,29 +14,28 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.ItemRender;
-import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
 
 public class TrackExchangerModel implements ItemRender.IItemModel {
-	private static OBJRender RENDERER;
+	private static OBJModel MODEL;
 
 	@Override
 	public StandardModel getModel(World world, ItemStack stack) {
-		if(RENDERER == null){
+		if(MODEL == null){
 			try {
-				RENDERER = new OBJRender(new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), -0.05f, null));
+				MODEL = new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), -0.05f, null);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		return new StandardModel().addCustom(() -> TrackExchangerModel.render(stack, world));
+		return new StandardModel().addCustom((state, pt) -> TrackExchangerModel.render(stack, world, state));
 	}
 
-	public static void render(ItemStack stack, World world) {
+	public static void render(ItemStack stack, World world, RenderState state) {
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		RailInfo info = new RailInfo(
                 new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false),
@@ -56,64 +55,60 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			}
 		}
 
-		try (OpenGL.With tex = RENDERER.bindTexture()) {
-			RENDERER.draw();
+		try (OBJRender.Binding vbo = MODEL.binder().bind(state)) {
+			vbo.draw();
 		}
 
-		try (
-				OpenGL.With matrix = OpenGL.matrix();
-				OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
-		) {
-			GL11.glScaled(0.01, 0.01, 0.01);
-			GL11.glRotated(90, 1, 0, 0);
+		state.lighting(false);
+		state.scale(0.01, 0.01, 0.01);
+		state.rotate(90, 1, 0, 0);
 
-			GL11.glTranslated(-15.15, 0.75, -8.75);
-			RailBaseRender.draw(info, world);
-			RailBuilderRender.renderRailBuilder(info, world);
+		state.translate(-15.15, 0.75, -8.75);
+		RailBaseRender.draw(info, world, state);
+		RailBuilderRender.renderRailBuilder(info, world, state);
 
-			if (lookInfo != null) {
-				GL11.glTranslated(-22.05, 0, 0);
-				RailBaseRender.draw(lookInfo, world);
-				RailBuilderRender.renderRailBuilder(lookInfo, world);
-			}
+		if (lookInfo != null) {
+			state.translate(-22.05, 0, 0);
+			RailBaseRender.draw(lookInfo, world, state);
+			RailBuilderRender.renderRailBuilder(lookInfo, world, state);
 		}
 	}
 
 	@Override
-	public void applyTransform(ItemRender.ItemRenderType type) {
+	public void applyTransform(ItemRender.ItemRenderType type, RenderState state) {
 		switch (type) {
 			case THIRD_PERSON_LEFT_HAND:
-				GL11.glTranslated(1.15, 0.5, 0.5);
-				GL11.glScaled(1.5, 1.5, 1.5);
+				state.translate(1.15, 0.5, 0.5);
+				state.scale(1.5, 1.5, 1.5);
 				break;
 			case THIRD_PERSON_RIGHT_HAND:
-				GL11.glTranslated(0.5, 0.5, 0.5);
-				GL11.glScaled(1.5, 1.5, 1.5);
+				state.translate(0.5, 0.5, 0.5);
+				state.scale(1.5, 1.5, 1.5);
 				break;
 			case FIRST_PERSON_LEFT_HAND:
-				GL11.glRotated(20, 0, 1, 0);
-				GL11.glTranslated(0.7, 0.8, 0.7);
-				GL11.glScaled(1.5, 1.5, 1.5);
+				state.rotate(20, 0, 1, 0);
+				state.translate(0.7, 0.8, 0.7);
+				state.scale(1.5, 1.5, 1.5);
 				break;
 			case FIRST_PERSON_RIGHT_HAND:
-				GL11.glRotated(-20, 0, 1, 0);
-				GL11.glTranslated(0.8, 0.8, 0.5);
-				GL11.glScaled(1.5, 1.5, 1.5);
+				state.rotate(-20, 0, 1, 0);
+				state.translate(0.8, 0.8, 0.5);
+				state.scale(1.5, 1.5, 1.5);
 				break;
 			case ENTITY:
-				GL11.glTranslated(1, 0.4, 0.5);
-				GL11.glRotated(-90, 1, 0, 0);
-				GL11.glScaled(2, 2, 2);
+				state.translate(1, 0.4, 0.5);
+				state.rotate(-90, 1, 0, 0);
+				state.scale(2, 2, 2);
 				break;
 			case FRAME:
-				GL11.glRotated(180, 1, 0, 0);
-				GL11.glRotated(-135, 0, 0, 1);
-				GL11.glTranslated(0.55, 0.75, -0.55);
-				GL11.glScaled(2.5, 2.5, 2.5);
+				state.rotate(180, 1, 0, 0);
+				state.rotate(-135, 0, 0, 1);
+				state.translate(0.55, 0.75, -0.55);
+				state.scale(2.5, 2.5, 2.5);
 				break;
 			case GUI:
-				GL11.glTranslated(0.95, 0.5, 0);
-				GL11.glScaled(2, 2, 2);
+				state.translate(0.95, 0.5, 0);
+				state.scale(2, 2, 2);
 				break;
 		}
 	}

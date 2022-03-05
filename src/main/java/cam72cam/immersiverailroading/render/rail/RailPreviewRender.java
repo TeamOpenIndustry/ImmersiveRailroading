@@ -6,9 +6,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
-import org.lwjgl.opengl.GL11;
 
 public class RailPreviewRender {
     public static StandardModel render(TileRailPreview te) {
@@ -18,19 +16,19 @@ public class RailPreviewRender {
             return null;
         }
 		StandardModel model = new StandardModel();
-        model.addCustom(() -> {
+        model.addCustom((state, pt) -> {
             MinecraftClient.startProfiler("tile_rail_preview");
-            try (OpenGL.With transparency = OpenGL.transparency(1, 1, 1, 0.7f); OpenGL.With matrix = OpenGL.matrix()) {
+            // TODO BORK BORK BORK try (OpenGL.With transparency = OpenGL.transparency(1, 1, 1, 0.7f); OpenGL.With matrix = OpenGL.matrix()) {
                 if (te.isAboveRails()) {
-                    GL11.glTranslated(0, -1, 0);
+                    state.translate(0, -1, 0);
                 }
                 // Move to specified position
                 Vec3d placementPosition = info.placementInfo.placementPosition;
-                GL11.glTranslated(placementPosition.x, placementPosition.y, placementPosition.z);
+                state.translate(placementPosition.x, placementPosition.y, placementPosition.z);
                 if (!te.isMulti()) {
-                    RailRenderUtil.render(info, te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true);
+                    RailRenderUtil.render(info, te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true, state);
                 }
-            }
+            //}
             MinecraftClient.endProfiler();
 		});
 

@@ -9,21 +9,13 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.LightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.model.obj.ImageUtils;
 import cam72cam.mod.render.Light;
-import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 import util.Matrix4;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -133,7 +125,8 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         return isLightOff(stock) || blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;
     }
 
-    public void postRender(T stock) {
+    public void postRender(T stock, RenderState state) {
+        /*
         if (!textures.containsKey(lightTex)) {
             BufferedImage image;
             try {
@@ -246,6 +239,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
                 GL11.glEnd();
             }
         }
+         */
     }
 
     public void effects(T stock) {

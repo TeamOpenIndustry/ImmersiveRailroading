@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.SmokeParticle;
-import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
@@ -34,6 +33,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.render.*;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
@@ -134,18 +134,18 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				IEntityRender<EntityMoveableRollingStock> stockRender = new IEntityRender<EntityMoveableRollingStock>() {
 					@Override
-					public void render(EntityMoveableRollingStock entity, float partialTicks) {
+					public void render(EntityMoveableRollingStock entity, RenderState state, float partialTicks) {
 						StockModel<?> renderer = entity.getDefinition().getModel();
 						if (renderer != null) {
-							renderer.render(entity, partialTicks);
+							renderer.render(entity, state, partialTicks);
 						}
 					}
 
 					@Override
-					public void postRender(EntityMoveableRollingStock entity, float partialTicks) {
+					public void postRender(EntityMoveableRollingStock entity, RenderState state, float partialTicks) {
 						StockModel<?> renderer = entity.getDefinition().getModel();
 						if (renderer != null) {
-							renderer.postRender(entity, partialTicks);
+							renderer.postRender(entity, state, partialTicks);
 						}
 					}
 				};
@@ -185,7 +185,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 
-				GlobalRender.registerOverlay(pt -> {
+				GlobalRender.registerOverlay((state, pt) -> {
 					Entity riding = MinecraftClient.getPlayer().getRiding();
 					if (!(riding instanceof EntityRollingStock)) {
 						return;
@@ -202,7 +202,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				break;
 			case RELOAD:
 				DefinitionManager.initDefinitions();
-				StockRenderCache.clearRenderCache();
 				break;
 		}
 	}

@@ -14,53 +14,48 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
 
 public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	@Override
 	public StandardModel getModel(World world, ItemStack stack) {
-		return new StandardModel().addCustom(() -> TrackBlueprintItemModel.render(stack, world));
+		return new StandardModel().addCustom((state, pt) -> TrackBlueprintItemModel.render(stack, world, state));
 	}
-	public static void render(ItemStack stack, World world) {
+	public static void render(ItemStack stack, World world, RenderState state) {
 		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
 		info = info.withLength(10);
 
-		try (
-			OpenGL.With matrix = OpenGL.matrix();
-			OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
-			OpenGL.With ligh = OpenGL.bool(GL11.GL_LIGHTING, false);
-		) {
-			if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
-				GL11.glTranslated(0, 0, -0.1 * (info.settings.degrees / 90 * 4));
-			}
+		state.cull_face(false);
+		state.lighting(false);
 
-			GL11.glTranslated(0.5, 0, 0.5);
-
-			GL11.glRotated(-90, 1, 0, 0);
-
-
-			double scale = 0.95 / info.settings.length;
-			if (info.settings.type == TrackItems.CROSSING) {
-				scale = 0.95 / 3;
-			}
-			if (info.settings.type == TrackItems.TURNTABLE) {
-				scale *= 0.25;
-			}
-			GL11.glScaled(-scale, -scale * 2, scale);
-
-			GL11.glTranslated(0.5, 0, 0.5);
-
-			try (OpenGL.With m = OpenGL.matrix()) {
-				GL11.glTranslated(-0.5, 0, -0.5);
-				RailBaseRender.draw(info, world);
-			}
-			RailBuilderRender.renderRailBuilder(info, world);
+		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
+			state.translate(0, 0, -0.1 * (info.settings.degrees / 90 * 4));
 		}
+
+		state.translate(0.5, 0, 0.5);
+
+		state.rotate(-90, 1, 0, 0);
+
+
+		double scale = 0.95 / info.settings.length;
+		if (info.settings.type == TrackItems.CROSSING) {
+			scale = 0.95 / 3;
+		}
+		if (info.settings.type == TrackItems.TURNTABLE) {
+			scale *= 0.25;
+		}
+		state.scale(-scale, -scale * 2, scale);
+
+		state.translate(0.5, 0, 0.5);
+
+		RailBuilderRender.renderRailBuilder(info, world, state);
+		state.translate(-0.5, 0, -0.5);
+		RailBaseRender.draw(info, world, state);
 	}
 
 	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
-	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, float partialTicks) {
+	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, RenderState state, float partialTicks) {
 		Vec3d hit = vec.subtract(pos);
 		World world = player.getWorld();
 
@@ -81,12 +76,12 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			infoCache.put(key, info);
 		}
 
-		try (OpenGL.With with = OpenGL.matrix(); OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.5f)) {
-			Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
-			Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);
-			GL11.glTranslated(offPos.x, offPos.y, offPos.z);
+		//TODO BORK BORK BORK state.tranparency(1,1,1, 0.5f)
 
-			RailRenderUtil.render(info, world, pos, true);
-		}
+		Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
+		Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);
+		state.translate(offPos.x, offPos.y, offPos.z);
+
+		RailRenderUtil.render(info, world, pos, true, state);
 	}
 }

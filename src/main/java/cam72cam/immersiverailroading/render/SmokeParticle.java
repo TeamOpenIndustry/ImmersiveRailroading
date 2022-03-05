@@ -1,18 +1,19 @@
 package cam72cam.immersiverailroading.render;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.GLSLShader;
 import cam72cam.mod.render.Particle;
 import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.mod.render.opengl.LegacyRenderContext;
+import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public class SmokeParticle extends Particle {
 
@@ -48,10 +49,10 @@ public class SmokeParticle extends Particle {
 	}
 
 	@Override
-	public void render(float partialTicks) {
+	public void render(RenderState ctx, float partialTicks) {
 	}
 
-	public static void renderAll(List<SmokeParticle> particles, float partialTicks) {
+	public static void renderAll(List<SmokeParticle> particles, RenderState state, float partialTicks) {
 		if (shader == null) {
 			shader = new GLSLShader(
 					new Identifier(ImmersiveRailroading.MODID, "particles/smoke_vert.c"),
@@ -75,12 +76,14 @@ public class SmokeParticle extends Particle {
 			}
 			GL11.glEndList();
 		}
+
+		state.lighting(false)
+				.cull_face(false)
+				.texture(Texture.NO_TEXTURE)
+				.blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
 		try (
-			OpenGL.With sb = shader.bind();
-			OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
-			OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
-			OpenGL.With tex = OpenGL.bool(GL11.GL_TEXTURE_2D, false);
-			OpenGL.With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				OpenGL.With sb = shader.bind();
+				OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state)
 		) {
 			for (SmokeParticle particle : particles) {
 
@@ -91,31 +94,32 @@ public class SmokeParticle extends Particle {
 				double radius = particle.data.diameter * (Math.sqrt(life) * expansionRate + 1) * 0.5;
 
 				float alpha = (particle.data.thickness + 0.2f) * (1 - (float) Math.sqrt(life));
-				try (OpenGL.With matrix = OpenGL.matrix()) {
-					float darken = 0.9f - particle.data.darken * 0.9f;
+				RenderState matrix = new RenderState();
+				float darken = 0.9f - particle.data.darken * 0.9f;
 
-					shader.paramFloat("ALPHA", alpha);
-					shader.paramFloat("DARKEN", darken, darken, darken);
+				shader.paramFloat("ALPHA", alpha);
+				shader.paramFloat("DARKEN", darken, darken, darken);
 
-					//setPos.accept(particle);
-					GL11.glTranslated(particle.renderX, particle.renderY, particle.renderZ);
+				//setPos.accept(particle);
+				matrix.translate(particle.renderX, particle.renderY, particle.renderZ);
 
-					// Rotate to look at internal
-					particle.lookAtPlayer();
+				// Rotate to look at internal
+				particle.lookAtPlayer(matrix);
 
-					// Apply size
-					GL11.glScaled(radius, radius, radius);
+				// Apply size
+				matrix.scale(radius, radius, radius);
 
-					// Noise Factor
-					GL11.glRotated(particle.rot, 0, 0, 1);
-					GL11.glTranslated(0.5, 0, 0);
-					GL11.glRotated(-particle.rot, 0, 0, 1);
+				// Noise Factor
+				matrix.rotate(particle.rot, 0, 0, 1);
+				matrix.translate(0.5, 0, 0);
+				matrix.rotate(-particle.rot, 0, 0, 1);
 
-					// Spin
-					double angle = particle.ticks + partialTicks;// + 45;
-					GL11.glRotated(angle, 0, 0, 1);
-
-					//Draw
+				// Spin
+				double angle = particle.ticks + partialTicks;// + 45;
+				matrix.rotate(angle, 0, 0, 1);
+				//Draw
+				try (OpenGL.With lc = LegacyRenderContext.INSTANCE.apply(matrix)) {
+					//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 					GL11.glCallList(dl);
 				}
 			}

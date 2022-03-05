@@ -17,6 +17,7 @@ import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.Axis;
@@ -155,7 +156,7 @@ public class Control<T extends EntityMoveableRollingStock>  {
         }
     }
 
-    public void postRender(T stock) {
+    public void postRender(T stock, RenderState state) {
         if (!ConfigGraphics.interactiveComponentsOverlay) {
             return;
         }
@@ -192,7 +193,7 @@ public class Control<T extends EntityMoveableRollingStock>  {
             return;
         }
         Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()), stock).apply(center);
-        String state = "";
+        String labelstate = "";
         float percent = getValue(stock) - offset;
         switch (part.type) {
             case TRAIN_BRAKE_X:
@@ -212,9 +213,9 @@ public class Control<T extends EntityMoveableRollingStock>  {
                     percent *= -2;
                 }
                 if (toggle || press) {
-                    state = percent == 1 ? " (On)" : " (Off)";
+                    labelstate = percent == 1 ? " (On)" : " (Off)";
                 } else {
-                    state = String.format(" (%d%%)", (int)(percent * 100));
+                    labelstate = String.format(" (%d%%)", (int)(percent * 100));
                 }
                 break;
             default:
@@ -222,12 +223,12 @@ public class Control<T extends EntityMoveableRollingStock>  {
                     return;
                 }
                 if (toggle || press) {
-                    state = percent == 1 ? " (On)" : " (Off)";
+                    labelstate = percent == 1 ? " (On)" : " (Off)";
                 } else {
-                    state = String.format(" (%d%%)", (int)(percent * 100));
+                    labelstate = String.format(" (%d%%)", (int)(percent * 100));
                 }
         }
-        GlobalRender.drawText((label != null ? label : formatLabel(part.type)) + state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        GlobalRender.drawText((label != null ? label : formatLabel(part.type)) + labelstate, state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public float getValue(T stock) {
