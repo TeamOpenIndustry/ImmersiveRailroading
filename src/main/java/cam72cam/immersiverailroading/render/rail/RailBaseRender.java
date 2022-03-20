@@ -4,16 +4,22 @@ import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
+import util.Matrix4;
 
 public class RailBaseRender {
 	private static StandardModel getModel(RailInfo info, World world) {
 		StandardModel model = new StandardModel();
 		if (!info.settings.railBed.isEmpty()) {
 			for (TrackBase base : info.getBuilder(world).getTracksForRender()) {
-				model.addItemBlock(info.settings.railBed, new Vec3d(base.getPos()), new Vec3d(1, base.getBedHeight() + 0.1f * (float) info.settings.gauge.scale(), 1));
+				Vec3i basePos = base.getPos();
+				model.addItemBlock(info.settings.railBed, new Matrix4()
+						.translate(basePos.x, basePos.y, basePos.z)
+						.scale(1, base.getBedHeight() + 0.1f * (float) info.settings.gauge.scale(), 1)
+				);
 			}
 		}
 		return model;

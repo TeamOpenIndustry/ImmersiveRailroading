@@ -8,7 +8,10 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
+import org.lwjgl.opengl.GL11;
+import util.Matrix4;
 
 import java.util.Map;
 
@@ -20,7 +23,7 @@ public class MBBlueprintRender {
             return;
         }
 
-        //TODO BORK BORK BORK try (OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.3f)) {
+        state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.3f)).lightmap(15, 15);
         Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
         Vec3d playerPos = player.getPosition();
         Vec3d lastPos = player.getLastTickPos();
@@ -40,7 +43,7 @@ public class MBBlueprintRender {
             }
 
             Vec3i rPos = bpos.subtract(mb.placementPos());
-            model.addItem(renderstack, new Vec3d(rPos.x, rPos.y, rPos.z), new Vec3d(scale,scale,scale));
+            model.addItem(renderstack, new Matrix4().translate(rPos.x, rPos.y, rPos.z).scale(scale,scale,scale));
         }
         model.render(state);
     }

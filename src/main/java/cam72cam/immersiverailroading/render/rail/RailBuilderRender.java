@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.render.opengl.VBO;

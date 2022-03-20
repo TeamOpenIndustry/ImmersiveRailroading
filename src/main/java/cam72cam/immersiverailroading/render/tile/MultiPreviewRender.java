@@ -9,9 +9,11 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.GlobalRender;
+import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.opengl.GL11;
 
 public class MultiPreviewRender {
     private static ExpireableList<Pair<World, Vec3i>, TileRailPreview> previews = new ExpireableList<>();
@@ -21,7 +23,7 @@ public class MultiPreviewRender {
     }
 
     private static void render(RenderState state, float partialTicks) {
-        //TODO BORK BORK BORK try (OpenGL.With transparency = OpenGL.transparency(1,1,1, 0.7f)) {
+        state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(15, 15);
         for (TileRailPreview preview : previews.values()) {
             for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getWorld(), preview.isAboveRails() ? preview.getPos().down() :preview.getPos())).getSubBuilders()) {
                 RailInfo info = builder.info;
@@ -29,8 +31,8 @@ public class MultiPreviewRender {
 
                 if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
                     placementPosition = placementPosition.subtract(GlobalRender.getCameraPos(partialTicks));
-                    state.translate(placementPosition);
-                    RailRenderUtil.render(info, preview.getWorld(), builder.pos, true, state);
+                    RenderState placementState = state.clone().translate(placementPosition);
+                    RailRenderUtil.render(info, preview.getWorld(), builder.pos, true, placementState);
                 }
             }
         }

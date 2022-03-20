@@ -14,8 +14,10 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
+import org.lwjgl.opengl.GL11;
 
 public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	@Override
@@ -76,7 +78,8 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			infoCache.put(key, info);
 		}
 
-		//TODO BORK BORK BORK state.tranparency(1,1,1, 0.5f)
+		state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.5f)).lightmap(15, 15);
+
 
 		Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
 		Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);

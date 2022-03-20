@@ -208,7 +208,7 @@ public class GuiBuilder {
 
         if (image != null) {
             try (OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state.clone()
-                            .texture(new Texture(image))
+                            .texture(Texture.wrap(image))
                             .alpha_test(false)
                             .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA))
             )) {
