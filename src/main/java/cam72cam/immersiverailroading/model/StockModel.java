@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -39,8 +40,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private final boolean hasInterior;
 
     public StockModel(EntityRollingStockDefinition def) throws Exception {
-        //TODO BORK BORK BORK ConfigGraphics.textureCacheSeconds
-        super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet());
+        super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds);
         this.def = def;
         this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
