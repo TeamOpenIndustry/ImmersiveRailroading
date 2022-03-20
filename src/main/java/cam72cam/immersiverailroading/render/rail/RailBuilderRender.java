@@ -2,8 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.render.opengl.VBO;
 import cam72cam.mod.render.obj.OBJRender;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class RailBuilderRender {
-    private static final ExpireableList<String, VBO> cache = new ExpireableList<String, VBO>() {
+    private static final ExpireableMap<String, VBO> cache = new ExpireableMap<String, VBO>() {
         @Override
         public void onRemove(String key, VBO value) {
             value.free();

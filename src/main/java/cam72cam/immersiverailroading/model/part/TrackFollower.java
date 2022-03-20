@@ -1,16 +1,13 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.physics.MovementTrack;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.UUID;
@@ -77,7 +74,7 @@ public class TrackFollower {
     }
 
     public static class TrackFollowers {
-        private final ExpireableList<UUID, TrackFollower> trackers = new ExpireableList<>();
+        private final ExpireableMap<UUID, TrackFollower> trackers = new ExpireableMap<>();
         private final Function<EntityMoveableRollingStock, Vec3d> point;
 
         public TrackFollowers(Function<EntityMoveableRollingStock, Vec3d> point) {

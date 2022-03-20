@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
@@ -130,7 +130,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         }
     }
 
-    ExpireableList<String, ChuffSound> chuffSounds = new ExpireableList<String, ChuffSound>() {
+    ExpireableMap<String, ChuffSound> chuffSounds = new ExpireableMap<String, ChuffSound>() {
         @Override
         public void onRemove(String key, ChuffSound value) {
             value.free();

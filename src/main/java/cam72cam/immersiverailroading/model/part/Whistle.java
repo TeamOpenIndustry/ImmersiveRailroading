@@ -10,7 +10,7 @@ import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.Quilling;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
@@ -165,7 +165,7 @@ public class Whistle {
         }
     }
 
-    private final ExpireableList<UUID, SoundEffects> sounds = new ExpireableList<UUID, SoundEffects>() {
+    private final ExpireableMap<UUID, SoundEffects> sounds = new ExpireableMap<UUID, SoundEffects>() {
         @Override
         public void onRemove(UUID key, SoundEffects value) {
             value.terminate();

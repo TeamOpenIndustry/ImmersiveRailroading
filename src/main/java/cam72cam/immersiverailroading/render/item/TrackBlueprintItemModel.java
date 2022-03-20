@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
@@ -56,7 +56,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		RailBaseRender.draw(info, world, state);
 	}
 
-	private static ExpireableList<String, RailInfo> infoCache = new ExpireableList<>();
+	private static ExpireableMap<String, RailInfo> infoCache = new ExpireableMap<>();
 	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, RenderState state, float partialTicks) {
 		Vec3d hit = vec.subtract(pos);
 		World world = player.getWorld();

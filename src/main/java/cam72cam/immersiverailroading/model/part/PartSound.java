@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.sound.ISound;
 
 import java.util.UUID;
@@ -15,7 +15,7 @@ public class PartSound {
         this.create = create;
     }
 
-    private final ExpireableList<UUID, ISound> sounds = new ExpireableList<UUID, ISound>() {
+    private final ExpireableMap<UUID, ISound> sounds = new ExpireableMap<UUID, ISound>() {
         @Override
         public void onRemove(UUID key, ISound value) {
             value.terminate();

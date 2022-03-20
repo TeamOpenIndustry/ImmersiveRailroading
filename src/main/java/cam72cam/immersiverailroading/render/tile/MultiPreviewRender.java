@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.render.tile;
 
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
@@ -16,7 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 public class MultiPreviewRender {
-    private static ExpireableList<Pair<World, Vec3i>, TileRailPreview> previews = new ExpireableList<>();
+    private static ExpireableMap<Pair<World, Vec3i>, TileRailPreview> previews = new ExpireableMap<>();
 
     static {
         GlobalRender.registerRender(MultiPreviewRender::render);

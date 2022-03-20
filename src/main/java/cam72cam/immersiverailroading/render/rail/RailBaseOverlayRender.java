@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3i;
@@ -10,7 +10,7 @@ import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.world.World;
 
 public class RailBaseOverlayRender {
-	private static final ExpireableList<String, DirectDraw> cache = new ExpireableList<String, DirectDraw>() {
+	private static final ExpireableMap<String, DirectDraw> cache = new ExpireableMap<String, DirectDraw>() {
 		@Override
 		public int lifespan() {
 			return 1;

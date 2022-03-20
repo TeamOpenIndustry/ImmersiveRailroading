@@ -1,9 +1,8 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.RenderState;
@@ -25,7 +24,7 @@ public class RailBaseRender {
 		return model;
 	}
 
-	private static final ExpireableList<String, StandardModel> models = new ExpireableList<>();
+	private static final ExpireableMap<String, StandardModel> models = new ExpireableMap<>();
 	public static void draw(RailInfo info, World world, RenderState state) {
 		StandardModel model = models.get(info.uniqueID);
 		if (model == null) {
