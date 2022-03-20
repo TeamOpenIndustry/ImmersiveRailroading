@@ -198,7 +198,7 @@ public class Whistle {
             double verticalSpeed = 0.8f * stock.gauge.scale();
             double size = 0.3 * (0.8 + smokeMod) * stock.gauge.scale();
 
-            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan, darken, thickness, size));
+            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan, darken, thickness, size, stock.getDefinition().smokeParticleTexture));
         }
     }
 

@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
@@ -84,6 +85,7 @@ public abstract class EntityRollingStockDefinition {
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
     private final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
+    public Identifier smokeParticleTexture;
     private boolean isLinearBrakeControl;
     private GuiBuilder overlay;
     private List<String> extraTooltipInfo;
@@ -327,6 +329,14 @@ public abstract class EntityRollingStockDefinition {
             data.getAsJsonArray("extra_tooltip_info").forEach(jsonElement -> extraTooltipInfo.add(jsonElement.getAsString()));
         } else {
             extraTooltipInfo = Collections.emptyList();
+        }
+
+        smokeParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
+        if (data.has("particles")) {
+            JsonObject particles = data.get("particles").getAsJsonObject();
+            if (particles.has("smoke")) {
+                smokeParticleTexture = new Identifier(particles.get("smoke").getAsJsonObject().get("texture").getAsString());
+            }
         }
     }
 

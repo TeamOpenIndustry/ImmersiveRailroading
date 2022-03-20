@@ -148,7 +148,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
                 accell = 0;
             }
             Vec3d sideMotion = stock.getVelocity().add(VecUtil.fromWrongYaw(accell, stock.getRotationYaw()+90));
-            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale()));
+            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale(), stock.getDefinition().smokeParticleTexture));
         }
 
         if (ConfigSound.soundEnabled && stock instanceof LocomotiveSteam) {

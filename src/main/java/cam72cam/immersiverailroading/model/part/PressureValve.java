@@ -66,7 +66,7 @@ public class PressureValve {
             for (ModelComponent valve : valves) {
                 Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(valve.center.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
                 particlePos = particlePos.subtract(fakeMotion);
-                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * stock.gauge.scale(), fakeMotion.z),40, 0, 0.2f, valve.width() * stock.gauge.scale()));
+                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * stock.gauge.scale(), fakeMotion.z),40, 0, 0.2f, valve.width() * stock.gauge.scale(), stock.getDefinition().smokeParticleTexture));
             }
         }
     }
