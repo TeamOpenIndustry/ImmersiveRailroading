@@ -9,11 +9,16 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.LightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.Light;
+import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.mod.render.opengl.DirectDraw;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
+import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.*;
@@ -27,7 +32,6 @@ import static cam72cam.immersiverailroading.model.ComponentRenderer.lcgPattern;
 public class LightFlare<T extends EntityMoveableRollingStock> {
     private final ModelComponent component;
     private final boolean forward;
-    private static final Map<Identifier, Integer> textures = new HashMap<>();
     private final Map<UUID, List<Light>> castLights = new HashMap<>();
     private final Map<UUID, List<Vec3d>> castPositions = new HashMap<>();
     private final float red;
@@ -126,31 +130,8 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
     }
 
     public void postRender(T stock, RenderState state) {
-        /*
-        if (!textures.containsKey(lightTex)) {
-            BufferedImage image;
-            try {
-                image = ImageIO.read(lightTex.getLastResourceStream());
-            } catch (IOException e) {
-                throw new RuntimeException(lightTex.toString(), e);
-            }
-            int[] texData = ImageUtils.toRGBA(image);
-            int texId = OpenGL.allocateTexture();
-            try (With tex = OpenGL.texture(texId)) {
-                int width = image.getWidth();
-                int height = image.getHeight();
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-
-                ByteBuffer buffer = ByteBuffer.allocateDirect(texData.length * Integer.BYTES);
-                buffer.asIntBuffer().put(texData);
-
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-            }
-            textures.put(lightTex, texId);
-        }
+        //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         boolean reverse = stock.getCurrentSpeed().minecraft() < 0;
         float red = reverse ? this.redReverse : this.red;
         float green = reverse ? this.greenReverse : this.green;
@@ -178,68 +159,51 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         intensity *= Math.abs(playerOffset.x/(50 * stock.gauge.scale()));
         intensity = Math.min(intensity, 1.5f);
 
-        try (
-                With tex = OpenGL.texture(textures.get(lightTex));
-                With light = OpenGL.shaderActive() ?
-                        OpenGL.lightmap(1, 1) :
-                        OpenGL.bool(GL11.GL_LIGHTING, false).and(OpenGL.lightmap(false));
-                With depth = OpenGL.depth(false);
-                With alpha = OpenGL.bool(GL11.GL_ALPHA_TEST, false);
-                With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)) {
+        state = state.clone()
+                .texture(Texture.wrap(lightTex))
+                .lightmap(1, 1)
+                .depth_test(true)
+                .alpha_test(false).blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
 
-            if (intensity > 0.01) {
-                try (With matrix = OpenGL.matrix()) {
-                    GL11.glTranslated(flareOffset.x - (intensity / 2 * stock.gauge.scale())*(forward ? 3 : -3), flareOffset.y, flareOffset.z);
-                    GL11.glRotated(90, 0, 1, 0);
-                    double scale = Math.max((component.max.z - component.min.z) * 0.5, intensity * 2) * stock.gauge.scale();
-                    GL11.glColor4f(red, green, blue, 1 - (intensity/3f));
-                    GL11.glScaled(scale, scale, scale);
-                    if (!forward) {
-                        GL11.glRotated(180, 0, 1, 0);
-                    }
-
-                    GL11.glBegin(GL11.GL_QUADS);
-                    GL11.glTexCoord2d(0, 0);
-                    GL11.glVertex3d(-1, -1, 0);
-                    GL11.glTexCoord2d(0, 1);
-                    GL11.glVertex3d(-1, 1, 0);
-                    GL11.glTexCoord2d(1, 1);
-                    GL11.glVertex3d(1, 1, 0);
-                    GL11.glTexCoord2d(1, 0);
-                    GL11.glVertex3d(1, -1, 0);
-                    GL11.glEnd();
-                }
+        if (intensity > 0.01) {
+            RenderState matrix = state.clone();
+            matrix.translate(flareOffset.x - (intensity / 2 * stock.gauge.scale())*(forward ? 3 : -3), flareOffset.y, flareOffset.z);
+            matrix.rotate(90, 0, 1, 0);
+            double scale = Math.max((component.max.z - component.min.z) * 0.5, intensity * 2) * stock.gauge.scale();
+            matrix.scale(scale, scale, scale);
+            if (!forward) {
+                matrix.rotate(180, 0, 1, 0);
             }
-            try (With matrix = OpenGL.matrix()) {
-                GL11.glTranslated(flareOffset.x, flareOffset.y, flareOffset.z);
-                GL11.glRotated(90, 0, 1, 0);
-                if (location != null) {
-                    // TODO: This is a shitty hack...
-                    // I'm tired and don't want to fix the headlight code properly at this point
-                    Matrix4 m = location.apply(stock).copy();
-                    m.invert();
-                    OpenGL.multMatrix(m);
-                }
-                GL11.glColor4d(Math.sqrt(red), Math.sqrt(green), Math.sqrt(blue), 1 - (intensity/3f));
-                double scale = (component.max.z - component.min.z) / 1.5 * stock.gauge.scale();
-                GL11.glScaled(scale, scale, scale);
-                if (!forward) {
-                    GL11.glRotated(180, 0, 1, 0);
-                }
 
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glTexCoord2d(0, 0);
-                GL11.glVertex3d(-1, -1, 0);
-                GL11.glTexCoord2d(0, 1);
-                GL11.glVertex3d(-1, 1, 0);
-                GL11.glTexCoord2d(1, 1);
-                GL11.glVertex3d(1, 1, 0);
-                GL11.glTexCoord2d(1, 0);
-                GL11.glVertex3d(1, -1, 0);
-                GL11.glEnd();
-            }
+            matrix.color(red, green, blue, 1 - (intensity/3f));
+
+            DirectDraw buffer = new DirectDraw();
+            buffer.vertex(-1, -1, 0).uv(0, 0);
+            buffer.vertex(-1, 1, 0).uv(0, 1);
+            buffer.vertex(1, 1, 0).uv(1, 1);
+            buffer.vertex(1, -1, 0).uv(1, 0);
+            buffer.draw(matrix);
         }
-         */
+
+        RenderState matrix = state.clone();
+        matrix.translate(flareOffset.x, flareOffset.y, flareOffset.z);
+        matrix.rotate(90, 0, 1, 0);
+        if (location != null) {
+            matrix.model_view().multiply(location.apply(stock));
+        }
+        double scale = (component.max.z - component.min.z) / 1.5 * stock.gauge.scale();
+        matrix.scale(scale, scale, scale);
+        if (!forward) {
+            matrix.rotate(180, 0, 1, 0);
+        }
+        matrix.color((float)Math.sqrt(red), (float)Math.sqrt(green), (float)Math.sqrt(blue), 1 - (intensity/3f));
+
+        DirectDraw buffer = new DirectDraw();
+        buffer.vertex(-1, -1, 0).uv(0, 0);
+        buffer.vertex(-1, 1, 0).uv(0, 1);
+        buffer.vertex(1, 1, 0).uv(1, 1);
+        buffer.vertex(1, -1, 0).uv(1, 0);
+        buffer.draw(matrix);
     }
 
     public void effects(T stock) {

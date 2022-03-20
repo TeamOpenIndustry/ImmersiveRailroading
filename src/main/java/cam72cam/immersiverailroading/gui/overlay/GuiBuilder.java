@@ -4,11 +4,8 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.render.opengl.*;
 import cam72cam.mod.util.With;
-import cam72cam.mod.render.opengl.BlendMode;
-import cam72cam.mod.render.opengl.LegacyRenderContext;
-import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -206,22 +203,16 @@ public class GuiBuilder {
         }
 
         if (image != null) {
-            try (With ctx = LegacyRenderContext.INSTANCE.apply(state.clone()
-                            .texture(Texture.wrap(image))
-                            .alpha_test(false)
-                            .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA))
-            )) {
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glTexCoord2d(0, 0);
-                GL11.glVertex3d(0, 0, 0);
-                GL11.glTexCoord2d(0, 1);
-                GL11.glVertex3d(0, imageHeight, 0);
-                GL11.glTexCoord2d(1, 1);
-                GL11.glVertex3d(imageWidth, imageHeight, 0);
-                GL11.glTexCoord2d(1, 0);
-                GL11.glVertex3d(imageWidth, 0, 0);
-                GL11.glEnd();
-            }
+            DirectDraw draw = new DirectDraw();
+            draw.vertex(0, 0, 0).uv(0, 0);
+            draw.vertex(0, imageHeight, 0).uv(0, 1);
+            draw.vertex(imageWidth, imageHeight, 0).uv(1, 1);
+            draw.vertex(imageWidth, 0, 0).uv(1, 0);
+            draw.draw(state.clone()
+                    .texture(Texture.wrap(image))
+                    .alpha_test(false)
+                    .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA))
+            );
         }
         if (text != null) {
             String out = text;

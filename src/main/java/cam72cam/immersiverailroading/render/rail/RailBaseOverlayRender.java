@@ -1,18 +1,16 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.render.DisplayListCache;
+import cam72cam.immersiverailroading.render.ExpireableList;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.With;
-import cam72cam.mod.render.opengl.LegacyRenderContext;
+import cam72cam.mod.render.opengl.DirectDraw;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
 
 public class RailBaseOverlayRender {
-	private static DisplayListCache cache = new DisplayListCache() {
+	private static final ExpireableList<String, DirectDraw> cache = new ExpireableList<String, DirectDraw>() {
 		@Override
 		public int lifespan() {
 			return 1;
@@ -23,72 +21,66 @@ public class RailBaseOverlayRender {
 		}
 	};
 
-	private static void doDraw(RailInfo info, World world, Vec3i pos) {
+	private static DirectDraw doDraw(RailInfo info, World world, Vec3i pos) {
+		DirectDraw draw = new DirectDraw();
 		Vec3i placePos = new Vec3i(info.placementInfo.placementPosition).add(pos);
 
 		for (TrackBase base : info.getBuilder(world, placePos).getTracksForRender()) {
 			boolean canPlace = base.canPlaceTrack();
-			if (! canPlace) {
-				GL11.glPushMatrix();
-				{
-					Vec3i tpos = base.getPos();
-					tpos = tpos.subtract(placePos);
-					GL11.glTranslated(tpos.x, tpos.y, tpos.z + 1);
-					GL11.glScaled(1.002, base.getBedHeight() + 0.2f, 1.002);
-					GL11.glTranslated(-0.001, 0, 0.001);
+			if (!canPlace) {
+				Vec3i tpos = base.getPos();
+				tpos = tpos.subtract(placePos);
 
-					GL11.glBegin(GL11.GL_QUADS);
-					// front
-					GL11.glVertex3f(0.0f, 0.0f, 0.0f);
-					GL11.glVertex3f(1.0f, 0.0f, 0.0f);
-					GL11.glVertex3f(1.0f, 1.0f, 0.0f);
-					GL11.glVertex3f(0.0f, 1.0f, 0.0f);
-					// back
-					GL11.glVertex3f(0.0f, 1.0f, -1.0f);
-					GL11.glVertex3f(1.0f, 1.0f, -1.0f);
-					GL11.glVertex3f(1.0f, 0.0f, -1.0f);
-					GL11.glVertex3f(0.0f, 0.0f, -1.0f);
-					// right
-					GL11.glVertex3f(1.0f, 0.0f, 0.0f);
-					GL11.glVertex3f(1.0f, 0.0f, -1.0f);
-					GL11.glVertex3f(1.0f, 1.0f, -1.0f);
-					GL11.glVertex3f(1.0f, 1.0f, 0.0f);
-					// left
-					GL11.glVertex3f(0.0f, 1.0f, 0.0f);
-					GL11.glVertex3f(0.0f, 1.0f, -1.0f);
-					GL11.glVertex3f(0.0f, 0.0f, -1.0f);
-					GL11.glVertex3f(0.0f, 0.0f, 0.0f);
-					// top
-					GL11.glVertex3f(0.0f, 1.0f, 0.0f);
-					GL11.glVertex3f(1.0f, 1.0f, 0.0f);
-					GL11.glVertex3f(1.0f, 1.0f, -1.0f);
-					GL11.glVertex3f(0.0f, 1.0f, -1.0f);
-					// bottom
-					GL11.glVertex3f(0.0f, 0.0f, 0.0f);
-					GL11.glVertex3f(1.0f, 0.0f, 0.0f);
-					GL11.glVertex3f(1.0f, 0.0f, -1.0f);
-					GL11.glVertex3f(0.0f, 0.0f, -1.0f);
-					GL11.glEnd();
-				}
-				GL11.glPopMatrix();
+				double width = 1.002;
+				double height = base.getBedHeight() + 0.2f;
+				double x = tpos.x + -0.001;
+				double y = tpos.y;
+				double z = tpos.z + 0.001 + 1;
+
+				// front
+				draw.vertex(x + 0.0f, y + 0.0f, z + 0.0f);
+				draw.vertex(x + width, y + 0.0f, z + 0.0f);
+				draw.vertex(x + width, y + height, z + 0.0f);
+				draw.vertex(x + 0.0f, y + height, z + 0.0f);
+				// back
+				draw.vertex(x + 0.0f, y + height, z + -width);
+				draw.vertex(x + width, y + height, z + -width);
+				draw.vertex(x + width, y + 0.0f, z + -width);
+				draw.vertex(x + 0.0f, y + 0.0f, z + -width);
+				// right
+				draw.vertex(x + width, y + 0.0f, z + 0.0f);
+				draw.vertex(x + width, y + 0.0f, z + -width);
+				draw.vertex(x + width, y + height, z + -width);
+				draw.vertex(x + width, y + height, z + 0.0f);
+				// left
+				draw.vertex(x + 0.0f, y + height, z + 0.0f);
+				draw.vertex(x + 0.0f, y + height, z + -width);
+				draw.vertex(x + 0.0f, y + 0.0f, z + -width);
+				draw.vertex(x + 0.0f, y + 0.0f, z + 0.0f);
+				// top
+				draw.vertex(x + 0.0f, y + height, z + 0.0f);
+				draw.vertex(x + width, y + height, z + 0.0f);
+				draw.vertex(x + width, y + height, z + -width);
+				draw.vertex(x + 0.0f, y + height, z + -width);
+				// bottom
+				draw.vertex(x + 0.0f, y + 0.0f, z + 0.0f);
+				draw.vertex(x + width, y + 0.0f, z + 0.0f);
+				draw.vertex(x + width, y + 0.0f, z + -width);
+				draw.vertex(x + 0.0f, y + 0.0f, z + -width);
 			}
 		}
+		return draw;
 	}
 
 	public static void draw(RailInfo info, World world, Vec3i pos, RenderState state) {
 		String key = info.uniqueID + pos.add(new Vec3i(info.placementInfo.placementPosition));
-		Integer displayList = cache.get(key);
-		if (displayList == null) {
-			displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			doDraw(info, world, pos);
-			GL11.glEndList();
-			cache.put(key, displayList);
+		DirectDraw draw = cache.get(key);
+		if (draw == null) {
+			draw = doDraw(info, world, pos);
+			cache.put(key, draw);
 		}
 		state.texture(Texture.NO_TEXTURE);
 		state.color(1, 0, 0, 1);
-		try (With ctx = LegacyRenderContext.INSTANCE.apply(state)) {
-			GL11.glCallList(displayList);
-		}
+		draw.draw(state);
 	}
 }
