@@ -136,7 +136,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
             }
             int[] texData = ImageUtils.toRGBA(image);
             int texId = OpenGL.allocateTexture();
-            try (OpenGL.With tex = OpenGL.texture(texId)) {
+            try (With tex = OpenGL.texture(texId)) {
                 int width = image.getWidth();
                 int height = image.getHeight();
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
@@ -179,16 +179,16 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         intensity = Math.min(intensity, 1.5f);
 
         try (
-                OpenGL.With tex = OpenGL.texture(textures.get(lightTex));
-                OpenGL.With light = OpenGL.shaderActive() ?
+                With tex = OpenGL.texture(textures.get(lightTex));
+                With light = OpenGL.shaderActive() ?
                         OpenGL.lightmap(1, 1) :
                         OpenGL.bool(GL11.GL_LIGHTING, false).and(OpenGL.lightmap(false));
-                OpenGL.With depth = OpenGL.depth(false);
-                OpenGL.With alpha = OpenGL.bool(GL11.GL_ALPHA_TEST, false);
-                OpenGL.With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)) {
+                With depth = OpenGL.depth(false);
+                With alpha = OpenGL.bool(GL11.GL_ALPHA_TEST, false);
+                With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)) {
 
             if (intensity > 0.01) {
-                try (OpenGL.With matrix = OpenGL.matrix()) {
+                try (With matrix = OpenGL.matrix()) {
                     GL11.glTranslated(flareOffset.x - (intensity / 2 * stock.gauge.scale())*(forward ? 3 : -3), flareOffset.y, flareOffset.z);
                     GL11.glRotated(90, 0, 1, 0);
                     double scale = Math.max((component.max.z - component.min.z) * 0.5, intensity * 2) * stock.gauge.scale();
@@ -210,7 +210,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
                     GL11.glEnd();
                 }
             }
-            try (OpenGL.With matrix = OpenGL.matrix()) {
+            try (With matrix = OpenGL.matrix()) {
                 GL11.glTranslated(flareOffset.x, flareOffset.y, flareOffset.z);
                 GL11.glRotated(90, 0, 1, 0);
                 if (location != null) {

@@ -106,12 +106,12 @@ public class TrackExchangerGui implements IScreen {
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);
 		/*
-		try (OpenGL.With matrix = OpenGL.matrix()) {
+		try (With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
 			GL11.glScaled(scale, scale, 1);
 			GUIHelpers.drawItem(stack, 0, 0);
 		}
-		try (OpenGL.With matrix = OpenGL.matrix()) {
+		try (With matrix = OpenGL.matrix()) {
 			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
 			GL11.glScaled(-scale, scale, 1);
 			GUIHelpers.drawItem(stack, 0, 0);

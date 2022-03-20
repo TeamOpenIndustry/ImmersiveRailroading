@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.GLSLShader;
 import cam72cam.mod.render.Particle;
-import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.util.With;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.LegacyRenderContext;
 import cam72cam.mod.render.opengl.RenderState;
@@ -82,8 +82,8 @@ public class SmokeParticle extends Particle {
 				.texture(Texture.NO_TEXTURE)
 				.blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
 		try (
-				OpenGL.With sb = shader.bind();
-				OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state)
+				With sb = shader.bind();
+				With ctx = LegacyRenderContext.INSTANCE.apply(state)
 		) {
 			for (SmokeParticle particle : particles) {
 
@@ -118,7 +118,7 @@ public class SmokeParticle extends Particle {
 				double angle = particle.ticks + partialTicks;// + 45;
 				matrix.rotate(angle, 0, 0, 1);
 				//Draw
-				try (OpenGL.With lc = LegacyRenderContext.INSTANCE.apply(matrix)) {
+				try (With lc = LegacyRenderContext.INSTANCE.apply(matrix)) {
 					//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 					GL11.glCallList(dl);
 				}

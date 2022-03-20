@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.render.DisplayListCache;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.util.With;
 import cam72cam.mod.render.opengl.LegacyRenderContext;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.render.opengl.Texture;
@@ -87,7 +87,7 @@ public class RailBaseOverlayRender {
 		}
 		state.texture(Texture.NO_TEXTURE);
 		state.color(1, 0, 0, 1);
-		try (OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state)) {
+		try (With ctx = LegacyRenderContext.INSTANCE.apply(state)) {
 			GL11.glCallList(displayList);
 		}
 	}

@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.util.With;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.LegacyRenderContext;
 import cam72cam.mod.render.opengl.RenderState;
@@ -13,7 +13,6 @@ import cam72cam.mod.resource.Identifier;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
@@ -207,7 +206,7 @@ public class GuiBuilder {
         }
 
         if (image != null) {
-            try (OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state.clone()
+            try (With ctx = LegacyRenderContext.INSTANCE.apply(state.clone()
                             .texture(Texture.wrap(image))
                             .alpha_test(false)
                             .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA))
@@ -236,7 +235,7 @@ public class GuiBuilder {
             }
             // Text is 8px tall
             float scale = textHeight / 8f;
-            try (OpenGL.With ctx = LegacyRenderContext.INSTANCE.apply(state.clone().scale(scale, scale, scale))) {
+            try (With ctx = LegacyRenderContext.INSTANCE.apply(state.clone().scale(scale, scale, scale))) {
                 GUIHelpers.drawCenteredString(out, 0, 0, col);
             }
         }
