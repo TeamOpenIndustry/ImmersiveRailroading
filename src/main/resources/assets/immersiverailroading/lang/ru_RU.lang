@@ -27,8 +27,8 @@ tile.immersiverailroading:block_steam_hammer.name=Паровой молот
 
 chat.immersiverailroading:stock.built=%s готов к эксплуатации!
 chat.immersiverailroading:stock.dissasembled=%s разобран!
-chat.immersiverailroading:stock.missing=Недостает: %s
-chat.immersiverailroading:stock.invalid=Ошибка В02: ошибка доступа к подвижному составу
+chat.immersiverailroading:stock.missing=Недостает следующих частей подвижного состава: %s
+chat.immersiverailroading:stock.invalid=Ошибка В02: невозможно разместить подвижной состав, данный тип подвижного состава не существует на сервере, так как пакет, в котором он состоит, не установлен на сервере. Проверьте, установили ли Вы этот пакет на сервер
 chat.immersiverailroading:stock.wrong_gauge=Ошибка А07: данный подвижной состав не предназначен для данной колеи!
 chat.immersiverailroading:stock.placement=Ошибка А04: подвижной состав должен быть установлен на прямом участке пути!
 chat.immersiverailroading:brush.no.variants=Ошибка А11: к сожалению, данный подвижной состав не имеет альтернативных вариантов окраски
