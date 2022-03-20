@@ -173,10 +173,6 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 .rescale_normal(true)
                 .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
 
-        state.lightmap(
-                stock.getWorld().getBlockLightLevel(stock.getBlockPosition()),
-                stock.getWorld().getSkyLightLevel(stock.getBlockPosition()));
-
         try (
                 OBJRender.Binding bound = binder().texture(stock.getTexture()).bind(state);
         ) {

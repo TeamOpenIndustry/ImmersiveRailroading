@@ -23,7 +23,7 @@ public class MultiPreviewRender {
     }
 
     private static void render(RenderState state, float partialTicks) {
-        state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(15, 15);
+        state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
         for (TileRailPreview preview : previews.values()) {
             for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getWorld(), preview.isAboveRails() ? preview.getPos().down() :preview.getPos())).getSubBuilders()) {
                 RailInfo info = builder.info;

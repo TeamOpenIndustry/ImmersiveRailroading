@@ -78,7 +78,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			infoCache.put(key, info);
 		}
 
-		state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.5f)).lightmap(15, 15);
+		state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.5f)).lightmap(1, 1);
 
 
 		Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);

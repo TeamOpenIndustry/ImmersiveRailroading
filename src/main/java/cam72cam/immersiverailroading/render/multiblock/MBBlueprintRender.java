@@ -23,7 +23,7 @@ public class MBBlueprintRender {
             return;
         }
 
-        state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.3f)).lightmap(15, 15);
+        state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.3f)).lightmap(1, 1);
         Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
         Vec3d playerPos = player.getPosition();
         Vec3d lastPos = player.getLastTickPos();

@@ -22,7 +22,7 @@ public class RailPreviewRender {
 		StandardModel model = new StandardModel();
         model.addCustom((state, pt) -> {
             MinecraftClient.startProfiler("tile_rail_preview");
-            state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(15, 15);
+            state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
             if (te.isAboveRails()) {
                 state.translate(0, -1, 0);
             }
