@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.lwjgl.opengl.GL11;
+import util.Matrix4;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -226,9 +227,9 @@ public class GuiBuilder {
             }
             // Text is 8px tall
             float scale = textHeight / 8f;
-            try (With ctx = LegacyRenderContext.INSTANCE.apply(state.clone().scale(scale, scale, scale))) {
-                GUIHelpers.drawCenteredString(out, 0, 0, col);
-            }
+            Matrix4 mat = state.model_view().copy();
+            mat.scale(scale, scale, scale);
+            GUIHelpers.drawCenteredString(out, 0, 0, col, mat);
         }
         for (GuiBuilder element : elements) {
             element.render(stock, state, maxx, maxy);
