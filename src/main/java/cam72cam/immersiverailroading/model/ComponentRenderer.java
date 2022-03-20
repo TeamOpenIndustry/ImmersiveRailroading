@@ -7,10 +7,7 @@ import cam72cam.mod.render.obj.OBJRender;
 import util.Matrix4;
 
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -89,6 +86,9 @@ public class ComponentRenderer implements Closeable {
     }
 
     public static final Pattern lcgPattern = Pattern.compile("_LCG_([^_]+)");
+    private static final Map<String, String> lcgCache = new HashMap<>();
+    private static final Map<String, Boolean> linvertCache = new HashMap<>();
+
     private void draw(Collection<String> groups) {
 
         if (interiorLight == null && !fullbright) {
@@ -104,10 +104,22 @@ public class ComponentRenderer implements Closeable {
         List<String> fullBright = fullbright ? new ArrayList<>() : noop;
 
         for (String group : groups) {
-            Matcher matcher = lcgPattern.matcher(group);
-            if (matcher.find()) {
-                boolean invert = group.contains("_LINVERT_") || group.startsWith("LINVERT_") || group.endsWith("_LINVERT");
-                if (stock.getControlPosition(matcher.group(1)) == (invert ? 1 : 0)) {
+            if (!lcgCache.containsKey(group)) {
+                Matcher matcher = lcgPattern.matcher(group);
+                if (matcher.find()) {
+                    lcgCache.put(group, matcher.group(1));
+                } else {
+                    lcgCache.put(group, null);
+                }
+            }
+            String lcg = lcgCache.get(group);
+            if (lcg != null) {
+                Boolean invert = linvertCache.getOrDefault(group, null);
+                if (invert == null) {
+                    invert = group.contains("_LINVERT_") || group.startsWith("LINVERT_") || group.endsWith("_LINVERT");
+                    linvertCache.put(group, invert);
+                }
+                if (stock.getControlPosition(lcg) == (invert ? 1 : 0)) {
                     dark.add(group);
                     continue;
                 }
