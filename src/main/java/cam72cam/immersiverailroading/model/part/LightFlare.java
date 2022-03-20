@@ -163,6 +163,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
                 .texture(Texture.wrap(lightTex))
                 .lightmap(1, 1)
                 .depth_test(true)
+                .depth_mask(false)
                 .alpha_test(false).blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
 
         if (intensity > 0.01) {
