@@ -475,10 +475,13 @@ public abstract class EntityRollingStockDefinition {
 
     private Function<EntityBuildableRollingStock, float[][]> initHeightmap() {
         String key = String.format(
-                "heightmap-%s-%s-%s-%s-%s-%s",
+                "%s-%s-%s-%s-%s-%s",
                 model.hash, frontBounds, rearBounds, widthBounds, heightBounds, renderComponents.size());
         try {
-            ResourceCache<HeightMapData> cache = new ResourceCache<>(modelLoc, key, provider -> new HeightMapData(this));
+            ResourceCache<HeightMapData> cache = new ResourceCache<>(
+                    new Identifier(modelLoc.getDomain(), modelLoc.getPath() + "_heightmap_" + key.hashCode()),
+                    provider -> new HeightMapData(this)
+            );
             Supplier<GenericByteBuffer> data = cache.getResource("data.bin", builder -> new GenericByteBuffer(builder.data));
             Supplier<GenericByteBuffer> meta = cache.getResource("meta.nbt", builder -> {
                 try {

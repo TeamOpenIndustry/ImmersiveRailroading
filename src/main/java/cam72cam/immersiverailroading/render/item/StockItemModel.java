@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -10,6 +11,7 @@ import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 
 public class StockItemModel implements ItemRender.ISpriteItemModel {
@@ -39,14 +41,19 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 	}
 
 	@Override
-	public String getSpriteKey(ItemStack stack) {
+	public Identifier getSpriteKey(ItemStack stack) {
 		ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
 		if (data.def == null) {
 			// Stock pack removed
 			//System.out.println(stack.getTagCompound());
 			return null;
 		}
-		return data.def.defID + data.def.getModel().hash + (!ConfigGraphics.stockItemVariants || data.texture == null ? "" : data.texture);
+		return new Identifier(
+				ImmersiveRailroading.MODID,
+				data.def.defID + "_" +
+						data.def.getModel().hash + "_" +
+						(!ConfigGraphics.stockItemVariants || data.texture == null ? "" : data.texture)
+		);
 	}
 
 	@Override
