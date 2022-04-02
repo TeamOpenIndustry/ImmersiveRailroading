@@ -86,6 +86,7 @@ public abstract class EntityRollingStockDefinition {
     private final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
     public Identifier smokeParticleTexture;
+    public Identifier steamParticleTexture;
     private boolean isLinearBrakeControl;
     private GuiBuilder overlay;
     private List<String> extraTooltipInfo;
@@ -332,10 +333,14 @@ public abstract class EntityRollingStockDefinition {
         }
 
         smokeParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
+        steamParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
         if (data.has("particles")) {
             JsonObject particles = data.get("particles").getAsJsonObject();
             if (particles.has("smoke")) {
                 smokeParticleTexture = new Identifier(particles.get("smoke").getAsJsonObject().get("texture").getAsString());
+            }
+            if (particles.has("steam")) {
+                steamParticleTexture = new Identifier(particles.get("steam").getAsJsonObject().get("texture").getAsString());
             }
         }
     }

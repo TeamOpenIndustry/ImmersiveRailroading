@@ -70,7 +70,7 @@ public class SmokeParticle extends Particle {
 
                 double radius = particle.data.diameter * (Math.sqrt(life) * expansionRate + 1) * 0.5;
 
-                float alpha = (particle.data.thickness + 0.2f) * (1 - (float) Math.sqrt(life));
+                float alpha = (particle.data.thickness + 0.25f) * (1 - (float) Math.sqrt(life));
                 Matrix4 matrix = new Matrix4();
                 float darken = 0.9f - particle.data.darken * 0.9f;
 
