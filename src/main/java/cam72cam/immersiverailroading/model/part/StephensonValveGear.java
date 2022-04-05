@@ -47,7 +47,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
 
         drivenWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
-        centerOfWheels = drivingRod.pos.equals("CENTER") ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
+        centerOfWheels = drivingRod.pos.equals(ModelPosition.CENTER) ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
     }
 
     protected double getStroke(EntityMoveableRollingStock stock, float throttle, int shift, boolean speedLimit) {
