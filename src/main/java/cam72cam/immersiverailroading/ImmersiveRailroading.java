@@ -195,7 +195,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					}
 					EntityRollingStock stock = (EntityRollingStock) riding;
 					if (stock.getDefinition().getOverlay() != null) {
-						stock.getDefinition().getOverlay().render(stock);
+						stock.getDefinition().getOverlay().render(state, stock);
 					}
 				});
 

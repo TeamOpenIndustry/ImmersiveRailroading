@@ -204,8 +204,8 @@ public class GuiBuilder {
         }
     }
 
-    public void render(EntityRollingStock stock) {
-        render(stock, new RenderState().color(1, 1, 1, 1), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight());
+    public void render(RenderState state, EntityRollingStock stock) {
+        render(stock, state.clone().color(1, 1, 1, 1), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight());
     }
 
     private void render(EntityRollingStock stock, RenderState state, int maxx, int maxy) {
