@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -27,6 +28,7 @@ import cam72cam.mod.ModEvent;
 import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.EntityRegistry;
+import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.input.Keyboard.KeyCode;
 import cam72cam.mod.math.Vec3d;
@@ -79,6 +81,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
 				Packet.register(ItemTrackExchangerUpdatePacket::new, PacketDirection.ClientToServer);
 				Packet.register(ClientPartDragging.DragPacket::new, PacketDirection.ClientToServer);
+				Packet.register(GuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
@@ -194,6 +197,21 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					if (stock.getDefinition().getOverlay() != null) {
 						stock.getDefinition().getOverlay().render(stock);
 					}
+				});
+
+				ClientEvents.MOUSE_GUI.subscribe(evt -> {
+					if (!MinecraftClient.isReady()) {
+						return true;
+					}
+					Entity riding = MinecraftClient.getPlayer().getRiding();
+					if (!(riding instanceof EntityRollingStock)) {
+						return true;
+					}
+					EntityRollingStock stock = (EntityRollingStock) riding;
+					if (stock.getDefinition().getOverlay() != null) {
+						return stock.getDefinition().getOverlay().click(evt, stock);
+					}
+					return false;
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);

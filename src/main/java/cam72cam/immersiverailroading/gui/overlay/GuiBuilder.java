@@ -1,12 +1,17 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.net.Packet;
 import cam72cam.mod.render.opengl.*;
-import cam72cam.mod.util.With;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.serialization.TagField;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -144,19 +149,25 @@ public class GuiBuilder {
         return new GuiBuilder(new JsonParser().parse(new InputStreamReader(overlay.getResourceStream())).getAsJsonObject());
     }
 
-    public void render(EntityRollingStock stock) {
-        render(stock, new RenderState().color(1, 1, 1, 1), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight());
-    }
-    private void render(EntityRollingStock stock, RenderState state, int maxx, int maxy) {
-        state = state.clone(); // TODO mem opt?
-        state.model_view().translate(x, y, 0);
+    private void applyPosition(Matrix4 matrix, int maxx, int maxy) {
+        matrix.translate(this.x, this.y, 0);
         if (centerx) {
-            state.model_view().translate(maxx/2f, 0, 0);
+            matrix.translate(maxx/2f, 0, 0);
         }
         if (centery) {
-            state.model_view().translate(0, maxy/2f, 0);
+            matrix.translate(0, maxy/2f, 0);
         }
 
+        Vec3d offset = matrix.apply(Vec3d.ZERO);
+        if (offset.x < 0) {
+            matrix.translate(maxx, 0, 0);
+        }
+        if (offset.y < 0) {
+            matrix.translate(0, maxy, 0);
+        }
+    }
+
+    private float getValue(EntityRollingStock stock) {
         float value = 0;
         if (readout != null) {
             value = readout.getValue(stock);
@@ -167,29 +178,45 @@ public class GuiBuilder {
         if (invert) {
             value = 1 - value;
         }
+
+        return value;
+    }
+
+    private void applyValue(Matrix4 matrix, float value, int maxx, int maxy) {
+        if (tlx != 0 || tly != 0) {
+            matrix.translate(tlx * value, tly * value, 0);
+        }
+        if (rotdeg != 0) {
+            matrix.translate(rotx, roty, 0);
+            matrix.rotate(Math.toRadians(rotdeg * value + rotoff), 0, 0, 1);
+            matrix.translate(-rotx, -roty, 0);
+        }
+        if (scalex != null || scaley != null) {
+            matrix.scale(scalex != null ? scalex * value : 1, scaley != null ? scaley * value : 1, 1);
+        }
+
+        Vec3d offset = matrix.apply(Vec3d.ZERO);
+        if (offset.x < 0) {
+            matrix.translate(maxx, 0, 0);
+        }
+        if (offset.y < 0) {
+            matrix.translate(0, maxy, 0);
+        }
+    }
+
+    public void render(EntityRollingStock stock) {
+        render(stock, new RenderState().color(1, 1, 1, 1), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight());
+    }
+
+    private void render(EntityRollingStock stock, RenderState state, int maxx, int maxy) {
+        float value = getValue(stock);
         if (hide && value != 1) {
             return;
         }
 
-        if (tlx != 0 || tly != 0) {
-            state.model_view().translate(tlx * value, tly * value, 0);
-        }
-        if (rotdeg != 0) {
-            state.model_view().translate(rotx, roty, 0);
-            state.model_view().rotate(Math.toRadians(rotdeg * value + rotoff), 0, 0, 1);
-            state.model_view().translate(-rotx, -roty, 0);
-        }
-        if (scalex != null || scaley != null) {
-            state.model_view().scale(scalex != null ? scalex * value : 1, scaley != null ? scaley * value : 1, 1);
-        }
-
-        Vec3d offset = state.model_view().apply(Vec3d.ZERO);
-        if (offset.x < 0) {
-            state.model_view().translate(maxx, 0, 0);
-        }
-        if (offset.y < 0) {
-            state.model_view().translate(0, maxy, 0);
-        }
+        state = state.clone(); // TODO mem opt?
+        applyPosition(state.model_view(), maxx, maxy);
+        applyValue(state.model_view(), value, maxx, maxy);
 
         Float colorKey = null;
         for (float key : colors.keySet()) {
@@ -233,6 +260,205 @@ public class GuiBuilder {
         }
         for (GuiBuilder element : elements) {
             element.render(stock, state, maxx, maxy);
+        }
+    }
+
+    private GuiBuilder find(EntityRollingStock stock, Matrix4 matrix, int maxx, int maxy, int x, int y) {
+        float value = getValue(stock);
+        /*if (hide && value != 1) {
+            return null;
+        }*/
+        matrix = matrix.copy(); // TODO mem opt?
+        applyPosition(matrix, maxx, maxy);
+        applyValue(matrix, value, maxx, maxy);
+        for (GuiBuilder element : elements) {
+            GuiBuilder found = element.find(stock, matrix, maxx, maxy, x, y);
+            if (found != null) {
+                return found;
+            }
+        }
+
+        if (image != null) {
+            if (control == null) {
+                if (readout == null) {
+                    return null;
+                }
+                switch (readout) {
+                    case THROTTLE:
+                    case REVERSER:
+                    case TRAIN_BRAKE:
+                    case INDEPENDENT_BRAKE:
+                    case COUPLER_FRONT:
+                    case COUPLER_REAR:
+                        break;
+                    default:
+                        return null;
+                }
+            }
+            matrix.invert();
+            Vec3d offset = matrix.apply(new Vec3d(x, y, 0));
+            int border = 2;
+            if (offset.x >= -border && offset.x <= imageWidth + border && offset.y >= -border && offset.y <= imageHeight + border) {
+                return this;
+            }
+        }
+        return null;
+    }
+
+    private boolean hasMovement() {
+        return tlx != 0 || tly != 0 || rotdeg != 0 || scalex != null || scaley != null;
+    }
+
+    private void onMouseMove(EntityRollingStock stock, Matrix4 matrix, GuiBuilder target, int maxx, int maxy, int x, int y) {
+        float value = getValue(stock);
+        matrix = matrix.copy(); // TODO mem opt?
+        applyPosition(matrix, maxx, maxy);
+        Matrix4 preApply = matrix.copy();
+        applyValue(matrix, value, maxx, maxy);
+
+        if (target == this) {
+            // 0 0 imageHeight imageWidth
+
+            float closestValue = value;
+            double closestDelta = 999999;
+
+            for (float checkValue = 0; checkValue <= 1; checkValue += 0.01) {
+                Matrix4 temp = preApply.copy();
+                if (tlx != 0 || tly != 0) {
+                    temp.translate(tlx * checkValue, tly * checkValue, 0);
+                }
+                if (rotdeg != 0) {
+                    temp.translate(rotx, roty, 0);
+                    temp.rotate(Math.toRadians(rotdeg * checkValue + rotoff), 0, 0, 1);
+                    temp.translate(-rotx, -roty, 0);
+                }
+                if (scalex != null || scaley != null) {
+                    temp.scale(scalex != null ? scalex * checkValue : 1, scaley != null ? scaley * checkValue : 1, 1);
+                }
+
+                Vec3d checkMiddle = temp.apply(new Vec3d(1, 1, 1));
+                double delta = checkMiddle.distanceTo(new Vec3d(x, y, 1));
+                if (delta < closestDelta) {
+                    closestDelta = delta;
+                    closestValue = checkValue;
+                }
+            }
+
+            if (closestValue != value) {
+                new ControlChangePacket(stock, readout, control, closestValue).sendToServer();
+            }
+        } else {
+            for (GuiBuilder element : elements) {
+                element.onMouseMove(stock, matrix, target, maxx, maxy, x, y);
+            }
+        }
+    }
+
+    private static GuiBuilder target = null;
+    public boolean click(ClientEvents.MouseGuiEvent event, EntityRollingStock stock) {
+        switch (event.action) {
+            case CLICK:
+                target = find(stock, new Matrix4(), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, GUIHelpers.getScreenHeight() - event.y);
+                return target == null;
+            case RELEASE:
+                if (target != null) {
+                    if (!target.hasMovement()) {
+                        new ControlChangePacket(stock, target.readout, target.control, invert ? target.getValue(stock) : 1 - target.getValue(stock)).sendToServer();
+                    }
+                    target = null;
+                    return false;
+                }
+                break;
+            case MOVE:
+                if (target != null && target.hasMovement()) {
+                    onMouseMove(stock, new Matrix4(), target, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, GUIHelpers.getScreenHeight() - event.y);
+                    return false;
+                }
+                break;
+        }
+        return true;
+    }
+
+    public static class ControlChangePacket extends Packet {
+        @TagField
+        private UUID stockUUID;
+        @TagField(typeHint = Readouts.class)
+        private Readouts readout;
+        @TagField
+        private String controlGroup;
+        @TagField
+        private float value;
+
+        public ControlChangePacket() {
+            super(); // Reflection
+        }
+
+        public ControlChangePacket(EntityRollingStock stock, Readouts readout, String controlGroup, float value) {
+            this.stockUUID = stock.getUUID();
+            this.readout = readout;
+            this.controlGroup = controlGroup;
+            this.value = value;
+        }
+
+        @Override
+        protected void handle() {
+            EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
+            if (stock != null) {
+                // TODO permissions!
+                if (controlGroup != null) {
+                    switch (controlGroup) {
+                        case "REVERSERFORWARD":
+                            readout = Readouts.REVERSER;
+                            value = 1;
+                            break;
+                        case "REVERSERNEUTRAL":
+                            readout = Readouts.REVERSER;
+                            value = 0.5f;
+                            break;
+                        case "REVERSERBACKWARD":
+                            readout = Readouts.REVERSER;
+                            value = 0;
+                            break;
+                        default:
+                            stock.setControlPosition(controlGroup, value);
+                            return;
+                    }
+                }
+                if (readout != null) {
+                    switch (readout) {
+                        case THROTTLE:
+                            if (stock instanceof Locomotive) {
+                                ((Locomotive) stock).setThrottle(value);
+                            }
+                            break;
+                        case REVERSER:
+                            if (stock instanceof Locomotive) {
+                                ((Locomotive) stock).setReverser(value * 2 - 1);
+                            }
+                            break;
+                        case TRAIN_BRAKE:
+                            if (stock instanceof Locomotive) {
+                                ((Locomotive) stock).setTrainBrake(value);
+                            }
+                            break;
+                        case INDEPENDENT_BRAKE:
+                            if (stock instanceof EntityMoveableRollingStock) {
+                                ((Locomotive) stock).setIndependentBrake(value);
+                            }
+                            break;
+                        case COUPLER_FRONT:
+                            if (stock instanceof EntityCoupleableRollingStock) {
+                                ((EntityCoupleableRollingStock) stock).setCouplerEngaged(EntityCoupleableRollingStock.CouplerType.FRONT, value == 0);
+                            }
+                            break;
+                        case COUPLER_REAR:
+                            if (stock instanceof EntityCoupleableRollingStock) {
+                                ((EntityCoupleableRollingStock) stock).setCouplerEngaged(EntityCoupleableRollingStock.CouplerType.BACK, value == 0);
+                            }
+                            break;
+                    }
+                }
+            }
         }
     }
 }
