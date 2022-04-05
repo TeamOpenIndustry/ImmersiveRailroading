@@ -31,19 +31,19 @@ public class SteamChimney {
         Vec3d fakeMotion = stock.getVelocity();
         float exhaust = stock.getThrottle() * Math.abs(stock.getReverser());
         if (emitter != null && ConfigGraphics.particlesEnabled) {
+            float darken = 0;
+            float thickness = exhaust/2;
+            for (int i : stock.getBurnTime().values()) {
+                darken += i >= 1 ? 1 : 0;
+            }
+            if (darken == 0 && Config.isFuelRequired(stock.gauge)) {
+                return;
+            }
+            darken /= stock.getInventorySize() - 2.0;
+            darken *= 0.75;
             for (ModelComponent smoke : emitter) {
                 Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(smoke.center.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
                 particlePos = particlePos.subtract(fakeMotion);
-                float darken = 0;
-                float thickness = exhaust/2;
-                for (int i : stock.getBurnTime().values()) {
-                    darken += i >= 1 ? 1 : 0;
-                }
-                if (darken == 0 && Config.isFuelRequired(stock.gauge)) {
-                    break;
-                }
-                darken /= stock.getInventorySize() - 2.0;
-                darken *= 0.75;
 
                 double smokeMod = Math.min(1, Math.max(0.2, Math.abs(stock.getCurrentSpeed().minecraft())*2));
 
@@ -60,10 +60,7 @@ public class SteamChimney {
                 particlePos = particlePos.subtract(fakeMotion);
                 isSmokeParticle = !isSmokeParticle;
                 Identifier particleTex = isSmokeParticle ? stock.getDefinition().smokeParticleTexture : stock.getDefinition().steamParticleTexture;
-                if (!isSmokeParticle) {
-                    darken = 0;
-                }
-                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size, particleTex));
+                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , isSmokeParticle ? darken : 0, thickness, size, particleTex));
             }
         }
     }
