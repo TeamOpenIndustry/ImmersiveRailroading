@@ -109,19 +109,19 @@ public class LocomotiveDiesel extends Locomotive {
 			case REVERSER_UP:
 			case REVERSER_ZERO:
 			case REVERSER_DOWN:
-				if (this.reverserCooldown <= 0) {
-					reverserCooldown = 3;
+				if (this.reverserCooldown > 0) {
 					return;
 				}
+				reverserCooldown = 3;
 				super.handleKeyPress(source, key);
 				break;
 			case THROTTLE_UP:
 			case THROTTLE_ZERO:
 			case THROTTLE_DOWN:
-				if (this.throttleCooldown <= 0) {
-					throttleCooldown = 3;
+				if (this.throttleCooldown > 0) {
 					return;
 				}
+				throttleCooldown = 5;
 				super.handleKeyPress(source, key);
 				break;
 			default:
