@@ -12,11 +12,11 @@ import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.render.OptiFine;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -156,22 +156,15 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 .stream().flatMap(x -> x.render.stream())
                 .collect(Collectors.toList());
 
-        try {
-            //Class<?> ShaderRenderer = Class.forName("net.optifine.shaders.ShadersRender");
-            //Method beginTerrainSolid = ShaderRenderer.getDeclaredMethod("beginTerrainSolid");
-            //beginTerrainSolid.invoke(ShaderRenderer);
-            //ShaderRenderer.getDeclaredMethod("beginHand", Boolean.class).invoke(false);
-            //Class.forName("net.optifine.shaders.Shaders").getDeclaredMethod("beginHand", boolean.class).invoke(null, false);
-            //Class.forName("net.optifine.shaders.Shaders").getDeclaredMethod("beginLitParticles").invoke(null);
-            //Class.forName("net.optifine.shaders.ShadersRender").getDeclaredMethod("beginTerrainSolid").invoke(null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
         state.lighting(true)
                 .cull_face(false)
                 .rescale_normal(true)
                 .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
+
+        if ((ConfigGraphics.OptifineEntityShaderOverrideAll || !normals.isEmpty() || !speculars.isEmpty()) &&
+                ConfigGraphics.OptiFineEntityShader != OptiFine.Shaders.Entities) {
+            state = state.shader(ConfigGraphics.OptiFineEntityShader);
+        }
 
         try (
                 OBJRender.Binding bound = binder().texture(stock.getTexture()).bind(state);
@@ -185,17 +178,6 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 //noinspection unchecked
                 render((T) stock, draw, distanceTraveled);
             }
-        }
-
-        try {
-            //Class<?> ShaderRenderer = Class.forName("net.optifine.shaders.ShadersRender");
-            //Method endTerrain = ShaderRenderer.getDeclaredMethod("endTerrain");
-            //endTerrain.invoke(ShaderRenderer);
-            //Class.forName("net.optifine.shaders.Shaders").getDeclaredMethod("endHand").invoke(null);
-            //Class.forName("net.optifine.shaders.Shaders").getDeclaredMethod("endParticles").invoke(null);
-            //Class.forName("net.optifine.shaders.ShadersRender").getDeclaredMethod("endTerrain").invoke(null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
