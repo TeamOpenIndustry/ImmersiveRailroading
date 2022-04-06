@@ -380,11 +380,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		
+		boolean moved = false;
 		for (int tickOffset = 1; tickOffset < 30; tickOffset++) {
 			simSpeed = this.getMovement(this.positions.get(tickOffset-1), train);
 			if (isStuck) {
 				simSpeed = Speed.ZERO;
+			}
+			if (!simSpeed.isZero()) {
+				moved = true;
 			}
 			TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + tickOffset - 1);
 			positions.add(pos);
@@ -398,10 +401,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		
-		for (DirectionalStock entity : train) {
-			new MRSSyncPacket(entity.stock, entity.stock.positions).sendToObserving(entity.stock);
-			entity.stock.resimulate = false;
+		if (moved) {
+			for (DirectionalStock entity : train) {
+				new MRSSyncPacket(entity.stock, entity.stock.positions).sendToObserving(entity.stock);
+				entity.stock.resimulate = false;
+			}
 		}
 	}
 
