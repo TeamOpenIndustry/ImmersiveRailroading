@@ -217,9 +217,9 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		setControlPressed(control, true);
 	}
 
-	public void onDrag(Control<?> control, double delta) {
+	public void onDrag(Control<?> control, double newValue) {
 		setControlPressed(control, true);
-		setControlPosition(control, (float)delta + getControlPosition(control));
+		setControlPosition(control, (float)newValue);
 	}
 
 	public void onDragRelease(Control<?> control) {

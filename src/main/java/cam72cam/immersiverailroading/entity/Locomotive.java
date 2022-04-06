@@ -183,8 +183,8 @@ public abstract class Locomotive extends FreightTank {
 		return throttleDelta;
 	}
 
-	public void onDrag(Control<?> component, double delta) {
-		super.onDrag(component, delta);
+	public void onDrag(Control<?> component, double newValue) {
+		super.onDrag(component, newValue);
 		//System.out.println("DRAG " + component + ": "+ getControlPosition(component));
 		switch (component.part.type) {
 			case THROTTLE_X:

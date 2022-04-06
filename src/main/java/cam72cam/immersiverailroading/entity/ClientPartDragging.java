@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ClientPartDragging {
     private EntityRollingStock stock = null;
     private Control<?> component = null;
-    private Float lastDelta = null;
+    private Float lastValue = null;
 
     public static void register() {
         ClientPartDragging dragger = new ClientPartDragging();
@@ -74,7 +74,7 @@ public class ClientPartDragging {
         @TagField
         private String typeKey;
         @TagField
-        private double delta;
+        private double newValue;
         @TagField
         private boolean start;
         @TagField
@@ -83,11 +83,11 @@ public class ClientPartDragging {
         public DragPacket() {
             super(); // Reflection
         }
-        public DragPacket(EntityRollingStock stock, Control<?> type, boolean start, double delta, boolean released) {
+        public DragPacket(EntityRollingStock stock, Control<?> type, boolean start, double newValue, boolean released) {
             this.stockUUID = stock.getUUID();
             this.typeKey = type.part.key;
             this.start = start;
-            this.delta = delta;
+            this.newValue = newValue;
             this.released = released;
         }
         @Override
@@ -102,7 +102,7 @@ public class ClientPartDragging {
             } else if (released) {
                 stock.onDragRelease(control);
             } else {
-                stock.onDrag(control, delta);
+                stock.onDrag(control, newValue);
             }
         }
     }
@@ -114,7 +114,7 @@ public class ClientPartDragging {
                 new DragPacket(stock, component, false, 0, true).sendToServer();
                 stock = null;
                 component = null;
-                lastDelta = null;
+                lastValue = null;
                 return;
             }
 
@@ -122,13 +122,16 @@ public class ClientPartDragging {
                 return;
             }
 
-            float delta = component.clientMovementDelta(MinecraftClient.getPlayer(), stock);
-            if (lastDelta != null && Math.abs(lastDelta - delta) < 0.001) {
+            float newValue = component.clientMovementDelta(MinecraftClient.getPlayer(), stock) + stock.getControlPosition(component);
+            if (lastValue != null && Math.abs(lastValue - newValue) < 0.001) {
                 return;
             }
-            //stock.onDrag(component, delta.x / 1000, delta.y / 1000);
-            new DragPacket(stock, component, false, delta, false).sendToServer();
-            lastDelta = delta;
+
+            // Server will override this, but for now it allows the client to see the active changes.
+            stock.setControlPosition(component, newValue);
+
+            new DragPacket(stock, component, false, newValue, false).sendToServer();
+            lastValue = newValue;
         }
     }
 }
