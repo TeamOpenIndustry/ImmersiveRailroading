@@ -180,7 +180,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         // X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
         // Y: Center of the rod
         // Z: does not really matter due to rotation axis
-        Vec3d drivingRodRotPoint = new Vec3d((reverse ? drivingRod.min.x : drivingRod.max.x) - drivingRod.height()/2, drivingRod.center.y, reverse ? drivingRod.min.z : drivingRod.max.z);
+        Vec3d drivingRodRotPoint = new Vec3d((reverse ? drivingRod.min.x + drivingRod.height()/2 : drivingRod.max.x - drivingRod.height()/2), drivingRod.center.y, reverse ? drivingRod.min.z : drivingRod.max.z);
         // Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
         float drivingRodAngle = (float) Math.toDegrees(Math.atan2((reverse ? -connRodMovment.z : connRodMovment.z), drivingRod.length() - drivingRod.height()));
 
