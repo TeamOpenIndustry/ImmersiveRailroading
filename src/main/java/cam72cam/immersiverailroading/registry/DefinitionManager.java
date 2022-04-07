@@ -29,7 +29,7 @@ public class DefinitionManager {
      * How much memory in bytes does the loading of a stock take.
      * This is used to determine whether loading stock in a multithreaded way is possible.
      */
-    private static final long STOCK_LOAD_MEMORY_PER_PROCESSOR = 512 * 1024 * 1024;
+    private static final long STOCK_LOAD_MEMORY_PER_PROCESSOR = 1024 * 1024 * 1024;
 
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
