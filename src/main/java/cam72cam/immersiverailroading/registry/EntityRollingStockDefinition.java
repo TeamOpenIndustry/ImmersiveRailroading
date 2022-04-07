@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
 
 @TagMapped(EntityRollingStockDefinition.TagMapper.class)
 public abstract class EntityRollingStockDefinition {
+    private static final Identifier DEFAULT_PARTICLE_TEXTURE = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
+
     private static Identifier default_wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
     private static Identifier default_clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
     private static Identifier default_clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
@@ -332,8 +334,8 @@ public abstract class EntityRollingStockDefinition {
             extraTooltipInfo = Collections.emptyList();
         }
 
-        smokeParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
-        steamParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
+        smokeParticleTexture = DEFAULT_PARTICLE_TEXTURE;
+        steamParticleTexture = DEFAULT_PARTICLE_TEXTURE;
         if (data.has("particles")) {
             JsonObject particles = data.get("particles").getAsJsonObject();
             if (particles.has("smoke")) {
