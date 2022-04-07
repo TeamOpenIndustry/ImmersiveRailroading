@@ -386,12 +386,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			if (isStuck) {
 				simSpeed = Speed.ZERO;
 			}
-			if (!simSpeed.isZero()) {
-				moved = true;
-			}
 			TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + tickOffset - 1);
 			positions.add(pos);
-			
+			if (!pos.position.equals(lastPos.position)) {
+				moved = true;
+			}
+
 			for (DirectionalStock stock : train) {
 				if (stock.stock.getUUID().equals(this.getUUID())) {
 					//Skip self
