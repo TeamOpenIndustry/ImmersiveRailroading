@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
 import cam72cam.mod.render.obj.OBJRender;
@@ -39,8 +40,18 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private final TrackFollowers rearTrackers;
     private final boolean hasInterior;
 
+    public static final int LOD_LARGE = 1024;
+    public static final int LOD_MEDIUM = 512;
+    public static final int LOD_SMALL = 128;
+
     public StockModel(EntityRollingStockDefinition def) throws Exception {
-        super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds);
+        super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds, i -> {
+            List<Integer> lodSizes = new ArrayList<>();
+            lodSizes.add(LOD_LARGE);
+            lodSizes.add(LOD_MEDIUM);
+            lodSizes.add(LOD_SMALL);
+            return lodSizes;
+        });
         this.def = def;
         this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
@@ -166,8 +177,19 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             state = state.shader(ConfigGraphics.OptiFineEntityShader);
         }
 
+        Binder binder = binder().texture(stock.getTexture());
+        double playerDistance = stock.getPosition().distanceTo(MinecraftClient.getPlayer().getPosition());
+        if (playerDistance > ConfigGraphics.StockLODDistance) {
+            binder.lod(LOD_LARGE);
+        }
+        if (playerDistance > ConfigGraphics.StockLODDistance * 2) {
+            binder.lod(LOD_MEDIUM);
+        }
+        if (playerDistance > ConfigGraphics.StockLODDistance * 2) {
+            binder.lod(LOD_SMALL);
+        }
         try (
-                OBJRender.Binding bound = binder().texture(stock.getTexture()).bind(state);
+                OBJRender.Binding bound = binder.bind(state);
         ) {
             double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
