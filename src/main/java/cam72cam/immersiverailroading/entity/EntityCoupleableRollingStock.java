@@ -485,13 +485,20 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			distance = -distance;
 		}
 
-		
+
 		TickPos nextPos = this.moveRollingStock(distance, currentPos.tickID);
 		this.positions.add(nextPos);
 		if (nextPos.isOffTrack) {
 			onTrack = false;
 		}
-		
+
+		if (Math.abs(currentPos.speed.metric() - nextPos.speed.metric()) > 5) {
+			TickPos temp = this.moveRollingStock(Speed.fromMetric(1).minecraft(), nextPos.tickID);
+			this.positions.remove(nextPos);
+			nextPos = temp;
+			this.positions.add(nextPos);
+		}
+
 		if (nextPos.speed.metric() != 0) {
 			getWorld().keepLoaded(new Vec3i(nextPos.position));
 			for (CouplerType toChunk : CouplerType.values()) {
