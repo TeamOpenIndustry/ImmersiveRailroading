@@ -140,12 +140,15 @@ public class TileRail extends TileRailBase {
 			Vec3i tpos = track.getPos();
 			total++;
 
-			if (!getWorld().isBlockLoaded(tpos) || !(getWorld().isBlock(tpos, IRBlocks.BLOCK_RAIL) || getWorld().isBlock(tpos, IRBlocks.BLOCK_RAIL_GAG))) {
+			if (!getWorld().isBlockLoaded(tpos) || !((getWorld().isBlock(tpos, IRBlocks.BLOCK_RAIL) || getWorld().isBlock(tpos, IRBlocks.BLOCK_RAIL_GAG)))) {
 				return 0;
 			}
 			if (!track.isDownSolid(false)) {
 				floating++;
 			}
+		}
+		if (floating > 0) {
+			System.out.println(floating / (double)total);
 		}
 		return floating / (double)total;
 	}
