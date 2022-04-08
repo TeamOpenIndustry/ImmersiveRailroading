@@ -135,7 +135,7 @@ public enum ItemComponentType {
 	}
 
 	public int getPlateCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
+		ModelComponent comp = definition.getComponents(this.render).get(0);
 		
 		double mult = 0;
 		switch(this.crafting) {
@@ -178,7 +178,7 @@ public enum ItemComponentType {
 		if (definition == null) {
 			return ItemCastingCost.BAD_CAST_COST;
 		}
-		List<ModelComponent> components = definition.getComponents(this.render.get(0));
+		List<ModelComponent> components = definition.getComponents(this.render);
 		if (components == null) {
 			return ItemCastingCost.BAD_CAST_COST;
 		}
@@ -188,13 +188,13 @@ public enum ItemComponentType {
 	}
 
 	public int getWoodCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
+		ModelComponent comp = definition.getComponents(this.render).get(0);
 		double densityGues = 4;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * Math.pow(gauge.scale(), 3));
 	}
 	
 	public boolean isWooden(EntityRollingStockDefinition definition) {
-		ModelComponent component = definition.getComponents(this.render.get(0)).get(0);
+		ModelComponent component = definition.getComponents(this.render).get(0);
 		return component.wooden;
 	}
 }

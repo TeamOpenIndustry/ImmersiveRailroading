@@ -43,6 +43,9 @@ public class CraftPicker {
 		for (ItemStack item : items) {
 			ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(item);
 			ItemComponentType comp = data.componentType;
+			if (data.def == null) {
+				System.out.println("WTF def is null");
+			}
 			if (comp.isWooden(data.def)) {
 				toRemove.add(item);
 				continue;
