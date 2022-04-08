@@ -147,9 +147,6 @@ public class TileRail extends TileRailBase {
 				floating++;
 			}
 		}
-		if (floating > 0) {
-			System.out.println(floating / (double)total);
-		}
 		return floating / (double)total;
 	}
 
