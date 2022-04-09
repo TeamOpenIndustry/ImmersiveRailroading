@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.render.obj.OBJRender;
+import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.io.Closeable;
@@ -88,77 +89,66 @@ public class ComponentRenderer implements Closeable {
     public static final Pattern lcgPattern = Pattern.compile("_LCG_([^_]+)");
     private static final Map<String, String> lcgCache = new HashMap<>();
     private static final Map<String, Boolean> linvertCache = new HashMap<>();
+    private static final Map<String, Boolean> interiorCache = new HashMap<>();
+    private static final Map<String, Boolean> fullbrightCache = new HashMap<>();
+
+    private boolean hasGroupFlag(String group, String filter) {
+        for (String x : group.split("_")) {
+            if (x.equals(filter)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void draw(Collection<String> groups) {
-
         if (interiorLight == null && !fullbright) {
             // Skip any sort of lighting logic
             vbo.draw(groups, s -> s.model_view().multiply(matrix));
             return;
         }
 
-        List<String> noop = Collections.emptyList();
-        List<String> dark = new ArrayList<>();
-        List<String> exteriorNormal = new ArrayList<>();
-        List<String> interiorNormal = hasInterior ? new ArrayList<>() : noop;
-        List<String> fullBright = fullbright ? new ArrayList<>() : noop;
-
+        Map<Pair<Float, Float>, List<String>> levels = new HashMap<>();
         for (String group : groups) {
             if (!lcgCache.containsKey(group)) {
                 Matcher matcher = lcgPattern.matcher(group);
-                if (matcher.find()) {
-                    lcgCache.put(group, matcher.group(1));
-                } else {
-                    lcgCache.put(group, null);
-                }
+                lcgCache.put(group, matcher.find() ? matcher.group(1) : null);
             }
             String lcg = lcgCache.get(group);
-            if (lcg != null) {
-                Boolean invert = linvertCache.getOrDefault(group, null);
-                if (invert == null) {
-                    invert = group.contains("_LINVERT_") || group.startsWith("LINVERT_") || group.endsWith("_LINVERT");
-                    linvertCache.put(group, invert);
-                }
-                if (stock.getControlPosition(lcg) == (invert ? 1 : 0)) {
-                    dark.add(group);
-                    continue;
+
+            boolean invertGroup = linvertCache.computeIfAbsent(group, g -> hasGroupFlag(g, "LINVERT"));
+            boolean interiorGroup = interiorCache.computeIfAbsent(group, g -> hasGroupFlag(g, "INTERIOR"));
+            boolean fullbrightGroup = fullbrightCache.computeIfAbsent(group, g -> hasGroupFlag(g, "FULLBRIGHT"));
+
+            Float lcgValue = lcg != null ? stock.getControlPosition(lcg) : null;
+            lcgValue = lcgValue == null ? null : invertGroup ? 1 - lcgValue : lcgValue;
+            Pair<Float, Float> key = null;
+
+            if (lcgValue == null || lcgValue > 0) {
+                if (fullbright && fullbrightGroup) {
+                    key = Pair.of(1f, 1f);
+                } else if (interiorLight != null) {
+                    if (!hasInterior || interiorGroup) {
+                        if (lcgValue != null) {
+                            key = Pair.of(interiorLight * lcgValue, skyLight);
+                        } else {
+                            key = Pair.of(interiorLight, skyLight);
+                        }
+                    }
                 }
             }
-            if (hasInterior && group.contains("INTERIOR")) {
-                (fullbright && interiorLight != null && group.contains("FULLBRIGHT") ? fullBright : interiorNormal).add(group);
-            } else {
-                (fullbright && group.contains("FULLBRIGHT") ? fullBright : exteriorNormal).add(group);
-            }
+
+            levels.computeIfAbsent(key, p -> new ArrayList<>()).add(group);
         }
 
-        if (!dark.isEmpty()) {
-            vbo.draw(dark, state -> state.model_view().multiply(matrix));
-        }
-
-        if (!fullBright.isEmpty()) {
-            vbo.draw(fullBright, state -> {
+        levels.forEach((level, litGroups) -> {
+            vbo.draw(litGroups, state -> {
                 state.model_view().multiply(matrix);
-                state.lightmap(1, 1).lighting(false);
-            });
-        }
-
-        if (!interiorNormal.isEmpty()) {
-            vbo.draw(interiorNormal, state -> {
-                state.model_view().multiply(matrix);
-                if (interiorLight != null) {
-                    state.lightmap(interiorLight, skyLight);
+                if (level != null) {
+                    state.lightmap(level.getKey(), level.getValue());
                 }
             });
-        }
-
-        if (!exteriorNormal.isEmpty()) {
-            vbo.draw(exteriorNormal, state -> {
-                state.model_view().multiply(matrix);
-                if (interiorLight != null && !hasInterior) {
-                    state.lightmap(interiorLight, skyLight);
-                }
-            });
-        }
+        });
     }
 
     @Override
