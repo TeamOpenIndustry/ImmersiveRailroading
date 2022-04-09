@@ -11,6 +11,7 @@ import cam72cam.mod.entity.*;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.util.SingleCache;
@@ -123,6 +124,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
 				return ClickResult.ACCEPTED;
 			}
+		}
+		if (player.getHeldItem(hand).is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
+			tag = player.getHeldItem(hand).getDisplayName();
+			return ClickResult.ACCEPTED;
 		}
 		return ClickResult.PASS;
 	}

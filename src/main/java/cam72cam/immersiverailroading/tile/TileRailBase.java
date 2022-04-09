@@ -70,6 +70,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private int ticksExisted;
 	public boolean blockUpdate;
 	private Gauge augmentGauge;
+	@TagField("stockTag")
+	private String stockTag;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -397,7 +399,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private Vec3d bbMax;
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type){
 		return getWorld().getEntities((T stock) -> {
-			if (augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID())) {
+			boolean defMatches = augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID());
+			boolean tagMatches = stockTag == null || stockTag.equals(stock.tag);
+			if (defMatches && tagMatches) {
 				if (bbMin == null) {
 					bbMax = new Vec3d(this.getPos().up(3).east().north()).max(new Vec3d(this.getPos().south().west()));
 					bbMin = new Vec3d(this.getPos().up(3).east().north()).min(new Vec3d(this.getPos().south().west()));
@@ -841,6 +845,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					tileRail.info = info;
 					tileRail.markAllDirty();
 				}
+			}
+			return true;
+		}
+		if (stack.is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.AUGMENT_TRACK)) {
+			if (player.isCrouching()) {
+				stockTag = null;
+			} else {
+				stockTag = stack.getDisplayName();
 			}
 			return true;
 		}
