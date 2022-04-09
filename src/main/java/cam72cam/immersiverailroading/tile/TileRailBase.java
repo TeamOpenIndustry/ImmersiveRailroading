@@ -621,6 +621,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						case HORN:
 							loco.setHorn(40, null);
 							break;
+						case BELL:
+							loco.setBell(10 * power);
+							break;
 						case COMPUTER:
 							//NOP
 							break;

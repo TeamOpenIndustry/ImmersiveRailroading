@@ -8,6 +8,7 @@ public enum LocoControlMode {
 	BRAKE,
 	HORN,
 	COMPUTER,
+	BELL,
 	;
 	
 	@Override
