@@ -15,8 +15,7 @@ import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.render.OpenGL;
-import org.lwjgl.opengl.GL11;
+import util.Matrix4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,15 +107,15 @@ public class TrackExchangerGui implements IScreen {
 				false);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);
-		try (OpenGL.With matrix = OpenGL.matrix()) {
-			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
-			GL11.glScaled(scale, scale, 1);
-			GUIHelpers.drawItem(stack, 0, 0);
-		}
-		try (OpenGL.With matrix = OpenGL.matrix()) {
-			GL11.glTranslated(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
-			GL11.glScaled(-scale, scale, 1);
-			GUIHelpers.drawItem(stack, 0, 0);
-		}
+
+		Matrix4 matrix = new Matrix4();
+		matrix.translate(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
+		matrix.scale(scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0, matrix);
+
+		matrix.setIdentity();
+		matrix.translate(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
+		matrix.scale(-scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0, matrix);
 	}
 }

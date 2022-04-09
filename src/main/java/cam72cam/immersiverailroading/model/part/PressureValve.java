@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
@@ -32,7 +32,7 @@ public class PressureValve {
         this.sndFile = sndFile;
     }
 
-    private final ExpireableList<UUID, ISound> sounds = new ExpireableList<UUID, ISound>() {
+    private final ExpireableMap<UUID, ISound> sounds = new ExpireableMap<UUID, ISound>() {
         @Override
         public void onRemove(UUID key, ISound value) {
             value.terminate();
@@ -66,7 +66,7 @@ public class PressureValve {
             for (ModelComponent valve : valves) {
                 Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(valve.center.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
                 particlePos = particlePos.subtract(fakeMotion);
-                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * stock.gauge.scale(), fakeMotion.z),40, 0, 0.2f, valve.width() * stock.gauge.scale()));
+                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.2 * stock.gauge.scale(), fakeMotion.z),40, 0, 0.2f, valve.width() * stock.gauge.scale(), stock.getDefinition().steamParticleTexture));
             }
         }
     }

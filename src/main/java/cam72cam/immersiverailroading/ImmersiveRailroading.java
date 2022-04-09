@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -10,7 +11,6 @@ import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.SmokeParticle;
-import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
@@ -28,12 +28,14 @@ import cam72cam.mod.ModEvent;
 import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.EntityRegistry;
+import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.input.Keyboard.KeyCode;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.render.*;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
@@ -79,6 +81,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
 				Packet.register(ItemTrackExchangerUpdatePacket::new, PacketDirection.ClientToServer);
 				Packet.register(ClientPartDragging.DragPacket::new, PacketDirection.ClientToServer);
+				Packet.register(GuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
@@ -134,18 +137,18 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				IEntityRender<EntityMoveableRollingStock> stockRender = new IEntityRender<EntityMoveableRollingStock>() {
 					@Override
-					public void render(EntityMoveableRollingStock entity, float partialTicks) {
+					public void render(EntityMoveableRollingStock entity, RenderState state, float partialTicks) {
 						StockModel<?> renderer = entity.getDefinition().getModel();
 						if (renderer != null) {
-							renderer.render(entity, partialTicks);
+							renderer.render(entity, state, partialTicks);
 						}
 					}
 
 					@Override
-					public void postRender(EntityMoveableRollingStock entity, float partialTicks) {
+					public void postRender(EntityMoveableRollingStock entity, RenderState state, float partialTicks) {
 						StockModel<?> renderer = entity.getDefinition().getModel();
 						if (renderer != null) {
-							renderer.postRender(entity, partialTicks);
+							renderer.postRender(entity, state, partialTicks);
 						}
 					}
 				};
@@ -185,15 +188,30 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 
-				GlobalRender.registerOverlay(pt -> {
+				GlobalRender.registerOverlay((state, pt) -> {
 					Entity riding = MinecraftClient.getPlayer().getRiding();
 					if (!(riding instanceof EntityRollingStock)) {
 						return;
 					}
 					EntityRollingStock stock = (EntityRollingStock) riding;
 					if (stock.getDefinition().getOverlay() != null) {
-						stock.getDefinition().getOverlay().render(stock);
+						stock.getDefinition().getOverlay().render(state, stock);
 					}
+				});
+
+				ClientEvents.MOUSE_GUI.subscribe(evt -> {
+					if (!MinecraftClient.isReady()) {
+						return true;
+					}
+					Entity riding = MinecraftClient.getPlayer().getRiding();
+					if (!(riding instanceof EntityRollingStock)) {
+						return true;
+					}
+					EntityRollingStock stock = (EntityRollingStock) riding;
+					if (stock.getDefinition().getOverlay() != null) {
+						return stock.getDefinition().getOverlay().click(evt, stock);
+					}
+					return false;
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
@@ -202,7 +220,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				break;
 			case RELOAD:
 				DefinitionManager.initDefinitions();
-				StockRenderCache.clearRenderCache();
 				break;
 		}
 	}

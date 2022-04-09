@@ -11,9 +11,8 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
-import org.lwjgl.opengl.GL11;
+import util.Matrix4;
 
 public class RailBaseModel {
 	public static StandardModel getModel(TileRailBase te) {
@@ -32,7 +31,7 @@ public class RailBaseModel {
 
 		StandardModel model = new StandardModel();
 		if (te instanceof TileRail && ((TileRail) te).info != null) {
-			model.addCustom(() -> {
+			model.addCustom((state, pt) -> {
 				RailInfo info = ((TileRail) te).info;
                 if (info.settings.type == TrackItems.SWITCH) {
                     //TODO render switch and don't render turn
@@ -45,28 +44,24 @@ public class RailBaseModel {
 					}
 				}
 
-
-				Vec3d pos = info.placementInfo.placementPosition;
-				GL11.glTranslated(pos.x, pos.y, pos.z);
-
-                RailBuilderRender.renderRailBuilder(info, te.getWorld());
+                RailBuilderRender.renderRailBuilder(info, te.getWorld(), state.translate(info.placementInfo.placementPosition));
 			});
 		}
 
 		if (augment != null) {
 			height = height + 0.1f * (float)gauge.scale() * 1.25f;
 
-			model.addColorBlock(augment.color(), Vec3d.ZERO, new Vec3d(1, height, 1));
+			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1));
 			return model;
 		}
 
 		height = height + 0.1f * (float)gauge.scale();
 
 		if (snow != 0) {
-			model.addSnow(snow + (int)(height * 8), Vec3d.ZERO);
+			model.addSnow(snow + (int)(height * 8), new Matrix4());
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {
-			model.addItemBlock(bed, Vec3d.ZERO, new Vec3d(1, height, 1));
+			model.addItemBlock(bed, new Matrix4().scale(1, height, 1));
 			return model;
 		}
 

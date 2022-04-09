@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.library.SpeedDisplayType;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
+import cam72cam.mod.render.OptiFine;
 
 import static cam72cam.mod.config.ConfigFile.*;
 
@@ -33,4 +34,9 @@ public class ConfigGraphics {
 
 	@Comment("Show stock variants in JEI/NEI/Creative search")
 	public static boolean stockItemVariants = false;
+
+	@Comment("Override OptiFine Shaders for entities")
+	public static OptiFine.Shaders OptiFineEntityShader = OptiFine.Shaders.Entities;
+	@Comment("Override Optifine Shader for all entities (not just ones that have specular/normal maps)")
+	public static boolean OptifineEntityShaderOverrideAll = false;
 }

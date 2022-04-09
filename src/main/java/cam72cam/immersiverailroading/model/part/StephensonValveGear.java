@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
@@ -47,7 +47,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
 
         drivenWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
-        centerOfWheels = drivingRod.pos.equals("CENTER") ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
+        centerOfWheels = drivingRod.pos.equals(ModelPosition.CENTER) ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
     }
 
     protected double getStroke(EntityMoveableRollingStock stock, float throttle, int shift, boolean speedLimit) {
@@ -130,7 +130,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         }
     }
 
-    ExpireableList<String, ChuffSound> chuffSounds = new ExpireableList<String, ChuffSound>() {
+    ExpireableMap<String, ChuffSound> chuffSounds = new ExpireableMap<String, ChuffSound>() {
         @Override
         public void onRemove(String key, ChuffSound value) {
             value.free();
@@ -148,7 +148,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
                 accell = 0;
             }
             Vec3d sideMotion = stock.getVelocity().add(VecUtil.fromWrongYaw(accell, stock.getRotationYaw()+90));
-            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale()));
+            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale(), stock.getDefinition().steamParticleTexture));
         }
 
         if (ConfigSound.soundEnabled && stock instanceof LocomotiveSteam) {
@@ -180,7 +180,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         // X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
         // Y: Center of the rod
         // Z: does not really matter due to rotation axis
-        Vec3d drivingRodRotPoint = new Vec3d((reverse ? drivingRod.min.x : drivingRod.max.x) - drivingRod.height()/2, drivingRod.center.y, reverse ? drivingRod.min.z : drivingRod.max.z);
+        Vec3d drivingRodRotPoint = new Vec3d((reverse ? drivingRod.min.x + drivingRod.height()/2 : drivingRod.max.x - drivingRod.height()/2), drivingRod.center.y, reverse ? drivingRod.min.z : drivingRod.max.z);
         // Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
         float drivingRodAngle = (float) Math.toDegrees(Math.atan2((reverse ? -connRodMovment.z : connRodMovment.z), drivingRod.length() - drivingRod.height()));
 

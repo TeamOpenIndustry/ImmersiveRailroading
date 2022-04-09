@@ -3,16 +3,16 @@ package cam72cam.immersiverailroading.render.item;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.ItemRender;
-import cam72cam.mod.render.OpenGL;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
+import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +20,9 @@ import java.util.List;
 public class StockItemComponentModel implements ItemRender.IItemModel {
     @Override
     public StandardModel getModel(World world, ItemStack stack) {
-        return new StandardModel().addCustom(() -> StockItemComponentModel.render(stack));
+        return new StandardModel().addCustom((state, pt) -> StockItemComponentModel.render(stack, state));
     }
-    public static void render(ItemStack stack) {
+    public static void render(ItemStack stack, RenderState state) {
         ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(stack);
         double itemScale = data.gauge.scale();
 
@@ -32,7 +32,7 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             return;
         }
 
-        OBJRender renderer = StockRenderCache.getRender(data.def.defID);
+        StockModel<?> model = data.def.getModel();
         ArrayList<String> groups = new ArrayList<>();
 
         for (ModelComponentType r : data.componentType.render) {
@@ -48,26 +48,25 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             return;
         }
 
-        Vec3d center = renderer.model.centerOfGroups(groups);
-        double width = renderer.model.heightOfGroups(groups);
-        double length = renderer.model.lengthOfGroups(groups);
+        Vec3d center = model.centerOfGroups(groups);
+        double width = model.heightOfGroups(groups);
+        double length = model.lengthOfGroups(groups);
         double scale = 1;
         if (width != 0 || length != 0) {
             scale = 0.95 / Math.max(width, length);
         }
         scale *= Math.sqrt(itemScale);
 
-        try (
-            OpenGL.With matrix = OpenGL.matrix();
-            OpenGL.With tex = renderer.bindTexture(true);
-            OpenGL.With blend = OpenGL.bool(GL11.GL_BLEND, false);
-            OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
-            OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false)
-        ) {
-            GL11.glTranslated(0.5, 0.5, 0.5);
-            GL11.glScaled(scale, scale, scale);
-            GL11.glTranslated(-center.x, -center.y, -center.z);
-            renderer.drawGroups(groups);
+
+        state.blend(BlendMode.OPAQUE)
+                .cull_face(false)
+                .lighting(false)
+                .translate(0.5, 0.5, 0.5)
+                .scale(scale, scale, scale)
+                .translate(-center.x, -center.y, -center.z);
+
+        try (OBJRender.Binding vbo = model.binder().bind(state)) {
+            vbo.draw(groups);
         }
     }
 }

@@ -34,7 +34,7 @@ public class DieselExhaust {
                     particlePos = particlePos.subtract(fakeMotion);
 
                     double smokeMod = (1 + Math.min(1, Math.max(0.2, Math.abs(stock.getCurrentSpeed().minecraft())*2)))/2;
-                    Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * stock.gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width() * stock.gauge.scale()));
+                    Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * stock.gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width() * stock.gauge.scale(), stock.getDefinition().smokeParticleTexture));
                 }
             }
         }

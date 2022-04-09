@@ -2,15 +2,13 @@ package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.render.OpenGL;
-import cam72cam.mod.render.VBO;
+import cam72cam.mod.render.opengl.VBO;
 import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.immersiverailroading.render.StockRenderCache;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.render.obj.OBJVBO;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
 import util.Matrix4;
 
@@ -18,23 +16,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class RailBuilderRender {
-    private static final ExpireableList<String, VBO> cache = new ExpireableList<String, VBO>() {
+    private static final ExpireableMap<String, VBO> cache = new ExpireableMap<String, VBO>() {
         @Override
         public void onRemove(String key, VBO value) {
             value.free();
         }
     };
 
-    public static void renderRailBuilder(RailInfo info, World world) {
+    public static void renderRailBuilder(RailInfo info, World world, RenderState state) {
         TrackModel model = DefinitionManager.getTrack(info.settings.track, info.settings.gauge.value());
         if (model == null) {
             return;
         }
-        OBJRender trackRenderer = StockRenderCache.getTrackRenderer(model);
 
         VBO cached = cache.get(info.uniqueID);
         if (cached == null) {
-            OBJVBO.Builder builder = trackRenderer.getVBO().subModel();
+            OBJRender.Builder builder = model.binder().builder();
 
             for (VecYawPitch piece : info.getBuilder(world).getRenderData()) {
                 Matrix4 m = new Matrix4();
@@ -51,7 +48,7 @@ public class RailBuilderRender {
                 m.scale(scale, scale, scale);
 
                 if (piece.getGroups().size() != 0) {
-                    List<String> groups = trackRenderer.model.groups().stream()
+                    List<String> groups = model.groups().stream()
                             .filter(group -> piece.getGroups().stream().anyMatch(group::contains))
                             .collect(Collectors.toList());
                     builder.draw(groups, m);
@@ -64,7 +61,7 @@ public class RailBuilderRender {
         }
 
         MinecraftClient.startProfiler("irTrackModel");
-        try (OpenGL.With tex = trackRenderer.bindTexture(); VBO.BoundVBO vbo = cached.bind()) {
+        try (VBO.Binding vbo = cached.bind(state)) {
             vbo.draw();
         }
         MinecraftClient.endProfiler();

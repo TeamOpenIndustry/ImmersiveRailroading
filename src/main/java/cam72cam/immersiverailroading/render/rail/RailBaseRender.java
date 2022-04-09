@@ -1,39 +1,36 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.render.DisplayListCache;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
+import util.Matrix4;
 
 public class RailBaseRender {
-	private static synchronized void drawSync(RailInfo info, World world) {
-		if (info.settings.railBed.isEmpty()) {
-			return;
-		}
-
+	private static StandardModel getModel(RailInfo info, World world) {
 		StandardModel model = new StandardModel();
-
-		for (TrackBase base : info.getBuilder(world).getTracksForRender()) {
-			model.addItemBlock(info.settings.railBed, new Vec3d(base.getPos()), new Vec3d(1, base.getBedHeight() + 0.1f * (float)info.settings.gauge.scale(), 1));
+		if (!info.settings.railBed.isEmpty()) {
+			for (TrackBase base : info.getBuilder(world).getTracksForRender()) {
+				Vec3i basePos = base.getPos();
+				model.addItemBlock(info.settings.railBed, new Matrix4()
+						.translate(basePos.x, basePos.y, basePos.z)
+						.scale(1, base.getBedHeight() + 0.1f * (float) info.settings.gauge.scale(), 1)
+				);
+			}
 		}
-
-		model.render();
+		return model;
 	}
 
-	private static DisplayListCache displayLists = new DisplayListCache();
-	public static void draw(RailInfo info, World world) {
-		Integer displayList = displayLists.get(info.uniqueID);
-		if (displayList == null) {
-			displayList = GL11.glGenLists(1);
-			GL11.glNewList(displayList, GL11.GL_COMPILE);
-			drawSync(info, world);
-			GL11.glEndList();
-
-			displayLists.put(info.uniqueID, displayList);
+	private static final ExpireableMap<String, StandardModel> models = new ExpireableMap<>();
+	public static void draw(RailInfo info, World world, RenderState state) {
+		StandardModel model = models.get(info.uniqueID);
+		if (model == null) {
+			model = getModel(info, world);
+			models.put(info.uniqueID, model);
 		}
-		GL11.glCallList(displayList);
+		model.render(state);
 	}
 }

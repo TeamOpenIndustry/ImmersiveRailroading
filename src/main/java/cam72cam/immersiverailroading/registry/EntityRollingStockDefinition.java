@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
@@ -46,6 +47,7 @@ public abstract class EntityRollingStockDefinition {
 
     public final String defID;
     private final Class<? extends EntityRollingStock> type;
+    public final List<String> itemGroups;
     public Map<String, String> textureNames = null;
     public float dampeningAmount;
     public Gauge recommended_gauge;
@@ -61,7 +63,7 @@ public abstract class EntityRollingStockDefinition {
     private ValveGearType valveGear;
     public float darken;
     public Identifier modelLoc;
-    private StockModel<?> model;
+    protected StockModel<?> model;
     private Vec3d passengerCenter = new Vec3d(0, 0, 0);
     private float bogeyFront;
     private float bogeyRear;
@@ -83,6 +85,8 @@ public abstract class EntityRollingStockDefinition {
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
     private final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
+    public Identifier smokeParticleTexture;
+    public Identifier steamParticleTexture;
     private boolean isLinearBrakeControl;
     private GuiBuilder overlay;
     private List<String> extraTooltipInfo;
@@ -137,6 +141,7 @@ public abstract class EntityRollingStockDefinition {
         parseJson(data);
 
         this.model = createModel();
+        this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.isParticle(x)).collect(Collectors.toList());
 
         this.renderComponents = new HashMap<>();
         for (ModelComponent component : model.allComponents) {
@@ -326,6 +331,18 @@ public abstract class EntityRollingStockDefinition {
         } else {
             extraTooltipInfo = Collections.emptyList();
         }
+
+        smokeParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
+        steamParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
+        if (data.has("particles")) {
+            JsonObject particles = data.get("particles").getAsJsonObject();
+            if (particles.has("smoke")) {
+                smokeParticleTexture = new Identifier(particles.get("smoke").getAsJsonObject().get("texture").getAsString());
+            }
+            if (particles.has("steam")) {
+                steamParticleTexture = new Identifier(particles.get("steam").getAsJsonObject().get("texture").getAsString());
+            }
+        }
     }
 
     public List<ModelComponent> getComponents(ModelComponentType name) {
@@ -413,7 +430,7 @@ public abstract class EntityRollingStockDefinition {
                     .collect(Collectors.toList());
             data = new float[components.size() * xRes * zRes];
 
-            VertexBuffer vb = def.model.vbo.get();
+            VertexBuffer vb = def.model.vbo.buffer.get();
 
             for (int i = 0; i < components.size(); i++) {
                 ModelComponent rc = components.get(i);
@@ -463,10 +480,13 @@ public abstract class EntityRollingStockDefinition {
 
     private Function<EntityBuildableRollingStock, float[][]> initHeightmap() {
         String key = String.format(
-                "heightmap-%s-%s-%s-%s-%s-%s",
+                "%s-%s-%s-%s-%s-%s",
                 model.hash, frontBounds, rearBounds, widthBounds, heightBounds, renderComponents.size());
         try {
-            ResourceCache<HeightMapData> cache = new ResourceCache<>(modelLoc, key, provider -> new HeightMapData(this));
+            ResourceCache<HeightMapData> cache = new ResourceCache<>(
+                    new Identifier(modelLoc.getDomain(), modelLoc.getPath() + "_heightmap_" + key.hashCode()),
+                    provider -> new HeightMapData(this)
+            );
             Supplier<GenericByteBuffer> data = cache.getResource("data.bin", builder -> new GenericByteBuffer(builder.data));
             Supplier<GenericByteBuffer> meta = cache.getResource("meta.nbt", builder -> {
                 try {

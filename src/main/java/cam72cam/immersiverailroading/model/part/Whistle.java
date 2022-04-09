@@ -10,7 +10,7 @@ import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.Quilling;
-import cam72cam.immersiverailroading.render.ExpireableList;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
@@ -165,7 +165,7 @@ public class Whistle {
         }
     }
 
-    private final ExpireableList<UUID, SoundEffects> sounds = new ExpireableList<UUID, SoundEffects>() {
+    private final ExpireableMap<UUID, SoundEffects> sounds = new ExpireableMap<UUID, SoundEffects>() {
         @Override
         public void onRemove(UUID key, SoundEffects value) {
             value.terminate();
@@ -198,7 +198,7 @@ public class Whistle {
             double verticalSpeed = 0.8f * stock.gauge.scale();
             double size = 0.3 * (0.8 + smokeMod) * stock.gauge.scale();
 
-            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan, darken, thickness, size));
+            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan, darken, thickness, size, stock.getDefinition().steamParticleTexture));
         }
     }
 

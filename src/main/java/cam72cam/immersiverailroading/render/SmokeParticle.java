@@ -1,124 +1,103 @@
 package cam72cam.immersiverailroading.render;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.render.GLSLShader;
 import cam72cam.mod.render.Particle;
-import cam72cam.mod.render.OpenGL;
+import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.mod.render.opengl.DirectDraw;
+import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 import org.lwjgl.opengl.GL11;
+import util.Matrix4;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SmokeParticle extends Particle {
+    public static final Identifier DEFAULT_TEXTURE = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
 
-	public static class SmokeParticleData extends ParticleData {
-		private final float darken;
-		private final float thickness;
-		private final double diameter;
-
-		public SmokeParticleData(World world, Vec3d pos, Vec3d motion, int lifespan, float darken, float thickness, double diameter) {
-			super(world, pos, motion, lifespan);
-			this.darken = darken;
-			this.thickness = thickness;
-			this.diameter = diameter;
-		}
-	}
+    public static class SmokeParticleData extends ParticleData {
+        private final float darken;
+        private final float thickness;
+        private final double diameter;
+        private final Identifier texture;
 
 
-	private static GLSLShader shader;
-	private static int dl;
+        public SmokeParticleData(World world, Vec3d pos, Vec3d motion, int lifespan, float darken, float thickness, double diameter, Identifier texture) {
+            super(world, pos, motion, lifespan);
+            this.darken = darken;
+            this.thickness = thickness;
+            this.diameter = diameter;
+            this.texture = texture;
+        }
+    }
 
 
-	private final double rot;
-	private final SmokeParticleData data;
+    private final double rot;
+    private final SmokeParticleData data;
 
-	public SmokeParticle(SmokeParticleData data) {
-		this.data = data;
-		this.rot = Math.random() * 360;
-	}
+    public SmokeParticle(SmokeParticleData data) {
+        this.data = data;
+        this.rot = Math.random() * 360;
+    }
 
-	@Override
-	public boolean depthTestEnabled() {
-		return false;
-	}
+    @Override
+    public boolean depthTestEnabled() {
+        return false;
+    }
 
-	@Override
-	public void render(float partialTicks) {
-	}
+    @Override
+    public void render(RenderState ctx, float partialTicks) {
+    }
 
-	public static void renderAll(List<SmokeParticle> particles, float partialTicks) {
-		if (shader == null) {
-			shader = new GLSLShader(
-					new Identifier(ImmersiveRailroading.MODID, "particles/smoke_vert.c"),
-					new Identifier(ImmersiveRailroading.MODID, "particles/smoke_frag.c")
-			);
-			dl = GL11.glGenLists(1);
-			GL11.glNewList(dl, GL11.GL_COMPILE);
-			{
-				GL11.glBegin(GL11.GL_QUADS);
-				{
-					GL11.glTexCoord2d(0, 0);
-					GL11.glVertex3d(-1, -1, 0);
-					GL11.glTexCoord2d(0, 1);
-					GL11.glVertex3d(-1, 1, 0);
-					GL11.glTexCoord2d(1, 1);
-					GL11.glVertex3d(1, 1, 0);
-					GL11.glTexCoord2d(1, 0);
-					GL11.glVertex3d(1, -1, 0);
-				}
-				GL11.glEnd();
-			}
-			GL11.glEndList();
-		}
-		try (
-			OpenGL.With sb = shader.bind();
-			OpenGL.With light = OpenGL.bool(GL11.GL_LIGHTING, false);
-			OpenGL.With cull = OpenGL.bool(GL11.GL_CULL_FACE, false);
-			OpenGL.With tex = OpenGL.bool(GL11.GL_TEXTURE_2D, false);
-			OpenGL.With blend = OpenGL.blend(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		) {
-			for (SmokeParticle particle : particles) {
+    public static void renderAll(List<SmokeParticle> particles, RenderState state, float partialTicks) {
+        state.lighting(false)
+                .cull_face(false)
+                .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
 
-				double life = particle.ticks / (float) particle.data.lifespan;
+        Map<Identifier, List<SmokeParticle>> partitioned = particles.stream().collect(Collectors.groupingBy(p -> p.data.texture));
+        for (Identifier texture : partitioned.keySet()) {
+            state.texture(Texture.wrap(texture));
 
-				double expansionRate = 16;
+            DirectDraw buffer = new DirectDraw();
+            for (SmokeParticle particle : partitioned.get(texture)) {
+                double life = particle.ticks / (float) particle.data.lifespan;
 
-				double radius = particle.data.diameter * (Math.sqrt(life) * expansionRate + 1) * 0.5;
+                double expansionRate = 16;
 
-				float alpha = (particle.data.thickness + 0.2f) * (1 - (float) Math.sqrt(life));
-				try (OpenGL.With matrix = OpenGL.matrix()) {
-					float darken = 0.9f - particle.data.darken * 0.9f;
+                double radius = particle.data.diameter * (Math.sqrt(life) * expansionRate + 1) * 0.5;
 
-					shader.paramFloat("ALPHA", alpha);
-					shader.paramFloat("DARKEN", darken, darken, darken);
+                float alpha = (particle.data.thickness + 0.25f) * (1 - (float) Math.sqrt(life));
+                Matrix4 matrix = new Matrix4();
+                float darken = 0.9f - particle.data.darken * 0.9f;
 
-					//setPos.accept(particle);
-					GL11.glTranslated(particle.renderX, particle.renderY, particle.renderZ);
+                matrix.translate(particle.renderX, particle.renderY, particle.renderZ);
 
-					// Rotate to look at internal
-					particle.lookAtPlayer();
+                // Rotate to look at internal
+                particle.lookAtPlayer(matrix);
 
-					// Apply size
-					GL11.glScaled(radius, radius, radius);
+                // Apply size
+                matrix.scale(radius, radius, radius);
 
-					// Noise Factor
-					GL11.glRotated(particle.rot, 0, 0, 1);
-					GL11.glTranslated(0.5, 0, 0);
-					GL11.glRotated(-particle.rot, 0, 0, 1);
+                // Noise Factor
+                matrix.rotate(Math.toRadians(particle.rot), 0, 0, 1);
+                matrix.translate(0.5, 0, 0);
+                matrix.rotate(Math.toRadians(-particle.rot), 0, 0, 1);
 
-					// Spin
-					double angle = particle.ticks + partialTicks;// + 45;
-					GL11.glRotated(angle, 0, 0, 1);
+                // Spin
+                double angle = particle.ticks + partialTicks;// + 45;
+                matrix.rotate(Math.toRadians(angle), 0, 0, 1);
 
-					//Draw
-					GL11.glCallList(dl);
-				}
-			}
-		}
-	}
+                //Draw
+                buffer.vertex(matrix.apply(new Vec3d(-1, -1, 0))).uv(0, 0).color(darken, darken, darken, alpha);
+                buffer.vertex(matrix.apply(new Vec3d(-1, 1, 0))).uv(0, 1).color(darken, darken, darken, alpha);
+                buffer.vertex(matrix.apply(new Vec3d(1, 1, 0))).uv(1, 1).color(darken, darken, darken, alpha);
+                buffer.vertex(matrix.apply(new Vec3d(1, -1, 0))).uv(1, 0).color(darken, darken, darken, alpha);
+            }
+            buffer.draw(state);
+        }
+    }
 }

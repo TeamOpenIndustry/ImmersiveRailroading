@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render;
 
 import java.util.*;
 
-public class ExpireableList<K,V> {
+public class ExpireableMap<K,V> {
 	
 	public int lifespan() {
 		return 10;

@@ -90,6 +90,23 @@ public class DefinitionManager {
     }
 
     public static void initDefinitions() {
+        if (definitions != null) {
+            for (EntityRollingStockDefinition def : definitions.values()) {
+                if (def.model != null) {
+                    def.model.free();
+                }
+            }
+        }
+
+        if (tracks != null) {
+            for (TrackDefinition def : tracks.values()) {
+                for (TrackModel model : def.models) {
+                    model.free();
+                }
+            }
+        }
+
+
         try {
             initGauges();
         } catch (Exception e) {
