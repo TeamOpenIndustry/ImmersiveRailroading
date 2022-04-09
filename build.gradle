@@ -31,7 +31,7 @@ universalmodcore {
 task ('umcIntegration') {
     doLast {
         String umcLoader = System.getProperty("umc.loader")
-        Util.GitClone("git@github.com:TeamOpenIndustry/ImmersiveRailroadingIntegration.git", "1.12.2-forge", "ImmersiveRailroadingIntegration");
+        Util.GitClone("git@github.com:TeamOpenIndustry/ImmersiveRailroadingIntegration.git", umcLoader, "ImmersiveRailroadingIntegration");
         apply from: 'ImmersiveRailroadingIntegration/setup.gradle'
     }
 }
