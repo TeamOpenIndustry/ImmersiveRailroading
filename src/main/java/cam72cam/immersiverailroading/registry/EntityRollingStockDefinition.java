@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
@@ -346,10 +347,11 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public List<ModelComponent> getComponents(List<ModelComponentType> names) {
-        return names.stream()
-                .flatMap(name -> renderComponents.getOrDefault(name, Collections.emptyList()).stream())
-                .collect(Collectors.toList());
+    public List<ModelComponent> getComponents(ModelComponentType name) {
+        if (!renderComponents.containsKey(name)) {
+            return null;
+        }
+        return renderComponents.get(name);
     }
 
     public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos, boolean shouldSit) {

@@ -35,12 +35,12 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
         StockModel<?> model = data.def.getModel();
         ArrayList<String> groups = new ArrayList<>();
 
-        List<ModelComponent> comps = data.def.getComponents(data.componentType.render);
-        for (ModelComponent comp : comps) {
-            if (comp.type == ModelComponentType.CARGO_FILL_X) {
+        for (ModelComponentType r : data.componentType.render) {
+            List<ModelComponent> comp = data.def.getComponents(r);
+            if (comp == null || r == ModelComponentType.CARGO_FILL_X) {
                 continue;
             }
-            groups.addAll(comp.modelIDs);
+            groups.addAll(comp.get(0).modelIDs);
         }
 
         if (groups.isEmpty()) {
