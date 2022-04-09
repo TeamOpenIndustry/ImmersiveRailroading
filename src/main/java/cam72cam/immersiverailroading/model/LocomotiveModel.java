@@ -155,7 +155,10 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         bell.render(draw);
 
         if (drivingWheels != null) {
-            drivingWheels.render(distanceTraveled, stock.getReverser(), draw);
+            try (ComponentRenderer matrix = draw.push()) {
+                matrix.rotate(-stock.getSwayDegrees(), 1, 0, 0);
+                drivingWheels.render(distanceTraveled, stock.getReverser(), matrix);
+            }
         }
         if (drivingWheelsFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
@@ -163,7 +166,10 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                     matrix.mult(frontTrackers.get(stock).getMatrix());
                 }
                 matrix.render(frameFront);
-                drivingWheelsFront.render(distanceTraveled, stock.getReverser(), matrix);
+                try (ComponentRenderer noSway = matrix.push()) {
+                    noSway.rotate(-stock.getSwayDegrees(), 1, 0, 0);
+                    drivingWheelsFront.render(distanceTraveled, stock.getReverser(), noSway);
+                }
                 matrix.render(shellFront);
                 if (cargoFront != null) {
                     cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
@@ -176,7 +182,10 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                     matrix.mult(rearTrackers.get(stock).getMatrix());
                 }
                 matrix.render(frameRear);
-                drivingWheelsRear.render(distanceTraveled, stock.getReverser(), matrix);
+                try (ComponentRenderer noSway = matrix.push()) {
+                    noSway.rotate(-stock.getSwayDegrees(), 1, 0, 0);
+                    drivingWheelsRear.render(distanceTraveled, stock.getReverser(), noSway);
+                }
                 matrix.render(shellRear);
                 if (cargoRear != null) {
                     cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);

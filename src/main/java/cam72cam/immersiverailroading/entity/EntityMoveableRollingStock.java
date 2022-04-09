@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Augment;
@@ -66,6 +67,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private ISound clackRear;
     private Vec3i clackFrontPos;
     private Vec3i clackRearPos;
+
+    private double swayMagnitude;
+    private double swayImpulse;
 
     @Override
     public void load(TagCompound data) {
@@ -314,6 +318,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
 
                 volume = Math.min(1, volume * 2);
+                swayMagnitude -= 0.07;
+                double swayMin = getCurrentSpeed().metric() / 300 / 3;
+                swayMagnitude = Math.max(swayMagnitude, swayMin);
+
+                if (swayImpulse > 0) {
+                    swayMagnitude += 0.3;
+                    swayImpulse -= 0.7;
+                }
+                swayMagnitude = Math.min(swayMagnitude, 3);
 
                 Vec3i posFront = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyFront(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
                 if (BlockUtil.isIRRail(getWorld(), posFront)) {
@@ -324,6 +337,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                         clackFront.setVolume(volume);
                         clackFront.play(new Vec3d(posFront));
                         clackFrontPos = rb.getPos();
+                        if (getWorld().getTicks() % 3 == 0) { // 1/3 chance
+                            swayImpulse += 7 * rb.getBumpiness();
+                            swayImpulse = Math.min(swayImpulse, 20);
+                        }
                     }
                 }
                 Vec3i posRear = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyRear(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
@@ -487,6 +504,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             ImmersiveRailroading.warn("Trying to move %s at over 1000 mph, cam72cam's physics really sucks", getUUID());
         }
         return new MovementSimulator(getWorld(), lastPos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value()).nextPosition(moveDistance);
+    }
+
+    public double getSwayDegrees() {
+        return getCurrentSpeed().metric() * gauge.scale() < 4 ? 0 : Math.cos(Math.toRadians(this.getTickCount() * 13)) *
+                swayMagnitude / 5 *
+                getDefinition().getSwayMultiplier() *
+                ConfigGraphics.StockSwayMultiplier;
     }
 
     /*

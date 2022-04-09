@@ -170,7 +170,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         state.lighting(true)
                 .cull_face(false)
                 .rescale_normal(true)
-                .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
+                .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())
+                .rotate(stock.getSwayDegrees(), 1, 0, 0);
 
         if ((ConfigGraphics.OptifineEntityShaderOverrideAll || !normals.isEmpty() || !speculars.isEmpty()) &&
                 ConfigGraphics.OptiFineEntityShader != OptiFine.Shaders.Entities) {
@@ -207,6 +208,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         postRender((T) stock, state);
     }
 
+    // TODO invert -> reinvert sway
     private Matrix4 getFrontBogeyMatrix(T stock) {
         if (frontTrackers != null) {
             return frontTrackers.get(stock).getMatrix();
@@ -245,6 +247,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         if (bogeyFront != null) {
             try (ComponentRenderer matrix = draw.push()) {
                 matrix.mult(getFrontBogeyMatrix(stock));
+                matrix.rotate(-stock.getSwayDegrees(), 1, 0, 0);
                 bogeyFront.render(distanceTraveled, matrix);
             }
         }
@@ -252,6 +255,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         if (bogeyRear != null) {
             try (ComponentRenderer matrix = draw.push()) {
                 matrix.mult(getRearBogeyMatrix(stock));
+                matrix.rotate(-stock.getSwayDegrees(), 1, 0, 0);
                 bogeyRear.render(distanceTraveled, matrix);
             }
         }
@@ -266,6 +270,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     protected void postRender(T stock, RenderState state) {
+        state.rotate(stock.getSwayDegrees(), 1, 0, 0);
         controls.forEach(c -> c.postRender(stock, state));
         doors.forEach(c -> c.postRender(stock, state));
         gauges.forEach(c -> c.postRender(stock, state));

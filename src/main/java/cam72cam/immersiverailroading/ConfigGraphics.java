@@ -42,4 +42,7 @@ public class ConfigGraphics {
 
 	@Comment("How far away stock needs to be to switch to a smaller LOD texture")
 	public static double StockLODDistance = 32;
+
+	@Comment("0.0 is no sway, 1.0 is default sway")
+	public static double StockSwayMultiplier = 1;
 }
