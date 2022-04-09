@@ -134,8 +134,18 @@ public enum ItemComponentType {
 		return TextUtil.translate("part.immersiverailroading:component." + super.toString().toLowerCase(Locale.ROOT));
 	}
 
+	private ModelComponent getExampleComponent(EntityRollingStockDefinition def) {
+		for (ModelComponentType type : this.render) {
+			List<ModelComponent> components = def.getComponents(type);
+			if (components != null && !components.isEmpty()) {
+				return components.get(0);
+			}
+		}
+		throw new RuntimeException(String.format("Something brok in IR for %s : %s", def, this));
+	}
+
 	public int getPlateCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
+		ModelComponent comp = getExampleComponent(definition);
 		
 		double mult = 0;
 		switch(this.crafting) {
@@ -178,23 +188,19 @@ public enum ItemComponentType {
 		if (definition == null) {
 			return ItemCastingCost.BAD_CAST_COST;
 		}
-		List<ModelComponent> components = definition.getComponents(this.render.get(0));
-		if (components == null) {
-			return ItemCastingCost.BAD_CAST_COST;
-		}
-		ModelComponent comp = components.get(0);
+		ModelComponent comp = getExampleComponent(definition);
 		double densityGues = 0.6;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * Math.pow(gauge.scale(), 3));
 	}
 
 	public int getWoodCost(Gauge gauge, EntityRollingStockDefinition definition) {
-		ModelComponent comp = definition.getComponents(this.render.get(0)).get(0);
+		ModelComponent comp = getExampleComponent(definition);
 		double densityGues = 4;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * Math.pow(gauge.scale(), 3));
 	}
 	
 	public boolean isWooden(EntityRollingStockDefinition definition) {
-		ModelComponent component = definition.getComponents(this.render.get(0)).get(0);
-		return component.wooden;
+		ModelComponent comp = getExampleComponent(definition);
+		return comp.wooden;
 	}
 }
