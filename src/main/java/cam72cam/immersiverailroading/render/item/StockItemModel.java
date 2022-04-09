@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.model.obj.OBJModel;
@@ -70,7 +71,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			state.scale(scale, scale, scale / (modelLength / 2));
 			state.rotate(85, 0, 1, 0);
 
-			OBJModel.Binder binder = def.getModel().binder().synchronous().icon();
+			OBJModel.Binder binder = def.getModel().binder().synchronous().lod(StockModel.LOD_MEDIUM);
 			if (ConfigGraphics.stockItemVariants) {
 				binder.texture(data.texture);
 			}

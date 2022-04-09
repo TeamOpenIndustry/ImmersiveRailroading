@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.render;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.Particle;
 import cam72cam.mod.render.opengl.BlendMode;
@@ -17,8 +16,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SmokeParticle extends Particle {
-    public static final Identifier DEFAULT_TEXTURE = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
-
     public static class SmokeParticleData extends ParticleData {
         private final float darken;
         private final float thickness;

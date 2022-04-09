@@ -207,8 +207,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
 
     @Override
-    public void onDrag(Control<?> control, double delta) {
-        super.onDrag(control, delta);
+    public void onDrag(Control<?> control, double newValue) {
+        super.onDrag(control, newValue);
         switch (control.part.type) {
             case INDEPENDENT_BRAKE_X:
                 if (getDefinition().isLinearBrakeControl()) {

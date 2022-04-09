@@ -162,10 +162,9 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         state = state.clone()
                 .texture(Texture.wrap(lightTex))
                 .lightmap(1, 1)
-                .depth_test(false)
+                .depth_test(true)
                 .depth_mask(false)
-                .alpha_test(false)
-                .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
+                .alpha_test(false).blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
 
         if (intensity > 0.01) {
             RenderState matrix = state.clone();

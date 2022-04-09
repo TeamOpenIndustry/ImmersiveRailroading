@@ -211,7 +211,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					if (stock.getDefinition().getOverlay() != null) {
 						return stock.getDefinition().getOverlay().click(evt, stock);
 					}
-					return false;
+					return true;
 				});
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);

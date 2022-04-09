@@ -317,8 +317,8 @@ public class LocomotiveSteam extends Locomotive {
     }
 
     @Override
-	public void onDrag(Control<?> component, double delta) {
-		super.onDrag(component, delta);
+	public void onDrag(Control<?> component, double newValue) {
+		super.onDrag(component, newValue);
 
 		if (component.part.type == ModelComponentType.WHISTLE_CONTROL_X) {
 			this.setHorn(10, null);

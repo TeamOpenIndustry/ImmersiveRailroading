@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
@@ -41,6 +40,8 @@ import java.util.stream.Collectors;
 
 @TagMapped(EntityRollingStockDefinition.TagMapper.class)
 public abstract class EntityRollingStockDefinition {
+    private static final Identifier DEFAULT_PARTICLE_TEXTURE = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
+
     private static Identifier default_wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
     private static Identifier default_clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
     private static Identifier default_clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
@@ -332,8 +333,8 @@ public abstract class EntityRollingStockDefinition {
             extraTooltipInfo = Collections.emptyList();
         }
 
-        smokeParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
-        steamParticleTexture = SmokeParticle.DEFAULT_TEXTURE;
+        smokeParticleTexture = DEFAULT_PARTICLE_TEXTURE;
+        steamParticleTexture = DEFAULT_PARTICLE_TEXTURE;
         if (data.has("particles")) {
             JsonObject particles = data.get("particles").getAsJsonObject();
             if (particles.has("smoke")) {
@@ -345,11 +346,10 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public List<ModelComponent> getComponents(ModelComponentType name) {
-        if (!renderComponents.containsKey(name)) {
-            return null;
-        }
-        return renderComponents.get(name);
+    public List<ModelComponent> getComponents(List<ModelComponentType> names) {
+        return names.stream()
+                .flatMap(name -> renderComponents.getOrDefault(name, Collections.emptyList()).stream())
+                .collect(Collectors.toList());
     }
 
     public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos, boolean shouldSit) {

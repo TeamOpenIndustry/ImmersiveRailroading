@@ -57,7 +57,7 @@ public class PhysicsAccummulator {
 	}
 	
 	public Speed getVelocity() {
-		double brakeNewtons = brakeAdhesionNewtons * Config.ConfigBalance.brakeMultiplier;
+		double brakeNewtons = brakeAdhesionNewtons * Config.ConfigBalance.brakeMultiplier * 2;
 
 		// a = f (to newtons) * m (to newtons)
 		double tractiveAccell = tractiveEffortNewtons / massToMoveKg;

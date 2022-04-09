@@ -39,4 +39,7 @@ public class ConfigGraphics {
 	public static OptiFine.Shaders OptiFineEntityShader = OptiFine.Shaders.Entities;
 	@Comment("Override Optifine Shader for all entities (not just ones that have specular/normal maps)")
 	public static boolean OptifineEntityShaderOverrideAll = false;
+
+	@Comment("How far away stock needs to be to switch to a smaller LOD texture")
+	public static double StockLODDistance = 32;
 }

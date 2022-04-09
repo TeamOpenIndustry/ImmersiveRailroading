@@ -380,7 +380,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		
+		boolean moved = false;
 		for (int tickOffset = 1; tickOffset < 30; tickOffset++) {
 			simSpeed = this.getMovement(this.positions.get(tickOffset-1), train);
 			if (isStuck) {
@@ -388,7 +388,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + tickOffset - 1);
 			positions.add(pos);
-			
+			if (!pos.position.equals(lastPos.position)) {
+				moved = true;
+			}
+
 			for (DirectionalStock stock : train) {
 				if (stock.stock.getUUID().equals(this.getUUID())) {
 					//Skip self
@@ -398,10 +401,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		
-		for (DirectionalStock entity : train) {
-			new MRSSyncPacket(entity.stock, entity.stock.positions).sendToObserving(entity.stock);
-			entity.stock.resimulate = false;
+		if (moved) {
+			for (DirectionalStock entity : train) {
+				new MRSSyncPacket(entity.stock, entity.stock.positions).sendToObserving(entity.stock);
+				entity.stock.resimulate = false;
+			}
 		}
 	}
 
@@ -481,13 +485,20 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			distance = -distance;
 		}
 
-		
+
 		TickPos nextPos = this.moveRollingStock(distance, currentPos.tickID);
 		this.positions.add(nextPos);
 		if (nextPos.isOffTrack) {
 			onTrack = false;
 		}
-		
+
+		if (Math.abs(currentPos.speed.metric() - nextPos.speed.metric()) > 5) {
+			TickPos temp = this.moveRollingStock(Speed.fromMetric(1).minecraft(), nextPos.tickID);
+			this.positions.remove(nextPos);
+			nextPos = temp;
+			this.positions.add(nextPos);
+		}
+
 		if (nextPos.speed.metric() != 0) {
 			getWorld().keepLoaded(new Vec3i(nextPos.position));
 			for (CouplerType toChunk : CouplerType.values()) {

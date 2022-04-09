@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +30,7 @@ public class DefinitionManager {
      * How much memory in bytes does the loading of a stock take.
      * This is used to determine whether loading stock in a multithreaded way is possible.
      */
-    private static final long STOCK_LOAD_MEMORY_PER_PROCESSOR = 1024 * 1024 * 1024 + 512 * 1024 * 1204;
+    private static final long STOCK_LOAD_MEMORY_PER_PROCESSOR = 1024 * 1024 * 1024;
 
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
@@ -121,9 +122,14 @@ public class DefinitionManager {
         runtime.gc();
 
         long maxMemory = runtime.maxMemory();
-        long totalMemory = runtime.totalMemory();
         if (maxMemory == Long.MAX_VALUE) {
-            maxMemory = totalMemory;
+            maxMemory = runtime.totalMemory();
+        }
+        try {
+            com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            maxMemory = Math.min(os.getFreePhysicalMemorySize() + runtime.totalMemory(), maxMemory);
+        } catch (Exception ex) {
+            ImmersiveRailroading.catching(ex);
         }
 
         int loadingThreads = Math.max(1, Math.min(processors, (int) (maxMemory / STOCK_LOAD_MEMORY_PER_PROCESSOR)));
