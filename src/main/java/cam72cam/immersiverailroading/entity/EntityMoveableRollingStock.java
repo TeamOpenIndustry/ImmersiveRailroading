@@ -506,11 +506,20 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return new MovementSimulator(getWorld(), lastPos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value()).nextPosition(moveDistance);
     }
 
-    public double getSwayDegrees() {
-        return getCurrentSpeed().metric() * gauge.scale() < 4 ? 0 : Math.cos(Math.toRadians(this.getTickCount() * 13)) *
+    public double getRollDegrees() {
+        if (Math.abs(getCurrentSpeed().metric() * gauge.scale()) < 4) {
+            // don't calculate it
+            return 0;
+        }
+
+        double sway = Math.cos(Math.toRadians(this.getTickCount() * 13)) *
                 swayMagnitude / 5 *
                 getDefinition().getSwayMultiplier() *
                 ConfigGraphics.StockSwayMultiplier;
+
+        double tilt = getDefinition().getTiltMultiplier() * (getPrevRotationYaw() - getRotationYaw()) * (getCurrentSpeed().minecraft() > 0 ? 1 : -1);
+
+        return sway + tilt;
     }
 
     /*

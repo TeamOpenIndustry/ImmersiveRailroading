@@ -94,6 +94,7 @@ public abstract class EntityRollingStockDefinition {
     private List<String> extraTooltipInfo;
     private boolean hasInternalLighting;
     private double swayMultiplier;
+    private double tiltMultiplier;
 
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
@@ -300,6 +301,7 @@ public abstract class EntityRollingStockDefinition {
         interiorLightLevel = properties.has("interior_light_level") ? properties.get("interior_light_level").getAsFloat() : 6 / 15f;
         hasInternalLighting = properties.has("internalLighting") ? properties.get("internalLighting").getAsBoolean() : this instanceof CarPassengerDefinition;
         swayMultiplier = properties.has("swayMultiplier") ? properties.get("swayMultiplier").getAsFloat() : 1d;
+        tiltMultiplier = properties.has("tiltMultiplier") ? properties.get("tiltMultiplier").getAsFloat() : 0d;
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
@@ -673,5 +675,9 @@ public abstract class EntityRollingStockDefinition {
 
     public double getSwayMultiplier() {
         return swayMultiplier;
+    }
+
+    public double getTiltMultiplier() {
+        return tiltMultiplier;
     }
 }

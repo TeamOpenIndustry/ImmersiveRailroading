@@ -156,7 +156,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
         if (drivingWheels != null) {
             try (ComponentRenderer matrix = draw.push()) {
-                matrix.rotate(-stock.getSwayDegrees(), 1, 0, 0);
+                matrix.rotate(-stock.getRollDegrees(), 1, 0, 0);
                 drivingWheels.render(distanceTraveled, stock.getReverser(), matrix);
             }
         }
@@ -167,7 +167,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                 }
                 matrix.render(frameFront);
                 try (ComponentRenderer noSway = matrix.push()) {
-                    noSway.rotate(-stock.getSwayDegrees(), 1, 0, 0);
+                    noSway.rotate(-stock.getRollDegrees(), 1, 0, 0);
                     drivingWheelsFront.render(distanceTraveled, stock.getReverser(), noSway);
                 }
                 matrix.render(shellFront);
@@ -183,7 +183,7 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                 }
                 matrix.render(frameRear);
                 try (ComponentRenderer noSway = matrix.push()) {
-                    noSway.rotate(-stock.getSwayDegrees(), 1, 0, 0);
+                    noSway.rotate(-stock.getRollDegrees(), 1, 0, 0);
                     drivingWheelsRear.render(distanceTraveled, stock.getReverser(), noSway);
                 }
                 matrix.render(shellRear);
