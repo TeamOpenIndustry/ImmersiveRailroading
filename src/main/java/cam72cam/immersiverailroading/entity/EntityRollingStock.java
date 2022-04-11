@@ -114,18 +114,23 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
+			if (getWorld().isClient)  {
+				return ClickResult.ACCEPTED;
+			}
 			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
 			if (texNames.size() > 1) {
 				int idx = texNames.indexOf(texture);
 				idx = (idx + (player.isCrouching() ? -1 : 1) + texNames.size()) % (texNames.size());
 				texture = texNames.get(idx);
-				return ClickResult.ACCEPTED;
 			} else {
 				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
-				return ClickResult.ACCEPTED;
 			}
+			return ClickResult.ACCEPTED;
 		}
 		if (player.getHeldItem(hand).is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
+			if (getWorld().isClient) {
+				return ClickResult.ACCEPTED;
+			}
 			tag = player.getHeldItem(hand).getDisplayName();
 			return ClickResult.ACCEPTED;
 		}

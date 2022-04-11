@@ -80,33 +80,42 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 
 		// See ItemLead.attachToFence
-		if (this.getDefinition().acceptsLivestock() && player.hasPermission(Permissions.BOARD_WITH_LEAD)) {
+		if (this.getDefinition().acceptsLivestock()) {
 			List<Living> leashed = getWorld().getEntities((Living e) -> e.getPosition().distanceTo(player.getPosition()) < 16 && e.isLeashedTo(player), Living.class);
-			for (Living entity : leashed) {
-				if (canFitPassenger(entity)) {
-					entity.unleash(player);
-					this.addPassenger(entity);
-					return ClickResult.ACCEPTED;
+			if (getWorld().isClient && !leashed.isEmpty()) {
+				return ClickResult.ACCEPTED;
+			}
+			if (player.hasPermission(Permissions.BOARD_WITH_LEAD)) {
+				for (Living entity : leashed) {
+					if (canFitPassenger(entity)) {
+						entity.unleash(player);
+						this.addPassenger(entity);
+						return ClickResult.ACCEPTED;
+					}
 				}
 			}
 		}
 
-		if (player.getHeldItem(Player.Hand.PRIMARY).is(Fuzzy.LEAD)) {
+		if (player.getHeldItem(hand).is(Fuzzy.LEAD)) {
 			for (Entity passenger : this.getPassengers()) {
 				if (passenger instanceof Living && !passenger.isVillager()) {
-					Living living = (Living) passenger;
-					if (living.canBeLeashedTo(player)) {
-						this.removePassenger(living);
-						living.setLeashHolder(player);
-						player.getHeldItem(Player.Hand.PRIMARY).shrink(1);
+					if (getWorld().isServer) {
+						Living living = (Living) passenger;
+						if (living.canBeLeashedTo(player)) {
+							this.removePassenger(living);
+							living.setLeashHolder(player);
+							player.getHeldItem(hand).shrink(1);
+						}
 					}
 					return ClickResult.ACCEPTED;
 				}
 			}
 		}
-		
-		if (openGui(player)) {
-			return ClickResult.ACCEPTED;
+
+		if (player.getHeldItem(hand).isEmpty()) {
+			if (getWorld().isClient || openGui(player)) {
+				return ClickResult.ACCEPTED;
+			}
 		}
 		return ClickResult.PASS;
 	}

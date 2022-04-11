@@ -252,6 +252,9 @@ public abstract class Locomotive extends FreightTank {
 
     public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+			if (getWorld().isClient) {
+				return ClickResult.ACCEPTED;
+			}
 			if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
 				ItemRadioCtrlCard.Data data = new ItemRadioCtrlCard.Data(player.getHeldItem(hand));
 				if (player.isCrouching()) {

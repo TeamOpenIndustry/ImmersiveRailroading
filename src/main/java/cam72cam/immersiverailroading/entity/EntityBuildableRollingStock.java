@@ -327,17 +327,16 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 			return clickRes;
 		}
 
-		if (getWorld().isClient) {
-			return ClickResult.PASS;
-		}
-		if (!player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
+		if (getWorld().isServer && !player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
 			return ClickResult.PASS;
 		}
 		if (player.getHeldItem(hand).is(IRItems.ITEM_LARGE_WRENCH) || player.getHeldItem(hand).is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
-			if (!player.isCrouching()) {
-				addNextComponent(player);
-			} else {
-				this.removeNextComponent(player);
+			if (getWorld().isServer) {
+				if (!player.isCrouching()) {
+					addNextComponent(player);
+				} else {
+					this.removeNextComponent(player);
+				}
 			}
 			return ClickResult.ACCEPTED;
 		}
