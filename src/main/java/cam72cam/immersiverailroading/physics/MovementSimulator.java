@@ -45,11 +45,17 @@ public class MovementSimulator {
 			TileRailBase frontBase = world.getBlockEntity(new Vec3i(front), TileRailBase.class);
 			TileRailBase rearBase  = world.getBlockEntity(new Vec3i(rear),  TileRailBase.class);
 			isTurnTable = frontBase != null &&
-					frontBase.getParentTile() != null &&
-					frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
+					(
+							frontBase.getTicksExisted() < 100 ||
+							frontBase.getParentTile() != null &&
+							frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
+					);
 			isTurnTable = isTurnTable || rearBase != null &&
-					rearBase.getParentTile() != null &&
-					rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE;
+					(
+							rearBase.getTicksExisted() < 100 ||
+							rearBase.getParentTile() != null &&
+							rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
+					);
 			
 			position.speed = Speed.ZERO;
 			
