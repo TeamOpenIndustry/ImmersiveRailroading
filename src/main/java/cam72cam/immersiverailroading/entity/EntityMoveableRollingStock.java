@@ -253,11 +253,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
             }
 
-            if (ConfigDebug.serverTickCompensation) {
-                this.tickSkew = 20 / getWorld().getTPS(1);
-            } else {
-                this.tickSkew = 1;
-            }
+            this.tickSkew = 1;
 
             if (this.getTickCount() % 10 == 0) {
                 // Wipe this now and again to force a refresh

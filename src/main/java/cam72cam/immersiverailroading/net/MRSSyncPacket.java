@@ -23,7 +23,7 @@ public class MRSSyncPacket extends Packet {
 
 	public MRSSyncPacket(EntityMoveableRollingStock mrs, List<TickPos> positions) {
 		this.stock = mrs;
-		this.tps = ConfigDebug.serverTickCompensation ? 20 : mrs.getWorld().getTPS(positions.size());
+		this.tps = mrs.getWorld().getTPS(positions.size());
 		this.positions = positions;
 	}
 	@Override
