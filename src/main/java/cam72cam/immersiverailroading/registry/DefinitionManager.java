@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -25,13 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefinitionManager {
-
-    /**
-     * How much memory in bytes does the loading of a stock take.
-     * This is used to determine whether loading stock in a multithreaded way is possible.
-     */
-    private static final long STOCK_LOAD_MEMORY_PER_PROCESSOR = 1024 * 1024 * 1024;
-
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
     private static Map<String, JsonLoader> jsonLoaders;
@@ -116,7 +110,7 @@ public class DefinitionManager {
 
         // Parallel streams use numCPUs-1 threads for stream workloads.
         Runtime runtime = Runtime.getRuntime();
-        int processors = runtime.availableProcessors() - 1;
+        int processors = runtime.availableProcessors();
 
         // Manual garbage collection so we get an accurate quantity of free memory.
         runtime.gc();
@@ -125,14 +119,17 @@ public class DefinitionManager {
         if (maxMemory == Long.MAX_VALUE) {
             maxMemory = runtime.totalMemory();
         }
+        ImmersiveRailroading.info("Detected %sMB of memory free", maxMemory/1024/1024);
         try {
             com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             maxMemory = Math.min(os.getFreePhysicalMemorySize() + runtime.totalMemory(), maxMemory);
+            ImmersiveRailroading.info("Adjusted to %sMB of memory free", maxMemory/1024/1024);
         } catch (UnsatisfiedLinkError | Exception ex) {
             ImmersiveRailroading.catching(ex);
         }
 
-        int loadingThreads = Math.max(1, Math.min(processors, (int) (maxMemory / STOCK_LOAD_MEMORY_PER_PROCESSOR)));
+        int loadingThreads = Math.max(1, Math.min(processors, (int) (maxMemory / (ConfigPerformance.megabytesReservedPerStockLoadingThread * 1024L * 1024L))));
+        ImmersiveRailroading.info("Using %s threads to load Immersive Railroading (%sMB per thread)", loadingThreads, ConfigPerformance.megabytesReservedPerStockLoadingThread);
         ForkJoinPool stockLoadingPool = new ForkJoinPool(loadingThreads, pool -> {
             final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName("ImmersiveRailroading-" + worker.getPoolIndex());
@@ -208,6 +205,7 @@ public class DefinitionManager {
                 input.close();
 
                 EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, jsonData);
+                System.gc();
 
                 return Pair.of(stockDefinition.defID, stockDefinition);
             } catch (Exception e) {

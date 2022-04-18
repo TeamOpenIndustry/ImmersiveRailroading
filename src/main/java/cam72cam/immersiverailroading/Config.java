@@ -185,6 +185,9 @@ public class Config {
 	public static class ConfigPerformance {
 		@Comment("Use multiple threads when loading stock. This is used on Minecraft's initial load or when manually reloading stocks.")
 		public static boolean multithreadedStockLoading = true;
+
+		@Comment("How many MB of memory to reserve for stock loading per thread, higher numbers = safer but slower")
+		public static int megabytesReservedPerStockLoadingThread = 1024;
 	}
 
 	@Name("debug")
@@ -219,7 +222,7 @@ public class Config {
 
 		@Comment("Old Narrow track placement (single width instead of 3)")
         public static boolean oldNarrowWidth = false;
-    }
+	}
 
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!ConfigBalance.FuelRequired || (!ConfigBalance.ModelFuelRequired && gauge.isModel()));
