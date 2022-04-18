@@ -128,7 +128,7 @@ public class DefinitionManager {
         try {
             com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             maxMemory = Math.min(os.getFreePhysicalMemorySize() + runtime.totalMemory(), maxMemory);
-        } catch (Exception ex) {
+        } catch (UnsatisfiedLinkError | Exception ex) {
             ImmersiveRailroading.catching(ex);
         }
 
