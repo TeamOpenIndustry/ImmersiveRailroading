@@ -404,11 +404,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		if (moved) {
-			for (DirectionalStock entity : train) {
+		for (DirectionalStock entity : train) {
+			if (moved) {
 				new MRSSyncPacket(entity.stock, entity.stock.positions).sendToObserving(entity.stock);
-				entity.stock.resimulate = false;
 			}
+			entity.stock.resimulate = false;
 		}
 	}
 
@@ -495,8 +495,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			onTrack = false;
 		}
 
-		if (Math.abs(currentPos.speed.metric() - nextPos.speed.metric()) > 5) {
-			TickPos temp = this.moveRollingStock(Speed.fromMetric(1).minecraft(), nextPos.tickID);
+		if (Math.abs(Math.abs(currentPos.speed.metric()) - Math.abs(nextPos.speed.metric())) > 25) {
+			ImmersiveRailroading.warn("Delta speed (%s, %s) too high!", currentPos.speed.metric(), nextPos.speed.metric());
+			TickPos temp = this.moveRollingStock(Speed.fromMetric(10).minecraft(), nextPos.tickID);
 			this.positions.remove(nextPos);
 			nextPos = temp;
 			this.positions.add(nextPos);
