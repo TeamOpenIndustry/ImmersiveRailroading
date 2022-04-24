@@ -192,10 +192,12 @@ public abstract class EntityRollingStockDefinition {
 
     public final EntityRollingStock spawn(World world, Vec3d pos, float yaw, Gauge gauge, String texture) {
         EntityRollingStock stock = (EntityRollingStock) EntityRegistry.create(world, type);
-        stock.setPosition(pos);
+        stock.setPosition(pos.add(0, 10, 0));
         stock.setRotationYaw(yaw);
         // Override prev
         stock.setRotationYaw(yaw);
+        stock.setRotationPitch(-20);
+        ((EntityMoveableRollingStock)stock).roll = 0;
         stock.setup(defID, gauge, texture);
 
         return stock;
@@ -301,7 +303,7 @@ public abstract class EntityRollingStockDefinition {
         interiorLightLevel = properties.has("interior_light_level") ? properties.get("interior_light_level").getAsFloat() : 6 / 15f;
         hasInternalLighting = properties.has("internalLighting") ? properties.get("internalLighting").getAsBoolean() : this instanceof CarPassengerDefinition;
         swayMultiplier = properties.has("swayMultiplier") ? properties.get("swayMultiplier").getAsFloat() : 1d;
-        tiltMultiplier = properties.has("tiltMultiplier") ? properties.get("tiltMultiplier").getAsFloat() : 0d;
+        tiltMultiplier = properties.has("tiltMultiplier") ? properties.get("tiltMultiplier").getAsFloat() : 1d;
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;

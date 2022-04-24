@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -167,6 +168,15 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 .stream().flatMap(x -> x.render.stream())
                 .collect(Collectors.toList());
 
+        state.rotate(stock.getRotationPitch(), 0, 0, -1);
+        state.rotate(180 - stock.getRotationYaw() - 90, 0, -1, 0);
+        state.translate(-stock.getPosition().x, -stock.getPosition().y, -stock.getPosition().z);
+        state.model_view().multiply(stock.matrix);
+        //state.model_view().set(stock.matrix);
+        //state.translate(0, stock.getDefinition().getHeight(stock.gauge)/2, 0);
+        //state.rotate(stock.roll, 1, 0, 0);
+        state.translate(0, -stock.getDefinition().getHeight(stock.gauge)/2, 0);
+
         state.lighting(true)
                 .cull_face(false)
                 .rescale_normal(true)
@@ -192,7 +202,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         try (
                 OBJRender.Binding bound = binder.bind(state);
         ) {
-            double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
+            double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * partialTicks * 1.1;
             distanceTraveled /= stock.gauge.scale();
 
             try (

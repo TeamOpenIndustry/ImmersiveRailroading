@@ -55,7 +55,6 @@ public class SpawnUtil {
 					// snap to track
 					EntityMoveableRollingStock mrs = (EntityMoveableRollingStock)stock;
 					tp.speed = Speed.ZERO;
-					mrs.initPositions(tp);
 				}
 
 				worldIn.spawnEntity(stock);

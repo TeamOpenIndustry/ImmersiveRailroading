@@ -85,6 +85,7 @@ public class DefinitionManager {
     }
 
     public static void initDefinitions() {
+        long start = System.currentTimeMillis();
         if (definitions != null) {
             for (EntityRollingStockDefinition def : definitions.values()) {
                 if (def.model != null) {
@@ -154,6 +155,7 @@ public class DefinitionManager {
         } catch (Exception e) {
             throw new RuntimeException("Unable to load tracks, do you have a broken pack?", e);
         }
+        ImmersiveRailroading.info("Definitions initialization took %ss", (System.currentTimeMillis() - start)/1000);
     }
 
     private static void initModels() throws IOException {

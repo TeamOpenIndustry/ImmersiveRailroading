@@ -13,10 +13,11 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.physics.StockState;
+import cam72cam.immersiverailroading.physics.simulation.RigidBodyBox;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.serialization.StrictTagMapper;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.*;
 import cam72cam.mod.world.World;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
@@ -28,51 +29,21 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
+import util.Matrix4;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
-	static {
-		World.onTick(world -> {
-			if (world.isClient) {
-				return;
-			}
-			// We do this here as to let all the entities do their onTick first.  Otherwise some might be one onTick ahead
-			// if we did this in the onUpdate method
-			List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class);
+	public StockState state = null;
+	public RigidBodyBox rbb = null;
+	@TagSync
+	@TagField(value = "magic", mapper = MagicMapper.class)
+	public List<Vec3d> points = new ArrayList<>();
 
-			for (EntityCoupleableRollingStock stock : entities) {
-				if (stock.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
-					world.keepLoaded(stock.getBlockPosition());
-				}
-			}
-
-			// Try locomotives first
-			for (EntityCoupleableRollingStock stock : entities) {
-				if (stock instanceof Locomotive) {
-					//stock = stock.findByUUID(stock.getUUID());
-					stock.tickPosRemainingCheck();
-				}
-			}
-			// Try rest
-			for (EntityCoupleableRollingStock stock : entities) {
-				//stock = stock.findByUUID(stock.getUUID());
-				stock.tickPosRemainingCheck();
-			}
-
-			try {
-				Thread.sleep(ConfigDebug.lagServer);
-			} catch (InterruptedException e) {
-				ImmersiveRailroading.catching(e);
-			}
-		});
-	}
-
-	public enum CouplerType {
+    public enum CouplerType {
 		FRONT(0), BACK(180);
 
 		public final float yaw;
@@ -92,8 +63,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	
-	private boolean resimulate = false;
-	private int resimulateCooldown = 0;
+	private long worldUpdateTick = -1;
 	public boolean isAttaching = false;
 
 	@TagSync
@@ -174,11 +144,18 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		World world = getWorld();
 
+		if (worldUpdateTick != getWorld().getTicks()) {
+			//simulateCoupledRollingStock();
+		}
+
 		if (world.isClient) {
 			// Only couple server side
 			
 			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
 			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
+			for (Vec3d point : points) {
+				world.createParticle(World.ParticleType.SMOKE, point, Vec3d.ZERO);
+			}
 
 			if (!hadElectricalPower && hasElectricalPower()) {
 				gotElectricalPowerTick = getTickCount();
@@ -214,10 +191,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		hadElectricalPower = hasElectricalPower();
 
-		if (this.resimulateCooldown > 0) {
-			this.resimulateCooldown -= 1;
-		}
-
 		if (this.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
 			world.keepLoaded(getBlockPosition());
 			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
@@ -229,7 +202,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				world.keepLoaded(this.lastKnownRear);
 			}
 		}
-		
+
+		/*
 		for (CouplerType coupler : CouplerType.values()) {
 			if (!this.isCoupled(coupler)) {
 				continue;
@@ -281,68 +255,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 						.sendToObserving(this);
 				}
 			}
-		}
+		}*/
 	}
 	
 	private Vec3d guessCouplerPosition(CouplerType coupler) {
 		return getPosition().add(VecUtil.fromWrongYaw(this.getDefinition().getLength(gauge)/2 * (coupler == CouplerType.FRONT ? 1 : -1), this.getRotationYaw()));
-	}
-
-	public void tickPosRemainingCheck() {
-		if (this.getRemainingPositions() < 10 || resimulate) {
-			TickPos lastPos = this.getCurrentTickPosAndPrune();
-			if (lastPos == null) {
-				this.triggerResimulate();
-				return;
-			}
-			
-			// Only simulate on locomotives if we can help it.
-			/*
-			if (!(this instanceof Locomotive)) {
-				for (EntityCoupleableRollingStock stock : this.getTrain()) {
-					if (stock instanceof Locomotive) {
-						stock.resimulate = true;
-						return;
-					}
-				}
-			}
-			*/
-			
-			if (resimulate && this.getTickCount() % 5 != 0) {
-				// Resimulate every 5 ticks, this will cut down on packet storms
-				return;
-			}
-			/*
-			
-			boolean isStuck = false;
-			for (EntityBuildableRollingStock stock : this.getTrain()) {
-				if (!stock.areWheelsBuilt()) {
-					isStuck = true;
-				}
-			}
-			
-			Speed simSpeed = this.getCurrentSpeed();
-			if (isStuck) {
-				simSpeed = Speed.ZERO;
-			}
-			
-			// Clear out the list and re-simulate
-			this.positions = new ArrayList<TickPos>();
-			positions.add(lastPos);
-
-			for (int i = 0; i < 30; i ++) {
-				if (!isStuck) {
-					simSpeed = this.getMovement(simSpeed);
-				}
-				TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + i);
-				if (pos.speed.metric() != 0) {
-					ChunkManager.flagEntityPos(this.internal, new Vec3i(pos.position));
-				}
-				positions.add(pos);
-			}*/
-			
-			simulateCoupledRollingStock();
-		}
 	}
 
 	/*
@@ -367,15 +284,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 
 	public void simulateCoupledRollingStock() {
-		TickPos lastPos = this.getCurrentTickPosAndPrune();
-		this.positions = new ArrayList<TickPos>();
-		positions.add(lastPos);
-		
-		
-		
 		Collection<DirectionalStock> train = this.getDirectionalTrain(true);
 
-		Speed simSpeed = this.getCurrentSpeed();
 		boolean isStuck = false;
 		for (DirectionalStock stock : train) {
 			if (!stock.stock.areWheelsBuilt()) {
@@ -383,57 +293,31 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 		}
 		
-		boolean moved = false;
-		for (int tickOffset = 1; tickOffset < 30; tickOffset++) {
-			simSpeed = this.getMovement(this.positions.get(tickOffset-1), train);
-			if (isStuck) {
-				simSpeed = Speed.ZERO;
-			}
-			TickPos pos = this.moveRollingStock(simSpeed.minecraft(), lastPos.tickID + tickOffset - 1);
-			positions.add(pos);
-			if (!pos.position.equals(lastPos.position)) {
-				moved = true;
-			}
+		Speed simSpeed = this.getMovement(getCurrentTickPosOrFake(), train);
+		if (isStuck) {
+			simSpeed = Speed.ZERO;
+		}
+		TickPos pos = this.moveRollingStock(simSpeed.minecraft());
+		this.applyTickPos(pos);
 
-			for (DirectionalStock stock : train) {
-				if (stock.stock.getUUID().equals(this.getUUID())) {
-					//Skip self
-					continue;
-				}
-				isStuck &= !stock.stock.simulateMove(stock.prev, tickOffset);
+		for (DirectionalStock stock : train) {
+			if (!stock.stock.getUUID().equals(this.getUUID())) {
+				//Skip self
+				isStuck &= !stock.stock.simulateMove(stock.prev);
+				continue;
 			}
+			stock.stock.worldUpdateTick = getWorld().getTicks();
+			stock.stock.setVelocity(getPosition().subtract(getPrevPosition()));
 		}
-		
-		for (DirectionalStock entity : train) {
-			if (moved) {
-				new MRSSyncPacket(entity.stock, entity.stock.positions).sendToObserving(entity.stock);
-			}
-			entity.stock.resimulate = false;
-		}
+
 	}
 
 	// This breaks with looped rolling stock
-	private boolean simulateMove(EntityCoupleableRollingStock parent, int tickOffset) {
-		if (this.positions.size() < tickOffset) {
-			ImmersiveRailroading.debug("MISSING START POS " + tickOffset);
-			return true;
-		}
-		
-		TickPos currentPos = this.positions.get(tickOffset-1);
-		
-		if (parent.positions.size() <= tickOffset) {
-			//TODO better hack
-			return currentPos.isOffTrack;
-		}
-		
-		TickPos parentPos = parent.positions.get(tickOffset);
+	private boolean simulateMove(EntityCoupleableRollingStock parent) {
+		TickPos currentPos = getCurrentTickPosOrFake();
+		TickPos parentPos = parent.getCurrentTickPosOrFake();
+
 		boolean onTrack = !currentPos.isOffTrack;
-		
-		if (tickOffset == 1) {
-			// Clear out existing movement information
-			this.positions = new ArrayList<TickPos>();
-			this.positions.add(currentPos);
-		}
 		
 		CouplerType coupler = this.getCouplerFor(parent);
 		CouplerType otherCoupler = parent.getCouplerFor(this);
@@ -446,18 +330,16 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 		
 		if ((!this.isCouplerEngaged(coupler) || !parent.isCouplerEngaged(otherCoupler)) && this.getTickCount() > 5 && parent.getTickCount() > 5) {
-			if (parent.positions.size() >= 2) {
-				// Push only, no pull
-				double prevDist = currentPos.position.distanceTo(parent.positions.get(tickOffset-1).position);
-				double dist = currentPos.position.distanceTo(parent.positions.get(tickOffset).position);
-				if (prevDist <= dist) {
-					TickPos nextPos = this.moveRollingStock(getMovement(currentPos, false).minecraft(), currentPos.tickID);
-					this.positions.add(nextPos);
-					if (nextPos.isOffTrack) {
-						onTrack = false;
-					}
-					return onTrack;
+			// Push only, no pull
+			double prevDist = currentPos.position.distanceTo(parent.getPrevPosition());
+			double dist = currentPos.position.distanceTo(parent.getPosition());
+			if (prevDist <= dist) {
+				TickPos nextPos = this.moveRollingStock(getMovement(currentPos, false).minecraft());
+				applyTickPos(nextPos);
+				if (nextPos.isOffTrack) {
+					onTrack = false;
 				}
+				return onTrack;
 			}
 		}
 		
@@ -489,18 +371,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 
 
-		TickPos nextPos = this.moveRollingStock(distance, currentPos.tickID);
-		this.positions.add(nextPos);
+		TickPos nextPos = this.moveRollingStock(distance);
 		if (nextPos.isOffTrack) {
 			onTrack = false;
 		}
 
-		if (Math.abs(Math.abs(currentPos.speed.metric()) - Math.abs(nextPos.speed.metric())) > 25) {
-			ImmersiveRailroading.warn("Delta speed (%s, %s) too high!", currentPos.speed.metric(), nextPos.speed.metric());
-			TickPos temp = this.moveRollingStock(Speed.fromMetric(10).minecraft(), nextPos.tickID);
-			this.positions.remove(nextPos);
-			nextPos = temp;
-			this.positions.add(nextPos);
+		if (Math.abs(currentPos.speed.metric() - nextPos.speed.metric()) > 5) {
+			nextPos = this.moveRollingStock(Speed.fromMetric(1).minecraft());
+			// TODO set prevPos
 		}
 
 		if (nextPos.speed.metric() != 0) {
@@ -509,6 +387,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				getWorld().keepLoaded(new Vec3i(this.getCouplerPosition(toChunk, nextPos)));
 			}
 		}
+
+		applyTickPos(nextPos);
 
 		return onTrack;
 	}
@@ -556,7 +436,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			this.mapTrain(this, true, true, fn);
 			Speed speedPos = Speed.fromMetric(fn.hashCode());
 			Speed speedNeg = Speed.fromMetric(-fn.hashCode());
-			this.mapTrain(this, true, true, (EntityCoupleableRollingStock e, Boolean b) -> e.setCurrentSpeed(b ? speedPos : speedNeg));
+			//TODO BORK this.mapTrain(this, true, true, (EntityCoupleableRollingStock e, Boolean b) -> e.setCurrentSpeed(b ? speedPos : speedNeg));
 		}
 		
 		triggerTrain();
@@ -928,10 +808,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 	@Override
 	public void triggerResimulate() {
+		/*
 		if (resimulateCooldown <= 0) {
 			resimulate = true;
 			resimulateCooldown = 5;
-		}
+		}*/
 	}
 
 	public boolean hasElectricalPower() {
@@ -955,5 +836,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 						getTickCount() - gotElectricalPowerTick > 15 ||
 						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0
 		);
+	}
+
+	private static class MagicMapper implements TagMapper<List<Vec3d>> {
+		@Override
+		public TagAccessor<List<Vec3d>> apply(Class<List<Vec3d>> type, String fieldName, TagField tag) throws SerializationException {
+			return new TagAccessor<>(
+					(d, o) -> d.setList(fieldName, o, v -> new TagCompound().setVec3d("v", v)),
+					d -> d.getList(fieldName, t -> t.getVec3d("v"))
+			);
+		}
 	}
 }

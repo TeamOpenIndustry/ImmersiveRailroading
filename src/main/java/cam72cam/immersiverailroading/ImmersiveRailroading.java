@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
+import cam72cam.immersiverailroading.physics.StockSimulator;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
@@ -64,6 +65,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 		switch (event) {
 			case CONSTRUCT:
+				StockSimulator.register();
+
 				EntityRegistry.register(ImmersiveRailroading.instance, CarFreight::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, CarPassenger::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, CarTank::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
@@ -74,7 +77,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
-				Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
 				Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 				Packet.register(SoundPacket::new, PacketDirection.ServerToClient);

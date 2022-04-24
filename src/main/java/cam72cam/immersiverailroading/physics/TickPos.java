@@ -61,14 +61,4 @@ public class TickPos {
 	public TickPos clone() {
 		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, rotationPitch, isOffTrack);
 	}
-
-    public static class ListTagMapper implements TagMapper<List<TickPos>> {
-        @Override
-        public TagAccessor<List<TickPos>> apply(Class<List<TickPos>> type, String fieldName, TagField tag) {
-            return new TagAccessor<>(
-                    (data, positions) -> data.setList(fieldName, positions, TickPos::toTag),
-                    data -> data.getList(fieldName, TickPos::new)
-            );
-        }
-    }
 }

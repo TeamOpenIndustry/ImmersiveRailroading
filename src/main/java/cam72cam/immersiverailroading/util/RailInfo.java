@@ -291,17 +291,23 @@ public class RailInfo {
 
 				if (tieParts != null) {
 					for (TrackDefinition.TrackMaterial tiePart : tieParts) {
-						materials.add(new MaterialManager((int) Math.ceil(builder.costTies() * tiePart.cost), tiePart::matches, tiePart.examples()));
+						if (!tiePart.examples().isEmpty()) {
+							materials.add(new MaterialManager((int) Math.ceil(builder.costTies() * tiePart.cost), tiePart::matches, tiePart.examples()));
+						}
 					}
 				}
 				if (railParts != null) {
 					for (TrackDefinition.TrackMaterial railPart : railParts) {
-						materials.add(new MaterialManager((int) Math.ceil(builder.costRails() * railPart.cost), railPart::matches, railPart.examples()));
+						if (!railPart.examples().isEmpty()) {
+							materials.add(new MaterialManager((int) Math.ceil(builder.costRails() * railPart.cost), railPart::matches, railPart.examples()));
+						}
 					}
 				}
 				if (bedParts != null) {
 					for (TrackDefinition.TrackMaterial bedPart : bedParts) {
-						materials.add(new MaterialManager((int) Math.ceil(builder.costBed() * bedPart.cost), bedPart::matches, bedPart.examples()));
+						if (!bedPart.examples().isEmpty()) {
+							materials.add(new MaterialManager((int) Math.ceil(builder.costBed() * bedPart.cost), bedPart::matches, bedPart.examples()));
+						}
 					}
 				}
 

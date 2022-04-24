@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -28,8 +27,6 @@ import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,15 +40,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private Float rearYaw;
     @TagField("distanceTraveled")
     public float distanceTraveled = 0;
-    @TagField("tickPosID")
-    public double tickPosID = 0;
-    private Speed currentSpeed;
-    @TagField(value = "positions", mapper = TickPos.ListTagMapper.class)
-    public List<TickPos> positions = new ArrayList<>();
     private RealBB boundingBox;
     private float[][] heightMapCache;
-    @TagField("tickSkew")
-    private double tickSkew = 1;
     @TagSync
     @TagField("IND_BRAKE")
     private float independentBrake = 0;
@@ -70,15 +60,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     private double swayMagnitude;
     private double swayImpulse;
+    @TagSync
+    @TagField("roll")
+    public float roll;
 
     @Override
     public void load(TagCompound data) {
         super.load(data);
-
-        if (positions.isEmpty()) {
-            this.tickPosID = 0;
-            positions.add(getCurrentTickPosOrFake());
-        }
 
         if (frontYaw == null) {
             frontYaw = getRotationYaw();
@@ -86,10 +74,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (rearYaw == null) {
             rearYaw = getRotationYaw();
         }
-    }
-
-    public void initPositions(TickPos tp) {
-        this.positions = Arrays.asList(tp);
     }
 
     /*
@@ -123,92 +107,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
      */
 
     public Speed getCurrentSpeed() {
-        if (currentSpeed == null) {
-            //Fallback
-            // does not work for curves
-            Vec3d motion = this.getVelocity();
-            float speed = (float) Math.sqrt(motion.x * motion.x + motion.y * motion.y + motion.z * motion.z);
-            if (Float.isNaN(speed)) {
-                speed = 0;
-            }
-            currentSpeed = Speed.fromMinecraft(speed);
+        // does not work for curves
+        Vec3d motion = this.getVelocity();
+        float speed = (float) Math.sqrt(motion.x * motion.x + motion.y * motion.y + motion.z * motion.z);
+        if (Float.isNaN(speed)) {
+            speed = 0;
         }
-        return currentSpeed;
+        return Speed.fromMinecraft(speed);
     }
-
-    public void setCurrentSpeed(Speed newSpeed) {
-        this.currentSpeed = newSpeed;
-    }
-
-    public void handleTickPosPacket(List<TickPos> newPositions, double serverTPS) {
-        this.tickSkew = serverTPS / 20;
-
-        if (newPositions.size() != 0) {
-            this.clearPositionCache();
-            double delta = newPositions.get(0).tickID - this.tickPosID;
-            if (Math.abs(delta) > 10) {
-                this.tickPosID = newPositions.get(0).tickID;
-            } else {
-                tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
-            }
-        }
-        this.positions = newPositions;
-    }
-
-    public TickPos getTickPos(int tickID) {
-        if (positions.size() == 0) {
-            return null;
-        }
-        for (TickPos pos : positions) {
-            if (pos.tickID == tickID) {
-                return pos;
-            }
-        }
-
-        return positions.get(positions.size() - 1);
-    }
-
-    public TickPos getCurrentTickPosAndPrune() {
-        if (positions.size() == 0) {
-            return null;
-        }
-        if (positions.get(0).tickID != (int) this.tickPosID) {
-            // Prune list
-            while (positions.get(0).tickID < (int) this.tickPosID && positions.size() > 1) {
-                positions.remove(0);
-            }
-        }
-        return positions.get(0);
-    }
-
-    public int getRemainingPositions() {
-        return positions.size();
-    }
-
-    private double skewScalar(double curr, double next) {
-        if (getWorld().isClient) {
-            return curr + (next - curr) * this.getTickSkew();
-        }
-        return next;
-    }
-
-    private float skewScalar(float curr, float next) {
-        if (getWorld().isClient) {
-            return curr + (next - curr) * this.getTickSkew();
-        }
-        return next;
-    }
-
-    private float fixAngleInterp(float curr, float next) {
-        if (curr - next > 180) {
-            curr -= 360;
-        }
-        if (next - curr > 180) {
-            curr += 360;
-        }
-        return curr;
-    }
-
 
     @Override
     public void onDrag(Control<?> control, double newValue) {
@@ -244,6 +150,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public void onTick() {
         super.onTick();
 
+        clearPositionCache();
+
         if (getWorld().isServer) {
             if (getDefinition().hasIndependentBrake()) {
                 for (Control<?> control : getDefinition().getModel().getControls()) {
@@ -252,8 +160,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
             }
-
-            this.tickSkew = 1;
 
             if (this.getTickCount() % 10 == 0) {
                 // Wipe this now and again to force a refresh
@@ -353,50 +259,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             }
         }
 
-        this.tickPosID += this.getTickSkew();
-
-        // Apply position onTick
-        TickPos currentPos = getCurrentTickPosAndPrune();
-        if (currentPos == null) {
-            // Not loaded yet or not moving
-            return;
-        }
-
-        Vec3d prevPos = this.getPosition();
-        double prevPosX = prevPos.x;
-        double prevPosY = prevPos.y;
-        double prevPosZ = prevPos.z;
-        float prevRotationYaw = this.getRotationYaw();
-        float prevRotationPitch = this.getRotationPitch();
-
-
-        if (getWorld().isClient) {
-            //TODO this.prevRotationYaw = fixAngleInterp(this.prevRotationYaw, currentPos.rotationYaw);
-            //TODO this.rotationYaw = fixAngleInterp(this.rotationYaw, currentPos.rotationYaw);
-            this.frontYaw = fixAngleInterp(this.frontYaw == null ? prevRotationYaw : this.frontYaw, currentPos.frontYaw);
-            this.rearYaw = fixAngleInterp(this.rearYaw == null ? prevRotationYaw : this.rearYaw, currentPos.rearYaw);
-            prevRotationYaw = fixAngleInterp(prevRotationYaw, currentPos.rotationYaw);
-        }
-
-        this.setRotationYaw(skewScalar(prevRotationYaw, currentPos.rotationYaw));
-        this.setRotationPitch(skewScalar(prevRotationPitch, currentPos.rotationPitch));
-        this.frontYaw = skewScalar(this.frontYaw == null ? prevRotationYaw : this.frontYaw, currentPos.frontYaw);
-        this.rearYaw = skewScalar(this.rearYaw == null ? prevRotationYaw : this.rearYaw, currentPos.rearYaw);
-
-        this.currentSpeed = currentPos.speed;
-        distanceTraveled = skewScalar(distanceTraveled, distanceTraveled + (float) this.currentSpeed.minecraft());
-
-        this.setPosition(new Vec3d(
-                        skewScalar(prevPosX, currentPos.position.x),
-                        skewScalar(prevPosY, currentPos.position.y),
-                        skewScalar(prevPosZ, currentPos.position.z)
-                )
-        );
-        this.setVelocity(getPosition().subtract(prevPosX, prevPosY, prevPosZ));
-
-        if (this.getVelocity().length() > 0.001) {
-            this.clearPositionCache();
-        }
+        distanceTraveled += this.getCurrentSpeed().minecraft();
 
         if (Math.abs(this.getCurrentSpeed().metric()) > 1) {
 			List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> entity.isLiving() || entity.isPlayer() && this.getCollision().intersects(entity.getBounds()), Entity.class);
@@ -464,7 +327,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				entity.setVelocity(this.getVelocity().add(0, entity.getVelocity().y, 0));
 			}
 	    }
-		if (getWorld().isServer && this.getTickCount() % 5 == 0 && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
+		if (false && getWorld().isServer && this.getTickCount() % 5 == 0 && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
             RealBB bb = this.getCollision().grow(new Vec3d(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale()));
 
             for (Vec3i bp : getWorld().blocksInBounds(bb)) {
@@ -494,12 +357,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.boundingBox = null;
     }
 
-    public TickPos moveRollingStock(double moveDistance, int lastTickID) {
-        TickPos lastPos = this.getTickPos(lastTickID);
+    public TickPos moveRollingStock(double moveDistance) {
+        TickPos lastPos = getCurrentTickPosOrFake();
         if (moveDistance > MovementSimulator.MAX_MOVE_DISTANCE) { // over 1000 mph
             ImmersiveRailroading.warn("Trying to move %s at over 1000 mph, cam72cam's physics really sucks", getUUID());
         }
         return new MovementSimulator(getWorld(), lastPos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value()).nextPosition(moveDistance);
+    }
+    public void applyTickPos(TickPos pos) {
+        this.setPosition(pos.position);
+        this.setRotationYaw(pos.rotationYaw);
+        this.setRotationPitch(pos.rotationPitch);
+        this.frontYaw = pos.frontYaw;
+        this.rearYaw = pos.rearYaw;
     }
 
     public double getRollDegrees() {
@@ -516,6 +386,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         double tilt = getDefinition().getTiltMultiplier() * (getPrevRotationYaw() - getRotationYaw()) * (getCurrentSpeed().minecraft() > 0 ? 1 : -1);
 
         return sway + tilt;
+    }
+
+    public void setRoll(float toDegrees) {
+        this.roll = toDegrees;
     }
 
     /*
@@ -555,7 +429,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public TickPos getCurrentTickPosOrFake() {
-        return new TickPos(0, Speed.fromMetric(0), getPosition(), this.getFrontYaw(), this.getRearYaw(), this.getRotationYaw(), this.getRotationPitch(), false);
+        return new TickPos(
+                0,
+                getCurrentSpeed(),
+                getPosition(),
+                frontYaw != null ? frontYaw : getRotationYaw(),
+                rearYaw != null ? rearYaw : getRotationYaw(),
+                getRotationYaw(),
+                getRotationPitch(),
+                false
+        );
     }
 
     public Vec3d predictFrontBogeyPosition(float offset) {
@@ -600,10 +483,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         lastRetarderPos = new Vec3i(latest.position);
         lastRetarderValue = over * max;
         return lastRetarderValue;
-    }
-
-    public float getTickSkew() {
-        return (float) this.tickSkew;
     }
 
     @Override

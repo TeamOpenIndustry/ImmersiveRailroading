@@ -32,6 +32,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@TagField("tag")
 	public String tag = "";
 
+	@TagField(mapper = MatrixMapper.class)
+	@TagSync
+	public Matrix4 matrix = new Matrix4();
+
 	@TagSync
 	@TagField(value = "texture", mapper = StrictTagMapper.class)
 	private String texture = null;
@@ -298,6 +302,50 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 			return new TagAccessor<>(
 					(d, o) -> d.setMap(fieldName, o, Function.identity(), x -> new TagCompound().setBoolean("pressed", x.getLeft()).setFloat("pos", x.getRight())),
 					d -> d.getMap(fieldName, Function.identity(), x -> Pair.of(x.hasKey("pressed") && x.getBoolean("pressed"), x.getFloat("pos")))
+			);
+		}
+	}
+
+	private static class MatrixMapper implements TagMapper<Matrix4> {
+		@Override
+		public TagAccessor<Matrix4> apply(Class<Matrix4> type, String fieldName, TagField tag) throws SerializationException {
+			return new TagAccessor<>(
+					(d, o) -> d.set(fieldName, new TagCompound()
+							.setDouble("m00", o.m00)
+							.setDouble("m01", o.m01)
+							.setDouble("m02", o.m02)
+							.setDouble("m03", o.m03)
+							.setDouble("m10", o.m10)
+							.setDouble("m11", o.m11)
+							.setDouble("m12", o.m12)
+							.setDouble("m13", o.m13)
+							.setDouble("m20", o.m20)
+							.setDouble("m21", o.m21)
+							.setDouble("m22", o.m22)
+							.setDouble("m23", o.m23)
+							.setDouble("m30", o.m30)
+							.setDouble("m31", o.m31)
+							.setDouble("m32", o.m32)
+							.setDouble("m33", o.m33)
+					),
+					d -> new Matrix4(
+							d.get(fieldName).getDouble("m00"),
+							d.get(fieldName).getDouble("m01"),
+							d.get(fieldName).getDouble("m02"),
+							d.get(fieldName).getDouble("m03"),
+							d.get(fieldName).getDouble("m10"),
+							d.get(fieldName).getDouble("m11"),
+							d.get(fieldName).getDouble("m12"),
+							d.get(fieldName).getDouble("m13"),
+							d.get(fieldName).getDouble("m20"),
+							d.get(fieldName).getDouble("m21"),
+							d.get(fieldName).getDouble("m22"),
+							d.get(fieldName).getDouble("m23"),
+							d.get(fieldName).getDouble("m30"),
+							d.get(fieldName).getDouble("m31"),
+							d.get(fieldName).getDouble("m32"),
+							d.get(fieldName).getDouble("m33")
+					)
 			);
 		}
 	}
