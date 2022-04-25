@@ -6,7 +6,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
-import org.omg.PortableInterceptor.ObjectReferenceTemplate;
 import util.Matrix4;
 
 import java.nio.FloatBuffer;
@@ -84,12 +83,13 @@ public class RigidBodyBox {
             return MathUtils.createTransformationMatrix(orientation, position);
         }
 
-
-        public void computeForces() {
+        public void resetForces() {
             // Clear forces that have been already applied
             MathUtils.zero(torque);
             MathUtils.zero(force);
+        }
 
+        public void computeForces() {
             // Gravity
             force.y += -9.8 * massKg;
 
@@ -191,7 +191,10 @@ public class RigidBodyBox {
                     Vector3f relativePoint = Vector3f.sub(calculatedPoint, position, new Vector3f());
 
                     Vector3f velocity = new Vector3f();
-                    Vector3f.add(linearVelocity, Vector3f.cross(angularVelocity, relativePoint, velocity), velocity);
+                    Vector3f.add(velocity, Vector3f.cross(angularVelocity, relativePoint, new Vector3f()), velocity);
+                    Vector3f.add(velocity, linearVelocity, velocity);
+                    Vector3f.sub(velocity, Vector3f.cross(otherState.angularVelocity, pointRelativeToOther, new Vector3f()), velocity);
+                    Vector3f.sub(velocity, otherState.linearVelocity, velocity);
 
                     // Find closest wall
                     float xNeg = Math.abs(pointInOtherSpace.x + other.x2);
@@ -243,13 +246,18 @@ public class RigidBodyBox {
                         // collided
                         //System.out.println("IMPULSE " + relativeVelocity);
                         results.add(() -> {
-                            Vector3f.add(linearVelocity, Vector3f.cross(angularVelocity, relativePoint, velocity), velocity);
+                            // TODO remove this recalc???
+                            MathUtils.zero(velocity);
+                            Vector3f.add(velocity, Vector3f.cross(this.angularVelocity, relativePoint, new Vector3f()), velocity);
+                            Vector3f.add(velocity, this.linearVelocity, velocity);
+                            Vector3f.sub(velocity, Vector3f.cross(otherState.angularVelocity, pointRelativeToOther, new Vector3f()), velocity);
+                            Vector3f.sub(velocity, otherState.linearVelocity, velocity);
 
 
-                            float impulseNumerator = -(1 + 0.7f) *
+                            float impulseNumerator = -(1 + Math.min(other.restitution, restitution)) *
                                     Vector3f.dot(velocity, normal);
-                            float impulseDenominator = inverseMassKg +
-                                    Vector3f.dot(Vector3f.cross(
+                            float impulseDenominator = (inverseMassKg + other.inverseMassKg);
+                            float impulseDenominatorSelf = Vector3f.dot(Vector3f.cross(
                                                     MathUtils.someOperation(
                                                             inverseExternalInertiaTensor,
                                                             Vector3f.cross(relativePoint, normal, new Vector3f()),
@@ -260,18 +268,35 @@ public class RigidBodyBox {
                                             ),
                                             normal
                                     );
+                            float impulseDenominatorOther = Vector3f.dot(Vector3f.cross(
+                                            MathUtils.someOperation(
+                                                    otherState.inverseExternalInertiaTensor,
+                                                    Vector3f.cross(pointRelativeToOther, normal, new Vector3f()),
+                                                    new Vector3f()
+                                            ),
+                                            pointRelativeToOther,
+                                            new Vector3f()
+                                    ),
+                                    normal
+                            );
 
-                            Vector3f impulse = new Vector3f(normal);
-                            impulse.scale(impulseNumerator / impulseDenominator);
+                            Vector3f impulseSelf = new Vector3f(normal);
+                            Vector3f impulseOther = new Vector3f(normal);
+                            impulseSelf.scale(impulseNumerator / (impulseDenominator + impulseDenominatorSelf));
+                            impulseOther.scale(-impulseNumerator / (impulseDenominator + impulseDenominatorOther));
 
-                            MathUtils.addScaledTo(impulse, inverseMassKg, linearVelocity);
-                            Vector3f.add(angularMomentum, Vector3f.cross(relativePoint, impulse, new Vector3f()), angularMomentum);
+                            MathUtils.addScaledTo(impulseSelf, inverseMassKg, linearVelocity);
+                            MathUtils.addScaledTo(impulseOther, other.inverseMassKg, otherState.linearVelocity);
+                            Vector3f.add(this.angularMomentum, Vector3f.cross(relativePoint, impulseSelf, new Vector3f()), this.angularMomentum);
+                            Vector3f.add(otherState.angularMomentum, Vector3f.cross(pointRelativeToOther, impulseOther, new Vector3f()), otherState.angularMomentum);
 
-                            //System.out.println(new Vector3f(impulse).scale(inverseMassKg));
-                            //System.out.println("LinearVelocity: " + linearVelocity);
-                            //System.out.println("Angular Momentum: " + angularMomentum);
+                            MathUtils.someOperation(this.inverseExternalInertiaTensor, this.angularMomentum, this.angularVelocity);
+                            MathUtils.someOperation(otherState.inverseExternalInertiaTensor, otherState.angularMomentum, otherState.angularVelocity);
 
-                            MathUtils.someOperation(inverseExternalInertiaTensor, angularMomentum, angularVelocity);
+                            impulseSelf.scale(inverseMassKg);
+                            impulseOther.scale(other.inverseMassKg);
+                            //System.out.println("SELF:  " + impulseSelf);
+                            //System.out.println("OTHER: " + impulseOther);
                         });
                     }
                 }
@@ -356,6 +381,15 @@ public class RigidBodyBox {
                 }
             }
             return results;
+        }
+
+        public void addInternalLinearForce(float newtons, Vec3d direction) {
+            Vector3f f = new Vector3f((float) direction.x, (float) direction.y, (float) direction.z);
+            f.normalise();
+            f.scale(newtons);
+            Matrix3f.transform(orientation, f, f);
+            Vector3f.add(f, force, force);
+
         }
     }
 

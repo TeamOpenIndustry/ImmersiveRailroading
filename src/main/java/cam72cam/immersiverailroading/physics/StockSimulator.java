@@ -1,14 +1,14 @@
 package cam72cam.immersiverailroading.physics;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.physics.simulation.RigidBodyBox;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.world.World;
-import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.*;
@@ -61,6 +61,10 @@ public class StockSimulator {
             if (entity.getTickCount() % 20 == 0) {
                 //System.out.println(String.format("In Pitch: %s, Yaw %s, Roll: %s", (int)entity.getRotationPitch(), (int)entity.getRotationYaw(), (int)entity.roll));
             }
+
+            if (entity instanceof Locomotive) {
+                entity.rbb.previousState().addInternalLinearForce((float)((Locomotive) entity).getTractiveEffortNewtons(Speed.fromMetric(30)) * 4, new Vec3d(1, 0, 0));
+            }
         }
 
         float currentTime = 0f;
@@ -69,7 +73,6 @@ public class StockSimulator {
         List<Runnable> collisions = new ArrayList<>();
 
         while(currentTime < deltaTime) {
-            boolean isPenetrating = false;
             for (RigidBodyBox body : bodies) {
                 body.previousState().computeForces();
 
@@ -80,72 +83,34 @@ public class StockSimulator {
 
             for (RigidBodyBox body : bodies) {
                 List<Runnable> collision = body.currentState().collideWithWorld(world);
-                if (collision == null) {
-                    isPenetrating = true;
-
-                    targetTime = (currentTime + targetTime) / 2;
-                    //System.out.println("TIME: " + (targetTime - currentTime));
-                    if (Math.abs(targetTime- currentTime) < 0.00001f) {
-                        ImmersiveRailroading.warn("PHYSICS LOCK!");
-                        deltaTime = 0;
+                collisions.addAll(collision);
+            }
+            for (int j = 0; j < bodies.size(); j++) {
+                for (int k = 0; k < bodies.size(); k++) {
+                    if (j == k) {
+                        continue;
                     }
-                    break;
-                } else {
+                    List<Runnable> collision = bodies.get(j).collideWithOther(bodies.get(k));
                     collisions.addAll(collision);
                 }
             }
-            if (! isPenetrating) {
-                for (int j = 0; j < bodies.size(); j++) {
-                    for (int k = 0; k < bodies.size(); k++) {
-                        if (j == k) {
-                            continue;
-                        }
-                        List<Runnable> collision = bodies.get(j).collideWithOther(bodies.get(k));
-                        collisions.addAll(collision);
-                    }
-                }
+                    collisions.forEach(Runnable::run);
+
+            currentTime = targetTime;
+            targetTime = deltaTime;
+
+            if (!bodies.isEmpty()) {
+                //System.out.println("NEXT STATE");
             }
-            if (! isPenetrating) {
-                // Apply collisions
-                for (int i = 0; i < 100; i++) {
-                        collisions.forEach(Runnable::run);
-                        collisions.clear();
-                        for (RigidBodyBox body : bodies) {
-                            List<Runnable> collision = body.currentState().collideWithWorld(world);
-                            if (collision == null) {
-                                ImmersiveRailroading.warn("THIS SHOULD NOT HAPPEN");
-                            } else {
-                                collisions.addAll(collision);
-                            }
-                        }
-                    for (int j = 0; j < bodies.size(); j++) {
-                        for (int k = 0; k < bodies.size(); k++) {
-                            if (j == k) {
-                                continue;
-                            }
-                            List<Runnable> collision = bodies.get(j).collideWithOther(bodies.get(k));
-                            collisions.addAll(collision);
-                        }
-                    }
-                        if (collisions.isEmpty()) {
-                            break;
-                        }
-                        //System.out.println("PROCESSING COLLISIONS");
-                }
-
-                currentTime = targetTime;
-                targetTime = deltaTime;
-
-                if (!bodies.isEmpty()) {
-                    //System.out.println("NEXT STATE");
-                }
-                for (RigidBodyBox body : bodies) {
-                    body.nextState();
-                }
+            for (RigidBodyBox body : bodies) {
+                body.nextState();
+                body.previousState().resetForces();
             }
         }
 
-        //System.out.println(String.format("Physics took %sms", System.currentTimeMillis() - time));
+        if (world.getTicks() % 10 == 0) {
+            System.out.println(String.format("Physics took %sms", System.currentTimeMillis() - time));
+        }
 
         for (EntityCoupleableRollingStock entity : entities) {
             entity.setPosition(entity.rbb.previousState().getPosition().subtract(0, entity.getDefinition().getHeight(entity.gauge)/2, 0));
