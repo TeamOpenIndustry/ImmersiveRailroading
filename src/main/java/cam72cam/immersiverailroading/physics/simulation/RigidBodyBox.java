@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.physics.simulation;
 
 import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -33,7 +34,6 @@ public class RigidBodyBox {
         // coordinates
         private Vector3f position = new Vector3f(); // linear
         private Matrix3f orientation = new Matrix3f(); // angular
-        private Matrix3f lastOrientation = new Matrix3f();
 
         // velocity
         private Vector3f linearVelocity = new Vector3f(); // linear
@@ -59,9 +59,9 @@ public class RigidBodyBox {
             MathUtils.setRotation(degX, degY, degZ, orientation);
         }
 
-        public Vector3f getOrientationDelta() {
+        public Vector3f getOrientation() {
             Vector3f result = new Vector3f(); // TODO remove this allocation if possible
-            MathUtils.getRotationDelta(lastOrientation, orientation, result);
+            MathUtils.getRotation(orientation, result);
             return result;
         }
 
@@ -100,22 +100,15 @@ public class RigidBodyBox {
             MathUtils.addScaledTo(angularVelocity, kdAngular, torque);
 
             //testing
-            /*
             float delta = (float) Math.toRadians(20);
+            /*
             angularVelocity.x = delta;
             angularVelocity.y = delta;
             angularVelocity.z = delta;
              */
-
-
-            // Backup orientation before integration
-            // TODO could this be source.orientation ?
-            //lastOrientation.load(orientation);
         }
 
         public void integrate(State previous, float elapsedTime) {
-            this.lastOrientation.load(previous.orientation);
-
             // Copy position from previous
             MathUtils.copyInto(previous.position, this.position);
 
@@ -532,30 +525,38 @@ public class RigidBodyBox {
         private static final Matrix3f R_y = new Matrix3f();
         private static final Matrix3f R_z = new Matrix3f();
         public static void setRotation(float degX, float degY, float degZ, Matrix3f out) {
-            double theta0 = Math.toRadians(degX);
-            double theta1 = Math.toRadians(degY);
-            double theta2 = Math.toRadians(degZ);
+            double rx = Math.toRadians(degX);
+            double ry = Math.toRadians(degY);
+            double rz = Math.toRadians(degZ);
 
-             // TODO get rid of FloatBuffer.wrap
+            float cx = (float) Math.cos(rx);
+            float sx = (float) Math.sin(rx);
+            float cy = (float) Math.cos(ry);
+            float sy = (float) Math.sin(ry);
+            float cz = (float) Math.cos(rz);
+            float sz = (float) Math.sin(rz);
+
+
+            // TODO get rid of FloatBuffer.wrap
 
             // Calculate rotation about x axis
             R_x.load(FloatBuffer.wrap(new float[]{
                     1, 0, 0,
-                    0, (float) Math.cos(theta0), -(float) Math.sin(theta0),
-                    0, (float) Math.sin(theta0), (float) Math.cos(theta0)
+                    0, cx, -sx,
+                    0, sx, cx
             }));
 
             // Calculate rotation about y axis
             R_y.load(FloatBuffer.wrap(new float[]{
-                    (float) Math.cos(theta1), 0, (float) Math.sin(theta1),
+                    cy, 0, sy,
                     0, 1, 0,
-                    -(float) Math.sin(theta1), 0, (float) Math.cos(theta1)
+                    -sy, 0, cy
             }));
 
             // Calculate rotation about z axis
-            R_z.load(FloatBuffer.wrap(new float[]{(
-                    float) Math.cos(theta2), -(float) Math.sin(theta2), 0,
-                    (float) Math.sin(theta2), (float) Math.cos(theta2), 0,
+            R_z.load(FloatBuffer.wrap(new float[]{
+                    cz, -sz, 0,
+                    sz, cz, 0,
                     0, 0, 1
             }));
 
@@ -564,29 +565,16 @@ public class RigidBodyBox {
             Matrix3f.mul(R_y, Matrix3f.mul(R_z, R_x, out), out);
         }
 
-        private static final Matrix3f rotationDelta = new Matrix3f();
-        public static void getRotationDelta(Matrix3f lastOrientation, Matrix3f orientation, Vector3f out) {
-            lastOrientation.invert();
-            Matrix3f.mul(orientation, lastOrientation, rotationDelta);
-            lastOrientation.invert();
-
-            float sy = (float) Math.sqrt(rotationDelta.m00 * rotationDelta.m00 +  rotationDelta.m10 * rotationDelta.m10);
-
-            boolean singular = sy < 1e-6;
-
-            if (!singular) {
-                out.x = (float) Math.atan2(rotationDelta.m21 ,rotationDelta.m22);
-                out.y = (float) Math.atan2(-rotationDelta.m20,sy);
-                out.z = (float) Math.atan2(rotationDelta.m10,rotationDelta.m00);
-            } else {
-                out.x = (float) Math.atan2(-rotationDelta.m12,rotationDelta.m11);
-                out.y = (float) Math.atan2(-rotationDelta.m20,sy);
-                out.z = 0;
-            }
+        public static void getRotation(Matrix3f orientation, Vector3f out) {
+            orientation.transpose();
+            out.y = (float) Math.atan2(-orientation.m20, orientation.m00);
+            out.z = (float) Math.atan2(orientation.m10, Math.sqrt(1 - Math.pow(orientation.m10, 2)));
+            out.x = (float) Math.atan2(-orientation.m12, orientation.m11);
 
             out.x = (float) Math.toDegrees(out.x);
             out.y = (float) Math.toDegrees(out.y);
             out.z = (float) Math.toDegrees(out.z);
+            orientation.transpose();
         }
 
         public static void addScaledTo(Vector3f source, float scale, Vector3f dest) {

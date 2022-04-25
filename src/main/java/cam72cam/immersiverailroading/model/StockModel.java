@@ -168,13 +168,11 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
                 .stream().flatMap(x -> x.render.stream())
                 .collect(Collectors.toList());
 
-        state.rotate(stock.getRotationPitch(), 0, 0, -1);
-        state.rotate(180 - stock.getRotationYaw() - 90, 0, -1, 0);
-        state.translate(-stock.getPosition().x, -stock.getPosition().y, -stock.getPosition().z);
-        state.model_view().multiply(stock.matrix);
-        //state.model_view().set(stock.matrix);
-        //state.translate(0, stock.getDefinition().getHeight(stock.gauge)/2, 0);
-        //state.rotate(stock.roll, 1, 0, 0);
+
+        state.translate(0, stock.getDefinition().getHeight(stock.gauge)/2, 0);
+        state.rotate(180 - stock.getRotationYaw() - 90, 0, 1, 0);
+        state.rotate(stock.getRotationPitch(), 0, 0, 1);
+        state.rotate(stock.roll, 1, 0, 0);
         state.translate(0, -stock.getDefinition().getHeight(stock.gauge)/2, 0);
 
         state.lighting(true)

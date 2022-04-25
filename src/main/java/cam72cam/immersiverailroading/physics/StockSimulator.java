@@ -40,31 +40,16 @@ public class StockSimulator {
 
                 entity.rbb.previousState().setPosition(entity.getPosition().add(0, def.getHeight(entity.gauge)/2, 0));
                 entity.rbb.previousState().setOrientation((entity.roll % 360), 180 + (entity.getRotationYaw() % 360) - 90, (entity.getRotationPitch() % 360));
+                entity.rbb.setRestitution(0.3f);
             } else {
-                //TODO entity.rbb.setMassKg((float) entity.getWeight());
-            }
-
-            entity.rbb.setRestitution(0.3f);
-
-            bodies.add(entity.rbb);
-
-            //entity.setRotationYaw((entity.getRotationYaw()) % 360);
-            //entity.setRotationPitch((entity.getRotationPitch()) % 360);
-            //entity.roll = (entity.roll) % 360;
-
-            //entity.setRotationYaw(0);
-            //entity.setRotationPitch(0);
-            //entity.roll = 0;
-
-            //entity.rbb.previousState().setOrientation((entity.roll % 360), 180 + (entity.getRotationYaw() % 360) - 90, (entity.getRotationPitch() % 360));
-
-            if (entity.getTickCount() % 20 == 0) {
-                //System.out.println(String.format("In Pitch: %s, Yaw %s, Roll: %s", (int)entity.getRotationPitch(), (int)entity.getRotationYaw(), (int)entity.roll));
+                entity.rbb.setMassKg((float) entity.getWeight());
             }
 
             if (entity instanceof Locomotive) {
-                entity.rbb.previousState().addInternalLinearForce((float)((Locomotive) entity).getTractiveEffortNewtons(Speed.fromMetric(30)) * 4, new Vec3d(1, 0, 0));
+                entity.rbb.previousState().addInternalLinearForce((float)((Locomotive) entity).getTractiveEffortNewtons(Speed.fromMetric(30)) * 4, new Vec3d(-1, 0, 0));
             }
+
+            bodies.add(entity.rbb);
         }
 
         float currentTime = 0f;
@@ -114,8 +99,8 @@ public class StockSimulator {
 
         for (EntityCoupleableRollingStock entity : entities) {
             entity.setPosition(entity.rbb.previousState().getPosition().subtract(0, entity.getDefinition().getHeight(entity.gauge)/2, 0));
-            /*
-            Vector3f rots = entity.rbb.previousState().getOrientationDelta();
+
+            Vector3f rots = entity.rbb.previousState().getOrientation();
             if (entity.getTickCount() % 20 == 0) {
                 System.out.println(String.format("Out Pitch: %s, Yaw %s, Roll: %s",
                         (((rots.x) + 360) % 360),
@@ -123,10 +108,10 @@ public class StockSimulator {
                         (((rots.z) + 360) % 360)
                 ));
             }
-            entity.setRoll(entity.roll + rots.x);
-            entity.setRotationYaw(entity.getRotationYaw() + rots.y);
-            entity.setRotationPitch(entity.getRotationPitch() + rots.z);
-             */
+            entity.setRoll(rots.x);
+            entity.setRotationYaw(180 - rots.y - 90);
+            entity.setRotationPitch(rots.z);
+
             entity.matrix = entity.rbb.previousState().getMatrix().transpose();
             entity.points.clear();;
             for (Vector3f point : entity.rbb.getPoints()) {
