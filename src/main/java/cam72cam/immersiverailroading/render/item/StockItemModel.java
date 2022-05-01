@@ -71,7 +71,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			state.scale(scale, scale, scale / (modelLength / 2));
 			state.rotate(85, 0, 1, 0);
 
-			OBJModel.Binder binder = def.getModel().binder().synchronous().lod(StockModel.LOD_MEDIUM);
+			OBJModel.Binder binder = def.getModel().binder().synchronous().lod(StockModel.LOD_SMALL);
 			if (ConfigGraphics.stockItemVariants) {
 				binder.texture(data.texture);
 			}

@@ -41,14 +41,12 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private final boolean hasInterior;
 
     public static final int LOD_LARGE = 1024;
-    public static final int LOD_MEDIUM = 512;
-    public static final int LOD_SMALL = 128;
+    public static final int LOD_SMALL = 512;
 
     public StockModel(EntityRollingStockDefinition def) throws Exception {
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds, i -> {
             List<Integer> lodSizes = new ArrayList<>();
             lodSizes.add(LOD_LARGE);
-            lodSizes.add(LOD_MEDIUM);
             lodSizes.add(LOD_SMALL);
             return lodSizes;
         });
@@ -180,14 +178,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
         Binder binder = binder().texture(stock.getTexture());
         double playerDistance = stock.getPosition().distanceTo(MinecraftClient.getPlayer().getPosition());
-        if (playerDistance > ConfigGraphics.StockLODDistance) {
-            binder.lod(LOD_LARGE);
-        }
-        if (playerDistance > ConfigGraphics.StockLODDistance * 2) {
-            binder.lod(LOD_MEDIUM);
-        }
         if (playerDistance > ConfigGraphics.StockLODDistance * 2) {
             binder.lod(LOD_SMALL);
+        } else if (playerDistance > ConfigGraphics.StockLODDistance) {
+            binder.lod(LOD_LARGE);
         }
         try (
                 OBJRender.Binding bound = binder.bind(state);
