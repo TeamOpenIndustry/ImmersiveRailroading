@@ -287,6 +287,7 @@ public abstract class Locomotive extends FreightTank {
 		super.onTick();
 		
 		if (getWorld().isServer) {
+			sync.setInterval(5);
 			for (Control<?> control : getDefinition().getModel().getControls()) {
 				if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
 					setTrainBrake(Math.max(0, Math.min(1, getTrainBrake() + (getControlPosition(control) - 0.5f) / 8)));

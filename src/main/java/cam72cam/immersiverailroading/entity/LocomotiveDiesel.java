@@ -121,7 +121,7 @@ public class LocomotiveDiesel extends Locomotive {
 				if (this.throttleCooldown > 0) {
 					return;
 				}
-				throttleCooldown = 5;
+				throttleCooldown = 2;
 				super.handleKeyPress(source, key);
 				break;
 			default:
