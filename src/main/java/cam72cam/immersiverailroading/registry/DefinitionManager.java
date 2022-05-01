@@ -205,7 +205,12 @@ public class DefinitionManager {
                 input.close();
 
                 EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, jsonData);
-                System.gc();
+
+                Runtime runtime = Runtime.getRuntime();
+                if (runtime.freeMemory() < runtime.maxMemory() * 0.25) {
+                    System.out.println("GC");
+                    System.gc();
+                }
 
                 return Pair.of(stockDefinition.defID, stockDefinition);
             } catch (Exception e) {
