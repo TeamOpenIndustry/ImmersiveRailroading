@@ -192,7 +192,7 @@ public abstract class EntityRollingStockDefinition {
 
     public final EntityRollingStock spawn(World world, Vec3d pos, float yaw, Gauge gauge, String texture) {
         EntityRollingStock stock = (EntityRollingStock) EntityRegistry.create(world, type);
-        stock.setPosition(pos.add(0, 1, 0));
+        stock.setPosition(pos);
         stock.setRotationYaw(yaw);
         // Override prev
         stock.setRotationYaw(yaw);

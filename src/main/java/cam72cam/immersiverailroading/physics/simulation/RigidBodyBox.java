@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.physics.simulation;
 
 import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -290,7 +291,11 @@ public class RigidBodyBox {
                             impulseOther.scale(other.inverseMassKg);
                             //System.out.println("SELF:  " + impulseSelf);
                             //System.out.println("OTHER: " + impulseOther);
+
+                            updateVertices();
+                            otherState.updateVertices();
                         });
+                        results.get(results.size()-1).run();
                     }
                 }
             }
@@ -304,10 +309,16 @@ public class RigidBodyBox {
                 return Collections.emptyList();
             }
             List<Runnable> results = new ArrayList<>();
-            float epsilon = 0.01f;
+            float epsilon = 0.0001f;
 
             for (int i = 0; i < calculatedPoints.length; i++) {
                 Vector3f calculatedPoint = calculatedPoints[i];
+                if (calculatedPoint.y < 1) {
+                    break;
+                }
+                if (calculatedPoint.y > 256) {
+                    break;
+                }
 
                 Vec3i blockPos = new Vec3i(calculatedPoint.x, calculatedPoint.y, calculatedPoint.z).up();
                 while (blockPos.y > 1) {
@@ -343,7 +354,7 @@ public class RigidBodyBox {
                             Vector3f.add(linearVelocity, Vector3f.cross(angularVelocity, relativePoint, velocity), velocity);
 
 
-                            float impulseNumerator = -(1 + restitution) *
+                            float impulseNumerator = -(0.5f + restitution) *
                                     Vector3f.dot(velocity, worldNorm);
                             float impulseDenominator = inverseMassKg +
                                     Vector3f.dot(Vector3f.cross(
@@ -369,7 +380,10 @@ public class RigidBodyBox {
                             //System.out.println("Angular Momentum: " + angularMomentum);
 
                             MathUtils.someOperation(inverseExternalInertiaTensor, angularMomentum, angularVelocity);
+
+                            updateVertices();
                         });
+                        results.get(results.size()-1).run();
                     }
                 }
             }
@@ -383,6 +397,27 @@ public class RigidBodyBox {
             Matrix3f.transform(orientation, f, f);
             Vector3f.add(f, force, force);
 
+        }
+
+        public void copyPhysicsAtPoint(RigidBodyBox rbb, Vec3d center) {
+            Vector3f ctr = new Vector3f((float) center.x, (float) center.y, (float) center.z);
+
+            // Position
+            Vector3f.add(
+                    position,
+                    Matrix3f.transform(orientation, ctr, rbb.previousState().position),
+                    rbb.previousState().position
+            );
+
+            // Orientation
+            Matrix3f.load(orientation, rbb.previousState().orientation);
+
+            // Velocity
+            Vector3f.add(
+                    linearVelocity,
+                    Vector3f.cross(angularVelocity, ctr, rbb.previousState().linearVelocity),
+                    rbb.previousState().linearVelocity
+            );
         }
     }
 
@@ -567,6 +602,7 @@ public class RigidBodyBox {
 
         public static void getRotation(Matrix3f orientation, Vector3f out) {
             orientation.transpose();
+            // https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix  See Tait-Bryan Angles # YZX
             out.y = (float) Math.atan2(-orientation.m20, orientation.m00);
             out.z = (float) Math.atan2(orientation.m10, Math.sqrt(1 - Math.pow(orientation.m10, 2)));
             out.x = (float) Math.atan2(-orientation.m12, orientation.m11);
@@ -617,16 +653,20 @@ public class RigidBodyBox {
         private static final Vector3f Z = new Vector3f();
         @SuppressWarnings("SuspiciousNameCombination")
         private static void orthnormalize(Matrix3f mat) {
-            X.x = mat.m00; X.y = mat.m10; X.z = mat.m20;
-            X.normalise();
-            Y.x = mat.m01;  Y.y = mat.m11; Y.z = mat.m21;
+            try {
+                X.x = mat.m00; X.y = mat.m10; X.z = mat.m20;
+                X.normalise();
+                Y.x = mat.m01;  Y.y = mat.m11; Y.z = mat.m21;
 
-            Vector3f.cross(X, Y, Z).normalise();
-            Vector3f.cross(Z, X, Y).normalise();
+                Vector3f.cross(X, Y, Z).normalise();
+                Vector3f.cross(Z, X, Y).normalise();
 
-            mat.m00 = X.x; mat.m01 = Y.x; mat.m02 = Z.x;
-            mat.m10 = X.y; mat.m11 = Y.y; mat.m12 = Z.y;
-            mat.m20 = X.z; mat.m21 = Y.z; mat.m22 = Z.z;
+                mat.m00 = X.x; mat.m01 = Y.x; mat.m02 = Z.x;
+                mat.m10 = X.y; mat.m11 = Y.y; mat.m12 = Z.y;
+                mat.m20 = X.z; mat.m21 = Y.z; mat.m22 = Z.z;
+            } catch (IllegalStateException norm) {
+                ImmersiveRailroading.warn("%s", norm);
+            }
         }
 
         public static void copyInto(Vector3f source, Vector3f dest) {

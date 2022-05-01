@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.RollingStockComponent;
 import cam72cam.immersiverailroading.physics.simulation.RigidBodyBox;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.Speed;
@@ -27,6 +28,7 @@ public class StockSimulator {
 
         // Single step for now
         List<EntityCoupleableRollingStock> entities = world.getEntities(EntityCoupleableRollingStock.class);
+        List<RollingStockComponent> components = world.getEntities(RollingStockComponent.class);
 
         List<RigidBodyBox> bodies = new ArrayList<>();
 
@@ -52,6 +54,18 @@ public class StockSimulator {
             bodies.add(entity.rbb);
         }
 
+        for (RollingStockComponent comp : components) {
+            if (comp.rbb == null) {
+                Vec3d mm = comp.modelMax.subtract(comp.modelMin);
+                comp.rbb = new RigidBodyBox((float) mm.x, (float) mm.y, (float) mm.z, (float) comp.weightKg);
+                comp.rbb.previousState().setPosition(comp.getPosition());
+                comp.rbb.previousState().setOrientation((comp.roll % 360), 180 + (comp.getRotationYaw() % 360) - 90, (comp.getRotationPitch() % 360));
+                comp.rbb.setRestitution(0.3f);
+            }
+
+            bodies.add(comp.rbb);
+        }
+
         float currentTime = 0f;
         float targetTime = 1f / 20f;
         float deltaTime = targetTime;
@@ -68,15 +82,12 @@ public class StockSimulator {
 
             for (RigidBodyBox body : bodies) {
                 List<Runnable> collision = body.currentState().collideWithWorld(world);
-                collisions.addAll(collision);
+                //collisions.addAll(collision);
             }
-            for (int j = 0; j < bodies.size(); j++) {
-                for (int k = 0; k < bodies.size(); k++) {
-                    if (j == k) {
-                        continue;
-                    }
+            for (int j = 0; j < bodies.size()-1; j++) {
+                for (int k = j+1; k < bodies.size(); k++) {
                     List<Runnable> collision = bodies.get(j).collideWithOther(bodies.get(k));
-                    collisions.addAll(collision);
+                    //collisions.addAll(collision);
                 }
             }
                     collisions.forEach(Runnable::run);
@@ -99,15 +110,7 @@ public class StockSimulator {
 
         for (EntityCoupleableRollingStock entity : entities) {
             entity.setPosition(entity.rbb.previousState().getPosition().subtract(0, entity.getDefinition().getHeight(entity.gauge)/2, 0));
-
             Vector3f rots = entity.rbb.previousState().getOrientation();
-            if (entity.getTickCount() % 20 == 0) {
-                System.out.println(String.format("Out Pitch: %s, Yaw %s, Roll: %s",
-                        (((rots.x) + 360) % 360),
-                        (((rots.y) + 360) % 360),
-                        (((rots.z) + 360) % 360)
-                ));
-            }
             entity.setRoll(rots.x);
             entity.setRotationYaw(180 - rots.y - 90);
             entity.setRotationPitch(rots.z);
@@ -123,7 +126,20 @@ public class StockSimulator {
             } catch (SerializationException e) {
                 e.printStackTrace();
             }
-            //TODO other rots
+        }
+
+        for (RollingStockComponent comp : components) {
+            comp.setPosition(comp.rbb.previousState().getPosition());
+            Vector3f rots = comp.rbb.previousState().getOrientation();
+            comp.roll = rots.x;
+            comp.setRotationYaw(180 - rots.y - 90);
+            comp.setRotationPitch(rots.z);
+            try {
+                comp.sync.setInterval(1);
+                comp.sync.send();
+            } catch (SerializationException e) {
+                e.printStackTrace();
+            }
         }
 
 

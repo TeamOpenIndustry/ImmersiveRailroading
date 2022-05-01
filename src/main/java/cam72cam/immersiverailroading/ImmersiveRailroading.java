@@ -6,11 +6,13 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
+import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.physics.StockSimulator;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.item.*;
@@ -33,9 +35,11 @@ import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.input.Keyboard.KeyCode;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.render.*;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
@@ -74,6 +78,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveDiesel::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveSteam::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, Tender::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+				EntityRegistry.register(ImmersiveRailroading.instance, RollingStockComponent::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 
 				Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
@@ -161,6 +166,34 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRenderer.register(CarTank.class, stockRender);
 				EntityRenderer.register(Tender.class, stockRender);
 				EntityRenderer.register(HandCar.class, stockRender);
+				EntityRenderer.register(RollingStockComponent.class, new IEntityRender<RollingStockComponent>() {
+					@Override
+					public void render(RollingStockComponent stock, RenderState state, float partialTicks) {
+						state.rotate(180 - stock.getRotationYaw() - 90, 0, 1, 0);
+						state.rotate(stock.getRotationPitch(), 0, 0, 1);
+						state.rotate(stock.roll, 1, 0, 0);
+
+						state.lighting(true)
+								.cull_face(false)
+								.rescale_normal(true)
+								.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
+
+						EntityRollingStockDefinition def = DefinitionManager.getDefinition(stock.defID);
+						OBJModel.Binder binder = def.getModel().binder().texture(stock.texture);
+
+						state.translate(stock.modelMin.add(stock.modelMax).scale(-0.5));
+						//state.translate(0, 1, 0);
+
+						try (OBJRender.Binding bound = binder.bind(state)) {
+							bound.draw(stock.modelIDs);
+						}
+					}
+
+					@Override
+					public void postRender(RollingStockComponent entity, RenderState state, float partialTicks) {
+
+					}
+				});
 
 
 				Function<KeyTypes, Runnable> onKeyPress = type -> () -> new KeyPressPacket(type).sendToServer();

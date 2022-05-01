@@ -7,20 +7,20 @@ import java.util.Map;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemPlate;
-import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
-import cam72cam.immersiverailroading.library.AssemblyStep;
-import cam72cam.immersiverailroading.library.ItemComponentType;
-import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
+import cam72cam.immersiverailroading.physics.simulation.RigidBodyBox;
 import cam72cam.mod.entity.DamageType;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IWorldData;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
@@ -362,6 +362,38 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		}
 
 		if (this.isDead() && shouldDropItems(type, amount)) {
+			List<ItemComponentType> components = isBuilt ? this.getDefinition().getItemComponents() : this.getItemComponents();
+
+			double density = getDefinition().getWeight(gauge) /
+					(getDefinition().getWidth(gauge) * getDefinition().getLength(gauge) * getDefinition().getHeight(gauge));
+
+			Map<ItemComponentType, List<ModelComponent>> mmap = new HashMap<>();
+			for (ItemComponentType component : components) {
+				for (ModelComponentType mct : component.render) {
+					List<ModelComponent> mcs = getDefinition().getComponents(mct);
+					if (mcs != null && !mcs.isEmpty()) {
+						mmap.computeIfAbsent(component, x -> new ArrayList<>()).addAll(mcs);
+					}
+				}
+			}
+
+			RigidBodyBox rbb = ((EntityCoupleableRollingStock) this).rbb;
+
+			for (ItemComponentType component : components) {
+				RollingStockComponent ent = (RollingStockComponent) EntityRegistry.create(getWorld(), RollingStockComponent.class);
+				ent.setup(
+						defID,
+						getTexture(),
+						gauge,
+						component,
+						mmap.get(component).remove(0),
+						density,
+						rbb
+				);
+				getWorld().spawnEntity(ent);
+			}
+
+			/*
 			if (isBuilt) {
 				ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK, 1);
 				ItemRollingStock.Data data = new ItemRollingStock.Data(item);
@@ -382,7 +414,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 					System.out.println(item.getTagCompound());
 					getWorld().dropItem(item, source != null ? source.getBlockPosition() : getBlockPosition());
 				}
-			}
+			}*/
 		}
 	}
 

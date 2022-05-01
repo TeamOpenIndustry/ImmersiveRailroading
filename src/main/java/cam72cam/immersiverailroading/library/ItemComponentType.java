@@ -134,7 +134,7 @@ public enum ItemComponentType {
 		return TextUtil.translate("part.immersiverailroading:component." + super.toString().toLowerCase(Locale.ROOT));
 	}
 
-	private ModelComponent getExampleComponent(EntityRollingStockDefinition def) {
+	public ModelComponent getExampleComponent(EntityRollingStockDefinition def) {
 		for (ModelComponentType type : this.render) {
 			List<ModelComponent> components = def.getComponents(type);
 			if (components != null && !components.isEmpty()) {
