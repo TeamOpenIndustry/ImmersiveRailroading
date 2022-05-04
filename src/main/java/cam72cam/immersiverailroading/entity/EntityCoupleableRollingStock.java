@@ -22,7 +22,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import org.apache.commons.lang3.tuple.Pair;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRItems;
@@ -34,8 +33,10 @@ import cam72cam.immersiverailroading.physics.PhysicsAccummulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
+import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
+
 	static {
 		World.onTick(world -> {
 			if (world.isClient) {
@@ -400,7 +401,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					//Skip self
 					continue;
 				}
+				TickPos otp = stock.stock.getTickPos(tickOffset - 1);
 				isStuck &= !stock.stock.simulateMove(stock.prev, tickOffset);
+				if (otp != null && !otp.position.equals(stock.stock.getTickPos(tickOffset).position)) {
+					moved = true;
+				}
 			}
 		}
 		
