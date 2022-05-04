@@ -333,7 +333,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                         clackFront.setVolume(volume);
                         clackFront.play(new Vec3d(posFront));
                         clackFrontPos = rb.getPos();
-                        if (getWorld().getTicks() % 3 == 0) { // 1/3 chance
+                        if (getWorld().getTicks() % ConfigGraphics.StockSwayChance == 0) {
                             swayImpulse += 7 * rb.getBumpiness();
                             swayImpulse = Math.min(swayImpulse, 20);
                         }

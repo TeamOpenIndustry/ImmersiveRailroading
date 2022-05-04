@@ -45,4 +45,7 @@ public class ConfigGraphics {
 
 	@Comment("0.0 is no sway, 1.0 is default sway")
 	public static double StockSwayMultiplier = 1;
+
+	@Comment("How likely a piece of stock is to sway (1 == always, 10 == infrequent)")
+	public static int StockSwayChance = 1;
 }
