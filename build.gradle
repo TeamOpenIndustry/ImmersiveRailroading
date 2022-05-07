@@ -46,7 +46,7 @@ if ((new File('umc.gradle')).exists()) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId archivesBaseName
+            artifactId 'ImmersiveRailroading'
         }
     }
     repositories {
