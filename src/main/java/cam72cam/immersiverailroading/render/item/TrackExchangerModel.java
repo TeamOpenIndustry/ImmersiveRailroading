@@ -75,7 +75,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	}
 
 	@Override
-	public void applyTransform(ItemRender.ItemRenderType type, RenderState state) {
+	public void applyTransform(ItemStack stack, ItemRender.ItemRenderType type, RenderState state) {
 		switch (type) {
 			case THIRD_PERSON_LEFT_HAND:
 				state.translate(1.15, 0.5, 0.5);

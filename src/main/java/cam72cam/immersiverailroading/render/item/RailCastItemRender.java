@@ -46,7 +46,7 @@ public class RailCastItemRender implements ItemRender.IItemModel {
 	}
 
 	@Override
-	public void applyTransform(ItemRender.ItemRenderType type, RenderState state) {
+	public void applyTransform(ItemStack stack, ItemRender.ItemRenderType type, RenderState state) {
 		ItemRender.IItemModel.defaultTransform(type, state);
 
 		if (type == ItemRender.ItemRenderType.GUI) {
