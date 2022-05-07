@@ -40,9 +40,6 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
-            groupId 'cam72cam.immersiverailroading'
-            artifactId 'ImmersiveRailroading'
-            version irVersion
         }
     }
     repositories {
@@ -76,4 +73,3 @@ if ((new File('umc.gradle')).exists()) {
     apply from: 'umc.gradle'
     apply from: 'ImmersiveRailroadingIntegration/dependencies.gradle'
 }
-
