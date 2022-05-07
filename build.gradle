@@ -40,7 +40,9 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
+            groupId 'cam72cam.immersiverailroading'
             artifactId 'ImmersiveRailroading'
+            version irVersion
         }
     }
     repositories {
