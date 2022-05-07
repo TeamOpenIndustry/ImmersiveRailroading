@@ -8,8 +8,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.BlendMode;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 import util.Matrix4;
 
 public class RailPreviewRender {
@@ -22,7 +20,7 @@ public class RailPreviewRender {
 		StandardModel model = new StandardModel();
         model.addCustom((state, pt) -> {
             MinecraftClient.startProfiler("tile_rail_preview");
-            state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
+            state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
             if (te.isAboveRails()) {
                 state.translate(0, -1, 0);
             }

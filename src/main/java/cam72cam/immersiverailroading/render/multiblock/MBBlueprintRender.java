@@ -10,7 +10,6 @@ import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.Map;
@@ -23,7 +22,7 @@ public class MBBlueprintRender {
             return;
         }
 
-        state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.3f)).lightmap(1, 1);
+        state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.3f)).lightmap(1, 1);
         Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
         Vec3d playerPos = player.getPosition();
         Vec3d lastPos = player.getLastTickPos();

@@ -18,7 +18,6 @@ import cam72cam.mod.render.opengl.DirectDraw;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.*;
@@ -164,7 +163,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
                 .lightmap(1, 1)
                 .depth_test(true)
                 .depth_mask(false)
-                .alpha_test(false).blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
+                .alpha_test(false).blend(new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA));
 
         if (intensity > 0.01) {
             RenderState matrix = state.clone();

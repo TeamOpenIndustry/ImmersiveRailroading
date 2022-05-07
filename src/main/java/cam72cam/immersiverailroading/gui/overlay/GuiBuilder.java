@@ -15,7 +15,6 @@ import cam72cam.mod.serialization.TagField;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import javax.imageio.ImageIO;
@@ -239,7 +238,7 @@ public class GuiBuilder {
             draw.draw(state.clone()
                     .texture(Texture.wrap(image))
                     .alpha_test(false)
-                    .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA))
+                    .blend(new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA))
             );
         }
         if (text != null) {

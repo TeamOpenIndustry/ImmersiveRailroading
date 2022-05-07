@@ -17,7 +17,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
 
 public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	@Override
@@ -78,7 +77,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			infoCache.put(key, info);
 		}
 
-		state.blend(new BlendMode(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE).constantColor(1, 1, 1, 0.5f)).lightmap(1, 1);
+		state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.5f)).lightmap(1, 1);
 
 
 		Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);

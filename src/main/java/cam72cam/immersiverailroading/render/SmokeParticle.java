@@ -8,7 +8,6 @@ import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
-import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class SmokeParticle extends Particle {
     public static void renderAll(List<SmokeParticle> particles, RenderState state, float partialTicks) {
         state.lighting(false)
                 .cull_face(false)
-                .blend(new BlendMode(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA));
+                .blend(new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA));
 
         Map<Identifier, List<SmokeParticle>> partitioned = particles.stream().collect(Collectors.groupingBy(p -> p.data.texture));
         for (Identifier texture : partitioned.keySet()) {
