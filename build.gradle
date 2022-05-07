@@ -39,7 +39,7 @@ task ('umcIntegration') {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId 'cam72cam.immersiverailroading'
+            artifact jar
             artifactId 'ImmersiveRailroading'
         }
     }
