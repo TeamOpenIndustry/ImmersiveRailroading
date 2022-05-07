@@ -33,10 +33,6 @@ jobs:
         java-version: 1.8
     - name: keyscan
       run: mkdir -p ~/.ssh/ && ssh-keyscan -t rsa teamopenindustry.cc >> ~/.ssh/known_hosts
-    - name: secrets
-      env:
-        MAVENCI: ${{ secrets.MAVENCI }}
-      run: echo "${MAVENCI}" >> publish_key
     - name: Install deps
       run: sudo apt install -y pngquant findutils xvfb
     - name: Setup Universal Mod Core (and helpers)
@@ -54,10 +50,10 @@ jobs:
       run: xvfb-run --auto-servernum ./gradlew runData || xvfb-run --auto-servernum ./gradlew runData || true
     - name: Gradle build
       run: ./gradlew build
-    - name: Gradle uploadArchives
-      run: ./gradlew uploadArchives
-    - name: cleanup
-      run: rm publish_key
+    - name: Gradle publish
+      env:
+        MAVENCI_PASS: ${{ secrets.MAVENCI_PASS }}
+      run: ./gradlew publish
     - uses: actions/upload-artifact@v2
       with:
         name: Immersive Railroading ${{matrix.branch}}

@@ -11,7 +11,7 @@ buildscript {
 }
 
 apply plugin: 'cam72cam.universalmodcore'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 String irVersion = '1.9.1'
 if (!"release".equalsIgnoreCase(System.getProperty("target"))) {
@@ -43,25 +43,24 @@ if ((new File('umc.gradle')).exists()) {
     apply from: 'ImmersiveRailroadingIntegration/dependencies.gradle'
 }
 
-task deployJar(type: Jar)
-
-configurations {
-    deployerJars
-}
-
-dependencies {
-    deployerJars "org.apache.maven.wagon:wagon-ssh:2.9"
-}
-
-uploadArchives {
-    tasks.uploadArchives.dependsOn build
-    repositories.mavenDeployer {
-        configuration = configurations.deployerJars
-        repository(url: "scp://teamopenindustry.cc/var/www/html/maven/") {
-            authentication(userName: "mavenci", privateKey: "publish_key")
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            artifactId archivesBaseName
+        }
+    }
+    repositories {
+        maven {
+            url "sftp://teamopenindustry.cc:22/var/www/html/maven/"
+            credentials {
+                username = "mavenci"
+                password = System.getenv("MAVENCI_PASS")
+            }
         }
     }
 }
+
 
 task ('showBuildInfo') {
     doLast {
@@ -74,4 +73,4 @@ task ('showBuildInfo') {
     }
 }
 
-uploadArchives.finalizedBy showBuildInfo
+publish.finalizedBy showBuildInfo
