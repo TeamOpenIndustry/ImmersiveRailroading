@@ -77,8 +77,8 @@ public class CraftPicker {
 		
 		if (craftType == CraftingType.CASTING) {
         	stock.add(new ItemStack(IRItems.ITEM_CAST_RAIL, 1));
-        	stock.add(IRFuzzy.steelIngotOrFallback().example());
-        	stock.add(IRFuzzy.steelBlockOrFallback().example());
+        	stock.addAll(IRFuzzy.steelIngotOrFallback().enumerate());
+        	stock.addAll(IRFuzzy.steelBlockOrFallback().enumerate());
 	        stock.addAll(IRItems.ITEM_AUGMENT.getItemVariants(ItemTabs.MAIN_TAB));
 		}
 		stockSelector.setItems(stock);
