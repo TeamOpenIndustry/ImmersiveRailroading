@@ -14,6 +14,8 @@ public class RailSettings {
     public final int length;
     @TagField(value = "degrees", mapper = DegreesMapper.class)
     public final float degrees;
+    @TagField("curvosity")
+    public final float curvosity;
     @TagField("pos_type")
     public final TrackPositionType posType;
     @TagField(value = "smoothing", mapper = SmoothingMapper.class)
@@ -31,7 +33,7 @@ public class RailSettings {
     @TagField("track")
     public final String track;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -44,6 +46,7 @@ public class RailSettings {
         this.railBedFill = railBedFill;
         this.isPreview = isPreview;
         this.isGradeCrossing = isGradeCrossing;
+        this.curvosity = curvosity;
     }
 
     private RailSettings() {
@@ -60,6 +63,7 @@ public class RailSettings {
         railBedFill = ItemStack.EMPTY;
         isPreview = false;
         isGradeCrossing = false;
+        curvosity = 1;
     }
 
     public void write(ItemStack stack) {
@@ -126,14 +130,15 @@ public class RailSettings {
 				type,
 				length,
                 degrees,
-				posType,
+               curvosity,
+               posType,
                 smoothing,
                 direction,
 				railBed,
 				railBedFill,
 				isPreview,
 				isGradeCrossing
-		) ;
+       ) ;
     }
 
     public RailSettings withType(TrackItems type) {
@@ -143,6 +148,7 @@ public class RailSettings {
                 type,
                 length,
                 degrees,
+                curvosity,
                 posType,
                 smoothing,
                 direction,
@@ -160,6 +166,7 @@ public class RailSettings {
                 type,
                 length,
                 degrees,
+                curvosity,
                 posType,
                 smoothing,
                 direction,
@@ -177,6 +184,7 @@ public class RailSettings {
                 type,
                 length,
                 degrees,
+                curvosity,
                 posType,
                 smoothing,
                 direction,
@@ -194,6 +202,7 @@ public class RailSettings {
                 type,
                 length,
                 degrees,
+                curvosity,
                 posType,
                 smoothing,
                 direction,
@@ -212,6 +221,7 @@ public class RailSettings {
                 type,
                 length,
                 degrees,
+                curvosity,
                 posType,
                 smoothing,
                 direction,

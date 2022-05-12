@@ -71,7 +71,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			nextPos = info.customInfo.placementPosition.subtract(info.placementInfo.placementPosition);
 		}
 
-		double ctrlGuess = nextPos.length()/2;
+		double ctrlGuess = nextPos.length()/2 * Math.max(0.1, info.settings.curvosity);
 		float angle = info.placementInfo.yaw;
 
 		float angle2 = angle + 180;

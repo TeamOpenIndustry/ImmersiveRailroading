@@ -27,6 +27,7 @@ public class TrackGui implements IScreen {
 	private Button typeButton;
 	private TextField lengthInput;
 	private Slider degreesSlider;
+	private Slider curvositySlider;
 	private CheckBox isPreviewCB;
 	private CheckBox isGradeCrossingCB;
 	private Button gaugeButton;
@@ -39,6 +40,7 @@ public class TrackGui implements IScreen {
 
 	private int length;
 	private float degrees;
+	private float curvosity;
 	private Gauge gauge;
 	private String track;
 	private boolean isPreview;
@@ -78,6 +80,7 @@ public class TrackGui implements IScreen {
 		RailSettings settings = RailSettings.from(stack);
 		length = settings.length;
 		degrees = settings.degrees;
+		curvosity = settings.curvosity;
 		type = settings.type;
 		gauge = settings.gauge;
 		track = settings.track;
@@ -121,7 +124,8 @@ public class TrackGui implements IScreen {
 				type = next(type, hand);
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
 				degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
-				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN);
+				curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN || type == TrackItems.SWITCH);
 			}
 		};
 
@@ -139,7 +143,16 @@ public class TrackGui implements IScreen {
 		degreesSlider.onSlider();
 		degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
 
-		bedTypeButton = new Button(screen, 0 - 100, -24 + 4 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed))) {
+		this.curvositySlider = new Slider(screen, 0 - 75,  - 24 + 4 * 22+1, "", 0.25, 1.5, curvosity, true) {
+			@Override
+			public void onSlider() {
+				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", this.getValue())));
+			}
+		};
+		curvositySlider.onSlider();
+		curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+
+		bedTypeButton = new Button(screen, 0 - 100, -24 + 5 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed))) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
@@ -154,7 +167,7 @@ public class TrackGui implements IScreen {
 			}
 		};
 
-		bedFillButton = new Button(screen, 0 - 100, -24 + 5 * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill))) {
+		bedFillButton = new Button(screen, 0 - 100, -24 + 6 * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill))) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
@@ -169,7 +182,7 @@ public class TrackGui implements IScreen {
 			}
 		};
 
-		posTypeButton = new Button(screen, 0 - 100, -24 + 6 * 22, GuiText.SELECTOR_POSITION.toString(posType)) {
+		posTypeButton = new Button(screen, 0 - 100, -24 + 7 * 22, GuiText.SELECTOR_POSITION.toString(posType)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				posType = next(posType, hand);
@@ -177,16 +190,16 @@ public class TrackGui implements IScreen {
 			}
 		};
 
-		smoothingButton = new Button(screen, 0 - 100, -24 + 7 * 22, GuiText.SELECTOR_SMOOTHING.toString(smoothing)) {
+		smoothingButton = new Button(screen, 0 - 100, -24 + 8 * 22, GuiText.SELECTOR_SMOOTHING.toString(smoothing)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				smoothing = next(smoothing, hand);
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(smoothing));
 			}
 		};
-		smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN);
+		smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN || type == TrackItems.SWITCH);
 
-		directionButton = new Button(screen, 0 - 100, -24 + 8 * 22, GuiText.SELECTOR_DIRECTION.toString(direction)) {
+		directionButton = new Button(screen, 0 - 100, -24 + 9 * 22, GuiText.SELECTOR_DIRECTION.toString(direction)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				direction = next(direction, hand);
@@ -194,7 +207,7 @@ public class TrackGui implements IScreen {
 			}
 		};
 
-		gaugeButton = new Button(screen, 0 - 100, -24 + 9 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
+		gaugeButton = new Button(screen, 0 - 100, -24 + 10 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				gauge = next(Gauge.values(), gauge, hand);
@@ -202,14 +215,14 @@ public class TrackGui implements IScreen {
 			}
 		};
 
-		isPreviewCB = new CheckBox(screen, -75, -24 + 10 * 22 + 4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview) {
+		isPreviewCB = new CheckBox(screen, -75, -24 + 11 * 22 + 4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				isPreview = isPreviewCB.isChecked();
 			}
 		};
 
-		isGradeCrossingCB = new CheckBox(screen, 0 - 75, -24 + 11 * 22 + 4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing) {
+		isGradeCrossingCB = new CheckBox(screen, 0 - 75, -24 + 12 * 22 + 4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				isGradeCrossing = isGradeCrossingCB.isChecked();
@@ -225,7 +238,7 @@ public class TrackGui implements IScreen {
 	@Override
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
-			RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
+			RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation), (float) curvositySlider.getValue(), posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 			if (this.te != null) {
 				new ItemRailUpdatePacket(te.getPos(), settings).sendToServer();
 			} else {
@@ -242,7 +255,7 @@ public class TrackGui implements IScreen {
 		int scale = 8;
 
 		// This could be more efficient...
-		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation),  posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
+		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation), (float) curvositySlider.getValue(), posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);
 

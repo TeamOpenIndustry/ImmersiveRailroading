@@ -106,7 +106,8 @@ public class ItemTrackBlueprint extends CustomItem {
             GuiText.TRACK_RAIL_BED.toString(settings.railBed.getDisplayName()),
             GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName()),
             (settings.isPreview ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString(),
-            GuiText.TRACK_QUARTERS.toString(settings.degrees)
+            GuiText.TRACK_QUARTERS.toString(settings.degrees),
+			GuiText.TRACK_CURVOSITY.toString(String.format("%.2f", settings.curvosity))
 		);
 	}
 

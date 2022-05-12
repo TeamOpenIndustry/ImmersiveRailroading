@@ -98,13 +98,14 @@ public class TrackExchangerGui implements IScreen {
 				TrackItems.STRAIGHT,
 				10,
 				0,
-				TrackPositionType.FIXED,
+				1, TrackPositionType.FIXED,
 				TrackSmoothing.BOTH,
 				TrackDirection.NONE,
 				railBed,
 				ItemStack.EMPTY,
 				false,
-				false);
+				false
+		);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);
 

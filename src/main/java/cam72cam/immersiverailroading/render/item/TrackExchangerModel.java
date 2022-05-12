@@ -38,7 +38,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	public static void render(ItemStack stack, World world, RenderState state) {
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		RailInfo info = new RailInfo(
-                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, 18, 0, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false),
+                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, 18, 0, 1, TrackPositionType.FIXED, TrackSmoothing.BOTH, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,
