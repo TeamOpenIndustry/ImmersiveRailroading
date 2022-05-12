@@ -213,7 +213,7 @@ public class RailInfo {
 				Set<String> exStrs = Arrays.stream(examples).map(ItemStack::getDisplayName).limit(3).collect(Collectors.toSet());
 				String example = String.join(" | ", exStrs);
 				if (exStrs.size() > 1) {
-					if (examples.length > 3) {
+					if (exStrs.size() > 3) {
 						example = "[ " + example + ", ... ]";
 					} else {
 						example = "[ " + example + " ]";
