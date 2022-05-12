@@ -210,10 +210,14 @@ public class RailInfo {
 			}
 
 			if (found < count) {
-				Set<String> exStrs = Arrays.stream(examples).map(ItemStack::getDisplayName).collect(Collectors.toSet());
+				Set<String> exStrs = Arrays.stream(examples).map(ItemStack::getDisplayName).limit(3).collect(Collectors.toSet());
 				String example = String.join(" | ", exStrs);
 				if (exStrs.size() > 1) {
-					example = "[ " + example + " ]";
+					if (examples.length > 3) {
+						example = "[ " + example + ", ... ]";
+					} else {
+						example = "[ " + example + " ]";
+					}
 				}
 				player.sendMessage(ChatText.BUILD_MISSING.getMessage(count - found, example));
 				return false;
