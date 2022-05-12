@@ -23,10 +23,8 @@ import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
 
 public class PlateRollerGUI implements IScreen {
 	private Button gaugeButton;
+
 	private Gauge gauge;
-	
-	private Button plateButton;
-	private PlateType plate;
 
 	private Button pickerButton;
 
@@ -42,14 +40,12 @@ public class PlateRollerGUI implements IScreen {
 
 		ItemPlate.Data data = new ItemPlate.Data(currentItem);
 		gauge = data.gauge;
-		plate = data.type;
 	}
 	
 	private void updatePickerButton() {
-		EntityRollingStockDefinition def = new ItemPlate.Data(currentItem.copy()).def;
-		if (def != null) {
-			pickerButton.setText(GuiText.SELECTOR_PLATE_BOILER.toString(def.name()));
-		}
+		pickerButton.setText(
+				GuiText.SELECTOR_PLATE_TYPE.toString(currentItem != null ? currentItem.getDisplayName() : "")
+		);
 	}
 
 	@Override
@@ -59,7 +55,7 @@ public class PlateRollerGUI implements IScreen {
 			public void onClick(Player.Hand hand) {
 				if(!currentItem.isEmpty()) {
 					EntityRollingStockDefinition def = new ItemPlate.Data(currentItem).def;
-					if (def != null && plate == PlateType.BOILER && ConfigBalance.DesignGaugeLock) {
+					if (def != null && ConfigBalance.DesignGaugeLock) {
 						List<Gauge> validGauges = Collections.singletonList(Gauge.from(def.recommended_gauge.value()));
 						gauge = next(validGauges, gauge, hand);
 					} else {
@@ -71,37 +67,34 @@ public class PlateRollerGUI implements IScreen {
 			}
 		};
 
-		plateButton = new Button(screen, 0 - 100, -24 + 1 * 30, GuiText.SELECTOR_PLATE_TYPE.toString(plate)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				plate = next(plate, hand);
-				plateButton.setText(GuiText.SELECTOR_PLATE_TYPE.toString(plate));
-				pickerButton.setVisible(plate == PlateType.BOILER);
-				sendPacket();
-			}
-		};
-
-		pickerButton = new Button(screen, 0 - 100, -24 + 2 * 30, GuiText.SELECTOR_PLATE_BOILER.toString("")) {
+		pickerButton = new Button(screen, 0 - 100, -24 + 2 * 30, "") {
 			@Override
 			public void onClick(Player.Hand hand) {
 				CraftPicker.showCraftPicker(screen, null, CraftingType.PLATE_BOILER, (ItemStack item) -> {
 					if (item != null) {
-						ItemRollingStock.Data rs = new ItemRollingStock.Data(item);
-						ItemPlate.Data data = new ItemPlate.Data(currentItem);
-						data.def = rs.def;
-						EntityRollingStockDefinition def = rs.def;
+						if (item.is(IRItems.ITEM_ROLLING_STOCK)) {
+							ItemRollingStock.Data stock = new ItemRollingStock.Data(item);
+							item = new ItemStack(IRItems.ITEM_PLATE, 1);
+							ItemPlate.Data data = new ItemPlate.Data(item);
+							data.def = stock.def;
+							data.gauge = gauge;
+							data.type = PlateType.BOILER;
+							data.write();
+						}
+
+						ItemPlate.Data data = new ItemPlate.Data(item);
+						EntityRollingStockDefinition def = data.def;
 						if (def != null && !gauge.isModel() && gauge.value() != def.recommended_gauge.value()) {
 							gauge = def.recommended_gauge;
 							gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
 						}
-						data.write();
+						currentItem = item;
 						updatePickerButton();
 						sendPacket();
 					}
 				});
 			}
 		};
-		pickerButton.setVisible(plate == PlateType.BOILER);
 		updatePickerButton();
 	}
 
@@ -124,25 +117,8 @@ public class PlateRollerGUI implements IScreen {
 	private void sendPacket() {
 		ItemPlate.Data data = new ItemPlate.Data(currentItem);
 		data.gauge = gauge;
-		data.type = plate;
 		data.write();
-    	switch (plate) {
-		case BOILER:
-			currentItem.setCount(1);
-			break;
-		case LARGE:
-			currentItem.setCount(1);
-			break;
-		case MEDIUM:
-			currentItem.setCount(4);
-			break;
-		case SMALL:
-			currentItem.setCount(8);
-			break;
-		default:
-			break;
-    	}
-		currentItem.setCount(Math.max(1, (int) Math.floor(currentItem.getCount()/gauge.scale())));
+		currentItem.setCount(Math.min(64, Math.max(1, (int) Math.floor(data.type.platesPerBlock() / gauge.scale()))));
 		tile.setCraftItem(currentItem);
     }
 }

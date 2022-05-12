@@ -15,4 +15,18 @@ public enum PlateType {
 	public String toString() {
 	    return TextUtil.translate("immersiverailroading:plate." + super.toString().toLowerCase(Locale.ROOT));
 	}
+
+	public int platesPerBlock() {
+		switch (this) {
+			case SMALL:
+				return 8;
+			case MEDIUM:
+				return 4;
+			case LARGE:
+				return 2;
+			case BOILER:
+				return 1;
+		}
+		return 0;
+	}
 }

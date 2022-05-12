@@ -1,11 +1,13 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemPlate;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.items.ItemTabs;
 import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.ItemComponentType;
+import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
@@ -77,11 +79,23 @@ public class CraftPicker {
 		}
 		stock.removeAll(toRemove);
 		
-		if (craftType == CraftingType.CASTING) {
+		if (craftType.isCasting()) {
         	stock.add(new ItemStack(IRItems.ITEM_CAST_RAIL, 1));
         	stock.addAll(IRFuzzy.steelIngotOrFallback().enumerate());
         	stock.addAll(IRFuzzy.steelBlockOrFallback().enumerate());
 	        stock.addAll(IRItems.ITEM_AUGMENT.getItemVariants(ItemTabs.MAIN_TAB));
+		}
+		else if (craftType.isPlate()) {
+			for (PlateType value : PlateType.values()) {
+				if (value == PlateType.BOILER) {
+					continue;
+				}
+				ItemStack item = new ItemStack(IRItems.ITEM_PLATE, 1);
+				ItemPlate.Data data = new ItemPlate.Data(item);
+				data.type = value;
+				data.write();
+				stock.add(item);
+			}
 		}
 		stockSelector.setItems(stock);
 		
