@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CraftPicker {
+	private final boolean enableItemPicker;
 	private ItemPickerGUI stockSelector;
 	private ItemPickerGUI itemSelector;
 	private List<ItemStack> items;
@@ -27,6 +28,7 @@ public class CraftPicker {
 	}
 	
 	private CraftPicker(IScreenBuilder screen, ItemStack current, CraftingType craftType, Consumer<ItemStack> onChoose) {
+		this.enableItemPicker = craftType.isCasting();
 		this.onChoose = stack -> {
 			screen.show();
 			onChoose.accept(stack);
@@ -89,7 +91,7 @@ public class CraftPicker {
 		}
 
 		// Draw/init
-		if (stockSelector.choosenItem != null) {
+		if (stockSelector.choosenItem != null && enableItemPicker) {
 			setupItemSelector();
 			if (itemSelector.hasOptions()) {
 				itemSelector.show();
@@ -128,12 +130,16 @@ public class CraftPicker {
 		if (stack == null) {
 			onChoose.accept(null);
 		} else {
-			this.setupItemSelector();
-			if (itemSelector.hasOptions()) {
-				itemSelector.show();
+			if (enableItemPicker) {
+				this.setupItemSelector();
+				if (itemSelector.hasOptions()) {
+					itemSelector.show();
+				} else {
+					this.itemSelector.choosenItem = null;
+					onChoose.accept(stack);
+				}
 			} else {
-				this.itemSelector.choosenItem = null;
-	    		onChoose.accept(stack);
+				onChoose.accept(stack);
 			}
 		}
 	}
