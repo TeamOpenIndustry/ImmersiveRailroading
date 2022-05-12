@@ -78,9 +78,9 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	@Override
-	public void handleKeyPress(Player source, KeyTypes key) {
+	public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
 
-		if (this.linkThrottleReverser()) {
+		if (disableIndependentThrottle) {
 			switch (key) {
 				case THROTTLE_UP:
 					key = KeyTypes.REVERSER_UP;
@@ -171,7 +171,7 @@ public abstract class Locomotive extends FreightTank {
 			}
 			break;
 			default:
-				super.handleKeyPress(source, key);
+				super.handleKeyPress(source, key, disableIndependentThrottle);
 		}
 	}
 

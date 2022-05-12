@@ -98,7 +98,7 @@ public class LocomotiveDiesel extends Locomotive {
 	 * Sets the throttle or brake on all connected diesel locomotives if the throttle or brake has been changed
 	 */
 	@Override
-	public void handleKeyPress(Player source, KeyTypes key) {
+	public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
 		switch(key) {
 			case START_STOP_ENGINE:
 				if (turnOnOffDelay == 0) {
@@ -113,7 +113,7 @@ public class LocomotiveDiesel extends Locomotive {
 					return;
 				}
 				reverserCooldown = 3;
-				super.handleKeyPress(source, key);
+				super.handleKeyPress(source, key, disableIndependentThrottle);
 				break;
 			case THROTTLE_UP:
 			case THROTTLE_ZERO:
@@ -122,10 +122,10 @@ public class LocomotiveDiesel extends Locomotive {
 					return;
 				}
 				throttleCooldown = 2;
-				super.handleKeyPress(source, key);
+				super.handleKeyPress(source, key, disableIndependentThrottle);
 				break;
 			default:
-				super.handleKeyPress(source, key);
+				super.handleKeyPress(source, key, disableIndependentThrottle);
 		}
 	}
 

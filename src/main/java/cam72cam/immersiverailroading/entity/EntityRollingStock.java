@@ -168,7 +168,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return type != DamageType.EXPLOSION || amount < 20;
 	}
 
-	public void handleKeyPress(Player source, KeyTypes key) {
+	public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
 
 	}
 

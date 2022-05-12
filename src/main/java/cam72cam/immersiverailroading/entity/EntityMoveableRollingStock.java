@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -623,7 +622,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     @Override
-    public void handleKeyPress(Player source, KeyTypes key) {
+    public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
         float independentBrakeNotch = 0.04f;
 
         if (source.hasPermission(Permissions.BRAKE_CONTROL)) {
@@ -638,10 +637,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     setIndependentBrake(getIndependentBrake() - independentBrakeNotch);
                     break;
                 default:
-                    super.handleKeyPress(source, key);
+                    super.handleKeyPress(source, key, disableIndependentThrottle);
             }
         } else {
-            super.handleKeyPress(source, key);
+            super.handleKeyPress(source, key, disableIndependentThrottle);
         }
     }
 
