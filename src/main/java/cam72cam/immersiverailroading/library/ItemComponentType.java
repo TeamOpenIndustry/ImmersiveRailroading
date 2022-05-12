@@ -195,7 +195,7 @@ public enum ItemComponentType {
 
 	public int getWoodCost(Gauge gauge, EntityRollingStockDefinition definition) {
 		ModelComponent comp = getExampleComponent(definition);
-		double densityGues = 4;
+		double densityGues = 0.5;
 		return (int) Math.ceil(comp.width() * comp.height() * comp.length() * densityGues * Math.pow(gauge.scale(), 3));
 	}
 	
