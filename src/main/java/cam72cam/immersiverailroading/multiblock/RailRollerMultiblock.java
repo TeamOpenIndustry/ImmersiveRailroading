@@ -167,7 +167,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (progress == 1) {
 				// Stop crafting
-				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 12);
+				ItemStack out = new ItemStack(IRItems.ITEM_RAIL, 20);
 				ItemRail.Data data = new ItemRail.Data(out);
 				data.gauge = new ItemCastRail.Data(input).gauge;
 				data.write();
