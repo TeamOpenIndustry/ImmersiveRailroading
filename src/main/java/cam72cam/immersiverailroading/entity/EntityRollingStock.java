@@ -30,6 +30,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@TagField("gauge")
 	public Gauge gauge;
 	@TagField("tag")
+	@TagSync
 	public String tag = "";
 
 	@TagSync

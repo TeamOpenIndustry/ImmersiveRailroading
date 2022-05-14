@@ -1,14 +1,13 @@
 package cam72cam.immersiverailroading.gui.container;
 
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
-import cam72cam.mod.gui.container.IContainer;
 import cam72cam.mod.gui.container.IContainerBuilder;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 
 import java.util.Map;
 
-public class SteamLocomotiveContainer implements IContainer {
+public class SteamLocomotiveContainer extends BaseContainer {
     public final LocomotiveSteam stock;
     private final ItemStack template;
 
@@ -63,6 +62,7 @@ public class SteamLocomotiveContainer implements IContainer {
 
         currY = container.drawPlayerInventoryConnector(0, currY, horizSlots);
         currY = container.drawPlayerInventory(currY, horizSlots*2);
+        drawName(container, stock);
     }
 
     @Override

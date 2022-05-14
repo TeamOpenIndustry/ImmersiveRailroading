@@ -858,10 +858,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return true;
 		}
 		if (stack.is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.AUGMENT_TRACK)) {
-			if (player.isCrouching()) {
-				stockTag = null;
-			} else {
-				stockTag = stack.getDisplayName();
+			if (getWorld().isServer) {
+				if (player.isCrouching()) {
+					stockTag = null;
+					player.sendMessage(ChatText.RESET_AUGMENT_FILTER.getMessage());
+				} else {
+					stockTag = stack.getDisplayName();
+					player.sendMessage(ChatText.SET_AUGMENT_FILTER.getMessage(stockTag));
+				}
 			}
 			return true;
 		}

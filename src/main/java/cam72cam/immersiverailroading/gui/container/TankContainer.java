@@ -1,12 +1,11 @@
 package cam72cam.immersiverailroading.gui.container;
 
 import cam72cam.immersiverailroading.entity.FreightTank;
-import cam72cam.mod.gui.container.IContainer;
 import cam72cam.mod.gui.container.IContainerBuilder;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 
-public class TankContainer implements IContainer {
+public class TankContainer extends BaseContainer {
     public final FreightTank stock;
     private final ItemStack template;
 
@@ -42,7 +41,7 @@ public class TankContainer implements IContainer {
 
         currY = container.drawPlayerInventoryConnector(0, currY, horizSlots);
         currY = container.drawPlayerInventory(currY, horizSlots);
-
+        drawName(container, stock);
     }
 
     @Override

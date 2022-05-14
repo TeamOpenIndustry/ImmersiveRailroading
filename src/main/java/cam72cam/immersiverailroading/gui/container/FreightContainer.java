@@ -1,10 +1,9 @@
 package cam72cam.immersiverailroading.gui.container;
 
 import cam72cam.immersiverailroading.entity.Freight;
-import cam72cam.mod.gui.container.IContainer;
 import cam72cam.mod.gui.container.IContainerBuilder;
 
-public class FreightContainer implements IContainer {
+public class FreightContainer extends BaseContainer {
     public Freight stock;
 
     public FreightContainer(Freight stock) {
@@ -17,6 +16,7 @@ public class FreightContainer implements IContainer {
         currY = container.drawSlotBlock(stock.cargoItems, 0, stock.getInventoryWidth(), 0, currY);
         currY = container.drawPlayerInventoryConnector(0, currY, stock.getInventoryWidth());
         currY = container.drawPlayerInventory(currY, stock.getInventoryWidth());
+        drawName(container, stock);
     }
 
     @Override
