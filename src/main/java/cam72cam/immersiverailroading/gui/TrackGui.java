@@ -124,7 +124,7 @@ public class TrackGui implements IScreen {
 				type = next(type, hand);
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
 				degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
-				curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+				curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN || type == TrackItems.CUSTOM);
 				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN || type == TrackItems.SWITCH);
 			}
 		};
@@ -150,7 +150,7 @@ public class TrackGui implements IScreen {
 			}
 		};
 		curvositySlider.onSlider();
-		curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+		curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN || type == TrackItems.CUSTOM);
 
 		bedTypeButton = new Button(screen, 0 - 100, -24 + 5 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed))) {
 			@Override
