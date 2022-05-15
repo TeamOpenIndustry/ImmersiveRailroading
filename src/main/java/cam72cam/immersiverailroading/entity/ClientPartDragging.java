@@ -30,7 +30,7 @@ public class ClientPartDragging {
 
     private boolean capture(Player.Hand hand) {
 
-        if (hand == Player.Hand.SECONDARY && MinecraftClient.isReady()) {
+        if (hand == Player.Hand.SECONDARY && MinecraftClient.isReady() && !MinecraftClient.getPlayer().isCrouching()) {
             this.stock = null;
             Player player = MinecraftClient.getPlayer();
             Vec3d look = player.getLookVector();
