@@ -1,0 +1,54 @@
+//BUILDSCRIPT//
+
+//PLUGINS//
+apply plugin: 'maven-publish'
+
+
+version = '#MINECRAFT#-#LOADER#-#VERSION#'
+if (!"release".equalsIgnoreCase(System.getProperty("target"))) {
+    try {
+        version += "-" + 'git rev-parse --verify --short=7 HEAD'.execute().text.trim()
+    } catch (Exception ex) {
+        version += "-unknown"
+    }
+}
+group = "cam72cam.immersiverailroading"
+archivesBaseName = "ImmersiveRailroading"
+
+//MINECRAFT//
+
+//DEPENDENCIES//
+
+apply from: 'ImmersiveRailroadingIntegration/dependencies.gradle'
+
+//JAR//
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "sftp://teamopenindustry.cc:22/var/www/html/maven/"
+            credentials {
+                username = "mavenci"
+                password = System.getenv("MAVENCI_PASS")
+            }
+        }
+    }
+}
+
+task ('showBuildInfo') {
+    doLast {
+        String minecraftString = "#MINECRAFT#"
+        String minecraftLoader = "#LOADER#"
+        String umcVersionString = "#MINECRAFT#-#LOADER#-#UMC#"
+        System.out.println("Build for MC #MINECRAFT# (#LOADER#)")
+        System.out.println("https://teamopenindustry.cc/maven/cam72cam/immersiverailroading/ImmersiveRailroading/${version}/ImmersiveRailroading-${version}.jar")
+        System.out.println("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/${umcVersionString}/UniversalModCore-${umcVersionString}.jar")
+    }
+}
+
+publish.finalizedBy showBuildInfo
