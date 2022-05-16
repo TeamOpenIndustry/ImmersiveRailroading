@@ -21,7 +21,7 @@ jobs:
     - name: Setup Universal Mod Core (and helpers)
       env:
         BRANCH: ${{ matrix.branch }}
-      run: java -jar UMCSetup.jar umc.loader=${BRANCH} -D ssh.http=true
+      run: java -jar UMCSetup.jar ${BRANCH} -D ssh.http=true
     - name: Gradle compile
       run: ./gradlew classes
     - name: Process images
