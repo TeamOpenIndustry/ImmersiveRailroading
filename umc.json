@@ -1,0 +1,23 @@
+{
+    "mod": {
+        "pkg": "cam72cam.immersiverailroading",
+        "cls": "ImmersiveRailroading",
+        "name": "Immersive Railroading",
+        "id": "immersiverailroading",
+        "version": "1.9.1",
+        "dependencies": {
+            "trackapi": {
+                "versions": "[1.1,)"
+            }
+        }
+    },
+    "integration": {
+        "repo": "git@github.com:TeamOpenIndustry/ImmersiveRailroadingIntegration.git",
+        "branch": "%s",
+        "path": "ImmersiveRailroadingIntegration"
+    },
+    "umc": {
+        "version": "latest"
+    }
+}
+
