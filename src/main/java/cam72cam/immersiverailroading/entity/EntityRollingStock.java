@@ -14,6 +14,7 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
@@ -133,6 +134,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 				return ClickResult.ACCEPTED;
 			}
 			tag = player.getHeldItem(hand).getDisplayName();
+			player.sendMessage(PlayerMessage.direct(tag));
 			return ClickResult.ACCEPTED;
 		}
 		return ClickResult.PASS;
