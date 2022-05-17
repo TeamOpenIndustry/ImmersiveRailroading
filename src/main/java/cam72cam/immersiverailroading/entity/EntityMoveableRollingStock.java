@@ -139,19 +139,51 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.currentSpeed = newSpeed;
     }
 
+    /** This is where fun network synchronization is handled
+     * So normally every 2 seconds we get a new packet with stock positional information for the next 4 seconds
+     */
     public void handleTickPosPacket(List<TickPos> newPositions, double serverTPS) {
         this.tickSkew = serverTPS / 20;
 
         if (newPositions.size() != 0) {
             this.clearPositionCache();
-            double delta = newPositions.get(0).tickID - this.tickPosID;
-            if (Math.abs(delta) > 10) {
-                this.tickPosID = newPositions.get(0).tickID;
+
+            double curr = this.tickPosID;
+            double sent = newPositions.get(0).tickID;
+            double delta = sent - curr;
+
+            if (Math.abs(delta) > 30 || this.positions.size() == 0) {
+                // We default to server time and assume something strange has happened
+                ImmersiveRailroading.warn("Server/Client desync, skipping %s from %s to %s", getUUID(), curr, sent);
+                this.tickPosID = sent;
+                this.positions = newPositions;
             } else {
+                // Standard skew code
                 tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
+                // Merge lists (slow)
+                for (TickPos newPosition : newPositions) {
+                    if (newPosition.tickID < positions.get(0).tickID) {
+                        // We have already hit this position, skipping
+                        continue;
+                    }
+
+                    if (newPosition.tickID <= positions.get(positions.size()-1).tickID) {
+                        // Override current position
+                        for (int i = 0; i < positions.size(); i++) {
+                            if (positions.get(i).tickID == newPosition.tickID) {
+                                positions.set(i, newPosition);
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+
+                    // This is past the end of the position list
+                    positions.add(newPosition);
+                }
             }
+            ImmersiveRailroading.debug("%s : tick=%s, tps=%s, this=%s, packet=%s, skew=%s, delta=%s", getUUID(), getTickCount(), (int)serverTPS, (int)curr, (int)newPositions.get(0).tickID, tickSkew, delta);
         }
-        this.positions = newPositions;
     }
 
     public TickPos getTickPos(int tickID) {
