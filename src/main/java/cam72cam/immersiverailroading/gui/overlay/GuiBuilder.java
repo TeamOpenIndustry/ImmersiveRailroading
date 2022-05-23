@@ -264,9 +264,9 @@ public class GuiBuilder {
 
     private GuiBuilder find(EntityRollingStock stock, Matrix4 matrix, int maxx, int maxy, int x, int y) {
         float value = getValue(stock);
-        /*if (hide && value != 1) {
+        if (hide && value != 1) {
             return null;
-        }*/
+        }
         matrix = matrix.copy(); // TODO mem opt?
         applyPosition(matrix, maxx, maxy);
         applyValue(matrix, value, maxx, maxy);
