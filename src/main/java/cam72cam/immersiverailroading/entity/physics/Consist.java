@@ -176,15 +176,11 @@ public class Consist {
 
             Particle current = particle;
             List<Particle> visited = new ArrayList<>();
-            boolean dirty = false;
 
             // Iterate to one end of the consist
             Particle prev = current;
             while (!visited.contains(current)) {
                 visited.add(current);
-
-                // Compute dirty value
-                dirty = dirty || current.state.dirty;
 
                 // If we have a Front connection
                 if (current.state.interactingFront != null) {
@@ -215,14 +211,18 @@ public class Consist {
 
             ordered.add(current);
 
+
+            // Keep track if the entire consist is dirty
+            boolean dirty = false;
+
             // We are now at the head of the iteration
             prev = current;
             visited.clear();
             while (!visited.contains(current)) {
                 visited.add(current);
 
-                // Copy linked dirty value
-                current.state.dirty = dirty;
+                // Compute dirty value
+                dirty = dirty || current.state.dirty;
 
                 // If we have a Front connection
                 if (current.state.interactingFront != null) {
@@ -251,6 +251,11 @@ public class Consist {
                     }
                 }
                 break;
+            }
+
+            for (Particle mark : visited) {
+                // Copy linked dirty value
+                mark.state.dirty = dirty;
             }
         }
 
