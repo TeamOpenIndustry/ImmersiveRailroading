@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.mod.math.Vec3d;
@@ -11,35 +12,64 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Simulation {
-    protected List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
-    protected List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
 
-    private Simulation(World world) {
+    public static void simulate(World world) {
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
         // I'm OK with that for now
         // We might want to chunk-load ahead of the train just to be safe?
 
         List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
-        {
-            Map<UUID, SimulationState> stateMap = new HashMap<>();
-            for (EntityCoupleableRollingStock entity : allStock) {
-                SimulationState current = entity.getCurrentState();
-                if (current == null) {
-                    current = new SimulationState(entity);
+        if (allStock.isEmpty()) {
+            return;
+        }
+
+        List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
+        List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
+
+        for (int i = 0; i < 30; i++) {
+            stateMaps.add(new HashMap<>());
+        }
+
+        boolean anyDirty = false;
+
+        for (EntityCoupleableRollingStock entity : allStock) {
+            SimulationState current = entity.getCurrentState();
+            if (current == null) {
+                // Newly placed
+                stateMaps.get(0).put(entity.getUUID(), new SimulationState(entity));
+                anyDirty = true;
+            } else {
+                current.update(entity);
+                if (current.dirty) {
+                    // Changed since last simulation
+                    stateMaps.get(0).put(entity.getUUID(), current);
+                    anyDirty = true;
                 } else {
-                    current.update(entity);
+                    // Copy from previous simulation
+                    int toCopy = Math.min(30, entity.states.size());
+                    for (int i = 0; i < toCopy; i++) {
+                        stateMaps.get(i).put(entity.getUUID(), entity.states.get(i));
+                    }
                 }
-                stateMap.put(entity.getUUID(), current);
             }
-            stateMaps.add(stateMap);
         }
 
         double maxCouplerDist = 20;
 
-        for (int i = 0; i < 30; i++) {
-            // Create new states
-            Map<UUID, SimulationState> stateMap = new HashMap<>();
-            stateMaps.get(i).forEach((uuid, state) -> stateMap.put(uuid, state.next()));
+        for (int i = 1; i < 30; i++) {
+            Map<UUID, SimulationState> stateMap = stateMaps.get(i);
+
+            // Override stateMap from previous where necessary
+            for (Map.Entry<UUID, SimulationState> entry : stateMaps.get(i-1).entrySet()) {
+                UUID id = entry.getKey();
+                SimulationState prev = entry.getValue();
+                SimulationState curr = stateMap.get(id);
+
+                if (prev.dirty || curr == null) {
+                    stateMap.put(id, prev.next());
+                }
+            }
+
             List<SimulationState> states = new ArrayList<>(stateMap.values());
 
             // Decouple / fix coupler positions
@@ -48,11 +78,14 @@ public class Simulation {
                     SimulationState next = stateMap.get(state.interactingFront);
                     if (next == null) {
                         state.interactingFront = null;
+                        state.dirty = true;
                     } else {
                         Vec3d myCouplerPos = state.couplerPositionFront;
                         Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
                         if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
                             System.out.println("DECOUPLER");
+                            state.dirty = true;
+                            next.dirty = true;
                             state.interactingFront = null;
                             if (state.config.id == next.interactingFront) {
                                 next.interactingFront = null;
@@ -66,12 +99,15 @@ public class Simulation {
                 if (state.interactingRear != null) {
                     SimulationState next = stateMap.get(state.interactingRear);
                     if (next == null) {
+                        state.dirty = true;
                         state.interactingRear = null;
                     } else {
                         Vec3d myCouplerPos = state.couplerPositionRear;
                         Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
                         if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
                             System.out.println("DECOUPLER");
+                            state.dirty = true;
+                            next.dirty = true;
                             state.interactingRear = null;
                             if (state.config.id == next.interactingFront) {
                                 next.interactingFront = null;
@@ -148,6 +184,10 @@ public class Simulation {
                         continue;
                     }
 
+                    stateA.dirty = true;
+                    stateB.dirty = true;
+                    System.out.println("COUPLE");
+
                     // Ok, we are clear to proceed!
                     if (targetACouplerFront) {
                         stateA.interactingFront = stateB.config.id;
@@ -164,9 +204,11 @@ public class Simulation {
 
             // collide with blocks
             for (SimulationState state : states) {
-                state.collideWithBlocks(blocksAlreadyBroken);
-                // TODO use hardness to apply resistance
-                state.overcameBlockResistance = true;
+                if (state.dirty && state.tickID % 5 == 0) {
+                    state.collideWithBlocks(blocksAlreadyBroken);
+                    // TODO use hardness to apply resistance
+                    state.overcameBlockResistance = true;
+                }
             }
 
             // calculate new velocities
@@ -177,18 +219,21 @@ public class Simulation {
                 state.addBlocksBroken(blocksAlreadyBroken);
             }
 
-            stateMaps.add(stateMap);
+            int dirty = (int) states.stream().filter(s -> s.dirty).count();
+            //System.out.println(String.format("%s: %s/%s dirty", i, dirty, states.size()));
         }
 
         // Apply new states
         for (EntityCoupleableRollingStock stock : allStock) {
             stock.states = stateMaps.stream().map(m -> m.get(stock.getUUID())).collect(Collectors.toList());
+            for (SimulationState state : stock.states) {
+                state.dirty = false;
+            }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
-            new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
+            if (world.getTicks() % 20 == 0 || anyDirty && world.getTicks() % 5 == 0) {
+                //System.out.println("Diry Send: " + anyDirty);
+                new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
+            }
         }
-    }
-
-    public static void simulate(World world) {
-        new Simulation(world);
     }
 }

@@ -6,6 +6,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.DegreeFuncs;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Consist {
     public static class Particle {
@@ -173,14 +174,18 @@ public class Consist {
                 continue;
             }
 
-
             Particle current = particle;
             List<Particle> visited = new ArrayList<>();
+            boolean dirty = false;
 
             // Iterate to one end of the consist
             Particle prev = current;
             while (!visited.contains(current)) {
                 visited.add(current);
+
+                // Compute dirty value
+                dirty = dirty || current.state.dirty;
+
                 // If we have a Front connection
                 if (current.state.interactingFront != null) {
                     // Find the particle for that connection
@@ -216,6 +221,9 @@ public class Consist {
             while (!visited.contains(current)) {
                 visited.add(current);
 
+                // Copy linked dirty value
+                current.state.dirty = dirty;
+
                 // If we have a Front connection
                 if (current.state.interactingFront != null) {
                     // Find the particle for that connection
@@ -246,7 +254,12 @@ public class Consist {
             }
         }
 
-        // collisions follows same order
+        // Don't process collisions for any "clean" states
+        ordered = ordered.stream().filter(p -> p.state.dirty).collect(Collectors.toList());
+        // This could be further optimized by making order act on states directly
+        particles = particles.entrySet().stream().filter(e -> e.getValue().state.dirty).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        // collisions follow same order
         List<Collision> collisions = new ArrayList<>();
         for (Particle particleA : ordered) {
             if (particleA.state.interactingFront != null) {

@@ -39,9 +39,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				return;
 			}
 
-			if (world.getTicks() % 20 == 0) {
-				Simulation.simulate(world);
-			}
+			Simulation.simulate(world);
 		});
 	}
 
