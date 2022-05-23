@@ -52,13 +52,13 @@ public class ClientChronoState implements ChronoState {
 
         double delta = server.tickID - client.tickID;
 
-        if (Math.abs(delta) > 30 || true) {
+        if (Math.abs(delta) > 15) {
             // We default to server time and assume something strange has happened
             ImmersiveRailroading.warn("Server/Client desync, skipping from %s to %s",  client.tickID, server.tickID);
             client.tickID = server.tickID;
         } else {
             // Standard skew assumption
-            //client.tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
+            client.tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
         }
     }
 

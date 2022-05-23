@@ -23,7 +23,13 @@ public class Simulation {
         {
             Map<UUID, SimulationState> stateMap = new HashMap<>();
             for (EntityCoupleableRollingStock entity : allStock) {
-                stateMap.put(entity.getUUID(), new SimulationState(entity));
+                SimulationState current = entity.getCurrentState();
+                if (current == null) {
+                    current = new SimulationState(entity);
+                } else {
+                    current.update(entity);
+                }
+                stateMap.put(entity.getUUID(), current);
             }
             stateMaps.add(stateMap);
         }
@@ -164,16 +170,6 @@ public class Simulation {
             }
 
             // calculate new velocities
-            /*
-            List<SimulationState> visited = new ArrayList<>();
-            for (SimulationState state : states) {
-                if (visited.contains(state)) {
-                    continue;
-                }
-
-                new Consist(visited, stateMap, state);
-            }
-             */
             Consist.iterate(stateMap);
 
             // update blocks broken

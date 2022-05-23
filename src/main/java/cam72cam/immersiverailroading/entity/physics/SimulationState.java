@@ -145,6 +145,7 @@ public class SimulationState {
     }
 
     public void calculateCouplerPositions() {
+        // TODO start at bogeyFront/Rear positions
         Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw);
         Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw);
 

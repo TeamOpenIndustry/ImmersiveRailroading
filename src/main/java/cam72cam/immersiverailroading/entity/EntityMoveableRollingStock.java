@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
 
@@ -148,31 +149,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (newPositions.size() != 0) {
             this.clearPositionCache();
 
-            if (positions.isEmpty()) {
-                positions = newPositions;
+            if (ChronoState.getState(getWorld()) == null) {
+                positions.clear();
             } else {
-                // Merge lists (slow)
-                for (TickPos newPosition : newPositions) {
-                    if (newPosition.tickID < positions.get(0).tickID) {
-                        // We have already hit this position, skipping
-                        continue;
-                    }
-
-                    if (newPosition.tickID <= positions.get(positions.size() - 1).tickID) {
-                        // Override current position
-                        for (int i = 0; i < positions.size(); i++) {
-                            if (positions.get(i).tickID == newPosition.tickID) {
-                                positions.set(i, newPosition);
-                                break;
-                            }
-                        }
-                        continue;
-                    }
-
-                    // This is past the end of the position list
-                    positions.add(newPosition);
-                }
+                int tickID = (int) Math.floor(ChronoState.getState(getWorld()).getTickID());
+                List<Integer> newIds = newPositions.stream().map(p -> p.tickID).collect(Collectors.toList());
+                positions.removeAll(positions.stream()
+                        // old OR far in the future OR to be replaced
+                        .filter(p -> p.tickID < tickID - 30 || p.tickID > tickID + 60 || newIds.contains(p.tickID))
+                        .collect(Collectors.toList())
+                );
             }
+            // unordered
+            positions.addAll(newPositions);
         }
     }
 
@@ -188,11 +177,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (ChronoState.getState(getWorld()) == null) {
             return null;
         }
-        int tickID = (int) Math.floor(ChronoState.getState(getWorld()).getTickID());
-        while (!positions.isEmpty() && positions.get(0).tickID < tickID) {
-            positions.remove(0);
+        int tickID = (int) Math.floor(ChronoState.getState(getWorld()).getTickID()) + offset;
+        for (TickPos position : positions) {
+            if (position.tickID == tickID) {
+                return position;
+            }
         }
-        return positions.isEmpty() ? null : positions.get(0);
+        return null;
     }
 
     private double skewScalar(double curr, double next) {
