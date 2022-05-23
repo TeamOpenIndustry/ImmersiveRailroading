@@ -4,6 +4,9 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.physics.SimulationState;
+import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
+import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -42,15 +45,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private Float rearYaw;
     @TagField("distanceTraveled")
     public float distanceTraveled = 0;
-    @TagField("tickPosID")
-    public double tickPosID = 0;
     private Speed currentSpeed;
     @TagField(value = "positions", mapper = TickPos.ListTagMapper.class)
     public List<TickPos> positions = new ArrayList<>();
+    public List<SimulationState> states = new ArrayList<>();
     private RealBB boundingBox;
     private float[][] heightMapCache;
-    @TagField("tickSkew")
-    private double tickSkew = 1;
     @TagSync
     @TagField("IND_BRAKE")
     private float independentBrake = 0;
@@ -75,8 +75,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         super.load(data);
 
         if (positions.isEmpty()) {
-            this.tickPosID = 0;
-            positions.add(getCurrentTickPosOrFake());
+            positions.add(getFakeTickPos());
         }
 
         if (frontYaw == null) {
@@ -88,7 +87,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public void initPositions(TickPos tp) {
-        this.positions = Arrays.asList(tp);
+        this.positions = new ArrayList<>();
+        this.positions.add(tp);
     }
 
     /*
@@ -110,7 +110,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @Override
     public RealBB getCollision() {
         if (this.boundingBox == null) {
-            this.boundingBox = this.getDefinition().getBounds(this, this.gauge)
+            this.boundingBox = this.getDefinition().getBounds(this.getRotationYaw(), this.gauge)
+                    .offset(getPosition())
                     .withHeightMap(this.getHeightMap())
                     .contract(new Vec3d(0, 0.5 * this.gauge.scale(), 0)).offset(new Vec3d(0, 0.5 * this.gauge.scale(), 0));
         }
@@ -142,24 +143,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     /** This is where fun network synchronization is handled
      * So normally every 2 seconds we get a new packet with stock positional information for the next 4 seconds
      */
-    public void handleTickPosPacket(List<TickPos> newPositions, double serverTPS) {
-        this.tickSkew = serverTPS / 20;
+    public void handleTickPosPacket(List<TickPos> newPositions) {
 
         if (newPositions.size() != 0) {
             this.clearPositionCache();
 
-            double curr = this.tickPosID;
-            double sent = newPositions.get(0).tickID;
-            double delta = sent - curr;
-
-            if (Math.abs(delta) > 30 || this.positions.size() == 0) {
-                // We default to server time and assume something strange has happened
-                ImmersiveRailroading.warn("Server/Client desync, skipping %s from %s to %s", getUUID(), curr, sent);
-                this.tickPosID = sent;
-                this.positions = newPositions;
+            if (positions.isEmpty()) {
+                positions = newPositions;
             } else {
-                // Standard skew code
-                tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
                 // Merge lists (slow)
                 for (TickPos newPosition : newPositions) {
                     if (newPosition.tickID < positions.get(0).tickID) {
@@ -167,7 +158,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                         continue;
                     }
 
-                    if (newPosition.tickID <= positions.get(positions.size()-1).tickID) {
+                    if (newPosition.tickID <= positions.get(positions.size() - 1).tickID) {
                         // Override current position
                         for (int i = 0; i < positions.size(); i++) {
                             if (positions.get(i).tickID == newPosition.tickID) {
@@ -182,38 +173,26 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     positions.add(newPosition);
                 }
             }
-            ImmersiveRailroading.debug("%s : tick=%s, tps=%s, this=%s, packet=%s, skew=%s, delta=%s", getUUID(), getTickCount(), (int)serverTPS, (int)curr, (int)newPositions.get(0).tickID, tickSkew, delta);
         }
     }
 
-    public TickPos getTickPos(int tickID) {
-        if (positions.size() == 0) {
+    public SimulationState getCurrentState() {
+        int tickID = ServerChronoState.getState(getWorld()).getServerTickID();
+        while (!states.isEmpty() && states.get(0).tickID < tickID) {
+            states.remove(0);
+        }
+        return states.isEmpty() ? null : states.get(0);
+    }
+
+    public TickPos getTickPos(int offset) {
+        if (ChronoState.getState(getWorld()) == null) {
             return null;
         }
-        for (TickPos pos : positions) {
-            if (pos.tickID == tickID) {
-                return pos;
-            }
+        int tickID = (int) Math.floor(ChronoState.getState(getWorld()).getTickID());
+        while (!positions.isEmpty() && positions.get(0).tickID < tickID) {
+            positions.remove(0);
         }
-
-        return positions.get(positions.size() - 1);
-    }
-
-    public TickPos getCurrentTickPosAndPrune() {
-        if (positions.size() == 0) {
-            return null;
-        }
-        if (positions.get(0).tickID != (int) this.tickPosID) {
-            // Prune list
-            while (positions.get(0).tickID < (int) this.tickPosID && positions.size() > 1) {
-                positions.remove(0);
-            }
-        }
-        return positions.get(0);
-    }
-
-    public int getRemainingPositions() {
-        return positions.size();
+        return positions.isEmpty() ? null : positions.get(0);
     }
 
     private double skewScalar(double curr, double next) {
@@ -283,8 +262,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
             }
-
-            this.tickSkew = 1;
 
             if (this.getTickCount() % 10 == 0) {
                 // Wipe this now and again to force a refresh
@@ -384,10 +361,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             }
         }
 
-        this.tickPosID += this.getTickSkew();
-
         // Apply position onTick
-        TickPos currentPos = getCurrentTickPosAndPrune();
+        TickPos currentPos = getTickPos(0);
         if (currentPos == null) {
             // Not loaded yet or not moving
             return;
@@ -525,14 +500,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.boundingBox = null;
     }
 
-    public TickPos moveRollingStock(double moveDistance, int lastTickID) {
-        TickPos lastPos = this.getTickPos(lastTickID);
-        if (moveDistance > MovementSimulator.MAX_MOVE_DISTANCE) { // over 1000 mph
-            ImmersiveRailroading.warn("Trying to move %s at over 1000 mph, cam72cam's physics really sucks", getUUID());
-        }
-        return new MovementSimulator(getWorld(), lastPos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value()).nextPosition(moveDistance);
-    }
-
     public double getRollDegrees() {
         if (Math.abs(getCurrentSpeed().metric() * gauge.scale()) < 4) {
             // don't calculate it
@@ -585,12 +552,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return this.getRotationYaw();
     }
 
-    public TickPos getCurrentTickPosOrFake() {
+    public TickPos getFakeTickPos() {
         return new TickPos(0, Speed.fromMetric(0), getPosition(), this.getFrontYaw(), this.getRearYaw(), this.getRotationYaw(), this.getRotationPitch(), false);
     }
 
     public Vec3d predictFrontBogeyPosition(float offset) {
-        return predictFrontBogeyPosition(getCurrentTickPosOrFake(), offset);
+        return predictFrontBogeyPosition(getFakeTickPos(), offset);
     }
 
     public Vec3d predictFrontBogeyPosition(TickPos pos, float offset) {
@@ -600,7 +567,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public Vec3d predictRearBogeyPosition(float offset) {
-        return predictRearBogeyPosition(getCurrentTickPosOrFake(), offset);
+        return predictRearBogeyPosition(getFakeTickPos(), offset);
     }
 
     public Vec3d predictRearBogeyPosition(TickPos pos, float offset) {
@@ -634,7 +601,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public float getTickSkew() {
-        return (float) this.tickSkew;
+        return 1;
     }
 
     @Override

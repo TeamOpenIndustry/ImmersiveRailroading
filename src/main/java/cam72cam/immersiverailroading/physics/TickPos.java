@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.physics;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
@@ -37,6 +38,17 @@ public class TickPos {
 		this.rearYaw = rearYaw;
 		this.rotationYaw = rotationYaw;
 		this.rotationPitch = rotationPitch;
+	}
+
+	public TickPos(SimulationState state) {
+		this.tickID = state.tickID;
+		this.speed = Speed.fromMinecraft(state.velocity.length());
+		this.isOffTrack = false;
+		this.position = state.position;
+		this.rotationYaw = state.yaw;
+		this.frontYaw = state.yawFront;
+		this.rearYaw = state.yawRear;
+		this.rotationPitch = state.pitch;
 	}
 
 	private TickPos(TagCompound tag) {

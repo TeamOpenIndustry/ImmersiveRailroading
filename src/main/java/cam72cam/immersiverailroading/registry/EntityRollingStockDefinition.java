@@ -565,9 +565,9 @@ public abstract class EntityRollingStockDefinition {
         return heightmap.apply(stock);
     }
 
-    public RealBB getBounds(EntityMoveableRollingStock stock, Gauge gauge) {
+    public RealBB getBounds(float yaw, Gauge gauge) {
         return new RealBB(gauge.scale() * frontBounds, gauge.scale() * -rearBounds, gauge.scale() * widthBounds,
-                gauge.scale() * heightBounds, stock.getRotationYaw()).offset(stock.getPosition());
+                gauge.scale() * heightBounds, yaw);
     }
 
     public String name() {
