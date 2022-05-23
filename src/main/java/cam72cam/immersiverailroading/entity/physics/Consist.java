@@ -150,7 +150,7 @@ public class Consist {
                     double slackDist = slack.length() - maxSlack;
                     if (Math.abs(slackDist) > 0.01) {
                         //System.out.println("CORRECT: " + slackDist);
-                        //particleB.state.moveAlongTrack(slack.normalize().scale(slackDist));
+                        particleB.state.moveAlongTrack(slack.normalize().scale(slackDist));
                         //particleB.state.calculateCouplerPositions();
                     }
                 }
@@ -269,13 +269,13 @@ public class Consist {
         //System.out.println("Collisions: " + collisions.size());
 
         for (Collision collision : collisions) {
+            collision.fixPositions();
+        }
+
+        for (Collision collision : collisions) {
             collision.collide();
         }
 
         particles.values().forEach(Particle::applyVelocity);
-
-        for (Collision collision : collisions) {
-            collision.fixPositions();
-        }
     }
 }
