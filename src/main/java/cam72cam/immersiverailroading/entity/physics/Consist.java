@@ -152,7 +152,7 @@ public class Consist {
                     if (Math.abs(slackDist) > 0.01) {
                         //System.out.println("CORRECT: " + slackDist);
                         particleB.state.moveAlongTrack(slack.normalize().scale(slackDist));
-                        //particleB.state.calculateCouplerPositions();
+                        particleB.state.calculateCouplerPositions();
                     }
                 }
             }
@@ -254,6 +254,9 @@ public class Consist {
             }
 
             for (Particle mark : visited) {
+                if (!dirty && mark.state.dirty) {
+                    System.out.println("BUG BUG BUG");
+                }
                 // Copy linked dirty value
                 mark.state.dirty = dirty;
             }
