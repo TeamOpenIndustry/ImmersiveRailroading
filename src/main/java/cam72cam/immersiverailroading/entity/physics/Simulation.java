@@ -80,17 +80,24 @@ public class Simulation {
                         state.interactingFront = null;
                         state.dirty = true;
                     } else {
-                        Vec3d myCouplerPos = state.couplerPositionFront;
-                        Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
-                        if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                            System.out.println("DECOUPLER");
+                        if (next.interactingFront != state.config.id && next.interactingRear != state.config.id) {
+                            System.out.println("BROKEN COUPLER STATE");
+                            state.interactingFront = null;
                             state.dirty = true;
                             next.dirty = true;
-                            state.interactingFront = null;
-                            if (state.config.id == next.interactingFront) {
-                                next.interactingFront = null;
-                            } else {
-                                next.interactingRear = null;
+                        } else {
+                            Vec3d myCouplerPos = state.couplerPositionFront;
+                            Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
+                            if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
+                                //System.out.println("DECOUPLER");
+                                state.dirty = true;
+                                next.dirty = true;
+                                state.interactingFront = null;
+                                if (state.config.id == next.interactingFront) {
+                                    next.interactingFront = null;
+                                } else {
+                                    next.interactingRear = null;
+                                }
                             }
                         }
                     }
@@ -102,17 +109,24 @@ public class Simulation {
                         state.dirty = true;
                         state.interactingRear = null;
                     } else {
-                        Vec3d myCouplerPos = state.couplerPositionRear;
-                        Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
-                        if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                            System.out.println("DECOUPLER");
+                        if (next.interactingFront != state.config.id && next.interactingRear != state.config.id) {
+                            System.out.println("BROKEN COUPLER STATE");
+                            state.interactingRear = null;
                             state.dirty = true;
                             next.dirty = true;
-                            state.interactingRear = null;
-                            if (state.config.id == next.interactingFront) {
-                                next.interactingFront = null;
-                            } else {
-                                next.interactingRear = null;
+                        } else {
+                            Vec3d myCouplerPos = state.couplerPositionRear;
+                            Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
+                            if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
+                                //System.out.println("DECOUPLER");
+                                state.dirty = true;
+                                next.dirty = true;
+                                state.interactingRear = null;
+                                if (state.config.id == next.interactingFront) {
+                                    next.interactingFront = null;
+                                } else {
+                                    next.interactingRear = null;
+                                }
                             }
                         }
                     }
@@ -186,7 +200,7 @@ public class Simulation {
 
                     stateA.dirty = true;
                     stateB.dirty = true;
-                    System.out.println("COUPLE");
+                    //System.out.println(String.format("COUPLE %s (%s) + %s (%s)%n", stateA.config.id, stateB.config.id, targetACouplerFront, targetBCouplerFront));
 
                     // Ok, we are clear to proceed!
                     if (targetACouplerFront) {
