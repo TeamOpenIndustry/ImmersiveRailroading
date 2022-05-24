@@ -234,11 +234,12 @@ public class SimulationState {
     public void moveAlongTrack(Vec3d vecDist) {
         // TODO turn table stuff
 
-        if (vecDist.lengthSquared() < 0.001 * 0.001) {
+        double distance = vecDist.length();
+
+        if (distance < 0.001) {
             return;
         }
 
-        double distance = vecDist.length();
         if (DegreeFuncs.delta(VecUtil.toWrongYaw(vecDist), yaw) > 90) {
             distance = -distance;
         }
@@ -265,7 +266,6 @@ public class SimulationState {
         boolean isReversed = distance < 0;
         if (isReversed) {
             distance = -distance;
-            yaw += 180;
             yawFront += 180;
             yawRear += 180;
         }
@@ -284,7 +284,7 @@ public class SimulationState {
             Vec3d bogeyDelta = nextFront.subtract(nextRear);
             yaw = VecUtil.toWrongYaw(bogeyDelta);
             pitch = (float) Math.toDegrees(Math.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
-            position = position.add(deltaCenter.normalize().scale(distance)); // Rescale fixes issues with curves losing precision
+            position = position.add(deltaCenter/*.normalize().scale(distance)*/); // Rescale fixes issues with curves losing precision
         } else {
             // Stuck
             System.out.println("STUCK");
