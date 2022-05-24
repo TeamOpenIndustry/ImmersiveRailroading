@@ -18,6 +18,11 @@ public class Simulation {
         // I'm OK with that for now
         // We might want to chunk-load ahead of the train just to be safe?
 
+        if (world.getTicks() % 5 != 0) {
+            // Only re-check every 5 ticks
+            return;
+        }
+
         List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
         if (allStock.isEmpty()) {
             return;
@@ -30,20 +35,20 @@ public class Simulation {
             stateMaps.add(new HashMap<>());
         }
 
-        boolean anyDirty = false;
+        boolean anyStartedDirty = false;
 
         for (EntityCoupleableRollingStock entity : allStock) {
             SimulationState current = entity.getCurrentState();
             if (current == null) {
                 // Newly placed
                 stateMaps.get(0).put(entity.getUUID(), new SimulationState(entity));
-                anyDirty = true;
+                anyStartedDirty = true;
             } else {
                 current.update(entity);
                 if (current.dirty) {
                     // Changed since last simulation
                     stateMaps.get(0).put(entity.getUUID(), current);
-                    anyDirty = true;
+                    anyStartedDirty = true;
                 } else {
                     // Copy from previous simulation
                     int toCopy = Math.min(30, entity.states.size());
@@ -244,8 +249,7 @@ public class Simulation {
                 state.dirty = false;
             }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
-            if (world.getTicks() % 20 == 0 || anyDirty && world.getTicks() % 5 == 0) {
-                //System.out.println("Diry Send: " + anyDirty);
+            if (world.getTicks() % 20 == 0 || anyStartedDirty) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }
