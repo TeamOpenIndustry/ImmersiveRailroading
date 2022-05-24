@@ -260,18 +260,20 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 lastRetarderPos = null;
             }
 
-            float trainBrake = 0;
-            if (this instanceof EntityCoupleableRollingStock) {
-                // This could be slow, but I don't want to do this properly till the next despaghettification
-                trainBrake = (float) ((EntityCoupleableRollingStock) this).getDirectionalTrain(false).stream()
-                        .map(m -> m.stock)
-                        .map(s -> s instanceof Locomotive ? (Locomotive) s : null)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(Locomotive::getTrainBrake)
-                        .max().orElse(0);
+            if (this.getTickCount() % 5 == 0) {
+                float trainBrake = 0;
+                if (this instanceof EntityCoupleableRollingStock) {
+                    // This could be slow, but I don't want to do this properly till the next despaghettification
+                    trainBrake = (float) ((EntityCoupleableRollingStock) this).getDirectionalTrain(false).stream()
+                            .map(m -> m.stock)
+                            .map(s -> s instanceof Locomotive ? (Locomotive) s : null)
+                            .filter(Objects::nonNull)
+                            .mapToDouble(Locomotive::getTrainBrake)
+                            .max().orElse(0);
 
+                }
+                this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrake));
             }
-            this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrake));
         }
 
         if (getWorld().isClient) {

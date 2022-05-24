@@ -170,12 +170,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		}
 
 
-		hasElectricalPower = false;
-		this.mapTrain(this, false, stock -> {
-			if (stock instanceof Locomotive && stock.hasElectricalPower()) {
-				hasElectricalPower = true;
-			}
-		});
+		if (this.getTickCount() % 5 == 0) {
+			hasElectricalPower = false;
+			this.mapTrain(this, false, stock -> {
+				if (stock instanceof Locomotive && stock.hasElectricalPower()) {
+					hasElectricalPower = true;
+				}
+			});
+		}
 
 		hadElectricalPower = hasElectricalPower();
 

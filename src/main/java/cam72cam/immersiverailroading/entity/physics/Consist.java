@@ -32,10 +32,12 @@ public class Consist {
         }
 
         public void applyVelocity() {
-            Vec3d currentPos = state.position;
-            state.moveAlongTrack(VecUtil.fromWrongYaw(velocity, state.yaw));
-            state.velocity = state.position.subtract(currentPos);
-            state.calculateCouplerPositions();
+            if (Math.abs(velocity) > 0.001) {
+                Vec3d currentPos = state.position;
+                state.moveAlongTrack(VecUtil.fromWrongYaw(velocity, state.yaw));
+                state.velocity = state.position.subtract(currentPos);
+                state.calculateCouplerPositions();
+            }
         }
     }
 
