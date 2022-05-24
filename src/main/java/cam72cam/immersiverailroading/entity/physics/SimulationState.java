@@ -234,7 +234,7 @@ public class SimulationState {
     public void moveAlongTrack(Vec3d vecDist) {
         // TODO turn table stuff
 
-        if (vecDist.lengthSquared() == 0) {
+        if (vecDist.lengthSquared() < 0.001 * 0.001) {
             return;
         }
 
@@ -271,25 +271,25 @@ public class SimulationState {
         }
 
         Vec3d nextFront = trackFront.getNextPosition(positionFront, VecUtil.fromWrongYaw(distance, yawFront));
-        Vec3d nextRear = trackFront.getNextPosition(positionRear, VecUtil.fromWrongYaw(distance, yawRear));
+        Vec3d nextRear = trackRear.getNextPosition(positionRear, VecUtil.fromWrongYaw(distance, yawRear));
 
-        if (nextFront.equals(positionFront) || nextRear.equals(positionRear)) {
+        if (!nextFront.equals(positionFront) && !nextRear.equals(positionRear)) {
+            yawFront = VecUtil.toWrongYaw(nextFront.subtract(positionFront));
+            yawRear = VecUtil.toWrongYaw(nextRear.subtract(positionRear));
+
+            Vec3d currCenter = VecUtil.between(positionFront, positionRear);
+            Vec3d nextCenter = VecUtil.between(nextFront, nextRear);
+            Vec3d deltaCenter = nextCenter.subtract(currCenter);
+
+            Vec3d bogeyDelta = nextFront.subtract(nextRear);
+            yaw = VecUtil.toWrongYaw(bogeyDelta);
+            pitch = (float) Math.toDegrees(Math.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
+            position = position.add(deltaCenter.normalize().scale(distance)); // Rescale fixes issues with curves losing precision
+        } else {
             // Stuck
             System.out.println("STUCK");
             return;
         }
-
-        yawFront = VecUtil.toWrongYaw(nextFront.subtract(positionFront));
-        yawRear = VecUtil.toWrongYaw(nextRear.subtract(positionRear));
-
-        Vec3d currCenter = VecUtil.between(positionFront, positionRear);
-        Vec3d nextCenter = VecUtil.between(nextFront, nextRear);
-        Vec3d deltaCenter = nextCenter.subtract(currCenter);
-
-        Vec3d bogeyDelta = nextFront.subtract(nextRear);
-        yaw = VecUtil.toWrongYaw(bogeyDelta);
-        pitch = (float) Math.toDegrees(Math.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
-        position = position.add(deltaCenter.normalize().scale(distance)); // Rescale fixes issues with curves losing precision
 
         if (isReversed) {
             yawFront += 180;
