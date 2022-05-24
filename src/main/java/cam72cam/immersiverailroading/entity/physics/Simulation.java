@@ -29,7 +29,7 @@ public class Simulation {
         }
 
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
-        List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
+        //List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
 
         for (int i = 0; i < 30; i++) {
             stateMaps.add(new HashMap<>());
@@ -222,21 +222,24 @@ public class Simulation {
             }
 
             // collide with blocks
+            /* TODO move this logic properly from EMRS
             for (SimulationState state : states) {
                 if (state.dirty && state.tickID % 5 == 0) {
                     state.collideWithBlocks(blocksAlreadyBroken);
                     // TODO use hardness to apply resistance
                     state.overcameBlockResistance = true;
                 }
-            }
+            }*/
 
             // calculate new velocities
             Consist.iterate(stateMap);
 
             // update blocks broken
+            /*
             for (SimulationState state : states) {
                 state.addBlocksBroken(blocksAlreadyBroken);
             }
+             */
 
             int dirty = (int) states.stream().filter(s -> s.dirty).count();
             //System.out.println(String.format("%s: %s/%s dirty", i, dirty, states.size()));
