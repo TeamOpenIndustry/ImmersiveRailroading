@@ -236,7 +236,7 @@ public class SimulationState {
 
         double distance = vecDist.length();
 
-        if (distance < 0.001) {
+        if (distance < 0.0001) {
             return;
         }
 

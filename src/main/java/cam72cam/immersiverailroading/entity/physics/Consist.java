@@ -32,7 +32,7 @@ public class Consist {
         }
 
         public void applyVelocity() {
-            if (Math.abs(velocity) > 0.001) {
+            if (Math.abs(velocity) > 0.0001) {
                 Vec3d currentPos = state.position;
                 state.moveAlongTrack(VecUtil.fromWrongYaw(velocity, state.yaw));
                 state.velocity = state.position.subtract(currentPos);
