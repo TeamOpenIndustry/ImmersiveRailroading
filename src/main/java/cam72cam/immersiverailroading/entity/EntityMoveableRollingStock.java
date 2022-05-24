@@ -652,4 +652,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public float getTotalBrake() {
         return totalBrake;
     }
+
+    @Deprecated
+    public TickPos getCurrentTickPosAndPrune() {
+        return getTickPos(0);
+    }
 }
