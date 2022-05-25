@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.entity.physics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.DegreeFuncs;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -138,7 +137,9 @@ public class Consist {
                 ImmersiveRailroading.warn("BUG BUG BUG");
                 return;
             }
-            System.out.printf("Collision %s: push %s pull %s a %s b %s dv %s %n", this.state.tickID, this.nextLink.isPushing, this.nextLink.isPulling, groupA.size(), groupB.size(), deltaV);
+            if (false) {
+                System.out.printf("Collision %s: push %s pull %s a %s b %s dv %s %n", this.state.tickID, this.nextLink.isPushing, this.nextLink.isPulling, groupA.size(), groupB.size(), deltaV);
+            }
 
             double massA = groupA.stream().mapToDouble(p -> p.state.config.massKg).sum();
             double massB = groupB.stream().mapToDouble(p -> p.state.config.massKg).sum();
@@ -178,22 +179,19 @@ public class Consist {
         }
 
 
-        public void applyToState() {
-            if (Math.abs(Math.abs(Speed.fromMinecraft(state.velocity).metric()) - Math.abs(velocity)) > 4) {
-                //System.out.printf("WATTTNEY");
-            }
-
+        public SimulationState applyToState() {
             state.velocity = Speed.fromMetric(velocity).minecraft() * direction;
             double movement = state.velocity + offset * direction;
             Vec3d currentPos = state.position;
-            state.moveAlongTrack(movement);
 
+            SimulationState state = this.state.next(movement);
             if (currentPos.equals(state.position)) {
                 state.velocity = 0;
             } else {
                 state.calculateCouplerPositions();
                 //System.out.printf("%s : %s%n", movement, state.position.subtract(currentPos).length());
             }
+            return state;
         }
     }
 
@@ -248,7 +246,7 @@ public class Consist {
         }
     }
 
-    public static void iterate(Map<UUID, SimulationState> states) {
+    public static Map<UUID, SimulationState> iterate(Map<UUID, SimulationState> states) {
         // ordered
         List<Particle> particles = new ArrayList<>();
 
@@ -349,7 +347,7 @@ public class Consist {
         particles.forEach(Particle::applyAcceleration);
         particles.forEach(Particle::applyFriction);
 
-        // Apply new position/velocity to state
-        particles.forEach(Particle::applyToState);
+        // Generate new states
+        return particles.stream().map(Particle::applyToState).collect(Collectors.toMap(s -> s.config.id, s -> s));
     }
 }

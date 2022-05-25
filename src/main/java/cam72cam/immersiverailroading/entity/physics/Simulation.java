@@ -2,11 +2,9 @@ package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
-import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
 import java.util.*;
@@ -24,8 +22,8 @@ public class Simulation {
             return;
         }
 
-        if (ChronoState.getState(world).getTickID() < 20 * 10) {
-            // Wait for at least 30 seconds before starting simulation (for stock to load)
+        if (ChronoState.getState(world).getTickID() < 20 * 2) {
+            // Wait for at least 2 seconds before starting simulation (for stock to load)
             return;
         }
 
@@ -67,19 +65,8 @@ public class Simulation {
 
         double maxCouplerDist = 20;
 
-        for (int i = 1; i < 30; i++) {
+        for (int i = 0; i < stateMaps.size(); i++) {
             Map<UUID, SimulationState> stateMap = stateMaps.get(i);
-
-            // Override stateMap from previous where necessary
-            for (Map.Entry<UUID, SimulationState> entry : stateMaps.get(i-1).entrySet()) {
-                UUID id = entry.getKey();
-                SimulationState prev = entry.getValue();
-                SimulationState curr = stateMap.get(id);
-
-                if (prev.dirty || curr == null) {
-                    stateMap.put(id, prev.next());
-                }
-            }
 
             List<SimulationState> states = new ArrayList<>(stateMap.values());
 
@@ -100,7 +87,7 @@ public class Simulation {
                             Vec3d myCouplerPos = state.couplerPositionFront;
                             Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
                             if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                                //System.out.println("DECOUPLER");
+                                System.out.println("DECOUPLER");
                                 state.dirty = true;
                                 next.dirty = true;
                                 state.interactingFront = null;
@@ -129,7 +116,7 @@ public class Simulation {
                             Vec3d myCouplerPos = state.couplerPositionRear;
                             Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
                             if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                                //System.out.println("DECOUPLER");
+                                System.out.println("DECOUPLER");
                                 state.dirty = true;
                                 next.dirty = true;
                                 state.interactingRear = null;
@@ -238,7 +225,9 @@ public class Simulation {
             }*/
 
             // calculate new velocities
-            Consist.iterate(stateMap);
+            if (i + 1 < stateMaps.size()) {
+                stateMaps.get(i+1).putAll(Consist.iterate(stateMap));
+            }
 
             // update blocks broken
             /*
@@ -253,7 +242,7 @@ public class Simulation {
 
         // Apply new states
         for (EntityCoupleableRollingStock stock : allStock) {
-            stock.states = stateMaps.stream().map(m -> m.get(stock.getUUID())).collect(Collectors.toList());
+            stock.states = stateMaps.stream().map(m -> m.get(stock.getUUID())).filter(Objects::nonNull).collect(Collectors.toList());
             for (SimulationState state : stock.states) {
                 state.dirty = false;
             }

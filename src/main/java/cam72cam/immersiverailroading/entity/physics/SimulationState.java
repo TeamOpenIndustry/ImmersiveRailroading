@@ -195,17 +195,16 @@ public class SimulationState {
         }
     }
 
-    public SimulationState next() {
-        return new SimulationState(this);
+    public SimulationState next(double distance) {
+        SimulationState state = new SimulationState(this);
+        state.moveAlongTrack(distance);
+        return state;
     }
 
     public void update(EntityCoupleableRollingStock stock) {
         Configuration oldConfig = config;
         config = new Configuration(stock);
         dirty = !config.equals(oldConfig);
-        if (dirty) {
-            System.out.printf("DIRTY!!! %n");
-        }
     }
 
     public void collideWithBlocks(List<Vec3i> blocksAlreadyBroken) {
@@ -236,7 +235,7 @@ public class SimulationState {
         }
     }
 
-    public void moveAlongTrack(double distance) {
+    private void moveAlongTrack(double distance) {
         // TODO turn table stuff
 
         if (Math.abs(distance) < 0.0001) {
