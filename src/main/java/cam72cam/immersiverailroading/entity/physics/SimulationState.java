@@ -26,7 +26,7 @@ public class SimulationState {
     public int tickID;
 
     public Vec3d position;
-    public Vec3d velocity;
+    public double velocity;
     public float yaw;
     public float pitch;
     public IBoundingBox bounds;
@@ -119,7 +119,8 @@ public class SimulationState {
     public SimulationState(EntityCoupleableRollingStock stock) {
         tickID = ServerChronoState.getState(stock.getWorld()).getServerTickID();
         position = stock.getPosition();
-        velocity = stock.getVelocity();
+        velocity = stock.getVelocity().length() *
+                (DegreeFuncs.delta(VecUtil.toWrongYaw(stock.getVelocity()), stock.getRotationYaw()) < 90 ? 1 : -1);
         yaw = stock.getRotationYaw();
         pitch = stock.getRotationPitch();
 
@@ -187,6 +188,7 @@ public class SimulationState {
                 couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront.subtract(bogeyFront));
                 couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear.subtract(bogeyRear));
             } else {
+                System.out.println("HACK");
                 couplerPositionFront = position.add(couplerVecFront);
                 couplerPositionRear = position.add(couplerVecRear);
             }
@@ -201,6 +203,9 @@ public class SimulationState {
         Configuration oldConfig = config;
         config = new Configuration(stock);
         dirty = !config.equals(oldConfig);
+        if (dirty) {
+            System.out.printf("DIRTY!!! %n");
+        }
     }
 
     public void collideWithBlocks(List<Vec3i> blocksAlreadyBroken) {
@@ -231,17 +236,11 @@ public class SimulationState {
         }
     }
 
-    public void moveAlongTrack(Vec3d vecDist) {
+    public void moveAlongTrack(double distance) {
         // TODO turn table stuff
 
-        double distance = vecDist.length();
-
-        if (distance < 0.0001) {
+        if (Math.abs(distance) < 0.0001) {
             return;
-        }
-
-        if (DegreeFuncs.delta(VecUtil.toWrongYaw(vecDist), yaw) > 90) {
-            distance = -distance;
         }
 
         Vec3d positionFront = VecUtil.fromWrongYawPitch(config.offsetFront, yaw, pitch).add(position);

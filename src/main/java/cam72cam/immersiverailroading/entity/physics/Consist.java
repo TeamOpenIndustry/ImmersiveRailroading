@@ -1,304 +1,355 @@
 package cam72cam.immersiverailroading.entity.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.DegreeFuncs;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 1d dynamics simulator
+ *
+ * It's a touch special since it applies forces to groups of
+ * particles when they are interfering with each other via slacked linkages
+ * It is not technically correct, but I believe it will produce the most reasonable simulation
+ *
+ * TODO: Make particles / linkages state agnostic for unit testing
+ *
+ * Question: Do we want to store the deltaV in particle instead of immediately applying it to velocity?
+ * */
 public class Consist {
     public static class Particle {
         public SimulationState state;
-        // Velocity along axis
+
+        // Acceleration along consist axis (m/s/s)
+        public double acceleration;
+        // Friction along consist axis (m/s/s)
+        public double friction;
+        // Velocity along consist axis (m/s)
         public double velocity;
-        public boolean fullyLinked = false;
+        // Position along consist axis (m)
+        public double position;
+        // Offset due to coupler overlap (m)
+        public double offset;
+        // consist axis -> vehicle axis
+        public int direction;
 
-        public Particle(SimulationState state) {
+        public Linkage prevLink;
+        public Linkage nextLink;
+
+        public Particle(SimulationState state, boolean same) {
+            this.direction = same ? 1 : -1;
+
             this.state = state;
-            this.velocity = state.velocity.length() * (DegreeFuncs.delta(VecUtil.toWrongYaw(state.velocity), state.yaw) < 90 ? 1 : -1);
-
-            this.velocity += Speed.fromMetric(
-                    state.forcesNewtons() / state.config.massKg
-            ).minecraft();
-
-            this.velocity += Math.copySign(
-                    Math.min(
-                            Speed.fromMetric(state.frictionNewtons() / state.config.massKg).minecraft(),
-                            Math.abs(velocity)
-                    ), -velocity
-            );
+            this.acceleration = state.forcesNewtons() * direction;
+            this.friction = state.frictionNewtons();
+            this.velocity = Speed.fromMinecraft(state.velocity).metric() * direction;
+            this.position = 0;
         }
 
-        public void applyVelocity() {
-            if (Math.abs(velocity) > 0.0001) {
-                Vec3d currentPos = state.position;
-                state.moveAlongTrack(VecUtil.fromWrongYaw(velocity, state.yaw));
-                state.velocity = state.position.subtract(currentPos);
+        public void fixNextCoupler() {
+            if (nextLink != null) {
+                nextLink.fixNextPosition();
+            }
+        }
+
+        public void findAffectedByForce(double force, List<Particle> output, boolean recursive) {
+            if (prevLink != null) {
+                if (force > 0 && prevLink.isPulling || force < 0 && prevLink.isPushing) {
+                    if (!output.contains(prevLink.prevParticle)) {
+                        output.add(prevLink.prevParticle);
+                        if (recursive) {
+                            prevLink.prevParticle.findAffectedByForce(force, output, true);
+                        }
+                    }
+                }
+            }
+            if (nextLink != null) {
+                if (force < 0 && nextLink.isPulling || force > 0 && nextLink.isPushing) {
+                    if (!output.contains(nextLink.nextParticle)) {
+                        output.add(nextLink.nextParticle);
+                        if (recursive) {
+                            nextLink.nextParticle.findAffectedByForce(force, output, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void applyNextCollision() {
+            // Since we are iterating, we only want to apply collisions from this -> next
+            // Order should not matter, if it does, we will sort that out elsewhere
+
+            if (this.nextLink == null) {
+                return;
+            }
+
+            double velocityA = this.velocity;
+            double velocityB = this.nextLink.nextParticle.velocity;
+            // What direction we are applying force in
+            double deltaV = velocityA - velocityB;
+
+            if (Math.abs(velocityA) > 0 && false) {
+                System.out.printf("%s %s <> %s %s vs %s %n", this.state.tickID, velocityA, velocityB, this.nextLink.prevCoupler.z, nextLink.nextCoupler.z);
+            }
+
+            if (Math.abs(deltaV) < 0.1) {
+                return;
+            }
+
+            // Target
+            List<Particle> groupB = new ArrayList<>();
+
+            // Setup end-stops on iteration
+            groupB.add(this);
+            if (this.prevLink != null) {
+                groupB.add(this.prevLink.prevParticle);
+            }
+
+            boolean groupForces = true;
+
+            // Try to find particles in the next direction that are affected by our collision
+            this.findAffectedByForce(deltaV, groupB, groupForces);
+
+            // Remove end-stops on iteration
+            groupB.remove(this);
+            if (this.prevLink != null) {
+                groupB.remove(this.prevLink.prevParticle);
+            }
+
+            if (groupB.isEmpty()) {
+                // Next particle was not a collision
+                return;
+            }
+
+            // Source
+            List<Particle> groupA = new ArrayList<>();
+            // We are part of the supporting group by default
+            groupA.add(this);
+            // Try to find particles in the prev direction that support us
+            if (groupForces) {
+                this.findAffectedByForce(-deltaV, groupA, true);
+            }
+
+            // Due to the above "next" logic, supporting should never contain next particles
+            if (groupA.contains(nextLink.nextParticle)) {
+                ImmersiveRailroading.warn("BUG BUG BUG");
+                return;
+            }
+            System.out.printf("Collision %s: push %s pull %s a %s b %s dv %s %n", this.state.tickID, this.nextLink.isPushing, this.nextLink.isPulling, groupA.size(), groupB.size(), deltaV);
+
+            double massA = groupA.stream().mapToDouble(p -> p.state.config.massKg).sum();
+            double massB = groupB.stream().mapToDouble(p -> p.state.config.massKg).sum();
+
+            double restitution = 0.3;
+            double deltaVA = (restitution * massB * (velocityB - velocityA) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityA;
+            double deltaVB = (restitution * massA * (velocityA - velocityB) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityB;
+
+            //System.out.printf("Response: a %s b %s %n", deltaVA, deltaVB);
+
+            groupA.forEach(p -> p.velocity += deltaVA);
+            groupB.forEach(p -> p.velocity += deltaVB);
+        }
+
+        public void applyAcceleration() {
+            if (Math.abs(acceleration) < 0.001) {
+                return;
+            }
+            List<Particle> affected = new ArrayList<>();
+            affected.add(this);
+            findAffectedByForce(acceleration, affected, true);
+            double totalMassKg = affected.stream().mapToDouble(p -> p.state.config.massKg).sum();
+            double deltaV = acceleration / totalMassKg;
+            affected.forEach(p -> p.velocity += deltaV);
+        }
+
+        public void applyFriction() {
+            List<Particle> affected = new ArrayList<>();
+            affected.add(this);
+            findAffectedByForce(-friction, affected, true);
+            double totalMassKg = affected.stream().mapToDouble(p -> p.state.config.massKg).sum();
+
+            // This could probably be improved, but is good enough for now.
+            // We don't take into account left over available friction, but that's likely a negligible edge case
+            double deltaV = friction / totalMassKg;
+            affected.forEach(p -> p.velocity += Math.copySign(Math.min(deltaV, Math.abs(p.velocity)), -p.velocity));
+        }
+
+
+        public void applyToState() {
+            if (Math.abs(Math.abs(Speed.fromMinecraft(state.velocity).metric()) - Math.abs(velocity)) > 4) {
+                //System.out.printf("WATTTNEY");
+            }
+
+            state.velocity = Speed.fromMetric(velocity).minecraft() * direction;
+            double movement = state.velocity + offset * direction;
+            Vec3d currentPos = state.position;
+            state.moveAlongTrack(movement);
+
+            if (currentPos.equals(state.position)) {
+                state.velocity = 0;
+            } else {
                 state.calculateCouplerPositions();
+                //System.out.printf("%s : %s%n", movement, state.position.subtract(currentPos).length());
             }
         }
     }
 
-    public static class Collision {
-        private final Particle particleA;
-        private final Particle particleB;
+    public static class Linkage {
+        private final Particle prevParticle;
+        private final Particle nextParticle;
 
-        private final boolean particleACouplerFront;
-        private final boolean particleBCouplerFront;
-        private final boolean particleAEngaged;
-        private final boolean particleBEngaged;
+        // TODO triginomify
+        private final Vec3d prevCoupler;
+        private final Vec3d nextCoupler;
 
-        private final boolean sameDirection;
+        public boolean isPushing;
+        public boolean isPulling;
+
         private final double maxSlack;
 
-        public static Collision detect(Particle particleA, Particle particleB) {
-            if (particleB == null) {
-                return null;
-            }
-            if (particleB.fullyLinked) {
-                return null;
-            }
-            //System.out.println(VecUtil.between(particleA.state.position, particleB.state.position));
-            return new Collision(particleA, particleB);
-        }
+        public Linkage(Particle prev, Particle next) {
+            this.prevParticle = prev;
+            this.nextParticle = next;
 
-        private Collision(Particle particleA, Particle particleB) {
-            this.particleA = particleA;
-            this.particleB = particleB;
+            maxSlack = 0.1 * prev.state.config.gauge.scale(); // TODO configurable
 
-            particleACouplerFront = particleB.state.config.id.equals(particleA.state.interactingFront);
-            particleBCouplerFront = particleA.state.config.id.equals(particleB.state.interactingFront);
-            sameDirection = particleACouplerFront != particleBCouplerFront;
+            boolean prevCouplerFront = next.state.config.id.equals(prev.state.interactingFront);
+            boolean nextCouplerFront = prev.state.config.id.equals(next.state.interactingFront);
 
-            particleAEngaged = particleACouplerFront ?
-                    particleA.state.config.couplerEngagedFront :
-                    particleA.state.config.couplerEngagedRear;
-            particleBEngaged = particleBCouplerFront ?
-                    particleB.state.config.couplerEngagedFront :
-                    particleB.state.config.couplerEngagedRear;
+            prevCoupler = prevCouplerFront ? prevParticle.state.couplerPositionFront : prevParticle.state.couplerPositionRear;
+            nextCoupler = nextCouplerFront ? nextParticle.state.couplerPositionFront : nextParticle.state.couplerPositionRear;
 
-            maxSlack = 0.1 * particleA.state.config.gauge.scale(); // TODO configurable
-        }
+            boolean prevEngaged = prevCouplerFront ?
+                    prev.state.config.couplerEngagedFront :
+                    prev.state.config.couplerEngagedRear;
+            boolean nextEngaged = nextCouplerFront ?
+                    next.state.config.couplerEngagedFront :
+                    next.state.config.couplerEngagedRear;
 
-        private Vec3d particleACoupler() {
-            return particleACouplerFront ? particleA.state.couplerPositionFront : particleA.state.couplerPositionRear;
-        }
-        private Vec3d particleBCoupler() {
-            return particleBCouplerFront ? particleB.state.couplerPositionFront : particleB.state.couplerPositionRear;
-        }
-
-        private boolean isTransferringForce(boolean checkAppliedForces) {
-            int dir2 = sameDirection ? 1 : -1;
-            double velocityA = particleA.velocity;
-            double velocityB = particleB.velocity * dir2;
-
-            Vec3d slack = particleACoupler().subtract(particleBCoupler());
+            Vec3d slack = prevCoupler.subtract(nextCoupler);
             boolean contacting = slack.lengthSquared() >= maxSlack * maxSlack;
-            boolean isOverlapping =
-                    particleA.state.position.distanceToSquared(particleACoupler()) >
-                            particleA.state.position.distanceToSquared(particleBCoupler());
+            boolean isOverlapping = prev.state.position.distanceToSquared(prevCoupler) > prev.state.position.distanceToSquared(nextCoupler);
 
-            boolean isPushingTogether = contacting && isOverlapping;
-            boolean isPullingApart = contacting && !isOverlapping && (particleAEngaged && particleBEngaged);
-
-            isPushingTogether = isPushingTogether && (!checkAppliedForces || (
-                    particleACouplerFront ?
-                            // A >>>*< B
-                            velocityA > velocityB :
-                            // A >*<<< B
-                            velocityB > velocityA
-            ));
-            isPullingApart = isPullingApart && (!checkAppliedForces || (
-                    particleACouplerFront ?
-                            // A <<<*> B
-                            velocityA < velocityB :
-                            // A <*>>> B
-                            velocityB < velocityA
-            ));
-            if (velocityA != 0 || velocityB != 0) {
-                //System.out.println(String.format("%s - %s : %s push=%s pull=%s", particleA.state.config.id, particleB.state.config.id, contacting, isPushingTogether, isPullingApart));
-            }
-            return isPushingTogether || isPullingApart;
+            isPushing = contacting && isOverlapping;
+            isPulling = contacting && !isOverlapping && (prevEngaged && nextEngaged);
         }
 
-        public void collide() {
-            int dirB = sameDirection ? 1 : -1;
-            double velocityA = particleA.velocity;
-            double velocityB = particleB.velocity * dirB;
-            double massA = particleA.state.config.massKg;
-            double massB = particleB.state.config.massKg;
-
-            if (velocityA != velocityB && isTransferringForce(true)) {
-                //System.out.println("Transfer Velocity");
-                // Transfer velocity
-                //System.out.println(String.format("I M1=%s V1=%s M2=%s V2=%s", massA, particleA.velocity, massB, particleB.velocity));
-
-                double restitution = 0.3;
-                double newVA = (restitution * massB * (velocityB - velocityA) + massA * velocityA + massB * velocityB) / (massA + massB);
-                double newVB = (restitution * massA * (velocityA - velocityB) + massA * velocityA + massB * velocityB) / (massA + massB);
-
-                particleA.velocity = newVA;
-                particleB.velocity = newVB * dirB;
-
-                //System.out.println(String.format("O M1=%s V1=%s M2=%s V2=%s", massA, particleA.velocity, massB, particleB.velocity));
-            }
-        }
-
-        public void fixPositions() {
-            if (isTransferringForce(false)) {
-                Vec3d slack = particleACoupler().subtract(particleBCoupler());
-                if (slack.lengthSquared() > maxSlack * maxSlack) {
-                    double slackDist = slack.length() - maxSlack;
-                    if (Math.abs(slackDist) > 0.01) {
-                        //System.out.println("CORRECT: " + slackDist);
-                        particleB.state.moveAlongTrack(slack.normalize().scale(slackDist));
-                        particleB.state.calculateCouplerPositions();
-                    }
-                }
+        public void fixNextPosition() {
+            Vec3d slack = prevCoupler.subtract(nextCoupler);
+            double fudge = 4;
+            if (slack.lengthSquared() > maxSlack * maxSlack * fudge * fudge) {
+                double slackDist = (slack.length() - maxSlack);
+                //nextParticle.offset += isPushing ? slackDist : -slackDist;
+                //System.out.println(nextParticle.offset);
             }
         }
     }
 
     public static void iterate(Map<UUID, SimulationState> states) {
-        //System.out.println(String.format("Iterate: %s", states.size()));
-        List<Particle> ordered = new ArrayList<>();
-        Map<UUID, Particle> particles = new HashMap<>();
+        // ordered
+        List<Particle> particles = new ArrayList<>();
 
-        for (Map.Entry<UUID, SimulationState> entry : states.entrySet()) {
-            particles.put(entry.getKey(), new Particle(entry.getValue()));
-        }
+        List<SimulationState> used = new ArrayList<>();
 
-        for (Particle particle : particles.values()) {
-            if (ordered.contains(particle)) {
-                //Already in order
+        for (SimulationState state : states.values()) {
+            if (used.contains(state)) {
                 continue;
             }
 
-            Particle current = particle;
-            List<Particle> visited = new ArrayList<>();
+            // Iterate all the way to one end of the consist
 
-            // Iterate to one end of the consist
-            Particle prev = current;
+            SimulationState current = state;
+            boolean direction = true;
+
+            List<SimulationState> visited = new ArrayList<>();
             while (!visited.contains(current)) {
                 visited.add(current);
 
-                // If we have a Front connection
-                if (current.state.interactingFront != null) {
-                    // Find the particle for that connection
-                    Particle next = particles.get(current.state.interactingFront);
-
-                    // Check if it's not the previous node and it's not already been walked as part of another iteration
-                    if (next != null && prev != next && !ordered.contains(next)) {
-                        prev = current;
-                        current = next;
-                        continue;
-                    }
+                // Find next
+                UUID nextId = direction ? current.interactingFront : current.interactingRear;
+                SimulationState next = nextId != null ? states.get(nextId) : null;
+                if (next == null) {
+                    break;
                 }
-                // If we have a Rear connection
-                if (current.state.interactingRear != null) {
-                    // Find the particle for that connection
-                    Particle next = particles.get(current.state.interactingRear);
 
-                    // Check if it's not the previous node and it's not already been walked as part of another iteration
-                    if (next != null && prev != next && !ordered.contains(next)) {
-                        prev = current;
-                        current = next;
-                        continue;
-                    }
+                // If next is flipped from our direction
+                if (!current.config.id.equals(direction ? next.interactingRear : next.interactingFront)) {
+                    direction = !direction;
                 }
-                break;
+
+                current = next;
             }
 
-            ordered.add(current);
+            // Current is now pointing at the head or the tail (does not matter which)
 
+            // Invert iteration direction
+            direction = !direction;
 
-            // Keep track if the entire consist is dirty
-            boolean dirty = false;
+            List<Particle> consist = new ArrayList<>();
 
-            // We are now at the head of the iteration
-            prev = current;
+            // Setup the starting particle
+            Particle prevParticle = new Particle(current, direction);
+            consist.add(prevParticle);
+
+            // Build up the consist starting at the head or the tail
             visited.clear();
             while (!visited.contains(current)) {
                 visited.add(current);
 
-                // Compute dirty value
-                dirty = dirty || current.state.dirty;
-
-                // If we have a Front connection
-                if (current.state.interactingFront != null) {
-                    // Find the particle for that connection
-                    Particle next = particles.get(current.state.interactingFront);
-
-                    // Check if it's not the previous node and it's not already been walked as part of another iteration
-                    if (next != null && prev != next && !ordered.contains(next)) {
-                        ordered.add(next);
-                        prev = current;
-                        current = next;
-                        continue;
-                    }
+                // Find next
+                UUID nextId = direction ? current.interactingFront : current.interactingRear;
+                SimulationState next = nextId != null ? states.get(nextId) : null;
+                if (next == null) {
+                    break;
                 }
-                // If we have a Rear connection
-                if (current.state.interactingRear != null) {
-                    // Find the particle for that connection
-                    Particle next = particles.get(current.state.interactingRear);
 
-                    // Check if it's not the previous node and it's not already been walked as part of another iteration
-                    if (next != null && prev != next && !ordered.contains(next)) {
-                        ordered.add(next);
-                        prev = current;
-                        current = next;
-                        continue;
-                    }
+                // If next is flipped from our direction
+                if (!current.config.id.equals(direction ? next.interactingRear : next.interactingFront)) {
+                    direction = !direction;
                 }
-                break;
+
+                // Create the new particle
+                Particle nextParticle = new Particle(next, direction);
+                consist.add(nextParticle);
+
+                // Link the two particles together
+                Linkage link = new Linkage(prevParticle, nextParticle);
+                prevParticle.nextLink = link;
+                nextParticle.prevLink = link;
+
+                current = next;
+                prevParticle = nextParticle;
             }
 
-            for (Particle mark : visited) {
-                if (!dirty && mark.state.dirty) {
-                    System.out.println("BUG BUG BUG");
-                }
-                // Copy linked dirty value
-                mark.state.dirty = dirty;
-            }
-        }
-
-        // Don't process collisions for any "clean" states
-        ordered = ordered.stream().filter(p -> p.state.dirty).collect(Collectors.toList());
-        // This could be further optimized by making order act on states directly
-        particles = particles.entrySet().stream().filter(e -> e.getValue().state.dirty).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        // collisions follow same order
-        List<Collision> collisions = new ArrayList<>();
-        for (Particle particleA : ordered) {
-            if (particleA.state.interactingFront != null) {
-                Collision c = Collision.detect(particleA, particles.get(particleA.state.interactingFront));
-                if (c != null) {
-                    collisions.add(c);
-                }
+            // Propagate dirty flag
+            boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
+            if (dirty) {
+                consist.forEach(p -> p.state.dirty = true);
+                particles.addAll(consist);
             }
 
-            if (particleA.state.interactingRear != null) {
-                Collision c = Collision.detect(particleA, particles.get(particleA.state.interactingRear));
-                if (c != null) {
-                    collisions.add(c);
-                }
-            }
-
-            particleA.fullyLinked = true;
+            // Make sure we can't accidentally hook into any of the processed states from this consist
+            used.addAll(visited);
         }
 
-        //System.out.println("Collisions: " + collisions.size());
+        //System.out.printf("CONSIST %s %n", nConsist);
 
-        for (Collision collision : collisions) {
-            collision.fixPositions();
-        }
+        // At this point we should have an ordered list
+        // TODO we need to reverse it?
+        //Collections.reverse(particles);
 
-        for (Collision collision : collisions) {
-            collision.collide();
-        }
+        // Figure out the coupler offset to be applied
+        particles.forEach(Particle::fixNextCoupler);
 
-        particles.values().forEach(Particle::applyVelocity);
+        // Spread forces
+        particles.forEach(Particle::applyNextCollision);
+        particles.forEach(Particle::applyAcceleration);
+        particles.forEach(Particle::applyFriction);
+
+        // Apply new position/velocity to state
+        particles.forEach(Particle::applyToState);
     }
 }

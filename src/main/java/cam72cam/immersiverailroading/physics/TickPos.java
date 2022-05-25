@@ -44,7 +44,7 @@ public class TickPos {
 
 	public TickPos(SimulationState state) {
 		this.tickID = state.tickID;
-		this.speed = Speed.fromMinecraft(state.velocity.length() * ((DegreeFuncs.delta(VecUtil.toWrongYaw(state.velocity), state.yaw) > 90) ? -1 : 1));
+		this.speed = Speed.fromMinecraft(state.velocity);
 		this.isOffTrack = false;
 		this.position = state.position;
 		this.rotationYaw = state.yaw;

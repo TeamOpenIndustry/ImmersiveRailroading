@@ -432,6 +432,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 	}
 
+	private Freight cachedInventory = null;
 	@Override
 	public IInventory getInventory(Facing side) {
 		if (this.getAugment() != null) {
@@ -439,9 +440,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				case ITEM_LOADER:
 				case ITEM_UNLOADER:
 					if (canOperate()) {
-						Freight stock = getStockNearBy(Freight.class);
-						if (stock != null) {
-							return stock.cargoItems;
+						if (getWorld().getTicks() % 10 == 0) {
+							cachedInventory = getStockNearBy(Freight.class);
+						}
+						if (cachedInventory != null) {
+							return cachedInventory.cargoItems;
 						}
 					}
 					// placeholder for connections

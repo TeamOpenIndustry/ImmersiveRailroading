@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
@@ -20,6 +21,11 @@ public class Simulation {
 
         if (world.getTicks() % 5 != 0) {
             // Only re-check every 5 ticks
+            return;
+        }
+
+        if (ChronoState.getState(world).getTickID() < 20 * 10) {
+            // Wait for at least 30 seconds before starting simulation (for stock to load)
             return;
         }
 
