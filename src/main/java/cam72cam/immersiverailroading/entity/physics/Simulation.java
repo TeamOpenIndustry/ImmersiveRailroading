@@ -78,20 +78,20 @@ public class Simulation {
                         state.interactingFront = null;
                         state.dirty = true;
                     } else {
-                        if (next.interactingFront != state.config.id && next.interactingRear != state.config.id) {
+                        if (!state.config.id.equals(next.interactingFront) && !state.config.id.equals(next.interactingRear)) {
                             System.out.println("BROKEN COUPLER STATE");
                             state.interactingFront = null;
                             state.dirty = true;
                             next.dirty = true;
                         } else {
                             Vec3d myCouplerPos = state.couplerPositionFront;
-                            Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
+                            Vec3d nextCouplerPos = state.config.id.equals(next.interactingFront) ? next.couplerPositionFront : next.couplerPositionRear;
                             if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
                                 System.out.println("DECOUPLER");
                                 state.dirty = true;
                                 next.dirty = true;
                                 state.interactingFront = null;
-                                if (state.config.id == next.interactingFront) {
+                                if (state.config.id.equals(next.interactingFront)) {
                                     next.interactingFront = null;
                                 } else {
                                     next.interactingRear = null;
@@ -107,20 +107,20 @@ public class Simulation {
                         state.dirty = true;
                         state.interactingRear = null;
                     } else {
-                        if (next.interactingFront != state.config.id && next.interactingRear != state.config.id) {
+                        if (!state.config.id.equals(next.interactingFront) && !state.config.id.equals(next.interactingRear)) {
                             System.out.println("BROKEN COUPLER STATE");
                             state.interactingRear = null;
                             state.dirty = true;
                             next.dirty = true;
                         } else {
                             Vec3d myCouplerPos = state.couplerPositionRear;
-                            Vec3d nextCouplerPos = state.config.id == next.interactingFront ? next.couplerPositionFront : next.couplerPositionRear;
+                            Vec3d nextCouplerPos = state.config.id.equals(next.interactingFront) ? next.couplerPositionFront : next.couplerPositionRear;
                             if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
                                 System.out.println("DECOUPLER");
                                 state.dirty = true;
                                 next.dirty = true;
                                 state.interactingRear = null;
-                                if (state.config.id == next.interactingFront) {
+                                if (state.config.id.equals(next.interactingFront)) {
                                     next.interactingFront = null;
                                 } else {
                                     next.interactingRear = null;
@@ -162,11 +162,11 @@ public class Simulation {
                         continue;
                     }
 
-                    if (stateA.interactingFront == stateB.config.id || stateA.interactingRear == stateB.config.id) {
+                    if (stateB.config.id.equals(stateA.interactingFront) || stateB.config.id.equals(stateA.interactingRear)) {
                         // Already coupled
                         continue;
                     }
-                    if (stateB.interactingFront == stateA.config.id || stateB.interactingRear == stateA.config.id) {
+                    if (stateA.config.id.equals(stateB.interactingFront) || stateA.config.id.equals(stateB.interactingRear)) {
                         // Already coupled (double safe check)
                         continue;
                     }
