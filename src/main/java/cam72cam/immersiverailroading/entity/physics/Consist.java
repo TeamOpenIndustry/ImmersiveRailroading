@@ -236,12 +236,13 @@ public class Consist {
         }
 
         public void fixNextPosition() {
-            Vec3d slack = prevCoupler.subtract(nextCoupler);
-            double fudge = 4;
-            if (slack.lengthSquared() > maxSlack * maxSlack * fudge * fudge) {
-                double slackDist = (slack.length() - maxSlack);
-                //nextParticle.offset += isPushing ? slackDist : -slackDist;
-                //System.out.println(nextParticle.offset);
+            if (isPushing || isPulling) {
+                Vec3d slack = prevCoupler.subtract(nextCoupler);
+                double fudge = 5 * prevParticle.state.config.gauge.scale();
+                if (slack.lengthSquared() > maxSlack * maxSlack * fudge * fudge) {
+                    double slackDist = (slack.length() - maxSlack);
+                    nextParticle.offset += isPushing ? slackDist : -slackDist;
+                }
             }
         }
     }
