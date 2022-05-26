@@ -443,7 +443,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						if (getWorld().getTicks() % 10 == 0) {
 							cachedInventory = getStockNearBy(Freight.class);
 						}
-						if (cachedInventory != null) {
+						if (cachedInventory != null && !cachedInventory.isDead()) {
 							return cachedInventory.cargoItems;
 						}
 					}
