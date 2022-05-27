@@ -10,6 +10,16 @@ import cam72cam.mod.world.World;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Bugs:
+ * Turn tables
+ * Waiting for chunk loading for long trains
+ *
+ * Todo:
+ * Integrate block breaking forces (including snow clearing)
+ * Optimizations
+ *
+ */
 public class Simulation {
 
     public static void simulate(World world) {
@@ -235,9 +245,6 @@ public class Simulation {
                 state.addBlocksBroken(blocksAlreadyBroken);
             }
              */
-
-            int dirty = (int) states.stream().filter(s -> s.dirty).count();
-            //System.out.println(String.format("%s: %s/%s dirty", i, dirty, states.size()));
         }
 
         // Apply new states

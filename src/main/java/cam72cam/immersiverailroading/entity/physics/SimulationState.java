@@ -87,7 +87,6 @@ public class SimulationState {
 
             couplerEngagedFront = stock.isCouplerEngaged(EntityCoupleableRollingStock.CouplerType.FRONT);
             couplerEngagedRear = stock.isCouplerEngaged(EntityCoupleableRollingStock.CouplerType.BACK);
-            // TODO This is intentional
             couplerDistanceFront = stock.getDefinition().getCouplerPosition(EntityCoupleableRollingStock.CouplerType.FRONT, gauge);
             couplerDistanceRear = -stock.getDefinition().getCouplerPosition(EntityCoupleableRollingStock.CouplerType.BACK, gauge);
 
@@ -159,39 +158,23 @@ public class SimulationState {
     }
 
     public void calculateCouplerPositions() {
-        // TODO start at bogeyFront/Rear positions
-        if (1 == 0) {
-            Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw);
-            Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw);
+        Vec3d bogeyFront = VecUtil.fromWrongYawPitch(config.offsetFront, yaw, pitch);
+        Vec3d bogeyRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch);
+        Vec3d positionFront = position.add(bogeyFront);
+        Vec3d positionRear = position.add(bogeyRear);
 
-            ITrack track = MovementTrack.findTrack(config.world, position, yaw, config.gauge.value());
-            if (track != null) {
-                couplerPositionFront = track.getNextPosition(position, couplerVecFront);
-                couplerPositionRear = track.getNextPosition(position, couplerVecRear);
-            } else {
-                couplerPositionFront = position.add(couplerVecFront);
-                couplerPositionRear = position.add(couplerVecRear);
-            }
+        Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw);
+        Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw);
+
+        ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
+        ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
+
+        if (trackFront != null && trackRear != null) {
+            couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront.subtract(bogeyFront));
+            couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear.subtract(bogeyRear));
         } else {
-            Vec3d bogeyFront = VecUtil.fromWrongYawPitch(config.offsetFront, yaw, pitch);
-            Vec3d bogeyRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch);
-            Vec3d positionFront = position.add(bogeyFront);
-            Vec3d positionRear = position.add(bogeyRear);
-
-            Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw);
-            Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw);
-
-            ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
-            ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
-
-            if (trackFront != null && trackRear != null) {
-                couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront.subtract(bogeyFront));
-                couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear.subtract(bogeyRear));
-            } else {
-                System.out.println("HACK");
-                couplerPositionFront = position.add(couplerVecFront);
-                couplerPositionRear = position.add(couplerVecRear);
-            }
+            couplerPositionFront = position.add(couplerVecFront);
+            couplerPositionRear = position.add(couplerVecRear);
         }
     }
 
@@ -249,7 +232,6 @@ public class SimulationState {
         ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
         ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
         if (trackFront == null || trackRear == null) {
-            System.out.println("OFF");
             return;
         }
 
@@ -282,11 +264,8 @@ public class SimulationState {
             Vec3d bogeyDelta = nextFront.subtract(nextRear);
             yaw = VecUtil.toWrongYaw(bogeyDelta);
             pitch = (float) Math.toDegrees(Math.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
-            position = position.add(deltaCenter/*.normalize().scale(distance)*/); // Rescale fixes issues with curves losing precision
-        } else {
-            // Stuck
-            System.out.println("STUCK");
-            return;
+            // TODO Rescale fixes issues with curves losing precision, but breaks when correcting stock positions
+            position = position.add(deltaCenter/*.normalize().scale(distance)*/);
         }
 
         if (isReversed) {
@@ -307,8 +286,6 @@ public class SimulationState {
     }
 
     public void apply(EntityCoupleableRollingStock stock) {
-        // TODO apply motion + coupler state
-
         if (overcameBlockResistance) {
             for (Vec3i bp : blocksToBreak) {
                 stock.getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(stock.getWorld().isSnow(bp)));

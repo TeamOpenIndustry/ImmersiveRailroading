@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.entity.physics;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 
@@ -28,8 +27,6 @@ public class Consist {
         public double friction;
         // Velocity along consist axis (m/s)
         public double velocity;
-        // Position along consist axis (m)
-        public double position;
         // Offset due to coupler overlap (m)
         public double offset;
         // consist axis -> vehicle axis
@@ -45,7 +42,6 @@ public class Consist {
             this.acceleration = state.forcesNewtons() * direction;
             this.friction = state.frictionNewtons();
             this.velocity = Speed.fromMinecraft(state.velocity).metric() * direction;
-            this.position = 0;
         }
 
         public void fixNextCoupler() {
@@ -87,16 +83,17 @@ public class Consist {
 
             double velocityA = this.velocity;
             double velocityB = this.nextLink.nextParticle.velocity;
+
             // What direction we are applying force in
             double deltaV = velocityA - velocityB;
-
-            if (Math.abs(velocityA) > 0 && false) {
-                System.out.printf("%s %s <> %s %s vs %s %n", this.state.tickID, velocityA, velocityB, this.nextLink.prevCoupler.z, nextLink.nextCoupler.z);
-            }
-
             if (Math.abs(deltaV) < 0.1) {
                 return;
             }
+
+            // This is what fudges the physics to treat a group of cars as a single rigid body
+            // My testing so far has shown that it makes normal operations more smooth
+            // but edge cases (like newtons cradle) don't work as well
+            boolean groupForces = true;
 
             // Target
             List<Particle> groupB = new ArrayList<>();
@@ -106,8 +103,6 @@ public class Consist {
             if (this.prevLink != null) {
                 groupB.add(this.prevLink.prevParticle);
             }
-
-            boolean groupForces = true;
 
             // Try to find particles in the next direction that are affected by our collision
             this.findAffectedByForce(deltaV, groupB, groupForces);
@@ -132,23 +127,12 @@ public class Consist {
                 this.findAffectedByForce(-deltaV, groupA, true);
             }
 
-            // Due to the above "next" logic, supporting should never contain next particles
-            if (groupA.contains(nextLink.nextParticle)) {
-                ImmersiveRailroading.warn("BUG BUG BUG");
-                return;
-            }
-            if (false) {
-                System.out.printf("Collision %s: push %s pull %s a %s b %s dv %s %n", this.state.tickID, this.nextLink.isPushing, this.nextLink.isPulling, groupA.size(), groupB.size(), deltaV);
-            }
-
             double massA = groupA.stream().mapToDouble(p -> p.state.config.massKg).sum();
             double massB = groupB.stream().mapToDouble(p -> p.state.config.massKg).sum();
 
             double restitution = 0.3;
             double deltaVA = (restitution * massB * (velocityB - velocityA) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityA;
             double deltaVB = (restitution * massA * (velocityA - velocityB) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityB;
-
-            //System.out.printf("Response: a %s b %s %n", deltaVA, deltaVB);
 
             groupA.forEach(p -> p.velocity += deltaVA);
             groupB.forEach(p -> p.velocity += deltaVB);
@@ -199,7 +183,7 @@ public class Consist {
         private final Particle prevParticle;
         private final Particle nextParticle;
 
-        // TODO triginomify
+        // TODO triginomify for performance
         private final Vec3d prevCoupler;
         private final Vec3d nextCoupler;
 
@@ -334,10 +318,8 @@ public class Consist {
             used.addAll(visited);
         }
 
-        //System.out.printf("CONSIST %s %n", nConsist);
-
         // At this point we should have an ordered list
-        // TODO we need to reverse it?
+        // Do we need to reverse it?
         //Collections.reverse(particles);
 
         // Figure out the coupler offset to be applied
