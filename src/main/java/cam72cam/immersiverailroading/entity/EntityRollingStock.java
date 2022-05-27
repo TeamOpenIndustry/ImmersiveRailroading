@@ -201,9 +201,6 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 	*/
 
-	public void triggerResimulate() {
-	}
-
 	public Gauge soundGauge() {
 		return this.getDefinition().shouldScalePitch() ? gauge : Gauge.from(Gauge.STANDARD);
 	}

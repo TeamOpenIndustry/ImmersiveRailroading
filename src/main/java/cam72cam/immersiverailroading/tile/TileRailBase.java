@@ -232,12 +232,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				railHeight = bedHeight;
 			}
 		}
-		if (getWorld().isServer) {
-			EntityCoupleableRollingStock stock = this.getStockNearBy(EntityCoupleableRollingStock.class);
-			if (stock != null) {
-				stock.triggerResimulate();
-			}
-		}
 	}
 	@Override
 	public void save(TagCompound nbt) {

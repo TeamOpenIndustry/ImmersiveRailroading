@@ -646,7 +646,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);
             }
             independentBrake = newIndependentBrake;
-            triggerResimulate();
         }
     }
     public float getTotalBrake() {

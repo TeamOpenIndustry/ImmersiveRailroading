@@ -135,7 +135,6 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 								couplable.getCoupledUUID(coupler),
 								couplable.getCoupledUUID(coupler)
 						);
-						((EntityCoupleableRollingStock) this).decouple(coupler);
 					}
 					return offset;
 				}

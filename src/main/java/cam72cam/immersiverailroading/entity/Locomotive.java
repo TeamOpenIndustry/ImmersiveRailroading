@@ -412,8 +412,6 @@ public abstract class Locomotive extends FreightTank {
 		if (this.getThrottle() != newThrottle) {
 			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
 			throttle = newThrottle;
-			triggerResimulate();
-
 			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrake())/2);
 		}
 	}
@@ -440,7 +438,6 @@ public abstract class Locomotive extends FreightTank {
 			}
 			setControlPositions(ModelComponentType.REVERSER_X, newReverser/-2 + 0.5f);
 			reverser = newReverser;
-			triggerResimulate();
 		}
 	}
 
@@ -490,8 +487,6 @@ public abstract class Locomotive extends FreightTank {
 				setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newTrainBrake);
 			}
 			trainBrake = newTrainBrake;
-			triggerResimulate();
-
 			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrake())/2);
 		}
 	}

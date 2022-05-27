@@ -313,39 +313,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		return getCouplerFor(stock) != null;
 	}
 
-	/*
-	 * Decouple
-	 * 
-	 */
-
-	public void decouple() {
-		decouple(CouplerType.FRONT);
-		decouple(CouplerType.BACK);
-	}
-
-	public void decouple(EntityCoupleableRollingStock stock) {
-		if (stock.getUUID().equals(this.getCoupledUUID(CouplerType.FRONT))) {
-			decouple(CouplerType.FRONT);
-		} else if (stock.getUUID().equals(this.getCoupledUUID(CouplerType.BACK))) {
-			decouple(CouplerType.BACK);
-		}
-	}
-
-	public void decouple(CouplerType coupler) {
-		EntityCoupleableRollingStock coupled = getCoupled(coupler);
-		
-		ImmersiveRailroading.info(this.getUUID() + " decouple " + coupler);
-
-		// Break the coupling
-		this.setCoupledUUID(coupler, null);
-
-		// Ask the connected car to do the same
-		if (coupled != null) {
-			coupled.decouple(this);
-		}
-	}
-
-
 	@Override
 	protected void clearPositionCache() {
 		super.clearPositionCache();
@@ -354,35 +321,17 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {
-		return getCouplerPosition(coupler, this.getFakeTickPos());
-	}
-
-	public Vec3d getCouplerPosition(CouplerType coupler, TickPos pos) {
-		
-		//Don't ask me why these are reversed...
-		if (coupler == CouplerType.FRONT) {
-			if (couplerFrontPosition == null) {
-				couplerFrontPosition = predictRearBogeyPosition(pos, (float) -(this.getDefinition().getCouplerPosition(coupler, gauge) + this.getDefinition().getBogeyRear(gauge))).add(pos.position).add(0, 1, 0);
-			}
-			return couplerFrontPosition;
-		} else {
-			if (couplerRearPosition == null) {
-				couplerRearPosition = predictFrontBogeyPosition(pos, (float) (this.getDefinition().getCouplerPosition(coupler, gauge) - this.getDefinition().getBogeyFront(gauge))).add(pos.position).add(0, 1, 0);
-			}
-			return couplerRearPosition;
+		SimulationState state = getCurrentState();
+		if (state != null) {
+			return coupler == CouplerType.FRONT ? state.couplerPositionFront : state.couplerPositionRear;
 		}
+		return getPosition();
 	}
 
 	/*
 	 * Helpers
 	 */
 	
-	public void triggerTrain() {
-		for (EntityCoupleableRollingStock stock : this.getTrain()) {
-			stock.triggerResimulate();
-		}
-	}
-
 	public final List<EntityCoupleableRollingStock> getTrain() {
 		return getTrain(true);
 	}
@@ -475,10 +424,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	public EntityCoupleableRollingStock findByUUID(UUID uuid) {
 		return getWorld().getEntity(uuid, EntityCoupleableRollingStock.class);
-	}
-	
-	@Override
-	public void triggerResimulate() {
 	}
 
 	public boolean hasElectricalPower() {
