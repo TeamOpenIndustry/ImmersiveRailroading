@@ -12,4 +12,5 @@ public interface ChronoState {
     }
 
     double getTickID();
+    double getTickSkew();
 }

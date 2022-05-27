@@ -3,10 +3,8 @@ package cam72cam.immersiverailroading.physics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
-import cam72cam.mod.util.DegreeFuncs;
 
 import java.util.List;
 
@@ -59,6 +57,39 @@ public class TickPos {
 		} catch (SerializationException e) {
 			ImmersiveRailroading.catching(e);
 		}
+	}
+
+	private static double skewScalar(double curr, double next, float ratio) {
+		return curr + (next - curr) * ratio;
+	}
+
+	private static float skewAngle(float curr, float next, float ratio) {
+		if (curr - next > 180) {
+			curr -= 360;
+		}
+		if (next - curr > 180) {
+			curr += 360;
+		}
+
+		return curr + (next - curr) * ratio;
+	}
+
+	public static TickPos skew(TickPos current, TickPos next, double tick) {
+		float ratio = (float) (tick % 1);
+		return new TickPos(
+				current.tickID,
+				current.speed,
+				new Vec3d(
+						skewScalar(current.position.x, next.position.x, ratio),
+						skewScalar(current.position.y, next.position.y, ratio),
+						skewScalar(current.position.z, next.position.z, ratio)
+				),
+				skewAngle(current.frontYaw, next.frontYaw, ratio),
+				skewAngle(current.rearYaw, next.rearYaw, ratio),
+				skewAngle(current.rotationYaw, next.rotationYaw, ratio),
+				skewAngle(current.rotationPitch, next.rotationPitch, ratio),
+				current.isOffTrack
+		);
 	}
 
 	private TagCompound toTag() {

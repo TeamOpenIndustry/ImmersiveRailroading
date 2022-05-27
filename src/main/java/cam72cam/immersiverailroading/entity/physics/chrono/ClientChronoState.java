@@ -30,6 +30,11 @@ public class ClientChronoState implements ChronoState {
         return tickID;
     }
 
+    @Override
+    public double getTickSkew() {
+        return tickSkew;
+    }
+
     public static ClientChronoState getState(World world) {
         return states.get(world);
     }

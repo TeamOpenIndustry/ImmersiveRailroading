@@ -173,43 +173,36 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return states.isEmpty() ? null : states.get(0);
     }
 
-    public TickPos getTickPos(int offset) {
+    public TickPos getTickPos() {
         if (ChronoState.getState(getWorld()) == null) {
             return null;
         }
-        int tickID = (int) Math.floor(ChronoState.getState(getWorld()).getTickID()) + offset;
+        double tick = ChronoState.getState(getWorld()).getTickID();
+        int currentTickID = (int) Math.floor(tick);
+        int nextTickID = (int) Math.ceil(tick);
+        TickPos current = null;
+        TickPos next = null;
+
         for (TickPos position : positions) {
-            if (position.tickID == tickID) {
-                return position;
+            if (position.tickID == currentTickID) {
+                current = position;
+            }
+            if (position.tickID == nextTickID) {
+                next = position;
+            }
+            if (current != null && next != null) {
+                break;
             }
         }
-        return null;
-    }
-
-    private double skewScalar(double curr, double next) {
-        if (getWorld().isClient) {
-            return curr + (next - curr) * this.getTickSkew();
+        if (current == null) {
+            return null;
         }
-        return next;
-    }
-
-    private float skewScalar(float curr, float next) {
-        if (getWorld().isClient) {
-            return curr + (next - curr) * this.getTickSkew();
+        if (next == null || current == next || getWorld().isServer) {
+            return current;
         }
-        return next;
+        // Skew
+        return TickPos.skew(current, next, tick);
     }
-
-    private float fixAngleInterp(float curr, float next) {
-        if (curr - next > 180) {
-            curr -= 360;
-        }
-        if (next - curr > 180) {
-            curr += 360;
-        }
-        return curr;
-    }
-
 
     @Override
     public void onDrag(Control<?> control, double newValue) {
@@ -355,7 +348,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         }
 
         // Apply position onTick
-        TickPos currentPos = getTickPos(0);
+        TickPos currentPos = getTickPos();
         if (currentPos == null) {
             // Not loaded yet or not moving
             return;
@@ -365,32 +358,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         double prevPosX = prevPos.x;
         double prevPosY = prevPos.y;
         double prevPosZ = prevPos.z;
-        float prevRotationYaw = this.getRotationYaw();
-        float prevRotationPitch = this.getRotationPitch();
 
-
-        if (getWorld().isClient) {
-            //TODO this.prevRotationYaw = fixAngleInterp(this.prevRotationYaw, currentPos.rotationYaw);
-            //TODO this.rotationYaw = fixAngleInterp(this.rotationYaw, currentPos.rotationYaw);
-            this.frontYaw = fixAngleInterp(this.frontYaw == null ? prevRotationYaw : this.frontYaw, currentPos.frontYaw);
-            this.rearYaw = fixAngleInterp(this.rearYaw == null ? prevRotationYaw : this.rearYaw, currentPos.rearYaw);
-            prevRotationYaw = fixAngleInterp(prevRotationYaw, currentPos.rotationYaw);
-        }
-
-        this.setRotationYaw(skewScalar(prevRotationYaw, currentPos.rotationYaw));
-        this.setRotationPitch(skewScalar(prevRotationPitch, currentPos.rotationPitch));
-        this.frontYaw = skewScalar(this.frontYaw == null ? prevRotationYaw : this.frontYaw, currentPos.frontYaw);
-        this.rearYaw = skewScalar(this.rearYaw == null ? prevRotationYaw : this.rearYaw, currentPos.rearYaw);
+        this.setRotationYaw(currentPos.rotationYaw);
+        this.setRotationPitch(currentPos.rotationPitch);
+        this.frontYaw = currentPos.frontYaw;
+        this.rearYaw = currentPos.rearYaw;
 
         this.currentSpeed = currentPos.speed;
-        distanceTraveled = skewScalar(distanceTraveled, distanceTraveled + (float) this.currentSpeed.minecraft());
+        distanceTraveled += (float) this.currentSpeed.minecraft() * getTickSkew();
 
-        this.setPosition(new Vec3d(
-                        skewScalar(prevPosX, currentPos.position.x),
-                        skewScalar(prevPosY, currentPos.position.y),
-                        skewScalar(prevPosZ, currentPos.position.z)
-                )
-        );
+        this.setPosition(currentPos.position);
         this.setVelocity(getPosition().subtract(prevPosX, prevPosY, prevPosZ));
 
         if (this.getVelocity().length() > 0.001) {
@@ -594,7 +571,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public float getTickSkew() {
-        return 1;
+        ChronoState state = ChronoState.getState(getWorld());
+        return state != null ? (float) state.getTickSkew() : 1;
     }
 
     @Override
@@ -654,6 +632,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     @Deprecated
     public TickPos getCurrentTickPosAndPrune() {
-        return getTickPos(0);
+        return getTickPos();
     }
 }

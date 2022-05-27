@@ -47,6 +47,11 @@ public class ServerChronoState extends Packet implements ChronoState {
         return tickID;
     }
 
+    @Override
+    public double getTickSkew() {
+        return 1;
+    }
+
     public int getServerTickID() {
         return tickID;
     }

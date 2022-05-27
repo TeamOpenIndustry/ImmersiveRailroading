@@ -26,9 +26,7 @@ import cam72cam.mod.math.Vec3i;
 
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.util.VecUtil;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
@@ -37,6 +35,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		World.onTick(world -> {
 			if (world.isClient) {
 				return;
+			}
+
+			if (ConfigDebug.lagServer > 0) {
+				try {
+					Thread.sleep(ConfigDebug.lagServer);
+				} catch (InterruptedException e) {
+					// pass
+				}
 			}
 
 			Simulation.simulate(world);
