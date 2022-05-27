@@ -71,6 +71,8 @@ public abstract class EntityRollingStockDefinition {
     private float bogeyRear;
     private float couplerOffsetFront;
     private float couplerOffsetRear;
+    private float couplerSlackFront;
+    private float couplerSlackRear;
     private boolean scalePitch;
     private double frontBounds;
     private double rearBounds;
@@ -205,6 +207,23 @@ public abstract class EntityRollingStockDefinition {
         return scalePitch;
     }
 
+    protected static String getOrDefault(JsonObject data, String field, String fallback) {
+        return data.has(field) ? data.get(field).getAsString() : fallback;
+    }
+    protected static boolean getOrDefault(JsonObject data, String field, boolean fallback) {
+        return data.has(field) ? data.get(field).getAsBoolean() : fallback;
+    }
+    protected static int getOrDefault(JsonObject data, String field, int fallback) {
+        return data.has(field) ? data.get(field).getAsInt() : fallback;
+    }
+    protected static float getOrDefault(JsonObject data, String field, float fallback) {
+        return data.has(field) ? data.get(field).getAsFloat() : fallback;
+    }
+    protected static double getOrDefault(JsonObject data, String field, double fallback) {
+        return data.has(field) ? data.get(field).getAsDouble() : fallback;
+    }
+
+
     public void parseJson(JsonObject data) throws Exception {
         name = data.get("name").getAsString();
         if (data.has("modeler")) {
@@ -282,8 +301,11 @@ public abstract class EntityRollingStockDefinition {
         }
 
         if (data.has("couplers")) {
-            couplerOffsetFront = (float) (data.get("couplers").getAsJsonObject().get("front_offset").getAsFloat() * internal_model_scale);
-            couplerOffsetRear = (float) (data.get("couplers").getAsJsonObject().get("rear_offset").getAsFloat() * internal_model_scale);
+            JsonObject couplers = data.get("couplers").getAsJsonObject();
+            couplerOffsetFront = getOrDefault(couplers, "front_offset", 0f) * (float) internal_model_scale;
+            couplerOffsetRear = getOrDefault(couplers, "rear_offset", 0f) * (float) internal_model_scale;
+            couplerSlackFront = getOrDefault(couplers, "front_slack", 0.05f) * (float) internal_model_scale;
+            couplerSlackRear = getOrDefault(couplers, "rear_slack", 0.05f) * (float) internal_model_scale;
         }
 
         JsonObject properties = data.get("properties").getAsJsonObject();
@@ -403,14 +425,24 @@ public abstract class EntityRollingStockDefinition {
 
     public double getCouplerPosition(CouplerType coupler, Gauge gauge) {
         switch (coupler) {
+            default:
             case FRONT:
                 return gauge.scale() * (this.frontBounds);
             case BACK:
                 return gauge.scale() * (this.rearBounds);
-            default:
-                return 0;
         }
     }
+
+    public double getCouplerSlack(CouplerType coupler, Gauge gauge) {
+        switch (coupler) {
+            default:
+            case FRONT:
+                return gauge.scale() * (this.couplerSlackFront);
+            case BACK:
+                return gauge.scale() * (this.couplerSlackRear);
+        }
+    }
+
 
     public boolean hasIndependentBrake() {
         return hasIndependentBrake;

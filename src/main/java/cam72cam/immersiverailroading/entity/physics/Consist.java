@@ -196,10 +196,11 @@ public class Consist {
             this.prevParticle = prev;
             this.nextParticle = next;
 
-            maxSlack = 0.1 * prev.state.config.gauge.scale(); // TODO configurable
-
             boolean prevCouplerFront = next.state.config.id.equals(prev.state.interactingFront);
             boolean nextCouplerFront = prev.state.config.id.equals(next.state.interactingFront);
+
+            maxSlack = (prevCouplerFront ? prev.state.config.couplerSlackFront : prev.state.config.couplerSlackRear) +
+                       (nextCouplerFront ? next.state.config.couplerSlackFront : next.state.config.couplerSlackRear);
 
             prevCoupler = prevCouplerFront ? prevParticle.state.couplerPositionFront : prevParticle.state.couplerPositionRear;
             nextCoupler = nextCouplerFront ? nextParticle.state.couplerPositionFront : nextParticle.state.couplerPositionRear;

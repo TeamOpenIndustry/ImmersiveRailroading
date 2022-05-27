@@ -63,6 +63,8 @@ public class SimulationState {
         public boolean couplerEngagedRear;
         public double couplerDistanceFront;
         public double couplerDistanceRear;
+        public double couplerSlackFront;
+        public double couplerSlackRear;
 
         public double massKg;
         // TODO these should probably be dynamic
@@ -89,6 +91,8 @@ public class SimulationState {
             couplerEngagedRear = stock.isCouplerEngaged(EntityCoupleableRollingStock.CouplerType.BACK);
             couplerDistanceFront = stock.getDefinition().getCouplerPosition(EntityCoupleableRollingStock.CouplerType.FRONT, gauge);
             couplerDistanceRear = -stock.getDefinition().getCouplerPosition(EntityCoupleableRollingStock.CouplerType.BACK, gauge);
+            couplerSlackFront = stock.getDefinition().getCouplerSlack(EntityCoupleableRollingStock.CouplerType.FRONT, gauge);
+            couplerSlackRear = stock.getDefinition().getCouplerSlack(EntityCoupleableRollingStock.CouplerType.BACK, gauge);
 
             this.massKg = stock.getWeight();
 
