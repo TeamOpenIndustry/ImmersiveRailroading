@@ -12,7 +12,6 @@ import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
-import cam72cam.immersiverailroading.physics.MovementSimulator;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -31,7 +30,6 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -74,10 +72,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @Override
     public void load(TagCompound data) {
         super.load(data);
-
-        if (positions.isEmpty()) {
-            positions.add(getFakeTickPos());
-        }
 
         if (frontYaw == null) {
             frontYaw = getRotationYaw();
@@ -490,23 +484,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
      *
      * Client side render guessing
      */
-    public class PosRot extends Vec3d {
-        private float rotation;
-
-        public PosRot(double xIn, double yIn, double zIn, float rotation) {
-            super(xIn, yIn, zIn);
-            this.rotation = rotation;
-        }
-
-        public PosRot(Vec3d nextFront, float yaw) {
-            this(nextFront.x, nextFront.y, nextFront.z, yaw);
-        }
-
-        public float getRotation() {
-            return rotation;
-        }
-    }
-
 
     public float getFrontYaw() {
         if (this.frontYaw != null) {
@@ -520,30 +497,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             return this.rearYaw;
         }
         return this.getRotationYaw();
-    }
-
-    public TickPos getFakeTickPos() {
-        return new TickPos(0, Speed.fromMetric(0), getPosition(), this.getFrontYaw(), this.getRearYaw(), this.getRotationYaw(), this.getRotationPitch(), false);
-    }
-
-    public Vec3d predictFrontBogeyPosition(float offset) {
-        return predictFrontBogeyPosition(getFakeTickPos(), offset);
-    }
-
-    public Vec3d predictFrontBogeyPosition(TickPos pos, float offset) {
-        MovementSimulator sim = new MovementSimulator(getWorld(), pos, this.getDefinition().getBogeyFront(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
-        Vec3d nextFront = sim.nextPosition(sim.frontBogeyPosition(), pos.rotationYaw, pos.frontYaw, offset);
-        return new PosRot(pos.position.subtract(nextFront), VecUtil.toYaw(pos.position.subtract(nextFront)));
-    }
-
-    public Vec3d predictRearBogeyPosition(float offset) {
-        return predictRearBogeyPosition(getFakeTickPos(), offset);
-    }
-
-    public Vec3d predictRearBogeyPosition(TickPos pos, float offset) {
-        MovementSimulator sim = new MovementSimulator(getWorld(), pos, this.getDefinition().getBogeyRear(gauge), this.getDefinition().getBogeyRear(gauge), gauge.value());
-        Vec3d nextRear = sim.nextPosition(sim.rearBogeyPosition(), pos.rotationYaw, pos.rearYaw, offset);
-        return new PosRot(pos.position.subtract(nextRear), VecUtil.toYaw(pos.position.subtract(nextRear)));
     }
 
     private Vec3i lastRetarderPos = null;

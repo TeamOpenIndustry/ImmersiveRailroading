@@ -10,6 +10,7 @@ import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 
+@Deprecated
 public class MovementSimulator {
 	private World world;
 	private TickPos position;

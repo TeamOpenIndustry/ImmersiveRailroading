@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.util.Speed;
 
+@Deprecated
 public class PhysicsAccummulator {
 	//http://evilgeniustech.com/idiotsGuideToRailroadPhysics/HorsepowerAndTractiveEffort/
 	//http://www.republiclocomotive.com/locomotive-power-calculations.html
