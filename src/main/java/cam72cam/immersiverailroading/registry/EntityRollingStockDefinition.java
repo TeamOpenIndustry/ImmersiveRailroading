@@ -300,12 +300,14 @@ public abstract class EntityRollingStockDefinition {
             scalePitch = data.get("scale_pitch").getAsBoolean();
         }
 
+        couplerSlackFront = couplerSlackRear = 0.05f;
+
         if (data.has("couplers")) {
             JsonObject couplers = data.get("couplers").getAsJsonObject();
             couplerOffsetFront = getOrDefault(couplers, "front_offset", 0f) * (float) internal_model_scale;
             couplerOffsetRear = getOrDefault(couplers, "rear_offset", 0f) * (float) internal_model_scale;
-            couplerSlackFront = getOrDefault(couplers, "front_slack", 0.05f) * (float) internal_model_scale;
-            couplerSlackRear = getOrDefault(couplers, "rear_slack", 0.05f) * (float) internal_model_scale;
+            couplerSlackFront = getOrDefault(couplers, "front_slack", couplerSlackFront) * (float) internal_model_scale;
+            couplerSlackRear = getOrDefault(couplers, "rear_slack", couplerSlackRear) * (float) internal_model_scale;
         }
 
         JsonObject properties = data.get("properties").getAsJsonObject();
