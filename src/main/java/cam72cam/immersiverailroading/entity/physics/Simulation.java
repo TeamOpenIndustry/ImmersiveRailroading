@@ -73,7 +73,7 @@ public class Simulation {
             }
         }
 
-        double maxCouplerDist = 20;
+        double maxCouplerDist = 4;
 
         for (int i = 0; i < stateMaps.size(); i++) {
             Map<UUID, SimulationState> stateMap = stateMaps.get(i);
