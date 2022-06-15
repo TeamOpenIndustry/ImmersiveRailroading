@@ -369,7 +369,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         }
 
         if (Math.abs(this.getCurrentSpeed().metric()) > 1) {
-			List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> entity.isLiving() || entity.isPlayer() && this.getCollision().intersects(entity.getBounds()), Entity.class);
+			List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && this.getCollision().intersects(entity.getBounds()), Entity.class);
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					// rolling stock collisions handled by looking at the front and
@@ -392,6 +392,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				
 				// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
 				// We need to do a forward lookup
+                // TODO move this to UMC?
 				if (!this.getCollision().intersects(entity.getBounds())) {
 					// miss
 					continue;
@@ -411,7 +412,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 			// Riding on top of cars
 			final RealBB bb = this.getCollision().offset(new Vec3d(0, gauge.scale()*2, 0));
-            List<Entity> entitiesAbove = getWorld().getEntities((Entity entity) -> entity.isLiving() || entity.isPlayer() && bb.intersects(entity.getBounds()), Entity.class);
+            List<Entity> entitiesAbove = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && bb.intersects(entity.getBounds()), Entity.class);
 			for (Entity entity : entitiesAbove) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					continue;
