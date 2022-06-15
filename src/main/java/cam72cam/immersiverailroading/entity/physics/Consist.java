@@ -274,14 +274,23 @@ public class Consist {
 
             List<Particle> consist = new ArrayList<>();
 
-            // Setup the starting particle
-            Particle prevParticle = new Particle(current, direction);
-            consist.add(prevParticle);
+            Particle prevParticle = null;
 
             // Build up the consist starting at the head or the tail
             visited.clear();
             while (!visited.contains(current)) {
                 visited.add(current);
+
+                // Create the new particle
+                Particle currParticle = new Particle(current, direction);
+                consist.add(currParticle);
+
+                // Link the two particles together
+                if (prevParticle != null) {
+                    Linkage link = new Linkage(prevParticle, currParticle);
+                    prevParticle.nextLink = link;
+                    currParticle.prevLink = link;
+                }
 
                 // Find next
                 UUID nextId = direction ? current.interactingFront : current.interactingRear;
@@ -295,17 +304,9 @@ public class Consist {
                     direction = !direction;
                 }
 
-                // Create the new particle
-                Particle nextParticle = new Particle(next, direction);
-                consist.add(nextParticle);
-
-                // Link the two particles together
-                Linkage link = new Linkage(prevParticle, nextParticle);
-                prevParticle.nextLink = link;
-                nextParticle.prevLink = link;
 
                 current = next;
-                prevParticle = nextParticle;
+                prevParticle = currParticle;
             }
 
             // Propagate dirty flag
