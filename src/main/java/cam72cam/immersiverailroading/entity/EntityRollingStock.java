@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.TextureSelector;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -116,19 +117,11 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
-			if (getWorld().isClient)  {
-				return ClickResult.ACCEPTED;
-			}
-			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
-			if (texNames.size() > 1) {
-				int idx = texNames.indexOf(texture);
-				idx = (idx + (player.isCrouching() ? -1 : 1) + texNames.size()) % (texNames.size());
-				texture = texNames.get(idx);
-			} else {
-				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
-			}
-			return ClickResult.ACCEPTED;
+			return selectNewTexture(player, IRItems.ITEM_PAINT_BRUSH);
+		} else if (player.getHeldItem(hand).is(IRItems.ITEM_CHAOS_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
+			return selectNewTexture(player, IRItems.ITEM_CHAOS_BRUSH);
 		}
+
 		if (player.getHeldItem(hand).is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
 			if (getWorld().isClient) {
 				return ClickResult.ACCEPTED;
@@ -138,6 +131,21 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 			return ClickResult.ACCEPTED;
 		}
 		return ClickResult.PASS;
+	}
+
+	private ClickResult selectNewTexture(Player player, TextureSelector item) {
+		if (getWorld().isClient) {
+			return ClickResult.ACCEPTED;
+		}
+
+		List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
+		if (texNames.size() > 1) {
+			this.texture = item.selectNewTexture(texNames, this.texture, player);
+			return ClickResult.ACCEPTED;
+		} else {
+			player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
+			return ClickResult.PASS;
+		}
 	}
 
 	@Override
