@@ -45,7 +45,7 @@ public class Simulation {
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
         //List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 40; i++) {
             stateMaps.add(new HashMap<>());
         }
 
@@ -97,7 +97,7 @@ public class Simulation {
                             Vec3d myCouplerPos = state.couplerPositionFront;
                             Vec3d nextCouplerPos = state.config.id.equals(next.interactingFront) ? next.couplerPositionFront : next.couplerPositionRear;
                             if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                                System.out.println("DECOUPLER");
+                                //System.out.println("DECOUPLER");
                                 state.dirty = true;
                                 next.dirty = true;
                                 state.interactingFront = null;
@@ -126,7 +126,7 @@ public class Simulation {
                             Vec3d myCouplerPos = state.couplerPositionRear;
                             Vec3d nextCouplerPos = state.config.id.equals(next.interactingFront) ? next.couplerPositionFront : next.couplerPositionRear;
                             if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                                System.out.println("DECOUPLER");
+                                //System.out.println("DECOUPLER");
                                 state.dirty = true;
                                 next.dirty = true;
                                 state.interactingRear = null;
