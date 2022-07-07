@@ -59,7 +59,7 @@ public class TileRail extends TileRailBase {
 		this.markDirty();
 		List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
 		for(EntityCoupleableRollingStock stock : ents) {
-			// TODO stock.triggerResimulate();
+			stock.states.clear();
 		}
 	}
 

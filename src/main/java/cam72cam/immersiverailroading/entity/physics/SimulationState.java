@@ -5,9 +5,12 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
@@ -223,12 +226,6 @@ public class SimulationState {
     }
 
     private void moveAlongTrack(double distance) {
-        // TODO turn table stuff
-
-        if (Math.abs(distance) < 0.0001) {
-            return;
-        }
-
         Vec3d positionFront = VecUtil.fromWrongYawPitch(config.offsetFront, yaw, pitch).add(position);
         Vec3d positionRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch).add(position);
 
@@ -237,6 +234,29 @@ public class SimulationState {
         ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
         if (trackFront == null || trackRear == null) {
             return;
+        }
+
+        if (Math.abs(distance) < 0.0001) {
+            boolean isTurnTable;
+
+            TileRailBase frontBase = trackFront instanceof TileRailBase ? (TileRailBase) trackFront : null;
+            TileRailBase rearBase  = trackRear instanceof TileRailBase ? (TileRailBase) trackRear : null;
+            isTurnTable = frontBase != null &&
+                    (
+                            frontBase.getTicksExisted() < 100 ||
+                                    frontBase.getParentTile() != null &&
+                                            frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
+                    );
+            isTurnTable = isTurnTable || rearBase != null &&
+                    (
+                            rearBase.getTicksExisted() < 100 ||
+                                    rearBase.getParentTile() != null &&
+                                            rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
+                    );
+
+            if (!isTurnTable) {
+                return;
+            }
         }
 
         // Fix bogeys pointing in opposite directions
