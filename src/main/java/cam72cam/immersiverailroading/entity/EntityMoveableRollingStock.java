@@ -493,11 +493,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return this.getRotationYaw();
     }
 
+    public void setFrontYaw(float frontYaw) {
+        this.frontYaw = frontYaw;
+    }
+
     public float getRearYaw() {
         if (this.rearYaw != null) {
             return this.rearYaw;
         }
         return this.getRotationYaw();
+    }
+
+    public void setRearYaw(float rearYaw) {
+        this.rearYaw = rearYaw;
     }
 
     private Vec3i lastRetarderPos = null;
