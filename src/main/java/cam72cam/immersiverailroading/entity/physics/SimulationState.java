@@ -281,9 +281,10 @@ public class SimulationState {
             yawFront = VecUtil.toWrongYaw(nextFront.subtract(positionFront));
             yawRear = VecUtil.toWrongYaw(nextRear.subtract(positionRear));
 
-            Vec3d currCenter = VecUtil.between(positionFront, positionRear);
-            Vec3d nextCenter = VecUtil.between(nextFront, nextRear);
-            Vec3d deltaCenter = nextCenter.subtract(currCenter);
+            // TODO flatten this vector calculation
+            Vec3d deltaCenter = nextFront.subtract(position).scale(config.offsetRear)
+                    .subtract(nextRear.subtract(position).scale(config.offsetFront))
+                    .scale(-1/(config.offsetFront-config.offsetRear));
 
             Vec3d bogeyDelta = nextFront.subtract(nextRear);
             yaw = VecUtil.toWrongYaw(bogeyDelta);
