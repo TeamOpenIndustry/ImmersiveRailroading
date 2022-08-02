@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
 import java.util.*;
@@ -43,7 +44,7 @@ public class Simulation {
         }
 
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
-        //List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
+        List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
 
         for (int i = 0; i < 40; i++) {
             stateMaps.add(new HashMap<>());
@@ -224,27 +225,10 @@ public class Simulation {
                 }
             }
 
-            // collide with blocks
-            /* TODO move this logic properly from EMRS
-            for (SimulationState state : states) {
-                if (state.dirty && state.tickID % 5 == 0) {
-                    state.collideWithBlocks(blocksAlreadyBroken);
-                    // TODO use hardness to apply resistance
-                    state.overcameBlockResistance = true;
-                }
-            }*/
-
             // calculate new velocities
             if (i + 1 < stateMaps.size()) {
-                stateMaps.get(i+1).putAll(Consist.iterate(stateMap));
+                stateMaps.get(i+1).putAll(Consist.iterate(stateMap, blocksAlreadyBroken));
             }
-
-            // update blocks broken
-            /*
-            for (SimulationState state : states) {
-                state.addBlocksBroken(blocksAlreadyBroken);
-            }
-             */
         }
 
         // Apply new states

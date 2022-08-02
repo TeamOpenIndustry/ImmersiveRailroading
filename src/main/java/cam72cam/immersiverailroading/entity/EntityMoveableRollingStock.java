@@ -261,6 +261,22 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
                 this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrake));
             }
+
+
+
+            SimulationState state = getCurrentState();
+            if (state != null) {
+                for (Vec3i bp : state.blocksToBreak) {
+                    getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !getWorld().isSnow(bp));
+                }
+                for (Vec3i bp : state.trackToUpdate) {
+                    TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
+                    if (te != null) {
+                        te.cleanSnow();
+                        // TODO add train overhead logic!
+                    }
+                }
+            }
         }
 
         if (getWorld().isClient) {
@@ -435,24 +451,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				entity.setVelocity(this.getVelocity().add(0, entity.getVelocity().y, 0));
 			}
 	    }
-		if (getWorld().isServer && this.getTickCount() % 5 == 0 && Math.abs(this.getCurrentSpeed().metric()) > 0.5) {
-            RealBB bb = this.getCollision().grow(new Vec3d(-0.25 * gauge.scale(), 0, -0.25 * gauge.scale()));
-
-            for (Vec3i bp : getWorld().blocksInBounds(bb)) {
-                if (!BlockUtil.isIRRail(getWorld(), bp)) {
-                    if (Config.ConfigDamage.TrainsBreakBlocks && getWorld().canEntityCollideWith(bp, DAMAGE_SOURCE_HIT)) {
-                        if (!BlockUtil.isIRRail(getWorld(), bp.up())) {
-                            getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(getWorld().isSnow(bp)));
-                        }
-                    }
-                } else {
-                    TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
-                    if (te != null) {
-                        te.cleanSnow();
-                    }
-                }
-            }
-        }
 
         if (getWorld().isServer) {
             setControlPosition("MOVINGFORWARD", getCurrentSpeed().minecraft() > 0 ? 1 : 0);

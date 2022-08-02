@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
@@ -10,7 +11,6 @@ import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
@@ -19,6 +19,7 @@ import cam72cam.mod.util.DegreeFuncs;
 import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -42,9 +43,17 @@ public class SimulationState {
     public Vec3d couplerPositionRear;
     public UUID interactingFront;
     public UUID interactingRear;
-    public List<Vec3i> blocksToBreak = new ArrayList<>();
-    public float totalBlockResistance;
-    public boolean overcameBlockResistance;
+
+    // All positions in the stock bounds
+    public List<Vec3i> collidingBlocks;
+    // Any track within those bounds
+    public List<Vec3i> trackToUpdate;
+    // Blocks that the stock would need to break to move
+    public List<Vec3i> interferingBlocks;
+    // How much force required to break the interfering blocks
+    public float interferingResistance;
+    // Blocks that were actually broken and need to be removed
+    public List<Vec3i> blocksToBreak;
 
     public Configuration config;
     public boolean dirty = true;
@@ -141,6 +150,9 @@ public class SimulationState {
         yawRear = stock.getRearYaw();
 
         calculateCouplerPositions();
+
+        calculateBlockCollisions(Collections.emptyList());
+        blocksToBreak = Collections.emptyList();
     }
 
     private SimulationState(SimulationState prev) {
@@ -159,9 +171,14 @@ public class SimulationState {
 
         this.yawFront = prev.yawFront;
         this.yawRear = prev.yawRear;
-        //calculateCouplerPositions();
         couplerPositionFront = prev.couplerPositionFront;
         couplerPositionRear = prev.couplerPositionRear;
+
+        collidingBlocks = prev.collidingBlocks;
+        trackToUpdate = prev.trackToUpdate;
+        interferingBlocks = prev.interferingBlocks;
+        interferingResistance = prev.interferingResistance;
+        blocksToBreak = Collections.emptyList();
     }
 
     public void calculateCouplerPositions() {
@@ -185,6 +202,28 @@ public class SimulationState {
         }
     }
 
+    public void calculateBlockCollisions(List<Vec3i> blocksAlreadyBroken) {
+        this.collidingBlocks = config.world.blocksInBounds(this.bounds);
+        this.trackToUpdate = new ArrayList<>();
+        this.interferingBlocks = new ArrayList<>();
+        this.interferingResistance = 0;
+
+        for (Vec3i bp : collidingBlocks) {
+            if (blocksAlreadyBroken.contains(bp)) {
+                continue;
+            }
+
+            if (BlockUtil.isIRRail(config.world, bp)) {
+                trackToUpdate.add(bp);
+            } else {
+                if (Config.ConfigDamage.TrainsBreakBlocks && !BlockUtil.isIRRail(config.world, bp.up())) {
+                    interferingBlocks.add(bp);
+                    interferingResistance += config.world.getBlockHardness(bp);
+                }
+            }
+        }
+    }
+
     public SimulationState next(double distance) {
         SimulationState state = new SimulationState(this);
         state.moveAlongTrack(distance);
@@ -195,34 +234,6 @@ public class SimulationState {
         Configuration oldConfig = config;
         config = new Configuration(stock);
         dirty = !config.equals(oldConfig);
-    }
-
-    public void collideWithBlocks(List<Vec3i> blocksAlreadyBroken) {
-        List<Vec3i> potential = config.world.blocksInBounds(this.bounds);
-        potential.removeAll(blocksAlreadyBroken);
-
-        for (Vec3i bp : potential) {
-            if (!BlockUtil.isIRRail(config.world, bp)) {
-                if (Config.ConfigDamage.TrainsBreakBlocks && config.world.canEntityCollideWith(bp, DAMAGE_SOURCE_HIT)) {
-                    if (!BlockUtil.isIRRail(config.world, bp.up())) {
-                        totalBlockResistance += config.world.getBlockHardness(bp);
-                        blocksToBreak.add(bp);
-                    }
-                }
-            }/* TODO move somewhere else {
-                TileRailBase te = config.world.getBlockEntity(bp, TileRailBase.class);
-                if (te != null) {
-                    te.cleanSnow();
-                }
-                should probably be an overhead check in TRB?
-            }*/
-        }
-    }
-
-    public void addBlocksBroken(List<Vec3i> blocksAlreadyBroken) {
-        if (overcameBlockResistance) {
-            blocksAlreadyBroken.addAll(blocksToBreak);
-        }
     }
 
     private void moveAlongTrack(double distance) {
@@ -307,14 +318,8 @@ public class SimulationState {
     public double frictionNewtons() {
         // https://evilgeniustech.com/idiotsGuideToRailroadPhysics/OtherLocomotiveForces/#rolling-resistance
         double rollingResistanceNewtons = 0.002 * (config.massKg * 9.8);
-        return rollingResistanceNewtons + config.brakeAdhesionNewtons;
-    }
-
-    public void apply(EntityCoupleableRollingStock stock) {
-        if (overcameBlockResistance) {
-            for (Vec3i bp : blocksToBreak) {
-                stock.getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !(stock.getWorld().isSnow(bp)));
-            }
-        }
+        // TODO This is kinda directional?
+        double blockResistanceNewtons = interferingResistance * 1000 * Config.ConfigDamage.blockHardness;
+        return rollingResistanceNewtons + blockResistanceNewtons + config.brakeAdhesionNewtons;
     }
 }

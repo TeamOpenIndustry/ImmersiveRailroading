@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -163,17 +164,24 @@ public class Consist {
         }
 
 
-        public SimulationState applyToState() {
+        public SimulationState applyToState(List<Vec3i> blocksAlreadyBroken) {
             state.velocity = Speed.fromMetric(velocity).minecraft() * direction;
             double movement = state.velocity + offset * direction;
             Vec3d currentPos = state.position;
 
+            // TODO: Honestly this should all be refactored to the state.next function
+            // It would reduce confusion on constructor logic
             SimulationState state = this.state.next(movement);
             if (currentPos.equals(state.position)) {
                 state.velocity = 0;
             } else {
                 state.calculateCouplerPositions();
-                //System.out.printf("%s : %s%n", movement, state.position.subtract(currentPos).length());
+                // We will actually break the blocks
+                this.state.blocksToBreak = this.state.interferingBlocks;
+                // We can now ignore those positions for the rest of the simulation
+                blocksAlreadyBroken.addAll(this.state.blocksToBreak);
+                // Calculate the next states interference
+                state.calculateBlockCollisions(blocksAlreadyBroken);
             }
             return state;
         }
@@ -232,7 +240,7 @@ public class Consist {
         }
     }
 
-    public static Map<UUID, SimulationState> iterate(Map<UUID, SimulationState> states) {
+    public static Map<UUID, SimulationState> iterate(Map<UUID, SimulationState> states, List<Vec3i> blocksAlreadyBroken) {
         // ordered
         List<Particle> particles = new ArrayList<>();
 
@@ -333,6 +341,6 @@ public class Consist {
         particles.forEach(Particle::applyFriction);
 
         // Generate new states
-        return particles.stream().map(Particle::applyToState).collect(Collectors.toMap(s -> s.config.id, s -> s));
+        return particles.stream().map(particle -> particle.applyToState(blocksAlreadyBroken)).collect(Collectors.toMap(s -> s.config.id, s -> s));
     }
 }
