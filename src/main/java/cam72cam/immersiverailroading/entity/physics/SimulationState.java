@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
@@ -23,8 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-
-import static cam72cam.immersiverailroading.entity.EntityMoveableRollingStock.DAMAGE_SOURCE_HIT;
 
 public class SimulationState {
     public int tickID;
@@ -224,10 +221,21 @@ public class SimulationState {
         }
     }
 
-    public SimulationState next(double distance) {
-        SimulationState state = new SimulationState(this);
-        state.moveAlongTrack(distance);
-        return state;
+    public SimulationState next(double distance, List<Vec3i> blocksAlreadyBroken) {
+        SimulationState next = new SimulationState(this);
+        next.moveAlongTrack(distance);
+        if (this.position.equals(next.position)) {
+            next.velocity = 0;
+        } else {
+            next.calculateCouplerPositions();
+            // We will actually break the blocks
+            this.blocksToBreak = this.interferingBlocks;
+            // We can now ignore those positions for the rest of the simulation
+            blocksAlreadyBroken.addAll(this.blocksToBreak);
+            // Calculate the next states interference
+            next.calculateBlockCollisions(blocksAlreadyBroken);
+        }
+        return next;
     }
 
     public void update(EntityCoupleableRollingStock stock) {

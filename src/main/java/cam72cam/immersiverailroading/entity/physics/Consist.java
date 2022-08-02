@@ -167,23 +167,8 @@ public class Consist {
         public SimulationState applyToState(List<Vec3i> blocksAlreadyBroken) {
             state.velocity = Speed.fromMetric(velocity).minecraft() * direction;
             double movement = state.velocity + offset * direction;
-            Vec3d currentPos = state.position;
 
-            // TODO: Honestly this should all be refactored to the state.next function
-            // It would reduce confusion on constructor logic
-            SimulationState state = this.state.next(movement);
-            if (currentPos.equals(state.position)) {
-                state.velocity = 0;
-            } else {
-                state.calculateCouplerPositions();
-                // We will actually break the blocks
-                this.state.blocksToBreak = this.state.interferingBlocks;
-                // We can now ignore those positions for the rest of the simulation
-                blocksAlreadyBroken.addAll(this.state.blocksToBreak);
-                // Calculate the next states interference
-                state.calculateBlockCollisions(blocksAlreadyBroken);
-            }
-            return state;
+            return this.state.next(movement, blocksAlreadyBroken);
         }
     }
 
