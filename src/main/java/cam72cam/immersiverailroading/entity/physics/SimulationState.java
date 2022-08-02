@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
@@ -41,6 +42,7 @@ public class SimulationState {
     public UUID interactingFront;
     public UUID interactingRear;
 
+    public Vec3d recalculatedAt;
     // All positions in the stock bounds
     public List<Vec3i> collidingBlocks;
     // Any track within those bounds
@@ -146,6 +148,8 @@ public class SimulationState {
         yawFront = stock.getFrontYaw();
         yawRear = stock.getRearYaw();
 
+        recalculatedAt = position;
+
         calculateCouplerPositions();
 
         calculateBlockCollisions(Collections.emptyList());
@@ -171,6 +175,7 @@ public class SimulationState {
         couplerPositionFront = prev.couplerPositionFront;
         couplerPositionRear = prev.couplerPositionRear;
 
+        recalculatedAt = prev.recalculatedAt;
         collidingBlocks = prev.collidingBlocks;
         trackToUpdate = prev.trackToUpdate;
         interferingBlocks = prev.interferingBlocks;
@@ -232,8 +237,17 @@ public class SimulationState {
             this.blocksToBreak = this.interferingBlocks;
             // We can now ignore those positions for the rest of the simulation
             blocksAlreadyBroken.addAll(this.blocksToBreak);
+
             // Calculate the next states interference
-            next.calculateBlockCollisions(blocksAlreadyBroken);
+            double minDist = 0.5;
+            if (next.recalculatedAt.distanceToSquared(next.position) > minDist * minDist) {
+                next.calculateBlockCollisions(blocksAlreadyBroken);
+                next.recalculatedAt = next.position;
+            } else {
+                // We put off calculating collisions for now
+                next.interferingBlocks = Collections.emptyList();
+                next.interferingResistance = 0;
+            }
         }
         return next;
     }
