@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.TextureSelector;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -13,6 +12,7 @@ import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.text.PlayerMessage;
@@ -117,9 +117,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
-			return selectNewTexture(player, IRItems.ITEM_PAINT_BRUSH);
-		} else if (player.getHeldItem(hand).is(IRItems.ITEM_CHAOS_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
-			return selectNewTexture(player, IRItems.ITEM_CHAOS_BRUSH);
+			return selectNewTexture(player, player.getHeldItem(hand));
 		}
 
 		if (player.getHeldItem(hand).is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
@@ -133,14 +131,14 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return ClickResult.PASS;
 	}
 
-	private ClickResult selectNewTexture(Player player, TextureSelector item) {
+	private ClickResult selectNewTexture(Player player, ItemStack item) {
 		if (getWorld().isClient) {
 			return ClickResult.ACCEPTED;
 		}
 
 		List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
 		if (texNames.size() > 1) {
-			this.texture = item.selectNewTexture(texNames, this.texture, player);
+			this.texture = IRItems.ITEM_PAINT_BRUSH.selectNewTexture(texNames, this.texture, player, item);
 			return ClickResult.ACCEPTED;
 		} else {
 			player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
