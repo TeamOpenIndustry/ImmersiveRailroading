@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PaintBrushMode;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.CreativeTab;
@@ -37,6 +38,18 @@ public class ItemPaintBrush extends CustomItem {
 	@Override
 	public List<CreativeTab> getCreativeTabs() {
 		return Collections.singletonList(ItemTabs.MAIN_TAB);
+	}
+
+	@Override
+	public List<String> getTooltip(ItemStack stack) {
+		PaintBrushMode pbm = new Data(stack).mode;
+		if (pbm == null) {
+			return super.getTooltip(stack);
+		}
+		List<String> tips = new ArrayList<>();
+		tips.add(GuiText.PAINT_BRUSH_MODE_TOOLTIP.toString(pbm.name()));
+		tips.add(GuiText.PAINT_BRUSH_DESCRIPTION_TOOLTIP.toString());
+		return tips;
 	}
 
 	@Override
