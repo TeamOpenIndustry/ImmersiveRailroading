@@ -114,7 +114,7 @@ public class SimulationState {
             }
 
             double totalAdhesionNewtons = stock.getWeight() * 0.25 * 0.25 * 4.44822f;
-            brakeAdhesionNewtons = totalAdhesionNewtons * stock.getTotalBrake();
+            brakeAdhesionNewtons = totalAdhesionNewtons * stock.getTotalBrake() * Config.ConfigBalance.brakeMultiplier;
         }
 
         @Override
@@ -333,7 +333,7 @@ public class SimulationState {
     }
 
     public double forcesNewtons() {
-        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitch));
+        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitch)) * Config.ConfigBalance.slopeMultiplier;
         return config.tractiveEffortNewtons + gradeForceNewtons;
     }
 
