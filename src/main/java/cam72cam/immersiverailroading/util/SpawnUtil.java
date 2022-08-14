@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class SpawnUtil {
 				for (int i = 0; i <= 90; i+= 5) {
 					for (int j = -1; j <= 1; j += 2) {
 						ecrs.setRotationYaw(yaw + i * j);
-						SimulationState state = new SimulationState(ecrs).next(offset, Collections.emptyList());
+						SimulationState state = new SimulationState(ecrs).next(offset, new ArrayList<>());
 						if (state.position.distanceTo(ecrs.getPosition()) > offset/2) {
 							ecrs.setPosition(state.position);
 							ecrs.setRotationYaw(state.yaw);
