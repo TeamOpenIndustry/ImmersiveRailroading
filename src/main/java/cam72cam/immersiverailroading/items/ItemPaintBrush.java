@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.items;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -67,36 +68,41 @@ public class ItemPaintBrush extends CustomItem {
 
 	public String selectNewTexture(Map<String, String> textures, String currentTexture, Player player, ItemStack stack) {
 		Data data = new Data(stack);
-		switch (data.mode) {
-			case SEQUENTIAL:
-				return selectNextTexture(new ArrayList<>(textures.keySet()), currentTexture, player);
-			case RANDOM:
-				return selectRandomTexture(textures, currentTexture, player);
-			default:
-				ImmersiveRailroading.error("Programmer error: invalid PaintBrush mode: " + data.mode + " is not supported");
-				return currentTexture;
-		}
-	}
-
-	private String selectNextTexture(List<String> texNames, String currentTexture, Player player) {
-		int curIdx = texNames.indexOf(currentTexture);
-		int idx = (curIdx + (player.isCrouching() ? -1 : 1) + texNames.size()) % (texNames.size());
-		return texNames.get(idx);
-	}
-
-	private String selectRandomTexture(Map<String, String> textures, String currentTexture, Player player) {
 		List<String> texNames = new ArrayList<>(textures.keySet());
 		int curIdx = texNames.indexOf(currentTexture);
-		int idx;
+		int newIdx;
+		switch (data.mode) {
+			case SEQUENTIAL:
+				newIdx = selectNextTextureIndex(texNames.size(), curIdx, player);
+				break;
+			case RANDOM:
+				newIdx = selectRandomTextureIndex(texNames.size(), curIdx);
+				break;
+			default:
+				ImmersiveRailroading.error("Programmer error: invalid PaintBrush mode: " + data.mode + " is not supported");
+				newIdx = curIdx;
+				break;
+		}
 
-		// Avoid randomly selecting the current texture
-		do {
-			idx = rand.nextInt(textures.size());
-		} while (idx == curIdx);
-
-		String newTexture = texNames.get(idx);
-		player.sendMessage(ChatText.BRUSH_CHAOS.getMessage(textures.get(newTexture)));
+		String newTexture = texNames.get(newIdx);
+		if (Config.ConfigDebug.debugPaintBrush) {
+			player.sendMessage(ChatText.BRUSH_NEXT.getMessage(textures.get(newTexture), data.mode.name()));
+		}
 		return newTexture;
+	}
+
+	private int selectNextTextureIndex(int nTextures, int curIdx, Player player) {
+		return (curIdx + (player.isCrouching() ? -1 : 1) + nTextures) % (nTextures);
+	}
+
+	private int selectRandomTextureIndex(int nTextures, int curIdx) {
+		// Avoid randomly selecting the current texture
+		int newIdx = curIdx;
+		while (newIdx == curIdx) {
+			newIdx = rand.nextInt(nTextures);
+		}
+
+		return newIdx;
 	}
 
 	public static class Data extends ItemDataSerializer {

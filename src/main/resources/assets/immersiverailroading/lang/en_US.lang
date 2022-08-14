@@ -51,7 +51,7 @@ chat.immersiverailroading:radio.unlink=Card unlinked from its locomotive
 chat.immersiverailroading:radio.nolink=Card has no linked locomotive
 chat.immersiverailroading:radio.cant_link=Locomotive %s does not have radio control equipment
 chat.immersiverailroading:brush.no.variants=This stock has no livery variants
-chat.immersiverailroading:brush.chaos=BEHOLD THE CHAOS! This stock's livery has been set to %s
+chat.immersiverailroading:brush.next=This stock's livery has been set to %s using mode: %s
 chat.immersiverailroading:switch_state.unlocked=Switch unlocked
 chat.immersiverailroading:switch_state.locked=Switch locked to %s
 
