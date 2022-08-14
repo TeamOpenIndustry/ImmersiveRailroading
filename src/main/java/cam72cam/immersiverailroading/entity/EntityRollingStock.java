@@ -20,9 +20,7 @@ import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -136,9 +134,8 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 			return ClickResult.ACCEPTED;
 		}
 
-		List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
-		if (texNames.size() > 1) {
-			this.texture = IRItems.ITEM_PAINT_BRUSH.selectNewTexture(texNames, this.texture, player, item);
+		if (this.getDefinition().textureNames.size() > 1) {
+			this.texture = IRItems.ITEM_PAINT_BRUSH.selectNewTexture(this.getDefinition().textureNames, this.texture, player, item);
 			return ClickResult.ACCEPTED;
 		} else {
 			player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());

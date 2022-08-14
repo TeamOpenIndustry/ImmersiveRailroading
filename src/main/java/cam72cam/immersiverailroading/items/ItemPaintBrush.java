@@ -13,8 +13,10 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class ItemPaintBrush extends CustomItem {
@@ -50,13 +52,13 @@ public class ItemPaintBrush extends CustomItem {
 		}
 	}
 
-	public String selectNewTexture(List<String> texNames, String currentTexture, Player player, ItemStack stack) {
+	public String selectNewTexture(Map<String, String> textures, String currentTexture, Player player, ItemStack stack) {
 		Data data = new Data(stack);
 		switch (data.mode) {
 			case SEQUENTIAL:
-				return selectNextTexture(texNames, currentTexture, player);
+				return selectNextTexture(new ArrayList<>(textures.keySet()), currentTexture, player);
 			case RANDOM:
-				return selectRandomTexture(texNames, currentTexture, player);
+				return selectRandomTexture(textures, currentTexture, player);
 			default:
 				ImmersiveRailroading.error("Programmer error: invalid PaintBrush mode: " + data.mode + " is not supported");
 				return currentTexture;
@@ -69,17 +71,18 @@ public class ItemPaintBrush extends CustomItem {
 		return texNames.get(idx);
 	}
 
-	private String selectRandomTexture(List<String> texNames, String currentTexture, Player player) {
+	private String selectRandomTexture(Map<String, String> textures, String currentTexture, Player player) {
+		List<String> texNames = new ArrayList<>(textures.keySet());
 		int curIdx = texNames.indexOf(currentTexture);
 		int idx;
 
 		// Avoid randomly selecting the current texture
 		do {
-			idx = rand.nextInt(texNames.size());
+			idx = rand.nextInt(textures.size());
 		} while (idx == curIdx);
 
 		String newTexture = texNames.get(idx);
-		player.sendMessage(ChatText.BRUSH_CHAOS.getMessage(newTexture));
+		player.sendMessage(ChatText.BRUSH_CHAOS.getMessage(textures.get(newTexture)));
 		return newTexture;
 	}
 
