@@ -212,7 +212,7 @@ public class Config {
 		public static boolean debugLog = false;
 
 		@Comment( "Announce the new livery in Chat when the paint brush is used" )
-		public static boolean debugPaintBrush;
+		public static boolean debugPaintBrush = false;
 
 		@Comment( "DEBUG: Buckets infinite fill/empty tanks" )
 		public static boolean debugInfiniteLiquids = false;
