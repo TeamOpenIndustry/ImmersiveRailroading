@@ -44,8 +44,8 @@ public class ItemPaintBrush extends CustomItem {
 	public List<String> getTooltip(ItemStack stack) {
 		PaintBrushMode pbm = new Data(stack).mode;
 		List<String> tips = new ArrayList<>();
-		tips.add(GuiText.PAINT_BRUSH_MODE_TOOLTIP.toString(pbm.name()));
-		tips.add(GuiText.PAINT_BRUSH_DESCRIPTION_TOOLTIP.toString());
+		tips.add(GuiText.PAINT_BRUSH_MODE_TOOLTIP.toString(pbm.toString()));
+		tips.add(GuiText.PAINT_BRUSH_DESCRIPTION_TOOLTIP.toString((Object[]) PaintBrushMode.values()));
 		return tips;
 	}
 

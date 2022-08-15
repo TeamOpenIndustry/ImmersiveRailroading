@@ -81,7 +81,7 @@ gui.immersiverailroading:selector.cast_repeat=Repeat Casting
 gui.immersiverailroading:item.switch_hammer=Right-Click a switch to cycle between: [ locked straight, locked turn, unlocked ]. Redstone is ignored when locked!!
 gui.immersiverailroading:item.track_exchanger=Right-Click in air to open the selection gui. Right-Click on a track to change it's track type to the one defined in the gui
 gui.immersiverailroading:item.paint_brush.mode=Current mode: %s
-gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click cycle modes between: [ SEQUENTIAL, RANDOM ]
+gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click cycle modes between: [ %s, %s ]
 gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
