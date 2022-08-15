@@ -31,6 +31,9 @@ public enum ChatText {
 	BRUSH_NO_VARIANTS("brush.no.variants"),
 	SWITCH_UNLOCKED("switch_state.unlocked"),
 	SWITCH_LOCKED("switch_state.locked"),
+	SWITCH_RESET("switch_state.reset"),
+	SWITCH_CANT_RESET("switch_state.cant_reset"),
+	SWITCH_ALREADY_RESET("switch_state.already_reset"),
 	;
 	
 	private String value;
