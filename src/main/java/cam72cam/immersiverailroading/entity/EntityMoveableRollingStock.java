@@ -35,6 +35,7 @@ import java.util.Objects;
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
 
     public static final String DAMAGE_SOURCE_HIT = "immersiverailroading:hitByTrain";
+    public static final String DAMAGE_SOURCE_HIT_IN_DARKNESS = "immersiverailroading:hitByTrainInDarkness";
 
     @TagField("frontYaw")
     private Float frontYaw;
@@ -466,7 +467,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 				double speedDamage = Math.abs(this.getCurrentSpeed().metric()) / Config.ConfigDamage.entitySpeedDamage;
 				if (speedDamage > 1) {
-				    entity.directDamage(DAMAGE_SOURCE_HIT, speedDamage);
+				    boolean isDark = Math.max(getWorld().getSkyLightLevel(entity.getBlockPosition()), getWorld().getBlockLightLevel(entity.getBlockPosition())) < 8.0F;
+				    entity.directDamage(isDark ? DAMAGE_SOURCE_HIT_IN_DARKNESS : DAMAGE_SOURCE_HIT, speedDamage);
 				}
 			}
 	
