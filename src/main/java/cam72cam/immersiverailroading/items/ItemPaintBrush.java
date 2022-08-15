@@ -12,7 +12,6 @@ import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.Recipes;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class ItemPaintBrush extends CustomItem {
 				Data data = new Data(item);
 				data.mode = PaintBrushMode.values()[(data.mode.ordinal() + 1) % (PaintBrushMode.values().length)];
 				data.write();
-				player.sendMessage(ChatText.BRUSH_MODE.getMessage(data.mode));
+				player.sendMessage(ChatText.BRUSH_MODE_SET.getMessage(data.mode));
 			}
 		}
 	}
