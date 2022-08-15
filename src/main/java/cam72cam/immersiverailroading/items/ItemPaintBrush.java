@@ -57,7 +57,7 @@ public class ItemPaintBrush extends CustomItem {
 				Data data = new Data(item);
 				data.mode = PaintBrushMode.values()[(data.mode.ordinal() + 1) % (PaintBrushMode.values().length)];
 				data.write();
-				player.sendMessage(ChatText.BRUSH_MODE_SET.getMessage(data.mode));
+				player.sendMessage(ChatText.BRUSH_MODE_SET.getMessage(data.mode.toTranslatedString()));
 			}
 		}
 	}
@@ -80,7 +80,8 @@ public class ItemPaintBrush extends CustomItem {
 
 		String newTexture = texNames.get(newIdx);
 		if (Config.ConfigDebug.debugPaintBrush) {
-			player.sendMessage(ChatText.BRUSH_NEXT.getMessage(textures.get(newTexture), data.mode.name()));
+			//This is a debug log so use the untranslated Mode name
+			player.sendMessage(ChatText.BRUSH_NEXT.getMessage(textures.get(newTexture), data.mode));
 		}
 		return newTexture;
 	}
