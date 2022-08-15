@@ -204,6 +204,7 @@ itemGroup.immersiverailroading.components=Immersive Railroading Components
 
 death.attack.immersiverailroading:casting=%s discovered that molten metal does not make a good swimming pool
 death.attack.immersiverailroading:hitByTrain=%s failed to outrun a train
+death.attack.immersiverailroading:hitByTrainInDarkness=%s failed to see the headlight of the oncoming train
 
 immersiverailroading:detector_mode.simple=Detecting Stock
 immersiverailroading:detector_mode.speed=Detecting Speed
