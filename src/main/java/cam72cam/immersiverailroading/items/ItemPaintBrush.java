@@ -44,9 +44,6 @@ public class ItemPaintBrush extends CustomItem {
 	@Override
 	public List<String> getTooltip(ItemStack stack) {
 		PaintBrushMode pbm = new Data(stack).mode;
-		if (pbm == null) {
-			return super.getTooltip(stack);
-		}
 		List<String> tips = new ArrayList<>();
 		tips.add(GuiText.PAINT_BRUSH_MODE_TOOLTIP.toString(pbm.name()));
 		tips.add(GuiText.PAINT_BRUSH_DESCRIPTION_TOOLTIP.toString());
@@ -61,7 +58,7 @@ public class ItemPaintBrush extends CustomItem {
 				Data data = new Data(item);
 				data.mode = PaintBrushMode.values()[(data.mode.ordinal() + 1) % (PaintBrushMode.values().length)];
 				data.write();
-				player.sendMessage(PlayerMessage.direct("Set mode to: " + data.mode));
+				player.sendMessage(ChatText.BRUSH_MODE.getMessage(data.mode));
 			}
 		}
 	}
@@ -79,9 +76,7 @@ public class ItemPaintBrush extends CustomItem {
 				newIdx = selectRandomTextureIndex(texNames.size(), curIdx);
 				break;
 			default:
-				ImmersiveRailroading.error("Programmer error: invalid PaintBrush mode: " + data.mode + " is not supported");
-				newIdx = curIdx;
-				break;
+				throw new IllegalStateException("Programmer error! invalid PaintBrush mode: " + data.mode + " is not supported");
 		}
 
 		String newTexture = texNames.get(newIdx);

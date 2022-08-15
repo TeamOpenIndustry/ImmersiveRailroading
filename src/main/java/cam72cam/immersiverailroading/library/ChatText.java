@@ -30,6 +30,7 @@ public enum ChatText {
 	RADIO_CANT_LINK("radio.cant_link"),
 	BRUSH_NO_VARIANTS("brush.no.variants"),
 	BRUSH_NEXT("brush.next"),
+	BRUSH_MODE("brush.mode"),
 	SWITCH_UNLOCKED("switch_state.unlocked"),
 	SWITCH_LOCKED("switch_state.locked"),
 	;
