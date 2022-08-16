@@ -31,7 +31,6 @@ public enum ChatText {
 	BRUSH_NO_VARIANTS("brush.no.variants"),
 	BRUSH_NEXT("brush.next"),
 	BRUSH_MODE_SET("brush.mode.set"),
-	BRUSH_MODE_NAME_PREFIX("brush.mode."),
 	SWITCH_UNLOCKED("switch_state.unlocked"),
 	SWITCH_LOCKED("switch_state.locked"),
 	;

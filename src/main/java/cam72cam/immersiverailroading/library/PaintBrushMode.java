@@ -9,9 +9,11 @@ public enum PaintBrushMode {
 	RANDOM,
 	;
 
+	private String BRUSH_MODE_NAME_PREFIX = "chat.immersiverailroading:brush.mode.";
+
 	@Override
 	public String toString() {
-		return ChatText.BRUSH_MODE_NAME_PREFIX.getRaw() + super.toString().toLowerCase(Locale.ROOT);
+		return BRUSH_MODE_NAME_PREFIX + super.toString().toLowerCase(Locale.ROOT);
 	}
 
 	public String toTranslatedString() {
