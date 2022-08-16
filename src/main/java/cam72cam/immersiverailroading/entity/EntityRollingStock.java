@@ -12,6 +12,7 @@ import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.text.PlayerMessage;
@@ -19,9 +20,7 @@ import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -116,19 +115,9 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
-			if (getWorld().isClient)  {
-				return ClickResult.ACCEPTED;
-			}
-			List<String> texNames = new ArrayList<>(this.getDefinition().textureNames.keySet());
-			if (texNames.size() > 1) {
-				int idx = texNames.indexOf(texture);
-				idx = (idx + (player.isCrouching() ? -1 : 1) + texNames.size()) % (texNames.size());
-				texture = texNames.get(idx);
-			} else {
-				player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
-			}
-			return ClickResult.ACCEPTED;
+			return selectNewTexture(player, player.getHeldItem(hand));
 		}
+
 		if (player.getHeldItem(hand).is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
 			if (getWorld().isClient) {
 				return ClickResult.ACCEPTED;
@@ -138,6 +127,20 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 			return ClickResult.ACCEPTED;
 		}
 		return ClickResult.PASS;
+	}
+
+	private ClickResult selectNewTexture(Player player, ItemStack item) {
+		if (getWorld().isClient) {
+			return ClickResult.ACCEPTED;
+		}
+
+		if (this.getDefinition().textureNames.size() > 1) {
+			this.texture = IRItems.ITEM_PAINT_BRUSH.selectNewTexture(this.getDefinition().textureNames, this.texture, player, item);
+			return ClickResult.ACCEPTED;
+		} else {
+			player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
+			return ClickResult.PASS;
+		}
 	}
 
 	@Override
