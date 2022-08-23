@@ -276,7 +276,7 @@ public abstract class Locomotive extends FreightTank {
 
 	@Override
 	public boolean canFitPassenger(Entity passenger) {
-		if (passenger instanceof Player && !((Player) passenger).hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+		if (passenger instanceof Player && !((Player) passenger).hasPermission(Permissions.BOARD_LOCOMOTIVE)) {
 			return false;
 		}
 		return super.canFitPassenger(passenger);
