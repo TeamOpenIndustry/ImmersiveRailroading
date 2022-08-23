@@ -29,8 +29,13 @@ public enum ChatText {
 	RADIO_NOLINK("radio.nolink"),
 	RADIO_CANT_LINK("radio.cant_link"),
 	BRUSH_NO_VARIANTS("brush.no.variants"),
+	BRUSH_NEXT("brush.next"),
+	BRUSH_MODE_SET("brush.mode.set"),
 	SWITCH_UNLOCKED("switch_state.unlocked"),
 	SWITCH_LOCKED("switch_state.locked"),
+	SWITCH_RESET("switch_state.reset"),
+	SWITCH_CANT_RESET("switch_state.cant_reset"),
+	SWITCH_ALREADY_RESET("switch_state.already_reset"),
 	;
 	
 	private String value;
@@ -38,7 +43,7 @@ public enum ChatText {
 		this.value = value;
 	}
 	
-	private String getRaw() {
+	public String getRaw() {
 		return "chat.immersiverailroading:" + value;
 	}
 	

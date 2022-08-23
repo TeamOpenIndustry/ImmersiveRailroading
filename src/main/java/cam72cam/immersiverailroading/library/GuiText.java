@@ -46,10 +46,13 @@ public enum GuiText {
 	FREIGHT_CAPACITY_TOOLTIP("stock.freight_capacity"),
 	WEIGHT_TOOLTIP("stock.weight"),
 	TEXTURE_TOOLTIP("stock.texture"),
-	SWITCH_HAMMER_TOOLTIP("item.switch_hammer"),
+	SWITCH_KEY_TOOLTIP("item.switch_key"),
+	SWITCH_KEY_DATA_TOOLTIP("item.switch_key.data"),
 	MODELER_TOOLTIP("stock.modeler"),
 	PACK_TOOLTIP("stock.pack"),
 	TRACK_SWITCHER_TOOLTIP("item.track_exchanger"),
+	PAINT_BRUSH_MODE_TOOLTIP("item.paint_brush.mode"),
+	PAINT_BRUSH_DESCRIPTION_TOOLTIP("item.paint_brush.description"),
 	NONE("none"),
 	;
 
