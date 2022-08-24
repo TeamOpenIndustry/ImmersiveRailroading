@@ -118,6 +118,8 @@ public abstract class Locomotive extends FreightTank {
 			}
 		}
 
+		boolean linkThrottleReverser = forceLinkThrottleReverser() || disableIndependentThrottle;
+
 		switch(key) {
 			case HORN:
 				setHorn(10, source.getUUID());
@@ -142,13 +144,38 @@ public abstract class Locomotive extends FreightTank {
 			setThrottle(getThrottle() - throttleDelta);
 			break;
 		case REVERSER_UP:
-			setReverser(getReverser() + getReverserDelta());
+			if (linkThrottleReverser) {
+				float mixed = getThrottle() * (getReverser() >= 0 ? 1 : -1);
+				if (mixed < 0) {
+					setRealThrottle(-mixed - throttleDelta);
+					setReverser(-1);
+				} else {
+					setRealThrottle(mixed + throttleDelta);
+					setReverser(1);
+				}
+			} else {
+				setReverser(getReverser() + getReverserDelta());
+			}
 			break;
 		case REVERSER_ZERO:
+			if (linkThrottleReverser) {
+				setRealThrottle(0);
+			}
 			setReverser(0f);
 			break;
 		case REVERSER_DOWN:
-			setReverser(getReverser() - getReverserDelta());
+			if (linkThrottleReverser) {
+				float mixed = getThrottle() * (getReverser() >= 0 ? 1 : -1);
+				if (mixed > 0) {
+					setRealThrottle(mixed - throttleDelta);
+					setReverser(1);
+				} else {
+					setRealThrottle(-mixed + throttleDelta);
+					setReverser(-1);
+				}
+			} else {
+				setReverser(getReverser() - getReverserDelta());
+			}
 			break;
 		case TRAIN_BRAKE_UP:
 			setTrainBrake(getTrainBrake() + trainBrakeNotch);
@@ -175,8 +202,8 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	protected boolean linkThrottleReverser() {
-		return Config.ImmersionConfig.disableIndependentThrottle;
+	protected boolean forceLinkThrottleReverser() {
+		return false;
 	}
 
 	protected float getReverserDelta() {
@@ -429,13 +456,6 @@ public abstract class Locomotive extends FreightTank {
 		newReverser = Math.min(1, Math.max(-1, newReverser));
 
 		if (this.getReverser() != newReverser) {
-			if (linkThrottleReverser()) {
-				// Slave throttle to reverser position
-				//setThrottle(Math.abs(newReverser));
-				float newThrottle = Math.abs(newReverser);
-				setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
-				throttle = newThrottle;
-			}
 			setControlPositions(ModelComponentType.REVERSER_X, newReverser/-2 + 0.5f);
 			reverser = newReverser;
 		}
