@@ -21,6 +21,7 @@ import java.util.OptionalDouble;
 public class LocomotiveDiesel extends Locomotive {
 
 	private float soundThrottle;
+	private float soundMotorThrottle;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
 
@@ -195,6 +196,11 @@ public class LocomotiveDiesel extends Locomotive {
 			} else if (this.soundThrottle < absThrottle) {
 				this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
 			}
+			if (this.soundMotorThrottle > absThrottle) {
+				this.soundMotorThrottle -= Math.min(0.08f, this.soundMotorThrottle - absThrottle);
+			} else if (this.soundMotorThrottle < absThrottle) {
+				this.soundMotorThrottle += Math.min(0.08f, absThrottle - this.soundMotorThrottle);
+			}
 			return;
 		}
 
@@ -276,7 +282,9 @@ public class LocomotiveDiesel extends Locomotive {
 	public float getSoundThrottle() {
 		return soundThrottle;
 	}
-
+	public float getSoundMotorThrottle() {
+		return soundMotorThrottle;
+	}
 	@Override
 	public void onDragRelease(Control<?> component) {
 		super.onDragRelease(component);

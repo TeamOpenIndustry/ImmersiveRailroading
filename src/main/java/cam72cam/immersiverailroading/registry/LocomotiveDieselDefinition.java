@@ -15,10 +15,14 @@ import java.io.IOException;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
+    private static Identifier default_motor = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/aaaa.ogg");
+    private static Identifier default_motor2x = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/aaaa.ogg");
     private static Identifier default_horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 
     public Identifier idle;
+    public Identifier motor;
+    public Identifier motor2x;
     public Identifier horn;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
@@ -55,8 +59,10 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
         idle = default_idle;
         horn = default_horn;
+        motor2x = default_motor2x;
         bell = default_bell;
-
+        motor = default_motor;
+        
         if(sounds != null){
             if (sounds.has("idle")) {
                 idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(default_idle);
@@ -68,6 +74,12 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
             if (sounds.has("bell")) {
                 bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
+            }
+            if (sounds.has("motor")) {
+                motor = new Identifier(ImmersiveRailroading.MODID, sounds.get("motor").getAsString()).getOrDefault(default_motor);
+            }
+            if (sounds.has("motor2x")) {
+                motor2x = new Identifier(ImmersiveRailroading.MODID, sounds.get("motor2x").getAsString()).getOrDefault(default_motor2x);
             }
         }
 

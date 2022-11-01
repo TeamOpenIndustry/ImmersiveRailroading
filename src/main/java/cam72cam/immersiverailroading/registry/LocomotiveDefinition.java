@@ -22,6 +22,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public boolean muliUnitCapable;
     private boolean isCabCar;
     private boolean isLinkedBrakeThrottle;
+    public int motordiv;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);
@@ -52,6 +53,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             power = (int) Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
             traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
             maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
+            if(properties.has("motordiv")){
+           	motordiv = properties.get("motordiv").getAsInt();
+            }
             muliUnitCapable = !properties.has("multi_unit_capable") ? this.multiUnitDefault() : properties.get("multi_unit_capable").getAsBoolean();
         }
         isLinkedBrakeThrottle = properties.has("isLinkedBrakeThrottle") && properties.get("linked_brake_throttle").getAsBoolean();
