@@ -87,16 +87,14 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
                 float pitch = adjust;               
                 float volume = ((0.01f + adjust) * stock.getSoundMotorThrottle() + ((0.01f + adjust) * stock.getTrainBrake()))*2;
 		if(pitch<2){
-                	if(previsnt2x==0){
+                	if(motor2x.isPlaying(stock)){
                 		motor2x.removed(stock);
-                		previsnt2x=1;
                 	}
             		motor.effects(stock, volume, pitch);
                 }
                 else{
-                	if(previsnt2x==1){
+                	if(motor.isPlaying(stock)){
                 		motor.removed(stock);
-                		previsnt2x=0;
                 	}
                 	motor2x.effects(stock, volume, pitch-1.0f);
                 }

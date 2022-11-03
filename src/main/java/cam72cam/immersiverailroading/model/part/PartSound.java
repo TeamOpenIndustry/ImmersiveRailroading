@@ -29,6 +29,14 @@ public class PartSound {
     public void effects(EntityMoveableRollingStock stock, float volume) {
         effects(stock, volume, 1);
     }
+    
+    public boolean isPlaying(EntityMoveableRollingStock stock){
+     	ISound sound = sounds.get(stock.getUUID());
+	if(sound == null){
+    		return false;
+    	}
+     	return sound.isPlaying();
+    }
 
     public void effects(EntityMoveableRollingStock stock, float volume, float pitch) {
         if (ConfigSound.soundEnabled && create != null) {
