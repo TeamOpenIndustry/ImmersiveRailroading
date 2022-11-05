@@ -324,7 +324,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     clackRear = ImmersiveRailroading.newSound(this.getDefinition().clackRear, false, 30, gauge);
                 }
                 if (this.flange == null) {
-                    flange = ImmersiveRailroading.newSound(this.getDefinition().flange, false, 30, gauge);
+                    flange = ImmersiveRailroading.newSound(this.getDefinition().flange, true, 40, gauge);
                 }                
                 
                 float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
