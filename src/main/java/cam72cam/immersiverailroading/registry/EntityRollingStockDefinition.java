@@ -46,7 +46,7 @@ public abstract class EntityRollingStockDefinition {
     private static Identifier default_wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
     private static Identifier default_clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
     private static Identifier default_clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
-
+    private static Identifier default_flange = new Identifier(ImmersiveRailroading.MODID, "sounds/misc/squeal_1.ogg");
     public final String defID;
     private final Class<? extends EntityRollingStock> type;
     public final List<String> itemGroups;
@@ -55,6 +55,7 @@ public abstract class EntityRollingStockDefinition {
     public Gauge recommended_gauge;
     public Boolean shouldSit;
     public Identifier wheel_sound;
+    public Identifier flange;
     public Identifier clackFront;
     public Identifier clackRear;
     public double internal_model_scale;
@@ -306,7 +307,8 @@ public abstract class EntityRollingStockDefinition {
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
         clackRear = default_clackRear;
-
+        flange = default_flange;
+        
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
         if (sounds != null) {
             if (sounds.has("wheels")) {
@@ -322,6 +324,9 @@ public abstract class EntityRollingStockDefinition {
             }
             if (sounds.has("clack_rear")) {
                 clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(default_clackRear);
+            }
+            if (sounds.has("flange")) {
+                flange = new Identifier(ImmersiveRailroading.MODID, sounds.get("flange").getAsString()).getOrDefault(default_flange);
             }
             if (sounds.has("controls")) {
                 for (Entry<String, JsonElement> entry : sounds.get("controls").getAsJsonObject().entrySet()) {

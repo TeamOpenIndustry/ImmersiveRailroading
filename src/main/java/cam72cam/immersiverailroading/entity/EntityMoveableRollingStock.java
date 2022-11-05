@@ -67,6 +67,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private ISound clackRear;
     private Vec3i clackFrontPos;
     private Vec3i clackRearPos;
+    private ISound flange;
 
     private double swayMagnitude;
     private double swayImpulse;
@@ -322,6 +323,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 if (this.clackRear == null) {
                     clackRear = ImmersiveRailroading.newSound(this.getDefinition().clackRear, false, 30, gauge);
                 }
+                if (this.flange == null) {
+                    flange = ImmersiveRailroading.newSound(this.getDefinition().flange, false, 30, gauge);
+                }                
+                
                 float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
                 float pitch = adjust + 0.7f;
                 if (getDefinition().shouldScalePitch()) {
@@ -333,7 +338,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     if (!wheel_sound.isPlaying()) {
                         wheel_sound.play(getPosition());
                     }
-                    wheel_sound.setPitch(pitch + this.sndRand);
+                    wheel_sound.setPitch(pitch + this.sndRand + 0.3f);
                     wheel_sound.setVolume(volume);
 
                     wheel_sound.setPosition(getPosition());
@@ -343,6 +348,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     if (wheel_sound.isPlaying()) {
                         wheel_sound.stop();
                     }
+                }
+                if(MinecraftClient.getPlayer().getPosition().distanceTo(getPosition()) < 40){
+                     if (!flange.isPlaying()) {
+                        flange.play(getPosition());
+                    }
+                    flange.setPitch(pitch + this.sndRand);
+                    flange.setVolume(Math.abs(getFrontYaw()-getRearYaw())/90);
+
+                    flange.setPosition(getPosition());
+                    flange.setVelocity(getVelocity());
+                    flange.update();
+                	
+                
                 }
 
                 volume = Math.min(1, volume * 2);
