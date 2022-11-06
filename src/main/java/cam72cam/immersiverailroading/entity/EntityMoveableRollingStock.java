@@ -338,7 +338,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     if (!wheel_sound.isPlaying()) {
                         wheel_sound.play(getPosition());
                     }
-                    wheel_sound.setPitch(pitch + this.sndRand + 0.3f);
+                    wheel_sound.setPitch(pitch + this.sndRand);
                     wheel_sound.setVolume(volume);
 
                     wheel_sound.setPosition(getPosition());
@@ -354,13 +354,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                         flange.play(getPosition());
                     }
                     flange.setPitch(pitch + this.sndRand);
-                    flange.setVolume(Math.abs(getFrontYaw()-getRearYaw())/90);
+                    flange.setVolume(Math.abs(getFrontYaw()-getRearYaw())/90*adjust);
 
                     flange.setPosition(getPosition());
                     flange.setVelocity(getVelocity());
-                    flange.update();
-                	
-                
+                    flange.update();                
+                }
+                else {
+                    if (wheel_sound.isPlaying()) {
+                        wheel_sound.stop();
+                    }
                 }
 
                 volume = Math.min(1, volume * 2);
