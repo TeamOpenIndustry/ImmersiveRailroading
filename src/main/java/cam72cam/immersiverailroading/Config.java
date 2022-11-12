@@ -225,7 +225,10 @@ public class Config {
 
 		@Comment("Old Narrow track placement (single width instead of 3)")
         public static boolean oldNarrowWidth = false;
-	}
+
+		@Comment("Reset speed when loading stock")
+		public static boolean resetSpeedOnLoad = false;
+    }
 
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!ConfigBalance.FuelRequired || (!ConfigBalance.ModelFuelRequired && gauge.isModel()));

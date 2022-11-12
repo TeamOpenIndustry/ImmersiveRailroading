@@ -75,6 +75,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public void load(TagCompound data) {
         super.load(data);
 
+        if (ConfigDebug.resetSpeedOnLoad) {
+            for (TickPos position : this.positions) {
+                position.speed = Speed.ZERO;
+            }
+        }
+
         if (positions.isEmpty()) {
             this.tickPosID = 0;
             positions.add(getCurrentTickPosOrFake());
