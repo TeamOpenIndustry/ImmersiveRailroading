@@ -11,7 +11,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 
 import java.util.List;
-import java.lang.Integer;
+
 
 public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     private List<ModelComponent> components;
@@ -64,10 +64,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
         super.parseComponents(provider, def);
     }
-	
-    void domotorsound(LocomotiveDiesel stock){
 
-    }
     
     @Override
     protected void effects(LocomotiveDiesel stock) {
@@ -85,7 +82,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 		div = stock.getDefinition().motordiv;
                 float adjust = Math.abs((float)stock.getCurrentSpeed().metric()) / div;
                 float pitch = adjust;               
-                float volume = ((0.01f + adjust) * stock.getSoundMotorThrottle() + ((0.01f + adjust) * stock.getTrainBrake()))*2;
+                float volume = ((0.01f + adjust) * stock.getSoundMotorThrottle() + ((0.01f + adjust) * stock.getTrainBrake()))*4;
 		if(pitch<2){
                 	if(motor2x.isPlaying(stock)){
                 		motor2x.removed(stock);

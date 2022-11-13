@@ -32,10 +32,8 @@ public class PartSound {
     
     public boolean isPlaying(EntityMoveableRollingStock stock){
      	ISound sound = sounds.get(stock.getUUID());
-	if(sound == null){
-    		return false;
-    	}
-     	return sound.isPlaying();
+     	
+     	return sound != null && sound.isPlaying();
     }
 
     public void effects(EntityMoveableRollingStock stock, float volume, float pitch) {
