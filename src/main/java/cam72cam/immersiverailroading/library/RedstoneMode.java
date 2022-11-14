@@ -6,7 +6,8 @@ public enum RedstoneMode {
     ENABLED,
     REQUIRED,
     INVERTED,
-    DISABLED
+    DISABLED,
+    COMPUTER
     ;
 
     @Override
