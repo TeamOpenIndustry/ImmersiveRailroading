@@ -109,7 +109,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		this.augment = augment;
 		if (getParentTile() != null) {
 			augmentGauge = getParentTile().info.settings.gauge;
-			if (ConfigDebug.defaultAugmentComputer) {
+			if (ConfigDebug.defaultAugmentComputer && augment != null) {
 				switch (augment) {
 					case DETECTOR:
 						detectorMode = StockDetectorMode.COMPUTER;
