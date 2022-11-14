@@ -217,6 +217,7 @@ immersiverailroading:redstone_mode.enabled=Включён
 immersiverailroading:redstone_mode.required=Включён с Редстоуном
 immersiverailroading:redstone_mode.inverted=Отключен с Редстоуном
 immersiverailroading:redstone_mode.disabled=Отключён
+immersiverailroading:redstone_mode.computer=Компьютер
 
 key.categories.immersiverailroading=Immersive Railroading
 ir_keys.increase_throttle=Увеличить тягу

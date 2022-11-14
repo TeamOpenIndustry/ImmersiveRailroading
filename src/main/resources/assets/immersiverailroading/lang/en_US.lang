@@ -229,6 +229,7 @@ immersiverailroading:redstone_mode.enabled=Enabled
 immersiverailroading:redstone_mode.required=Enabled with Redstone
 immersiverailroading:redstone_mode.inverted=Disabled with Redstone
 immersiverailroading:redstone_mode.disabled=Disabled
+immersiverailroading:redstone_mode.computer=Computer
 
 immersiverailroading:switch_state.none=None
 immersiverailroading:switch_state.straight=Straight
