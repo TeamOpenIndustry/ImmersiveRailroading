@@ -2,16 +2,11 @@
     <br>
         <a href=""><img src="https://i.imgur.com/GibETo1.png" alt="Immersive Railroading" width="250"></a>
     <br>
-    Immersive Railroading Sound Tweaks fork
+    Immersive Railroading
     <br>
 </h1>
 <h4 align="center">
     Immersive Railroading is a Minecraft mod for 1.16, 1.15, 1.14, 1.12, 1.11, 1.10, and 1.7.  It adds a new transport system (item and players) to the game.  It is based in real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
-
-
-    Add motordiv in json properties block to set the pitch divider
-
-    Add motor and motor2x in json sound block to set a motor sound
 </h4>
 
 <p align="center">
