@@ -161,8 +161,8 @@ public abstract class EntityRollingStockDefinition {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        frontBounds = -model.minOfGroup(model.groups()).x + couplerOffsetFront;
-        rearBounds = model.maxOfGroup(model.groups()).x + couplerOffsetRear;
+        frontBounds = -model.minOfGroup(model.groups()).x;
+        rearBounds = model.maxOfGroup(model.groups()).x;
         widthBounds = model.widthOfGroups(model.groups());
 
         // Bad hack for height bounds
@@ -429,9 +429,9 @@ public abstract class EntityRollingStockDefinition {
         switch (coupler) {
             default:
             case FRONT:
-                return gauge.scale() * (this.frontBounds);
+                return gauge.scale() * (this.frontBounds + couplerOffsetFront);
             case BACK:
-                return gauge.scale() * (this.rearBounds);
+                return gauge.scale() * (this.rearBounds + couplerOffsetRear);
         }
     }
 
