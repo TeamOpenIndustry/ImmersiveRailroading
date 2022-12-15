@@ -77,7 +77,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagSync
 	@TagField("frontCouplerEngaged")
 	private boolean frontCouplerEngaged = true;
-	private Vec3d couplerFrontPosition = null;
 
 	@TagSync
 	@TagField(value = "CoupledBack", mapper = StrictTagMapper.class)
@@ -87,7 +86,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagSync
 	@TagField("backCouplerEngaged")
 	private boolean backCouplerEngaged = true;
-	private Vec3d couplerRearPosition = null;
 
 	@TagSync
 	@TagField("hasElectricalPower")
@@ -313,17 +311,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 	public final boolean isCoupled(CouplerType coupler) {
 		return getCoupledUUID(coupler) != null;
-	}
-	
-	public final boolean isCoupled(EntityCoupleableRollingStock stock) { 
-		return getCouplerFor(stock) != null;
-	}
-
-	@Override
-	protected void clearPositionCache() {
-		super.clearPositionCache();
-		couplerFrontPosition = null;
-		couplerRearPosition = null;
 	}
 
 	public Vec3d getCouplerPosition(CouplerType coupler) {
