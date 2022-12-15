@@ -18,15 +18,15 @@ public class CargoItems {
     private final Map<UUID, StandardModel> cache = new HashMap<>();
     private long lastUpdate = 0;
 
-    private final List<ModelComponent> areas;
+    private final List<ModelComponent> components;
 
     public static CargoItems get(ComponentProvider provider) {
         List<ModelComponent> found = provider.parseAll(ModelComponentType.CARGO_ITEMS_X);
         return found.isEmpty() ? null : new CargoItems(found);
     }
 
-    public CargoItems(List<ModelComponent> areas) {
-        this.areas = areas;
+    public CargoItems(List<ModelComponent> components) {
+        this.components = components;
     }
 
     public <T extends Freight> void postRender(T stock, RenderState state) {
@@ -39,12 +39,12 @@ public class CargoItems {
         if (model == null) {
             model = new StandardModel();
 
-            double totalVolume = areas.stream().mapToDouble(a -> a.length() * a.width() * a.height()).sum();
+            double totalVolume = components.stream().mapToDouble(a -> a.length() * a.width() * a.height()).sum();
             int slotOffset = 0;
-            for (ModelComponent area : areas) {
-                double itemsX = area.length();
-                double itemsY = area.height();
-                double itemsZ = area.width();
+            for (ModelComponent comp : components) {
+                double itemsX = comp.length();
+                double itemsY = comp.height();
+                double itemsZ = comp.width();
 
                 double modelVolume = itemsX * itemsY * itemsZ;
                 int cargoVolume = (int) Math.ceil(stock.cargoItems.getSlotCount() * modelVolume/totalVolume);
@@ -73,8 +73,8 @@ public class CargoItems {
                     model.addItem(
                             stack,
                             new Matrix4().
-                                    translate(area.min.x, area.min.y, area.min.z)
-                                    .scale(area.length() / itemsX, area.height() / itemsY, area.width() / itemsZ)
+                                    translate(comp.min.x, comp.min.y, comp.min.z)
+                                    .scale(comp.length() / itemsX, comp.height() / itemsY, comp.width() / itemsZ)
                                     .translate(0.5, 0.5, 0.5)
                                     .translate(x, y, z)
                     );
