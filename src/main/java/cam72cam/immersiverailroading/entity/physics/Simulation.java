@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
@@ -204,6 +205,17 @@ public class Simulation {
                         continue;
                     }
                     if ((targetBCouplerFront ? stateB.interactingFront : stateB.interactingRear) != null) {
+                        continue;
+                    }
+
+                    // Since bounding boxes can overlap across different tracks (think parallel curves) we need to do
+                    // a more fine-grained check here
+                    Vec3d couplerPosA = targetACouplerFront ? stateA.couplerPositionFront : stateA.couplerPositionRear;
+                    // Move coupler pos up to inside the BB (it's at track level by default)
+                    // This could be optimized further, but it's an infrequent calculation
+                    couplerPosA = couplerPosA.add(0, stateA.bounds.max().subtract(stateA.bounds.min()).y/2, 0);
+                    if (!stateB.bounds.contains(couplerPosA)) {
+                        // Not actually on the same track, just a BB collision and can be ignored
                         continue;
                     }
 
