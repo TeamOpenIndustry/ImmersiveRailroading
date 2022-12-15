@@ -8,15 +8,15 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 
 import java.util.List;
 
-public class Cargo {
+public class CargoFill {
     private final List<ModelComponent> cargoLoads;
 
-    public static Cargo get(ComponentProvider provider, ModelPosition pos) {
+    public static CargoFill get(ComponentProvider provider, ModelPosition pos) {
         List<ModelComponent> cargoLoads = pos == null ? provider.parseAll(ModelComponentType.CARGO_FILL_X) : provider.parseAll(ModelComponentType.CARGO_FILL_POS_X, pos);
-        return cargoLoads.isEmpty() ? null : new Cargo(cargoLoads);
+        return cargoLoads.isEmpty() ? null : new CargoFill(cargoLoads);
     }
 
-    public Cargo(List<ModelComponent> cargoLoads) {
+    public CargoFill(List<ModelComponent> cargoLoads) {
         this.cargoLoads = cargoLoads;
     }
 

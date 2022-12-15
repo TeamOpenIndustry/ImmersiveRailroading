@@ -24,8 +24,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     private ModelComponent frameRear;
     protected DrivingAssembly drivingWheelsFront;
     protected DrivingAssembly drivingWheelsRear;
-    private Cargo cargoFront;
-    private Cargo cargoRear;
+    private CargoFill cargoFillFront;
+    private CargoFill cargoFillRear;
     private ModelComponent shellFront;
     private ModelComponent shellRear;
 
@@ -98,12 +98,12 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         ValveGearType type = def.getValveGear();
 
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
-        cargoFront = Cargo.get(provider, ModelPosition.FRONT);
+        cargoFillFront = CargoFill.get(provider, ModelPosition.FRONT);
         shellFront = provider.parse(ModelComponentType.FRONT_SHELL);
         drivingWheelsFront = DrivingAssembly.get(type,provider, ModelPosition.FRONT, 0);
 
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
-        cargoRear = Cargo.get(provider, ModelPosition.REAR);
+        cargoFillRear = CargoFill.get(provider, ModelPosition.REAR);
         shellRear = provider.parse(ModelComponentType.REAR_SHELL);
         drivingWheelsRear = DrivingAssembly.get(type, provider, ModelPosition.REAR, 45);
 
@@ -171,8 +171,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                     drivingWheelsFront.render(distanceTraveled, stock.getReverser(), noSway);
                 }
                 matrix.render(shellFront);
-                if (cargoFront != null) {
-                    cargoFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
+                if (cargoFillFront != null) {
+                    cargoFillFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
                 }
             }
         }
@@ -187,8 +187,8 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
                     drivingWheelsRear.render(distanceTraveled, stock.getReverser(), noSway);
                 }
                 matrix.render(shellRear);
-                if (cargoRear != null) {
-                    cargoRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
+                if (cargoFillRear != null) {
+                    cargoFillRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
                 }
             }
         }

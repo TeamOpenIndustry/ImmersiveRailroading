@@ -77,6 +77,7 @@ public enum ModelComponentType {
 	// Cargo
 	CARGO_FILL_X("CARGO_FILL_#ID#"),
 	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#"),
+	CARGO_ITEMS_X("CARGO_ITEMS_#ID#"),
 
 	// Lights
 	HEADLIGHT_X("HEADLIGHT_#ID#"),
