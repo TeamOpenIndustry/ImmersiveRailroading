@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -16,7 +15,7 @@ public class Bell extends PartSound {
 
     public Bell(ModelComponent component, Identifier soundFile) {
         super(soundFile == null ? null :
-                stock -> ImmersiveRailroading.newSound(soundFile, true, 150, stock.soundGauge())
+                stock -> stock.createSound(soundFile, true, 150)
         );
         this.component = component;
     }

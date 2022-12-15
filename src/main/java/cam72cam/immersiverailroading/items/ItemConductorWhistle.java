@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.items;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.mod.entity.Entity;
@@ -61,7 +60,7 @@ public class ItemConductorWhistle extends CustomItem {
 					player.getPosition(), Vec3d.ZERO,
 					0.7f, (float) (Math.random() / 4 + 0.75), 
 					(int) (Config.ConfigBalance.villagerConductorDistance * 1.2f), 
-					Gauge.from(Gauge.STANDARD)
+					1
 			);
 			packet.sendToAllAround(world, player.getPosition(), Config.ConfigBalance.villagerConductorDistance * 1.2f);
 

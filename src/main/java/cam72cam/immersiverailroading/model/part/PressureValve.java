@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Particles;
@@ -43,7 +42,7 @@ public class PressureValve {
         if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
             ISound sound = sounds.get(stock.getUUID());
             if (sound == null) {
-                sound = ImmersiveRailroading.newSound(sndFile, true, 40, stock.soundGauge());
+                sound = stock.createSound(sndFile, true, 40);
                 sound.setVolume(0.3f);
                 sounds.put(stock.getUUID(), sound);
             }
