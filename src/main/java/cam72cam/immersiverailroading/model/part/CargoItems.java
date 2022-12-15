@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -70,13 +71,25 @@ public class CargoItems {
                     int z = (renderSlot / (int) itemsX) % (int) itemsZ;
                     int y = (renderSlot / (int) itemsX / (int) itemsZ) % (int) itemsY;
 
+                    double scaleX = comp.length() / itemsX;
+                    double scaleY = comp.height() / itemsY;
+                    double scaleZ = comp.width() / itemsZ;
+                    if (!comp.key.contains("STRETCHED")) {
+                        scaleX = scaleY = scaleZ = Math.min(comp.length() / itemsX, Math.min(comp.height() / itemsY, comp.width() / itemsZ));
+                    }
+                    double rot = 0;
+                    if (stack.is(IRItems.ITEM_ROLLING_STOCK) || stack.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
+                        rot = 90;
+                    }
+
                     model.addItem(
                             stack,
                             new Matrix4().
                                     translate(comp.min.x, comp.min.y, comp.min.z)
-                                    .scale(comp.length() / itemsX, comp.height() / itemsY, comp.width() / itemsZ)
+                                    .scale(scaleX, scaleY, scaleZ)
                                     .translate(0.5, 0.5, 0.5)
                                     .translate(x, y, z)
+                                    .rotate(Math.toRadians(rot), 0, 1, 0)
                     );
                     renderSlot++;
                 }
