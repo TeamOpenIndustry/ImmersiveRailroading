@@ -362,7 +362,7 @@ public class GuiBuilder {
             case RELEASE:
                 if (target != null) {
                     if (!target.hasMovement()) {
-                        new ControlChangePacket(stock, target.readout, target.control, invert ? target.getValue(stock) : 1 - target.getValue(stock)).sendToServer();
+                        new ControlChangePacket(stock, target.readout, target.control, target.invert ? target.getValue(stock) : 1 - target.getValue(stock)).sendToServer();
                     }
                     target = null;
                     return false;
