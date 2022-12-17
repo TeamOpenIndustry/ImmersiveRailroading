@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.RenderState;
@@ -77,20 +78,21 @@ public class CargoItems {
                     if (!comp.key.contains("STRETCHED")) {
                         scaleX = scaleY = scaleZ = Math.min(comp.length() / itemsX, Math.min(comp.height() / itemsY, comp.width() / itemsZ));
                     }
-                    double rot = 0;
+
+                    Matrix4 matrix = new Matrix4().
+                            translate(comp.min.x, comp.min.y, comp.min.z)
+                            .scale(scaleX, scaleY, scaleZ)
+                            .translate(0.5, 0.5, 0.5)
+                            .translate(x, y, z);
+
                     if (stack.is(IRItems.ITEM_ROLLING_STOCK) || stack.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
-                        rot = 90;
+                        matrix.rotate(Math.toRadians(90), 0, 0, 0);
+                    }
+                    if (stack.is(Fuzzy.LOG_WOOD)) {
+                        matrix.rotate(Math.toRadians(90), 0, 0, 1);
                     }
 
-                    model.addItem(
-                            stack,
-                            new Matrix4().
-                                    translate(comp.min.x, comp.min.y, comp.min.z)
-                                    .scale(scaleX, scaleY, scaleZ)
-                                    .translate(0.5, 0.5, 0.5)
-                                    .translate(x, y, z)
-                                    .rotate(Math.toRadians(rot), 0, 1, 0)
-                    );
+                    model.addItem(stack, matrix);
                     renderSlot++;
                 }
                 slotOffset += cargoVolume;
