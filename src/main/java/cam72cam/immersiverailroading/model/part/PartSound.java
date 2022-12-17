@@ -34,9 +34,9 @@ public class PartSound {
     private final ExpireableMap<UUID, Sounds> sounds = new ExpireableMap<UUID, Sounds>() {
         @Override
         public void onRemove(UUID key, Sounds value) {
-            value.start.terminate();
-            value.loop.terminate();
-            value.end.terminate();
+            if(value.start != null){ value.start.terminate();}
+            if(value.loop != null){ value.loop.terminate();}
+            if(value.end != null){ value.end.terminate();}
         }
     };
 
