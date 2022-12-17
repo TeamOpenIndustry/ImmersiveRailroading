@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class CargoFill {
@@ -13,6 +14,8 @@ public class CargoFill {
 
     public static CargoFill get(ComponentProvider provider, ModelPosition pos) {
         List<ModelComponent> cargoLoads = pos == null ? provider.parseAll(ModelComponentType.CARGO_FILL_X) : provider.parseAll(ModelComponentType.CARGO_FILL_POS_X, pos);
+        // Make sure that cargo loads are in order for showCurrentLoadOnly (if enabled)
+        cargoLoads.sort(Comparator.comparingInt(a -> -a.id));
         return cargoLoads.isEmpty() ? null : new CargoFill(cargoLoads);
     }
 
