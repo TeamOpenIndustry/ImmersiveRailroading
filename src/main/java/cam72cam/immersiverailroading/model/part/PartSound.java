@@ -71,13 +71,12 @@ public class PartSound {
                     startSound.setVolume(volume);
                     startSound.setPitch(pitch);
 
-                    if(!startSound.isPlaying() && !startHasPlayed) { //If nothing has started yet
-                        startSound.play(stock.getPosition());
-                        startIsPlaying = true;
-                    } else if (!startSound.isPlaying() && startIsPlaying) { //Start sound is done playing one take
+                    if (!startSound.isPlaying() && startIsPlaying) { //Start sound is done playing one take
                         startHasPlayed = true;
                         startIsPlaying = false;
-                        startSound.stop();
+                    } else if(!startSound.isPlaying() && !startHasPlayed) { //If nothing has started yet
+                        startSound.play(stock.getPosition());
+                        startIsPlaying = true;
                     } else {
                         startSound.update();
                     }
