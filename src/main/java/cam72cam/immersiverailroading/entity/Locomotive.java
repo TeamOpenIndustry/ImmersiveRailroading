@@ -45,6 +45,7 @@ public abstract class Locomotive extends FreightTank {
 	@TagField("HORN")
 	protected int hornTime = 0;
 
+	public static final UUID AUTOMATED_PLAYER = new UUID(0, 0);
 	@TagSync
 	@TagField(value = "HORN_PLAYER", mapper = StrictTagMapper.class)
 	protected UUID hornPlayer = null;
@@ -464,6 +465,10 @@ public abstract class Locomotive extends FreightTank {
 			}
 		}
 		return null;
+	}
+
+	public boolean isAutomatedHorn() {
+		return AUTOMATED_PLAYER.equals(hornPlayer);
 	}
 
 	@Deprecated

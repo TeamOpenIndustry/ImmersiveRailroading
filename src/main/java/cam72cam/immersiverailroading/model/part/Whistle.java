@@ -58,7 +58,7 @@ public class Whistle {
             }
         }
 
-        public void update(EntityMoveableRollingStock stock, int hornTime, Entity hornPlayer) {
+        public void update(EntityMoveableRollingStock stock, int hornTime, boolean isAutomatedHorn, Entity hornPlayer) {
             if (chimes != null) {
                 if (hornTime < 1) {
                     pullString = 0;
@@ -86,7 +86,7 @@ public class Whistle {
                                     .filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
                                     .mapToDouble(stock::getControlPosition)
                                     .max();
-                            if (control.isPresent()) {
+                            if (control.isPresent() && !isAutomatedHorn) {
                                 delta = (float) control.getAsDouble() - pullString;
                             } else {
                                 delta = (float) quilling.maxPull - pullString;
@@ -172,7 +172,7 @@ public class Whistle {
         }
     };
 
-    public void effects(EntityMoveableRollingStock stock, int hornTime, Entity hornPlayer) {
+    public void effects(EntityMoveableRollingStock stock, int hornTime, boolean isAutomatedHorn, Entity hornPlayer) {
         // Particles and Sound
 
         if (ConfigSound.soundEnabled) {
@@ -183,7 +183,7 @@ public class Whistle {
                 sounds.put(stock.getUUID(), sound);
             }
 
-            sound.update(stock, hornTime, hornPlayer);
+            sound.update(stock, hornTime, isAutomatedHorn, hornPlayer);
         }
 
         Vec3d fakeMotion = stock.getVelocity();
