@@ -61,7 +61,7 @@ public class ItemPaintBrush extends CustomItem {
 					break;
 				case RANDOM_SINGLE:
 				case RANDOM_COUPLED:
-					new PaintBrushPacket(stock, data.mode, null).sendToServer();
+					new PaintBrushPacket(stock, data.mode, null, false).sendToServer();
 					break;
 			}
 		}
@@ -99,10 +99,14 @@ public class ItemPaintBrush extends CustomItem {
 		@TagField("variant")
 		public String variant;
 
-		public PaintBrushPacket(EntityRollingStock stock, PaintBrushMode mode, String variant) {
+		@TagField
+		public boolean gui_connected;
+
+		public PaintBrushPacket(EntityRollingStock stock, PaintBrushMode mode, String variant, boolean gui_connected) {
 			this.stock = stock;
 			this.mode = mode;
 			this.variant = variant;
+			this.gui_connected = gui_connected;
 		}
 
 		public PaintBrushPacket() {
@@ -116,7 +120,16 @@ public class ItemPaintBrush extends CustomItem {
 			}
 			switch (mode) {
 				case GUI:
-					stock.setTexture(variant);
+					if (gui_connected) {
+						EntityCoupleableRollingStock coupled = (EntityCoupleableRollingStock) stock;
+						for (EntityCoupleableRollingStock stock : coupled.getTrain(false)) {
+							if (stock.getDefinition().textureNames.containsKey(variant)) {
+								stock.setTexture(variant);
+							}
+						}
+					} else {
+						stock.setTexture(variant);
+					}
 					break;
 				case RANDOM_SINGLE:
 					stock.setTexture(nextRandomTexture(stock, stock.getTexture()));

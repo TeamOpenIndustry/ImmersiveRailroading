@@ -84,7 +84,7 @@ public class PaintBrushPicker implements IScreen {
         });
         this.updateVariants("");
 
-        width = 60;
+        width = 80;
         Button random = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width, height, "Random") {
             @Override
             public void onClick(Player.Hand hand) {
@@ -92,10 +92,17 @@ public class PaintBrushPicker implements IScreen {
             }
         };
 
-        Button apply = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, (int) (GUIHelpers.getScreenHeight()*0.75 - height), width, height, "Apply") {
+        Button apply = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, (int) (GUIHelpers.getScreenHeight()*0.75 - height*2), width, height, "Apply to Stock") {
             @Override
             public void onClick(Player.Hand hand) {
-                new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant).sendToServer();
+                new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, false).sendToServer();
+                screen.close();
+            }
+        };
+        Button apply_connected = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, (int) (GUIHelpers.getScreenHeight()*0.75 - height), width, height, "Apply to Train") {
+            @Override
+            public void onClick(Player.Hand hand) {
+                new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, true).sendToServer();
                 screen.close();
             }
         };
@@ -138,7 +145,7 @@ public class PaintBrushPicker implements IScreen {
 
     @Override
     public void onEnterKey(IScreenBuilder builder) {
-        new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant).sendToServer();
+        new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, false).sendToServer();
         builder.close();
     }
 
