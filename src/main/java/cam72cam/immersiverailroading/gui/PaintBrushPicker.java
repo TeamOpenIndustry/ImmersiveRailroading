@@ -1,7 +1,8 @@
 package cam72cam.immersiverailroading.gui;
 
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.mod.MinecraftClient;
@@ -12,8 +13,8 @@ import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.gui.screen.TextField;
-import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
+import util.Matrix4;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 public class PaintBrushPicker implements IScreen {
     private static final Random r = new Random();
 
-    private EntityRollingStock stock;
+    private EntityMoveableRollingStock stock;
     private String variant;
 
     private List<Button> options;
@@ -29,15 +30,18 @@ public class PaintBrushPicker implements IScreen {
     private int page;
     private int pageSize;
     private Button pagination;
+    private long frame;
 
     @Override
     public void init(IScreenBuilder screen) {
+        frame = 0;
+
         Entity ent = MinecraftClient.getEntityMouseOver();
         if (ent == null) {
             screen.close();
             return;
         }
-        this.stock = ent.as(EntityRollingStock.class);
+        this.stock = ent.as(EntityMoveableRollingStock.class);
         if (stock == null) {
             screen.close();
         }
@@ -52,7 +56,7 @@ public class PaintBrushPicker implements IScreen {
 
         TextField search = new TextField(screen, xtop + 1, ytop + 1, width - 2, height - 2);
 
-        pagination = new Button(screen, xtop-1, ytop + height, width + 1, height, "Page") {
+        pagination = new Button(screen, xtop, ytop + height, width + 1, height, "Page") {
             @Override
             public void onClick(Player.Hand hand) {
                 page += hand == Player.Hand.PRIMARY ? 1 : -1;
@@ -62,7 +66,7 @@ public class PaintBrushPicker implements IScreen {
 
         options = new ArrayList<>();
         for (int i = 0; i < pageSize; i++) {
-            options.add(new Button(screen, xtop-1, ytop + height*2 + i * height, width+1, height, "") {
+            options.add(new Button(screen, xtop, ytop + height*2 + i * height, width+1, height, "") {
                 @Override
                 public void onClick(Player.Hand hand) {
                     variant = stock.getDefinition().textureNames.entrySet().stream()
@@ -146,8 +150,13 @@ public class PaintBrushPicker implements IScreen {
 
     @Override
     public void draw(IScreenBuilder builder) {
-        //GUIHelpers.drawRect(0, 0, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), 0x44000000);
-        GUIHelpers.drawCenteredString(stock.getDefinition().name(), 200 + (GUIHelpers.getScreenWidth()-200) / 2, 40, 0xFFFFFF);
+        frame++;
+
+        double textScale = 1.5;
+
+        GUIHelpers.drawRect(200, 0, GUIHelpers.getScreenWidth()-200, GUIHelpers.getScreenHeight(), 0xCC000000);
+        GUIHelpers.drawRect(0, 0, 200, GUIHelpers.getScreenHeight(), 0xEE000000);
+
         String current = variant == null ? null : variant + "";
         if (current == null || current.isEmpty()) {
             current = stock.getDefinition().textureNames.keySet().stream().findFirst().orElse(null);
@@ -158,7 +167,9 @@ public class PaintBrushPicker implements IScreen {
             current = stock.getDefinition().textureNames.getOrDefault(current, "Unknown");
         }
         current = GuiText.TEXTURE_TOOLTIP.toString(current);
-        GUIHelpers.drawCenteredString(current, 200 + (GUIHelpers.getScreenWidth()-200) / 2, GUIHelpers.getScreenHeight() - 60, 0xFFFFFF);
+
+        GUIHelpers.drawCenteredString(stock.getDefinition().name(), (int) ((200 + (GUIHelpers.getScreenWidth()-200) / 2) / textScale), (int) (40 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
+        GUIHelpers.drawCenteredString(current, (int) ((200 + (GUIHelpers.getScreenWidth()-200) / 2) / textScale), (int) ((GUIHelpers.getScreenHeight() - 60) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
 
         RenderState state = new RenderState();
@@ -168,13 +179,29 @@ public class PaintBrushPicker implements IScreen {
 
         //int scale = 8;
         int scale = GUIHelpers.getScreenWidth() / 40;
-        float speed = 1.5f;
-        state.translate(200 + (GUIHelpers.getScreenWidth()-200) / 2, builder.getHeight() / 2, 400);
+        float speed = 0.75f;
+        state.translate(200 + (GUIHelpers.getScreenWidth()-200) / 2, builder.getHeight() / 2 + 10, 400);
         state.rotate((stock.getTickCount()*speed) % 360, 0, 1, 0);
         state.scale(-scale, -scale, -scale);
+        state.lightmap(1, 1);
 
-        try (OBJRender.Binding binding = model.binder().texture(variant).bind(state)) {
+        float prevDist = stock.distanceTraveled;
+        String prevTex = stock.getTexture();
+        Gauge prevGauge = stock.gauge;
+
+        stock.setTexture(variant);
+        stock.distanceTraveled += frame * 0.02;
+        stock.gauge = Gauge.standard();
+
+        model.render(stock, state, 0);
+        model.postRender(stock, state, 0);
+
+        stock.setTexture(prevTex);
+        stock.distanceTraveled = prevDist;
+        stock.gauge = prevGauge;
+
+        /*try (OBJRender.Binding binding = model.binder().texture(variant).bind(state)) {
             binding.draw(stock.getDefinition().itemGroups);
-        }
+        }*/
     }
 }
