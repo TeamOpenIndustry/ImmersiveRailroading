@@ -115,7 +115,8 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
-			return selectNewTexture(player, player.getHeldItem(hand));
+			GuiTypes.PAINT_BRUSH.open(player);
+			return ClickResult.ACCEPTED;
 		}
 
 		if (player.getHeldItem(hand).is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
@@ -141,6 +142,11 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 			player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
 			return ClickResult.PASS;
 		}
+	}
+
+	public void setTexture(String variant) {
+		// TODO packet
+		this.texture = variant;
 	}
 
 	@Override
