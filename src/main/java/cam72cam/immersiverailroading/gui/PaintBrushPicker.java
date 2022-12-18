@@ -1,9 +1,11 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.PaintBrushMode;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
@@ -20,8 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PaintBrushPicker implements IScreen {
-    private static final Random r = new Random();
-
     private EntityMoveableRollingStock stock;
     private String variant;
 
@@ -88,18 +88,14 @@ public class PaintBrushPicker implements IScreen {
         Button random = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width, height, "Random") {
             @Override
             public void onClick(Player.Hand hand) {
-                List<String> choices = new ArrayList<>(stock.getDefinition().textureNames.keySet());
-                if (choices.size() > 1) {
-                    choices.remove(variant);
-                }
-                variant = choices.get(r.nextInt(choices.size()));
+                variant = ItemPaintBrush.nextRandomTexture(stock, variant);
             }
         };
 
         Button apply = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, (int) (GUIHelpers.getScreenHeight()*0.75 - height), width, height, "Apply") {
             @Override
             public void onClick(Player.Hand hand) {
-                stock.setTexture(variant);
+                new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant).sendToServer();
                 screen.close();
             }
         };
@@ -142,7 +138,7 @@ public class PaintBrushPicker implements IScreen {
 
     @Override
     public void onEnterKey(IScreenBuilder builder) {
-        stock.setTexture(variant);
+        new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant).sendToServer();
         builder.close();
     }
 
