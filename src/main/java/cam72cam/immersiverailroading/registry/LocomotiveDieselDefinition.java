@@ -15,7 +15,6 @@ import java.io.IOException;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
-    private static Identifier default_start = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/start.ogg"); //Needs a CC-free default sound
     private static Identifier default_horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 
@@ -56,7 +55,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
         idle = default_idle;
-        start = default_start;
+        start = null;
         horn = default_horn;
         bell = default_bell;
 
@@ -66,7 +65,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
             }
 
             if (sounds.has("start")) {
-                start = new Identifier(ImmersiveRailroading.MODID, sounds.get("start").getAsString()).getOrDefault(default_start);
+                start = new Identifier(ImmersiveRailroading.MODID, sounds.get("start").getAsString());
             }
 
             if (sounds.has("horn")) {
