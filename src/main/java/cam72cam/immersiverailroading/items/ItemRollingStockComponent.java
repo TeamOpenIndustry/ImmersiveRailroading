@@ -67,7 +67,7 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 	public List<String> getTooltip(ItemStack stack) {
 		List<String> tooltip = new ArrayList<>();
 		Data data = new Data(stack);
-		tooltip.add(GuiText.GAUGE_TOOLTIP.toString(data.gauge));
+		tooltip.add(GuiText.GAUGE_TOOLTIP.toString(data.gauge) + stack.getTagCompound().toString());
 		if (data.requiresHammering()) {
 			tooltip.add(TextColor.RED.wrap(GuiText.RAW_CAST_TOOLTIP.toString()));
 		}

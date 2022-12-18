@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
@@ -162,10 +163,14 @@ public class CastingGUI implements IScreen {
 	private void sendItemPacket() {
 		currentItem.setCount(1);
 
-        if (currentItem.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT) || currentItem.is(IRItems.ITEM_CAST_RAIL) || currentItem.is(IRItems.ITEM_AUGMENT)) {
+        if (currentItem.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT) || currentItem.is(IRItems.ITEM_CAST_RAIL)) {
 			ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(currentItem);
 			data.gauge = gauge;
 			data.rawCast = true;
+			data.write();
+		} else if (currentItem.is(IRItems.ITEM_AUGMENT)) {
+			ItemRailAugment.Data data = new ItemRailAugment.Data(currentItem);
+			data.gauge = gauge;
 			data.write();
 		} else if (currentItem.is(IRItems.ITEM_ROLLING_STOCK)) {
 			ItemRollingStock.Data data = new ItemRollingStock.Data(currentItem);
