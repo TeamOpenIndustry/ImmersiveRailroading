@@ -53,10 +53,20 @@ public class ExpireableMap<K,V> {
 	public void put(K key, V displayList) {
 		synchronized(this) {
 			if (displayList == null) {
-				map.remove(key);
+				remove(key);
 			} else {
 				mapUsage.put(key, timeS());
 				map.put(key, displayList);
+			}
+		}
+	}
+
+	public void remove(K key) {
+		synchronized(this) {
+			if(map.containsKey(key)) {
+				onRemove(key, map.get(key));
+				map.remove(key);
+				mapUsage.remove(key);
 			}
 		}
 	}

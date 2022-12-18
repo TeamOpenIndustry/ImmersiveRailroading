@@ -14,9 +14,9 @@ public class PartSound {
     private final Function<EntityMoveableRollingStock, ISound> endCreate;
 
     public PartSound(Function<EntityMoveableRollingStock, ISound> loopCreate)
-    { this.startCreate = null; this.loopCreate = loopCreate; this.endCreate = null;}
+    { this(null, loopCreate, null);}
     public PartSound(Function<EntityMoveableRollingStock, ISound> startCreate, Function<EntityMoveableRollingStock, ISound> loopCreate)
-    { this.startCreate = startCreate; this.loopCreate = loopCreate; this.endCreate = null;}
+    { this(startCreate, loopCreate, null);}
     public PartSound(Function<EntityMoveableRollingStock, ISound> startCreate, Function<EntityMoveableRollingStock, ISound> loopCreate, Function<EntityMoveableRollingStock, ISound> endCreate)
     { this.startCreate = startCreate; this.loopCreate = loopCreate; this.endCreate = endCreate;}
 
@@ -104,6 +104,7 @@ public class PartSound {
                 if (endSound != null && endSound.isPlaying()) {
                     endSound.stop();
                 }
+                startIsPlaying = false;
                 startHasPlayed = false;
                 endHasPlayed = false; //Probably needs to be somewhere else when endSound has usage
             }
@@ -111,12 +112,7 @@ public class PartSound {
     }
 
     public void removed(EntityMoveableRollingStock stock) {
-        Sounds soundTrio = sounds.get(stock.getUUID());
-        if (soundTrio != null) {
-            if(soundTrio.start != null){ soundTrio.start.terminate();}
-            if(soundTrio.loop != null){ soundTrio.loop.terminate();}
-            if(soundTrio.end != null){ soundTrio.end.terminate();}
-        }
+        sounds.remove(stock.getUUID());
     }
 
 }
