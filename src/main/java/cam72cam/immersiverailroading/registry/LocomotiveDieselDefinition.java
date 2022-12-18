@@ -19,6 +19,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 
     public Identifier idle;
+    public Identifier start;
     public Identifier horn;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
@@ -54,12 +55,17 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
         idle = default_idle;
+        start = null;
         horn = default_horn;
         bell = default_bell;
 
         if(sounds != null){
             if (sounds.has("idle")) {
                 idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(default_idle);
+            }
+
+            if (sounds.has("start")) {
+                start = new Identifier(ImmersiveRailroading.MODID, sounds.get("start").getAsString());
             }
 
             if (sounds.has("horn")) {
