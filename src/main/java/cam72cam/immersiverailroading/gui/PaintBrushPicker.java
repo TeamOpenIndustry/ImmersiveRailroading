@@ -89,6 +89,9 @@ public class PaintBrushPicker implements IScreen {
             @Override
             public void onClick(Player.Hand hand) {
                 List<String> choices = new ArrayList<>(stock.getDefinition().textureNames.keySet());
+                if (choices.size() > 1) {
+                    choices.remove(variant);
+                }
                 variant = choices.get(r.nextInt(choices.size()));
             }
         };
