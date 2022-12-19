@@ -5,6 +5,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -18,7 +20,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -95,20 +97,58 @@ public class ItemTrackBlueprint extends CustomItem {
 
 	@Override
 	public List<String> getTooltip(ItemStack stack) {
+		List<String> tooltip = new ArrayList<>();
         RailSettings settings = RailSettings.from(stack);
-        return Arrays.asList(
-            GuiText.TRACK_TYPE.toString(settings.type),
-            GuiText.TRACK_GAUGE.toString(settings.gauge),
-            GuiText.TRACK_LENGTH.toString(settings.length),
-            GuiText.TRACK_POSITION.toString(settings.posType),
-            GuiText.TRACK_SMOOTHING.toString(settings.smoothing),
-            GuiText.TRACK_DIRECTION.toString(settings.direction),
-            GuiText.TRACK_RAIL_BED.toString(settings.railBed.getDisplayName()),
-            GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName()),
-            (settings.isPreview ? GuiText.TRACK_PLACE_BLUEPRINT_TRUE : GuiText.TRACK_PLACE_BLUEPRINT_FALSE).toString(),
-            GuiText.TRACK_QUARTERS.toString(settings.degrees),
-			GuiText.TRACK_CURVOSITY.toString(String.format("%.2f", settings.curvosity))
-		);
+		TrackDefinition track = DefinitionManager.getTrack(settings.track);
+
+		String indented = "    - %s";
+
+		tooltip.add(GuiText.TRACK_TYPE.toString(""));
+		tooltip.add(String.format(indented, settings.type));
+		tooltip.add(String.format(indented, settings.length + " Meters"));
+		tooltip.add(String.format(indented, settings.gauge + " Gauge"));
+		// TODO move checks for if applicable to enum
+		if (settings.type.hasQuarters()) {
+			tooltip.add(String.format(indented, GuiText.TRACK_QUARTERS.toString(settings.degrees)));
+		}
+		if (settings.type.hasCurvosity()) {
+			tooltip.add(String.format(indented, GuiText.TRACK_CURVOSITY.toString(String.format("%.2f", settings.curvosity))));
+		}
+
+		tooltip.add(GuiText.SELECTOR_TRACK.toString(""));
+		tooltip.add(String.format(indented, track.name));
+		if (track.modelerName != null) {
+			tooltip.add("    " + String.format(indented, track.modelerName));
+		}
+		if (track.packName != null) {
+			tooltip.add("    " + String.format(indented, track.packName));
+		}
+		if (!settings.railBed.isEmpty()) {
+			tooltip.add(String.format(indented, GuiText.TRACK_RAIL_BED.toString(settings.railBed.getDisplayName())));
+		}
+		if (!settings.railBedFill.isEmpty()) {
+			tooltip.add(String.format(indented, GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName())));
+		}
+
+		tooltip.add(GuiText.TRACK_POSITION.toString(""));
+		tooltip.add(String.format(indented, settings.posType));
+		if (settings.type.hasSmoothing()) {
+			tooltip.add(String.format(indented, GuiText.TRACK_SMOOTHING.toString(settings.smoothing)));
+		}
+		if (settings.type.hasDirection()) {
+			tooltip.add(String.format(indented, GuiText.TRACK_DIRECTION.toString(settings.direction)));
+		}
+
+		if (settings.isPreview) {
+			tooltip.add(GuiText.TRACK_PLACE_BLUEPRINT_TRUE.toString());
+		}
+
+		return tooltip;
+
+
+
+        /*return Arrays.asList(
+		);*/
 	}
 
 }
