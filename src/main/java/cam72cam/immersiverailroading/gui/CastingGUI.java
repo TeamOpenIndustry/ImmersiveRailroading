@@ -166,7 +166,7 @@ public class CastingGUI implements IScreen {
         if (currentItem.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT) || currentItem.is(IRItems.ITEM_CAST_RAIL)) {
 			ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(currentItem);
 			data.gauge = gauge;
-			data.rawCast = true;
+			data.rawCast = (data.componentType.crafting == CraftingType.CASTING_HAMMER);
 			data.write();
 		} else if (currentItem.is(IRItems.ITEM_AUGMENT)) {
 			ItemRailAugment.Data data = new ItemRailAugment.Data(currentItem);
