@@ -86,6 +86,10 @@ public class RailSettings {
         return res;
     }
 
+    public Builder builder() {
+        return new Builder(this);
+    }
+
     private static class DegreesMapper implements TagMapper<Float> {
         @Override
         public TagAccessor<Float> apply(Class<Float> type, String fieldName, TagField tag) {
@@ -120,6 +124,56 @@ public class RailSettings {
                     return true;
                 }
             };
+        }
+    }
+
+    public static class Builder {
+        public Gauge gauge;
+        public TrackItems type;
+        public int length;
+        public float degrees;
+        public float curvosity;
+        public TrackPositionType posType;
+        public TrackSmoothing smoothing;
+        public TrackDirection direction;
+        public ItemStack railBed;
+        public ItemStack railBedFill;
+        public boolean isPreview;
+        public boolean isGradeCrossing;
+        public String track;
+
+        private Builder(RailSettings settings) {
+            this.gauge = settings.gauge;
+            this.track = settings.track;
+            this.type = settings.type;
+            this.length = settings.length;
+            this.degrees = settings.degrees;
+            this.curvosity = settings.curvosity;
+            this.posType = settings.posType;
+            this.smoothing = settings.smoothing;
+            this.direction = settings.direction;
+            this.railBed = settings.railBed;
+            this.railBedFill = settings.railBedFill;
+            this.isPreview = settings.isPreview;
+            this.isGradeCrossing = settings.isGradeCrossing;
+        }
+
+        public RailSettings build() {
+            return new RailSettings(
+                    gauge,
+                    track,
+                    type,
+                    length,
+                    degrees,
+                    curvosity,
+                    posType,
+                    smoothing,
+                    direction,
+                    railBed,
+                    railBedFill,
+                    isPreview,
+                    isGradeCrossing
+            );
         }
     }
 

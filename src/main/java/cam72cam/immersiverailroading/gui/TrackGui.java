@@ -1,26 +1,36 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.gui.components.ListSelector;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.registry.TrackDefinition;
+import cam72cam.immersiverailroading.render.rail.RailBaseRender;
+import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.immersiverailroading.util.PlacementInfo;
+import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
+import static cam72cam.immersiverailroading.gui.components.GuiUtils.fitString;
 
 public class TrackGui implements IScreen {
 	private TileRailPreview te;
@@ -38,33 +48,15 @@ public class TrackGui implements IScreen {
 	private Button bedTypeButton;
 	private Button bedFillButton;
 
-	private int length;
-	private float degrees;
-	private float curvosity;
-	private Gauge gauge;
-	private String track;
-	private boolean isPreview;
-	private boolean isGradeCrossing;
-	private TrackItems type;
-	private TrackPositionType posType;
-	private TrackSmoothing smoothing;
-	private TrackDirection direction;
-	private ItemStack bed;
-	private ItemStack bedFill;
-	List<ItemStack> oreDict;
+	private final List<ItemStack> oreDict;
 
-	private final Predicate<String> integerFilter = inputString -> {
-		if (inputString == null || inputString.length() == 0) {
-			return true;
-		}
-		int val;
-		try {
-			val = Integer.parseInt(inputString);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return val > 0 && val <= 1000;
-	};
+	private RailSettings.Builder settings;
+
+	private ListSelector<Gauge> gaugeSelector;
+	private ListSelector<TrackItems> typeSelector;
+	private ListSelector<TrackDefinition>  trackSelector;
+	private ListSelector<ItemStack> railBedSelector;
+	private ListSelector<ItemStack> railBedFillSelector;
 
 	public TrackGui() {
 		this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY));
@@ -77,28 +69,9 @@ public class TrackGui implements IScreen {
 
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
-		RailSettings settings = RailSettings.from(stack);
-		length = settings.length;
-		degrees = settings.degrees;
-		curvosity = settings.curvosity;
-		type = settings.type;
-		gauge = settings.gauge;
-		track = settings.track;
-		posType = settings.posType;
-		smoothing = settings.smoothing;
-		direction = settings.direction;
-		isPreview = settings.isPreview;
-		isGradeCrossing = settings.isGradeCrossing;
-		bed = settings.railBed;
-		bedFill = settings.railBedFill;
+		settings = RailSettings.from(stack).builder();
 		oreDict = new ArrayList<>();
-
-		//if (!DefinitionManager.getTrackIDs().contains(type)) {
-		//	track = DefinitionManager.getTrackIDs().stream().findFirst().getContents();
-		//}
-		
 		oreDict.add(ItemStack.EMPTY);
-
 		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
 	}
 
@@ -110,124 +83,216 @@ public class TrackGui implements IScreen {
 	}
 
 	public void init(IScreenBuilder screen) {
-		trackButton = new Button(screen, 0 - 100, -24 + 0 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				track = next(DefinitionManager.getTrackIDs(), track, hand);
-				trackButton.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
-			}
-		};
 
-		typeButton = new Button(screen, 0 - 100, -24 + 1 * 22 - 1, GuiText.SELECTOR_TYPE.toString(type)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				type = next(type, hand);
-				typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
-				degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
-				curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.CUSTOM);
-				smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN || type == TrackItems.SWITCH);
-			}
-		};
+		// Left pane
+		int width = 200;
+		int height = 20;
+		int xtop = -GUIHelpers.getScreenWidth() / 2;
+		int ytop = -GUIHelpers.getScreenHeight() / 4;
 
-		this.lengthInput = new TextField(screen, 0 - 100,  - 24 + 2 * 22, 200, 20);
-		this.lengthInput.setText("" + length);
-		this.lengthInput.setValidator(this.integerFilter);
+		this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
+		this.lengthInput.setText("" + settings.length);
+		this.lengthInput.setValidator(s -> {
+			if (s == null || s.length() == 0) {
+				return true;
+			}
+			int val;
+			try {
+				val = Integer.parseInt(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			if (val > 0 && val <= 1000) {
+				settings.length = val;
+				return true;
+			}
+			return false;
+		});
 		this.lengthInput.setFocused(true);
+		ytop += height;
 
-		this.degreesSlider = new Slider(screen, 0 - 75,  - 24 + 3 * 22+1, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
+		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
+				Gauge.values().stream().collect(Collectors.toMap(Gauge::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
+		) {
+			@Override
+			public void onClick(Gauge gauge) {
+				settings.gauge = gauge;
+				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
+			}
+		};
+		gaugeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_GAUGE.toString(settings.gauge)) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				showSelector(gaugeSelector);
+			}
+		};
+		ytop += height;
+
+		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
+				Arrays.stream(TrackItems.values())
+						.filter(i -> i != TrackItems.CROSSING)
+						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
+		) {
+			@Override
+			public void onClick(TrackItems option) {
+				settings.type = option;
+				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
+				degreesSlider.setVisible(settings.type.hasQuarters());
+				curvositySlider.setVisible(settings.type.hasCurvosity());
+				smoothingButton.setVisible(settings.type.hasSmoothing());
+				directionButton.setVisible(settings.type.hasDirection());
+			}
+		};
+		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				showSelector(typeSelector);
+			}
+		};
+		ytop += height;
+
+		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.smoothing = next(settings.smoothing, hand);
+				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+			}
+		};
+		smoothingButton.setVisible(settings.type.hasSmoothing());
+		ytop += height;
+
+		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(settings.direction)) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.direction = next(settings.direction, hand);
+				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
+			}
+		};
+		directionButton.setVisible(settings.type.hasDirection());
+		ytop += height;
+
+
+		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
+				settings.degrees = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
 		degreesSlider.onSlider();
-		degreesSlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.TURN);
+		ytop += height;
 
-		this.curvositySlider = new Slider(screen, 0 - 75,  - 24 + 4 * 22+1, "", 0.25, 1.5, curvosity, true) {
+
+		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
 			@Override
 			public void onSlider() {
-				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", this.getValue())));
+				settings.curvosity = (float) this.getValue();
+				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
 			}
 		};
 		curvositySlider.onSlider();
-		curvositySlider.setVisible(type == TrackItems.SWITCH || type == TrackItems.CUSTOM);
+		ytop += height;
 
-		bedTypeButton = new Button(screen, 0 - 100, -24 + 5 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed))) {
+		directionButton.setVisible(settings.type.hasDirection());
+		degreesSlider.setVisible(settings.type.hasQuarters());
+		curvositySlider.setVisible(settings.type.hasCurvosity());
+		smoothingButton.setVisible(settings.type.hasSmoothing());
+
+
+
+		// Bottom Pane
+		//width = 200;
+		//height = 20;
+		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
+		//ytop = -GUIHelpers.getScreenHeight() / 4;
+		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 6);
+
+		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
+				DefinitionManager.getTrack(settings.track),
+				DefinitionManager.getTracks().stream().collect(Collectors.toMap(t -> t.name, g -> g, (u, v) -> u, LinkedHashMap::new))) {
 			@Override
-			public void onClick(Player.Hand hand) {
-				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
-					if (bed != null) {
-						TrackGui.this.bed = bed;
-						bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed)));
-					}
-					screen.show();
-				});
-				ip.choosenItem = bed;
-				ip.show();
+			public void onClick(TrackDefinition track) {
+				settings.track = track.trackID;
+				trackButton.setText(GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)));
 			}
 		};
-
-		bedFillButton = new Button(screen, 0 - 100, -24 + 6 * 22, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill))) {
+		trackButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24))) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
-					if (bed != null) {
-						TrackGui.this.bedFill = bed;
-						bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(bedFill)));
-					}
-					screen.show();
-				});
-				ip.choosenItem = bedFill;
-				ip.show();
+				showSelector(trackSelector);
 			}
 		};
+		ytop += height;
 
-		posTypeButton = new Button(screen, 0 - 100, -24 + 7 * 22, GuiText.SELECTOR_POSITION.toString(posType)) {
+		railBedSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.railBed,
+				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new))
+		) {
+			@Override
+			public void onClick(ItemStack option) {
+				settings.railBed = option;
+			}
+		};
+		bedTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed))) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				posType = next(posType, hand);
-				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(posType));
+				showSelector(railBedSelector);
 			}
 		};
+		ytop += height;
 
-		smoothingButton = new Button(screen, 0 - 100, -24 + 8 * 22, GuiText.SELECTOR_SMOOTHING.toString(smoothing)) {
+		railBedFillSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.railBedFill,
+				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new))
+		) {
+			@Override
+			public void onClick(ItemStack option) {
+				settings.railBedFill = option;
+			}
+		};
+		bedFillButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill))) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				smoothing = next(smoothing, hand);
-				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(smoothing));
+				showSelector(railBedFillSelector);
 			}
 		};
-		smoothingButton.setVisible(type == TrackItems.CUSTOM || type == TrackItems.SLOPE || type == TrackItems.TURN || type == TrackItems.SWITCH);
+		ytop += height;
 
-		directionButton = new Button(screen, 0 - 100, -24 + 9 * 22, GuiText.SELECTOR_DIRECTION.toString(direction)) {
+		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				direction = next(direction, hand);
-				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(direction));
+				settings.posType = next(settings.posType, hand);
+				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.posType));
 			}
 		};
+		ytop += height;
 
-		gaugeButton = new Button(screen, 0 - 100, -24 + 10 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
+		isPreviewCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				gauge = next(Gauge.values(), gauge, hand);
-				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
+				settings.isPreview = isPreviewCB.isChecked();
 			}
 		};
+		ytop += height;
 
-		isPreviewCB = new CheckBox(screen, -75, -24 + 11 * 22 + 4, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), isPreview) {
+		isGradeCrossingCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				isPreview = isPreviewCB.isChecked();
+				settings.isGradeCrossing = isGradeCrossingCB.isChecked();
 			}
 		};
+		ytop += height;
 
-		isGradeCrossingCB = new CheckBox(screen, 0 - 75, -24 + 12 * 22 + 4, GuiText.SELECTOR_GRADE_CROSSING.toString(), isGradeCrossing) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				isGradeCrossing = isGradeCrossingCB.isChecked();
-			}
-		};
+	}
+
+	private void showSelector(ListSelector<?> selector) {
+		boolean isVisible = selector.isVisible();
+
+		gaugeSelector.setVisible(false);
+		typeSelector.setVisible(false);
+		trackSelector.setVisible(false);
+		railBedSelector.setVisible(false);
+		railBedFillSelector.setVisible(false);
+
+		selector.setVisible(!isVisible);
 	}
 
 	@Override
@@ -238,36 +303,121 @@ public class TrackGui implements IScreen {
 	@Override
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
-			RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation), (float) curvositySlider.getValue(), posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.build()).sendToServer();
 			} else {
-				new ItemRailUpdatePacket(settings).sendToServer();
+				new ItemRailUpdatePacket(settings.build()).sendToServer();
 			}
 		}
 	}
 
 	@Override
 	public void draw(IScreenBuilder builder) {
+		long frame = MinecraftClient.getPlayer().getWorld().getTicks() * 20; //TODO actuall frame tracking
+
+
+		GUIHelpers.drawRect(200, 0, GUIHelpers.getScreenWidth() - 200, GUIHelpers.getScreenHeight(), 0xCC000000);
+		GUIHelpers.drawRect(0, 0, 200, GUIHelpers.getScreenHeight(), 0xEE000000);
+
+		if (gaugeSelector.isVisible()) {
+			double textScale = 1.5;
+			GUIHelpers.drawCenteredString(GuiText.SELECTOR_GAUGE.toString(settings.gauge.toString()), (int) ((300 + (GUIHelpers.getScreenWidth()-300) / 2) / textScale), (int) (10 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
+
+			RailInfo info = new RailInfo(settings.build().withLength(5).withType(TrackItems.STRAIGHT), new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null), null, SwitchState.NONE, SwitchState.NONE, 0, true);
+
+			double scale = GUIHelpers.getScreenWidth() / 12.0;
+
+			RenderState state = new RenderState();
+			state.translate(300 + (GUIHelpers.getScreenWidth() - 300) / 2, builder.getHeight(), 100);
+			state.rotate(90, 1, 0, 0);
+			state.scale(-scale, scale, scale);
+			state.translate(0, 0, 1);
+			RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
+			state.translate(-0.5, 0, -0.5);
+			RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);
+			return;
+		}
+
+		if (trackSelector.isVisible() || railBedSelector.isVisible() || railBedFillSelector.isVisible()) {
+			double textScale = 1.5;
+			String str = trackSelector.isVisible() ? GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(settings.track).name) :
+					railBedSelector.isVisible() ? GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)) :
+							GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill));
+
+			GUIHelpers.drawCenteredString(str, (int) ((450 + (GUIHelpers.getScreenWidth()-450) / 2) / textScale), (int) (10 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
+
+			RailInfo info = new RailInfo(settings.build().withLength(3).withType(TrackItems.STRAIGHT), new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null), null, SwitchState.NONE, SwitchState.NONE, 0, true);
+
+			double scale = GUIHelpers.getScreenWidth() / 15.0;
+
+			RenderState state = new RenderState();
+			state.translate(450 + (GUIHelpers.getScreenWidth() - 450) / 2, builder.getHeight()/2, 500);
+			state.rotate(90, 1, 0, 0);
+			state.scale(-scale, scale, scale);
+			state.translate(0, 0, -1);
+			//state.rotate(60, 1, -1, -0.6);
+			state.rotate(60, 1, 0, 0);
+
+			state.translate(0, 0, 1);
+			state.rotate(frame/30.0, 0, 1, 0);
+			state.translate(0, 0, -1);
+
+			RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
+			state.translate(-0.5, 0, -0.5);
+			RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);
+
+			if (!info.settings.railBedFill.isEmpty()) {
+				StandardModel model = new StandardModel();
+				for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
+					Vec3i basePos = base.getPos();
+					model.addItemBlock(info.settings.railBedFill, new Matrix4()
+							.translate(basePos.x, basePos.y-1, basePos.z)
+					);
+				}
+				model.render(state);
+			}
+
+			return;
+		}
+
 		if (lengthInput.getText().isEmpty()) {
 			return;
 		}
-		int scale = 8;
 
 		// This could be more efficient...
-		RailSettings settings = new RailSettings(gauge, track, type, Integer.parseInt(lengthInput.getText()), degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation), (float) curvositySlider.getValue(), posType, smoothing, direction, bed, bedFill, isPreview, isGradeCrossing);
-		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
-		settings.write(stack);
+		int length = settings.length;
+		if (length < 5) {
+			length = 5;
+		}
+		if (settings.type == TrackItems.TURNTABLE) {
+			length = Math.min(25, Math.max(10, length));
+		}
 
-		Matrix4 matrix = new Matrix4();
-		matrix.translate(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
-		matrix.scale(scale, scale, 1);
-		GUIHelpers.drawItem(stack, 0, 0, matrix);
+		RailInfo info = new RailInfo(settings.build().withLength(length), new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null), null, SwitchState.NONE, SwitchState.NONE, frame/20.0, true);
 
-		matrix.setIdentity();
-		matrix.translate(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
-		matrix.scale(-scale, scale, 1);
-		GUIHelpers.drawItem(stack, 0, 0, matrix);
+		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25));
+		if (settings.type == TrackItems.TURNTABLE) {
+			scale /= 2;
+		}
+
+		RenderState state = new RenderState();
+		state.translate(200 + (GUIHelpers.getScreenWidth() - 200) / 2, builder.getHeight() - 30, 100);
+		state.rotate(90, 1, 0, 0);
+		state.scale(-scale, scale, scale);
+		state.translate(0, 0, 1);
+		if (settings.type.hasDirection()) {
+			switch (settings.direction) {
+				case LEFT:
+					state.translate(length / 2.0, 0, 0);
+					break;
+				case NONE:
+				case RIGHT:
+					state.translate(-length / 2.0, 0, 0);
+					break;
+			}
+		}
+		RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
+		state.translate(-0.5, 0, -0.5);
+		RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);
 	}
-
 }
