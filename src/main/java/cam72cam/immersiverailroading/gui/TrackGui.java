@@ -230,6 +230,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(ItemStack option) {
 				settings.railBed = option;
+				bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)));
 			}
 		};
 		bedTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed))) {
@@ -246,6 +247,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(ItemStack option) {
 				settings.railBedFill = option;
+				bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)));
 			}
 		};
 		bedFillButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill))) {
@@ -339,6 +341,20 @@ public class TrackGui implements IScreen {
 		}
 
 		if (trackSelector.isVisible() || railBedSelector.isVisible() || railBedFillSelector.isVisible()) {
+			ListSelector.ButtonRenderer<ItemStack> icons = new ListSelector.ButtonRenderer<ItemStack>() {
+				@Override
+				public void render(Button button, int x, int y, ItemStack value) {
+					Matrix4 zMatrix = new Matrix4();
+					zMatrix.translate(0, 0, 100);
+
+					GUIHelpers.drawItem(value, x+2, y+2, zMatrix);
+				}
+			};
+
+			railBedSelector.render(icons);
+			railBedFillSelector.render(icons);
+
+
 			double textScale = 1.5;
 			String str = trackSelector.isVisible() ? GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(settings.track).name) :
 					railBedSelector.isVisible() ? GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)) :
@@ -393,7 +409,7 @@ public class TrackGui implements IScreen {
 			length = Math.min(25, Math.max(10, length));
 		}
 
-		RailInfo info = new RailInfo(settings.build().withLength(length), new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null), null, SwitchState.NONE, SwitchState.NONE, frame/20.0, true);
+		RailInfo info = new RailInfo(settings.build().withLength(length), new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null), null, SwitchState.NONE, SwitchState.NONE, settings.type == TrackItems.TURNTABLE ? (frame/20.0) % 360 : 0, true);
 
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25));
 		if (settings.type == TrackItems.TURNTABLE) {
@@ -419,5 +435,15 @@ public class TrackGui implements IScreen {
 		RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
 		state.translate(-0.5, 0, -0.5);
 		RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);
+		if (!info.settings.railBedFill.isEmpty()) {
+			StandardModel model = new StandardModel();
+			for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
+				Vec3i basePos = base.getPos();
+				model.addItemBlock(info.settings.railBedFill, new Matrix4()
+						.translate(basePos.x, basePos.y-1, basePos.z)
+				);
+			}
+			model.render(state);
+		}
 	}
 }

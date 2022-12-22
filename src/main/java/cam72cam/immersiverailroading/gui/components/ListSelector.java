@@ -26,6 +26,8 @@ public abstract class ListSelector<T> {
     List<Button> options;
 
     Map<Button, T> usableButtons;
+    Map<Button, Integer> buttonsX;
+    Map<Button, Integer> buttonsY;
 
     public ListSelector(IScreenBuilder screen, int xOff, int width, int height, T currentValue, Map<String, T> rawOptions) {
         this.width = width;
@@ -55,15 +57,20 @@ public abstract class ListSelector<T> {
         }
 
         options = new ArrayList<>();
+        buttonsX = new HashMap<>();
+        buttonsY = new HashMap<>();
         for (int i = 0; i < pageSize; i++) {
-            options.add(new Button(screen, xtop, ytop + height * 2 + i * height, width + 1, height, "") {
+            Button btn = new Button(screen, xtop, ytop + height * 2 + i * height, width + 1, height, "") {
                 @Override
                 public void onClick(Player.Hand hand) {
                     ListSelector.this.currentValue = usableButtons.get(this);
                     ListSelector.this.onClick(ListSelector.this.currentValue);
                     ListSelector.this.updateSearch(search.getText());
                 }
-            });
+            };
+            buttonsX.put(btn, xtop);
+            buttonsY.put(btn, ytop + height * 2 + i * height);
+            options.add(btn);
         }
 
         search.setValidator(s -> {
@@ -128,5 +135,20 @@ public abstract class ListSelector<T> {
 
             bid++;
         }
+    }
+
+    public void render(ButtonRenderer<T> renderer) {
+        if (!isVisible()) {
+            return;
+        }
+
+        for (Map.Entry<Button, T> entry : usableButtons.entrySet()) {
+            renderer.render(entry.getKey(), GUIHelpers.getScreenWidth()/2 + buttonsX.get(entry.getKey()), GUIHelpers.getScreenHeight()/4 + buttonsY.get(entry.getKey()), entry.getValue());
+        }
+    }
+
+    @FunctionalInterface
+    public interface ButtonRenderer<T> {
+        void render(Button button, int x, int y, T value);
     }
 }
