@@ -297,11 +297,10 @@ public class GuiBuilder {
             int border = 2;
             Vec3d cornerA = matrix.apply(new Vec3d(-border, -border, 0));
             Vec3d cornerB = matrix.apply(new Vec3d(imageWidth + border, imageHeight + border, 0));
-            if (x >= cornerA.x && x <= cornerB.x && y >= cornerA.y && y <= cornerB.y) {
-                return this;
-            }
-            if (x >= cornerB.x && x <= cornerA.x && y >= cornerB.y && y <= cornerA.y) {
-                return this;
+            if (x >= cornerA.x && x <= cornerB.x || x >= cornerB.x && x <= cornerA.x) {
+                if (y >= cornerA.y && y <= cornerB.y || y >= cornerB.y && y <= cornerA.y) {
+                    return this;
+                }
             }
         }
         return null;
@@ -338,8 +337,8 @@ public class GuiBuilder {
                     temp.scale(scalex != null ? scalex * checkValue : 1, scaley != null ? scaley * checkValue : 1, 1);
                 }
 
-                Vec3d checkMiddle = temp.apply(new Vec3d(1, 1, 1));
-                double delta = checkMiddle.distanceTo(new Vec3d(x, y, 1));
+                Vec3d checkMiddle = temp.apply(new Vec3d(1, 1, 0));
+                double delta = checkMiddle.distanceTo(new Vec3d(x, y, 0));
                 if (delta < closestDelta) {
                     closestDelta = delta;
                     closestValue = checkValue;
