@@ -56,7 +56,7 @@ The main mod contains only a few trains. If you want to add more trains to your 
 If you want to add your own train models as resource pack to the game, please make sure to check out the *#modeling* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq) and the pinned Messages in that Channel.
 
 ## Bugs and Suggestions
-If you found a bug please open an Issue here on Github or report it in the *#bug-reports* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq).
+If you found a bug please open an Issue here on GitHub or report it in the *#bug-reports* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq).
 Please make sure to explain the bug as exactly as possible (and add screenshots if possible).
 
 If you want to suggest a feature for the mod, you can do that with opening an Issue.
@@ -65,6 +65,13 @@ If you want to suggest rolling stock, please do that in the *#suggestions* Chann
 ## Help
 If you need support you can ask in the *#help* Channel on our [Discord](https://discordapp.com/invite/CS2RTGq). 
 Make sure to read *#faq* before asking your question.
+
+## Building
+To build ImmersiveRailroading, you will need to have Java 8 installed.  
+After cloning, run the `UMCSetup.jar` from the terminal, passing in [the version of UMC](https://github.com/TeamOpenIndustry/UniversalModCore/branches/all) to set up.[^1]  
+To perform the build, open a terminal and run `./gradlew build` on Linux/macOS, or `gradle build` on Windows.
+
+[^1]: For example, to set up a build environment for Forge 1.12.2, you would run `java -jar UMCSetup.jar 1.12.2-forge`.
 
 ## License
 Immersive Railroading is licensed under the *GNU LESSER GENERAL PUBLIC LICENSE*. See [LICENSE](https://github.com/cam72cam/ImmersiveRailroading/blob/master/LICENSE).
