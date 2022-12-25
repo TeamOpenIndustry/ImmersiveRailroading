@@ -24,6 +24,9 @@ build/
 *.jar
 !UMCSetup.jar
 
+## ForgeGradle
+run/
+
 ## Projects
 TrackAPI/
 ImmersiveRailroadingIntegration/
@@ -35,6 +38,3 @@ UMC.md
 gradle/wrapper/gradle-wrapper.properties
 src/main/java/cam72cam/immersiverailroading/Mod.java
 src/main/resources/mcmod.info
-
-## Misc
-run/
