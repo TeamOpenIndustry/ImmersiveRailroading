@@ -97,6 +97,7 @@ public abstract class EntityRollingStockDefinition {
     private boolean hasInternalLighting;
     private double swayMultiplier;
     private double tiltMultiplier;
+    private float brakeCoefficient;
 
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
@@ -326,6 +327,14 @@ public abstract class EntityRollingStockDefinition {
         hasInternalLighting = properties.has("internalLighting") ? properties.get("internalLighting").getAsBoolean() : this instanceof CarPassengerDefinition;
         swayMultiplier = properties.has("swayMultiplier") ? properties.get("swayMultiplier").getAsFloat() : 1d;
         tiltMultiplier = properties.has("tiltMultiplier") ? properties.get("tiltMultiplier").getAsFloat() : 0d;
+
+        brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
+        try {
+            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(getOrDefault(properties, "brake_shoe_material", "CAST_IRON")));
+        } catch (Exception ex) {
+            ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
+        }
+        brakeCoefficient = getOrDefault(properties, "brake_friction_coefficient", brakeCoefficient);
 
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
@@ -714,4 +723,9 @@ public abstract class EntityRollingStockDefinition {
     public double getTiltMultiplier() {
         return tiltMultiplier;
     }
+
+    public double getBrakeShoeFriction() {
+        return brakeCoefficient;
+    }
+
 }

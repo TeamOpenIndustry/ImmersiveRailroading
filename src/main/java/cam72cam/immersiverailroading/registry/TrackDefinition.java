@@ -20,12 +20,14 @@ public class TrackDefinition {
     public final boolean clack;
     public final Map<TrackComponent, List<TrackMaterial>> materials = new HashMap<>();
     public final float bumpiness;
+    public final boolean cog;
 
     TrackDefinition(String trackID, JsonObject object) throws Exception {
         this.trackID = trackID;
         this.name = object.get("name").getAsString();
         this.clack = !object.has("clack") || object.get("clack").getAsBoolean();
         this.bumpiness = object.has("bumpiness") ? object.get("bumpiness").getAsFloat() : clack ? 1f : 0f;
+        this.cog = object.has("cog") && object.get("cog").getAsBoolean();
         this.models = new ArrayList<>();
         for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("models").entrySet()) {
             models.add(new TrackModel(entry.getKey(), entry.getValue().getAsString()));

@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
@@ -113,7 +112,7 @@ public class SimulationState {
                 tractiveEffortNewtons = 0;
             }
 
-            double totalAdhesionNewtons = stock.getWeight() * 0.25 * 0.25 * 4.44822f;
+            double totalAdhesionNewtons = stock.getWeight() * stock.getBrakeShoeFriction();
             brakeAdhesionNewtons = totalAdhesionNewtons * stock.getTotalBrake() * Config.ConfigBalance.brakeMultiplier;
         }
 

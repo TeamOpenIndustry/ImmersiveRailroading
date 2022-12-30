@@ -3,14 +3,10 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
-import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -595,5 +591,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @Deprecated
     public TickPos getCurrentTickPosAndPrune() {
         return getTickPos();
+    }
+
+    public double getBrakeShoeFriction() {
+        return getDefinition().getBrakeShoeFriction();
     }
 }

@@ -1005,6 +1005,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return getParent() != null ? getParentTile().getBumpiness() : 1;
 	}
 
+	public boolean isCog() {
+		return getParentTile() != null ? getParentTile().isCog() : false;
+	}
+
 	public int getTicksExisted() {
 		return ticksExisted;
 	}

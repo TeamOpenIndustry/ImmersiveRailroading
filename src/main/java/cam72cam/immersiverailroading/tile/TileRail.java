@@ -193,6 +193,14 @@ public class TileRail extends TileRailBase {
 	}
 
 	@Override
+	public boolean isCog() {
+		if (info == null) {
+			return false;
+		}
+		return DefinitionManager.getTrack(info.settings.track).cog;
+	}
+
+	@Override
 	public ItemStack getRenderRailBed() {
 		if (info == null) {
 			return null;
