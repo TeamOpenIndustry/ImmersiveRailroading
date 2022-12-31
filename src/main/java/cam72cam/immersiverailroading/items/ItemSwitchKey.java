@@ -197,7 +197,7 @@ public class ItemSwitchKey extends CustomItem {
 			super(stack);
 
 			if (lastUsedAt == null) {
-				lastUsedAt = System.currentTimeMillis();
+				lastUsedAt = 0L;
 			}
 		}
 

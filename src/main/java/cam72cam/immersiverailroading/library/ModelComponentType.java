@@ -75,11 +75,12 @@ public enum ModelComponentType {
 	DIESEL_EXHAUST_X("EXHAUST_#ID#", false),
 	
 	// Cargo
-	CARGO_FILL_X("CARGO_FILL_#ID#"),
-	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#"),
+	CARGO_FILL_X("CARGO_FILL_#ID#", false),
+	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#", false),
+	CARGO_ITEMS_X("CARGO_ITEMS_#ID#", false),
 
 	// Lights
-	HEADLIGHT_X("HEADLIGHT_#ID#"),
+	HEADLIGHT_X("HEADLIGHT_#ID#", false),
 
 	// Controls
 	THROTTLE_X("THROTTLE_#ID#"),
@@ -124,8 +125,8 @@ public enum ModelComponentType {
 		this.collisionsEnabled = collide;
 	}
 
-	public static boolean isParticle(String group) {
-		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_");
+	public static boolean shouldRender(String group) {
+		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_") || group.contains("CARGO_ITEMS");
 	}
 
     public static class ModelPosition {

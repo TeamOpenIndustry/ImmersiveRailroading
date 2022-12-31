@@ -19,7 +19,13 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
-        idle = def.isCabCar() ? null : new PartSound(stock -> stock.createSound(def.idle, true, 80));
+        if(def.start != null) {
+            idle = def.isCabCar() ? null : new PartSound(
+                    stock -> stock.createSound(def.start, false, 80), //Start sound
+                    stock -> stock.createSound(def.idle, true, 80)); //Loop sound
+        } else {
+            idle = def.isCabCar() ? null : new PartSound(stock -> stock.createSound(def.idle, true, 80));
+        }
     }
 
     @Override
