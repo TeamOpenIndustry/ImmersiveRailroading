@@ -1,35 +1,40 @@
-# eclipse
+## Eclipse
+eclipse/
 *.launch
 .settings
 .metadata
 .classpath
 .project
 
-# idea
-out
+## Idea
+.idea/
 *.ipr
 *.iws
 *.iml
-.idea
+out/
 
-# gradle
-.gradle
-build
+## Gradle
+.gradle/
+build/
 
-# other
-eclipse
-run
-
-# sketchup
+## Sketchup
 *.skb
 
+## Built JARs
 *.jar
+!UMCSetup.jar
 
-# Projects
-TrackAPI
-ImmersiveRailroadingIntegration
-UniversalModCore
+## ForgeGradle
+run/
+
+## Projects
+TrackAPI/
+ImmersiveRailroadingIntegration/
+UniversalModCore/
+
+## Generated
+build.gradle
+UMC.md
+gradle/wrapper/gradle-wrapper.properties
 src/main/java/cam72cam/immersiverailroading/Mod.java
-
-#UMC
-umc.gradle
+src/main/resources/mcmod.info
