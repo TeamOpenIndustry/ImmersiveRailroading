@@ -22,15 +22,14 @@ public class Consist {
     public static class Particle {
         public SimulationState state;
 
-        // Acceleration along consist axis (m/s/s)
+        /** Acceleration along consist axis (m/s/s) */
         public double acceleration;
-        // Friction along consist axis (m/s/s)
+        /** Friction along consist axis (m/s/s) */
         public double friction;
-        // Velocity along consist axis (m/s)
+        /** Velocity along consist axis (m/s) */
         public double velocity;
-        // Offset due to coupler overlap (m)
-        public double offset;
-        // consist axis -> vehicle axis
+
+        /** consist axis -> vehicle axis */
         public int direction;
 
         public Linkage prevLink;
@@ -43,12 +42,6 @@ public class Consist {
             this.acceleration = state.forcesNewtons() * direction;
             this.friction = state.frictionNewtons();
             this.velocity = Speed.fromMinecraft(state.velocity).metric() * direction;
-        }
-
-        public void fixNextCoupler() {
-            if (nextLink != null) {
-                nextLink.fixNextPosition();
-            }
         }
 
         public void findAffectedByForce(double force, List<Particle> output, boolean recursive) {
@@ -134,6 +127,7 @@ public class Consist {
             double restitution = 0.3;
             double deltaVA = (restitution * massB * (velocityB - velocityA) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityA;
             double deltaVB = (restitution * massA * (velocityA - velocityB) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityB;
+            //System.out.printf("Collision%n: %s - %s", deltaVA, deltaVB);
 
             groupA.forEach(p -> p.velocity += deltaVA);
             groupB.forEach(p -> p.velocity += deltaVB);
@@ -165,25 +159,49 @@ public class Consist {
 
 
         public SimulationState applyToState(List<Vec3i> blocksAlreadyBroken) {
-            state.velocity = Speed.fromMetric(velocity).minecraft() * direction;
-            double movement = state.velocity + offset * direction;
+            double velocityMPT = Speed.fromMetric(this.velocity).minecraft(); // per 1 tick
 
-            return this.state.next(movement, blocksAlreadyBroken);
+            // Calculate the applied velocity from this particle.  This should not include the coupler adjustment speed/distance below
+            state.velocity = velocityMPT * direction;
+
+            // Most of this "magic" would be easier to do (and more correct) after the new velocity has been applied
+            // using track following.  That however would be a significant performance hit and is avoided (for now)
+            if (prevLink != null) {
+                // Update previous link distance (simulated move)
+                double couplerDelta = Speed.fromMetric(this.velocity - prevLink.prevParticle.velocity).minecraft();
+                prevLink.couplerOffset += couplerDelta;
+
+                double tolerance = 0.1 * state.config.gauge.scale();
+
+                // If the previous link is not within tolerances
+                if (Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance > tolerance) {
+                    // We need to adjust the position AND Update the next coupler.  Since the iteration order
+                    // is from back to front, any delta added to the next link should be applied when this is called on
+                    // the next state object.
+
+                    // How much we need to adjust our position to satisfy the link constraints
+                    double adjustment = Math.copySign((Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance)/2, -prevLink.couplerOffset);
+                    velocityMPT += adjustment;
+
+                    if (nextLink != null) {
+                        nextLink.couplerOffset -= adjustment;
+                    }
+                }
+            }
+
+            return this.state.next(velocityMPT * direction, blocksAlreadyBroken);
         }
     }
 
     public static class Linkage {
         private final Particle prevParticle;
         private final Particle nextParticle;
-
-        // TODO triginomify for performance
-        private final Vec3d prevCoupler;
-        private final Vec3d nextCoupler;
-
         public boolean isPushing;
         public boolean isPulling;
 
-        private final double maxSlack;
+        private final double maxCouplerDistance;
+
+        private double couplerOffset;
 
         public Linkage(Particle prev, Particle next) {
             this.prevParticle = prev;
@@ -192,11 +210,12 @@ public class Consist {
             boolean prevCouplerFront = next.state.config.id.equals(prev.state.interactingFront);
             boolean nextCouplerFront = prev.state.config.id.equals(next.state.interactingFront);
 
-            maxSlack = (prevCouplerFront ? prev.state.config.couplerSlackFront : prev.state.config.couplerSlackRear) +
+            maxCouplerDistance = (prevCouplerFront ? prev.state.config.couplerSlackFront : prev.state.config.couplerSlackRear) +
                        (nextCouplerFront ? next.state.config.couplerSlackFront : next.state.config.couplerSlackRear);
 
-            prevCoupler = prevCouplerFront ? prevParticle.state.couplerPositionFront : prevParticle.state.couplerPositionRear;
-            nextCoupler = nextCouplerFront ? nextParticle.state.couplerPositionFront : nextParticle.state.couplerPositionRear;
+            // TODO triginomify for performance
+            Vec3d prevCoupler = prevCouplerFront ? prevParticle.state.couplerPositionFront : prevParticle.state.couplerPositionRear;
+            Vec3d nextCoupler = nextCouplerFront ? nextParticle.state.couplerPositionFront : nextParticle.state.couplerPositionRear;
 
             boolean prevEngaged = prevCouplerFront ?
                     prev.state.config.couplerEngagedFront :
@@ -205,23 +224,15 @@ public class Consist {
                     next.state.config.couplerEngagedFront :
                     next.state.config.couplerEngagedRear;
 
-            Vec3d slack = prevCoupler.subtract(nextCoupler);
-            boolean contacting = slack.lengthSquared() >= maxSlack * maxSlack;
-            boolean isOverlapping = prev.state.position.distanceToSquared(prevCoupler) > prev.state.position.distanceToSquared(nextCoupler);
+            // TODO distance squared optimizations
+            Vec3d couplerDelta = prevCoupler.subtract(nextCoupler);
+            double couplerDistance = couplerDelta.length();
+            boolean contacting = couplerDistance >= maxCouplerDistance;
+            boolean isOverlapping = prev.state.position.distanceTo(prevCoupler) > prev.state.position.distanceTo(nextCoupler) - (maxCouplerDistance/4);
 
             isPushing = contacting && isOverlapping;
             isPulling = contacting && !isOverlapping && (prevEngaged && nextEngaged);
-        }
-
-        public void fixNextPosition() {
-            if (isPushing || isPulling) {
-                Vec3d slack = prevCoupler.subtract(nextCoupler);
-                double fudge = 5 * prevParticle.state.config.gauge.scale();
-                if (slack.lengthSquared() > maxSlack * maxSlack * fudge * fudge) {
-                    double slackDist = (slack.length() - maxSlack);
-                    nextParticle.offset += isPushing ? slackDist : -slackDist;
-                }
-            }
+            couplerOffset = isPushing ? -couplerDistance : couplerDistance;
         }
     }
 
@@ -316,9 +327,6 @@ public class Consist {
         // At this point we should have an ordered list
         // Do we need to reverse it?
         //Collections.reverse(particles);
-
-        // Figure out the coupler offset to be applied
-        particles.forEach(Particle::fixNextCoupler);
 
         // Spread forces
         particles.forEach(Particle::applyNextCollision);
