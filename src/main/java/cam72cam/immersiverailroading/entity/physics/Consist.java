@@ -214,8 +214,13 @@ public class Consist {
                        (nextCouplerFront ? next.state.config.couplerSlackFront : next.state.config.couplerSlackRear);
 
             // TODO triginomify for performance
+            Vec3d prevPos = prev.state.position;
             Vec3d prevCoupler = prevCouplerFront ? prevParticle.state.couplerPositionFront : prevParticle.state.couplerPositionRear;
             Vec3d nextCoupler = nextCouplerFront ? nextParticle.state.couplerPositionFront : nextParticle.state.couplerPositionRear;
+
+            prevPos = prevPos.subtract(0, prevPos.y, 0);
+            prevCoupler = prevCoupler.subtract(0, prevCoupler.y, 0);
+            nextCoupler = nextCoupler.subtract(0, nextCoupler.y, 0);
 
             boolean prevEngaged = prevCouplerFront ?
                     prev.state.config.couplerEngagedFront :
@@ -228,7 +233,7 @@ public class Consist {
             Vec3d couplerDelta = prevCoupler.subtract(nextCoupler);
             double couplerDistance = couplerDelta.length();
             boolean contacting = couplerDistance >= maxCouplerDistance;
-            boolean isOverlapping = prev.state.position.distanceTo(prevCoupler) > prev.state.position.distanceTo(nextCoupler) - (maxCouplerDistance/4);
+            boolean isOverlapping = prevPos.distanceTo(prevCoupler) > prevPos.distanceTo(nextCoupler) - (maxCouplerDistance/4);
 
             isPushing = contacting && isOverlapping;
             isPulling = contacting && !isOverlapping && (prevEngaged && nextEngaged);
