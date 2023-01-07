@@ -46,6 +46,7 @@ public abstract class EntityRollingStockDefinition {
     private static Identifier default_wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
     private static Identifier default_clackFront = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
     private static Identifier default_clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
+    private static Identifier default_couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
 
     public final String defID;
     private final Class<? extends EntityRollingStock> type;
@@ -58,6 +59,7 @@ public abstract class EntityRollingStockDefinition {
     public Identifier clackFront;
     public Identifier clackRear;
     public double internal_model_scale;
+    public Identifier couple_sound;
     double internal_inv_scale;
     private String name = "Unknown";
     private String modelerName = "N/A";
@@ -339,6 +341,7 @@ public abstract class EntityRollingStockDefinition {
         wheel_sound = default_wheel_sound;
         clackFront = default_clackFront;
         clackRear = default_clackRear;
+        couple_sound = default_couple_sound;
 
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
         if (sounds != null) {
@@ -355,6 +358,9 @@ public abstract class EntityRollingStockDefinition {
             }
             if (sounds.has("clack_rear")) {
                 clackRear = new Identifier(ImmersiveRailroading.MODID, sounds.get("clack_rear").getAsString()).getOrDefault(default_clackRear);
+            }
+            if (sounds.has("couple")) {
+                couple_sound = new Identifier(ImmersiveRailroading.MODID, sounds.get("couple").getAsString()).getOrDefault(default_couple_sound);
             }
             if (sounds.has("controls")) {
                 for (Entry<String, JsonElement> entry : sounds.get("controls").getAsJsonObject().entrySet()) {

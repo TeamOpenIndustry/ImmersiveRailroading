@@ -219,7 +219,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		if (target == null) {
 			// Technically this fires the coupling sound twice (once for each entity)
-			new SoundPacket("immersiverailroading:sounds/default/coupling.ogg",
+			new SoundPacket(getDefinition().couple_sound,
 					this.getCouplerPosition(coupler), this.getVelocity(),
 					1, 1, (int) (200 * gauge.scale()), soundScale())
 					.sendToObserving(this);
