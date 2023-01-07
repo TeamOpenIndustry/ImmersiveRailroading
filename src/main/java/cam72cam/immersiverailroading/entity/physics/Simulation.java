@@ -129,7 +129,11 @@ public class Simulation {
                                 pass, state.tickID,
                                 myID, myCouplerLabel,
                                 otherID, other.interactingFront, other.interactingRear);
-                        state.interactingFront = null;
+                        if (isMyCouplerFront) {
+                            state.interactingFront = null;
+                        } else {
+                            state.interactingRear = null;
+                        }
                         state.dirty = true;
                         other.dirty = true;
                         continue;
