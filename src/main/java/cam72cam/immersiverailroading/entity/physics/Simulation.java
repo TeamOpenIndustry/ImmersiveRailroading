@@ -44,6 +44,8 @@ public class Simulation {
             return;
         }
 
+        int pass = (int) ChronoState.getState(world).getTickID();
+
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
         List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
 
@@ -84,60 +86,77 @@ public class Simulation {
 
             // Decouple / fix coupler positions
             for (SimulationState state : states) {
-                if (state.interactingFront != null) {
-                    SimulationState next = stateMap.get(state.interactingFront);
-                    if (next == null) {
+                for (boolean isMyCouplerFront : new boolean[]{true, false}) {
+                    UUID myID = state.config.id;
+                    UUID otherID = isMyCouplerFront ? state.interactingFront : state.interactingRear;
+                    Vec3d myCouplerPos = isMyCouplerFront ? state.couplerPositionFront : state.couplerPositionRear;
+                    String myCouplerLabel = isMyCouplerFront ? "Front" : "Rear";
+
+                    if (otherID == null) {
+                        // No existing coupler, nothing to check
+                        continue;
+                    }
+
+                    SimulationState other = stateMap.get(otherID);
+                    if (other == null) {
+                        // Likely due to chunk loading?
+                        ImmersiveRailroading.debug("%s-%s: Unable to find coupled stock for %s (%s) -> %s!",
+                                pass, state.tickID, myID, myCouplerLabel, otherID);
+
+                        state.dirty = true;
+                        if (isMyCouplerFront) {
+                            state.interactingFront = null;
+                        } else {
+                            state.interactingRear = null;
+                        }
+                        continue;
+                    }
+
+                    boolean isOtherCouplerFront;
+                    if (myID.equals(other.interactingFront)) {
+                        isOtherCouplerFront = true;
+                    } else if (myID.equals(other.interactingRear)) {
+                        isOtherCouplerFront = false;
+                    } else {
+                        /*
+                        This can happen when a piece of stock is marked dirty (discard existing states ex: throttle/brake)
+                        and a piece of stock it couples with in the future states has not been marked dirty.  The dirty
+                        stock is starting from 0, while the one it has future coupled to in a previous pass (that's english right?)
+                        does not know until this re-check that it has desync'd at this point and must generate new states
+                        from here on out in this pass.
+                         */
+                        ImmersiveRailroading.debug("%s-%s: Mismatched coupler states: %s (%s) -> %s (%s, %s)",
+                                pass, state.tickID,
+                                myID, myCouplerLabel,
+                                otherID, other.interactingFront, other.interactingRear);
                         state.interactingFront = null;
                         state.dirty = true;
-                    } else {
-                        if (!state.config.id.equals(next.interactingFront) && !state.config.id.equals(next.interactingRear)) {
-                            System.out.println("BROKEN COUPLER STATE");
-                            state.interactingFront = null;
-                            state.dirty = true;
-                            next.dirty = true;
-                        } else {
-                            Vec3d myCouplerPos = state.couplerPositionFront;
-                            Vec3d nextCouplerPos = state.config.id.equals(next.interactingFront) ? next.couplerPositionFront : next.couplerPositionRear;
-                            if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                                //System.out.println("DECOUPLER");
-                                state.dirty = true;
-                                next.dirty = true;
-                                state.interactingFront = null;
-                                if (state.config.id.equals(next.interactingFront)) {
-                                    next.interactingFront = null;
-                                } else {
-                                    next.interactingRear = null;
-                                }
-                            }
-                        }
+                        other.dirty = true;
+                        continue;
                     }
-                }
 
-                if (state.interactingRear != null) {
-                    SimulationState next = stateMap.get(state.interactingRear);
-                    if (next == null) {
+                    Vec3d otherCouplerPos = isOtherCouplerFront ? other.couplerPositionFront : other.couplerPositionRear;
+                    String otherCouplerLabel = isOtherCouplerFront ? "Front" : "Rear";
+
+                    double maxCouplerDistScaled = maxCouplerDist * state.config.gauge.scale();
+                    if (myCouplerPos.distanceToSquared(otherCouplerPos) > maxCouplerDistScaled * maxCouplerDistScaled) {
+                        ImmersiveRailroading.debug("%s-%s: Coupler snapping due to distance: %s (%s) -> %s (%s)",
+                                pass, state.tickID,
+                                myID, myCouplerLabel,
+                                otherID, otherCouplerLabel);
                         state.dirty = true;
-                        state.interactingRear = null;
-                    } else {
-                        if (!state.config.id.equals(next.interactingFront) && !state.config.id.equals(next.interactingRear)) {
-                            System.out.println("BROKEN COUPLER STATE");
-                            state.interactingRear = null;
-                            state.dirty = true;
-                            next.dirty = true;
+                        other.dirty = true;
+
+                        if (isMyCouplerFront) {
+                            state.interactingFront = null;
                         } else {
-                            Vec3d myCouplerPos = state.couplerPositionRear;
-                            Vec3d nextCouplerPos = state.config.id.equals(next.interactingFront) ? next.couplerPositionFront : next.couplerPositionRear;
-                            if (myCouplerPos.distanceToSquared(nextCouplerPos) > maxCouplerDist * maxCouplerDist) {
-                                //System.out.println("DECOUPLER");
-                                state.dirty = true;
-                                next.dirty = true;
-                                state.interactingRear = null;
-                                if (state.config.id.equals(next.interactingFront)) {
-                                    next.interactingFront = null;
-                                } else {
-                                    next.interactingRear = null;
-                                }
-                            }
+                            state.interactingRear = null;
+                        }
+
+                        if (isOtherCouplerFront) {
+                            other.interactingFront = null;
+                        } else {
+                            other.interactingRear = null;
                         }
                     }
                 }
@@ -221,7 +240,10 @@ public class Simulation {
 
                     stateA.dirty = true;
                     stateB.dirty = true;
-                    //System.out.println(String.format("COUPLE %s (%s) + %s (%s)%n", stateA.config.id, stateB.config.id, targetACouplerFront, targetBCouplerFront));
+                    ImmersiveRailroading.debug("%s-%s: Coupling %s (%s) to %s (%s)",
+                            pass, stateA.tickID,
+                            stateA.config.id, targetACouplerFront ? "Front" : "Rear",
+                            stateB.config.id, targetBCouplerFront ? "Front" : "Rear");
 
                     // Ok, we are clear to proceed!
                     if (targetACouplerFront) {
