@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -339,6 +340,17 @@ public class Consist {
         particles.forEach(Particle::applyFriction);
 
         // Generate new states
-        return particles.stream().map(particle -> particle.applyToState(blocksAlreadyBroken)).collect(Collectors.toMap(s -> s.config.id, s -> s));
+        try {
+            return particles.stream().map(particle -> particle.applyToState(blocksAlreadyBroken)).collect(Collectors.toMap(s -> s.config.id, s -> s));
+        } catch (Exception ex) {
+            for (SimulationState state : states.values()) {
+                ImmersiveRailroading.debug("State: %s (%s, %s)", state.config.id, state.interactingFront, state.interactingRear);
+            }
+            for (Particle particle : particles) {
+                ImmersiveRailroading.debug("Particle: %s (%s, %s)", particle.state.config.id, particle.state.interactingFront, particle.state.interactingRear);
+            }
+
+            throw ex;
+        }
     }
 }
