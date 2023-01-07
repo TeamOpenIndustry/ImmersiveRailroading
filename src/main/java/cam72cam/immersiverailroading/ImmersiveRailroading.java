@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
@@ -39,7 +38,6 @@ import cam72cam.mod.render.*;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
-import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.Command;
 
 import java.util.function.Function;
@@ -229,9 +227,5 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 	@Override
 	public void serverEvent(ModEvent event) {
-	}
-
-	public static ISound newSound(Identifier oggLocation, boolean repeats, float attenuationDistance, Gauge gauge) {
-		return Audio.newSound(oggLocation, Identifier::getResourceStream, repeats, (float) (attenuationDistance * gauge.scale() * ConfigSound.soundDistanceScale), (float)Math.sqrt(Math.sqrt(gauge.scale())));
 	}
 }

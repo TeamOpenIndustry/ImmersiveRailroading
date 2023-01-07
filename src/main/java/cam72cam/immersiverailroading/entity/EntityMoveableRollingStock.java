@@ -282,18 +282,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
             if (ConfigSound.soundEnabled) {
                 if (this.wheel_sound == null) {
-                    wheel_sound = ImmersiveRailroading.newSound(this.getDefinition().wheel_sound, true, 40, gauge);
+                    wheel_sound = this.createSound(this.getDefinition().wheel_sound, true, 40);
                     this.sndRand = (float) Math.random() / 10;
                 }
                 if (this.clackFront == null) {
-                    clackFront = ImmersiveRailroading.newSound(this.getDefinition().clackFront, false, 30, gauge);
+                    clackFront = this.createSound(this.getDefinition().clackFront, false, 30);
                 }
                 if (this.clackRear == null) {
-                    clackRear = ImmersiveRailroading.newSound(this.getDefinition().clackRear, false, 30, gauge);
+                    clackRear = this.createSound(this.getDefinition().clackRear, false, 30);
                 }
                 float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
                 float pitch = adjust + 0.7f;
                 if (getDefinition().shouldScalePitch()) {
+                    // TODO this is probably wrong...
                     pitch = (float) (pitch/ gauge.scale());
                 }
                 float volume = 0.01f + adjust;

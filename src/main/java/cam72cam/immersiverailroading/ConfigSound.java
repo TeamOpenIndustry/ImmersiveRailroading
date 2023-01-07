@@ -18,6 +18,9 @@ public class ConfigSound {
 	@Comment("Sound Distance Multiplier")
 	public static double soundDistanceScale = 1;
 
+	@Comment("Scales sound emitted by rolling stock to the gauge they are on.  Requres restart.")
+	public static boolean scaleSoundToGauge = true;
+
 	//@RequiresMcRestart
 	@Comment("Re-configure the sound system to use more audo channels (fixes audio cutting out at high speed)")
 	public static boolean overrideSoundChannels = true;

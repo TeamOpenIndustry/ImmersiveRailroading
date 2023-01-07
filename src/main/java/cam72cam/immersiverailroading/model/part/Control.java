@@ -171,26 +171,29 @@ public class Control<T extends EntityMoveableRollingStock>  {
 
         Player player = MinecraftClient.getPlayer();
 
-        if (transform(center, stock).distanceTo(player.getPositionEyes().add(stock.getVelocity())) > 4) {
-            return;
-        }
+        boolean overrideRange = stock.getControlPressed(this);
+        if (!overrideRange) {
+            if (transform(center, stock).distanceTo(player.getPositionEyes().add(stock.getVelocity())) > 4) {
+                return;
+            }
 
+            IBoundingBox bb = IBoundingBox.from(
+                    transform(part.min, stock),
+                    transform(part.max, stock)
+            ).grow(new Vec3d(0.05, 0.05, 0.05));
+            // The added velocity is due to a bug where the player may tick before or after the stock.
+            // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
+            // or at least expose a "tick order" function as crappy as that would be...
 
-        IBoundingBox bb = IBoundingBox.from(
-                transform(part.min, stock),
-                transform(part.max, stock)
-        ).grow(new Vec3d(0.05, 0.05, 0.05));
-        // The added velocity is due to a bug where the player may tick before or after the stock.
-        // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
-        // or at least expose a "tick order" function as crappy as that would be...
-        boolean inRange = false;
-        Vec3d delta = bb.max().subtract(bb.min());
-        double step = Math.max(0.01, Math.min(delta.x, Math.min(delta.y, delta.z))/2);
-        for (double i = 0; i < 2; i+=step) {
-            inRange = inRange || bb.contains(player.getPositionEyes().add(player.getLookVector().scale(i)).add(stock.getVelocity()));
-        }
-        if (!inRange) {
-            return;
+            boolean inRange = false;
+            Vec3d delta = bb.max().subtract(bb.min());
+            double step = Math.max(0.01, Math.min(delta.x, Math.min(delta.y, delta.z)) / 2);
+            for (double i = 0; i < 2; i += step) {
+                inRange = inRange || bb.contains(player.getPositionEyes().add(player.getLookVector().scale(i)).add(stock.getVelocity()));
+            }
+            if (!inRange) {
+                return;
+            }
         }
         Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()), stock).apply(center);
         String labelstate = "";
@@ -375,7 +378,7 @@ public class Control<T extends EntityMoveableRollingStock>  {
         if (sound == null) {
             return;
         }
-        ISound snd = ImmersiveRailroading.newSound(sound, repeats, 10, stock.gauge);
+        ISound snd = stock.createSound(sound, repeats, 10);
         snd.setVelocity(stock.getVelocity());
         snd.setVolume(1);
         snd.setPitch(1f);

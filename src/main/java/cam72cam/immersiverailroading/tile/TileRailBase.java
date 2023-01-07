@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
-import cam72cam.immersiverailroading.items.ItemSwitchKey;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Door;
@@ -36,6 +35,8 @@ import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.List;
+
+import static cam72cam.immersiverailroading.entity.Locomotive.AUTOMATED_PLAYER;
 
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	@TagField("parent")
@@ -109,6 +110,16 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		this.augment = augment;
 		if (getParentTile() != null) {
 			augmentGauge = getParentTile().info.settings.gauge;
+			if (ConfigDebug.defaultAugmentComputer && augment != null) {
+				switch (augment) {
+					case DETECTOR:
+						detectorMode = StockDetectorMode.COMPUTER;
+						break;
+					case LOCO_CONTROL:
+						controlMode = LocoControlMode.COMPUTER;
+						break;
+				}
+			}
 		}
 		setAugmentFilter(null);
 		redstoneMode = RedstoneMode.ENABLED;
@@ -623,7 +634,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							loco.setTrainBrake(power / 15f);
 							break;
 						case HORN:
-							loco.setHorn(40, null);
+							loco.setHorn(40, AUTOMATED_PLAYER);
 							break;
 						case BELL:
 							loco.setBell(10 * power);

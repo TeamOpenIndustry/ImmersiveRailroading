@@ -37,7 +37,7 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
 
         for (ModelComponentType r : data.componentType.render) {
             List<ModelComponent> comp = data.def.getComponents(r);
-            if (comp == null || r == ModelComponentType.CARGO_FILL_X) {
+            if (comp == null || r == ModelComponentType.CARGO_FILL_X || r == ModelComponentType.CARGO_FILL_POS_X) {
                 continue;
             }
             groups.addAll(comp.get(0).modelIDs);

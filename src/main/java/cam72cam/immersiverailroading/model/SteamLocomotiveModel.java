@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -25,7 +24,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
-        idleSounds = new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 40, stock.soundGauge()));
+        idleSounds = new PartSound(stock -> stock.createSound(def.idle, true, 40));
     }
 
     @Override
@@ -87,7 +86,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         pressureValve.effects(stock, stock.isOverpressure() && Config.isFuelRequired(stock.gauge));
 
         idleSounds.effects(stock, stock.getBoilerTemperature() > stock.ambientTemperature() + 5 ? 0.1f : 0);
-        whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.getHornPlayer());
+        whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.isAutomatedHorn(), stock.getHornPlayer());
     }
 
     @Override

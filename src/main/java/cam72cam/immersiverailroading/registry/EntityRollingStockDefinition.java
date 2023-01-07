@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
@@ -9,7 +10,6 @@ import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
@@ -148,7 +148,7 @@ public abstract class EntityRollingStockDefinition {
         parseJson(data);
 
         this.model = createModel();
-        this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.isParticle(x)).collect(Collectors.toList());
+        this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
 
         this.renderComponents = new HashMap<>();
         for (ModelComponent component : model.allComponents) {
@@ -205,7 +205,7 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public boolean shouldScalePitch() {
-        return scalePitch;
+        return ConfigSound.scaleSoundToGauge && scalePitch;
     }
 
     protected static String getOrDefault(JsonObject data, String field, String fallback) {

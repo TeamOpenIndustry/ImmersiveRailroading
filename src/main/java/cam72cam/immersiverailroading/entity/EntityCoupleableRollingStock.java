@@ -1,10 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -15,6 +11,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
@@ -147,7 +144,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		if (world.isClient) {
 			// Only couple server side
-			
+
 			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
 			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
 
@@ -215,23 +212,32 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	 */
 
 	public final void setCoupledUUID(CouplerType coupler, UUID id) {
-		if (id != null && id.equals(getCoupledUUID(coupler))) {
-			// NOP
+		UUID target = coupler == CouplerType.FRONT ? coupledFront : coupledBack;
+		if (Objects.equals(target, id)) {
 			return;
 		}
+
+		if (target == null) {
+			// Technically this fires the coupling sound twice (once for each entity)
+			new SoundPacket("immersiverailroading:sounds/default/coupling.ogg",
+					this.getCouplerPosition(coupler), this.getVelocity(),
+					1, 1, (int) (200 * gauge.scale()), soundScale())
+					.sendToObserving(this);
+		}
+
 		switch (coupler) {
-		case FRONT:
-			coupledFront = id;
-			if (id == null) {
-				lastKnownFront = null;
-			}
-			break;
-		case BACK:
-			coupledBack = id;
-			if (id == null) {
-				lastKnownRear = null;
-			}
-			break;
+			case FRONT:
+				coupledFront = id;
+				if (coupledFront == null) {
+					lastKnownFront = null;
+				}
+				break;
+			case BACK:
+				coupledBack = id;
+				if (coupledBack == null) {
+					lastKnownRear = null;
+				}
+				break;
 		}
 	}
 

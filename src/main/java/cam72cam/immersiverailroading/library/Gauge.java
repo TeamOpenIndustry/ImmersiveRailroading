@@ -29,7 +29,7 @@ public class Gauge {
 	public double scale() {
 		return gauge / Gauges.STANDARD;
 	}
-	
+
 	@Override
 	public String toString() {
 	    return TextUtil.translate("immersiverailroading:gauge." + name.toLowerCase(Locale.ROOT));
