@@ -333,9 +333,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
                     rb = rb != null ? rb.getParentTile() : null;
                     if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
-                        clackFront.setPitch(pitch);
-                        clackFront.setVolume(volume);
-                        clackFront.play(new Vec3d(posFront));
+                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
+                            clackFront.setPitch(pitch);
+                            clackFront.setVolume(volume);
+                            clackFront.play(new Vec3d(posFront));
+                        }
                         clackFrontPos = rb.getPos();
                         if (getWorld().getTicks() % ConfigGraphics.StockSwayChance == 0) {
                             swayImpulse += 7 * rb.getBumpiness();
@@ -348,9 +350,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     TileRailBase rb = getWorld().getBlockEntity(posRear, TileRailBase.class);
                     rb = rb != null ? rb.getParentTile() : null;
                     if (rb != null && !rb.getPos().equals(clackRearPos) && rb.clacks()) {
-                        clackRear.setPitch(pitch);
-                        clackRear.setVolume(volume);
-                        clackRear.play(new Vec3d(posRear));
+                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
+                            clackRear.setPitch(pitch);
+                            clackRear.setVolume(volume);
+                            clackRear.play(new Vec3d(posRear));
+                        }
                         clackRearPos = rb.getPos();
                     }
                 }
