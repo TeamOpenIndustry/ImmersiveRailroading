@@ -13,13 +13,6 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
-    private static Identifier default_whistle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
-    private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
-    private static Identifier default_chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
-    private static Identifier default_pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
-    private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
-    private static Identifier default_cylinder_drain = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/cylinder_drain.ogg");
-
     public Quilling quill;
     public Identifier whistle;
     public Identifier idle;
@@ -35,11 +28,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 
     public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveSteam.class, defID, data);
-
-        // Handle null data
-        if (tankCapacity == null) {
-            tankCapacity = FluidQuantity.ZERO;
-        }
     }
 
     @Override
@@ -49,64 +37,43 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         if (isCabCar()) {
             tankCapacity = FluidQuantity.ZERO;
             maxPSI = 0;
-            this.numSlots = 0;
-            this.width = 0;
-            this.tender_auto_feed = false;
+            numSlots = 0;
+            width = 0;
+            tender_auto_feed = false;
         } else {
+            JsonObject firebox = data.get("firebox").getAsJsonObject();
+
             tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_inv_scale));
             maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_inv_scale);
-            JsonObject firebox = data.get("firebox").getAsJsonObject();
-            this.numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
-            this.width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
-            this.tender_auto_feed = properties.has("tender_auto_feed") ? properties.get("tender_auto_feed").getAsBoolean() : true;
+            numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
+            width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
+            tender_auto_feed = getOrDefault(properties, "tender_auto_feed", true);
         }
-        this.cab_forward = properties.has("cab_forward") && properties.get("cab_forward").getAsBoolean();
-
-        JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
+        cab_forward = getOrDefault(properties, "cab_forward", false);
 
         //sets default sounds
-        whistle = default_whistle;
-        idle = default_idle;
-        chuff = default_chuff;
-        pressure = default_pressure;
-        bell = default_bell;
-        cylinder_drain = default_cylinder_drain;
+        whistle = null; //new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
+        idle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
+        chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
+        pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
+        bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
+        cylinder_drain = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/cylinder_drain.ogg");
 
-        boolean whistleSet = false;
-
+        JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
         //overrides original sounds with added sounds
         if (sounds != null) {
-            if (sounds.has("whistle")) {
-                whistle = new Identifier(ImmersiveRailroading.MODID, sounds.get("whistle").getAsString()).getOrDefault(default_whistle);
-                whistleSet = true;
-            }
-
-            if (sounds.has("idle")) {
-                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(default_idle);
-            }
-
-            if (sounds.has("chuff")) {
-                chuff = new Identifier(ImmersiveRailroading.MODID, sounds.get("chuff").getAsString()).getOrDefault(default_chuff);
-            }
-
-            if (sounds.has("pressure")) {
-                pressure = new Identifier(ImmersiveRailroading.MODID, sounds.get("pressure").getAsString()).getOrDefault(default_pressure);
-            }
-
-            if (sounds.has("bell")) {
-                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
-            }
-
-            if (sounds.has("cylinder_drain")) {
-                cylinder_drain = new Identifier(ImmersiveRailroading.MODID, sounds.get("cylinder_drain").getAsString()).getOrDefault(default_cylinder_drain);
-            }
+            whistle = getOrDefault(sounds, "whistle", whistle);
+            idle = getOrDefault(sounds, "idle", idle);
+            chuff = getOrDefault(sounds, "chuff", chuff);
+            pressure = getOrDefault(sounds, "pressure", pressure);
+            bell = getOrDefault(sounds, "bell", bell);
+            cylinder_drain = getOrDefault(sounds, "cylinder_drain", cylinder_drain);
 
             if (sounds.has("quilling")) {
                 quill = new Quilling(sounds.get("quilling").getAsJsonArray());
-                whistleSet = true;
             }
         }
-        if (!whistleSet && (quill == null || !quill.canLoad())) {
+        if (whistle != null && (quill == null || !quill.canLoad())) {
             quill = new Quilling(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
         }
 

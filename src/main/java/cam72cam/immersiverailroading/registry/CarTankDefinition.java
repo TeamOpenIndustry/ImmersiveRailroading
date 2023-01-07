@@ -25,11 +25,6 @@ public class CarTankDefinition extends FreightDefinition {
 
     CarTankDefinition(Class<? extends CarTank> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);
-
-        // Handle null data
-        if (capacity == null) {
-            capacity = FluidQuantity.ZERO;
-        }
     }
 
     @Override

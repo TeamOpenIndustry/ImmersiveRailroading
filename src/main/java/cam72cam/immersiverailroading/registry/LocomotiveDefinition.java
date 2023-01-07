@@ -26,14 +26,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);
-
-        // Handle null data
-        if (works == null) {
-            works = "Unknown";
-        }
-        if (maxSpeed == null) {
-            maxSpeed = Speed.ZERO;
-        }
     }
 
     @Override
@@ -44,25 +36,28 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
         JsonObject properties = data.get("properties").getAsJsonObject();
 
-        hasRadioEquipment = properties.has("radio_equipped") && properties.get("radio_equipped").getAsBoolean();
+        hasRadioEquipment = getOrDefault(properties, "radio_equipped", false);
 
         isCabCar = readCabCarFlag(data);
         if (isCabCar) {
+            power = 0;
+            traction = 0;
+            maxSpeed = Speed.ZERO;
             muliUnitCapable = true;
         } else {
             power = (int) Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
             traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
             maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
-            muliUnitCapable = !properties.has("multi_unit_capable") ? this.multiUnitDefault() : properties.get("multi_unit_capable").getAsBoolean();
+            muliUnitCapable = getOrDefault(properties, "multi_unit_capable", this.multiUnitDefault());
         }
-        isLinkedBrakeThrottle = properties.has("isLinkedBrakeThrottle") && properties.get("linked_brake_throttle").getAsBoolean();
-        toggleBell = !properties.has("toggle_bell") || properties.get("toggle_bell").getAsBoolean();
+        isLinkedBrakeThrottle = getOrDefault(properties, "isLinkedBrakeThrottle", false);
+        toggleBell = getOrDefault(properties, "toggle_bell", true);
         isCog = getOrDefault(properties, "cog", false);
     }
 
     protected boolean readCabCarFlag(JsonObject data) {
         JsonObject properties = data.get("properties").getAsJsonObject();
-        return properties.has("cab_car") && properties.get("cab_car").getAsBoolean();
+        return getOrDefault(properties, "cab_car", false);
     }
 
     protected abstract boolean multiUnitDefault();

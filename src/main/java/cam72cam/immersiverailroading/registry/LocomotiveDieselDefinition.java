@@ -14,10 +14,6 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
-    private static Identifier default_idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
-    private static Identifier default_horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
-    private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
-
     public Identifier idle;
     public Identifier start;
     public Identifier horn;
@@ -28,11 +24,6 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
-
-        // Handle null data
-        if (fuelCapacity == null) {
-            fuelCapacity = FluidQuantity.ZERO;
-        }
     }
 
     @Override
@@ -46,35 +37,21 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         } else {
             fuelCapacity = FluidQuantity.ZERO;
         }
-        notches = properties.has("throttle_notches") ? properties.get("throttle_notches").getAsInt() : 8;
+        notches = getOrDefault(properties, "throttle_notches", 8);
 
-        hornSus = false;
-        if (properties.has("horn_sustained")) {
-            hornSus = properties.get("horn_sustained").getAsBoolean();
-        }
+        hornSus = getOrDefault(properties, "horn_sustained", false);
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
-        idle = default_idle;
+        idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
         start = null;
-        horn = default_horn;
-        bell = default_bell;
+        horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
+        bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
 
         if(sounds != null){
-            if (sounds.has("idle")) {
-                idle = new Identifier(ImmersiveRailroading.MODID, sounds.get("idle").getAsString()).getOrDefault(default_idle);
-            }
-
-            if (sounds.has("start")) {
-                start = new Identifier(ImmersiveRailroading.MODID, sounds.get("start").getAsString());
-            }
-
-            if (sounds.has("horn")) {
-                horn = new Identifier(ImmersiveRailroading.MODID, sounds.get("horn").getAsString()).getOrDefault(default_horn);
-            }
-
-            if (sounds.has("bell")) {
-                bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
-            }
+            idle = getOrDefault(sounds, "idle", idle);
+            start = getOrDefault(sounds, "start", start);
+            horn = getOrDefault(sounds, "horn", horn);
+            bell = getOrDefault(sounds, "bell", bell);
         }
 
         if (controlSounds.isEmpty()) {

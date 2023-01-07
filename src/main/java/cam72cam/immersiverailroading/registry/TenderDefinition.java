@@ -25,10 +25,7 @@ public class TenderDefinition extends CarTankDefinition {
         JsonObject tender = data.get("tender").getAsJsonObject();
         this.numSlots = (int) Math.ceil(tender.get("slots").getAsInt() * internal_inv_scale);
         this.width = (int) Math.ceil(tender.get("width").getAsInt() * internal_inv_scale);
-        this.showCurrentLoadOnly = false;
-        if (tender.has("show_current_load_only")) {
-            this.showCurrentLoadOnly = tender.get("show_current_load_only").getAsBoolean();
-        }
+        this.showCurrentLoadOnly = getOrDefault(tender, "show_current_load_only", false);
     }
 
     @Override

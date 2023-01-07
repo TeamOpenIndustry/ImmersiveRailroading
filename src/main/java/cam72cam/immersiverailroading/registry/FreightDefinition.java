@@ -15,11 +15,7 @@ public abstract class FreightDefinition extends EntityRollingStockDefinition {
 
     public void parseJson(JsonObject data) throws Exception {
         super.parseJson(data);
-        if (data.has("show_current_load_only")) {
-            this.showCurrentLoadOnly = data.get("show_current_load_only").getAsBoolean();
-        } else {
-            this.showCurrentLoadOnly = false;
-        }
+        this.showCurrentLoadOnly = getOrDefault(data, "show_current_load_only", false);
     }
 
     @Override
