@@ -175,7 +175,7 @@ public class Consist {
                 double tolerance = 0.1 * state.config.gauge.scale();
 
                 // If the previous link is not within tolerances
-                if (Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance > tolerance) {
+                if (Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance > tolerance && (prevLink.isPushing || prevLink.isPulling)) {
                     // We need to adjust the position AND Update the next coupler.  Since the iteration order
                     // is from back to front, any delta added to the next link should be applied when this is called on
                     // the next state object.
