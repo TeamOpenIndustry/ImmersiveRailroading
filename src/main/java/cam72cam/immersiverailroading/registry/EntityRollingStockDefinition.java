@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
@@ -201,7 +202,7 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public boolean shouldScalePitch() {
-        return scalePitch;
+        return ConfigSound.scaleSoundToGauge && scalePitch;
     }
 
     public void parseJson(JsonObject data) throws Exception {

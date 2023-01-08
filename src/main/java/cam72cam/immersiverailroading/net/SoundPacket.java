@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.net;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
@@ -22,23 +22,22 @@ public class SoundPacket extends Packet {
 	@TagField
 	private int distance;
 	@TagField
-	private double gauge;
+	private float scale;
 
 	public SoundPacket() { }
-	public SoundPacket(String soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, Gauge gauge) {
+	public SoundPacket(String soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, float scale) {
 		this.file = soundfile;
 		this.pos = pos;
 		this.motion = motion;
 		this.volume = volume;
 		this.pitch = pitch;
 		this.distance = distance;
-		this.gauge = gauge.value();
+		this.scale = scale;
 	}
 
 	@Override
 	public void handle() {
-		Gauge gauge = Gauge.from(this.gauge);
-		ISound snd = ImmersiveRailroading.newSound(new Identifier(file), false, distance, gauge);
+		ISound snd = Audio.newSound(new Identifier(file), Identifier::getResourceStream, false, (float) (distance * ConfigSound.soundDistanceScale), scale);
 		snd.setVelocity(motion);
 		snd.setVolume(volume);
 		snd.setPitch(pitch);

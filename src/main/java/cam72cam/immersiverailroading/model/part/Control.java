@@ -378,7 +378,7 @@ public class Control<T extends EntityMoveableRollingStock>  {
         if (sound == null) {
             return;
         }
-        ISound snd = ImmersiveRailroading.newSound(sound, repeats, 10, stock.gauge);
+        ISound snd = stock.createSound(sound, repeats, 10);
         snd.setVelocity(stock.getVelocity());
         snd.setVolume(1);
         snd.setPitch(1f);

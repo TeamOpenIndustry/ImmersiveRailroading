@@ -1,9 +1,7 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
@@ -44,16 +42,16 @@ public class Whistle {
         private float pullString = 0;
         private float soundDampener = 0;
 
-        private SoundEffects(Gauge gauge) {
+        private SoundEffects(EntityMoveableRollingStock stock) {
             if (quilling != null) {
                 whistle = null;
                 chimes = new ArrayList<>();
                 for (Quilling.Chime chime : quilling.chimes) {
-                    chimes.add(ImmersiveRailroading.newSound(chime.sample, true, 150, gauge));
+                    chimes.add(stock.createSound(chime.sample, true, 150));
                 }
             } else {
                 chimes = null;
-                whistle = ImmersiveRailroading.newSound(fallback, false, 150, gauge);
+                whistle = stock.createSound(fallback, false, 150);
                 whistle.setPitch(1);
             }
         }
@@ -179,7 +177,7 @@ public class Whistle {
             SoundEffects sound = sounds.get(stock.getUUID());
 
             if (sound == null) {
-                sound = new SoundEffects(stock.soundGauge());
+                sound = new SoundEffects(stock);
                 sounds.put(stock.getUUID(), sound);
             }
 
