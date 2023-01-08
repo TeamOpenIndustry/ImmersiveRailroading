@@ -155,7 +155,7 @@ public class PaintBrushPicker implements IScreen {
     }
 
     @Override
-    public void draw(IScreenBuilder builder) {
+    public void draw(IScreenBuilder builder, RenderState state) {
         frame++;
 
         double textScale = 1.5;
@@ -176,10 +176,6 @@ public class PaintBrushPicker implements IScreen {
 
         GUIHelpers.drawCenteredString(stock.getDefinition().name(), (int) ((200 + (GUIHelpers.getScreenWidth()-200) / 2) / textScale), (int) (40 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(current, (int) ((200 + (GUIHelpers.getScreenWidth()-200) / 2) / textScale), (int) ((GUIHelpers.getScreenHeight() - 60) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
-
-
-        RenderState state = new RenderState();
-        // TODO add state to draw params
 
         StockModel<?> model = stock.getDefinition().getModel();
 
@@ -205,9 +201,5 @@ public class PaintBrushPicker implements IScreen {
         stock.setTexture(prevTex);
         stock.distanceTraveled = prevDist;
         stock.gauge = prevGauge;
-
-        /*try (OBJRender.Binding binding = model.binder().texture(variant).bind(state)) {
-            binding.draw(stock.getDefinition().itemGroups);
-        }*/
     }
 }
