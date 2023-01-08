@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.model;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -22,10 +21,10 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         super(def);
         if(def.start != null) {
             idle = def.isCabCar() ? null : new PartSound(
-                    stock -> ImmersiveRailroading.newSound(def.start, false, 80, stock.soundGauge()), //Start sound
-                    stock -> ImmersiveRailroading.newSound(def.idle, true, 80, stock.soundGauge())); //Loop sound
+                    stock -> stock.createSound(def.start, false, 80), //Start sound
+                    stock -> stock.createSound(def.idle, true, 80)); //Loop sound
         } else {
-            idle = def.isCabCar() ? null : new PartSound(stock -> ImmersiveRailroading.newSound(def.idle, true, 80, stock.soundGauge()));
+            idle = def.isCabCar() ? null : new PartSound(stock -> stock.createSound(def.idle, true, 80));
         }
     }
 

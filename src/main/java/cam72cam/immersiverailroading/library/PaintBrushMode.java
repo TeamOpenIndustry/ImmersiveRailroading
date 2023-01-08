@@ -5,15 +5,14 @@ import cam72cam.mod.text.TextUtil;
 import java.util.Locale;
 
 public enum PaintBrushMode {
-	SEQUENTIAL,
-	RANDOM,
+	GUI,
+	RANDOM_SINGLE,
+	RANDOM_COUPLED,
 	;
-
-	private String BRUSH_MODE_NAME_PREFIX = "chat.immersiverailroading:brush.mode.";
 
 	@Override
 	public String toString() {
-		return BRUSH_MODE_NAME_PREFIX + super.toString().toLowerCase(Locale.ROOT);
+		return "chat.immersiverailroading:brush.mode." + super.toString().toLowerCase(Locale.ROOT);
 	}
 
 	public String toTranslatedString() {

@@ -278,7 +278,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				this.setCoupledUUID(coupler, stock.getUUID());
 				stock.setCoupledUUID(otherCoupler, this.getUUID());
 				if (stock.isCouplerEngaged(otherCoupler) && this.isCouplerEngaged(coupler)) {
-					new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, gauge)
+					new SoundPacket("immersiverailroading:sounds/default/coupling.ogg", this.getCouplerPosition(coupler), this.getVelocity(), 1, 1, 200, stock.soundScale())
 						.sendToObserving(this);
 				}
 			}

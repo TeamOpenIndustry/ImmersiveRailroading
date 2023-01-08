@@ -20,15 +20,15 @@ public class PartSound {
     public PartSound(Function<EntityMoveableRollingStock, ISound> startCreate, Function<EntityMoveableRollingStock, ISound> loopCreate, Function<EntityMoveableRollingStock, ISound> endCreate)
     { this.startCreate = startCreate; this.loopCreate = loopCreate; this.endCreate = endCreate;}
 
-    private boolean startIsPlaying;
-    private boolean startHasPlayed;
-    private boolean endIsPlaying; //Unused
-    private boolean endHasPlayed;
-
     class Sounds {
         ISound start;
         ISound loop;
         ISound end;
+
+        boolean startIsPlaying = false;
+        boolean startHasPlayed = false;
+        boolean endIsPlaying = false; //Unused but for future
+        boolean endHasPlayed = false; // ^
     }
 
     private final ExpireableMap<UUID, Sounds> sounds = new ExpireableMap<UUID, Sounds>() {
@@ -71,17 +71,17 @@ public class PartSound {
                     startSound.setVolume(volume);
                     startSound.setPitch(pitch);
 
-                    if (!startSound.isPlaying() && startIsPlaying) { //Start sound is done playing one take
-                        startHasPlayed = true;
-                        startIsPlaying = false;
-                    } else if(!startSound.isPlaying() && !startHasPlayed) { //If nothing has started yet
+                    if (!startSound.isPlaying() && soundTrio.startIsPlaying) { //Start sound is done playing one take
+                        soundTrio.startHasPlayed = true;
+                        soundTrio.startIsPlaying = false;
+                    } else if(!startSound.isPlaying() && !soundTrio.startHasPlayed) { //If nothing has started yet
                         startSound.play(stock.getPosition());
-                        startIsPlaying = true;
+                        soundTrio.startIsPlaying = true;
                     } else {
                         startSound.update();
                     }
                 }
-                if(startHasPlayed || startSound == null) { //Once start has played, move on to loop
+                if(soundTrio.startHasPlayed || startSound == null) { //Once start has played, move on to loop
                     loopSound.setPosition(stock.getPosition());
                     loopSound.setVelocity(stock.getVelocity());
                     loopSound.setVolume(volume);
@@ -104,9 +104,8 @@ public class PartSound {
                 if (endSound != null && endSound.isPlaying()) {
                     endSound.stop();
                 }
-                startIsPlaying = false;
-                startHasPlayed = false;
-                endHasPlayed = false; //Probably needs to be somewhere else when endSound has usage
+                soundTrio.startIsPlaying = false;
+                soundTrio.startHasPlayed = false;
             }
         }
     }

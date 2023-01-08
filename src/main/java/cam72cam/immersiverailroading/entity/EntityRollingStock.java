@@ -1,8 +1,10 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config.ConfigDamage;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -14,10 +16,14 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.*;
+import cam72cam.mod.sound.Audio;
+import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.tuple.Pair;
+import trackapi.lib.Gauges;
 import util.Matrix4;
 
 import java.util.HashMap;
@@ -115,7 +121,8 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_PAINT_BRUSH) && player.hasPermission(Permissions.PAINT_BRUSH)) {
-			return selectNewTexture(player, player.getHeldItem(hand));
+			ItemPaintBrush.onStockInteract(this, player, hand);
+			return ClickResult.ACCEPTED;
 		}
 
 		if (player.getHeldItem(hand).is(Fuzzy.NAME_TAG) && player.hasPermission(Permissions.STOCK_ASSEMBLY)) {
@@ -129,18 +136,8 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return ClickResult.PASS;
 	}
 
-	private ClickResult selectNewTexture(Player player, ItemStack item) {
-		if (getWorld().isClient) {
-			return ClickResult.ACCEPTED;
-		}
-
-		if (this.getDefinition().textureNames.size() > 1) {
-			this.texture = IRItems.ITEM_PAINT_BRUSH.selectNewTexture(this.getDefinition().textureNames, this.texture, player, item);
-			return ClickResult.ACCEPTED;
-		} else {
-			player.sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
-			return ClickResult.PASS;
-		}
+	public void setTexture(String variant) {
+		this.texture = variant;
 	}
 
 	@Override
@@ -207,8 +204,17 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	public void triggerResimulate() {
 	}
 
-	public Gauge soundGauge() {
-		return this.getDefinition().shouldScalePitch() ? gauge : Gauge.from(Gauge.STANDARD);
+	public float soundScale() {
+		return this.getDefinition().shouldScalePitch() ? (float) Math.sqrt(Math.sqrt(gauge.scale())) : 1;
+	}
+
+	public ISound createSound(Identifier oggLocation, boolean repeats, double attenuationDistance) {
+		return Audio.newSound(
+				oggLocation, Identifier::getResourceStream,
+				repeats,
+				(float) (attenuationDistance * ConfigSound.soundDistanceScale * gauge.scale()),
+				soundScale()
+		);
 	}
 
 	public String getTexture() {

@@ -15,7 +15,7 @@ public class Horn extends PartSound {
     }
 
     public Horn(ModelComponent component, Identifier soundFile, boolean repeats) {
-        super(stock -> ImmersiveRailroading.newSound(soundFile, repeats, 100, stock.soundGauge()));
+        super(stock -> stock.createSound(soundFile, repeats, 100));
         this.component = component;
     }
 

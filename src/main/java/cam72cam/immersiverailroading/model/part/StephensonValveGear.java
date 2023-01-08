@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -81,7 +80,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
             chuffId = 0;
             chuffs = new ArrayList<>();
             for (int i = 0; i < 6; i++) {
-                chuffs.add(ImmersiveRailroading.newSound(stock.getDefinition().chuff, false, 80, stock.soundGauge()));
+                chuffs.add(stock.createSound(stock.getDefinition().chuff, false, 80));
             }
             this.stock = stock;
             this.pitchOffset = (float) (Math.random() / 50);
