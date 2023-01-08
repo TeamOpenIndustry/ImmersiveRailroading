@@ -163,6 +163,7 @@ public class DefinitionManager {
         List<String> blacklist = getModelBlacklist(defTypes);
 
         LinkedHashMap<String, String> definitionIDMap = new LinkedHashMap<>();
+        Map<String, String> definitionIDPacks = new HashMap<>();
         Identifier stock_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
         List<InputStream> inputs = stock_json.getResourceStreamAll();
         for (InputStream input : inputs) {
@@ -185,6 +186,9 @@ public class DefinitionManager {
                         }
 
                         definitionIDMap.put(defID, defType);
+                        if (stock.has("pack")) {
+                            definitionIDPacks.put(defID, stock.get("pack").getAsString());
+                        }
                     }
                 }
             }
@@ -203,6 +207,10 @@ public class DefinitionManager {
                 JsonParser parser = new JsonParser();
                 JsonObject jsonData = parser.parse(new InputStreamReader(input)).getAsJsonObject();
                 input.close();
+
+                if (definitionIDPacks.containsKey(defID) && !jsonData.has("pack")) {
+                    jsonData.addProperty("pack", definitionIDPacks.get(defID));
+                }
 
                 EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, jsonData);
 
@@ -275,6 +283,10 @@ public class DefinitionManager {
                 ImmersiveRailroading.debug("Loading Track %s", trackID);
                 JsonParser trackParser = new JsonParser();
                 JsonObject trackData = trackParser.parse(new InputStreamReader(new Identifier(trackID).getResourceStream())).getAsJsonObject();
+                if (track.has("pack") && !trackData.has("pack")) {
+                    // Copy in the pack name if not specified
+                    trackData.add("pack", track.get("pack"));
+                }
                 try {
                     tracks.put(trackID, new TrackDefinition(trackID, trackData));
                 } catch (Exception e) {
