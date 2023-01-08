@@ -11,10 +11,7 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
-import cam72cam.mod.gui.screen.Button;
-import cam72cam.mod.gui.screen.IScreen;
-import cam72cam.mod.gui.screen.IScreenBuilder;
-import cam72cam.mod.gui.screen.TextField;
+import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
@@ -30,6 +27,7 @@ public class PaintBrushPicker implements IScreen {
     private int page;
     private int pageSize;
     private Button pagination;
+    private double zoom = 1;
     private long frame;
 
     @Override
@@ -83,6 +81,13 @@ public class PaintBrushPicker implements IScreen {
             return true;
         });
         this.updateVariants("");
+
+        Slider zoom_slider = new Slider(screen, xtop + width, (int) (GUIHelpers.getScreenHeight()*0.75 - height), "Zoom: ", 0.1, 2, 1, true) {
+            @Override
+            public void onSlider() {
+                zoom = this.getValue();
+            }
+        };
 
         width = 80;
         Button random = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width, height, "Random") {
@@ -180,7 +185,7 @@ public class PaintBrushPicker implements IScreen {
         StockModel<?> model = stock.getDefinition().getModel();
 
         //int scale = 8;
-        int scale = GUIHelpers.getScreenWidth() / 40;
+        int scale = (int) (GUIHelpers.getScreenWidth() / 40 * zoom);
         float speed = 0.75f;
         state.translate(200 + (GUIHelpers.getScreenWidth()-200) / 2, builder.getHeight() / 2 + 10, 400);
         state.rotate((stock.getTickCount()*speed) % 360, 0, 1, 0);
