@@ -2,10 +2,7 @@ package cam72cam.immersiverailroading.library;
 
 import cam72cam.immersiverailroading.*;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.gui.CastingGUI;
-import cam72cam.immersiverailroading.gui.PlateRollerGUI;
-import cam72cam.immersiverailroading.gui.TrackExchangerGui;
-import cam72cam.immersiverailroading.gui.TrackGui;
+import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.container.*;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
@@ -29,6 +26,7 @@ public class GuiTypes {
     public static final GUI RAIL = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "RAIL"), TrackGui::new);
     public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, TrackGui::new);
     public static final GUI TRACK_EXCHANGER = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "TRACK_EXCHANGER"), TrackExchangerGui::new);
+    public static final GUI PAINT_BRUSH = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "PAINT_BRUSH"), PaintBrushPicker::new);
 
     public static final BlockGUI STEAM_HAMMER = GuiRegistry.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
     public static final BlockGUI CASTING = GuiRegistry.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);

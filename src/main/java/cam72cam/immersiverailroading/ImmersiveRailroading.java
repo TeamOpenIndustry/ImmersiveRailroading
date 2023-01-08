@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
+import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Particles;
@@ -80,6 +81,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(ItemTrackExchangerUpdatePacket::new, PacketDirection.ClientToServer);
 				Packet.register(ClientPartDragging.DragPacket::new, PacketDirection.ClientToServer);
 				Packet.register(GuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
+				Packet.register(ItemPaintBrush.PaintBrushPacket::new, PacketDirection.ClientToServer);
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
