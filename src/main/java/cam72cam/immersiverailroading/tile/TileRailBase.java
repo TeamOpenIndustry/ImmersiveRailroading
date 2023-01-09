@@ -322,15 +322,16 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 	}
 
+	private Double cachedGauge = null;
 	@Override
 	public double getTrackGauge() {
-		if (getParent() != null) {
+		if (cachedGauge == null && getParent() != null) {
 			TileRail parent = this.getParentTile();
 			if (parent != null) {
-				return parent.info.settings.gauge.value();
+				cachedGauge = parent.info.settings.gauge.value();
 			}
 		}
-		return 0;
+		return cachedGauge != null ? cachedGauge : 0;
 	}
 
 	@Override
@@ -379,6 +380,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						currentPosition == nextPos) {
 					nextPos = potential;
 				}
+			}
+
+			if (self.getReplaced() == null) {
+				break;
 			}
 
 			if (self.getParentTile() == null) {
