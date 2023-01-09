@@ -234,10 +234,12 @@ public class Simulation {
                     // Since bounding boxes can overlap across different tracks (think parallel curves) we need to do
                     // a more fine-grained check here
                     Vec3d couplerPosA = targetACouplerFront ? stateA.couplerPositionFront : stateA.couplerPositionRear;
+                    Vec3d couplerPosB = targetBCouplerFront ? stateB.couplerPositionFront : stateB.couplerPositionRear;
                     // Move coupler pos up to inside the BB (it's at track level by default)
                     // This could be optimized further, but it's an infrequent calculation
                     couplerPosA = couplerPosA.add(0, stateA.bounds.max().subtract(stateA.bounds.min()).y/2, 0);
-                    if (!stateB.bounds.contains(couplerPosA)) {
+                    couplerPosB = couplerPosB.add(0, stateB.bounds.max().subtract(stateB.bounds.min()).y/2, 0);
+                    if (!stateB.bounds.contains(couplerPosA) || !stateA.bounds.contains(couplerPosB)) {
                         // Not actually on the same track, just a BB collision and can be ignored
                         continue;
                     }
