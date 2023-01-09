@@ -238,7 +238,7 @@ public class SimulationState {
             blocksAlreadyBroken.addAll(this.blocksToBreak);
 
             // Calculate the next states interference
-            double minDist = 0.5;
+            double minDist = Math.max(0.5, Math.abs(velocity*4));
             if (next.recalculatedAt.distanceToSquared(next.position) > minDist * minDist) {
                 next.calculateBlockCollisions(blocksAlreadyBroken);
                 next.recalculatedAt = next.position;
