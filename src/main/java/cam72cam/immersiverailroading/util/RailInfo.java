@@ -17,24 +17,19 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @TagMapped(RailInfo.TagMapper.class)
 public class RailInfo {
-	@TagField("settings")
 	public final RailSettings settings;
-	@TagField("placement")
 	public final PlacementInfo placementInfo;
-	@TagField("custom")
 	public final PlacementInfo customInfo;
 
 	// Used for tile rendering only
-	@TagField("switchState")
 	public final SwitchState switchState;
-	@TagField("switchForced")
 	public final SwitchState switchForced;
-	@TagField("tablePos")
 	public final double tablePos;
 
 	public final String uniqueID;
@@ -99,57 +94,71 @@ public class RailInfo {
 		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
-	private RailInfo(TagCompound nbt) throws SerializationException {
-		this.settings = null;
-		this.placementInfo = null;
-		this.customInfo = null;
-		this.switchState = null;
-		this.switchForced = null;
-		this.tablePos = 0;
-		this.itemHeld = false;
-
-		TagSerializer.deserialize(nbt, this);
-
-		this.uniqueID = generateID();
-	}
-
-	@Override
-	public RailInfo clone() {
-		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos);
-	}
-
-	public RailInfo withLength(int length) {
-		RailSettings settings = this.settings.withLength(length);
-		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
-	}
-
-	public RailInfo withType(TrackItems type) {
-		RailSettings settings = this.settings.withType(type);
-		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
-	}
-
-	public RailInfo withTrack(String track) {
-		RailSettings settings = this.settings.withTrack(track);
-		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
-	}
-
-	public RailInfo withRailBed(ItemStack railBed) {
-		RailSettings settings = this.settings.withBed(railBed);
-		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
-	}
-
-	public RailInfo withGauge(Gauge gauge) {
-		RailSettings settings = this.settings.withGauge(gauge);
-		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
-	}
-
-	public RailInfo withItemHeld(boolean itemHeld) {
-		return new RailInfo(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld);
+	public RailInfo withSettings(Consumer<RailSettings.Mutable> mod) {
+		return with(b -> b.settings = b.settings.with(mod));
 	}
 
 	public RailInfo offset(Vec3i offset) {
-		return new RailInfo(settings, placementInfo.offset(offset), customInfo != null ? customInfo.offset(offset) : null, switchState, switchForced, tablePos, itemHeld);
+		return with(b -> {
+			b.placementInfo = placementInfo.offset(offset);
+			b.customInfo = b.customInfo != null ? b.customInfo.offset(offset) : null;
+		});
 	}
+
+	public static class Mutable {
+		@TagField("settings")
+		public RailSettings settings;
+		@TagField("placement")
+		public PlacementInfo placementInfo;
+		@TagField("custom")
+		public PlacementInfo customInfo;
+		@TagField("switchState")
+		public SwitchState switchState;
+		@TagField("switchForced")
+		public SwitchState switchForced;
+		@TagField("tablePos")
+		public double tablePos;
+
+		// Not serialized
+		public boolean itemHeld;
+
+		private Mutable(RailInfo info) {
+			this.settings = info.settings;
+			this.placementInfo = info.placementInfo;
+			this.customInfo = info.customInfo;
+			this.switchState = info.switchState;
+			this.switchForced = info.switchForced;
+			this.tablePos = info.tablePos;
+			this.itemHeld = info.itemHeld;
+		}
+
+		private Mutable(TagCompound data) throws SerializationException {
+			// Defaults
+			tablePos = 0;
+			itemHeld = false;
+
+			TagSerializer.deserialize(data, this);
+		}
+
+		public RailInfo immutable() {
+			return new RailInfo(
+					settings,
+					placementInfo,
+					customInfo,
+					switchState,
+					switchForced,
+					tablePos,
+					itemHeld
+			);
+		}
+	}
+
+	public RailInfo with(Consumer<Mutable> mod) {
+		Mutable mut = new Mutable(this);
+		mod.accept(mut);
+		return mut.immutable();
+	}
+
 
 	public Map<Vec3i, BuilderBase> builders = new HashMap<>();
 	public BuilderBase getBuilder(World world, Vec3i pos) {
@@ -359,10 +368,10 @@ public class RailInfo {
 							return;
 						}
 						TagCompound info = new TagCompound();
-						TagSerializer.serialize(info, o);
+						TagSerializer.serialize(info, new Mutable(o));
 						d.set(fieldName, info);
 					},
-					(d, w) -> d.hasKey(fieldName) ? new RailInfo(d.get(fieldName)) : legacy(d)
+					(d, w) -> d.hasKey(fieldName) ? new Mutable(d.get(fieldName)).immutable() : legacy(d)
 			);
 		}
 

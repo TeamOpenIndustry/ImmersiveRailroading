@@ -44,7 +44,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				//delta = delta.subtract(new Vec3i(delta)); // Relative position within the block
 				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), subCurve.ctrl1.add(delta));
 				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop(), subCurve.ctrl2.add(delta));
-				RailInfo subInfo = new RailInfo(info.settings.withType(TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
+				RailInfo subInfo = new RailInfo(info.settings.with(b -> b.type = TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
 
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, world, sPos);
 				if (subBuilders.size() != 0) {

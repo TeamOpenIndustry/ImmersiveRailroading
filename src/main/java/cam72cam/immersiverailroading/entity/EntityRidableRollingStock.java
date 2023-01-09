@@ -23,7 +23,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	@TagField(value = "payingPassengerPositions", mapper = PassengerMapper.class)
-	private final Map<UUID, Vec3d> payingPassengerPositions = new HashMap<>();
+	private Map<UUID, Vec3d> payingPassengerPositions = new HashMap<>();
 
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
